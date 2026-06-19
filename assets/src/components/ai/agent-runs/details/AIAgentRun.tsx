@@ -16,6 +16,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   AgentRunStatus,
   useAgentRunQuery,
+  useApproveAgentRunMutation,
   useCancelAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
@@ -58,6 +59,11 @@ export function AIAgentRun() {
     useCancelAgentRunMutation({
       variables: { id },
     })
+  const [approveAgentRun, { loading: approving, error: approvingError }] =
+    useApproveAgentRunMutation({
+      variables: { id },
+      refetchQueries: ['AgentRun', 'PendingApprovalAgentRuns'],
+    })
 
   const { data, error, loading } = useAgentRunQuery({
     variables: { id },
@@ -73,6 +79,8 @@ export function AIAgentRun() {
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
   const isCancellable = isRunning || run?.status == AgentRunStatus.Babysitting
+  const isApprovable =
+    run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
 
   useSetBreadcrumbs(
     useMemo(
@@ -124,6 +132,15 @@ export function AIAgentRun() {
                 />
               </Flex>
               <Flex gap="small">
+                {isApprovable && (
+                  <Button
+                    small
+                    onClick={() => approveAgentRun()}
+                    loading={approving}
+                  >
+                    Approve agent run
+                  </Button>
+                )}
                 {isCancellable && (
                   <Button
                     small
@@ -180,14 +197,18 @@ export function AIAgentRun() {
         )}
       </StretchedFlex>
       <Toast
-        error={'Cancelling agent run failed'}
-        show={!!cancellingError}
+        error={
+          cancellingError
+            ? 'Cancelling agent run failed'
+            : 'Approving agent run failed'
+        }
+        show={!!cancellingError || !!approvingError}
         closeTimeout={5000}
         severity="danger"
         position="bottom"
         marginBottom="medium"
       >
-        {cancellingError?.message}
+        {(cancellingError || approvingError)?.message}
       </Toast>
     </>
   )

@@ -8,6 +8,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import {
   AgentRunStatus,
   AwaitingReviewAgentRunFragment,
+  useApproveAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { Link } from 'react-router-dom'
@@ -24,6 +25,10 @@ export function AwaitingReviewAgentRunItem({
 }) {
   const theme = useTheme()
   const { prompt, runtime, analysis, pullRequests, workbenchJob } = agentRun
+  const [approveAgentRun, { loading: approving }] = useApproveAgentRunMutation({
+    variables: { id: agentRun.id },
+    refetchQueries: ['PendingApprovalAgentRuns', 'AgentRun'],
+  })
   const subtitle =
     pullRequests?.[0]?.title ??
     truncate(prompt ?? '', { length: 56 }) ??
@@ -114,6 +119,15 @@ export function AwaitingReviewAgentRunItem({
           status={AgentRunStatus.PendingApproval}
           showSpinner={false}
         />
+        {!agentRun.approvedAt && (
+          <Button
+            small
+            onClick={() => approveAgentRun()}
+            loading={approving}
+          >
+            Approve
+          </Button>
+        )}
         <Button
           small
           as={Link}
