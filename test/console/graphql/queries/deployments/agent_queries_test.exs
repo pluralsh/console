@@ -35,6 +35,26 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       assert from_connection(found)
              |> ids_equal(runs)
     end
+
+    test "it can filter runs by status" do
+      user = insert(:user)
+      pending_approval = insert_list(2, :agent_run, user: user, status: :pending_approval)
+      insert_list(2, :agent_run, user: user, status: :running)
+      insert_list(2, :agent_run, status: :pending_approval)
+
+      {:ok, %{data: %{"agentRuns" => found}}} = run_query("""
+        query AgentRuns($status: AgentRunStatus!) {
+          agentRuns(first: 10, status: $status) {
+            edges { node { id status } }
+          }
+        }
+      """, %{"status" => "PENDING_APPROVAL"}, %{current_user: user})
+
+      nodes = from_connection(found)
+      assert length(nodes) == 2
+      assert Enum.all?(nodes, &(&1["status"] == "PENDING_APPROVAL"))
+      assert ids_equal(nodes, pending_approval)
+    end
   end
 
   describe "agentRun" do
