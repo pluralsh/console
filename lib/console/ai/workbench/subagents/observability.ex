@@ -40,14 +40,16 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   end
 
   def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities}, user) do
+    skills = Environment.subagent_skills(skills, :observability)
+
     obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(plrl_log_tools(job))
     |> Enum.concat(plrl_metric_tools(job))
     |> Enum.concat(pod_logs_tools(job, user))
     |> Enum.concat([
-      %Skills{skills: Environment.subagent_skills(skills, :observability)},
-      %Skill{skills: Environment.subagent_skills(skills, :observability)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       ObservabilityResult,
       Lua,

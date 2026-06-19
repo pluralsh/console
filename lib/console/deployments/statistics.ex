@@ -13,7 +13,7 @@ defmodule Console.Deployments.Statistics do
     %{
       clusters: Repo.aggregate(Cluster, :count, :id),
       services: Repo.aggregate(Service, :count, :id),
-      bytes_ingested: Console.Prom.Meter.collect()
+      bytes_ingested: Console.Prom.Meter.collect()[:bytes_ingested]
     }
   end
 

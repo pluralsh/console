@@ -577,6 +577,15 @@ type RootQueryType {
 
   workbenchAggregates: WorkbenchAggregates!
 
+  workbenchUsage(
+    period: EvalResultsPeriod
+
+    q: String
+
+    "filter workbenches by project"
+    projectId: ID
+  ): [WorkbenchUsageTimeseries]
+
   workbenchPrMergeRates(period: EvalResultsPeriod): [WorkbenchPrMergeRateEntry]
 
   workbenchPrMergeRatesByWorkbench(period: EvalResultsPeriod): [WorkbenchPrMergeRateByWorkbenchEntry]
@@ -1957,6 +1966,9 @@ input AgentRunStatusAttributes {
 
   "the agent run this run consumed"
   consumed: ID
+
+  "the skills available to this agent run"
+  skills: [AgentSkillAttributes]
 }
 
 input AgentPullRequestAttributes {
@@ -2004,6 +2016,17 @@ input AgentAnalysisAttributes {
 
   "the bullets of the analysis"
   bullets: [String]
+}
+
+input AgentSkillAttributes {
+  "the name of the skill"
+  name: String!
+
+  "the description of the skill"
+  description: String
+
+  "the contents of the skill"
+  contents: String!
 }
 
 input AgentRunUploadAttributes {
@@ -2186,6 +2209,9 @@ type AgentRun {
   "the analysis of the agent run"
   analysis: AgentAnalysis
 
+  "the skills available to this agent run"
+  skills: [AgentSkill]
+
   "the todos of the agent run"
   todos: [AgentTodo]
 
@@ -2251,6 +2277,17 @@ type AgentAnalysis {
 
   "quick bullet points to summarize the analysis"
   bullets: [String]
+}
+
+type AgentSkill {
+  "the name of the skill"
+  name: String!
+
+  "the description of the skill"
+  description: String
+
+  "the contents of the skill"
+  contents: String!
 }
 
 type AgentTodo {
@@ -3358,6 +3395,9 @@ type WorkbenchJob {
   "mode-specific options for this job"
   modes: WorkbenchJobModes
 
+  "token and cost usage for this job"
+  usage: WorkbenchJobUsage
+
   "chatbot integration metadata for this job, when present"
   chatbotMessage: ChatbotMessage
 
@@ -3444,6 +3484,32 @@ type WorkbenchJobCodingModes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+}
+
+type WorkbenchJobUsage {
+  "input tokens consumed by this job"
+  inputTokens: Int
+
+  "output tokens produced by this job"
+  outputTokens: Int
+
+  "total tokens consumed by this job"
+  totalTokens: Int
+
+  "cached input tokens used by this job"
+  cachedTokens: Int
+
+  "reasoning tokens produced by this job"
+  reasoningTokens: Int
+
+  "input token cost for this job"
+  inputCost: Float
+
+  "output token cost for this job"
+  outputCost: Float
+
+  "total token cost for this job"
+  totalCost: Float
 }
 
 type WorkbenchJobActivity {
@@ -3949,6 +4015,23 @@ type WorkbenchAggregates {
 
   "average eval grade across workbench eval results"
   evalResults: Float
+}
+
+type WorkbenchUsageTimeseries {
+  "UTC timestamp for this data point"
+  timestamp: DateTime
+
+  "the workbench this usage data is associated with"
+  workbench: Workbench
+
+  "number of input tokens consumed during this interval"
+  inputTokens: Int
+
+  "number of output tokens produced during this interval"
+  outputTokens: Int
+
+  "total cost for this interval, in USD"
+  totalCost: Float
 }
 
 type WorkbenchWebhookMatches {

@@ -40,6 +40,12 @@ defmodule Console.Schema.AgentRun do
 
     embeds_one :pod_reference, NamespacedName, on_replace: :update
 
+    embeds_many :skills, Skill, on_replace: :delete do
+      field :name,        :string
+      field :description, :string
+      field :contents,    :string
+    end
+
     embeds_many :todos, Todo, on_replace: :delete do
       field :title,       :string
       field :description, :string
@@ -105,6 +111,7 @@ defmodule Console.Schema.AgentRun do
     |> cast_embed(:pod_reference)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)
+    |> cast_embed(:skills, with: &skill_changeset/2)
     |> cast_assoc(:messages)
     |> validate_required(~w(status prompt repository runtime_id user_id mode)a)
   end
@@ -119,6 +126,12 @@ defmodule Console.Schema.AgentRun do
     model
     |> cast(attrs, ~w(summary analysis bullets)a)
     |> validate_required(~w(summary analysis)a)
+  end
+
+  defp skill_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name description contents)a)
+    |> validate_required(~w(name contents)a)
   end
 
   def validate_repository(cs, field \\ :repository) do
