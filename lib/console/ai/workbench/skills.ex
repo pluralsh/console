@@ -89,10 +89,10 @@ defmodule Console.AI.Workbench.Skills do
   end
   defp convert_db_skills(_), do: []
 
-  @regex ~r/---(.*)---(.*)/s
+  @metadata_regex ~r/\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\z)(.*)\z/s
 
   def parse_skill(file, skill) when is_binary(skill) do
-    with {:regex, [_, meta, contents]} <- {:regex, Regex.run(@regex, skill)},
+    with {:regex, [_, meta, contents]} <- {:regex, Regex.run(@metadata_regex, skill)},
          {:yaml, {:ok, %{"name" => name, "description" => description} = meta}} <- {:yaml, YamlElixir.read_from_string(meta)} do
       {:ok, %Skill{
         name: String.trim(name),

@@ -14,6 +14,7 @@ export const WORKBENCH_PROMPT_MODE_ICON_SIZE_HEADER = 16
 
 export type WorkbenchPromptModeConfig = {
   label: string
+  triggerLabel?: string
   Icon: React.ComponentType<{ size: number; color: string }>
   iconColor?: SemanticColorKey
   iconFill?: string

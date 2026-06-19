@@ -157,6 +157,15 @@ func OpenAIUpstreamURL() string {
 	return resolveOpenAIUpstreamURL(explicit, helpers.GetEnv(EnvConsoleURL, ""))
 }
 
+func OpenAIResponsesUpstreamURL() string {
+	chatURL := OpenAIUpstreamURL()
+	if chatURL != "" && strings.HasSuffix(chatURL, "/v1/chat/completions") {
+		return strings.TrimSuffix(chatURL, "/v1/chat/completions") + "/v1/responses"
+	}
+
+	return resolveOpenAIResponsesUpstreamURL("", helpers.GetEnv(EnvConsoleURL, ""))
+}
+
 func resolveOpenAIUpstreamURL(explicit, consoleURL string) string {
 	if strings.TrimSpace(explicit) != "" {
 		return strings.TrimSpace(explicit)
@@ -171,6 +180,22 @@ func resolveOpenAIUpstreamURL(explicit, consoleURL string) string {
 	}
 
 	return fmt.Sprintf("%s/ext/ai/v1/chat/completions", consoleURL)
+}
+
+func resolveOpenAIResponsesUpstreamURL(explicit, consoleURL string) string {
+	if strings.TrimSpace(explicit) != "" {
+		return strings.TrimSpace(explicit)
+	}
+
+	consoleURL = strings.TrimSpace(consoleURL)
+	consoleURL = strings.TrimSuffix(consoleURL, "/ext/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/gql")
+	consoleURL = strings.TrimSuffix(consoleURL, "/")
+	if consoleURL == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s/ext/ai/v1/responses", consoleURL)
 }
 
 func ensureOrDie(argName string, arg *string) {

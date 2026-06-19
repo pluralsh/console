@@ -1,6 +1,7 @@
 package terraform
 
 import (
+	tfjson "github.com/hashicorp/terraform-json"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 )
 
@@ -33,4 +34,13 @@ type Terraform struct {
 	// refresh is a flag to refresh the state.
 	// Default: true
 	refresh *bool
+
+	// stateCache stores the parsed state for the lifetime of a harness run.
+	stateCache *tfjson.State
+
+	// planTextCache stores the human-readable plan for the lifetime of a harness run.
+	planTextCache *string
+
+	// planJSONCache stores the parsed JSON plan for the lifetime of a harness run.
+	planJSONCache *tfjson.Plan
 }

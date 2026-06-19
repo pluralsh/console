@@ -44,10 +44,6 @@ var _ = Describe("Core", func() {
 				By("service")
 				_, exists = manifests[resources.Kas.Service.String()]
 				Expect(exists).To(BeTrue())
-
-				By("ingress")
-				_, exists = manifests[resources.Kas.Ingress.String()]
-				Expect(exists).To(BeTrue())
 			})
 
 			It("should have operator controller deployment", func() {
@@ -63,6 +59,34 @@ var _ = Describe("Core", func() {
 
 				By("service")
 				_, exists = manifests[resources.Redis.Service.String()]
+				Expect(exists).To(BeTrue())
+			})
+		})
+
+		Context(chartEntry.Name+" with dedicated kas hostname", Ordered, func() {
+			var (
+				err       error
+				manifests common.ManifestMap
+				resources = chartEntry.Resources()
+				values    = map[string]interface{}{
+					"ingress": map[string]interface{}{
+						"console_dns": "console.example.com",
+					},
+					"kas": map[string]interface{}{
+						"ingress": map[string]interface{}{
+							"kas_dns": "kas.example.com",
+						},
+					},
+				}
+			)
+
+			BeforeAll(func() {
+				manifests, err = chartEntry.Load(values)
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("should have kas ingress", func() {
+				_, exists := manifests[resources.Kas.Ingress.String()]
 				Expect(exists).To(BeTrue())
 			})
 		})

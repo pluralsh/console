@@ -2,52 +2,40 @@ package openaiproxy
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/responses"
 )
 
-var forwardRequestHeaders = []string{
-	"Authorization",
-	"Content-Type",
-	"OpenAI-Organization",
-	"OpenAI-Project",
-	"X-Request-Id",
-}
-
-// HTTPDoer performs outbound HTTP requests. It matches *http.Client.
-type HTTPDoer interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
-// Config configures the OpenAI chat completion proxy.
-type Config struct {
+// ResponsesConfig configures the OpenAI responses proxy.
+type ResponsesConfig struct {
 	UpstreamURL string
 	Client      HTTPDoer
 }
 
-// Handler proxies OpenAI chat completion requests, converting streaming client
+// ResponsesHandler proxies OpenAI responses requests, converting streaming client
 // requests into non-streaming upstream calls and re-emitting the response as SSE.
-type Handler struct {
+type ResponsesHandler struct {
 	upstreamURL string
 	client      HTTPDoer
 }
 
-// NewHandler creates a proxy handler.
-func NewHandler(cfg Config) (*Handler, error) {
+// NewResponsesHandler creates a responses proxy handler.
+func NewResponsesHandler(cfg ResponsesConfig) (*ResponsesHandler, error) {
 	upstreamURL, err := validateUpstreamURL(cfg.UpstreamURL)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Handler{
+	return &ResponsesHandler{
 		upstreamURL: upstreamURL,
 		client:      newProxyClient(cfg.Client),
 	}, nil
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *ResponsesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -67,7 +55,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	upstreamBody := body
 	if streaming {
-		upstreamBody, err = forceNonStreaming(body)
+		upstreamBody, err = forceNonStreamingResponses(body)
 		if err != nil {
 			http.Error(w, "invalid JSON request body", http.StatusBadRequest)
 			return
@@ -96,13 +84,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var completion openai.ChatCompletion
-	if err := json.Unmarshal(respBody, &completion); err != nil {
+	var response responses.Response
+	if err := json.Unmarshal(respBody, &response); err != nil {
 		http.Error(w, "upstream returned non-JSON response for streaming request", http.StatusBadGateway)
 		return
 	}
 
-	chunks, err := StreamChunksFromCompletion(completion)
+	events, err := StreamEventsFromResponse(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		return
@@ -118,8 +106,23 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
-	if err := WriteSSE(w, chunks); err != nil {
+	if err := WriteResponseSSE(w, events); err != nil {
 		return
 	}
 	flusher.Flush()
+}
+
+// WriteResponseSSE writes OpenAI-compatible SSE events for the given response stream events.
+func WriteResponseSSE(w io.Writer, events []json.RawMessage) error {
+	for _, payload := range events {
+		if _, err := fmt.Fprintf(w, "data: %s\n\n", payload); err != nil {
+			return err
+		}
+	}
+
+	if _, err := io.WriteString(w, "data: [DONE]\n\n"); err != nil {
+		return err
+	}
+
+	return nil
 }
