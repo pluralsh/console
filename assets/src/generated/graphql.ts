@@ -472,6 +472,8 @@ export type AgentRun = {
   upload?: Maybe<AgentRunUpload>;
   /** the user who initiated this agent run */
   user?: Maybe<User>;
+  /** the workbench job this agent run was spawned from, if any */
+  workbenchJob?: Maybe<WorkbenchJob>;
 };
 
 export type AgentRunAttributes = {
@@ -26670,18 +26672,6 @@ export const WorkbenchJobTinyFragmentDoc = gql`
       id
       name
       type
-    }
-  }
-  activities(first: 10) {
-    edges {
-      node {
-        agentRun {
-          status
-        }
-        agentRuns {
-          status
-        }
-      }
     }
   }
 }
