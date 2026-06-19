@@ -426,6 +426,7 @@ defmodule Console.GraphQl.Deployments.Agent do
         resource: :agent,
         action: :read
       arg :runtime_id, :id
+      arg :status,     :agent_run_status, description: "filter runs by status"
 
       resolve &Deployments.agent_runs/2
     end

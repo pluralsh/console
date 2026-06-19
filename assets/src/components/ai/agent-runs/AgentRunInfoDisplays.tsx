@@ -13,6 +13,7 @@ import {
   PrOpenIcon,
   SpinnerAlt,
   Tooltip,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -214,6 +215,13 @@ export function RunStatusIcon({
     case AgentRunStatus.Running:
     case AgentRunStatus.Pending:
       return <SpinnerAlt size={size === 'small' ? 12 : 16} />
+    case AgentRunStatus.PendingApproval:
+      return (
+        <WarningIcon
+          color="icon-warning"
+          size={size === 'small' ? 12 : 16}
+        />
+      )
     case AgentRunStatus.Cancelled:
       return (
         <CancelledFilledIcon

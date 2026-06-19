@@ -10896,6 +10896,7 @@ export type RootQueryTypeAgentRunsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   runtimeId?: InputMaybe<Scalars['ID']['input']>;
+  status?: InputMaybe<AgentRunStatus>;
 };
 
 
@@ -17802,12 +17803,21 @@ export type RegisterGitHubAppMutation = { __typename?: 'RootMutationType', regis
 
 export type AwaitingReviewStackFragment = { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, runs?: { __typename?: 'StackRunConnection', edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus, message?: string | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, configuration: { __typename?: 'StackConfiguration', aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean } | null }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null } | null } | null } | null> | null } | null };
 
+export type AwaitingReviewAgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string } | null } | null };
+
 export type PendingApprovalStacksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
 export type PendingApprovalStacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, runs?: { __typename?: 'StackRunConnection', edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus, message?: string | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, configuration: { __typename?: 'StackConfiguration', aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean } | null }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null } | null } | null } | null> | null } | null } | null } | null> | null } | null };
+
+export type PendingApprovalAgentRunsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type PendingApprovalAgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null } | null> | null } | null };
 
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
@@ -22427,6 +22437,31 @@ export const AwaitingReviewStackFragmentDoc = gql`
   }
 }
     `;
+export const AwaitingReviewAgentRunFragmentDoc = gql`
+    fragment AwaitingReviewAgentRun on AgentRun {
+  id
+  status
+  prompt
+  repository
+  runtime {
+    id
+    name
+    type
+  }
+  analysis {
+    summary
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  workbenchJob {
+    id
+    workbench {
+      id
+    }
+  }
+}
+    ${PullRequestBasicFragmentDoc}`;
 export const ObjectStoreFragmentDoc = gql`
     fragment ObjectStore on ObjectStore {
   id
@@ -30214,6 +30249,53 @@ export type PendingApprovalStacksQueryHookResult = ReturnType<typeof usePendingA
 export type PendingApprovalStacksLazyQueryHookResult = ReturnType<typeof usePendingApprovalStacksLazyQuery>;
 export type PendingApprovalStacksSuspenseQueryHookResult = ReturnType<typeof usePendingApprovalStacksSuspenseQuery>;
 export type PendingApprovalStacksQueryResult = Apollo.QueryResult<PendingApprovalStacksQuery, PendingApprovalStacksQueryVariables>;
+export const PendingApprovalAgentRunsDocument = gql`
+    query PendingApprovalAgentRuns($first: Int = 100) {
+  agentRuns(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewAgentRun
+      }
+    }
+  }
+}
+    ${AwaitingReviewAgentRunFragmentDoc}`;
+
+/**
+ * __usePendingApprovalAgentRunsQuery__
+ *
+ * To run a query within a React component, call `usePendingApprovalAgentRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePendingApprovalAgentRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePendingApprovalAgentRunsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function usePendingApprovalAgentRunsQuery(baseOptions?: Apollo.QueryHookOptions<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>(PendingApprovalAgentRunsDocument, options);
+      }
+export function usePendingApprovalAgentRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>(PendingApprovalAgentRunsDocument, options);
+        }
+// @ts-ignore
+export function usePendingApprovalAgentRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>): Apollo.UseSuspenseQueryResult<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>;
+export function usePendingApprovalAgentRunsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>): Apollo.UseSuspenseQueryResult<PendingApprovalAgentRunsQuery | undefined, PendingApprovalAgentRunsQueryVariables>;
+export function usePendingApprovalAgentRunsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>(PendingApprovalAgentRunsDocument, options);
+        }
+export type PendingApprovalAgentRunsQueryHookResult = ReturnType<typeof usePendingApprovalAgentRunsQuery>;
+export type PendingApprovalAgentRunsLazyQueryHookResult = ReturnType<typeof usePendingApprovalAgentRunsLazyQuery>;
+export type PendingApprovalAgentRunsSuspenseQueryHookResult = ReturnType<typeof usePendingApprovalAgentRunsSuspenseQuery>;
+export type PendingApprovalAgentRunsQueryResult = Apollo.QueryResult<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>;
 export const ObjectStoresDocument = gql`
     query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
@@ -45718,6 +45800,7 @@ export const namedOperations = {
     ScmConnection: 'ScmConnection',
     ScmWebhooks: 'ScmWebhooks',
     PendingApprovalStacks: 'PendingApprovalStacks',
+    PendingApprovalAgentRuns: 'PendingApprovalAgentRuns',
     ObjectStores: 'ObjectStores',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
@@ -46180,6 +46263,7 @@ export const namedOperations = {
     ScmConnection: 'ScmConnection',
     ScmWebhook: 'ScmWebhook',
     AwaitingReviewStack: 'AwaitingReviewStack',
+    AwaitingReviewAgentRun: 'AwaitingReviewAgentRun',
     ObjectStore: 'ObjectStore',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',

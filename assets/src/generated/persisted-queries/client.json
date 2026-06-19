@@ -412,6 +412,11 @@
          "name": "PendingApprovalStacks",
          "body": "query PendingApprovalStacks($first: Int = 50) {\n  infrastructureStacks(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        ...AwaitingReviewStack\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AwaitingReviewStack on InfrastructureStack {\n  id\n  name\n  status\n  runs(first: 50) {\n    edges {\n      node {\n        id\n        status\n        message\n        approvalResult {\n          reason\n          result\n          __typename\n        }\n        configuration {\n          aiApproval {\n            enabled\n            __typename\n          }\n          __typename\n        }\n        pullRequest {\n          id\n          title\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:20c7d8fd5c8f7d5c24acc066236a2b51d77f232f95da06dd438baf3501272df2": {
+         "type": "query",
+         "name": "PendingApprovalAgentRuns",
+         "body": "query PendingApprovalAgentRuns($first: Int = 100) {\n  agentRuns(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        ...AwaitingReviewAgentRun\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AwaitingReviewAgentRun on AgentRun {\n  id\n  status\n  prompt\n  repository\n  runtime {\n    id\n    name\n    type\n    __typename\n  }\n  analysis {\n    summary\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  workbenchJob {\n    id\n    workbench {\n      id\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:988ccffca43dd7f6a0d38dc29d76ea7b85bb4b829d0df9f1ae79511ca4472221": {
          "type": "query",
          "name": "ObjectStores",

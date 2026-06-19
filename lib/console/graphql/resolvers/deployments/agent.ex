@@ -121,6 +121,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   defp run_filters(query, args) do
     Enum.reduce(args, query, fn
       {:runtime_id, id}, q when not is_nil(id) -> AgentRun.for_runtime(q, id)
+      {:status, status}, q when not is_nil(status) -> AgentRun.for_status(q, status)
       _, q -> q
     end)
   end

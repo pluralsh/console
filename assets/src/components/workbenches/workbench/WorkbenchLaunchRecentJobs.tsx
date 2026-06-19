@@ -1,5 +1,5 @@
 import { Card, CaretRightIcon } from '@pluralsh/design-system'
-import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import { WorkbenchJobCardStatus } from 'components/workbenches/common/WorkbenchJobCardStatus'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -66,7 +66,7 @@ function WorkbenchLaunchRecentJobCard({
 }: {
   job: WorkbenchJobTinyFragment
 }) {
-  const { id, prompt, status, insertedAt, user, workbench } = job
+  const { id, prompt, insertedAt, user, workbench } = job
   if (!workbench) return null
 
   return (
@@ -76,10 +76,7 @@ function WorkbenchLaunchRecentJobCard({
       to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
     >
       <StretchedFlex>
-        <RunStatusIcon
-          fullColor
-          status={status}
-        />
+        <WorkbenchJobCardStatus job={job} />
         <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
       </StretchedFlex>
       <WorkbenchStoredPromptMarkdown

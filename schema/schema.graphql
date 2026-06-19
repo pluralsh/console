@@ -585,7 +585,7 @@ type RootQueryType {
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
 
-  agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
+  agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID, status: AgentRunStatus): AgentRunConnection
 
   agentRunRepositories(after: String, first: Int, before: String, last: Int, q: String): AgentRunRepositoryConnection
 
