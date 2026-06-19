@@ -22,7 +22,8 @@ export default function AwaitingReviewLauncher() {
   useKeyDown(['Escape'], () => setOpen(false))
   useClickOutside(ref, () => setOpen(false))
 
-  const { stacks, count, loading, error } = usePendingApprovalStacks()
+  const { stacks, agentRuns, count, loading, error } =
+    usePendingApprovalStacks()
 
   return (
     <div
@@ -48,6 +49,7 @@ export default function AwaitingReviewLauncher() {
         >
           <AwaitingReviewPanel
             stacks={stacks}
+            agentRuns={agentRuns}
             loading={loading}
             error={error}
             onClose={() => setOpen(false)}

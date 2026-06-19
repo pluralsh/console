@@ -7,27 +7,34 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
-import { AwaitingReviewStackFragment } from 'generated/graphql'
+import {
+  AwaitingReviewAgentRunFragment,
+  AwaitingReviewStackFragment,
+} from 'generated/graphql'
 import { ApolloError } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
+import { AwaitingReviewAgentRunItem } from './AwaitingReviewAgentRunItem'
 import { AwaitingReviewItem } from './AwaitingReviewItem'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 
 export function AwaitingReviewPanel({
   stacks,
+  agentRuns,
   loading,
   error,
   onClose,
   ...props
 }: ComponentProps<typeof Card> & {
   stacks: AwaitingReviewStackFragment[]
+  agentRuns: AwaitingReviewAgentRunFragment[]
   loading: boolean
   error?: ApolloError
   onClose: () => void
 }) {
   const theme = useTheme()
+  const hasItems = !isEmpty(stacks) || !isEmpty(agentRuns)
 
   return (
     <Card
@@ -67,7 +74,7 @@ export function AwaitingReviewPanel({
           },
         }}
       >
-        {loading && isEmpty(stacks) ? (
+        {loading && !hasItems ? (
           <RectangleSkeleton
             $width="100%"
             $height={120}
@@ -78,7 +85,7 @@ export function AwaitingReviewPanel({
             error={error}
             margin="medium"
           />
-        ) : isEmpty(stacks) ? (
+        ) : !hasItems ? (
           <div
             css={{
               color: theme.colors['text-light'],
@@ -86,16 +93,25 @@ export function AwaitingReviewPanel({
               padding: theme.spacing.medium,
             }}
           >
-            No infrastructure stacks are awaiting review.
+            Nothing is awaiting review.
           </div>
         ) : (
-          stacks.map((stack) => (
-            <AwaitingReviewItem
-              key={stack.id}
-              stack={stack}
-              onNavigate={onClose}
-            />
-          ))
+          <>
+            {agentRuns.map((agentRun) => (
+              <AwaitingReviewAgentRunItem
+                key={agentRun.id}
+                agentRun={agentRun}
+                onNavigate={onClose}
+              />
+            ))}
+            {stacks.map((stack) => (
+              <AwaitingReviewItem
+                key={stack.id}
+                stack={stack}
+                onNavigate={onClose}
+              />
+            ))}
+          </>
         )}
       </div>
     </Card>

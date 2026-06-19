@@ -26,17 +26,6 @@ fragment AwaitingReviewStack on InfrastructureStack {
   }
 }
 
-fragment AwaitingReviewAgentRunMessage on AgentMessage {
-  id
-  metadata {
-    tool {
-      name
-      input
-      output
-    }
-  }
-}
-
 fragment AwaitingReviewAgentRun on AgentRun {
   id
   status
@@ -53,26 +42,10 @@ fragment AwaitingReviewAgentRun on AgentRun {
   pullRequests {
     ...PullRequestBasic
   }
-  messages {
-    ...AwaitingReviewAgentRunMessage
-  }
-}
-
-fragment AwaitingReviewWorkbenchJobLink on WorkbenchJob {
-  id
-  workbench {
+  workbenchJob {
     id
-  }
-  activities(first: 10) {
-    edges {
-      node {
-        agentRun {
-          id
-        }
-        agentRuns {
-          id
-        }
-      }
+    workbench {
+      id
     }
   }
 }
@@ -94,11 +67,5 @@ query PendingApprovalAgentRuns($first: Int = 100) {
         ...AwaitingReviewAgentRun
       }
     }
-  }
-}
-
-query AwaitingReviewWorkbenchJobLinks($count: Int = 20) {
-  recentWorkbenchJobs(count: $count) {
-    ...AwaitingReviewWorkbenchJobLink
   }
 }

@@ -1,6 +1,8 @@
 import { ApolloError } from '@apollo/client'
 import {
+  AwaitingReviewAgentRunFragment,
   AwaitingReviewStackFragment,
+  usePendingApprovalAgentRunsQuery,
   usePendingApprovalStacksQuery,
 } from 'generated/graphql'
 import { createContext, ReactNode, use, useMemo } from 'react'
@@ -10,6 +12,7 @@ const POLL_INTERVAL = 60 * 1000
 
 type PendingApprovalStacksContextValue = {
   stacks: AwaitingReviewStackFragment[]
+  agentRuns: AwaitingReviewAgentRunFragment[]
   count: number
   loading: boolean
   error?: ApolloError
@@ -18,6 +21,7 @@ type PendingApprovalStacksContextValue = {
 const PendingApprovalStacksContext =
   createContext<PendingApprovalStacksContextValue>({
     stacks: [],
+    agentRuns: [],
     count: 0,
     loading: false,
   })
@@ -31,24 +35,50 @@ export function PendingApprovalStacksProvider({
 }: {
   children: ReactNode
 }) {
-  const { data, loading, error } = usePendingApprovalStacksQuery({
+  const {
+    data: stacksData,
+    loading: stacksLoading,
+    error: stacksError,
+  } = usePendingApprovalStacksQuery({
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
+
+  const {
+    data: agentRunsData,
+    loading: agentRunsLoading,
+    error: agentRunsError,
+  } = usePendingApprovalAgentRunsQuery({
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
 
   const stacks = useMemo(
-    () => mapExistingNodes(data?.infrastructureStacks),
-    [data?.infrastructureStacks]
+    () => mapExistingNodes(stacksData?.infrastructureStacks),
+    [stacksData?.infrastructureStacks]
+  )
+
+  const agentRuns = useMemo(
+    () => mapExistingNodes(agentRunsData?.agentRuns),
+    [agentRunsData?.agentRuns]
   )
 
   const value = useMemo(
     () => ({
       stacks,
-      count: stacks.length,
-      loading,
-      error,
+      agentRuns,
+      count: stacks.length + agentRuns.length,
+      loading: stacksLoading || agentRunsLoading,
+      error: stacksError ?? agentRunsError,
     }),
-    [stacks, loading, error]
+    [
+      stacks,
+      agentRuns,
+      stacksLoading,
+      agentRunsLoading,
+      stacksError,
+      agentRunsError,
+    ]
   )
 
   return (
