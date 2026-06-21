@@ -18168,20 +18168,21 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 86.2.3
+  - version: 86.3.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Bumped kube-prometheus-stack chart dependencies with non-major
-          updates (Renovate-driven). No functional chart refactors called out in the
-          provided notes.]
+      chart_updates: ['Both 86.2.0 and 86.3.2 are chart releases that only bump kube-prometheus-stack
+          dependencies with non-major updates (Renovate PRs #6971 and #7008).', 'No
+          explicit chart template/manifest changes, CRD changes, or default value
+          changes are called out in the provided release notes.']
       features: []
       breaking_changes: []
-    chart_version: 86.2.3
-    images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+    chart_version: 86.3.2
+    images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
       'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.91.0',
       'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
@@ -23792,23 +23793,38 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.4.3
+  - version: 3.4.4
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
+      helm_changes: '- No Helm chart changelog was provided in the notes you shared,
+        so there are **no chart values changes we can assert from this input**.
+
+        - If you are upgrading via the **Argo CD Helm chart**, still run a values
+        diff against your current version (e.g., `helm show values` for both versions
+        + `helm diff upgrade`) to confirm there are no new required values or renamed
+        keys.'
       chart_updates: []
-      features: []
-      breaking_changes: ['**Kubernetes cluster version label format change (introduced
-          in v3.4.1):** If you use ApplicationSet Cluster Generator with auto-labeled
-          cluster info (`argocd.argoproj.io/auto-label-cluster-info`), selectors must
-          switch from `argocd.argoproj.io/kubernetes-version` in `Major.Minor` to
-          `vMajor.Minor.Patch` format. This can affect cluster selection and therefore
-          what apps get generated/synced if not updated.']
-    chart_version: 9.5.21
+      features: ['(Introduced in v3.4.1, included in your target v3.4.4) ApplicationSet
+          improvements: new `Health` field in ApplicationSet status, new watch/listResourceEvents
+          APIs, and multiple performance/behavior fixes around cluster secrets and
+          reconciliation.', '(Introduced in v3.4.1) Helm rendering enhancement: supports
+          wildcard glob patterns for `valueFiles`, and supports custom `User-Agent`
+          headers for Helm repository requests.', '(Introduced in v3.4.1) Controller/UI
+          enhancements: pause reconciliation per-cluster via annotation; UI adds richer
+          ApplicationSet views, filtering improvements, and better hydrator visibility.',
+        '(Introduced in v3.4.1) Security/observability improvements: OTEL instrumentation
+          added for authentication/handlers; Swagger endpoints gain additional security
+          headers; logout invalidates JWT tokens.']
+      breaking_changes: ['Kubernetes cluster version label format change (v3.4.1):
+          ApplicationSets using Cluster Generator filtering by K8s version and relying
+          on `argocd.argoproj.io/auto-label-cluster-info` must switch from `argocd.argoproj.io/kubernetes-version:
+          Major.Minor` to `vMajor.Minor.Patch` format. This can affect cluster selection
+          and generated apps if not updated.']
+    chart_version: 9.6.0
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.4.3']
+      'quay.io/argoproj/argocd:v3.4.4']
   - version: 3.4.1
     kube: ['1.36', '1.35', '1.34']
     requirements: []
