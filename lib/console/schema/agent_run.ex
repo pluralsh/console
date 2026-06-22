@@ -66,9 +66,9 @@ defmodule Console.Schema.AgentRun do
     has_one :workbench_job_activity_agent_run, WorkbenchJobActivityAgentRun
 
     has_many :pull_requests, PullRequest
-    has_many :messages, AgentMessage, on_replace: :delete
-    has_many :prompts, AgentPrompt, on_replace: :delete
-    has_one  :upload, AgentRunUpload
+    has_many :messages,      AgentMessage, on_replace: :delete
+    has_many :prompts,       AgentPrompt, on_replace: :delete
+    has_one  :upload,        AgentRunUpload
 
     timestamps()
   end

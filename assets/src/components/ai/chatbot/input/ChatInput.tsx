@@ -162,6 +162,7 @@ export function ChatInputSimple({
   wrapperStyles,
   enableAutoComplete = false,
   workbenchId,
+  flowId,
   submitOnEnter = true,
   showSubmitButton = true,
   submitButton,
@@ -179,6 +180,7 @@ export function ChatInputSimple({
   wrapperStyles?: StyledObject
   enableAutoComplete?: boolean
   workbenchId?: Nullable<string>
+  flowId?: Nullable<string>
   submitOnEnter?: boolean
   showSubmitButton?: boolean
   submitButton?: ReactNode
@@ -190,6 +192,7 @@ export function ChatInputSimple({
   const autocomplete = useMentionAutocomplete({
     containerRef: divRef,
     workbenchId,
+    flowId,
     enabled: enableAutoComplete,
   })
 

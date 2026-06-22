@@ -1,10 +1,12 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.Manifests do
   use Console.AI.Tools.Agent.Base
+  import Console.AI.Tools.Workbench.Base
   import Piazza.Ecto.Schema, only: [validate_one_present: 2]
   alias Console.Deployments.{Services, Stacks}
   alias Console.AI.{File.Grepper, Workbench.FileCache}
 
   embedded_schema do
+    field :job,    :map, virtual: true
     field :user,   :map, virtual: true
     field :cache,  :map, virtual: true
 
@@ -41,7 +43,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Manifests do
     end
   end
 
-  defp parent(%__MODULE__{service_id: id}) when is_binary(id), do: {:ok, Services.get_service(id)}
+  defp parent(%__MODULE__{service_id: id} = model) when is_binary(id), do: check_flow(Services.get_service(id), model.job)
   defp parent(%__MODULE__{stack_id: id}) when is_binary(id), do: {:ok, Stacks.get_stack(id)}
   defp parent(_), do: {:error, "no service or stack id provided"}
 

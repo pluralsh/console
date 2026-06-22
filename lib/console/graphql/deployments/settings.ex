@@ -757,7 +757,14 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   object :available_model do
     field :provider, non_null(:ai_provider)
-    field :model, non_null(:string)
+    field :model,    non_null(:string)
+  end
+
+  object :model_default do
+    field :provider,        non_null(:ai_provider)
+    field :model,           non_null(:string)
+    field :tool_model,      non_null(:string)
+    field :embedding_model, :string
   end
 
   connection node_type: :project
@@ -775,13 +782,23 @@ defmodule Console.GraphQl.Deployments.Settings do
       resolve &Deployments.settings/2
     end
 
+    @desc "The model defaults for each configurable provider"
+    field :default_models, list_of(:model_default) do
+      middleware Authenticated, :cluster
+
+      middleware Scope,
+        resource: :settings,
+        action: :read
+
+      resolve &Deployments.default_models/2
+    end
+
     field :available_models, list_of(:available_model) do
       middleware Authenticated, :cluster
 
       middleware Scope,
         resource: :settings,
-        action: :read,
-        api: "availableModels"
+        action: :read
 
       resolve &Deployments.available_models/2
     end

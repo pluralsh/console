@@ -5,6 +5,7 @@ import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
+  ModelDefault,
   useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
@@ -42,6 +43,17 @@ export function AISettingsProvider() {
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
+  const modelDefaultsByProvider = useMemo(
+    () =>
+      Object.fromEntries(
+        deploymentSettings.defaultModels
+          ?.filter((defaultModel): defaultModel is ModelDefault => {
+            return !!defaultModel?.provider
+          })
+          .map((defaultModel) => [defaultModel.provider, defaultModel]) ?? []
+      ) as Partial<Record<AiProvider, ModelDefault>>,
+    [deploymentSettings.defaultModels]
+  )
 
   const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
   const activeProvider = ai?.provider ?? AiProvider.Openai
@@ -156,6 +168,7 @@ export function AISettingsProvider() {
     provider: activeProvider,
     providerSettings,
     updateProviderSettings,
+    modelDefaultsByProvider,
     loading,
     saveDisabled: !ai?.enabled && !enabled,
     error,

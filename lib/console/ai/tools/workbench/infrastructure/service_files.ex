@@ -1,10 +1,12 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceFiles do
   use Console.AI.Tools.Agent.Base
+  import Console.AI.Tools.Workbench.Base
   alias Console.Schema.{Service, User}
   alias Console.Deployments.Services
   alias Console.AI.Fixer.Service, as: ServiceFixer
 
   embedded_schema do
+    field :job,        :map, virtual: true
     field :service_id, :string
   end
 
@@ -23,11 +25,12 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceFiles do
   def name(), do: plrl_tool("service_files")
   def description(), do: "Finds the terraform files for a Plural service and renders them as a sequence of messages"
 
-  def implement(%__MODULE__{service_id: id}) do
+  def implement(%__MODULE__{service_id: id} = model) do
     Console.AI.Fixer.Base.raw()
     with %Service{} = service <- Services.get_service(id) |> Console.Repo.preload([:repository]),
          %User{} = user <- Tool.actor(),
          {:ok, service} <- Policies.allow(service, user, :write),
+         {:ok, service} <- check_flow(service, model.job),
          {:ok, result} <- ServiceFixer.file_contents(service, ctx_window_scale: 0.5) do
       Jason.encode(result)
     else

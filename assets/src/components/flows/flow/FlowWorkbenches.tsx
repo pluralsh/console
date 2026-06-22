@@ -9,6 +9,7 @@ import {
   workbenchColumn,
   WorkbenchJobsTableContent,
 } from 'components/workbenches/workbench/WorkbenchJobsTable'
+import { WorkbenchJobCreateInput } from 'components/workbenches/workbench/WorkbenchJobCreateInput'
 import {
   useFlowWorkbenchJobsQuery,
   useFlowWorkbenchesQuery,
@@ -26,9 +27,12 @@ export function FlowWorkbenches() {
   const { flow } = useOutletContext<FlowOutletContext>()
   const { setSidePanelContent } = useFlowSidePanel()
   const [attachModalOpen, setAttachModalOpen] = useState(false)
+  const [selectedWorkbenchId, setSelectedWorkbenchId] =
+    useState<Nullable<string>>(null)
   const openAttachModal = useCallback(() => setAttachModalOpen(true), [])
   const {
     data: workbenchesData,
+    loading: workbenchesLoading,
     error: workbenchesError,
     refetch: refetchWorkbenches,
   } = useFlowWorkbenchesQuery({
@@ -71,12 +75,33 @@ export function FlowWorkbenches() {
     return () => setSidePanelContent(null)
   }, [openAttachModal, workbenches, setSidePanelContent])
 
+  useEffect(() => {
+    if (!workbenchesData) return
+    if (!workbenches.length) {
+      setSelectedWorkbenchId(null)
+      return
+    }
+
+    if (!workbenches.some((workbench) => workbench.id === selectedWorkbenchId))
+      setSelectedWorkbenchId(workbenches[0]?.id ?? null)
+  }, [selectedWorkbenchId, workbenches, workbenchesData])
+
   if (workbenchesError) return <GqlError error={workbenchesError} />
   if (jobsError) return <GqlError error={jobsError} />
 
   return (
     <>
       <WrapperSC>
+        <WorkbenchJobCreateInput
+          workbenchId={selectedWorkbenchId}
+          setWorkbenchId={setSelectedWorkbenchId}
+          workbenchOptions={workbenches}
+          flowId={flow?.id}
+          workbenchLoading={workbenchesLoading && !workbenchesData}
+          disabled={!workbenches.length}
+          placeholder="Send a job to your flow workbenches. Use / for skills and @ to mention services in this flow"
+          wrapperStyles={{ maxWidth: 'none' }}
+        />
         <Body2BoldP>Workbench Jobs</Body2BoldP>
         <TableContainerSC>
           <WorkbenchJobsTableContent

@@ -7,6 +7,7 @@ import {
   AiProvider,
   AiSettings,
   AiSettingsAttributes,
+  ModelDefault,
   OpenAiMethod,
 } from '../../../generated/graphql.ts'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
@@ -32,6 +33,11 @@ export const aiProviderToLabel = {
   [AiProvider.Ollama]: 'Ollama',
   [AiProvider.Vertex]: 'Vertex AI',
 } as const satisfies Record<AiProvider, string>
+
+type ModelDefaults = Pick<
+  ModelDefault,
+  'model' | 'toolModel' | 'embeddingModel'
+>
 
 export function initialSettingsAttributes(
   ai: Nullable<AiSettings>
@@ -159,10 +165,12 @@ export function validateAttributes(
 export function OpenAISettings({
   enabled,
   settings,
+  modelDefaults,
   updateSettings,
 }: {
   enabled: boolean
   settings: AiSettingsAttributes['openai']
+  modelDefaults?: ModelDefaults
   updateSettings: (
     update: NonNullable<Partial<AiSettingsAttributes['openai']>>
   ) => void
@@ -176,7 +184,7 @@ export function OpenAISettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.model}
+          value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
@@ -187,7 +195,9 @@ export function OpenAISettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.embeddingModel}
+          value={
+            settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
+          }
           onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
           }
@@ -200,7 +210,7 @@ export function OpenAISettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.toolModel}
+          value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
@@ -261,10 +271,12 @@ export function OpenAISettings({
 export function AnthropicSettings({
   enabled,
   settings,
+  modelDefaults,
   updateSettings,
 }: {
   enabled: boolean
   settings: AiSettingsAttributes['anthropic']
+  modelDefaults?: ModelDefaults
   updateSettings: (
     update: NonNullable<Partial<AiSettingsAttributes['anthropic']>>
   ) => void
@@ -278,7 +290,7 @@ export function AnthropicSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.model}
+          value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
@@ -289,7 +301,7 @@ export function AnthropicSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.toolModel}
+          value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
@@ -313,10 +325,12 @@ export function AnthropicSettings({
 export function BedrockSettings({
   enabled,
   settings,
+  modelDefaults,
   updateSettings,
 }: {
   enabled: boolean
   settings: AiSettingsAttributes['bedrock']
+  modelDefaults?: ModelDefaults
   updateSettings: (
     update: NonNullable<Partial<AiSettingsAttributes['bedrock']>>
   ) => void
@@ -330,7 +344,7 @@ export function BedrockSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.modelId}
+          value={settings?.modelId ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ modelId: e.currentTarget.value })}
         />
       </FormField>
@@ -341,7 +355,9 @@ export function BedrockSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.embeddingModel}
+          value={
+            settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
+          }
           onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
           }
@@ -354,7 +370,7 @@ export function BedrockSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.toolModelId}
+          value={settings?.toolModelId ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) =>
             updateSettings({ toolModelId: e.currentTarget.value })
           }
@@ -393,10 +409,12 @@ export function BedrockSettings({
 export function OllamaSettings({
   enabled,
   settings,
+  modelDefaults,
   updateSettings,
 }: {
   enabled: boolean
   settings: AiSettingsAttributes['ollama']
+  modelDefaults?: ModelDefaults
   updateSettings: (
     update: NonNullable<Partial<AiSettingsAttributes['ollama']>>
   ) => void
@@ -411,7 +429,7 @@ export function OllamaSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.model}
+          value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
@@ -422,7 +440,7 @@ export function OllamaSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.toolModel}
+          value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
@@ -459,10 +477,12 @@ export function OllamaSettings({
 export function AzureSettings({
   enabled,
   settings,
+  modelDefaults,
   updateSettings,
 }: {
   enabled: boolean
   settings: AiSettingsAttributes['azure']
+  modelDefaults?: ModelDefaults
   updateSettings: (
     update: NonNullable<Partial<AiSettingsAttributes['azure']>>
   ) => void
@@ -476,7 +496,7 @@ export function AzureSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.model}
+          value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
@@ -500,7 +520,9 @@ export function AzureSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.embeddingModel}
+          value={
+            settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
+          }
           onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
           }
@@ -513,7 +535,7 @@ export function AzureSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.toolModel}
+          value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
@@ -554,10 +576,12 @@ enum FileError {
 export function VertexSettings({
   enabled,
   settings,
+  modelDefaults,
   updateSettings,
 }: {
   enabled: boolean
   settings: AiSettingsAttributes['vertex']
+  modelDefaults?: ModelDefaults
   updateSettings: (
     update: NonNullable<Partial<AiSettingsAttributes['vertex']>>
   ) => void
@@ -607,7 +631,7 @@ export function VertexSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.model}
+          value={settings?.model ?? modelDefaults?.model ?? ''}
           onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
@@ -618,7 +642,9 @@ export function VertexSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.embeddingModel}
+          value={
+            settings?.embeddingModel ?? modelDefaults?.embeddingModel ?? ''
+          }
           onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
           }
@@ -643,7 +669,7 @@ export function VertexSettings({
       >
         <Input
           disabled={!enabled}
-          value={settings?.toolModel}
+          value={settings?.toolModel ?? modelDefaults?.toolModel ?? ''}
           onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>

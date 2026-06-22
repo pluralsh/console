@@ -275,6 +275,9 @@ type RootQueryType {
     "a project to filter services w\/in"
     projectId: ID
 
+    "a flow to filter services w\/in"
+    flowId: ID
+
     "the handle of the cluster for this service"
     cluster: String
   ): ServiceDeploymentConnection
@@ -473,6 +476,9 @@ type RootQueryType {
   ): Monitor
 
   deploymentSettings: DeploymentSettings
+
+  "The model defaults for each configurable provider"
+  defaultModels: [ModelDefault]
 
   availableModels: [AvailableModel]
 
@@ -2587,6 +2593,9 @@ input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
 
+  "the flow this job is associated with"
+  flowId: ID
+
   "mode-specific options for this job"
   modes: WorkbenchJobModesAttributes
 }
@@ -3392,6 +3401,9 @@ type WorkbenchJob {
   "error message when the job failed"
   error: String
 
+  "the flow this job is associated with"
+  flowId: ID
+
   "mode-specific options for this job"
   modes: WorkbenchJobModes
 
@@ -3403,6 +3415,9 @@ type WorkbenchJob {
 
   "the workbench this run belongs to"
   workbench: Workbench
+
+  "the flow this job is associated with"
+  flow: Flow
 
   "the user who created this run"
   user: User
@@ -6417,6 +6432,13 @@ type FederatedCredential {
 type AvailableModel {
   provider: AiProvider!
   model: String!
+}
+
+type ModelDefault {
+  provider: AiProvider!
+  model: String!
+  toolModel: String!
+  embeddingModel: String
 }
 
 type ProjectConnection {

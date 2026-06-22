@@ -668,6 +668,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :git_ref,    :string, description: "a git reference to filter services by"
       arg :errored,    :boolean
       arg :project_id, :id, description: "a project to filter services w/in"
+      arg :flow_id,    :id, description: "a flow to filter services w/in"
       arg :cluster,    :string, description: "the handle of the cluster for this service"
 
       resolve &Deployments.list_services/2

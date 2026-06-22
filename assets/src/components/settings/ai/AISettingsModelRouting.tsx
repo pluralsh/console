@@ -4,6 +4,8 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
+  AiProvider,
+  ModelDefault,
   useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
@@ -23,6 +25,17 @@ export function AISettingsModelRouting() {
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
+  const modelDefaultsByProvider = useMemo(
+    () =>
+      Object.fromEntries(
+        deploymentSettings.defaultModels
+          ?.filter((defaultModel): defaultModel is ModelDefault => {
+            return !!defaultModel?.provider
+          })
+          .map((defaultModel) => [defaultModel.provider, defaultModel]) ?? []
+      ) as Partial<Record<AiProvider, ModelDefault>>,
+    [deploymentSettings.defaultModels]
+  )
 
   const initialRouting = useMemo(() => initialModelRoutingState(ai), [ai])
 
@@ -86,6 +99,7 @@ export function AISettingsModelRouting() {
             routing={routing}
             onRoutingChange={setRouting}
             configuredProviders={configuredProviders}
+            modelDefaultsByProvider={modelDefaultsByProvider}
           />
         ))}
         <ActionsSC>
