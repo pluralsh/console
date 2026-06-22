@@ -20,8 +20,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_job_attributes do
-    field :prompt, :string, description: "the prompt for this job"
-    field :modes,  :workbench_job_modes_attributes, description: "mode-specific options for this job"
+    field :prompt,  :string, description: "the prompt for this job"
+    field :flow_id, :id, description: "the flow this job is associated with"
+    field :modes,   :workbench_job_modes_attributes, description: "mode-specific options for this job"
   end
 
   input_object :workbench_job_modes_attributes do
@@ -467,6 +468,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+    field :flow_id,      :id, description: "the flow this job is associated with"
     field :modes,        :workbench_job_modes, description: "mode-specific options for this job"
     field :usage,        :workbench_job_usage, description: "token and cost usage for this job"
 
@@ -475,6 +477,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
+    field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
     field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"

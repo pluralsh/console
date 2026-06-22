@@ -284,6 +284,7 @@ query ServiceDeployments(
   $clusterId: ID
   $status: ServiceDeploymentStatus
   $projectId: ID
+  $flowId: ID
 ) {
   serviceDeployments(
     first: $first
@@ -293,6 +294,7 @@ query ServiceDeployments(
     clusterId: $clusterId
     status: $status
     projectId: $projectId
+    flowId: $flowId
   ) {
     ...ServiceDeploymentsConnection
   }

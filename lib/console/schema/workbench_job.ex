@@ -11,6 +11,7 @@ defmodule Console.Schema.WorkbenchJob do
     Alert,
     Issue,
     PullRequest,
+    Flow,
     ChatbotMessage
   }
   alias Console.Deployments.Policies.Rbac
@@ -80,6 +81,7 @@ defmodule Console.Schema.WorkbenchJob do
     belongs_to :user,           User
     belongs_to :alert,          Alert
     belongs_to :issue,          Issue
+    belongs_to :flow,           Flow
     belongs_to :referenced_job, __MODULE__
 
     has_one  :result,          WorkbenchJobResult, on_replace: :update
@@ -124,11 +126,7 @@ defmodule Console.Schema.WorkbenchJob do
   end
 
   def for_flow(query \\ __MODULE__, flow_id) do
-    from(j in query,
-      join: w in assoc(j, :workbench),
-      join: fb in assoc(w, :flows_workbenches),
-      where: fb.flow_id == ^flow_id
-    )
+    from(j in query, where: j.flow_id == ^flow_id)
   end
 
   def workbench_usage(query \\ Workbench, period) do
@@ -185,7 +183,7 @@ defmodule Console.Schema.WorkbenchJob do
   end
 
   def expired(query \\ __MODULE__) do
-    from(j in query, where: j.inserted_at < ago(14, "day"))
+    from(j in query, where: j.inserted_at < ago(3, "month"))
   end
 
   def preloaded(query \\ __MODULE__, preloads \\ [:result]) do
@@ -225,7 +223,7 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
-  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id)a
+  @valid ~w(status type prompt workbench_id error user_id started_at completed_at alert_id issue_id referenced_job_id flow_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -239,6 +237,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> foreign_key_constraint(:alert_id)
     |> foreign_key_constraint(:issue_id)
     |> foreign_key_constraint(:referenced_job_id)
+    |> foreign_key_constraint(:flow_id)
     |> validate_required([:status, :workbench_id, :user_id])
   end
 

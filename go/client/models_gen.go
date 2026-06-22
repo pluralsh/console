@@ -10114,6 +10114,8 @@ type WorkbenchJob struct {
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// error message when the job failed
 	Error *string `json:"error,omitempty"`
+	// the flow this job is associated with
+	FlowID *string `json:"flowId,omitempty"`
 	// mode-specific options for this job
 	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// token and cost usage for this job
@@ -10122,6 +10124,8 @@ type WorkbenchJob struct {
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
+	// the flow this job is associated with
+	Flow *Flow `json:"flow,omitempty"`
 	// the user who created this run
 	User *User `json:"user,omitempty"`
 	// the result for this job (sideloadable)
@@ -10253,6 +10257,8 @@ type WorkbenchJobActivityTrace struct {
 type WorkbenchJobAttributes struct {
 	// the prompt for this job
 	Prompt *string `json:"prompt,omitempty"`
+	// the flow this job is associated with
+	FlowID *string `json:"flowId,omitempty"`
 	// mode-specific options for this job
 	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }

@@ -1,8 +1,8 @@
 defmodule Console.Deployments.Policies do
-  use Piazza.Policy
+  use Console.Policies.Base
   import Console.Deployments.Policies.Rbac, only: [rbac: 3]
   alias Console.Repo
-  alias Console.Deployments.{Services, Clusters, Global, BootstrapPolicies}
+  alias Console.Deployments.{Services, Clusters, Global, BootstrapPolicies, Workbenches}
   alias Console.Schema.{
     User,
     Cluster,
@@ -22,7 +22,9 @@ defmodule Console.Deployments.Policies do
     AgentRuntime,
     AgentRun,
     SentinelRunJob,
-    WorkbenchJob
+    WorkbenchJob,
+    Flow,
+    FlowWorkbench
   }
 
   def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
@@ -52,6 +54,17 @@ defmodule Console.Deployments.Policies do
 
 
   def can?(%User{id: id}, %WorkbenchJob{user_id: id}, :edit), do: :pass
+  def can?(%User{} = user, %WorkbenchJob{flow_id: fid, workbench_id: wid} = job, :read) when is_binary(fid) do
+    with %FlowWorkbench{} <- Workbenches.flow_association(fid, wid),
+         %{flow: %Flow{} = flow} <- Repo.preload(job, [:flow]) do
+      cascade(user, [
+        {flow, :read},
+        {%{job | flow_id: nil}, :read}
+      ])
+    else
+      _ -> {:error, "this flow is not associated with the workbench"}
+    end
+  end
   def can?(%User{} = user, %WorkbenchJob{} = job, :edit), do: can?(user, job, :write)
   def can?(%User{} = user, %WorkbenchJob{} = job, :prompt), do: can?(user, job, :read)
   def can?(%Cluster{id: id}, %SentinelRunJob{cluster_id: id}, _), do: :pass

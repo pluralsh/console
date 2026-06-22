@@ -492,6 +492,40 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
     end
 
+    test "users with flow read access can create associated flow jobs without workbench read access" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench)
+      insert(:flow_workbench, flow: flow, workbench: workbench)
+
+      {:ok, job} =
+        Workbenches.create_workbench_job(
+          %{prompt: "test prompt", flow_id: flow.id},
+          workbench.id,
+          user
+        )
+
+      assert job.workbench_id == workbench.id
+      assert job.flow_id == flow.id
+      assert job.user_id == user.id
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
+    test "users with flow read access cannot create flow jobs for unrelated workbenches" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench)
+
+      assert {:error, "this flow is not associated with the workbench"} =
+               Workbenches.create_workbench_job(
+                 %{prompt: "test prompt", flow_id: flow.id},
+                 workbench.id,
+                 user
+               )
+
+      refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
+    end
+
     test "creates a workbench job with an associated chatbot message" do
       user = insert(:user)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])

@@ -12098,6 +12098,7 @@ export type RootQueryTypeServiceDeploymentsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   errored?: InputMaybe<Scalars['Boolean']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   gitRef?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -15732,6 +15733,10 @@ export type WorkbenchJob = {
   error?: Maybe<Scalars['String']['output']>;
   /** the eval result for this job (sideloadable) */
   evalResult?: Maybe<WorkbenchEvalResult>;
+  /** the flow this job is associated with */
+  flow?: Maybe<Flow>;
+  /** the flow this job is associated with */
+  flowId?: Maybe<Scalars['ID']['output']>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -15930,6 +15935,8 @@ export enum WorkbenchJobActivityType {
 }
 
 export type WorkbenchJobAttributes = {
+  /** the flow this job is associated with */
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   /** mode-specific options for this job */
   modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** the prompt for this job */
@@ -18847,6 +18854,7 @@ export type ServiceDeploymentsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -34336,7 +34344,7 @@ export type PullRequestsLazyQueryHookResult = ReturnType<typeof usePullRequestsL
 export type PullRequestsSuspenseQueryHookResult = ReturnType<typeof usePullRequestsSuspenseQuery>;
 export type PullRequestsQueryResult = Apollo.QueryResult<PullRequestsQuery, PullRequestsQueryVariables>;
 export const ServiceDeploymentsDocument = gql`
-    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus, $projectId: ID) {
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus, $projectId: ID, $flowId: ID) {
   serviceDeployments(
     first: $first
     after: $after
@@ -34345,6 +34353,7 @@ export const ServiceDeploymentsDocument = gql`
     clusterId: $clusterId
     status: $status
     projectId: $projectId
+    flowId: $flowId
   ) {
     ...ServiceDeploymentsConnection
   }
@@ -34370,6 +34379,7 @@ export const ServiceDeploymentsDocument = gql`
  *      clusterId: // value for 'clusterId'
  *      status: // value for 'status'
  *      projectId: // value for 'projectId'
+ *      flowId: // value for 'flowId'
  *   },
  * });
  */

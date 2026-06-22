@@ -20,7 +20,8 @@ defmodule Console.Deployments.Workbenches do
     ChatConnection,
     WorkbenchChatbot,
     WorkbenchJobActivityAgentRun,
-    WorkbenchJobThought
+    WorkbenchJobThought,
+    FlowWorkbench
   }
   alias Console.AI.{Provider, Tools.Workbench.SavedPrompt, VectorStore}
   alias Console.Deployments.Settings
@@ -77,6 +78,10 @@ defmodule Console.Deployments.Workbenches do
 
   def get_workbench_eval_result!(id), do: Repo.get!(WorkbenchEvalResult, id)
   def get_workbench_eval_result(id), do: Repo.get(WorkbenchEvalResult, id)
+
+  def flow_association(flow_id, workbench_id) do
+    Repo.get_by(FlowWorkbench, flow_id: flow_id, workbench_id: workbench_id)
+  end
 
   def accessible_users(%Workbench{} = workbench) do
     {users, groups} = Console.AI.Authorizable.authorize(workbench)

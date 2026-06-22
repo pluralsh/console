@@ -364,8 +364,8 @@ defmodule Console.Deployments.CronTest do
 
   describe "#prune_workbench_jobs/0" do
     test "it will prune workbench jobs older than the retention window" do
-      remove = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -15))
-      keep = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      remove = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(months: -4))
+      keep = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -15))
 
       :ok = Cron.prune_workbench_jobs()
 
