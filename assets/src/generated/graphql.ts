@@ -17823,7 +17823,7 @@ export type RegisterGitHubAppMutation = { __typename?: 'RootMutationType', regis
 
 export type AwaitingReviewStackFragment = { __typename?: 'InfrastructureStack', id?: string | null, name: string, status: StackStatus, runs?: { __typename?: 'StackRunConnection', edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus, message?: string | null, approvalResult?: { __typename?: 'StackRunApprovalResult', reason?: string | null, result?: ApprovalResult | null } | null, configuration: { __typename?: 'StackConfiguration', aiApproval?: { __typename?: 'AiApprovalConfiguration', enabled: boolean } | null }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null } | null } | null } | null> | null } | null };
 
-export type AwaitingReviewAgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, approvedAt?: string | null, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string } | null } | null };
+export type AwaitingReviewAgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, approvedAt?: string | null, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null };
 
 export type PendingApprovalStacksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -17837,7 +17837,7 @@ export type PendingApprovalAgentRunsQueryVariables = Exact<{
 }>;
 
 
-export type PendingApprovalAgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, approvedAt?: string | null, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null } | null> | null } | null };
+export type PendingApprovalAgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, approvedAt?: string | null, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null } | null } | null> | null } | null };
 
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
@@ -22480,6 +22480,7 @@ export const AwaitingReviewAgentRunFragmentDoc = gql`
     id
     workbench {
       id
+      name
     }
   }
 }

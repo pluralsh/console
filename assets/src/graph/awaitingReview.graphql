@@ -47,6 +47,7 @@ fragment AwaitingReviewAgentRun on AgentRun {
     id
     workbench {
       id
+      name
     }
   }
 }

@@ -1,17 +1,18 @@
-import { Button, DiscoverIcon, Flex, IconFrame } from '@pluralsh/design-system'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
-import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
+import {
+  Button,
+  Chip,
+  DiscoverIcon,
+  Flex,
+  IconFrame,
+  WarningOutlineIcon,
+  WorkbenchIcon,
+} from '@pluralsh/design-system'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
-import { TRUNCATE } from 'components/utils/truncate'
-import {
-  AgentRunStatus,
-  AwaitingReviewAgentRunFragment,
-  useApproveAgentRunMutation,
-} from 'generated/graphql'
+import { Body2P } from 'components/utils/typography/Text'
+import { AwaitingReviewAgentRunFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -24,11 +25,9 @@ export function AwaitingReviewAgentRunItem({
   onNavigate: () => void
 }) {
   const theme = useTheme()
-  const { prompt, runtime, analysis, pullRequests, workbenchJob } = agentRun
-  const [approveAgentRun, { loading: approving }] = useApproveAgentRunMutation({
-    variables: { id: agentRun.id },
-    refetchQueries: ['PendingApprovalAgentRuns', 'AgentRun'],
-  })
+  const navigate = useNavigate()
+  const { prompt, analysis, pullRequests, workbenchJob } = agentRun
+  const workbench = workbenchJob?.workbench
   const subtitle =
     pullRequests?.[0]?.title ??
     truncate(prompt ?? '', { length: 56 }) ??
@@ -46,13 +45,13 @@ export function AwaitingReviewAgentRunItem({
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.small,
+        gap: theme.spacing.medium,
         padding: theme.spacing.large,
       }}
     >
       <Flex
-        align="start"
-        gap="small"
+        align="center"
+        gap="medium"
       >
         <IconFrame
           circle
@@ -64,7 +63,12 @@ export function AwaitingReviewAgentRunItem({
               color={theme.colors['icon-default']}
             />
           }
-          css={{ flexShrink: 0 }}
+          css={{
+            flexShrink: 0,
+
+            border: theme.borders['fill-two'],
+            backgroundColor: 'transparent',
+          }}
         />
         <StackedText
           first="Approval required"
@@ -74,25 +78,28 @@ export function AwaitingReviewAgentRunItem({
           truncate
           css={{ flex: 1, minWidth: 0 }}
         />
-        {runtime && (
-          <Flex
-            align="center"
-            gap="xxsmall"
-            padding="xxsmall"
-            css={{
-              border: theme.borders.default,
-              borderRadius: theme.borderRadiuses.medium,
-              flexShrink: 0,
+        {workbenchJob?.id && workbench?.id && workbench.name && (
+          <Chip
+            size="small"
+            severity="neutral"
+            fillLevel={1}
+            clickable
+            onClick={() => {
+              navigate(
+                getWorkbenchJobAbsPath({
+                  workbenchId: workbench.id,
+                  jobId: workbenchJob.id,
+                })
+              )
+              onNavigate()
             }}
+            icon={<WorkbenchIcon size={12} />}
+            truncateWidth={80}
+            tooltip="View workbench job"
+            css={{ flexShrink: 0 }}
           >
-            <AgentRuntimeIcon type={runtime.type} />
-            <CaptionP
-              $color="text-xlight"
-              css={TRUNCATE}
-            >
-              {runtime.name}
-            </CaptionP>
-          </Flex>
+            {workbench.name}
+          </Chip>
         )}
       </Flex>
 
@@ -110,24 +117,19 @@ export function AwaitingReviewAgentRunItem({
         </Body2P>
       )}
 
+      {/* TODO: Render per-file diff stats (+/- counts) here once awaiting-review can fetch them from the API. */}
+
       <StretchedFlex
         align="center"
         gap="small"
       >
-        <RunStatusChip
+        <Chip
           size="small"
-          status={AgentRunStatus.PendingApproval}
-          showSpinner={false}
-        />
-        {!agentRun.approvedAt && (
-          <Button
-            small
-            onClick={() => approveAgentRun()}
-            loading={approving}
-          >
-            Approve
-          </Button>
-        )}
+          iconColor="icon-warning"
+          icon={<WarningOutlineIcon />}
+        >
+          Pending approval
+        </Chip>
         <Button
           small
           as={Link}
