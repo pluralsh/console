@@ -1,4 +1,9 @@
-import { AiProvider, AiSettings, AiSettingsAttributes } from 'generated/graphql'
+import {
+  AiProvider,
+  AiSettings,
+  AiSettingsAttributes,
+  ModelDefault,
+} from 'generated/graphql'
 import pick from 'lodash/pick'
 import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 
@@ -52,6 +57,7 @@ export const modelRoutingRoleMeta = {
 >
 
 type ProviderConfigKey = (typeof providerSettingsKey)[AiProvider]
+export type ModelDefaultsByProvider = Partial<Record<AiProvider, ModelDefault>>
 
 type ModelFieldKey =
   | 'model'
@@ -123,7 +129,8 @@ export function effectiveProviderForRole(
 export function getModelValue(
   role: ModelRoutingRole,
   routing: ModelRoutingState,
-  ai: Nullable<AiSettings>
+  ai: Nullable<AiSettings>,
+  modelDefaultsByProvider?: ModelDefaultsByProvider
 ): string {
   const provider = effectiveProviderForRole(role, routing)
   if (!provider) return DEFAULT_MODEL_ROUTING_OPTION
@@ -132,9 +139,24 @@ export function getModelValue(
   const field = modelFieldKeyFor(provider, role)
   const serverConfig = ai?.[key as ProviderConfigKey]
   const value = serverConfig?.[field as keyof NonNullable<typeof serverConfig>]
-  return typeof value === 'string' && value.trim()
-    ? value
-    : DEFAULT_MODEL_ROUTING_OPTION
+  if (typeof value === 'string' && value.trim()) return value
+
+  const defaults = modelDefaultsByProvider?.[provider]
+  const defaultValue = defaults?.[defaultModelFieldForRole(role)]
+  return defaultValue?.trim() || DEFAULT_MODEL_ROUTING_OPTION
+}
+
+function defaultModelFieldForRole(
+  role: ModelRoutingRole
+): keyof Pick<ModelDefault, 'model' | 'toolModel' | 'embeddingModel'> {
+  switch (role) {
+    case 'tool':
+      return 'toolModel'
+    case 'embedding':
+      return 'embeddingModel'
+    default:
+      return 'model'
+  }
 }
 
 export function setRoutingProvider(

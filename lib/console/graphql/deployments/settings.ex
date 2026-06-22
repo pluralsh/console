@@ -757,13 +757,13 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   object :available_model do
     field :provider, non_null(:ai_provider)
-    field :model, non_null(:string)
+    field :model,    non_null(:string)
   end
 
   object :model_default do
-    field :provider, non_null(:ai_provider)
-    field :model, non_null(:string)
-    field :tool_model, non_null(:string)
+    field :provider,        non_null(:ai_provider)
+    field :model,           non_null(:string)
+    field :tool_model,      non_null(:string)
     field :embedding_model, :string
   end
 
