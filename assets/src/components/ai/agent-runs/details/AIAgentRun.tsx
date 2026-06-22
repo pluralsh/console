@@ -1,8 +1,10 @@
 import {
   ArrowTopRightIcon,
   Button,
+  Card,
   Divider,
   Flex,
+  IconFrame,
   SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
@@ -13,7 +15,9 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
+import { Body2P } from 'components/utils/typography/Text.tsx'
 import {
+  AgentRunFragment,
   AgentRunStatus,
   useAgentRunQuery,
   useApproveAgentRunMutation,
@@ -30,6 +34,8 @@ import {
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI.tsx'
+import { RunStatusChip } from '../../infra-research/details/InfraResearch.tsx'
+import { RunStatusIcon } from '../AgentRunInfoDisplays.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
@@ -132,15 +138,6 @@ export function AIAgentRun() {
                 />
               </Flex>
               <Flex gap="small">
-                {isApprovable && (
-                  <Button
-                    small
-                    onClick={() => approveAgentRun()}
-                    loading={approving}
-                  >
-                    Approve agent run
-                  </Button>
-                )}
                 {isCancellable && (
                   <Button
                     small
@@ -161,7 +158,19 @@ export function AIAgentRun() {
                 {run && <AIAgentRunShareButton runId={run?.id} />}
               </Flex>
             </StretchedFlex>
-            <Divider backgroundColor="border" />
+            <Divider
+              backgroundColor="border"
+              marginTop="small"
+              marginBottom="small"
+            />
+            {run && (
+              <AgentRunStatusCallout
+                run={run}
+                isApprovable={isApprovable}
+                approving={approving}
+                onApprove={() => approveAgentRun()}
+              />
+            )}
             {run?.error && (
               <GqlError
                 header="There was an error during this run."
@@ -214,10 +223,152 @@ export function AIAgentRun() {
   )
 }
 
+function AgentRunStatusCallout({
+  run,
+  isApprovable,
+  approving,
+  onApprove,
+}: {
+  run: AgentRunFragment
+  isApprovable: boolean
+  approving: boolean
+  onApprove: () => void
+}) {
+  const theme = useTheme()
+  const pullRequest = run.pullRequests?.[0]
+  const title = pullRequest?.title ?? agentRunStatusTitle(run.status)
+  const summary = run.analysis?.summary
+
+  return (
+    <StatusCalloutSC
+      fillLevel={1}
+      $status={run.status}
+    >
+      <StretchedFlex
+        align="start"
+        gap="medium"
+      >
+        <StackedText
+          truncate
+          first={title}
+          firstPartialType="body2Bold"
+          firstColor="text"
+          second={pullRequest?.title ? agentRunStatusTitle(run.status) : null}
+          secondColor="text-light"
+          icon={
+            <IconFrame
+              circle
+              size="large"
+              type="secondary"
+              icon={
+                <RunStatusIcon
+                  status={run.status}
+                  fullColor
+                />
+              }
+              css={{ flexShrink: 0 }}
+            />
+          }
+          css={{ flex: 1, minWidth: 0 }}
+        />
+        <RunStatusChip
+          status={run.status}
+          showSpinner={false}
+          size="small"
+          css={{ flexShrink: 0 }}
+        />
+      </StretchedFlex>
+      {summary && (
+        <Body2P
+          $color="text-light"
+          css={{
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {summary}
+        </Body2P>
+      )}
+      {(pullRequest?.url || isApprovable) && (
+        <Flex
+          justify="flex-end"
+          gap="small"
+          css={{ marginTop: theme.spacing.xsmall }}
+        >
+          {pullRequest?.url && (
+            <Button
+              small
+              secondary
+              as="a"
+              href={pullRequest.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              endIcon={<ArrowTopRightIcon size={12} />}
+            >
+              View PR
+            </Button>
+          )}
+          {isApprovable && (
+            <Button
+              small
+              onClick={onApprove}
+              loading={approving}
+            >
+              Approve agent run
+            </Button>
+          )}
+        </Flex>
+      )}
+    </StatusCalloutSC>
+  )
+}
+
+function agentRunStatusTitle(status: AgentRunStatus) {
+  switch (status) {
+    case AgentRunStatus.PendingApproval:
+      return 'Approval required'
+    case AgentRunStatus.Successful:
+      return 'Run complete'
+    case AgentRunStatus.Failed:
+      return 'Run failed'
+    case AgentRunStatus.Cancelled:
+      return 'Run cancelled'
+    case AgentRunStatus.Babysitting:
+      return 'Babysitting'
+    case AgentRunStatus.Running:
+      return 'Agent run in progress'
+    case AgentRunStatus.Pending:
+      return 'Agent run pending'
+  }
+}
+
 const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
   height: '100%',
   borderLeft: theme.borders.default,
 }))
+
+const statusToBorderColor = {
+  [AgentRunStatus.PendingApproval]: 'icon-warning',
+  [AgentRunStatus.Successful]: 'icon-success',
+  [AgentRunStatus.Failed]: 'icon-danger',
+  [AgentRunStatus.Cancelled]: 'icon-xlight',
+  [AgentRunStatus.Babysitting]: 'icon-info',
+  [AgentRunStatus.Running]: 'icon-info',
+  [AgentRunStatus.Pending]: 'icon-info',
+} as const
+
+const StatusCalloutSC = styled(Card)<{ $status: AgentRunStatus }>(
+  ({ theme, $status }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.medium,
+    padding: theme.spacing.medium,
+    width: '100%',
+    borderLeft: `3px solid ${theme.colors[statusToBorderColor[$status]]}`,
+  })
+)
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
