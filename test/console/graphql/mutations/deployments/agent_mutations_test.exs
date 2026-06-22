@@ -130,15 +130,13 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
         mutation Prompt($id: ID!, $prompt: String!) {
           createAgentRunPrompt(id: $id, prompt: $prompt) {
             id
-            prompts {
-              prompt
-            }
+            prompt
           }
         }
       """, %{"id" => run.id, "prompt" => "please adjust this"}, %{current_user: user})
 
-      assert found["id"] == run.id
-      assert [%{"prompt" => "please adjust this"}] = found["prompts"]
+      assert found["id"]
+      assert found["prompt"] == "please adjust this"
     end
   end
 
