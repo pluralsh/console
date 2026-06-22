@@ -417,10 +417,10 @@
          "name": "PendingApprovalStacks",
          "body": "query PendingApprovalStacks($first: Int = 50) {\n  infrastructureStacks(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        ...AwaitingReviewStack\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AwaitingReviewStack on InfrastructureStack {\n  id\n  name\n  status\n  runs(first: 50) {\n    edges {\n      node {\n        id\n        status\n        message\n        approvalResult {\n          reason\n          result\n          __typename\n        }\n        configuration {\n          aiApproval {\n            enabled\n            __typename\n          }\n          __typename\n        }\n        pullRequest {\n          id\n          title\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:d3cc295d945fd0f7a58926b0feabc458684de2e616e11733f5c6d7b27f94be55": {
+      "sha256:889b429fc27f76a2f9525100fd7754554439fcf3432d6ac68c4ecab07ef42b84": {
          "type": "query",
          "name": "PendingApprovalAgentRuns",
-         "body": "query PendingApprovalAgentRuns($first: Int = 100) {\n  agentRuns(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        ...AwaitingReviewAgentRun\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AwaitingReviewAgentRun on AgentRun {\n  id\n  status\n  approvedAt\n  prompt\n  repository\n  runtime {\n    id\n    name\n    type\n    __typename\n  }\n  analysis {\n    summary\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  workbenchJob {\n    id\n    workbench {\n      id\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
+         "body": "query PendingApprovalAgentRuns($first: Int = 100) {\n  agentRuns(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        ...AwaitingReviewAgentRun\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment AwaitingReviewAgentRun on AgentRun {\n  id\n  status\n  approvedAt\n  prompt\n  repository\n  runtime {\n    id\n    name\n    type\n    __typename\n  }\n  analysis {\n    summary\n    __typename\n  }\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  workbenchJob {\n    id\n    workbench {\n      id\n      name\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
       "sha256:988ccffca43dd7f6a0d38dc29d76ea7b85bb4b829d0df9f1ae79511ca4472221": {
          "type": "query",
@@ -2206,6 +2206,16 @@
          "type": "subscription",
          "name": "WorkbenchCanvasStream",
          "body": "subscription WorkbenchCanvasStream($jobId: ID!, $activityId: ID) {\n  workbenchCanvasStream(jobId: $jobId, activityId: $activityId) {\n    ...WorkbenchCanvasBlock\n    __typename\n  }\n}\n\nfragment WorkbenchCanvasBlock on WorkbenchCanvasBlock {\n  identifier\n  type\n  layout {\n    x\n    y\n    w\n    h\n    __typename\n  }\n  content {\n    markdown\n    metrics {\n      ...WorkbenchCanvasToolGraph\n      __typename\n    }\n    logs {\n      ...WorkbenchCanvasToolGraph\n      __typename\n    }\n    traces {\n      ...WorkbenchCanvasToolGraph\n      __typename\n    }\n    pie {\n      ...WorkbenchCanvasBlockGraph\n      __typename\n    }\n    bar {\n      ...WorkbenchCanvasBlockGraph\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchCanvasToolGraph on WorkbenchCanvasToolGraph {\n  title\n  summary\n  query {\n    ...WorkbenchToolQueryData\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchToolQueryData on WorkbenchToolQueryData {\n  toolName\n  toolArgs\n  summary\n  __typename\n}\n\nfragment WorkbenchCanvasBlockGraph on WorkbenchCanvasBlockGraph {\n  title\n  data {\n    label\n    value\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:68ec95d65a3dd33b1c3935155958624bdf9751d210445b282069f6e511f930fc": {
+         "type": "query",
+         "name": "WorkbenchLinkCard",
+         "body": "query WorkbenchLinkCard($id: ID!) {\n  workbench(id: $id) {\n    ...WorkbenchLinkCard\n    __typename\n  }\n}\n\nfragment WorkbenchLinkCard on Workbench {\n  id\n  name\n  repository {\n    url\n    httpsPath\n    __typename\n  }\n  botUser {\n    name\n    __typename\n  }\n  agentRuntime {\n    id\n    cluster {\n      id\n      name\n      handle\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:50990ea576cfe718bacfbea62a1615f9c9525e78a65aa8670ff2c2bef441f09b": {
+         "type": "query",
+         "name": "WorkbenchLinkCardPendingAgentRuns",
+         "body": "query WorkbenchLinkCardPendingAgentRuns($first: Int = 100) {\n  agentRuns(first: $first, status: PENDING_APPROVAL) {\n    edges {\n      node {\n        id\n        workbenchJob {\n          workbench {\n            id\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"
       }
    }
 }

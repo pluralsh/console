@@ -5,6 +5,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { AwaitingReviewLauncherButton } from './AwaitingReviewLauncherButton'
 import { AwaitingReviewPanel } from './AwaitingReviewPanel'
+import { WORKBENCH_LINK_HOVER_CARD_SELECTOR } from 'components/workbenches/common/WorkbenchLinkChip'
 
 export default function AwaitingReviewLauncher() {
   const theme = useTheme()
@@ -20,7 +21,16 @@ export default function AwaitingReviewLauncher() {
   })
 
   useKeyDown(['Escape'], () => setOpen(false))
-  useClickOutside(ref, () => setOpen(false))
+  useClickOutside(ref, (event) => {
+    const target = event.target
+    if (
+      target instanceof Element &&
+      target.closest(WORKBENCH_LINK_HOVER_CARD_SELECTOR)
+    ) {
+      return
+    }
+    setOpen(false)
+  })
 
   const { stacks, agentRuns, count, loading, error } = useAwaitingReview()
 

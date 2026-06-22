@@ -5,14 +5,14 @@ import {
   Flex,
   IconFrame,
   WarningOutlineIcon,
-  WorkbenchIcon,
 } from '@pluralsh/design-system'
+import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
 import { AwaitingReviewAgentRunFragment } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -25,7 +25,6 @@ export function AwaitingReviewAgentRunItem({
   onNavigate: () => void
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
   const { prompt, analysis, pullRequests, workbenchJob } = agentRun
   const workbench = workbenchJob?.workbench
   const subtitle =
@@ -79,27 +78,13 @@ export function AwaitingReviewAgentRunItem({
           css={{ flex: 1, minWidth: 0 }}
         />
         {workbenchJob?.id && workbench?.id && workbench.name && (
-          <Chip
-            size="small"
-            severity="neutral"
-            fillLevel={1}
-            clickable
-            onClick={() => {
-              navigate(
-                getWorkbenchJobAbsPath({
-                  workbenchId: workbench.id,
-                  jobId: workbenchJob.id,
-                })
-              )
-              onNavigate()
-            }}
-            icon={<WorkbenchIcon size={12} />}
-            truncateWidth={80}
-            tooltip="View workbench job"
+          <WorkbenchLinkChip
+            workbenchId={workbench.id}
+            workbenchName={workbench.name}
+            workbenchJobId={workbenchJob.id}
+            onNavigate={onNavigate}
             css={{ flexShrink: 0 }}
-          >
-            {workbench.name}
-          </Chip>
+          />
         )}
       </Flex>
 

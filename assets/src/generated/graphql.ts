@@ -400,6 +400,16 @@ export type AgentPrompt = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering */
+export type AgentPromptHistory = {
+  __typename?: 'AgentPromptHistory';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt to give this agent run */
+  prompt: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type AgentPullRequestAttributes = {
   /** the base branch of the pull request */
   base: Scalars['String']['input'];
@@ -8836,7 +8846,7 @@ export type RootMutationType = {
   createAgentMessage?: Maybe<AgentMessage>;
   createAgentMigration?: Maybe<AgentMigration>;
   createAgentRun?: Maybe<AgentRun>;
-  createAgentRunPrompt?: Maybe<AgentRun>;
+  createAgentRunPrompt?: Maybe<AgentPromptHistory>;
   createAgentRunUpload?: Maybe<AgentRunUpload>;
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
   createAgentSession?: Maybe<ChatThread>;
@@ -21269,6 +21279,22 @@ export type WorkbenchCanvasStreamSubscriptionVariables = Exact<{
 
 export type WorkbenchCanvasStreamSubscription = { __typename?: 'RootSubscriptionType', workbenchCanvasStream?: { __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null };
 
+export type WorkbenchLinkCardFragment = { __typename?: 'Workbench', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string, httpsPath?: string | null } | null, botUser?: { __typename?: 'User', name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null };
+
+export type WorkbenchLinkCardQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchLinkCardQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, repository?: { __typename?: 'GitRepository', url: string, httpsPath?: string | null } | null, botUser?: { __typename?: 'User', name: string } | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null } | null };
+
+export type WorkbenchLinkCardPendingAgentRunsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type WorkbenchLinkCardPendingAgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, workbenchJob?: { __typename?: 'WorkbenchJob', workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null } | null> | null } | null };
+
 export const PullRequestBasicFragmentDoc = gql`
     fragment PullRequestBasic on PullRequest {
   id
@@ -26832,6 +26858,27 @@ export const UnifiedWorkbenchSkillTinyFragmentDoc = gql`
   name
   description
   subagents
+}
+    `;
+export const WorkbenchLinkCardFragmentDoc = gql`
+    fragment WorkbenchLinkCard on Workbench {
+  id
+  name
+  repository {
+    url
+    httpsPath
+  }
+  botUser {
+    name
+  }
+  agentRuntime {
+    id
+    cluster {
+      id
+      name
+      handle
+    }
+  }
 }
     `;
 export const AgentRunsDocument = gql`
@@ -45811,6 +45858,101 @@ export function useWorkbenchCanvasStreamSubscription(baseOptions: Apollo.Subscri
       }
 export type WorkbenchCanvasStreamSubscriptionHookResult = ReturnType<typeof useWorkbenchCanvasStreamSubscription>;
 export type WorkbenchCanvasStreamSubscriptionResult = Apollo.SubscriptionResult<WorkbenchCanvasStreamSubscription>;
+export const WorkbenchLinkCardDocument = gql`
+    query WorkbenchLinkCard($id: ID!) {
+  workbench(id: $id) {
+    ...WorkbenchLinkCard
+  }
+}
+    ${WorkbenchLinkCardFragmentDoc}`;
+
+/**
+ * __useWorkbenchLinkCardQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchLinkCardQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchLinkCardQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchLinkCardQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchLinkCardQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables> & ({ variables: WorkbenchLinkCardQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>(WorkbenchLinkCardDocument, options);
+      }
+export function useWorkbenchLinkCardLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>(WorkbenchLinkCardDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchLinkCardSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>;
+export function useWorkbenchLinkCardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchLinkCardQuery | undefined, WorkbenchLinkCardQueryVariables>;
+export function useWorkbenchLinkCardSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>(WorkbenchLinkCardDocument, options);
+        }
+export type WorkbenchLinkCardQueryHookResult = ReturnType<typeof useWorkbenchLinkCardQuery>;
+export type WorkbenchLinkCardLazyQueryHookResult = ReturnType<typeof useWorkbenchLinkCardLazyQuery>;
+export type WorkbenchLinkCardSuspenseQueryHookResult = ReturnType<typeof useWorkbenchLinkCardSuspenseQuery>;
+export type WorkbenchLinkCardQueryResult = Apollo.QueryResult<WorkbenchLinkCardQuery, WorkbenchLinkCardQueryVariables>;
+export const WorkbenchLinkCardPendingAgentRunsDocument = gql`
+    query WorkbenchLinkCardPendingAgentRuns($first: Int = 100) {
+  agentRuns(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        id
+        workbenchJob {
+          workbench {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchLinkCardPendingAgentRunsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchLinkCardPendingAgentRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchLinkCardPendingAgentRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchLinkCardPendingAgentRunsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function useWorkbenchLinkCardPendingAgentRunsQuery(baseOptions?: Apollo.QueryHookOptions<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>(WorkbenchLinkCardPendingAgentRunsDocument, options);
+      }
+export function useWorkbenchLinkCardPendingAgentRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>(WorkbenchLinkCardPendingAgentRunsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchLinkCardPendingAgentRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>;
+export function useWorkbenchLinkCardPendingAgentRunsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchLinkCardPendingAgentRunsQuery | undefined, WorkbenchLinkCardPendingAgentRunsQueryVariables>;
+export function useWorkbenchLinkCardPendingAgentRunsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>(WorkbenchLinkCardPendingAgentRunsDocument, options);
+        }
+export type WorkbenchLinkCardPendingAgentRunsQueryHookResult = ReturnType<typeof useWorkbenchLinkCardPendingAgentRunsQuery>;
+export type WorkbenchLinkCardPendingAgentRunsLazyQueryHookResult = ReturnType<typeof useWorkbenchLinkCardPendingAgentRunsLazyQuery>;
+export type WorkbenchLinkCardPendingAgentRunsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchLinkCardPendingAgentRunsSuspenseQuery>;
+export type WorkbenchLinkCardPendingAgentRunsQueryResult = Apollo.QueryResult<WorkbenchLinkCardPendingAgentRunsQuery, WorkbenchLinkCardPendingAgentRunsQueryVariables>;
 export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
@@ -46061,7 +46203,9 @@ export const namedOperations = {
     WorkbenchJobActivityWhimseyText: 'WorkbenchJobActivityWhimseyText',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchTools: 'WorkbenchTools',
-    WorkbenchTool: 'WorkbenchTool'
+    WorkbenchTool: 'WorkbenchTool',
+    WorkbenchLinkCard: 'WorkbenchLinkCard',
+    WorkbenchLinkCardPendingAgentRuns: 'WorkbenchLinkCardPendingAgentRuns'
   },
   Mutation: {
     CreateAgentRun: 'CreateAgentRun',
@@ -46578,6 +46722,7 @@ export const namedOperations = {
     WorkbenchEvalResultRow: 'WorkbenchEvalResultRow',
     WorkbenchAccessibleUser: 'WorkbenchAccessibleUser',
     WorkbenchJobSearchRow: 'WorkbenchJobSearchRow',
-    UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny'
+    UnifiedWorkbenchSkillTiny: 'UnifiedWorkbenchSkillTiny',
+    WorkbenchLinkCard: 'WorkbenchLinkCard'
   }
 }
