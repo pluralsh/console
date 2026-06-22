@@ -40,6 +40,35 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     end
   end
 
+  describe "defaultModels" do
+    test "it lists the configured provider defaults" do
+      {:ok, %{data: %{"defaultModels" => found}}} =
+        run_query(
+          """
+            query {
+              defaultModels { provider model toolModel embeddingModel }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
+
+      assert Enum.find(found, &(&1["provider"] == "OPENAI")) == %{
+               "provider" => "OPENAI",
+               "model" => "gpt-5.4-mini",
+               "toolModel" => "gpt-5.4",
+               "embeddingModel" => "text-embedding-3-large"
+             }
+
+      assert Enum.find(found, &(&1["provider"] == "ANTHROPIC")) == %{
+               "provider" => "ANTHROPIC",
+               "model" => "claude-4-5-haiku-latest",
+               "toolModel" => "claude-4-6-sonnet-latest",
+               "embeddingModel" => nil
+             }
+    end
+  end
+
   describe "availableModels" do
     test "it lists configured ai provider models" do
       deployment_settings(

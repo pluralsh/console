@@ -477,6 +477,9 @@ type RootQueryType {
 
   deploymentSettings: DeploymentSettings
 
+  "The model defaults for each configurable provider"
+  defaultModels: [ModelDefault]
+
   availableModels: [AvailableModel]
 
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
@@ -6429,6 +6432,13 @@ type FederatedCredential {
 type AvailableModel {
   provider: AiProvider!
   model: String!
+}
+
+type ModelDefault {
+  provider: AiProvider!
+  model: String!
+  toolModel: String!
+  embeddingModel: String
 }
 
 type ProjectConnection {

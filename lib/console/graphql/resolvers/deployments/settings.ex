@@ -60,6 +60,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
 
   def available_models(_, _), do: {:ok, Settings.available_models()}
 
+  def default_models(_, _), do: {:ok, Console.AI.Provider.model_defaults()}
+
   def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
 
   def self_manage(%{values: values}, %{context: %{current_user: user}}),

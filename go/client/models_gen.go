@@ -4868,6 +4868,13 @@ type MetricsSettingsAttributes struct {
 	Crontab *string `json:"crontab,omitempty"`
 }
 
+type ModelDefault struct {
+	Provider       AiProvider `json:"provider"`
+	Model          string     `json:"model"`
+	ToolModel      string     `json:"toolModel"`
+	EmbeddingModel *string    `json:"embeddingModel,omitempty"`
+}
+
 // A monitor defines a recurring check over observability data that can raise alerts
 type Monitor struct {
 	// Stable identifier for this monitor

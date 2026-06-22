@@ -5952,6 +5952,14 @@ export type MetricsSettingsAttributes = {
   endpoint?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ModelDefault = {
+  __typename?: 'ModelDefault';
+  embeddingModel?: Maybe<Scalars['String']['output']>;
+  model: Scalars['String']['output'];
+  provider: AiProvider;
+  toolModel: Scalars['String']['output'];
+};
+
 /** A monitor defines a recurring check over observability data that can raise alerts */
 export type Monitor = {
   __typename?: 'Monitor';
@@ -10713,6 +10721,8 @@ export type RootQueryType = {
   daemonSet?: Maybe<DaemonSet>;
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
+  /** The model defaults for each configurable provider */
+  defaultModels?: Maybe<Array<Maybe<ModelDefault>>>;
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
