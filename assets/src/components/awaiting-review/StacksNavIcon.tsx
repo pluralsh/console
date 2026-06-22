@@ -4,7 +4,7 @@ import { useTheme } from 'styled-components'
 
 export function StacksNavIcon() {
   const theme = useTheme()
-  const { count } = useAwaitingReview()
+  const { stacks } = useAwaitingReview()
 
   return (
     <div
@@ -15,7 +15,7 @@ export function StacksNavIcon() {
       }}
     >
       <StackIcon />
-      {count > 0 && (
+      {stacks.length > 0 && (
         <div
           css={{
             position: 'absolute',
