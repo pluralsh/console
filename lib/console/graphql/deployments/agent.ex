@@ -474,7 +474,7 @@ defmodule Console.GraphQl.Deployments.Agent do
       resolve &Deployments.create_agent_run/2
     end
 
-    field :create_agent_run_prompt, :agent_prompt do
+    field :create_agent_run_prompt, :agent_prompt_history do
       middleware Authenticated
       middleware Scope,
         resource: :agent,

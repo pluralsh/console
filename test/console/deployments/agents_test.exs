@@ -2,7 +2,7 @@ defmodule Console.Deployments.AgentsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Agents
   alias Console.PubSub
-  alias Console.Schema.{WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
+  alias Console.Schema.{AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -619,14 +619,33 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
-  describe "#create_prompt/2" do
-    test "it can create a prompt" do
-      run = insert(:agent_run)
+  describe "#create_prompt/3" do
+    test "it can create a prompt history record" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
 
-      {:ok, prompt} = Agents.create_prompt("a prompt", run.id)
+      {:ok, prompt} = Agents.create_prompt("a prompt", run.id, user)
 
       assert prompt.prompt == "a prompt"
       assert prompt.agent_run_id == run.id
+      assert Repo.get(AgentPromptHistory, prompt.id)
+    end
+
+    test "it uses monotonic ids for prompt ordering" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+
+      {:ok, first} = Agents.create_prompt("first prompt", run.id, user)
+      {:ok, second} = Agents.create_prompt("second prompt", run.id, user)
+
+      assert first.id < second.id
+    end
+
+    test "non initiated users cannot create prompts" do
+      user = insert(:user)
+      run = insert(:agent_run, user: insert(:user))
+
+      {:error, _} = Agents.create_prompt("a prompt", run.id, user)
     end
   end
 

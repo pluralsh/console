@@ -136,6 +136,7 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       """, %{"id" => run.id, "prompt" => "please adjust this"}, %{current_user: user})
 
       assert found["id"]
+      refute found["id"] == run.id
       assert found["prompt"] == "please adjust this"
     end
   end
