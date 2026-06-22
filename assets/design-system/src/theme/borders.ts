@@ -1,5 +1,10 @@
 import { type CSSProperties } from 'react'
 
+import {
+  DEFAULT_SCALE_PRESET_ID,
+  getScalePreset,
+  type ScalePresetId,
+} from './scale-presets'
 import { semanticColorCssVars } from './colors'
 
 export type SemanticBorderKey = keyof typeof borders
@@ -23,7 +28,11 @@ export const borders = {
   selected: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-selected']}`,
 } as const satisfies Record<string, CSSProperties['border']>
 
-export const borderRadiuses = {
-  medium: 3,
-  large: 6,
-} as const satisfies Record<string, number>
+export function getBorderRadiusesForScale(
+  scaleId: ScalePresetId = DEFAULT_SCALE_PRESET_ID
+) {
+  const { medium, large } = getScalePreset(scaleId).borderRadiuses
+  return { medium, large } as const
+}
+
+export const borderRadiuses = getBorderRadiusesForScale(DEFAULT_SCALE_PRESET_ID)

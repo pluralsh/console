@@ -1,36 +1,38 @@
 import { DefaultTheme, StyledObject } from 'styled-components'
 import { type PrefixKeys } from '../utils/ts-utils'
 
+import {
+  DEFAULT_SCALE_PRESET_ID,
+  getScalePreset,
+  type BaseSpacingRecord,
+  type ScalePresetId,
+} from './scale-presets'
+
 export type SemanticSpacingKey = keyof typeof spacing
 
-export const baseSpacing = {
-  xxxsmall: 2, //      1/8 * 16
-  xxsmall: 4, //       1/4 * 16
-  xsmall: 8, //        1/2 * 16
-  small: 12, //        3/4 * 16
-  medium: 16, //       1   * 16
-  large: 24, //        1.5 * 16
-  xlarge: 32, //       2   * 16
-  xxlarge: 48, //      3   * 16
-  xxxlarge: 64, //     4   * 16
-  xxxxlarge: 96, //    6   * 16
-  xxxxxlarge: 128, //  8   * 16
-  xxxxxxlarge: 192, // 12  * 16
-} as const satisfies Record<string, number>
-
 const negativePrefix = 'minus-' as const
-const negativeSpacing = Object.fromEntries(
-  Object.entries(baseSpacing).map((key, val) => [
-    `${negativePrefix}${key}`,
-    -val,
-  ])
-) as PrefixKeys<typeof baseSpacing, typeof negativePrefix, number>
 
-export const spacing = {
-  none: 0,
-  ...baseSpacing,
-  ...negativeSpacing,
-} as const satisfies Record<string, number>
+export function buildSpacingFromBase(base: BaseSpacingRecord) {
+  const negativeSpacing = Object.fromEntries(
+    Object.entries(base).map(([key, val]) => [`${negativePrefix}${key}`, -val])
+  ) as PrefixKeys<typeof base, typeof negativePrefix, number>
+
+  return {
+    none: 0,
+    ...base,
+    ...negativeSpacing,
+  } as const satisfies Record<string, number>
+}
+
+export const baseSpacing = getScalePreset(DEFAULT_SCALE_PRESET_ID).baseSpacing
+
+export const spacing = buildSpacingFromBase(baseSpacing)
+
+export function getSpacingForScale(
+  scaleId: ScalePresetId = DEFAULT_SCALE_PRESET_ID
+) {
+  return buildSpacingFromBase(getScalePreset(scaleId).baseSpacing)
+}
 
 const SIZING_KEYS = [
   'margin',
@@ -51,7 +53,6 @@ export type SpacerProps<T = SemanticSpacingKey | number> = {
   [key in SpacerKey]?: T
 }
 
-// separates out semantic spacing props, resolves them, and adds them to the css style object
 export function resolveSpacersAndSanitizeCss(
   props: Record<string, any> & { css?: StyledObject },
   { spacing }: DefaultTheme
