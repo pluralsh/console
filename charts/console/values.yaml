@@ -88,6 +88,9 @@ console:
 
     kasHost: ~
 
+    # groupsWhitelist is used to configure the set of groups plural syncs from OIDC.
+    groupsWhitelist: []
+
     objectStore:
       # path is used to configure the path within object storage for storing large files, useful for multi-tenant bucket usage.
       path: ~
@@ -333,7 +336,8 @@ ingress:
   # tls is used to determine if tls should be enabled. If enabled, then tls.host is set to ingress.console_dns and tls.secretName is set to console-tls
   tls:
     enabled: true
-  console-dns: ~
+  # console_dns is required when gatewayApi.enabled is true
+  console_dns: ~
 
   # rewrite is used to configure console-kas-rewrite ingress controller
   rewrite:
@@ -356,6 +360,48 @@ ingress:
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
   # kas-dns is used in secrets.yaml to set data.KAS_HOST
   kas-dns: ~
+
+# gatewayApi is used to configure Gateway API HTTPRoute resources (see templates/httproute.yaml)
+gatewayApi:
+  enabled: false
+  # parentRefs is the list of Gateway resources this HTTPRoute attaches to
+  parentRefs: []
+  # annotations is merged into every HTTPRoute; route-specific annotations are layered on top
+  annotations: {}
+  # appProtocol is set on backend Service ports when gateway API is enabled (kubernetes.io/ws for websocket)
+  appProtocol: kubernetes.io/ws
+  # console configures the main console HTTPRoute (metadata.annotations merge with gatewayApi.annotations)
+  console:
+    annotations: {}
+    # rule is applied to the catch-all / rule serving /socket and other console traffic
+    rule:
+      timeouts:
+        request: 3600s
+      sessionPersistence:
+        sessionName: console
+        type: Cookie
+        cookieConfig:
+          path: /socket
+  rewrite:
+    # annotations is merged with gatewayApi.annotations for the console-kas-rewrite HTTPRoute
+    annotations: {}
+  kas:
+    # annotations is merged with gatewayApi.annotations for the kas HTTPRoute
+    annotations: {}
+  external:
+    # parentRefs overrides gatewayApi.parentRefs for the console-external HTTPRoute
+    parentRefs: []
+    # annotations is merged with gatewayApi.annotations for the console-external HTTPRoute
+    annotations: {}
+    # rule is applied to the /ext rule serving /ext/socket and other external traffic
+    rule:
+      timeouts:
+        request: 3600s
+      sessionPersistence:
+        sessionName: console-external
+        type: Cookie
+        cookieConfig:
+          path: /ext/socket
 
 # externalIngress is used to configure console-external ingress controller in ingress.yaml
 externalIngress:

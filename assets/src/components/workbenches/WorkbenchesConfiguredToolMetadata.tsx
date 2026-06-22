@@ -21,6 +21,7 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Http]: extractHttpMetadata,
   [WorkbenchToolType.Datadog]: extractDatadogMetadata,
   [WorkbenchToolType.Elastic]: extractElasticMetadata,
+  [WorkbenchToolType.Opensearch]: extractOpensearchMetadata,
   [WorkbenchToolType.Loki]: extractLokiMetadata,
   [WorkbenchToolType.Prometheus]: extractPrometheusMetadata,
   [WorkbenchToolType.Tempo]: extractTempoMetadata,
@@ -124,6 +125,22 @@ function extractElasticMetadata(
     { label: 'URL', value: configuration?.elastic?.url },
     { label: 'Index', value: configuration?.elastic?.index },
     { label: 'User', value: configuration?.elastic?.username },
+  ]
+}
+
+function extractOpensearchMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  const os = configuration?.opensearch
+  return [
+    { label: 'Host', value: os?.host },
+    { label: 'Index', value: os?.index },
+    { label: 'Region', value: os?.awsRegion },
+    { label: 'Role', value: os?.assumeRoleArn },
+    {
+      label: 'Auth',
+      value: os?.usePodIdentity ? 'Pod identity / IRSA' : 'Static AWS keys',
+    },
   ]
 }
 

@@ -37,7 +37,7 @@ defmodule Console.AI.Vertex do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
-      |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client]))}", vtx.stream, Keyword.put(provider_options, :tools, tools(opts)))
+      |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client]))}", vtx.stream, base_opts(Keyword.put(provider_options, :tools, tools(opts)), opts))
       |> reqllm_result()
     end
   end
@@ -50,14 +50,14 @@ defmodule Console.AI.Vertex do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
-      |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client] || :tool))}", vtx.stream, Keyword.put(provider_options, :tools, reqllm_tools(tools)))
+      |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client] || :tool))}", vtx.stream, base_opts(Keyword.put(provider_options, :tools, reqllm_tools(tools)), opts))
       |> reqllm_result()
       |> tool_calls()
     end
   end
 
   def embeddings(%__MODULE__{} = vtx, text) do
-    chunked = Utils.chunk(text, 8000)
+    chunked = Utils.chunk(text, chunk_size("google-vertex:#{normalize(vtx.embedding_model)}"))
     with {:ok, provider_options} <- provider_options(vtx),
          opts = Keyword.put(provider_options, :dimensions, Utils.embedding_dims()),
          {:ok, embeddings} <- ReqLLM.embed("google-vertex:#{normalize(vtx.embedding_model)}", chunked, opts) do

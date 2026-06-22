@@ -1,4 +1,5 @@
 import {
+  ArrowTopRightIcon,
   Button,
   Card,
   EmptyState,
@@ -26,10 +27,13 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchChatbotCreateAbsPath,
-  getWorkbenchChatbotCreateConnectionAbsPath,
   getWorkbenchChatbotEditAbsPath,
   WORKBENCH_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
+import {
+  CHATBOTS_SETTINGS_ABS_PATH,
+  CHATBOTS_SETTINGS_CREATE_ABS_PATH,
+} from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
@@ -101,6 +105,11 @@ export function Chatbots() {
       }),
     [navigate, workbenchId]
   )
+  const navigateToManageChatbots = () => navigate(CHATBOTS_SETTINGS_ABS_PATH)
+  const navigateToCreateChatbotConnection = () =>
+    navigate(CHATBOTS_SETTINGS_CREATE_ABS_PATH, {
+      state: { returnPath: getWorkbenchChatbotCreateAbsPath(workbenchId) },
+    })
 
   if (workbenchError) return <GqlError error={workbenchError} />
 
@@ -137,8 +146,8 @@ export function Chatbots() {
               message="No chatbots created yet"
               description={
                 hasExistingConnections
-                  ? 'No chatbots connected. Select an existing connected chatbot or create a new one.'
-                  : 'No chatbots connected. Setup a new chatbot trigger for your workbench.'
+                  ? 'No chatbots connected. Select an existing chatbot connection for this workbench.'
+                  : 'No chatbot connections configured. Create one in global chatbot settings before adding it to this workbench.'
               }
               css={{ margin: '0 auto', width: 500 }}
             >
@@ -147,12 +156,13 @@ export function Chatbots() {
                   small
                   secondary={hasExistingConnections}
                   onClick={() =>
-                    navigate(
-                      getWorkbenchChatbotCreateConnectionAbsPath(workbenchId)
-                    )
+                    hasExistingConnections
+                      ? navigateToManageChatbots()
+                      : navigateToCreateChatbotConnection()
                   }
+                  endIcon={<ArrowTopRightIcon />}
                 >
-                  Add new chatbot
+                  Manage chatbots
                 </Button>
                 {hasExistingConnections && (
                   <Button
@@ -189,13 +199,10 @@ export function Chatbots() {
                 <Button
                   small
                   secondary
-                  onClick={() =>
-                    navigate(
-                      getWorkbenchChatbotCreateConnectionAbsPath(workbenchId)
-                    )
-                  }
+                  onClick={navigateToManageChatbots}
+                  endIcon={<ArrowTopRightIcon />}
                 >
-                  Add new chatbot
+                  Manage chatbots
                 </Button>
                 <Button
                   small

@@ -710,29 +710,35 @@ defmodule Console.Deployments.Stacks do
   end
   defp maybe_merge_overrides(attrs, _), do: attrs
 
+  @default_run_name "Custom stack run"
+
   @doc """
   Creates an ad-hoc command run w/in the stack's execution context
   """
-  @spec create_custom_run(Stack.t, [map], map | nil, User.t) :: run_resp
-  def create_custom_run(stack, commands, ctx \\ nil, user)
-  def create_custom_run(%Stack{id: id, sha: sha} = stack, commands, ctx, %User{} = user) do
+  @spec create_custom_run(Stack.t, [map], binary, map | nil, User.t) :: run_resp
+  def create_custom_run(stack, commands, name \\ @default_run_name, ctx \\ nil, user)
+  def create_custom_run(%Stack{id: id, sha: sha} = stack, commands, name, ctx, %User{} = user) do
     steps =
-      Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: :init, status: :pending, name: "cmd #{&2}"}))
+      Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: infer_stage(&1), status: :pending, name: "cmd #{&2}"}))
       |> template_cmds(ctx)
+
     %StackRun{stack_id: id, status: :queued}
     |> StackRun.changeset(
       stack_attrs(stack, sha)
-      |> Map.put(:message, "Custom stack run")
+      |> Map.put(:message, name || @default_run_name)
       |> Map.put(:steps, steps)
     )
     |> allow(user, :write)
     |> when_ok(:insert)
     |> notify(:create)
   end
-  def create_custom_run(stack_id, commands, ctx, user) when is_binary(stack_id) do
+  def create_custom_run(stack_id, commands, name, ctx, user) when is_binary(stack_id) do
     get_stack!(stack_id)
-    |> create_custom_run(commands, ctx, user)
+    |> create_custom_run(commands, name, ctx, user)
   end
+
+  defp infer_stage(%{approve: true}), do: :apply
+  defp infer_stage(_), do: :init
 
   defp template_cmds(commands, ctx) when is_map(ctx) do
     Enum.map(commands, fn %{args: args} = cmd ->

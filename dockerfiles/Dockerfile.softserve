@@ -4,7 +4,7 @@
 # 2. run "soft serve" to start the server (done inside the shellscript)
 # 3. import the repos (also done inside the shellscript)
 # This is all done in builder image since we want our actual soft-serve image to not require github interaction for imports
-FROM golang:1.26.3-alpine AS builder
+FROM golang:1.26.4-alpine AS builder
 
 EXPOSE 23231
 EXPOSE 23232
@@ -14,7 +14,8 @@ EXPOSE 9418
 # basics, in case need to access shell to debug/troubleshoot
 RUN apk update --no-cache
 # Upgrade OpenSSL packages to fix CVE-2025-1670 (NULL pointer dereference in CMS EnvelopedData processing)
-RUN apk add --no-cache "libssl3>=3.5.6-r0" "libcrypto3>=3.5.6-r0"
+# and QUIC PATH_CHALLENGE DoS vulnerability
+RUN apk add --no-cache "libssl3>=3.5.7-r0" "libcrypto3>=3.5.7-r0"
 # Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
 RUN apk upgrade --no-cache libexpat
 # Upgrade zlib to fix buffer overflow vulnerability in untgz utility (CVE in zlib <= 1.3.1)
@@ -28,7 +29,7 @@ RUN apk add openssh-client
 # Reason that we manually install soft-serve instead of using the soft-serve docker image is that
 # the soft-serve image starts the server without allowing us to set admin ssh keys, thus preventing
 # us from importing repos
-RUN go install github.com/pluralsh/soft-serve/cmd/soft@v0.1.9
+RUN go install github.com/pluralsh/soft-serve/cmd/soft@v0.1.10
 RUN mv /go/bin/soft /usr/bin/
 
 # soft-serve data folder
@@ -51,7 +52,8 @@ EXPOSE 9418
 # needs git for repos to be accessible
 RUN apk update --no-cache
 # Upgrade OpenSSL packages to fix CVE-2025-1670 (NULL pointer dereference in CMS EnvelopedData processing)
-RUN apk add --no-cache "libssl3>=3.5.6-r0" "libcrypto3>=3.5.6-r0"
+# and QUIC PATH_CHALLENGE DoS vulnerability
+RUN apk add --no-cache "libssl3>=3.5.7-r0" "libcrypto3>=3.5.7-r0"
 # Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
 RUN apk upgrade --no-cache libexpat musl musl-utils zlib
 RUN apk add git

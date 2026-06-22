@@ -60,6 +60,12 @@ spec:
                     - GEMINI: vertex/{model}
                     - CUSTOM: no automatic prefix; use provider/name explicitly
                 type: boolean
+              streamingProxy:
+                description: |-
+                  StreamingProxy routes OpenAI-compatible LLM requests through the in-pod mcpserver
+                  streaming proxy before they reach the Console AI proxy (/ext/ai). Only valid when aiProxy
+                  is enabled. Applies to CODEX and OPENCODE runtimes.
+                type: boolean
               allowedRepositories:
                 description: AllowedRepositories the git repositories allowed to be
                   used with this runtime.
@@ -1784,6 +1790,16 @@ spec:
                       endpoint:
                         description: Endpoint is the base URL for the Codex API (supports
                           OpenAI/Azure-compatible endpoints).
+                        type: string
+                      method:
+                        description: |-
+                          Method configures which OpenAI API Codex should use.
+                          AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.
+                          RESPONSES forces /responses.
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
                         type: string
                       model:
                         description: Model to use.
@@ -10515,6 +10531,9 @@ spec:
             - targetNamespace
             - type
             type: object
+            x-kubernetes-validations:
+            - message: streamingProxy requires aiProxy to be enabled
+              rule: '!has(self.streamingProxy) || !self.streamingProxy || (has(self.aiProxy) && self.aiProxy)'
           status:
             properties:
               conditions:

@@ -7,14 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
-
-	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/kubectl/pkg/util/i18n"
-	"k8s.io/kubectl/pkg/util/templates"
-	"sigs.k8s.io/kustomize/kustomize/v5/commands/build"
+	"sigs.k8s.io/kustomize/api/krusty"
 	"sigs.k8s.io/kustomize/kyaml/filesys"
 )
 
@@ -27,21 +24,13 @@ func NewKustomize(dir string) Template {
 }
 
 func (k *kustomize) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
-	out := &bytes.Buffer{}
-	h := build.MakeHelp("plural", "kustomize")
-	help := &build.Help{
-		Use:     h.Use,
-		Short:   i18n.T(h.Short),
-		Long:    templates.LongDesc(i18n.T(h.Long)),
-		Example: templates.Examples(i18n.T(h.Example)),
-	}
-
+	enableHelm := false
 	subdir := ""
 	if svc.Kustomize != nil {
 		subdir = svc.Kustomize.Path
+		enableHelm = svc.Kustomize.EnableHelm != nil && *svc.Kustomize.EnableHelm
 	}
 
-	command := build.NewCmdBuild(filesys.MakeFsOnDisk(), help, out)
 	dir := filepath.Join(k.dir, subdir)
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -73,17 +62,15 @@ func (k *kustomize) Render(svc *console.ServiceDeploymentForAgent, mapper meta.R
 		return nil, err
 	}
 
-	args := []string{dir}
-	if svc.Kustomize != nil && svc.Kustomize.EnableHelm != nil && *svc.Kustomize.EnableHelm {
-		args = append(args, "--enable-helm")
-	}
-
-	command.SetArgs(args)
-	if err := command.Execute(); err != nil {
+	kustomizer := krusty.MakeKustomizer(makeKrustyOptions(enableHelm))
+	res, err := kustomizer.Run(filesys.MakeFsOnDisk(), dir)
+	if err != nil {
 		return nil, err
 	}
-
-	r := bytes.NewReader(out.Bytes())
+	out, err := res.AsYaml()
+	if err != nil {
+		return nil, err
+	}
 
 	readerOptions := ReaderOptions{
 		Mapper:           mapper,
@@ -92,7 +79,7 @@ func (k *kustomize) Render(svc *console.ServiceDeploymentForAgent, mapper meta.R
 	}
 	mReader := &StreamManifestReader{
 		ReaderName:    "kustomize",
-		Reader:        r,
+		Reader:        bytes.NewReader(out),
 		ReaderOptions: readerOptions,
 	}
 

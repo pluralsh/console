@@ -289,12 +289,17 @@ type ObserverTarget struct {
 	Format *string `json:"format,omitempty"`
 
 	// Order determines how discovered versions are sorted and which one is selected.
-	// SEMVER sorts by semantic version rules, while LATEST uses chronological ordering.
-	// SEMVER is recommended for most use cases as it provides predictable version ordering.
+	// SEMVER sorts by semantic version rules, LATEST uses chronological ordering,
+	// and RENOVATE uses regex capture groups with Renovate-style version comparison.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=SEMVER;LATEST
+	// +kubebuilder:validation:Enum:=SEMVER;LATEST;RENOVATE
 	Order console.ObserverTargetOrder `json:"order"`
+
+	// Renovate contains options for RENOVATE target ordering.
+	// Used when Order is RENOVATE to control prerelease filtering and related behavior.
+	// +kubebuilder:validation:Optional
+	Renovate *ObserverRenovate `json:"renovate,omitempty"`
 
 	// Helm contains configuration for monitoring Helm chart repositories.
 	// Used when Type is HELM to specify the repository URL, chart name, and authentication.
@@ -320,6 +325,13 @@ type ObserverTarget struct {
 	// Used when Type is EKS_ADDON to specify which EKS add-on to monitor for updates.
 	// +kubebuilder:validation:Optional
 	EksAddOn *ObserverAddOn `json:"eksAddon,omitempty"`
+}
+
+// ObserverRenovate defines Renovate regex versioning options for observer target ordering.
+type ObserverRenovate struct {
+	// IgnoreUnstable skips prerelease values captured by the target format regex.
+	// +kubebuilder:validation:Optional
+	IgnoreUnstable *bool `json:"ignoreUnstable,omitempty"`
 }
 
 // ObserverGit defines configuration for monitoring Git repository tags.

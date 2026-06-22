@@ -3,6 +3,7 @@ names:
 - aws-ebs-csi-driver
 - aws-efs-csi-driver
 - aws-load-balancer-controller
+- bigbang
 - amazon-vpc-cni-k8s
 - calico
 - cert-manager

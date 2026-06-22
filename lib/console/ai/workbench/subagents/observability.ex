@@ -5,19 +5,22 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user}, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user} = job, %Environment{} = environment) do
     tools = tools(environment, user)
 
     MemoryEngine.new(tools, 50,
-      system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
-      acc: %{},
-      callback: &callback(activity, &1),
-      tool_search: length(tools) > 10,
-      pre_enable: [ObservabilityResult, %Skills{} ,%Skill{}],
-      continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
+      engine_opts(job) ++ [
+        system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
+        acc: %{},
+        callback: &callback(activity, &1),
+        tool_search: length(tools) > 10,
+        pre_enable: [ObservabilityResult, %Skills{} ,%Skill{}],
+        continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
+      ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
@@ -37,14 +40,16 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   end
 
   def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities}, user) do
+    skills = Environment.subagent_skills(skills, :observability)
+
     obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(plrl_log_tools(job))
     |> Enum.concat(plrl_metric_tools(job))
     |> Enum.concat(pod_logs_tools(job, user))
     |> Enum.concat([
-      %Skills{skills: Environment.subagent_skills(skills, :observability)},
-      %Skill{skills: Environment.subagent_skills(skills, :observability)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       ObservabilityResult,
       Lua,

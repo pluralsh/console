@@ -13,7 +13,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
     |> allow(user, :read)
   end
 
-  def get_cloud_connection(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
+  def get_cloud_connection(%{name: name}, %{context: %{current_user: user}})
+      when is_binary(name) do
     Settings.get_cloud_connection_by_name!(name)
     |> allow(user, :read)
   end
@@ -37,6 +38,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
 
   defp filter_provider(query, %{provider: provider}) when not is_nil(provider),
     do: CloudConnection.for_provider(query, provider)
+
   defp filter_provider(query, _), do: query
 
   def create_project(%{attributes: attrs}, %{context: %{current_user: user}}),
@@ -56,6 +58,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
 
   def settings(_, _), do: {:ok, Settings.fetch_consistent()}
 
+  def available_models(_, _), do: {:ok, Settings.available_models()}
+
   def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
 
   def self_manage(%{values: values}, %{context: %{current_user: user}}),
@@ -70,7 +74,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
     do: Settings.create_federated_credential(attrs, user)
 
   def update_federated_credential(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
-    do: Settings.update_federated_credential(attrs, id, user)
+      do: Settings.update_federated_credential(attrs, id, user)
 
   def delete_federated_credential(%{id: id}, %{context: %{current_user: user}}),
     do: Settings.delete_federated_credential(id, user)

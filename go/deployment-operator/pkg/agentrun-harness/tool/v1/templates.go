@@ -15,6 +15,7 @@ type SystemPromptTemplateInput struct {
 	WorkDir        string
 	RepositoryDir  string
 	Prompt         string
+	Branch         string
 }
 
 func systemPromptTemplate(templateFilePath string, input *SystemPromptTemplateInput) (content string, err error) {

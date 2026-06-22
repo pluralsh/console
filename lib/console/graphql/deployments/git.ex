@@ -377,6 +377,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :git,       :observer_git_attributes
     field :addon,     :observer_addon_attributes
     field :eks_addon, :observer_addon_attributes
+    field :renovate,  :observer_renovate_attributes
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -409,6 +410,12 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a spec for filtering a git repository tags in an observer"
   input_object :observer_git_filter_attributes do
     field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
+  end
+
+  @desc "Renovate regex versioning options for observer target ordering"
+  input_object :observer_renovate_attributes do
+    field :ignore_unstable, :boolean,
+      description: "whether prerelease matches captured by the renovate regex should be ignored"
   end
 
   @desc "configuration for an observer action"
@@ -776,6 +783,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :url,     non_null(:string)
     field :title,   :string
     field :creator, :string
+    field :ref,     :string
     field :labels,  list_of(:string)
     field :patch,   :string, description: "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
 
@@ -852,6 +860,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :helm,   :observer_helm_repo
     field :oci,    :observer_oci_repo
     field :git,    :observer_git_repo
+    field :renovate, :observer_renovate
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -884,6 +893,12 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "a spec for filtering a git repository tags in an observer"
   object :observer_git_filter do
     field :regex, :string, description: "a regex to filter the git repository tags for the observed value"
+  end
+
+  @desc "Renovate regex versioning options for observer target ordering"
+  object :observer_renovate do
+    field :ignore_unstable, :boolean,
+      description: "whether prerelease matches captured by the renovate regex should be ignored"
   end
 
   @desc "configuration for an observer action"
@@ -960,17 +975,22 @@ defmodule Console.GraphQl.Deployments.Git do
   end
 
   object :pr_automation_search_item do
-    field :id,          non_null(:id)
-    field :name,        non_null(:string)
-    field :description, :string, description: "the description for this pr automation"
-    field :icon,        :string, description: "an icon url to use for this pr automation"
-    field :dark_icon,   :string, description: "a darkmode icon url to use for this pr automation"
+    field :id,            non_null(:id)
+    field :name,          non_null(:string)
+    field :documentation, :string
+    field :identifier,    :string
+    field :role,          :pr_role
+    field :icon,          :string, description: "an icon url to use for this pr automation"
+    field :dark_icon,     :string, description: "a darkmode icon url to use for this pr automation"
+    field :cluster,       :cluster, resolve: dataloader(Deployments)
   end
 
   object :catalog_search_item do
     field :id,            non_null(:id)
     field :name,          non_null(:string)
-    field :documentation, :string, description: "the documentation for this pr automation"
+    field :author,        :string, description: "the name of the author of this catalog"
+    field :description,   :string, description: "longform description for the purpose of this catalog"
+    field :category,      :string, description: "short category name used for browsing catalogs"
     field :icon,          :string, description: "an icon url to use for this catalog"
     field :dark_icon,     :string, description: "a darkmode icon url to use for this catalog"
   end

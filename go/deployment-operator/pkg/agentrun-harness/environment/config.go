@@ -12,6 +12,8 @@ const (
 
 type Config struct {
 	BaseBranch string
+	BaseCommit string
+	HeadBranch string
 	Dir        string
 }
 

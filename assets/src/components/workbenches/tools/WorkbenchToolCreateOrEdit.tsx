@@ -168,6 +168,7 @@ export function WorkbenchToolCreateOrEdit({
       onCompleted: ({ updateWorkbenchTool }) => {
         const name = updateWorkbenchTool?.name ?? 'Tool'
         popToast({ content: `${name} updated`, severity: 'success' })
+        navigate(WORKBENCHES_TOOLS_YOUR_ABS_PATH)
       },
     })
   const mutationLoading = createLoading || updateLoading
@@ -216,8 +217,9 @@ export function WorkbenchToolCreateOrEdit({
       ) : (
         <Flex
           gap="medium"
-          height="100%"
+          flex={1}
           minHeight={0}
+          css={{ minWidth: 0, width: '100%' }}
         >
           <WorkbenchToolForm
             key={`${JSON.stringify(tool)}`} // reset form state if data updates
@@ -315,6 +317,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
   minHeight: 0,
-  maxWidth: 800,
+  maxWidth: 1200,
   margin: '0 auto',
 }))

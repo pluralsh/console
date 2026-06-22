@@ -6,7 +6,7 @@ defmodule Console.Schema.Observer do
   defenum Status,        healthy: 0, failed: 1
   defenum TargetType,    oci: 0, helm: 1, git: 2, eks_addon: 3, addon: 4
   defenum GitTargetType, tags: 0
-  defenum TargetOrder,   semver: 0, latest: 1
+  defenum TargetOrder,   semver: 0, latest: 1, renovate: 2
 
   schema "observers" do
     field :name,           :string
@@ -55,6 +55,10 @@ defmodule Console.Schema.Observer do
         field :name,                :string
         field :kubernetes_version,  :string
         field :kubernetes_versions, {:array, :string}
+      end
+
+      embeds_one :renovate, Renovate, on_replace: :update do
+        field :ignore_unstable, :boolean
       end
     end
 
@@ -139,6 +143,7 @@ defmodule Console.Schema.Observer do
     |> cast_embed(:git, with: &git_changeset/2)
     |> cast_embed(:addon, with: &addon_changeset/2)
     |> cast_embed(:eks_addon, with: &addon_changeset/2)
+    |> cast_embed(:renovate, with: &renovate_changeset/2)
     |> validate_required([:type, :order])
   end
 
@@ -178,6 +183,11 @@ defmodule Console.Schema.Observer do
   defp git_filter_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(regex)a)
+  end
+
+  defp renovate_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(ignore_unstable)a)
   end
 
   defp addon_changeset(model, attrs) do

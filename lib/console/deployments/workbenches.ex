@@ -579,7 +579,7 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:delete, user)
   end
 
-  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words"
+  @whimsey_prompt "Ok generate a clever and whimsical (but not fantastical) phrase to describe the current thing you're working in at most 5 words.  If there are no activities, just base it off the original job prompt."
 
   def whimsey_text(%WorkbenchJob{} = job) do
     job = Repo.preload(job, [:activities])
@@ -612,7 +612,7 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:create, user)
   end
 
-  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{} = hook) do
+  def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
     hook = Repo.preload(hook, [:user])
     bench = get_workbench!(workbench_id) |> Repo.preload([:bot_user])
     start_transaction()
@@ -623,7 +623,10 @@ defmodule Console.Deployments.Workbenches do
         _ -> {:error, "workbench webhook does not have a bot user"}
       end
     end)
-    |> add_operation(:job, fn %{actor: user} -> create_workbench_job(attrs, workbench_id, user) end)
+    |> add_operation(:job, fn %{actor: user} ->
+      Map.put(attrs, :modes, Console.mapify(modes))
+      |> create_workbench_job(workbench_id, user)
+    end)
     |> execute(extract: :job)
   end
 
@@ -695,11 +698,11 @@ defmodule Console.Deployments.Workbenches do
   Marks a workbench job as paused, and cancels its activities so they can be restarted later.
   """
   @spec pause_job(WorkbenchJob.t()) :: job_resp
-  def pause_job(%WorkbenchJob{} = job) do
+  def pause_job(%WorkbenchJob{} = job, usage \\ %{}) do
     start_transaction()
     |> add_operation(:job, fn _ ->
       job
-      |> WorkbenchJob.changeset(%{status: :paused})
+      |> WorkbenchJob.changeset(%{status: :paused, usage: usage})
       |> Repo.update()
     end)
     |> add_operation(:activities, fn _ ->
@@ -736,20 +739,20 @@ defmodule Console.Deployments.Workbenches do
   @spec create_message(map, binary, User.t()) :: activity_resp
   def create_message(attrs, %WorkbenchJob{} = job, %User{} = user) do
     start_transaction()
-    |> add_operation(:job, fn _ ->
-      allow(job, user, :edit)
-      |> error("you can only create messages for your own jobs")
-    end)
     |> add_operation(:idle, fn _ ->
       case WorkbenchJob.idle?(job) do
-        true ->
-          WorkbenchJob.changeset(job, %{status: :pending, error: nil})
-          |> Repo.update()
+        true -> {:ok, job}
         false -> {:error, "job is currently active, please wait for it to complete before prompting"}
       end
     end)
+    |> add_operation(:job, fn %{idle: job} ->
+      with {:ok, job} <- allow(job, user, :prompt) do
+        WorkbenchJob.changeset(job, %{status: :pending, error: nil, user_id: user.id})
+        |> Repo.update()
+      end
+    end)
     |> add_operation(:activity, fn %{job: job} ->
-      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, status: :successful}
+      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, user_id: user.id, status: :successful}
       |> WorkbenchJobActivity.changeset(attrs)
       |> Repo.insert()
     end)
@@ -904,14 +907,26 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Saves usage records for a workbench job.
+  """
+  @spec save_usage(WorkbenchJob.t(), map) :: job_resp
+  def save_usage(%WorkbenchJob{} = job, usage) do
+    job
+    |> WorkbenchJob.changeset(%{usage: usage})
+    |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
   Fails a job with an error message.
   """
   @spec fail_job(binary, WorkbenchJob.t()) :: job_resp
-  def fail_job(error, %WorkbenchJob{} = job) when is_binary(error) do
+  def fail_job(error, %WorkbenchJob{} = job, usage \\ %{}) when is_binary(error) do
     WorkbenchJob.changeset(job, %{
       status: :failed,
       completed_at: DateTime.utc_now(),
-      error: error
+      error: error,
+      usage: usage
     })
     |> Repo.update()
     |> notify(:update)

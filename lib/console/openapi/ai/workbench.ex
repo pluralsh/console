@@ -98,6 +98,53 @@ defmodule Console.OpenAPI.AI.WorkbenchJobResult do
   }
 end
 
+defmodule Console.OpenAPI.AI.WorkbenchJobCodingModes do
+  @moduledoc "OpenAPI schema for workbench job coding mode options."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchJobCodingModes",
+    description: "Coding mode options for a workbench job",
+    properties: %{
+      babysit: boolean(description: "Whether babysit mode is enabled for coding agent runs"),
+      approval: boolean(description: "Whether coding agent runs require approval before continuing")
+    }
+  }
+end
+
+defmodule Console.OpenAPI.AI.WorkbenchJobModel do
+  @moduledoc "OpenAPI schema for workbench job model override."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchJobModel",
+    description: "Model override for a workbench job",
+    properties: %{
+      provider: ecto_enum(Console.Schema.DeploymentSettings.AIProvider, description: "The AI provider for this job"),
+      model: string(description: "The model name for this job")
+    },
+    required: [:provider, :model]
+  }
+end
+
+defmodule Console.OpenAPI.AI.WorkbenchJobModes do
+  @moduledoc "OpenAPI schema for workbench job mode-specific options."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchJobModes",
+    description: "Mode-specific options for a workbench job",
+    properties: %{
+      plan: boolean(description: "Whether planning mode is enabled for this job"),
+      model: Console.OpenAPI.AI.WorkbenchJobModel,
+      coding: Console.OpenAPI.AI.WorkbenchJobCodingModes
+    }
+  }
+end
+
 defmodule Console.OpenAPI.AI.WorkbenchJob do
   @moduledoc """
   OpenAPI schema for workbench jobs.
@@ -126,6 +173,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJob do
       error: string(description: "Error message when the job failed"),
       started_at: datetime(description: "When the run started"),
       completed_at: datetime(description: "When the run completed"),
+      modes: Console.OpenAPI.AI.WorkbenchJobModes,
       workbench_id: string(description: "ID of the workbench this job belongs to"),
       user_id: string(description: "ID of the user who created this run"),
       result: Console.OpenAPI.AI.WorkbenchJobResult,
@@ -144,7 +192,8 @@ defmodule Console.OpenAPI.AI.WorkbenchJobInput do
     title: "WorkbenchJobInput",
     description: "Input for creating a new workbench job",
     properties: %{
-      prompt: string(description: "The prompt for this job")
+      prompt: string(description: "The prompt for this job"),
+      modes: Console.OpenAPI.AI.WorkbenchJobModes
     },
     required: [:prompt]
   }

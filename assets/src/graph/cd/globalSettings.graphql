@@ -21,6 +21,14 @@ fragment AiSettings on AiSettings {
     model
     toolModel
     embeddingModel
+    method
+  }
+  openaiCompatible {
+    baseUrl
+    model
+    toolModel
+    embeddingModel
+    method
   }
   azure {
     apiVersion
@@ -52,6 +60,17 @@ fragment AiSettings on AiSettings {
   enabled
   toolsEnabled
   provider
+  toolProvider
+  embeddingProvider
+  analysisRates {
+    fast
+    slow
+  }
+  logAnalysis
+  vectorStore {
+    enabled
+    store
+  }
 }
 
 fragment DeploymentSettings on DeploymentSettings {
@@ -152,6 +171,12 @@ query ObservabilityWebhooks($first: Int, $after: String) {
     pageInfo {
       ...PageInfo
     }
+  }
+}
+
+query ObservabilityWebhook($id: ID, $name: String) {
+  observabilityWebhook(id: $id, name: $name) {
+    ...ObservabilityWebhook
   }
 }
 

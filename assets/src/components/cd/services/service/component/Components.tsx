@@ -5,7 +5,7 @@ import {
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
-import { ReactElement, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { type Key } from '@react-types/shared'
 import styled from 'styled-components'
@@ -14,11 +14,21 @@ import {
   ComponentState,
   ServiceDeploymentComponentFragment,
 } from 'generated/graphql'
-import { ComponentIcon, ComponentStateChip } from './misc'
+import { ComponentIcon, stateToDisplay } from './misc'
+import { TRUNCATE } from 'components/utils/truncate'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
+
+const FILTER_SELECT_WIDTH = 205
+
+const FilterSelectSC = styled.div({
+  width: FILTER_SELECT_WIDTH,
+  flexShrink: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+})
 
 export function FilterFooter({ allSelected = true, ...props }) {
   return (
@@ -32,17 +42,19 @@ export function FilterFooter({ allSelected = true, ...props }) {
 }
 
 export const FilterTrigger = styled(SelectButton)<{
-  $width?: number
+  $width?: number | string
   $border?: boolean
 }>(({ $width, $border = false }) => ({
-  width: $width || 220,
-  '&, *': {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    flexShrink: 1,
-    border: $border ? undefined : 'none',
-    height: '100%',
+  width: $width ?? '100%',
+  minWidth: 0,
+  border: $border ? undefined : 'none',
+  height: '100%',
+  '.content': {
+    minWidth: 0,
+  },
+  '.children': {
+    ...TRUNCATE,
+    minWidth: 0,
   },
 }))
 
@@ -97,35 +109,14 @@ type ComponentKindSelectArray = Pick<
 >[]
 
 export function useComponentKindSelect(
-  components: Nullable<ComponentKindSelectArray>,
-  config?: { width?: number }
-): {
-  selectedKinds: Set<string>
-  setSelectedKinds: (kinds: Set<string>) => void
-  kindSelector: ReactElement<any>
-} {
+  components: Nullable<ComponentKindSelectArray>
+) {
   const kinds = useMemo(() => getUniqueKinds(components || []), [components])
   const [selectedKinds, setSelectedKinds] = useState<Set<string>>(
     new Set<string>()
   )
 
-  return useMemo(
-    () => ({
-      selectedKinds,
-      setSelectedKinds,
-      kindSelector: (
-        <ComponentKindSelect
-          {...config}
-          {...{
-            selectedKinds,
-            setSelectedKinds,
-            kinds,
-          }}
-        />
-      ),
-    }),
-    [config, kinds, selectedKinds]
-  )
+  return { selectedKinds, setSelectedKinds, kinds }
 }
 
 function getUniqueKinds(components: Nullable<ComponentKindSelectArray>) {
@@ -140,60 +131,57 @@ function getUniqueKinds(components: Nullable<ComponentKindSelectArray>) {
   ).sort(compareComponentKinds)
 }
 
-function ComponentKindSelect({
+export function ComponentKindSelect({
   selectedKinds,
   setSelectedKinds,
   kinds,
-  width,
 }: {
   selectedKinds: Set<string>
   setSelectedKinds: (kinds: Set<string>) => void
   kinds: string[]
-  width?: number
 }) {
   const sortedSelectedKinds = Array.from(selectedKinds).sort()
-  const allSelected = sortedSelectedKinds.length >= kinds.length
+  const typeTriggerLabel =
+    sortedSelectedKinds.length === 0 ? 'Type' : sortedSelectedKinds.join(', ')
 
   return (
-    <Select
-      width={360}
-      label="All components"
-      triggerButton={
-        <FilterTrigger
-          $width={width}
-          showArrow={false}
-        >
-          {allSelected
-            ? 'All components'
-            : sortedSelectedKinds.length === 0
-              ? 'Select types'
-              : sortedSelectedKinds.join(', ')}
-        </FilterTrigger>
-      }
-      selectionMode="multiple"
-      selectedKeys={selectedKinds}
-      onSelectionChange={(keys) => {
-        setSelectedKinds(keys as Set<string>)
-      }}
-      placement="right"
-      dropdownFooterFixed={
-        <FilterFooter
-          allSelected={allSelected}
-          onClick={() =>
-            setSelectedKinds(new Set(allSelected ? undefined : kinds))
-          }
-        />
-      }
-      maxHeight={300}
-    >
-      {kinds.map((kind) => (
-        <ListBoxItem
-          key={kind}
-          leftContent={<ComponentIcon kind={kind} />}
-          label={kind}
-        />
-      ))}
-    </Select>
+    <FilterSelectSC>
+      <Select
+        selectionMode="multiple"
+        selectedKeys={selectedKinds}
+        onSelectionChange={(keys: Set<Key>) => {
+          setSelectedKinds(keys as Set<string>)
+        }}
+        label="Type"
+        placement="bottom-start"
+        maxHeight={300}
+        width={FILTER_SELECT_WIDTH}
+        triggerButton={
+          <FilterTrigger
+            $border
+            showArrow
+            title={typeTriggerLabel}
+          >
+            {typeTriggerLabel}
+          </FilterTrigger>
+        }
+        dropdownFooterFixed={
+          selectedKinds.size > 0 ? (
+            <FilterFooterInner onClick={() => setSelectedKinds(new Set())}>
+              Clear selection
+            </FilterFooterInner>
+          ) : undefined
+        }
+      >
+        {kinds.map((kind) => (
+          <ListBoxItem
+            key={kind}
+            leftContent={<ComponentIcon kind={kind} />}
+            label={kind}
+          />
+        ))}
+      </Select>
+    </FilterSelectSC>
   )
 }
 
@@ -204,35 +192,43 @@ export function ComponentStateFilter({
   selectedState: Key | null
   setSelectedState: (state: Key | null) => void
 }) {
+  const stateTriggerLabel = selectedState
+    ? stateToDisplay[selectedState as ComponentState]
+    : 'State'
+
   return (
-    <Select
-      selectionMode="single"
-      selectedKey={selectedState}
-      onSelectionChange={setSelectedState}
-      triggerButton={
-        <FilterTrigger showArrow={false}>
-          {selectedState ? (
-            <ComponentStateChip state={selectedState as ComponentState} />
-          ) : (
-            'Select state'
-          )}
-        </FilterTrigger>
-      }
-      dropdownFooterFixed={
-        <FilterFooterInner
-          leftContent={<ComponentsIcon />}
-          onClick={() => setSelectedState(null)}
-        >
-          Clear selection
-        </FilterFooterInner>
-      }
-    >
-      {Object.values(ComponentState).map((state) => (
-        <ListBoxItem
-          key={state}
-          label={<ComponentStateChip state={state} />}
-        />
-      ))}
-    </Select>
+    <FilterSelectSC>
+      <Select
+        selectionMode="single"
+        selectedKey={selectedState}
+        onSelectionChange={setSelectedState}
+        placement="bottom-start"
+        label="State"
+        width={FILTER_SELECT_WIDTH}
+        triggerButton={
+          <FilterTrigger
+            $border
+            showArrow
+            title={stateTriggerLabel}
+          >
+            {stateTriggerLabel}
+          </FilterTrigger>
+        }
+        dropdownFooterFixed={
+          selectedState ? (
+            <FilterFooterInner onClick={() => setSelectedState(null)}>
+              Clear selection
+            </FilterFooterInner>
+          ) : undefined
+        }
+      >
+        {Object.values(ComponentState).map((state) => (
+          <ListBoxItem
+            key={state}
+            label={stateToDisplay[state]}
+          />
+        ))}
+      </Select>
+    </FilterSelectSC>
   )
 }

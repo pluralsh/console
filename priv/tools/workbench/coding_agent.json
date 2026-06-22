@@ -10,6 +10,10 @@
             "type": "string",
             "description": "The url of the repository to create a PR for"
         },
+        "base_branch": {
+            "type": "string",
+            "description": "**OPTIONAL** branch to clone when starting the run and use as the pull request base.  This should **always** be left blank unless you are explicitly prompted to set it."
+        },
         "prompt": {
             "type": "string", 
             "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository.  Commonmark Markdown formatting is encouraged to convey structure and semantic importance."

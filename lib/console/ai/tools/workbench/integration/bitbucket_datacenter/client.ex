@@ -1,17 +1,23 @@
 defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.{Http, Query}
   alias Console.Schema.{ScmConnection, WorkbenchTool}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketDatacenterConnection}
 
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{api_url: url, token: token}}),
-    do: {:ok, %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
-  def build(%WorkbenchTool{configuration: %Configuration{
-    bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}}
-  }) do
-      api_base = api_base(url)
-      {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
+    do:
+      {:ok,
+       %{api_base: api_base(url), reactions_base: reactions_base(api_base(url)), token: token}}
+
+  def build(%WorkbenchTool{
+        configuration: %Configuration{
+          bitbucket_datacenter: %BitbucketDatacenterConnection{token: token, url: url}
+        }
+      }) do
+    api_base = api_base(url)
+    {:ok, %{api_base: api_base, reactions_base: reactions_base(api_base), token: token}}
   end
 
   def build(%WorkbenchTool{}),
@@ -42,14 +48,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
 
   @spec get(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def get(%{api_base: base, token: token}, path, query \\ %{}) when is_binary(path) do
-    qs =
-      case query do
-        %{} = m when map_size(m) == 0 -> ""
-        %{} = m -> "?" <> URI.encode_query(stringify_query(m), :safe)
-        _ -> ""
-      end
-
-    url = base <> path <> qs
+    url = base <> path <> Query.query_string(query)
 
     case HTTPoison.get(url, auth_headers(token), http_opts()) do
       {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
@@ -59,7 +58,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
         {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Data Center", reason)
     end
   end
 
@@ -77,7 +76,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
         {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Data Center", reason)
     end
   end
 
@@ -93,7 +92,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
         {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Data Center", reason)
     end
   end
 
@@ -142,13 +141,6 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
       {"Authorization", "Basic #{basic}"},
       {"Accept", "application/json"}
     ]
-  end
-
-  defp stringify_query(map) do
-    map
-    |> Enum.reject(fn {_, v} -> is_nil(v) end)
-    |> Enum.map(fn {k, v} -> {to_string(k), v} end)
-    |> Map.new()
   end
 
   defp decode_json(""), do: {:ok, %{}}

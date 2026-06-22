@@ -109,6 +109,7 @@ export function BindingInput({
   remove,
   add,
   hint,
+  layout,
   placeholder = TEXT[type]?.placeholder,
   label = TEXT[type]?.label,
   inputProps,
@@ -124,6 +125,7 @@ export function BindingInput({
       noborder
       placeholder={placeholder}
       hint={hint}
+      layout={layout}
       icon={icon || (type ? ICONS[type] : null)}
       label={label}
       width="100%"
@@ -146,6 +148,7 @@ function TagInput({
   placeholder,
   label,
   hint,
+  layout,
   suggestions,
   items,
   icon,
@@ -166,6 +169,7 @@ function TagInput({
       <FormField
         label={label}
         hint={hint}
+        layout={layout}
         width={width}
       >
         <ComboBox

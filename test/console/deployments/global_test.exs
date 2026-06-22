@@ -60,6 +60,51 @@ defmodule Console.Deployments.GlobalTest do
       assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
     end
 
+    test "it rejects global services with conflicting managed services" do
+      cluster = insert(:cluster)
+      existing_global = insert(:global_service)
+      insert(:service, name: "conflicting", cluster: cluster, owner: existing_global)
+      svc = insert(:service)
+      error = "A global service managed service with the same name already exists on one or more clusters"
+
+      assert {:error, ^error} = Global.create(%{name: "conflicting"}, svc.id, admin_user())
+    end
+
+    test "it creates global services with non-conflicting managed services on targeted clusters" do
+      cluster = insert(:cluster)
+      existing_global = insert(:global_service)
+      insert(:service, name: "other-service", cluster: cluster, owner: existing_global)
+      svc = insert(:service)
+
+      assert {:ok, global} = Global.create(%{name: "new-service"}, svc.id, admin_user())
+
+      assert global.name == "new-service"
+      assert global.service_id == svc.id
+      assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
+    end
+
+    test "it creates template global services with non-conflicting managed services on targeted clusters" do
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      existing_global = insert(:global_service)
+      insert(:service, name: "other-service", cluster: cluster, owner: existing_global)
+
+      assert {:ok, global} =
+        Global.create(%{
+          name: "template-global",
+          template: %{
+            repository_id: git.id,
+            git: %{ref: "main", folder: "k8s"},
+            name: "new-service",
+            namespace: "prod"
+          }
+        }, admin_user())
+
+      assert global.name == "template-global"
+      assert global.template.name == "new-service"
+      assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
+    end
+
     test "it can create a template global service" do
       git = insert(:git_repository)
       {:ok, global} = Global.create(%{

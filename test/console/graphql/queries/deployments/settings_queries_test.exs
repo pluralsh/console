@@ -6,11 +6,16 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "it can fetch a project by id" do
       proj = insert(:project)
 
-      {:ok, %{data: %{"project" => found}}} = run_query("""
-        query Proj($id: ID!) {
-          project(id: $id) { id name }
-        }
-      """, %{"id" => proj.id}, %{current_user: admin_user()})
+      {:ok, %{data: %{"project" => found}}} =
+        run_query(
+          """
+            query Proj($id: ID!) {
+              project(id: $id) { id name }
+            }
+          """,
+          %{"id" => proj.id},
+          %{current_user: admin_user()}
+        )
 
       assert found["id"] == proj.id
       assert found["name"] == proj.name
@@ -19,14 +24,109 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "it can fetch a project by name" do
       proj = insert(:project)
 
-      {:ok, %{data: %{"project" => found}}} = run_query("""
-        query Proj($name: String!) {
-          project(name: $name) { id name }
-        }
-      """, %{"name" => proj.name}, %{current_user: admin_user()})
+      {:ok, %{data: %{"project" => found}}} =
+        run_query(
+          """
+            query Proj($name: String!) {
+              project(name: $name) { id name }
+            }
+          """,
+          %{"name" => proj.name},
+          %{current_user: admin_user()}
+        )
 
       assert found["id"] == proj.id
       assert found["name"] == proj.name
+    end
+  end
+
+  describe "availableModels" do
+    test "it lists configured ai provider models" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai: %{
+            access_token: "key",
+            model: "gpt-custom",
+            tool_model: "gpt-tool",
+            proxy_models: ["gpt-proxy"]
+          }
+        }
+      )
+
+      {:ok, %{data: %{"availableModels" => found}}} =
+        run_query(
+          """
+            query {
+              availableModels { provider model }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
+
+      assert found == [
+               %{"provider" => "OPENAI", "model" => "gpt-custom"},
+               %{"provider" => "OPENAI", "model" => "gpt-tool"},
+               %{"provider" => "OPENAI", "model" => "text-embedding-3-large"},
+               %{"provider" => "OPENAI", "model" => "gpt-proxy"}
+             ]
+    end
+
+    test "it lists default models for partially configured providers" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          anthropic: %{access_token: "anthropic-key"},
+          bedrock: %{region: "us-east-1"}
+        }
+      )
+
+      {:ok, %{data: %{"availableModels" => found}}} =
+        run_query(
+          """
+            query {
+              availableModels { provider model }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
+
+      assert found == [
+               %{"provider" => "ANTHROPIC", "model" => "claude-4-5-haiku-latest"},
+               %{"provider" => "ANTHROPIC", "model" => "claude-4-6-sonnet-latest"},
+               %{
+                 "provider" => "BEDROCK",
+                 "model" => "global.anthropic.claude-haiku-4-5-20251001-v1:0"
+               },
+               %{"provider" => "BEDROCK", "model" => "global.anthropic.claude-sonnet-4-6"},
+               %{"provider" => "BEDROCK", "model" => "cohere.embed-english-v3"}
+             ]
+    end
+
+    test "it returns an empty list when providers are selected but not configured" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :azure,
+          tool_provider: :bedrock,
+          embedding_provider: :vertex
+        }
+      )
+
+      {:ok, %{data: %{"availableModels" => found}}} =
+        run_query(
+          """
+            query {
+              availableModels { provider model }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
+
+      assert found == []
     end
   end
 
@@ -34,13 +134,18 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "it can list projects" do
       projects = insert_list(3, :project)
 
-      {:ok, %{data: %{"projects" => found}}} = run_query("""
-        query {
-          projects(first: 5) {
-            edges { node { id } }
-          }
-        }
-      """, %{}, %{current_user: admin_user()})
+      {:ok, %{data: %{"projects" => found}}} =
+        run_query(
+          """
+            query {
+              projects(first: 5) {
+                edges { node { id } }
+              }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
 
       assert from_connection(found)
              |> ids_equal([Settings.default_project!() | projects])
@@ -53,13 +158,18 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       proj2 = insert(:project, read_bindings: [%{group_id: group.id}])
       insert(:project)
 
-      {:ok, %{data: %{"projects" => found}}} = run_query("""
-        query {
-          projects(first: 5) {
-            edges { node { id } }
-          }
-        }
-      """, %{}, %{current_user: user})
+      {:ok, %{data: %{"projects" => found}}} =
+        run_query(
+          """
+            query {
+              projects(first: 5) {
+                edges { node { id } }
+              }
+            }
+          """,
+          %{},
+          %{current_user: user}
+        )
 
       assert from_connection(found)
              |> ids_equal([proj1, proj2])
@@ -70,11 +180,16 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "it can fetch a cloud connection by id" do
       conn = insert(:cloud_connection)
 
-      {:ok, %{data: %{"cloudConnection" => found}}} = run_query("""
-        query CloudConn($id: ID!) {
-          cloudConnection(id: $id) { id name }
-        }
-      """, %{"id" => conn.id}, %{current_user: admin_user()})
+      {:ok, %{data: %{"cloudConnection" => found}}} =
+        run_query(
+          """
+            query CloudConn($id: ID!) {
+              cloudConnection(id: $id) { id name }
+            }
+          """,
+          %{"id" => conn.id},
+          %{current_user: admin_user()}
+        )
 
       assert found["id"] == conn.id
     end
@@ -84,11 +199,16 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       %{group: group} = insert(:group_member, user: user)
       conn = insert(:cloud_connection, read_bindings: [%{group_id: group.id}])
 
-      {:ok, %{data: %{"cloudConnection" => found}}} = run_query("""
-        query CloudConn($id: ID!) {
-          cloudConnection(id: $id) { id name }
-        }
-      """, %{"id" => conn.id}, %{current_user: Console.Services.Rbac.preload(user)})
+      {:ok, %{data: %{"cloudConnection" => found}}} =
+        run_query(
+          """
+            query CloudConn($id: ID!) {
+              cloudConnection(id: $id) { id name }
+            }
+          """,
+          %{"id" => conn.id},
+          %{current_user: Console.Services.Rbac.preload(user)}
+        )
 
       assert found["id"] == conn.id
     end
@@ -96,11 +216,16 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "non-readers cannot access" do
       conn = insert(:cloud_connection)
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query CloudConn($id: ID!) {
-          cloudConnection(id: $id) { id name }
-        }
-      """, %{"id" => conn.id}, %{current_user: insert(:user)})
+      {:ok, %{errors: [_ | _]}} =
+        run_query(
+          """
+            query CloudConn($id: ID!) {
+              cloudConnection(id: $id) { id name }
+            }
+          """,
+          %{"id" => conn.id},
+          %{current_user: insert(:user)}
+        )
     end
   end
 
@@ -110,11 +235,16 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       ctx = insert(:service_context, project: project)
 
-      {:ok, %{data: %{"serviceContext" => found}}} = run_query("""
-        query ServiceContext($name: String!) {
-          serviceContext(name: $name) { id name }
-        }
-      """, %{"name" => ctx.name}, %{current_user: user})
+      {:ok, %{data: %{"serviceContext" => found}}} =
+        run_query(
+          """
+            query ServiceContext($name: String!) {
+              serviceContext(name: $name) { id name }
+            }
+          """,
+          %{"name" => ctx.name},
+          %{current_user: user}
+        )
 
       assert found["id"] == ctx.id
       assert found["name"] == ctx.name
@@ -123,11 +253,16 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "non readers cannot fetch" do
       ctx = insert(:service_context)
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query ServiceContext($name: String!) {
-          serviceContext(name: $name) { id name }
-        }
-      """, %{"name" => ctx.name}, %{current_user: insert(:user)})
+      {:ok, %{errors: [_ | _]}} =
+        run_query(
+          """
+            query ServiceContext($name: String!) {
+              serviceContext(name: $name) { id name }
+            }
+          """,
+          %{"name" => ctx.name},
+          %{current_user: insert(:user)}
+        )
     end
   end
 
@@ -135,13 +270,18 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
     test "it can list cloud connections" do
       conns = insert_list(3, :cloud_connection)
 
-      {:ok, %{data: %{"cloudConnections" => found}}} = run_query("""
-        query {
-          cloudConnections(first: 5) {
-            edges { node { id } }
-          }
-        }
-      """, %{}, %{current_user: admin_user()})
+      {:ok, %{data: %{"cloudConnections" => found}}} =
+        run_query(
+          """
+            query {
+              cloudConnections(first: 5) {
+                edges { node { id } }
+              }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
 
       assert from_connection(found)
              |> ids_equal(conns)
@@ -154,13 +294,18 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       conn2 = insert(:cloud_connection, read_bindings: [%{group_id: group.id}])
       insert(:cloud_connection)
 
-      {:ok, %{data: %{"cloudConnections" => found}}} = run_query("""
-        query {
-          cloudConnections(first: 5) {
-            edges { node { id } }
-          }
-        }
-      """, %{}, %{current_user: Console.Services.Rbac.preload(user)})
+      {:ok, %{data: %{"cloudConnections" => found}}} =
+        run_query(
+          """
+            query {
+              cloudConnections(first: 5) {
+                edges { node { id } }
+              }
+            }
+          """,
+          %{},
+          %{current_user: Console.Services.Rbac.preload(user)}
+        )
 
       assert from_connection(found)
              |> ids_equal([conn1, conn2])
@@ -171,13 +316,18 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       insert(:cloud_connection, provider: :gcp)
       insert(:cloud_connection, provider: :azure)
 
-      {:ok, %{data: %{"cloudConnections" => found}}} = run_query("""
-        query {
-          cloudConnections(first: 5, provider: AWS) {
-            edges { node { id provider } }
-          }
-        }
-      """, %{}, %{current_user: admin_user()})
+      {:ok, %{data: %{"cloudConnections" => found}}} =
+        run_query(
+          """
+            query {
+              cloudConnections(first: 5, provider: AWS) {
+                edges { node { id provider } }
+              }
+            }
+          """,
+          %{},
+          %{current_user: admin_user()}
+        )
 
       assert from_connection(found)
              |> ids_equal([aws])

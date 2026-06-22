@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.{Http, Query}
   alias Console.Schema.{WorkbenchTool, ScmConnection}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
 
@@ -112,14 +113,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
 
   @spec get_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def get_json(%{token: _} = client, url, query \\ %{}) when is_binary(url) do
-    qs =
-      case query do
-        %{} = m when map_size(m) == 0 -> ""
-        %{} = m -> "?" <> URI.encode_query(m, :safe)
-        _ -> ""
-      end
-
-    req_url = url <> qs
+    req_url = url <> Query.query_string(query)
 
     case HTTPoison.get(req_url, basic_auth_header(client), http_opts()) do
       {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
@@ -129,7 +123,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 
@@ -146,7 +140,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 
@@ -167,7 +161,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 
@@ -181,7 +175,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Azure DevOps", reason)
     end
   end
 

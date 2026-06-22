@@ -71,6 +71,33 @@ func (c *gitHubClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetai
 	}, nil
 }
 
+func (c *gitHubClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
+	m := githubPRPattern.FindStringSubmatch(prURL)
+	if m == nil {
+		return nil, fmt.Errorf("cannot parse GitHub PR URL: %s", prURL)
+	}
+	owner, repo := m[1], m[2]
+	number, _ := strconv.Atoi(m[3])
+
+	pr, _, err := c.gh.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return nil, fmt.Errorf("get PR: %w", err)
+	}
+
+	state := PRStateOpen
+	if !pr.GetMergedAt().IsZero() {
+		state = PRStateMerged
+	} else if pr.GetState() == "closed" {
+		state = PRStateClosed
+	}
+	return &PRDetails{
+		Title:   pr.GetTitle(),
+		Body:    pr.GetBody(),
+		HeadRef: pr.GetHead().GetRef(),
+		State:   state,
+	}, nil
+}
+
 func (c *gitHubClient) allComments(ctx context.Context, owner, repo string, number int) ([]PRComment, error) {
 	opts := &gogithub.IssueListCommentsOptions{ListOptions: gogithub.ListOptions{PerPage: 100}}
 	var all []PRComment

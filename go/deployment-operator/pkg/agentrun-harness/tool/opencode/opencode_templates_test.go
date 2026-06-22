@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 const (
@@ -53,6 +54,17 @@ func TestConfigTemplate_PluralMcpServer(t *testing.T) {
 			t.Fatalf("expected plural MCP url http://127.0.0.1:8080/mcp, got %v", plural["url"])
 		}
 	})
+}
+
+func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+	if out["autoupdate"] != false {
+		t.Fatalf("expected autoupdate=false, got %v", out["autoupdate"])
+	}
+	if out["snapshot"] != false {
+		t.Fatalf("expected snapshot=false, got %v", out["snapshot"])
+	}
 }
 
 func TestConfigTemplate_DindPermissions(t *testing.T) {
@@ -129,6 +141,39 @@ func TestConfigTemplate_Provider(t *testing.T) {
 		}
 	})
 
+	t.Run("plural provider with streaming proxy uses mcpserver base URL", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+		input.StreamingProxy = true
+		input.StreamingProxyBaseURL = common.AgentOpenAIBaseURL
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai" {
+			t.Fatalf("expected npm=@ai-sdk/openai for streaming proxy, got %v", plural["npm"])
+		}
+		options := plural["options"].(map[string]any)
+
+		if options["baseURL"] != common.AgentOpenAIBaseURL {
+			t.Errorf("expected mcpserver baseURL %s, got %v", common.AgentOpenAIBaseURL, options["baseURL"])
+		}
+	})
+
+	t.Run("plural provider without streaming proxy uses responses sdk", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai" {
+			t.Fatalf("expected npm=@ai-sdk/openai, got %v", plural["npm"])
+		}
+	})
+
 	t.Run("openai provider omits baseURL when endpoint unset", func(t *testing.T) {
 		input := baseInput(console.AgentRunModeWrite)
 		input.Provider = ProviderOpenAI
@@ -158,8 +203,8 @@ func TestConfigTemplate_Provider(t *testing.T) {
 
 		providers := out["provider"].(map[string]any)
 		compat := providers[string(ProviderOpenAICompatible)].(map[string]any)
-		if compat["npm"] != "@ai-sdk/openai-compatible" {
-			t.Errorf("expected npm=@ai-sdk/openai-compatible, got %v", compat["npm"])
+		if compat["npm"] != "@ai-sdk/openai" {
+			t.Errorf("expected npm=@ai-sdk/openai, got %v", compat["npm"])
 		}
 		options := compat["options"].(map[string]any)
 		if options["baseURL"] != "https://litellm.example/v1" {

@@ -24,10 +24,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
-    Infrastructure.Manifests
+    Infrastructure.Manifests,
+    Infrastructure.StateSearch
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.{Environment, FileCache}
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
@@ -35,12 +37,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     tools = tools(job, environment, FileCache.new())
 
     MemoryEngine.new(tools, 50,
-      system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
-      acc: %{},
-      continue_msg: cont_msg(),
-      tool_search: length(tools) > 10,
-      pre_enable: [Result, %Skills{} ,%Skill{}],
-      callback: &callback(activity, &1)
+      engine_opts(job) ++ [
+        system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
+        acc: %{},
+        continue_msg: cont_msg(),
+        tool_search: length(tools) > 10,
+        pre_enable: [Result, %Skills{} ,%Skill{}],
+        callback: &callback(activity, &1)
+      ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
@@ -60,6 +64,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
 
   defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
+    skills = Environment.subagent_skills(skills, :infrastructure)
+
     svc_tools(bench, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
@@ -68,8 +74,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat(cloud_tools(environment))
     |> Enum.concat(manifests_tools(bench, user, cache))
     |> Enum.concat([
-      %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
-      %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       Lua,
       %History{job: job, activities: activities},
@@ -96,8 +102,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
 
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, user) do
-    [
-      ServiceComponent,
+    if_vector_store_enabled(ServiceComponent) ++ [
       %ServiceInspect{user: user},
       %ClusterServices{user: user},
       %Cluster{user: user},
@@ -109,10 +114,10 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp svc_tools(_, _), do: []
 
   defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}, user) do
-    [
-      Stack,
+    if_vector_store_enabled(Stack) ++ [
       %StackInspect{user: user},
-      %StackList{user: user}
+      %StackList{user: user},
+      %StateSearch{user: user}
     ]
   end
   defp stack_tools(_, _), do: []

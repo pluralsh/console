@@ -54,7 +54,7 @@ const (
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
 
-	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getPRState,getCILogs,reactToComment,downloadServiceManifests"
+	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getCILogs,reactToComment,downloadServiceManifests"
 )
 
 var dindClientEnvs = []corev1.EnvVar{
@@ -110,8 +110,8 @@ var (
 	// Check .github/workflows/deployment-operator-cd-agent-harness.yaml to see images being published.
 	defaultContainerVersions = map[console.AgentRuntimeType]string{
 		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.72",
-		console.AgentRuntimeTypeGemini:   "%s-gemini-0.36.0",
-		console.AgentRuntimeTypeOpencode: "%s-opencode-1.14.50",
+		console.AgentRuntimeTypeGemini:   "%s-gemini-0.44.1",
+		console.AgentRuntimeTypeOpencode: "%s-opencode-1.17.3",
 		console.AgentRuntimeTypeCodex:    "%s-codex-0.104.0",
 	}
 
@@ -312,6 +312,8 @@ func getDefaultEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 		envVars = append(envVars, corev1.EnvVar{Name: EnvGitProxy, Value: *runtime.Spec.Git.Proxy})
 	}
 
+	envVars = append(envVars, streamingProxyEnvVars(runtime)...)
+
 	return envVars
 }
 
@@ -479,7 +481,7 @@ func getMCPServerStartupProbe() *corev1.Probe {
 }
 
 func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
-	result := make([]corev1.EnvVar, 0, 2)
+	result := make([]corev1.EnvVar, 0, 3)
 
 	if run.Spec.Mode == console.AgentRunModeAnalyze {
 		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: analyzeModeExcludedTools})
@@ -489,7 +491,17 @@ func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime)
 		result = append(result, corev1.EnvVar{Name: EnvGitProxy, Value: *runtime.Spec.Git.Proxy})
 	}
 
+	result = append(result, streamingProxyEnvVars(runtime)...)
+
 	return result
+}
+
+func streamingProxyEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	if !runtime.IsStreamingProxyEnabled() {
+		return nil
+	}
+
+	return []corev1.EnvVar{{Name: EnvStreamingProxy, Value: "true"}}
 }
 
 func ensureMCPServerEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {

@@ -890,7 +890,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
       expect(Client, :connect, fn -> {:ok, :mock_conn} end)
-      expect(Stub, :metrics, fn :mock_conn, input ->
+      expect(Stub, :metrics, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.seconds(30)
         assert input.query == "sum(rate(http_requests_total[5m]))"
         assert input.step == "30s"
 
@@ -967,7 +968,8 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       ten_seconds_later = DateTime.add(now, 10, :second)
 
       expect(Client, :connect, fn -> {:ok, :mock_conn} end)
-      expect(Stub, :traces, fn :mock_conn, input ->
+      expect(Stub, :traces, fn :mock_conn, input, opts ->
+        assert opts[:timeout] == :timer.minutes(1)
         assert input.query == "{ service.name = \"checkout\" }"
         assert input.limit == 50
 
@@ -1027,9 +1029,12 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
   describe "workbenchJobActivity" do
     test "it can fetch a workbench job activity by id" do
+      user = insert(:user)
+
       activity =
         insert(:workbench_job_activity,
           workbench_job: insert(:workbench_job),
+          user: user,
           type: :coding,
           status: :running,
           prompt: "fix the bug"
@@ -1042,6 +1047,9 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             status
             type
             prompt
+            user {
+              id
+            }
           }
         }
       """, %{"id" => activity.id}, %{current_user: admin_user()})
@@ -1050,6 +1058,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == "RUNNING"
       assert found["type"] == "CODING"
       assert found["prompt"] == "fix the bug"
+      assert found["user"]["id"] == user.id
     end
 
     test "users with read access to the workbench can fetch workbench job activities" do
@@ -1717,6 +1726,150 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       row = hd(rows)
       assert row["average"] == 7.0
       assert row["timestamp"]
+    end
+  end
+
+  describe "workbenchUsage" do
+    test "aggregates usage and treats null or missing usage fields as zero" do
+      workbench = insert(:workbench)
+      timestamp = DateTime.new!(Date.add(Date.utc_today(), -1), ~T[10:00:00], "Etc/UTC")
+
+      insert(:workbench_job,
+        workbench: workbench,
+        usage: %{input_tokens: 10, output_tokens: 5, total_cost: 0.25},
+        inserted_at: timestamp,
+        updated_at: timestamp
+      )
+
+      insert(:workbench_job,
+        workbench: workbench,
+        usage: %{input_tokens: 2},
+        inserted_at: timestamp,
+        updated_at: timestamp
+      )
+
+      insert(:workbench_job,
+        workbench: workbench,
+        usage: nil,
+        inserted_at: timestamp,
+        updated_at: timestamp
+      )
+
+      {:ok, %{data: %{"workbenchUsage" => [row]}}} = run_query("""
+        query WorkbenchUsage($period: EvalResultsPeriod) {
+          workbenchUsage(period: $period) {
+            timestamp
+            inputTokens
+            outputTokens
+            totalCost
+            workbench { id }
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: admin_user()})
+
+      assert row["workbench"]["id"] == workbench.id
+      assert row["inputTokens"] == 12
+      assert row["outputTokens"] == 5
+      assert row["totalCost"] == 0.25
+      assert row["timestamp"]
+    end
+
+    test "aggregates jobs into the correct day buckets" do
+      workbench = insert(:workbench)
+      older = DateTime.new!(Date.add(Date.utc_today(), -3), ~T[10:00:00], "Etc/UTC")
+      newer = DateTime.new!(Date.add(Date.utc_today(), -1), ~T[10:00:00], "Etc/UTC")
+
+      insert(:workbench_job,
+        workbench: workbench,
+        usage: %{input_tokens: 4, output_tokens: 2, total_cost: 0.1},
+        inserted_at: older,
+        updated_at: older
+      )
+
+      insert(:workbench_job,
+        workbench: workbench,
+        usage: %{input_tokens: 5, output_tokens: 3, total_cost: 0.2},
+        inserted_at: newer,
+        updated_at: newer
+      )
+
+      insert(:workbench_job,
+        workbench: workbench,
+        usage: %{input_tokens: 7, output_tokens: 11, total_cost: 0.4},
+        inserted_at: newer,
+        updated_at: newer
+      )
+
+      {:ok, %{data: %{"workbenchUsage" => rows}}} = run_query("""
+        query WorkbenchUsage($period: EvalResultsPeriod) {
+          workbenchUsage(period: $period) {
+            inputTokens
+            outputTokens
+            totalCost
+            workbench { id }
+          }
+        }
+      """, %{"period" => "DAY"}, %{current_user: admin_user()})
+
+      assert length(rows) == 2
+      assert Enum.all?(rows, &(&1["workbench"]["id"] == workbench.id))
+      assert Enum.map(rows, & &1["inputTokens"]) |> Enum.sort() == [4, 12]
+      assert Enum.map(rows, & &1["outputTokens"]) |> Enum.sort() == [2, 14]
+      total_costs = Enum.map(rows, & &1["totalCost"]) |> Enum.sort()
+      assert_in_delta Enum.at(total_costs, 0), 0.1, 0.001
+      assert_in_delta Enum.at(total_costs, 1), 0.6, 0.001
+    end
+
+    test "returns separate aggregates for multiple workbenches and respects project filters" do
+      project = insert(:project)
+      other_project = insert(:project)
+      workbench_a = insert(:workbench, project: project)
+      workbench_b = insert(:workbench, project: project)
+      workbench_c = insert(:workbench, project: other_project)
+      timestamp = DateTime.new!(Date.add(Date.utc_today(), -1), ~T[10:00:00], "Etc/UTC")
+
+      insert(:workbench_job,
+        workbench: workbench_a,
+        usage: %{input_tokens: 3, output_tokens: 4, total_cost: 0.3},
+        inserted_at: timestamp,
+        updated_at: timestamp
+      )
+
+      insert(:workbench_job,
+        workbench: workbench_b,
+        usage: %{input_tokens: 7, output_tokens: 8, total_cost: 0.7},
+        inserted_at: timestamp,
+        updated_at: timestamp
+      )
+
+      insert(:workbench_job,
+        workbench: workbench_c,
+        usage: %{input_tokens: 11, output_tokens: 12, total_cost: 1.1},
+        inserted_at: timestamp,
+        updated_at: timestamp
+      )
+
+      {:ok, %{data: %{"workbenchUsage" => rows}}} = run_query("""
+        query WorkbenchUsage($period: EvalResultsPeriod, $projectId: ID!) {
+          workbenchUsage(period: $period, projectId: $projectId) {
+            inputTokens
+            outputTokens
+            totalCost
+            workbench { id }
+          }
+        }
+      """, %{"period" => "DAY", "projectId" => project.id}, %{current_user: admin_user()})
+
+      assert length(rows) == 2
+      assert ids_equal(Enum.map(rows, & &1["workbench"]), [workbench_a, workbench_b])
+
+      usage_by_workbench = Map.new(rows, fn row ->
+        {row["workbench"]["id"], {row["inputTokens"], row["outputTokens"], row["totalCost"]}}
+      end)
+
+      assert usage_by_workbench[workbench_a.id] == {3, 4, 0.3}
+      assert usage_by_workbench[workbench_b.id] == {7, 8, 0.7}
+      refute Map.has_key?(usage_by_workbench, workbench_c.id)
     end
   end
 

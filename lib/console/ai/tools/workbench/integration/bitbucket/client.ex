@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.{Http, Query}
   alias Console.Schema.{WorkbenchTool, ScmConnection}
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.BitbucketConnection}
 
@@ -9,14 +10,19 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   @spec build(WorkbenchTool.t()) :: {:ok, map()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{base_url: base, token: token}}),
     do: {:ok, %{base_url: api_root(base), token: token}}
-  def build(%WorkbenchTool{configuration: %Configuration{bitbucket: %BitbucketConnection{token: token, url: url}}}) do
+
+  def build(%WorkbenchTool{
+        configuration: %Configuration{bitbucket: %BitbucketConnection{token: token, url: url}}
+      }) do
     {:ok, %{base_url: api_root(url), token: token}}
   end
+
   def build(%WorkbenchTool{}),
     do: {:error, "Bitbucket Cloud connection is not configured for this workbench tool."}
 
   @doc false
   def api_root(url) when url in [nil, ""], do: @default_api_root
+
   def api_root(url) when is_binary(url) do
     url
     |> String.trim()
@@ -42,14 +48,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
 
   @spec get(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def get(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
-    qs =
-      case query do
-        %{} = m when map_size(m) == 0 -> ""
-        %{} = m -> "?" <> URI.encode_query(stringify_query(m), :safe)
-        _ -> ""
-      end
-
-    url = base <> path <> qs
+    url = base <> path <> Query.query_string(query)
 
     case HTTPoison.get(url, auth_headers(token), http_opts()) do
       {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
@@ -59,7 +58,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
         {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Cloud", reason)
     end
   end
 
@@ -77,7 +76,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
         {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("Bitbucket Cloud", reason)
     end
   end
 
@@ -90,13 +89,6 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
       {"Authorization", "Bearer #{token}"},
       {"Accept", "application/json"}
     ]
-  end
-
-  defp stringify_query(map) do
-    map
-    |> Enum.reject(fn {_, v} -> is_nil(v) end)
-    |> Enum.map(fn {k, v} -> {to_string(k), v} end)
-    |> Map.new()
   end
 
   defp decode_json(""), do: {:ok, %{}}

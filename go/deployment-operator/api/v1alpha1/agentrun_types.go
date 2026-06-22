@@ -22,6 +22,10 @@ type AgentRunSpec struct {
 	// +kubebuilder:validation:Required
 	Repository string `json:"repository"`
 
+	// Branch is the repository branch the agent should operate on. If omitted, the repository default branch is used.
+	// +kubebuilder:validation:Optional
+	Branch *string `json:"branch,omitempty"`
+
 	// Mode defines how the agent should run (ANALYZE, WRITE)
 	// +kubebuilder:validation:Required
 	Mode console.AgentRunMode `json:"mode"`
@@ -142,6 +146,7 @@ func (in *AgentRun) Attributes() console.AgentRunAttributes {
 	return console.AgentRunAttributes{
 		Prompt:     in.Spec.Prompt,
 		Repository: in.Spec.Repository,
+		Branch:     in.Spec.Branch,
 		Mode:       in.Spec.Mode,
 		FlowID:     in.Spec.FlowID,
 	}

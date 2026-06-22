@@ -474,6 +474,8 @@ type RootQueryType {
 
   deploymentSettings: DeploymentSettings
 
+  availableModels: [AvailableModel]
+
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
 
   project(id: ID, name: String): Project
@@ -574,6 +576,15 @@ type RootQueryType {
   workbenchPullRequests: Int!
 
   workbenchAggregates: WorkbenchAggregates!
+
+  workbenchUsage(
+    period: EvalResultsPeriod
+
+    q: String
+
+    "filter workbenches by project"
+    projectId: ID
+  ): [WorkbenchUsageTimeseries]
 
   workbenchPrMergeRates(period: EvalResultsPeriod): [WorkbenchPrMergeRateEntry]
 
@@ -1157,7 +1168,7 @@ type RootMutationType {
   deleteStackDefinition(id: ID!): StackDefinition
 
   "Creates a custom run, with the given command list, to execute w\/in the stack's environment"
-  onDemandRun(stackId: ID!, commands: [CommandAttributes], context: Json): StackRun
+  onDemandRun(stackId: ID!, runName: String, commands: [CommandAttributes], context: Json): StackRun
 
   "start a new run from the newest sha in the stack's run history"
   triggerRun(id: ID!): StackRun
@@ -1832,6 +1843,7 @@ enum AgentRunStatus {
   FAILED
   CANCELLED
   BABYSITTING
+  PENDING_APPROVAL
 }
 
 enum AgentRunMode {
@@ -1899,6 +1911,9 @@ input AgentRunAttributes {
   "the repository the agent will be working in"
   repository: String!
 
+  "the branch this agent run should operate on (if not set, the repository default branch is used)"
+  branch: String
+
   "the mode of the agent run"
   mode: AgentRunMode!
 
@@ -1916,6 +1931,9 @@ input AgentRunAttributes {
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
 }
 
 input AgentRunStatusAttributes {
@@ -1931,11 +1949,26 @@ input AgentRunStatusAttributes {
   "the kubernetes pod this agent is running on"
   podReference: NamespacedName
 
+  "the head branch this agent run has created for its pull request"
+  headBranch: String
+
   "whether babysit mode is enabled for this run"
   babysit: Boolean
 
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
+
+  "whether this run requires approval before continuing"
+  approval: Boolean
+
+  "when this run was approved"
+  approvedAt: DateTime
+
+  "the agent run this run consumed"
+  consumed: ID
+
+  "the skills available to this agent run"
+  skills: [AgentSkillAttributes]
 }
 
 input AgentPullRequestAttributes {
@@ -1983,6 +2016,17 @@ input AgentAnalysisAttributes {
 
   "the bullets of the analysis"
   bullets: [String]
+}
+
+input AgentSkillAttributes {
+  "the name of the skill"
+  name: String!
+
+  "the description of the skill"
+  description: String
+
+  "the contents of the skill"
+  contents: String!
 }
 
 input AgentRunUploadAttributes {
@@ -2123,6 +2167,9 @@ type AgentRun {
   "the branch this agent run is operating on (if not set, use default branch on clone)"
   branch: String
 
+  "the head branch this agent run has created for its pull request"
+  headBranch: String
+
   "the status of this agent run"
   status: AgentRunStatus!
 
@@ -2144,6 +2191,15 @@ type AgentRun {
   "interval in seconds between babysit checks for this run"
   babysitInterval: Int
 
+  "whether this run requires approval before continuing"
+  approval: Boolean
+
+  "when this run was approved"
+  approvedAt: DateTime
+
+  "the agent run this run consumed"
+  consumed: ID
+
   "the programming language used in the agent run"
   language: AgentRunLanguage
 
@@ -2152,6 +2208,9 @@ type AgentRun {
 
   "the analysis of the agent run"
   analysis: AgentAnalysis
+
+  "the skills available to this agent run"
+  skills: [AgentSkill]
 
   "the todos of the agent run"
   todos: [AgentTodo]
@@ -2168,6 +2227,9 @@ type AgentRun {
 
   "the messages this agent run has generated during its run"
   messages: [AgentMessage]
+
+  "the upload bundle this agent run has generated"
+  upload: AgentRunUpload
 
   "the runtime this agent is using"
   runtime: AgentRuntime
@@ -2215,6 +2277,17 @@ type AgentAnalysis {
 
   "quick bullet points to summarize the analysis"
   bullets: [String]
+}
+
+type AgentSkill {
+  "the name of the skill"
+  name: String!
+
+  "the description of the skill"
+  description: String
+
+  "the contents of the skill"
+  contents: String!
 }
 
 type AgentTodo {
@@ -2420,6 +2493,7 @@ enum WorkbenchToolType {
   BITBUCKET_DATACENTER
   AZURE_DEVOPS
   PAGERDUTY
+  OPENSEARCH
 }
 
 enum WorkbenchToolCategory {
@@ -2512,6 +2586,36 @@ enum EvalResultsPeriod {
 input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
+
+  "mode-specific options for this job"
+  modes: WorkbenchJobModesAttributes
+}
+
+input WorkbenchJobModesAttributes {
+  "whether planning mode is enabled for this job"
+  plan: Boolean
+
+  "model override for this job"
+  model: WorkbenchJobModelAttributes
+
+  "coding mode options for this job"
+  coding: WorkbenchJobCodingModesAttributes
+}
+
+input WorkbenchJobModelAttributes {
+  "the ai provider for this job"
+  provider: AiProvider!
+
+  "the model name for this job"
+  model: String!
+}
+
+input WorkbenchJobCodingModesAttributes {
+  "whether babysit mode is enabled for coding agent runs"
+  babysit: Boolean
+
+  "whether coding agent runs require approval before continuing"
+  approval: Boolean
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -2632,6 +2736,9 @@ input WorkbenchCronAttributes {
   "the prompt to run when the cron triggers"
   prompt: String
 
+  "mode-specific options for jobs created by this cron"
+  modes: WorkbenchJobModesAttributes
+
   "user this cron runs as; must have read access to the workbench"
   userId: ID
 }
@@ -2645,6 +2752,9 @@ input WorkbenchPromptAttributes {
 
   "the saved prompt text"
   prompt: String!
+
+  "mode-specific options for jobs created from this prompt"
+  modes: WorkbenchJobModesAttributes
 }
 
 input WorkbenchSkillAttributes {
@@ -2699,6 +2809,9 @@ input WorkbenchWebhookAttributes {
   "optional prompt text applied when this webhook matches"
   prompt: String
 
+  "mode-specific options for jobs created by this webhook"
+  modes: WorkbenchJobModesAttributes
+
   "higher values are preferred when multiple webhooks match the same payload"
   priority: Int
 
@@ -2718,6 +2831,9 @@ input WorkbenchChatbotAttributes {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "mode-specific options for jobs created by this chatbot"
+  modes: WorkbenchJobModesAttributes
 
   "how the chatbot posts responses in the channel"
   messageBehavior: WorkbenchChatbotMessageBehavior
@@ -2767,6 +2883,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "elasticsearch connection (logs)"
   elastic: WorkbenchToolElasticConnectionAttributes
+
+  "aws opensearch connection (logs)"
+  opensearch: WorkbenchToolOpensearchConnectionAttributes
 
   "prometheus connection (metrics)"
   prometheus: WorkbenchToolPrometheusConnectionAttributes
@@ -2844,6 +2963,29 @@ input WorkbenchToolElasticConnectionAttributes {
 
   "elasticsearch index"
   index: String!
+}
+
+input WorkbenchToolOpensearchConnectionAttributes {
+  "aws opensearch endpoint"
+  host: String!
+
+  "opensearch index"
+  index: String!
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS secret access key for SigV4 authentication"
+  awsSecretAccessKey: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
+
+  "optional IAM role ARN to assume before signing OpenSearch requests"
+  assumeRoleArn: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication instead of static credentials"
+  usePodIdentity: Boolean
 }
 
 input WorkbenchToolPrometheusConnectionAttributes {
@@ -3250,6 +3392,12 @@ type WorkbenchJob {
   "error message when the job failed"
   error: String
 
+  "mode-specific options for this job"
+  modes: WorkbenchJobModes
+
+  "token and cost usage for this job"
+  usage: WorkbenchJobUsage
+
   "chatbot integration metadata for this job, when present"
   chatbotMessage: ChatbotMessage
 
@@ -3311,6 +3459,59 @@ type WorkbenchJob {
   updatedAt: DateTime
 }
 
+type WorkbenchJobModes {
+  "whether planning mode is enabled for this job"
+  plan: Boolean
+
+  "model override for this job"
+  model: WorkbenchJobModel
+
+  "coding mode options for this job"
+  coding: WorkbenchJobCodingModes
+}
+
+type WorkbenchJobModel {
+  "the ai provider for this job"
+  provider: AiProvider
+
+  "the model name for this job"
+  model: String
+}
+
+type WorkbenchJobCodingModes {
+  "whether babysit mode is enabled for coding agent runs"
+  babysit: Boolean
+
+  "whether coding agent runs require approval before continuing"
+  approval: Boolean
+}
+
+type WorkbenchJobUsage {
+  "input tokens consumed by this job"
+  inputTokens: Int
+
+  "output tokens produced by this job"
+  outputTokens: Int
+
+  "total tokens consumed by this job"
+  totalTokens: Int
+
+  "cached input tokens used by this job"
+  cachedTokens: Int
+
+  "reasoning tokens produced by this job"
+  reasoningTokens: Int
+
+  "input token cost for this job"
+  inputCost: Float
+
+  "output token cost for this job"
+  outputCost: Float
+
+  "total token cost for this job"
+  totalCost: Float
+}
+
 type WorkbenchJobActivity {
   "the id of the activity"
   id: String!
@@ -3341,6 +3542,9 @@ type WorkbenchJobActivity {
 
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
+
+  "the user who created this activity"
+  user: User
 
   insertedAt: DateTime
 
@@ -3630,6 +3834,9 @@ type WorkbenchCron {
   "prompt to run when the cron triggers"
   prompt: String
 
+  "mode-specific options for jobs created by this cron"
+  modes: WorkbenchJobModes
+
   "when the cron will next run"
   nextRunAt: DateTime
 
@@ -3659,6 +3866,9 @@ type WorkbenchPrompt {
 
   "the saved prompt text"
   prompt: String
+
+  "mode-specific options for jobs created from this prompt"
+  modes: WorkbenchJobModes
 
   "the workbench this prompt belongs to"
   workbench: Workbench
@@ -3807,6 +4017,23 @@ type WorkbenchAggregates {
   evalResults: Float
 }
 
+type WorkbenchUsageTimeseries {
+  "UTC timestamp for this data point"
+  timestamp: DateTime
+
+  "the workbench this usage data is associated with"
+  workbench: Workbench
+
+  "number of input tokens consumed during this interval"
+  inputTokens: Int
+
+  "number of output tokens produced during this interval"
+  outputTokens: Int
+
+  "total cost for this interval, in USD"
+  totalCost: Float
+}
+
 type WorkbenchWebhookMatches {
   "regex pattern to match"
   regex: String
@@ -3833,6 +4060,9 @@ type WorkbenchWebhook {
 
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatches
+
+  "mode-specific options for jobs created by this webhook"
+  modes: WorkbenchJobModes
 
   "user this webhook runs as"
   userId: ID
@@ -3863,6 +4093,9 @@ type WorkbenchChatbot {
 
   "optional prompt text applied when this chatbot runs"
   prompt: String
+
+  "mode-specific options for jobs created by this chatbot"
+  modes: WorkbenchJobModes
 
   "how the chatbot posts responses in the channel"
   messageBehavior: WorkbenchChatbotMessageBehavior!
@@ -3929,6 +4162,9 @@ type WorkbenchToolConfiguration {
 
   "elasticsearch connection (no secrets)"
   elastic: WorkbenchToolElasticConnection
+
+  "aws opensearch connection (no secrets)"
+  opensearch: WorkbenchToolOpensearchConnection
 
   "prometheus connection (no secrets)"
   prometheus: WorkbenchToolPrometheusConnection
@@ -4003,6 +4239,26 @@ type WorkbenchToolElasticConnection {
 
   "basic auth username"
   username: String!
+}
+
+type WorkbenchToolOpensearchConnection {
+  "aws opensearch endpoint"
+  host: String!
+
+  "opensearch index"
+  index: String!
+
+  "AWS access key id for SigV4 authentication"
+  awsAccessKeyId: String
+
+  "AWS region for SigV4 authentication"
+  awsRegion: String
+
+  "assumed role ARN when configured"
+  assumeRoleArn: String
+
+  "whether pod identity (IRSA\/Workload Identity) is used for AWS authentication"
+  usePodIdentity: Boolean
 }
 
 type WorkbenchToolPrometheusConnection {
@@ -5281,6 +5537,7 @@ enum AiProvider {
   AZURE
   BEDROCK
   VERTEX
+  OPENAI_COMPATIBLE
 }
 
 enum LogDriver {
@@ -5436,6 +5693,9 @@ input AiSettingsAttributes {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "whether to stream responses from LLM providers"
+  streaming: Boolean
+
   "ai provider to use with embeddings (for vector indexing)"
   embeddingProvider: AiProvider
 
@@ -5443,6 +5703,8 @@ input AiSettingsAttributes {
   logAnalysis: Boolean
 
   openai: OpenaiSettingsAttributes
+
+  openaiCompatible: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
 
@@ -5497,6 +5759,14 @@ input OpenaiSettingsAttributes {
 
   "OAuth2 client credentials against a token endpoint to obtain access tokens"
   tokenExchange: OpenaiTokenExchangeAttributes
+
+  "custom HTTP headers to include in OpenAI-compatible API requests"
+  headers: [OpenaiHeaderAttributes]
+}
+
+input OpenaiHeaderAttributes {
+  name: String!
+  value: String!
 }
 
 input OpenaiTokenExchangeAttributes {
@@ -5851,10 +6121,21 @@ type AiSettings {
   "ai provider to use with tool calls"
   toolProvider: AiProvider
 
+  "whether to stream responses from LLM providers"
+  streaming: Boolean
+
+  "ai provider to use with embeddings (for vector indexing)"
+  embeddingProvider: AiProvider
+
   "whether to enable log analysis in AI insights (turn off to save on log query costs)"
   logAnalysis: Boolean
 
+  "settings for vector-backed search"
+  vectorStore: VectorStoreSettings
+
   openai: OpenaiSettings
+
+  openaiCompatible: OpenaiSettings
 
   anthropic: AnthropicSettings
 
@@ -5865,6 +6146,11 @@ type AiSettings {
   bedrock: BedrockAiSettings
 
   vertex: VertexAiSettings
+}
+
+type VectorStoreSettings {
+  enabled: Boolean
+  store: VectorStore
 }
 
 type AiAnalysisRates {
@@ -5897,6 +6183,14 @@ type OpenaiSettings {
 
   "OAuth2 client credentials configured for token endpoint exchange"
   tokenExchange: OpenaiTokenExchange
+
+  "custom HTTP headers included in OpenAI-compatible API requests"
+  headers: [OpenaiHeader]
+}
+
+type OpenaiHeader {
+  name: String!
+  value: String!
 }
 
 "OAuth2 token endpoint client credentials for OpenAI-compatible APIs"
@@ -6118,6 +6412,11 @@ type FederatedCredential {
   user: User
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type AvailableModel {
+  provider: AiProvider!
+  model: String!
 }
 
 type ProjectConnection {
@@ -6612,6 +6911,7 @@ enum StackType {
   TERRAFORM
   ANSIBLE
   CUSTOM
+  TERRAGRUNT
 }
 
 enum StepStatus {
@@ -6728,6 +7028,9 @@ input StackConfigurationAttributes {
   "the terraform configuration for this stack"
   terraform: TerraformConfigurationAttributes
 
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfigurationAttributes
+
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
 
@@ -6738,6 +7041,9 @@ input StackConfigurationAttributes {
 input StackOverridesAttributes {
   "the terraform configuration for this stack"
   terraform: TerraformConfigurationAttributes
+
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfigurationAttributes
 }
 
 input StackHookAttributes {
@@ -6766,6 +7072,17 @@ input TerraformConfigurationAttributes {
 
   "whether to use the OpenTofu registry for provider and module sources"
   tofuRegistry: Boolean
+}
+
+input TerragruntConfigurationAttributes {
+  "equivalent to the -parallelism flag passed through to the underlying terraform\/tofu invocation"
+  parallelism: Int
+
+  "equivalent to the -refresh flag passed through to the underlying terraform\/tofu invocation"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -6943,6 +7260,7 @@ input CommandAttributes {
   cmd: String!
   args: [String]
   dir: String
+  approve: Boolean
 }
 
 input StackDefinitionAttributes {
@@ -7125,6 +7443,9 @@ type StateUrls {
 type StackOverrides {
   "the terraform configuration for this stack"
   terraform: TerraformConfiguration
+
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfiguration
 }
 
 "Urls for configuring terraform HTTP remote state"
@@ -7163,6 +7484,9 @@ type StackConfiguration {
 
   "the terraform configuration for this stack"
   terraform: TerraformConfiguration
+
+  "the terragrunt configuration for this stack"
+  terragrunt: TerragruntConfiguration
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfiguration
@@ -7224,6 +7548,17 @@ type TerraformConfiguration {
 
   "whether to use the OpenTofu registry for provider and module sources"
   tofuRegistry: Boolean
+}
+
+type TerragruntConfiguration {
+  "equivalent to the -parallelism flag passed through to the underlying terraform\/tofu invocation"
+  parallelism: Int
+
+  "equivalent to the -refresh flag passed through to the underlying terraform\/tofu invocation"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 type AnsibleConfiguration {
@@ -7515,6 +7850,9 @@ type StackCommand {
 
   "working directory for this command (not required)"
   dir: String
+
+  "whether this command requires approval before running"
+  approve: Boolean
 }
 
 type StackPolicyViolation {
@@ -12207,6 +12545,7 @@ enum ObserverGitTargetType {
 enum ObserverTargetOrder {
   SEMVER
   LATEST
+  RENOVATE
 }
 
 enum ObserverStatus {
@@ -12750,6 +13089,8 @@ input ObserverTargetAttributes {
   addon: ObserverAddonAttributes
 
   eksAddon: ObserverAddonAttributes
+
+  renovate: ObserverRenovateAttributes
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -12783,6 +13124,12 @@ input ObserverGitAttributes {
 input ObserverGitFilterAttributes {
   "a regex to filter the git repository tags for the observed value"
   regex: String
+}
+
+"Renovate regex versioning options for observer target ordering"
+input ObserverRenovateAttributes {
+  "whether prerelease matches captured by the renovate regex should be ignored"
+  ignoreUnstable: Boolean
 }
 
 "configuration for an observer action"
@@ -13334,6 +13681,8 @@ type PullRequest {
 
   creator: String
 
+  ref: String
+
   labels: [String]
 
   "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
@@ -13422,6 +13771,8 @@ type ObserverTarget {
   oci: ObserverOciRepo
 
   git: ObserverGitRepo
+
+  renovate: ObserverRenovate
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -13457,6 +13808,12 @@ type ObserverGitRepo {
 type ObserverGitFilter {
   "a regex to filter the git repository tags for the observed value"
   regex: String
+}
+
+"Renovate regex versioning options for observer target ordering"
+type ObserverRenovate {
+  "whether prerelease matches captured by the renovate regex should be ignored"
+  ignoreUnstable: Boolean
 }
 
 "configuration for an observer action"
@@ -13569,14 +13926,19 @@ type PrAutomationSearchItem {
 
   name: String!
 
-  "the description for this pr automation"
-  description: String
+  documentation: String
+
+  identifier: String
+
+  role: PrRole
 
   "an icon url to use for this pr automation"
   icon: String
 
   "a darkmode icon url to use for this pr automation"
   darkIcon: String
+
+  cluster: Cluster
 }
 
 type CatalogSearchItem {
@@ -13584,8 +13946,14 @@ type CatalogSearchItem {
 
   name: String!
 
-  "the documentation for this pr automation"
-  documentation: String
+  "the name of the author of this catalog"
+  author: String
+
+  "longform description for the purpose of this catalog"
+  description: String
+
+  "short category name used for browsing catalogs"
+  category: String
 
   "an icon url to use for this catalog"
   icon: String

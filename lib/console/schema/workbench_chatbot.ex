@@ -2,6 +2,7 @@ defmodule Console.Schema.WorkbenchChatbot do
   use Console.Schema.Base
   alias Console.Schema.{ChatConnection, PolicyBinding, User, Workbench}
   alias Console.Deployments.Policies.Rbac
+  alias Console.Schema.WorkbenchJob.Modes
 
   defenum MessageBehavior, reply: 0, message: 1
 
@@ -9,6 +10,8 @@ defmodule Console.Schema.WorkbenchChatbot do
     field :channel, :string
     field :prompt,  :string
     field :message_behavior, MessageBehavior, default: :reply
+
+    embeds_one :modes, Modes, on_replace: :update
 
     belongs_to :workbench,       Workbench
     belongs_to :chat_connection, ChatConnection
@@ -59,6 +62,7 @@ defmodule Console.Schema.WorkbenchChatbot do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:modes)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:chat_connection_id)
     |> foreign_key_constraint(:user_id)

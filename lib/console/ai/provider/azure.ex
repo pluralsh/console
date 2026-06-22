@@ -36,7 +36,7 @@ defmodule Console.AI.Azure do
   def completion(%__MODULE__{} = az, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("azure:#{select_model(az, opts[:client])}", az.stream, provider_options(az, az.model) ++ [tools: tools(opts)])
+    |> generate_text("azure:#{select_model(az, opts[:model], opts[:client])}", az.stream, base_opts(provider_options(az, az.model) ++ [tools: tools(opts)], opts))
     |> reqllm_result()
   end
 
@@ -47,7 +47,7 @@ defmodule Console.AI.Azure do
   def tool_call(%__MODULE__{} = az, messages, tools, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("azure:#{select_model(az, opts[:client])}", az.stream, provider_options(az, az.tool_model) ++ [tools: reqllm_tools(tools)])
+    |> generate_text("azure:#{select_model(az, opts[:model], opts[:client])}", az.stream, base_opts(provider_options(az, az.tool_model) ++ [tools: reqllm_tools(tools)], opts))
     |> reqllm_result()
     |> tool_calls()
   end

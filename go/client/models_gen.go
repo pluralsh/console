@@ -350,6 +350,8 @@ type AgentRun struct {
 	Repository string `json:"repository"`
 	// the branch this agent run is operating on (if not set, use default branch on clone)
 	Branch *string `json:"branch,omitempty"`
+	// the head branch this agent run has created for its pull request
+	HeadBranch *string `json:"headBranch,omitempty"`
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
 	// the mode of the agent run
@@ -364,12 +366,20 @@ type AgentRun struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// whether this run requires approval before continuing
+	Approval *bool `json:"approval,omitempty"`
+	// when this run was approved
+	ApprovedAt *string `json:"approvedAt,omitempty"`
+	// the agent run this run consumed
+	Consumed *string `json:"consumed,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
 	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the analysis of the agent run
 	Analysis *AgentAnalysis `json:"analysis,omitempty"`
+	// the skills available to this agent run
+	Skills []*AgentSkill `json:"skills,omitempty"`
 	// the todos of the agent run
 	Todos       []*AgentTodo `json:"todos,omitempty"`
 	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
@@ -380,6 +390,8 @@ type AgentRun struct {
 	Prompts []*AgentPrompt `json:"prompts,omitempty"`
 	// the messages this agent run has generated during its run
 	Messages []*AgentMessage `json:"messages,omitempty"`
+	// the upload bundle this agent run has generated
+	Upload *AgentRunUpload `json:"upload,omitempty"`
 	// the runtime this agent is using
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	// the user who initiated this agent run
@@ -397,6 +409,8 @@ type AgentRunAttributes struct {
 	Prompt string `json:"prompt"`
 	// the repository the agent will be working in
 	Repository string `json:"repository"`
+	// the branch this agent run should operate on (if not set, the repository default branch is used)
+	Branch *string `json:"branch,omitempty"`
 	// the mode of the agent run
 	Mode AgentRunMode `json:"mode"`
 	// the programming language used in the agent run
@@ -409,6 +423,8 @@ type AgentRunAttributes struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// whether this run requires approval before continuing
+	Approval *bool `json:"approval,omitempty"`
 }
 
 type AgentRunConnection struct {
@@ -456,10 +472,20 @@ type AgentRunStatusAttributes struct {
 	Error *string `json:"error,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *NamespacedName `json:"podReference,omitempty"`
+	// the head branch this agent run has created for its pull request
+	HeadBranch *string `json:"headBranch,omitempty"`
 	// whether babysit mode is enabled for this run
 	Babysit *bool `json:"babysit,omitempty"`
 	// interval in seconds between babysit checks for this run
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// whether this run requires approval before continuing
+	Approval *bool `json:"approval,omitempty"`
+	// when this run was approved
+	ApprovedAt *string `json:"approvedAt,omitempty"`
+	// the agent run this run consumed
+	Consumed *string `json:"consumed,omitempty"`
+	// the skills available to this agent run
+	Skills []*AgentSkillAttributes `json:"skills,omitempty"`
 }
 
 type AgentRunUpload struct {
@@ -595,6 +621,24 @@ type AgentSessionConnection struct {
 type AgentSessionEdge struct {
 	Node   *AgentSession `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type AgentSkill struct {
+	// the name of the skill
+	Name string `json:"name"`
+	// the description of the skill
+	Description *string `json:"description,omitempty"`
+	// the contents of the skill
+	Contents string `json:"contents"`
+}
+
+type AgentSkillAttributes struct {
+	// the name of the skill
+	Name string `json:"name"`
+	// the description of the skill
+	Description *string `json:"description,omitempty"`
+	// the contents of the skill
+	Contents string `json:"contents"`
 }
 
 type AgentTodo struct {
@@ -744,14 +788,21 @@ type AiSettings struct {
 	Provider      *AiProvider      `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to stream responses from LLM providers
+	Streaming *bool `json:"streaming,omitempty"`
+	// ai provider to use with embeddings (for vector indexing)
+	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis *bool                `json:"logAnalysis,omitempty"`
-	Openai      *OpenaiSettings      `json:"openai,omitempty"`
-	Anthropic   *AnthropicSettings   `json:"anthropic,omitempty"`
-	Ollama      *OllamaSettings      `json:"ollama,omitempty"`
-	Azure       *AzureOpenaiSettings `json:"azure,omitempty"`
-	Bedrock     *BedrockAiSettings   `json:"bedrock,omitempty"`
-	Vertex      *VertexAiSettings    `json:"vertex,omitempty"`
+	LogAnalysis *bool `json:"logAnalysis,omitempty"`
+	// settings for vector-backed search
+	VectorStore      *VectorStoreSettings `json:"vectorStore,omitempty"`
+	Openai           *OpenaiSettings      `json:"openai,omitempty"`
+	OpenaiCompatible *OpenaiSettings      `json:"openaiCompatible,omitempty"`
+	Anthropic        *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama           *OllamaSettings      `json:"ollama,omitempty"`
+	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock          *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex           *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -761,18 +812,21 @@ type AiSettingsAttributes struct {
 	Provider      *AiProvider              `json:"provider,omitempty"`
 	// ai provider to use with tool calls
 	ToolProvider *AiProvider `json:"toolProvider,omitempty"`
+	// whether to stream responses from LLM providers
+	Streaming *bool `json:"streaming,omitempty"`
 	// ai provider to use with embeddings (for vector indexing)
 	EmbeddingProvider *AiProvider `json:"embeddingProvider,omitempty"`
 	// whether to enable log analysis in AI insights (turn off to save on log query costs)
-	LogAnalysis *bool                        `json:"logAnalysis,omitempty"`
-	Openai      *OpenaiSettingsAttributes    `json:"openai,omitempty"`
-	Anthropic   *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
-	Ollama      *OllamaAttributes            `json:"ollama,omitempty"`
-	Azure       *AzureOpenaiAttributes       `json:"azure,omitempty"`
-	Bedrock     *BedrockAiAttributes         `json:"bedrock,omitempty"`
-	Vertex      *VertexAiAttributes          `json:"vertex,omitempty"`
-	VectorStore *VectorStoreAttributes       `json:"vectorStore,omitempty"`
-	Graph       *GraphStoreAttributes        `json:"graph,omitempty"`
+	LogAnalysis      *bool                        `json:"logAnalysis,omitempty"`
+	Openai           *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	OpenaiCompatible *OpenaiSettingsAttributes    `json:"openaiCompatible,omitempty"`
+	Anthropic        *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama           *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure            *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock          *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex           *VertexAiAttributes          `json:"vertex,omitempty"`
+	VectorStore      *VectorStoreAttributes       `json:"vectorStore,omitempty"`
+	Graph            *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
 // An individual alert raised from an observability provider or monitor
@@ -1058,6 +1112,11 @@ type AvailableFeatures struct {
 	Cd                 *bool `json:"cd,omitempty"`
 	UserManagement     *bool `json:"userManagement,omitempty"`
 	DatabaseManagement *bool `json:"databaseManagement,omitempty"`
+}
+
+type AvailableModel struct {
+	Provider AiProvider `json:"provider"`
+	Model    string     `json:"model"`
 }
 
 // aws node customizations
@@ -1415,8 +1474,12 @@ type CatalogEdge struct {
 type CatalogSearchItem struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
-	// the documentation for this pr automation
-	Documentation *string `json:"documentation,omitempty"`
+	// the name of the author of this catalog
+	Author *string `json:"author,omitempty"`
+	// longform description for the purpose of this catalog
+	Description *string `json:"description,omitempty"`
+	// short category name used for browsing catalogs
+	Category *string `json:"category,omitempty"`
 	// an icon url to use for this catalog
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this catalog
@@ -2567,9 +2630,10 @@ type ClusterVulnAggregate struct {
 }
 
 type CommandAttributes struct {
-	Cmd  string    `json:"cmd"`
-	Args []*string `json:"args,omitempty"`
-	Dir  *string   `json:"dir,omitempty"`
+	Cmd     string    `json:"cmd"`
+	Args    []*string `json:"args,omitempty"`
+	Dir     *string   `json:"dir,omitempty"`
+	Approve *bool     `json:"approve,omitempty"`
 }
 
 type CommitShaAttributes struct {
@@ -5575,6 +5639,18 @@ type ObserverPrAiActionAttributes struct {
 	Prompt string `json:"prompt"`
 }
 
+// Renovate regex versioning options for observer target ordering
+type ObserverRenovate struct {
+	// whether prerelease matches captured by the renovate regex should be ignored
+	IgnoreUnstable *bool `json:"ignoreUnstable,omitempty"`
+}
+
+// Renovate regex versioning options for observer target ordering
+type ObserverRenovateAttributes struct {
+	// whether prerelease matches captured by the renovate regex should be ignored
+	IgnoreUnstable *bool `json:"ignoreUnstable,omitempty"`
+}
+
 // Resets the current value of the observer
 type ObserverResetAttributes struct {
 	LastValue string `json:"lastValue"`
@@ -5589,24 +5665,26 @@ type ObserverTarget struct {
 	// in a larger release string.  The first capture group is the substring that is used for the value.
 	Format *string `json:"format,omitempty"`
 	// the order in which polled results are applied, defaults to SEMVER
-	Order ObserverTargetOrder `json:"order"`
-	Helm  *ObserverHelmRepo   `json:"helm,omitempty"`
-	Oci   *ObserverOciRepo    `json:"oci,omitempty"`
-	Git   *ObserverGitRepo    `json:"git,omitempty"`
+	Order    ObserverTargetOrder `json:"order"`
+	Helm     *ObserverHelmRepo   `json:"helm,omitempty"`
+	Oci      *ObserverOciRepo    `json:"oci,omitempty"`
+	Git      *ObserverGitRepo    `json:"git,omitempty"`
+	Renovate *ObserverRenovate   `json:"renovate,omitempty"`
 }
 
 // A spec for a target to poll
 type ObserverTargetAttributes struct {
 	Type *ObserverTargetType `json:"type,omitempty"`
 	// present for backwards compat
-	Target   *ObserverTargetType      `json:"target,omitempty"`
-	Format   *string                  `json:"format,omitempty"`
-	Order    ObserverTargetOrder      `json:"order"`
-	Helm     *ObserverHelmAttributes  `json:"helm,omitempty"`
-	Oci      *ObserverOciAttributes   `json:"oci,omitempty"`
-	Git      *ObserverGitAttributes   `json:"git,omitempty"`
-	Addon    *ObserverAddonAttributes `json:"addon,omitempty"`
-	EksAddon *ObserverAddonAttributes `json:"eksAddon,omitempty"`
+	Target   *ObserverTargetType         `json:"target,omitempty"`
+	Format   *string                     `json:"format,omitempty"`
+	Order    ObserverTargetOrder         `json:"order"`
+	Helm     *ObserverHelmAttributes     `json:"helm,omitempty"`
+	Oci      *ObserverOciAttributes      `json:"oci,omitempty"`
+	Git      *ObserverGitAttributes      `json:"git,omitempty"`
+	Addon    *ObserverAddonAttributes    `json:"addon,omitempty"`
+	EksAddon *ObserverAddonAttributes    `json:"eksAddon,omitempty"`
+	Renovate *ObserverRenovateAttributes `json:"renovate,omitempty"`
 }
 
 // A representation of a created OIDC provider client
@@ -5677,6 +5755,16 @@ type OllamaSettings struct {
 	URL string `json:"url"`
 }
 
+type OpenaiHeader struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type OpenaiHeaderAttributes struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 // OpenAI connection information
 type OpenaiSettings struct {
 	// the base url to use when querying an OpenAI compatible API, leave blank for OpenAI
@@ -5693,6 +5781,8 @@ type OpenaiSettings struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// OAuth2 client credentials configured for token endpoint exchange
 	TokenExchange *OpenaiTokenExchange `json:"tokenExchange,omitempty"`
+	// custom HTTP headers included in OpenAI-compatible API requests
+	Headers []*OpenaiHeader `json:"headers,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5709,6 +5799,8 @@ type OpenaiSettingsAttributes struct {
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 	// OAuth2 client credentials against a token endpoint to obtain access tokens
 	TokenExchange *OpenaiTokenExchangeAttributes `json:"tokenExchange,omitempty"`
+	// custom HTTP headers to include in OpenAI-compatible API requests
+	Headers []*OpenaiHeaderAttributes `json:"headers,omitempty"`
 }
 
 // OAuth2 token endpoint client credentials for OpenAI-compatible APIs
@@ -6535,14 +6627,16 @@ type PrAutomationEdge struct {
 }
 
 type PrAutomationSearchItem struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	// the description for this pr automation
-	Description *string `json:"description,omitempty"`
+	ID            string  `json:"id"`
+	Name          string  `json:"name"`
+	Documentation *string `json:"documentation,omitempty"`
+	Identifier    *string `json:"identifier,omitempty"`
+	Role          *PrRole `json:"role,omitempty"`
 	// an icon url to use for this pr automation
 	Icon *string `json:"icon,omitempty"`
 	// a darkmode icon url to use for this pr automation
-	DarkIcon *string `json:"darkIcon,omitempty"`
+	DarkIcon *string  `json:"darkIcon,omitempty"`
+	Cluster  *Cluster `json:"cluster,omitempty"`
 }
 
 // templates to apply in this pr
@@ -6990,6 +7084,7 @@ type PullRequest struct {
 	URL     string    `json:"url"`
 	Title   *string   `json:"title,omitempty"`
 	Creator *string   `json:"creator,omitempty"`
+	Ref     *string   `json:"ref,omitempty"`
 	Labels  []*string `json:"labels,omitempty"`
 	// the patch for this pr, if it is a patch.  This is in place of generating a full pr
 	Patch *string `json:"patch,omitempty"`
@@ -8527,6 +8622,8 @@ type StackCommand struct {
 	Args []*string `json:"args,omitempty"`
 	// working directory for this command (not required)
 	Dir *string `json:"dir,omitempty"`
+	// whether this command requires approval before running
+	Approve *bool `json:"approve,omitempty"`
 }
 
 type StackConfiguration struct {
@@ -8540,6 +8637,8 @@ type StackConfiguration struct {
 	Hooks []*StackHook `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8557,6 +8656,8 @@ type StackConfigurationAttributes struct {
 	Hooks []*StackHookAttributes `json:"hooks,omitempty"`
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8700,11 +8801,15 @@ type StackOutputAttributes struct {
 type StackOverrides struct {
 	// the terraform configuration for this stack
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
 }
 
 type StackOverridesAttributes struct {
 	// the terraform configuration for this stack
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
+	// the terragrunt configuration for this stack
+	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -9122,6 +9227,24 @@ type TerraformStateUrls struct {
 	Unlock *string `json:"unlock,omitempty"`
 }
 
+type TerragruntConfiguration struct {
+	// equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+}
+
+type TerragruntConfigurationAttributes struct {
+	// equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation
+	Parallelism *int64 `json:"parallelism,omitempty"`
+	// equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+}
+
 type ToolConfigAttributes struct {
 	CreatePr *CreatePrConfigAttributes `json:"createPr,omitempty"`
 }
@@ -9368,6 +9491,11 @@ type VectorStoreAttributes struct {
 	Store      *VectorStore                       `json:"store,omitempty"`
 	Elastic    *ElasticsearchConnectionAttributes `json:"elastic,omitempty"`
 	Opensearch *OpensearchConnectionAttributes    `json:"opensearch,omitempty"`
+}
+
+type VectorStoreSettings struct {
+	Enabled *bool        `json:"enabled,omitempty"`
+	Store   *VectorStore `json:"store,omitempty"`
 }
 
 // a shortform reference to an addon by version
@@ -9749,6 +9877,8 @@ type WorkbenchChatbot struct {
 	Channel string `json:"channel"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this chatbot
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// how the chatbot posts responses in the channel
 	MessageBehavior WorkbenchChatbotMessageBehavior `json:"messageBehavior"`
 	// user this chatbot runs as
@@ -9770,6 +9900,8 @@ type WorkbenchChatbotAttributes struct {
 	Channel *string `json:"channel,omitempty"`
 	// optional prompt text applied when this chatbot runs
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this chatbot
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// how the chatbot posts responses in the channel
 	MessageBehavior *WorkbenchChatbotMessageBehavior `json:"messageBehavior,omitempty"`
 	// user this chatbot runs as; must have read access to the workbench
@@ -9836,6 +9968,8 @@ type WorkbenchCron struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this cron
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// when the cron will next run
 	NextRunAt *string `json:"nextRunAt,omitempty"`
 	// when the cron last ran
@@ -9853,6 +9987,8 @@ type WorkbenchCronAttributes struct {
 	Crontab *string `json:"crontab,omitempty"`
 	// the prompt to run when the cron triggers
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this cron
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// user this cron runs as; must have read access to the workbench
 	UserID *string `json:"userId,omitempty"`
 }
@@ -9982,6 +10118,10 @@ type WorkbenchJob struct {
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// error message when the job failed
 	Error *string `json:"error,omitempty"`
+	// mode-specific options for this job
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+	// token and cost usage for this job
+	Usage *WorkbenchJobUsage `json:"usage,omitempty"`
 	// chatbot integration metadata for this job, when present
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
@@ -10030,9 +10170,11 @@ type WorkbenchJobActivity struct {
 	// the agent run that executed this activity
 	AgentRun *AgentRun `json:"agentRun,omitempty"`
 	// all agent runs associated with this activity (sideloadable)
-	AgentRuns  []*AgentRun `json:"agentRuns,omitempty"`
-	InsertedAt *string     `json:"insertedAt,omitempty"`
-	UpdatedAt  *string     `json:"updatedAt,omitempty"`
+	AgentRuns []*AgentRun `json:"agentRuns,omitempty"`
+	// the user who created this activity
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobActivityConnection struct {
@@ -10115,6 +10257,22 @@ type WorkbenchJobActivityTrace struct {
 type WorkbenchJobAttributes struct {
 	// the prompt for this job
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for this job
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
+}
+
+type WorkbenchJobCodingModes struct {
+	// whether babysit mode is enabled for coding agent runs
+	Babysit *bool `json:"babysit,omitempty"`
+	// whether coding agent runs require approval before continuing
+	Approval *bool `json:"approval,omitempty"`
+}
+
+type WorkbenchJobCodingModesAttributes struct {
+	// whether babysit mode is enabled for coding agent runs
+	Babysit *bool `json:"babysit,omitempty"`
+	// whether coding agent runs require approval before continuing
+	Approval *bool `json:"approval,omitempty"`
 }
 
 type WorkbenchJobConnection struct {
@@ -10130,6 +10288,38 @@ type WorkbenchJobDelta struct {
 type WorkbenchJobEdge struct {
 	Node   *WorkbenchJob `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type WorkbenchJobModel struct {
+	// the ai provider for this job
+	Provider *AiProvider `json:"provider,omitempty"`
+	// the model name for this job
+	Model *string `json:"model,omitempty"`
+}
+
+type WorkbenchJobModelAttributes struct {
+	// the ai provider for this job
+	Provider AiProvider `json:"provider"`
+	// the model name for this job
+	Model string `json:"model"`
+}
+
+type WorkbenchJobModes struct {
+	// whether planning mode is enabled for this job
+	Plan *bool `json:"plan,omitempty"`
+	// model override for this job
+	Model *WorkbenchJobModel `json:"model,omitempty"`
+	// coding mode options for this job
+	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
+}
+
+type WorkbenchJobModesAttributes struct {
+	// whether planning mode is enabled for this job
+	Plan *bool `json:"plan,omitempty"`
+	// model override for this job
+	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
+	// coding mode options for this job
+	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
 }
 
 type WorkbenchJobProgress struct {
@@ -10219,6 +10409,25 @@ type WorkbenchJobUpdateAttributes struct {
 	Result *WorkbenchResultAttributes `json:"result,omitempty"`
 }
 
+type WorkbenchJobUsage struct {
+	// input tokens consumed by this job
+	InputTokens *int64 `json:"inputTokens,omitempty"`
+	// output tokens produced by this job
+	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total tokens consumed by this job
+	TotalTokens *int64 `json:"totalTokens,omitempty"`
+	// cached input tokens used by this job
+	CachedTokens *int64 `json:"cachedTokens,omitempty"`
+	// reasoning tokens produced by this job
+	ReasoningTokens *int64 `json:"reasoningTokens,omitempty"`
+	// input token cost for this job
+	InputCost *float64 `json:"inputCost,omitempty"`
+	// output token cost for this job
+	OutputCost *float64 `json:"outputCost,omitempty"`
+	// total token cost for this job
+	TotalCost *float64 `json:"totalCost,omitempty"`
+}
+
 type WorkbenchMessageAttributes struct {
 	// the prompt for the message
 	Prompt string `json:"prompt"`
@@ -10263,6 +10472,8 @@ type WorkbenchPrompt struct {
 	Category string `json:"category"`
 	// the saved prompt text
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created from this prompt
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// the workbench this prompt belongs to
 	Workbench  *Workbench `json:"workbench,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -10276,6 +10487,8 @@ type WorkbenchPromptAttributes struct {
 	Category *string `json:"category,omitempty"`
 	// the saved prompt text
 	Prompt string `json:"prompt"`
+	// mode-specific options for jobs created from this prompt
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type WorkbenchPromptConnection struct {
@@ -10514,6 +10727,8 @@ type WorkbenchToolConfiguration struct {
 	HTTP *WorkbenchToolHTTPConfiguration `json:"http,omitempty"`
 	// elasticsearch connection (no secrets)
 	Elastic *WorkbenchToolElasticConnection `json:"elastic,omitempty"`
+	// aws opensearch connection (no secrets)
+	Opensearch *WorkbenchToolOpensearchConnection `json:"opensearch,omitempty"`
 	// prometheus connection (no secrets)
 	Prometheus *WorkbenchToolPrometheusConnection `json:"prometheus,omitempty"`
 	// loki connection (no secrets)
@@ -10563,6 +10778,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	HTTP *WorkbenchToolHTTPConfigurationAttributes `json:"http,omitempty"`
 	// elasticsearch connection (logs)
 	Elastic *WorkbenchToolElasticConnectionAttributes `json:"elastic,omitempty"`
+	// aws opensearch connection (logs)
+	Opensearch *WorkbenchToolOpensearchConnectionAttributes `json:"opensearch,omitempty"`
 	// prometheus connection (metrics)
 	Prometheus *WorkbenchToolPrometheusConnectionAttributes `json:"prometheus,omitempty"`
 	// loki connection (logs)
@@ -10797,6 +11014,38 @@ type WorkbenchToolLokiConnectionAttributes struct {
 	TenantID *string `json:"tenantId,omitempty"`
 }
 
+type WorkbenchToolOpensearchConnection struct {
+	// aws opensearch endpoint
+	Host string `json:"host"`
+	// opensearch index
+	Index string `json:"index"`
+	// AWS access key id for SigV4 authentication
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS region for SigV4 authentication
+	AWSRegion *string `json:"awsRegion,omitempty"`
+	// assumed role ARN when configured
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+	// whether pod identity (IRSA/Workload Identity) is used for AWS authentication
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
+}
+
+type WorkbenchToolOpensearchConnectionAttributes struct {
+	// aws opensearch endpoint
+	Host string `json:"host"`
+	// opensearch index
+	Index string `json:"index"`
+	// AWS access key id for SigV4 authentication
+	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+	// AWS secret access key for SigV4 authentication
+	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
+	// AWS region for SigV4 authentication
+	AWSRegion *string `json:"awsRegion,omitempty"`
+	// optional IAM role ARN to assume before signing OpenSearch requests
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+	// whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
+}
+
 type WorkbenchToolPagerdutyConnection struct {
 	// PagerDuty REST API base URL (API token never exposed)
 	URL string `json:"url"`
@@ -10930,6 +11179,19 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	TenantID *string `json:"tenantId,omitempty"`
 }
 
+type WorkbenchUsageTimeseries struct {
+	// UTC timestamp for this data point
+	Timestamp *string `json:"timestamp,omitempty"`
+	// the workbench this usage data is associated with
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// number of input tokens consumed during this interval
+	InputTokens *int64 `json:"inputTokens,omitempty"`
+	// number of output tokens produced during this interval
+	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total cost for this interval, in USD
+	TotalCost *float64 `json:"totalCost,omitempty"`
+}
+
 type WorkbenchWebhook struct {
 	// the id of the webhook
 	ID string `json:"id"`
@@ -10941,6 +11203,8 @@ type WorkbenchWebhook struct {
 	Priority *int64 `json:"priority,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
+	// mode-specific options for jobs created by this webhook
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// user this webhook runs as
 	UserID *string `json:"userId,omitempty"`
 	// the workbench this webhook belongs to
@@ -10966,6 +11230,8 @@ type WorkbenchWebhookAttributes struct {
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 	// optional prompt text applied when this webhook matches
 	Prompt *string `json:"prompt,omitempty"`
+	// mode-specific options for jobs created by this webhook
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// higher values are preferred when multiple webhooks match the same payload
 	Priority *int64 `json:"priority,omitempty"`
 	// user this webhook runs as; must have read access to the workbench
@@ -11210,12 +11476,13 @@ func (e AgentRunMode) MarshalJSON() ([]byte, error) {
 type AgentRunStatus string
 
 const (
-	AgentRunStatusPending     AgentRunStatus = "PENDING"
-	AgentRunStatusRunning     AgentRunStatus = "RUNNING"
-	AgentRunStatusSuccessful  AgentRunStatus = "SUCCESSFUL"
-	AgentRunStatusFailed      AgentRunStatus = "FAILED"
-	AgentRunStatusCancelled   AgentRunStatus = "CANCELLED"
-	AgentRunStatusBabysitting AgentRunStatus = "BABYSITTING"
+	AgentRunStatusPending         AgentRunStatus = "PENDING"
+	AgentRunStatusRunning         AgentRunStatus = "RUNNING"
+	AgentRunStatusSuccessful      AgentRunStatus = "SUCCESSFUL"
+	AgentRunStatusFailed          AgentRunStatus = "FAILED"
+	AgentRunStatusCancelled       AgentRunStatus = "CANCELLED"
+	AgentRunStatusBabysitting     AgentRunStatus = "BABYSITTING"
+	AgentRunStatusPendingApproval AgentRunStatus = "PENDING_APPROVAL"
 )
 
 var AllAgentRunStatus = []AgentRunStatus{
@@ -11225,11 +11492,12 @@ var AllAgentRunStatus = []AgentRunStatus{
 	AgentRunStatusFailed,
 	AgentRunStatusCancelled,
 	AgentRunStatusBabysitting,
+	AgentRunStatusPendingApproval,
 }
 
 func (e AgentRunStatus) IsValid() bool {
 	switch e {
-	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled, AgentRunStatusBabysitting:
+	case AgentRunStatusPending, AgentRunStatusRunning, AgentRunStatusSuccessful, AgentRunStatusFailed, AgentRunStatusCancelled, AgentRunStatusBabysitting, AgentRunStatusPendingApproval:
 		return true
 	}
 	return false
@@ -11401,12 +11669,13 @@ func (e AgentSessionType) MarshalJSON() ([]byte, error) {
 type AiProvider string
 
 const (
-	AiProviderOpenai    AiProvider = "OPENAI"
-	AiProviderAnthropic AiProvider = "ANTHROPIC"
-	AiProviderOllama    AiProvider = "OLLAMA"
-	AiProviderAzure     AiProvider = "AZURE"
-	AiProviderBedrock   AiProvider = "BEDROCK"
-	AiProviderVertex    AiProvider = "VERTEX"
+	AiProviderOpenai           AiProvider = "OPENAI"
+	AiProviderAnthropic        AiProvider = "ANTHROPIC"
+	AiProviderOllama           AiProvider = "OLLAMA"
+	AiProviderAzure            AiProvider = "AZURE"
+	AiProviderBedrock          AiProvider = "BEDROCK"
+	AiProviderVertex           AiProvider = "VERTEX"
+	AiProviderOpenaiCompatible AiProvider = "OPENAI_COMPATIBLE"
 )
 
 var AllAiProvider = []AiProvider{
@@ -11416,11 +11685,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderAzure,
 	AiProviderBedrock,
 	AiProviderVertex,
+	AiProviderOpenaiCompatible,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible:
 		return true
 	}
 	return false
@@ -14393,18 +14663,20 @@ func (e ObserverStatus) MarshalJSON() ([]byte, error) {
 type ObserverTargetOrder string
 
 const (
-	ObserverTargetOrderSemver ObserverTargetOrder = "SEMVER"
-	ObserverTargetOrderLatest ObserverTargetOrder = "LATEST"
+	ObserverTargetOrderSemver   ObserverTargetOrder = "SEMVER"
+	ObserverTargetOrderLatest   ObserverTargetOrder = "LATEST"
+	ObserverTargetOrderRenovate ObserverTargetOrder = "RENOVATE"
 )
 
 var AllObserverTargetOrder = []ObserverTargetOrder{
 	ObserverTargetOrderSemver,
 	ObserverTargetOrderLatest,
+	ObserverTargetOrderRenovate,
 }
 
 func (e ObserverTargetOrder) IsValid() bool {
 	switch e {
-	case ObserverTargetOrderSemver, ObserverTargetOrderLatest:
+	case ObserverTargetOrderSemver, ObserverTargetOrderLatest, ObserverTargetOrderRenovate:
 		return true
 	}
 	return false
@@ -16202,20 +16474,22 @@ func (e StackStatus) MarshalJSON() ([]byte, error) {
 type StackType string
 
 const (
-	StackTypeTerraform StackType = "TERRAFORM"
-	StackTypeAnsible   StackType = "ANSIBLE"
-	StackTypeCustom    StackType = "CUSTOM"
+	StackTypeTerraform  StackType = "TERRAFORM"
+	StackTypeAnsible    StackType = "ANSIBLE"
+	StackTypeCustom     StackType = "CUSTOM"
+	StackTypeTerragrunt StackType = "TERRAGRUNT"
 )
 
 var AllStackType = []StackType{
 	StackTypeTerraform,
 	StackTypeAnsible,
 	StackTypeCustom,
+	StackTypeTerragrunt,
 }
 
 func (e StackType) IsValid() bool {
 	switch e {
-	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom:
+	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom, StackTypeTerragrunt:
 		return true
 	}
 	return false
@@ -17447,6 +17721,7 @@ const (
 	WorkbenchToolTypeBitbucketDatacenter WorkbenchToolType = "BITBUCKET_DATACENTER"
 	WorkbenchToolTypeAzureDevops         WorkbenchToolType = "AZURE_DEVOPS"
 	WorkbenchToolTypePagerduty           WorkbenchToolType = "PAGERDUTY"
+	WorkbenchToolTypeOpensearch          WorkbenchToolType = "OPENSEARCH"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17475,11 +17750,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeBitbucketDatacenter,
 	WorkbenchToolTypeAzureDevops,
 	WorkbenchToolTypePagerduty,
+	WorkbenchToolTypeOpensearch,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch:
 		return true
 	}
 	return false

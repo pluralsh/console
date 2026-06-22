@@ -82,11 +82,10 @@ function NetworkGraphInternal({
 
   const { updateEdge } = useReactFlow()
 
-  const { data: namespacesData, error: namespacesError } =
-    useClusterNamespacesQuery({
-      variables: { clusterId },
-      skip: !enableNamespaceFilter,
-    })
+  const { data: namespacesData } = useClusterNamespacesQuery({
+    variables: { clusterId },
+    skip: !enableNamespaceFilter,
+  })
   const namespaces =
     namespacesData?.namespaces
       ?.filter(isNonNullable)
@@ -129,7 +128,7 @@ function NetworkGraphInternal({
           startIcon={<SearchIcon color="icon-light" />}
           flex={1}
         />
-        {enableNamespaceFilter && !namespacesError && (
+        {enableNamespaceFilter && (
           <NamespaceFilter
             namespaces={namespaces}
             namespace={namespace ?? ''}

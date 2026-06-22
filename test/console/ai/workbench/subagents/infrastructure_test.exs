@@ -59,8 +59,45 @@ defmodule Console.AI.Workbench.Subagents.InfrastructureTest do
         ]}
       end)
 
-      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
-                  |> Repo.preload(:tools)
+      workbench =
+        insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
+        |> Repo.preload(:tools)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :infrastructure)
+
+      result = Subagents.Infrastructure.run(activity, job, Environment.new(job, workbench.tools, []))
+
+      assert result[:status] == :successful
+      assert result[:result][:output] == "complete"
+    end
+
+    test "does not expose vector search tools when vector store is disabled" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{enabled: false},
+        }
+      )
+
+      expect(Provider, :completion, fn _, opts ->
+        %{enabled: %{tool_names: tool_names}} =
+          Keyword.fetch!(opts, :plural)
+          |> Enum.find(&match?(%Console.AI.Tools.ToolSearch{}, &1))
+
+        refute "__plrl__service_search" in tool_names
+        refute "__plrl__stack_resource_search" in tool_names
+
+        {:ok, "complete", [
+          %Tool{name: "subagent_result", arguments: %{"output" => "complete"}}
+        ]}
+      end)
+
+      workbench =
+        insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
+        |> Repo.preload(:tools)
       job = insert(:workbench_job, workbench: workbench)
       activity = insert(:workbench_job_activity, workbench_job: job, type: :infrastructure)
 

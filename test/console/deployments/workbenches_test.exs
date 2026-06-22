@@ -6,6 +6,17 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.Deployments.Workbenches
   alias Console.Schema.{WorkbenchJob}
 
+  @usage %{
+    input_tokens: 100,
+    output_tokens: 25,
+    total_tokens: 125,
+    cached_tokens: 10,
+    reasoning_tokens: 5,
+    input_cost: 0.01,
+    output_cost: 0.02,
+    total_cost: 0.03
+  }
+
   describe "create_workbench/2" do
     test "project writers can create a workbench" do
       user = insert(:user)
@@ -218,33 +229,131 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_tool/2" do
-    test "project writers can create a tool" do
+    test "project writers can create each tool type with a likely configuration" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
 
-      {:ok, tool} = Workbenches.create_tool(%{
-        name: "my_http_tool",
-        tool: :http,
-        project_id: project.id,
-        configuration: %{
-          http: %{
-            url: "https://example.com",
-            method: :post,
-            headers: [],
-            body: "{}",
-            input_schema: %{
-              "type" => "object",
-              "properties" => %{},
-              "required" => []
-            }
-          }
-        }
-      }, user)
+      cases = [
+        {:http, [configuration: %{http: %{
+          url: "https://example.com",
+          method: :post,
+          headers: [],
+          body: "{}",
+          input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+        }}], [:integration]},
+        {:elastic, [configuration: %{elastic: %{
+          url: "https://elastic.example.com",
+          username: "elastic",
+          password: "elastic-password",
+          index: "logs-*"
+        }}], [:logs]},
+        {:opensearch, [configuration: %{opensearch: %{
+          host: "https://opensearch.example.com",
+          index: "logs-*",
+          use_pod_identity: true
+        }}], [:logs]},
+        {:datadog, [configuration: %{datadog: %{
+          site: "datadoghq.com",
+          api_key: "datadog-api-key",
+          app_key: "datadog-app-key"
+        }}], [:metrics, :logs]},
+        {:prometheus, [configuration: %{prometheus: %{
+          url: "https://prometheus.example.com",
+          token: "prometheus-bearer-token"
+        }}], [:metrics]},
+        {:loki, [configuration: %{loki: %{
+          url: "https://loki.example.com",
+          token: "loki-bearer-token"
+        }}], [:logs]},
+        {:tempo, [configuration: %{tempo: %{
+          url: "https://tempo.example.com",
+          token: "tempo-bearer-token"
+        }}], [:traces]},
+        {:jaeger, [configuration: %{jaeger: %{
+          url: "https://jaeger.example.com",
+          token: "jaeger-bearer-token"
+        }}], [:traces]},
+        {:splunk, [configuration: %{splunk: %{
+          url: "https://splunk.example.com",
+          token: "splunk-token"
+        }}], [:logs]},
+        {:dynatrace, [configuration: %{dynatrace: %{
+          url: "https://dynatrace.example.com",
+          platform_token: "dynatrace-platform-token"
+        }}], [:metrics, :logs, :traces]},
+        {:cloudwatch, [configuration: %{cloudwatch: %{
+          region: "us-east-1",
+          log_group_names: ["/aws/eks/test"]
+        }}], [:metrics, :logs]},
+        {:azure, [configuration: %{azure: %{
+          subscription_id: "subscription-id",
+          tenant_id: "tenant-id",
+          client_id: "client-id",
+          client_secret: "client-secret",
+          prometheus_url: "https://prometheus.monitor.azure.com"
+        }}], [:metrics, :logs]},
+        {:sentry, [configuration: %{sentry: %{
+          url: "https://sentry.example.com",
+          access_token: "sentry-access-token"
+        }}], [:error_tracking]},
+        {:linear, [configuration: %{linear: %{
+          access_token: "linear-access-token"
+        }}], [:ticketing]},
+        {:slack, [configuration: %{slack: %{
+          bot_token: "xoxb-slack-bot-token"
+        }}], [:chat]},
+        {:pagerduty, [configuration: %{pagerduty: %{
+          api_token: "pagerduty-api-token"
+        }}], [:integration]},
+        {:teams, [configuration: %{teams: %{
+          client_id: "teams-client-id",
+          client_secret: "teams-client-secret",
+          tenant_id: "teams-tenant-id"
+        }}], [:chat]},
+        {:atlassian, [configuration: %{atlassian: %{
+          email: "jira@example.com",
+          api_token: "atlassian-api-token"
+        }}], [:ticketing]},
+        {:exa, [configuration: %{exa: %{
+          api_key: "exa-api-key"
+        }}], [:search]},
+        {:github, [configuration: %{github: %{
+          url: "https://api.github.com",
+          access_token: "github-access-token"
+        }}], [:scm]},
+        {:gitlab, [configuration: %{gitlab: %{
+          url: "https://gitlab.com",
+          token: "gitlab-token"
+        }}], [:scm]},
+        {:bitbucket, [configuration: %{bitbucket: %{
+          url: "https://api.bitbucket.org/2.0",
+          token: "bitbucket-token"
+        }}], [:scm]},
+        {:bitbucket_datacenter, [configuration: %{bitbucket_datacenter: %{
+          url: "https://bitbucket.example.com",
+          token: "bitbucket-datacenter-token"
+        }}], [:scm]},
+        {:azure_devops, [configuration: %{azure_devops: %{
+          url: "https://dev.azure.com/plural",
+          token: "azure-devops-token"
+        }}], [:scm]},
+        {:cloud, [cloud_connection_id: insert(:cloud_connection).id], [:infrastructure]},
+        {:mcp, [mcp_server_id: insert(:mcp_server, project: project).id], [:integration]}
+      ]
 
-      assert tool.project_id == project.id
-      assert tool.name == "my_http_tool"
-      assert tool.tool == :http
-      assert_receive {:event, %PubSub.WorkbenchToolCreated{item: ^tool}}
+      for {tool_type, attrs, categories} <- cases do
+        {:ok, tool} =
+          attrs
+          |> Map.new()
+          |> Map.merge(%{name: "#{tool_type}_tool", tool: tool_type, project_id: project.id})
+          |> Workbenches.create_tool(user)
+
+        assert tool.project_id == project.id
+        assert tool.name == "#{tool_type}_tool"
+        assert tool.tool == tool_type
+        assert tool.categories == categories
+        assert_receive {:event, %PubSub.WorkbenchToolCreated{item: ^tool}}
+      end
     end
 
     test "project readers cannot create a tool" do
@@ -544,12 +653,38 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert refetch(activity).status == :cancelled
       assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
     end
+
+    test "persists usage when provided" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, paused} = Workbenches.pause_job(job, @usage)
+
+      assert paused.status == :paused
+      assert_usage(paused.usage, @usage)
+      assert_usage(refetch(job).usage, @usage)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
+    end
+  end
+
+  describe "save_usage/2" do
+    test "persists token and cost usage for a job" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, updated} = Workbenches.save_usage(job, @usage)
+
+      assert updated.id == job.id
+      assert updated.status == :running
+      assert_usage(updated.usage, @usage)
+      assert_usage(refetch(job).usage, @usage)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^updated}}
+    end
   end
 
   describe "create_message/3" do
     test "job owner can create a user message for their job" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench)
 
       {:ok, activity} =
         Workbenches.create_message(%{prompt: "follow-up from user"}, job.id, user)
@@ -558,6 +693,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "follow-up from user"
       assert activity.type == :user
       assert activity.status == :successful
+      assert activity.user_id == user.id
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
 
       assert refetch(job).status == :pending
@@ -565,7 +701,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
     test "job owner can create a message when passing the job struct" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench)
 
       {:ok, activity} =
         Workbenches.create_message(%{prompt: "via struct"}, job, user)
@@ -574,19 +711,41 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "via struct"
     end
 
-    test "another user cannot create messages for someone else's job" do
+    test "user with workbench read access can create messages for someone else's job" do
+      owner = insert(:user)
+      reader = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}, %{user_id: reader.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench)
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "reader follow-up"}, job.id, reader)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "reader follow-up"
+      assert activity.user_id == reader.id
+      assert refetch(job).user_id == reader.id
+    end
+
+    test "user without workbench read access cannot create messages for someone else's job" do
       owner = insert(:user)
       other = insert(:user)
-      job = insert(:workbench_job, user: owner)
+      workbench = insert(:workbench, read_bindings: [%{user_id: owner.id}])
+      job = insert(:workbench_job, user: owner, workbench: workbench)
 
-      {:error, _} = Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
+      {:error, "forbidden"} = Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
 
       refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
     end
 
     test "creates a message when the job is idle" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user, status: :successful)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
 
       assert WorkbenchJob.idle?(job)
 
@@ -600,7 +759,8 @@ defmodule Console.Deployments.WorkbenchesTest do
 
     test "returns an error when the job is active (not idle)" do
       user = insert(:user)
-      job = insert(:workbench_job, user: user, status: :running)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
 
       refute WorkbenchJob.idle?(job)
 
@@ -869,6 +1029,30 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert failed.completed_at
       assert failed.error == "Something went wrong."
     end
+
+    test "persists usage when provided" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, failed} = Workbenches.fail_job("Something went wrong.", job, @usage)
+
+      assert failed.status == :failed
+      assert failed.completed_at
+      assert failed.error == "Something went wrong."
+      assert_usage(failed.usage, @usage)
+      assert_usage(refetch(job).usage, @usage)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^failed}}
+    end
+  end
+
+  defp assert_usage(usage, expected) do
+    assert usage.input_tokens == expected.input_tokens
+    assert usage.output_tokens == expected.output_tokens
+    assert usage.total_tokens == expected.total_tokens
+    assert usage.cached_tokens == expected.cached_tokens
+    assert usage.reasoning_tokens == expected.reasoning_tokens
+    assert usage.input_cost == expected.input_cost
+    assert usage.output_cost == expected.output_cost
+    assert usage.total_cost == expected.total_cost
   end
 
   describe "create_workbench_cron/3" do

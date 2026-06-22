@@ -30,6 +30,8 @@ defmodule Console.OpenAPI.AI.AgentRun do
       language_version: string(description: "Specific version of the programming language to use"),
       error: string(description: "Error message if the agent run failed"),
       shared: boolean(description: "Whether this agent run is shared publicly"),
+      approval: boolean(description: "Whether this agent run requires approval before continuing"),
+      approved_at: datetime(description: "When this agent run was approved"),
       runtime_id: string(description: "ID of the runtime executing this agent run"),
       user_id: string(description: "ID of the user who initiated this agent run"),
       flow_id: string(description: "ID of the flow this agent run is associated with, if any"),
@@ -53,9 +55,11 @@ defmodule Console.OpenAPI.AI.AgentRunInput do
       runtime_id: string(description: "The runtime ID to execute the agent run on"),
       prompt: string(description: "The prompt to give to the agent describing the task to perform"),
       repository: string(description: "The git repository URL the agent will work on (https or ssh format)"),
+      branch: string(description: "The branch this agent run should operate on (if not set, the repository default branch is used)"),
       mode: ecto_enum(Console.Schema.AgentRun.Mode, description: "Mode of the agent run (analyze for read-only, write for modifications)"),
       flow_id: string(description: "Optional flow ID to associate this agent run with"),
       shared: boolean(description: "Whether to share this agent run publicly"),
+      approval: boolean(description: "Whether this agent run requires approval before continuing"),
     },
     required: [:prompt, :repository, :mode, :runtime_id]
   }

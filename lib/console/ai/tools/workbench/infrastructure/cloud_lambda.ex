@@ -34,7 +34,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudLambda do
     with {:ok, client} <- Client.connect(),
          {:ok, json_payload} <- payload_json(payload_json),
          input = %InvokeLambdaInput{connection: to_pb(connection), identifier: identifier, payload_json: json_payload},
-         {:ok, %InvokeLambdaOutput{} = output} <- Stub.invoke_lambda(client, input),
+         {:ok, %InvokeLambdaOutput{} = output} <- Stub.invoke_lambda(client, input, Client.cloud_query_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
       {:ok, %{result: output.result, error: output.error, content: content}}
     end

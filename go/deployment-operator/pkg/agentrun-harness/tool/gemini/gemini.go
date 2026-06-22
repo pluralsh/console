@@ -35,6 +35,9 @@ type Gemini struct {
 
 	// model used to generate code.
 	model Model
+
+	// sessionID is the latest native Gemini session identifier observed in stream events.
+	sessionID string
 }
 
 func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
@@ -42,7 +45,7 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 		return false
 	}
 
-	env := []string{fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey), fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true")}
+	env := in.env()
 	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
 		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))
 	}
@@ -79,6 +82,7 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 			in.Config.ErrorChan <- err
 			return
 		}
+		in.recordSessionID(line, event.Type)
 
 		if err := event.OnMessage(line, in.onMessage); err != nil {
 			klog.ErrorS(err, "failed to process Gemini stream event", "line", string(line))
@@ -104,7 +108,7 @@ func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
 	}
 
-	env := []string{fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey), fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true")}
+	env := in.env()
 	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
 		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))
 	}
@@ -131,6 +135,7 @@ func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 			klog.ErrorS(err, "failed to unmarshal Gemini stream event (analysis follow-up)", "line", line)
 			return
 		}
+		in.recordSessionID(line, event.Type)
 
 		if err := event.OnMessage(line, in.onMessage); err != nil {
 			klog.ErrorS(err, "failed to process Gemini stream event (analysis follow-up)", "line", string(line))
@@ -152,7 +157,7 @@ func (in *Gemini) Run(ctx context.Context, options ...exec.Option) {
 }
 
 func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
-	env := []string{fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey), fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true")}
+	env := in.env()
 	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
 		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))
 	}
@@ -192,6 +197,7 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 			in.Config.ErrorChan <- err
 			return
 		}
+		in.recordSessionID(line, event.Type)
 
 		if err := event.OnMessage(line, in.onMessage); err != nil {
 			klog.ErrorS(err, "failed to process Gemini stream event", "line", string(line))
@@ -255,7 +261,30 @@ func (in *Gemini) Configure(_, _ string) error {
 }
 
 func (in *Gemini) settingsPath() string {
-	return path.Join(in.Config.WorkDir, ".gemini", SettingsFileName)
+	return path.Join(in.providerPath(), SettingsFileName)
+}
+
+func (in *Gemini) providerPath() string {
+	return path.Join(in.Config.WorkDir, ".gemini")
+}
+
+func (in *Gemini) env() []string {
+	return []string{
+		fmt.Sprintf("GEMINI_API_KEY=%s", in.apiKey),
+		fmt.Sprintf("GEMINI_CLI_TRUST_WORKSPACE=%s", "true"),
+		fmt.Sprintf("GEMINI_CLI_HOME=%s", in.Config.WorkDir),
+	}
+}
+
+func (in *Gemini) recordSessionID(line []byte, eventType events.EventType) {
+	if eventType != events.EventTypeInit {
+		return
+	}
+	initEvent := &events.InitEvent{}
+	if err := json.Unmarshal(line, initEvent); err != nil || initEvent.SessionID == "" {
+		return
+	}
+	in.sessionID = initEvent.SessionID
 }
 
 func (in *Gemini) OnMessage(f func(message *console.AgentMessageAttributes)) {

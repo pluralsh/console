@@ -15,6 +15,42 @@ defmodule Console.Schema.WorkbenchJob do
   }
   alias Console.Deployments.Policies.Rbac
 
+  defmodule Modes do
+    use Console.Schema.Base
+    alias Console.Schema.DeploymentSettings.AIProvider
+
+    embedded_schema do
+      embeds_one :model, Model, on_replace: :update do
+        field :provider, AIProvider
+        field :model,    :string
+      end
+
+      field :plan, :boolean
+      embeds_one :coding, Coding, on_replace: :update do
+        field :babysit,  :boolean
+        field :approval, :boolean
+      end
+    end
+
+    def changeset(model, attrs) do
+      model
+      |> cast(attrs, [:plan])
+      |> cast_embed(:model, with: &model_changeset/2)
+      |> cast_embed(:coding, with: &coding_changeset/2)
+    end
+
+    defp model_changeset(model, attrs) do
+      model
+      |> cast(attrs, [:provider, :model])
+      |> validate_required([:provider, :model])
+    end
+
+    defp coding_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(babysit approval)a)
+    end
+  end
+
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, paused: 5
   defenum Type, job: 0, skill: 1
 
@@ -26,6 +62,19 @@ defmodule Console.Schema.WorkbenchJob do
 
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
+
+    embeds_one :modes, Modes, on_replace: :update
+
+    embeds_one :usage, Usage, on_replace: :update do
+      field :input_tokens,     :integer
+      field :output_tokens,    :integer
+      field :total_tokens,     :integer
+      field :cached_tokens,    :integer
+      field :reasoning_tokens, :integer
+      field :input_cost,       :float
+      field :output_cost,      :float
+      field :total_cost,       :float
+    end
 
     belongs_to :workbench,      Workbench
     belongs_to :user,           User
@@ -79,6 +128,41 @@ defmodule Console.Schema.WorkbenchJob do
       join: w in assoc(j, :workbench),
       join: fb in assoc(w, :flows_workbenches),
       where: fb.flow_id == ^flow_id
+    )
+  end
+
+  def workbench_usage(query \\ Workbench, period) do
+    from(w in query,
+      join: r in subquery(avg_workbench_usage(query, period)),
+      on: w.id == r.workbench_id,
+      select: %{
+        workbench: w,
+        timestamp: r.timestamp,
+        input_tokens: r.input_tokens,
+        output_tokens: r.output_tokens,
+        total_cost: r.total_cost
+      },
+      order_by: [asc: r.timestamp]
+    )
+  end
+
+  defp avg_workbench_usage(query, period) do
+    period = normalize_period(period)
+    {lookback_value, lookback_unit} = lookback_window(period)
+
+    from(j in __MODULE__,
+      join: w in subquery(query),
+        on: w.id == j.workbench_id,
+      where: j.inserted_at >= ago(^lookback_value, ^lookback_unit),
+      group_by: [w.id, 2],
+      select: %{
+        workbench_id: w.id,
+        timestamp: fragment("date_trunc(?, ?) at time zone 'UTC'", ^period, j.inserted_at),
+        input_tokens: fragment("sum(coalesce((?->>'input_tokens')::integer, 0))", j.usage),
+        output_tokens: fragment("sum(coalesce((?->>'output_tokens')::integer, 0))", j.usage),
+        total_cost: fragment("sum(coalesce((?->>'total_cost')::double precision, 0.0))", j.usage)
+      },
+      order_by: [asc: 2]
     )
   end
 
@@ -148,6 +232,8 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, @valid)
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
+    |> cast_embed(:modes)
+    |> cast_embed(:usage, with: &usage_changeset/2)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
@@ -161,6 +247,20 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, [])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
+  end
+
+  defp usage_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(
+      input_tokens
+      output_tokens
+      total_tokens
+      cached_tokens
+      reasoning_tokens
+      input_cost
+      output_cost
+      total_cost
+    )a)
   end
 end
 

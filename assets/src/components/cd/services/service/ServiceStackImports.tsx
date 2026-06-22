@@ -11,8 +11,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { StackMinimalFragment } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useServiceContext } from './ServiceDetailsContext'
-import { capitalize } from 'lodash'
 import { StackStatusChip } from 'components/stacks/common/StackStatusChip'
+import { stackTypeLabel } from 'components/stacks/common/stackTypeUtils'
 import { Link } from 'react-router-dom'
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
 
@@ -42,7 +42,7 @@ const columns = [
     header: 'Name',
     meta: { gridTemplate: '1fr' },
   }),
-  columnHelper.accessor((stack) => capitalize(stack.type), {
+  columnHelper.accessor((stack) => stackTypeLabel(stack.type), {
     id: 'type',
     header: 'Type',
     meta: { gridTemplate: '1fr' },

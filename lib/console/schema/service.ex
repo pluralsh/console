@@ -100,9 +100,16 @@ defmodule Console.Schema.Service do
     end
 
     defp ensure_chart(cs) do
-      case get_field(cs, :repository) do
-        %{} -> validate_required(cs, ~w(chart version)a)
+      case byte_size(get_field(cs, :url) || "") > 0 || has_flux?(cs) do
+        true -> validate_required(cs, ~w(chart version)a)
         _ -> cs
+      end
+    end
+
+    defp has_flux?(cs) do
+      case get_field(cs, :repository) do
+        %{namespace: ns, name: n} when is_binary(ns) and is_binary(n) -> true
+        _ -> false
       end
     end
   end
@@ -242,6 +249,15 @@ defmodule Console.Schema.Service do
       references: :write_policy_id
 
     timestamps()
+  end
+
+  def conflicting(query \\ __MODULE__, %GlobalService{id: gid} = global) do
+    name = GlobalService.svc_name(global)
+    from(s in query,
+      join: c in ^subquery(Cluster.target(global)),
+        on: c.id == s.cluster_id,
+      where: s.name == ^name and s.owner_id != ^gid
+    )
   end
 
   def for_flow(query \\ __MODULE__, flow_id) do

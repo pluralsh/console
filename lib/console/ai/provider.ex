@@ -17,6 +17,8 @@ defmodule Console.AI.Provider do
   @default_context_window 128_000 * 4
   @local_cache Console.conf(:local_cache)
 
+  @providers ~w(openai openai_compatible anthropic ollama azure bedrock vertex nexus)a
+
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
   give a concise but clear explanation of issues in your companies kubernetes infrastructure.  The user is not necessarily
@@ -164,9 +166,13 @@ defmodule Console.AI.Provider do
 
   defp client(settings, :tool), do: tool_client(settings)
   defp client(settings, :embedding), do: embedding_client(settings)
+  defp client(settings, provider) when provider in @providers,
+    do: client(put_in(settings.ai.provider, provider))
   defp client(settings, _), do: client(settings)
 
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai, openai: %{} = openai}}),
+    do: {:ok, OpenAI.new(openai)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai_compatible, openai_compatible: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :anthropic, anthropic: %{} = anthropic}}),
     do: {:ok, Anthropic.new(anthropic)}

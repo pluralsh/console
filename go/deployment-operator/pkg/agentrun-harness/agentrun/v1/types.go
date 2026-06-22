@@ -31,6 +31,7 @@ type AgentRun struct {
 	Prompt     string                 `json:"prompt"`
 	Repository string                 `json:"repository"`
 	Branch     *string                `json:"branch,omitempty"`
+	HeadBranch *string                `json:"headBranch,omitempty"`
 	Mode       console.AgentRunMode   `json:"mode"`
 	Status     console.AgentRunStatus `json:"status"`
 	FlowID     *string                `json:"flowId,omitempty"`
@@ -50,12 +51,13 @@ type AgentRun struct {
 }
 
 type AgentRuntime struct {
-	ID            string                   `json:"id"`
-	Name          string                   `json:"name"`
-	Type          console.AgentRuntimeType `json:"type"`
-	AiProxy       bool                     `json:"aiProxy"`
-	Config        *AgentRuntimeConfig      `json:"config,omitempty"`
-	ExaConnection bool                     `json:"exaConnection,omitempty"`
+	ID             string                   `json:"id"`
+	Name           string                   `json:"name"`
+	Type           console.AgentRuntimeType `json:"type"`
+	AiProxy        bool                     `json:"aiProxy"`
+	StreamingProxy bool                     `json:"streamingProxy"`
+	Config         *AgentRuntimeConfig      `json:"config,omitempty"`
+	ExaConnection  bool                     `json:"exaConnection,omitempty"`
 }
 
 type AgentRuntimeConfig struct {
@@ -95,6 +97,7 @@ type GeminiConfig struct {
 type CodexConfig struct {
 	ApiKey   string        `json:"apiKey"`
 	Model    string        `json:"model,omitempty"`
+	Method   string        `json:"method,omitempty"`
 	Timeout  time.Duration `json:"timeout"`
 	Endpoint *string       `json:"endpoint,omitempty"`
 }
@@ -106,6 +109,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		Prompt:      fragment.Prompt,
 		Repository:  fragment.Repository,
 		Branch:      fragment.Branch,
+		HeadBranch:  fragment.HeadBranch,
 		Mode:        fragment.Mode,
 		Status:      fragment.Status,
 		ScmCreds:    fragment.ScmCreds,
@@ -149,6 +153,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 	result.Name = runtime.Name
 	result.Type = runtime.Type
 	result.AiProxy = runtime.AiProxy != nil && *runtime.AiProxy
+	result.StreamingProxy = helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false)
 	result.ExaConnection = helpers.GetPluralEnv(controller.EnvExaConnection, "") != ""
 
 	config := &AgentRuntimeConfig{}
@@ -188,6 +193,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 		config.Codex = &CodexConfig{
 			ApiKey:  helpers.GetPluralEnv(controller.EnvCodexAPIKey, ""),
 			Model:   helpers.GetPluralEnv(controller.EnvCodexModel, ""),
+			Method:  helpers.GetPluralEnv(controller.EnvCodexMethod, ""),
 			Timeout: helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvCodexEndpoint, ""); endpoint != "" {
@@ -201,6 +207,10 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 
 func (ar *AgentRun) IsProxyEnabled() bool {
 	return ar.Runtime != nil && ar.Runtime.AiProxy
+}
+
+func (ar *AgentRun) IsStreamingProxyEnabled() bool {
+	return ar.IsProxyEnabled() && ar.Runtime != nil && ar.Runtime.StreamingProxy
 }
 
 func (ar *AgentRun) ExaConnectionEnabled() bool {

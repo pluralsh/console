@@ -37,7 +37,7 @@ defmodule Console.AI.Bedrock do
   def completion(%__MODULE__{} = bedrock, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client])}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
+    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:model], opts[:client])}", bedrock.stream, base_opts(Keyword.put(provider_options(bedrock), :tools, tools(opts)), opts))
     |> reqllm_result()
   end
 
@@ -50,19 +50,22 @@ defmodule Console.AI.Bedrock do
 
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client] || :tool)}", bedrock.stream, provider_opts)
+    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:model], opts[:client] || :tool)}", bedrock.stream, base_opts(provider_opts, opts))
     |> reqllm_result()
     |> tool_calls()
   end
 
   def embeddings(%__MODULE__{} = bedrock, text) do
     bedrock = choose_region(bedrock)
-    chunked = Utils.chunk(text, 8000)
+    chunked = Utils.chunk(text, chunk_size("amazon-bedrock:#{bedrock.embedding_model}"))
+
     provider_options(bedrock)
-    |> Keyword.put(:dimensions, Utils.embedding_dims())
+    |> maybe_dims(bedrock.embedding_model)
     |> then(&ReqLLM.embed("amazon-bedrock:#{bedrock.embedding_model}", chunked, &1))
     |> case do
-      {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
+      {:ok, embeddings} ->
+        maybe_truncate(embeddings, bedrock.embedding_model)
+        |> then(&{:ok, Enum.zip(chunked, &1)})
       error -> error
     end
   end
@@ -85,6 +88,12 @@ defmodule Console.AI.Bedrock do
   defp choose_region(%__MODULE__{embedding_model: "cohere.embed-english-v3"} = rock),
     do: %{rock | region: "us-east-1"}
   defp choose_region(rock), do: rock
+
+  defp maybe_dims(opts, "cohere.embed-english-v3"), do: opts
+  defp maybe_dims(opts, _), do: Keyword.put(opts, :dimensions, Utils.embedding_dims())
+
+  defp maybe_truncate(embeddings, "cohere.embed-english-v3"), do: Enum.map(embeddings, &Enum.take(&1, 512))
+  defp maybe_truncate(embeddings, _), do: embeddings
 
   defp aws_auth(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
     when is_binary(aid) and is_binary(sak), do: [access_key_id: aid, secret_access_key: sak]

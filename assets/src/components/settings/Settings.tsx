@@ -21,11 +21,13 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
+  CHATBOTS_SETTINGS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
   PROJECT_SETTINGS_REL_PATH,
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
+  WEBHOOKS_SETTINGS_REL_PATH,
 } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 
@@ -35,6 +37,8 @@ const getDirectory = (
   { path: USER_MANAGEMENT_REL_PATH, label: 'User management' },
   { path: GLOBAL_SETTINGS_REL_PATH, label: 'Global settings' },
   { path: AI_SETTINGS_REL_PATH, label: 'AI settings' },
+  { path: WEBHOOKS_SETTINGS_REL_PATH, label: 'Webhooks settings' },
+  { path: CHATBOTS_SETTINGS_REL_PATH, label: 'Chatbots settings' },
   { path: PROJECT_SETTINGS_REL_PATH, label: 'Project settings' },
   { path: NOTIFICATIONS_REL_PATH, label: 'Notifications' },
   {
@@ -50,6 +54,7 @@ const getDirectory = (
 export const SETTINGS_BREADCRUMBS: Breadcrumb[] = [
   { label: 'settings', url: SETTINGS_ABS_PATH },
 ]
+
 export default function Settings() {
   const { personaConfiguration, me, configuration } = useLogin()
   const { pathname } = useLocation()
@@ -119,7 +124,7 @@ export function SettingsPageHeader({
   children,
 }: {
   heading?: ReactNode
-  children: ReactNode
+  children?: ReactNode
 }) {
   const theme = useTheme()
 

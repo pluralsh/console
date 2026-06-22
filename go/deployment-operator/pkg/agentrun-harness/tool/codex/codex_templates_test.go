@@ -22,6 +22,7 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 		Name:    "plural",
 		BaseURL: fmt.Sprintf("%s/ext/ai/v1", consoleURL),
 		EnvKey:  consoleTokenEnv,
+		WireAPI: "chat",
 	}})
 	if err != nil {
 		t.Fatalf("BuildCodexConfig() failed: %v", err)
@@ -36,6 +37,9 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 	}
 	if provider.EnvKey != consoleTokenEnv {
 		t.Fatalf("env_key = %q, want %q", provider.EnvKey, consoleTokenEnv)
+	}
+	if provider.WireAPI != "chat" {
+		t.Fatalf("wire_api = %q, want chat", provider.WireAPI)
 	}
 }
 
@@ -56,6 +60,27 @@ func TestCodexExecArgs(t *testing.T) {
 		if args[i] != want[i] {
 			t.Fatalf("arg[%d]: expected %q, got %q (full: %v)", i, want[i], args[i], args)
 		}
+	}
+}
+
+func TestCodexWireAPI(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		want   string
+	}{
+		{name: "chat", method: string(console.OpenAiMethodChat), want: "chat"},
+		{name: "responses", method: string(console.OpenAiMethodResponses), want: "responses"},
+		{name: "auto", method: string(console.OpenAiMethodAuto), want: ""},
+		{name: "empty", method: "", want: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := codexWireAPI(tt.method); got != tt.want {
+				t.Fatalf("codexWireAPI(%q) = %q, want %q", tt.method, got, tt.want)
+			}
+		})
 	}
 }
 

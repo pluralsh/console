@@ -3,10 +3,10 @@ The coding agent completed its task.  Here are the results:
 <%= if @analysis do %>
 # Analysis
 
+This is an overall analysis of what the agent has found and done.
+
 ## Summary
 <%= @analysis.summary %>
-
-<%= Enum.map(@analysis.bullets || [], &"- #{&1}") |> Enum.join("\n") %>
 
 ## Details
 <%= @analysis.analysis %>
@@ -14,8 +14,11 @@ The coding agent completed its task.  Here are the results:
 <% end %>
 
 <%= if is_list(@pull_requests) and length(@pull_requests) > 0 do %>
-<% pr = hd(@pull_requests) %>
-# Pull Request (<%= pr.status %>)
+We've also created <%= length(@pull_requests) %> pull requests, here's the details for each:
+
+<%= for pr <- @pull_requests do %>
+## PR URL
+<%= pr.url %>
 
 ## PR Title
 <%= pr.title %>
@@ -23,13 +26,11 @@ The coding agent completed its task.  Here are the results:
 ## PR Description
 <%= pr.body %>
 
-## PR URL
-<%= pr.url %>
-
 ## Details
 
 Head Branch: <%= pr.ref || "not available" %>
 Base Branch: <%= pr.base || "not available" %>
 Commit SHA: <%= pr.commit_sha || "not available" %>
 
+<% end %>
 <% end %>

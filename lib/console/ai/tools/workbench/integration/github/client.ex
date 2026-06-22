@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   @moduledoc false
 
+  alias Console.AI.Tools.Workbench.Integration.Http
   alias Console.Deployments.Pr.Git, as: PrGit
   alias Console.Jwt.Github, as: GithubJwt
   alias Console.Schema.{ScmConnection, WorkbenchTool}
@@ -12,7 +13,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   def plain_get(%Tentacat.Client{} = client, path, extra_headers \\ []) when is_binary(path) do
     url = client.endpoint <> path
     tentacat_extra = Application.get_env(:tentacat, :extra_headers, [])
-    req_opts = (client.request_options || []) ++ Application.get_env(:tentacat, :request_options, [])
+
+    req_opts =
+      (client.request_options || []) ++ Application.get_env(:tentacat, :request_options, [])
 
     headers =
       tentacat_extra ++
@@ -26,7 +29,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
         {:error, "GitHub API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
-        {:error, inspect(reason)}
+        Http.error("GitHub", reason)
     end
   end
 
@@ -35,10 +38,17 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
       when not is_nil(gh) and is_binary(gh.app_id) and is_binary(gh.installation_id) and
              not is_nil(gh.private_key) do
     scm_github_rest_url(conn)
-    |> GithubJwt.gh_client(gh.app_id, gh.installation_id, gh.private_key, PrGit.request_options(conn))
+    |> GithubJwt.gh_client(
+      gh.app_id,
+      gh.installation_id,
+      gh.private_key,
+      PrGit.request_options(conn)
+    )
   end
+
   def build(%WorkbenchTool{scm_connection: %ScmConnection{token: token} = conn}),
     do: {:ok, Tentacat.Client.new(%{access_token: token}, scm_github_rest_url(conn))}
+
   def build(%WorkbenchTool{configuration: %Configuration{github: %GithubConnection{} = gh}}),
     do: resolve_tentacat(gh)
 

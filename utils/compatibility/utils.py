@@ -248,7 +248,7 @@ def find_nested_images(objs: Any) -> List[str]:
 
     walk(objs)
     return sorted(images)
-    
+
 
 def get_github_releases(repo_owner, repo_name):
     url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
@@ -510,7 +510,7 @@ def update_compatibility_info(filepath, new_versions):
         if data:
             new_versions = [ensure_keys(v) for v in new_versions]
             update_versions_data(data, new_versions)
-            
+
             data["versions"] = reduce_versions(data["versions"])
 
             if data.get('helm_repository_url'):
@@ -528,7 +528,7 @@ def update_compatibility_info(filepath, new_versions):
                     [ensure_keys(v) for v in new_versions]
                 )
             }
-        
+
         if summarization_enabled():
             for i in range(len(data["versions"]) - 1):
                 to_vsn = data["versions"][i] # in reverse order
@@ -540,9 +540,12 @@ def update_compatibility_info(filepath, new_versions):
                 summary = helm_summary(app_name, data, from_vsn, to_vsn)
                 if summary:
                     data["versions"][i]["summary"] = summary
+                    # Write after each summary so progress is never lost on interruption
+                    write_yaml(filepath, data)
+                    print_success(f"Saved summary for {app_name} {from_vsn['version']} → {to_vsn['version']}")
         else:
-            print_warning("Skipping summarization: EXA_API_KEY or OPENAI_API_KEY not set")
-        
+            print_warning("Skipping summarization: OPENAI_API_KEY not set")
+
         if write_yaml(filepath, data):
             print_success(
                 f"Updated compatibility info table: {Fore.CYAN}{filepath}"
@@ -576,16 +579,16 @@ def match_version_to_eol_cycle(version_str, eol_cycles):
     """
     if not eol_cycles or not version_str:
         return None
-    
+
     version = version_str.lstrip('v')
-    
+
     for cycle in eol_cycles:
         cycle_name = cycle.get('cycle', '')
         if cycle_name == version:
             eol_date = cycle.get('eol')
             if eol_date:
                 return eol_date
-    
+
     version_parts = version.split('.')
     if len(version_parts) >= 2:
         major_minor = f"{version_parts[0]}.{version_parts[1]}"
@@ -595,7 +598,7 @@ def match_version_to_eol_cycle(version_str, eol_cycles):
                 eol_date = cycle.get('eol')
                 if eol_date:
                     return eol_date
-    
+
     return None
 
 
@@ -607,15 +610,15 @@ def enrich_addon_with_eol(addon_dict, slug):
     addon_name = addon_dict.get('name')
     if not addon_name:
         return addon_dict
-    
+
     versions = addon_dict.get('versions', [])
     if not versions:
         return addon_dict
-    
+
     eol_cycles = fetch_eol_data(slug)
     if not eol_cycles:
         return addon_dict
-    
+
     enriched_count = 0
     for version in versions:
         version_str = version.get('version')
@@ -624,5 +627,5 @@ def enrich_addon_with_eol(addon_dict, slug):
             if eol_date:
                 version['eolAt'] = eol_date
                 enriched_count += 1
-    
+
     return addon_dict

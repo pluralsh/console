@@ -33,18 +33,24 @@ import NotificationSinks from '../components/settings/notifications/sinks/Notifi
 
 import NotificationRouters from '../components/settings/notifications/routers/NotificationRouters'
 
+import { AISettingsAIInsights } from 'components/settings/ai/AISettingsAIInsights'
+import { AISettingsModelRouting } from 'components/settings/ai/AISettingsModelRouting'
 import { AISettingsProvider } from 'components/settings/ai/AISettingsProvider'
 import { ObservabilityProviders } from 'components/settings/global/observability/ObservabilityProviders'
-import { ObservabilityWebhooks } from 'components/settings/global/observability/ObservabilityWebhooks'
 import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 import { RequireCdEnabled } from './cdRoutes'
 import {
   ACCESS_TOKENS_REL_PATH,
   AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
+  AI_SETTINGS_AI_INSIGHTS_REL_PATH,
   AI_SETTINGS_AI_PROVIDER_REL_PATH,
   AI_SETTINGS_MCP_SERVERS_REL_PATH,
+  AI_SETTINGS_MODEL_ROUTING_REL_PATH,
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
+  CHATBOTS_SETTINGS_CREATE_REL_PATH,
+  CHATBOTS_SETTINGS_EDIT_REL_PATH,
+  CHATBOTS_SETTINGS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
   NOTIFICATIONS_ROUTERS_REL_PATH,
@@ -53,10 +59,20 @@ import {
   SETTINGS_REL_PATH,
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
+  WEBHOOKS_SETTINGS_EDIT_REL_PATH,
+  WEBHOOKS_SETTINGS_CREATE_REL_PATH,
+  WEBHOOKS_SETTINGS_ABS_PATH,
+  WEBHOOKS_SETTINGS_REL_PATH,
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
 import { McpServers } from 'components/settings/ai/mcp/McpServers'
 import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
+import WebhooksSettings from '../components/settings/webhooks/WebhooksSettings'
+import ChatbotsSettings from '../components/settings/chatbots/ChatbotsSettings'
+import { WebhookCreateSettings } from 'components/settings/webhooks/WebhookCreateSettings'
+import { WebhookEditSettings } from 'components/settings/webhooks/WebhookEditSettings'
+import { ChatbotCreateSettings } from 'components/settings/chatbots/ChatbotCreateSettings'
+import { ChatbotEditSettings } from 'components/settings/chatbots/ChatbotEditSettings'
 
 const userManagementRoutes = (
   <Route
@@ -140,7 +156,12 @@ const globalSettingsRoutes = (
       />
       <Route
         path="webhooks"
-        element={<ObservabilityWebhooks />}
+        element={
+          <Navigate
+            replace
+            to={WEBHOOKS_SETTINGS_ABS_PATH}
+          />
+        }
       />
     </Route>
     <Route
@@ -173,6 +194,14 @@ const aiSettingsRoutes = (
       element={<AISettingsProvider />}
     />
     <Route
+      path={AI_SETTINGS_MODEL_ROUTING_REL_PATH}
+      element={<AISettingsModelRouting />}
+    />
+    <Route
+      path={AI_SETTINGS_AI_INSIGHTS_REL_PATH}
+      element={<AISettingsAIInsights />}
+    />
+    <Route
       path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
       element={<AIAgentRuntimes />}
     />
@@ -181,6 +210,40 @@ const aiSettingsRoutes = (
       element={<McpServers />}
     />
   </Route>
+)
+
+const webhooksSettingsRoutes = (
+  <>
+    <Route
+      path={WEBHOOKS_SETTINGS_REL_PATH}
+      element={<WebhooksSettings />}
+    />
+    <Route
+      path={`${WEBHOOKS_SETTINGS_REL_PATH}/${WEBHOOKS_SETTINGS_CREATE_REL_PATH}`}
+      element={<WebhookCreateSettings />}
+    />
+    <Route
+      path={`${WEBHOOKS_SETTINGS_REL_PATH}/${WEBHOOKS_SETTINGS_EDIT_REL_PATH}`}
+      element={<WebhookEditSettings />}
+    />
+  </>
+)
+
+const chatbotsSettingsRoutes = (
+  <>
+    <Route
+      path={CHATBOTS_SETTINGS_REL_PATH}
+      element={<ChatbotsSettings />}
+    />
+    <Route
+      path={`${CHATBOTS_SETTINGS_REL_PATH}/${CHATBOTS_SETTINGS_CREATE_REL_PATH}`}
+      element={<ChatbotCreateSettings />}
+    />
+    <Route
+      path={`${CHATBOTS_SETTINGS_REL_PATH}/${CHATBOTS_SETTINGS_EDIT_REL_PATH}`}
+      element={<ChatbotEditSettings />}
+    />
+  </>
 )
 
 const projectSettingsRoutes = (
@@ -259,6 +322,8 @@ export const settingsRoutes = (
     {userManagementRoutes}
     {globalSettingsRoutes}
     {aiSettingsRoutes}
+    {webhooksSettingsRoutes}
+    {chatbotsSettingsRoutes}
     {projectSettingsRoutes}
     {notificationsRoutes}
     {auditRoutes}

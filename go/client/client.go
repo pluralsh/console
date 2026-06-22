@@ -5,6 +5,7 @@ package client
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
@@ -15,7 +16,9 @@ type ConsoleClient interface {
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
 	GetAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRun, error)
+	GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error)
 	ListAgentRuns(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuns, error)
+	ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error)
 	ListAgentRuntimePendingRuns(ctx context.Context, id string, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimePendingRuns, error)
 	GetAgentRunTodos(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunTodos, error)
 	CancelAgentRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*CancelAgentRun, error)
@@ -25,6 +28,7 @@ type ConsoleClient interface {
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
+	CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
 	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
 	GetScmWebhook(ctx context.Context, id *string, externalID *string, interceptors ...clientv2.RequestInterceptor) (*GetScmWebhook, error)
@@ -581,11 +585,44 @@ func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 	return t.Todos
 }
 
+type AgentRunUploadFragment struct {
+	ID              string  "json:\"id\" graphql:\"id\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+}
+
+func (t *AgentRunUploadFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunUploadFragment) GetSession() *string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.Session
+}
+func (t *AgentRunUploadFragment) GetScreenRecording() *string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.ScreenRecording
+}
+func (t *AgentRunUploadFragment) GetPatch() *string {
+	if t == nil {
+		t = &AgentRunUploadFragment{}
+	}
+	return t.Patch
+}
+
 type AgentRunFragment struct {
 	ID              string                     "json:\"id\" graphql:\"id\""
 	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
 	Repository      string                     "json:\"repository\" graphql:\"repository\""
 	Branch          *string                    "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadBranch      *string                    "json:\"headBranch,omitempty\" graphql:\"headBranch\""
 	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
 	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
@@ -600,6 +637,7 @@ type AgentRunFragment struct {
 	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
 	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
 	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Upload          *AgentRunUploadFragment    "json:\"upload,omitempty\" graphql:\"upload\""
 	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
 	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
 }
@@ -627,6 +665,12 @@ func (t *AgentRunFragment) GetBranch() *string {
 		t = &AgentRunFragment{}
 	}
 	return t.Branch
+}
+func (t *AgentRunFragment) GetHeadBranch() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.HeadBranch
 }
 func (t *AgentRunFragment) GetMode() *AgentRunMode {
 	if t == nil {
@@ -712,6 +756,12 @@ func (t *AgentRunFragment) GetPullRequests() []*PullRequestFragment {
 	}
 	return t.PullRequests
 }
+func (t *AgentRunFragment) GetUpload() *AgentRunUploadFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Upload
+}
 func (t *AgentRunFragment) GetBabysit() *bool {
 	if t == nil {
 		t = &AgentRunFragment{}
@@ -723,6 +773,66 @@ func (t *AgentRunFragment) GetBabysitInterval() *int64 {
 		t = &AgentRunFragment{}
 	}
 	return t.BabysitInterval
+}
+
+type AgentRunMinimalFragment struct {
+	ID           string                                  "json:\"id\" graphql:\"id\""
+	Prompt       string                                  "json:\"prompt\" graphql:\"prompt\""
+	Repository   string                                  "json:\"repository\" graphql:\"repository\""
+	Branch       *string                                 "json:\"branch,omitempty\" graphql:\"branch\""
+	HeadBranch   *string                                 "json:\"headBranch,omitempty\" graphql:\"headBranch\""
+	Runtime      *AgentRunMinimalFragment_Runtime        "json:\"runtime,omitempty\" graphql:\"runtime\""
+	PullRequests []*AgentRunMinimalFragment_PullRequests "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	Upload       *AgentRunMinimalFragment_Upload         "json:\"upload,omitempty\" graphql:\"upload\""
+}
+
+func (t *AgentRunMinimalFragment) GetID() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.ID
+}
+func (t *AgentRunMinimalFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentRunMinimalFragment) GetRepository() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Repository
+}
+func (t *AgentRunMinimalFragment) GetBranch() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Branch
+}
+func (t *AgentRunMinimalFragment) GetHeadBranch() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.HeadBranch
+}
+func (t *AgentRunMinimalFragment) GetRuntime() *AgentRunMinimalFragment_Runtime {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Runtime
+}
+func (t *AgentRunMinimalFragment) GetPullRequests() []*AgentRunMinimalFragment_PullRequests {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.PullRequests
+}
+func (t *AgentRunMinimalFragment) GetUpload() *AgentRunMinimalFragment_Upload {
+	if t == nil {
+		t = &AgentRunMinimalFragment{}
+	}
+	return t.Upload
 }
 
 type ScmWebhookFragment struct {
@@ -3506,6 +3616,7 @@ type PullRequestFragment struct {
 	URL     string    "json:\"url\" graphql:\"url\""
 	Title   *string   "json:\"title,omitempty\" graphql:\"title\""
 	Creator *string   "json:\"creator,omitempty\" graphql:\"creator\""
+	Ref     *string   "json:\"ref,omitempty\" graphql:\"ref\""
 }
 
 func (t *PullRequestFragment) GetID() string {
@@ -3537,6 +3648,12 @@ func (t *PullRequestFragment) GetCreator() *string {
 		t = &PullRequestFragment{}
 	}
 	return t.Creator
+}
+func (t *PullRequestFragment) GetRef() *string {
+	if t == nil {
+		t = &PullRequestFragment{}
+	}
+	return t.Ref
 }
 
 type SyncConfigFragment struct {
@@ -6360,12 +6477,13 @@ func (t *RunStepFragment) GetIndex() int64 {
 }
 
 type StackConfigurationFragment struct {
-	Image     *string                               "json:\"image,omitempty\" graphql:\"image\""
-	Version   *string                               "json:\"version,omitempty\" graphql:\"version\""
-	Tag       *string                               "json:\"tag,omitempty\" graphql:\"tag\""
-	Hooks     []*StackHookFragment                  "json:\"hooks,omitempty\" graphql:\"hooks\""
-	Terraform *StackConfigurationFragment_Terraform "json:\"terraform,omitempty\" graphql:\"terraform\""
-	Ansible   *StackConfigurationFragment_Ansible   "json:\"ansible,omitempty\" graphql:\"ansible\""
+	Image      *string                                "json:\"image,omitempty\" graphql:\"image\""
+	Version    *string                                "json:\"version,omitempty\" graphql:\"version\""
+	Tag        *string                                "json:\"tag,omitempty\" graphql:\"tag\""
+	Hooks      []*StackHookFragment                   "json:\"hooks,omitempty\" graphql:\"hooks\""
+	Terraform  *StackConfigurationFragment_Terraform  "json:\"terraform,omitempty\" graphql:\"terraform\""
+	Terragrunt *StackConfigurationFragment_Terragrunt "json:\"terragrunt,omitempty\" graphql:\"terragrunt\""
+	Ansible    *StackConfigurationFragment_Ansible    "json:\"ansible,omitempty\" graphql:\"ansible\""
 }
 
 func (t *StackConfigurationFragment) GetImage() *string {
@@ -6397,6 +6515,12 @@ func (t *StackConfigurationFragment) GetTerraform() *StackConfigurationFragment_
 		t = &StackConfigurationFragment{}
 	}
 	return t.Terraform
+}
+func (t *StackConfigurationFragment) GetTerragrunt() *StackConfigurationFragment_Terragrunt {
+	if t == nil {
+		t = &StackConfigurationFragment{}
+	}
+	return t.Terragrunt
 }
 func (t *StackConfigurationFragment) GetAnsible() *StackConfigurationFragment_Ansible {
 	if t == nil {
@@ -7030,6 +7154,81 @@ func (t *AgentRunFragment_Flow) GetName() string {
 		t = &AgentRunFragment_Flow{}
 	}
 	return t.Name
+}
+
+type AgentRunMinimalFragment_Runtime struct {
+	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+}
+
+func (t *AgentRunMinimalFragment_Runtime) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Runtime{}
+	}
+	return &t.Type
+}
+
+type AgentRunMinimalFragment_PullRequests struct {
+	ID     string    "json:\"id\" graphql:\"id\""
+	Ref    *string   "json:\"ref,omitempty\" graphql:\"ref\""
+	Status *PrStatus "json:\"status,omitempty\" graphql:\"status\""
+	Title  *string   "json:\"title,omitempty\" graphql:\"title\""
+	URL    string    "json:\"url\" graphql:\"url\""
+}
+
+func (t *AgentRunMinimalFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetRef() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Ref
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetStatus() *PrStatus {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Status
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetTitle() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Title
+}
+func (t *AgentRunMinimalFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.URL
+}
+
+type AgentRunMinimalFragment_Upload struct {
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+}
+
+func (t *AgentRunMinimalFragment_Upload) GetPatch() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Upload{}
+	}
+	return t.Patch
+}
+func (t *AgentRunMinimalFragment_Upload) GetScreenRecording() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Upload{}
+	}
+	return t.ScreenRecording
+}
+func (t *AgentRunMinimalFragment_Upload) GetSession() *string {
+	if t == nil {
+		t = &AgentRunMinimalFragment_Upload{}
+	}
+	return t.Session
 }
 
 type ClusterBackupFragment_Cluster struct {
@@ -11429,6 +11628,31 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Config
 	return t.Refresh
 }
 
+type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -11608,6 +11832,31 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFra
 	return t.Refresh
 }
 
+type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -11729,6 +11978,31 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigura
 func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -11858,6 +12132,31 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_
 	return t.Refresh
 }
 
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -11979,6 +12278,31 @@ func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Te
 func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -12162,6 +12486,31 @@ func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackC
 	return t.Refresh
 }
 
+type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12287,6 +12636,31 @@ func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terraform) Ge
 	return t.Refresh
 }
 
+type StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12408,6 +12782,31 @@ func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraf
 func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -12591,6 +12990,31 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_St
 	return t.Refresh
 }
 
+type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12716,6 +13140,31 @@ func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform
 	return t.Refresh
 }
 
+type StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12769,6 +13218,31 @@ func (t *StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 func (t *StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -14213,6 +14687,81 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
 	return t.Name
 }
 
+type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime struct {
+	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+}
+
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Runtime{}
+	}
+	return &t.Type
+}
+
+type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests struct {
+	ID     string    "json:\"id\" graphql:\"id\""
+	Ref    *string   "json:\"ref,omitempty\" graphql:\"ref\""
+	Status *PrStatus "json:\"status,omitempty\" graphql:\"status\""
+	Title  *string   "json:\"title,omitempty\" graphql:\"title\""
+	URL    string    "json:\"url\" graphql:\"url\""
+}
+
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetRef() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Ref
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetStatus() *PrStatus {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Status
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetTitle() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Title
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.URL
+}
+
+type GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload struct {
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+}
+
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetPatch() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Patch
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetScreenRecording() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
+	}
+	return t.ScreenRecording
+}
+func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetSession() *string {
+	if t == nil {
+		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Session
+}
+
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14281,6 +14830,110 @@ func (t *ListAgentRuns_AgentRuns) GetEdges() []*ListAgentRuns_AgentRuns_Edges {
 func (t *ListAgentRuns_AgentRuns) GetPageInfo() *PageInfoFragment {
 	if t == nil {
 		t = &ListAgentRuns_AgentRuns{}
+	}
+	return &t.PageInfo
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Runtime struct {
+	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Runtime) GetType() *AgentRuntimeType {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Runtime{}
+	}
+	return &t.Type
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests struct {
+	ID     string    "json:\"id\" graphql:\"id\""
+	Ref    *string   "json:\"ref,omitempty\" graphql:\"ref\""
+	Status *PrStatus "json:\"status,omitempty\" graphql:\"status\""
+	Title  *string   "json:\"title,omitempty\" graphql:\"title\""
+	URL    string    "json:\"url\" graphql:\"url\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetID() string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.ID
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetRef() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Ref
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetStatus() *PrStatus {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Status
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetTitle() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.Title
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests) GetURL() string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_PullRequests{}
+	}
+	return t.URL
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload struct {
+	Patch           *string "json:\"patch,omitempty\" graphql:\"patch\""
+	ScreenRecording *string "json:\"screenRecording,omitempty\" graphql:\"screenRecording\""
+	Session         *string "json:\"session,omitempty\" graphql:\"session\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload) GetPatch() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Patch
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload) GetScreenRecording() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload{}
+	}
+	return t.ScreenRecording
+}
+func (t *ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload) GetSession() *string {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges_Node_AgentRunMinimalFragment_Upload{}
+	}
+	return t.Session
+}
+
+type ListAgentRunsMinimal_AgentRuns_Edges struct {
+	Node *AgentRunMinimalFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns_Edges) GetNode() *AgentRunMinimalFragment {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns_Edges{}
+	}
+	return t.Node
+}
+
+type ListAgentRunsMinimal_AgentRuns struct {
+	Edges    []*ListAgentRunsMinimal_AgentRuns_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                        "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListAgentRunsMinimal_AgentRuns) GetEdges() []*ListAgentRunsMinimal_AgentRuns_Edges {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns{}
+	}
+	return t.Edges
+}
+func (t *ListAgentRunsMinimal_AgentRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListAgentRunsMinimal_AgentRuns{}
 	}
 	return &t.PageInfo
 }
@@ -25970,6 +26623,31 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 	return t.Refresh
 }
 
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -26091,6 +26769,31 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -26256,6 +26959,31 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 	return t.Refresh
 }
 
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -26399,6 +27127,31 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 	return t.Refresh
 }
 
+type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -26538,6 +27291,31 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -26732,6 +27510,31 @@ func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment
 	return t.Refresh
 }
 
+type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -26853,6 +27656,31 @@ func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationF
 func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -27036,6 +27864,31 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 	return t.Refresh
 }
 
+type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27157,6 +28010,31 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -27340,6 +28218,31 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 	return t.Refresh
 }
 
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27461,6 +28364,31 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackC
 func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -27590,6 +28518,31 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_Stack
 	return t.Refresh
 }
 
+type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27715,6 +28668,31 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_Stack
 	return t.Refresh
 }
 
+type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27836,6 +28814,31 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -28074,6 +29077,31 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 	return t.Refresh
 }
 
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -28195,6 +29223,31 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Conf
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -28418,6 +29471,31 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 	return t.Refresh
 }
 
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Refresh
+}
+
 type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -28539,6 +29617,31 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigura
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
 	if t == nil {
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.Refresh
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.ApproveEmpty
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
+	}
+	return t.Parallelism
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
 }
@@ -35497,6 +36600,17 @@ func (t *GetAgentRun) GetAgentRun() *AgentRunFragment {
 	return t.AgentRun
 }
 
+type GetAgentRunMinimal struct {
+	AgentRun *AgentRunMinimalFragment "json:\"agentRun,omitempty\" graphql:\"agentRun\""
+}
+
+func (t *GetAgentRunMinimal) GetAgentRun() *AgentRunMinimalFragment {
+	if t == nil {
+		t = &GetAgentRunMinimal{}
+	}
+	return t.AgentRun
+}
+
 type ListAgentRuns struct {
 	AgentRuns *ListAgentRuns_AgentRuns "json:\"agentRuns,omitempty\" graphql:\"agentRuns\""
 }
@@ -35504,6 +36618,17 @@ type ListAgentRuns struct {
 func (t *ListAgentRuns) GetAgentRuns() *ListAgentRuns_AgentRuns {
 	if t == nil {
 		t = &ListAgentRuns{}
+	}
+	return t.AgentRuns
+}
+
+type ListAgentRunsMinimal struct {
+	AgentRuns *ListAgentRunsMinimal_AgentRuns "json:\"agentRuns,omitempty\" graphql:\"agentRuns\""
+}
+
+func (t *ListAgentRunsMinimal) GetAgentRuns() *ListAgentRunsMinimal_AgentRuns {
+	if t == nil {
+		t = &ListAgentRunsMinimal{}
 	}
 	return t.AgentRuns
 }
@@ -35605,6 +36730,17 @@ func (t *CreateAgentMessage) GetCreateAgentMessage() *CreateAgentMessage_CreateA
 		t = &CreateAgentMessage{}
 	}
 	return t.CreateAgentMessage
+}
+
+type CreateAgentRunUpload struct {
+	CreateAgentRunUpload *AgentRunUploadFragment "json:\"createAgentRunUpload,omitempty\" graphql:\"createAgentRunUpload\""
+}
+
+func (t *CreateAgentRunUpload) GetCreateAgentRunUpload() *AgentRunUploadFragment {
+	if t == nil {
+		t = &CreateAgentRunUpload{}
+	}
+	return t.CreateAgentRunUpload
 }
 
 type AddClusterAuditLog struct {
@@ -39209,6 +40345,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -39243,6 +40380,9 @@ fragment AgentRunFragment on AgentRun {
 	}
 	pullRequests {
 		... PullRequestFragment
+	}
+	upload {
+		... AgentRunUploadFragment
 	}
 	babysit
 	babysitInterval
@@ -39323,6 +40463,13 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 `
 
@@ -39333,6 +40480,52 @@ func (c *Client) GetAgentRun(ctx context.Context, id string, interceptors ...cli
 
 	var res GetAgentRun
 	if err := c.Client.Post(ctx, "GetAgentRun", GetAgentRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetAgentRunMinimalDocument = `query GetAgentRunMinimal ($id: ID!) {
+	agentRun(id: $id) {
+		... AgentRunMinimalFragment
+	}
+}
+fragment AgentRunMinimalFragment on AgentRun {
+	id
+	prompt
+	repository
+	branch
+	headBranch
+	runtime {
+		type
+	}
+	pullRequests {
+		id
+		status
+		url
+		title
+		ref
+	}
+	upload {
+		session
+		patch
+		screenRecording
+	}
+}
+`
+
+func (c *Client) GetAgentRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRunMinimal, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetAgentRunMinimal
+	if err := c.Client.Post(ctx, "GetAgentRunMinimal", GetAgentRunMinimalDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -39360,6 +40553,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -39394,6 +40588,9 @@ fragment AgentRunFragment on AgentRun {
 	}
 	pullRequests {
 		... PullRequestFragment
+	}
+	upload {
+		... AgentRunUploadFragment
 	}
 	babysit
 	babysitInterval
@@ -39474,6 +40671,13 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -39491,6 +40695,66 @@ func (c *Client) ListAgentRuns(ctx context.Context, after *string, first *int64,
 
 	var res ListAgentRuns
 	if err := c.Client.Post(ctx, "ListAgentRuns", ListAgentRunsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListAgentRunsMinimalDocument = `query ListAgentRunsMinimal ($after: String, $first: Int, $before: String, $last: Int) {
+	agentRuns(after: $after, first: $first, before: $before, last: $last) {
+		edges {
+			node {
+				... AgentRunMinimalFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment AgentRunMinimalFragment on AgentRun {
+	id
+	prompt
+	repository
+	branch
+	headBranch
+	runtime {
+		type
+	}
+	pullRequests {
+		id
+		status
+		url
+		title
+		ref
+	}
+	upload {
+		session
+		patch
+		screenRecording
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListAgentRunsMinimal(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListAgentRunsMinimal, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListAgentRunsMinimal
+	if err := c.Client.Post(ctx, "ListAgentRunsMinimal", ListAgentRunsMinimalDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -39520,6 +40784,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -39554,6 +40819,9 @@ fragment AgentRunFragment on AgentRun {
 	}
 	pullRequests {
 		... PullRequestFragment
+	}
+	upload {
+		... AgentRunUploadFragment
 	}
 	babysit
 	babysitInterval
@@ -39634,6 +40902,13 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 fragment PageInfoFragment on PageInfo {
 	hasNextPage
@@ -39727,6 +41002,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -39761,6 +41037,9 @@ fragment AgentRunFragment on AgentRun {
 	}
 	pullRequests {
 		... PullRequestFragment
+	}
+	upload {
+		... AgentRunUploadFragment
 	}
 	babysit
 	babysitInterval
@@ -39841,6 +41120,13 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 `
 
@@ -39872,6 +41158,7 @@ fragment AgentRunFragment on AgentRun {
 	prompt
 	repository
 	branch
+	headBranch
 	mode
 	language
 	languageVersion
@@ -39906,6 +41193,9 @@ fragment AgentRunFragment on AgentRun {
 	}
 	pullRequests {
 		... PullRequestFragment
+	}
+	upload {
+		... AgentRunUploadFragment
 	}
 	babysit
 	babysitInterval
@@ -39986,6 +41276,13 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
 }
 `
 
@@ -40100,6 +41397,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 `
 
@@ -40137,6 +41435,39 @@ func (c *Client) CreateAgentMessage(ctx context.Context, runID string, attribute
 
 	var res CreateAgentMessage
 	if err := c.Client.Post(ctx, "CreateAgentMessage", CreateAgentMessageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentRunUploadDocument = `mutation CreateAgentRunUpload ($runId: ID!, $session: Upload, $screenRecording: Upload, $patch: Upload) {
+	createAgentRunUpload(runId: $runId, attributes: {session:$session,screenRecording:$screenRecording,patch:$patch}) {
+		... AgentRunUploadFragment
+	}
+}
+fragment AgentRunUploadFragment on AgentRunUpload {
+	id
+	session
+	screenRecording
+	patch
+}
+`
+
+func (c *Client) CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error) {
+	vars := map[string]any{
+		"runId":           runID,
+		"session":         session,
+		"screenRecording": screenRecording,
+		"patch":           patch,
+	}
+
+	var res CreateAgentRunUpload
+	if err := c.Client.Post(ctx, "CreateAgentRunUpload", CreateAgentRunUploadDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -50308,6 +51639,7 @@ fragment PullRequestFragment on PullRequest {
 	url
 	title
 	creator
+	ref
 }
 `
 
@@ -56274,6 +57606,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	terragrunt {
+		parallelism
+		refresh
+		approveEmpty
+	}
 	ansible {
 		inventory
 		playbook
@@ -56558,6 +57895,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	terragrunt {
+		parallelism
+		refresh
+		approveEmpty
+	}
 	ansible {
 		inventory
 		playbook
@@ -56717,6 +58059,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		... StackHookFragment
 	}
 	terraform {
+		parallelism
+		refresh
+		approveEmpty
+	}
+	terragrunt {
 		parallelism
 		refresh
 		approveEmpty
@@ -56906,6 +58253,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		... StackHookFragment
 	}
 	terraform {
+		parallelism
+		refresh
+		approveEmpty
+	}
+	terragrunt {
 		parallelism
 		refresh
 		approveEmpty
@@ -57149,6 +58501,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		... StackHookFragment
 	}
 	terraform {
+		parallelism
+		refresh
+		approveEmpty
+	}
+	terragrunt {
 		parallelism
 		refresh
 		approveEmpty
@@ -57483,6 +58840,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	terragrunt {
+		parallelism
+		refresh
+		approveEmpty
+	}
 	ansible {
 		inventory
 		playbook
@@ -57813,6 +59175,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	terragrunt {
+		parallelism
+		refresh
+		approveEmpty
+	}
 	ansible {
 		inventory
 		playbook
@@ -58101,6 +59468,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	terragrunt {
+		parallelism
+		refresh
+		approveEmpty
+	}
 	ansible {
 		inventory
 		playbook
@@ -58320,6 +59692,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		... StackHookFragment
 	}
 	terraform {
+		parallelism
+		refresh
+		approveEmpty
+	}
+	terragrunt {
 		parallelism
 		refresh
 		approveEmpty
@@ -58598,6 +59975,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		... StackHookFragment
 	}
 	terraform {
+		parallelism
+		refresh
+		approveEmpty
+	}
+	terragrunt {
 		parallelism
 		refresh
 		approveEmpty
@@ -59297,6 +60679,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	terragrunt {
+		parallelism
+		refresh
+		approveEmpty
+	}
 	ansible {
 		inventory
 		playbook
@@ -59627,6 +61014,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		... StackHookFragment
 	}
 	terraform {
+		parallelism
+		refresh
+		approveEmpty
+	}
+	terragrunt {
 		parallelism
 		refresh
 		approveEmpty
@@ -62977,7 +64369,9 @@ var DocumentOperationNames = map[string]string{
 	DeleteAgentRuntimeDocument:                        "DeleteAgentRuntime",
 	ListAgentRuntimesDocument:                         "ListAgentRuntimes",
 	GetAgentRunDocument:                               "GetAgentRun",
+	GetAgentRunMinimalDocument:                        "GetAgentRunMinimal",
 	ListAgentRunsDocument:                             "ListAgentRuns",
+	ListAgentRunsMinimalDocument:                      "ListAgentRunsMinimal",
 	ListAgentRuntimePendingRunsDocument:               "ListAgentRuntimePendingRuns",
 	GetAgentRunTodosDocument:                          "GetAgentRunTodos",
 	CancelAgentRunDocument:                            "CancelAgentRun",
@@ -62987,6 +64381,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
 	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
 	CreateAgentMessageDocument:                        "CreateAgentMessage",
+	CreateAgentRunUploadDocument:                      "CreateAgentRunUpload",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",
 	GetScmWebhookDocument:                             "GetScmWebhook",

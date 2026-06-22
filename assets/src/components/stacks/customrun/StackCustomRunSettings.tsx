@@ -53,6 +53,7 @@ export function StackCustomRunSettings({
       stackId,
       commands,
       context: JSON.stringify(configVals),
+      runName: `Running ${customRun.name} with args ${JSON.stringify(configVals)}`,
     },
     onCompleted: () => onClose(),
     update: (cache, { data }) => {

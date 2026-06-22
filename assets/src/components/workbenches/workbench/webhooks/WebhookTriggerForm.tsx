@@ -1,4 +1,5 @@
 import {
+  ArrowTopRightIcon,
   Button,
   Checkbox,
   Chip,
@@ -8,7 +9,6 @@ import {
   Input2,
   ListBoxFooter,
   ListBoxItem,
-  AddIcon,
   ReturnIcon,
   Select,
   Tab,
@@ -41,8 +41,8 @@ import {
 } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { WEBHOOKS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import {
-  getWorkbenchWebhookTriggerCreateWebhookAbsPath,
   getWorkbenchWebhookTriggersAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM,
@@ -401,24 +401,15 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                     Select webhook*
                   </div>
                   <InlineA
-                    href=""
+                    href={WEBHOOKS_SETTINGS_ABS_PATH}
                     onClick={(e) => {
                       e.preventDefault()
-                      navigate(
-                        getWorkbenchWebhookTriggerCreateWebhookAbsPath(
-                          workbenchId
-                        ),
-                        {
-                          state: {
-                            returnPath: `${location.pathname}${location.search}`,
-                            draftState: formState,
-                          },
-                        }
-                      )
+                      navigate(WEBHOOKS_SETTINGS_ABS_PATH)
                     }}
                     css={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                   >
-                    Create new webhook
+                    Manage webhooks
+                    <ArrowTopRightIcon size={12} />
                   </InlineA>
                 </Flex>
                 <FormField hint="New webhooks added will appear in this list.">
@@ -474,22 +465,12 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                           label={wh.name}
                         />
                       )),
-                      <ListBoxFooter key="create-webhook-footer">
+                      <ListBoxFooter key="manage-webhooks-footer">
                         <InlineA
-                          href=""
+                          href={WEBHOOKS_SETTINGS_ABS_PATH}
                           onClick={(e) => {
                             e.preventDefault()
-                            navigate(
-                              getWorkbenchWebhookTriggerCreateWebhookAbsPath(
-                                workbenchId
-                              ),
-                              {
-                                state: {
-                                  returnPath: `${location.pathname}${location.search}`,
-                                  draftState: formState,
-                                },
-                              }
-                            )
+                            navigate(WEBHOOKS_SETTINGS_ABS_PATH)
                           }}
                           css={{
                             display: 'flex',
@@ -497,8 +478,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                             gap: theme.spacing.small,
                           }}
                         >
-                          <AddIcon size={14} />
-                          Create new webhook
+                          Manage webhooks
+                          <ArrowTopRightIcon size={12} />
                         </InlineA>
                       </ListBoxFooter>,
                     ]}

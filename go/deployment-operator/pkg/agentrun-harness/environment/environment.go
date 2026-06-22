@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
@@ -58,6 +59,9 @@ func (in *environment) cloneRepository() error {
 
 	if _, err := os.Stat(path.Join(repoDirPath, ".git")); err == nil {
 		klog.V(log.LogLevelInfo).InfoS("repository already exists, skipping clone", "dir", repoDirPath)
+		if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
+			return err
+		}
 		return in.configureRepository(repoDirPath, "", "")
 	}
 
@@ -73,11 +77,13 @@ func (in *environment) cloneRepository() error {
 		}
 	}
 
-	if err := exec.NewExecutable(
-		"git",
-		exec.WithArgs([]string{"clone", in.agentRun.Repository, repoDir}),
-		exec.WithDir(in.dir),
-	).Run(context.Background()); err != nil {
+	cloneArgs := []string{"clone"}
+	if branch := strings.TrimSpace(lo.FromPtr(in.agentRun.Branch)); branch != "" {
+		cloneArgs = append(cloneArgs, "--branch", branch)
+	}
+	cloneArgs = append(cloneArgs, in.agentRun.Repository, repoDir)
+
+	if err := exec.NewExecutable("git", exec.WithArgs(cloneArgs), exec.WithDir(in.dir)).Run(context.Background()); err != nil {
 		return err
 	}
 
@@ -99,6 +105,37 @@ func (in *environment) cloneRepository() error {
 
 	repoDirPath = path.Join(in.dir, repoDir)
 	return in.configureRepository(repoDirPath, userName, userEmail)
+}
+
+func (in *environment) checkoutRequestedBranch(repoDirPath string) error {
+	branch := strings.TrimSpace(lo.FromPtr(in.agentRun.Branch))
+	if branch == "" {
+		return nil
+	}
+
+	currentBranch, _ := exec.NewExecutable("git",
+		exec.WithArgs([]string{"branch", "--show-current"}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background())
+	if strings.TrimSpace(string(currentBranch)) == branch {
+		return nil
+	}
+
+	if out, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"fetch", "origin", branch}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		return fmt.Errorf("failed to fetch branch %s: %w: %s", branch, err, out)
+	}
+
+	if out, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"checkout", branch}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		return fmt.Errorf("failed to checkout branch %s: %w: %s", branch, err, out)
+	}
+
+	return nil
 }
 
 func (in *environment) configureRepository(repoDirPath, userName, userEmail string) error {
@@ -133,10 +170,18 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 	if err != nil {
 		return err
 	}
+	baseBranch := strings.TrimSpace(string(output))
+
+	cmd = exec.NewExecutable("git", exec.WithArgs([]string{"rev-parse", "HEAD"}), exec.WithDir(repoDirPath))
+	output, err = cmd.RunWithOutput(context.Background())
+	if err != nil {
+		return err
+	}
 
 	config := &Config{
 		Dir:        repoDirPath,
-		BaseBranch: strings.TrimSpace(string(output)),
+		BaseBranch: baseBranch,
+		BaseCommit: strings.TrimSpace(string(output)),
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("repository ready", "url", in.agentRun.Repository, "dir", repoDirPath)

@@ -13,6 +13,7 @@ import {
 } from 'components/ai/chatbot/SidePanelShared'
 import {
   SidePanel,
+  useSidePanelWidth,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
 import {
@@ -26,6 +27,10 @@ import {
 
 const DEFAULT_TITLE = 'Setup guide'
 const SIDE_PANEL_TYPE: SidePanel = 'webhook-setup-guide'
+const SETUP_GUIDE_SIDE_PANEL_WIDTH = {
+  maxWidthVw: 32,
+  minWidth: 350,
+}
 
 type SetupGuidePanelData = {
   documentationUrl?: string
@@ -92,6 +97,7 @@ export function useWebhookSetupGuidePanel() {
 export function WebhookSetupGuidePanelContent() {
   const { isOpen, documentationUrl, markdownPath, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
+  useSidePanelWidth(SETUP_GUIDE_SIDE_PANEL_WIDTH)
   const [markdownText, setMarkdownText] = useState('')
   const [isMarkdownLoading, setIsMarkdownLoading] = useState(false)
   const [markdownError, setMarkdownError] = useState<Nullable<string>>(null)

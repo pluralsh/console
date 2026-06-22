@@ -9,7 +9,7 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange]
+  defstruct [:access_key, :azure_token, :model, :tool_model, :embedding_model, :base_url, :params, :stream, :method, :token_exchange, :headers]
 
   @type t :: %__MODULE__{}
 
@@ -27,6 +27,7 @@ defmodule Console.AI.OpenAI do
       azure_token: Map.get(opts, :azure_token),
       method: Map.get(opts, :method) || :auto,
       token_exchange: Map.get(opts, :token_exchange),
+      headers: Map.get(opts, :headers),
       stream: Stream.stream()
     }
   end
@@ -51,7 +52,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_opts ++ [tools: tools(opts)])
+      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, base_opts(provider_opts ++ [tools: tools(opts)], opts))
       |> reqllm_result()
     end
   end
@@ -67,7 +68,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
+      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, base_opts(provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required], opts))
       |> reqllm_result()
       |> tool_calls()
     end
@@ -78,7 +79,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       provider_opts
       |> Keyword.put(:dimensions, Utils.embedding_dims())
-      |> then(&ReqLLM.embed(openai_model(openai, :embedding_model), chunked, &1))
+      |> then(&ReqLLM.embed(openai_model(openai, nil, :embedding_model), chunked, &1))
       |> case do
         {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
         error -> error
@@ -97,25 +98,29 @@ defmodule Console.AI.OpenAI do
 
   defp provider_options(%__MODULE__{base_url: base_url} = openai) do
     with {:ok, key} <- api_key(openai),
-      do: {:ok, Enum.filter([base_url: base_url, api_key: key], fn {_, v} -> not is_nil(v) end)}
+      do: {:ok, Enum.filter([base_url: base_url, api_key: key] ++ http_options(openai), fn {_, v} -> not is_nil(v) end)}
   end
 
   defp api_key(%__MODULE__{token_exchange: %OauthToken{enabled: true} = token}) do
-    with {:ok, %OAuth2.AccessToken{access_token: token}} <- TokenExchange.exchange(token.token_url, token.client_id, token.client_secret),
-      do: {:ok, token}
+    case TokenExchange.exchange(token.token_url, token.client_id, token.client_secret) do
+      {:ok, %OAuth2.AccessToken{access_token: token}} when is_binary(token) -> {:ok, token}
+      {:ok, token} when is_binary(token) -> {:ok, token}
+      err -> err
+    end
   end
   defp api_key(%__MODULE__{access_key: key}) when is_binary(key), do: {:ok, key}
   defp api_key(_), do: {:ok, "ignore"}
 
-  defp openai_model(%__MODULE__{base_url: base_url, method: method} = openai, model) when is_binary(base_url) do
-    model_name = Map.get(openai, model)
+  defp openai_model(%__MODULE__{base_url: base_url, method: method} = openai, model, model_type) when is_binary(base_url) do
+    model_name = if is_binary(model), do: model, else: Map.get(openai, model_type)
     ReqLLM.model!(%{
       provider: :openai,
       extra: %{wire: %{protocol: guess_protocol(model_name, method)}},
       model: model_name,
     })
   end
-  defp openai_model(%__MODULE__{} = openai, model), do: ReqLLM.model!({:openai, id: Map.get(openai, model)})
+  defp openai_model(_, model, _) when is_binary(model), do: ReqLLM.model!({:openai, id: model})
+  defp openai_model(%__MODULE__{} = openai, _, model_type), do: ReqLLM.model!({:openai, id: Map.get(openai, model_type)})
 
   defp guess_protocol(_, :chat), do: "openai_chat"
   defp guess_protocol(_, :responses), do: "openai_responses"

@@ -157,6 +157,12 @@ defmodule Console.Deployments.Services do
   defp add_sources(specs, _svc), do: specs
 
   defp digest_filter({_, nil, _}, _), do: false
+  defp digest_filter({:repository, _, _} = res, %Service{helm: %Service.Helm{lua_file: path}})
+       when is_binary(path) and path != "",
+       do: res
+  defp digest_filter({:repository, _, _} = res, %Service{helm: %Service.Helm{lua_folder: path}})
+       when is_binary(path) and path != "",
+       do: res
   defp digest_filter({:repository, _, _} = res, %Service{helm: %Service.Helm{values_files: [_ | _]}}), do: res
   defp digest_filter({:repository, _, _}, %Service{helm: %Service.Helm{url: u}}) when is_binary(u),
     do: false
@@ -164,8 +170,8 @@ defmodule Console.Deployments.Services do
     when is_binary(ns) and is_binary(n), do: false
   defp digest_filter(ref, _), do: ref
 
-  defp subdigests(%Service{helm: %Service.Helm{values_files: f, values: v, lua_script: s}}) do
-    combined_sha((f || []) ++ Enum.filter([v, s], & &1))
+  defp subdigests(%Service{helm: %Service.Helm{values_files: f, values: v, lua_script: s, lua_file: lf, lua_folder: lfo}}) do
+    combined_sha((f || []) ++ Enum.filter([v, s, lf, lfo], & &1))
   end
   defp subdigests(_), do: ""
 

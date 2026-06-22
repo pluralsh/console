@@ -11,19 +11,22 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   alias Console.AI.Tools.Workbench.Integration.Teams.Tools, as: TeamsTools
   alias Console.AI.Tools.Workbench.Integration.Pagerduty.Tools, as: PagerdutyTools
   alias Console.AI.Workbench.{Environment, MCP}
+  import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
     tools = tools(environment)
 
     MemoryEngine.new(tools, 20,
-      system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
-      acc: %{},
-      tool_search: length(tools) > 10,
-      pre_enable: [Result, %Skills{} ,%Skill{}],
-      callback: &callback(activity, &1),
-      continue_msg: cont_msg()
+      engine_opts(job) ++ [
+        system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
+        acc: %{},
+        tool_search: length(tools) > 10,
+        pre_enable: [Result, %Skills{} ,%Skill{}],
+        callback: &callback(activity, &1),
+        continue_msg: cont_msg()
+      ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
@@ -43,11 +46,13 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   end
 
   defp tools(%Environment{skills: skills, tools: tools, job: job}) do
+    skills = Environment.subagent_skills(skills, :integration)
+
     workbench_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :integration), job))
     |> Enum.concat([
-      %Skills{skills: Environment.subagent_skills(skills, :integration)},
-      %Skill{skills: Environment.subagent_skills(skills, :integration)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       Result
     ])

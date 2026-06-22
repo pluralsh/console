@@ -32,12 +32,13 @@ import (
 )
 
 const (
-	AgentRunFinalizer    = "deployments.plural.sh/agentrun-protection"
-	requeueAfterAgentRun = 2 * time.Minute
-	agentRunMaxLifetime  = 12 * time.Hour
-	EnvConsoleURL        = "PLRL_CONSOLE_URL"
-	EnvDeployToken       = "PLRL_DEPLOY_TOKEN"
-	EnvAgentRunID        = "PLRL_AGENT_RUN_ID"
+	AgentRunFinalizer                    = "deployments.plural.sh/agentrun-protection"
+	requeueAfterAgentRun                 = 2 * time.Minute
+	agentRunMaxLifetime                  = 12 * time.Hour
+	initContainerFailurePodDeletionDelay = 5 * time.Minute
+	EnvConsoleURL                        = "PLRL_CONSOLE_URL"
+	EnvDeployToken                       = "PLRL_DEPLOY_TOKEN"
+	EnvAgentRunID                        = "PLRL_AGENT_RUN_ID"
 
 	EnvOpenCodeProvider         = "PLRL_OPENCODE_PROVIDER"
 	EnvOpenCodeEndpoint         = "PLRL_OPENCODE_ENDPOINT"
@@ -60,6 +61,7 @@ const (
 	EnvCodexModel    = "PLRL_CODEX_MODEL"
 	EnvCodexAPIKey   = "PLRL_CODEX_API_KEY"
 	EnvCodexEndpoint = "PLRL_CODEX_ENDPOINT"
+	EnvCodexMethod   = "PLRL_CODEX_METHOD"
 
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
@@ -69,6 +71,7 @@ const (
 
 	EnvExaConnection   = "PLRL_EXA_CONNECTION"
 	EnvMcpExcludeTools = "PLRL_EXCLUDE_TOOLS"
+	EnvStreamingProxy  = "PLRL_STREAMING_PROXY"
 )
 
 var (
@@ -195,12 +198,18 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	if completion, ok := getAgentRunPodCompletion(pod); ok {
+	if completion, ok, delay := getAgentRunPodCompletion(pod); ok {
+		run.Status.Phase = completion.phase
+		run.Status.Error = completion.reason
+
+		if delay {
+			logger.V(2).Info("delaying deletion of agent run pod after init container failure", "pod", pod.Name)
+			return ctrl.Result{RequeueAfter: requeueAfterAgentRun}, nil
+		}
+
 		if err := r.Delete(ctx, pod); err != nil && !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
-		run.Status.Phase = completion.phase
-		run.Status.Error = completion.reason
 		attrs := run.StatusAttributes(completion.status)
 		attrs.Error = completion.reason
 		if _, err := r.ConsoleClient.UpdateAgentRun(ctx, run.GetAgentRunID(), attrs); err != nil {
@@ -277,12 +286,12 @@ type agentRunPodCompletion struct {
 	reason *string
 }
 
-func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool) {
+func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool, bool) {
 	if isAgentRunPodTimedOut(pod) {
 		return &agentRunPodCompletion{
 			status: console.AgentRunStatusCancelled,
 			phase:  v1alpha1.AgentRunPhaseCancelled,
-		}, true
+		}, true, false
 	}
 
 	if failed, reason := isAgentRunPodFailed(pod); failed {
@@ -290,10 +299,17 @@ func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool) {
 			status: console.AgentRunStatusFailed,
 			phase:  v1alpha1.AgentRunPhaseFailed,
 			reason: &reason,
-		}, true
+		}, true, delayInitContainerFailurePodDeletion(getAgentRunPodInitContainerFailureFinishedAt(pod))
 	}
 
-	return nil, false
+	return nil, false, false
+}
+
+func delayInitContainerFailurePodDeletion(finishedAt *metav1.Time) bool {
+	if finishedAt == nil || finishedAt.IsZero() {
+		return false
+	}
+	return time.Since(finishedAt.Time) < initContainerFailurePodDeletionDelay
 }
 
 func isAgentRunPodTimedOut(pod *corev1.Pod) bool {
@@ -338,6 +354,18 @@ func isAgentRunPodFailed(pod *corev1.Pod) (bool, string) {
 		return true, "agent run pod failed"
 	}
 	return false, ""
+}
+
+func getAgentRunPodInitContainerFailureFinishedAt(pod *corev1.Pod) *metav1.Time {
+	if pod == nil {
+		return nil
+	}
+	for _, status := range pod.Status.InitContainerStatuses {
+		if status.State.Terminated != nil && status.State.Terminated.ExitCode != 0 {
+			return &status.State.Terminated.FinishedAt
+		}
+	}
+	return nil
 }
 
 // reconcilePod ensures the pod for the agent run exists and is in the desired state.
@@ -603,6 +631,9 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		}
 		result[EnvCodexModel] = lo.FromPtr(config.Codex.Model)
 		result[EnvCodexAPIKey] = config.Codex.ApiKey
+		if config.Codex.Method != nil {
+			result[EnvCodexMethod] = config.Codex.Method.String()
+		}
 		if config.Codex.Timeout != nil {
 			result[EnvExecTimeout] = config.Codex.Timeout.Duration.String()
 		}

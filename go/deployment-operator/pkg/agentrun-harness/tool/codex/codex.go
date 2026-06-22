@@ -23,9 +23,12 @@ import (
 const (
 	consoleTokenEnv   = "PLRL_CONSOLE_TOKEN"
 	gitAccessTokenEnv = "GIT_ACCESS_TOKEN"
+	openAIAPIKeyEnv   = "OPENAI_API_KEY"
 	gitAskpassPath    = "/plural/.git-askpass"
 	gitSigningKeyPath = common.GitSigningKeyMountPath
 	autonomousProfile = "autonomous"
+	openAIProvider    = "openai-api"
+	openAIBaseURL     = "https://api.openai.com/v1"
 	// sandboxModeHarness disables Codex OS sandboxing; the agent-run pod is the isolation boundary.
 	sandboxModeHarness = "danger-full-access"
 )
@@ -114,19 +117,35 @@ func (in *Codex) writeCodexConfig() error {
 	)
 
 	modelProvider := ""
-	if in.proxy {
+	wireAPI := codexWireAPI(in.Config.Run.Runtime.Config.Codex.Method)
+	switch {
+	case in.proxy:
 		modelProvider = "plural"
+		baseURL := fmt.Sprintf("%s/ext/ai/v1", in.consoleURL)
+		if in.Config.Run.IsStreamingProxyEnabled() {
+			baseURL = common.AgentOpenAIBaseURL
+		}
 		providers = []ModelProviderInput{{
 			Name:    "plural",
-			BaseURL: fmt.Sprintf("%s/ext/ai/v1", in.consoleURL),
+			BaseURL: baseURL,
 			EnvKey:  consoleTokenEnv,
+			WireAPI: wireAPI,
 		}}
-	} else if in.Config.Run.Runtime.Config.Codex.Endpoint != nil {
+	case in.Config.Run.Runtime.Config.Codex.Endpoint != nil:
 		modelProvider = "custom"
 		providers = []ModelProviderInput{{
 			Name:    "custom",
 			BaseURL: *in.Config.Run.Runtime.Config.Codex.Endpoint,
-			EnvKey:  "OPENAI_API_KEY",
+			EnvKey:  openAIAPIKeyEnv,
+			WireAPI: wireAPI,
+		}}
+	case wireAPI != "":
+		modelProvider = openAIProvider
+		providers = []ModelProviderInput{{
+			Name:    openAIProvider,
+			BaseURL: openAIBaseURL,
+			EnvKey:  openAIAPIKeyEnv,
+			WireAPI: wireAPI,
 		}}
 	}
 
@@ -259,12 +278,12 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 	// In proxy mode the plural provider handles auth via PLRL_CONSOLE_TOKEN;
 	// codex login is only needed for direct OpenAI usage.
 	if !in.proxy && in.Config.Run.Runtime.Config.Codex.Endpoint == nil {
-		loginArgs := []string{"-c", "printenv OPENAI_API_KEY | codex login --with-api-key"}
+		loginArgs := []string{"-c", fmt.Sprintf("printenv %s | codex login --with-api-key", openAIAPIKeyEnv)}
 		in.executable = exec.NewExecutable(
 			"bash",
 			exec.WithArgs(loginArgs),
 			exec.WithDir(in.Config.WorkDir),
-			exec.WithEnv([]string{fmt.Sprintf("OPENAI_API_KEY=%s", in.apiKey), fmt.Sprintf("CODEX_HOME=%s", in.codexHome())}),
+			exec.WithEnv([]string{fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey), fmt.Sprintf("CODEX_HOME=%s", in.codexHome())}),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 		)
 		if err := in.executable.Run(ctx); err != nil {
@@ -308,12 +327,17 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 }
 
 func (in *Codex) codexExecOptions() []exec.Option {
+	env := []string{
+		fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken),
+		fmt.Sprintf("CODEX_HOME=%s", in.codexHome()),
+	}
+	if !in.proxy && in.apiKey != "" {
+		env = append(env, fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey))
+	}
+
 	return []exec.Option{
 		exec.WithDir(in.Config.RepositoryDir),
-		exec.WithEnv([]string{
-			fmt.Sprintf("PLRL_CONSOLE_TOKEN=%s", in.consoleToken),
-			fmt.Sprintf("CODEX_HOME=%s", in.codexHome()),
-		}),
+		exec.WithEnv(env),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 	}
 }
@@ -334,6 +358,17 @@ func codexExecArgs(repositoryDir, profile, prompt string) []string {
 		"--cd", repositoryDir,
 		"--profile", profile,
 		"--json", prompt,
+	}
+}
+
+func codexWireAPI(method string) string {
+	switch console.OpenAiMethod(method) {
+	case console.OpenAiMethodChat:
+		return "chat"
+	case console.OpenAiMethodResponses:
+		return "responses"
+	default:
+		return ""
 	}
 }
 

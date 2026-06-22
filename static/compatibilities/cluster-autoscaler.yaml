@@ -8,89 +8,376 @@ versions:
   kube: ['1.35']
   requirements: []
   incompatibilities: []
-  chart_version: 9.57.0
+  summary:
+    helm_changes: "- **Helm chart value added**: `vpa.recommender` \u2014 allows VPA\
+      \ to use a specific recommender (`Added vpa.recommender to the cluster-autoscaler\
+      \ Helm chart`, #8567).\n- **Deployment wiring change**: imagePullSecrets are\
+      \ now passed to the updater deployment (#8711). If you rely on private registries,\
+      \ verify the chart values render `imagePullSecrets` where you expect for both\
+      \ main and updater components.\n- **Image tag bump**: update to `registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.0`\
+      \ (and arch-specific images)."
+    chart_updates: [Chart now supports setting a VPA recommender via `vpa.recommender`
+        (#8567)., Updater deployment now receives `imagePullSecrets` (#8711).]
+    features: [CapacityBuffers v1beta1 API is released and integrated with ResourceQuotas;
+        buffer replicas will shrink to respect quotas., Autoscaler can now account
+        for CSI volume limits when scaling nodes., 'Expanded accelerator resource
+        support (amd.com/gpu, gpu.intel.com/xe, habana.ai/gaudi).', 'New tuning/observability
+        options: `--max-node-startup-time`, `--predicate-parallelism`, and new/updated
+        metrics including node deletion duration histogram and scale-down simulation
+        timing.', 'Optimized scaling loop interval is enabled by default, changing
+        default behavior toward faster loops.']
+    breaking_changes: [CapacityBuffers CRD scope changes from **Cluster** to **Namespaced**;
+        existing CRs/automation must be migrated accordingly., External gRPC cloudprovider
+        APIs deprecate several fields (nodeInfo/time fields) in favor of byte/duration
+        equivalents; external integrations should update before removals land., '`--scale-down-enabled`
+        is deprecated; plan to remove/replace usage in automation/scripts.', AWS provider
+        switches to AWS SDK v2 and deprecates v1; custom builds/plugins depending
+        on v1 need adjustment.]
+  chart_version: 9.58.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.0']
 - version: 1.34.2
   kube: ['1.34']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['In 1.33.x, DRA (Dynamic Resource Allocation) support matured: faster/safer
+        snapshotting (DeltaSnapshotStore, patch-based snapshots) and better handling
+        of node readiness after scale-up; Cluster API provider gained better DRA handling
+        for scale-from-zero.', 'Performance/behavior improvements in 1.33.x: parallelized
+        pod addition when building snapshots (tunable via `--cluster-snapshot-parallelization`),
+        improved ProvisioningRequest processing (less delay, instance filtering via
+        `--checkCapacityProvisioningRequestProcessorInstance`), and default expander
+        changed to `least-waste` (instead of `random`).', 'In 1.34.2, multiple correctness/stability
+        fixes landed: proactive scale-up no longer injects fake pods for scheduling-gated
+        pods, and a panic in SimulateNodeRemoval is prevented when node info is missing.',
+      '1.34.2 includes Cluster API improvements (process managed labels) and dependency
+        bumps to Kubernetes 1.34.2, plus Azure SKU list/testing updates and a Capacity
+        Buffers CRD scope fix backport.']
+    breaking_changes: ['Removed deprecated flags in the 1.33 line; upgrades will fail
+        or behave unexpectedly if your deployment still sets any of: `--max-autoprovisioned-node-group-count`,
+        `--node-autoprovisioning-enabled`, `--gce-expander-ephemeral-storage-support`,
+        or `--max-empty-bulk-delete`.', 'Default expander changed from `random` to
+        `least-waste` in 1.33; if you relied on prior expander behavior, explicitly
+        set `--expander=` to keep the old selection strategy.']
   chart_version: 9.53.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.34.2']
 - version: 1.33.0
   kube: ['1.33']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['DRA (Dynamic Resource Allocation) work matured in 1.33.0 with more
+        efficient snapshot processing (DeltaSnapshotStore, patch-based snapshots)
+        and better handling of node readiness after scale-up.', 'Performance improvements:
+        parallelized adding pods to the cluster snapshot for scale-up; tunable via
+        `--cluster-snapshot-parallelization`.', 'ProvisioningRequest improvements:
+        ability to filter CheckCapacity ProvisioningRequests by autoscaler instance;
+        faster/frequent processing of newly created ProvisioningRequests; additional
+        throughput improvements (parallel condition marking).', 'Behavioral improvements:
+        default expander changed from `random` to `least-waste` to avoid selecting
+        unnecessarily expensive nodes.', 'Provider enhancements: Cluster API provider
+        can handle DRA devices for scale-from-0; AWS ignores unrecognized provider
+        IDs; Azure VM node pools enabled; GCE pricing and diskTypes request resilience
+        updates; various provider bug fixes (Azure crash, Kamatera alignment, GCE
+        memory leak).']
+    breaking_changes: ['Removed deprecated flags in 1.33.0: `--max-autoprovisioned-node-group-count`,
+        `--node-autoprovisioning-enabled`, `--gce-expander-ephemeral-storage-support`,
+        and `--max-empty-bulk-delete` (previously deprecated; in 1.32.0 it still worked
+        but warned).', 'If you relied on the default expander behavior, note the default
+        changed to `least-waste`; set `--expander=random` explicitly to preserve prior
+        behavior.']
   chart_version: 9.51.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.33.0']
 - version: 1.32.0
   kube: ['1.32']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Experimental Dynamic Resource Allocation (DRA) autoscaling support
+        (disabled by default); enable with `--enable-dynamic-resource-allocation`
+        plus the cluster `DynamicResourceAllocation` feature gate and additional RBAC
+        for `resource.k8s.io` objects., 'ProvisioningRequest improvements: v1 CRD
+        added; faster/frequent loops when ProvisioningRequest seen; batch processing
+        for CheckCapacity requests with new batch-size/timebox flags; new parameter
+        limiting retries; parallel marking of CheckCapacity conditions to increase
+        throughput.', 'Operational behavior tweaks: best-effort eviction of DaemonSet
+        pods when draining empty nodes; custom lease resource name via `--lease-resource-name`;
+        new flag `--force-delete-long-unregistered-nodes` to remove long-unregistered
+        nodes even if it violates nodegroup min size constraints.', 'Cloud-provider
+        enhancements: AWS adds Nvidia L40s and g6e instance support and optimizes
+        instance requirement caching; Azure improves scale-from-zero accuracy, adds
+        cache/fast-delete flags, spot pool scaling fixes, and updated SKU list; Hetzner
+        adds custom endpoint and placement group support; OCI adds node-group auto-discovery
+        support; Exoscale adds `--nodes` flag support.', 'gRPC expander behavior change:
+        if server returns nil best options, client returns nil (avoid unexpected behavior).']
+    breaking_changes: [Removed legacy scale-down code (may affect behavior/metrics;
+        validate scale-down outcomes in staging)., '`--parallel-drain` flag removed;
+        use `--max-drain-parallelism` (set to 1 to preserve single-node drain behavior).',
+      'Azure GPU node identification changed: VMSS GPU nodes are now identified by
+        `kubernetes.azure.com/accelerator` label instead of `accelerator` (update
+        labels/queries/taints/affinity accordingly).', '`--max-empty-bulk-delete`
+        deprecated; still works but will be replaced by `--max-scale-down-parallelism`
+        in a future release (start migrating now).']
   chart_version: 9.46.6
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.32.0']
 - version: 1.31.0
   kube: ['1.31']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Proactive scale-up (disabled by default) can provision nodes before
+        pods are fully created/marked unschedulable; tunable with the new `--pod-injection-limit`
+        flag to avoid instability on large clusters., ProvisioningRequest v1 API support
+        was added., New `least-nodes` expander option was introduced to bias scale-ups
+        toward using fewer nodes., New `--max-binpacking-time` flag caps binpacking
+        duration to prevent rare unresponsive behavior with very large pending pod
+        sets., Improved handling of failed scale-ups (faster recovery when multiple
+        quota/stockout errors occur)., Cluster Autoscaler can use in-cluster Kubernetes
+        config when self-hosted as a pod (simplifies auth/config in many deployments).,
+      'Provider improvements: AWS fixes around placeholder vs real instance scale-down
+        and taints on MNGs at size 0; Azure config/interface improvements and new
+        features; GCE performance improvements for listing instances; Cluster API
+        provider gains per-nodegroup autoscaling options; Hetzner backoff fix.']
+    breaking_changes: ['Azure ACTION REQUIRED: VMSS GPU node groups must now include
+        the `kubernetes.azure.com/accelerator` label in addition to `accelerator`,
+        otherwise GPU nodes may not be recognized/handled correctly.', 'Azure configuration
+        field and environment variable names were renamed (old names still work and
+        take precedence), but teams should update configs to the new names and reference
+        the cloud-provider-azure configuration docs going forward.']
   chart_version: 9.44.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.31.0']
 - version: 1.30.0
   kube: ['1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Provider rename: the former Packet cloud provider is now fully renamed
+        to Equinix Metal; in 1.30.0 you should use `--cloud-provider=equinixmetal`
+        and update any related env vars/configs if still referencing packet.', 'New
+        scale-down behavior control: `--scale-down-delay-type-local` lets you choose
+        whether the `--scale-down-delay-after-*` timers apply per nodegroup (local)
+        or across all nodegroups (global).', 'New scale-up backoff control: `--node-group-keep-backoff-out-of-resources`
+        makes CA honor the full backoff window after out-of-resources errors during
+        scale-up.', 'Operational observability improvements: node group health/backoff
+        metrics added; `function_duration_seconds` metric uses finer exponential buckets;
+        status ConfigMap now stores status data as YAML and includes scale-up backoff
+        error info.', 'Additional optional tuning: restored QPS limit flags; added
+        `frequent-loops-enabled` (disabled by default) to run iterations more frequently.']
+    breaking_changes: ['Cloud provider rename impact: if you still use `--cloud-provider=packet`
+        or Packet-specific env vars, migrate to Equinix Metal naming; Packet is effectively
+        removed/renamed in 1.30.0.', 'Status ConfigMap format change: the `cluster-autoscaler-status`
+        ConfigMap status field switches to YAML, so any scripts/parsers expecting
+        the previous format must be updated.', 'ProvisioningRequest is not actually
+        available by default: code landed with beta API but the feature flag is hard-disabled
+        in 1.30.0; enabling requires reverting #6755 and building custom binaries/images.']
   chart_version: 9.37.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.30.0']
 - version: 1.29.0
   kube: ['1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [New `--bypassed-scheduler-names` flag to let Cluster Autoscaler react
+        to pending pods without waiting for specific schedulers to mark them unschedulable;
+        can reduce scale-up latency but may increase CA load on very large bursts.,
+      "New `--drain-priority-config` flag to tune scale-down/drain behavior by pod\
+        \ priority; mutually exclusive with `--max-graceful-termination-sec` (defaults\
+        \ preserve existing behavior if you don\u2019t use it).", "Optional dynamic\
+        \ node delete delay with `--dynamic-node-delete-delay-after-taint-enabled`,\
+        \ making taint\u2192drain delay adapt to API server latency for better scale-down\
+        \ throughput and fewer race conditions.", Structured logging support via `--logging-format
+        json`., 'New metrics: `node_group_target_count` (requires `--emit-per-nodegroup-metrics`)
+        and `node_taints_count`.', New `--kube-api-content-type` flag; default switches
+        to protobuf (`application/vnd.kubernetes.protobuf`) instead of JSON., 'Provider
+        enhancements: AWS instance type list updates, caching to reduce AWS API calls,
+        better scale-from-zero with existing EBS CSI PVs; Civo scale-from-zero; Cluster
+        API arch override for scale-from-zero; new Kwok cloud provider; gRPC timeout
+        config and better optional-method signaling.']
+    breaking_changes: ['Deprecation: `--ignore-taint` / `ignore-taint.cluster-autoscaler.kubernetes.io/`
+        is deprecated in favor of `--status-taint`/`status-taint...` and `--startup-taint`/`startup-taint...`;
+        old flag still works but now behaves like startup taint.', 'Deprecation: unused
+        flags `--node-autoprovisioning-enabled` and `--max-autoprovisioned-node-group-count`
+        are deprecated and will be removed in a future release.', 'Azure: AKS `vmType`
+        removed (may require config cleanup for AKS users).', 'Equinix Metal: `packet`
+        cloud provider is deprecated in favor of `equinixmetal`; env var names changed
+        (with backward compatibility) and facilities support removed in favor of metros.',
+      'GCE: `--gce-expander-ephemeral-storage-support` deprecated/ignored because
+        ephemeral storage support is always on.', Default API server content type
+        changes to protobuf unless overridden; can affect environments that rely on
+        JSON for debugging/proxies or have compatibility constraints.]
   chart_version: 9.36.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0']
 - version: 1.28.2
   kube: ['1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Updates Cluster Autoscaler to v1.28.2, which includes a fix for a
+        startup crash when using the `--leader-elect` flag.', Adds an official s390x
+        image variant for v1.28.2 (in addition to amd64/arm64).]
+    breaking_changes: []
   chart_version: 9.34.1
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.28.2']
 - version: 1.27.2
   kube: ['1.27']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Updated Kubernetes vendor dependencies to 1.27.2 (aligns Cluster Autoscaler
+        with Kubernetes 1.27 APIs/behavior)., 'AliCloud: added support for RRSA authentication.',
+      'AWS: added preview support for EC2 instance type p4de.24xlarge.']
+    breaking_changes: []
   chart_version: 9.33.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.27.2']
 - version: 1.26.2
   kube: ['1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Improved scale-down behavior: Cluster Autoscaler no longer blocks
+        scale-down across the whole cluster just because some pods are waiting for
+        nodes to boot; it can scale down other node groups while scale-up is in progress.',
+      Added a gRPC expander and an external gRPC cloud provider option for extensible
+        scaling strategies/providers., Added a debugging snapshot feature to capture
+        autoscaler state for troubleshooting., Added `--node-info-cache-expire-time`
+        to control how long node templates are cached., 'Improved resilience: autoscaler
+        can continue operating even if it cannot remove some VMs that failed to register
+        to the cluster.', 'Performance fixes: faster reaction when many similar pods
+        exist (e.g., indexed Jobs), improved handling of large scale-ups, and optimizations
+        for large environments (e.g., GCE).', 'Improved correctness: fixed multiple
+        issues with daemonset accounting during scale-up calculations.', Status ConfigMap
+        now includes additional details about nodes with unready resources., 'Cloud/provider
+        enhancements: AWS early-abort when ASG has no capacity and tag key `:` support;
+        updated instance type lists for AWS/Azure; Azure NP-series support; Cluster
+        API multi-node delete fix; provider additions/renames (OracleCloud, TencentCloud,
+        Vultr; Packet->Equinix Metal).', 'Azure-specific stability fix in 1.26.2:
+        avoids crash in non-public clouds.']
+    breaking_changes: ['Container image registry moved from `k8s.gcr.io` to `registry.k8s.io`
+        between 1.24.0 and 1.26.2; update your image repository references, mirrors,
+        and any allowlists accordingly.']
   chart_version: 9.28.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.26.2']
 - version: 1.24.0
   kube: ['1.24']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Scale-down no longer blocks cluster-wide when some pods are waiting
+        for nodes to boot; scale-down can proceed in other node groups while scale-up
+        is happening elsewhere., 'New gRPC expander option and a new External gRPC
+        cloud provider, enabling custom expansion logic and providers over gRPC.',
+      New debugging snapshot capability to capture autoscaler state for troubleshooting.,
+      "Improved resiliency: autoscaler can continue operating even if it can\u2019\
+        t delete some VMs that never registered with the cluster.", New --node-info-cache-expire-time
+        flag to control caching duration for node templates., 'Provider additions/updates:
+        new OracleCloud, TencentCloud, and Vultr providers; Equinix Metal provider
+        rename from Packet; instance-type list updates across AWS/Azure and performance
+        improvements on GCE.']
+    breaking_changes: ['If you build a custom Cluster Autoscaler image or import its
+        code, note that the previously deprecated NodeInfoProcessor interface is removed
+        in 1.24 and you must migrate to TemplateNodeInfoProvider; official images
+        are unaffected.', Go module import of Cluster Autoscaler 1.24.0 may fail to
+        compile for downstream projects importing CA code (known issue); this does
+        not affect running the official container image.]
   chart_version: 9.27.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.24.0']
 - version: 1.23.0
   kube: ['1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['`--expander` now supports a comma-separated list of expanders with
+        fallback behavior when the first returns multiple node groups.', New `--feature-gates`
+        flag to control Kubernetes feature gates for the embedded kube-scheduler code
+        used by Cluster Autoscaler., More reliable Kubernetes Events attached to the
+        `cluster-autoscaler-status` ConfigMap for every scale-up/scale-down attempt
+        (including failures)., Performance improvements for clusters with many pods
+        using projected volumes., 'AWS: Instance type discovery now uses the EC2 `DescribeInstanceTypes`
+        API (adds NVIDIA A100 support), reduces API calls, and allows per-ASG scale-down
+        options.', 'Azure: Per-VMSS scale-down options, optional use of CLI credentials
+        instead of service principal, and NVIDIA A100 support.', 'GCE: Per-MIG scale-down
+        options, ability to specify SSD ephemeral-storage via instance templates enabling
+        scale-from-0 for pods requesting it, and reduced API calls.', New Brightbox
+        cloud provider support.]
+    breaking_changes: ['AWS default configuration now requires additional IAM permission
+        `ec2:DescribeInstanceTypes` due to switching instance type list generation
+        to the DescribeInstanceTypes API.', NodeInfoProcessor interface is deprecated
+        (removed in 1.24); impacts only users building customized Cluster Autoscaler
+        images/plugins and should be migrated to TemplateNodeInfoProvider.]
   chart_version: 9.24.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.23.0']
 - version: 1.21.1
   kube: ['1.21']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Core performance and correctness improvements in binpacking and scale-down
+        simulations, plus new metric for `--max-nodes-total` and better utilization
+        calculation (DaemonSet request handling).', 'Broader cloud provider support
+        and enhancements: new providers (CloudStack, Exoscale, IONOS) and major additions
+        for Cluster API and HuaweiCloud; ARM64 build support added.', AWS/Azure/GCE
+        received numerous reliability/performance improvements; in 1.21.1 AWS gains
+        proper IMDSv2 support and reduced memory usage; Packet adds providerID prefix
+        support and configurable controller node label.]
+    breaking_changes: [Error type returned by `IncreaseSize` changed from `apiError`
+        to `cloudProviderError` (could affect error handling or log parsing in integrations/tests).]
   chart_version: 9.13.1
   images: ['k8s.gcr.io/autoscaling/cluster-autoscaler:v1.21.1']
 - version: 1.20.0
   kube: ['1.20']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds Helm chart support for the Magnum cloud provider., 'Cluster
+        API provider: switches to using Kubernetes Unstructured objects, adds node
+        autodiscovery support and support for --cloud-config; updates the annotation
+        group identifier used.']
+    features: ['Performance improvements: faster binpacking and scale-down simulations
+        via fewer scheduler PreFilter calls; large-cluster scale-down unneeded-node
+        detection sped up 5x+.', 'New metrics/observability: exposes --max-nodes-total
+        as a metric.', 'New platform support: ARM64 image/build support; added providers
+        (Apache CloudStack, Exoscale, IONOS) and expanded support for HuaweiCloud
+        and Packet.', 'Improved scale-down behavior: best-effort eviction for DaemonSet
+        pods on non-empty nodes; more accurate node utilization by accounting for
+        DaemonSet requests in allocatable denominator.', 'Multiple cloud-provider
+        fixes and enhancements across AWS/Azure/GCE (pricing, caching, labels, throttling/backoff
+        behavior, template labels, etc.).']
+    breaking_changes: [Error type returned from IncreaseSize changed from apiError
+        to cloudProviderError (could affect integrations relying on the specific error
+        type)., 'Image registry/name changes between 1.18.x and 1.20.0: 1.20.0 images
+        are published under k8s.gcr.io/autoscaling/* whereas 1.18.1 notes reference
+        k8s-artifacts-prod registries; update any pinned image repos accordingly.']
   chart_version: 9.9.2
   images: ['k8s.gcr.io/autoscaling/cluster-autoscaler:v1.20.0']
 - version: 1.18.1
   kube: ['1.18']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 9.4.0
   images: ['us.gcr.io/k8s-artifacts-prod/autoscaling/cluster-autoscaler:v1.18.1']

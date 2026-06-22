@@ -29,7 +29,7 @@ func (in *OpenAIRouter) embeddingsRequestConverter(ctx *schemas.BifrostContext, 
 		return nil, errors.New("invalid request type")
 	}
 
-	provider, model, err := in.validateModelFormat(embeddingReq.Model)
+	provider, model, _, err := in.resolveModel(ctx, embeddingReq.Model)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (in *OpenAIRouter) embeddingsRequestConverter(ctx *schemas.BifrostContext, 
 }
 
 func (in *OpenAIRouter) embeddingsResponseConverter(_ *schemas.BifrostContext, resp *schemas.BifrostEmbeddingResponse) (interface{}, error) {
-	if resp.ExtraFields.Provider == schemas.OpenAI {
+	if isOpenAIBackedProvider(resp.ExtraFields.Provider) {
 		if resp.ExtraFields.RawResponse != nil {
 			return resp.ExtraFields.RawResponse, nil
 		}

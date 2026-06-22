@@ -18,6 +18,8 @@ func secretKeySelectorSet(ref *corev1.SecretKeySelector) bool {
 }
 
 // AgentRuntimeSpec defines the desired state of AgentRuntime
+//
+// +kubebuilder:validation:XValidation:rule="!has(self.streamingProxy) || !self.streamingProxy || (has(self.aiProxy) && self.aiProxy)",message="streamingProxy requires aiProxy to be enabled"
 type AgentRuntimeSpec struct {
 	// Name of this AgentRuntime.
 	// If not provided, the name from AgentRuntime.ObjectMeta will be used.
@@ -62,6 +64,12 @@ type AgentRuntimeSpec struct {
 	//   - GEMINI: vertex/{model}
 	//   - CUSTOM: no automatic prefix; use provider/name explicitly
 	AiProxy *bool `json:"aiProxy,omitempty"`
+
+	// StreamingProxy routes OpenAI-compatible LLM requests through the in-pod mcpserver
+	// sse conversion proxy before they reach the Console AI proxy (/ext/ai). Only valid when aiProxy
+	// is enabled. Applies to CODEX and OPENCODE runtimes.
+	// +kubebuilder:validation:Optional
+	StreamingProxy *bool `json:"streamingProxy,omitempty"`
 
 	// Dind enables Docker-in-Docker for this agent runtime.
 	// When true, the runtime will be configured to run with DinD support.
@@ -321,6 +329,13 @@ type CodexConfigRaw struct {
 	// Model to use.
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API Codex should use.
+	// AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.
+	// RESPONSES forces /responses.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints).
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
@@ -339,6 +354,13 @@ type CodexConfig struct {
 	// Model to use.
 	Model *string `json:"model,omitempty"`
 
+	// Method configures which OpenAI API Codex should use.
+	// AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.
+	// RESPONSES forces /responses.
+	// +kubebuilder:validation:Enum=CHAT;RESPONSES;AUTO
+	// +kubebuilder:validation:Optional
+	Method *console.OpenAiMethod `json:"method,omitempty"`
+
 	// Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints).
 	// +kubebuilder:validation:Optional
 	Endpoint *string `json:"endpoint,omitempty"`
@@ -355,6 +377,7 @@ func (in *CodexConfig) ToCodexConfigRaw(secretGetter func(corev1.SecretKeySelect
 
 	result := &CodexConfigRaw{
 		Model:    in.Model,
+		Method:   in.Method,
 		Endpoint: in.Endpoint,
 		Timeout:  in.Timeout,
 	}
@@ -729,6 +752,10 @@ func (in *AgentRuntime) Diff(hasher Hasher) (changed bool, sha string, err error
 
 func (in *AgentRuntime) IsAiProxyEnabled() bool {
 	return in != nil && in.Spec.AiProxy != nil && *in.Spec.AiProxy
+}
+
+func (in *AgentRuntime) IsStreamingProxyEnabled() bool {
+	return in.IsAiProxyEnabled() && in.Spec.StreamingProxy != nil && *in.Spec.StreamingProxy
 }
 
 func (in *AgentRuntime) ConsoleName() string {

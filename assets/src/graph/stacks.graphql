@@ -69,6 +69,10 @@ fragment Stack on InfrastructureStack {
       parallelism
       refresh
     }
+    terragrunt {
+      parallelism
+      refresh
+    }
   }
   repository {
     id
@@ -261,6 +265,10 @@ fragment StackConfiguration on StackConfiguration {
   version
   image
   terraform {
+    parallelism
+    refresh
+  }
+  terragrunt {
     parallelism
     refresh
   }
@@ -535,8 +543,14 @@ mutation CreateOnDemandRun(
   $stackId: ID!
   $context: Json
   $commands: [CommandAttributes]
+  $runName: String
 ) {
-  onDemandRun(stackId: $stackId, context: $context, commands: $commands) {
+  onDemandRun(
+    stackId: $stackId
+    context: $context
+    commands: $commands
+    runName: $runName
+  ) {
     ...StackRun
   }
 }

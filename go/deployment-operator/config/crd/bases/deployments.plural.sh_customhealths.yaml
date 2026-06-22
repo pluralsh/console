@@ -39,7 +39,13 @@ spec:
           spec:
             description: CustomHealthSpec defines the desired state of CustomHealth
             properties:
+              group:
+                type: string
+              kind:
+                type: string
               script:
+                type: string
+              version:
                 type: string
             type: object
           status:

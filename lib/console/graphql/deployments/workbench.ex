@@ -21,6 +21,23 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_job_attributes do
     field :prompt, :string, description: "the prompt for this job"
+    field :modes,  :workbench_job_modes_attributes, description: "mode-specific options for this job"
+  end
+
+  input_object :workbench_job_modes_attributes do
+    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :model,  :workbench_job_model_attributes, description: "model override for this job"
+    field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+  end
+
+  input_object :workbench_job_model_attributes do
+    field :provider, non_null(:ai_provider), description: "the ai provider for this job"
+    field :model,    non_null(:string), description: "the model name for this job"
+  end
+
+  input_object :workbench_job_coding_modes_attributes do
+    field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
+    field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
   end
 
   input_object :workbench_job_update_attributes do
@@ -85,6 +102,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_cron_attributes do
     field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
+    field :modes,   :workbench_job_modes_attributes, description: "mode-specific options for jobs created by this cron"
     field :user_id, :id, description: "user this cron runs as; must have read access to the workbench"
   end
 
@@ -92,6 +110,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :title,    :string, description: "display title for the saved prompt"
     field :category, :string, description: "grouping category for the saved prompt"
     field :prompt,   non_null(:string), description: "the saved prompt text"
+    field :modes,    :workbench_job_modes_attributes, description: "mode-specific options for jobs created from this prompt"
   end
 
   input_object :workbench_skill_attributes do
@@ -119,6 +138,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :issue_webhook_id,       :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
     field :matches,                :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
     field :prompt,                 :string, description: "optional prompt text applied when this webhook matches"
+    field :modes,                  :workbench_job_modes_attributes, description: "mode-specific options for jobs created by this webhook"
     field :priority,               :integer, description: "higher values are preferred when multiple webhooks match the same payload"
     field :user_id,                :id, description: "user this webhook runs as; must have read access to the workbench"
     field :override_webhook_user,  :boolean, description: "when true on update, sets userId to the authenticated user"
@@ -128,6 +148,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :chat_connection_id,      :id, description: "chat provider connection id (required for create)"
     field :channel,                 :string, description: "external channel identifier (globally unique)"
     field :prompt,                  :string, description: "optional prompt text applied when this chatbot runs"
+    field :modes,                   :workbench_job_modes_attributes, description: "mode-specific options for jobs created by this chatbot"
     field :message_behavior,        :workbench_chatbot_message_behavior, description: "how the chatbot posts responses in the channel"
     field :user_id,                 :id, description: "user this chatbot runs as; must have read access to the workbench"
     field :override_chatbot_user,   :boolean, description: "when true on update, sets userId to the authenticated user"
@@ -149,6 +170,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_tool_configuration_attributes do
     field :http,       :workbench_tool_http_configuration_attributes, description: "http tool configuration"
     field :elastic,    :workbench_tool_elastic_connection_attributes, description: "elasticsearch connection (logs)"
+    field :opensearch, :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
     field :prometheus, :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
     field :loki,       :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
     field :splunk,     :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
@@ -178,6 +200,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :username, non_null(:string), description: "basic auth username"
     field :password, :string, description: "basic auth password"
     field :index,    non_null(:string), description: "elasticsearch index"
+  end
+
+  input_object :workbench_tool_opensearch_connection_attributes do
+    field :host,                  non_null(:string), description: "aws opensearch endpoint"
+    field :index,                 non_null(:string), description: "opensearch index"
+    field :aws_access_key_id,     :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_secret_access_key, :string, description: "AWS secret access key for SigV4 authentication"
+    field :aws_region,            :string, description: "AWS region for SigV4 authentication"
+    field :assume_role_arn,       :string, description: "optional IAM role ARN to assume before signing OpenSearch requests"
+    field :use_pod_identity,      :boolean, description: "whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials"
   end
 
   input_object :workbench_tool_prometheus_connection_attributes do
@@ -435,6 +467,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+    field :modes,        :workbench_job_modes, description: "mode-specific options for this job"
+    field :usage,        :workbench_job_usage, description: "token and cost usage for this job"
 
     field :chatbot_message, :chatbot_message,
       resolve: dataloader(Deployments),
@@ -480,6 +514,33 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_job_modes do
+    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
+    field :model,  :workbench_job_model, description: "model override for this job"
+    field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+  end
+
+  object :workbench_job_model do
+    field :provider, :ai_provider, description: "the ai provider for this job"
+    field :model,    :string, description: "the model name for this job"
+  end
+
+  object :workbench_job_coding_modes do
+    field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
+    field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  object :workbench_job_usage do
+    field :input_tokens,     :integer, description: "input tokens consumed by this job"
+    field :output_tokens,    :integer, description: "output tokens produced by this job"
+    field :total_tokens,     :integer, description: "total tokens consumed by this job"
+    field :cached_tokens,    :integer, description: "cached input tokens used by this job"
+    field :reasoning_tokens, :integer, description: "reasoning tokens produced by this job"
+    field :input_cost,       :float, description: "input token cost for this job"
+    field :output_cost,      :float, description: "output token cost for this job"
+    field :total_cost,       :float, description: "total token cost for this job"
+  end
+
   object :workbench_job_activity do
     field :id,       non_null(:string), description: "the id of the activity"
     field :status,   non_null(:workbench_job_activity_status), description: "the status of the activity"
@@ -493,6 +554,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
+    field :user,         :user, resolve: dataloader(User), description: "the user who created this activity"
 
     timestamps()
   end
@@ -673,6 +735,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :id,          non_null(:string), description: "the id of the cron"
     field :crontab,     :string, description: "cron expression"
     field :prompt,      :string, description: "prompt to run when the cron triggers"
+    field :modes,       :workbench_job_modes, description: "mode-specific options for jobs created by this cron"
     field :next_run_at, :datetime, description: "when the cron will next run"
     field :last_run_at, :datetime, description: "when the cron last ran"
     field :user_id,     :id, description: "user this cron runs as"
@@ -696,6 +759,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     field :prompt, :string, description: "the saved prompt text"
+    field :modes,  :workbench_job_modes, description: "mode-specific options for jobs created from this prompt"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this prompt belongs to"
 
@@ -787,6 +851,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "average eval grade across workbench eval results"
   end
 
+  object :workbench_usage_timeseries do
+    field :timestamp,     :datetime, description: "UTC timestamp for this data point"
+    field :workbench,     :workbench, description: "the workbench this usage data is associated with"
+    field :input_tokens,  :integer, description: "number of input tokens consumed during this interval"
+    field :output_tokens, :integer, description: "number of output tokens produced during this interval"
+    field :total_cost,    :float, description: "total cost for this interval, in USD"
+  end
+
   object :workbench_webhook_matches do
     field :regex,            :string, description: "regex pattern to match"
     field :substring,        :string, description: "substring to match"
@@ -799,6 +871,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,   :string, description: "optional prompt text applied when this webhook matches"
     field :priority, :integer, description: "higher values are preferred when multiple webhooks match the same payload"
     field :matches,  :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+    field :modes,    :workbench_job_modes, description: "mode-specific options for jobs created by this webhook"
     field :user_id,  :id, description: "user this webhook runs as"
 
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
@@ -813,6 +886,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :id,               non_null(:string), description: "the id of this chatbot binding"
     field :channel,          non_null(:string), description: "external channel identifier (globally unique)"
     field :prompt,           :string, description: "optional prompt text applied when this chatbot runs"
+    field :modes,            :workbench_job_modes, description: "mode-specific options for jobs created by this chatbot"
     field :message_behavior, non_null(:workbench_chatbot_message_behavior), description: "how the chatbot posts responses in the channel"
     field :user_id, :id, description: "user this chatbot runs as"
 
@@ -842,6 +916,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_configuration do
     field :http,      :workbench_tool_http_configuration, description: "http tool configuration"
     field :elastic,   :workbench_tool_elastic_connection, description: "elasticsearch connection (no secrets)"
+    field :opensearch, :workbench_tool_opensearch_connection, description: "aws opensearch connection (no secrets)"
     field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
     field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
@@ -870,6 +945,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url,      non_null(:string), description: "elasticsearch base url (credentials never exposed)"
     field :index,    non_null(:string), description: "elasticsearch index"
     field :username, non_null(:string), description: "basic auth username"
+  end
+
+  object :workbench_tool_opensearch_connection do
+    field :host,              non_null(:string), description: "aws opensearch endpoint"
+    field :index,             non_null(:string), description: "opensearch index"
+    field :aws_access_key_id, :string, description: "AWS access key id for SigV4 authentication"
+    field :aws_region,        :string, description: "AWS region for SigV4 authentication"
+    field :assume_role_arn,   :string, description: "assumed role ARN when configured"
+    field :use_pod_identity,  :boolean, description: "whether pod identity (IRSA/Workload Identity) is used for AWS authentication"
   end
 
   object :workbench_tool_prometheus_connection do
@@ -1204,6 +1288,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
 
       resolve &Deployments.aggregates/2
+    end
+
+    field :workbench_usage, list_of(:workbench_usage_timeseries) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period,     :eval_results_period
+      arg :q,          :string
+      arg :project_id, :id, description: "filter workbenches by project"
+
+      resolve &Deployments.workbench_usage/2
     end
 
     field :workbench_pr_merge_rates, list_of(:workbench_pr_merge_rate_entry) do

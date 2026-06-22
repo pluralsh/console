@@ -11,6 +11,10 @@ defmodule ConsoleWeb.Router do
     plug ConsoleWeb.Plugs.Authorized
   end
 
+  pipeline :graphql_multipart_spec do
+    plug ConsoleWeb.Plugs.GraphQLMultipartSpec
+  end
+
   pipeline :openapi do
     plug :accepts, ["json"]
     plug ConsoleWeb.Plugs.EnsureAuthenticated
@@ -63,12 +67,16 @@ defmodule ConsoleWeb.Router do
     scope "/" do
       pipe_through [:auth]
 
-      forward "/gql", Console.ExternalGraphQl.Plug,
-        schema: Console.ExternalGraphQl,
-        document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
-        analyze_complexity: true,
-        max_complexity: 650,
-        token_limit: 5_000
+      scope "/" do
+        pipe_through [:graphql_multipart_spec]
+
+        forward "/gql", Console.ExternalGraphQl.Plug,
+          schema: Console.ExternalGraphQl,
+          document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
+          analyze_complexity: true,
+          max_complexity: 650,
+          token_limit: 5_000
+      end
 
       scope "/v1", ConsoleWeb do
         get "/digests", GitController, :digest
@@ -214,12 +222,16 @@ defmodule ConsoleWeb.Router do
       end
     end
 
-    forward "/gql", Absinthe.Plug,
-      schema: Console.GraphQl,
-      document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
-      analyze_complexity: true,
-      max_complexity: 650,
-      token_limit: 5_000
+    scope "/" do
+      pipe_through [:graphql_multipart_spec]
+
+      forward "/gql", Absinthe.Plug,
+        schema: Console.GraphQl,
+        document_providers: [Console.GraphQl.PersistedQuery, Absinthe.Plug.DocumentProvider.Default],
+        analyze_complexity: true,
+        max_complexity: 650,
+        token_limit: 5_000
+    end
   end
 
   scope "/", ConsoleWeb do

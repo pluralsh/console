@@ -1,9 +1,11 @@
 defmodule Console.AI.Tools.Explain.SummarizeComponentTest do
-  use Console.DataCase, async: true
+  use Console.DataCase, async: false
   use Mimic
   import KubernetesScaffolds
   alias Console.AI.Tools.Explain.SummarizeComponent
   alias Console.AI.Tools.Explain.Summary
+
+  setup :set_mimic_global
 
   describe "implement/1" do
     test "it will summarize a component" do
@@ -12,20 +14,32 @@ defmodule Console.AI.Tools.Explain.SummarizeComponentTest do
         ai: %{
           enabled: true,
           provider: :openai,
-          openai: %{access_token: "key"},
+          openai: %{access_token: "key"}
         }
       )
+
       insert(:user, email: "console@plural.sh", roles: %{admin: true})
       service = insert(:service)
-      component = insert(:service_component, service: service, version: "v1", group: "apps", kind: "Deployment", namespace: "default", name: "test")
+
+      component =
+        insert(:service_component,
+          service: service,
+          version: "v1",
+          group: "apps",
+          kind: "Deployment",
+          namespace: "default",
+          name: "test"
+        )
 
       Console.AI.Tool.context(service: refetch(service))
       expect(Kube.Utils, :run, fn _ -> {:ok, deployment("default", "test")} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: [event()]}} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: [pod("test")]}} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: [event()]}} end)
 
-      expect(Console.AI.Provider, :simple_tool_call, fn _, _, _ -> {:ok, %Summary{summary: "This is a test summary", relevant: true}} end)
-
+      expect(Console.AI.Provider, :simple_tool_call, fn _, _, _ ->
+        {:ok, %Summary{summary: "This is a test summary", relevant: true}}
+      end)
 
       model = %SummarizeComponent{component_id: component.id, prompt: "What is this component?"}
       {:ok, summary} = SummarizeComponent.implement(model)

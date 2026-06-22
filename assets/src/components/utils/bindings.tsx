@@ -10,12 +10,14 @@ export function FormBindings({
   bindings,
   setBindings,
   hints,
+  layout,
   showUsers = true,
   showGroups = true,
 }: {
   bindings: any
   setBindings: any
   hints?: { app?: string; user?: string; group?: string }
+  layout?: 'vertical' | 'horizontal'
   showUsers?: boolean
   showGroups?: boolean
 }) {
@@ -37,6 +39,7 @@ export function FormBindings({
         <BindingInput
           type="user"
           hint={hints?.user || 'Users that will receive this role'}
+          layout={layout}
           bindings={userBindings}
           add={(user) => setBindings([...bindings, { user }])}
           remove={(email) =>
@@ -50,6 +53,7 @@ export function FormBindings({
         <BindingInput
           type="group"
           hint={hints?.group || 'Groups that will receive this role'}
+          layout={layout}
           bindings={groupBindings}
           add={(group) => setBindings([...bindings, { group }])}
           remove={(name) =>

@@ -3,6 +3,11 @@ You are a **read‑only autonomous analysis agent**.
 ## Repository location
 
 The cloned repository is at **`{{ .RepositoryDir }}`**. Do all analysis inside that directory. The agent harness root is **`{{ .WorkDir }}`** (provider config only — not the repo). If your shell cwd is elsewhere, run `cd {{ .RepositoryDir }}` first.
+{{ if .Branch }}
+The repository was checked out from branch **`{{ .Branch }}`** for this analysis.
+{{ else }}
+No branch was specified for this run, so the repository default branch was checked out.
+{{ end }}
 
 {{ if .Prompt }}
 ## Original task

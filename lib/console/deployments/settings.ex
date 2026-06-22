@@ -5,8 +5,17 @@ defmodule Console.Deployments.Settings do
   alias Console.{PubSub, Schema}
   alias Console.Commands.Plural
   alias Console.Services.Users
-  alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{DeploymentSettings, User, Project, BootstrapToken, CloudConnection, FederatedCredential}
+  alias Console.Deployments.{AvailableModels, Clusters, Services}
+
+  alias Console.Schema.{
+    DeploymentSettings,
+    User,
+    Project,
+    BootstrapToken,
+    CloudConnection,
+    FederatedCredential
+  }
+
   require Logger
 
   @agent_vsn File.read!("AGENT_VERSION") |> String.trim()
@@ -16,10 +25,10 @@ defmodule Console.Deployments.Settings do
   @local_adapter Console.conf(:local_cache)
   @ttl :timer.minutes(45)
 
-  @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
-  @type project_resp :: {:ok, Project.t} | Console.error
-  @type cloud_connection_resp :: {:ok, CloudConnection.t} | Console.error
-  @type federated_credential_resp :: {:ok, FederatedCredential.t} | Console.error
+  @type settings_resp :: {:ok, DeploymentSettings.t()} | Console.error()
+  @type project_resp :: {:ok, Project.t()} | Console.error()
+  @type cloud_connection_resp :: {:ok, CloudConnection.t()} | Console.error()
+  @type federated_credential_resp :: {:ok, FederatedCredential.t()} | Console.error()
 
   @latest_vs_version 3
 
@@ -27,45 +36,51 @@ defmodule Console.Deployments.Settings do
 
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
 
-  @spec get_project!(binary) :: Project.t
+  @spec get_project!(binary) :: Project.t()
   def get_project!(id), do: Repo.get!(Project, id)
 
-  @spec get_project_by_name!(binary) :: Project.t
+  @spec get_project_by_name!(binary) :: Project.t()
   def get_project_by_name!(name), do: Repo.get_by!(Project, name: name)
 
-  @spec get_project_by_name(binary) :: Project.t | nil
+  @spec get_project_by_name(binary) :: Project.t() | nil
   def get_project_by_name(name), do: Repo.get_by(Project, name: name)
 
-  @spec get_cloud_connection!(binary) :: CloudConnection.t
+  @spec get_cloud_connection!(binary) :: CloudConnection.t()
   def get_cloud_connection!(id), do: Repo.get!(CloudConnection, id)
 
-  @spec get_cloud_connection_by_name(binary) :: CloudConnection.t | nil
+  @spec get_cloud_connection_by_name(binary) :: CloudConnection.t() | nil
   def get_cloud_connection_by_name(name), do: Repo.get_by(CloudConnection, name: name)
 
-  @spec get_cloud_connection_by_name!(binary) :: CloudConnection.t
+  @spec get_cloud_connection_by_name!(binary) :: CloudConnection.t()
   def get_cloud_connection_by_name!(name), do: Repo.get_by!(CloudConnection, name: name)
 
-  @spec get_federated_credential!(binary) :: FederatedCredential.t
+  @spec get_federated_credential!(binary) :: FederatedCredential.t()
   def get_federated_credential!(id), do: Repo.get!(FederatedCredential, id)
 
   @doc """
   same as `fetch/0` but caches in the process dict
   """
-  @spec cached() :: DeploymentSettings.t | nil
+  @spec cached() :: DeploymentSettings.t() | nil
   def cached(), do: Console.Cache.process_cache(:settings, &fetch/0)
 
   @doc """
   same as `fetch_consistent/0` but caches in a node-local ets table
   """
-  @decorate cacheable(cache: @local_adapter, key: :deployment_settings_local, opts: [ttl: :timer.minutes(10)])
+  @decorate cacheable(
+              cache: @local_adapter,
+              key: :deployment_settings_local,
+              opts: [ttl: :timer.minutes(10)]
+            )
   def local_cached(), do: fetch_consistent()
 
   @doc """
   Fetches and caches the global deployment settings object, preloads also fetched along the way
   """
-  @spec fetch() :: DeploymentSettings.t | nil
+  @spec fetch() :: DeploymentSettings.t() | nil
   @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
   def fetch(), do: fetch_consistent()
+
+  def available_models(), do: fetch() |> AvailableModels.list()
 
   @doc """
   The latest known k8s version
@@ -147,20 +162,23 @@ defmodule Console.Deployments.Settings do
 
   def default_project!(), do: Repo.get_by(Project, default: true)
 
-  def add_project_id(attrs, %User{bootstrap: %BootstrapToken{project_id: pid}}), do: Map.put(attrs, :project_id, pid)
+  def add_project_id(attrs, %User{bootstrap: %BootstrapToken{project_id: pid}}),
+    do: Map.put(attrs, :project_id, pid)
+
   def add_project_id(attrs, _), do: add_project_id(attrs)
 
-  def add_project_id(%{project_id: id} = attrs) when is_binary(id) and byte_size(id) > 0, do: attrs
+  def add_project_id(%{project_id: id} = attrs) when is_binary(id) and byte_size(id) > 0,
+    do: attrs
+
   def add_project_id(attrs) do
     proj = default_project!()
     Map.put(attrs, :project_id, proj.id)
   end
 
-
   @doc """
   Creates a new project, fails if no perms
   """
-  @spec create_project(map, User.t) :: project_resp
+  @spec create_project(map, User.t()) :: project_resp
   def create_project(attrs, %User{} = user) do
     %Project{}
     |> Project.changeset(attrs)
@@ -171,7 +189,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Updates a project in place, fails if no perms
   """
-  @spec update_project(map, binary, User.t) :: project_resp
+  @spec update_project(map, binary, User.t()) :: project_resp
   def update_project(attrs, id, %User{} = user) do
     get_project!(id)
     |> Repo.preload([:read_bindings, :write_bindings])
@@ -183,7 +201,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   It will delete a repository if it's not currently in use
   """
-  @spec delete_project(binary, User.t) :: project_resp
+  @spec delete_project(binary, User.t()) :: project_resp
   def delete_project(id, %User{} = user) do
     try do
       get_project!(id)
@@ -201,7 +219,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   modifies rbac settings for this project
   """
-  @spec project_rbac(map, binary, User.t) :: project_resp
+  @spec project_rbac(map, binary, User.t()) :: project_resp
   def project_rbac(attrs, project_id, %User{} = user) do
     get_project!(project_id)
     |> Repo.preload([:read_bindings, :write_bindings])
@@ -239,7 +257,9 @@ defmodule Console.Deployments.Settings do
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def vector_store_initialized() do
     fetch_consistent()
-    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true, version: vector_store_version()}}})
+    |> Ecto.Changeset.change(%{
+      ai: %{vector_store: %{initialized: true, version: vector_store_version()}}
+    })
     |> Repo.update()
   end
 
@@ -257,7 +277,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Updates global deployment settings and busts cache
   """
-  @spec update(map, User.t) :: settings_resp
+  @spec update(map, User.t()) :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs, %User{} = user) do
     start_transaction()
@@ -275,7 +295,9 @@ defmodule Console.Deployments.Settings do
       %{update: %{helm_changed: h, version_changed: v} = settings} when h == true or v == true ->
         migration_attrs(%{}, settings)
         |> Clusters.create_agent_migration(user)
-      %{update: up} -> {:ok, up}
+
+      %{update: up} ->
+        {:ok, up}
     end)
     |> execute(extract: :update)
     |> notify(:update, user)
@@ -284,7 +306,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Will upsert a cloud connection, fails if a user isn't an admin
   """
-  @spec upsert_cloud_connection(map, User.t) :: cloud_connection_resp
+  @spec upsert_cloud_connection(map, User.t()) :: cloud_connection_resp
   def upsert_cloud_connection(%{name: name} = attrs, %User{} = user) do
     case get_cloud_connection_by_name(name) do
       %CloudConnection{} = conn -> Repo.preload(conn, [:read_bindings])
@@ -298,7 +320,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Deletes a cloud connection, fails if a user isn't an admin
   """
-  @spec delete_cloud_connection(binary, User.t) :: cloud_connection_resp
+  @spec delete_cloud_connection(binary, User.t()) :: cloud_connection_resp
   def delete_cloud_connection(id, %User{} = user) do
     get_cloud_connection!(id)
     |> allow(user, :write)
@@ -308,7 +330,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Creates a new federated credential, fails if a user isn't an admin
   """
-  @spec create_federated_credential(map, User.t) :: federated_credential_resp
+  @spec create_federated_credential(map, User.t()) :: federated_credential_resp
   def create_federated_credential(attrs, %User{} = user) do
     %FederatedCredential{}
     |> FederatedCredential.changeset(attrs)
@@ -319,7 +341,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Updates a federated credential, fails if a user isn't an admin
   """
-  @spec update_federated_credential(map, binary, User.t) :: federated_credential_resp
+  @spec update_federated_credential(map, binary, User.t()) :: federated_credential_resp
   def update_federated_credential(attrs, id, %User{} = user) do
     get_federated_credential!(id)
     |> FederatedCredential.changeset(attrs)
@@ -330,7 +352,7 @@ defmodule Console.Deployments.Settings do
   @doc """
   Deletes a federated credential, fails if a user isn't an admin
   """
-  @spec delete_federated_credential(binary, User.t) :: federated_credential_resp
+  @spec delete_federated_credential(binary, User.t()) :: federated_credential_resp
   def delete_federated_credential(id, %User{} = user) do
     get_federated_credential!(id)
     |> allow(user, :write)
@@ -356,16 +378,23 @@ defmodule Console.Deployments.Settings do
       |> Enum.filter(&FederatedCredential.allow?(&1, claims))
       |> case do
         [_ | _] = credentials ->
-          scopes = Enum.flat_map(credentials, & &1.scopes || [])
-                   |> Enum.uniq()
+          scopes =
+            Enum.flat_map(credentials, &(&1.scopes || []))
+            |> Enum.uniq()
+
           sign_token(user, scopes)
-        _ -> {:error, "no federated credentials for #{email} match jwt claims"}
+
+        _ ->
+          {:error, "no federated credentials for #{email} match jwt claims"}
       end
     else
-      {:token, _} -> {:error, "invalid jwt format, must include iss and aud claims"}
+      {:token, _} ->
+        {:error, "invalid jwt format, must include iss and aud claims"}
+
       {:config, _} = res ->
         Logger.error("failed to fetch issuer configuration: #{inspect(res)}")
         {:error, "invalid issuer url from jwt"}
+
       {:validate, _} = res ->
         Logger.error("failed to validate jwt: #{inspect(res)}")
         {:error, "could not validate jwt"}
@@ -384,7 +413,7 @@ defmodule Console.Deployments.Settings do
       allow_issuer_mismatch: true,
       document_overrides: %{
         # needed for atypical oidc implementations like Github's
-        "authorization_endpoint" => "https://example.com/ignore/oauth/authorize",
+        "authorization_endpoint" => "https://example.com/ignore/oauth/authorize"
       }
     }
   }
@@ -392,11 +421,15 @@ defmodule Console.Deployments.Settings do
   @doc """
   Fetches the issuer configuration from the issuer url
   """
-  @decorate cacheable(cache: @cache_adapter, key: {:issuer_configuration, issuer}, opts: [ttl: :timer.minutes(60)])
+  @decorate cacheable(
+              cache: @cache_adapter,
+              key: {:issuer_configuration, issuer},
+              opts: [ttl: :timer.minutes(60)]
+            )
   def issuer_configuration(issuer) do
     with {:ok, {conf, _}} <- Oidcc.ProviderConfiguration.load_configuration(issuer, @quirks),
          {:ok, {jwks, _}} <- Oidcc.ProviderConfiguration.load_jwks(conf.jwks_uri),
-      do: {:ok, {conf, jwks}}
+         do: {:ok, {conf, jwks}}
   end
 
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
@@ -406,7 +439,7 @@ defmodule Console.Deployments.Settings do
     |> Repo.update()
   end
 
-  @spec enable(User.t) :: settings_resp
+  @spec enable(User.t()) :: settings_resp
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def enable(%User{} = user) do
     case fetch() do
@@ -417,6 +450,7 @@ defmodule Console.Deployments.Settings do
 
   def migrate_agents() do
     vsn = agent_ref()
+
     case fetch_consistent() do
       %DeploymentSettings{manage_agents: true, agent_version: ^vsn} = settings -> {:ok, settings}
       %DeploymentSettings{manage_agents: true} = settings -> migrate_agents(settings, vsn)
@@ -438,15 +472,25 @@ defmodule Console.Deployments.Settings do
     |> execute(extract: :settings)
   end
 
-  defp migration_attrs(attrs, %DeploymentSettings{helm_changed: true, agent_helm_values: vals} = settings) when is_binary(vals) and byte_size(vals) > 0 do
+  defp migration_attrs(
+         attrs,
+         %DeploymentSettings{helm_changed: true, agent_helm_values: vals} = settings
+       )
+       when is_binary(vals) and byte_size(vals) > 0 do
     Map.merge(attrs, %{helm_values: vals})
     |> migration_attrs(%{settings | helm_changed: false})
   end
-  defp migration_attrs(attrs, %DeploymentSettings{version_changed: true, agent_version: vsn} = settings) do
+
+  defp migration_attrs(
+         attrs,
+         %DeploymentSettings{version_changed: true, agent_version: vsn} = settings
+       ) do
     Map.merge(attrs, %{ref: vsn})
     |> migration_attrs(%{settings | version_changed: false})
   end
-  defp migration_attrs(attrs, _), do: Map.merge(attrs, %{name: "settings-#{Console.rand_alphanum(10)}"})
+
+  defp migration_attrs(attrs, _),
+    do: Map.merge(attrs, %{name: "settings-#{Console.rand_alphanum(10)}"})
 
   defp do_enable(settings, user) do
     start_transaction()
@@ -457,6 +501,7 @@ defmodule Console.Deployments.Settings do
     end)
     |> add_operation(:install, fn _ ->
       cluster = Clusters.local_cluster()
+
       Services.api_url("gql")
       |> Plural.install_cd(cluster.deploy_token)
     end)
@@ -466,6 +511,7 @@ defmodule Console.Deployments.Settings do
 
   defp notify({:ok, %DeploymentSettings{} = settings}, :update, user),
     do: handle_notify(PubSub.DeploymentSettingsUpdated, settings, actor: user)
+
   defp notify(pass, _, _), do: pass
 
   @doc """

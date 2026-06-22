@@ -3,6 +3,34 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.56.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['New `databricks_zerobus` sink for streaming logs into Databricks Unity
+        Catalog via Zerobus, including OAuth2 auth, schema fetching, and protobuf
+        batching.', New `delay` transform to hold events for a fixed duration or conditionally
+        (including VRL-based conditions)., HTTP-based sinks using shared retry helpers
+        now support a `retry_strategy` option to choose which HTTP status codes should
+        be retried (with an updated `http` sink example)., '`vector` sink adds `zstd`
+        compression alongside `gzip` for improved Vector-to-Vector throughput and
+        efficiency.', 'Major enhancements to `tag_cardinality_limit`: per-tag limits,
+        per-metric tracking isolation, global tracked-key cap, and ability to opt
+        metrics out of tracking.', '`aws_s3` sink Parquet encoding now ships enabled
+        in official binaries by default (no special build required).', 'Fixes a CPU
+        regression affecting sinks that use metric normalization (e.g., `prometheus_remote_write`,
+        `aws_cloudwatch_metrics`, `statsd`).', Restores install support for RHEL/Rocky/Alma/CentOS
+        Stream 8 that was broken in 0.55.0 due to a glibc requirement bump., Unit
+        tests gain optional `expected_event_count` on outputs to assert how many events
+        a transform emits.]
+    breaking_changes: ['`greptimedb_metrics` and `greptimedb_logs` sinks now require
+        GreptimeDB v1.x; GreptimeDB v0.x users must upgrade GreptimeDB before upgrading
+        Vector.']
+  chart_version: 0.56.0
+  images: ['docker.io/timberio/vector:0.56.0-distroless-libc']
 - version: 0.55.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -159,28 +187,59 @@ versions:
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Release notes provided only include metadata and asset lists; no feature\
+        \ list was included for v0.48.0 beyond what\u2019s on the linked page.", 'Based
+        on the provided text, there are no described new features between v0.47.0
+        and v0.48.0 (features likely exist in the linked release notes).']
+    breaking_changes: [No breaking changes are mentioned in the provided release-note
+        excerpts; check the full v0.48.0 release notes link for any config/behavior
+        changes before upgrading.]
   chart_version: 0.44.0
   images: ['timberio/vector:0.48.0-distroless-libc']
 - version: 0.47.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were included in the provided 0.47.0 notes beyond
+        the existence of new build artifacts., Release primarily indicates a version
+        bump from 0.46.0 to 0.47.0 with updated binaries/packages for multiple platforms.]
+    breaking_changes: [No breaking-change information was included in the provided
+        release notes excerpt (only metadata and asset lists).]
   chart_version: 0.43.0
   images: ['timberio/vector:0.47.0-distroless-libc']
 - version: 0.46.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were included in the provided release notes excerpt
+        beyond the fact this is v0.46.0 (the excerpt only lists assets/metadata).]
+    breaking_changes: [No breaking changes were listed in the provided release notes
+        excerpt; must review the actual v0.46.0 and v0.45.0 release pages/changelog
+        for breaking/config changes before upgrading.]
   chart_version: 0.42.0
   images: ['timberio/vector:0.46.0-distroless-libc']
 - version: 0.45.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided are metadata-only (assets list, dates, download
+        counts) for Vector 0.44.0 and 0.45.0; no functional changes, new features,
+        fixes, or config changes are included in the text you shared.']
+    breaking_changes: ['Unknown from provided notes: the actual 0.45.0 release notes
+        content (features/fixes/breaking changes) is not included, so breaking changes
+        cannot be assessed.']
   chart_version: 0.41.0
   images: ['timberio/vector:0.45.0-distroless-libc']
 - version: 0.44.0
@@ -218,14 +277,31 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided are limited to metadata and build artifacts;
+        no feature list was included, so no new features can be reliably summarized
+        from the supplied text.']
+    breaking_changes: [No breaking changes were listed in the provided notes; cannot
+        confirm whether any exist without the full 0.42.0 release notes content (changelog
+        section).]
   chart_version: 0.37.0
   images: ['timberio/vector:0.42.0-distroless-libc']
 - version: 0.41.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes were included in the notes you provided; the
+        v0.41.0 entry only lists build artifacts/packaging outputs., The release primarily
+        appears to be a version bump from 0.40.1 to 0.41.0 with updated binaries for
+        multiple platforms.]
+    breaking_changes: [No breaking changes were documented in the notes you provided;
+        treat as 'unknown' until you review the full v0.41.0 changelog on vector.dev
+        (link included).]
   chart_version: 0.36.0
   images: ['timberio/vector:0.41.0-distroless-libc']
 - version: 0.40.1
@@ -245,175 +321,358 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Release notes provided contain only metadata and build artifacts for
+        v0.40.0 vs v0.39.0; no functional changes are listed, so features cannot be
+        derived from the pasted content.']
+    breaking_changes: [No breaking changes are mentioned in the provided notes; verify
+        the full v0.40.0 release page/changelog for config schema or component changes
+        before upgrading.]
   chart_version: 0.35.0
   images: ['timberio/vector:0.40.0-distroless-libc']
 - version: 0.39.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were provided in the pasted release notes beyond
+        the fact that v0.39.0 is a newer release with updated build artifacts.]
+    breaking_changes: [No breaking-change details were provided in the pasted release
+        notes; only asset lists and metadata were included.]
   chart_version: 0.34.0
   images: ['timberio/vector:0.39.0-distroless-libc']
 - version: 0.38.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['The provided notes are metadata and asset lists for v0.37.0 and v0.38.0;
+        they do not include the actual v0.38.0 change details, so no concrete feature
+        summary can be derived from this content alone.']
+    breaking_changes: [No breaking changes are listed in the provided text; actual
+        breaking changes (if any) would be in the linked Vector 0.38.0 release notes
+        page.]
   chart_version: 0.33.0
   images: ['timberio/vector:0.38.0-distroless-libc']
 - version: 0.37.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Vector upgraded from v0.36.0 to v0.37.0 (new upstream release artifacts
+        published March 26, 2024).']
+    breaking_changes: [No breaking changes were provided in the supplied release notes;
+        verify on the official v0.37.0 release page/changelog before upgrading.]
   chart_version: 0.32.0
   images: ['timberio/vector:0.37.0-distroless-libc']
 - version: 0.36.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were provided in the pasted notes; only metadata
+        and build artifacts for 0.35.0 and 0.36.0., The 0.36.0 release appears to
+        include updated binaries across platforms (rpm/deb/tar/msi) compared to 0.35.0.]
+    breaking_changes: [No breaking-change information was included in the provided
+        release notes excerpt.]
   chart_version: 0.31.0
   images: ['timberio/vector:0.36.0-distroless-libc']
 - version: 0.35.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details provided in the notes you shared; only release metadata
+        and downloadable artifacts are listed.]
+    breaking_changes: [No breaking-change details provided in the notes you shared;
+        only release metadata and downloadable artifacts are listed.]
   chart_version: 0.30.0
   images: ['timberio/vector:0.35.0-distroless-libc']
 - version: 0.34.2
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were included in the provided notes; only release
+        metadata and build artifacts for 0.34.0 and 0.34.2 were shown.]
+    breaking_changes: [No breaking-change details were included in the provided notes;
+        only release metadata and build artifacts were shown.]
   chart_version: 0.29.1
   images: ['timberio/vector:0.34.2-distroless-libc']
 - version: 0.34.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No specific features were included in the notes you provided (only
+        release metadata and asset lists). Please share the 0.34.0 release page details
+        (highlights/changes) to extract new features.]
+    breaking_changes: [No breaking changes were listed in the notes you provided.
+        Confirm by reviewing the 0.34.0 release notes 'Breaking changes' or 'Upgrade
+        notes' section on vector.dev.]
   chart_version: 0.28.0
   images: ['timberio/vector:0.34.0-distroless-libc']
 - version: 0.33.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['No feature details were included in the provided release notes text
+        beyond links to the full 0.32.0 and 0.33.0 release pages. Based on what you
+        pasted, the only observable change is the bump from Vector 0.32.0 to 0.33.0
+        and updated build artifacts for multiple platforms.']
+    breaking_changes: ["No breaking changes were listed in the provided text; you\u2019\
+        ll need to review the full 0.33.0 release notes link for any config/component\
+        \ deprecations or behavior changes before upgrading."]
   chart_version: 0.26.0
   images: ['timberio/vector:0.33.0-distroless-libc']
 - version: 0.32.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Vector v0.32.0 release notes link provided, but no detailed changelog
+        items included in the text you pasted (only metadata and build assets).']
+    breaking_changes: [No breaking changes can be identified from the pasted notes;
+        the actual 0.32.0 release notes content is referenced by link but not included
+        here.]
   chart_version: 0.24.0
   images: ['timberio/vector:0.32.0-distroless-libc']
 - version: 0.31.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['No feature details were included in the provided v0.30.0/v0.31.0 notes
+        beyond links and build artifacts; review https://vector.dev/releases/0.31.0
+        for the actual change list before upgrading.']
+    breaking_changes: [No breaking-change information was included in the provided
+        notes; validate by reading the v0.31.0 release notes and checking deprecations/removals
+        that could affect your current sources/sinks/transforms.]
   chart_version: 0.23.0
   images: ['timberio/vector:0.31.0-distroless-libc']
 - version: 0.30.0
-  kube: ['1.27', '1.26', '1.25']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['No functional changes were provided in the notes shared (only metadata
+        and asset lists). Please share the v0.30.0 release highlights/changes from
+        https://vector.dev/releases/0.30.0 (or paste the changelog sections) so we
+        can extract new features, fixes, and any deprecations/breaking changes.']
+    breaking_changes: ['Unknown from the provided excerpt; the pasted content contains
+        only release metadata and build artifacts, not the change log details.']
   chart_version: 0.22.1
   images: ['timberio/vector:0.30.0-distroless-libc']
 - version: 0.29.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Application bumped from Vector 0.28.0 to 0.29.0 (per release headers).]
+    breaking_changes: []
   chart_version: 0.21.0
   images: ['timberio/vector:0.29.0-distroless-libc']
 - version: 0.28.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Vector updated from v0.27.0 to v0.28.0 (new release available with
+        updated build artifacts across Linux/macOS/Windows and package formats).]
+    breaking_changes: [No breaking changes were provided in the supplied release notes
+        excerpt; review the full v0.28.0 release notes link for any config/behavior
+        changes before upgrading.]
   chart_version: 0.20.0
   images: ['timberio/vector:0.28.0-distroless-libc']
 - version: 0.27.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Bumped Vector application version from v0.26.0 to v0.27.0.]
+    breaking_changes: ["Release note content for v0.27.0 (features/breaking changes)\
+        \ was not included here\u2014only metadata and asset lists\u2014so potential\
+        \ breaking changes need to be reviewed at https://vector.dev/releases/0.27.0/."]
   chart_version: 0.19.0
   images: ['timberio/vector:0.27.0-distroless-libc']
 - version: 0.26.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes identified from the provided notes; the pasted
+        release entries only list metadata and build artifacts for v0.25.1 and v0.26.0.,
+      'Expect general bug fixes/performance improvements may exist in the full 0.26.0
+        release notes at vector.dev, but they are not included in the text provided.']
+    breaking_changes: ['No breaking changes are shown in the provided content; verify
+        in the full v0.26.0 release notes before upgrading (config, transforms/sinks/sources,
+        deprecated options).']
   chart_version: 0.18.0
   images: ['timberio/vector:0.26.0-distroless-libc']
 - version: 0.25.1
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["Release notes content for v0.24.0 and v0.25.1 wasn\u2019t included\
+        \ beyond metadata/assets, so no feature-level deltas can be extracted from\
+        \ what was provided."]
+    breaking_changes: ["Release notes content for v0.24.0 and v0.25.1 wasn\u2019t\
+        \ included beyond metadata/assets, so no breaking changes can be identified\
+        \ from what was provided."]
   chart_version: 0.17.0
   images: ['timberio/vector:0.25.1-distroless-libc']
 - version: 0.24.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No application feature details were provided in the pasted notes (only
+        links to full release notes and build artifacts). Review the Vector 0.24.0
+        release page for actual feature list before upgrading.]
+    breaking_changes: ['No breaking-change details were provided in the pasted notes.
+        Check the Vector 0.24.0 release page and any upgrade/breaking-changes section,
+        and scan for config/schema changes that could affect existing Vector configs.']
   chart_version: 0.16.0
   images: ['timberio/vector:0.24.0-distroless-libc']
 - version: 0.23.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ["The provided notes don\u2019t include the actual v0.23.0 changelog\
+        \ items (features/fixes/breaking changes); only metadata and build artifacts\
+        \ are shown. No feature changes can be extracted from the text you shared."]
+    breaking_changes: ["The provided notes don\u2019t list any breaking changes between\
+        \ v0.22.0 and v0.23.0; none can be confirmed from the text shared. Review\
+        \ the linked Vector 0.23.0 release page for any config schema changes, component\
+        \ deprecations/removals, or default-behavior changes before upgrading."]
   chart_version: 0.15.0
   images: ['timberio/vector:0.23.0-distroless-libc']
 - version: 0.22.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Vector upgraded from v0.21.0 to v0.22.0 (new Vector binary/images available
+        for the same set of target platforms).]
+    breaking_changes: []
   chart_version: 0.13.0
   images: ['timberio/vector:0.22.0-distroless-libc']
 - version: 0.21.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['No feature details were included in the provided v0.20.0/v0.21.0 notes
+        beyond asset/package listings, so features for 0.21.0 vs 0.20.0 cannot be
+        summarized from this input.']
+    breaking_changes: ['No breaking-change information was included in the provided
+        notes (only asset lists), so breaking changes between 0.20.0 and 0.21.0 cannot
+        be determined from this input.']
   chart_version: 0.10.0
   images: ['timberio/vector:0.21.0-distroless-libc']
 - version: 0.20.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional feature details were provided in the supplied release
+        notes excerpt (only metadata and asset lists).]
+    breaking_changes: [No breaking-change information was provided in the supplied
+        release notes excerpt (only metadata and asset lists).]
   chart_version: 0.7.0
   images: ['timberio/vector:0.20.0-distroless-libc']
 - version: 0.19.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release notes provided here only include asset lists; no feature details
+        were included in the pasted notes., 'Vector v0.19.0 is a minor-version bump
+        over v0.18.0; expect incremental improvements, but consult the full v0.19.0
+        release notes link for specifics (new sources/sinks/transforms, performance,
+        and bug fixes).']
+    breaking_changes: [No breaking changes were listed in the provided excerpt; you
+        must review the full v0.19.0 release notes for any config or behavior changes
+        that could affect pipelines.]
   chart_version: 0.4.0
   images: ['timberio/vector:0.19.0-distroless-libc']
 - version: 0.18.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Application updated from Vector v0.17.3 to v0.18.0 (new release published
+        2021-11-18).]
+    breaking_changes: [No breaking changes were included in the provided release notes
+        excerpt (only assets/metadata). Review the full 0.18.0 release notes page
+        for config/component deprecations or behavioral changes before upgrading.]
   chart_version: 0.2.1
   images: ['timberio/vector:0.18.0-distroless-libc']
 - version: 0.17.3
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No feature details were provided in the supplied notes; only links
+        to the full release pages and build artifacts., "Upgrade spans multiple Vector\
+        \ versions (0.16.1 \u2192 0.17.3); review intermediate release notes on vector.dev\
+        \ for component-specific changes (sources, transforms, sinks)."]
+    breaking_changes: [No breaking-change information was included in the provided
+        notes; you must review the 0.17.x release notes (and any 0.17.0/0.17.1/0.17.2
+        notes) for config/behavior changes before upgrading.]
   chart_version: 0.1.1
   images: ['timberio/vector:0.17.3-distroless-libc']
 - version: 0.16.1

@@ -21,7 +21,9 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator'
+import { useSimpleToast } from '../utils/SimpleToastContext'
 import { DataSelectProvider } from './common/DataSelect'
+import { getNamespaceListLoadError } from './common/namespaceList'
 
 import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
 
@@ -92,6 +94,7 @@ export const useNamespaces = () => {
 
 export default function Cluster() {
   const theme = useTheme()
+  const { popToast } = useSimpleToast()
   const projectId = useProjectId()
   const { clusterId } = useParams()
   const { search } = useLocation()
@@ -115,15 +118,34 @@ export default function Cluster() {
     [clusterId, clusters]
   )
 
+  const namespaceQueryOptions = getNamespacesOptions({
+    client: AxiosInstance(clusterId!),
+  })
+
   const {
     data: namespacesData,
     error: namespacesError,
+    isError: namespacesQueryError,
     refetch: refetchNamespaces,
   } = useQuery({
-    ...getNamespacesOptions({ client: AxiosInstance(clusterId!) }),
+    ...namespaceQueryOptions,
+    queryKey: [
+      ...namespaceQueryOptions.queryKey,
+      clusterId ?? '',
+    ] as unknown as typeof namespaceQueryOptions.queryKey,
     enabled: !!clusterId,
     refetchInterval: 30_000,
   })
+
+  const namespaceListError = useMemo(
+    () =>
+      getNamespaceListLoadError(
+        namespacesData,
+        namespacesQueryError,
+        namespacesError
+      ),
+    [namespacesData, namespacesQueryError, namespacesError]
+  )
 
   const namespaces = useMemo(
     () =>
@@ -132,6 +154,16 @@ export default function Cluster() {
         .filter((namespace): namespace is string => !isEmpty(namespace)),
     [namespacesData?.namespaces]
   )
+
+  useEffect(() => {
+    if (!clusterId || !namespaceListError) return
+
+    popToast({
+      heading: 'Cannot load namespaces',
+      content: namespaceListError,
+      severity: 'danger',
+    })
+  }, [clusterId, namespaceListError, popToast])
 
   const context = useMemo(
     () => ({ clusters, refetch, cluster, namespaces }) as ClusterContextT,
@@ -170,16 +202,6 @@ export default function Cluster() {
         <GqlError
           header="Cannot load clusters"
           error={error}
-        />
-      </div>
-    )
-
-  if (namespacesError)
-    return (
-      <div css={{ padding: theme.spacing.large }}>
-        <GqlError
-          header="Cannot load namespaces"
-          error={namespacesError}
         />
       </div>
     )

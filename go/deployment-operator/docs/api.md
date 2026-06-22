@@ -165,6 +165,7 @@ _Appears in:_
 | `runtimeRef` _[AgentRuntimeReference](#agentruntimereference)_ |  |  | Required: \{\} <br /> |
 | `prompt` _string_ | Prompt is the task/prompt given to the agent |  | Required: \{\} <br /> |
 | `repository` _string_ | Repository is the git repository the agent will work with |  | Required: \{\} <br /> |
+| `branch` _string_ | Branch is the repository branch the agent should operate on. If omitted, the repository default branch is used. |  | Optional: \{\} <br /> |
 | `mode` _[AgentRunMode](#agentrunmode)_ | Mode defines how the agent should run (ANALYZE, WRITE) |  | Required: \{\} <br /> |
 | `flowId` _string_ | FlowID is the flow this agent run is associated with (optional) |  | Optional: \{\} <br /> |
 | `language` _[AgentRunLanguage](#agentrunlanguage)_ | Language is the programming language used in the agent run.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |
@@ -265,6 +266,7 @@ _Appears in:_
 | `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template defines the pod template for this agent runtime. |  |  |
 | `config` _[AgentRuntimeConfig](#agentruntimeconfig)_ | Config contains typed configuration depending on the chosen runtime type. |  | Optional: \{\} <br /> |
 | `aiProxy` _boolean_ | AiProxy routes LLM requests through the Console AI proxy (/ext/ai) using the deploy token,<br />so provider API keys in spec.config are optional.<br />Set the model on the runtime-specific config block (for example spec.config.codex.model).<br />The proxy expects models in provider/name format (for example openai/gpt-5.4,<br />anthropic/claude-sonnet-4-5, vertex/gemini-2.5-pro). Values that already include a "/"<br />are passed through unchanged.<br />When only a bare model id is given, the harness may prefix it by runtime type:<br />  - CLAUDE: anthropic/\{model\} (for example claude-sonnet-4-5 -> anthropic/claude-sonnet-4-5)<br />  - CODEX, OPENCODE: openai/\{model\} (for example gpt-5.4 -> openai/gpt-5.4)<br />  - GEMINI: vertex/\{model\}<br />  - CUSTOM: no automatic prefix; use provider/name explicitly |  |  |
+| `streamingProxy` _boolean_ | StreamingProxy routes OpenAI-compatible LLM requests through the in-pod mcpserver<br />sse conversion proxy before they reach the Console AI proxy (/ext/ai). Only valid when aiProxy<br />is enabled. Applies to CODEX and OPENCODE runtimes. |  | Optional: \{\} <br /> |
 | `dind` _boolean_ | Dind enables Docker-in-Docker for this agent runtime.<br />When true, the runtime will be configured to run with DinD support. |  | Optional: \{\} <br /> |
 | `allowedRepositories` _string array_ | AllowedRepositories the git repositories allowed to be used with this runtime. |  | Optional: \{\} <br /> |
 | `browser` _[BrowserConfig](#browserconfig)_ | Browser configuration augments agent runtime with a headless browser.<br />When provided, the runtime will be configured to run with a headless browser available<br />for the agent to use. |  | Optional: \{\} <br /> |
@@ -497,6 +499,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ApiKeySecretRef references a Secret containing the Codex API key.<br />Optional when aiProxy is enabled; authentication uses the Console deploy token instead. |  | Optional: \{\} <br /> |
 | `model` _string_ | Model to use. |  |  |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API Codex should use.<br />AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.<br />RESPONSES forces /responses. |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints). |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single codex run invocation. |  | Optional: \{\} <br /> |
 
@@ -516,6 +519,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `apiKey` _string_ | ApiKey is the raw API key to use. |  |  |
 | `model` _string_ | Model to use. |  |  |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method configures which OpenAI API Codex should use.<br />AUTO omits wire_api and lets Codex choose. CHAT forces /chat/completions.<br />RESPONSES forces /responses. |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is the base URL for the Codex API (supports OpenAI/Azure-compatible endpoints). |  | Optional: \{\} <br /> |
 | `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single codex run invocation. |  | Optional: \{\} <br /> |
 
@@ -524,6 +528,23 @@ _Appears in:_
 
 
 
+
+
+#### CostProvider
+
+_Underlying type:_ _string_
+
+CostProvider identifies which cost allocation backend to query.
+
+
+
+_Appears in:_
+- [KubecostExtractorSpec](#kubecostextractorspec)
+
+| Field | Description |
+| --- | --- |
+| `Kubecost` |  |
+| `OpenCost` |  |
 
 
 #### CustomHealth
@@ -558,6 +579,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `script` _string_ |  |  |  |
+| `group` _string_ |  |  | Optional: \{\} <br /> |
+| `version` _string_ |  |  | Optional: \{\} <br /> |
+| `kind` _string_ |  |  | Optional: \{\} <br /> |
 
 
 
@@ -812,8 +836,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `provider` _[CostProvider](#costprovider)_ | Provider selects which cost backend to query. Defaults to Kubecost. | Kubecost | Enum: [Kubecost OpenCost] <br />Optional: \{\} <br /> |
 | `interval` _string_ |  | 1h | Optional: \{\} <br /> |
-| `kubecostServiceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  |  |
+| `kubecostServiceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | KubecostServiceRef points at the cost analyzer Service. When omitted, defaults<br />are chosen from provider: kubecost-cost-analyzer/kubecost or opencost/opencost. |  | Optional: \{\} <br /> |
 | `kubecostPort` _integer_ |  |  | Optional: \{\} <br /> |
 | `recommendationThreshold` _string_ | RecommendationThreshold float value for example: `1.2 or 0.001` |  |  |
 | `recommendationsSettings` _[RecommendationsSettings](#recommendationssettings)_ |  |  | Optional: \{\} <br /> |

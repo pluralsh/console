@@ -54,6 +54,7 @@ config :console,
   audit_expiry: 30,
   admin_emails: [],
   cloud: false,
+  groups_whitelist: nil,
   chunk_size: 1024 * 10,
   sidecar_token: "example",
   sidecar_token_path: "./secrets",
@@ -232,8 +233,6 @@ config :req_llm,
       ]
     }
   ]
-
-config :console, :kas_service, "console-kas-service.plrl-console:8154"
 
 # config :rustler_precompiled, :force_build, tiktoken: true
 

@@ -57,6 +57,7 @@ defmodule Console.Services.UsersTest do
       on_exit(fn ->
         Application.put_env(:console, :org_email_suffix, "")
         Application.put_env(:console, :oidc_sync, :upsert)
+        Application.put_env(:console, :groups_whitelist, nil)
       end)
     end
 
@@ -203,6 +204,49 @@ defmodule Console.Services.UsersTest do
       })
 
       assert again.id == user.id
+    end
+
+    test "only syncs whitelisted groups when groups_whitelist is set" do
+      Application.put_env(:console, :groups_whitelist, ["general"])
+
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "someone@example.com",
+        "name" => "Some User",
+        "groups" => ["general", "restricted"],
+      })
+
+      general = Users.get_group_by_name("general")
+      assert Users.get_group_member(general.id, user.id)
+
+      refute Users.get_group_by_name("restricted")
+    end
+
+    for ignorable <- [nil, []] do
+      test "syncs all groups when groups_whitelist is #{inspect(ignorable)}" do
+        Application.put_env(:console, :groups_whitelist, unquote(Macro.escape(ignorable)))
+
+        {:ok, user} = Users.bootstrap_user(%{
+          "email" => "someone@example.com",
+          "name" => "Some User",
+          "groups" => ["general", "restricted"],
+        })
+
+        for name <- ["general", "restricted"] do
+          group = Users.get_group_by_name(name)
+          assert Users.get_group_member(group.id, user.id)
+        end
+      end
+    end
+
+    test "does not sync groups when the groups claim is empty" do
+      {:ok, user} = Users.bootstrap_user(%{
+        "email" => "someone@example.com",
+        "name" => "Some User",
+        "groups" => [],
+      })
+
+      refute Users.get_group_by_name("general")
+      refute Console.Schema.GroupMember.for_user(user.id) |> Console.Repo.exists?()
     end
   end
 

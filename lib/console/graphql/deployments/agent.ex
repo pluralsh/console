@@ -32,12 +32,14 @@ defmodule Console.GraphQl.Deployments.Agent do
   input_object :agent_run_attributes do
     field :prompt,           non_null(:string), description: "the prompt to give to the agent"
     field :repository,       non_null(:string), description: "the repository the agent will be working in"
+    field :branch,           :string, description: "the branch this agent run should operate on (if not set, the repository default branch is used)"
     field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
     field :flow_id,          :id, description: "the flow this agent run is associated with"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
+    field :approval,         :boolean, description: "whether this run requires approval before continuing"
   end
 
   input_object :agent_run_status_attributes do
@@ -45,8 +47,13 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :messages,         list_of(:agent_message_attributes), description: "the messages this agent run has generated during its run"
     field :error,            :string, description: "the error reason of the agent run"
     field :pod_reference,    :namespaced_name, description: "the kubernetes pod this agent is running on"
+    field :head_branch,      :string, description: "the head branch this agent run has created for its pull request"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
+    field :approval,         :boolean, description: "whether this run requires approval before continuing"
+    field :approved_at,      :datetime, description: "when this run was approved"
+    field :consumed,         :id, description: "the agent run this run consumed"
+    field :skills,           list_of(:agent_skill_attributes), description: "the skills available to this agent run"
   end
 
   input_object :agent_pull_request_attributes do
@@ -72,6 +79,12 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :summary,  non_null(:string), description: "the summary of the analysis"
     field :analysis, non_null(:string), description: "the analysis of the agent run"
     field :bullets,  list_of(:string), description: "the bullets of the analysis"
+  end
+
+  input_object :agent_skill_attributes do
+    field :name,        non_null(:string), description: "the name of the skill"
+    field :description, :string, description: "the description of the skill"
+    field :contents,    non_null(:string), description: "the contents of the skill"
   end
 
   input_object :agent_run_upload_attributes do
@@ -152,6 +165,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :repository,       non_null(:string), description: "the repository the agent will be working in",
       resolve: &Deployments.agent_repository/3
     field :branch,           :string, description: "the branch this agent run is operating on (if not set, use default branch on clone)"
+    field :head_branch,      :string, description: "the head branch this agent run has created for its pull request"
     field :status,           non_null(:agent_run_status), description: "the status of this agent run"
     field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
     field :pod_reference,    :agent_pod_reference, description: "the kubernetes pod this agent is running on"
@@ -159,10 +173,14 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :shared,           :boolean, description: "whether this agent run is shared"
     field :babysit,          :boolean, description: "whether babysit mode is enabled for this run"
     field :babysit_interval, :integer, description: "interval in seconds between babysit checks for this run"
+    field :approval,         :boolean, description: "whether this run requires approval before continuing"
+    field :approved_at,      :datetime, description: "when this run was approved"
+    field :consumed,         :id, description: "the agent run this run consumed"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
 
     field :analysis, :agent_analysis, description: "the analysis of the agent run"
+    field :skills,   list_of(:agent_skill), description: "the skills available to this agent run"
     field :todos,    list_of(:agent_todo), description: "the todos of the agent run"
 
     field :scm_creds,    :scm_creds, resolve: &Deployments.agent_scm_credentials/3
@@ -176,6 +194,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
     field :prompts,  list_of(:agent_prompt), resolve: dataloader(Deployments), description: "the prompts this agent run has received"
     field :messages, list_of(:agent_message), resolve: dataloader(Deployments), description: "the messages this agent run has generated during its run"
+    field :upload,   :agent_run_upload, resolve: dataloader(Deployments), description: "the upload bundle this agent run has generated"
     field :runtime,  :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
     field :user,     :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
     field :flow,     :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
@@ -215,6 +234,12 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :summary,  non_null(:string), description: "the summary of the analysis"
     field :analysis, non_null(:string), description: "the analysis of the agent run"
     field :bullets,  list_of(:string), description: "quick bullet points to summarize the analysis"
+  end
+
+  object :agent_skill do
+    field :name,        non_null(:string), description: "the name of the skill"
+    field :description, :string, description: "the description of the skill"
+    field :contents,    non_null(:string), description: "the contents of the skill"
   end
 
   object :agent_todo do
@@ -470,10 +495,18 @@ defmodule Console.GraphQl.Deployments.Agent do
     end
   end
 
+  defp upload_url(%AgentRunUpload{} = upload, _, %{definition: %{schema_node: %{identifier: field}}}) do
+    upload_url(upload, field)
+  end
+
   defp upload_url(%AgentRunUpload{} = upload, _, %{definition: %{identifier: field}}) do
+    upload_url(upload, field)
+  end
+
+  defp upload_url(%AgentRunUpload{} = upload, field) do
     case Map.get(upload, field) do
       nil -> {:ok, nil}
-      file -> {:ok, Uploads.url({file, upload}, :original)}
+      file -> {:ok, Uploads.url({file, upload}, :original, signed: true)}
     end
   end
 

@@ -1,28 +1,7 @@
-import {
-  AiSparkleFilledIcon,
-  Button,
-  Card,
-  Flex,
-  FormField,
-  ListBoxItem,
-  Radio,
-  RadioGroup,
-  Select,
-  SelectPropsSingle,
-  Switch,
-  Toast,
-} from '@pluralsh/design-system'
-import {
-  AIVerbosityLevel,
-  useExplainWithAIContext,
-} from 'components/ai/AIContext.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
+import { Button, Callout, Flex, Switch } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import {
-  Body1BoldP,
-  Body2BoldP,
-  Body2P,
-} from 'components/utils/typography/Text'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
@@ -32,18 +11,18 @@ import {
 import { produce } from 'immer'
 import merge from 'lodash/merge'
 import pick from 'lodash/pick'
-import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { FormEvent, useMemo, useReducer, useState } from 'react'
+import { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
 import {
-  AnthropicSettings,
-  AzureSettings,
-  BedrockSettings,
+  AISettingsConfiguredProviders,
+  getUnconfiguredProviders,
+} from './AISettingsConfiguredProviders.tsx'
+import { AISettingsProviderModal } from './AISettingsProviderEditModal.tsx'
+import { providerSettingsKey } from './AISettingsProviderForm.tsx'
+import {
   initialSettingsAttributes,
-  OllamaSettings,
-  OpenAISettings,
   validateAttributes,
-  VertexSettings,
 } from './AISettingsProviders.tsx'
 
 const updateSettings = produce(
@@ -59,118 +38,128 @@ const updateSettings = produce(
 
 export function AISettingsProvider() {
   const theme = useTheme()
+  const { popToast } = useSimpleToast()
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
 
   const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
-  const [provider, setProvider] = useState<AiProvider>(
-    ai?.provider ?? AiProvider.Openai
-  )
+  const activeProvider = ai?.provider ?? AiProvider.Openai
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
     initialSettingsAttributes(ai)
   )
-  const { verbosityLevel, setVerbosityLevel } = useExplainWithAIContext()
-  const [showToast, setShowToast] = useState(false)
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingProvider, setEditingProvider] =
+    useState<Nullable<AiProvider>>(null)
+  const [connectModalOpen, setConnectModalOpen] = useState(false)
+  const [connectingProvider, setConnectingProvider] =
+    useState<Nullable<AiProvider>>(null)
 
-  let settings: ReactNode
-  switch (provider) {
-    case AiProvider.Openai:
-      settings = (
-        <OpenAISettings
-          enabled={enabled}
-          settings={providerSettings.openai}
-          updateSettings={(settings) =>
-            updateProviderSettings({ openai: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Anthropic:
-      settings = (
-        <AnthropicSettings
-          enabled={enabled}
-          settings={providerSettings.anthropic}
-          updateSettings={(settings) =>
-            updateProviderSettings({ anthropic: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Bedrock:
-      settings = (
-        <BedrockSettings
-          enabled={enabled}
-          settings={providerSettings.bedrock}
-          updateSettings={(settings) =>
-            updateProviderSettings({ bedrock: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Ollama:
-      settings = (
-        <OllamaSettings
-          enabled={enabled}
-          settings={providerSettings.ollama}
-          updateSettings={(settings) =>
-            updateProviderSettings({ ollama: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Azure:
-      settings = (
-        <AzureSettings
-          enabled={enabled}
-          settings={providerSettings.azure}
-          updateSettings={(settings) =>
-            updateProviderSettings({ azure: settings })
-          }
-        />
-      )
-      break
-    case AiProvider.Vertex:
-      settings = (
-        <VertexSettings
-          enabled={enabled}
-          settings={providerSettings.vertex}
-          updateSettings={(settings) =>
-            updateProviderSettings({ vertex: settings })
-          }
-        />
-      )
-      break
-  }
+  const unconfiguredProviders = useMemo(
+    () => getUnconfiguredProviders(ai),
+    [ai]
+  )
 
-  const valid = useMemo(
-    () => validateAttributes(enabled, provider, providerSettings),
-    [enabled, provider, providerSettings]
+  const editValid = useMemo(
+    () =>
+      editingProvider
+        ? validateAttributes(enabled, editingProvider, providerSettings)
+        : false,
+    [enabled, editingProvider, providerSettings]
+  )
+
+  const connectValid = useMemo(
+    () =>
+      connectingProvider
+        ? validateAttributes(enabled, connectingProvider, providerSettings)
+        : false,
+    [enabled, connectingProvider, providerSettings]
   )
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
-    variables: {
-      attributes: {
-        ai: {
-          enabled,
-          ...(enabled
-            ? { provider, ...pick(providerSettings, provider.toLowerCase()) }
-            : {}),
-        } satisfies AiSettingsAttributes,
-      },
-    },
     onCompleted: (data) => {
-      setShowToast(true)
+      popToast({ content: 'Changes saved', severity: 'success' })
+      setEditModalOpen(false)
+      setEditingProvider(null)
+      setConnectModalOpen(false)
+      setConnectingProvider(null)
+      setEnabled(data?.updateDeploymentSettings?.ai?.enabled ?? false)
       updateProviderSettings(
         initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
       )
     },
   })
 
-  const handleSubmit = (e: FormEvent) => {
+  const saveSettings = (
+    settingsProvider: AiProvider,
+    routingProvider: AiProvider
+  ) => {
+    mutation({
+      variables: {
+        attributes: {
+          ai: {
+            enabled,
+            ...(enabled
+              ? {
+                  provider: routingProvider,
+                  ...pick(
+                    providerSettings,
+                    providerSettingsKey[settingsProvider]
+                  ),
+                }
+              : {}),
+          },
+        },
+      },
+    })
+  }
+
+  const saveEnabled = (checked: boolean) => {
+    const previous = ai?.enabled ?? false
+    setEnabled(checked)
+    mutation({
+      variables: { attributes: { ai: { enabled: checked } } },
+      onError: () => setEnabled(previous),
+    })
+  }
+
+  const handleEditSubmit = (e: FormEvent) => {
     e.preventDefault()
-    mutation()
+    if (!editingProvider) return
+
+    saveSettings(editingProvider, activeProvider)
+  }
+
+  const handleEditProvider = (editProvider: AiProvider) => {
+    setEditingProvider(editProvider)
+    setEditModalOpen(true)
+  }
+
+  const handleConnectProvider = () => {
+    const nextProvider = unconfiguredProviders[0]
+    if (!nextProvider) return
+
+    setConnectingProvider(nextProvider)
+    setConnectModalOpen(true)
+  }
+
+  const handleConnectSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    if (!connectingProvider) return
+
+    saveSettings(connectingProvider, activeProvider)
+  }
+
+  const formProps = {
+    enabled,
+    provider: activeProvider,
+    providerSettings,
+    updateProviderSettings,
+    loading,
+    saveDisabled: !ai?.enabled && !enabled,
+    error,
+    deploymentSettingsError,
   }
 
   return (
@@ -179,184 +168,78 @@ export function AISettingsProvider() {
         direction="column"
         gap="medium"
       >
-        <WrapperCardSC
-          forwardedAs="form"
-          onSubmit={handleSubmit}
+        <Switch
+          checked={enabled}
+          onChange={saveEnabled}
         >
-          {(error || deploymentSettingsError) && (
-            <GqlError error={error || deploymentSettingsError} />
-          )}
-          <Flex justifyContent="space-between">
-            <Switch
-              checked={enabled}
-              onChange={(checked) => setEnabled(checked)}
-            >
-              Enable AI insights
-            </Switch>
-          </Flex>
-          <FormField label="AI provider">
-            <SelectWithDisable
-              disabled={!enabled}
-              selectedKey={provider}
-              onSelectionChange={(v) => {
-                setProvider(v as AiProvider)
-              }}
-            >
-              <ListBoxItem
-                key={AiProvider.Openai}
-                label="OpenAI"
-              />
-              <ListBoxItem
-                key={AiProvider.Anthropic}
-                label="Anthropic"
-              />
-              <ListBoxItem
-                key={AiProvider.Azure}
-                label="Azure AI"
-              />
-              <ListBoxItem
-                key={AiProvider.Bedrock}
-                label="AWS Bedrock"
-              />
-              <ListBoxItem
-                key={AiProvider.Ollama}
-                label="Ollama"
-              />
-              <ListBoxItem
-                key={AiProvider.Vertex}
-                label="Vertex AI"
-              />
-            </SelectWithDisable>
-          </FormField>
-          <Body2P $color="text-xlight">
-            Note: model fields can be left blank to use Plural defaults unless
-            otherwise specified.
-          </Body2P>
-          {settings}
-          <Button
-            alignSelf="flex-end"
-            type="submit"
-            disabled={!valid || (!ai?.enabled && !enabled)}
-            loading={loading}
+          {enabled ? 'Disable' : 'Enable'} AI in Plural
+        </Switch>
+        {!enabled && (
+          <Callout
+            severity="neutral"
+            size="compact"
+            css={{ padding: theme.spacing.small }}
           >
-            Save changes
-          </Button>
-        </WrapperCardSC>
-        {enabled && (
-          <>
-            <Card
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.small,
-                padding: theme.spacing.xlarge,
-              }}
-            >
-              <Body2BoldP>AI explain length</Body2BoldP>
-              <Body2P>
-                Control the level of depth for the “Explain with AI” feature on
-                some pages. Please note that this is local setting that impacts
-                only your current browser.
-              </Body2P>
-              <RadioGroup
-                value={verbosityLevel}
-                onChange={(v) => setVerbosityLevel(v as AIVerbosityLevel)}
-                css={{
-                  backgroundColor: theme.colors['fill-two'],
-                  borderRadius: theme.borderRadiuses.large,
-                  display: 'flex',
-                  gap: theme.spacing.xxxxxlarge,
-                  padding: theme.spacing.medium,
-                }}
-              >
-                {Object.values(AIVerbosityLevel).map((value) => (
-                  <Radio
-                    value={value}
-                    key={value}
-                  >
-                    {value}
-                  </Radio>
-                ))}
-              </RadioGroup>
-            </Card>
-            <InsightsCallout />
-          </>
+            Plural AI is disabled. Enable to access Model routing and AI
+            insights tabs.
+          </Callout>
         )}
+        <Flex
+          align="center"
+          gap="xlarge"
+        >
+          <Body2P $color="text-light">
+            Connect the LLM and embedding providers you want Plural AI to use.
+            You can connect more than one and pin specific roles in Model
+            routing.
+          </Body2P>
+          {unconfiguredProviders.length > 0 && (
+            <Button
+              disabled={!enabled}
+              style={{ flexShrink: 0 }}
+              onClick={handleConnectProvider}
+            >
+              Connect provider
+            </Button>
+          )}
+        </Flex>
+        <AISettingsConfiguredProviders
+          ai={ai}
+          enabled={enabled}
+          onEdit={handleEditProvider}
+        />
       </Flex>
-      <Toast
-        severity="success"
-        css={{ margin: theme.spacing.large }}
-        position="bottom"
-        show={showToast}
-        onClose={() => setShowToast(false)}
-      >
-        Changes saved
-      </Toast>
+      {editingProvider && (
+        <AISettingsProviderModal
+          open={editModalOpen}
+          hideProviderSelect
+          onClose={() => {
+            setEditModalOpen(false)
+            setEditingProvider(null)
+          }}
+          {...formProps}
+          provider={editingProvider}
+          onSubmit={handleEditSubmit}
+          valid={editValid}
+        />
+      )}
+      {connectingProvider && (
+        <AISettingsProviderModal
+          open={connectModalOpen}
+          header="Connect AI provider"
+          providerOptions={unconfiguredProviders}
+          forceEnableProviderSelect
+          onClose={() => {
+            setConnectModalOpen(false)
+            setConnectingProvider(null)
+          }}
+          {...formProps}
+          provider={connectingProvider}
+          onProviderChange={setConnectingProvider}
+          onSubmit={handleConnectSubmit}
+          valid={connectValid}
+        />
+      )}
     </ScrollablePage>
-  )
-}
-
-const WrapperCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  padding: theme.spacing.xlarge,
-}))
-
-const InsightsCalloutSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.small,
-  alignItems: 'flex-start',
-  background: theme.colors['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
-  padding: theme.spacing.medium,
-  borderLeft: `3px solid ${theme.colors['border-info']}`,
-}))
-
-function InsightsCallout() {
-  return (
-    <InsightsCalloutSC>
-      <AiSparkleFilledIcon
-        marginTop="xxsmall"
-        color="icon-info"
-      />
-      <Flex
-        direction="column"
-        gap="xxsmall"
-      >
-        <Body1BoldP>
-          Look out for the Insights icon, shown to the left
-        </Body1BoldP>
-        <Body2P $color="text-light">
-          Wherever you see this icon there will be AI-generated insights.
-        </Body2P>
-      </Flex>
-    </InsightsCalloutSC>
-  )
-}
-
-function SelectWithDisable({
-  disabled,
-  ...props
-}: { disabled: boolean } & SelectPropsSingle) {
-  const theme = useTheme()
-  return (
-    <div
-      css={
-        disabled
-          ? {
-              '& div:last-child': {
-                color: theme.colors['text-input-disabled'],
-                cursor: 'unset',
-              },
-            }
-          : undefined
-      }
-    >
-      <Select
-        {...props}
-        isDisabled={disabled}
-      />
-    </div>
   )
 }

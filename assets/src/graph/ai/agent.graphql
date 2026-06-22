@@ -13,12 +13,17 @@ fragment AgentRunTiny on AgentRun {
   }
   repository
   branch
+  headBranch
   pullRequests {
     ...PullRequestBasic
   }
   podReference {
     name
     namespace
+  }
+  upload {
+    id
+    session
   }
   insertedAt
   updatedAt

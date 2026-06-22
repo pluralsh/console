@@ -42,6 +42,10 @@ defmodule Console.Schema.GlobalService do
     timestamps()
   end
 
+  def svc_name(%__MODULE__{template: %ServiceTemplate{name: name}}) when is_binary(name), do: name
+  def svc_name(%__MODULE__{service: %Service{name: name}}) when is_binary(name), do: name
+  def svc_name(%__MODULE__{name: name}), do: name
+
   def search(query \\ __MODULE__, search) do
     from(g in query, where: ilike(g.name, ^"%#{search}%"))
   end

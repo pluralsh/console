@@ -179,6 +179,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> ok()
   end
 
+  def workbench_usage(args, %{context: %{current_user: user}}) do
+    period = args[:period] || :day
+
+    Workbench.for_user(user)
+    |> workbench_filters(args)
+    |> maybe_search(Workbench, args)
+    |> WorkbenchJob.workbench_usage(period)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   def average_eval_results(args, _ctx) do
     period = args[:period] || :day
 

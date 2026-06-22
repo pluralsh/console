@@ -3,8 +3,8 @@ defmodule Console.AI.Provider.TokenExchangeTest do
   use Console.DataCase, async: false
   use Mimic
 
-  alias Console.AI.{OpenAI, Provider.TokenExchange}
-  alias Console.Schema.DeploymentSettings.OauthToken
+  alias Console.AI.Provider
+  alias Console.AI.Provider.TokenExchange
 
   @token_url "https://example.com/oauth2/token"
   @client_id "test-client-id"
@@ -139,37 +139,71 @@ defmodule Console.AI.Provider.TokenExchangeTest do
         :ok
       end)
 
-      openai =
-        OpenAI.new(%{
-          access_token: nil,
-          token_exchange: %OauthToken{
-            enabled: true,
-            token_url: @token_url,
-            client_id: @client_id,
-            client_secret: @client_secret
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{
+            model: "gpt-5.4-mini",
+            token_exchange: %{
+              enabled: true,
+              token_url: @token_url,
+              client_id: @client_id,
+              client_secret: @client_secret
+            }
           }
-        })
+        }
+      )
 
       expect(ReqLLM, :generate_text, fn %{provider: :openai, model: "gpt-5.4-mini"}, _messages, opts ->
         assert Keyword.get(opts, :api_key) == oauth_access_token
 
-        Jason.encode!(%{
-          "id" => "resp_e2e",
-          "object" => "response",
-          "output" => [
-            %{
-              "type" => "message",
-              "id" => "msg_e2e",
-              "status" => "completed",
-              "role" => "assistant",
-              "content" => [%{"type" => "output_text", "text" => "ok"}]
-            }
-          ]
-        })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        openai_response()
       end)
 
-      assert {:ok, "ok"} = OpenAI.completion(openai, [{:user, "ping"}], [])
+      assert {:ok, "ok"} = Provider.completion([{:user, "ping"}], preface: :ignore)
+    end
+
+    test "OpenAI completion uses cached OAuth token from deployment settings" do
+      oauth_access_token = "cached-oauth-access-token-for-reqllm"
+
+      stub(Console.Cache, :get, fn _ ->
+        %OAuth2.AccessToken{
+          access_token: oauth_access_token,
+          expires_at: nil,
+          refresh_token: nil,
+          token_type: "Bearer",
+          other_params: %{}
+        }
+      end)
+
+      Tesla.Mock.mock(fn _ ->
+        flunk("token endpoint should not be called when the token is cached")
+      end)
+
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{
+            model: "gpt-5.4-mini",
+            token_exchange: %{
+              enabled: true,
+              token_url: @token_url,
+              client_id: @client_id,
+              client_secret: @client_secret
+            }
+          }
+        }
+      )
+
+      expect(ReqLLM, :generate_text, fn %{provider: :openai, model: "gpt-5.4-mini"}, _messages, opts ->
+        assert Keyword.get(opts, :api_key) == oauth_access_token
+
+        openai_response()
+      end)
+
+      assert {:ok, "ok"} = Provider.completion([{:user, "ping"}], preface: :ignore)
     end
   end
 
@@ -179,5 +213,22 @@ defmodule Console.AI.Provider.TokenExchangeTest do
     Enum.find_value(headers, fn {k, v} ->
       if String.downcase(to_string(k)) == wanted, do: v
     end)
+  end
+
+  defp openai_response do
+    Jason.encode!(%{
+      "id" => "resp_e2e",
+      "object" => "response",
+      "output" => [
+        %{
+          "type" => "message",
+          "id" => "msg_e2e",
+          "status" => "completed",
+          "role" => "assistant",
+          "content" => [%{"type" => "output_text", "text" => "ok"}]
+        }
+      ]
+    })
+    |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
   end
 end

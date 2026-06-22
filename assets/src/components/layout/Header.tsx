@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
 
+import AwaitingReviewLauncher from '../awaiting-review/AwaitingReviewLauncher'
 import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
 import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
@@ -30,8 +31,9 @@ export default function Header() {
         <HeaderProjectSelect />
         <Flex grow={1} />
         <BillingLegacyUserMessage />
-        <ChatbotLauncher />
+        <AwaitingReviewLauncher />
         <NotificationsLauncher />
+        <ChatbotLauncher />
         <ProfileMenu />
       </HeaderContentSC>
     </HeaderSC>

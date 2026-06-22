@@ -1,27 +1,13 @@
-import {
-  AsanaLogoIcon,
-  AzureDevopsLogoIcon,
-  BitBucketIcon,
-  DatadogLogoIcon,
-  GitHubLogoIcon,
-  GitLabLogoIcon,
-  GrafanaLogoIcon,
-  JiraLogoIcon,
-  LinearLogoIcon,
-  NewrelicLogoIcon,
-  PagerdutyLogoIcon,
-  SentryLogoIcon,
-  TicketIcon,
-  VisualInspectionIcon,
-  WebhooksIcon,
-} from '@pluralsh/design-system'
+import { TicketIcon, VisualInspectionIcon } from '@pluralsh/design-system'
 
 import {
-  IssueWebhookProvider,
-  ObservabilityWebhookType,
   WorkbenchWebhookFragment,
   WorkbenchWebhookTinyFragment,
 } from 'generated/graphql'
+import {
+  getIssueWebhookProviderIcon,
+  getObservabilityWebhookTypeIcon,
+} from 'components/settings/webhooks/webhookIcons'
 
 export function webhookURL(webhook: WorkbenchWebhookFragment) {
   if (webhook.issueWebhook) return webhook.issueWebhook.url
@@ -43,46 +29,6 @@ export function webhookTypeLabel(webhook: WorkbenchWebhookFragment) {
   return 'Observability'
 }
 
-export function getObservabilityWebhookTypeIcon(type: Nullable<string>) {
-  switch (type) {
-    case ObservabilityWebhookType.Grafana:
-      return <GrafanaLogoIcon fullColor />
-    case ObservabilityWebhookType.Datadog:
-      return <DatadogLogoIcon fullColor />
-    case ObservabilityWebhookType.Newrelic:
-      return <NewrelicLogoIcon fullColor />
-    case ObservabilityWebhookType.Pagerduty:
-      return <PagerdutyLogoIcon fullColor />
-    case ObservabilityWebhookType.Sentry:
-      return <SentryLogoIcon fullColor />
-    case ObservabilityWebhookType.Plural:
-    default:
-      return <WebhooksIcon />
-  }
-}
-
-export function getIssueWebhookProviderIcon(provider: Nullable<string>) {
-  switch (provider) {
-    case IssueWebhookProvider.AzureDevops:
-      return <AzureDevopsLogoIcon fullColor />
-    case IssueWebhookProvider.Bitbucket:
-    case IssueWebhookProvider.BitbucketDatacenter:
-      return <BitBucketIcon fullColor />
-    case IssueWebhookProvider.Github:
-      return <GitHubLogoIcon />
-    case IssueWebhookProvider.Gitlab:
-      return <GitLabLogoIcon fullColor />
-    case IssueWebhookProvider.Linear:
-      return <LinearLogoIcon fullColor />
-    case IssueWebhookProvider.Jira:
-      return <JiraLogoIcon fullColor />
-    case IssueWebhookProvider.Asana:
-      return <AsanaLogoIcon fullColor />
-    default:
-      return <WebhooksIcon />
-  }
-}
-
 export function getWebhookIcon(
   webhook: WorkbenchWebhookFragment | WorkbenchWebhookTinyFragment
 ) {
@@ -91,3 +37,5 @@ export function getWebhookIcon(
   }
   return getObservabilityWebhookTypeIcon(webhook.webhook?.type)
 }
+
+export { getIssueWebhookProviderIcon, getObservabilityWebhookTypeIcon }

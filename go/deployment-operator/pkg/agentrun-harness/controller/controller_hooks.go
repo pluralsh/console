@@ -72,6 +72,7 @@ func (in *agentRunController) postStart(err error) {
 func (in *agentRunController) postExecHook() v1.HookFunction {
 	return func() error {
 		klog.V(log.LogLevelDebug).InfoS("post exec hook")
+		in.uploadAgentRunArtifacts(context.Background())
 		// Signal that the initial AI run has finished so the babysit loop
 		// can start.
 		select {

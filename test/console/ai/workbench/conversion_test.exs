@@ -2,8 +2,17 @@ defmodule Console.AI.Workbench.ConversionTest do
   use Console.DataCase, async: true
   alias Console.Schema.WorkbenchTool
   alias Console.AI.Workbench.Conversion
+  alias Toolquery.{PrometheusConnection, ToolConnection}
 
   describe "to_proto/1" do
+    test "passes through an already built tool connection" do
+      conn = %ToolConnection{
+        connection: {:prometheus, %PrometheusConnection{url: "https://prometheus.example.com"}}
+      }
+
+      assert {:ok, ^conn} = Conversion.to_proto(conn)
+    end
+
     test "converts elastic tool to proto" do
       tool = %WorkbenchTool{
         tool: :elastic,
@@ -13,6 +22,32 @@ defmodule Console.AI.Workbench.ConversionTest do
       }
 
       {:ok, res} = Conversion.to_proto(tool)
+      {:ok, _} = Protobuf.JSON.encode(res)
+      assert is_binary(Protobuf.encode(res))
+    end
+
+    test "converts opensearch tool to proto" do
+      tool = %WorkbenchTool{
+        tool: :opensearch,
+        configuration: %{
+          opensearch: %{
+            host: "https://search-domain.us-east-1.es.amazonaws.com",
+            index: "logs",
+            aws_region: "us-east-1",
+            assume_role_arn: "arn:aws:iam::123456789012:role/opensearch-readonly",
+            use_pod_identity: true
+          }
+        }
+      }
+
+      {:ok, res} = Conversion.to_proto(tool)
+      {:opensearch, opensearch} = res.connection
+
+      assert opensearch.host == "https://search-domain.us-east-1.es.amazonaws.com"
+      assert opensearch.index == "logs"
+      assert opensearch.aws_region == "us-east-1"
+      assert opensearch.assume_role_arn == "arn:aws:iam::123456789012:role/opensearch-readonly"
+      assert opensearch.use_pod_identity
       {:ok, _} = Protobuf.JSON.encode(res)
       assert is_binary(Protobuf.encode(res))
     end

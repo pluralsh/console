@@ -384,6 +384,7 @@ const statusToSeverity: Record<
   [AgentRunStatus.Cancelled]: 'neutral',
   [AgentRunStatus.Successful]: 'success',
   [AgentRunStatus.Babysitting]: 'neutral',
+  [AgentRunStatus.PendingApproval]: 'warning',
   [WorkbenchJobStatus.Paused]: 'neutral',
 }
 

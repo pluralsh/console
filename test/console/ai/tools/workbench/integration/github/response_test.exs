@@ -44,9 +44,25 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
                }
              }
     end
+
+    test "bubbles Tentacat transport failures as tool errors" do
+      error = %HTTPoison.Error{
+        reason: {:tls_alert, {:unknown_ca, ~c"TLS client: certificate verify failed"}}
+      }
+
+      assert {:error, message} = Response.json({:error, error})
+      assert message =~ "GitHub request failed: TLS unknown_ca:"
+      assert message =~ "certificate verify failed"
+      refute message =~ "%HTTPoison.Error"
+    end
   end
 
   describe "github query helpers" do
+    test "encodes query params with reserved branch characters" do
+      assert Query.qp(%{"head" => "pluralsh:agent/prod-4949-grafana-db-storage-1781106200000"}) ==
+               "?head=pluralsh%3Aagent%2Fprod-4949-grafana-db-storage-1781106200000"
+    end
+
     test "adds bounded pagination defaults" do
       assert Query.paginated(%{}) == %{page: 1, per_page: 30}
       assert Query.paginated(%{page: 3, per_page: 5}) == %{page: 3, per_page: 5}

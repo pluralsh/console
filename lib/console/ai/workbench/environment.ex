@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Environment do
   alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity, User}
-  alias Console.AI.Workbench.{Skill, Skills.Builtins}
+  alias Console.AI.Workbench.{Skill, Skills.Builtins, Heartbeat}
 
   @type t :: %__MODULE__{
     user: User.t,
@@ -23,6 +23,10 @@ defmodule Console.AI.Workbench.Environment do
     }
     |> save()
   end
+
+  def engine_opts(%WorkbenchJob{modes: %{model: %{model: m, provider: p}}} = job) when is_binary(m),
+    do: [model: m, provider: p, usage_callback: &Heartbeat.usage_callback(job, &1)]
+  def engine_opts(%WorkbenchJob{} = job), do: [usage_callback: &Heartbeat.usage_callback(job, &1)]
 
   def with_builtins(skills) when is_map(skills) do
     Builtins.builtins()

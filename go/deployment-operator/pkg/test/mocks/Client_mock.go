@@ -290,6 +290,66 @@ func (_c *ClientMock_CreateAgentPullRequest_Call) RunAndReturn(run func(context.
 	return _c
 }
 
+// CreateAgentRunUpload provides a mock function with given fields: ctx, runID, attrs
+func (_m *ClientMock) CreateAgentRunUpload(ctx context.Context, runID string, attrs goclient.AgentRunUploadAttributes) (*goclient.AgentRunUploadFragment, error) {
+	ret := _m.Called(ctx, runID, attrs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateAgentRunUpload")
+	}
+
+	var r0 *goclient.AgentRunUploadFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentRunUploadAttributes) (*goclient.AgentRunUploadFragment, error)); ok {
+		return rf(ctx, runID, attrs)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentRunUploadAttributes) *goclient.AgentRunUploadFragment); ok {
+		r0 = rf(ctx, runID, attrs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*goclient.AgentRunUploadFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, goclient.AgentRunUploadAttributes) error); ok {
+		r1 = rf(ctx, runID, attrs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientMock_CreateAgentRunUpload_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateAgentRunUpload'
+type ClientMock_CreateAgentRunUpload_Call struct {
+	*mock.Call
+}
+
+// CreateAgentRunUpload is a helper method to define mock.On call
+//   - ctx context.Context
+//   - runID string
+//   - attrs goclient.AgentRunUploadAttributes
+func (_e *ClientMock_Expecter) CreateAgentRunUpload(ctx interface{}, runID interface{}, attrs interface{}) *ClientMock_CreateAgentRunUpload_Call {
+	return &ClientMock_CreateAgentRunUpload_Call{Call: _e.mock.On("CreateAgentRunUpload", ctx, runID, attrs)}
+}
+
+func (_c *ClientMock_CreateAgentRunUpload_Call) Run(run func(ctx context.Context, runID string, attrs goclient.AgentRunUploadAttributes)) *ClientMock_CreateAgentRunUpload_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(goclient.AgentRunUploadAttributes))
+	})
+	return _c
+}
+
+func (_c *ClientMock_CreateAgentRunUpload_Call) Return(_a0 *goclient.AgentRunUploadFragment, _a1 error) *ClientMock_CreateAgentRunUpload_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ClientMock_CreateAgentRunUpload_Call) RunAndReturn(run func(context.Context, string, goclient.AgentRunUploadAttributes) (*goclient.AgentRunUploadFragment, error)) *ClientMock_CreateAgentRunUpload_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateAgentRun provides a mock function with given fields: ctx, runtimeID, attrs
 func (_m *ClientMock) CreateAgentRun(ctx context.Context, runtimeID string, attrs goclient.AgentRunAttributes) (*goclient.AgentRunFragment, error) {
 	ret := _m.Called(ctx, runtimeID, attrs)

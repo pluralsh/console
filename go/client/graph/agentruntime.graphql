@@ -41,11 +41,30 @@ query GetAgentRun($id: ID!) {
     }
 }
 
+query GetAgentRunMinimal($id: ID!) {
+    agentRun(id: $id) {
+        ...AgentRunMinimalFragment
+    }
+}
+
 query ListAgentRuns($after: String, $first: Int, $before: String, $last: Int) {
     agentRuns(after: $after, first: $first, before: $before, last: $last) {
         edges {
             node {
                 ...AgentRunFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+query ListAgentRunsMinimal($after: String, $first: Int, $before: String, $last: Int) {
+    agentRuns(after: $after, first: $first, before: $before, last: $last) {
+        edges {
+            node {
+                ...AgentRunMinimalFragment
             }
         }
         pageInfo {
@@ -120,6 +139,12 @@ mutation CreateAgentMessage($runId: ID!, $attributes: AgentMessageAttributes!) {
   }
 }
 
+mutation CreateAgentRunUpload($runId: ID!, $session: Upload, $screenRecording: Upload, $patch: Upload) {
+  createAgentRunUpload(runId: $runId, attributes: {session: $session, screenRecording: $screenRecording, patch: $patch}) {
+    ...AgentRunUploadFragment
+  }
+}
+
 fragment TinyAgentRuntimeFragment on AgentRuntime {
     id
     name
@@ -186,11 +211,19 @@ fragment AgentRunBaseFragment on AgentRun {
   }
 }
 
+fragment AgentRunUploadFragment on AgentRunUpload {
+  id
+  session
+  screenRecording
+  patch
+}
+
 fragment AgentRunFragment on AgentRun {
     id
     prompt
     repository
     branch
+    headBranch
     mode
     language
     languageVersion
@@ -226,6 +259,33 @@ fragment AgentRunFragment on AgentRun {
     pullRequests {
         ...PullRequestFragment
     }
+    upload {
+        ...AgentRunUploadFragment
+    }
     babysit
     babysitInterval
+}
+
+
+fragment AgentRunMinimalFragment on AgentRun {
+    id
+    prompt
+    repository
+    branch
+    headBranch
+    runtime {
+        type
+    }
+    pullRequests {
+        id
+        status
+        url
+        title
+        ref
+    }
+    upload {
+        session
+        patch
+        screenRecording
+    }
 }

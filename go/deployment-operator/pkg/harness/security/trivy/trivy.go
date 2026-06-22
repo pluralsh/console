@@ -34,7 +34,7 @@ func (in *Scanner) Scan(tool console.StackType, options ...v1.ScanOption) ([]*co
 // scan performs the actual scan for a given tool.
 func (in *Scanner) scan(tool console.StackType, options *v1.ScanOptions) ([]*console.StackPolicyViolationAttributes, error) {
 	switch tool {
-	case console.StackTypeTerraform:
+	case console.StackTypeTerraform, console.StackTypeTerragrunt:
 		return in.scanTerraform(options)
 	default:
 		klog.Fatalf("unsupported tool type: %s", tool)

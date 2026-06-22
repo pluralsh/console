@@ -35,11 +35,13 @@ func Charts() []ChartEntry {
 
 // Resources returns DefaultResources using this chart's release name as prefix.
 func (e ChartEntry) Resources() struct {
-	Console   Console
-	Dashboard Dashboard
-	Kas       KAS
-	Operator  Operator
-	Redis     Redis
+	Console    Console
+	Dashboard  Dashboard
+	Nexus      Nexus
+	CloudQuery CloudQuery
+	Kas        KAS
+	Operator   Operator
+	Redis      Redis
 } {
 	return DefaultResources(e.ReleaseName)
 }
@@ -53,6 +55,14 @@ type Console struct {
 type Dashboard struct {
 	Deployment common.ManifestKey
 	Service    common.ManifestKey
+}
+
+type Nexus struct {
+	Deployment common.ManifestKey
+}
+
+type CloudQuery struct {
+	Deployment common.ManifestKey
 }
 
 type KAS struct {
@@ -71,18 +81,22 @@ type Redis struct {
 }
 
 func DefaultResources(prefix string) struct {
-	Console   Console
-	Dashboard Dashboard
-	Kas       KAS
-	Operator  Operator
-	Redis     Redis
+	Console    Console
+	Dashboard  Dashboard
+	Nexus      Nexus
+	CloudQuery CloudQuery
+	Kas        KAS
+	Operator   Operator
+	Redis      Redis
 } {
 	return struct {
-		Console   Console
-		Dashboard Dashboard
-		Kas       KAS
-		Operator  Operator
-		Redis     Redis
+		Console    Console
+		Dashboard  Dashboard
+		Nexus      Nexus
+		CloudQuery CloudQuery
+		Kas        KAS
+		Operator   Operator
+		Redis      Redis
 	}{
 		Console: Console{
 			Deployment: common.ManifestKey{
@@ -120,6 +134,24 @@ func DefaultResources(prefix string) struct {
 				GroupKind: schema.GroupKind{
 					Group: common.GroupCore,
 					Kind:  common.KindService,
+				},
+			},
+		},
+		Nexus: Nexus{
+			Deployment: common.ManifestKey{
+				Name: "console-nexus",
+				GroupKind: schema.GroupKind{
+					Group: common.GroupApps,
+					Kind:  common.KindDeployment,
+				},
+			},
+		},
+		CloudQuery: CloudQuery{
+			Deployment: common.ManifestKey{
+				Name: "cloud-query",
+				GroupKind: schema.GroupKind{
+					Group: common.GroupApps,
+					Kind:  common.KindDeployment,
 				},
 			},
 		},

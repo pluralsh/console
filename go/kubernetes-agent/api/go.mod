@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/kubernetes-agent/api
 
-go 1.26.3
+go 1.26.4
 
 require (
 	github.com/Yiling-J/theine-go v0.6.0
@@ -95,7 +95,7 @@ require (
 	github.com/prometheus/common v0.67.4 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
-	github.com/quic-go/quic-go v0.59.0 // indirect
+	github.com/quic-go/quic-go v0.59.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect

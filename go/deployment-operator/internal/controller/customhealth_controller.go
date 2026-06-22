@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -49,14 +48,19 @@ type CustomHealthReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *CustomHealthReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	if req.Name != "default" {
-		logger.Error(fmt.Errorf("expected 'default' name, got %s", req.Name), "")
-		return reconcile.Result{}, nil
-	}
+
 	script := &v1alpha1.CustomHealth{}
 	if err := r.Get(ctx, req.NamespacedName, script); err != nil {
-		logger.Error(err, "Unable to fetch LuaScript")
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+		if client.IgnoreNotFound(err) == nil {
+			if syncErr := r.syncLuaScripts(ctx); syncErr != nil {
+				logger.Error(syncErr, "Unable to sync Lua scripts after CustomHealth deletion")
+				return ctrl.Result{}, syncErr
+			}
+			return ctrl.Result{}, nil
+		}
+
+		logger.Error(err, "Unable to fetch CustomHealth")
+		return ctrl.Result{}, err
 	}
 	utils.MarkCondition(script.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
@@ -73,10 +77,24 @@ func (r *CustomHealthReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}()
 
-	common.GetLuaScript().SetValue(script.Spec.Script)
+	if err := r.syncLuaScripts(ctx); err != nil {
+		logger.Error(err, "Unable to sync Lua scripts")
+		utils.MarkCondition(script.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
+		return ctrl.Result{}, err
+	}
 	utils.MarkCondition(script.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return ctrl.Result{}, nil
+}
+
+func (r *CustomHealthReconciler) syncLuaScripts(ctx context.Context) error {
+	list := &v1alpha1.CustomHealthList{}
+	if err := r.List(ctx, list); err != nil {
+		return err
+	}
+
+	common.SyncLuaScriptsFromCustomHealths(list.Items)
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

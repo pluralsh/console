@@ -143,6 +143,21 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 		utils.RemoveFinalizer(credentials, ElasticSearchUserProtectionFinalizerName)
 	}
 
+	if controllerutil.ContainsFinalizer(credentials, ElasticsearchIndexProtectionFinalizerName) {
+		indexList := &v1alpha1.ElasticsearchIndexList{}
+		if err := r.List(ctx, indexList, client.InNamespace(credentials.Namespace)); err != nil {
+			return err
+		}
+		for _, index := range indexList.Items {
+			if strings.EqualFold(index.Spec.CredentialsRef.Name, credentials.Name) {
+				if err := r.Delete(ctx, &index); err != nil {
+					return err
+				}
+			}
+		}
+		utils.RemoveFinalizer(credentials, ElasticsearchIndexProtectionFinalizerName)
+	}
+
 	if controllerutil.ContainsFinalizer(credentials, ElasticsearchIndexTemplateProtectionFinalizerName) {
 		indexTemplateList := &v1alpha1.ElasticsearchIndexTemplateList{}
 		if err := r.List(ctx, indexTemplateList, client.InNamespace(credentials.Namespace)); err != nil {

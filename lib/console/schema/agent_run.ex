@@ -9,12 +9,13 @@ defmodule Console.Schema.AgentRun do
     NamespacedName,
     PullRequest,
     AgentSession,
+    AgentRunUpload,
     WorkbenchJobActivityAgentRun
   }
 
   @expiry 14
 
-  defenum Status,   pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, babysitting: 5
+  defenum Status,   pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, babysitting: 5, pending_approval: 6
   defenum Mode,     analyze: 0, write: 1
   defenum Language, javascript: 0, python: 1, java: 2, cpp: 3, csharp: 4, go: 5, ruby: 6, php: 7, terraform: 8
 
@@ -29,11 +30,21 @@ defmodule Console.Schema.AgentRun do
     field :prompt,           :binary
     field :repository,       :string
     field :branch,           :string
+    field :head_branch,      :string
     field :error,            :binary
+    field :consumed,         :binary_id
+    field :approval,         :boolean, default: false
+    field :approved_at,      :utc_datetime_usec
 
     field :tool, :map, virtual: true
 
     embeds_one :pod_reference, NamespacedName, on_replace: :update
+
+    embeds_many :skills, Skill, on_replace: :delete do
+      field :name,        :string
+      field :description, :string
+      field :contents,    :string
+    end
 
     embeds_many :todos, Todo, on_replace: :delete do
       field :title,       :string
@@ -57,6 +68,7 @@ defmodule Console.Schema.AgentRun do
     has_many :pull_requests, PullRequest
     has_many :messages, AgentMessage, on_replace: :delete
     has_many :prompts, AgentPrompt, on_replace: :delete
+    has_one  :upload, AgentRunUpload
 
     timestamps()
   end
@@ -86,7 +98,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status language language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch error)a
+  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -99,6 +111,7 @@ defmodule Console.Schema.AgentRun do
     |> cast_embed(:pod_reference)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)
+    |> cast_embed(:skills, with: &skill_changeset/2)
     |> cast_assoc(:messages)
     |> validate_required(~w(status prompt repository runtime_id user_id mode)a)
   end
@@ -113,6 +126,12 @@ defmodule Console.Schema.AgentRun do
     model
     |> cast(attrs, ~w(summary analysis bullets)a)
     |> validate_required(~w(summary analysis)a)
+  end
+
+  defp skill_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name description contents)a)
+    |> validate_required(~w(name contents)a)
   end
 
   def validate_repository(cs, field \\ :repository) do

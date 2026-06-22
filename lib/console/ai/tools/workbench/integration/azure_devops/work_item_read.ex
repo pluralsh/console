@@ -5,7 +5,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.WorkItemRead do
 
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.AzureDevopsConnection}
-  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Client
+  alias Console.AI.Tools.Workbench.Integration.{AzureDevops.Client, Query}
 
   embedded_schema do
     field :tool, :map, virtual: true
@@ -43,12 +43,12 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.WorkItemRead do
     with {:ok, client} <- Client.build(m.tool),
          {:ok, root} <- Client.project_api_root(client, m.organization, m.project) do
       wi_url =
-        "#{root}/_apis/wit/workItems/#{m.work_item_id}?#{URI.encode_query(%{"api-version" => "7.1"}, :safe)}"
+        "#{root}/_apis/wit/workItems/#{m.work_item_id}#{Query.query_string(%{"api-version" => "7.1"})}"
 
       with {:ok, work_item} <- Client.get_json(client, wi_url) do
         if m.include_comments do
           comments_url =
-            "#{root}/_apis/wit/workItems/#{m.work_item_id}/comments?#{URI.encode_query(%{"api-version" => "7.0-preview.3"}, :safe)}"
+            "#{root}/_apis/wit/workItems/#{m.work_item_id}/comments#{Query.query_string(%{"api-version" => "7.0-preview.3"})}"
 
           with {:ok, comments} <- Client.get_json(client, comments_url) do
             Jason.encode(%{"work_item" => work_item, "comments" => comments})

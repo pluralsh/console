@@ -52,6 +52,11 @@ type ConfigTemplateInput struct {
 	// BrowserMCPURL is the in-pod URL of the browser-use MCP server
 	// (typically http://127.0.0.1:8082/mcp).
 	BrowserMCPURL string
+	// StreamingProxy routes plural provider requests through the in-pod mcpserver proxy.
+	StreamingProxy bool
+
+	// StreamingProxyBaseURL is the OpenAI-compatible base URL for the in-pod streaming proxy.
+	StreamingProxyBaseURL string
 }
 
 func configTemplate(input *ConfigTemplateInput) (fileName, content string, err error) {

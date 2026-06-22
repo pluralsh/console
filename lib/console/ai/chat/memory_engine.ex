@@ -18,12 +18,15 @@ defmodule Console.AI.Chat.MemoryEngine do
     :reducer,
     :enabled_tools,
     :callback,
+    :provider,
+    :model,
+    :usage_callback,
     continue_msg: "looks like we aren't done let's continue",
     messages: [],
     pre_enable: [],
     acc: [],
     tool_fmt: &Console.identity/1,
-    tool_search: false
+    tool_search: false,
   ]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
@@ -73,7 +76,13 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> append_continue(engine)
     |> Enum.map(&msg(&1, :tool))
     |> fit_context_window(preface)
-    |> Provider.completion(preface: preface, plural: tools, client: :tool)
+    |> Provider.completion(
+      preface: preface,
+      plural: tools,
+      model: engine.model,
+      client: engine.provider || :tool,
+      usage_callback: engine.usage_callback
+    )
     |> case do
       {:ok, content} -> {[callback(engine, {:assistant, content})], engine}
       {:ok, content, calls} ->
@@ -130,8 +139,8 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp call_tools(engine, tools, impls) do
     by_name = Map.new(impls, & {Tool.name(&1), &1})
     Enum.reduce_while(tools, {[], engine}, fn %Tool{id: id, name: name, arguments: args} = tool, {acc, engine} ->
-      with {:ok, impl}    <- Map.fetch(by_name, name),
-           {:ok, parsed}  <- Tool.validate(impl, args) do
+      with {:ok, impl}   <- Map.fetch(by_name, name),
+           {:ok, parsed} <- Tool.validate(impl, args) do
         case Tool.implement(impl, Map.put(parsed, :id, tool)) do
           %EnabledTools{} = enabled ->
             msg = callback(engine, tool_msg("enabled tools: #{Enum.join(EnabledTools.enabled(enabled), ", ")}", id, name, args, engine.tool_fmt))

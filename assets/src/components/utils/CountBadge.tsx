@@ -1,22 +1,44 @@
-import styled from 'styled-components'
+import styled, { DefaultTheme } from 'styled-components'
+
+export type CountBadgeVariant = 'danger' | 'warning'
+
+function countBadgeVariantStyles(
+  theme: DefaultTheme,
+  variant: CountBadgeVariant
+) {
+  switch (variant) {
+    case 'warning':
+      return {
+        color: 'black',
+        backgroundColor: theme.colors.yellow[400],
+      }
+    case 'danger':
+    default:
+      return {
+        color: 'white',
+        backgroundColor: theme.colors.red[500],
+      }
+  }
+}
 
 const CountBadgeSC = styled.div<{
   $size?: 'small' | 'medium'
   $label?: string
-}>(({ $label = '', $size = 'medium', theme }) => {
+  $variant?: CountBadgeVariant
+}>(({ $label = '', $size = 'medium', $variant = 'danger', theme }) => {
   const width =
     $size === 'small'
       ? $label.length > 1
-        ? 18
-        : 14
+        ? 16
+        : 12
       : $label.length > 1
-        ? 18
-        : 16
-  const fontSize = $size === 'small' ? 10.5 : $label.length > 1 ? 10.5 : 12
+        ? 16
+        : 14
+  const fontSize = $size === 'small' ? 9 : $label.length > 1 ? 9 : 10
 
   return {
     ...theme.partials.text.badgeLabel,
-    color: theme.colors.grey[25],
+    ...countBadgeVariantStyles(theme, $variant),
     letterSpacing: 0,
     fontSize,
     width,
@@ -24,7 +46,6 @@ const CountBadgeSC = styled.div<{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.red[500],
     borderRadius: '50%',
   }
 })
@@ -32,10 +53,12 @@ const CountBadgeSC = styled.div<{
 export function CountBadge({
   count,
   size = 'medium',
+  variant = 'danger',
   ...props
 }: {
   count?: number
   size?: 'small' | 'medium'
+  variant?: CountBadgeVariant
 }) {
   if (!count) {
     return null
@@ -50,6 +73,7 @@ export function CountBadge({
     <CountBadgeSC
       $label={badgeLabel}
       $size={size}
+      $variant={variant}
       {...props}
     >
       {badgeLabel}

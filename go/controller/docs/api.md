@@ -97,11 +97,13 @@ _Appears in:_
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: \{\} <br /> |
 | `analysisRates` _[AnalysisRates](#analysisrates)_ | Configure the pace at which AI insight analysis should run. Useful if you want to minimize impacts on inference costs. |  | Optional: \{\} <br /> |
 | `tools` _[Tools](#tools)_ | Tools holds the configuration for the tools that can be used with the AI integration. |  | Optional: \{\} <br /> |
-| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
-| `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
-| `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `streaming` _boolean_ | Streaming defines whether to stream responses from LLM providers. | true | Optional: \{\} <br /> |
+| `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `logAnalysis` _boolean_ | LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs) |  | Optional: \{\} <br /> |
 | `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
+| `openAICompatible` _[OpenAISettings](#openaisettings)_ | OpenAICompatible holds the OpenAI-compatible provider configuration. |  | Optional: \{\} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: \{\} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment,<br />more details available at https://github.com/ollama/ollama |  | Optional: \{\} <br /> |
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: \{\} <br /> |
@@ -1003,6 +1005,7 @@ _Appears in:_
 | `cmd` _string_ | Cmd is the command to execute |  | Required: \{\} <br /> |
 | `args` _string array_ | Args are the arguments to pass to the command. |  | Optional: \{\} <br /> |
 | `dir` _string_ | Dir is the working directory for the command. |  | Optional: \{\} <br /> |
+| `approve` _boolean_ | Approve determines whether this command should run in the approval-gated stage. |  | Optional: \{\} <br /> |
 
 
 #### CompatibilityMatrixSummary
@@ -1896,6 +1899,23 @@ _Appears in:_
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef is a reference to a secret containing the password to connect with basic auth. |  | Optional: \{\} <br /> |
 
 
+#### HTTPHeader
+
+
+
+
+
+
+
+_Appears in:_
+- [OpenAISettings](#openaisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the HTTP header name. |  | Required: \{\} <br /> |
+| `value` _string_ | Value is the HTTP header value. |  | Required: \{\} <br /> |
+
+
 
 
 #### HelmMinimal
@@ -2135,7 +2155,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM TERRAGRUNT ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Optional: \{\} <br /> |
@@ -2942,6 +2962,22 @@ _Appears in:_
 | `prompt` _string_ | The prompt to use to guide the AI code change for this PR. |  | Required: \{\} <br /> |
 
 
+#### ObserverRenovate
+
+
+
+ObserverRenovate defines Renovate regex versioning options for observer target ordering.
+
+
+
+_Appears in:_
+- [ObserverTarget](#observertarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `ignoreUnstable` _boolean_ | IgnoreUnstable skips prerelease values captured by the target format regex. |  | Optional: \{\} <br /> |
+
+
 #### ObserverSpec
 
 
@@ -2983,7 +3019,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `type` _[ObserverTargetType](#observertargettype)_ | Type specifies the kind of external source to monitor.<br />Each type has different configuration requirements and polling mechanisms.<br />Supported types include Helm charts, OCI images, Git tags, and Kubernetes add-ons. |  | Enum: [OCI HELM GIT ADDON EKS_ADDON] <br />Required: \{\} <br />Type: string <br /> |
 | `format` _string_ | Format is a regex pattern with a capture group for extracting version information.<br />Useful when version strings are embedded in larger release names or tags.<br />The first capture group is used as the version value.<br />Example: "app-v([0-9]+.[0-9]+.[0-9]+)" extracts "1.2.3" from "app-v1.2.3". |  | Optional: \{\} <br /> |
-| `order` _[ObserverTargetOrder](#observertargetorder)_ | Order determines how discovered versions are sorted and which one is selected.<br />SEMVER sorts by semantic version rules, while LATEST uses chronological ordering.<br />SEMVER is recommended for most use cases as it provides predictable version ordering. |  | Enum: [SEMVER LATEST] <br />Required: \{\} <br />Type: string <br /> |
+| `order` _[ObserverTargetOrder](#observertargetorder)_ | Order determines how discovered versions are sorted and which one is selected.<br />SEMVER sorts by semantic version rules, LATEST uses chronological ordering,<br />and RENOVATE uses regex capture groups with Renovate-style version comparison. |  | Enum: [SEMVER LATEST RENOVATE] <br />Required: \{\} <br />Type: string <br /> |
+| `renovate` _[ObserverRenovate](#observerrenovate)_ | Renovate contains options for RENOVATE target ordering.<br />Used when Order is RENOVATE to control prerelease filtering and related behavior. |  | Optional: \{\} <br /> |
 | `helm` _[ObserverHelm](#observerhelm)_ | Helm contains configuration for monitoring Helm chart repositories.<br />Used when Type is HELM to specify the repository URL, chart name, and authentication. |  | Optional: \{\} <br /> |
 | `oci` _[ObserverOci](#observeroci)_ | OCI contains configuration for monitoring OCI (container) registries.<br />Used when Type is OCI to specify the registry URL and authentication credentials. |  | Optional: \{\} <br /> |
 | `git` _[ObserverGit](#observergit)_ | Git contains configuration for monitoring Git repository tags.<br />Used when Type is GIT to specify which Git repository to monitor for new tags. |  | Optional: \{\} <br /> |
@@ -3029,6 +3066,7 @@ _Appears in:_
 | `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec).  Should be similar to https://api.openai.com/v1 |  | Optional: \{\} <br /> |
 | `tokenExchange` _[OAuth2TokenExchange](#oauth2tokenexchange)_ | TokenExchange configures OAuth2 client credentials against a token endpoint to obtain access tokens for OpenAI-compatible APIs. |  | Optional: \{\} <br /> |
+| `headers` _[HTTPHeader](#httpheader) array_ | Headers are custom HTTP headers to include in OpenAI-compatible API requests. |  | Optional: \{\} <br /> |
 | `method` _[OpenAiMethod](#openaimethod)_ | Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies) |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
@@ -4985,6 +5023,7 @@ _Appears in:_
 | `tag` _string_ | Tag of the IaC tool Docker image to use. |  | Optional: \{\} <br /> |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
+| `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt configuration for this stack. |  | Optional: \{\} <br /> |
 | `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
 | `aiApproval` _[AiApprovalConfiguration](#aiapprovalconfiguration)_ | AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git. |  | Optional: \{\} <br /> |
 
@@ -5118,6 +5157,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: \{\} <br /> |
+| `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt is the terragrunt configuration for this stack |  | Optional: \{\} <br /> |
 
 
 #### StackSettings
@@ -5250,6 +5290,25 @@ _Appears in:_
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 | `tofu` _boolean_ | Tofu is whether to use OpenTofu instead of Terraform for this stack. |  | Optional: \{\} <br /> |
 | `tofuRegistry` _boolean_ | TofuRegistry is whether to use the OpenTofu registry for provider and module sources. |  | Optional: \{\} <br /> |
+
+
+#### TerragruntConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+- [StackOverrides](#stackoverrides)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
+| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag passed through to the underlying Terraform/OpenTofu invocation. |  | Optional: \{\} <br /> |
+| `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 
 
 #### Tools

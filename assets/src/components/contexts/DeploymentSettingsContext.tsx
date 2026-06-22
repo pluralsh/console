@@ -43,6 +43,12 @@ export function useAIEnabled() {
   return ctx.ai?.enabled
 }
 
+export function useVectorStoreEnabled() {
+  const ctx = useDeploymentSettings()
+
+  return ctx.ai?.vectorStore?.enabled
+}
+
 export function useLatestK8sVsn() {
   const ctx = useDeploymentSettings()
 

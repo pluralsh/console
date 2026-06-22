@@ -34,6 +34,7 @@ export function FlowCard({
   return (
     <>
       <CardSC
+        fillLevel={1}
         forwardedAs={Link}
         to={flow.name}
         onMouseEnter={() => setHovered(true)}
@@ -113,17 +114,11 @@ const FooterSC = styled.div<{ $parentHover: boolean }>(
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-    borderTop: theme.borders['fill-two'],
-    backgroundColor:
-      theme.mode === 'light'
-        ? theme.colors['fill-one']
-        : theme.colors['fill-two'],
+    borderTop: theme.borders.default,
     ...($parentHover && {
       '&:not(:has(button:hover))': {
-        backgroundColor:
-          theme.mode === 'light'
-            ? theme.colors['fill-one-hover']
-            : theme.colors['fill-two-hover'],
+        backgroundColor: theme.colors['fill-one-hover'],
+        borderTopColor: theme.colors['border-fill-one'],
       },
     }),
   })
@@ -136,14 +131,8 @@ const CardSC = styled(Card)(({ theme }) => ({
   overflow: 'hidden',
   cursor: 'pointer',
   textDecoration: 'none',
-  backgroundColor:
-    theme.mode === 'light'
-      ? theme.colors['fill-zero']
-      : theme.colors['fill-one'],
   '&:hover:not(:has(button:hover))': {
-    backgroundColor:
-      theme.mode === 'light'
-        ? theme.colors['fill-zero-hover']
-        : theme.colors['fill-one-hover'],
+    backgroundColor: theme.colors['fill-one-hover'],
+    borderColor: theme.colors['border-fill-one'],
   },
 }))

@@ -7,7 +7,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   require Logger
 
   @table :clouds_addons
-  @poll :timer.minutes(30)
+  @poll :timer.hours(6)
   @url "/matrices/compatability/static/addons/"
 
   defmodule State do
@@ -47,7 +47,7 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   end
 
   def handle_info(:poll, %State{table: table, url: url} = state) do
-    with [_ | _] = platforms <- fetch_manifest(url) do
+    with [_ | _] = platforms <- Console.safely(fn -> fetch_manifest(url) end, fn err -> {:error, err} end) do
       table = Enum.reduce(platforms, table, fn name, table ->
         case fetch_platform(url, name) do
           {:ok, addon} -> persist(table, addon)

@@ -4,11 +4,7 @@ import {
   Divider,
   Flex,
   FormField,
-  GearTrainIcon,
   Input2,
-  ShieldOutlineIcon,
-  Stepper,
-  StepperSteps,
 } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { FormBindings } from 'components/utils/bindings'
@@ -25,7 +21,9 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { useState } from 'react'
 import {
   FormCardSC,
+  SidebarBtnSC,
   StickyActionsFooterSC,
+  WorkbenchSplitLayoutSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
 import { McpServerSelectField } from './mcp-server/McpServerSelectField'
@@ -98,6 +96,20 @@ function sentryConfigurationIsComplete(
   return scmTokenIsSet(c?.accessToken)
 }
 
+function opensearchConfigurationIsComplete(
+  c: WorkbenchToolConfigurationAttributes['opensearch'] | null | undefined
+): boolean {
+  const hasEndpoint = (c?.host ?? '').trim().length > 0
+  const hasIndex = (c?.index ?? '').trim().length > 0
+  const hasStaticCredentials =
+    (c?.awsAccessKeyId ?? '').trim().length > 0 &&
+    (c?.awsSecretAccessKey ?? '').trim().length > 0
+
+  return (
+    hasEndpoint && hasIndex && (!!c?.usePodIdentity || hasStaticCredentials)
+  )
+}
+
 function bitbucketDatacenterConfigurationIsComplete(
   c:
     | WorkbenchToolConfigurationAttributes['bitbucketDatacenter']
@@ -128,17 +140,9 @@ export type WorkbenchToolFormState = Omit<
 type WorkbenchToolFormStep = 'configuration' | 'access-policy'
 
 const TOOL_FORM_STEPS = [
-  {
-    key: 'configuration',
-    stepTitle: 'Configuration',
-    IconComponent: GearTrainIcon,
-  },
-  {
-    key: 'access-policy',
-    stepTitle: 'Access policy',
-    IconComponent: ShieldOutlineIcon,
-  },
-] as const satisfies StepperSteps
+  { key: 'configuration', label: 'Configuration' },
+  { key: 'access-policy', label: 'Access policy' },
+] as const
 
 export function WorkbenchToolForm({
   type,
@@ -170,7 +174,6 @@ export function WorkbenchToolForm({
     readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
-  const stepIndex = TOOL_FORM_STEPS.findIndex((s) => s.key === currentStep)
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
   const hasRegisteredScm = Boolean(state.scmConnectionId)
   const scmType = scmTypeForWorkbenchTool(type)
@@ -184,6 +187,8 @@ export function WorkbenchToolForm({
         appId: tool?.configuration?.github?.appId,
         installationId: tool?.configuration?.github?.installationId,
       })) &&
+    (type !== WorkbenchToolType.Opensearch ||
+      opensearchConfigurationIsComplete(state.configuration?.opensearch)) &&
     (type !== WorkbenchToolType.Gitlab ||
       hasRegisteredScm ||
       scmTokenIsSet(state.configuration?.gitlab?.token)) &&
@@ -208,156 +213,178 @@ export function WorkbenchToolForm({
       sentryConfigurationIsComplete(state.configuration?.sentry))
   const allowSave = hasUpdates && configurationStepComplete
   return (
-    <FormCardSC>
-      <Flex css={{ paddingTop: 2 }}>
-        <Stepper
-          compact
-          steps={TOOL_FORM_STEPS}
-          stepIndex={stepIndex}
-        />
-      </Flex>
-      {currentStep === 'configuration' ? (
-        <>
-          <FormField
-            required
-            label="Name"
-            value={state.name}
-            onChange={(e) => update({ name: e.target.value })}
+    <WorkbenchSplitLayoutSC
+      css={{
+        flex: 1,
+        minHeight: 0,
+        minWidth: 0,
+        width: '100%',
+        height: '100%',
+        alignItems: 'flex-start',
+      }}
+    >
+      <Flex
+        direction="column"
+        width={200}
+        flexShrink={0}
+        gap="xxxsmall"
+      >
+        {TOOL_FORM_STEPS.map(({ key, label }) => (
+          <SidebarBtnSC
+            key={key}
+            $active={currentStep === key}
+            onClick={() => setCurrentStep(key)}
           >
-            <Input2
-              placeholder="Enter a name for the tool"
+            {label}
+          </SidebarBtnSC>
+        ))}
+      </Flex>
+      <FormCardSC
+        css={{
+          flex: 'unset',
+          height: 'auto',
+          maxHeight: '100%',
+          minHeight: 0,
+          alignSelf: 'flex-start',
+        }}
+      >
+        {currentStep === 'configuration' ? (
+          <>
+            <FormField
+              required
+              label="Name"
               value={state.name}
               onChange={(e) => update({ name: e.target.value })}
-            />
-          </FormField>
-          {type === WorkbenchToolType.Cloud && provider ? (
-            <CloudConnectionSelectField
-              provider={provider}
-              selectedId={state.cloudConnectionId ?? null}
-              onChange={(id) => update({ cloudConnectionId: id })}
-            />
-          ) : type === WorkbenchToolType.Mcp ? (
-            <McpServerSelectField
-              selectedId={state.mcpServerId ?? null}
-              onChange={(id) => update({ mcpServerId: id })}
-            />
-          ) : (
-            <>
-              {scmType ? (
-                <ScmConnectionWorkbenchSelect
-                  scmType={scmType}
-                  toolLabel={getWorkbenchToolLabel(type)}
-                  selectedId={state.scmConnectionId ?? null}
-                  onChange={(id) => update({ scmConnectionId: id })}
-                />
-              ) : null}
-              <WorkbenchToolFormFields
-                type={type}
-                state={state}
-                update={update}
-              />
-            </>
-          )}
-          {categories.length > 1 && (
-            <FormField label="Allowed capabilities (must select at least one)">
-              <Flex
-                direction="column"
-                gap="xsmall"
-              >
-                {categories.map((category) => {
-                  const selected = (state.categories ?? []).filter(Boolean)
-                  const isChecked = selected.includes(category)
-                  const canUncheck = selected.length > 1
-                  return (
-                    <Checkbox
-                      key={category}
-                      small
-                      checked={isChecked}
-                      onChange={(e) => {
-                        const checked = e.target.checked
-                        if (checked) {
-                          update({
-                            categories: [...selected, category].filter(Boolean),
-                          })
-                        } else if (canUncheck) {
-                          update({
-                            categories: selected.filter((c) => c !== category),
-                          })
-                        }
-                      }}
-                    >
-                      {categoryToLabel[category]}
-                    </Checkbox>
-                  )
-                })}
-              </Flex>
-            </FormField>
-          )}
-        </>
-      ) : (
-        <ToolAccessPolicyStep
-          readBindings={state.readBindings?.filter(isNonNullable) ?? []}
-          writeBindings={state.writeBindings?.filter(isNonNullable) ?? []}
-          update={update}
-        />
-      )}
-      <StickyActionsFooterSC>
-        {tool?.id ? (
-          <Button
-            destructive
-            onClick={() => setDeleteOpen(true)}
-          >
-            Delete tool
-          </Button>
-        ) : null}
-        <Flex
-          gap="small"
-          grow={1}
-          justify="end"
-        >
-          <Button
-            secondary
-            as={Link}
-            to={backPath}
-          >
-            {hasUpdates ? 'Cancel' : 'Back'}
-          </Button>
-          {currentStep === 'access-policy' ? (
-            <Button
-              secondary
-              type="button"
-              onClick={() => setCurrentStep('configuration')}
-              disabled={mutationLoading}
             >
-              Back to configuration
+              <Input2
+                placeholder="Enter a name for the tool"
+                value={state.name}
+                onChange={(e) => update({ name: e.target.value })}
+              />
+            </FormField>
+            {type === WorkbenchToolType.Cloud && provider ? (
+              <CloudConnectionSelectField
+                provider={provider}
+                selectedId={state.cloudConnectionId ?? null}
+                onChange={(id) => update({ cloudConnectionId: id })}
+              />
+            ) : type === WorkbenchToolType.Mcp ? (
+              <McpServerSelectField
+                selectedId={state.mcpServerId ?? null}
+                onChange={(id) => update({ mcpServerId: id })}
+              />
+            ) : (
+              <>
+                {scmType ? (
+                  <ScmConnectionWorkbenchSelect
+                    scmType={scmType}
+                    toolLabel={getWorkbenchToolLabel(type)}
+                    selectedId={state.scmConnectionId ?? null}
+                    onChange={(id) => update({ scmConnectionId: id })}
+                  />
+                ) : null}
+                <WorkbenchToolFormFields
+                  type={type}
+                  state={state}
+                  update={update}
+                />
+              </>
+            )}
+            {categories.length > 1 && (
+              <FormField label="Allowed capabilities (must select at least one)">
+                <Flex
+                  direction="column"
+                  gap="xsmall"
+                >
+                  {categories.map((category) => {
+                    const selected = (state.categories ?? []).filter(Boolean)
+                    const isChecked = selected.includes(category)
+                    const canUncheck = selected.length > 1
+                    return (
+                      <Checkbox
+                        key={category}
+                        small
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const checked = e.target.checked
+                          if (checked) {
+                            update({
+                              categories: [...selected, category].filter(
+                                Boolean
+                              ),
+                            })
+                          } else if (canUncheck) {
+                            update({
+                              categories: selected.filter(
+                                (c) => c !== category
+                              ),
+                            })
+                          }
+                        }}
+                      >
+                        {categoryToLabel[category]}
+                      </Checkbox>
+                    )
+                  })}
+                </Flex>
+              </FormField>
+            )}
+          </>
+        ) : (
+          <ToolAccessPolicyStep
+            readBindings={state.readBindings?.filter(isNonNullable) ?? []}
+            writeBindings={state.writeBindings?.filter(isNonNullable) ?? []}
+            update={update}
+          />
+        )}
+        <StickyActionsFooterSC>
+          {tool?.id ? (
+            <Button
+              destructive
+              onClick={() => setDeleteOpen(true)}
+            >
+              Delete tool
             </Button>
           ) : null}
-          <Button
-            disabled={
-              currentStep === 'configuration'
-                ? !configurationStepComplete
-                : !allowSave
-            }
-            loading={currentStep === 'access-policy' && mutationLoading}
-            onClick={() => {
-              if (currentStep === 'configuration') {
-                setCurrentStep('access-policy')
-                return
-              }
-              onSave(state)
-            }}
+          <Flex
+            gap="small"
+            grow={1}
+            justify="end"
           >
-            {currentStep === 'configuration' ? 'Next' : 'Save'}
-          </Button>
-        </Flex>
-      </StickyActionsFooterSC>
-      <WorkbenchToolDeleteModal
-        open={deleteOpen}
-        tool={tool}
-        onClose={() => setDeleteOpen(false)}
-        onDeleted={onToolDeleted}
-      />
-    </FormCardSC>
+            <Button
+              secondary
+              as={Link}
+              to={backPath}
+            >
+              {hasUpdates ? 'Cancel' : 'Back'}
+            </Button>
+            <Button
+              disabled={
+                currentStep === 'configuration'
+                  ? !configurationStepComplete
+                  : !allowSave
+              }
+              loading={currentStep === 'access-policy' && mutationLoading}
+              onClick={() => {
+                if (currentStep === 'configuration') {
+                  setCurrentStep('access-policy')
+                  return
+                }
+                onSave(state)
+              }}
+            >
+              {currentStep === 'configuration' ? 'Next' : 'Save'}
+            </Button>
+          </Flex>
+        </StickyActionsFooterSC>
+        <WorkbenchToolDeleteModal
+          open={deleteOpen}
+          tool={tool}
+          onClose={() => setDeleteOpen(false)}
+          onDeleted={onToolDeleted}
+        />
+      </FormCardSC>
+    </WorkbenchSplitLayoutSC>
   )
 }
 
@@ -436,6 +463,27 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         url: url ?? '',
         username: username ?? '',
         password: '',
+      },
+    }
+  },
+  [WorkbenchToolType.Opensearch]: (config) => {
+    const {
+      host,
+      index,
+      awsAccessKeyId,
+      awsRegion,
+      assumeRoleArn,
+      usePodIdentity,
+    } = config?.opensearch ?? {}
+    return {
+      opensearch: {
+        host: host ?? '',
+        index: index ?? '',
+        awsAccessKeyId: awsAccessKeyId ?? undefined,
+        awsSecretAccessKey: undefined,
+        awsRegion: awsRegion ?? undefined,
+        assumeRoleArn: assumeRoleArn ?? undefined,
+        usePodIdentity: usePodIdentity ?? false,
       },
     }
   },

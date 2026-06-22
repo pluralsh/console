@@ -66,7 +66,7 @@ func run() error {
 	client := console.New(args.ConsoleApiURL(), *agentRun.PluralCreds.Token)
 	mcpServer := agent.NewServer(
 		client,
-		createServerOptions(client, agentRun)...,
+		createServerOptions(client, extClient, agentRun)...,
 	)
 
 	err = environment.New(
@@ -165,26 +165,29 @@ func startMcpServer(server *agent.Server) <-chan error {
 	return errChan
 }
 
-func createServerOptions(client console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
-	return append(
-		[]agent.Option{
-			agent.WithTools(),
-			agent.WithVersion(Version),
-		},
-		createServerTools(client, agentRun)...,
-	)
+func createServerOptions(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
+	opts := []agent.Option{
+		agent.WithTools(),
+		agent.WithVersion(Version),
+	}
+
+	if helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false) {
+		opts = append(opts, agent.WithOpenAIProxy(args.OpenAIUpstreamURL(), args.OpenAIResponsesUpstreamURL()))
+	}
+
+	return append(opts, createServerTools(client, runtimeClient, agentRun)...)
 }
 
-func createServerTools(client console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
+func createServerTools(client, runtimeClient console.Client, agentRun *consoleclient.AgentRunFragment) []agent.Option {
 	excludedTools, err := args.ExcludeTools()
 	if err != nil {
 		klog.Fatalf("could not parse excluded tools: %v", err)
 	}
 
 	toolMap := map[tool.ID]tool.Tool{
-		tool.CreateBranchTool:      tool.NewCreateBranch(client, args.AgentRunID()),
+		tool.CreateBranchTool:      tool.NewCreateBranch(client, runtimeClient, args.AgentRunID()),
 		tool.CreateCommitTool:      tool.NewCreateCommit(client, args.AgentRunID()),
-		tool.CreatePullRequestTool: tool.NewCreatePullRequest(client, args.AgentRunID()),
+		tool.CreatePullRequestTool: tool.NewCreatePullRequest(client, runtimeClient, args.AgentRunID()),
 		tool.FetchTodosTool:        tool.NewFetchTodos(client, args.AgentRunID()),
 		tool.UpdateAnalysisTool:    tool.NewUpdateAnalysis(client, args.AgentRunID()),
 		tool.UpdateTodosTool:       tool.NewUpdateTodos(client, args.AgentRunID()),

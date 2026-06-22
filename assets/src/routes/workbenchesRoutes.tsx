@@ -17,7 +17,6 @@ import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-e
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
 import { SavedPrompts } from 'components/workbenches/workbench/prompts/SavedPrompts'
 import { SavedPromptForm } from 'components/workbenches/workbench/prompts/SavedPromptForm'
-import { ChatbotConnectionForm } from 'components/workbenches/workbench/chatbots/ChatbotConnectionForm'
 import { ChatbotForm } from 'components/workbenches/workbench/chatbots/ChatbotForm'
 import { Chatbots } from 'components/workbenches/workbench/chatbots/Chatbots'
 import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/WebhookTriggers'
@@ -26,7 +25,8 @@ import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronSch
 import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
 import { WorkbenchEvalSettings } from 'components/workbenches/workbench/evals/WorkbenchEvalSettings'
 import { WorkbenchEvals } from 'components/workbenches/workbench/evals/WorkbenchEvals'
-import { Route } from 'react-router-dom'
+import { Navigate, Route } from 'react-router-dom'
+import { CHATBOTS_SETTINGS_CREATE_ABS_PATH } from './settingsRoutesConst'
 import {
   WORKBENCH_EVAL_SETTINGS_REL_PATH,
   WORKBENCH_EVAL_RESULT_PARAM_ID,
@@ -175,7 +175,12 @@ export const workbenchesRoutes = [
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CHATBOTS_REL_PATH}/${WORKBENCHES_CHATBOTS_CREATE_CHATBOT_REL_PATH}`}
-    element={<ChatbotConnectionForm />}
+    element={
+      <Navigate
+        replace
+        to={CHATBOTS_SETTINGS_CREATE_ABS_PATH}
+      />
+    }
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_CHATBOTS_REL_PATH}/:${WORKBENCHES_CHATBOT_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}

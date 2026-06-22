@@ -25,14 +25,16 @@ export function StackApprovalChip({
 
 export function StackAIApprovalChip({
   approvalResult,
+  ...props
 }: {
   approvalResult: ApprovalResult
-}) {
+} & ChipProps) {
   const { icon, color } = approvalResultToIcon[approvalResult]
   return (
     <Chip
       icon={icon}
       iconColor={color}
+      {...props}
     >
       {capitalize(approvalResult)}
     </Chip>
