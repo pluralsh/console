@@ -3,7 +3,7 @@ ARG OTP_VERSION=28.5
 ARG OS_VARIANT=alpine
 ARG OS_VERSION=3.23.4
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
-ARG RUNNER_IMAGE=alpine:3.23.4 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
+ARG RUNNER_IMAGE=${OS_VARIANT}:${OS_VERSION}
 
 FROM node:22.22.0-alpine as node
 
@@ -81,10 +81,10 @@ COPY --from=node /app/build ./priv/static
 
 RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 
-FROM alpine:3.21.3 as tools
+FROM ${TOOLS_IMAGE} as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.54
+ARG CLI_VERSION=v0.12.54
 
 COPY AGENT_VERSION AGENT_VERSION
 
@@ -111,7 +111,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib musl musl-utils || true
+RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk add --no-cache "libexpat>=2.8.1-r0" && apk upgrade --no-cache zlib musl musl-utils || true
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh
