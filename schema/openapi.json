@@ -233,6 +233,10 @@
             },
             "type": "array"
           },
+          "browser_enabled": {
+            "description": "Whether this runtime provisions a headless browser sidecar (and the browser-use MCP tools) for runs",
+            "type": "boolean"
+          },
           "cluster_id": {
             "description": "ID of the cluster this runtime is deployed on",
             "type": "string"

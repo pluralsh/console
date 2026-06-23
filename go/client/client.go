@@ -40020,6 +40020,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40091,6 +40092,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40163,6 +40165,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40265,6 +40268,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40415,6 +40419,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40623,6 +40628,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40854,6 +40860,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -41072,6 +41079,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -41228,6 +41236,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
