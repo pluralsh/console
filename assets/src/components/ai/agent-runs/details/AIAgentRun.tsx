@@ -40,8 +40,7 @@ import {
   ChatInputSimple,
   ChatInputSimpleRef,
 } from '../../chatbot/input/ChatInput.tsx'
-import { RunStatusChip } from '../../infra-research/details/InfraResearch.tsx'
-import { RunStatusIcon } from '../AgentRunInfoDisplays.tsx'
+import { AgentRunStatusChip } from './AgentRunStatusChip.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
@@ -331,9 +330,8 @@ function AgentRunStatusCallout({
           }
           css={{ flex: 1, minWidth: 0 }}
         />
-        <RunStatusChip
+        <AgentRunStatusChip
           status={run.status}
-          showSpinner={false}
           fillLevel={2}
           css={{ flexShrink: 0 }}
         />
