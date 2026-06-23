@@ -187,7 +187,11 @@ export function WorkbenchJob() {
             />
           </Flex>
         </StretchedFlex>
-        <WorkbenchJobActivities jobId={jobId} />
+        <WorkbenchJobActivities
+          jobId={jobId}
+          workbenchId={workbenchId}
+          workbenchName={workbenchName}
+        />
       </WrapperSC>
       {!isOpen && (
         <PanelOpenBtnSC

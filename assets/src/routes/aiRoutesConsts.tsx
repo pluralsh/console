@@ -26,6 +26,10 @@ export const AI_SENTINELS_RUNS_PARAM_RUN_ID = 'runId'
 export const AI_SENTINELS_RUNS_JOBS_PARAM_JOB_ID = 'jobId'
 export const AI_AGENT_RUNS_PARAM_RUN_ID = 'runId'
 export const AI_INFRA_RESEARCH_PARAM_ID = 'researchId'
+export const AI_AGENT_RUN_BACK_SOURCE_PARAM = 'from'
+export const AI_AGENT_RUN_BACK_TO_PARAM = 'backTo'
+export const AI_AGENT_RUN_BACK_LABEL_PARAM = 'backLabel'
+export const AI_AGENT_RUN_BACK_SOURCE_WORKBENCH = 'workbench'
 
 export const getSentinelAbsPath = (id: string) =>
   `${AI_SENTINELS_ABS_PATH}/${id}`
@@ -51,9 +55,24 @@ export const getSentinelRunJobAbsPath = ({
 
 export const getAgentRunAbsPath = ({
   agentRunId,
+  backTo,
+  backLabel,
 }: {
   agentRunId: Nullable<string>
-}) => `${AI_AGENT_RUNS_ABS_PATH}/${agentRunId ?? ''}`
+  backTo?: string
+  backLabel?: string
+}) => {
+  const path = `${AI_AGENT_RUNS_ABS_PATH}/${agentRunId ?? ''}`
+  if (!backTo) return path
+
+  const params = new URLSearchParams({
+    [AI_AGENT_RUN_BACK_SOURCE_PARAM]: AI_AGENT_RUN_BACK_SOURCE_WORKBENCH,
+    [AI_AGENT_RUN_BACK_TO_PARAM]: backTo,
+    ...(backLabel ? { [AI_AGENT_RUN_BACK_LABEL_PARAM]: backLabel } : {}),
+  })
+
+  return `${path}?${params}`
+}
 
 export const AI_AGENT_RUN_ABS_PATH = `${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`
 

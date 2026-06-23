@@ -29,6 +29,7 @@ import {
 import { capitalize } from 'lodash'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -44,6 +45,20 @@ export function AgentRunInfoCard({
 } & CardProps) {
   const { colors } = useTheme()
   const { id = '', status, prompt, insertedAt, updatedAt } = agentRun ?? {}
+  const workbenchJob = agentRun?.workbenchJob
+  const workbench = workbenchJob?.workbench
+  const detailsPath = getAgentRunAbsPath({
+    agentRunId: id,
+    ...(workbenchJob?.id && workbench?.id
+      ? {
+          backTo: getWorkbenchJobAbsPath({
+            workbenchId: workbench.id,
+            jobId: workbenchJob.id,
+          }),
+          backLabel: workbench.name,
+        }
+      : {}),
+  })
   const isRunning =
     status === AgentRunStatus.Running || status === AgentRunStatus.Pending
   const { data } = useAgentRunTinyQuery({
@@ -92,7 +107,7 @@ export function AgentRunInfoCard({
           <Button
             small
             as={Link}
-            to={getAgentRunAbsPath({ agentRunId: id })}
+            to={detailsPath}
             endIcon={<ArrowTopRightIcon size={12} />}
           >
             View details

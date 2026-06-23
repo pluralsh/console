@@ -39,6 +39,7 @@ import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -58,11 +59,15 @@ export function WorkbenchJobActivity({
   activity,
   textStream,
   jobId,
+  workbenchId,
+  workbenchName,
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
   jobId: string
+  workbenchId: string
+  workbenchName: string
 }) {
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
@@ -141,7 +146,15 @@ export function WorkbenchJobActivity({
               clickable
               as={Link}
               size="small"
-              to={getAgentRunAbsPath({ agentRunId: agentRun.id })}
+              to={getAgentRunAbsPath({
+                agentRunId: agentRun.id,
+                ...(workbenchId
+                  ? {
+                      backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+                      backLabel: workbenchName,
+                    }
+                  : {}),
+              })}
               target="_blank"
               rel="noopener noreferrer"
               icon={
