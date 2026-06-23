@@ -700,6 +700,22 @@ query Workbench($id: ID, $name: String) {
   }
 }
 
+query AvailableModels {
+  availableModels {
+    provider
+    model
+  }
+}
+
+query DefaultModels {
+  defaultModels {
+    embeddingModel
+    model
+    provider
+    toolModel
+  }
+}
+
 fragment WorkbenchAccessibleUser on User {
   id
   name
