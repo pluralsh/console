@@ -94,6 +94,7 @@ fragment AgentMessage on AgentMessage {
   seq
   role
   message
+  insertedAt
   cost {
     ...AgentMessageCost
   }

@@ -120,6 +120,7 @@ const agentMsgToChatMsg = (msg: AgentMessageFragment): ChatFragment => ({
   id: msg.id,
   seq: msg.seq,
   role: msg.role,
+  insertedAt: msg.insertedAt,
   content: msg.metadata?.tool
     ? msg.metadata.tool.output
     : msg.metadata?.file

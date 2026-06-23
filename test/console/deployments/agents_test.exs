@@ -2,7 +2,7 @@ defmodule Console.Deployments.AgentsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Agents
   alias Console.PubSub
-  alias Console.Schema.{AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
+  alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -629,6 +629,13 @@ defmodule Console.Deployments.AgentsTest do
       assert prompt.prompt == "a prompt"
       assert prompt.agent_run_id == run.id
       assert Repo.get(AgentPromptHistory, prompt.id)
+
+      agent_prompt = Repo.get_by(AgentPrompt, agent_run_id: run.id)
+      assert agent_prompt.prompt == "a prompt"
+
+      agent_message = Repo.get_by(AgentMessage, agent_run_id: run.id)
+      assert agent_message.message == "a prompt"
+      assert agent_message.role == :user
     end
 
     test "it uses monotonic ids for prompt ordering" do

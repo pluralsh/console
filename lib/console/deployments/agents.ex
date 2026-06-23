@@ -11,6 +11,7 @@ defmodule Console.Deployments.Agents do
   alias Console.Schema.{
     AgentRuntime,
     AgentRun,
+    AgentPrompt,
     AgentPromptHistory,
     Cluster,
     User,
@@ -333,6 +334,16 @@ defmodule Console.Deployments.Agents do
     |> add_operation(:prompt, fn _ ->
       %AgentPromptHistory{}
       |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
+      |> Repo.insert()
+    end)
+    |> add_operation(:agent_prompt, fn _ ->
+      %AgentPrompt{}
+      |> AgentPrompt.changeset(%{prompt: prompt, agent_run_id: run_id})
+      |> Repo.insert()
+    end)
+    |> add_operation(:message, fn _ ->
+      %AgentMessage{}
+      |> AgentMessage.changeset(%{role: :user, message: prompt, agent_run_id: run_id})
       |> Repo.insert()
     end)
     |> execute(extract: :prompt)

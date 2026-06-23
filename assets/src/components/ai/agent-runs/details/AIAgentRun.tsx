@@ -2,7 +2,6 @@ import {
   ArrowTopRightIcon,
   Button,
   Card,
-  Divider,
   Flex,
   IconFrame,
   PrIcon,
@@ -64,7 +63,6 @@ export const getAgentRunBreadcrumbs = (
 }
 
 export function AIAgentRun() {
-  const { spacing } = useTheme()
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
 
   const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
