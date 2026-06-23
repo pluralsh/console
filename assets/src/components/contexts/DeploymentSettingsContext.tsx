@@ -1,8 +1,13 @@
 import {
+  AvailableModel,
+  AiProvider,
   DeploymentSettingsFragment,
+  ModelDefault,
   useDeploymentSettingsQuery,
+  WorkbenchJobModelAttributes,
 } from 'generated/graphql'
 import { createContext, ReactNode, use, useMemo } from 'react'
+import { isNonNullable } from 'utils/isNonNullable'
 
 import { isValidURL } from '../../utils/url'
 
@@ -10,8 +15,10 @@ const POLL_INTERVAL = 60 * 1000
 
 const DeploymentSettingsContext = createContext<{
   data: Nullable<DeploymentSettingsFragment>
+  defaultModels: Nullable<Array<Nullable<ModelDefault>>>
+  availableModels: Nullable<Array<Nullable<AvailableModel>>>
   loading: boolean
-}>({ data: null, loading: false })
+}>({ data: null, defaultModels: null, availableModels: null, loading: false })
 
 export function useDeploymentSettings(): Partial<DeploymentSettingsFragment> {
   const { data } = use(DeploymentSettingsContext)
@@ -23,6 +30,61 @@ export function useLoadingDeploymentSettings() {
   const { loading, data } = use(DeploymentSettingsContext)
 
   return loading && !data
+}
+
+export function useAiModels(): {
+  loading: boolean
+  default: Nullable<WorkbenchJobModelAttributes>
+  available: WorkbenchJobModelAttributes[]
+  defaultsByProvider: Partial<Record<AiProvider, ModelDefault>>
+} {
+  const { loading, availableModels, defaultModels } = use(
+    DeploymentSettingsContext
+  )
+
+  return useMemo(() => {
+    const defaultModelEntry = defaultModels?.find(isNonNullable) ?? null
+    const defaultModel =
+      defaultModelEntry?.provider && defaultModelEntry?.model?.trim()
+        ? ({
+            provider: defaultModelEntry.provider,
+            model: defaultModelEntry.model,
+          } satisfies WorkbenchJobModelAttributes)
+        : null
+    const defaultsByProvider = Object.fromEntries(
+      (defaultModels ?? [])
+        .filter((modelDefault): modelDefault is ModelDefault => {
+          return !!modelDefault?.provider
+        })
+        .map((modelDefault) => [modelDefault.provider, modelDefault])
+    ) as Partial<Record<AiProvider, ModelDefault>>
+
+    const dedupedAvailableModels = new Map<
+      string,
+      WorkbenchJobModelAttributes
+    >()
+
+    availableModels?.forEach((option) => {
+      if (!option?.provider || !option.model?.trim()) return
+
+      const normalizedOption = {
+        provider: option.provider,
+        model: option.model,
+      } satisfies WorkbenchJobModelAttributes
+
+      dedupedAvailableModels.set(
+        `${normalizedOption.provider}:${normalizedOption.model}`,
+        normalizedOption
+      )
+    })
+
+    return {
+      loading: loading && (!availableModels || !defaultModels),
+      default: defaultModel,
+      available: Array.from(dedupedAvailableModels.values()),
+      defaultsByProvider,
+    }
+  }, [availableModels, defaultModels, loading])
 }
 
 export function useLogsEnabled() {
@@ -72,8 +134,18 @@ export function DeploymentSettingsProvider({
   })
 
   const providerValue = useMemo(
-    () => ({ data: data?.deploymentSettings, loading }),
-    [data?.deploymentSettings, loading]
+    () => ({
+      data: data?.deploymentSettings,
+      defaultModels: data?.defaultModels,
+      availableModels: data?.availableModels,
+      loading,
+    }),
+    [
+      data?.availableModels,
+      data?.defaultModels,
+      data?.deploymentSettings,
+      loading,
+    ]
   )
 
   return (

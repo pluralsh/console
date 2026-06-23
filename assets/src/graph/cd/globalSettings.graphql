@@ -146,6 +146,10 @@ query DeploymentSettings {
   deploymentSettings {
     ...DeploymentSettings
   }
+  availableModels {
+    provider
+    model
+  }
   defaultModels {
     provider
     model

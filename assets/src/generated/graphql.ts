@@ -18521,7 +18521,7 @@ export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook'
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null, toolModel?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, accessKeyId?: string | null, region?: string | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, defaultModels?: Array<{ __typename?: 'ModelDefault', provider: AiProvider, model: string, toolModel: string, embeddingModel?: string | null } | null> | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null, toolModel?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, accessKeyId?: string | null, region?: string | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, availableModels?: Array<{ __typename?: 'AvailableModel', provider: AiProvider, model: string } | null> | null, defaultModels?: Array<{ __typename?: 'ModelDefault', provider: AiProvider, model: string, toolModel: string, embeddingModel?: string | null } | null> | null };
 
 export type ObservabilityProvidersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -20781,16 +20781,6 @@ export type WorkbenchQueryVariables = Exact<{
 
 
 export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, repository?: { __typename?: 'GitRepository', id: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null, podLogs?: boolean | null, vulnerabilities?: boolean | null } | null, observability?: { __typename?: 'WorkbenchObservability', logs?: boolean | null, metrics?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null, enableBabysitting?: boolean | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, workbenchSkills?: { __typename?: 'WorkbenchSkillConnection', edges?: Array<{ __typename?: 'WorkbenchSkillEdge', node?: { __typename?: 'WorkbenchSkill', id: string, name?: string | null, description?: string | null, contents?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null } | null } | null> | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, scmConnection?: { __typename?: 'ScmConnection', id: string, name: string, type: ScmType } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, opensearch?: { __typename?: 'WorkbenchToolOpensearchConnection', host: string, index: string, awsAccessKeyId?: string | null, awsRegion?: string | null, assumeRoleArn?: string | null, usePodIdentity?: boolean | null } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null, awsSigv4?: boolean | null, awsAccessKeyId?: string | null, awsRegion?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, jaeger?: { __typename?: 'WorkbenchToolJaegerConnection', url?: string | null, username?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null, slack?: { __typename?: 'WorkbenchToolSlackConnection', url: string } | null, pagerduty?: { __typename?: 'WorkbenchToolPagerdutyConnection', url: string } | null, teams?: { __typename?: 'WorkbenchToolTeamsConnection', clientId?: string | null, tenantId?: string | null } | null, splunk?: { __typename?: 'WorkbenchToolSplunkConnection', url?: string | null, username?: string | null } | null, cloudwatch?: { __typename?: 'WorkbenchToolCloudwatchConnection', logGroupNames?: Array<string | null> | null, region?: string | null, roleArn?: string | null, roleSessionName?: string | null } | null, azure?: { __typename?: 'WorkbenchToolAzureConnection', subscriptionId?: string | null, tenantId?: string | null, clientId?: string | null, prometheusUrl?: string | null } | null, dynatrace?: { __typename?: 'WorkbenchToolDynatraceConnection', url?: string | null } | null, sentry?: { __typename?: 'WorkbenchToolSentryConnection', url?: string | null } | null, github?: { __typename?: 'WorkbenchToolGithubConnection', url: string, toolset?: string | null, appId?: string | null, installationId?: string | null } | null, gitlab?: { __typename?: 'WorkbenchToolGitlabConnection', url?: string | null } | null, bitbucket?: { __typename?: 'WorkbenchToolBitbucketConnection', url?: string | null } | null, bitbucketDatacenter?: { __typename?: 'WorkbenchToolBitbucketDatacenterConnection', url?: string | null } | null, azureDevops?: { __typename?: 'WorkbenchToolAzureDevopsConnection', url?: string | null } | null } | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, botUser?: { __typename?: 'User', id: string, name: string, email: string, profile?: string | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
-
-export type AvailableModelsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type AvailableModelsQuery = { __typename?: 'RootQueryType', availableModels?: Array<{ __typename?: 'AvailableModel', provider: AiProvider, model: string } | null> | null };
-
-export type DefaultModelsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type DefaultModelsQuery = { __typename?: 'RootQueryType', defaultModels?: Array<{ __typename?: 'ModelDefault', embeddingModel?: string | null, model: string, provider: AiProvider, toolModel: string } | null> | null };
 
 export type WorkbenchAccessibleUserFragment = { __typename?: 'User', id: string, name: string, email: string, profile?: string | null };
 
@@ -33002,6 +32992,10 @@ export const DeploymentSettingsDocument = gql`
   deploymentSettings {
     ...DeploymentSettings
   }
+  availableModels {
+    provider
+    model
+  }
   defaultModels {
     provider
     model
@@ -42909,94 +42903,6 @@ export type WorkbenchQueryHookResult = ReturnType<typeof useWorkbenchQuery>;
 export type WorkbenchLazyQueryHookResult = ReturnType<typeof useWorkbenchLazyQuery>;
 export type WorkbenchSuspenseQueryHookResult = ReturnType<typeof useWorkbenchSuspenseQuery>;
 export type WorkbenchQueryResult = Apollo.QueryResult<WorkbenchQuery, WorkbenchQueryVariables>;
-export const AvailableModelsDocument = gql`
-    query AvailableModels {
-  availableModels {
-    provider
-    model
-  }
-}
-    `;
-
-/**
- * __useAvailableModelsQuery__
- *
- * To run a query within a React component, call `useAvailableModelsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAvailableModelsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAvailableModelsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useAvailableModelsQuery(baseOptions?: Apollo.QueryHookOptions<AvailableModelsQuery, AvailableModelsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AvailableModelsQuery, AvailableModelsQueryVariables>(AvailableModelsDocument, options);
-      }
-export function useAvailableModelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AvailableModelsQuery, AvailableModelsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AvailableModelsQuery, AvailableModelsQueryVariables>(AvailableModelsDocument, options);
-        }
-// @ts-ignore
-export function useAvailableModelsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AvailableModelsQuery, AvailableModelsQueryVariables>): Apollo.UseSuspenseQueryResult<AvailableModelsQuery, AvailableModelsQueryVariables>;
-export function useAvailableModelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AvailableModelsQuery, AvailableModelsQueryVariables>): Apollo.UseSuspenseQueryResult<AvailableModelsQuery | undefined, AvailableModelsQueryVariables>;
-export function useAvailableModelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<AvailableModelsQuery, AvailableModelsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AvailableModelsQuery, AvailableModelsQueryVariables>(AvailableModelsDocument, options);
-        }
-export type AvailableModelsQueryHookResult = ReturnType<typeof useAvailableModelsQuery>;
-export type AvailableModelsLazyQueryHookResult = ReturnType<typeof useAvailableModelsLazyQuery>;
-export type AvailableModelsSuspenseQueryHookResult = ReturnType<typeof useAvailableModelsSuspenseQuery>;
-export type AvailableModelsQueryResult = Apollo.QueryResult<AvailableModelsQuery, AvailableModelsQueryVariables>;
-export const DefaultModelsDocument = gql`
-    query DefaultModels {
-  defaultModels {
-    embeddingModel
-    model
-    provider
-    toolModel
-  }
-}
-    `;
-
-/**
- * __useDefaultModelsQuery__
- *
- * To run a query within a React component, call `useDefaultModelsQuery` and pass it any options that fit your needs.
- * When your component renders, `useDefaultModelsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useDefaultModelsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useDefaultModelsQuery(baseOptions?: Apollo.QueryHookOptions<DefaultModelsQuery, DefaultModelsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DefaultModelsQuery, DefaultModelsQueryVariables>(DefaultModelsDocument, options);
-      }
-export function useDefaultModelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DefaultModelsQuery, DefaultModelsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DefaultModelsQuery, DefaultModelsQueryVariables>(DefaultModelsDocument, options);
-        }
-// @ts-ignore
-export function useDefaultModelsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DefaultModelsQuery, DefaultModelsQueryVariables>): Apollo.UseSuspenseQueryResult<DefaultModelsQuery, DefaultModelsQueryVariables>;
-export function useDefaultModelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DefaultModelsQuery, DefaultModelsQueryVariables>): Apollo.UseSuspenseQueryResult<DefaultModelsQuery | undefined, DefaultModelsQueryVariables>;
-export function useDefaultModelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<DefaultModelsQuery, DefaultModelsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DefaultModelsQuery, DefaultModelsQueryVariables>(DefaultModelsDocument, options);
-        }
-export type DefaultModelsQueryHookResult = ReturnType<typeof useDefaultModelsQuery>;
-export type DefaultModelsLazyQueryHookResult = ReturnType<typeof useDefaultModelsLazyQuery>;
-export type DefaultModelsSuspenseQueryHookResult = ReturnType<typeof useDefaultModelsSuspenseQuery>;
-export type DefaultModelsQueryResult = Apollo.QueryResult<DefaultModelsQuery, DefaultModelsQueryVariables>;
 export const WorkbenchAccessibleUsersDocument = gql`
     query WorkbenchAccessibleUsers($id: ID!) {
   workbench(id: $id) {
@@ -46073,8 +45979,6 @@ export const namedOperations = {
     WorkbenchesEvalsAvgTimelineGraph: 'WorkbenchesEvalsAvgTimelineGraph',
     WorkbenchesAlerts: 'WorkbenchesAlerts',
     Workbench: 'Workbench',
-    AvailableModels: 'AvailableModels',
-    DefaultModels: 'DefaultModels',
     WorkbenchAccessibleUsers: 'WorkbenchAccessibleUsers',
     WorkbenchEvalSettings: 'WorkbenchEvalSettings',
     WorkbenchJobs: 'WorkbenchJobs',

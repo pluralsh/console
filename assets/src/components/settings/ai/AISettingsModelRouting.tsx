@@ -1,11 +1,10 @@
 import { Button, Flex } from '@pluralsh/design-system'
+import { useAiModels } from 'components/contexts/DeploymentSettingsContext'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
-  AiProvider,
-  ModelDefault,
   useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
@@ -25,17 +24,7 @@ export function AISettingsModelRouting() {
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
-  const modelDefaultsByProvider = useMemo(
-    () =>
-      Object.fromEntries(
-        deploymentSettings.defaultModels
-          ?.filter((defaultModel): defaultModel is ModelDefault => {
-            return !!defaultModel?.provider
-          })
-          .map((defaultModel) => [defaultModel.provider, defaultModel]) ?? []
-      ) as Partial<Record<AiProvider, ModelDefault>>,
-    [deploymentSettings.defaultModels]
-  )
+  const { defaultsByProvider: modelDefaultsByProvider } = useAiModels()
 
   const initialRouting = useMemo(() => initialModelRoutingState(ai), [ai])
 

@@ -1,18 +1,13 @@
 import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
+import { useAiModels } from 'components/contexts/DeploymentSettingsContext'
 import { aiProviderToIcon } from 'components/settings/ai/AISettingsConfiguredProviders'
 import { aiProviderToLabel } from 'components/settings/ai/AISettingsProviders'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  AiProvider,
-  useAvailableModelsQuery,
-  useDefaultModelsQuery,
-  WorkbenchJobModelAttributes,
-} from 'generated/graphql'
+import { AiProvider, WorkbenchJobModelAttributes } from 'generated/graphql'
 import groupBy from 'lodash/groupBy'
 import { type ReactElement, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import { TRUNCATE } from '../../utils/truncate'
 import { CaptionP } from '../../utils/typography/Text'
 
@@ -36,47 +31,17 @@ export function WorkbenchModelSelector({
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
-
-  const { data: availableModelsData, loading: availableModelsLoading } =
-    useAvailableModelsQuery({
-      fetchPolicy: 'cache-first',
-    })
-  const { data: defaultModelsData, loading: defaultModelsLoading } =
-    useDefaultModelsQuery({
-      fetchPolicy: 'cache-first',
-    })
-
-  const defaultModelEntry = useMemo(
-    () => (defaultModelsData?.defaultModels ?? []).find(isNonNullable) ?? null,
-    [defaultModelsData?.defaultModels]
-  )
-
-  const defaultModel =
-    defaultModelEntry?.provider && defaultModelEntry?.model
-      ? ({
-          provider: defaultModelEntry.provider,
-          model: defaultModelEntry.model,
-        } satisfies WorkbenchJobModelAttributes)
-      : null
-
+  const {
+    default: defaultModel,
+    available: allAvailableModels,
+    loading,
+  } = useAiModels()
   const availableModels = useMemo(
     () =>
-      (availableModelsData?.availableModels ?? [])
-        .filter(isNonNullable)
-        .filter(
-          (option) =>
-            !isSameModelOption(option, defaultModel) &&
-            !!option.model?.trim() &&
-            !!option.provider
-        )
-        .map(
-          ({ provider, model }) =>
-            ({
-              provider,
-              model,
-            }) satisfies WorkbenchJobModelAttributes
-        ),
-    [availableModelsData?.availableModels, defaultModel]
+      allAvailableModels.filter(
+        (option) => !isSameModelOption(option, defaultModel)
+      ),
+    [allAvailableModels, defaultModel]
   )
 
   const hasMultipleProviders =
@@ -124,7 +89,6 @@ export function WorkbenchModelSelector({
     shouldShowSearch,
   ])
 
-  const loading = availableModelsLoading || defaultModelsLoading
   const hasSelectableModels = !!defaultModel || availableModels.length > 0
   const triggerDisabled = disabled || (!loading && !hasSelectableModels)
   const triggerModel = value ?? defaultModel
