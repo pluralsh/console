@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { Card } from '@pluralsh/design-system'
+import { Code } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
-import styled from 'styled-components'
 
 async function fetchPatch(patchUrl: string) {
   const response = await fetch(patchUrl)
@@ -45,21 +44,14 @@ export function AgentRunDiff({ patchUrl }: { patchUrl: string }) {
   }
 
   return (
-    <DiffCardSC>
-      <DiffPreSC>{data}</DiffPreSC>
-    </DiffCardSC>
+    <Code
+      height="100%"
+      language="diff"
+      showHeader={false}
+      showLineNumbers
+      title="patch.diff"
+    >
+      {data}
+    </Code>
   )
 }
-
-const DiffCardSC = styled(Card)(({ theme }) => ({
-  overflow: 'auto',
-  padding: theme.spacing.medium,
-  maxHeight: '100%',
-}))
-
-const DiffPreSC = styled.pre(({ theme }) => ({
-  ...theme.partials.text.code,
-  margin: 0,
-  whiteSpace: 'pre',
-  color: theme.colors.text,
-}))
