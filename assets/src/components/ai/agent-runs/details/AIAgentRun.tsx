@@ -5,6 +5,7 @@ import {
   Divider,
   Flex,
   IconFrame,
+  PrIcon,
   SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
@@ -311,18 +312,18 @@ function AgentRunStatusCallout({
           truncate
           first={title}
           firstPartialType="body2Bold"
-          firstColor="text"
+          firstColor="text-light"
           second={pullRequest?.title ? agentRunStatusTitle(run.status) : null}
-          secondColor="text-light"
+          secondColor="text-xlight"
           icon={
             <IconFrame
               circle
               size="large"
               type="secondary"
               icon={
-                <RunStatusIcon
-                  status={run.status}
-                  fullColor
+                <PrIcon
+                  size="small"
+                  color="icon-light"
                 />
               }
               css={{ flexShrink: 0 }}
@@ -333,7 +334,7 @@ function AgentRunStatusCallout({
         <RunStatusChip
           status={run.status}
           showSpinner={false}
-          size="small"
+          fillLevel={2}
           css={{ flexShrink: 0 }}
         />
       </StretchedFlex>
