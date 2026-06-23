@@ -482,7 +482,8 @@ function GitRepositoryImportSubStep({
   const formId = useId()
   const { setFooterActions } = useWorkbenchFormFooterActions()
   const importFormState = useGitRepositoryImport({
-    onCompleted: (repository) => onImported(repository.id),
+    onCompleted: onBack,
+    onImported: (repository) => onImported(repository.id),
   })
   const { disabled, loading, setShowAdvanced, showAdvanced } = importFormState
 

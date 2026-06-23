@@ -124,8 +124,10 @@ export function ImportGitModal({
 
 export function useGitRepositoryImport({
   onCompleted,
+  onImported,
 }: {
-  onCompleted?: (repository: ImportedGitRepository) => void
+  onCompleted?: () => void
+  onImported?: (repository: ImportedGitRepository) => void
 } = {}) {
   const [gitUrl, setGitUrl] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
@@ -149,7 +151,8 @@ export function useGitRepositoryImport({
       },
     },
     onCompleted: (data) => {
-      if (data.createGitRepository) onCompleted?.(data.createGitRepository)
+      onCompleted?.()
+      if (data.createGitRepository) onImported?.(data.createGitRepository)
     },
     awaitRefetchQueries: true,
     refetchQueries: [
