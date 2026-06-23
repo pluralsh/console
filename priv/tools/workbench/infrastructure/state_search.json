@@ -1,0 +1,21 @@
+{
+    "type": "object",
+    "properties": {
+        "stack_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "UUID of the stack whose persisted Terraform/Pulumi state should be searched. Use plrl_stacks to find stack IDs."
+        },
+        "query": {
+            "type": "string",
+            "description": "Case-sensitive fuzzy search text matched against each state resource's identifier, name, or resource type. Use concise terms such as a resource name, cloud resource identifier, or Terraform/Pulumi resource type."
+        },
+        "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 19,
+            "description": "Optional maximum number of matching state resources to return. Defaults to 10; must be between 1 and 19."
+        }
+    },
+    "required": ["stack_id", "query"]
+}

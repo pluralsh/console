@@ -28,18 +28,21 @@ export function useMentionDataSources({
   trigger,
   query,
   workbenchId,
+  flowId,
   enabled,
 }: {
   trigger: MentionTrigger | null
   query: string
   workbenchId?: Nullable<string>
+  flowId?: Nullable<string>
   enabled: boolean
 }): { items: ChipAttrs[]; loading: boolean } {
   const throttled = useThrottle(query, QUERY_THROTTLE_MS)
   const wantsAt = enabled && trigger === '@'
   const wantsSlash = enabled && trigger === '/'
+  const baseAtVariables = { q: throttled || undefined, first: MAX_PER_KIND }
   const atOptions = {
-    variables: { q: throttled || undefined, first: MAX_PER_KIND },
+    variables: baseAtVariables,
     skip: !wantsAt,
     fetchPolicy: 'cache-and-network' as const,
   }
@@ -47,21 +50,25 @@ export function useMentionDataSources({
     data: cluCur,
     previousData: cluPrev,
     loading: clustersLoading,
-  } = useClustersTinyQuery(atOptions)
+  } = useClustersTinyQuery({ ...atOptions, skip: !wantsAt || !!flowId })
   const clusterData = cluCur || cluPrev
 
   const {
     data: svcCur,
     previousData: svcPrev,
     loading: servicesLoading,
-  } = useServiceDeploymentsQuery(atOptions)
+  } = useServiceDeploymentsQuery({
+    variables: { ...baseAtVariables, flowId: flowId || undefined },
+    skip: !wantsAt,
+    fetchPolicy: 'cache-and-network',
+  })
   const serviceData = svcCur || svcPrev
 
   const {
     data: stkCur,
     previousData: stkPrev,
     loading: stacksLoading,
-  } = useStacksQuery(atOptions)
+  } = useStacksQuery({ ...atOptions, skip: !wantsAt || !!flowId })
   const stackData = stkCur || stkPrev
 
   const {
@@ -140,16 +147,19 @@ export function useMentionDataSources({
   }, [skillData, throttled])
 
   const items = useMemo<ChipAttrs[]>(() => {
-    if (wantsAt) return [...clusters, ...services, ...stacks]
+    if (wantsAt)
+      return flowId ? services : [...clusters, ...services, ...stacks]
     if (wantsSlash) return skills
     return []
-  }, [wantsAt, wantsSlash, clusters, services, stacks, skills])
+  }, [wantsAt, wantsSlash, flowId, clusters, services, stacks, skills])
 
   const loading = wantsAt
-    ? isEmpty(clusters) &&
-      isEmpty(services) &&
-      isEmpty(stacks) &&
-      (clustersLoading || servicesLoading || stacksLoading)
+    ? flowId
+      ? isEmpty(services) && servicesLoading
+      : isEmpty(clusters) &&
+        isEmpty(services) &&
+        isEmpty(stacks) &&
+        (clustersLoading || servicesLoading || stacksLoading)
     : wantsSlash
       ? isEmpty(skills) && skillsLoading
       : false

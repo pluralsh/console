@@ -2,9 +2,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterServices do
   use Console.AI.Tools.Agent.Base
   alias Console.Deployments.{Clusters, Policies}
   alias Console.Repo
-  alias Console.Schema.{Cluster, Service, User}
+  alias Console.Schema.{Cluster, Service, User, WorkbenchJob}
 
   embedded_schema do
+    field :job,  :map, virtual: true
     field :user, :map, virtual: true
     field :cluster, :string
     field :q, :string
@@ -24,13 +25,14 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterServices do
   def name(_), do: "plrl_cluster_services"
   def description(_), do: "List Plural services deployed to a cluster. Pass the cluster handle from plrl_clusters; use plrl_service with a service id for details."
 
-  def implement(%__MODULE__{user: %User{} = user, cluster: handle, q: q}) do
+  def implement(%__MODULE__{user: %User{} = user, cluster: handle, q: q, job: job}) do
     with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
          {:ok, _} <- Policies.allow(cluster, user, :read) do
       Service.for_user(user)
       |> Service.for_cluster(cluster.id)
       |> Service.ordered()
       |> maybe_search(q)
+      |> maybe_flow(job)
       |> Repo.all()
       |> Repo.preload([:cluster])
       |> Enum.map(&service_brief/1)
@@ -43,6 +45,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterServices do
 
   defp maybe_search(query, q) when is_binary(q) and q != "", do: Service.search(query, q)
   defp maybe_search(query, _), do: query
+
+  defp maybe_flow(query, %WorkbenchJob{flow_id: id}) when is_binary(id), do: Service.for_flow(query, id)
+  defp maybe_flow(query, _), do: query
 
   defp service_brief(%Service{} = s) do
     %{

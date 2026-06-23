@@ -288,7 +288,7 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       out_of_flow_workbench = insert(:workbench)
 
       insert(:flow_workbench, flow: flow, workbench: in_flow_workbench)
-      flow_jobs = insert_list(3, :workbench_job, workbench: in_flow_workbench)
+      flow_jobs = insert_list(3, :workbench_job, workbench: in_flow_workbench, flow: flow)
       insert_list(2, :workbench_job, workbench: out_of_flow_workbench)
 
       {:ok, %{data: %{"flow" => found}}} = run_query("""

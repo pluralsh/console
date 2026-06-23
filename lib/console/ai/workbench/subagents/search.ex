@@ -35,10 +35,12 @@ defmodule Console.AI.Workbench.Subagents.Search do
   end
 
   defp tools(%Environment{skills: skills, tools: tools, job: job}) do
+    skills = Environment.subagent_skills(skills, :search)
+
     MCP.expand_tools(Environment.subagent_tools(tools, :search), job)
     |> Enum.concat([
-      %Skills{skills: Environment.subagent_skills(skills, :search)},
-      %Skill{skills: Environment.subagent_skills(skills, :search)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       Result
     ])

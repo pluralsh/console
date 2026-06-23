@@ -40,7 +40,7 @@ defmodule Console.AI.Anthropic do
   def completion(%__MODULE__{} = anthropic, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("anthropic:#{select_model(anthropic, opts[:model], opts[:client])}", anthropic.stream, provider_options(anthropic) ++ [tools: tools(opts)])
+    |> generate_text("anthropic:#{select_model(anthropic, opts[:model], opts[:client])}", anthropic.stream, base_opts(provider_options(anthropic) ++ [tools: tools(opts)], opts))
     |> reqllm_result()
   end
 
@@ -48,7 +48,7 @@ defmodule Console.AI.Anthropic do
   def tool_call(%__MODULE__{} = anthropic, messages, tools, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("anthropic:#{select_model(anthropic, opts[:model], opts[:client] || :tool)}", anthropic.stream, provider_options(anthropic) ++ [tools: reqllm_tools(tools)])
+    |> generate_text("anthropic:#{select_model(anthropic, opts[:model], opts[:client] || :tool)}", anthropic.stream, base_opts(provider_options(anthropic) ++ [tools: reqllm_tools(tools)], opts))
     |> reqllm_result()
     |> tool_calls()
   end

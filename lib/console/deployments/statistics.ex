@@ -10,10 +10,13 @@ defmodule Console.Deployments.Statistics do
   def clusters(), do: Repo.aggregate(Cluster.physical(), :count, :id)
 
   def info() do
+    meter = Console.Prom.Meter.collect()
+
     %{
-      clusters: Repo.aggregate(Cluster, :count, :id),
+      clusters: Repo.aggregate(Cluster.physical(), :count, :id),
       services: Repo.aggregate(Service, :count, :id),
-      bytes_ingested: Console.Prom.Meter.collect()
+      bytes_ingested: meter[:bytes_ingested],
+      tokens: meter[:tokens]
     }
   end
 

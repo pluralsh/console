@@ -24,6 +24,7 @@ import {
   useWorkbenchQuery,
   WorkbenchJobFragment,
   WorkbenchPromptFragment,
+  WorkbenchTinyFragment,
 } from 'generated/graphql'
 import capitalize from 'lodash/capitalize'
 import groupBy from 'lodash/groupBy'
@@ -52,7 +53,9 @@ const MAX_WIDTH = 924
 
 export function WorkbenchJobCreateInput({
   workbenchId,
+  flowId,
   setWorkbenchId,
+  workbenchOptions,
   workbenchLoading,
   disabled = false,
   onCreated,
@@ -60,7 +63,9 @@ export function WorkbenchJobCreateInput({
   wrapperStyles,
 }: {
   workbenchId: Nullable<string>
+  flowId?: Nullable<string>
   setWorkbenchId?: (id: Nullable<string>) => void
+  workbenchOptions?: WorkbenchTinyFragment[]
   workbenchLoading: boolean
   disabled?: boolean
   onCreated?: (job: WorkbenchJobFragment) => void
@@ -111,6 +116,8 @@ export function WorkbenchJobCreateInput({
       onCompleted: ({ createWorkbenchJob }) => {
         if (!createWorkbenchJob?.id) return
         if (onCreated) {
+          inputRef.current?.resetInput()
+          setPrompt('')
           onCreated(createWorkbenchJob)
           return
         }
@@ -141,6 +148,7 @@ export function WorkbenchJobCreateInput({
         workbenchId,
         attributes: {
           prompt: trimmedPrompt,
+          ...(flowId ? { flowId } : {}),
           ...(modes ? { modes } : {}),
         },
       },
@@ -173,6 +181,7 @@ export function WorkbenchJobCreateInput({
           allowSubmit={!!prompt.trim() && !!workbenchId && !disabled}
           enableAutoComplete
           workbenchId={workbenchId}
+          flowId={flowId}
           options={
             <Flex
               gap="xsmall"
@@ -187,6 +196,7 @@ export function WorkbenchJobCreateInput({
                 <WorkbenchPillSelector
                   workbenchId={workbenchId}
                   setWorkbenchId={setWorkbenchId}
+                  workbenchOptions={workbenchOptions}
                 />
               )}
               {workbenchId && (
@@ -209,21 +219,28 @@ export function WorkbenchJobCreateInput({
 function WorkbenchPillSelector({
   workbenchId,
   setWorkbenchId,
+  workbenchOptions,
 }: {
   workbenchId: Nullable<string>
   setWorkbenchId: (id: Nullable<string>) => void
+  workbenchOptions?: WorkbenchTinyFragment[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const { data, loading } = useWorkbenchesQuery({
     fetchPolicy: 'cache-and-network',
+    skip: !!workbenchOptions,
   })
-  const workbenches = useMemo(() => mapExistingNodes(data?.workbenches), [data])
+  const workbenches = useMemo(
+    () => workbenchOptions ?? mapExistingNodes(data?.workbenches),
+    [data, workbenchOptions]
+  )
   const selectedWorkbench = workbenches.find((w) => w.id === workbenchId)
+  const loaded = !!workbenchOptions || !!data
 
   // clear a persisted id that no longer maps to an existing workbench
   useEffect(() => {
-    if (data && workbenchId && !selectedWorkbench) setWorkbenchId(null)
-  }, [data, workbenchId, selectedWorkbench, setWorkbenchId])
+    if (loaded && workbenchId && !selectedWorkbench) setWorkbenchId(null)
+  }, [loaded, workbenchId, selectedWorkbench, setWorkbenchId])
 
   return (
     <Select
@@ -233,6 +250,7 @@ function WorkbenchPillSelector({
       width={240}
       placement="left"
       label="Select workbench"
+      isDisabled={loaded && !workbenches.length}
       selectedKey={workbenchId ?? ''}
       onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
       triggerButton={
@@ -241,7 +259,7 @@ function WorkbenchPillSelector({
           css={{ height: '100%' }}
         >
           <WorkbenchIcon size={12} />
-          {!data && loading ? (
+          {!loaded && loading ? (
             <RectangleSkeleton
               $bright
               $width={75}

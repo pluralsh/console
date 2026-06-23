@@ -12,6 +12,7 @@ import { aiProviderToLabel } from './AISettingsProviders.tsx'
 import {
   effectiveProviderForRole,
   getModelValue,
+  ModelDefaultsByProvider,
   ModelRoutingRole,
   modelRoutingRoleMeta,
   ModelRoutingState,
@@ -25,12 +26,14 @@ export function AISettingsModelRoutingRoleCard({
   routing,
   onRoutingChange,
   configuredProviders,
+  modelDefaultsByProvider,
 }: {
   role: ModelRoutingRole
   ai: Nullable<AiSettings>
   routing: ModelRoutingState
   onRoutingChange: (routing: ModelRoutingState) => void
   configuredProviders: AiProvider[]
+  modelDefaultsByProvider?: ModelDefaultsByProvider
 }) {
   const { title, description, modelHint } = modelRoutingRoleMeta[role]
   const effectiveProvider = effectiveProviderForRole(role, routing)
@@ -38,7 +41,7 @@ export function AISettingsModelRoutingRoleCard({
     ? aiProviderToIcon[effectiveProvider]
     : null
   const theme = useTheme()
-  const modelName = getModelValue(role, routing, ai)
+  const modelName = getModelValue(role, routing, ai, modelDefaultsByProvider)
 
   return (
     <CardSC>

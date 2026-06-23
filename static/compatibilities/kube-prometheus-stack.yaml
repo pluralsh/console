@@ -5,20 +5,24 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 86.2.3
+- version: 86.3.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: [Bumped kube-prometheus-stack chart dependencies with non-major
-        updates (Renovate-driven). No functional chart refactors called out in the
-        provided notes.]
-    features: []
-    breaking_changes: []
-  chart_version: 86.2.3
-  images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+    chart_updates: ["Both 86.2.0 and 86.3.2 releases only mention \u201CUpdate kube-prometheus-stack\
+        \ dependency non-major updates\u201D, indicating dependency patch/minor bumps\
+        \ within the chart; no explicit template/CRD/value changes are called out\
+        \ in the provided notes."]
+    features: [No new user-facing features are described in the provided release notes;
+        changes appear limited to dependency non-major updates.]
+    breaking_changes: ["No breaking changes are mentioned in the provided release\
+        \ notes; however, dependency bumps can still introduce behavioral changes\u2014\
+        verify component image/app versions after the upgrade."]
+  chart_version: 86.3.2
+  images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
     'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.91.0',
     'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
     'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']

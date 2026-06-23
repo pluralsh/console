@@ -473,6 +473,8 @@ export type AgentRun = {
   scmCreds?: Maybe<ScmCreds>;
   /** whether this agent run is shared */
   shared?: Maybe<Scalars['Boolean']['output']>;
+  /** the skills available to this agent run */
+  skills?: Maybe<Array<Maybe<AgentSkill>>>;
   /** the status of this agent run */
   status: AgentRunStatus;
   /** the todos of the agent run */
@@ -597,6 +599,8 @@ export type AgentRunStatusAttributes = {
   messages?: InputMaybe<Array<InputMaybe<AgentMessageAttributes>>>;
   /** the kubernetes pod this agent is running on */
   podReference?: InputMaybe<NamespacedName>;
+  /** the skills available to this agent run */
+  skills?: InputMaybe<Array<InputMaybe<AgentSkillAttributes>>>;
   /** the status of this agent run */
   status: AgentRunStatus;
 };
@@ -807,6 +811,25 @@ export enum AgentSessionType {
   Search = 'SEARCH',
   Terraform = 'TERRAFORM'
 }
+
+export type AgentSkill = {
+  __typename?: 'AgentSkill';
+  /** the contents of the skill */
+  contents: Scalars['String']['output'];
+  /** the description of the skill */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the name of the skill */
+  name: Scalars['String']['output'];
+};
+
+export type AgentSkillAttributes = {
+  /** the contents of the skill */
+  contents: Scalars['String']['input'];
+  /** the description of the skill */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the skill */
+  name: Scalars['String']['input'];
+};
 
 export type AgentTodo = {
   __typename?: 'AgentTodo';
@@ -5941,6 +5964,14 @@ export type MetricsSettingsAttributes = {
   endpoint?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type ModelDefault = {
+  __typename?: 'ModelDefault';
+  embeddingModel?: Maybe<Scalars['String']['output']>;
+  model: Scalars['String']['output'];
+  provider: AiProvider;
+  toolModel: Scalars['String']['output'];
+};
+
 /** A monitor defines a recurring check over observability data that can raise alerts */
 export type Monitor = {
   __typename?: 'Monitor';
@@ -10715,6 +10746,8 @@ export type RootQueryType = {
   daemonSet?: Maybe<DaemonSet>;
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
+  /** The model defaults for each configurable provider */
+  defaultModels?: Maybe<Array<Maybe<ModelDefault>>>;
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
@@ -10881,6 +10914,7 @@ export type RootQueryType = {
   workbenchPullRequests: Scalars['Int']['output'];
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
+  workbenchUsage?: Maybe<Array<Maybe<WorkbenchUsageTimeseries>>>;
   workbenches?: Maybe<WorkbenchConnection>;
 };
 
@@ -12100,6 +12134,7 @@ export type RootQueryTypeServiceDeploymentsArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   errored?: InputMaybe<Scalars['Boolean']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   gitRef?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -12327,6 +12362,13 @@ export type RootQueryTypeWorkbenchToolsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchUsageArgs = {
+  period?: InputMaybe<EvalResultsPeriod>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -15727,6 +15769,10 @@ export type WorkbenchJob = {
   error?: Maybe<Scalars['String']['output']>;
   /** the eval result for this job (sideloadable) */
   evalResult?: Maybe<WorkbenchEvalResult>;
+  /** the flow this job is associated with */
+  flow?: Maybe<Flow>;
+  /** the flow this job is associated with */
+  flowId?: Maybe<Scalars['ID']['output']>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -15750,6 +15796,8 @@ export type WorkbenchJob = {
   status: WorkbenchJobStatus;
   tracesTool?: Maybe<Array<Maybe<WorkbenchJobActivityTrace>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** token and cost usage for this job */
+  usage?: Maybe<WorkbenchJobUsage>;
   /** the user who created this run */
   user?: Maybe<User>;
   /** whimsically describes current progress for you */
@@ -15923,6 +15971,8 @@ export enum WorkbenchJobActivityType {
 }
 
 export type WorkbenchJobAttributes = {
+  /** the flow this job is associated with */
+  flowId?: InputMaybe<Scalars['ID']['input']>;
   /** mode-specific options for this job */
   modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** the prompt for this job */
@@ -16097,6 +16147,26 @@ export type WorkbenchJobThoughtDelta = {
 export type WorkbenchJobUpdateAttributes = {
   /** the result for this job */
   result?: InputMaybe<WorkbenchResultAttributes>;
+};
+
+export type WorkbenchJobUsage = {
+  __typename?: 'WorkbenchJobUsage';
+  /** cached input tokens used by this job */
+  cachedTokens?: Maybe<Scalars['Int']['output']>;
+  /** input token cost for this job */
+  inputCost?: Maybe<Scalars['Float']['output']>;
+  /** input tokens consumed by this job */
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  /** output token cost for this job */
+  outputCost?: Maybe<Scalars['Float']['output']>;
+  /** output tokens produced by this job */
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  /** reasoning tokens produced by this job */
+  reasoningTokens?: Maybe<Scalars['Int']['output']>;
+  /** total token cost for this job */
+  totalCost?: Maybe<Scalars['Float']['output']>;
+  /** total tokens consumed by this job */
+  totalTokens?: Maybe<Scalars['Int']['output']>;
 };
 
 export type WorkbenchMessageAttributes = {
@@ -16952,6 +17022,20 @@ export enum WorkbenchToolType {
   Teams = 'TEAMS',
   Tempo = 'TEMPO'
 }
+
+export type WorkbenchUsageTimeseries = {
+  __typename?: 'WorkbenchUsageTimeseries';
+  /** number of input tokens consumed during this interval */
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  /** number of output tokens produced during this interval */
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  /** UTC timestamp for this data point */
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  /** total cost for this interval, in USD */
+  totalCost?: Maybe<Scalars['Float']['output']>;
+  /** the workbench this usage data is associated with */
+  workbench?: Maybe<Workbench>;
+};
 
 export type WorkbenchWebhook = {
   __typename?: 'WorkbenchWebhook';
@@ -18487,7 +18571,7 @@ export type ObservabilityWebhookFragment = { __typename?: 'ObservabilityWebhook'
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null, toolModel?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, accessKeyId?: string | null, region?: string | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, onboarded?: boolean | null, agentHelmValues?: string | null, latestK8sVsn: string, logging?: { __typename?: 'LoggingSettings', enabled?: boolean | null, driver?: LogDriver | null } | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, toolProvider?: AiProvider | null, embeddingProvider?: AiProvider | null, logAnalysis?: boolean | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null, toolModel?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, openaiCompatible?: { __typename?: 'OpenaiSettings', baseUrl?: string | null, model?: string | null, toolModel?: string | null, embeddingModel?: string | null, method?: OpenAiMethod | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string, model?: string | null, embeddingModel?: string | null, toolModel?: string | null } | null, ollama?: { __typename?: 'OllamaSettings', model: string, toolModel?: string | null, url: string } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, embeddingModel?: string | null, toolModel?: string | null, project: string, location: string, endpoint?: string | null } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId?: string | null, toolModelId?: string | null, embeddingModel?: string | null, accessKeyId?: string | null, region?: string | null } | null, analysisRates?: { __typename?: 'AiAnalysisRates', fast?: number | null, slow?: number | null } | null, vectorStore?: { __typename?: 'VectorStoreSettings', enabled?: boolean | null, store?: VectorStore | null } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null, defaultModels?: Array<{ __typename?: 'ModelDefault', provider: AiProvider, model: string, toolModel: string, embeddingModel?: string | null } | null> | null };
 
 export type ObservabilityProvidersQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -18830,6 +18914,7 @@ export type ServiceDeploymentsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  flowId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -33147,6 +33232,12 @@ export const DeploymentSettingsDocument = gql`
   deploymentSettings {
     ...DeploymentSettings
   }
+  defaultModels {
+    provider
+    model
+    toolModel
+    embeddingModel
+  }
 }
     ${DeploymentSettingsFragmentDoc}`;
 
@@ -34509,7 +34600,7 @@ export type PullRequestsLazyQueryHookResult = ReturnType<typeof usePullRequestsL
 export type PullRequestsSuspenseQueryHookResult = ReturnType<typeof usePullRequestsSuspenseQuery>;
 export type PullRequestsQueryResult = Apollo.QueryResult<PullRequestsQuery, PullRequestsQueryVariables>;
 export const ServiceDeploymentsDocument = gql`
-    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus, $projectId: ID) {
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus, $projectId: ID, $flowId: ID) {
   serviceDeployments(
     first: $first
     after: $after
@@ -34518,6 +34609,7 @@ export const ServiceDeploymentsDocument = gql`
     clusterId: $clusterId
     status: $status
     projectId: $projectId
+    flowId: $flowId
   ) {
     ...ServiceDeploymentsConnection
   }
@@ -34543,6 +34635,7 @@ export const ServiceDeploymentsDocument = gql`
  *      clusterId: // value for 'clusterId'
  *      status: // value for 'status'
  *      projectId: // value for 'projectId'
+ *      flowId: // value for 'flowId'
  *   },
  * });
  */

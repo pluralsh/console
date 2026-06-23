@@ -9,6 +9,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     field :activity,     :map, virtual: true
     field :workbench,    :map, virtual: true
     field :job,          :map, virtual: true
+    field :skills,       :map, virtual: true
     field :mode,         AgentRun.Mode
     field :babysit,      :boolean
     field :approval,     :boolean
@@ -91,6 +92,19 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
 
   defp run_args(tool) do
     Map.take(tool, @run_attrs)
+    |> Map.put(:skills, skills(tool.skills))
     |> Map.put(:branch, tool.base_branch)
   end
+
+  @skill_attrs ~w(name description contents)a
+
+  defp skills(%{} = skills), do: skills(Map.values(skills))
+  defp skills([_ | _] = skills) do
+    Enum.map(skills, fn
+      %{} = skill -> Map.take(skill, @skill_attrs)
+      _ -> nil
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+  defp skills(_), do: []
 end

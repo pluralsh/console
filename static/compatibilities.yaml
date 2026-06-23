@@ -14112,56 +14112,60 @@ addons:
   helm_repository_url: https://coredns.github.io/helm
   versions:
   - version: 1.12.0
-    kube: ['1.33']
+    kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.42.2
     images: ['coredns/coredns:1.12.0']
   - version: 1.11.3
-    kube: ['1.32', '1.31']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.36.1
     images: ['coredns/coredns:1.11.3']
   - version: 1.11.1
-    kube: ['1.30', '1.29']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.31.0
     images: []
   - version: 1.10.1
-    kube: ['1.28', '1.27']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.24.5
     images: ['coredns/coredns:1.10.1']
   - version: 1.9.3
-    kube: ['1.26', '1.25']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.19.6
     images: ['coredns/coredns:1.9.3']
   - version: 1.8.6
-    kube: ['1.24', '1.23']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.16.6
     images: ['coredns/coredns:1.8.6']
   - version: 1.8.4
-    kube: ['1.22']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.16.4
     images: ['coredns/coredns:1.8.4']
   - version: 1.8.0
-    kube: ['1.21']
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     summary: null
@@ -14556,7 +14560,7 @@ addons:
         '`--scale-down-enabled` is deprecated; plan to remove/replace usage in automation/scripts.',
         AWS provider switches to AWS SDK v2 and deprecates v1; custom builds/plugins
           depending on v1 need adjustment.]
-    chart_version: 9.57.0
+    chart_version: 9.58.0
     images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.0']
   - version: 1.34.2
     kube: ['1.34']
@@ -18164,20 +18168,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 86.2.3
+  - version: 86.3.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Bumped kube-prometheus-stack chart dependencies with non-major
-          updates (Renovate-driven). No functional chart refactors called out in the
-          provided notes.]
-      features: []
-      breaking_changes: []
-    chart_version: 86.2.3
-    images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.3',
+      chart_updates: ["Both 86.2.0 and 86.3.2 releases only mention \u201CUpdate kube-prometheus-stack\
+          \ dependency non-major updates\u201D, indicating dependency patch/minor\
+          \ bumps within the chart; no explicit template/CRD/value changes are called\
+          \ out in the provided notes."]
+      features: [No new user-facing features are described in the provided release
+          notes; changes appear limited to dependency non-major updates.]
+      breaking_changes: ["No breaking changes are mentioned in the provided release\
+          \ notes; however, dependency bumps can still introduce behavioral changes\u2014\
+          verify component image/app versions after the upgrade."]
+    chart_version: 86.3.2
+    images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
       'quay.io/kiwigrid/k8s-sidecar:2.7.3', 'quay.io/prometheus-operator/prometheus-operator:v0.91.0',
       'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
@@ -23788,23 +23796,40 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.4.3
+  - version: 3.4.4
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
+      helm_changes: "- **If you use ApplicationSet Cluster Generator filtering by\
+        \ Kubernetes version:** Argo CD 3.4 aligns Kubernetes version parsing with\
+        \ Helm 3.19 behavior. If you rely on `argocd.argoproj.io/auto-label-cluster-info`\
+        \ on cluster secrets, update consumers to read `argocd.argoproj.io/kubernetes-version`\
+        \ in **`vMajor.Minor.Patch`** format (e.g., `v1.30.2`) instead of the prior\
+        \ `Major.Minor` format.\n  - Upgrade guide: https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/3.3-3.4/#cluster-version-format-change\n\
+        \n- **Helm source behavior improvements to be aware of (no action required\
+        \ unless you depend on old behavior):**\n  - `valueFiles` now supports wildcard\
+        \ glob patterns.\n  - `helm version --client` deprecation handled/removed\
+        \ in Argo CD (compatibility with newer Helm).\n  - `repo.insecure` is passed\
+        \ to `helm dependency build` (matters for insecure Helm repos)."
       chart_updates: []
-      features: []
-      breaking_changes: ['**Kubernetes cluster version label format change (introduced
-          in v3.4.1):** If you use ApplicationSet Cluster Generator with auto-labeled
-          cluster info (`argocd.argoproj.io/auto-label-cluster-info`), selectors must
-          switch from `argocd.argoproj.io/kubernetes-version` in `Major.Minor` to
-          `vMajor.Minor.Patch` format. This can affect cluster selection and therefore
-          what apps get generated/synced if not updated.']
-    chart_version: 9.5.21
+      features: ['ApplicationSet/cluster-generator behavior changed around Kubernetes
+          version labeling: cluster secrets now expose `argocd.argoproj.io/kubernetes-version`
+          using `vMajor.Minor.Patch` formatting; selectors/filters should be updated
+          accordingly.', 'Support wildcard glob patterns for Helm `valueFiles`, simplifying
+          complex Helm-based app definitions.', 'Controller adds an annotation to
+          pause reconciliation for a specific cluster, useful during maintenance or
+          incident response.', Adds application-level sync option to allow Prune and
+          Delete behavior to be set per-Application., 'Multiple UI enhancements for
+          ApplicationSet views and filtering, plus Source Hydrator support surfaced
+          in the UI.']
+      breaking_changes: ['Cluster version format change impacts ApplicationSet Cluster
+          Generator setups that filter by Kubernetes version when using auto-labeled
+          cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
+          format.']
+    chart_version: 9.6.0
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.4.3']
+      'quay.io/argoproj/argocd:v3.4.4']
   - version: 3.4.1
     kube: ['1.36', '1.35', '1.34']
     requirements: []

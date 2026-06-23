@@ -146,6 +146,12 @@ query DeploymentSettings {
   deploymentSettings {
     ...DeploymentSettings
   }
+  defaultModels {
+    provider
+    model
+    toolModel
+    embeddingModel
+  }
 }
 
 query ObservabilityProviders($first: Int, $after: String) {
