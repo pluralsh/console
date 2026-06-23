@@ -1,6 +1,7 @@
 import {
   ArrowTopRightIcon,
   CloseIcon,
+  FileDiffIcon,
   Flex,
   IconFrame,
   ListIcon,
@@ -34,12 +35,13 @@ import {
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { AgentRunDiff } from './AgentRunDiff.tsx'
 import { AgentRunPullRequests } from './AgentRunPullRequests.tsx'
 import { AgentRunTodos } from './AgentRunTodos.tsx'
 import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
-type AgentRunPanelTab = 'Analysis' | 'Agent todos' | 'Pull requests'
+type AgentRunPanelTab = 'Diff' | 'Analysis' | 'Agent todos' | 'Pull requests'
 
 export function AgentRunPanelContent() {
   const { spacing } = useTheme()
@@ -76,10 +78,12 @@ export function AgentRunPanelContent() {
   const showAnalysisTab =
     !!run?.analysis &&
     (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
+  const showDiffTab = !!run?.upload?.patch
   const todos = useAgentRunTodos(run)
   const showAgentTodosTab = !isEmpty(todos)
   const showPrsTab = hasPullRequests
-  const hasContentTabs = showAnalysisTab || showAgentTodosTab || showPrsTab
+  const hasContentTabs =
+    showDiffTab || showAnalysisTab || showAgentTodosTab || showPrsTab
   const isWriteMode = run?.mode === AgentRunMode.Write
   const isActiveRun =
     isJobRunning(run?.status) ||
@@ -97,26 +101,29 @@ export function AgentRunPanelContent() {
   const showTabSkeleton =
     !hasContentTabs && (expectsTodos || expectsPullRequests || expectsAnalysis)
   const showingTabContent =
+    (showDiffTab && selectedTab === 'Diff' && !!run?.upload?.patch) ||
     (showAnalysisTab && selectedTab === 'Analysis' && !!run?.analysis) ||
     (showAgentTodosTab && selectedTab === 'Agent todos' && !!run) ||
     (showPrsTab && selectedTab === 'Pull requests' && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
+    if (showDiffTab) return 'Diff'
     if (showAnalysisTab) return 'Analysis'
     if (showAgentTodosTab) return 'Agent todos'
     if (showPrsTab) return 'Pull requests'
     return null
-  }, [showAnalysisTab, showAgentTodosTab, showPrsTab])
+  }, [showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
 
   useEffect(() => {
     if (!defaultTab) return
     setSelectedTab((tab) => {
+      if (tab === 'Diff' && showDiffTab) return tab
       if (tab === 'Analysis' && showAnalysisTab) return tab
       if (tab === 'Agent todos' && showAgentTodosTab) return tab
       if (tab === 'Pull requests' && showPrsTab) return tab
       return defaultTab
     })
-  }, [defaultTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
+  }, [defaultTab, showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
 
   return (
     <SidePanelContent>
@@ -140,6 +147,15 @@ export function AgentRunPanelContent() {
                   }}
                   css={{ gap: spacing.small }}
                 >
+                  {showDiffTab && (
+                    <PanelSubTabSC
+                      key="Diff"
+                      textValue="Diff"
+                    >
+                      <FileDiffIcon size={12} />
+                      Diff
+                    </PanelSubTabSC>
+                  )}
                   {showAnalysisTab && (
                     <PanelSubTabSC
                       key="Analysis"
@@ -205,6 +221,13 @@ export function AgentRunPanelContent() {
           tooltip="Close panel"
         />
       </PanelHeaderSC>
+      {showDiffTab && selectedTab === 'Diff' && run?.upload?.patch && (
+        <ContentWrapperSC>
+          <ContentInnerSC>
+            <AgentRunDiff patchUrl={run.upload.patch} />
+          </ContentInnerSC>
+        </ContentWrapperSC>
+      )}
       {showAnalysisTab && selectedTab === 'Analysis' && run?.analysis && (
         <ContentWrapperSC>
           <ContentInnerSC>
