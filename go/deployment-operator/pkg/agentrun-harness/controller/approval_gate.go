@@ -17,8 +17,15 @@ import (
 
 const approvalFollowUpPollInterval = 5 * time.Second
 
-func buildApprovalGrantedPrompt() string {
-	return "The user has approved these changes. You may now create a pull request using the agentPullRequest MCP tool. Do not make additional code changes unless they are strictly necessary to create the PR."
+func buildApprovalGrantedPrompt(headBranch string) string {
+	msg := "The user has approved these changes. You may now create a pull request using the agentPullRequest MCP tool."
+	if branch := strings.TrimSpace(headBranch); branch != "" {
+		msg += fmt.Sprintf(" Use head %q exactly (this is the branch createBranch already created and pushed).", branch)
+	} else {
+		msg += " You may omit head; the tool will use the branch from createBranch."
+	}
+	msg += " Do not make additional code changes unless they are strictly necessary to create the PR."
+	return msg
 }
 
 func (in *agentRunController) requiresApprovalFollowUp() bool {
@@ -100,8 +107,13 @@ func (in *agentRunController) waitForApprovalFollowUps(ctx context.Context) {
 		}
 		if run.ApprovedAt != nil {
 			in.agentRun.ApprovedAt = run.ApprovedAt
+			in.agentRun.HeadBranch = run.HeadBranch
 			in.approvalPromptSent = true
-			in.runApprovalFollowUp(ctx, buildApprovalGrantedPrompt())
+			headBranch := ""
+			if run.HeadBranch != nil {
+				headBranch = *run.HeadBranch
+			}
+			in.runApprovalFollowUp(ctx, buildApprovalGrantedPrompt(headBranch))
 			return
 		}
 
