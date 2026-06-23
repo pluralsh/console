@@ -16,6 +16,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
 )
 
@@ -81,6 +82,25 @@ func (t *recordingTool) AnalysisFollowUpRun(context.Context, string) error {
 func (t *recordingTool) UploadArtifacts(context.Context) (*artifacts.UploadArtifacts, error) {
 	return nil, nil
 }
+
+type fakeBabysitGRPCClient struct {
+	details map[string]*scm.PRDetails
+}
+
+func (f *fakeBabysitGRPCClient) GetPRDetails(_ context.Context, prURL string) (*scm.PRDetails, error) {
+	details, ok := f.details[prURL]
+	if !ok {
+		return nil, fmt.Errorf("missing details for %s", prURL)
+	}
+
+	return details, nil
+}
+
+func (f *fakeBabysitGRPCClient) GetPRSummary(ctx context.Context, prURL string) (*scm.PRDetails, error) {
+	return f.GetPRDetails(ctx, prURL)
+}
+
+func (f *fakeBabysitGRPCClient) Close() error { return nil }
 
 func TestRequeuePendingInitialRunError(t *testing.T) {
 	t.Parallel()
@@ -209,4 +229,93 @@ func TestEnsureAnalysisPersistedAfterInitialRun_followUpError(t *testing.T) {
 	in.ensureAnalysisPersistedAfterInitialRun(context.Background())
 	require.Equal(t, 1, rt.analysisFollowUps)
 	require.EqualError(t, <-in.errChan, "codex crashed")
+}
+
+func TestBuildBabysitContextBaselinesAndSkipsUnchanged(t *testing.T) {
+	t.Parallel()
+
+	prURL := "https://github.com/pluralsh/console/pull/1"
+	in := &agentRunController{dir: t.TempDir()}
+	agentRun := &gqlclient.AgentRunFragment{
+		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
+	}
+	client := &fakeBabysitGRPCClient{
+		details: map[string]*scm.PRDetails{
+			prURL: {
+				Title:   "Fix babysit",
+				HeadRef: "fix/babysit",
+				State:   scm.PRStateOpen,
+				Comments: []scm.PRComment{{
+					ID:        "1",
+					Type:      scm.PRCommentTypeIssue,
+					Author:    "reviewer",
+					Body:      "existing comment",
+					CreatedAt: time.Unix(10, 0),
+				}},
+			},
+		},
+	}
+
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.NotEmpty(t, in.lastPRSHA)
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+}
+
+func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
+	t.Parallel()
+
+	prURL := "https://github.com/pluralsh/console/pull/1"
+	in := &agentRunController{dir: t.TempDir()}
+	agentRun := &gqlclient.AgentRunFragment{
+		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
+	}
+	client := &fakeBabysitGRPCClient{
+		details: map[string]*scm.PRDetails{
+			prURL: {
+				Title:   "Fix babysit",
+				HeadRef: "fix/babysit",
+				State:   scm.PRStateOpen,
+				Comments: []scm.PRComment{{
+					ID:        "1",
+					Type:      scm.PRCommentTypeIssue,
+					Author:    "reviewer",
+					Body:      "existing comment",
+					CreatedAt: time.Unix(10, 0),
+				}},
+			},
+		},
+	}
+
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	createdBeforeBaseline := in.lastPRCheckAt.Add(-time.Hour)
+
+	client.details[prURL] = &scm.PRDetails{
+		Title:   "Fix babysit",
+		HeadRef: "fix/babysit",
+		State:   scm.PRStateOpen,
+		Comments: []scm.PRComment{
+			{
+				ID:        "1",
+				Type:      scm.PRCommentTypeIssue,
+				Author:    "reviewer",
+				Body:      "existing comment",
+				CreatedAt: time.Unix(10, 0),
+			},
+			{
+				ID:        "2",
+				Type:      scm.PRCommentTypeReview,
+				Author:    "reviewer",
+				Body:      "late visible comment",
+				CreatedAt: createdBeforeBaseline,
+			},
+		},
+	}
+
+	bCtx := in.buildBabysitContext(context.Background(), agentRun, client)
+	require.NotNil(t, bCtx)
+	require.Len(t, bCtx.PRs, 1)
+	require.Len(t, bCtx.PRs[0].NewComments, 1)
+	require.Equal(t, "late visible comment", bCtx.PRs[0].NewComments[0].Body)
+	require.Contains(t, bCtx.Prompt, "late visible comment")
+	require.Contains(t, bCtx.Prompt, "review:2")
 }
