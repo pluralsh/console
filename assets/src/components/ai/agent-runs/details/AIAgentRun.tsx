@@ -12,6 +12,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
@@ -296,6 +297,10 @@ function AgentRunStatusCallout({
   const title = pullRequest?.title ?? agentRunStatusTitle(run.status)
   const summary = run.analysis?.summary
   const hasPatch = !!run.upload?.patch
+  const workbenchJob = run.workbenchJob
+  const workbench = workbenchJob?.workbench
+  const showWorkbenchChip =
+    !!workbenchJob?.id && !!workbench?.id && !!workbench.name
 
   return (
     <Card
@@ -357,44 +362,59 @@ function AgentRunStatusCallout({
           {summary}
         </Body2P>
       )}
-      {(hasPatch || pullRequest?.url || isApprovable) && (
-        <Flex
-          justify="flex-end"
+      {(hasPatch || pullRequest?.url || isApprovable || showWorkbenchChip) && (
+        <StretchedFlex
+          align="center"
           gap="small"
         >
-          {hasPatch ? (
-            <Button
-              small
-              secondary
-              onClick={onViewDiff}
-            >
-              View diff
-            </Button>
-          ) : (
-            pullRequest?.url && (
-              <Button
-                small
-                secondary
-                as="a"
-                href={pullRequest.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                endIcon={<ArrowTopRightIcon size={12} />}
-              >
-                View PR
-              </Button>
-            )
+          {showWorkbenchChip && (
+            <WorkbenchLinkChip
+              workbenchId={workbench.id}
+              workbenchName={workbench.name}
+              workbenchJobId={workbenchJob.id}
+              css={{ flexShrink: 0 }}
+            />
           )}
-          {isApprovable && (
-            <Button
-              small
-              onClick={onApprove}
-              loading={approving}
+          {(hasPatch || pullRequest?.url || isApprovable) && (
+            <Flex
+              gap="small"
+              css={{ marginLeft: 'auto' }}
             >
-              Approve & create PR
-            </Button>
+              {hasPatch ? (
+                <Button
+                  small
+                  secondary
+                  onClick={onViewDiff}
+                >
+                  View diff
+                </Button>
+              ) : (
+                pullRequest?.url && (
+                  <Button
+                    small
+                    secondary
+                    as="a"
+                    href={pullRequest.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    endIcon={<ArrowTopRightIcon size={12} />}
+                  >
+                    View PR
+                  </Button>
+                )
+              )}
+              {isApprovable && (
+                <Button
+                  small
+                  onClick={onApprove}
+                  loading={approving}
+                >
+                  Approve & create PR
+                </Button>
+              )}
+            </Flex>
           )}
-        </Flex>
+        </StretchedFlex>
       )}
     </Card>
   )
