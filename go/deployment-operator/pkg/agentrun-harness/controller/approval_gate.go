@@ -22,7 +22,7 @@ func buildApprovalGrantedPrompt(headBranch string) string {
 	if branch := strings.TrimSpace(headBranch); branch != "" {
 		msg += fmt.Sprintf(" Use head %q exactly (this is the branch createBranch already created and pushed).", branch)
 	} else {
-		msg += " You may omit head; the tool will use the branch from createBranch."
+		msg += " No head branch was recorded on this agent run — call createBranch first to commit and push your changes, then call agentPullRequest with that branch name as head."
 	}
 	msg += " Do not make additional code changes unless they are strictly necessary to create the PR."
 	return msg
