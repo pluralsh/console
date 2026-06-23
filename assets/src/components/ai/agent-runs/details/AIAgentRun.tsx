@@ -299,9 +299,16 @@ function AgentRunStatusCallout({
   const summary = run.analysis?.summary
 
   return (
-    <StatusCalloutSC
+    <Card
       fillLevel={1}
-      $status={run.status}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+        padding: theme.spacing.medium,
+        width: '100%',
+        borderLeft: `3px solid ${theme.colors[statusToBorderColor[run.status]]}`,
+      }}
     >
       <StretchedFlex
         align="start"
@@ -353,7 +360,6 @@ function AgentRunStatusCallout({
         <Flex
           justify="flex-end"
           gap="small"
-          css={{ marginTop: theme.spacing.xsmall }}
         >
           {pullRequest?.url && (
             <Button
@@ -374,12 +380,12 @@ function AgentRunStatusCallout({
               onClick={onApprove}
               loading={approving}
             >
-              Approve agent run
+              Approve & create PR
             </Button>
           )}
         </Flex>
       )}
-    </StatusCalloutSC>
+    </Card>
   )
 }
 
@@ -416,17 +422,6 @@ const statusToBorderColor = {
   [AgentRunStatus.Running]: 'icon-info',
   [AgentRunStatus.Pending]: 'icon-info',
 } as const
-
-const StatusCalloutSC = styled(Card)<{ $status: AgentRunStatus }>(
-  ({ theme, $status }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.medium,
-    padding: theme.spacing.medium,
-    width: '100%',
-    borderLeft: `3px solid ${theme.colors[statusToBorderColor[$status]]}`,
-  })
-)
 
 const RepromptInputWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
