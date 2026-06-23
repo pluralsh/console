@@ -128,7 +128,6 @@ export function AIAgentRun() {
             <StretchedFlex
               gap="xxxxlarge"
               alignItems="start"
-              css={{ paddingBottom: spacing.large }}
             >
               <Flex
                 direction="column"
@@ -166,17 +165,14 @@ export function AIAgentRun() {
                 {run && <AIAgentRunShareButton runId={run?.id} />}
               </Flex>
             </StretchedFlex>
-            <Divider
-              backgroundColor="border"
-              marginTop="small"
-              marginBottom="small"
-            />
+
             {run && (
               <AgentRunStatusCallout
                 run={run}
                 isApprovable={isApprovable}
                 approving={approving}
                 onApprove={() => approveAgentRun()}
+                onViewDiff={() => setOpen(true)}
               />
             )}
             {run?.error && (
@@ -287,16 +283,19 @@ function AgentRunStatusCallout({
   isApprovable,
   approving,
   onApprove,
+  onViewDiff,
 }: {
   run: AgentRunFragment
   isApprovable: boolean
   approving: boolean
   onApprove: () => void
+  onViewDiff: () => void
 }) {
   const theme = useTheme()
   const pullRequest = run.pullRequests?.[0]
   const title = pullRequest?.title ?? agentRunStatusTitle(run.status)
   const summary = run.analysis?.summary
+  const hasPatch = !!run.upload?.patch
 
   return (
     <Card
@@ -305,6 +304,8 @@ function AgentRunStatusCallout({
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
+        marginBottom: theme.spacing.small,
+        marginTop: theme.spacing.small,
         padding: theme.spacing.medium,
         width: '100%',
         borderLeft: `3px solid ${theme.colors[statusToBorderColor[run.status]]}`,
@@ -356,23 +357,33 @@ function AgentRunStatusCallout({
           {summary}
         </Body2P>
       )}
-      {(pullRequest?.url || isApprovable) && (
+      {(hasPatch || pullRequest?.url || isApprovable) && (
         <Flex
           justify="flex-end"
           gap="small"
         >
-          {pullRequest?.url && (
+          {hasPatch ? (
             <Button
               small
               secondary
-              as="a"
-              href={pullRequest.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              endIcon={<ArrowTopRightIcon size={12} />}
+              onClick={onViewDiff}
             >
-              View PR
+              View diff
             </Button>
+          ) : (
+            pullRequest?.url && (
+              <Button
+                small
+                secondary
+                as="a"
+                href={pullRequest.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                endIcon={<ArrowTopRightIcon size={12} />}
+              >
+                View PR
+              </Button>
+            )
           )}
           {isApprovable && (
             <Button
