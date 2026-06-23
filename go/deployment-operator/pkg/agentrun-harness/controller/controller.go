@@ -12,6 +12,7 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -96,6 +97,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 func (in *agentRunController) prepare() error {
 	var err error
 	repositoryDir := filepath.Join(in.dir, "shared", "repository")
+	if err := environment.ConfigureGitSafeDirectory(repositoryDir); err != nil {
+		return fmt.Errorf("configure git safe directory: %w", err)
+	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
 		RepositoryDir: repositoryDir,

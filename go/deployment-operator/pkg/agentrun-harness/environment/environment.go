@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/samber/lo"
@@ -55,6 +56,9 @@ func (in *environment) cloneRepository() error {
 	repoDirPath := path.Join(in.dir, repoDir)
 	if _, err := in.configureGitCredentials(); err != nil {
 		return err
+	}
+	if err := ConfigureGitSafeDirectory(repoDirPath); err != nil {
+		return fmt.Errorf("failed to configure git safe directory: %w", err)
 	}
 
 	if _, err := os.Stat(path.Join(repoDirPath, ".git")); err == nil {
@@ -186,6 +190,25 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 
 	klog.V(log.LogLevelInfo).InfoS("repository ready", "url", in.agentRun.Repository, "dir", repoDirPath)
 	return config.Save()
+}
+
+// ConfigureGitSafeDirectory marks the repository as trusted for git when the
+// directory is owned by a different user than the current process (for example
+// when agent-bootstrap clones into a shared volume and the harness runs later).
+func ConfigureGitSafeDirectory(repoDirPath string) error {
+	abs, err := filepath.Abs(repoDirPath)
+	if err != nil {
+		return fmt.Errorf("resolve repository path: %w", err)
+	}
+
+	if err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"config", "--global", "--add", "safe.directory", abs}),
+	).Run(context.Background()); err != nil {
+		return fmt.Errorf("git config safe.directory %q: %w", abs, err)
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("configured git safe directory", "path", abs)
+	return nil
 }
 
 func (in *environment) configureGitCredentials() (string, error) {
