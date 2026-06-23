@@ -113,6 +113,7 @@ func (in *agentRunController) waitForApprovalFollowUps(ctx context.Context) {
 			if run.HeadBranch != nil {
 				headBranch = *run.HeadBranch
 			}
+			klog.V(log.LogLevelInfo).InfoS("agent run approved, sending follow-up prompt", "id", in.agentRunID, "headBranch", headBranch)
 			in.runApprovalFollowUp(ctx, buildApprovalGrantedPrompt(headBranch))
 			return
 		}
