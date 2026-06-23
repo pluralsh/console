@@ -33,6 +33,7 @@ fragment AgentRunTiny on AgentRun {
   upload {
     id
     session
+    patch
   }
   insertedAt
   updatedAt
