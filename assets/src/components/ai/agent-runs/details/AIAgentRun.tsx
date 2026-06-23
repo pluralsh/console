@@ -227,6 +227,7 @@ export function AIAgentRun() {
   )
 }
 
+// TODO: Test that reprompt input submits and the prompt appears in agent run chat.
 function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
   const inputRef = useRef<Nullable<ChatInputSimpleRef>>(null)
   const [prompt, setPrompt] = useState('')
