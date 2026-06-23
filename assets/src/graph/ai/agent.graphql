@@ -253,6 +253,14 @@ mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
   }
 }
 
+mutation CreateAgentRunPrompt($id: ID!, $prompt: String!) {
+  createAgentRunPrompt(id: $id, prompt: $prompt) {
+    id
+    prompt
+    insertedAt
+  }
+}
+
 mutation CancelAgentRun($id: ID!) {
   cancelAgentRun(id: $id) {
     ...AgentRunTiny

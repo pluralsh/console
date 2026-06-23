@@ -17160,6 +17160,14 @@ export type CreateAgentRunMutationVariables = Exact<{
 
 export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null } | null };
 
+export type CreateAgentRunPromptMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  prompt: Scalars['String']['input'];
+}>;
+
+
+export type CreateAgentRunPromptMutation = { __typename?: 'RootMutationType', createAgentRunPrompt?: { __typename?: 'AgentPromptHistory', id: string, prompt: string, insertedAt?: string | null } | null };
+
 export type CancelAgentRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -27340,6 +27348,42 @@ export function useCreateAgentRunMutation(baseOptions?: Apollo.MutationHookOptio
 export type CreateAgentRunMutationHookResult = ReturnType<typeof useCreateAgentRunMutation>;
 export type CreateAgentRunMutationResult = Apollo.MutationResult<CreateAgentRunMutation>;
 export type CreateAgentRunMutationOptions = Apollo.BaseMutationOptions<CreateAgentRunMutation, CreateAgentRunMutationVariables>;
+export const CreateAgentRunPromptDocument = gql`
+    mutation CreateAgentRunPrompt($id: ID!, $prompt: String!) {
+  createAgentRunPrompt(id: $id, prompt: $prompt) {
+    id
+    prompt
+    insertedAt
+  }
+}
+    `;
+export type CreateAgentRunPromptMutationFn = Apollo.MutationFunction<CreateAgentRunPromptMutation, CreateAgentRunPromptMutationVariables>;
+
+/**
+ * __useCreateAgentRunPromptMutation__
+ *
+ * To run a mutation, you first call `useCreateAgentRunPromptMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAgentRunPromptMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createAgentRunPromptMutation, { data, loading, error }] = useCreateAgentRunPromptMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      prompt: // value for 'prompt'
+ *   },
+ * });
+ */
+export function useCreateAgentRunPromptMutation(baseOptions?: Apollo.MutationHookOptions<CreateAgentRunPromptMutation, CreateAgentRunPromptMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateAgentRunPromptMutation, CreateAgentRunPromptMutationVariables>(CreateAgentRunPromptDocument, options);
+      }
+export type CreateAgentRunPromptMutationHookResult = ReturnType<typeof useCreateAgentRunPromptMutation>;
+export type CreateAgentRunPromptMutationResult = Apollo.MutationResult<CreateAgentRunPromptMutation>;
+export type CreateAgentRunPromptMutationOptions = Apollo.BaseMutationOptions<CreateAgentRunPromptMutation, CreateAgentRunPromptMutationVariables>;
 export const CancelAgentRunDocument = gql`
     mutation CancelAgentRun($id: ID!) {
   cancelAgentRun(id: $id) {
@@ -46210,6 +46254,7 @@ export const namedOperations = {
   },
   Mutation: {
     CreateAgentRun: 'CreateAgentRun',
+    CreateAgentRunPrompt: 'CreateAgentRunPrompt',
     CancelAgentRun: 'CancelAgentRun',
     ApproveAgentRun: 'ApproveAgentRun',
     UpsertAgentRuntime: 'UpsertAgentRuntime',

@@ -247,6 +247,20 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 		}
 	}
 
+	if prompt := nextPrompt(agentRun.Prompts, in.lastPromptSeq); prompt != nil {
+		in.lastPromptSeq = prompt.Seq
+		if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+			klog.ErrorS(err, "failed to update agent run status before babysit follow-up")
+			return false
+		}
+		if err = in.tool.FollowUpRun(ctx, prompt.Prompt); err != nil {
+			in.errChan <- err
+			return true
+		}
+		in.uploadAgentRunArtifacts(context.Background())
+		return false
+	}
+
 	stop := callback(ctx, bCtx)
 	if bCtx != nil {
 		in.uploadAgentRunArtifacts(context.Background())

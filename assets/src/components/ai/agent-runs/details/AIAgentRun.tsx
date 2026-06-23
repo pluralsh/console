@@ -22,9 +22,10 @@ import {
   useAgentRunQuery,
   useApproveAgentRunMutation,
   useCancelAgentRunMutation,
+  useCreateAgentRunPromptMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AI_AGENT_RUNS_ABS_PATH,
@@ -34,6 +35,10 @@ import {
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI.tsx'
+import {
+  ChatInputSimple,
+  ChatInputSimpleRef,
+} from '../../chatbot/input/ChatInput.tsx'
 import { RunStatusChip } from '../../infra-research/details/InfraResearch.tsx'
 import { RunStatusIcon } from '../AgentRunInfoDisplays.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
@@ -87,6 +92,9 @@ export function AIAgentRun() {
   const isCancellable = isRunning || run?.status == AgentRunStatus.Babysitting
   const isApprovable =
     run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
+  const canReprompt =
+    (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||
+    run?.status === AgentRunStatus.Babysitting
 
   useSetBreadcrumbs(
     useMemo(
@@ -194,6 +202,7 @@ export function AIAgentRun() {
                 $height={400}
               />
             ) : null}
+            {run && canReprompt && <AgentRunRepromptInput run={run} />}
           </Flex>
         </WrapperSC>
         {!isOpen && (
@@ -220,6 +229,56 @@ export function AIAgentRun() {
         {(cancellingError || approvingError)?.message}
       </Toast>
     </>
+  )
+}
+
+function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
+  const inputRef = useRef<Nullable<ChatInputSimpleRef>>(null)
+  const [prompt, setPrompt] = useState('')
+  const [createPrompt, { loading, error }] = useCreateAgentRunPromptMutation({
+    refetchQueries: ['AgentRun', 'PendingApprovalAgentRuns'],
+    awaitRefetchQueries: true,
+    onCompleted: () => {
+      setPrompt('')
+      inputRef.current?.resetInput()
+    },
+  })
+
+  const submitPrompt = () => {
+    const content = prompt.trim()
+    if (!content) return
+
+    createPrompt({
+      variables: {
+        id: run.id,
+        prompt: content,
+      },
+    })
+  }
+
+  return (
+    <RepromptInputWrapperSC>
+      {error && (
+        <GqlError
+          error={error}
+          margin="small"
+        />
+      )}
+      <ChatInputSimple
+        ref={inputRef}
+        bgColor="fill-zero-selected"
+        placeholder={
+          run.status === AgentRunStatus.Babysitting
+            ? 'Ask the agent to follow up on the draft PR.'
+            : 'Ask the agent to revise the pending changes before you approve.'
+        }
+        setValue={setPrompt}
+        onSubmit={submitPrompt}
+        loading={loading}
+        allowSubmit={!!prompt.trim()}
+        wrapperStyles={{ minHeight: 112 }}
+      />
+    </RepromptInputWrapperSC>
   )
 }
 
@@ -369,6 +428,13 @@ const StatusCalloutSC = styled(Card)<{ $status: AgentRunStatus }>(
     borderLeft: `3px solid ${theme.colors[statusToBorderColor[$status]]}`,
   })
 )
+
+const RepromptInputWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  paddingTop: theme.spacing.medium,
+}))
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
