@@ -4,11 +4,13 @@ import {
   DeploymentSettingsFragment,
   ModelDefault,
   useDeploymentSettingsQuery,
-  WorkbenchJobModelAttributes,
 } from 'generated/graphql'
 import { createContext, ReactNode, use, useMemo } from 'react'
-import { isNonNullable } from 'utils/isNonNullable'
 
+import {
+  modelDefaultForProvider,
+  ModelDefaultsByProvider,
+} from '../settings/ai/aiModelRoutingUtils'
 import { isValidURL } from '../../utils/url'
 
 const POLL_INTERVAL = 60 * 1000
@@ -32,59 +34,73 @@ export function useLoadingDeploymentSettings() {
   return loading && !data
 }
 
+/**
+ * Returns AI model metadata for the current deployment settings.
+ *
+ * @returns {{
+ *   loading: boolean
+ *   default: Nullable<ModelDefault>
+ *   available: ModelDefault[]
+ *   defaultsByProvider: Partial<Record<AiProvider, ModelDefault>>
+ * }}
+ *
+ * Hook result with:
+ * - `available`: provider-level effective model defaults for configured
+ *   providers returned by `availableModels`, using runtime settings first and
+ *   static `defaultModels` only as fallback.
+ * - `default`: the provider-level effective model defaults for
+ *   `deploymentSettings.ai.provider`, selected from `available`.
+ * - `defaultsByProvider`: the static per-provider fallback defaults from
+ *   `defaultModels`.
+ */
 export function useAiModels(): {
   loading: boolean
-  default: Nullable<WorkbenchJobModelAttributes>
-  available: WorkbenchJobModelAttributes[]
+  default: Nullable<ModelDefault>
+  available: ModelDefault[]
   defaultsByProvider: Partial<Record<AiProvider, ModelDefault>>
 } {
-  const { loading, availableModels, defaultModels } = use(
+  const { loading, data, availableModels, defaultModels } = use(
     DeploymentSettingsContext
   )
 
   return useMemo(() => {
-    const defaultModelEntry = defaultModels?.find(isNonNullable) ?? null
-    const defaultModel =
-      defaultModelEntry?.provider && defaultModelEntry?.model?.trim()
-        ? ({
-            provider: defaultModelEntry.provider,
-            model: defaultModelEntry.model,
-          } satisfies WorkbenchJobModelAttributes)
-        : null
     const defaultsByProvider = Object.fromEntries(
       (defaultModels ?? [])
         .filter((modelDefault): modelDefault is ModelDefault => {
           return !!modelDefault?.provider
         })
         .map((modelDefault) => [modelDefault.provider, modelDefault])
-    ) as Partial<Record<AiProvider, ModelDefault>>
-
-    const dedupedAvailableModels = new Map<
-      string,
-      WorkbenchJobModelAttributes
-    >()
+    ) as ModelDefaultsByProvider
+    const availableProviders = new Set<AiProvider>()
 
     availableModels?.forEach((option) => {
-      if (!option?.provider || !option.model?.trim()) return
-
-      const normalizedOption = {
-        provider: option.provider,
-        model: option.model,
-      } satisfies WorkbenchJobModelAttributes
-
-      dedupedAvailableModels.set(
-        `${normalizedOption.provider}:${normalizedOption.model}`,
-        normalizedOption
-      )
+      if (option?.provider) availableProviders.add(option.provider)
     })
+
+    const availableModelDefaults = Array.from(availableProviders).flatMap(
+      (provider) => {
+        const modelDefault = modelDefaultForProvider(
+          provider,
+          data?.ai,
+          defaultsByProvider
+        )
+
+        return modelDefault ? [modelDefault] : []
+      }
+    )
+    const defaultProvider = data?.ai?.provider
+    const defaultModel =
+      availableModelDefaults.find(
+        ({ provider }) => provider === defaultProvider
+      ) ?? null
 
     return {
       loading: loading && (!availableModels || !defaultModels),
       default: defaultModel,
-      available: Array.from(dedupedAvailableModels.values()),
+      available: availableModelDefaults,
       defaultsByProvider,
     }
-  }, [availableModels, defaultModels, loading])
+  }, [data, availableModels, defaultModels, loading])
 }
 
 export function useLogsEnabled() {

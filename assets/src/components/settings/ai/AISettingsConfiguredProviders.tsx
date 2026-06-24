@@ -16,8 +16,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
+import { providerSettingsKey } from './aiModelRoutingUtils'
 
 type ConfiguredAiProvider = {
   provider: AiProvider

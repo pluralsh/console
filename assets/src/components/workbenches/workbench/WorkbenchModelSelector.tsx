@@ -3,8 +3,16 @@ import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { useAiModels } from 'components/contexts/DeploymentSettingsContext'
 import { aiProviderToIcon } from 'components/settings/ai/AISettingsConfiguredProviders'
 import { aiProviderToLabel } from 'components/settings/ai/AISettingsProviders'
+import {
+  modelForRole,
+  ModelRoutingRole,
+} from 'components/settings/ai/aiModelRoutingUtils'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { AiProvider, WorkbenchJobModelAttributes } from 'generated/graphql'
+import {
+  AiProvider,
+  ModelDefault,
+  WorkbenchJobModelAttributes,
+} from 'generated/graphql'
 import groupBy from 'lodash/groupBy'
 import { type ReactElement, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -31,17 +39,19 @@ export function WorkbenchModelSelector({
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const {
-    default: defaultModel,
-    available: allAvailableModels,
-    loading,
-  } = useAiModels()
+  const { default: defaultModelDefault, available, loading } = useAiModels()
+  const defaultModel = useMemo(
+    () => modelDefaultToChatOption(defaultModelDefault),
+    [defaultModelDefault]
+  )
   const availableModels = useMemo(
     () =>
-      allAvailableModels.filter(
-        (option) => !isSameModelOption(option, defaultModel)
-      ),
-    [allAvailableModels, defaultModel]
+      available.flatMap((modelDefault) => {
+        const option = modelDefaultToChatOption(modelDefault)
+        if (!option) return []
+        return isSameModelOption(option, defaultModel) ? [] : [option]
+      }),
+    [available, defaultModel]
   )
 
   const hasMultipleProviders =
@@ -304,6 +314,19 @@ function isSameModelOption(
     left.provider === right.provider &&
     left.model === right.model
   )
+}
+
+function modelDefaultToChatOption(
+  modelDefault: Nullable<ModelDefault>
+): Nullable<WorkbenchJobModelAttributes> {
+  const model = modelForRole(ModelRoutingRole.Chat, modelDefault)?.trim()
+
+  return modelDefault && model
+    ? {
+        provider: modelDefault.provider,
+        model,
+      }
+    : null
 }
 
 function modelOptionKey({ provider, model }: WorkbenchJobModelAttributes) {
