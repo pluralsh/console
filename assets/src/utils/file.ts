@@ -41,7 +41,7 @@ export function getLanguageFromFileName(fileName: string): string | undefined {
     yml: 'yaml',
     go: 'go',
     md: 'markdown',
-    tpl: 'go',
+    tpl: 'yaml',
     json: 'json',
     toml: 'toml',
     txt: 'text',
