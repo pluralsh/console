@@ -122,13 +122,6 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error {
 	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
 
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{
-			Message: followUpPrompt,
-			Role:    console.AiRoleUser,
-		})
-	}
-
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := analysisAgent
 	if in.Config.Run.Mode == console.AgentRunModeWrite {

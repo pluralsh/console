@@ -103,10 +103,6 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 func (in *Gemini) FollowUpRun(ctx context.Context, followUpPrompt string) error {
 	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
 
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
-	}
-
 	env := in.env()
 	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
 		env = append(env, fmt.Sprintf("GEMINI_API_BASE_URL=%s", *in.Config.Run.Runtime.Config.Gemini.Endpoint))

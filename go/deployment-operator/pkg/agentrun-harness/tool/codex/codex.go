@@ -241,10 +241,6 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 func (in *Codex) FollowUpRun(ctx context.Context, followUpPrompt string) error {
 	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting codex", "prompt_len", len(followUpPrompt))
 
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
-	}
-
 	profile := "analysis"
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		profile = autonomousProfile

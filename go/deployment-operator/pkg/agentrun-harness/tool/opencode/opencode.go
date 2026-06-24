@@ -381,10 +381,6 @@ func (in *Opencode) FollowUpRun(ctx context.Context, followUpPrompt string) erro
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 	)
 
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
-	}
-
 	state := &streamState{
 		events: make(map[string]*Event),
 	}

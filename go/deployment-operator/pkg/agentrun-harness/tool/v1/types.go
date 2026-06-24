@@ -62,7 +62,8 @@ type Tool interface {
 
 	// FollowUpRun re-invokes the provider CLI with a user prompt after the
 	// initial run. It must not write to ErrorChan; failures are returned to
-	// the caller.
+	// the caller. Implementations must not emit followUpPrompt via OnMessage:
+	// user reprompts are already persisted as agent messages by the API.
 	FollowUpRun(ctx context.Context, followUpPrompt string) error
 
 	// UploadArtifacts collects provider-native session state and other
