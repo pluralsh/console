@@ -8,11 +8,7 @@ import {
   ModelRoutingRole,
 } from 'components/settings/ai/aiModelRoutingUtils'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  AiProvider,
-  ModelDefault,
-  WorkbenchJobModelAttributes,
-} from 'generated/graphql'
+import { AiProvider, WorkbenchJobModelAttributes } from 'generated/graphql'
 import groupBy from 'lodash/groupBy'
 import { type ReactElement, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -40,15 +36,30 @@ export function WorkbenchModelSelector({
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
   const { default: defaultModelDefault, available, loading } = useAiModels()
-  const defaultModel = useMemo(
-    () => modelDefaultToChatOption(defaultModelDefault),
-    [defaultModelDefault]
-  )
+  const defaultModel = useMemo(() => {
+    const model = modelForRole(
+      ModelRoutingRole.Chat,
+      defaultModelDefault
+    )?.trim()
+
+    return defaultModelDefault && model
+      ? {
+          provider: defaultModelDefault.provider,
+          model,
+        }
+      : null
+  }, [defaultModelDefault])
   const availableModels = useMemo(
     () =>
       available.flatMap((modelDefault) => {
-        const option = modelDefaultToChatOption(modelDefault)
-        if (!option) return []
+        const model = modelForRole(ModelRoutingRole.Chat, modelDefault)?.trim()
+        if (!model) return []
+
+        const option = {
+          provider: modelDefault.provider,
+          model,
+        }
+
         return isSameModelOption(option, defaultModel) ? [] : [option]
       }),
     [available, defaultModel]
@@ -314,19 +325,6 @@ function isSameModelOption(
     left.provider === right.provider &&
     left.model === right.model
   )
-}
-
-function modelDefaultToChatOption(
-  modelDefault: Nullable<ModelDefault>
-): Nullable<WorkbenchJobModelAttributes> {
-  const model = modelForRole(ModelRoutingRole.Chat, modelDefault)?.trim()
-
-  return modelDefault && model
-    ? {
-        provider: modelDefault.provider,
-        model,
-      }
-    : null
 }
 
 function modelOptionKey({ provider, model }: WorkbenchJobModelAttributes) {

@@ -207,19 +207,19 @@ export function modelDefaultForProvider(
     ai,
     modelDefaultsByProvider
   )
-  const toolModel = effectiveModelForRole(
-    ModelRoutingRole.Tool,
-    provider,
-    ai,
-    modelDefaultsByProvider
-  )
 
-  if (!model || !toolModel) return null
+  if (!model) return null
 
   return {
     provider,
     model,
-    toolModel,
+    toolModel:
+      effectiveModelForRole(
+        ModelRoutingRole.Tool,
+        provider,
+        ai,
+        modelDefaultsByProvider
+      ) ?? '',
     embeddingModel: effectiveModelForRole(
       ModelRoutingRole.Embedding,
       provider,

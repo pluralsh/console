@@ -45,10 +45,10 @@ export function useLoadingDeploymentSettings() {
  * }}
  *
  * Hook result with:
- * - `available`: provider-level effective model defaults for configured
- *   providers returned by `availableModels`, using runtime settings first and
+ * - `available`: one provider-level effective model default per configured
+ *   provider returned by `availableModels`, using runtime settings first and
  *   static `defaultModels` only as fallback.
- * - `default`: the provider-level effective model defaults for
+ * - `default`: the provider-level effective model default for
  *   `deploymentSettings.ai.provider`, selected from `available`.
  * - `defaultsByProvider`: the static per-provider fallback defaults from
  *   `defaultModels`.
@@ -71,28 +71,29 @@ export function useAiModels(): {
         })
         .map((modelDefault) => [modelDefault.provider, modelDefault])
     ) as ModelDefaultsByProvider
-    const availableProviders = new Set<AiProvider>()
+    const availableModelDefaultsByProvider = new Map<AiProvider, ModelDefault>()
 
     availableModels?.forEach((option) => {
-      if (option?.provider) availableProviders.add(option.provider)
+      const provider = option?.provider
+      if (!provider || availableModelDefaultsByProvider.has(provider)) return
+
+      const providerDefault = modelDefaultForProvider(
+        provider,
+        data?.ai,
+        defaultsByProvider
+      )
+      if (!providerDefault) return
+
+      availableModelDefaultsByProvider.set(provider, providerDefault)
     })
-
-    const availableModelDefaults = Array.from(availableProviders).flatMap(
-      (provider) => {
-        const modelDefault = modelDefaultForProvider(
-          provider,
-          data?.ai,
-          defaultsByProvider
-        )
-
-        return modelDefault ? [modelDefault] : []
-      }
+    const availableModelDefaults = Array.from(
+      availableModelDefaultsByProvider.values()
     )
     const defaultProvider = data?.ai?.provider
     const defaultModel =
-      availableModelDefaults.find(
-        ({ provider }) => provider === defaultProvider
-      ) ?? null
+      availableModelDefaults.find(({ provider }) => {
+        return provider === defaultProvider
+      }) ?? null
 
     return {
       loading: loading && (!availableModels || !defaultModels),
