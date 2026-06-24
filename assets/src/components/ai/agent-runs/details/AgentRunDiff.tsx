@@ -614,14 +614,8 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   [`& .${treeItemClasses.groupTransition}`]: {
     paddingLeft:
       'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
-    borderLeft: `1px solid ${theme.colors['border']}`,
     margin: `2px 0 2px 14px`,
   },
-
-  [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:
-    {
-      borderLeftColor: theme.colors.grey[600],
-    },
 }))
 
 const TreeLabelSC = styled.div({
