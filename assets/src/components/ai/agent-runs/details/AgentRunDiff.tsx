@@ -9,7 +9,7 @@ import { Code, FolderIcon, Tooltip } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
-import { TRUNCATE_LEFT } from 'components/utils/truncate'
+import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { parsePatch } from 'diff'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -18,6 +18,8 @@ import { getExtensionFromFileName } from 'utils/file'
 type DiffFile = {
   path: string
   patch: string
+  additions: number
+  deletions: number
 }
 
 type TreeNode = {
@@ -73,10 +75,29 @@ function splitPatchFiles(content: string): DiffFile[] {
     .filter(Boolean)
   const parsedFiles = parsePatch(content)
 
-  return parsedFiles.map((file, index) => ({
-    path: patchFilePath(file.oldFileName, file.newFileName, index),
-    patch: rawFiles[index] ?? '',
-  }))
+  return parsedFiles.map((file, index) => {
+    const patch = rawFiles[index] ?? ''
+
+    return {
+      path: patchFilePath(file.oldFileName, file.newFileName, index),
+      patch,
+      ...countChangedLines(patch),
+    }
+  })
+}
+
+function countChangedLines(
+  patch: string
+): Pick<DiffFile, 'additions' | 'deletions'> {
+  return patch.split('\n').reduce(
+    (acc, line) => {
+      if (line.startsWith('+') && !line.startsWith('+++')) acc.additions += 1
+      if (line.startsWith('-') && !line.startsWith('---')) acc.deletions += 1
+
+      return acc
+    },
+    { additions: 0, deletions: 0 }
+  )
 }
 
 function patchFilePath(
@@ -173,6 +194,17 @@ export function AgentRunDiff({
     () => (content ? splitPatchFiles(content) : []),
     [content]
   )
+  const totals = useMemo(
+    () =>
+      files.reduce(
+        (acc, file) => ({
+          additions: acc.additions + file.additions,
+          deletions: acc.deletions + file.deletions,
+        }),
+        { additions: 0, deletions: 0 }
+      ),
+    [files]
+  )
   const tree = useMemo(() => buildTree(files), [files])
   const [selectedPath, setSelectedPath] = useState<string>()
   const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
@@ -220,55 +252,101 @@ export function AgentRunDiff({
 
   if (isLoading && !content) {
     return (
-      <RectangleSkeleton
-        $height={200}
-        $width="100%"
-      />
+      <DiffStateSC>
+        <RectangleSkeleton
+          $height={200}
+          $width="100%"
+        />
+      </DiffStateSC>
     )
   }
 
   if (error) {
     return (
-      <GqlError
-        header="Unable to load diff."
-        error={error}
-      />
+      <DiffStateSC>
+        <GqlError
+          header="Unable to load diff."
+          error={error}
+        />
+      </DiffStateSC>
     )
   }
 
   if (!content?.trim()) {
-    return <CaptionP $color="text-light">No diff content available.</CaptionP>
+    return (
+      <DiffStateSC>
+        <CaptionP $color="text-light">No diff content available.</CaptionP>
+      </DiffStateSC>
+    )
   }
 
   return (
     <DiffLayoutSC>
       <DiffTreeSC>
-        <MuiThemeProvider theme={muiTheme}>
-          <StyledTreeView
-            itemChildrenIndentation={12}
-            selectedItems={selectedFile?.path ? [selectedFile.path] : []}
-            expandedItems={expandedItems}
-            onExpandedItemsChange={(_event, itemIds) =>
-              setExpandedItems(itemIds)
-            }
-            onItemSelectionToggle={handleItemSelection}
-          >
-            {renderTree(tree, parentOfSelectedId, selectedFile?.path)}
-          </StyledTreeView>
-        </MuiThemeProvider>
+        <DiffTreeHeaderSC>
+          <span>{files.length} files changed</span>
+          <DiffLineStatsSC>
+            <DiffDeletionsSC>-{totals.deletions}</DiffDeletionsSC>
+            <DiffAdditionsSC>+{totals.additions}</DiffAdditionsSC>
+          </DiffLineStatsSC>
+        </DiffTreeHeaderSC>
+        <DiffTreeContentSC>
+          <MuiThemeProvider theme={muiTheme}>
+            <StyledTreeView
+              itemChildrenIndentation={12}
+              selectedItems={selectedFile?.path ? [selectedFile.path] : []}
+              expandedItems={expandedItems}
+              onExpandedItemsChange={(_event, itemIds) =>
+                setExpandedItems(itemIds)
+              }
+              onItemSelectionToggle={handleItemSelection}
+            >
+              {renderTree(tree, parentOfSelectedId, selectedFile?.path)}
+            </StyledTreeView>
+          </MuiThemeProvider>
+        </DiffTreeContentSC>
       </DiffTreeSC>
       <DiffContentSC>
-        <Code
-          language="diff"
-          showHeader={false}
-          showLineNumbers
-          title={selectedFile?.path ?? 'patch.diff'}
-        >
-          {selectedFile?.patch ?? content}
-        </Code>
+        {selectedFile && (
+          <DiffPanelHeaderSC>
+            <DiffFileHeaderInfoSC>
+              <DiffFileIconSC>
+                <FileTreeItemIcon
+                  fileName={getFileNameFromPath(selectedFile.path)}
+                />
+              </DiffFileIconSC>
+              <DiffFileTextSC>
+                <DiffFileNameSC>
+                  {getFileNameFromPath(selectedFile.path)}
+                </DiffFileNameSC>
+                <DiffFilePathSC>{selectedFile.path}</DiffFilePathSC>
+              </DiffFileTextSC>
+            </DiffFileHeaderInfoSC>
+            <DiffLineStatsSC>
+              <DiffDeletionsSC>-{selectedFile.deletions}</DiffDeletionsSC>
+              <DiffAdditionsSC>+{selectedFile.additions}</DiffAdditionsSC>
+            </DiffLineStatsSC>
+          </DiffPanelHeaderSC>
+        )}
+        <DiffCodeSC>
+          <Code
+            language="diff"
+            showHeader={false}
+            showLineNumbers
+            title={selectedFile?.path ?? 'patch.diff'}
+          >
+            {selectedFile?.patch ?? content}
+          </Code>
+        </DiffCodeSC>
       </DiffContentSC>
     </DiffLayoutSC>
   )
+}
+
+function getFileNameFromPath(path: string) {
+  const parts = path.split('/')
+
+  return parts[parts.length - 1] ?? path
 }
 
 function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
@@ -373,16 +451,113 @@ const DiffLayoutSC = styled.div({
 const DiffTreeSC = styled.div(({ theme }) => ({
   width: 220,
   flexShrink: 0,
-  overflow: 'auto',
+  minHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
   borderRight: theme.borders.default,
-  paddingRight: theme.spacing.small,
 }))
 
-const DiffContentSC = styled.div(({ theme }) => ({
+const DIFF_PANEL_HEADER_HEIGHT = 56
+
+const DiffPanelHeaderSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-one'],
+  borderBottom: theme.borders['fill-one'],
+  boxSizing: 'border-box',
+  flexShrink: 0,
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  height: DIFF_PANEL_HEADER_HEIGHT,
+  minHeight: DIFF_PANEL_HEADER_HEIGHT,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  width: '100%',
+}))
+
+const DiffTreeHeaderSC = styled(DiffPanelHeaderSC)(({ theme }) => ({
+  ...theme.partials.text.overline,
+  color: theme.colors['text-xlight'],
+  lineHeight: 1,
+}))
+
+const DiffFileHeaderInfoSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
   flex: 1,
   minWidth: 0,
+}))
+
+const DiffFileIconSC = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  flexShrink: 0,
+})
+
+const DiffFileTextSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxxsmall,
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+}))
+
+const DiffFileNameSC = styled.div(({ theme }) => ({
+  fontFamily: '"Roboto Mono", monospace',
+  fontSize: 14,
+  lineHeight: '20px',
+  color: theme.colors['text-light'],
+  ...TRUNCATE,
+}))
+
+const DiffFilePathSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  ...TRUNCATE,
+}))
+
+const DiffLineStatsSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  display: 'inline-flex',
+  gap: theme.spacing.xsmall,
+  flexShrink: 0,
+  letterSpacing: 0,
+  textTransform: 'none',
+}))
+
+const DiffDeletionsSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-danger'],
+}))
+
+const DiffAdditionsSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-success'],
+}))
+
+const DiffTreeContentSC = styled.div(({ theme }) => ({
+  minHeight: 0,
+  flex: 1,
   overflow: 'auto',
-  paddingLeft: theme.spacing.medium,
+  padding: `${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.medium}px`,
+}))
+
+const DiffContentSC = styled.div({
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+})
+
+const DiffCodeSC = styled.div({
+  flex: 1,
+  minHeight: 0,
+  overflow: 'auto',
+})
+
+const DiffStateSC = styled.div(({ theme }) => ({
+  padding: theme.spacing.large,
 }))
 
 const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({

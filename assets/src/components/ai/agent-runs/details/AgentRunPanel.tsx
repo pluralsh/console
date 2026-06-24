@@ -216,14 +216,14 @@ export function AgentRunPanelContent() {
         />
       </PanelHeaderSC>
       {showDiffTab && selectedTab === 'Diff' && run?.upload?.patch && (
-        <ContentWrapperSC>
-          <ContentInnerSC>
+        <ContentWrapperFlushSC>
+          <ContentInnerFlushSC>
             <AgentRunDiff
               runId={run.id}
               patchUrl={run.upload.patch}
             />
-          </ContentInnerSC>
-        </ContentWrapperSC>
+          </ContentInnerFlushSC>
+        </ContentWrapperFlushSC>
       )}
       {showAnalysisTab && selectedTab === 'Analysis' && run?.analysis && (
         <ContentWrapperSC>
@@ -318,10 +318,16 @@ export function useAgentRunPanel(autoOpen?: Nullable<boolean>) {
 }
 
 const ContentWrapperSC = styled.div(() => ({
+  flex: 1,
   height: '100%',
   width: '100%',
+  minHeight: 0,
   overflow: 'auto',
 }))
+
+const ContentWrapperFlushSC = styled(ContentWrapperSC)({
+  overflow: 'hidden',
+})
 
 const ContentInnerSC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
@@ -330,6 +336,13 @@ const ContentInnerSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   minHeight: '100%',
 }))
+
+const ContentInnerFlushSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  minHeight: 0,
+})
 
 const TabListWrapperSC = styled.div({
   flex: 1,
