@@ -159,8 +159,15 @@ func (in *agentRunController) init() (Controller, error) {
 	return in, nil
 }
 
-// babysitLoop runs the callback periodically while babysit is enabled.
-// It stops when ctx is done, the done channel is closed, or all PRs are terminal.
+// babysitLoop waits for the initial autonomous run, then optionally enters
+// post-run phases:
+//
+//  1. Analysis persistence (if configured)
+//  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
+//  3. Babysit loop (if enabled): each tick polls user prompts first, then PR state
+//
+// When both approval and babysit are enabled, approval follow-up creates the PR
+// before step 3; babysit then monitors PRs and continues accepting user prompts.
 func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool,
 ) {
 	d := time.Duration(in.agentRun.BabysitInterval) * time.Second
@@ -174,7 +181,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.runDone:
 		klog.Info("initial agent run completed, starting babysit loop")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
-		in.waitForApprovalFollowUps(ctx)
+		in.runPostRunPollLoop(ctx)
 		if !in.agentRun.Babysit {
 			return
 		}
@@ -203,6 +210,11 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 	agentRun, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusBabysitting})
 	if err != nil {
 		klog.ErrorS(err, "failed to update agent run status during babysit")
+		return false
+	}
+
+	// User prompts take priority over PR babysit ticks.
+	if in.tryDispatchQueuedUserPrompt(ctx, agentRun, false) {
 		return false
 	}
 
@@ -249,20 +261,6 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 			klog.ErrorS(err, "failed to update agent run status during babysit")
 			return false
 		}
-	}
-
-	if prompt := nextPrompt(agentRun.Prompts, in.lastPromptSeq); prompt != nil {
-		in.lastPromptSeq = prompt.Seq
-		if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
-			klog.ErrorS(err, "failed to update agent run status before babysit follow-up")
-			return false
-		}
-		if err = in.tool.FollowUpRun(ctx, prompt.Prompt); err != nil {
-			in.errChan <- err
-			return true
-		}
-		in.uploadAgentRunArtifacts(context.Background())
-		return false
 	}
 
 	stop := callback(ctx, bCtx)

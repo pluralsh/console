@@ -15,7 +15,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
-const approvalFollowUpPollInterval = 5 * time.Second
+const postRunPollInterval = 5 * time.Second
 
 func buildApprovalGrantedPrompt(headBranch string) string {
 	msg := "The user has approved these changes. You may now create a pull request using the agentPullRequest MCP tool."
@@ -26,6 +26,16 @@ func buildApprovalGrantedPrompt(headBranch string) string {
 	}
 	msg += " Do not make additional code changes unless they are strictly necessary to create the PR."
 	return msg
+}
+
+// enterPendingApproval uploads the current git diff (and session artifacts) so
+// reviewers can inspect changes, then marks the run as pending approval.
+func (in *agentRunController) enterPendingApproval(ctx context.Context) error {
+	in.uploadAgentRunArtifacts(ctx)
+	if err := agentrun.MarkAgentRunPendingApproval(ctx, in.consoleClient, in.agentRunID); err != nil {
+		return fmt.Errorf("could not update agent run status to pending approval: %w", err)
+	}
+	return nil
 }
 
 func (in *agentRunController) requiresApprovalFollowUp() bool {
@@ -59,19 +69,25 @@ func nextPrompt(prompts []*gqlclient.AgentPromptFragment, after int64) *gqlclien
 	return next
 }
 
-func (in *agentRunController) waitForApprovalFollowUps(ctx context.Context) {
+// runPostRunPollLoop waits after the initial autonomous run for either:
+//   - a queued user prompt → dispatch via FollowUpRun in the same session
+//   - approval → dispatch the PR-creation prompt, then exit into babysit (if enabled)
+//
+// This only runs when approval is required. Babysit mode handles further user
+// prompts alongside PR polling in runBabysit.
+func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 	if !in.requiresApprovalFollowUp() {
 		return
 	}
 
-	if err := agentrun.MarkAgentRunPendingApproval(ctx, in.consoleClient, in.agentRunID); err != nil {
-		in.errChan <- fmt.Errorf("could not update agent run status to pending approval: %w", err)
+	if err := in.enterPendingApproval(ctx); err != nil {
+		in.errChan <- err
 		return
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("waiting for agent run approval or follow-up prompts", "id", in.agentRunID)
 
-	timer := time.NewTimer(approvalFollowUpPollInterval)
+	timer := time.NewTimer(postRunPollInterval)
 	defer timer.Stop()
 
 	for {
@@ -85,62 +101,32 @@ func (in *agentRunController) waitForApprovalFollowUps(ctx context.Context) {
 
 		run, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
 		if err != nil {
-			klog.ErrorS(err, "could not poll agent run approval state", "id", in.agentRunID)
-			timer.Reset(approvalFollowUpPollInterval)
+			klog.ErrorS(err, "could not poll agent run state", "id", in.agentRunID)
+			timer.Reset(postRunPollInterval)
 			continue
 		}
 		if run == nil {
-			timer.Reset(approvalFollowUpPollInterval)
+			timer.Reset(postRunPollInterval)
 			continue
 		}
 		if run.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
 			in.errChan <- internalerrors.ErrRemoteCancel
 			return
 		}
-		if prompt := nextPrompt(run.Prompts, in.lastPromptSeq); prompt != nil {
-			in.lastPromptSeq = prompt.Seq
-			if !in.runApprovalFollowUp(ctx, prompt.Prompt) {
-				return
-			}
-			timer.Reset(approvalFollowUpPollInterval)
+
+		// User prompts take priority — agent keeps working while approval is pending.
+		if in.tryDispatchQueuedUserPrompt(ctx, run, true) {
+			timer.Reset(postRunPollInterval)
 			continue
 		}
+
 		if run.ApprovedAt != nil {
-			in.agentRun.ApprovedAt = run.ApprovedAt
-			in.agentRun.HeadBranch = run.HeadBranch
-			in.approvalPromptSent = true
-			headBranch := ""
-			if run.HeadBranch != nil {
-				headBranch = *run.HeadBranch
+			if !in.dispatchApprovalGrantedPrompt(ctx, run) {
+				return
 			}
-			klog.V(log.LogLevelInfo).InfoS("agent run approved, sending follow-up prompt", "id", in.agentRunID, "headBranch", headBranch)
-			in.runApprovalFollowUp(ctx, buildApprovalGrantedPrompt(headBranch))
 			return
 		}
 
-		timer.Reset(approvalFollowUpPollInterval)
+		timer.Reset(postRunPollInterval)
 	}
-}
-
-func (in *agentRunController) runApprovalFollowUp(ctx context.Context, prompt string) bool {
-	prompt = strings.TrimSpace(prompt)
-	if prompt == "" {
-		return true
-	}
-	if _, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
-		in.errChan <- fmt.Errorf("could not update agent run status before follow-up: %w", err)
-		return false
-	}
-	if err := in.tool.FollowUpRun(ctx, prompt); err != nil {
-		in.errChan <- err
-		return false
-	}
-	in.uploadAgentRunArtifacts(context.Background())
-	if in.requiresApprovalFollowUp() {
-		if err := agentrun.MarkAgentRunPendingApproval(ctx, in.consoleClient, in.agentRunID); err != nil {
-			in.errChan <- fmt.Errorf("could not restore agent run pending approval status: %w", err)
-			return false
-		}
-	}
-	return true
 }
