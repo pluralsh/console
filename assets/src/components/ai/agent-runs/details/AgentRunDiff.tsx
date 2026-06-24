@@ -5,7 +5,7 @@ import {
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { useQuery } from '@tanstack/react-query'
-import { Code, FolderIcon, Tooltip } from '@pluralsh/design-system'
+import { FolderIcon, PatchHighlight, Tooltip } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -329,15 +329,12 @@ export function AgentRunDiff({
           </DiffFileHeaderSC>
         )}
         <DiffCodeSC>
-          <Code
-            variant="patch"
+          <PatchHighlight
             patchLanguage={getLanguageFromFileName(selectedFile?.path ?? '')}
-            showHeader={false}
             showLineNumbers
-            height="100%"
           >
             {selectedFile?.patch ?? content}
-          </Code>
+          </PatchHighlight>
         </DiffCodeSC>
       </DiffContentSC>
     </DiffLayoutSC>
@@ -562,11 +559,13 @@ const DiffContentSC = styled.div({
   overflow: 'hidden',
 })
 
-const DiffCodeSC = styled.div({
+const DiffCodeSC = styled.div(({ theme }) => ({
+  backgroundColor: theme.colors['fill-accent'],
   flex: 1,
   minHeight: 0,
   overflow: 'auto',
-})
+  padding: theme.spacing.medium,
+}))
 
 const DiffStateSC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
