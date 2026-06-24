@@ -33,6 +33,21 @@ export function getExtensionFromFileName(fileName: string): string | undefined {
   return fileName.split('.').pop()?.toLowerCase()
 }
 
+export function getFileTypeIconKey(fileName: string): string | undefined {
+  const lower = fileName.toLowerCase()
+
+  if (
+    lower === 'dockerfile' ||
+    lower.startsWith('docker-compose.') ||
+    lower === 'compose.yml' ||
+    lower === 'compose.yaml'
+  ) {
+    return 'dockerfile'
+  }
+
+  return getExtensionFromFileName(fileName)
+}
+
 export function getLanguageFromFileName(fileName: string): string | undefined {
   const extension = getExtensionFromFileName(fileName)
 
