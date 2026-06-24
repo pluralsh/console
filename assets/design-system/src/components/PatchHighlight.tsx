@@ -128,6 +128,8 @@ const PatchWrap = styled.div(({ theme }) => ({
   flexDirection: 'column',
   width: '100%',
   minWidth: 0,
+  paddingTop: theme.spacing.medium,
+  paddingBottom: theme.spacing.medium,
   color: theme.colors['text-light'],
   fontFamily: '"Roboto Mono", monospace',
   fontSize: 14,
@@ -141,6 +143,7 @@ const PatchLineSC = styled.div<{ $type: PatchLineType }>(
     alignItems: 'flex-start',
     gap: theme.spacing.medium,
     width: '100%',
+    padding: `0 ${theme.spacing.medium}px`,
     backgroundColor: patchLineBackground($type, theme),
   })
 )
