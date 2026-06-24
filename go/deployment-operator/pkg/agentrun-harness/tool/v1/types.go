@@ -18,9 +18,10 @@ const (
 
 // EnrichedPR pairs the Console PR fragment with its live SCM state.
 type EnrichedPR struct {
-	URL     string
-	Title   string
-	Details *scm.PRDetails
+	URL         string
+	Title       string
+	Details     *scm.PRDetails
+	NewComments []scm.PRComment
 }
 
 // BabysitContext is passed to BabysitRun when PR state has changed since the last check.

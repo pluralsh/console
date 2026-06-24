@@ -130,8 +130,8 @@ function ListBoxItem({
           </div>
         )}
       </div>
-      {rightContent && <Flex>{rightContent}</Flex>}
       {selectionMode === 'single' && selected && <CheckRoundedIcon size={16} />}
+      {rightContent && <Flex>{rightContent}</Flex>}
     </ListBoxItemInner>
   )
 }

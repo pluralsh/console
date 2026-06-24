@@ -47,8 +47,7 @@ defmodule Console.Deployments.AvailableModels do
 
     [
       Map.get(config, :model) || defaults[:model],
-      Map.get(config, :tool_model) || defaults[:tool_model],
-      Map.get(config, :embedding_model) || defaults[:embedding_model]
+      Map.get(config, :tool_model) || defaults[:tool_model]
       | proxy_models(config)
     ]
   end
@@ -58,8 +57,7 @@ defmodule Console.Deployments.AvailableModels do
 
     [
       Map.get(config, :model_id) || defaults[:model],
-      Map.get(config, :tool_model_id) || defaults[:tool_model],
-      Map.get(config, :embedding_model) || defaults[:embedding_model]
+      Map.get(config, :tool_model_id) || defaults[:tool_model]
       | proxy_models(config)
     ]
   end
@@ -69,8 +67,7 @@ defmodule Console.Deployments.AvailableModels do
 
     [
       Map.get(config, :model) || defaults[:model],
-      Map.get(config, :tool_model) || defaults[:tool_model],
-      Map.get(config, :embedding_model) || defaults[:embedding_model]
+      Map.get(config, :tool_model) || defaults[:tool_model]
       | proxy_models(config)
     ]
   end
@@ -80,8 +77,7 @@ defmodule Console.Deployments.AvailableModels do
 
     [
       Map.get(config, :model) || defaults[:model],
-      Map.get(config, :tool_model) || defaults[:tool_model],
-      Map.get(config, :embedding_model) || defaults[:embedding_model]
+      Map.get(config, :tool_model) || defaults[:tool_model]
       | proxy_models(config)
     ]
   end

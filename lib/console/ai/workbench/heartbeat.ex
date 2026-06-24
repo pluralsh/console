@@ -32,7 +32,8 @@ defmodule Console.AI.Workbench.Heartbeat do
 
     {:noreply, %State{state | usage: usage}}
   end
-  def handle_cast(:cancel, %State{job: job, booted: booted} = state), do: {:stop, :cancel, %{state | job: job, booted: booted}}
+  def handle_cast(:cancel, %State{job: job, booted: booted} = state),
+    do: {:stop, :cancel, %{state | job: job, booted: booted}}
   def handle_cast(_, state), do: {:noreply, state}
 
   def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
