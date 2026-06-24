@@ -4,11 +4,13 @@ import {
   DeploymentSettingsFragment,
   ModelDefault,
   useDeploymentSettingsQuery,
-  WorkbenchJobModelAttributes,
 } from 'generated/graphql'
 import { createContext, ReactNode, use, useMemo } from 'react'
-import { isNonNullable } from 'utils/isNonNullable'
 
+import {
+  modelDefaultForProvider,
+  ModelDefaultsByProvider,
+} from '../settings/ai/aiModelRoutingUtils'
 import { isValidURL } from '../../utils/url'
 
 const POLL_INTERVAL = 60 * 1000
@@ -32,59 +34,74 @@ export function useLoadingDeploymentSettings() {
   return loading && !data
 }
 
+/**
+ * Returns AI model metadata for the current deployment settings.
+ *
+ * @returns {{
+ *   loading: boolean
+ *   default: Nullable<ModelDefault>
+ *   available: ModelDefault[]
+ *   defaultsByProvider: Partial<Record<AiProvider, ModelDefault>>
+ * }}
+ *
+ * Hook result with:
+ * - `available`: one provider-level effective model default per configured
+ *   provider returned by `availableModels`, using runtime settings first and
+ *   static `defaultModels` only as fallback.
+ * - `default`: the provider-level effective model default for
+ *   `deploymentSettings.ai.provider`, selected from `available`.
+ * - `defaultsByProvider`: the static per-provider fallback defaults from
+ *   `defaultModels`.
+ */
 export function useAiModels(): {
   loading: boolean
-  default: Nullable<WorkbenchJobModelAttributes>
-  available: WorkbenchJobModelAttributes[]
+  default: Nullable<ModelDefault>
+  available: ModelDefault[]
   defaultsByProvider: Partial<Record<AiProvider, ModelDefault>>
 } {
-  const { loading, availableModels, defaultModels } = use(
+  const { loading, data, availableModels, defaultModels } = use(
     DeploymentSettingsContext
   )
 
   return useMemo(() => {
-    const defaultModelEntry = defaultModels?.find(isNonNullable) ?? null
-    const defaultModel =
-      defaultModelEntry?.provider && defaultModelEntry?.model?.trim()
-        ? ({
-            provider: defaultModelEntry.provider,
-            model: defaultModelEntry.model,
-          } satisfies WorkbenchJobModelAttributes)
-        : null
     const defaultsByProvider = Object.fromEntries(
       (defaultModels ?? [])
         .filter((modelDefault): modelDefault is ModelDefault => {
           return !!modelDefault?.provider
         })
         .map((modelDefault) => [modelDefault.provider, modelDefault])
-    ) as Partial<Record<AiProvider, ModelDefault>>
-
-    const dedupedAvailableModels = new Map<
-      string,
-      WorkbenchJobModelAttributes
-    >()
+    ) as ModelDefaultsByProvider
+    const availableModelDefaultsByProvider = new Map<AiProvider, ModelDefault>()
 
     availableModels?.forEach((option) => {
-      if (!option?.provider || !option.model?.trim()) return
+      const provider = option?.provider
+      if (!provider || availableModelDefaultsByProvider.has(provider)) return
 
-      const normalizedOption = {
-        provider: option.provider,
-        model: option.model,
-      } satisfies WorkbenchJobModelAttributes
-
-      dedupedAvailableModels.set(
-        `${normalizedOption.provider}:${normalizedOption.model}`,
-        normalizedOption
+      const providerDefault = modelDefaultForProvider(
+        provider,
+        data?.ai,
+        defaultsByProvider
       )
+      if (!providerDefault) return
+
+      availableModelDefaultsByProvider.set(provider, providerDefault)
     })
+    const availableModelDefaults = Array.from(
+      availableModelDefaultsByProvider.values()
+    )
+    const defaultProvider = data?.ai?.provider
+    const defaultModel =
+      availableModelDefaults.find(({ provider }) => {
+        return provider === defaultProvider
+      }) ?? null
 
     return {
       loading: loading && (!availableModels || !defaultModels),
       default: defaultModel,
-      available: Array.from(dedupedAvailableModels.values()),
+      available: availableModelDefaults,
       defaultsByProvider,
     }
-  }, [availableModels, defaultModels, loading])
+  }, [data, availableModels, defaultModels, loading])
 }
 
 export function useLogsEnabled() {

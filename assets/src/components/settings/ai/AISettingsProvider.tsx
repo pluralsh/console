@@ -20,11 +20,11 @@ import {
   getUnconfiguredProviders,
 } from './AISettingsConfiguredProviders.tsx'
 import { AISettingsProviderModal } from './AISettingsProviderEditModal.tsx'
-import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 import {
   initialSettingsAttributes,
   validateAttributes,
 } from './AISettingsProviders.tsx'
+import { providerSettingsKey } from './aiModelRoutingUtils'
 
 const updateSettings = produce(
   (

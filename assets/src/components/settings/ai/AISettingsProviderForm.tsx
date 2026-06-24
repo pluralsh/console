@@ -23,19 +23,6 @@ import {
   VertexSettings,
 } from './AISettingsProviders.tsx'
 
-export const providerSettingsKey: Record<
-  AiProvider,
-  keyof Omit<AiSettingsAttributes, 'enabled' | 'provider'>
-> = {
-  [AiProvider.Openai]: 'openai',
-  [AiProvider.OpenaiCompatible]: 'openaiCompatible',
-  [AiProvider.Anthropic]: 'anthropic',
-  [AiProvider.Bedrock]: 'bedrock',
-  [AiProvider.Ollama]: 'ollama',
-  [AiProvider.Azure]: 'azure',
-  [AiProvider.Vertex]: 'vertex',
-}
-
 export function AISettingsProviderForm({
   enabled,
   provider,

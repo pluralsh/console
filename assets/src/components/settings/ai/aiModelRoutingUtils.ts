@@ -5,9 +5,47 @@ import {
   ModelDefault,
 } from 'generated/graphql'
 import pick from 'lodash/pick'
-import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 
 export const DEFAULT_MODEL_ROUTING_OPTION = 'default'
+
+type ModelDefaultField = keyof Pick<
+  ModelDefault,
+  'model' | 'toolModel' | 'embeddingModel'
+>
+
+const ModelDefaultField = {
+  Model: 'model',
+  ToolModel: 'toolModel',
+  EmbeddingModel: 'embeddingModel',
+} as const satisfies Record<string, ModelDefaultField>
+
+export const ModelRoutingRole = {
+  Chat: 'chat',
+  Tool: 'tool',
+  Embedding: 'embedding',
+} as const
+
+export type ModelRoutingRole =
+  (typeof ModelRoutingRole)[keyof typeof ModelRoutingRole]
+
+const modelDefaultFieldByRole = {
+  [ModelRoutingRole.Chat]: ModelDefaultField.Model,
+  [ModelRoutingRole.Tool]: ModelDefaultField.ToolModel,
+  [ModelRoutingRole.Embedding]: ModelDefaultField.EmbeddingModel,
+} as const satisfies Record<ModelRoutingRole, ModelDefaultField>
+
+export const providerSettingsKey: Record<
+  AiProvider,
+  keyof Omit<AiSettingsAttributes, 'enabled' | 'provider'>
+> = {
+  [AiProvider.Openai]: 'openai',
+  [AiProvider.OpenaiCompatible]: 'openaiCompatible',
+  [AiProvider.Anthropic]: 'anthropic',
+  [AiProvider.Bedrock]: 'bedrock',
+  [AiProvider.Ollama]: 'ollama',
+  [AiProvider.Azure]: 'azure',
+  [AiProvider.Vertex]: 'vertex',
+}
 
 const modelRoutingStateKeys = [
   'provider',
@@ -15,32 +53,27 @@ const modelRoutingStateKeys = [
   'embeddingProvider',
 ] as const
 
-export type ModelRoutingRole = 'chat' | 'embedding' | 'tool'
-
 export const modelRoutingRoles = [
-  'chat',
-  'embedding',
-  'tool',
+  ModelRoutingRole.Chat,
+  ModelRoutingRole.Embedding,
+  ModelRoutingRole.Tool,
 ] as const satisfies readonly ModelRoutingRole[]
 
 export const modelRoutingRoleMeta = {
-  chat: {
+  [ModelRoutingRole.Chat]: {
     title: 'Chat model',
     description: 'Used for low-compute chat and completion use cases.',
-    providerField: 'provider',
     modelHint: 'Configured in the provider connection settings.',
   },
-  embedding: {
+  [ModelRoutingRole.Embedding]: {
     title: 'Embedding model',
     description:
       'Indexes Kubernetes and IaC state information for semantic search.',
-    providerField: 'embeddingProvider',
     modelHint: 'Configured in the provider connection settings.',
   },
-  tool: {
+  [ModelRoutingRole.Tool]: {
     title: 'Tool model',
     description: 'Used for complex agentic inference.',
-    providerField: 'toolProvider',
     modelHint: 'Configured in the provider connection settings.',
   },
 } as const satisfies Record<
@@ -48,10 +81,6 @@ export const modelRoutingRoleMeta = {
   {
     title: string
     description: string
-    providerField: keyof Pick<
-      AiSettingsAttributes,
-      'provider' | 'toolProvider' | 'embeddingProvider'
-    >
     modelHint: string
   }
 >
@@ -59,36 +88,24 @@ export const modelRoutingRoleMeta = {
 type ProviderConfigKey = (typeof providerSettingsKey)[AiProvider]
 export type ModelDefaultsByProvider = Partial<Record<AiProvider, ModelDefault>>
 
-type ModelFieldKey =
-  | 'model'
-  | 'toolModel'
-  | 'embeddingModel'
-  | 'modelId'
-  | 'toolModelId'
+type ProviderModelField = ModelDefaultField | 'modelId' | 'toolModelId'
 
-export function modelFieldKeyFor(
+function modelFieldKeyFor(
   provider: AiProvider,
   role: ModelRoutingRole
-): ModelFieldKey {
+): ProviderModelField {
   if (provider === AiProvider.Bedrock) {
     switch (role) {
-      case 'chat':
+      case ModelRoutingRole.Chat:
         return 'modelId'
-      case 'tool':
+      case ModelRoutingRole.Tool:
         return 'toolModelId'
       default:
         return 'embeddingModel'
     }
   }
 
-  switch (role) {
-    case 'chat':
-      return 'model'
-    case 'tool':
-      return 'toolModel'
-    default:
-      return 'embeddingModel'
-  }
+  return modelDefaultFieldByRole[role]
 }
 
 export type ModelRoutingState = Pick<
@@ -102,14 +119,14 @@ export function initialModelRoutingState(
   return { ...pick(ai ?? {}, modelRoutingStateKeys) }
 }
 
-export function selectedProviderForRole(
+function selectedProviderForRole(
   role: ModelRoutingRole,
   routing: ModelRoutingState
 ): Nullable<AiProvider> {
   switch (role) {
-    case 'chat':
+    case ModelRoutingRole.Chat:
       return routing.provider
-    case 'tool':
+    case ModelRoutingRole.Tool:
       return routing.toolProvider
     default:
       return routing.embeddingProvider
@@ -135,27 +152,80 @@ export function getModelValue(
   const provider = effectiveProviderForRole(role, routing)
   if (!provider) return DEFAULT_MODEL_ROUTING_OPTION
 
+  return (
+    effectiveModelForRole(
+      role,
+      provider,
+      ai,
+      modelDefaultsByProvider
+    )?.trim() || DEFAULT_MODEL_ROUTING_OPTION
+  )
+}
+
+function effectiveModelForRole(
+  role: ModelRoutingRole,
+  provider: AiProvider,
+  ai: Nullable<AiSettings>,
+  modelDefaultsByProvider?: ModelDefaultsByProvider
+): Nullable<string> {
   const key = providerSettingsKey[provider]
   const field = modelFieldKeyFor(provider, role)
   const serverConfig = ai?.[key as ProviderConfigKey]
   const value = serverConfig?.[field as keyof NonNullable<typeof serverConfig>]
   if (typeof value === 'string' && value.trim()) return value
 
-  const defaults = modelDefaultsByProvider?.[provider]
-  const defaultValue = defaults?.[defaultModelFieldForRole(role)]
-  return defaultValue?.trim() || DEFAULT_MODEL_ROUTING_OPTION
+  const defaults = defaultsForProvider(provider, modelDefaultsByProvider)
+  return modelForRole(role, defaults)?.trim() || null
 }
 
-function defaultModelFieldForRole(
-  role: ModelRoutingRole
-): keyof Pick<ModelDefault, 'model' | 'toolModel' | 'embeddingModel'> {
-  switch (role) {
-    case 'tool':
-      return 'toolModel'
-    case 'embedding':
-      return 'embeddingModel'
-    default:
-      return 'model'
+function defaultsForProvider(
+  provider: AiProvider,
+  modelDefaultsByProvider?: ModelDefaultsByProvider
+): Nullable<ModelDefault> {
+  if (provider === AiProvider.OpenaiCompatible) {
+    return modelDefaultsByProvider?.[AiProvider.Openai] ?? null
+  }
+
+  return modelDefaultsByProvider?.[provider] ?? null
+}
+
+export function modelForRole(
+  role: ModelRoutingRole,
+  modelDefault: Nullable<ModelDefault>
+): Nullable<string> {
+  return modelDefault?.[modelDefaultFieldByRole[role]] ?? null
+}
+
+export function modelDefaultForProvider(
+  provider: AiProvider,
+  ai: Nullable<AiSettings>,
+  modelDefaultsByProvider?: ModelDefaultsByProvider
+): Nullable<ModelDefault> {
+  const model = effectiveModelForRole(
+    ModelRoutingRole.Chat,
+    provider,
+    ai,
+    modelDefaultsByProvider
+  )
+
+  if (!model) return null
+
+  return {
+    provider,
+    model,
+    toolModel:
+      effectiveModelForRole(
+        ModelRoutingRole.Tool,
+        provider,
+        ai,
+        modelDefaultsByProvider
+      ) ?? '',
+    embeddingModel: effectiveModelForRole(
+      ModelRoutingRole.Embedding,
+      provider,
+      ai,
+      modelDefaultsByProvider
+    ),
   }
 }
 
@@ -165,9 +235,9 @@ export function setRoutingProvider(
   routing: ModelRoutingState
 ): ModelRoutingState {
   switch (role) {
-    case 'chat':
+    case ModelRoutingRole.Chat:
       return provider ? { ...routing, provider } : routing
-    case 'tool':
+    case ModelRoutingRole.Tool:
       return { ...routing, toolProvider: provider }
     default:
       return { ...routing, embeddingProvider: provider }
