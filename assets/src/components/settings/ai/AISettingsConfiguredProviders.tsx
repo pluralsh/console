@@ -1,6 +1,6 @@
 import {
-  AwsLogoIcon,
   AzureLogoIcon,
+  BedrockLogoIcon,
   ClaudeLogoIcon,
   Flex,
   IconFrame,
@@ -33,7 +33,7 @@ export const aiProviderToIcon = {
   [AiProvider.OpenaiCompatible]: OpenCodeLogoIcon,
   [AiProvider.Anthropic]: ClaudeLogoIcon,
   [AiProvider.Azure]: AzureLogoIcon,
-  [AiProvider.Bedrock]: AwsLogoIcon,
+  [AiProvider.Bedrock]: BedrockLogoIcon,
   [AiProvider.Ollama]: OllamaLogoIcon,
   [AiProvider.Vertex]: VertexLogoIcon,
 } as const satisfies Record<AiProvider, ComponentType<IconProps>>

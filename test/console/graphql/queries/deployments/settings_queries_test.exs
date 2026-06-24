@@ -78,6 +78,7 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
             access_token: "key",
             model: "gpt-custom",
             tool_model: "gpt-tool",
+            embedding_model: "embedding-custom",
             proxy_models: ["gpt-proxy"]
           }
         }
@@ -97,7 +98,6 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
       assert found == [
                %{"provider" => "OPENAI", "model" => "gpt-custom"},
                %{"provider" => "OPENAI", "model" => "gpt-tool"},
-               %{"provider" => "OPENAI", "model" => "text-embedding-3-large"},
                %{"provider" => "OPENAI", "model" => "gpt-proxy"}
              ]
     end
@@ -129,8 +129,7 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
                  "provider" => "BEDROCK",
                  "model" => "global.anthropic.claude-haiku-4-5-20251001-v1:0"
                },
-               %{"provider" => "BEDROCK", "model" => "global.anthropic.claude-sonnet-4-6"},
-               %{"provider" => "BEDROCK", "model" => "cohere.embed-english-v3"}
+               %{"provider" => "BEDROCK", "model" => "global.anthropic.claude-sonnet-4-6"}
              ]
     end
 

@@ -26,6 +26,7 @@ defmodule Console.Deployments.SettingsTest do
             access_token: "key",
             model: "gpt-custom",
             tool_model: "gpt-tool",
+            embedding_model: "embedding-custom",
             proxy_models: ["gpt-proxy", "gpt-tool", ""]
           },
           bedrock: %{
@@ -39,11 +40,9 @@ defmodule Console.Deployments.SettingsTest do
       assert Enum.map(Settings.available_models(), &Map.take(&1, [:provider, :model])) == [
                %{provider: :openai, model: "gpt-custom"},
                %{provider: :openai, model: "gpt-tool"},
-               %{provider: :openai, model: "text-embedding-3-large"},
                %{provider: :openai, model: "gpt-proxy"},
                %{provider: :bedrock, model: "anthropic.custom"},
                %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
-               %{provider: :bedrock, model: "cohere.embed-english-v3"},
                %{provider: :bedrock, model: "anthropic.proxy"}
              ]
     end
@@ -77,18 +76,14 @@ defmodule Console.Deployments.SettingsTest do
       assert model_fields() == [
                %{provider: :openai, model: "gpt-5.4-mini"},
                %{provider: :openai, model: "gpt-5.4"},
-               %{provider: :openai, model: "text-embedding-3-large"},
                %{provider: :anthropic, model: "claude-4-5-haiku-latest"},
                %{provider: :anthropic, model: "claude-4-6-sonnet-latest"},
                %{provider: :vertex, model: "claude-haiku-4-5@20251001"},
                %{provider: :vertex, model: "claude-sonnet-4-6@20260114"},
-               %{provider: :vertex, model: "gemini-embedding-001"},
                %{provider: :bedrock, model: "global.anthropic.claude-haiku-4-5-20251001-v1:0"},
                %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
-               %{provider: :bedrock, model: "cohere.embed-english-v3"},
                %{provider: :azure, model: "gpt-5.4-mini"},
-               %{provider: :azure, model: "gpt-5.4"},
-               %{provider: :azure, model: "text-embedding-3-large"}
+               %{provider: :azure, model: "gpt-5.4"}
              ]
     end
 
@@ -105,8 +100,7 @@ defmodule Console.Deployments.SettingsTest do
 
       assert model_fields() == [
                %{provider: :openai, model: "gpt-5.4-mini"},
-               %{provider: :openai, model: "gpt-5.4"},
-               %{provider: :openai, model: "text-embedding-3-large"}
+               %{provider: :openai, model: "gpt-5.4"}
              ]
     end
 
@@ -131,11 +125,9 @@ defmodule Console.Deployments.SettingsTest do
       assert model_fields() == [
                %{provider: :openai_compatible, model: "custom-default"},
                %{provider: :openai_compatible, model: "gpt-5.4"},
-               %{provider: :openai_compatible, model: "text-embedding-3-large"},
                %{provider: :openai_compatible, model: "custom-proxy"},
                %{provider: :azure, model: "gpt-5.4-mini"},
                %{provider: :azure, model: "azure-tool"},
-               %{provider: :azure, model: "text-embedding-3-large"},
                %{provider: :azure, model: "azure-proxy"}
              ]
     end
