@@ -13,7 +13,7 @@ import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { getExtensionFromFileName, getLanguageFromFileName } from 'utils/file'
+import { getFileTypeIconKey, getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
   useSetServiceComponentsFiltersHidden,
@@ -102,7 +102,7 @@ const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
   helmignore: `${FILE_TYPE_ICON_PATH}/file_type_helm.svg`,
   json: `${FILE_TYPE_ICON_PATH}/file_type_json.svg`,
   yaml: `${FILE_TYPE_ICON_PATH}/file_type_light_yaml.svg`,
-  yml: `${FILE_TYPE_ICON_PATH}/file_type_yaml.svg`,
+  yml: `${FILE_TYPE_ICON_PATH}/file_type_light_yaml.svg`,
   md: `${FILE_TYPE_ICON_PATH}/file_type_markdown.svg`,
   markdown: `${FILE_TYPE_ICON_PATH}/file_type_markdown.svg`,
   license: `${FILE_TYPE_ICON_PATH}/file_type_license.svg`,
@@ -125,23 +125,21 @@ function decodeBase64(content: string): string {
 }
 
 function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
-  const extension = getExtensionFromFileName(fileName)
-  const iconPath = extension
-    ? FILE_TYPE_ICONS[extension.toLowerCase()]
-    : undefined
+  const iconKey = getFileTypeIconKey(fileName)
+  const iconPath = iconKey ? FILE_TYPE_ICONS[iconKey.toLowerCase()] : undefined
 
   if (iconPath) {
     return (
       <img
         src={iconPath}
-        alt={extension}
+        alt={iconKey}
         width={FILE_ICON_SIZE}
         height={FILE_ICON_SIZE}
       />
     )
   }
 
-  return <FileTreeItemTextIcon extension={extension ?? ''} />
+  return <FileTreeItemTextIcon extension={iconKey ?? ''} />
 }
 
 function FileTreeItemTextIcon({
