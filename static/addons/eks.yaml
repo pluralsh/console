@@ -2383,6 +2383,15 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v3.3.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.2.0-eksbuild.1
     compatibilities:
     - '1.36'
