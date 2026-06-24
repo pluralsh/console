@@ -20,6 +20,7 @@ type DiffFile = {
   patch: string
   additions: number
   deletions: number
+  binary?: boolean
 }
 
 type TreeNode = {
@@ -68,18 +69,49 @@ async function fetchPatch(patchUrl: string) {
   return response.text()
 }
 
+function isBinaryPatch(patch: string): boolean {
+  return (
+    /^GIT binary patch$/m.test(patch) || /^Binary files .+ differ$/m.test(patch)
+  )
+}
+
+function extractPathFromDiffHeader(patch: string, index: number): string {
+  const match = patch.match(/^diff --git a\/(.+?) b\/(.+)$/m)
+
+  if (!match) return `file-${index + 1}.patch`
+
+  const [, oldPath, newPath] = match
+  const path = newPath === '/dev/null' ? oldPath : newPath
+
+  return path
+}
+
 function splitPatchFiles(content: string): DiffFile[] {
   const rawFiles = content
     .split(/(?=^diff --git )/gm)
     .map((file) => file.trim())
     .filter(Boolean)
-  const parsedFiles = parsePatch(content)
 
-  return parsedFiles.map((file, index) => {
-    const patch = rawFiles[index] ?? ''
+  return rawFiles.map((patch, index) => {
+    const path = extractPathFromDiffHeader(patch, index)
+
+    if (isBinaryPatch(patch)) {
+      return {
+        path,
+        patch: '',
+        additions: 0,
+        deletions: 0,
+        binary: true,
+      }
+    }
+
+    const parsed = parsePatch(patch)
+    const file = parsed[0]
 
     return {
-      path: patchFilePath(file.oldFileName, file.newFileName, index),
+      path: file
+        ? patchFilePath(file.oldFileName, file.newFileName, index)
+        : path,
       patch,
       ...countChangedLines(patch),
     }
@@ -329,12 +361,18 @@ export function AgentRunDiff({
           </DiffFileHeaderSC>
         )}
         <DiffCodeSC>
-          <PatchHighlight
-            patchLanguage={getLanguageFromFileName(selectedFile?.path ?? '')}
-            showLineNumbers
-          >
-            {selectedFile?.patch ?? content}
-          </PatchHighlight>
+          {selectedFile?.binary ? (
+            <DiffBinarySC>
+              <CaptionP $color="text-light">Binary file not shown.</CaptionP>
+            </DiffBinarySC>
+          ) : (
+            <PatchHighlight
+              patchLanguage={getLanguageFromFileName(selectedFile?.path ?? '')}
+              showLineNumbers
+            >
+              {selectedFile?.patch ?? ''}
+            </PatchHighlight>
+          )}
         </DiffCodeSC>
       </DiffContentSC>
     </DiffLayoutSC>
@@ -562,6 +600,10 @@ const DiffCodeSC = styled.div(({ theme }) => ({
   flex: 1,
   minHeight: 0,
   overflow: 'auto',
+}))
+
+const DiffBinarySC = styled.div(({ theme }) => ({
+  padding: theme.spacing.large,
 }))
 
 const DiffStateSC = styled.div(({ theme }) => ({
