@@ -182,7 +182,7 @@ export default function StackOutput() {
             onChange={(e) => setFilterString(e.currentTarget.value)}
             css={{ flexGrow: 1 }}
           />
-          <CopyOutputsButton outputs={output} />
+          {output?.length > 0 && <CopyOutputsButton outputs={output} />}
         </div>
         <Table
           fullHeightWrap
