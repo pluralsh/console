@@ -173,7 +173,7 @@ export function AIAgentRun() {
                 isApprovable={isApprovable}
                 approving={approving}
                 onApprove={() => approveAgentRun()}
-                onViewDiff={() => setOpen(true)}
+                onViewDiff={() => setOpen(true, 'Diff')}
               />
             )}
             {run?.error && (

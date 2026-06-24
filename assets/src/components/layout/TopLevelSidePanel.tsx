@@ -3,7 +3,10 @@ import { AIContextProvider } from 'components/ai/AIContext'
 import { ChatbotPanelContent } from 'components/ai/chatbot/Chatbot'
 import { DragHandleSC } from 'components/ai/chatbot/SidePanelShared'
 import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
-import { AgentRunPanelContent } from 'components/ai/agent-runs/details/AgentRunPanel'
+import {
+  AgentRunPanelContent,
+  AgentRunPanelProvider,
+} from 'components/ai/agent-runs/details/AgentRunPanel'
 import { WorkbenchJobPanelContent } from 'components/workbenches/workbench/job/WorkbenchJobPanel'
 import {
   WebhookSetupGuidePanelContent,
@@ -160,11 +163,13 @@ export function TopLevelSidePanelProviders({
 }) {
   return (
     <TopLevelSidePanelProvider>
-      <AIContextProvider>
-        <WebhookSetupGuidePanelProvider>
-          {children}
-        </WebhookSetupGuidePanelProvider>
-      </AIContextProvider>
+      <AgentRunPanelProvider>
+        <AIContextProvider>
+          <WebhookSetupGuidePanelProvider>
+            {children}
+          </WebhookSetupGuidePanelProvider>
+        </AIContextProvider>
+      </AgentRunPanelProvider>
     </TopLevelSidePanelProvider>
   )
 }

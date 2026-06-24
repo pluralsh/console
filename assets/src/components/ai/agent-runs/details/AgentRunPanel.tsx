@@ -26,7 +26,17 @@ import {
   useAgentRunQuery,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Link, matchPath, useLocation } from 'react-router-dom'
 import {
   AI_AGENT_RUN_ABS_PATH,
@@ -43,6 +53,64 @@ import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
 type AgentRunPanelTab = 'Diff' | 'Analysis' | 'Agent todos' | 'Pull requests'
 
+type AgentRunPanelContextT = {
+  isOpen: boolean
+  selectedTab: AgentRunPanelTab
+  setSelectedTab: (tab: AgentRunPanelTab) => void
+  requestedTab: AgentRunPanelTab | null
+  clearRequestedTab: () => void
+  setOpen: (open: boolean, tab?: AgentRunPanelTab) => void
+}
+
+const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
+  isOpen: false,
+  selectedTab: 'Analysis',
+  setSelectedTab: () =>
+    console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
+  requestedTab: null,
+  clearRequestedTab: () =>
+    console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
+  setOpen: () =>
+    console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
+})
+
+export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
+  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+  const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>('Analysis')
+  const [requestedTab, setRequestedTab] = useState<AgentRunPanelTab | null>(
+    null
+  )
+  const isOpen = sidePanel === SIDE_PANEL_TYPE
+
+  const clearRequestedTab = useCallback(() => setRequestedTab(null), [])
+
+  const setOpen = useCallback(
+    (open: boolean, tab?: AgentRunPanelTab) => {
+      if (open && tab) {
+        setRequestedTab(tab)
+        setSelectedTab(tab)
+      }
+      if (!open) setRequestedTab(null)
+      setSidePanel(open ? SIDE_PANEL_TYPE : null)
+    },
+    [setSidePanel]
+  )
+
+  const ctx = useMemo(
+    () => ({
+      isOpen,
+      selectedTab,
+      setSelectedTab,
+      requestedTab,
+      clearRequestedTab,
+      setOpen,
+    }),
+    [isOpen, selectedTab, requestedTab, clearRequestedTab, setOpen]
+  )
+
+  return <AgentRunPanelContext value={ctx}>{children}</AgentRunPanelContext>
+}
+
 export function AgentRunPanelContent() {
   const { spacing } = useTheme()
   const { pathname } = useLocation()
@@ -50,9 +118,18 @@ export function AgentRunPanelContent() {
     matchPath(AI_AGENT_RUN_ABS_PATH, pathname)?.params[
       AI_AGENT_RUNS_PARAM_RUN_ID
     ] ?? ''
-  const { setOpen } = useAgentRunPanel()
+  const {
+    setOpen,
+    selectedTab,
+    setSelectedTab,
+    requestedTab,
+    clearRequestedTab,
+  } = useAgentRunPanel()
   const tabStateRef = useRef<any>(null)
-  const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>('Analysis')
+
+  useEffect(() => {
+    clearRequestedTab()
+  }, [runId, clearRequestedTab])
 
   const { data, loading } = useAgentRunQuery({
     skip: !runId,
@@ -116,8 +193,17 @@ export function AgentRunPanelContent() {
 
   useEffect(() => {
     if (!runId || !defaultTab) return
+    if (requestedTab === 'Diff' && !showDiffTab) return
+    if (requestedTab) clearRequestedTab()
     setSelectedTab(defaultTab)
-  }, [runId, defaultTab])
+  }, [
+    runId,
+    defaultTab,
+    showDiffTab,
+    requestedTab,
+    clearRequestedTab,
+    setSelectedTab,
+  ])
 
   return (
     <SidePanelContent>
@@ -136,8 +222,10 @@ export function AgentRunPanelContent() {
                   stateProps={{
                     orientation: 'horizontal',
                     selectedKey: selectedTab,
-                    onSelectionChange: (key) =>
-                      setSelectedTab(String(key) as AgentRunPanelTab),
+                    onSelectionChange: (key) => {
+                      clearRequestedTab()
+                      setSelectedTab(String(key) as AgentRunPanelTab)
+                    },
                   }}
                   css={{ gap: spacing.small }}
                 >
@@ -301,12 +389,10 @@ export function AgentRunPanelContent() {
 }
 
 export function useAgentRunPanel(autoOpen?: Nullable<boolean>) {
-  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
-  const isOpen = sidePanel === SIDE_PANEL_TYPE
-  const setOpen = (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null)
+  const ctx = use(AgentRunPanelContext)
 
-  const onAutoOpen = useEffectEvent(() => setOpen(true))
-  const onUnmount = useEffectEvent(() => setOpen(false))
+  const onAutoOpen = useEffectEvent(() => ctx.setOpen(true))
+  const onUnmount = useEffectEvent(() => ctx.setOpen(false))
   useEffect(() => {
     if (!!autoOpen) onAutoOpen()
     return () => {
@@ -314,7 +400,7 @@ export function useAgentRunPanel(autoOpen?: Nullable<boolean>) {
     }
   }, [autoOpen])
 
-  return { isOpen, setOpen }
+  return ctx
 }
 
 const ContentWrapperSC = styled.div(() => ({
