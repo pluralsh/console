@@ -23,6 +23,7 @@ import {
   useWorkbenchPromptsQuery,
   useWorkbenchQuery,
   WorkbenchJobFragment,
+  WorkbenchJobModelAttributes,
   WorkbenchPromptFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
@@ -41,6 +42,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
+import { WorkbenchModelSelector } from './WorkbenchModelSelector'
 import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
 import {
   defaultPromptModesFromWorkbench,
@@ -78,7 +80,15 @@ export function WorkbenchJobCreateInput({
   const [promptSyncKey, setPromptSyncKey] = useState(0)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
+  const [selectedModelState, setSelectedModelState] = useState<{
+    workbenchId: Nullable<string>
+    model: Nullable<WorkbenchJobModelAttributes>
+  }>({ workbenchId, model: null })
   const initializedWorkbenchIdRef = useRef<string | null>(null)
+  const selectedModel =
+    selectedModelState.workbenchId === workbenchId
+      ? selectedModelState.model
+      : null
 
   const { data } = useWorkbenchQuery({
     variables: { id: workbenchId },
@@ -142,7 +152,14 @@ export function WorkbenchJobCreateInput({
     const trimmedPrompt = (nextPrompt ?? prompt).trim()
     if (!trimmedPrompt || !workbenchId) return
     setPrompt(trimmedPrompt)
-    const modes = modesAttributes(promptModes)
+    const promptModeAttributes = modesAttributes(promptModes)
+    const modes =
+      promptModeAttributes || selectedModel
+        ? {
+            ...(promptModeAttributes ?? {}),
+            ...(selectedModel ? { model: selectedModel } : {}),
+          }
+        : undefined
     createWorkbenchJob({
       variables: {
         workbenchId,
@@ -190,6 +207,13 @@ export function WorkbenchJobCreateInput({
               <WorkbenchPromptModeSelector
                 value={promptModes}
                 onChange={setPromptModes}
+                disabled={disabled || loading}
+              />
+              <WorkbenchModelSelector
+                value={selectedModel}
+                onChange={(model) =>
+                  setSelectedModelState({ workbenchId, model })
+                }
                 disabled={disabled || loading}
               />
               {setWorkbenchId && (
