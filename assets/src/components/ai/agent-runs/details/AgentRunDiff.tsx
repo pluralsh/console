@@ -12,8 +12,8 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { parsePatch } from 'diff'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { getExtensionFromFileName } from 'utils/file'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import { getExtensionFromFileName, getLanguageFromFileName } from 'utils/file'
 
 type DiffFile = {
   path: string
@@ -308,32 +308,33 @@ export function AgentRunDiff({
       </DiffTreeSC>
       <DiffContentSC>
         {selectedFile && (
-          <DiffPanelHeaderSC>
+          <DiffFileHeaderSC>
             <DiffFileHeaderInfoSC>
-              <DiffFileIconSC>
-                <FileTreeItemIcon
-                  fileName={getFileNameFromPath(selectedFile.path)}
-                />
-              </DiffFileIconSC>
-              <DiffFileTextSC>
+              <DiffFileNameRowSC>
+                <DiffFileIconSC>
+                  <FileTreeItemIcon
+                    fileName={getFileNameFromPath(selectedFile.path)}
+                  />
+                </DiffFileIconSC>
                 <DiffFileNameSC>
                   {getFileNameFromPath(selectedFile.path)}
                 </DiffFileNameSC>
-                <DiffFilePathSC>{selectedFile.path}</DiffFilePathSC>
-              </DiffFileTextSC>
+              </DiffFileNameRowSC>
+              <DiffFilePathSC>{selectedFile.path}</DiffFilePathSC>
             </DiffFileHeaderInfoSC>
             <DiffLineStatsSC>
               <DiffDeletionsSC>-{selectedFile.deletions}</DiffDeletionsSC>
               <DiffAdditionsSC>+{selectedFile.additions}</DiffAdditionsSC>
             </DiffLineStatsSC>
-          </DiffPanelHeaderSC>
+          </DiffFileHeaderSC>
         )}
         <DiffCodeSC>
           <Code
-            language="diff"
+            variant="patch"
+            patchLanguage={getLanguageFromFileName(selectedFile?.path ?? '')}
             showHeader={false}
             showLineNumbers
-            title={selectedFile?.path ?? 'patch.diff'}
+            height="100%"
           >
             {selectedFile?.patch ?? content}
           </Code>
@@ -457,12 +458,12 @@ const DiffTreeSC = styled.div(({ theme }) => ({
   borderRight: theme.borders.default,
 }))
 
-const DIFF_PANEL_HEADER_HEIGHT = 56
+const DIFF_PANEL_HEADER_HEIGHT = 64
 
-const DiffPanelHeaderSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-one'],
-  borderBottom: theme.borders['fill-one'],
-  boxSizing: 'border-box',
+const diffPanelHeaderStyles = ({ theme }: { theme: DefaultTheme }) => ({
+  backgroundColor: theme.colors['fill-zero'],
+  borderBottom: theme.borders.default,
+  boxSizing: 'border-box' as const,
   flexShrink: 0,
   display: 'flex',
   justifyContent: 'space-between',
@@ -470,21 +471,36 @@ const DiffPanelHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   height: DIFF_PANEL_HEADER_HEIGHT,
   minHeight: DIFF_PANEL_HEADER_HEIGHT,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   width: '100%',
+})
+
+const DiffTreeHeaderSC = styled.div(({ theme }) => ({
+  ...diffPanelHeaderStyles({ theme }),
+  ...theme.partials.text.overline,
+  color: theme.colors['text-light'],
+  lineHeight: 1,
+  padding: `${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
 }))
 
-const DiffTreeHeaderSC = styled(DiffPanelHeaderSC)(({ theme }) => ({
-  ...theme.partials.text.overline,
-  color: theme.colors['text-xlight'],
-  lineHeight: 1,
+const DiffFileHeaderSC = styled.div(({ theme }) => ({
+  ...diffPanelHeaderStyles({ theme }),
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
 }))
 
 const DiffFileHeaderInfoSC = styled.div(({ theme }) => ({
   display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
+  flexDirection: 'column',
+  gap: theme.spacing.xxxsmall,
   flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+}))
+
+const DiffFileNameRowSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  minHeight: 32,
   minWidth: 0,
 }))
 
@@ -494,21 +510,14 @@ const DiffFileIconSC = styled.div({
   flexShrink: 0,
 })
 
-const DiffFileTextSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxxsmall,
-  flex: 1,
-  minWidth: 0,
-  overflow: 'hidden',
-}))
-
 const DiffFileNameSC = styled.div(({ theme }) => ({
   fontFamily: '"Roboto Mono", monospace',
   fontSize: 14,
-  lineHeight: '20px',
+  lineHeight: '16px',
   color: theme.colors['text-light'],
   ...TRUNCATE,
+  flex: 1,
+  minWidth: 0,
 }))
 
 const DiffFilePathSC = styled.div(({ theme }) => ({
@@ -520,9 +529,12 @@ const DiffFilePathSC = styled.div(({ theme }) => ({
 const DiffLineStatsSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   display: 'inline-flex',
+  alignItems: 'center',
   gap: theme.spacing.xsmall,
   flexShrink: 0,
   letterSpacing: 0,
+  lineHeight: '16px',
+  textAlign: 'right',
   textTransform: 'none',
 }))
 
