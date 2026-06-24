@@ -115,15 +115,9 @@ export function AgentRunPanelContent() {
   }, [showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
 
   useEffect(() => {
-    if (!defaultTab) return
-    setSelectedTab((tab) => {
-      if (tab === 'Diff' && showDiffTab) return tab
-      if (tab === 'Analysis' && showAnalysisTab) return tab
-      if (tab === 'Agent todos' && showAgentTodosTab) return tab
-      if (tab === 'Pull requests' && showPrsTab) return tab
-      return defaultTab
-    })
-  }, [defaultTab, showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
+    if (!runId || !defaultTab) return
+    setSelectedTab(defaultTab)
+  }, [runId, defaultTab])
 
   return (
     <SidePanelContent>
@@ -224,7 +218,10 @@ export function AgentRunPanelContent() {
       {showDiffTab && selectedTab === 'Diff' && run?.upload?.patch && (
         <ContentWrapperSC>
           <ContentInnerSC>
-            <AgentRunDiff patchUrl={run.upload.patch} />
+            <AgentRunDiff
+              runId={run.id}
+              patchUrl={run.upload.patch}
+            />
           </ContentInnerSC>
         </ContentWrapperSC>
       )}
