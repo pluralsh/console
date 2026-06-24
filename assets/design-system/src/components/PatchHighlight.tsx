@@ -54,9 +54,9 @@ function patchLineContent(line: string, type: PatchLineType) {
 function patchLineBackground(type: PatchLineType, theme: DefaultTheme) {
   switch (type) {
     case 'addition':
-      return chroma(theme.colors.green[850]).alpha(0.2).css()
+      return chroma(theme.colors.green[850]).alpha(0.3).css()
     case 'deletion':
-      return chroma(theme.colors.red[850]).alpha(0.2).css()
+      return chroma(theme.colors.red[800]).alpha(0.3).css()
     default:
       return 'transparent'
   }
