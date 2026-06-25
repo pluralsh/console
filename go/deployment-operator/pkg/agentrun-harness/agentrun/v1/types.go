@@ -23,7 +23,7 @@ const (
 	// tool call, or session if there is no output or input detected.
 	defaultInactivityTimeout = defaultBashTimeout
 
-	defaultBabysitInterval = int64(60)
+	defaultBabysitInterval = int64(60) // seconds between PR/SCM babysit checks
 )
 
 type AgentRun struct {

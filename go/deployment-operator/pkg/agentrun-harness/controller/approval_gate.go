@@ -15,8 +15,6 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
-const postRunPollInterval = 5 * time.Second
-
 func buildApprovalGrantedPrompt(headBranch string) string {
 	msg := "The user has approved these changes. You may now create a pull request using the agentPullRequest MCP tool."
 	if branch := strings.TrimSpace(headBranch); branch != "" {
@@ -74,7 +72,7 @@ func nextPrompt(prompts []*gqlclient.AgentPromptFragment, after int64) *gqlclien
 //   - approval → dispatch the PR-creation prompt, then exit into babysit (if enabled)
 //
 // This only runs when approval is required. Babysit mode handles further user
-// prompts alongside PR polling in runBabysit.
+// prompts alongside PR polling in runBabysitPR.
 func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 	if !in.requiresApprovalFollowUp() {
 		return
@@ -87,7 +85,7 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 
 	klog.V(log.LogLevelInfo).InfoS("waiting for agent run approval or follow-up prompts", "id", in.agentRunID)
 
-	timer := time.NewTimer(postRunPollInterval)
+	timer := time.NewTimer(promptPollInterval)
 	defer timer.Stop()
 
 	for {
@@ -102,11 +100,11 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 		run, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
 		if err != nil {
 			klog.ErrorS(err, "could not poll agent run state", "id", in.agentRunID)
-			timer.Reset(postRunPollInterval)
+			timer.Reset(promptPollInterval)
 			continue
 		}
 		if run == nil {
-			timer.Reset(postRunPollInterval)
+			timer.Reset(promptPollInterval)
 			continue
 		}
 		if run.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
@@ -116,7 +114,7 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 
 		// User prompts take priority — agent keeps working while approval is pending.
 		if in.tryDispatchQueuedUserPrompt(ctx, run, true) {
-			timer.Reset(postRunPollInterval)
+			timer.Reset(promptPollInterval)
 			continue
 		}
 
@@ -127,6 +125,6 @@ func (in *agentRunController) runPostRunPollLoop(ctx context.Context) {
 			return
 		}
 
-		timer.Reset(postRunPollInterval)
+		timer.Reset(promptPollInterval)
 	}
 }

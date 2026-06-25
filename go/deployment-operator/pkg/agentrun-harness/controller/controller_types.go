@@ -61,6 +61,10 @@ type agentRunController struct {
 	// back to the agent after the initial run.
 	lastPromptSeq int64
 
+	// lastBabysitPRPollAt is when PR/SCM babysit work last ran. Queued user
+	// prompts are polled more frequently via promptPollInterval.
+	lastBabysitPRPollAt time.Time
+
 	// approvalPromptSent ensures the approval-unblocked prompt is only sent once.
 	approvalPromptSent bool
 }

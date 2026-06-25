@@ -16,6 +16,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -164,13 +165,14 @@ func (in *agentRunController) init() (Controller, error) {
 //
 //  1. Analysis persistence (if configured)
 //  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
-//  3. Babysit loop (if enabled): each tick polls user prompts first, then PR state
+//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s),
+//     PR/SCM checks every babysitInterval (default 60s)
 //
 // When both approval and babysit are enabled, approval follow-up creates the PR
 // before step 3; babysit then monitors PRs and continues accepting user prompts.
 func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool,
 ) {
-	d := time.Duration(in.agentRun.BabysitInterval) * time.Second
+	prInterval := time.Duration(in.agentRun.BabysitInterval) * time.Second
 
 	// Wait for initial Run() to complete.
 	select {
@@ -190,31 +192,66 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 		}
 	}
 
-	// Run immediately, then wait d after each call completes before running again.
 	for {
-		if in.runBabysit(ctx, callback) {
+		agentRun, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
+		if err != nil {
+			klog.ErrorS(err, "could not poll agent run during babysit", "id", in.agentRunID)
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+		if agentRun == nil {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+		if agentRun.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
+			in.errChan <- internalerrors.ErrRemoteCancel
 			return
 		}
 
-		select {
-		case <-ctx.Done():
+		if in.tryDispatchQueuedUserPrompt(ctx, agentRun, false) {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+
+		if !in.lastBabysitPRPollAt.IsZero() && time.Since(in.lastBabysitPRPollAt) < prInterval {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+
+		in.lastBabysitPRPollAt = time.Now()
+		if in.runBabysitPR(ctx, callback) {
 			return
-		case <-in.done:
+		}
+
+		if in.waitBabysit(ctx, promptPollInterval) {
 			return
-		case <-time.After(d):
 		}
 	}
 }
 
-func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
+func (in *agentRunController) waitBabysit(ctx context.Context, d time.Duration) bool {
+	select {
+	case <-ctx.Done():
+		return true
+	case <-in.done:
+		return true
+	case <-time.After(d):
+		return false
+	}
+}
+
+func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
 	agentRun, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusBabysitting})
 	if err != nil {
 		klog.ErrorS(err, "failed to update agent run status during babysit")
-		return false
-	}
-
-	// User prompts take priority over PR babysit ticks.
-	if in.tryDispatchQueuedUserPrompt(ctx, agentRun, false) {
 		return false
 	}
 
