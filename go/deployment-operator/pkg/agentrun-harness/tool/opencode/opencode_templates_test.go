@@ -107,6 +107,23 @@ func TestConfigTemplate_DindPermissions(t *testing.T) {
 	})
 }
 
+func TestConfigTemplate_SkillPermissions(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+	agents := out["agent"].(map[string]any)
+	for _, name := range []string{"analysis", "autonomous"} {
+		agent := agents[name].(map[string]any)
+		permission := agent["permission"].(map[string]any)
+		skill, ok := permission["skill"].(map[string]any)
+		if !ok {
+			t.Fatalf("expected %s skill permission map, got %T %v", name, permission["skill"], permission["skill"])
+		}
+		if skill["*"] != "allow" {
+			t.Fatalf("expected %s skill wildcard allow, got %v", name, skill["*"])
+		}
+	}
+}
+
 func TestConfigTemplate_PluraMcpExcludeTools(t *testing.T) {
 	t.Run("WRITE mode omits PLRL_EXCLUDE_TOOLS from plural MCP env", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))

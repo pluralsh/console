@@ -281,6 +281,9 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeClaude); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	mcp := NewMCPConfigBuilder()
 	mcp.
@@ -339,6 +342,10 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 
 func (in *Claude) configPath() string {
 	return path.Join(in.Config.WorkDir, ".claude")
+}
+
+func (in *Claude) skillsPath() string {
+	return path.Join(in.configPath(), "skills")
 }
 
 func (in *Claude) withConfigEnv(env []string) []string {

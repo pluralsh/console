@@ -28,6 +28,9 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeOpencode); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	input := &ConfigTemplateInput{
 		ConsoleURL:            consoleURL,
@@ -273,6 +276,10 @@ func (in *Opencode) agent() string {
 
 func (in *Opencode) configFilePath() string {
 	return path.Join(in.providerPath(), ConfigFileName)
+}
+
+func (in *Opencode) skillsPath() string {
+	return path.Join(in.providerPath(), "skills")
 }
 
 func (in *Opencode) providerPath() string {

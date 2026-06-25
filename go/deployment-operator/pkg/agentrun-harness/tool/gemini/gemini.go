@@ -230,6 +230,9 @@ func (in *Gemini) Configure(_, _ string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeGemini); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	input := &ConfigTemplateInput{
 		RepositoryDir:     in.Config.RepositoryDir,
@@ -255,6 +258,10 @@ func (in *Gemini) Configure(_, _ string) error {
 
 func (in *Gemini) settingsPath() string {
 	return path.Join(in.providerPath(), SettingsFileName)
+}
+
+func (in *Gemini) skillsPath() string {
+	return path.Join(in.providerPath(), "skills")
 }
 
 func (in *Gemini) providerPath() string {

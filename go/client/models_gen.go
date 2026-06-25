@@ -329,6 +329,15 @@ type AgentPrompt struct {
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+// A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering
+type AgentPromptHistory struct {
+	ID string `json:"id"`
+	// the prompt to give this agent run
+	Prompt     string  `json:"prompt"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
 type AgentPullRequestAttributes struct {
 	// the title of the pull request
 	Title string `json:"title"`

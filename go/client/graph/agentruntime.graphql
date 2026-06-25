@@ -238,6 +238,11 @@ fragment AgentRunFragment on AgentRun {
     prompts {
         ...AgentPromptFragment
     }
+    skills {
+        name
+        description
+        contents
+    }
     status
     podReference {
         ...AgentPodReferenceFragment

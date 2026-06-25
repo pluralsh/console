@@ -84,6 +84,9 @@ func (in *Codex) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeCodex); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	return in.writeCodexConfig()
 }
@@ -331,6 +334,10 @@ func (in *Codex) codexExecOptions() []exec.Option {
 
 func (in *Codex) codexHome() string {
 	return path.Join(in.Config.WorkDir, ".codex")
+}
+
+func (in *Codex) skillsPath() string {
+	return path.Join(in.codexHome(), "skills")
 }
 
 func (in *Codex) systemPromptPath() (string, error) {

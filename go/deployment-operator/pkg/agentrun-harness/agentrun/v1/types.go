@@ -3,6 +3,8 @@ package v1
 import (
 	"time"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
@@ -43,6 +45,7 @@ type AgentRun struct {
 	// Runtime information
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	Prompts []*console.AgentPromptFragment
+	Skills  []AgentSkill
 
 	DindEnabled    bool
 	BrowserEnabled bool
@@ -51,6 +54,12 @@ type AgentRun struct {
 	BabysitInterval int64
 	Approval        bool
 	ApprovedAt      *string
+}
+
+type AgentSkill struct {
+	Name        string
+	Description *string
+	Contents    string
 }
 
 type AgentRuntime struct {
@@ -119,6 +128,15 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
 		Prompts:     fragment.Prompts,
+		Skills: lo.Map(
+			lo.Filter(fragment.Skills, func(skill *console.AgentRunFragment_Skills, _ int) bool { return skill != nil }),
+			func(skill *console.AgentRunFragment_Skills, _ int) AgentSkill {
+				return AgentSkill{
+					Name:        skill.Name,
+					Description: skill.Description,
+					Contents:    skill.Contents,
+				}
+			}),
 	}
 
 	if fragment.Flow != nil {
