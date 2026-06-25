@@ -71,6 +71,14 @@ mix deps.get
 mix test
 ```
 
+If you're starting from a fresh checkout, make sure the dependencies are running before invoking `mix test`.  `make testup` starts the docker-compose services the server depends on, while `mix local.hex` and `mix deps.get` install the local Elixir tooling and project dependencies used by the test suite.
+
+When you're done with local server work, you can stop the supporting containers with:
+
+```sh
+make testdown
+```
+
 ### Git Hooks
 Custom Git hooks are stored in `.githooks` directory. They ensure that when controller or client files are changed, automated code generation targets are executed. In order to enable git hooks for this repo run:
 
