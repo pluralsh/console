@@ -65,6 +65,8 @@ const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
   txt: `${FILE_TYPE_ICON_PATH}/file_type_text.svg`,
 } as const
 
+// FIXME: Signed upload.patch URLs point at object storage and
+// direct browser fetch() fails on CORS in dev and prod.
 async function fetchPatch(patchUrl: string) {
   const response = await fetch(patchUrl)
 
