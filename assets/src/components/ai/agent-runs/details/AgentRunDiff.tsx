@@ -11,6 +11,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
 import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { parsePatch } from 'diff'
+import pluralize from 'pluralize'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 import { getFileTypeIconKey, getLanguageFromFileName } from 'utils/file'
@@ -316,7 +317,9 @@ export function AgentRunDiff({
     <DiffLayoutSC>
       <DiffTreeSC>
         <DiffTreeHeaderSC>
-          <span>{files.length} files changed</span>
+          <span>
+            {files.length} {pluralize('file', files.length)} changed
+          </span>
           <DiffLineStatsSC>
             <DiffDeletionsSC>-{totals.deletions}</DiffDeletionsSC>
             <DiffAdditionsSC>+{totals.additions}</DiffAdditionsSC>
