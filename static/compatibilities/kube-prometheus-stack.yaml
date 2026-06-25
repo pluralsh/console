@@ -5,6 +5,62 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 87.2.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds an "agent" skill to support/promote automated Prometheus
+        Operator version bumps., Updates kube-prometheus-stack chart dependencies
+        with non-major (patch/minor) bumps (performed in both 87.1.0 and 87.2.1).]
+    features: ["Routine chart maintenance: adds support metadata/automation (\u201C\
+        agent skill\u201D) around Prometheus Operator bumps.", Dependency refreshes
+        for subcharts/components (non-major updates).]
+    breaking_changes: []
+  chart_version: 87.2.1
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.0', 'quay.io/prometheus-operator/prometheus-operator:v0.92.0',
+    'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.1.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Adds an ''agent skill'' to help automate/streamline Prometheus
+        Operator version bumps (per PR #7013).', 'Updates kube-prometheus-stack chart
+        dependencies with non-major (patch/minor) updates (per PR #7020).']
+    features: [Improved support for handling Prometheus Operator version bumps via
+        a newly added 'agent skill' in the chart tooling/workflow.]
+    breaking_changes: []
+  chart_version: 87.1.0
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.0', 'quay.io/prometheus-operator/prometheus-operator:v0.92.0',
+    'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.0.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Both 86.3.2 and 87.0.1 are chart-only releases that primarily
+        bump kube-prometheus-stack chart dependencies via Renovate (non-major updates).,
+      No explicit template/CRD/value changes are called out in the provided notes;
+        treat this as a low-risk patch-level chart maintenance change despite the
+        version jump crossing a major boundary in the chart number.]
+    features: []
+    breaking_changes: []
+  chart_version: 87.0.1
+  images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.7.4', 'quay.io/prometheus-operator/prometheus-operator:v0.92.0',
+    'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
 - version: 86.3.2
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']

@@ -1594,6 +1594,122 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.27.0
+    kube: ['1.35']
+    requirements:
+    - name: Alloy
+      version: 4.0.1-bb.0
+    - name: Anchore Enterprise
+      version: 3.25.0-bb.0
+    - name: Argocd
+      version: 9.5.21-bb.0
+    - name: Authservice
+      version: 1.1.5-bb.5
+    - name: Backstage
+      version: 2.8.1-bb.0
+    - name: Bbctl
+      version: 3.0.1-bb.3
+    - name: Eck Operator
+      version: 3.4.0-bb.1
+    - name: Elasticsearch Kibana
+      version: 1.37.0-bb.0
+    - name: External Secrets Operator
+      version: 1.3.1-bb.1
+    - name: Fluentbit
+      version: 0.57.3-bb.0
+    - name: Fortify
+      version: 25.4.1-bb.0
+    - name: Gatekeeper
+      version: 3.22.2-bb.1
+    - name: Gateway Api
+      version: 1.5.1-bb.1
+    - name: Gitlab
+      version: 9.11.1-bb.2
+    - name: Gitlab Runner
+      version: 0.88.1-bb.0
+    - name: Grafana
+      version: 10.5.15-bb.3
+    - name: Harbor
+      version: 1.19.0-bb.0
+    - name: Headlamp
+      version: 0.40.0-bb.1
+    - name: Istio Cni
+      version: 1.30.1-bb.0
+    - name: Istio Crds
+      version: 1.30.1-bb.0
+    - name: Istio Gateway
+      version: 1.30.1-bb.0
+    - name: Istiod
+      version: 1.30.1-bb.0
+    - name: Keycloak
+      version: 7.2.0-bb.2
+    - name: Kiali
+      version: 2.27.0-bb.0
+    - name: Kyverno
+      version: 3.8.1-bb.2
+    - name: Kyverno Policies
+      version: 3.3.4-bb.65
+    - name: Kyverno Reporter
+      version: 3.7.4-bb.2
+    - name: Loki
+      version: 6.55.0-bb.2
+    - name: Mattermost
+      version: 11.7.3-bb.0
+    - name: Mattermost Operator
+      version: 1.25.7-bb.0
+    - name: Metrics Server
+      version: 3.13.0-bb.6
+    - name: Mimir
+      version: 6.0.6-bb.2
+    - name: Minio
+      version: 7.1.1-bb.18
+    - name: Minio Operator
+      version: 7.1.1-bb.6
+    - name: Monitoring
+      version: 85.3.3-bb.0
+    - name: Neuvector
+      version: 2.10.2-bb.0
+    - name: Prometheus Operator Crds
+      version: 28.0.1-bb.0
+    - name: Renovate
+      version: 46.31.6-bb.5
+    - name: Sonarqube
+      version: 2026.3.1-bb.0
+    - name: Tempo
+      version: 2.1.0-bb.1
+    - name: Thanos
+      version: 17.4.0-bb.2
+    - name: Twistlock
+      version: 0.26.0-bb.0
+    - name: Vault
+      version: 0.32.0-bb.1
+    - name: Velero
+      version: 12.0.2-bb.1
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.1-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["BigBang 3.26.0 \u2192 3.27.0 is primarily a dependency bump\
+          \ release across multiple components (Argo CD, Authservice, Backstage, Istio\
+          \ stack including ztunnel, Keycloak, Kyverno Reporter, Mattermost + operator,\
+          \ Mimir, SonarQube, Velero).", "Istio stack moves from 1.29.2 to 1.30.1\
+          \ (and ztunnel 1.29.1 \u2192 1.30.1), which is the most operationally significant\
+          \ change and may require special upgrade sequencing/validation."]
+      features: ["Argo CD receives patch updates (9.5.15-bb.0 \u2192 9.5.21-bb.0)\
+          \ likely including bugfixes and security fixes.", "Backstage receives a\
+          \ minor version bump (2.6.3-bb.3 \u2192 2.8.1-bb.0) adding upstream features/bugfixes.",
+        Istio moves to 1.30.1 which likely includes performance and security fixes
+          plus behavior changes relative to 1.29.x., "Velero patch bump (12.0.1 \u2192\
+          \ 12.0.2-bb.1) likely includes backup/restore fixes."]
+      breaking_changes: ["No explicit breaking changes were provided in the notes\
+          \ you shared; assume none are known from this input, but treat the Istio\
+          \ 1.29 \u2192 1.30 upgrade as potentially introducing behavioral changes\
+          \ and re-validate traffic management, mTLS, and ambient/ztunnel behavior."]
+    chart_version: 3.27.0
+    images: []
   - version: 3.26.0
     kube: ['1.35']
     requirements:
@@ -18168,6 +18284,62 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 87.2.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Adds an "agent" skill to support/promote automated Prometheus
+          Operator version bumps., Updates kube-prometheus-stack chart dependencies
+          with non-major (patch/minor) bumps (performed in both 87.1.0 and 87.2.1).]
+      features: ["Routine chart maintenance: adds support metadata/automation (\u201C\
+          agent skill\u201D) around Prometheus Operator bumps.", Dependency refreshes
+          for subcharts/components (non-major updates).]
+      breaking_changes: []
+    chart_version: 87.2.1
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.0', 'quay.io/prometheus-operator/prometheus-operator:v0.92.0',
+      'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+  - version: 87.1.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Adds an ''agent skill'' to help automate/streamline Prometheus
+          Operator version bumps (per PR #7013).', 'Updates kube-prometheus-stack
+          chart dependencies with non-major (patch/minor) updates (per PR #7020).']
+      features: [Improved support for handling Prometheus Operator version bumps via
+          a newly added 'agent skill' in the chart tooling/workflow.]
+      breaking_changes: []
+    chart_version: 87.1.0
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.0', 'quay.io/prometheus-operator/prometheus-operator:v0.92.0',
+      'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+  - version: 87.0.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Both 86.3.2 and 87.0.1 are chart-only releases that primarily
+          bump kube-prometheus-stack chart dependencies via Renovate (non-major updates).,
+        No explicit template/CRD/value changes are called out in the provided notes;
+          treat this as a low-risk patch-level chart maintenance change despite the
+          version jump crossing a major boundary in the chart number.]
+      features: []
+      breaking_changes: []
+    chart_version: 87.0.1
+    images: ['docker.io/grafana/grafana:13.0.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.7.4', 'quay.io/prometheus-operator/prometheus-operator:v0.92.0',
+      'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 86.3.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -23827,7 +23999,7 @@ addons:
           Generator setups that filter by Kubernetes version when using auto-labeled
           cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
           format.']
-    chart_version: 9.6.0
+    chart_version: 9.7.0
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.4']
   - version: 3.4.1
@@ -24352,7 +24524,7 @@ addons:
       breaking_changes: [No breaking changes are described in the provided notes;
           both releases instruct readers to consult the upgrading guide and main changelog
           for breaking/known issues.]
-    chart_version: 1.0.16
+    chart_version: 1.0.17
     images: ['quay.io/argoproj/argocli:v4.0.6', 'quay.io/argoproj/workflow-controller:v4.0.6',
       'registry.k8s.io/kubectl:v1.36.2']
   - version: 4.0.2
@@ -28811,17 +28983,12 @@ addons:
   helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imagePullSecret.password=dummy
   chart_name: wiz-sensor
   versions:
-  - version: 1.0.11181
+  - version: 1.0.11492
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: [No chart template/values changes were provided in the notes
-          shared (release entry only lists the packaged chart asset).]
-      features: []
-      breaking_changes: []
-    chart_version: 1.0.11181
+    summary: null
+    chart_version: 1.0.11492
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999
     kube: ['1.36', '1.35', '1.34', '1.33']

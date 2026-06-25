@@ -256,6 +256,10 @@ defmodule Console.Deployments.Git.Cache do
     Console.ls_r(subpath)
     |> Enum.filter(filter)
     |> Enum.map(&tar_path(&1, subpath))
+    |> Enum.filter(fn
+      :ignore -> false
+      _ -> true
+    end)
     |> case do
       [_ | _] = files -> tar_files(files, tgz_path)
       [] -> {:error, "folder is empty"}
@@ -272,8 +276,10 @@ defmodule Console.Deployments.Git.Cache do
   end
 
   defp tar_path(filename, repo_path) do
-    relative_path = Path.relative_to(filename, repo_path) |> to_charlist()
-    {relative_path, to_charlist(filename)}
+    case Path.relative_to(filename, repo_path) do
+      ".git/" <> _ -> :ignore
+      relpath -> {to_charlist(relpath), to_charlist(filename)}
+    end
   end
 
   defp cache_key(sha, path, [_ | _] = filter), do: {sha, path, filter}

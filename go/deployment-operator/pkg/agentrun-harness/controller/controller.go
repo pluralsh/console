@@ -293,17 +293,17 @@ func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ct
 	}
 
 	bCtx := in.buildBabysitContext(ctx, agentRun, babysitClient)
-	if bCtx != nil {
-		if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
-			klog.ErrorS(err, "failed to update agent run status during babysit")
-			return false
-		}
+	if bCtx == nil {
+		return false
+	}
+
+	if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+		klog.ErrorS(err, "failed to update agent run status during babysit")
+		return false
 	}
 
 	stop := callback(ctx, bCtx)
-	if bCtx != nil {
-		in.uploadAgentRunArtifacts(context.Background())
-	}
+	in.uploadAgentRunArtifacts(context.Background())
 	return stop
 }
 
@@ -330,9 +330,10 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 			title = *pr.Title
 		}
 		enriched = append(enriched, toolv1.EnrichedPR{
-			URL:     pr.URL,
-			Title:   title,
-			Details: d,
+			URL:         pr.URL,
+			Title:       title,
+			Details:     d,
+			NewComments: in.newOrUpdatedPRComments(pr.URL, d.Comments),
 		})
 		details = append(details, d)
 	}
@@ -347,10 +348,20 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 		return nil
 	}
 
-	// SHA unchanged or empty
-	if sha == in.lastPRSHA || in.lastPRSHA == "" {
+	if in.lastPRSHA == "" {
+		for _, e := range enriched {
+			in.recordSeenPRComments(e.URL, e.Details.Comments)
+		}
 		in.lastPRSHA = sha
 		in.lastPRCheckAt = time.Now()
+		klog.V(log.LogLevelExtended).InfoS("PR state baseline recorded, skipping reprompt")
+		return nil
+	}
+
+	if sha == in.lastPRSHA {
+		for _, e := range enriched {
+			in.recordSeenPRComments(e.URL, e.Details.Comments)
+		}
 		klog.V(log.LogLevelExtended).InfoS("PR state unchanged, skipping reprompt")
 		return nil
 	}
@@ -369,6 +380,9 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 	prompt := buildBabysitPrompt(branch, repositoryDir, enriched, in.lastPRCheckAt)
 
 	// Persist the new SHA and timestamp so the next tick can diff against it.
+	for _, e := range enriched {
+		in.recordSeenPRComments(e.URL, e.Details.Comments)
+	}
 	in.lastPRSHA = sha
 	in.lastPRCheckAt = time.Now()
 
@@ -398,22 +412,15 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 	for _, e := range prs {
 		_, _ = fmt.Fprintf(&sb, "## PR: %s\nURL: %s\n", e.Title, e.URL)
 		_, _ = fmt.Fprintf(&sb, "### Branch: %s\n", branch)
-		// New comments since last check.
-		var newComments []scm.PRComment
-		for _, c := range e.Details.Comments {
-			if c.CreatedAt.After(lastChecked) {
-				newComments = append(newComments, c)
-			}
-		}
-		if len(newComments) > 0 {
-			sb.WriteString("### New comments since last check\n\n")
-			for _, c := range newComments {
+		if len(e.NewComments) > 0 {
+			sb.WriteString("### New or updated comments since last reprompt\n\n")
+			for _, c := range e.NewComments {
 				body := strings.ReplaceAll(c.Body, "\n", "\n  > ")
 				_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
 					c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
 			}
 		} else {
-			sb.WriteString("No new comments since last check.\n\n")
+			sb.WriteString("No new or updated comments since last reprompt.\n\n")
 		}
 
 		// CI check status.
@@ -447,6 +454,38 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 		}
 	}
 	return sb.String()
+}
+
+func (in *agentRunController) newOrUpdatedPRComments(prURL string, comments []scm.PRComment) []scm.PRComment {
+	in.ensureSeenPRCommentBodies()
+
+	var result []scm.PRComment
+	for _, comment := range comments {
+		key := prCommentKey(prURL, comment)
+		if body, ok := in.seenPRCommentBodies[key]; !ok || body != comment.Body {
+			result = append(result, comment)
+		}
+	}
+
+	return result
+}
+
+func (in *agentRunController) recordSeenPRComments(prURL string, comments []scm.PRComment) {
+	in.ensureSeenPRCommentBodies()
+
+	for _, comment := range comments {
+		in.seenPRCommentBodies[prCommentKey(prURL, comment)] = comment.Body
+	}
+}
+
+func (in *agentRunController) ensureSeenPRCommentBodies() {
+	if in.seenPRCommentBodies == nil {
+		in.seenPRCommentBodies = make(map[string]string)
+	}
+}
+
+func prCommentKey(prURL string, comment scm.PRComment) string {
+	return prURL + "|" + comment.ReactableID()
 }
 
 // NewAgentRunController creates a new agent run controller

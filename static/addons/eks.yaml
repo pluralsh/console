@@ -1262,6 +1262,16 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-training-operator
   versions:
+  - version: v1.2.2-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.2.1-eksbuild.1
     compatibilities:
     - '1.35'
@@ -2373,6 +2383,15 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v3.3.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.2.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -3353,6 +3372,15 @@
   publisher: eks
 - name: aws-mountpoint-s3-csi-driver
   versions:
+  - version: v2.7.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.6.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -5236,6 +5264,17 @@
   publisher: CyberArk
 - name: datadog_operator
   versions:
+  - version: v0.1.28-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.1.27-eksbuild.1
     compatibilities:
     - '1.35'

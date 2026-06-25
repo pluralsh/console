@@ -1,10 +1,14 @@
 import {
+  Button,
+  CheckIcon,
+  CopyIcon,
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
   Input,
   SearchIcon,
   Table,
+  useCopyText,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
@@ -66,6 +70,33 @@ const columns = [
   }),
 ]
 
+function getOutputsJson(outputs: StackOutputT[]) {
+  return JSON.stringify(
+    outputs.reduce<Record<string, string>>((acc, { name, value }) => {
+      acc[name] = value
+
+      return acc
+    }, {}),
+    null,
+    2
+  )
+}
+
+function CopyOutputsButton({ outputs }: { outputs: StackOutputT[] }) {
+  const outputsJson = useMemo(() => getOutputsJson(outputs), [outputs])
+  const { copied, handleCopy } = useCopyText(outputsJson, 1000)
+
+  return (
+    <Button
+      secondary
+      startIcon={copied ? <CheckIcon /> : <CopyIcon />}
+      onClick={handleCopy}
+    >
+      {copied ? 'Copied!' : 'Copy All'}
+    </Button>
+  )
+}
+
 function OutputValue({ value, secret }: { value: string; secret?: boolean }) {
   const theme = useTheme()
   const [reveal, setReveal] = useState(!secret)
@@ -117,9 +148,15 @@ export default function StackOutput() {
     skip: !stack.id,
   })
 
-  if (loading) return <LoadingIndicator />
+  const output = useMemo(
+    () =>
+      data?.infrastructureStack?.output?.filter(
+        (output): output is StackOutputT => !!output
+      ) ?? [],
+    [data?.infrastructureStack?.output]
+  )
 
-  const output = data?.infrastructureStack?.output
+  if (loading) return <LoadingIndicator />
 
   return (
     <div css={{ overflow: 'hidden' }}>
@@ -131,17 +168,25 @@ export default function StackOutput() {
           height: '100%',
         }}
       >
-        <div>
+        <div
+          css={{
+            display: 'flex',
+            columnGap: theme.spacing.medium,
+            flexShrink: 0,
+          }}
+        >
           <Input
             placeholder="Search"
             startIcon={<SearchIcon />}
             value={filterString}
             onChange={(e) => setFilterString(e.currentTarget.value)}
+            css={{ flexGrow: 1 }}
           />
+          {output?.length > 0 && <CopyOutputsButton outputs={output} />}
         </div>
         <Table
           fullHeightWrap
-          data={output || []}
+          data={output}
           columns={columns}
           reactTableOptions={{
             state: { globalFilter: debouncedFilterString },

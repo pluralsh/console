@@ -34,7 +34,7 @@ versions:
         Generator setups that filter by Kubernetes version when using auto-labeled
         cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
         format.']
-  chart_version: 9.6.0
+  chart_version: 9.7.0
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.4.4']
 - version: 3.4.1

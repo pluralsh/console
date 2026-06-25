@@ -18,6 +18,7 @@ export { default as AtlassianLogoIcon } from './components/icons/AtlassianLogoIc
 export { default as AwsLogoIcon } from './components/icons/AwsLogoIcon'
 export { default as AzureDevopsLogoIcon } from './components/icons/AzureDevopsLogoIcon'
 export { default as AzureLogoIcon } from './components/icons/AzureLogoIcon'
+export { default as BedrockLogoIcon } from './components/icons/BedrockLogoIcon'
 export { default as BellIcon } from './components/icons/BellIcon'
 export { default as BitBucketIcon } from './components/icons/BitBucketIcon'
 export { default as BlockedIcon } from './components/icons/BlockedIcon'

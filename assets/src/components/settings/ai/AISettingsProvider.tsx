@@ -1,11 +1,11 @@
 import { Button, Callout, Flex, Switch } from '@pluralsh/design-system'
+import { useAiModels } from 'components/contexts/DeploymentSettingsContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
-  ModelDefault,
   useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
@@ -20,11 +20,11 @@ import {
   getUnconfiguredProviders,
 } from './AISettingsConfiguredProviders.tsx'
 import { AISettingsProviderModal } from './AISettingsProviderEditModal.tsx'
-import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 import {
   initialSettingsAttributes,
   validateAttributes,
 } from './AISettingsProviders.tsx'
+import { providerSettingsKey } from './aiModelRoutingUtils'
 
 const updateSettings = produce(
   (
@@ -43,17 +43,7 @@ export function AISettingsProvider() {
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
-  const modelDefaultsByProvider = useMemo(
-    () =>
-      Object.fromEntries(
-        deploymentSettings.defaultModels
-          ?.filter((defaultModel): defaultModel is ModelDefault => {
-            return !!defaultModel?.provider
-          })
-          .map((defaultModel) => [defaultModel.provider, defaultModel]) ?? []
-      ) as Partial<Record<AiProvider, ModelDefault>>,
-    [deploymentSettings.defaultModels]
-  )
+  const { defaultsByProvider: modelDefaultsByProvider } = useAiModels()
 
   const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
   const activeProvider = ai?.provider ?? AiProvider.Openai
