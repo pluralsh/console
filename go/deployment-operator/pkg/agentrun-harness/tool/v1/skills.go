@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
@@ -11,11 +13,13 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	harnessexec "github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const (
-	skillFileName = "SKILL.md"
+	skillFileName          = "SKILL.md"
+	skillsListCommandLimit = time.Minute
 )
 
 type skillFrontmatter struct {
@@ -60,6 +64,43 @@ func (in DefaultTool) ConfigureSkills(skillRoot string) error {
 
 	klog.V(log.LogLevelInfo).InfoS("agent run skills configured", "agentRunID", in.Config.Run.ID, "count", written, "root", skillRoot)
 	return nil
+}
+
+// LogConfiguredSkills emits provider-native CLI output that verifies loaded skills.
+func (in DefaultTool) LogConfiguredSkills(provider, command string, args []string, options ...harnessexec.Option) {
+	if in.Config.Run == nil || len(in.Config.Run.Skills) == 0 {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), skillsListCommandLimit)
+	defer cancel()
+
+	executable := harnessexec.NewExecutable(
+		command,
+		append([]harnessexec.Option{harnessexec.WithArgs(args)}, options...)...,
+	)
+
+	output, err := executable.RunWithOutput(ctx)
+	trimmedOutput := strings.TrimSpace(string(output))
+	if err != nil {
+		klog.V(log.LogLevelExtended).InfoS(
+			"failed to list configured agent run skills",
+			"agentRunID", in.Config.Run.ID,
+			"provider", provider,
+			"command", executable.Command(),
+			"error", err.Error(),
+			"output", trimmedOutput,
+		)
+		return
+	}
+
+	klog.V(log.LogLevelExtended).InfoS(
+		"configured agent run skills listed",
+		"agentRunID", in.Config.Run.ID,
+		"provider", provider,
+		"command", executable.Command(),
+		"output", trimmedOutput,
+	)
 }
 
 func (in DefaultTool) renderSkill(name string, skill agentrunv1.AgentSkill) (string, error) {

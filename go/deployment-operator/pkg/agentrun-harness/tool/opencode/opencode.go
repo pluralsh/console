@@ -56,6 +56,11 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		return fmt.Errorf("failed configuring opencode config file %q: %w", ConfigFileName, err)
 	}
 
+	configFilePath, err := filepath.Abs(in.configFilePath())
+	if err != nil {
+		return err
+	}
+
 	klog.V(log.LogLevelExtended).InfoS(
 		"opencode configured",
 		"configFile", in.configFilePath(),
@@ -65,6 +70,13 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		"mode", in.Config.Run.Mode,
 	)
 
+	in.LogConfiguredSkills(
+		"opencode",
+		"opencode",
+		[]string{"run", "list all available global, user and project skills"},
+		exec.WithDir(in.Config.RepositoryDir),
+		exec.WithEnv(in.env(configFilePath)),
+	)
 	return nil
 }
 

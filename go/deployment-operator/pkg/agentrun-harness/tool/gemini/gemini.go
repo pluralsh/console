@@ -253,6 +253,13 @@ func (in *Gemini) Configure(_, _ string) error {
 	}
 
 	klog.V(log.LogLevelExtended).InfoS("Gemini configured", "settings", in.settingsPath(), "inactivityTimeout", in.Config.Run.Runtime.Config.Gemini.InactivityTimeout)
+	in.LogConfiguredSkills(
+		"gemini",
+		"gemini",
+		[]string{"skills", "list"},
+		exec.WithDir(in.Config.WorkDir),
+		exec.WithEnv(in.env()),
+	)
 	return nil
 }
 
