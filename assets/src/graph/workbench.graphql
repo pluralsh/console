@@ -532,6 +532,11 @@ fragment WorkbenchIssue on Issue {
   }
 }
 
+fragment WorkbenchJobPullRequest on PullRequest {
+  ...PullRequestBasic
+  patch
+}
+
 fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
@@ -557,7 +562,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
     url
   }
   pullRequests {
-    ...PullRequestBasic
+    ...WorkbenchJobPullRequest
   }
   result {
     id
