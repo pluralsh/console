@@ -1,17 +1,29 @@
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { useTransition, animated } from '@react-spring/web'
 import { useAwaitingReview } from 'components/contexts/AwaitingReviewContext'
-import { useCallback, useRef, useState } from 'react'
+import { useTopLevelSidePanel } from 'components/layout/TopLevelSidePanel'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useTheme } from 'styled-components'
 import { AwaitingReviewLauncherButton } from './AwaitingReviewLauncherButton'
 import { AwaitingReviewPanel } from './AwaitingReviewPanel'
 import { WORKBENCH_LINK_HOVER_CARD_SELECTOR } from 'components/workbenches/common/WorkbenchLinkChip'
 
+const PANEL_WIDTH = 460
+
 export default function AwaitingReviewLauncher() {
   const theme = useTheme()
   const ref = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const toggle = useCallback(() => setOpen((o) => !o), [])
+  const { sidePanel } = useTopLevelSidePanel()
+  const [panelPosition, setPanelPosition] = useState<{
+    left?: number
+    right?: number
+    top: number
+    transformOrigin: string
+  }>()
 
   const transitions = useTransition(open ? [true] : [], {
     from: { opacity: 0, scale: 0.65 },
@@ -23,6 +35,9 @@ export default function AwaitingReviewLauncher() {
   useKeyDown(['Escape'], () => setOpen(false))
   useClickOutside(ref, (event) => {
     const target = event.target
+    if (target instanceof Node && panelRef.current?.contains(target)) {
+      return
+    }
     if (
       target instanceof Element &&
       target.closest(WORKBENCH_LINK_HOVER_CARD_SELECTOR)
@@ -34,37 +49,61 @@ export default function AwaitingReviewLauncher() {
 
   const { stacks, agentRuns, count, loading, error } = useAwaitingReview()
 
+  useLayoutEffect(() => {
+    if (!open) return
+
+    const launcherRect = ref.current?.getBoundingClientRect()
+    if (!launcherRect) return
+
+    const opensRight = !!sidePanel || launcherRect.right < PANEL_WIDTH
+
+    setPanelPosition({
+      left: opensRight ? launcherRect.left : undefined,
+      right: opensRight ? undefined : window.innerWidth - launcherRect.right,
+      top: launcherRect.bottom + theme.spacing.xsmall,
+      transformOrigin: opensRight ? 'top left' : 'top right',
+    })
+  }, [open, sidePanel, theme.spacing.xsmall])
+
   return (
     <div
       ref={ref}
-      css={{ position: 'relative', zIndex: theme.zIndexes.modal }}
+      css={{
+        position: 'relative',
+        zIndex: open ? theme.zIndexes.selectPopover : theme.zIndexes.modal,
+      }}
     >
       <AwaitingReviewLauncherButton
         open={open}
         onClick={toggle}
         count={count}
       />
-      {transitions((styles) => (
-        <animated.div
-          style={{
-            ...styles,
-            position: 'absolute',
-            right: 0,
-            top: 32 + theme.spacing.xsmall,
-            display: 'flex',
-            flexDirection: 'column',
-            transformOrigin: 'top right',
-          }}
-        >
-          <AwaitingReviewPanel
-            stacks={stacks}
-            agentRuns={agentRuns}
-            loading={loading}
-            error={error}
-            onClose={() => setOpen(false)}
-          />
-        </animated.div>
-      ))}
+      {transitions((styles, item) =>
+        item && panelPosition
+          ? createPortal(
+              <animated.div
+                ref={panelRef}
+                style={{
+                  ...styles,
+                  position: 'fixed',
+                  zIndex: theme.zIndexes.selectPopover,
+                  ...panelPosition,
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <AwaitingReviewPanel
+                  stacks={stacks}
+                  agentRuns={agentRuns}
+                  loading={loading}
+                  error={error}
+                  onClose={() => setOpen(false)}
+                />
+              </animated.div>,
+              document.body
+            )
+          : null
+      )}
     </div>
   )
 }
