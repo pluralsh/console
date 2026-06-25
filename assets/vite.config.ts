@@ -12,6 +12,11 @@ const WS_URL = process.env.BASE_URL
   ? `wss://${process.env.BASE_URL}`
   : 'wss://console.plural.sh'
 
+// Dev-only: signed object-store URLs (S3, Azure, localstack) are cross-origin from
+// localhost, so direct fetch() fails on CORS. A shim rewrites those requests to
+// /__object_store/... and this middleware proxies them server-side. Only
+// content-type is forwarded — Vite's HTTP/2 dev server rejects hop-by-hop headers
+// like transfer-encoding from upstream.
 const objectStoreDevProxy = {
   name: 'object-store-dev-proxy',
   apply: 'serve' as const,
