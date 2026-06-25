@@ -11,7 +11,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -86,7 +85,6 @@ export function AIAgentRun() {
   const runLoading = !data && loading
   const run = data?.agentRun
   const { isOpen, setOpen } = useAgentRunPanel(!!run?.id)
-  useSidePanelWidth({ maxWidthVw: 60, initialWidthVw: 60 })
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending

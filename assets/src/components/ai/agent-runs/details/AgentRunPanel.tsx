@@ -16,6 +16,7 @@ import {
 } from 'components/ai/chatbot/SidePanelShared'
 import {
   SidePanel,
+  useSidePanelWidth,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -126,10 +127,26 @@ export function AgentRunPanelContent() {
     clearRequestedTab,
   } = useAgentRunPanel()
   const tabStateRef = useRef<any>(null)
+  const [diffFullscreen, setDiffFullscreen] = useState(false)
+  const isDiffMaximized = diffFullscreen && selectedTab === 'Diff'
+
+  useSidePanelWidth(
+    isDiffMaximized
+      ? { fullWidth: true }
+      : { maxWidthVw: 60, initialWidthVw: 60 }
+  )
 
   useEffect(() => {
     clearRequestedTab()
   }, [runId, clearRequestedTab])
+
+  useEffect(() => {
+    if (!runId) setDiffFullscreen(false)
+  }, [runId])
+
+  useEffect(() => {
+    if (selectedTab !== 'Diff') setDiffFullscreen(false)
+  }, [selectedTab])
 
   const { data, loading } = useAgentRunQuery({
     skip: !runId,
@@ -206,7 +223,7 @@ export function AgentRunPanelContent() {
   ])
 
   return (
-    <SidePanelContent>
+    <SidePanelContent hideResizeChrome={isDiffMaximized}>
       <PanelHeaderSC>
         {(hasContentTabs || run?.podReference || showTabSkeleton) && (
           <TabListWrapperSC>
@@ -309,6 +326,8 @@ export function AgentRunPanelContent() {
             <AgentRunDiff
               runId={run.id}
               patchUrl={run.upload.patch}
+              isFullscreen={diffFullscreen}
+              onFullscreenChange={setDiffFullscreen}
             />
           </ContentInnerFlushSC>
         </ContentWrapperFlushSC>
