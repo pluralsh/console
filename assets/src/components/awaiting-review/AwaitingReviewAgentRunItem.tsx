@@ -1,11 +1,11 @@
 import {
   Button,
   Chip,
-  DiscoverIcon,
   Flex,
   IconFrame,
   WarningOutlineIcon,
 } from '@pluralsh/design-system'
+import { AgentRunIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -57,9 +57,9 @@ export function AwaitingReviewAgentRunItem({
           size="large"
           type="secondary"
           icon={
-            <DiscoverIcon
+            <AgentRunIcon
+              runtime={agentRun.runtime}
               size={16}
-              color={theme.colors['icon-default']}
             />
           }
           css={{
