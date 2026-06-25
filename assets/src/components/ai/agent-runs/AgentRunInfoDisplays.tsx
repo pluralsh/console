@@ -5,17 +5,18 @@ import {
   Card,
   CardProps,
   CheckOutlineIcon,
-  DiscoverIcon,
   FailedFilledIcon,
   Flex,
   FlexProps,
   IconFrame,
+  IconProps,
   PrOpenIcon,
   SpinnerAlt,
   Tooltip,
   WarningIcon,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
@@ -23,6 +24,7 @@ import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   AgentRunTinyFragment,
+  AgentRuntimeType,
   useAgentRunTinyQuery,
   WorkbenchJobStatus,
 } from 'generated/graphql'
@@ -34,6 +36,27 @@ import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { PRsModalIcon } from './AIAgentRunsTableCols'
+
+export function AgentRunIcon({
+  runtime,
+  size = 16,
+  fullColor = true,
+  ...props
+}: {
+  runtime?: Nullable<AgentRunTinyFragment['runtime']>
+  size?: number
+  fullColor?: boolean
+} & Omit<IconProps, 'size'>) {
+  const Icon = runtimeToIcon[runtime?.type ?? AgentRuntimeType.Custom]
+
+  return (
+    <Icon
+      fullColor={fullColor}
+      size={size}
+      {...props}
+    />
+  )
+}
 
 export function AgentRunInfoCard({
   agentRun,
@@ -89,9 +112,9 @@ export function AgentRunInfoCard({
               circle
               type="secondary"
               icon={
-                <DiscoverIcon
+                <AgentRunIcon
+                  runtime={agentRun.runtime}
                   size={16}
-                  color={colors['icon-default']}
                 />
               }
               css={{ flexShrink: 0 }}

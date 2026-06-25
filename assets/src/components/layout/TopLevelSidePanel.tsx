@@ -35,6 +35,12 @@ import {
   WORKBENCH_TOOLS_YOUR_PATH_MATCHER_ABS,
   WORKBENCH_WEBHOOK_TRIGGERS_PATH_MATCHER_ABS,
 } from 'routes/workbenchesRoutesConsts'
+import {
+  SIDEBAR_EXPANDED_WIDTH,
+  SIDEBAR_WIDTH,
+  SidebarContext,
+} from './Sidebar'
+import styled from 'styled-components'
 
 export type SidePanel =
   | 'agent-run'
@@ -42,14 +48,16 @@ export type SidePanel =
   | 'webhook-setup-guide'
   | 'workbench-job'
 
-type SidePanelWidthOverride = {
+export type SidePanelWidthOverride = {
   minWidth?: number
   maxWidthVw?: number
   initialWidthVw?: number
+  fullWidth?: boolean
 }
 
 export const DEFAULT_MIN_WIDTH = 500
 export const DEFAULT_MAX_WIDTH_VW = 40
+const SIDE_PANEL_WIDTH_TRANSITION = '0.3s ease-in-out'
 
 const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
   'webhook-setup-guide': [
@@ -87,52 +95,66 @@ export function useTopLevelSidePanel() {
 // removes override when caller is unmounted
 export function useSidePanelWidth(override: SidePanelWidthOverride | null) {
   const { setWidthOverride } = useTopLevelSidePanel()
-  const { minWidth, maxWidthVw, initialWidthVw } = override ?? {}
+  const { minWidth, maxWidthVw, initialWidthVw, fullWidth } = override ?? {}
   const hasOverride = !!override
   useEffect(() => {
     if (!hasOverride) return
-    setWidthOverride({ minWidth, maxWidthVw, initialWidthVw })
+    setWidthOverride({ minWidth, maxWidthVw, initialWidthVw, fullWidth })
     return () => setWidthOverride(null)
-  }, [setWidthOverride, hasOverride, minWidth, maxWidthVw, initialWidthVw])
+  }, [
+    setWidthOverride,
+    hasOverride,
+    minWidth,
+    maxWidthVw,
+    initialWidthVw,
+    fullWidth,
+  ])
 }
 
 export function TopLevelSidePanel() {
   const { sidePanel, widthOverride } = useTopLevelSidePanel()
+  const { isExpanded } = use(SidebarContext)
+  const sidebarWidth = isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH
   const { calculatedPanelWidth, dragHandleProps, isDragging } =
     useResizablePane(
       widthOverride?.minWidth ?? DEFAULT_MIN_WIDTH,
       widthOverride?.maxWidthVw ?? DEFAULT_MAX_WIDTH_VW,
       widthOverride?.initialWidthVw
     )
+  const fullWidth = !!widthOverride?.fullWidth
+  const panelWidth = fullWidth
+    ? `calc(100vw - ${sidebarWidth}px)`
+    : `${calculatedPanelWidth}px`
 
   return (
     <Accordion
       type="single"
       value={`${sidePanel !== null}`}
       orientation="horizontal"
-      css={{ border: 'none', zIndex: 1 }}
+      css={{ border: 'none', height: '100%', zIndex: 1 }}
     >
       <AccordionItem
         value={`${true}`}
         caret="none"
         padding="none"
         trigger={null}
-        css={{ height: '100%', width: '100%' }}
-        additionalContentStyles={{ overflow: 'visible' }}
+        css={{ height: '100%', width: 'auto' }}
+        additionalContentStyles={{ height: '100%', overflow: 'visible' }}
       >
-        <div
-          css={{ position: 'relative', height: '100%' }}
+        <SidePanelWidthSC
           style={{
-            '--side-panel-width': `${calculatedPanelWidth}px`,
+            '--side-panel-width': panelWidth,
             '--is-dragging': isDragging ? '1' : '0',
           }}
         >
           <TopLevelSidePanelContent sidePanel={sidePanel} />
-          <DragHandleSC
-            tabIndex={0}
-            {...dragHandleProps}
-          />
-        </div>
+          {!fullWidth && (
+            <DragHandleSC
+              tabIndex={0}
+              {...dragHandleProps}
+            />
+          )}
+        </SidePanelWidthSC>
       </AccordionItem>
     </Accordion>
   )
@@ -204,3 +226,12 @@ function TopLevelSidePanelProvider({ children }: { children: ReactNode }) {
     <TopLevelSidePanelContext value={ctx}>{children}</TopLevelSidePanelContext>
   )
 }
+
+const SidePanelWidthSC = styled.div({
+  position: 'relative',
+  height: '100%',
+  width: 'var(--side-panel-width)',
+  flexShrink: 0,
+  overflow: 'hidden',
+  transition: `width calc((1 - var(--is-dragging)) * ${SIDE_PANEL_WIDTH_TRANSITION}) ease-in-out`,
+})

@@ -5,12 +5,21 @@ import {
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { useQuery } from '@tanstack/react-query'
-import { FolderIcon, PatchHighlight, Tooltip } from '@pluralsh/design-system'
+import { useKeyDown } from '@react-hooks-library/core'
+import {
+  ExpandIcon,
+  FolderIcon,
+  IconFrame,
+  MinimizeIcon,
+  PatchHighlight,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
 import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { parsePatch } from 'diff'
+import pluralize from 'pluralize'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 import { getFileTypeIconKey, getLanguageFromFileName } from 'utils/file'
@@ -57,8 +66,7 @@ const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
 } as const
 
 async function fetchPatch(patchUrl: string) {
-  const { host, pathname, search } = new URL(patchUrl)
-  const response = await fetch(`/__object_store/${host}${pathname}${search}`)
+  const response = await fetch(patchUrl)
 
   if (!response.ok) {
     throw new Error(
@@ -208,9 +216,13 @@ function buildNodeLookup(
 export function AgentRunDiff({
   runId,
   patchUrl,
+  isFullscreen = false,
+  onFullscreenChange,
 }: {
   runId: string
   patchUrl: string
+  isFullscreen?: boolean
+  onFullscreenChange?: (fullscreen: boolean) => void
 }) {
   const {
     data: content,
@@ -244,6 +256,12 @@ export function AgentRunDiff({
   const { nodeMap, parentMap } = useMemo(() => buildNodeLookup(tree), [tree])
   const selectedNode = selectedPath ? nodeMap.get(selectedPath) : undefined
   const selectedFile = selectedNode?.file ?? files[0]
+
+  const toggleFullscreen = useCallback(() => {
+    onFullscreenChange?.(!isFullscreen)
+  }, [isFullscreen, onFullscreenChange])
+
+  useKeyDown('Escape', () => isFullscreen && onFullscreenChange?.(false))
 
   useEffect(() => {
     setSelectedPath(files[0]?.path)
@@ -316,7 +334,9 @@ export function AgentRunDiff({
     <DiffLayoutSC>
       <DiffTreeSC>
         <DiffTreeHeaderSC>
-          <span>{files.length} files changed</span>
+          <span>
+            {files.length} {pluralize('file', files.length)} changed
+          </span>
           <DiffLineStatsSC>
             <DiffDeletionsSC>-{totals.deletions}</DiffDeletionsSC>
             <DiffAdditionsSC>+{totals.additions}</DiffAdditionsSC>
@@ -354,10 +374,34 @@ export function AgentRunDiff({
               </DiffFileNameRowSC>
               <DiffFilePathSC>{selectedFile.path}</DiffFilePathSC>
             </DiffFileHeaderInfoSC>
-            <DiffLineStatsSC>
-              <DiffDeletionsSC>-{selectedFile.deletions}</DiffDeletionsSC>
-              <DiffAdditionsSC>+{selectedFile.additions}</DiffAdditionsSC>
-            </DiffLineStatsSC>
+            <DiffHeaderActionsSC>
+              <DiffLineStatsSC>
+                <DiffDeletionsSC>-{selectedFile.deletions}</DiffDeletionsSC>
+                <DiffAdditionsSC>+{selectedFile.additions}</DiffAdditionsSC>
+              </DiffLineStatsSC>
+              {isFullscreen ? (
+                <DiffMinimizeControlSC>
+                  <DiffEscHintSC>Esc to close</DiffEscHintSC>
+                  <IconFrame
+                    clickable
+                    size="xsmall"
+                    type="tertiary"
+                    icon={<MinimizeIcon />}
+                    tooltip="Minimize diff"
+                    onClick={toggleFullscreen}
+                  />
+                </DiffMinimizeControlSC>
+              ) : (
+                <IconFrame
+                  clickable
+                  size="xsmall"
+                  type="tertiary"
+                  icon={<ExpandIcon />}
+                  tooltip="Maximize diff"
+                  onClick={toggleFullscreen}
+                />
+              )}
+            </DiffHeaderActionsSC>
           </DiffFileHeaderSC>
         )}
         <DiffCodeSC>
@@ -513,6 +557,7 @@ const DiffTreeHeaderSC = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
   lineHeight: 1,
   padding: `${theme.spacing.small}px ${theme.spacing.small}px ${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+  textTransform: 'uppercase',
 }))
 
 const DiffFileHeaderSC = styled.div(({ theme }) => ({
@@ -557,6 +602,25 @@ const DiffFilePathSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
   ...TRUNCATE,
+}))
+
+const DiffHeaderActionsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  flexShrink: 0,
+}))
+
+const DiffMinimizeControlSC = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 2,
+})
+
+const DiffEscHintSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  whiteSpace: 'nowrap',
 }))
 
 const DiffLineStatsSC = styled.span(({ theme }) => ({

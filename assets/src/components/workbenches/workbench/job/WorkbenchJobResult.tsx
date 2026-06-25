@@ -1,12 +1,16 @@
 import {
   ArrowTopRightIcon,
+  Button,
   Card,
   Code,
   Flex,
   IconFrame,
   Markdown,
+  Modal,
   prettifyRepoUrl,
   PrIcon,
+  PrOpenIcon,
+  WarningOutlineIcon,
 } from '@pluralsh/design-system'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
@@ -16,17 +20,30 @@ import { Body2BoldP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
 import {
+  AgentRunTinyFragment,
   PullRequestBasicFragment,
   WorkbenchJobFragment,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import { isEmpty, truncate } from 'lodash'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerChatbot } from './WorkbenchJobTriggerChatbot'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
+
+export const PATCH_PR_URL = '<patch>'
+
+export type WorkbenchJobDraftPr =
+  | { type: 'agentRun'; agentRun: AgentRunTinyFragment }
+  | {
+      type: 'patchPr'
+      pullRequest: PullRequestBasicFragment & { patch?: Nullable<string> }
+    }
 
 export function WorkbenchJobResult({
   job,
@@ -91,48 +108,225 @@ export function WorkbenchJobTopology({ topology }: { topology: string }) {
   )
 }
 
-export function WorkbenchJobPrs({ prs }: { prs: PullRequestBasicFragment[] }) {
+export function WorkbenchJobPrs({
+  generatedPrs,
+  draftPrs,
+  workbenchId,
+  workbenchName,
+  jobId,
+}: {
+  generatedPrs: PullRequestBasicFragment[]
+  draftPrs: WorkbenchJobDraftPr[]
+  workbenchId: string
+  workbenchName: string
+  jobId: string
+}) {
+  const { spacing } = useTheme()
+
   return (
-    <>
-      <StackedText
-        icon={
-          <IconFrame
-            circle
-            type="secondary"
-            icon={<PrIcon />}
-          />
-        }
-        first={<Body2BoldP>Generated pull requests</Body2BoldP>}
-      />
-      {prs.map((pr) => (
-        <WrapperCardSC
-          key={pr.id}
-          fillLevel={0}
-          clickable
-          forwardedAs="a"
-          href={pr.url}
-          target="_blank"
-          rel="noopener noreferrer"
+    <Flex
+      direction="column"
+      gap="xlarge"
+    >
+      {!isEmpty(generatedPrs) && (
+        <Flex
+          direction="column"
+          gap="medium"
         >
           <StackedText
-            truncate
-            first={
-              <span id={`link-${pr.id}`}>{prettifyRepoUrl(pr.url, true)}</span>
+            icon={
+              <IconFrame
+                circle
+                type="secondary"
+                icon={<PrIcon />}
+              />
             }
-            firstPartialType="body2"
-            firstColor="text"
-            second={pr.title}
+            first={<Body2BoldP>Generated pull requests</Body2BoldP>}
           />
-          <RightActionsSC>
-            <PrStatusChip status={pr.status} />
-            <IconFrame
-              size="small"
-              tooltip="View PR"
-              icon={<ArrowTopRightIcon color="icon-light" />}
-            />
-          </RightActionsSC>
-        </WrapperCardSC>
-      ))}
+          {generatedPrs.map((pr) => (
+            <WrapperCardSC
+              key={pr.id}
+              fillLevel={0}
+              clickable
+              forwardedAs="a"
+              href={pr.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <StackedText
+                truncate
+                first={
+                  <span id={`link-${pr.id}`}>
+                    {prettifyRepoUrl(pr.url, true)}
+                  </span>
+                }
+                firstPartialType="body2"
+                firstColor="text"
+                second={pr.title}
+              />
+              <RightActionsSC>
+                <PrStatusChip status={pr.status} />
+                <IconFrame
+                  size="small"
+                  tooltip="View PR"
+                  icon={<ArrowTopRightIcon color="icon-light" />}
+                />
+              </RightActionsSC>
+            </WrapperCardSC>
+          ))}
+        </Flex>
+      )}
+      {!isEmpty(draftPrs) && (
+        <Flex
+          direction="column"
+          gap="medium"
+          css={
+            !isEmpty(generatedPrs) ? { paddingTop: spacing.small } : undefined
+          }
+        >
+          <StackedText
+            icon={
+              <IconFrame
+                circle
+                type="secondary"
+                icon={<PrOpenIcon />}
+              />
+            }
+            first={
+              <Body2BoldP>Draft pull requests waiting for approvals</Body2BoldP>
+            }
+          />
+          {draftPrs.map((draft) =>
+            draft.type === 'agentRun' ? (
+              <WorkbenchJobDraftAgentRunCard
+                key={`agent-run-${draft.agentRun.id}`}
+                agentRun={draft.agentRun}
+                workbenchId={workbenchId}
+                workbenchName={workbenchName}
+                jobId={jobId}
+              />
+            ) : (
+              <WorkbenchJobDraftPatchPrCard
+                key={`patch-pr-${draft.pullRequest.id}`}
+                pullRequest={draft.pullRequest}
+              />
+            )
+          )}
+        </Flex>
+      )}
+    </Flex>
+  )
+}
+
+function WorkbenchJobDraftAgentRunCard({
+  agentRun,
+  workbenchId,
+  workbenchName,
+  jobId,
+}: {
+  agentRun: AgentRunTinyFragment
+  workbenchId: string
+  workbenchName: string
+  jobId: string
+}) {
+  const linkedPr = agentRun.pullRequests?.find(
+    (pr) => pr?.url && pr.url !== PATCH_PR_URL
+  )
+  const path = linkedPr?.url
+    ? prettifyRepoUrl(linkedPr.url, true)
+    : prettifyRepoUrl(agentRun.repository, true)
+  const title =
+    linkedPr?.title ??
+    agentRun.pullRequests?.[0]?.title ??
+    truncate(agentRun.prompt ?? '', { length: 80 })
+
+  return (
+    <DraftCardSC fillLevel={0}>
+      <StackedText
+        truncate
+        first={path}
+        firstPartialType="body2"
+        firstColor="text"
+        second={title}
+      />
+      <RightActionsSC>
+        <WarningOutlineIcon
+          size={16}
+          color="icon-warning"
+        />
+        <Button
+          small
+          as={Link}
+          to={getAgentRunAbsPath({
+            agentRunId: agentRun.id,
+            ...(workbenchId
+              ? {
+                  backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+                  backLabel: workbenchName,
+                }
+              : {}),
+          })}
+          target="_blank"
+          rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
+        >
+          Review patch
+        </Button>
+      </RightActionsSC>
+    </DraftCardSC>
+  )
+}
+
+function WorkbenchJobDraftPatchPrCard({
+  pullRequest,
+}: {
+  pullRequest: PullRequestBasicFragment & { patch?: Nullable<string> }
+}) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const { patch, title } = pullRequest
+
+  return (
+    <>
+      <DraftCardSC fillLevel={0}>
+        <StackedText
+          truncate
+          first="Patch pending approval"
+          firstPartialType="body2"
+          firstColor="text"
+          second={title}
+        />
+        <RightActionsSC>
+          <WarningOutlineIcon
+            size={16}
+            color="icon-warning"
+          />
+          <Button
+            small
+            disabled={!patch}
+            onClick={() => setModalOpen(true)}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            Review patch
+          </Button>
+        </RightActionsSC>
+      </DraftCardSC>
+      {patch && (
+        <Modal
+          header="Patch content"
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          size="auto"
+          css={{ minWidth: '50%', maxWidth: '80%' }}
+        >
+          <Code
+            showHeader={false}
+            language="diff"
+            overflow="auto"
+          >
+            {patch}
+          </Code>
+        </Modal>
+      )}
     </>
   )
 }
@@ -215,6 +409,13 @@ const WrapperCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   textDecoration: 'none',
   '&:hover span[id^="link-"]': { textDecoration: 'underline' },
+}))
+
+const DraftCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.large,
+  padding: theme.spacing.medium,
 }))
 
 const RightActionsSC = styled.div(({ theme }) => ({

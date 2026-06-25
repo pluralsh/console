@@ -101,8 +101,7 @@ export function WorkbenchJob() {
           <GqlError
             header="Workbench job reported an error"
             error={job?.error}
-            margin="large"
-            css={{ marginBottom: 0 }}
+            css={{ marginBottom: theme.spacing.small }}
           />
         )}
 

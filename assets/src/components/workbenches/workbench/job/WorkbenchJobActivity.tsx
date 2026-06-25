@@ -1,7 +1,6 @@
 import {
   AccordionItem,
   Card,
-  DiscoverIcon,
   FailedFilledIcon,
   Flex,
   IconFrame,
@@ -10,6 +9,7 @@ import {
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
 import {
+  AgentRunIcon,
   AgentRunInfoCard,
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
@@ -158,9 +158,9 @@ export function WorkbenchJobActivity({
               target="_blank"
               rel="noopener noreferrer"
               icon={
-                <DiscoverIcon
-                  color="icon-xlight"
-                  css={{ width: 14 }}
+                <AgentRunIcon
+                  runtime={agentRun.runtime}
+                  size={14}
                 />
               }
               tooltip="Go to agent run details"
@@ -269,12 +269,7 @@ function WorkbenchJobActivityResult({
             first="Other agent runs"
             firstPartialType="body2Bold"
             firstColor="text-xlight"
-            icon={
-              <DiscoverIcon
-                size={12}
-                color="icon-xlight"
-              />
-            }
+            icon={<AgentRunIcon size={12} />}
           />
           {otherAgentRuns?.map((agentRun) => (
             <AgentRunInfoSimple
