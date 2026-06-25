@@ -337,18 +337,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	settings.WithEnv("BASH_MAX_TIMEOUT_MS", maxTimeout)
 	klog.V(log.LogLevelInfo).InfoS("claude timeouts configured", "default_timeout", defaultTimeout, "max_timeout", maxTimeout)
 
-	if err := settings.WriteToFile(filepath.Join(in.configPath(), "settings.local.json")); err != nil {
-		return err
-	}
-
-	in.LogConfiguredSkills(
-		"claude",
-		"claude",
-		[]string{"-p", "list all available global, user and project skills"},
-		exec.WithDir(in.Config.WorkDir),
-		exec.WithEnv(in.withConfigEnv(nil)),
-	)
-	return nil
+	return settings.WriteToFile(filepath.Join(in.configPath(), "settings.local.json"))
 }
 
 func (in *Claude) configPath() string {

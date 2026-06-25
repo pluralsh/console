@@ -88,12 +88,7 @@ func (in *Codex) Configure(consoleURL, consoleToken string) error {
 		return err
 	}
 
-	if err := in.writeCodexConfig(); err != nil {
-		return err
-	}
-
-	in.LogConfiguredSkills("codex", "codex", []string{"list all available global, user and project skills"}, in.codexExecOptions()...)
-	return nil
+	return in.writeCodexConfig()
 }
 
 func (in *Codex) writeCodexConfig() error {
