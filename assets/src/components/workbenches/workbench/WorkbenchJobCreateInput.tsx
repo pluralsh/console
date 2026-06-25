@@ -85,6 +85,7 @@ export function WorkbenchJobCreateInput({
     model: Nullable<WorkbenchJobModelAttributes>
   }>({ workbenchId, model: null })
   const initializedWorkbenchIdRef = useRef<string | null>(null)
+  const prevWorkbenchIdRef = useRef<string | null>(null)
   const selectedModel =
     selectedModelState.workbenchId === workbenchId
       ? selectedModelState.model
@@ -98,14 +99,18 @@ export function WorkbenchJobCreateInput({
   useEffect(() => {
     if (!workbenchId) {
       initializedWorkbenchIdRef.current = null
+      prevWorkbenchIdRef.current = null
       setPromptModes(null)
       return
     }
 
-    if (initializedWorkbenchIdRef.current === workbenchId) return
+    if (prevWorkbenchIdRef.current !== workbenchId) {
+      prevWorkbenchIdRef.current = workbenchId
+      initializedWorkbenchIdRef.current = null
+      setPromptModes(null)
+    }
 
-    initializedWorkbenchIdRef.current = null
-    setPromptModes(null)
+    if (initializedWorkbenchIdRef.current === workbenchId) return
 
     const defaults = defaultPromptModesFromWorkbench(
       data?.workbench,
@@ -114,7 +119,7 @@ export function WorkbenchJobCreateInput({
     if (defaults === undefined) return
 
     initializedWorkbenchIdRef.current = workbenchId
-    setPromptModes(defaults)
+    setPromptModes((current) => current ?? defaults)
   }, [workbenchId, data?.workbench])
 
   useEffect(() => {
