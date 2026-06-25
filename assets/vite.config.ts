@@ -1,9 +1,8 @@
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import react from '@vitejs/plugin-react'
-import http from 'node:http'
-import https from 'node:https'
+import { Readable } from 'node:stream'
 import { resolve } from 'path'
-import { defineConfig, type ViteDevServer } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 const API_URL = process.env.BASE_URL
@@ -13,94 +12,45 @@ const WS_URL = process.env.BASE_URL
   ? `wss://${process.env.BASE_URL}`
   : 'wss://console.plural.sh'
 
-function objectStoreProxyPlugin() {
-  return {
-    name: 'object-store-proxy',
-    apply: 'serve' as const,
-    configureServer(server: ViteDevServer) {
-      server.middlewares.use((
-        req: http.IncomingMessage,
-        res: http.ServerResponse,
-        next: () => void
-      ) => {
-        if (req.url?.startsWith('/__object_store/fetch-shim.js')) {
-          res.setHeader('Content-Type', 'application/javascript')
-          return res.end(
-            'const f=fetch.bind(window);window.fetch=(i,n)=>{try{const r=new URL(typeof i=="string"?i:i.url);if(r.origin!==location.origin&&/localhost|127\\.0\\.0\\.1|localstack|amazonaws|blob\\.core\\.windows\\.net|X-Amz-|sig=/i.test(r.hostname+r.search))return f("/__object_store/"+r.host+r.pathname+r.search,n)}catch{}return f(i,n)}'
-          )
-        }
-
-        if (!req.url?.startsWith('/__object_store/')) return next()
-
-        const requestPath = req.url.slice('/__object_store/'.length)
-        const pathStart = requestPath.indexOf('/')
-
-        if (pathStart < 0) {
-          res.statusCode = 400
-          res.end('Invalid object store proxy URL')
-          return
-        }
-
-        const signedHost = requestPath.slice(0, pathStart)
-        const targetPath = requestPath.slice(pathStart)
-        const connectHost = signedHost.replace(/^localstack/i, 'localhost')
-        const target = new URL(
-          /localhost|127\.0\.0\.1|localstack/i.test(connectHost)
-            ? `http://${connectHost}`
-            : `https://${connectHost}`
+const objectStoreDevProxy = {
+  name: 'object-store-dev-proxy',
+  apply: 'serve' as const,
+  configureServer({ middlewares }) {
+    middlewares.use(async (req, res, next) => {
+      if (req.url === '/__object_store/fetch-shim.js') {
+        res.setHeader('Content-Type', 'application/javascript')
+        return res.end(
+          'const f=fetch.bind(window);window.fetch=(i,n)=>{try{const r=new URL(typeof i=="string"?i:i.url);if(r.origin!==location.origin&&/localhost|127\\.0\\.0\\.1|localstack|amazonaws|blob\\.core\\.windows\\.net|X-Amz-|sig=/i.test(r.hostname+r.search))return f("/__object_store/"+r.host+r.pathname+r.search,n)}catch{}return f(i,n)}'
         )
-        const client = target.protocol === 'https:' ? https : http
-        const headers: http.OutgoingHttpHeaders = Object.fromEntries(
-          Object.entries(req.headers).filter(([name]) => !name.startsWith(':'))
+      }
+      if (!req.url?.startsWith('/__object_store/')) return next()
+      const [host, ...path] = req.url.slice('/__object_store/'.length).split('/')
+      if (!host || !path.length) return res.writeHead(400).end()
+      const h = host.replace(/^localstack/i, 'localhost')
+      try {
+        const r = await fetch(
+          `${/localhost|127\.0\.0\.1|localstack/i.test(h) ? `http://${h}` : `https://${host}`}/${path.join('/')}`,
+          { headers: { host } }
         )
-
-        headers.host = signedHost
-
-        const proxyReq = client.request(
-          {
-            protocol: target.protocol,
-            hostname: target.hostname,
-            port: target.port || undefined,
-            method: req.method,
-            path: targetPath,
-            headers,
-          },
-          (proxyRes) => {
-            res.writeHead(
-              proxyRes.statusCode ?? 502,
-              Object.fromEntries(
-                Object.entries(proxyRes.headers).filter(
-                  ([name]) =>
-                    ![
-                      'transfer-encoding',
-                      'connection',
-                      'keep-alive',
-                      'upgrade',
-                      'proxy-connection',
-                    ].includes(name.toLowerCase())
-                )
-              )
-            )
-            proxyRes.pipe(res)
-          }
-        )
-
-        proxyReq.on('error', (err: NodeJS.ErrnoException) => {
-          res.statusCode = 502
-          res.end(`Object store proxy failed: ${err.code ?? err.message}`)
+        res.writeHead(r.status, {
+          'content-type': r.headers.get('content-type') ?? 'text/plain',
         })
-
-        if (req.method === 'GET' || req.method === 'HEAD') proxyReq.end()
-        else req.pipe(proxyReq)
-      })
-    },
-    transformIndexHtml: (html: string) =>
-      html.replace(
-        '<head>',
-        '<head><script src="/__object_store/fetch-shim.js"></script>'
-      ),
-  }
-}
+        r.body
+          ? Readable.fromWeb(
+              r.body as import('stream/web').ReadableStream
+            ).pipe(res)
+          : res.end()
+      } catch {
+        res.writeHead(502).end()
+      }
+    })
+  },
+  transformIndexHtml: (html: string) =>
+    html.replace(
+      '<head>',
+      '<head><script src="/__object_store/fetch-shim.js"></script>'
+    ),
+} satisfies Plugin
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -114,7 +64,7 @@ export default defineConfig({
       },
     }),
     tsconfigPaths({ loose: true }),
-    objectStoreProxyPlugin(),
+    objectStoreDevProxy,
     // this was very memory intensive (from source maps) and ultimately not that useful
     // could consider reenabling in the future if we rework DS bundling/publishing
     // sentryVitePlugin({
