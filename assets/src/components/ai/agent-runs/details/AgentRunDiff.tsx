@@ -66,8 +66,7 @@ const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
 } as const
 
 async function fetchPatch(patchUrl: string) {
-  const { host, pathname, search } = new URL(patchUrl)
-  const response = await fetch(`/__object_store/${host}${pathname}${search}`)
+  const response = await fetch(patchUrl)
 
   if (!response.ok) {
     throw new Error(
