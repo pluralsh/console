@@ -2,6 +2,11 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
   use ConsoleWeb.ConnCase, async: false
   use Mimic
 
+<<<<<<< HEAD
+=======
+  @compatibilities_url "https://assets.plural.sh/matrices/compatability/static/compatibilities.yaml"
+
+>>>>>>> 62e599653 (Agent Run downloads apis)
   alias Console.Schema.AgentRunUpload
 
   setup :set_mimic_global
@@ -80,6 +85,30 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       assert response =~ "Example Domain"
     end
 
+<<<<<<< HEAD
+=======
+    test "downloads a multi-chunk public upload url", %{conn: conn} do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      upload = insert(:agent_run_upload, agent_run: run, session: nil, screen_recording: nil)
+
+      expect(Console.Uploads, :url, fn {file, %AgentRunUpload{id: id}}, :original, signed: true ->
+        assert id == upload.id
+        assert file.file_name == "agent.patch"
+        @compatibilities_url
+      end)
+
+      response =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
+        |> response(200)
+
+      assert response =~ "addons:"
+      assert byte_size(response) > 100_000
+    end
+
+>>>>>>> 62e599653 (Agent Run downloads apis)
     test "accepts upload type names from the agent run upload schema" do
       user = insert(:user)
       run = insert(:agent_run, user: user)
