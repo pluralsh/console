@@ -6,6 +6,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
+import { WorkbenchUsageChips } from 'components/workbenches/common/WorkbenchUsageChips'
 import {
   useWorkbenchJobsQuery,
   WorkbenchJobTinyFragment,
@@ -76,26 +77,36 @@ function WorkbenchLaunchRecentJobCard({
       to={getWorkbenchJobAbsPath({ workbenchId: workbench.id, jobId: id })}
     >
       <StretchedFlex>
-        <RunStatusIcon
-          fullColor
-          status={status}
-        />
-        <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
-      </StretchedFlex>
-      <WorkbenchStoredPromptMarkdown
-        text={prompt ?? ''}
-        density="jobCard"
-        clampLines={2}
-      />
-      <BottomSectionSC>
-        {user && (
+        {user ? (
           <CaptionP
             $color="text-xlight"
             css={{ ...TRUNCATE_STYLE }}
           >
             {user.name}
           </CaptionP>
+        ) : (
+          <span />
         )}
+        <StretchedFlex
+          gap="small"
+          css={{ width: 'auto' }}
+        >
+          <CaptionP $color="text-xlight">{fromNow(insertedAt)}</CaptionP>
+          <RunStatusIcon
+            fullColor
+            status={status}
+          />
+        </StretchedFlex>
+      </StretchedFlex>
+      <WorkbenchStoredPromptMarkdown
+        text={prompt ?? ''}
+        density="jobCard"
+        clampLines={2}
+      />
+      <UsageRowSC>
+        <WorkbenchUsageChips usage={job.usage} />
+      </UsageRowSC>
+      <BottomSectionSC>
         <DividerSC />
         <CardActionsRowSC>
           <WorkbenchJobActionsRow
@@ -143,6 +154,13 @@ const RecentJobCardSC = styled(Card)(({ theme }) => ({
   '&&:has(button:hover, [data-clickable="true"]:hover):hover': {
     backgroundColor: theme.colors['fill-one'],
   },
+}))
+
+const UsageRowSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.xxsmall,
+  flexWrap: 'wrap',
+  minHeight: 24,
 }))
 
 const BottomSectionSC = styled.div(({ theme }) => ({
