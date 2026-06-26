@@ -316,7 +316,7 @@ function deriveTokenRows(
   theme: DefaultTheme
 ): Array<BreakdownRow> {
   const cachedTokensPercentage =
-    ((usage?.cachedTokens ?? 0) / (usage?.inputTokens ?? 1)) * 100
+    ((usage?.cachedTokens ?? 0) / Math.max(usage?.inputTokens ?? 1, 1)) * 100
 
   return [
     {
