@@ -93,7 +93,8 @@ export function AIAgentRun() {
     run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
   const canReprompt =
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||
-    run?.status === AgentRunStatus.Babysitting
+    run?.status === AgentRunStatus.Babysitting ||
+    run?.status === AgentRunStatus.Running
 
   useSetBreadcrumbs(
     useMemo(
@@ -263,11 +264,7 @@ function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
       <ChatInputSimple
         ref={inputRef}
         bgColor="fill-zero-selected"
-        placeholder={
-          run.status === AgentRunStatus.Babysitting
-            ? 'Ask the agent to follow up on the draft PR.'
-            : 'Ask the agent to revise the pending changes before you approve.'
-        }
+        placeholder={agentRunRepromptPlaceholder(run.status)}
         setValue={setPrompt}
         onSubmit={submitPrompt}
         loading={loading}
@@ -417,6 +414,19 @@ function AgentRunStatusCallout({
       )}
     </Card>
   )
+}
+
+function agentRunRepromptPlaceholder(status: AgentRunStatus) {
+  switch (status) {
+    case AgentRunStatus.Running:
+      return 'Send an additional message to this agent run.'
+    case AgentRunStatus.Babysitting:
+      return 'Ask the agent to follow up on the draft PR.'
+    case AgentRunStatus.PendingApproval:
+      return 'Have revisions to PR draft? Ask the agent here before you approve.'
+    default:
+      return 'Send an additional message to this agent run.'
+  }
 }
 
 function agentRunStatusTitle(status: AgentRunStatus) {
