@@ -5,6 +5,7 @@ import { Outlet, useMatch } from 'react-router-dom'
 import {
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EVALS_REL_PATH,
+  WORKBENCHES_USAGE_REL_PATH,
   WORKBENCHES_TOOLS_ADD_REL_PATH,
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
@@ -16,6 +17,7 @@ const directory = [
   { label: 'Integrations', path: WORKBENCHES_TOOLS_ADD_REL_PATH },
   { label: 'Configured Tools', path: WORKBENCHES_TOOLS_YOUR_REL_PATH },
   { label: 'Evals', path: WORKBENCHES_EVALS_REL_PATH },
+  { label: 'Usage', path: WORKBENCHES_USAGE_REL_PATH },
 ]
 
 export const getWorkbenchesBreadcrumbs = (tab: Nullable<string>) => [

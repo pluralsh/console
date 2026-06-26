@@ -1,5 +1,6 @@
 import {
   CloseIcon,
+  CostManagementIcon,
   DashboardIcon,
   GaugeIcon,
   GraphIcon,
@@ -46,11 +47,12 @@ import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import {
   PATCH_PR_URL,
   WorkbenchJobDraftPr,
-  WorkbenchJobPrs,
   WorkbenchJobEval,
+  WorkbenchJobPrs,
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
+import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
@@ -59,6 +61,7 @@ type JobPanelTab =
   | 'Topology'
   | 'Pull requests'
   | 'Eval'
+  | 'Usage'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -218,6 +221,9 @@ export function WorkbenchJobPanelContent() {
           {selectedTab === 'Eval' && job?.evalResult && (
             <WorkbenchJobEval job={job} />
           )}
+          {selectedTab === 'Usage' && job?.usage && (
+            <WorkbenchJobUsage usage={job?.usage} />
+          )}
         </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
@@ -300,6 +306,10 @@ const getPanelTabs = (
     job?.evalResult && {
       label: 'Eval',
       icon: <GaugeIcon size={12} />,
+    },
+    job?.usage && {
+      label: 'Usage',
+      icon: <CostManagementIcon size={12} />,
     },
   ].filter(
     (

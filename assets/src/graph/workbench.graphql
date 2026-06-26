@@ -537,11 +537,30 @@ fragment WorkbenchJobPullRequest on PullRequest {
   patch
 }
 
+fragment WorkbenchJobUsageTiny on WorkbenchJobUsage {
+  totalCost
+  totalTokens
+}
+
+fragment WorkbenchJobUsage on WorkbenchJobUsage {
+  cachedTokens
+  inputCost
+  inputTokens
+  outputCost
+  outputTokens
+  reasoningTokens
+  totalCost
+  totalTokens
+}
+
 fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
   insertedAt
+  usage {
+    ...WorkbenchJobUsageTiny
+  }
   user {
     id
     name
@@ -586,6 +605,9 @@ fragment WorkbenchJobTiny on WorkbenchJob {
 
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
+  usage {
+    ...WorkbenchJobUsage
+  }
   workbench {
     id
     name
@@ -679,6 +701,19 @@ query WorkbenchesEvalsAvgTimelineGraph($period: EvalResultsPeriod = WEEK) {
   averageWorkbenchEvalResults(period: $period) {
     timestamp
     average
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+query WorkbenchesUsage($period: EvalResultsPeriod = WEEK) {
+  workbenchUsage(period: $period) {
+    timestamp
+    inputTokens
+    outputTokens
+    totalCost
     workbench {
       id
       name
