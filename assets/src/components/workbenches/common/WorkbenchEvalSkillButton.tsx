@@ -205,6 +205,7 @@ const AnimatedWrapperSC = styled(animated.div)(({ theme }) => ({
   maxHeight: 'calc(100vh - 160px)',
   overflow: 'visible',
   transformOrigin: 'top right',
+  zIndex: theme.zIndexes.modal,
 }))
 
 const PanelContentSC = styled(Flex)(({ theme }) => ({
