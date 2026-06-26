@@ -22,6 +22,7 @@ import { parsePatch } from 'diff'
 import pluralize from 'pluralize'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import { fetchAgentRunUpload } from 'utils/agentRun'
 import { getFileTypeIconKey, getLanguageFromFileName } from 'utils/file'
 
 type DiffFile = {
@@ -64,20 +65,6 @@ const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
   tpl_: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
   txt: `${FILE_TYPE_ICON_PATH}/file_type_text.svg`,
 } as const
-
-// FIXME: Signed upload.patch URLs point at object storage and
-// direct browser fetch() fails on CORS in dev and prod.
-async function fetchPatch(patchUrl: string) {
-  const response = await fetch(patchUrl)
-
-  if (!response.ok) {
-    throw new Error(
-      `Unable to fetch diff (${response.status} ${response.statusText})`
-    )
-  }
-
-  return response.text()
-}
 
 function isBinaryPatch(patch: string): boolean {
   return (
@@ -217,12 +204,10 @@ function buildNodeLookup(
 
 export function AgentRunDiff({
   runId,
-  patchUrl,
   isFullscreen = false,
   onFullscreenChange,
 }: {
   runId: string
-  patchUrl: string
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
 }) {
@@ -232,8 +217,8 @@ export function AgentRunDiff({
     isLoading,
   } = useQuery({
     queryKey: ['agent-run-patch', runId],
-    queryFn: () => fetchPatch(patchUrl),
-    enabled: !!runId && !!patchUrl,
+    queryFn: () => fetchAgentRunUpload(runId, 'patch'),
+    enabled: !!runId,
     staleTime: Infinity,
   })
   const files = useMemo(
