@@ -2,18 +2,23 @@ import {
   ArrowTopRightIcon,
   Button,
   Card,
+  CircleDashIcon,
   Flex,
   IconFrame,
   PrIcon,
   SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
+  TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { TRUNCATE } from 'components/utils/truncate'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text.tsx'
@@ -26,7 +31,7 @@ import {
   useCreateAgentRunPromptMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AI_AGENT_RUNS_ABS_PATH,
@@ -91,10 +96,12 @@ export function AIAgentRun() {
   const isCancellable = isRunning || run?.status == AgentRunStatus.Babysitting
   const isApprovable =
     run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
-  const canReprompt =
+  const isPromptConsuming =
     (run?.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||
-    run?.status === AgentRunStatus.Babysitting ||
-    run?.status === AgentRunStatus.Running
+    run?.status === AgentRunStatus.Babysitting
+  const canReprompt =
+    isPromptConsuming ||
+    (run?.status === AgentRunStatus.Running && (run.approval || run.babysit))
 
   useSetBreadcrumbs(
     useMemo(
@@ -228,29 +235,99 @@ export function AIAgentRun() {
   )
 }
 
-// TODO: Test that reprompt input submits and the prompt appears in agent run chat.
 function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
   const inputRef = useRef<Nullable<ChatInputSimpleRef>>(null)
+  const canDispatchQueuedPromptRef = useRef(false)
+  const queuedPromptInFlightRef = useRef<Nullable<string>>(null)
+  const queuedPromptDispatchIdsRef = useRef<Set<string>>(new Set())
   const [prompt, setPrompt] = useState('')
+  const [chatQueue, setChatQueue] = useState<{ id: string; message: string }[]>(
+    []
+  )
   const [createPrompt, { loading, error }] = useCreateAgentRunPromptMutation({
     refetchQueries: ['AgentRun', 'PendingApprovalAgentRuns'],
     awaitRefetchQueries: true,
-    onCompleted: () => {
-      setPrompt('')
-      inputRef.current?.resetInput()
-    },
   })
+  const isRunning = run.status === AgentRunStatus.Running
+  const isPromptConsuming =
+    (run.status === AgentRunStatus.PendingApproval && !run.approvedAt) ||
+    run.status === AgentRunStatus.Babysitting
+
+  const resetInput = () => {
+    setPrompt('')
+    inputRef.current?.resetInput()
+  }
+
+  const enqueuePrompt = (message: string) => {
+    setChatQueue((prev) => [...prev, { id: Math.random().toString(), message }])
+    resetInput()
+  }
+
+  const createRunPrompt = (message: string, resetOnCompleted = false) => {
+    createPrompt({
+      variables: {
+        id: run.id,
+        prompt: message,
+      },
+    })
+      .then(() => {
+        if (resetOnCompleted) resetInput()
+      })
+      .catch(() => undefined)
+  }
+
+  const sendTopQueuePrompt = useEffectEvent(() => {
+    if (
+      !isPromptConsuming ||
+      !canDispatchQueuedPromptRef.current ||
+      loading ||
+      !chatQueue.length
+    )
+      return
+
+    const queuedPrompt = chatQueue[0]
+    if (
+      queuedPromptInFlightRef.current ||
+      queuedPromptDispatchIdsRef.current.has(queuedPrompt.id)
+    )
+      return
+
+    canDispatchQueuedPromptRef.current = false
+    queuedPromptInFlightRef.current = queuedPrompt.id
+    queuedPromptDispatchIdsRef.current.add(queuedPrompt.id)
+    createPrompt({
+      variables: {
+        id: run.id,
+        prompt: queuedPrompt.message,
+      },
+    })
+      .then(() =>
+        setChatQueue((prev) => prev.filter(({ id }) => id !== queuedPrompt.id))
+      )
+      .catch(() => undefined)
+      .finally(() => {
+        queuedPromptInFlightRef.current = null
+      })
+  })
+
+  useEffect(() => {
+    if (isRunning) canDispatchQueuedPromptRef.current = true
+  }, [isRunning])
+
+  useEffect(() => {
+    sendTopQueuePrompt()
+  }, [chatQueue.length, isPromptConsuming, loading, sendTopQueuePrompt])
 
   const submitPrompt = () => {
     const content = prompt.trim()
     if (!content) return
 
-    createPrompt({
-      variables: {
-        id: run.id,
-        prompt: content,
-      },
-    })
+    if (isRunning || chatQueue.length || loading) {
+      enqueuePrompt(content)
+      return
+    }
+
+    createRunPrompt(content, true)
   }
 
   return (
@@ -261,16 +338,57 @@ function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
           margin="small"
         />
       )}
-      <ChatInputSimple
-        ref={inputRef}
-        bgColor="fill-zero-selected"
-        placeholder={agentRunRepromptPlaceholder(run.status)}
-        setValue={setPrompt}
-        onSubmit={submitPrompt}
-        loading={loading}
-        allowSubmit={!!prompt.trim()}
-        wrapperStyles={{ minHeight: 112 }}
-      />
+      <div css={{ position: 'relative' }}>
+        {!!chatQueue.length && (
+          <QueueCardSC>
+            <SimpleAccordion
+              defaultOpen
+              trigger={
+                <Body2P $color="text-primary-disabled">{`${chatQueue.length} Queued`}</Body2P>
+              }
+              caret="right-quarter-mirror"
+              triggerWrapperStyles={{
+                justifyContent: 'flex-start',
+                '.icon': { width: 10 },
+              }}
+            >
+              {chatQueue.map(({ id, message }) => (
+                <QueueItemSC key={id}>
+                  <CircleDashIcon
+                    size={14}
+                    color="icon-light"
+                  />
+                  <Body2P
+                    $color="text-light"
+                    css={{ ...TRUNCATE, flex: 1 }}
+                  >
+                    {prettifyPrompt(message)}
+                  </Body2P>
+                  <IconFrame
+                    clickable
+                    size="small"
+                    tooltip="Remove"
+                    icon={<TrashCanIcon color="icon-danger" />}
+                    onClick={() =>
+                      setChatQueue(chatQueue.filter((m) => m.id !== id))
+                    }
+                  />
+                </QueueItemSC>
+              ))}
+            </SimpleAccordion>
+          </QueueCardSC>
+        )}
+        <ChatInputSimple
+          ref={inputRef}
+          bgColor="fill-zero-selected"
+          placeholder={agentRunRepromptPlaceholder(run.status)}
+          setValue={setPrompt}
+          onSubmit={submitPrompt}
+          loading={loading}
+          allowSubmit={!!prompt.trim()}
+          wrapperStyles={{ minHeight: 112 }}
+        />
+      </div>
     </RepromptInputWrapperSC>
   )
 }
@@ -468,6 +586,29 @@ const RepromptInputWrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.small,
   paddingTop: theme.spacing.medium,
+}))
+
+const QueueItemSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  paddingTop: theme.spacing.xsmall,
+}))
+
+const QueueCardSC = styled(Card)(({ theme }) => ({
+  position: 'absolute',
+  bottom: '100%',
+  left: theme.spacing.medium,
+  right: theme.spacing.medium,
+  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  border: theme.borders['fill-three'],
+  borderBottomLeftRadius: 0,
+  borderBottomRightRadius: 0,
+  borderBottom: 'none',
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({
