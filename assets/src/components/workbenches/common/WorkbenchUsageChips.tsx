@@ -28,7 +28,7 @@ export function WorkbenchUsageSummaryChip({
       fillLevel={fillLevel}
       css={{
         display: 'flex',
-        wrap: 'nowrap',
+        flexWrap: 'nowrap',
         gap: theme.spacing.xxsmall,
       }}
     >

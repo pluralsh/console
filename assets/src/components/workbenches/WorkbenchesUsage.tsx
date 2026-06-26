@@ -77,7 +77,7 @@ export function WorkbenchesUsage() {
           label="Total cost"
           value={
             totals.hasCost
-              ? (formatTokenCost(totals.totalCost) ?? 'Not available')
+              ? formatTokenCost(totals.totalCost)!
               : 'Not available'
           }
           helper={
@@ -104,7 +104,7 @@ export function WorkbenchesUsage() {
           css={{
             display: 'grid',
             gap: theme.spacing.large,
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gridTemplateColumns: `repeat(auto-fit, minmax(300px, 1fr))`,
           }}
         >
           <UsageLineChart

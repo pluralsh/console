@@ -95,6 +95,11 @@ function TokenBreakdown({
     usage?.reasoningTokens != null
 
   const rows = useMemo(() => deriveTokenRows(usage, theme), [usage, theme])
+  const derivedTotalTokens = rows.reduce((sum, row) => sum + row.value, 0)
+  const totalTokens =
+    usage?.totalTokens && usage.totalTokens > 0
+      ? usage.totalTokens
+      : Math.max(derivedTotalTokens, 1)
 
   if (!hasAnyTokens) {
     return (
@@ -122,8 +127,7 @@ function TokenBreakdown({
       >
         <Body1P>Token breakdown</Body1P>
         <CaptionP $color="text-xlight">
-          {new Intl.NumberFormat('en-US').format(usage?.totalTokens ?? 0)}{' '}
-          tokens total
+          {new Intl.NumberFormat('en-US').format(totalTokens)} tokens total
         </CaptionP>
       </Flex>
       <Flex
@@ -179,7 +183,7 @@ function TokenBreakdown({
               css={{ gridColumn: '1 / -1', marginTop: 0 }}
               height={8}
               mode="determinate"
-              progress={row.value / (usage?.totalTokens ?? 1)}
+              progress={Math.min(row.value / totalTokens, 1)}
               progressColor={row.color}
               completeColor={row.color}
             />

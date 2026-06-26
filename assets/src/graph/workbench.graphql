@@ -779,28 +779,6 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchUsageJobs($id: ID!, $first: Int = 20) {
-  workbench(id: $id) {
-    id
-    runs(first: $first) {
-      edges {
-        node {
-          id
-          prompt
-          insertedAt
-          usage {
-            ...WorkbenchJobUsageTiny
-          }
-          workbench {
-            id
-            name
-          }
-        }
-      }
-    }
-  }
-}
-
 fragment WorkbenchJobSearchRow on WorkbenchJob {
   id
   prompt
