@@ -1132,6 +1132,15 @@ defmodule Console.Factory do
     }
   end
 
+  def agent_run_upload_factory do
+    %Schema.AgentRunUpload{
+      agent_run: build(:agent_run),
+      patch: upload("agent.patch"),
+      session: upload("agent-session.json"),
+      screen_recording: upload("recording.mp4")
+    }
+  end
+
   def agent_message_factory do
     %Schema.AgentMessage{
       agent_run: build(:agent_run),
@@ -1159,6 +1168,8 @@ defmodule Console.Factory do
       last_used_at: Timex.now()
     }
   end
+
+  defp upload(file_name), do: %{file_name: file_name, updated_at: nil}
 
   def workbench_factory do
     %Schema.Workbench{

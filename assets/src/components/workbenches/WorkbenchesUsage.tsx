@@ -108,7 +108,7 @@ export function WorkbenchesUsage() {
           }}
         >
           <UsageLineChart
-            title="Input token"
+            title="Input tokens"
             value={formatTokenCount(totals.inputTokens) ?? '0'}
             entries={entries}
             getValue={(entry) => entry.inputTokens ?? 0}
@@ -116,7 +116,7 @@ export function WorkbenchesUsage() {
             formatValue={(value) => formatTokenCount(value) ?? '0'}
           />
           <UsageLineChart
-            title="Output token"
+            title="Output tokens"
             value={formatTokenCount(totals.outputTokens) ?? '0'}
             entries={entries}
             getValue={(entry) => entry.outputTokens ?? 0}
@@ -288,6 +288,7 @@ function UsageLineChart({
             enableGridX={false}
             enableGridY={false}
             enablePoints={isSinglePoint}
+            lineWidth={1}
             pointSize={theme.spacing.small}
             pointBorderWidth={theme.spacing.xxxsmall}
             pointBorderColor={theme.colors['fill-accent']}
