@@ -54,6 +54,24 @@ func TestConfigTemplate_PluralMcpServer(t *testing.T) {
 			t.Fatalf("expected plural MCP url http://127.0.0.1:8080/mcp, got %v", plural["url"])
 		}
 	})
+
+	t.Run("codebase memory MCP server uses local stdio command", func(t *testing.T) {
+		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+		mcp := out["mcp"].(map[string]any)
+		codebaseMemory := mcp[common.CodebaseMemoryMCPServerName].(map[string]any)
+		if codebaseMemory["type"] != "local" {
+			t.Fatalf("expected codebase memory MCP type local, got %v", codebaseMemory["type"])
+		}
+		command := codebaseMemory["command"].([]any)
+		if len(command) != 1 || command[0] != common.CodebaseMemoryMCPCommand {
+			t.Fatalf("expected codebase memory command [%q], got %v", common.CodebaseMemoryMCPCommand, command)
+		}
+		environment := codebaseMemory["environment"].(map[string]any)
+		if environment[common.CodebaseMemoryCacheEnv] != common.CodebaseMemoryCacheDir {
+			t.Fatalf("expected %s=%s, got %v", common.CodebaseMemoryCacheEnv, common.CodebaseMemoryCacheDir, environment[common.CodebaseMemoryCacheEnv])
+		}
+	})
 }
 
 func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
@@ -236,7 +254,7 @@ func TestConfigTemplate_Provider(t *testing.T) {
 }
 
 func TestConfigTemplate_AgentTools(t *testing.T) {
-	t.Run("analysis agent has plural* tool only", func(t *testing.T) {
+	t.Run("analysis agent has MCP tools", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
 
 		agent := out["agent"].(map[string]any)
@@ -246,8 +264,11 @@ func TestConfigTemplate_AgentTools(t *testing.T) {
 		if _, ok := tools["plural*"]; !ok {
 			t.Error("agent.analysis.tools should contain plural*")
 		}
+		if _, ok := tools["codebase-memory-mcp*"]; !ok {
+			t.Error("agent.analysis.tools should contain codebase-memory-mcp*")
+		}
 		for k := range tools {
-			if k != "plural*" {
+			if k != "plural*" && k != "codebase-memory-mcp*" {
 				t.Errorf("unexpected tool %q in analysis agent tools", k)
 			}
 		}

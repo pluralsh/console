@@ -154,6 +154,12 @@ func (in *Codex) writeCodexConfig() error {
 		Type:        "http",
 		URL:         common.AgentMCPServerURL,
 		TrustPolicy: "always",
+	}, {
+		Name:        common.CodebaseMemoryMCPServerName,
+		Type:        "stdio",
+		Command:     common.CodebaseMemoryMCPCommand,
+		Env:         map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir},
+		TrustPolicy: "always",
 	}}
 
 	switch in.Config.Run.Mode {

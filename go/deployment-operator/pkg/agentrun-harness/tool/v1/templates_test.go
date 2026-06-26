@@ -59,6 +59,41 @@ func TestSystemPromptTemplate_OmitsOriginalTaskWhenPromptEmpty(t *testing.T) {
 	}
 }
 
+func TestSystemPromptTemplate_MemoryPersistenceInstructions(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+
+	disabled, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/repo",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() memory disabled failed: %v", err)
+	}
+	if !strings.Contains(disabled, "Do not pass `persistence: true`") {
+		t.Fatal("expected disabled memory prompt to prohibit persistence by default")
+	}
+	if strings.Contains(disabled, "Runtime memory persistence is enabled") {
+		t.Fatal("did not expect enabled memory instructions when MemoryEnabled=false")
+	}
+
+	enabled, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		MemoryEnabled: true,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/repo",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() memory enabled failed: %v", err)
+	}
+	if !strings.Contains(enabled, "Runtime memory persistence is enabled") {
+		t.Fatal("expected enabled memory prompt")
+	}
+	if !strings.Contains(enabled, "`persistence: true`") {
+		t.Fatal("expected enabled memory prompt to request persistent indexing")
+	}
+}
+
 func TestSystemPromptTemplate_TemplateFilesExist(t *testing.T) {
 	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
 	for _, name := range []string{"analyze.md.tmpl", "write.md.tmpl", "babysit.md.tmpl"} {

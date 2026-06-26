@@ -216,6 +216,41 @@ func TestBuildAgentRunPod_BasicStructure(t *testing.T) {
 	assert.Equal(t, corev1.RestartPolicyNever, pod.Spec.RestartPolicy)
 	assert.NotNil(t, pod.Spec.AutomountServiceAccountToken, "AutomountServiceAccountToken should be set")
 	assert.False(t, *pod.Spec.AutomountServiceAccountToken, "AutomountServiceAccountToken should be false by default")
+
+	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	assert.Contains(t, defaultC.VolumeMounts, codebaseMemoryCacheVolumeMount)
+	assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: common.CodebaseMemoryCacheEnv, Value: common.CodebaseMemoryCacheDir})
+	assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMemoryEnabled, Value: "false"})
+	codebaseMemoryCache := requireVolume(t, pod.Spec.Volumes, codebaseMemoryCacheVolumeName)
+	assert.NotNil(t, codebaseMemoryCache.EmptyDir)
+}
+
+func TestBuildAgentRunPod_MemoryEnabled(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:            console.AgentRuntimeTypeClaude,
+			TargetNamespace: "default",
+			Memory:          lo.ToPtr(true),
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	assert.Contains(t, defaultC.Env, corev1.EnvVar{Name: EnvMemoryEnabled, Value: "true"})
 }
 
 func TestBuildAgentRunPod_AppliesCertificateBundleTemplate(t *testing.T) {

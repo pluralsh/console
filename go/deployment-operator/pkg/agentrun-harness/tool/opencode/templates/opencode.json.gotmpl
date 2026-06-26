@@ -9,7 +9,8 @@
       "mode": "primary",
       "temperature": 0.1,
       "tools": {
-        "plural*": true
+        "plural*": true,
+        "codebase-memory-mcp*": true
       },
       "permission": {
         {{- if .DindEnabled }}
@@ -40,6 +41,7 @@
       "temperature": 0.3,
       "tools": {
         "plural*": true,
+        "codebase-memory-mcp*": true,
         "write": false,
         "todowrite": false,
         "edit": false
@@ -58,6 +60,14 @@
       "url": "http://127.0.0.1:8080/mcp",
       "enabled": true,
       "headers": {}
+    },
+    "codebase-memory-mcp": {
+      "type": "local",
+      "command": ["/usr/local/bin/codebase-memory-mcp"],
+      "enabled": true,
+      "environment": {
+        "CBM_CACHE_DIR": "/plural/.cache/codebase-memory-mcp"
+      }
     }
   },
   "username": "plural",

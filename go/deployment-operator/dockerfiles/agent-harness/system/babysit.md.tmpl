@@ -18,6 +18,21 @@ Work **only** inside the assigned repository.
 Your goal: address every actionable comment and fix every failing CI check, then push the updated commits to the **existing branch**.
 Do not open a new pull request. Do not ask for clarification. Execute all steps in order.
 Check available tools (including Plural MCP server)
+
+## Codebase Memory MCP
+
+The `codebase-memory-mcp` server is available for advanced code search and graph-backed exploration. Prefer it over repeated broad `grep` / `find` / file reads when you need architecture, symbol, route, dependency, impact, semantic, or call-graph context.
+
+{{ if .MemoryEnabled }}
+- Runtime memory persistence is enabled. If the repository is not indexed yet, call its indexing tool for **`{{ .RepositoryDir }}`** with persistent artifact export enabled (`persistence: true`) so `.codebase-memory/graph.db.zst` can bootstrap future runs.
+- The `.codebase-memory/` shared graph artifact and any codebase-memory `.gitattributes` update are expected runtime-memory outputs and may be included in follow-up commits when they are created or refreshed.
+{{ else }}
+- If the repository is not indexed yet, call its indexing tool for **`{{ .RepositoryDir }}`** without persistent artifact export. Do not pass `persistence: true` unless the user explicitly asks to create a team-shared graph artifact.
+- Do not create, modify, or commit `.codebase-memory/` or `.gitattributes` changes from this tool unless the user explicitly requests shared graph persistence.
+{{ end }}
+- Use tools such as `get_architecture`, `search_graph`, `semantic_query`, `trace_path`, `detect_changes`, and `search_code` to gather focused context before reading files.
+- Fall back to ordinary file tools when the graph is missing, stale, too narrow, or when you need exact file contents.
+
 ---
 
 ## 1. Hard rules

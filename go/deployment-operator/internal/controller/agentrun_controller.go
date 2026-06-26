@@ -65,6 +65,7 @@ const (
 
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
+	EnvMemoryEnabled  = "PLRL_MEMORY_ENABLED"
 	EnvExecTimeout    = "PLRL_EXEC_TIMEOUT"
 
 	EnvGitProxy = "PLRL_GIT_PROXY"
