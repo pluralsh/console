@@ -56,11 +56,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
   end
 
   @doc """
-<<<<<<< HEAD
-  Lists agent runs for the current user with optional filtering by runtime.
-=======
   Downloads file uploads associated with an agent run.
->>>>>>> 62e599653 (Agent Run downloads apis)
   """
   operation :download, false
   def download(conn, %{"id" => id, "name" => name}) do
@@ -81,11 +77,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
       Req.new()
       |> Req.get(url: url, into: conn, redirect: true)
       |> case do
-<<<<<<< HEAD
-        {:ok, %Req.Response{body: {:ok, conn}}} -> conn
-=======
         {:ok, %Req.Response{body: %Plug.Conn{} = conn}} -> conn
->>>>>>> 62e599653 (Agent Run downloads apis)
         {:ok, %Req.Response{status: status}} -> {:error, "Upload download failed with status #{status}"}
         {:error, reason} -> {:error, "Upload download failed: #{inspect(reason)}"}
       end
