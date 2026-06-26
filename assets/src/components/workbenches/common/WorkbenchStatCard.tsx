@@ -22,9 +22,10 @@ export function WorkbenchStatCard({
   return (
     <Card
       css={{
+        border: 'none',
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.xxsmall,
+        gap: theme.spacing.small,
         padding: theme.spacing.large,
       }}
     >

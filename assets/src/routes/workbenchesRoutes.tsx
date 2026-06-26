@@ -8,6 +8,7 @@ import { CloudConnectionCreateForm } from 'components/workbenches/tools/cloud-co
 import { McpServerCreateForm } from 'components/workbenches/tools/mcp-server/McpServerCreateForm'
 import { WorkbenchesIntegrations } from 'components/workbenches/WorkbenchesIntegrations'
 import { WorkbenchesConfiguredTools } from 'components/workbenches/WorkbenchesConfiguredTools'
+import { WorkbenchesUsage } from 'components/workbenches/WorkbenchesUsage'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
 import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
@@ -45,6 +46,7 @@ import {
   WORKBENCHES_TOOLS_CREATE_MCP_SERVER_ABS_PATH,
   WORKBENCHES_TOOLS_EDIT_ABS_PATH,
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
+  WORKBENCHES_USAGE_REL_PATH,
   WORKBENCHES_CRON_PARAM_ID,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
   WORKBENCHES_CHATBOT_PARAM_ID,
@@ -70,6 +72,10 @@ export const workbenchesRoutes = [
     <Route
       path={WORKBENCHES_EVALS_REL_PATH}
       element={<WorkbenchesEvals />}
+    />
+    <Route
+      path={WORKBENCHES_USAGE_REL_PATH}
+      element={<WorkbenchesUsage />}
     />
     <Route
       path={WORKBENCHES_TOOLS_ADD_REL_PATH}
