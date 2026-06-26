@@ -16,7 +16,12 @@ export function formatTokenCount(value: Nullable<number>) {
 export function formatTokenCost(value: Nullable<number>) {
   if (value == null) return undefined
 
-  return `$${value.toFixed(2)}`
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
 }
 
 export function compactDateLabel(value: Nullable<string>) {
