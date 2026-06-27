@@ -237,6 +237,11 @@ fragment AgentRunFragment on AgentRun {
     analysis {
         ...AgentAnalysisFragment
     }
+    skills {
+        name
+        description
+        contents
+    }
     scmCreds {
         ...ScmCredentialFragment
     }

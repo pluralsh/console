@@ -281,7 +281,10 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 			"bash",
 			exec.WithArgs(loginArgs),
 			exec.WithDir(in.Config.WorkDir),
-			exec.WithEnv([]string{fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey), fmt.Sprintf("CODEX_HOME=%s", in.codexHome())}),
+			exec.WithEnv([]string{
+				fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey),
+				fmt.Sprintf("CODEX_HOME=%s", in.codexHome()),
+			}),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 		)
 		if err := in.executable.Run(ctx); err != nil {

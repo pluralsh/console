@@ -28,6 +28,9 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCodexConfig() failed: %v", err)
 	}
+	if cfg.Features == nil || !cfg.Features.Skills {
+		t.Fatal("expected Codex skills feature to be enabled")
+	}
 
 	provider := cfg.ModelProviders["plural"]
 	if provider == nil {

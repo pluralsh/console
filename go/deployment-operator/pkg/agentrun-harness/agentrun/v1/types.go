@@ -41,7 +41,8 @@ type AgentRun struct {
 	PluralCreds *console.PluralCredsFragment   `json:"pluralCreds,omitempty"`
 
 	// Runtime information
-	Runtime *AgentRuntime `json:"runtime,omitempty"`
+	Runtime *AgentRuntime         `json:"runtime,omitempty"`
+	Skills  []*console.AgentSkill `json:"skills,omitempty"`
 
 	DindEnabled    bool
 	BrowserEnabled bool
@@ -117,6 +118,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		ScmCreds:    fragment.ScmCreds,
 		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
+		Skills:      fragment.Skills,
 	}
 
 	if fragment.Flow != nil {

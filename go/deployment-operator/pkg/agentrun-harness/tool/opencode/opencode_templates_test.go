@@ -2,9 +2,12 @@ package opencode
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
@@ -82,6 +85,36 @@ func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
 	}
 	if out["snapshot"] != false {
 		t.Fatalf("expected snapshot=false, got %v", out["snapshot"])
+	}
+}
+
+func TestConfigTemplate_AllowsSkillLoading(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+	permission := out["permission"].(map[string]any)
+	skill := permission["skill"].(map[string]any)
+	if skill["*"] != "allow" {
+		t.Fatalf("expected skill wildcard permission to be allow, got %v", skill["*"])
+	}
+}
+
+func TestEnvUsesHarnessHomeAndConfigHome(t *testing.T) {
+	workDir := t.TempDir()
+	tool := &Opencode{DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{
+		WorkDir: workDir,
+		Run: &agentrunv1.AgentRun{
+			Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{OpenCode: &agentrunv1.OpencodeConfig{}}},
+		},
+	}}}
+
+	env := strings.Join(tool.env("/tmp/opencode.json"), "\n")
+	for _, want := range []string{
+		"XDG_CONFIG_HOME=" + workDir + "/.config",
+		"XDG_DATA_HOME=" + workDir + "/.local/share",
+	} {
+		if !strings.Contains(env, want) {
+			t.Fatalf("expected env to contain %q, got:\n%s", want, env)
+		}
 	}
 }
 

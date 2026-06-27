@@ -407,8 +407,13 @@ func (in *Opencode) ConfigureBabysitRun() error {
 func (in *Opencode) env(configFilePath string) []string {
 	return []string{
 		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
+		fmt.Sprintf("XDG_CONFIG_HOME=%s", in.configHome()),
 		fmt.Sprintf("XDG_DATA_HOME=%s", in.dataHome()),
 	}
+}
+
+func (in *Opencode) configHome() string {
+	return filepath.Join(in.Config.WorkDir, ".config")
 }
 
 func (in *Opencode) dataPath() string {
