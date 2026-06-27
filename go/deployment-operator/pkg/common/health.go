@@ -12,8 +12,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
-	autoscalingv2beta1 "k8s.io/api/autoscaling/v2beta1"
-	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta2"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -85,20 +83,9 @@ func getHPAHealth(obj *unstructured.Unstructured) (*HealthStatus, error) {
 			return nil, fmt.Errorf(failedConversionMsg, err)
 		}
 		return getAutoScalingV1HPAHealth(&hpa)
-	case autoscalingv2beta1.SchemeGroupVersion.WithKind(HorizontalPodAutoscalerKind):
-		var hpa autoscalingv2beta1.HorizontalPodAutoscaler
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &hpa)
-		if err != nil {
-			return nil, fmt.Errorf(failedConversionMsg, err)
-		}
-		return getAutoScalingV2beta1HPAHealth(&hpa)
-	case autoscalingv2beta2.SchemeGroupVersion.WithKind(HorizontalPodAutoscalerKind):
-		var hpa autoscalingv2beta2.HorizontalPodAutoscaler
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &hpa)
-		if err != nil {
-			return nil, fmt.Errorf(failedConversionMsg, err)
-		}
-		return getAutoScalingV2beta2HPAHealth(&hpa)
+	case schema.GroupVersion{Group: "autoscaling", Version: "v2beta1"}.WithKind(HorizontalPodAutoscalerKind),
+		schema.GroupVersion{Group: "autoscaling", Version: "v2beta2"}.WithKind(HorizontalPodAutoscalerKind):
+		return getUnstructuredHPAHealth(obj)
 	case autoscalingv2.SchemeGroupVersion.WithKind(HorizontalPodAutoscalerKind):
 		var hpa autoscalingv2.HorizontalPodAutoscaler
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(obj.Object, &hpa)
@@ -199,36 +186,6 @@ func getAutoScalingV2HPAHealth(hpa *autoscalingv2.HorizontalPodAutoscaler) (*Hea
 	return checkConditions(conditions, progressingStatus)
 }
 
-func getAutoScalingV2beta2HPAHealth(hpa *autoscalingv2beta2.HorizontalPodAutoscaler) (*HealthStatus, error) {
-	statusConditions := hpa.Status.Conditions
-	conditions := make([]hpaCondition, 0, len(statusConditions))
-	for _, statusCondition := range statusConditions {
-		conditions = append(conditions, hpaCondition{
-			Type:    string(statusCondition.Type),
-			Reason:  statusCondition.Reason,
-			Message: statusCondition.Message,
-			Status:  string(statusCondition.Status),
-		})
-	}
-
-	return checkConditions(conditions, progressingStatus)
-}
-
-func getAutoScalingV2beta1HPAHealth(hpa *autoscalingv2beta1.HorizontalPodAutoscaler) (*HealthStatus, error) {
-	statusConditions := hpa.Status.Conditions
-	conditions := make([]hpaCondition, 0, len(statusConditions))
-	for _, statusCondition := range statusConditions {
-		conditions = append(conditions, hpaCondition{
-			Type:    string(statusCondition.Type),
-			Reason:  statusCondition.Reason,
-			Message: statusCondition.Message,
-			Status:  string(statusCondition.Status),
-		})
-	}
-
-	return checkConditions(conditions, progressingStatus)
-}
-
 func getAutoScalingV1HPAHealth(hpa *autoscalingv1.HorizontalPodAutoscaler) (*HealthStatus, error) {
 	annotation, ok := hpa.GetAnnotations()["autoscaling.alpha.kubernetes.io/conditions"]
 	if !ok {
@@ -247,6 +204,40 @@ func getAutoScalingV1HPAHealth(hpa *autoscalingv1.HorizontalPodAutoscaler) (*Hea
 	}
 
 	return checkConditions(conditions, progressingStatus)
+}
+
+func getUnstructuredHPAHealth(hpa *unstructured.Unstructured) (*HealthStatus, error) {
+	statusConditions, found, err := unstructured.NestedSlice(hpa.Object, "status", "conditions")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read HPA conditions: %w", err)
+	}
+	if !found {
+		return progressingStatus, nil
+	}
+
+	conditions := make([]hpaCondition, 0, len(statusConditions))
+	for _, statusCondition := range statusConditions {
+		condition, ok := statusCondition.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("failed to convert HPA condition to typed")
+		}
+
+		conditions = append(conditions, hpaCondition{
+			Type:    asString(condition["type"]),
+			Reason:  asString(condition["reason"]),
+			Message: asString(condition["message"]),
+			Status:  asString(condition["status"]),
+		})
+	}
+
+	return checkConditions(conditions, progressingStatus)
+}
+
+func asString(value interface{}) string {
+	if str, ok := value.(string); ok {
+		return str
+	}
+	return ""
 }
 
 func checkConditions(conditions []hpaCondition, progressingStatus *HealthStatus) (*HealthStatus, error) {
