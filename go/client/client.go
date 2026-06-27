@@ -373,6 +373,7 @@ type AgentRuntimeFragment struct {
 	Name           string                   "json:\"name\" graphql:\"name\""
 	Type           AgentRuntimeType         "json:\"type\" graphql:\"type\""
 	AiProxy        *bool                    "json:\"aiProxy,omitempty\" graphql:\"aiProxy\""
+	BrowserEnabled *bool                    "json:\"browserEnabled,omitempty\" graphql:\"browserEnabled\""
 	Cluster        *TinyClusterFragment     "json:\"cluster,omitempty\" graphql:\"cluster\""
 	CreateBindings []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
 }
@@ -400,6 +401,12 @@ func (t *AgentRuntimeFragment) GetAiProxy() *bool {
 		t = &AgentRuntimeFragment{}
 	}
 	return t.AiProxy
+}
+func (t *AgentRuntimeFragment) GetBrowserEnabled() *bool {
+	if t == nil {
+		t = &AgentRuntimeFragment{}
+	}
+	return t.BrowserEnabled
 }
 func (t *AgentRuntimeFragment) GetCluster() *TinyClusterFragment {
 	if t == nil {
@@ -40013,6 +40020,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40084,6 +40092,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40156,6 +40165,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40258,6 +40268,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40408,6 +40419,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40616,6 +40628,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -40847,6 +40860,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -41065,6 +41079,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}
@@ -41221,6 +41236,7 @@ fragment AgentRuntimeFragment on AgentRuntime {
 	name
 	type
 	aiProxy
+	browserEnabled
 	cluster {
 		... TinyClusterFragment
 	}

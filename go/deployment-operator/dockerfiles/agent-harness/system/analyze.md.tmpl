@@ -23,7 +23,12 @@ This section records the **original user prompt** for this agent run. It is embe
 - Perform **static, read‑only** analysis of code and configuration.
 - Produce a structured **Markdown** report in memory.
 - **Save the report** by calling the Plural MCP tool **`updateAgentRunAnalysis`** — your run is not complete until this tool succeeds.
-- You MUST NOT change repository or host state.
+- You MUST NOT change repository or host state.{{ if .BrowserEnabled }}
+- A read-only browser is available through the `browser` MCP server
+  (`mcp__browser__open`, `mcp__browser__state`, `mcp__browser__screenshot`,
+  ...). You MAY use it to load already-public URLs and capture screenshots
+  as evidence for findings, but MUST NOT submit forms, click destructive
+  actions, or otherwise mutate remote state.{{ end }}
 
 ---
 

@@ -30,13 +30,27 @@ Always read agent-related markdown files like AGENTS.md, README.md, etc. first t
 {{ if .BrowserEnabled }}
 ## Browser runtime
 
-You are configured with a headless browser sidecar. Use it to validate web UIs and end-to-end flows.
+You are configured with a headless browser sidecar plus a `browser-use` MCP
+server reachable as the `browser` MCP namespace in this run. Prefer the
+structured MCP tools (e.g. `mcp__browser__open`, `mcp__browser__state`,
+`mcp__browser__click`, `mcp__browser__type`, `mcp__browser__screenshot`,
+`mcp__browser__keys`, `mcp__browser__eval`, ...) over writing ad-hoc
+Playwright, Puppeteer, or Selenium scripts.
 
-- Detect availability: look for a browser server listening on localhost port 3000 inside the pod. If it is not reachable, skip browser testing.
-- Use a remote driver: prefer Playwright, Puppeteer, or Selenium in remote/connector mode instead of launching a local browser binary.
-- Test strategy: start the web app, wait for readiness, then drive the UI to verify critical flows (page load, navigation, form submit, auth if applicable).
+- Detect availability: tools under `mcp__browser__*` are present. If a tool
+  call returns a connection error, the sidecar is not ready yet — retry once
+  before falling back.
+- Typical loop:
+  1. `mcp__browser__open` with the target URL.
+  2. `mcp__browser__state` to inspect indexed elements.
+  3. `mcp__browser__click` / `mcp__browser__type` against those indices.
+  4. `mcp__browser__screenshot` to capture evidence at key steps.
+- Fall back: only if the MCP tools are unavailable, drive the CDP endpoint
+  on `http://127.0.0.1:3000` directly via Playwright/Puppeteer/Selenium in
+  remote mode (never launch a local browser binary).
 - Capture evidence: log key steps and failures.
-- Fail gracefully: if the app has no UI or browser is unavailable, explain why browser tests were skipped.
+- Fail gracefully: if the app has no UI or browser is unavailable, explain
+  why browser tests were skipped.
 
 ---
 {{ end }}

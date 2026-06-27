@@ -1,0 +1,84 @@
+name: CD / Browser Use Sidecar
+
+on:
+  pull_request:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/deployment-operator-cd-browser-use.yaml"
+    - "go/deployment-operator/dockerfiles/browser-use/**"
+  push:
+    tags:
+    - 'go/deployment-operator/v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Semantic Version (e.g. 0.1.0)'
+        required: true
+        type: string
+      browser_use_version:
+        description: 'Pinned browser-use PyPI version baked into the image'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+  REGISTRY_IMAGE: pluralsh/browser-use
+  BROWSER_USE_DEFAULT_VERSION: 0.1.0
+
+jobs:
+  build-and-publish:
+    name: Build and push browser-use sidecar image
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pluralsh/browser-use
+            docker.io/pluralsh/browser-use
+          tags: |
+            type=raw,value=${{ inputs.version }},enable=${{ inputs.version != '' }},priority=1100
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/deployment-operator/v(\d+\.\d+\.\d+)$,priority=1000
+            type=sha,priority=800
+            type=ref,event=pr,priority=600
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: "./go/deployment-operator/dockerfiles/browser-use"
+          file: "./go/deployment-operator/dockerfiles/browser-use/Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BROWSER_USE_VERSION=${{ inputs.browser_use_version || env.BROWSER_USE_DEFAULT_VERSION }}

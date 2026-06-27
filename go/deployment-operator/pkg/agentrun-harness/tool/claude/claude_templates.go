@@ -10,6 +10,11 @@ import (
 // PluralMCPToolsWildcard allows any tool exposed by the in-pod plural MCP server.
 const PluralMCPToolsWildcard = "mcp__plural__*"
 
+// BrowserMCPToolsWildcard allows any tool exposed by the in-pod browser-use
+// MCP server (provisioned alongside the browser sidecar when
+// AgentRuntime.spec.browser.enabled is true).
+const BrowserMCPToolsWildcard = "mcp__browser__*"
+
 type SettingsBuilder struct {
 	settings Settings
 }

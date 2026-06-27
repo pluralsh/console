@@ -1889,6 +1889,9 @@ input AgentRuntimeAttributes {
   "whether this runtime uses the built-in Plural AI proxy"
   aiProxy: Boolean
 
+  "whether this runtime provisions a headless browser sidecar (and the browser-use MCP tools) for runs"
+  browserEnabled: Boolean
+
   "whether this is the default runtime for coding agents"
   default: Boolean
 
@@ -2138,6 +2141,9 @@ type AgentRuntime {
 
   "whether this runtime uses the built-in Plural AI proxy"
   aiProxy: Boolean
+
+  "whether this runtime provisions a headless browser sidecar (and the browser-use MCP tools) for runs"
+  browserEnabled: Boolean
 
   "whether this is the default runtime for coding agents"
   default: Boolean

@@ -155,6 +155,14 @@ func (in *Codex) writeCodexConfig() error {
 		URL:         common.AgentMCPServerURL,
 		TrustPolicy: "always",
 	}}
+	if in.Config.Run.BrowserEnabled {
+		mcps = append(mcps, MCPInput{
+			Name:        "browser",
+			Type:        "http",
+			URL:         common.BrowserUseMCPServerURL,
+			TrustPolicy: "always",
+		})
+	}
 
 	switch in.Config.Run.Mode {
 	case console.AgentRunModeAnalyze:

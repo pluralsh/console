@@ -9,7 +9,8 @@
       "mode": "primary",
       "temperature": 0.1,
       "tools": {
-        "plural*": true
+        "plural*": true{{ if .BrowserEnabled }},
+        "browser*": true{{ end }}
       },
       "permission": {
         {{- if .DindEnabled }}
@@ -39,7 +40,8 @@
       "mode": "primary",
       "temperature": 0.3,
       "tools": {
-        "plural*": true,
+        "plural*": true,{{ if .BrowserEnabled }}
+        "browser*": true,{{ end }}
         "write": false,
         "todowrite": false,
         "edit": false
@@ -58,7 +60,13 @@
       "url": "http://127.0.0.1:8080/mcp",
       "enabled": true,
       "headers": {}
-    }
+    }{{ if .BrowserEnabled }},
+    "browser": {
+      "type": "remote",
+      "url": "{{ .BrowserMCPURL }}",
+      "enabled": true,
+      "headers": {}
+    }{{ end }}
   },
   "username": "plural",
   "provider": {

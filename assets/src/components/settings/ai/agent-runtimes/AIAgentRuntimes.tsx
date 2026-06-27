@@ -94,6 +94,24 @@ const columns = [
       </Chip>
     ),
   }),
+  columnHelper.accessor((runtime) => runtime.browserEnabled, {
+    id: 'browserEnabled',
+    header: 'Browser',
+    cell: ({ getValue }) => (
+      <Chip
+        fillLevel={0}
+        size="small"
+        severity={getValue() ? 'success' : 'neutral'}
+        tooltip={
+          getValue()
+            ? 'A headless browser sidecar and the browser-use MCP tools are provisioned for runs on this runtime.'
+            : 'Runs on this runtime do not have browser capabilities. Set spec.browser.enabled on the AgentRuntime CRD to enable.'
+        }
+      >
+        {getValue() ? 'Enabled' : 'Disabled'}
+      </Chip>
+    ),
+  }),
   columnHelper.accessor((runtime) => runtime.cluster, {
     id: 'cluster',
     header: 'Cluster',

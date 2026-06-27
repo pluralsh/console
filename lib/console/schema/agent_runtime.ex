@@ -12,6 +12,7 @@ defmodule Console.Schema.AgentRuntime do
     field :create_policy_id,     :binary_id
     field :allowed_repositories, {:array, :string}
     field :ai_proxy,             :boolean, default: false
+    field :browser_enabled,      :boolean, default: false
     field :babysit_interval,     :integer
 
 
@@ -62,7 +63,7 @@ defmodule Console.Schema.AgentRuntime do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(name type ai_proxy default allowed_repositories connection_id babysit_interval)a
+  @valid ~w(name type ai_proxy browser_enabled default allowed_repositories connection_id babysit_interval)a
 
   def changeset(model, attrs \\ %{}) do
     model

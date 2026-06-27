@@ -48,6 +48,20 @@ Docker-in-Docker is enabled. You can use `docker` and `docker-compose` for testi
 ---
 {{ end }}
 
+{{ if .BrowserEnabled }}
+## Browser runtime
+
+The `browser` MCP server (browser-use over a headless browser sidecar) is
+available in this run. When reviewer feedback or a failing CI check requires
+exercising a web UI, prefer the structured `mcp__browser__*` tools
+(`open`, `state`, `click`, `type`, `screenshot`, `keys`, `eval`, ...) over
+writing ad-hoc Playwright/Puppeteer/Selenium scripts. If the MCP tools are
+unavailable, fall back to a remote driver against
+`http://127.0.0.1:3000`.
+
+---
+{{ end }}
+
 ## Plural MCP tool hints
 
 ### `downloadServiceManifests`

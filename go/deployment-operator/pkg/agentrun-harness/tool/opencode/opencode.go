@@ -40,6 +40,8 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 		Token:                 in.Config.Run.Runtime.Config.OpenCode.Token,
 		Mode:                  in.Config.Run.Mode,
 		DindEnabled:           in.Config.Run.DindEnabled,
+		BrowserEnabled:        in.Config.Run.BrowserEnabled,
+		BrowserMCPURL:         common.BrowserUseMCPServerURL,
 		StreamingProxy:        in.Config.Run.IsStreamingProxyEnabled(),
 		StreamingProxyBaseURL: common.AgentOpenAIBaseURL,
 	}

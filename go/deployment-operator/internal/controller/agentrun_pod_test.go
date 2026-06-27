@@ -380,6 +380,94 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Contains(t, bootstrap.Args, common.AgentRunSharedWorkDir)
 }
 
+func TestBuildAgentRunPod_BrowserUseSidecar(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-run",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeWrite,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+
+	t.Run("absent when browser is disabled", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:            console.AgentRuntimeTypeClaude,
+				TargetNamespace: "default",
+			},
+		}
+		pod := buildAgentRunPod(run, runtime)
+		assert.Falsef(t, hasInitContainer(pod, browseruseContainerName),
+			"%s init container should not be added when browser is disabled", browseruseContainerName)
+
+		for _, c := range pod.Spec.Containers {
+			if c.Name == defaultContainer {
+				assert.Contains(t, c.Env, corev1.EnvVar{Name: EnvBrowserEnabled, Value: "false"})
+			}
+		}
+	})
+
+	t.Run("present and wired alongside browser sidecar when enabled", func(t *testing.T) {
+		runtime := &v1alpha1.AgentRuntime{
+			ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+			Spec: v1alpha1.AgentRuntimeSpec{
+				Type:            console.AgentRuntimeTypeClaude,
+				TargetNamespace: "default",
+				Browser:         &v1alpha1.BrowserConfig{Enabled: true},
+			},
+		}
+
+		pod := buildAgentRunPod(run, runtime)
+
+		assert.Truef(t, hasInitContainer(pod, browserContainerName),
+			"browser sidecar should be added when browser is enabled")
+
+		bu := findInitContainer(pod, browseruseContainerName)
+		if bu == nil {
+			t.Fatalf("expected %s init container to be present", browseruseContainerName)
+		}
+
+		assert.Equal(t, corev1.ContainerRestartPolicyAlways, lo.FromPtr(bu.RestartPolicy))
+		assert.Contains(t, bu.Args, "--mcp")
+		assert.Contains(t, bu.Args, "--cdp-url")
+		assert.Contains(t, bu.Args, "http://127.0.0.1:3000")
+		assert.Contains(t, bu.Args, "--port")
+		assert.Contains(t, bu.Args, "8082")
+
+		if assert.Len(t, bu.Ports, 1) {
+			assert.Equal(t, int32(common.BrowserUseMCPServerPort), bu.Ports[0].ContainerPort)
+		}
+
+		for _, c := range pod.Spec.Containers {
+			if c.Name == defaultContainer {
+				assert.Contains(t, c.Env, corev1.EnvVar{Name: EnvBrowserEnabled, Value: "true"})
+			}
+		}
+	})
+}
+
+func hasInitContainer(pod *corev1.Pod, name string) bool {
+	return findInitContainer(pod, name) != nil
+}
+
+func findInitContainer(pod *corev1.Pod, name string) *corev1.Container {
+	for i := range pod.Spec.InitContainers {
+		if pod.Spec.InitContainers[i].Name == name {
+			return &pod.Spec.InitContainers[i]
+		}
+	}
+	return nil
+}
+
 func TestGetAgentRunPodCompletion(t *testing.T) {
 	tests := []struct {
 		name       string

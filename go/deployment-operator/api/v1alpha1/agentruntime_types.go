@@ -777,10 +777,11 @@ func (in *AgentRuntime) ConsoleID() *string {
 
 func (in *AgentRuntime) Attributes() console.AgentRuntimeAttributes {
 	attrs := console.AgentRuntimeAttributes{
-		Name:    in.ConsoleName(),
-		Default: in.Spec.Default,
-		Type:    in.Spec.Type,
-		AiProxy: in.Spec.AiProxy,
+		Name:           in.ConsoleName(),
+		Default:        in.Spec.Default,
+		Type:           in.Spec.Type,
+		AiProxy:        in.Spec.AiProxy,
+		BrowserEnabled: lo.ToPtr(in.Spec.Browser.IsEnabled()),
 	}
 	if in.Spec.Bindings != nil {
 		attrs.CreateBindings = algorithms.Map(in.Spec.Bindings.Create, func(b Binding) *console.AgentBindingAttributes {

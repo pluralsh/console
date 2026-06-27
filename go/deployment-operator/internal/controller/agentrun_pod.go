@@ -34,6 +34,13 @@ const (
 	defaultContainerBrowser           = v1alpha1.BrowserChrome
 	defaultContainerBrowserServerPort = 3000
 
+	// browseruseContainerName is the init container that runs
+	// `browser-use --mcp` against the browser sidecar, exposing the browser
+	// to agent CLIs over MCP rather than ad-hoc Playwright/Selenium scripts.
+	browseruseContainerName = "browseruse"
+	defaultBrowseruseImage  = "ghcr.io/pluralsh/browser-use"
+	defaultBrowseruseTag    = "0.1.0"
+
 	bootstrapScriptVolumeName   = "bootstrap-script"
 	bootstrapScriptMountPath    = "/bootstrap/bootstrap.sh"
 	bootstrapScriptConfigMapKey = "bootstrap.sh"
@@ -162,6 +169,7 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 
 	if runtime.Spec.Browser.IsEnabled() {
 		enableBrowser(runtime.Spec.Browser, pod)
+		enableBrowserUse(pod)
 	}
 
 	if runtime.Spec.BootstrapScript != nil && len(*runtime.Spec.BootstrapScript) > 0 {
@@ -600,6 +608,48 @@ func enableBrowser(browserConfig *v1alpha1.BrowserConfig, pod *corev1.Pod) {
 	}
 
 	pod.Spec.InitContainers = append(pod.Spec.InitContainers, container)
+}
+
+// enableBrowserUse appends a `browser-use --mcp` init container alongside the
+// browser sidecar. It speaks CDP to the browserless container on
+// localhost:3000 and exposes a typed MCP tool surface (open, click, type,
+// screenshot, ...) on localhost:8082 so agent CLIs can call it instead of
+// improvising Playwright scripts. Gated externally on
+// runtime.Spec.Browser.IsEnabled().
+func enableBrowserUse(pod *corev1.Pod) {
+	if algorithms.Index(pod.Spec.InitContainers, func(c corev1.Container) bool {
+		return c.Name == browseruseContainerName
+	}) != -1 {
+		return
+	}
+
+	image := fmt.Sprintf("%s:%s", common.GetConfigurationManager().SwapBaseRegistry(defaultBrowseruseImage), defaultBrowseruseTag)
+	pod.Spec.InitContainers = append(pod.Spec.InitContainers, corev1.Container{
+		Name:            browseruseContainerName,
+		Image:           image,
+		SecurityContext: ensureDefaultContainerSecurityContext(nil),
+		RestartPolicy:   lo.ToPtr(corev1.ContainerRestartPolicyAlways),
+		Args: []string{
+			"--mcp",
+			"--cdp-url", fmt.Sprintf("http://127.0.0.1:%d", defaultContainerBrowserServerPort),
+			"--port", fmt.Sprintf("%d", common.BrowserUseMCPServerPort),
+		},
+		Ports: []corev1.ContainerPort{
+			{
+				Name:          "browseruse",
+				ContainerPort: int32(common.BrowserUseMCPServerPort),
+			},
+		},
+		StartupProbe: &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				TCPSocket: &corev1.TCPSocketAction{
+					Port: intstr.FromInt32(int32(common.BrowserUseMCPServerPort)),
+				},
+			},
+			PeriodSeconds:    2,
+			FailureThreshold: 30,
+		},
+	})
 }
 
 // enableBootstrapScript mounts a ConfigMap containing the bootstrap script as an
