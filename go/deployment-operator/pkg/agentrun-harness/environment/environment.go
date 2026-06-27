@@ -10,6 +10,7 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -22,6 +23,7 @@ import (
 // Defined in pkg/common to stay in sync with the controller's agentrun_pod.go.
 const gitSigningKeyPath = common.GitSigningKeyMountPath
 const gitAskpassFileName = ".git-askpass"
+const codebaseMemoryGitExcludePattern = ".codebase-memory/"
 
 // Setup implements Environment interface.
 func (in *environment) Setup() error {
@@ -165,6 +167,12 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 		return fmt.Errorf("failed to configure git proxy: %w", err)
 	}
 
+	if !helpers.GetPluralEnvBool(controller.EnvMemoryEnabled, false) {
+		if err := configureCodebaseMemoryGitExclude(repoDirPath); err != nil {
+			return fmt.Errorf("failed to configure codebase-memory git exclude: %w", err)
+		}
+	}
+
 	cmd := exec.NewExecutable("git", exec.WithArgs([]string{"branch", "--show-current"}), exec.WithDir(repoDirPath))
 	output, err := cmd.RunWithOutput(context.Background())
 	if err != nil {
@@ -260,6 +268,30 @@ func (in *environment) configureGitProxy(repoDirPath string) error {
 		exec.WithArgs([]string{"config", "http.proxy", proxy}),
 		exec.WithDir(repoDirPath),
 	).Run(context.Background())
+}
+
+func configureCodebaseMemoryGitExclude(repoDirPath string) error {
+	excludePath := path.Join(repoDirPath, ".git", "info", "exclude")
+	if err := os.MkdirAll(path.Dir(excludePath), 0755); err != nil {
+		return err
+	}
+
+	contents, err := os.ReadFile(excludePath)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	for _, line := range strings.Split(string(contents), "\n") {
+		if strings.TrimSpace(line) == codebaseMemoryGitExcludePattern {
+			return nil
+		}
+	}
+
+	prefix := ""
+	if len(contents) > 0 && !strings.HasSuffix(string(contents), "\n") {
+		prefix = "\n"
+	}
+	return os.WriteFile(excludePath, append(contents, []byte(prefix+codebaseMemoryGitExcludePattern+"\n")...), 0644)
 }
 
 // init ensures that all required values are initialized

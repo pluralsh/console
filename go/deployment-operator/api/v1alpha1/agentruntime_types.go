@@ -76,6 +76,14 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Optional
 	Dind *bool `json:"dind,omitempty"`
 
+	// Memory enables team-shared codebase-memory persistence for this agent runtime.
+	// When true, agents may create and commit .codebase-memory/ graph artifacts
+	// by default so future runs can bootstrap from the persisted index. When false
+	// or unset, codebase-memory indexes stay in the pod-local cache and generated
+	// .codebase-memory/ artifacts are excluded from commits.
+	// +kubebuilder:validation:Optional
+	Memory *bool `json:"memory,omitempty"`
+
 	// AllowedRepositories the git repositories allowed to be used with this runtime.
 	// +kubebuilder:validation:Optional
 	AllowedRepositories []string `json:"allowedRepositories,omitempty"`

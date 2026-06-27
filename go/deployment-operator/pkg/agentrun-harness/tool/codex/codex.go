@@ -154,6 +154,12 @@ func (in *Codex) writeCodexConfig() error {
 		Type:        "http",
 		URL:         common.AgentMCPServerURL,
 		TrustPolicy: "always",
+	}, {
+		Name:        common.CodebaseMemoryMCPServerName,
+		Type:        "stdio",
+		Command:     common.CodebaseMemoryMCPCommand,
+		Env:         map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir},
+		TrustPolicy: "always",
 	}}
 
 	switch in.Config.Run.Mode {
@@ -275,7 +281,10 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 			"bash",
 			exec.WithArgs(loginArgs),
 			exec.WithDir(in.Config.WorkDir),
-			exec.WithEnv([]string{fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey), fmt.Sprintf("CODEX_HOME=%s", in.codexHome())}),
+			exec.WithEnv([]string{
+				fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey),
+				fmt.Sprintf("CODEX_HOME=%s", in.codexHome()),
+			}),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 		)
 		if err := in.executable.Run(ctx); err != nil {

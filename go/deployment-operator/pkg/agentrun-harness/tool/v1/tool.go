@@ -64,6 +64,10 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 		return fmt.Errorf("failed configuring %s system prompt/context file %q: %w", runtime, outputFile, err)
 	}
 
+	if err = in.ConfigureSkills(runtime); err != nil {
+		return err
+	}
+
 	klog.V(log.LogLevelExtended).InfoS("system prompt/context file configured", "output", outputFile)
 	return nil
 }
@@ -93,6 +97,10 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 		return fmt.Errorf("failed to write babysit system prompt %q: %w", outputFile, err)
 	}
 
+	if err = in.ConfigureSkills(runtime); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -106,6 +114,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		Mode:           in.Config.Run.Mode,
 		BrowserEnabled: in.Config.Run.BrowserEnabled,
 		DindEnabled:    in.Config.Run.DindEnabled,
+		MemoryEnabled:  in.Config.Run.MemoryEnabled,
 		WorkDir:        in.Config.WorkDir,
 		RepositoryDir:  in.Config.RepositoryDir,
 		Prompt:         in.Config.Run.Prompt,

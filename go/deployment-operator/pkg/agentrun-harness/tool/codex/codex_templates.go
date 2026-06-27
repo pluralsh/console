@@ -11,6 +11,9 @@ import (
 
 func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput, providers []ModelProviderInput) (*CodexConfig, error) {
 	cfg := &CodexConfig{
+		Features: &Features{
+			Skills: true,
+		},
 		Profiles:   make(map[string]*Profile),
 		MCPServers: make(map[string]*MCPServer),
 	}

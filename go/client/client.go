@@ -624,6 +624,7 @@ type AgentRunFragment struct {
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	Skills          []*AgentSkill              "json:\"skills,omitempty\" graphql:\"skills\""
 	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
@@ -712,6 +713,12 @@ func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Analysis
+}
+func (t *AgentRunFragment) GetSkills() []*AgentSkill {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Skills
 }
 func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
 	if t == nil {
@@ -40353,6 +40360,11 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	skills {
+		name
+		description
+		contents
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -40560,6 +40572,11 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	skills {
+		name
+		description
+		contents
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -40792,6 +40809,11 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	skills {
+		name
+		description
+		contents
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41010,6 +41032,11 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	skills {
+		name
+		description
+		contents
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41165,6 +41192,11 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	skills {
+		name
+		description
+		contents
 	}
 	scmCreds {
 		... ScmCredentialFragment

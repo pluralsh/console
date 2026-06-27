@@ -21,6 +21,7 @@ const (
 	defaultContainer              = "default"
 	defaultTmpVolumeName          = "default-tmp"
 	defaultTmpVolumePath          = "/tmp"
+	codebaseMemoryCacheVolumeName = "codebase-memory-cache"
 	sharedContextVolumeName       = dind.SharedContextVolumeName
 	sharedContextVolumePath       = dind.SharedContextMountPath
 	nonRootUID                    = int64(65532)
@@ -56,6 +57,10 @@ var dindClientEnvs = []corev1.EnvVar{
 
 func runtimeDindEnabled(runtime *v1alpha1.AgentRuntime) bool {
 	return runtime.Spec.Dind != nil && *runtime.Spec.Dind
+}
+
+func runtimeMemoryEnabled(runtime *v1alpha1.AgentRuntime) bool {
+	return runtime.Spec.Memory != nil && *runtime.Spec.Memory
 }
 
 func upsertEnvVar(envs []corev1.EnvVar, want corev1.EnvVar) []corev1.EnvVar {
@@ -95,6 +100,18 @@ var (
 	defaultTmpContainerVolumeMount = corev1.VolumeMount{
 		Name:      defaultTmpVolumeName,
 		MountPath: defaultTmpVolumePath,
+	}
+
+	codebaseMemoryCacheVolume = corev1.Volume{
+		Name: codebaseMemoryCacheVolumeName,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+
+	codebaseMemoryCacheVolumeMount = corev1.VolumeMount{
+		Name:      codebaseMemoryCacheVolumeName,
+		MountPath: common.CodebaseMemoryCacheDir,
 	}
 
 	defaultContainerImage    = "ghcr.io/pluralsh/agent-harness"
@@ -223,9 +240,10 @@ func ensureDefaultContainer(containers []corev1.Container, run *v1alpha1.AgentRu
 func ensureDefaultVolumeMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 	return append(
 		algorithms.Filter(mounts, func(v corev1.VolumeMount) bool {
-			return v.Name != defaultTmpVolumeName
+			return v.Name != defaultTmpVolumeName && v.Name != codebaseMemoryCacheVolumeName
 		}),
 		defaultTmpContainerVolumeMount,
+		codebaseMemoryCacheVolumeMount,
 		corev1.VolumeMount{
 			Name:      sharedContextVolumeName,
 			MountPath: sharedContextVolumePath,
@@ -236,9 +254,10 @@ func ensureDefaultVolumeMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount
 func ensureDefaultVolumes(volumes []corev1.Volume) []corev1.Volume {
 	return append(
 		algorithms.Filter(volumes, func(v corev1.Volume) bool {
-			return v.Name != defaultTmpVolumeName
+			return v.Name != defaultTmpVolumeName && v.Name != codebaseMemoryCacheVolumeName
 		}),
 		defaultTmpVolume,
+		codebaseMemoryCacheVolume,
 		corev1.Volume{
 			Name: sharedContextVolumeName,
 			VolumeSource: corev1.VolumeSource{
@@ -294,6 +313,8 @@ func getDefaultEnvVars(runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 	envVars := []corev1.EnvVar{
 		{Name: EnvDindEnabled, Value: fmt.Sprintf("%t", runtimeDindEnabled(runtime))},
 		{Name: EnvBrowserEnabled, Value: fmt.Sprintf("%t", runtime.Spec.Browser.IsEnabled())},
+		{Name: EnvMemoryEnabled, Value: fmt.Sprintf("%t", runtimeMemoryEnabled(runtime))},
+		{Name: common.CodebaseMemoryCacheEnv, Value: common.CodebaseMemoryCacheDir},
 	}
 
 	if runtimeDindEnabled(runtime) {
