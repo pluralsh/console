@@ -42,9 +42,19 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> cast_embed(:options)
+    |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
     |> validate_required([:query])
+  end
+
+  defp options_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:azure, with: &azure_options_changeset/2)
+  end
+
+  defp azure_options_changeset(model, attrs) do
+    cast(model, attrs, ~w(resource_id metrics_namespace aggregation filter order_by roll_up_by metrics_endpoint)a)
   end
 
   def implement(%__MODULE__{} = tool) do

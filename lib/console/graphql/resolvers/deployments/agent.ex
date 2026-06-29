@@ -90,8 +90,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def cancel_agent_run(%{id: id}, %{context: %{current_user: user}}),
     do: Agents.cancel_agent_run(id, user)
 
+  def approve_agent_run(%{id: id}, %{context: %{current_user: user}}),
+    do: Agents.approve_agent_run(id, user)
+
   def create_agent_run(%{runtime_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.create_agent_run(attrs, id, user)
+
+  def create_agent_run_prompt(%{id: id, prompt: prompt}, %{context: %{current_user: user}}) do
+    Agents.create_prompt(prompt, id, user)
+  end
 
   def agent_pull_request(%{run_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.agent_pull_request(attrs, id, user)
@@ -121,6 +128,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   defp run_filters(query, args) do
     Enum.reduce(args, query, fn
       {:runtime_id, id}, q when not is_nil(id) -> AgentRun.for_runtime(q, id)
+      {:status, status}, q when not is_nil(status) -> AgentRun.for_status(q, status)
       _, q -> q
     end)
   end

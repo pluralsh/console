@@ -12,6 +12,7 @@ import {
   SpinnerAlt,
   Tooltip,
   useSetBreadcrumbs,
+  WarningOutlineIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { useChatbot } from 'components/ai/AIContext'
@@ -351,10 +352,14 @@ export function RunStatusChip({
     status === InfraResearchStatus.Running ||
     status === AgentRunStatus.Running ||
     status === WorkbenchJobStatus.Running
+  const isPendingApproval = status === AgentRunStatus.PendingApproval
+
   return (
     <Chip
       fillLevel={isRunning ? 2 : 1}
       severity={statusToSeverity[status]}
+      icon={isPendingApproval ? <WarningOutlineIcon /> : undefined}
+      iconColor={isPendingApproval ? 'icon-warning' : undefined}
       {...props}
     >
       {isRunning ? (
@@ -366,10 +371,21 @@ export function RunStatusChip({
           <span>{runningText}</span>
         </Flex>
       ) : (
-        capitalize(status)
+        statusToLabel(status)
       )}
     </Chip>
   )
+}
+
+const statusToLabel = (
+  status: InfraResearchStatus | AgentRunStatus | WorkbenchJobStatus
+) => {
+  if (status === AgentRunStatus.PendingApproval) return 'Pending approval'
+  if (status === AgentRunStatus.Successful) return 'Successful'
+  if (status === WorkbenchJobStatus.Successful) return 'Successful'
+  if (status === InfraResearchStatus.Completed) return 'Completed'
+
+  return capitalize(status).replaceAll('_', ' ')
 }
 
 // these have a lot of overlap so this map is actually exhaustive (typecheck would fail if it wasn't)
@@ -384,7 +400,7 @@ const statusToSeverity: Record<
   [AgentRunStatus.Cancelled]: 'neutral',
   [AgentRunStatus.Successful]: 'success',
   [AgentRunStatus.Babysitting]: 'neutral',
-  [AgentRunStatus.PendingApproval]: 'warning',
+  [AgentRunStatus.PendingApproval]: 'neutral',
   [WorkbenchJobStatus.Paused]: 'neutral',
 }
 

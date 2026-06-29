@@ -18,10 +18,9 @@ import {
   ChatInputSimpleRef,
   ChatOptionPill,
 } from '../chatbot/input/ChatInput'
-import { BABYSITTING_TOOLTIP } from '../babysittingTooltip'
+import usePersistedState from 'components/hooks/usePersistedState'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { AgentRunRepoSelector } from './AgentRunRepoSelector'
-import usePersistedState from 'components/hooks/usePersistedState'
 
 const PROMPT_KEY = 'ai-agent-run-prompt'
 const MODE_KEY = 'ai-agent-run-mode'
@@ -41,6 +40,7 @@ export function AIAgentRunInput() {
     null
   )
   const [babysit, setBabysit] = useState(false)
+  const [approval, setApproval] = useState(false)
 
   const [mutation, { loading, error }] = useCreateAgentRunMutation({
     variables: {
@@ -50,6 +50,7 @@ export function AIAgentRunInput() {
         mode,
         repository: repository ?? '',
         babysit: mode === AgentRunMode.Write ? babysit : undefined,
+        approval: mode === AgentRunMode.Write ? approval : undefined,
       },
     },
     onCompleted: ({ createAgentRun }) =>
@@ -91,21 +92,38 @@ export function AIAgentRunInput() {
               setSelectedRepository={setRepository}
             />
             {mode === AgentRunMode.Write && (
-              <Tooltip
-                label={BABYSITTING_TOOLTIP}
-                css={{ width: 320 }}
-              >
-                <Checkbox
-                  small
-                  checked={babysit}
-                  onChange={(e) => setBabysit(e.target.checked)}
-                  {...{
-                    '& .label': { userSelect: 'none', textWrap: 'nowrap' },
-                  }}
+              <>
+                <Tooltip
+                  label="Keeps the agent active after it opens a PR so it can monitor review feedback and requested changes, then follow up until the PR is ready."
+                  css={{ width: 320 }}
                 >
-                  Babysit
-                </Checkbox>
-              </Tooltip>
+                  <Checkbox
+                    small
+                    checked={babysit}
+                    onChange={(e) => setBabysit(e.target.checked)}
+                    {...{
+                      '& .label': { userSelect: 'none', textWrap: 'nowrap' },
+                    }}
+                  >
+                    Babysit
+                  </Checkbox>
+                </Tooltip>
+                <Tooltip
+                  label="Pause for your sign-off before the agent edits anything or opens a PR."
+                  css={{ width: 320 }}
+                >
+                  <Checkbox
+                    small
+                    checked={approval}
+                    onChange={(e) => setApproval(e.target.checked)}
+                    {...{
+                      '& .label': { userSelect: 'none', textWrap: 'nowrap' },
+                    }}
+                  >
+                    Approval required
+                  </Checkbox>
+                </Tooltip>
+              </>
             )}
           </Flex>
         }
@@ -134,7 +152,7 @@ function AgentRunTypeSelector({
       triggerButton={
         <ChatOptionPill isOpen={isOpen}>
           <LogsIcon size={12} />
-          {selectedMode ?? 'Select mode'}
+          {selectedMode ? capitalize(selectedMode) : 'Select mode'}
         </ChatOptionPill>
       }
     >

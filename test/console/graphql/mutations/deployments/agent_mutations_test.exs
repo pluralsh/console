@@ -120,6 +120,27 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "createAgentRunPrompt" do
+    test "a user can add a prompt to their own agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run, runtime: runtime, user: user)
+
+      {:ok, %{data: %{"createAgentRunPrompt" => found}}} = run_query("""
+        mutation Prompt($id: ID!, $prompt: String!) {
+          createAgentRunPrompt(id: $id, prompt: $prompt) {
+            id
+            prompt
+          }
+        }
+      """, %{"id" => run.id, "prompt" => "please adjust this"}, %{current_user: user})
+
+      assert found["id"]
+      refute found["id"] == run.id
+      assert found["prompt"] == "please adjust this"
+    end
+  end
+
   describe "updateAgentRun" do
     test "a cluster can update an agent run" do
       cluster = insert(:cluster)
@@ -181,6 +202,50 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
 
       assert found["id"] == run.id
       assert found["status"] == "CANCELLED"
+    end
+  end
+
+  describe "approveAgentRun" do
+    test "a user can approve their own pending approval agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: user,
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:ok, %{data: %{"approveAgentRun" => found}}} = run_query("""
+        mutation Approve($id: ID!) {
+          approveAgentRun(id: $id) {
+            id
+            approvedAt
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["id"] == run.id
+      assert found["approvedAt"]
+    end
+
+    test "a user cannot approve another user's agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: insert(:user),
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Approve($id: ID!) {
+          approveAgentRun(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
     end
   end
 

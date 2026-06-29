@@ -2,157 +2,100 @@ package v1
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
-	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
+	"gopkg.in/yaml.v3"
+	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const (
 	skillFileName = "SKILL.md"
 )
 
-var skillNameInvalidChars = regexp.MustCompile(`[^a-z0-9-]+`)
+type skillFrontmatter struct {
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+}
 
-func (in DefaultTool) ConfigureSkills(runtime console.AgentRuntimeType) error {
+// ConfigureSkills sideloads agent-run skills into the provider-specific skills directory.
+func (in DefaultTool) ConfigureSkills(skillRoot string) error {
 	if in.Config.Run == nil || len(in.Config.Run.Skills) == 0 {
 		return nil
 	}
-
-	baseDir := in.skillsDir(runtime)
-	if baseDir == "" {
-		return nil
+	if strings.TrimSpace(skillRoot) == "" {
+		return fmt.Errorf("skill root is empty")
 	}
 
-	seen := map[string]int{}
+	written := 0
 	for _, skill := range in.Config.Run.Skills {
-		if skill == nil || strings.TrimSpace(skill.Name) == "" {
+		name := strings.TrimSpace(skill.Name)
+		contents := strings.TrimSpace(skill.Contents)
+		if name == "" || contents == "" {
+			klog.V(log.LogLevelDebug).InfoS("skipping malformed agent run skill", "agentRunID", in.Config.Run.ID, "name", skill.Name)
 			continue
 		}
 
-		name := normalizeSkillName(skill.Name)
-		if name == "" {
-			continue
+		content, err := in.renderSkill(name, skill)
+		if err != nil {
+			return fmt.Errorf("failed rendering skill %q: %w", name, err)
 		}
 
-		seen[name]++
-		dirName := name
-		if seen[name] > 1 {
-			dirName = fmt.Sprintf("%s-%d", name, seen[name])
-		}
-
-		if err := writeSkill(baseDir, dirName, skill); err != nil {
+		outputPath, err := in.skillOutputPath(skillRoot, name)
+		if err != nil {
 			return err
 		}
-	}
-
-	return nil
-}
-
-func (in DefaultTool) skillsDir(runtime console.AgentRuntimeType) string {
-	switch runtime {
-	case console.AgentRuntimeTypeClaude:
-		return filepath.Join(in.Config.WorkDir, ".claude", "skills")
-	case console.AgentRuntimeTypeCodex:
-		return filepath.Join(in.Config.WorkDir, ".codex", "skills")
-	case console.AgentRuntimeTypeOpencode:
-		return filepath.Join(in.Config.WorkDir, ".config", "opencode", "skills")
-	default:
-		return ""
-	}
-}
-
-func writeSkill(baseDir, dirName string, skill *console.AgentSkill) error {
-	skillDir := filepath.Join(baseDir, dirName)
-	if err := os.MkdirAll(skillDir, 0755); err != nil {
-		return fmt.Errorf("failed to create skill directory %q: %w", skillDir, err)
-	}
-
-	content := skillContents(dirName, skill)
-	if err := os.WriteFile(filepath.Join(skillDir, skillFileName), []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write skill %q: %w", dirName, err)
-	}
-
-	return nil
-}
-
-func normalizeSkillName(name string) string {
-	name = strings.ToLower(strings.TrimSpace(name))
-	name = strings.ReplaceAll(name, " ", "-")
-	name = skillNameInvalidChars.ReplaceAllString(name, "-")
-	name = strings.Trim(name, "-")
-	for strings.Contains(name, "--") {
-		name = strings.ReplaceAll(name, "--", "-")
-	}
-	return name
-}
-
-func skillContents(name string, skill *console.AgentSkill) string {
-	contents := strings.TrimSpace(skill.Contents)
-	description := strings.TrimSpace(stringValue(skill.Description))
-	if hasFrontmatter(contents) {
-		return normalizeSkillFrontmatter(contents, name, description)
-	}
-
-	if description == "" {
-		description = fmt.Sprintf("Use this skill for %s workflows.", name)
-	}
-
-	return fmt.Sprintf("---\nname: %s\ndescription: %s\n---\n\n%s\n", name, yamlQuote(description), contents)
-}
-
-func hasFrontmatter(contents string) bool {
-	contents = strings.TrimSpace(contents)
-	if !strings.HasPrefix(contents, "---\n") {
-		return false
-	}
-
-	return strings.Contains(contents[4:], "\n---")
-}
-
-func normalizeSkillFrontmatter(contents, name, description string) string {
-	rest := strings.TrimSpace(contents)[len("---\n"):]
-	closing := strings.Index(rest, "\n---")
-	if closing == -1 {
-		return contents + "\n"
-	}
-
-	frontmatter := rest[:closing]
-	body := rest[closing+len("\n---"):]
-	lines := strings.Split(frontmatter, "\n")
-	hasName := false
-	hasDescription := false
-	for i, line := range lines {
-		key := strings.TrimSpace(line)
-		switch {
-		case strings.HasPrefix(key, "name:"):
-			lines[i] = "name: " + name
-			hasName = true
-		case strings.HasPrefix(key, "description:"):
-			hasDescription = true
+		if err := helpers.File().Create(outputPath, content, 0644); err != nil {
+			return fmt.Errorf("failed writing skill %q to %q: %w", name, outputPath, err)
 		}
-	}
-	if !hasName {
-		lines = append([]string{"name: " + name}, lines...)
-	}
-	if !hasDescription && description != "" {
-		lines = append(lines, "description: "+yamlQuote(description))
+
+		written++
+		klog.V(log.LogLevelExtended).InfoS("agent run skill configured", "agentRunID", in.Config.Run.ID, "name", name, "output", outputPath)
 	}
 
-	return fmt.Sprintf("---\n%s\n---%s\n", strings.Join(lines, "\n"), body)
+	klog.V(log.LogLevelInfo).InfoS("agent run skills configured", "agentRunID", in.Config.Run.ID, "count", written, "root", skillRoot)
+	return nil
 }
 
-func stringValue(value *string) string {
-	if value == nil {
-		return ""
+func (in DefaultTool) renderSkill(name string, skill agentrunv1.AgentSkill) (string, error) {
+	description := lo.CoalesceOrEmpty(
+		strings.TrimSpace(lo.FromPtr(skill.Description)),
+		fmt.Sprintf("Plural workbench skill from agent run %s", in.Config.Run.ID),
+	)
+
+	frontmatter, err := yaml.Marshal(skillFrontmatter{
+		Name:        name,
+		Description: description,
+	})
+	if err != nil {
+		return "", err
 	}
-	return *value
+
+	return fmt.Sprintf("---\n%s---\n\n%s\n",
+		string(frontmatter),
+		strings.TrimSpace(skill.Contents),
+	), nil
 }
 
-func yamlQuote(value string) string {
-	value = strings.ReplaceAll(value, "\\", "\\\\")
-	value = strings.ReplaceAll(value, `"`, `\"`)
-	return `"` + value + `"`
+func (in DefaultTool) skillOutputPath(root, name string) (string, error) {
+	cleanRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", fmt.Errorf("failed resolving skill root %q: %w", root, err)
+	}
+
+	output := filepath.Join(cleanRoot, name, skillFileName)
+	rel, err := filepath.Rel(cleanRoot, output)
+	if err != nil {
+		return "", fmt.Errorf("failed checking skill path %q: %w", output, err)
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || filepath.IsAbs(rel) {
+		return "", fmt.Errorf("skill path %q escapes root %q", output, cleanRoot)
+	}
+
+	return output, nil
 }

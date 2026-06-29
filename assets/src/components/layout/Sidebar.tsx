@@ -1,5 +1,4 @@
 import {
-  AiSparkleOutlineIcon,
   CatalogIcon,
   CostManagementIcon,
   EdgeComputeIcon,
@@ -56,10 +55,11 @@ import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
 import { WORKBENCHES_ABS_PATH } from '../../routes/workbenchesRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
+import { AINavIcon } from 'components/ai/AINavIcon'
 import { StacksNavIcon } from 'components/awaiting-review/StacksNavIcon'
 
-const SIDEBAR_WIDTH = 64
-const SIDEBAR_EXPANDED_WIDTH = 180
+export const SIDEBAR_WIDTH = 64
+export const SIDEBAR_EXPANDED_WIDTH = 180
 const APP_ICON_LIGHT = '/plural-logo.png'
 const APP_ICON_DARK = '/plural-logo-white.png'
 
@@ -165,7 +165,7 @@ function getMenuItems({
     {
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
-      icon: <AiSparkleOutlineIcon />,
+      icon: <AINavIcon />,
       path: AI_ABS_PATH,
       hotkeys: ['shift A'],
     },

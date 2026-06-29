@@ -417,6 +417,35 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         }
       """, %{"workbenchId" => workbench.id}, %{current_user: user})
     end
+
+    test "it persists coding approval mode on job creation" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createWorkbenchJob" => job}}} = run_query("""
+        mutation CreateWorkbenchJob($workbenchId: ID!, $attributes: WorkbenchJobAttributes!) {
+          createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            modes {
+              coding {
+                approval
+                babysit
+              }
+            }
+          }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{
+          "prompt" => "fix the bug",
+          "modes" => %{"coding" => %{"approval" => true}}
+        }
+      }, %{current_user: admin_user()})
+
+      assert job["modes"]["coding"]["approval"] == true
+
+      db_job = Console.Repo.get!(Console.Schema.WorkbenchJob, job["id"])
+      assert db_job.modes.coding.approval == true
+    end
   end
 
   describe "createWorkbenchMessage" do

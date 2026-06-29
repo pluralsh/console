@@ -3,6 +3,8 @@ fragment AgentRunTiny on AgentRun {
   status
   mode
   babysit
+  approval
+  approvedAt
   prompt
   shared
   error
@@ -21,9 +23,17 @@ fragment AgentRunTiny on AgentRun {
     name
     namespace
   }
+  workbenchJob {
+    id
+    workbench {
+      id
+      name
+    }
+  }
   upload {
     id
     session
+    patch
   }
   insertedAt
   updatedAt
@@ -84,6 +94,7 @@ fragment AgentMessage on AgentMessage {
   seq
   role
   message
+  insertedAt
   cost {
     ...AgentMessageCost
   }
@@ -243,8 +254,22 @@ mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
   }
 }
 
+mutation CreateAgentRunPrompt($id: ID!, $prompt: String!) {
+  createAgentRunPrompt(id: $id, prompt: $prompt) {
+    id
+    prompt
+    insertedAt
+  }
+}
+
 mutation CancelAgentRun($id: ID!) {
   cancelAgentRun(id: $id) {
+    ...AgentRunTiny
+  }
+}
+
+mutation ApproveAgentRun($id: ID!) {
+  approveAgentRun(id: $id) {
     ...AgentRunTiny
   }
 }

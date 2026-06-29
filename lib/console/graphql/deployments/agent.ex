@@ -197,6 +197,10 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :user,     :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
     field :flow,     :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
 
+    field :workbench_job, :workbench_job,
+      resolve: dataloader(Deployments),
+      description: "the workbench job this agent run was spawned from, if any"
+
     field :pull_requests, list_of(:pull_request),
       resolve: dataloader(Deployments),
       description: "the pull requests this agent run has created"
@@ -436,6 +440,7 @@ defmodule Console.GraphQl.Deployments.Agent do
         resource: :agent,
         action: :read
       arg :runtime_id, :id
+      arg :status,     :agent_run_status, description: "filter runs by status"
 
       resolve &Deployments.agent_runs/2
     end
@@ -462,6 +467,16 @@ defmodule Console.GraphQl.Deployments.Agent do
       resolve &Deployments.cancel_agent_run/2
     end
 
+    field :approve_agent_run, :agent_run do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.approve_agent_run/2
+    end
+
     field :create_agent_run, :agent_run do
       middleware Authenticated
       middleware Scope,
@@ -471,6 +486,17 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_run_attributes)
 
       resolve &Deployments.create_agent_run/2
+    end
+
+    field :create_agent_run_prompt, :agent_prompt_history do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
+      arg :id,     non_null(:id)
+      arg :prompt, non_null(:string)
+
+      resolve &Deployments.create_agent_run_prompt/2
     end
 
     field :share_agent_run, :agent_run do

@@ -10,6 +10,7 @@ import {
   SmallPodIcon,
   Table,
 } from '@pluralsh/design-system'
+import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { createColumnHelper } from '@tanstack/react-table'
 import {
   ColInsertedAt,
@@ -31,7 +32,7 @@ import { Link, LinkProps } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { RunStatusChip } from '../infra-research/details/InfraResearch'
+import { RunStatusIcon } from './AgentRunInfoDisplays'
 
 const columnHelper = createColumnHelper<AgentRunTinyFragment>()
 
@@ -48,6 +49,23 @@ export const agentRunsCols = [
         <div css={{ overflow: 'hidden', width: '100%' }}>
           <Body2P css={TRUNCATE}>{getValue()}</Body2P>
         </div>
+      )
+    },
+  }),
+  columnHelper.accessor((run) => run.workbenchJob, {
+    id: 'workbench',
+    cell: function Cell({ getValue }) {
+      const workbenchJob = getValue()
+      const workbench = workbenchJob?.workbench
+      if (!workbenchJob?.id || !workbench?.id || !workbench.name) return null
+
+      return (
+        <WorkbenchLinkChip
+          workbenchId={workbench.id}
+          workbenchName={workbench.name}
+          workbenchJobId={workbenchJob.id}
+          stopPropagation
+        />
       )
     },
   }),
@@ -97,10 +115,9 @@ export const agentRunsCols = [
     enableSorting: true,
     cell: function Cell({ getValue }) {
       return (
-        <RunStatusChip
-          fillLevel={2}
+        <RunStatusIcon
+          fullColor
           status={getValue()}
-          css={{ alignSelf: 'flex-end' }}
         />
       )
     },

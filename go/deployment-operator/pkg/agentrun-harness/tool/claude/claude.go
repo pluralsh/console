@@ -55,20 +55,11 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 		})
 	}
 
-	// Re-run the Claude CLI synchronously with the reprompt.
-	// We reuse the same configuration but swap the -p argument.
+	// promptFile is the absolute path to the rendered system prompt file.
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := babysitAgent
 
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", bCtx.Prompt,
-		"--output-format", "stream-json",
-		"--verbose",
-	}
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, bCtx.Prompt, in.sessionID)
 
 	var envOpt exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -116,33 +107,23 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	return false
 }
 
-// AnalysisFollowUpRun re-runs the Claude CLI with the same analyze agent and
-// system prompt as the initial run, swapping only the -p user prompt.
-// Errors are returned to the caller and must not be sent on ErrorChan.
-func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
-
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{
-			Message: followUpPrompt,
-			Role:    console.AiRoleUser,
-		})
-	}
+// FollowUpRun re-runs the Claude CLI with the same agent and system prompt as
+// the initial run, swapping only the -p user prompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting claude",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.sessionID != "",
+		"sessionID", in.sessionID,
+	)
 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := analysisAgent
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		agent = autonomousAgent
 	}
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", followUpPrompt,
-		"--output-format", "stream-json",
-		"--verbose",
-	}
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, followUpPrompt, in.sessionID)
 
 	var opts []exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -171,7 +152,7 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 	err := in.executable.RunStream(ctx, func(line []byte) {
 		event := &StreamEvent{}
 		if err := json.Unmarshal(line, event); err != nil {
-			klog.ErrorS(err, "failed to unmarshal claude stream event (analysis follow-up)", "line", string(line))
+			klog.ErrorS(err, "failed to unmarshal claude stream event (follow-up)", "line", string(line))
 			return
 		}
 		in.recordSessionID(event.SessionID)
@@ -183,9 +164,9 @@ func (in *Claude) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("claude analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("claude follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("claude analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("claude follow-up execution finished")
 	return nil
 }
 
@@ -195,14 +176,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		agent = autonomousAgent
 	}
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", in.Config.Run.Prompt,
-		"--output-format", "stream-json",
-		"--verbose"}
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, in.Config.Run.Prompt, "")
 
 	if in.Config.Run.IsProxyEnabled() {
 		options = append(options,
@@ -264,6 +238,9 @@ func (in *Claude) ConfigureBabysitRun() error {
 	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeClaude); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	settings := NewSettingsBuilder(in.model)
 	settings.AllowTools(
@@ -287,6 +264,9 @@ func (in *Claude) ConfigureBabysitRun() error {
 
 func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeClaude); err != nil {
+		return err
+	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
 		return err
 	}
 
@@ -352,6 +332,10 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 
 func (in *Claude) configPath() string {
 	return path.Join(in.Config.WorkDir, ".claude")
+}
+
+func (in *Claude) skillsPath() string {
+	return path.Join(in.configPath(), "skills")
 }
 
 func (in *Claude) withConfigEnv(env []string) []string {
@@ -477,4 +461,19 @@ func mapRole(role string) console.AiRole {
 	default:
 		return console.AiRoleSystem // Default to system role for unknown roles.
 	}
+}
+
+func claudeRunArgs(repositoryDir, promptFile, agent string, model Model, prompt, resumeSessionID string) []string {
+	args := []string{
+		"--add-dir", repositoryDir,
+		"--agents", agent,
+		"--system-prompt-file", promptFile,
+		"--model", string(model),
+	}
+	if resumeSessionID != "" {
+		args = append(args, "--resume", resumeSessionID, "-p", prompt)
+	} else {
+		args = append(args, "-p", prompt)
+	}
+	return append(args, "--output-format", "stream-json", "--verbose")
 }

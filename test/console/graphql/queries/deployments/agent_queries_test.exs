@@ -1,5 +1,6 @@
 defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
   use Console.DataCase, async: true
+  alias Console.Deployments.Workbenches
 
   describe "agentRuntimes" do
     test "it can list runtimes a user can access" do
@@ -34,6 +35,26 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(runs)
+    end
+
+    test "it can filter runs by status" do
+      user = insert(:user)
+      pending_approval = insert_list(2, :agent_run, user: user, status: :pending_approval)
+      insert_list(2, :agent_run, user: user, status: :running)
+      insert_list(2, :agent_run, status: :pending_approval)
+
+      {:ok, %{data: %{"agentRuns" => found}}} = run_query("""
+        query AgentRuns($status: AgentRunStatus!) {
+          agentRuns(first: 10, status: $status) {
+            edges { node { id status } }
+          }
+        }
+      """, %{"status" => "PENDING_APPROVAL"}, %{current_user: user})
+
+      nodes = from_connection(found)
+      assert length(nodes) == 2
+      assert Enum.all?(nodes, &(&1["status"] == "PENDING_APPROVAL"))
+      assert ids_equal(nodes, pending_approval)
     end
   end
 
@@ -117,6 +138,50 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
           agentRun(id: $id) { id }
         }
       """, %{"id" => run.id}, %{cluster: cluster})
+    end
+
+    test "it exposes the workbench job when the run is linked to a workbench activity" do
+      user = insert(:user)
+      workbench = insert(:workbench, name: "infra-debugger")
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :coding)
+      run = insert(:agent_run, user: user)
+
+      {:ok, _} = Workbenches.associate_agent_run(activity, run.id)
+
+      {:ok, %{data: %{"agentRun" => found}}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) {
+            id
+            workbenchJob {
+              id
+              workbench { id name }
+            }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["id"] == run.id
+      assert found["workbenchJob"]["id"] == job.id
+      assert found["workbenchJob"]["workbench"]["id"] == workbench.id
+      assert found["workbenchJob"]["workbench"]["name"] == "infra-debugger"
+    end
+
+    test "it returns null workbenchJob when the run is not linked to a workbench activity" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+
+      {:ok, %{data: %{"agentRun" => found}}} = run_query("""
+        query AgentRun($id: ID!) {
+          agentRun(id: $id) {
+            id
+            workbenchJob { id }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: user})
+
+      assert found["id"] == run.id
+      refute found["workbenchJob"]
     end
   end
 

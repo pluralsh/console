@@ -38,7 +38,7 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	case console.AgentRuntimeTypeClaude:
 		providerDir = ".claude/prompts"
 	case console.AgentRuntimeTypeGemini:
-		providerDir = ".gemini/contexts"
+		providerDir = ".gemini"
 	case console.AgentRuntimeTypeOpencode:
 		providerDir = ".opencode/prompts"
 	case console.AgentRuntimeTypeCodex:
@@ -64,10 +64,6 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 		return fmt.Errorf("failed configuring %s system prompt/context file %q: %w", runtime, outputFile, err)
 	}
 
-	if err = in.ConfigureSkills(runtime); err != nil {
-		return err
-	}
-
 	klog.V(log.LogLevelExtended).InfoS("system prompt/context file configured", "output", outputFile)
 	return nil
 }
@@ -78,7 +74,7 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 	case console.AgentRuntimeTypeClaude:
 		providerDir = ".claude/prompts"
 	case console.AgentRuntimeTypeGemini:
-		providerDir = ".gemini/contexts"
+		providerDir = ".gemini"
 	case console.AgentRuntimeTypeOpencode:
 		providerDir = ".opencode/prompts"
 	case console.AgentRuntimeTypeCodex:
@@ -95,10 +91,6 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 
 	if err = helpers.File().Create(outputFile, content, 0644); err != nil {
 		return fmt.Errorf("failed to write babysit system prompt %q: %w", outputFile, err)
-	}
-
-	if err = in.ConfigureSkills(runtime); err != nil {
-		return err
 	}
 
 	return nil

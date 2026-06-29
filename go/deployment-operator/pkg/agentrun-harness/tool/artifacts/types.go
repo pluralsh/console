@@ -38,8 +38,10 @@ type SessionMetadata struct {
 }
 
 type BuildArtifactsOptions struct {
-	Provider  string
-	Source    SessionSource
+	Provider string
+	Source   SessionSource
+	// SessionID is the provider-native session identifier captured during the
+	// run. The same value must be passed to provider resume flags on follow-up.
 	SessionID string
 }
 

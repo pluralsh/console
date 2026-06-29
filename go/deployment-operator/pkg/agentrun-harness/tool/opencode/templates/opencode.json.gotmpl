@@ -36,7 +36,10 @@
         },
         {{- end }}
         "edit": "deny",
-        "webfetch": "allow"
+        "webfetch": "allow",
+        "skill": {
+          "*": "allow"
+        }
       }
     },
     "autonomous": {
@@ -55,7 +58,10 @@
         "bash": "allow",
         "edit": "allow",
         "webfetch": "allow",
-        "git": "deny"
+        "git": "deny",
+        "skill": {
+          "*": "allow"
+        }
       }
     }
   },

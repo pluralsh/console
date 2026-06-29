@@ -101,8 +101,7 @@ export function WorkbenchJob() {
           <GqlError
             header="Workbench job reported an error"
             error={job?.error}
-            margin="large"
-            css={{ marginBottom: 0 }}
+            css={{ marginBottom: theme.spacing.small }}
           />
         )}
 
@@ -187,7 +186,11 @@ export function WorkbenchJob() {
             />
           </Flex>
         </StretchedFlex>
-        <WorkbenchJobActivities jobId={jobId} />
+        <WorkbenchJobActivities
+          jobId={jobId}
+          workbenchId={workbenchId}
+          workbenchName={workbenchName}
+        />
       </WrapperSC>
       {!isOpen && (
         <PanelOpenBtnSC

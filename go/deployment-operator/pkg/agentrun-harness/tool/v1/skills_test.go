@@ -6,99 +6,107 @@ import (
 	"strings"
 	"testing"
 
-	console "github.com/pluralsh/console/go/client"
+	"gopkg.in/yaml.v3"
+
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 )
 
-func TestNormalizeSkillName(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name string
-		want string
-	}{
-		{name: "Code Review", want: "code-review"},
-		{name: "  Release   QA  ", want: "release-qa"},
-		{name: "GitHub/PR Reviewer!", want: "github-pr-reviewer"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			if got := normalizeSkillName(tt.name); got != tt.want {
-				t.Fatalf("normalizeSkillName() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestConfigureSkillsWritesRuntimeGlobalSkills(t *testing.T) {
-	t.Parallel()
-
-	description := "Use when reviewing pull requests."
-	workDir := t.TempDir()
-	tool := DefaultTool{Config: Config{
-		WorkDir: workDir,
-		Run: &agentrunv1.AgentRun{
-			Skills: []*console.AgentSkill{{
-				Name:        "Code Review",
+func TestConfigureSkillsWritesSkillFiles(t *testing.T) {
+	description := `Use when "docs" change: keep examples runnable.`
+	root := t.TempDir()
+	run := &agentrunv1.AgentRun{
+		ID: "run-123",
+		Skills: []agentrunv1.AgentSkill{
+			{
+				Name:        "readme-helper",
 				Description: &description,
-				Contents:    "Review the diff and call out correctness risks.",
-			}},
+				Contents:    "Always keep examples runnable.",
+			},
+			{
+				Name:     "empty-contents",
+				Contents: "   ",
+			},
 		},
-	}}
+	}
 
-	if err := tool.ConfigureSkills(console.AgentRuntimeTypeClaude); err != nil {
+	tool := DefaultTool{Config: Config{Run: run}}
+	if err := tool.ConfigureSkills(root); err != nil {
 		t.Fatalf("ConfigureSkills() error = %v", err)
 	}
 
-	content := readSkill(t, workDir, ".claude", "skills", "code-review")
-	if !strings.Contains(content, "name: code-review") {
-		t.Fatalf("expected normalized skill name in frontmatter, got:\n%s", content)
+	readmePath := filepath.Join(root, "readme-helper", skillFileName)
+	readme, err := os.ReadFile(readmePath)
+	if err != nil {
+		t.Fatalf("expected skill file %q: %v", readmePath, err)
 	}
-	if !strings.Contains(content, `description: "Use when reviewing pull requests."`) {
-		t.Fatalf("expected skill description in frontmatter, got:\n%s", content)
+	content := string(readme)
+	if !strings.Contains(content, "name: readme-helper") {
+		t.Fatalf("expected skill name in frontmatter, got:\n%s", content)
 	}
-	if !strings.Contains(content, "Review the diff") {
-		t.Fatalf("expected skill body, got:\n%s", content)
+	frontmatter := parseSkillFrontmatter(t, content)
+	if frontmatter.Name != "readme-helper" {
+		t.Fatalf("expected frontmatter name readme-helper, got %q", frontmatter.Name)
+	}
+	if frontmatter.Description != description {
+		t.Fatalf("expected frontmatter description %q, got %q", description, frontmatter.Description)
+	}
+	if strings.Contains(content, "Plural workbench skill.") ||
+		strings.Contains(content, "Original skill name:") ||
+		strings.Contains(content, "Source: AgentRun") {
+		t.Fatalf("expected no provenance comment, got:\n%s", content)
+	}
+	if !strings.Contains(content, "Always keep examples runnable.") {
+		t.Fatalf("expected skill contents, got:\n%s", content)
+	}
+
+	if _, err := os.Stat(filepath.Join(root, "empty-contents", skillFileName)); !os.IsNotExist(err) {
+		t.Fatalf("expected empty skill to be skipped, stat err = %v", err)
 	}
 }
 
-func TestConfigureSkillsNormalizesExistingFrontmatterName(t *testing.T) {
-	t.Parallel()
-
-	workDir := t.TempDir()
-	contents := "---\nname: Custom Name\ndescription: Custom description.\n---\n\nBody"
-	tool := DefaultTool{Config: Config{
-		WorkDir: workDir,
-		Run: &agentrunv1.AgentRun{
-			Skills: []*console.AgentSkill{{Name: "Custom Name", Contents: contents}},
+func TestConfigureSkillsUsesFallbackDescription(t *testing.T) {
+	root := t.TempDir()
+	run := &agentrunv1.AgentRun{
+		ID: "run--123",
+		Skills: []agentrunv1.AgentSkill{
+			{
+				Name:     "safe-comment",
+				Contents: "Instructions.",
+			},
 		},
-	}}
+	}
 
-	if err := tool.ConfigureSkills(console.AgentRuntimeTypeCodex); err != nil {
+	tool := DefaultTool{Config: Config{Run: run}}
+	if err := tool.ConfigureSkills(root); err != nil {
 		t.Fatalf("ConfigureSkills() error = %v", err)
 	}
 
-	got := readSkill(t, workDir, ".codex", "skills", "custom-name")
-	if strings.Count(got, "---") != 2 {
-		t.Fatalf("expected existing frontmatter to be preserved, got:\n%s", got)
+	raw, err := os.ReadFile(filepath.Join(root, "safe-comment", skillFileName))
+	if err != nil {
+		t.Fatalf("expected skill file: %v", err)
 	}
-	if !strings.Contains(got, "name: custom-name") {
-		t.Fatalf("expected normalized frontmatter name, got:\n%s", got)
+	content := string(raw)
+	frontmatter := parseSkillFrontmatter(t, content)
+	if frontmatter.Description != "Plural workbench skill from agent run run--123" {
+		t.Fatalf("expected fallback description, got %q", frontmatter.Description)
 	}
-	if !strings.Contains(got, "description: Custom description.") {
-		t.Fatalf("expected existing frontmatter description, got:\n%s", got)
+	if strings.Contains(content, "Source: AgentRun run--123") {
+		t.Fatalf("expected no provenance comment, got:\n%s", content)
 	}
 }
 
-func readSkill(t *testing.T, parts ...string) string {
+func parseSkillFrontmatter(t *testing.T, content string) skillFrontmatter {
 	t.Helper()
 
-	path := filepath.Join(append(parts, skillFileName)...)
-	content, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("failed to read skill %q: %v", path, err)
+	parts := strings.SplitN(content, "---", 3)
+	if len(parts) != 3 {
+		t.Fatalf("expected YAML frontmatter, got:\n%s", content)
 	}
-	return string(content)
+
+	var frontmatter skillFrontmatter
+	if err := yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
+		t.Fatalf("failed to parse frontmatter: %v\n%s", err, content)
+	}
+
+	return frontmatter
 }

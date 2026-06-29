@@ -1,7 +1,9 @@
-import { Breadcrumbs } from '@pluralsh/design-system'
+import { Breadcrumbs, Chip, Flex, ReturnIcon } from '@pluralsh/design-system'
 import { CommandPaletteLauncher } from 'components/commandpalette/CommandPaletteLauncher.tsx'
+import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import ExplainWithAI from '../ai/explain/ExplainWithAI.tsx'
+import { useSubheaderBackButton } from './useSubheaderBackButton.tsx'
 
 const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -29,9 +31,28 @@ const BreadcrumbsContainerSC = styled.div(({ theme }) => ({
 
 export default function Subheader() {
   const theme = useTheme()
+  const backButton = useSubheaderBackButton()
 
   return (
     <SubheaderSC>
+      {backButton && (
+        <BackLinkSC to={backButton.to}>
+          <Chip
+            clickable
+            size="small"
+            fillLevel={2}
+            icon={<ReturnIcon size={12} />}
+          >
+            <Flex
+              align="center"
+              gap="xsmall"
+            >
+              {backButton.icon}
+              {backButton.label}
+            </Flex>
+          </Chip>
+        </BackLinkSC>
+      )}
       <BreadcrumbsContainerSC>
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
@@ -48,3 +69,9 @@ export default function Subheader() {
     </SubheaderSC>
   )
 }
+
+const BackLinkSC = styled(Link)({
+  display: 'inline-flex',
+  flexShrink: 0,
+  textDecoration: 'none',
+})

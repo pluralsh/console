@@ -43,6 +43,9 @@ func (in *CreateBranch) handler(ctx context.Context, request mcp.CallToolRequest
 	}
 
 	repoDir := config.Dir
+	if err := environment.ConfigureGitSafeDirectory(repoDir); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("failed to configure git repository: %v", err)), nil
+	}
 
 	currentBranch, _ := exec.NewExecutable("git", exec.WithArgs([]string{"branch", "--show-current"}), exec.WithDir(repoDir)).RunWithOutput(ctx)
 

@@ -1,7 +1,6 @@
 import {
   AccordionItem,
   Card,
-  DiscoverIcon,
   FailedFilledIcon,
   Flex,
   IconFrame,
@@ -10,6 +9,7 @@ import {
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
 import {
+  AgentRunIcon,
   AgentRunInfoCard,
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
@@ -39,6 +39,7 @@ import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
@@ -58,11 +59,15 @@ export function WorkbenchJobActivity({
   activity,
   textStream,
   jobId,
+  workbenchId,
+  workbenchName,
 }: {
   isOpen: boolean
   activity: WorkbenchJobActivityFragment
   textStream: Nullable<string>
   jobId: string
+  workbenchId: string
+  workbenchName: string
 }) {
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
@@ -141,13 +146,21 @@ export function WorkbenchJobActivity({
               clickable
               as={Link}
               size="small"
-              to={getAgentRunAbsPath({ agentRunId: agentRun.id })}
+              to={getAgentRunAbsPath({
+                agentRunId: agentRun.id,
+                ...(workbenchId
+                  ? {
+                      backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+                      backLabel: workbenchName,
+                    }
+                  : {}),
+              })}
               target="_blank"
               rel="noopener noreferrer"
               icon={
-                <DiscoverIcon
-                  color="icon-xlight"
-                  css={{ width: 14 }}
+                <AgentRunIcon
+                  runtime={agentRun.runtime}
+                  size={14}
                 />
               }
               tooltip="Go to agent run details"
@@ -256,12 +269,7 @@ function WorkbenchJobActivityResult({
             first="Other agent runs"
             firstPartialType="body2Bold"
             firstColor="text-xlight"
-            icon={
-              <DiscoverIcon
-                size={12}
-                color="icon-xlight"
-              />
-            }
+            icon={<AgentRunIcon size={12} />}
           />
           {otherAgentRuns?.map((agentRun) => (
             <AgentRunInfoSimple

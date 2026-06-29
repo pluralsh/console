@@ -34,9 +34,18 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> cast_embed(:options)
+    |> cast_embed(:options, with: &options_changeset/2)
   end
 
+  defp options_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:azure, with: &azure_options_changeset/2)
+  end
+
+  defp azure_options_changeset(model, attrs) do
+    cast(model, attrs, [:resource_id])
+  end
 
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),

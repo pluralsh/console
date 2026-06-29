@@ -37,10 +37,20 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> cast_embed(:options)
+    |> cast_embed(:options, with: &options_changeset/2)
     |> cast_embed(:time_range)
     |> cast_embed(:facets, with: &facet_changeset/2)
     |> validate_required([:query])
+  end
+
+  defp options_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:azure, with: &azure_options_changeset/2)
+  end
+
+  defp azure_options_changeset(model, attrs) do
+    cast(model, attrs, [:resource_id])
   end
 
   defp facet_changeset(model, attrs) do

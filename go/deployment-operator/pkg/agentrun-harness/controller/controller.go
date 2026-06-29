@@ -12,9 +12,11 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -46,7 +48,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 		return retErr
 	}
 
-	in.preStart()
+	if retErr = in.preStart(ctx); retErr != nil {
+		return retErr
+	}
 
 	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes) {
 		if message == nil {
@@ -94,6 +98,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 func (in *agentRunController) prepare() error {
 	var err error
 	repositoryDir := filepath.Join(in.dir, "shared", "repository")
+	if err := environment.ConfigureGitSafeDirectory(repositoryDir); err != nil {
+		return fmt.Errorf("configure git safe directory: %w", err)
+	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
 		RepositoryDir: repositoryDir,
@@ -141,6 +148,7 @@ func (in *agentRunController) init() (Controller, error) {
 
 	// Convert console fragment to harness type
 	in.agentRun = (&agentrunv1.AgentRun{}).FromAgentRunFragment(agentRunFragment)
+	in.initializePromptCursor()
 
 	klog.V(log.LogLevelInfo).InfoS("found agent run",
 		"id", in.agentRun.ID,
@@ -152,11 +160,19 @@ func (in *agentRunController) init() (Controller, error) {
 	return in, nil
 }
 
-// babysitLoop runs the callback periodically while babysit is enabled.
-// It stops when ctx is done, the done channel is closed, or all PRs are terminal.
+// babysitLoop waits for the initial autonomous run, then optionally enters
+// post-run phases:
+//
+//  1. Analysis persistence (if configured)
+//  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
+//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s),
+//     PR/SCM checks every babysitInterval (default 60s)
+//
+// When both approval and babysit are enabled, approval follow-up creates the PR
+// before step 3; babysit then monitors PRs and continues accepting user prompts.
 func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool,
 ) {
-	d := time.Duration(in.agentRun.BabysitInterval) * time.Second
+	prInterval := time.Duration(in.agentRun.BabysitInterval) * time.Second
 
 	// Wait for initial Run() to complete.
 	select {
@@ -167,6 +183,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.runDone:
 		klog.Info("initial agent run completed, starting babysit loop")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
+		in.runPostRunPollLoop(ctx)
 		if !in.agentRun.Babysit {
 			return
 		}
@@ -175,23 +192,63 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 		}
 	}
 
-	// Run immediately, then wait d after each call completes before running again.
 	for {
-		if in.runBabysit(ctx, callback) {
+		agentRun, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
+		if err != nil {
+			klog.ErrorS(err, "could not poll agent run during babysit", "id", in.agentRunID)
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+		if agentRun == nil {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+		if agentRun.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
+			in.errChan <- internalerrors.ErrRemoteCancel
 			return
 		}
 
-		select {
-		case <-ctx.Done():
+		if in.tryDispatchQueuedUserPrompt(ctx, agentRun, false) {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+
+		if !in.lastBabysitPRPollAt.IsZero() && time.Since(in.lastBabysitPRPollAt) < prInterval {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+
+		in.lastBabysitPRPollAt = time.Now()
+		if in.runBabysitPR(ctx, callback) {
 			return
-		case <-in.done:
+		}
+
+		if in.waitBabysit(ctx, promptPollInterval) {
 			return
-		case <-time.After(d):
 		}
 	}
 }
 
-func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
+func (in *agentRunController) waitBabysit(ctx context.Context, d time.Duration) bool {
+	select {
+	case <-ctx.Done():
+		return true
+	case <-in.done:
+		return true
+	case <-time.After(d):
+		return false
+	}
+}
+
+func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
 	agentRun, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusBabysitting})
 	if err != nil {
 		klog.ErrorS(err, "failed to update agent run status during babysit")

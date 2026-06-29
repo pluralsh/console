@@ -64,6 +64,8 @@ defmodule Console.Schema.AgentRun do
     belongs_to :session, AgentSession
 
     has_one :workbench_job_activity_agent_run, WorkbenchJobActivityAgentRun
+    has_one :workbench_job_activity, through: [:workbench_job_activity_agent_run, :workbench_job_activity]
+    has_one :workbench_job, through: [:workbench_job_activity, :workbench_job]
 
     has_many :pull_requests, PullRequest
     has_many :messages,      AgentMessage, on_replace: :delete
