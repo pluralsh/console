@@ -12,11 +12,7 @@ import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
-import {
-  Body2BoldP,
-  Subtitle1H1,
-  Subtitle2H1,
-} from 'components/utils/typography/Text'
+import { Body2BoldP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { WorkbenchEvalSkillButton } from 'components/workbenches/common/WorkbenchEvalSkillButton'
 import {
@@ -67,13 +63,6 @@ export function WorkbenchJobResult({
         direction="column"
         overflow="auto"
       >
-        <Subtitle1H1 $color="text">
-          {conclusion
-            ? 'Conclusion'
-            : workingTheory
-              ? 'Working theory'
-              : undefined}
-        </Subtitle1H1>
         <Markdown text={conclusion || workingTheory || 'No output yet.'} />
       </Flex>
       {!isEmpty(job?.result?.todos) && !conclusion && (
