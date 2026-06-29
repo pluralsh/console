@@ -86,7 +86,10 @@ export function ExpandableUserPrompt({
   const isExpandable = prompt.length > EXPANDABLE_PROMPT_LENGTH
 
   return (
-    <PromptCardSC {...props}>
+    <PromptCardSC
+      $isExpanded={isExpandable && isExpanded}
+      {...props}
+    >
       <SimplifiedMarkdown
         text={
           !isExpandable || isExpanded
@@ -510,17 +513,20 @@ const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
   background: $color,
 }))
 
-const PromptCardSC = styled(Card)(({ theme }) => ({
-  padding: theme.spacing.medium,
-  width: 'fit-content',
-  maxWidth: '100%',
-  overflow: 'auto',
-  wordBreak: 'break-word',
-  marginLeft: 'auto',
-  marginTop: theme.spacing.small,
-  marginBottom: theme.spacing.small,
-  [`& ${Code}`]: {
-    backgroundColor: theme.colors['fill-two'],
-    borderColor: theme.colors['border-fill-two'],
-  },
-}))
+const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
+  ({ theme, $isExpanded }) => ({
+    padding: theme.spacing.medium,
+    width: 'fit-content',
+    maxWidth: '100%',
+    overflow: 'auto',
+    wordBreak: 'break-word',
+    marginLeft: 'auto',
+    marginTop: theme.spacing.small,
+    marginBottom: theme.spacing.small,
+    border: $isExpanded ? 'none' : undefined,
+    [`& ${Code}`]: {
+      backgroundColor: theme.colors['fill-two'],
+      borderColor: theme.colors['border-fill-two'],
+    },
+  })
+)

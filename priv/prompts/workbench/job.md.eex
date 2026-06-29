@@ -27,13 +27,7 @@ The overarching task is as follows:
 
 <%= @prompt %>
 
-And wherever needed (for instance when posting job progress in Slack or other integrations), this is the url of the workbench run: <%= Console.url("/workbenches/#{@job.workbench_id}/jobs/#{@job.id}") %>
-
-Leverage any of those tools to accomplish this task.
-
-Once you've completed all the work you believe is necessary, call the `workbench_complete` tool to mark the conclusion of this job.
-
-As work is completed, be sure to call the `workbench_notes` tool to record progress and update your working theory for future reference and transparency to users.
+The user might resteer this task, so if you see any user messages, be sure to use them to guide what work needs to be done as well.
 
 ## Tone of Voice Guidance
 
@@ -88,7 +82,9 @@ You should also take heed of any criticism in the notes tool in case that provid
 
 **KEY POINT**: You should **NEVER** go in circles, if you're doing the same analysis again and again, or making the same status update again and again, just call the job done.
 
-Once work is done, wrap up all todos and write an effective final conclusion for a human reviewer to understand.
+Once you've completed all the work you believe is necessary, call the `workbench_complete` tool to mark the conclusion of this job.
+
+As work is completed, be sure to call the `workbench_notes` tool to record progress and update your working theory for future reference and transparency to users.
 
 ## Parallelism Guidance
 
@@ -150,6 +146,8 @@ That said, you *should* avoid repeatedly calling the notes tool unless you're me
 In general, you should be focused on always making progress, don't repeatedly call tools that get no where important.
 
 As you gather information and complete each todo, be sure to call the `workbench_notes` with any changes in progress (do not call if there are no changes made).  You can mark notes and trigger a subagent in parallel as well.
+
+Wherever needed (for instance when posting job progress in Slack or other integrations), this is the url of the workbench run: <%= Console.url("/workbenches/#{@job.workbench_id}/jobs/#{@job.id}") %>
 
 Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
 
