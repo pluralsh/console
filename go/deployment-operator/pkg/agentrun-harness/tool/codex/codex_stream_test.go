@@ -100,6 +100,22 @@ func TestMapCommandExecutionIncludesInput(t *testing.T) {
 	require.Equal(t, "docs\n", *msg.Metadata.Tool.Output)
 }
 
+func TestMapTurnCompletedPersistsCostWithoutChatContent(t *testing.T) {
+	line := `{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":20,"output_tokens":50}}`
+
+	c := &Codex{toolItems: make(map[string]*StreamItem)}
+	event := &StreamEvent{}
+	require.NoError(t, json.Unmarshal([]byte(line), event))
+
+	msg := c.mapStreamEvent(event)
+	require.NotNil(t, msg)
+	require.Equal(t, ignoredAgentMessage, msg.Message)
+	require.NotNil(t, msg.Cost)
+	require.Equal(t, float64(150), msg.Cost.Total)
+	require.Equal(t, float64(100), *msg.Cost.Tokens.Input)
+	require.Equal(t, float64(50), *msg.Cost.Tokens.Output)
+}
+
 func TestMapWebSearchIncludesQueryAsInput(t *testing.T) {
 	line := `{"type":"item.completed","item":{"id":"item_7","type":"web_search","query":"codex exec --json schema"}}`
 

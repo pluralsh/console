@@ -22,6 +22,9 @@ const (
 	streamEventTypeTurnFailed    = "turn.failed"
 
 	streamItemTypeDynamicToolCall = "dynamic_tool_call"
+
+	// ignoredAgentMessage marks messages persisted for metadata (e.g. cost) but hidden in chat.
+	ignoredAgentMessage = "__plrl_ignore__"
 )
 
 type Codex struct {
