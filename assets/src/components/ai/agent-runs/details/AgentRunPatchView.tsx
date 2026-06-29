@@ -1,9 +1,68 @@
 import { CaptionP } from 'components/utils/typography/Text'
 import chroma from 'chroma-js'
-import { useMemo } from 'react'
-import { Diff, Hunk, markEdits, parseDiff, tokenize } from 'react-diff-view'
+import pluralize from 'pluralize'
+import { useMemo, type ReactElement } from 'react'
+import {
+  Decoration,
+  Diff,
+  Hunk,
+  getCollapsedLinesCountBetween,
+  markEdits,
+  parseDiff,
+  tokenize,
+} from 'react-diff-view'
+import type { HunkData } from 'react-diff-view'
 import styled, { useTheme } from 'styled-components'
 import 'react-diff-view/style/index.css'
+
+const MIN_COLLAPSED_LINES_TO_SHOW = 1
+
+function collapsedLinesBeforeHunk(hunks: HunkData[], index: number) {
+  const hunk = hunks[index]
+  const previousHunk = index > 0 ? hunks[index - 1] : null
+
+  if (!previousHunk) {
+    return Math.max(0, hunk.oldStart - 1)
+  }
+
+  return Math.max(0, getCollapsedLinesCountBetween(previousHunk, hunk))
+}
+
+function renderHunksWithCollapsedIndicators(hunks: HunkData[]): ReactElement[] {
+  const elements: ReactElement[] = []
+
+  hunks.forEach((hunk, index) => {
+    const collapsedLines = collapsedLinesBeforeHunk(hunks, index)
+
+    if (collapsedLines >= MIN_COLLAPSED_LINES_TO_SHOW) {
+      elements.push(
+        <CollapsedLinesDecoration
+          key={`collapsed-${hunk.content}`}
+          count={collapsedLines}
+        />
+      )
+    }
+
+    elements.push(
+      <Hunk
+        key={hunk.content}
+        hunk={hunk}
+      />
+    )
+  })
+
+  return elements
+}
+
+function CollapsedLinesDecoration({ count }: { count: number }) {
+  return (
+    <Decoration contentClassName="agent-run-diff-collapsed-content">
+      <CollapsedLinesLabelSC>
+        {count} unchanged {pluralize('line', count)} hidden
+      </CollapsedLinesLabelSC>
+    </Decoration>
+  )
+}
 
 export function AgentRunPatchView({ patch }: { patch: string }) {
   const theme = useTheme()
@@ -50,14 +109,7 @@ export function AgentRunPatchView({ patch }: { patch: string }) {
         tokens={tokens}
         viewType="unified"
       >
-        {(hunks) =>
-          hunks.map((hunk) => (
-            <Hunk
-              key={hunk.content}
-              hunk={hunk}
-            />
-          ))
-        }
+        {renderHunksWithCollapsedIndicators}
       </Diff>
     </PatchViewSC>
   )
@@ -126,5 +178,24 @@ const PatchViewSC = styled.div<{
       paddingRight: theme.spacing.medium,
       wordBreak: 'break-word',
     },
+
+    '.diff-decoration': {
+      backgroundColor: theme.colors['fill-accent'],
+    },
+
+    '.agent-run-diff-collapsed-content': {
+      backgroundColor: theme.colors['fill-accent'],
+      padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
+      textAlign: 'center',
+    },
   }
 })
+
+const CollapsedLinesLabelSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  display: 'inline-block',
+  lineHeight: '96px',
+  userSelect: 'none',
+  whiteSpace: 'nowrap',
+}))
