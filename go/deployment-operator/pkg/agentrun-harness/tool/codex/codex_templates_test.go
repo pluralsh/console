@@ -45,13 +45,35 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 
 func TestCodexExecArgs(t *testing.T) {
 	repositoryDir := dind.RepositoryDir()
-	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests")
+	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests", "")
 	want := []string{
 		"exec",
 		"--sandbox", sandboxModeHarness,
 		"--cd", repositoryDir,
 		"--profile", autonomousProfile,
 		"--json", "run tests",
+	}
+	if len(args) != len(want) {
+		t.Fatalf("expected %d args, got %d: %v", len(want), len(args), args)
+	}
+	for i := range want {
+		if args[i] != want[i] {
+			t.Fatalf("arg[%d]: expected %q, got %q (full: %v)", i, want[i], args[i], args)
+		}
+	}
+}
+
+func TestCodexExecArgsResume(t *testing.T) {
+	repositoryDir := dind.RepositoryDir()
+	sessionID := "thr_abc123"
+	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests", sessionID)
+	want := []string{
+		"exec",
+		"--sandbox", sandboxModeHarness,
+		"--cd", repositoryDir,
+		"--profile", autonomousProfile,
+		"--json",
+		"resume", sessionID, "run tests",
 	}
 	if len(args) != len(want) {
 		t.Fatalf("expected %d args, got %d: %v", len(want), len(args), args)

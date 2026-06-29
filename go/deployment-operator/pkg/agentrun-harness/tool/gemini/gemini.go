@@ -51,7 +51,7 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 
 	in.executable = exec.NewExecutable(
 		"gemini",
-		exec.WithArgs(in.args(bCtx.Prompt)),
+		exec.WithArgs(in.args(bCtx.Prompt, true)),
 		exec.WithDir(in.Config.WorkDir),
 		exec.WithEnv(env),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -101,7 +101,12 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 // run, using followUpPrompt as the user prompt. Errors are returned to the
 // caller and must not be sent on ErrorChan.
 func (in *Gemini) FollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting gemini",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.sessionID != "",
+		"sessionID", in.sessionID,
+	)
 
 	env := in.env()
 	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
@@ -110,7 +115,7 @@ func (in *Gemini) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 
 	in.executable = exec.NewExecutable(
 		"gemini",
-		exec.WithArgs(in.args(followUpPrompt)),
+		exec.WithArgs(in.args(followUpPrompt, true)),
 		exec.WithDir(in.Config.WorkDir),
 		exec.WithEnv(env),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -161,7 +166,7 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 		"gemini",
 		append(
 			options,
-			exec.WithArgs(in.args("")),
+			exec.WithArgs(in.args("", false)),
 			exec.WithDir(in.Config.WorkDir),
 			exec.WithEnv(env),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -208,22 +213,19 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 	// FinishedChan is closed by the controller after the babysit loop exits.
 }
 
-func (in *Gemini) args(prompt string) []string {
+func (in *Gemini) args(prompt string, resume bool) []string {
 	if len(prompt) > 0 {
 		in.Config.Run.Prompt = prompt
 	}
-	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		return []string{
-			"--approval-mode", "yolo",
-			"--output-format", "stream-json", "--prompt",
-			in.Config.Run.Prompt,
-		}
-	}
 
-	return []string{
-		"--output-format", "stream-json", "--prompt",
-		in.Config.Run.Prompt,
+	args := []string{"--output-format", "stream-json"}
+	if in.Config.Run.Mode == console.AgentRunModeWrite {
+		args = append([]string{"--approval-mode", "yolo"}, args...)
 	}
+	if resume && in.sessionID != "" {
+		return append(args, "--resume", in.sessionID, "--prompt", in.Config.Run.Prompt)
+	}
+	return append(args, "--prompt", in.Config.Run.Prompt)
 }
 
 func (in *Gemini) Configure(_, _ string) error {

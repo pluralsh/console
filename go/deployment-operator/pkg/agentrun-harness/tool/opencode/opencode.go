@@ -87,7 +87,7 @@ func (in *Opencode) start(ctx context.Context, options ...exec.Option) {
 		append(
 			options,
 			exec.WithEnv(in.env(configFilePath)),
-			exec.WithArgs(in.args("")),
+			exec.WithArgs(in.args("", false)),
 			exec.WithDir(in.Config.RepositoryDir),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 		)...,
@@ -249,7 +249,7 @@ func (in *Opencode) getID(e EventListResponse) string {
 	return e.Part.MessageID
 }
 
-func (in *Opencode) args(prompt string) []string {
+func (in *Opencode) args(prompt string, resume bool) []string {
 	if len(prompt) == 0 {
 		prompt = in.Config.Run.Prompt
 		if overridePrompt := os.Getenv(environment.EnvOverrideSystemPrompt); len(overridePrompt) > 0 {
@@ -257,13 +257,16 @@ func (in *Opencode) args(prompt string) []string {
 		}
 	}
 
-	return []string{
+	args := []string{
 		"run",
 		"--format", "json",
 		"--agent", in.agent(),
 		"--model", fmt.Sprintf("%s/%s", in.provider, in.model),
-		prompt,
 	}
+	if resume && in.sessionID != "" {
+		args = append(args, "--session", in.sessionID)
+	}
+	return append(args, prompt)
 }
 
 func (in *Opencode) agent() string {
@@ -334,7 +337,7 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 	in.executable = exec.NewExecutable(
 		"opencode",
 		exec.WithEnv(in.env(configFilePath)),
-		exec.WithArgs(in.args(bCtx.Prompt)),
+		exec.WithArgs(in.args(bCtx.Prompt, true)),
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 	)
@@ -370,7 +373,12 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 // FollowUpRun re-runs OpenCode with followUpPrompt. Errors are returned to the
 // caller and must not be sent on ErrorChan.
 func (in *Opencode) FollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting opencode", "prompt_len", len(followUpPrompt))
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting opencode",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.sessionID != "",
+		"sessionID", in.sessionID,
+	)
 
 	configFilePath, err := filepath.Abs(in.configFilePath())
 	if err != nil {
@@ -383,7 +391,7 @@ func (in *Opencode) FollowUpRun(ctx context.Context, followUpPrompt string) erro
 	in.executable = exec.NewExecutable(
 		"opencode",
 		exec.WithEnv(in.env(configFilePath)),
-		exec.WithArgs(in.args(followUpPrompt)),
+		exec.WithArgs(in.args(followUpPrompt, true)),
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 	)

@@ -62,8 +62,9 @@ type Tool interface {
 	OnMessage(func(message *console.AgentMessageAttributes))
 
 	// FollowUpRun re-invokes the provider CLI with a user prompt after the
-	// initial run. It must not write to ErrorChan; failures are returned to
-	// the caller. Implementations must not emit followUpPrompt via OnMessage:
+	// initial run, resuming the provider session when a session ID was captured
+	// during streaming. It must not write to ErrorChan; failures are returned
+	// to the caller. Implementations must not emit followUpPrompt via OnMessage:
 	// user reprompts are already persisted as agent messages by the API.
 	FollowUpRun(ctx context.Context, followUpPrompt string) error
 

@@ -213,7 +213,7 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 		return false
 	}
 
-	args := codexExecArgs(in.Config.RepositoryDir, autonomousProfile, bCtx.Prompt)
+	args := codexExecArgs(in.Config.RepositoryDir, autonomousProfile, bCtx.Prompt, in.threadID)
 
 	in.executable = exec.NewExecutable(
 		"codex",
@@ -242,13 +242,18 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 // FollowUpRun re-runs Codex with followUpPrompt. Errors are returned to the
 // caller and must not be sent on ErrorChan.
 func (in *Codex) FollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting codex", "prompt_len", len(followUpPrompt))
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting codex",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.threadID != "",
+		"sessionID", in.threadID,
+	)
 
 	profile := "analysis"
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		profile = autonomousProfile
 	}
-	args := codexExecArgs(in.Config.RepositoryDir, profile, followUpPrompt)
+	args := codexExecArgs(in.Config.RepositoryDir, profile, followUpPrompt, in.threadID)
 
 	in.executable = exec.NewExecutable(
 		"codex",
@@ -288,7 +293,7 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 		agent = autonomousProfile
 	}
 
-	args := codexExecArgs(in.Config.RepositoryDir, agent, in.Config.Run.Prompt)
+	args := codexExecArgs(in.Config.RepositoryDir, agent, in.Config.Run.Prompt, "")
 
 	in.executable = exec.NewExecutable(
 		"codex",
@@ -345,14 +350,18 @@ func (in *Codex) systemPromptPath() (string, error) {
 	return filepath.Abs(p)
 }
 
-func codexExecArgs(repositoryDir, profile, prompt string) []string {
-	return []string{
+func codexExecArgs(repositoryDir, profile, prompt, resumeSessionID string) []string {
+	args := []string{
 		"exec",
 		"--sandbox", sandboxModeHarness,
 		"--cd", repositoryDir,
 		"--profile", profile,
-		"--json", prompt,
+		"--json",
 	}
+	if resumeSessionID != "" {
+		return append(args, "resume", resumeSessionID, prompt)
+	}
+	return append(args, prompt)
 }
 
 func codexWireAPI(method string) string {

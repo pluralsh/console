@@ -55,20 +55,11 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 		})
 	}
 
-	// Re-run the Claude CLI synchronously with the reprompt.
-	// We reuse the same configuration but swap the -p argument.
+	// promptFile is the absolute path to the rendered system prompt file.
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := babysitAgent
 
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", bCtx.Prompt,
-		"--output-format", "stream-json",
-		"--verbose",
-	}
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, bCtx.Prompt, in.sessionID)
 
 	var envOpt exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -120,22 +111,19 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 // the initial run, swapping only the -p user prompt. Errors are returned to the
 // caller and must not be sent on ErrorChan.
 func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("follow-up: reprompting claude", "prompt_len", len(followUpPrompt))
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting claude",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.sessionID != "",
+		"sessionID", in.sessionID,
+	)
 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := analysisAgent
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		agent = autonomousAgent
 	}
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", followUpPrompt,
-		"--output-format", "stream-json",
-		"--verbose",
-	}
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, followUpPrompt, in.sessionID)
 
 	var opts []exec.Option
 	if in.Config.Run.IsProxyEnabled() {
@@ -188,14 +176,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
 		agent = autonomousAgent
 	}
-	args := []string{
-		"--add-dir", in.Config.RepositoryDir,
-		"--agents", agent,
-		"--system-prompt-file", promptFile,
-		"--model", string(in.model),
-		"-p", in.Config.Run.Prompt,
-		"--output-format", "stream-json",
-		"--verbose"}
+	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, in.Config.Run.Prompt, "")
 
 	if in.Config.Run.IsProxyEnabled() {
 		options = append(options,
@@ -471,4 +452,19 @@ func mapRole(role string) console.AiRole {
 	default:
 		return console.AiRoleSystem // Default to system role for unknown roles.
 	}
+}
+
+func claudeRunArgs(repositoryDir, promptFile, agent string, model Model, prompt, resumeSessionID string) []string {
+	args := []string{
+		"--add-dir", repositoryDir,
+		"--agents", agent,
+		"--system-prompt-file", promptFile,
+		"--model", string(model),
+	}
+	if resumeSessionID != "" {
+		args = append(args, "--resume", resumeSessionID, "-p", prompt)
+	} else {
+		args = append(args, "-p", prompt)
+	}
+	return append(args, "--output-format", "stream-json", "--verbose")
 }
