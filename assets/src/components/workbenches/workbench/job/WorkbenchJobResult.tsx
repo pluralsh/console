@@ -68,7 +68,7 @@ export function WorkbenchJobResult({
   return (
     <Flex
       direction="column"
-      gap="medium"
+      gap="xlarge"
       height="100%"
       minHeight={0}
       overflow="auto"
