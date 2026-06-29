@@ -10,6 +10,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
   alias Console.Deployments.Agents
   alias Console.Schema.{AgentRun, AgentRunUpload}
   alias Console.Uploads
+  alias ConsoleWeb.ReqStream
 
   plug Scope, [resource: :ai, action: :read] when action in [:show, :index, :download]
   plug Scope, [resource: :ai, action: :write] when action in [:create]
@@ -74,13 +75,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunController do
 
   defp resolve_upload(%AgentRunUpload{} = upload, type, conn) do
     with {:ok, url} <- signed_url(upload, type) do
-      Req.new()
-      |> Req.get(url: url, into: conn, redirect: true)
-      |> case do
-        {:ok, %Req.Response{body: %Plug.Conn{} = conn}} -> conn
-        {:ok, %Req.Response{status: status}} -> {:error, "Upload download failed with status #{status}"}
-        {:error, reason} -> {:error, "Upload download failed: #{inspect(reason)}"}
-      end
+      ReqStream.get(conn, Req.new(), [url: url, redirect: true], error_message: "Agent Run upload failed to download")
     end
   end
 

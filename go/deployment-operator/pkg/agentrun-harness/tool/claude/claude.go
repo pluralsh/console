@@ -238,6 +238,9 @@ func (in *Claude) ConfigureBabysitRun() error {
 	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeClaude); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	settings := NewSettingsBuilder(in.model)
 	settings.AllowTools(
@@ -248,6 +251,7 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"Bash",
 		"WebFetch",
 		PluralMCPToolsWildcard,
+		CodebaseMemoryMCPToolsWildcard,
 	)
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())
 	maxTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashMaxTimeout.Milliseconds())
@@ -269,6 +273,9 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	mcp := NewMCPConfigBuilder()
 	mcp.
 		AddURLServer("plural", common.AgentMCPServerURL).
+		Done().
+		AddServer(common.CodebaseMemoryMCPServerName, common.CodebaseMemoryMCPCommand).
+		Env(common.CodebaseMemoryCacheEnv, common.CodebaseMemoryCacheDir).
 		Done()
 
 	if err := mcp.WriteToFile(filepath.Join(in.Config.WorkDir, ".mcp.json")); err != nil {
@@ -299,6 +306,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"Bash(find:*)",
 			"WebFetch",
 			PluralMCPToolsWildcard,
+			CodebaseMemoryMCPToolsWildcard,
 		).DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
 	} else {
 		settings.AllowTools(
@@ -309,6 +317,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"Bash",
 			"WebFetch",
 			PluralMCPToolsWildcard,
+			CodebaseMemoryMCPToolsWildcard,
 		)
 	}
 

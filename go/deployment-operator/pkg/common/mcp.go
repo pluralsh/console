@@ -16,4 +16,9 @@ const (
 	AgentMCPGRPCAddress       = "127.0.0.1:8081"
 
 	AgentRunSharedWorkDir = "/plural/shared"
+
+	CodebaseMemoryMCPServerName = "codebase-memory-mcp"
+	CodebaseMemoryMCPCommand    = "/usr/local/bin/codebase-memory-mcp"
+	CodebaseMemoryCacheEnv      = "CBM_CACHE_DIR"
+	CodebaseMemoryCacheDir      = "/plural/.cache/codebase-memory-mcp"
 )

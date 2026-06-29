@@ -412,14 +412,23 @@ func (in *Opencode) FollowUpRun(ctx context.Context, followUpPrompt string) erro
 }
 
 func (in *Opencode) ConfigureBabysitRun() error {
-	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeOpencode)
+	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeOpencode); err != nil {
+		return err
+	}
+
+	return in.ConfigureSkills(in.skillsPath())
 }
 
 func (in *Opencode) env(configFilePath string) []string {
 	return []string{
 		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
+		fmt.Sprintf("XDG_CONFIG_HOME=%s", in.configHome()),
 		fmt.Sprintf("XDG_DATA_HOME=%s", in.dataHome()),
 	}
+}
+
+func (in *Opencode) configHome() string {
+	return filepath.Join(in.Config.WorkDir, ".config")
 }
 
 func (in *Opencode) dataPath() string {

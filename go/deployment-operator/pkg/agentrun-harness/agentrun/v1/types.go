@@ -49,6 +49,7 @@ type AgentRun struct {
 
 	DindEnabled    bool
 	BrowserEnabled bool
+	MemoryEnabled  bool
 
 	Babysit         bool
 	BabysitInterval int64
@@ -67,6 +68,7 @@ type AgentRuntime struct {
 	Name           string                   `json:"name"`
 	Type           console.AgentRuntimeType `json:"type"`
 	AiProxy        bool                     `json:"aiProxy"`
+	Memory         bool                     `json:"memory"`
 	StreamingProxy bool                     `json:"streamingProxy"`
 	Config         *AgentRuntimeConfig      `json:"config,omitempty"`
 	ExaConnection  bool                     `json:"exaConnection,omitempty"`
@@ -153,6 +155,10 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		run.BrowserEnabled = true
 	}
 
+	if helpers.GetPluralEnvBool(controller.EnvMemoryEnabled, false) {
+		run.MemoryEnabled = true
+	}
+
 	if fragment.Babysit != nil {
 		run.Babysit = *fragment.Babysit
 	}
@@ -179,6 +185,7 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 	result.Name = runtime.Name
 	result.Type = runtime.Type
 	result.AiProxy = runtime.AiProxy != nil && *runtime.AiProxy
+	result.Memory = helpers.GetPluralEnvBool(controller.EnvMemoryEnabled, false)
 	result.StreamingProxy = helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false)
 	result.ExaConnection = helpers.GetPluralEnv(controller.EnvExaConnection, "") != ""
 

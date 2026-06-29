@@ -72,7 +72,11 @@ func (in *Codex) Run(ctx context.Context, options ...exec.Option) {
 func (in *Codex) ConfigureBabysitRun() error {
 	klog.Info("configuring codex babysit run")
 	// model_instructions_file points at AGENTS.md; re-rendering the file is enough.
-	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeCodex)
+	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeCodex); err != nil {
+		return err
+	}
+
+	return in.ConfigureSkills(in.skillsPath())
 }
 
 func (in *Codex) Configure(consoleURL, consoleToken string) error {
@@ -156,6 +160,12 @@ func (in *Codex) writeCodexConfig() error {
 		Name:        "plural",
 		Type:        "http",
 		URL:         common.AgentMCPServerURL,
+		TrustPolicy: "always",
+	}, {
+		Name:        common.CodebaseMemoryMCPServerName,
+		Type:        "stdio",
+		Command:     common.CodebaseMemoryMCPCommand,
+		Env:         map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir},
 		TrustPolicy: "always",
 	}}
 
@@ -278,7 +288,10 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 			"bash",
 			exec.WithArgs(loginArgs),
 			exec.WithDir(in.Config.WorkDir),
-			exec.WithEnv([]string{fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey), fmt.Sprintf("CODEX_HOME=%s", in.codexHome())}),
+			exec.WithEnv([]string{
+				fmt.Sprintf("%s=%s", openAIAPIKeyEnv, in.apiKey),
+				fmt.Sprintf("CODEX_HOME=%s", in.codexHome()),
+			}),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Codex.Timeout),
 		)
 		if err := in.executable.Run(ctx); err != nil {

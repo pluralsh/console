@@ -73,13 +73,13 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
         "https://example.com"
       end)
 
-      response =
+      conn =
         conn
         |> add_auth_headers(user)
         |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
-        |> response(200)
 
-      assert response =~ "Example Domain"
+      assert response(conn, 200) =~ "Example Domain"
+      assert ["text/html" <> _] = get_resp_header(conn, "content-type")
     end
 
     test "downloads a multi-chunk public upload url", %{conn: conn} do
@@ -93,12 +93,14 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
         @compatibilities_url
       end)
 
-      response =
+      conn =
         conn
         |> add_auth_headers(user)
         |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
-        |> response(200)
 
+      response = response(conn, 200)
+
+      assert [_ | _] = get_resp_header(conn, "content-type")
       assert response =~ "addons:"
       assert byte_size(response) > 100_000
     end
@@ -134,7 +136,11 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
         "https://example.com"
       end)
 
-      expect(Req, :get, fn %Req.Request{}, url: "https://example.com", into: %Plug.Conn{}, redirect: true ->
+      expect(Req, :get, fn %Req.Request{}, opts ->
+        assert Keyword.get(opts, :url) == "https://example.com"
+        assert Keyword.get(opts, :into) == :self
+        assert Keyword.get(opts, :redirect) == true
+
         {:error, :econnrefused}
       end)
 
@@ -144,7 +150,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
         |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
         |> json_response(401)
 
-      assert result["error"] == "Upload download failed: :econnrefused"
+      assert result["error"] == "Agent Run upload failed to download: :econnrefused"
     end
   end
 

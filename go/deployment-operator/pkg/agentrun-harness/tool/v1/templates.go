@@ -12,6 +12,7 @@ type SystemPromptTemplateInput struct {
 	Mode           console.AgentRunMode
 	BrowserEnabled bool
 	DindEnabled    bool
+	MemoryEnabled  bool
 	WorkDir        string
 	RepositoryDir  string
 	Prompt         string

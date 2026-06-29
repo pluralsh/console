@@ -8,7 +8,10 @@ import (
 )
 
 // PluralMCPToolsWildcard allows any tool exposed by the in-pod plural MCP server.
-const PluralMCPToolsWildcard = "mcp__plural__*"
+const (
+	PluralMCPToolsWildcard         = "mcp__plural__*"
+	CodebaseMemoryMCPToolsWildcard = "mcp__codebase-memory-mcp__*"
+)
 
 type SettingsBuilder struct {
 	settings Settings

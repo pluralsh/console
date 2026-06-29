@@ -149,7 +149,11 @@ func (in *Gemini) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 }
 
 func (in *Gemini) ConfigureBabysitRun() error {
-	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeGemini)
+	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeGemini); err != nil {
+		return err
+	}
+
+	return in.ConfigureSkills(in.skillsPath())
 }
 
 func (in *Gemini) Run(ctx context.Context, options ...exec.Option) {

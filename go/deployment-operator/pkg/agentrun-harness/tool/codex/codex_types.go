@@ -231,6 +231,7 @@ type SandboxWorkspaceWrite struct {
 type Features struct {
 	WebSearchRequest bool `toml:"web_search_request,omitempty"`
 	ShellSnapshot    bool `toml:"shell_snapshot,omitempty"`
+	Skills           bool `toml:"skills,omitempty"`
 }
 
 type Profile struct {
@@ -258,6 +259,7 @@ type MCPServer struct {
 }
 
 type CodexConfig struct {
+	Features       *Features                       `toml:"features,omitempty"`
 	Projects       map[string]*Project             `toml:"projects,omitempty"`
 	ModelProviders map[string]*ModelProviderConfig `toml:"model_providers,omitempty"`
 	Profiles       map[string]*Profile             `toml:"profiles"`
