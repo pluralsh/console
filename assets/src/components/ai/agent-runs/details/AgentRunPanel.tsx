@@ -52,7 +52,12 @@ import { AgentRunTodos } from './AgentRunTodos.tsx'
 import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
-type AgentRunPanelTab = 'Diff' | 'Analysis' | 'Agent todos' | 'Pull requests'
+export enum AgentRunPanelTab {
+  Diff = 'Diff',
+  Analysis = 'Analysis',
+  AgentTodos = 'Agent todos',
+  PullRequests = 'Pull requests',
+}
 
 type AgentRunPanelContextT = {
   isOpen: boolean
@@ -65,7 +70,7 @@ type AgentRunPanelContextT = {
 
 const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
   isOpen: false,
-  selectedTab: 'Analysis',
+  selectedTab: AgentRunPanelTab.Analysis,
   setSelectedTab: () =>
     console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
   requestedTab: null,
@@ -77,7 +82,9 @@ const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
 
 export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
   const { sidePanel, setSidePanel } = useTopLevelSidePanel()
-  const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>('Analysis')
+  const [selectedTab, setSelectedTab] = useState<AgentRunPanelTab>(
+    AgentRunPanelTab.Analysis
+  )
   const [requestedTab, setRequestedTab] = useState<AgentRunPanelTab | null>(
     null
   )
@@ -128,13 +135,8 @@ export function AgentRunPanelContent() {
   } = useAgentRunPanel()
   const tabStateRef = useRef<any>(null)
   const [diffFullscreen, setDiffFullscreen] = useState(false)
-  const isDiffMaximized = diffFullscreen && selectedTab === 'Diff'
-
-  useSidePanelWidth(
-    isDiffMaximized
-      ? { fullWidth: true }
-      : { maxWidthVw: 60, initialWidthVw: 60 }
-  )
+  const isDiffMaximized =
+    diffFullscreen && selectedTab === AgentRunPanelTab.Diff
 
   useEffect(() => {
     clearRequestedTab()
@@ -145,7 +147,7 @@ export function AgentRunPanelContent() {
   }, [runId])
 
   useEffect(() => {
-    if (selectedTab !== 'Diff') setDiffFullscreen(false)
+    if (selectedTab !== AgentRunPanelTab.Diff) setDiffFullscreen(false)
   }, [selectedTab])
 
   const { data, loading } = useAgentRunQuery({
@@ -173,7 +175,16 @@ export function AgentRunPanelContent() {
     !!run?.analysis &&
     (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
   const showDiffTab = !!run?.upload?.patch
+  const isDiffTabShowingPatch =
+    selectedTab === AgentRunPanelTab.Diff && showDiffTab
   const todos = useAgentRunTodos(run)
+  useSidePanelWidth(
+    isDiffMaximized
+      ? { fullWidth: true }
+      : isDiffTabShowingPatch
+        ? { maxWidthVw: 60, initialWidthVw: 60 }
+        : { maxWidthVw: 50, initialWidthVw: 45 }
+  )
   const showAgentTodosTab = !isEmpty(todos)
   const showPrsTab = hasPullRequests
   const hasContentTabs =
@@ -195,22 +206,28 @@ export function AgentRunPanelContent() {
   const showTabSkeleton =
     !hasContentTabs && (expectsTodos || expectsPullRequests || expectsAnalysis)
   const showingTabContent =
-    (showDiffTab && selectedTab === 'Diff' && !!run?.upload?.patch) ||
-    (showAnalysisTab && selectedTab === 'Analysis' && !!run?.analysis) ||
-    (showAgentTodosTab && selectedTab === 'Agent todos' && !!run) ||
-    (showPrsTab && selectedTab === 'Pull requests' && !!run)
+    (showDiffTab &&
+      selectedTab === AgentRunPanelTab.Diff &&
+      !!run?.upload?.patch) ||
+    (showAnalysisTab &&
+      selectedTab === AgentRunPanelTab.Analysis &&
+      !!run?.analysis) ||
+    (showAgentTodosTab &&
+      selectedTab === AgentRunPanelTab.AgentTodos &&
+      !!run) ||
+    (showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
-    if (showDiffTab) return 'Diff'
-    if (showAnalysisTab) return 'Analysis'
-    if (showAgentTodosTab) return 'Agent todos'
-    if (showPrsTab) return 'Pull requests'
+    if (showDiffTab) return AgentRunPanelTab.Diff
+    if (showAnalysisTab) return AgentRunPanelTab.Analysis
+    if (showAgentTodosTab) return AgentRunPanelTab.AgentTodos
+    if (showPrsTab) return AgentRunPanelTab.PullRequests
     return null
   }, [showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
 
   useEffect(() => {
     if (!runId || !defaultTab) return
-    if (requestedTab === 'Diff' && !showDiffTab) return
+    if (requestedTab === AgentRunPanelTab.Diff && !showDiffTab) return
     if (requestedTab) clearRequestedTab()
     setSelectedTab(defaultTab)
   }, [
@@ -248,8 +265,8 @@ export function AgentRunPanelContent() {
                 >
                   {showDiffTab && (
                     <PanelSubTabSC
-                      key="Diff"
-                      textValue="Diff"
+                      key={AgentRunPanelTab.Diff}
+                      textValue={AgentRunPanelTab.Diff}
                     >
                       <FileDiffIcon size={12} />
                       Diff
@@ -257,16 +274,16 @@ export function AgentRunPanelContent() {
                   )}
                   {showAnalysisTab && (
                     <PanelSubTabSC
-                      key="Analysis"
-                      textValue="Analysis"
+                      key={AgentRunPanelTab.Analysis}
+                      textValue={AgentRunPanelTab.Analysis}
                     >
                       Analysis
                     </PanelSubTabSC>
                   )}
                   {showAgentTodosTab && (
                     <PanelSubTabSC
-                      key="Agent todos"
-                      textValue="Agent todos"
+                      key={AgentRunPanelTab.AgentTodos}
+                      textValue={AgentRunPanelTab.AgentTodos}
                     >
                       <ListIcon size={12} />
                       Agent todos
@@ -274,8 +291,8 @@ export function AgentRunPanelContent() {
                   )}
                   {showPrsTab && (
                     <PanelSubTabSC
-                      key="Pull requests"
-                      textValue="Pull requests"
+                      key={AgentRunPanelTab.PullRequests}
+                      textValue={AgentRunPanelTab.PullRequests}
                     >
                       <PrIcon size={12} />
                       Pull requests
@@ -320,42 +337,48 @@ export function AgentRunPanelContent() {
           tooltip="Close panel"
         />
       </PanelHeaderSC>
-      {showDiffTab && selectedTab === 'Diff' && run?.upload?.patch && (
-        <ContentWrapperFlushSC>
-          <ContentInnerFlushSC>
-            <AgentRunDiff
-              runId={run.id}
-              isFullscreen={diffFullscreen}
-              onFullscreenChange={setDiffFullscreen}
-            />
-          </ContentInnerFlushSC>
-        </ContentWrapperFlushSC>
-      )}
-      {showAnalysisTab && selectedTab === 'Analysis' && run?.analysis && (
-        <ContentWrapperSC>
-          <ContentInnerSC>
-            {run.analysis.summary && (
-              <Markdown
-                text={`# High level summary\n\n${run.analysis.summary}`}
+      {showDiffTab &&
+        selectedTab === AgentRunPanelTab.Diff &&
+        run?.upload?.patch && (
+          <ContentWrapperFlushSC>
+            <ContentInnerFlushSC>
+              <AgentRunDiff
+                runId={run.id}
+                isFullscreen={diffFullscreen}
+                onFullscreenChange={setDiffFullscreen}
               />
-            )}
-            {run.analysis.bullets && (
-              <Markdown
-                text={`# Summary\n\n${`- ${run.analysis.bullets.join('\n- ')}`.trim()}`}
-              />
-            )}
-            <Markdown text={run.analysis.analysis} />
-          </ContentInnerSC>
-        </ContentWrapperSC>
-      )}
-      {showAgentTodosTab && selectedTab === 'Agent todos' && run && (
-        <ContentWrapperSC>
-          <ContentInnerSC>
-            <AgentRunTodos todos={todos} />
-          </ContentInnerSC>
-        </ContentWrapperSC>
-      )}
-      {showPrsTab && selectedTab === 'Pull requests' && run && (
+            </ContentInnerFlushSC>
+          </ContentWrapperFlushSC>
+        )}
+      {showAnalysisTab &&
+        selectedTab === AgentRunPanelTab.Analysis &&
+        run?.analysis && (
+          <ContentWrapperSC>
+            <ContentInnerSC>
+              {run.analysis.summary && (
+                <Markdown
+                  text={`# High level summary\n\n${run.analysis.summary}`}
+                />
+              )}
+              {run.analysis.bullets && (
+                <Markdown
+                  text={`# Summary\n\n${`- ${run.analysis.bullets.join('\n- ')}`.trim()}`}
+                />
+              )}
+              <Markdown text={run.analysis.analysis} />
+            </ContentInnerSC>
+          </ContentWrapperSC>
+        )}
+      {showAgentTodosTab &&
+        selectedTab === AgentRunPanelTab.AgentTodos &&
+        run && (
+          <ContentWrapperSC>
+            <ContentInnerSC>
+              <AgentRunTodos todos={todos} />
+            </ContentInnerSC>
+          </ContentWrapperSC>
+        )}
+      {showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && run && (
         <ContentWrapperSC>
           <ContentInnerSC>
             <AgentRunPullRequests pullRequests={pullRequests} />

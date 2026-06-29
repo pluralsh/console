@@ -45,12 +45,11 @@ import {
   ChatInputSimple,
   ChatInputSimpleRef,
 } from '../../chatbot/input/ChatInput.tsx'
-import { AgentRunStatusChip } from './AgentRunStatusChip.tsx'
 import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
-import { useAgentRunPanel } from './AgentRunPanel.tsx'
+import { AgentRunPanelTab, useAgentRunPanel } from './AgentRunPanel.tsx'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -89,7 +88,10 @@ export function AIAgentRun() {
 
   const runLoading = !data && loading
   const run = data?.agentRun
-  const { isOpen, setOpen } = useAgentRunPanel(!!run?.id)
+  const hasPersistedAgentTodos = hasAgentRunTodos(run)
+  const { isOpen, setOpen } = useAgentRunPanel(
+    !!run?.id && hasPersistedAgentTodos
+  )
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
@@ -179,7 +181,7 @@ export function AIAgentRun() {
                 isApprovable={isApprovable}
                 approving={approving}
                 onApprove={() => approveAgentRun()}
-                onViewDiff={() => setOpen(true, 'Diff')}
+                onViewDiff={() => setOpen(true, AgentRunPanelTab.Diff)}
               />
             )}
             {run?.error && (
@@ -208,7 +210,7 @@ export function AIAgentRun() {
             {run && canReprompt && <AgentRunRepromptInput run={run} />}
           </Flex>
         </WrapperSC>
-        {!isOpen && (
+        {hasPersistedAgentTodos && !isOpen && (
           <PanelOpenBtnSC
             tertiary
             onClick={() => setOpen(true)}
@@ -233,6 +235,15 @@ export function AIAgentRun() {
       </Toast>
     </>
   )
+}
+
+function hasAgentRunTodos(run: Nullable<AgentRunFragment>) {
+  return (run?.todos ?? []).some((todo) => {
+    const title = todo?.title?.trim() ?? ''
+    const description = todo?.description?.trim() ?? ''
+
+    return title.length > 0 || description.length > 0
+  })
 }
 
 function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
@@ -456,11 +467,6 @@ function AgentRunStatusCallout({
             />
           }
           css={{ flex: 1, minWidth: 0 }}
-        />
-        <AgentRunStatusChip
-          status={run.status}
-          fillLevel={2}
-          css={{ flexShrink: 0 }}
         />
       </StretchedFlex>
       {summary && (
