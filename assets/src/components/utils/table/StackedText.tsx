@@ -34,7 +34,7 @@ const FirstSC = styled.div<{
     $color = 'text-light',
   }) => ({
     ...theme.partials.text[$partialType],
-    ...($truncate ? TRUNCATE : {}),
+    ...($truncate ? { ...TRUNCATE, minWidth: 0 } : {}),
     color: theme.colors[$color],
   })
 )
@@ -46,7 +46,7 @@ const SecondSC = styled.div<{
   ({ theme, $truncate, $partialType = 'caption', $color = 'text-xlight' }) => ({
     ...theme.partials.text[$partialType],
     color: theme.colors[$color],
-    ...($truncate ? TRUNCATE : {}),
+    ...($truncate ? { ...TRUNCATE, minWidth: 0 } : {}),
   })
 )
 
@@ -89,6 +89,11 @@ export const StackedText = memo(
           <IconWrapper
             icon={icon}
             gap={iconGap}
+            css={
+              truncate
+                ? { flex: 1, minWidth: 0, overflow: 'hidden' }
+                : undefined
+            }
             {...iconFlexProps}
           />
         }
