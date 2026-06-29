@@ -95,7 +95,6 @@ export function WorkbenchJobTodos({
                 <TodoBodySC>
                   <Body2BoldP
                     $color="text"
-                    css={{ fontWeight: 700 }}
                   >
                     {todo.title}
                   </Body2BoldP>
