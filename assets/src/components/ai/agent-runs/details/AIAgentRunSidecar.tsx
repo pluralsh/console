@@ -9,7 +9,6 @@ import {
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { CaptionP } from 'components/utils/typography/Text'
-import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
   AgentRunFragment,
   AgentRunStatus,
@@ -26,7 +25,10 @@ import { isNonNullable } from 'utils/isNonNullable'
 
 export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
   const { colors } = useTheme()
-  const isRunning = isJobRunning(run.status)
+  const isFinished =
+    run.status === AgentRunStatus.Successful ||
+    run.status === AgentRunStatus.Failed ||
+    run.status === AgentRunStatus.Cancelled
   const RuntimeIcon =
     runtimeToIcon[run.runtime?.type ?? AgentRuntimeType.Custom]
 
@@ -77,12 +79,14 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
           {formatDateTime(run.insertedAt)}
         </span>
       </CaptionP>
-      <CaptionP $color="text-input-disabled">
-        End{' '}
-        <span css={{ color: colors['text-xlight'] }}>
-          {isRunning ? '---' : formatDateTime(run.updatedAt)}
-        </span>
-      </CaptionP>
+      {isFinished && (
+        <CaptionP $color="text-input-disabled">
+          End{' '}
+          <span css={{ color: colors['text-xlight'] }}>
+            {formatDateTime(run.updatedAt)}
+          </span>
+        </CaptionP>
+      )}
     </Flex>
   )
 }
