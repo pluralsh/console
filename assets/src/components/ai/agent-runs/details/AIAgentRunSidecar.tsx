@@ -1,6 +1,6 @@
 import {
   Chip,
-  ContainerRuntimeMonitorIcon,
+  ContainerRuntimeIcon,
   Flex,
   prettifyRepoUrl,
   Tooltip,
@@ -52,7 +52,7 @@ export function AgentRunMetadata({ run }: { run: AgentRunFragment }) {
       )}
       {run.babysit && (
         <Tooltip label="Babysit">
-          <ContainerRuntimeMonitorIcon size={12} />
+          <ContainerRuntimeIcon size={12} />
         </Tooltip>
       )}
       {run.approval && (
@@ -99,14 +99,17 @@ export function useAgentRunTodos(run: Nullable<AgentRunFragment>) {
   useAgentRunDeltaSubscription({
     skip: !run?.id || run?.status !== AgentRunStatus.Running,
     variables: { runId: run?.id ?? '' },
-    onData: ({ data: { data } }) =>
-      setSubscribedTodos(
-        produce(subscribedTodos, (todos) => {
-          const payload =
-            data?.agentRunDelta?.payload?.todos?.filter(isNonNullable)
-          if (payload) todos.push(...payload)
-        })
-      ),
+    onData: ({ data: { data } }) => {
+      const payload = data?.agentRunDelta?.payload?.todos?.filter(isNonNullable)
+
+      if (payload) {
+        setSubscribedTodos((prev) =>
+          produce(prev, (todos) => {
+            todos.push(...payload)
+          })
+        )
+      }
+    },
   })
 
   return useMemo(

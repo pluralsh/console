@@ -7,10 +7,10 @@ import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { useQuery } from '@tanstack/react-query'
 import { useKeyDown } from '@react-hooks-library/core'
 import {
+  CollapseIcon,
   ExpandIcon,
   FolderIcon,
   IconFrame,
-  MinimizeIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import { AgentRunPatchView } from 'components/ai/agent-runs/details/AgentRunPatchView'
@@ -373,7 +373,7 @@ export function AgentRunDiff({
                     clickable
                     size="xsmall"
                     type="tertiary"
-                    icon={<MinimizeIcon />}
+                    icon={<CollapseIcon />}
                     tooltip="Minimize diff"
                     onClick={toggleFullscreen}
                   />
