@@ -1396,6 +1396,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `agentHelmValues` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | AgentHelmValues custom helm values to apply<br />to all agents (useful for things like adding<br />customary annotations/labels) |  | Optional: \{\} <br /> |
+| `agentHelmValuesTemplateable` _boolean_ | AgentHelmValuesTemplateable indicates whether to render<br />agent helm values as a template. |  | Optional: \{\} <br /> |
 | `managementRepo` _string_ | ManagementRepo is the root repo for setting up<br />your infrastructure with Plural. Usually this<br />will be your `plural up repo` |  | Optional: \{\} <br /> |
 | `stacks` _[StackSettings](#stacksettings)_ | Stacks global configuration for stack execution. |  | Optional: \{\} <br /> |
 | `bindings` _[DeploymentSettingsBindings](#deploymentsettingsbindings)_ | Bindings global configuration for access control. |  | Optional: \{\} <br /> |

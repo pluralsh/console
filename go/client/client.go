@@ -3330,16 +3330,17 @@ func (t *GitRepositoryEdgeFragment) GetCursor() *string {
 }
 
 type DeploymentSettingsFragment struct {
-	ID                 string                   "json:\"id\" graphql:\"id\""
-	Name               string                   "json:\"name\" graphql:\"name\""
-	AgentHelmValues    *string                  "json:\"agentHelmValues,omitempty\" graphql:\"agentHelmValues\""
-	AgentVsn           string                   "json:\"agentVsn\" graphql:\"agentVsn\""
-	WriteBindings      []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
-	ReadBindings       []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
-	CreateBindings     []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
-	ArtifactRepository *GitRepositoryFragment   "json:\"artifactRepository,omitempty\" graphql:\"artifactRepository\""
-	DeployerRepository *GitRepositoryFragment   "json:\"deployerRepository,omitempty\" graphql:\"deployerRepository\""
-	Ai                 *AISettingsFragment      "json:\"ai,omitempty\" graphql:\"ai\""
+	ID                          string                   "json:\"id\" graphql:\"id\""
+	Name                        string                   "json:\"name\" graphql:\"name\""
+	AgentHelmValues             *string                  "json:\"agentHelmValues,omitempty\" graphql:\"agentHelmValues\""
+	AgentHelmValuesTemplateable *bool                    "json:\"agentHelmValuesTemplateable,omitempty\" graphql:\"agentHelmValuesTemplateable\""
+	AgentVsn                    string                   "json:\"agentVsn\" graphql:\"agentVsn\""
+	WriteBindings               []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings                []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	CreateBindings              []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
+	ArtifactRepository          *GitRepositoryFragment   "json:\"artifactRepository,omitempty\" graphql:\"artifactRepository\""
+	DeployerRepository          *GitRepositoryFragment   "json:\"deployerRepository,omitempty\" graphql:\"deployerRepository\""
+	Ai                          *AISettingsFragment      "json:\"ai,omitempty\" graphql:\"ai\""
 }
 
 func (t *DeploymentSettingsFragment) GetID() string {
@@ -3359,6 +3360,12 @@ func (t *DeploymentSettingsFragment) GetAgentHelmValues() *string {
 		t = &DeploymentSettingsFragment{}
 	}
 	return t.AgentHelmValues
+}
+func (t *DeploymentSettingsFragment) GetAgentHelmValuesTemplateable() *bool {
+	if t == nil {
+		t = &DeploymentSettingsFragment{}
+	}
+	return t.AgentHelmValuesTemplateable
 }
 func (t *DeploymentSettingsFragment) GetAgentVsn() string {
 	if t == nil {
@@ -47969,6 +47976,7 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
 	id
 	name
 	agentHelmValues
+	agentHelmValuesTemplateable
 	agentVsn
 	writeBindings {
 		... PolicyBindingFragment
@@ -48056,6 +48064,7 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
 	id
 	name
 	agentHelmValues
+	agentHelmValuesTemplateable
 	agentVsn
 	writeBindings {
 		... PolicyBindingFragment

@@ -82,6 +82,7 @@ fragment DeploymentSettings on DeploymentSettings {
   updatedAt
   onboarded
   agentHelmValues
+  agentHelmValuesTemplateable
   logging {
     enabled
     driver

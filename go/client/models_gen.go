@@ -3234,6 +3234,8 @@ type DeploymentSettings struct {
 	PrometheusConnection *HTTPConnection `json:"prometheusConnection,omitempty"`
 	// custom helm values to apply to all agents (useful for things like adding customary annotations/labels)
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
+	// whether to render agent helm values as a template
+	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
 	// global settings for stack configuration
 	Stacks *StackSettings `json:"stacks,omitempty"`
 	// smtp server configuration for email notifications
@@ -3277,6 +3279,8 @@ type DeploymentSettingsAttributes struct {
 	DeployerRepositoryID *string `json:"deployerRepositoryId,omitempty"`
 	// custom helm values to apply to all agents (useful for things like adding customary annotations/labels)
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
+	// whether to render agent helm values as a template
+	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
 	// global configuration for stack execution
 	Stacks *StackSettingsAttributes `json:"stacks,omitempty"`
 	// connection details for a prometheus instance to use

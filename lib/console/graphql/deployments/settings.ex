@@ -31,6 +31,9 @@ defmodule Console.GraphQl.Deployments.Settings do
       description:
         "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
 
+    field :agent_helm_values_templateable, :boolean,
+      description: "whether to render agent helm values as a template"
+
     field :stacks, :stack_settings_attributes,
       description: "global configuration for stack execution"
 
@@ -407,6 +410,9 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :agent_helm_values, :string,
       description:
         "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
+
+    field :agent_helm_values_templateable, :boolean,
+      description: "whether to render agent helm values as a template"
 
     field :stacks, :stack_settings, description: "global settings for stack configuration"
     field :smtp, :smtp_settings, description: "smtp server configuration for email notifications"

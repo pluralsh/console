@@ -194,6 +194,7 @@ defmodule Console.Schema.DeploymentSettings do
     field :onboarded,        :boolean, default: false
 
     field :agent_helm_values, EncryptedString
+    field :agent_helm_values_templateable, :boolean, default: false
 
     field :helm_changed, :boolean, virtual: true
     field :version_changed, :boolean, virtual: true
@@ -372,7 +373,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast(attrs, ~w(onboarded)a)
   end
 
-  @valid ~w(name enabled mgmt_repo agent_version agent_helm_values manage_agents self_managed artifact_repository_id deployer_repository_id)a
+  @valid ~w(name enabled mgmt_repo agent_version agent_helm_values agent_helm_values_templateable manage_agents self_managed artifact_repository_id deployer_repository_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
