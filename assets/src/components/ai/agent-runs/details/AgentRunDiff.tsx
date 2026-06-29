@@ -11,9 +11,9 @@ import {
   FolderIcon,
   IconFrame,
   MinimizeIcon,
-  PatchHighlight,
   Tooltip,
 } from '@pluralsh/design-system'
+import { AgentRunPatchView } from 'components/ai/agent-runs/details/AgentRunPatchView'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -23,7 +23,7 @@ import pluralize from 'pluralize'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 import { fetchAgentRunUpload } from 'utils/agentRun'
-import { getFileTypeIconKey, getLanguageFromFileName } from 'utils/file'
+import { getFileTypeIconKey } from 'utils/file'
 
 type DiffFile = {
   path: string
@@ -397,12 +397,7 @@ export function AgentRunDiff({
               <CaptionP $color="text-light">Binary file not shown.</CaptionP>
             </DiffBinarySC>
           ) : (
-            <PatchHighlight
-              patchLanguage={getLanguageFromFileName(selectedFile?.path ?? '')}
-              showLineNumbers
-            >
-              {selectedFile?.patch ?? ''}
-            </PatchHighlight>
+            <AgentRunPatchView patch={selectedFile?.patch ?? ''} />
           )}
         </DiffCodeSC>
       </DiffContentSC>
