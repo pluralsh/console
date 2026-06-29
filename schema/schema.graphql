@@ -5626,6 +5626,9 @@ input DeploymentSettingsAttributes {
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
 
+  "whether to render agent helm values as a template"
+  agentHelmValuesTemplateable: Boolean
+
   "global configuration for stack execution"
   stacks: StackSettingsAttributes
 
@@ -6053,6 +6056,9 @@ type DeploymentSettings {
 
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
+
+  "whether to render agent helm values as a template"
+  agentHelmValuesTemplateable: Boolean
 
   "global settings for stack configuration"
   stacks: StackSettings

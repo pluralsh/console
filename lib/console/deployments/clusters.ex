@@ -741,6 +741,16 @@ defmodule Console.Deployments.Clusters do
   end
   defp add_callout(result, _), do: result
 
+  defp template_values(values, %Cluster{} = cluster) when is_binary(values) do
+    with {:ok, tpl} <- Solid.parse(values),
+         {:ok, res, _} <- Solid.render(tpl, %{"cluster" => cluster}, [strict_variables: false, strict_filters: true]) do
+      IO.iodata_to_binary(res)
+    else
+      _ -> values
+    end
+  end
+  defp template_values(values, _), do: values
+
   @doc """
   Determines current status of this clusters upgrade plan given what information we currently have
   """
@@ -1163,8 +1173,10 @@ defmodule Console.Deployments.Clusters do
     |> when_ok(:delete)
   end
 
-  def agent_helm_values(%Cluster{}) do
+  def agent_helm_values(%Cluster{} = cluster) do
     case Settings.fetch_consistent() do
+      %DeploymentSettings{agent_helm_values: values, agent_helm_values_templateable: true} ->
+        template_values(values, cluster)
       %DeploymentSettings{agent_helm_values: values} -> values
       _ -> nil
     end

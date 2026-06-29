@@ -156,6 +156,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 		attr.AgentHelmValues = lo.ToPtr(string(rawHelmValues))
 	}
+	attr.AgentHelmValuesTemplateable = settings.Spec.AgentHelmValuesTemplateable
 	if settings.Spec.PrometheusConnection != nil {
 		pc, err := settings.Spec.PrometheusConnection.Attributes(ctx, r.Client, settings.Namespace)
 		if err != nil {

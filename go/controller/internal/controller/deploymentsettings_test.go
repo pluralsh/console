@@ -59,7 +59,8 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.DeploymentSettingsSpec{
-						AgentHelmValues: &runtime.RawExtension{Raw: []byte(`{"foo":"bar"}`)},
+						AgentHelmValues:             &runtime.RawExtension{Raw: []byte(`{"foo":"bar"}`)},
+						AgentHelmValuesTemplateable: lo.ToPtr(true),
 					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
@@ -83,7 +84,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
+					SHA: lo.ToPtr("U6Z5LZ3OTX5VXTK3KPRJS7FFO6XRVW22ZW3AGZWZVF2HVVWXXPAQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -111,7 +112,9 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetDeploymentSettings", mock.Anything).Return(test.returnResource, nil)
-			fakeConsoleClient.On("UpdateDeploymentSettings", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("UpdateDeploymentSettings", mock.Anything, mock.MatchedBy(func(attr gqlclient.DeploymentSettingsAttributes) bool {
+				return attr.AgentHelmValuesTemplateable != nil && *attr.AgentHelmValuesTemplateable
+			})).Return(nil, nil)
 
 			controllerReconciler := &controller.DeploymentSettingsReconciler{
 				Client:           k8sClient,
@@ -139,7 +142,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
+					SHA: lo.ToPtr("U6Z5LZ3OTX5VXTK3KPRJS7FFO6XRVW22ZW3AGZWZVF2HVVWXXPAQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -205,7 +208,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
+					SHA: lo.ToPtr("U6Z5LZ3OTX5VXTK3KPRJS7FFO6XRVW22ZW3AGZWZVF2HVVWXXPAQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -271,7 +274,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
+					SHA: lo.ToPtr("U6Z5LZ3OTX5VXTK3KPRJS7FFO6XRVW22ZW3AGZWZVF2HVVWXXPAQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -354,7 +357,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
+					SHA: lo.ToPtr("U6Z5LZ3OTX5VXTK3KPRJS7FFO6XRVW22ZW3AGZWZVF2HVVWXXPAQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
