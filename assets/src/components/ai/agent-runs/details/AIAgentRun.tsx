@@ -136,25 +136,22 @@ export function AIAgentRun() {
             overflow="auto"
           >
             <StretchedFlex
-              gap="xxxxlarge"
+              gap="medium"
               alignItems="start"
             >
+              <StackedText
+                truncate
+                loading={runLoading}
+                first={run?.prompt}
+                firstPartialType="subtitle2"
+                firstColor="text"
+                second={run && <AgentRunMetadata run={run} />}
+                css={{ flex: 1, minWidth: 0 }}
+              />
               <Flex
-                direction="column"
-                flex={1}
-                minWidth={0}
                 gap="small"
+                css={{ flexShrink: 0 }}
               >
-                <StackedText
-                  truncate
-                  loading={runLoading}
-                  first={run?.prompt}
-                  firstPartialType="subtitle2"
-                  firstColor="text"
-                  second={run && <AgentRunMetadata run={run} />}
-                />
-              </Flex>
-              <Flex gap="small">
                 {isCancellable && (
                   <Button
                     small
@@ -163,7 +160,7 @@ export function AIAgentRun() {
                     startIcon={<SpinnerAlt />}
                     loading={cancelling}
                   >
-                    Cancel agent run
+                    Cancel
                   </Button>
                 )}
                 {run?.upload?.session && (
