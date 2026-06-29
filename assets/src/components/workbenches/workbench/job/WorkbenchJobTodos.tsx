@@ -93,11 +93,7 @@ export function WorkbenchJobTodos({
                   {index < todos.length - 1 && <ConnectorSC />}
                 </SpineSC>
                 <TodoBodySC>
-                  <Body2BoldP
-                    $color="text"
-                  >
-                    {todo.title}
-                  </Body2BoldP>
+                  <Body2BoldP $color="text">{todo.title}</Body2BoldP>
                   {description && <TodoDescription description={description} />}
                 </TodoBodySC>
               </TimelineItemSC>
