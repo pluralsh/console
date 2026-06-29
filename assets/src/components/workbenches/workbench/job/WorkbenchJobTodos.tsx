@@ -63,7 +63,7 @@ export function WorkbenchJobTodos({
       ) : (
         <TimelineListSC>
           {todos.map((todo, index) => {
-            const description = todo.description.trim()
+            const description = todo.description
             const isActivePending = !todo.done && index === activePendingIndex
             const todoKey = getTodoKey(todo, index)
 
