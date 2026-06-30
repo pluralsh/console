@@ -156,14 +156,26 @@ defmodule Console.Deployments.Pipelines do
     |> Repo.update()
   end
 
+  def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage) when is_binary(ctx_id) do
+    case missing_context_pulls?(stage) do
+      true ->
+        Logger.info "reapplying missing context pull requests to stage #{stage.id}"
+        do_apply_pipeline_context(stage)
+      _ ->
+        Logger.info "ignoring applying existing context to stage #{stage.id}"
+        {:ok, stage}
+    end
+  end
   def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage) do
     Logger.info "ignoring applying existing context to stage #{stage.id}"
     {:ok, stage}
   end
+  def apply_pipeline_context(%PipelineStage{} = stage), do: do_apply_pipeline_context(stage)
 
-  def apply_pipeline_context(%PipelineStage{} = stage) do
+  defp do_apply_pipeline_context(%PipelineStage{} = stage) do
     %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, :errors, services: [:service, criteria: :pr_automation]])
     Enum.filter(stage.services, & &1.criteria && &1.criteria.pr_automation_id)
+    |> Enum.reject(& existing_context_pull?(&1, stage, ctx))
     |> Enum.reduce(start_transaction(), fn %{service: service} = svc, xact ->
       xact
       |> add_operation({:pull, svc.id}, fn _ -> create_stage_pull_request(stage, svc, Users.admin_bot()) end)
@@ -185,6 +197,21 @@ defmodule Console.Deployments.Pipelines do
     end)
     |> execute(timeout: 120_000)
     |> notify(:context)
+  end
+
+  defp missing_context_pulls?(%PipelineStage{} = stage) do
+    case Repo.preload(stage, [:context, services: [:service, :criteria]], force: true) do
+      %{context: %PipelineContext{} = ctx, services: services} ->
+        Enum.any?(services, & requires_context_pull?(&1) && !existing_context_pull?(&1, stage, ctx))
+      _ -> false
+    end
+  end
+
+  defp requires_context_pull?(%StageService{criteria: %{pr_automation_id: id}}) when is_binary(id), do: true
+  defp requires_context_pull?(_), do: false
+
+  defp existing_context_pull?(%StageService{service_id: service_id}, %PipelineStage{id: stage_id}, %PipelineContext{id: ctx_id}) do
+    Repo.get_by(PipelinePullRequest, context_id: ctx_id, service_id: service_id, stage_id: stage_id)
   end
 
   defp create_stage_pull_request(

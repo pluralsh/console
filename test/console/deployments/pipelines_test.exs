@@ -271,6 +271,36 @@ defmodule Console.Deployments.PipelinesTest do
 
       assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
     end
+
+    test "it can repair an applied stage missing pull request records" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      assert Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
+
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
+
+      {:ok, %{stg: %{id: id} = stage}} = Pipelines.apply_pipeline_context(dev)
+
+      assert stage.applied_context_id == ctx.id
+      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id, stage_id: dev.id)
+      refute Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
+      assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
+    end
   end
 
   describe "#revert_pipeline_context/1" do
