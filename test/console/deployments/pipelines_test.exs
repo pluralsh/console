@@ -9,32 +9,50 @@ defmodule Console.Deployments.PipelinesTest do
     test "it can create a new pipeline w/ stages and gates" do
       user = admin_user()
       [svc, svc2] = insert_list(2, :service)
-      {:ok, pipeline} = Pipelines.upsert(%{
-        stages: [
-          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
-          %{name: "prod", services: [
-            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
-                name: svc.name,
-                handle: svc.cluster.handle,
-                secrets: ["test-secret"]
-            }},
-          ]}
-        ],
-        edges: [
+
+      {:ok, pipeline} =
+        Pipelines.upsert(
           %{
-            from: "dev",
-            to: "prod",
-            gates: [
-              %{type: :approval, name: "approve"},
-              %{type: :job, name: "integration", spec: %{
-                job: %{
-                  namespace: "namespace",
-                  containers: [%{image: "my-test:latest"}]
-                }
-              }}
-            ]}
-        ]
-      }, "my-pipeline", user)
+            stages: [
+              %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+              %{
+                name: "prod",
+                services: [
+                  %{
+                    name: svc2.name,
+                    handle: svc2.cluster.handle,
+                    criteria: %{
+                      name: svc.name,
+                      handle: svc.cluster.handle,
+                      secrets: ["test-secret"]
+                    }
+                  }
+                ]
+              }
+            ],
+            edges: [
+              %{
+                from: "dev",
+                to: "prod",
+                gates: [
+                  %{type: :approval, name: "approve"},
+                  %{
+                    type: :job,
+                    name: "integration",
+                    spec: %{
+                      job: %{
+                        namespace: "namespace",
+                        containers: [%{image: "my-test:latest"}]
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "my-pipeline",
+          user
+        )
 
       assert pipeline.name == "my-pipeline"
       assert pipeline.project_id == Settings.default_project!().id
@@ -81,21 +99,33 @@ defmodule Console.Deployments.PipelinesTest do
       edge = insert(:pipeline_edge, from: dev, to: prod, pipeline: pipe)
       gate = insert(:pipeline_gate, edge: edge, type: :approval, name: "approve")
 
-      {:ok, pipeline} = Pipelines.upsert(%{
-        stages: [
-          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
-          %{name: "prod", services: [
-            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
-              name: svc.name,
-              handle: svc.cluster.handle,
-              secrets: ["test-secret"]
-            }},
-          ]}
-        ],
-        edges: [
-          %{from: "dev", to: "prod", gates: [%{type: :approval, name: "approve"}]}
-        ]
-      }, "my-pipeline", user)
+      {:ok, pipeline} =
+        Pipelines.upsert(
+          %{
+            stages: [
+              %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+              %{
+                name: "prod",
+                services: [
+                  %{
+                    name: svc2.name,
+                    handle: svc2.cluster.handle,
+                    criteria: %{
+                      name: svc.name,
+                      handle: svc.cluster.handle,
+                      secrets: ["test-secret"]
+                    }
+                  }
+                ]
+              }
+            ],
+            edges: [
+              %{from: "dev", to: "prod", gates: [%{type: :approval, name: "approve"}]}
+            ]
+          },
+          "my-pipeline",
+          user
+        )
 
       [d, p] = pipeline.stages
 
@@ -136,69 +166,118 @@ defmodule Console.Deployments.PipelinesTest do
       insert(:promotion_criteria, stage_service: ss2, source: svc, secrets: ["some-secret"])
       insert(:pipeline_edge, from: dev, to: prod, pipeline: pipe)
 
-      {:ok, _} = Pipelines.upsert(%{
-        stages: [
-          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
-          %{name: "prod", services: [
-            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
-                name: svc.name,
-                handle: svc.cluster.handle,
-                secrets: ["test-secret"]
-            }},
-          ]}
-        ],
-        edges: [%{from: "dev", to: "prod"}]
-      }, "my-pipeline", user)
+      {:ok, _} =
+        Pipelines.upsert(
+          %{
+            stages: [
+              %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+              %{
+                name: "prod",
+                services: [
+                  %{
+                    name: svc2.name,
+                    handle: svc2.cluster.handle,
+                    criteria: %{
+                      name: svc.name,
+                      handle: svc.cluster.handle,
+                      secrets: ["test-secret"]
+                    }
+                  }
+                ]
+              }
+            ],
+            edges: [%{from: "dev", to: "prod"}]
+          },
+          "my-pipeline",
+          user
+        )
 
-      {:error, _} = Pipelines.upsert(%{
-        stages: [
-          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
-          %{name: "prod", services: [
-            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
-                name: svc.name,
-                handle: svc.cluster.handle,
-                secrets: ["test-secret"]
-            }},
-          ]}
-        ],
-        edges: [%{from: "dev", to: "prod"}]
-      }, "my-pipeline", insert(:user))
-
+      {:error, _} =
+        Pipelines.upsert(
+          %{
+            stages: [
+              %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+              %{
+                name: "prod",
+                services: [
+                  %{
+                    name: svc2.name,
+                    handle: svc2.cluster.handle,
+                    criteria: %{
+                      name: svc.name,
+                      handle: svc.cluster.handle,
+                      secrets: ["test-secret"]
+                    }
+                  }
+                ]
+              }
+            ],
+            edges: [%{from: "dev", to: "prod"}]
+          },
+          "my-pipeline",
+          insert(:user)
+        )
 
       [svc, svc2] = insert_list(2, :service)
-      {:ok, pipe} = Pipelines.upsert(%{
-        project_id: project.id,
-        stages: [
-          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
-          %{name: "prod", services: [
-            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
-                name: svc.name,
-                handle: svc.cluster.handle,
-                secrets: ["test-secret"]
-            }},
-          ]}
-        ],
-        edges: [%{from: "dev", to: "prod"}]
-      }, "new-pipeline", user)
+
+      {:ok, pipe} =
+        Pipelines.upsert(
+          %{
+            project_id: project.id,
+            stages: [
+              %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+              %{
+                name: "prod",
+                services: [
+                  %{
+                    name: svc2.name,
+                    handle: svc2.cluster.handle,
+                    criteria: %{
+                      name: svc.name,
+                      handle: svc.cluster.handle,
+                      secrets: ["test-secret"]
+                    }
+                  }
+                ]
+              }
+            ],
+            edges: [%{from: "dev", to: "prod"}]
+          },
+          "new-pipeline",
+          user
+        )
 
       assert pipe.project_id == project.id
 
       [svc, svc2] = insert_list(2, :service)
       user = insert(:user)
-      {:error, _} = Pipelines.upsert(%{
-        write_bindings: [%{user_id: user.id}],
-        stages: [
-          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
-          %{name: "prod", services: [
-            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
-                name: svc.name,
-                handle: svc.cluster.handle,
-                secrets: ["test-secret"]
-            }},
-          ]}
-        ],
-        edges: [%{from: "dev", to: "prod"}]
-      }, "new-pipeline-2", user)
+
+      {:error, _} =
+        Pipelines.upsert(
+          %{
+            write_bindings: [%{user_id: user.id}],
+            stages: [
+              %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+              %{
+                name: "prod",
+                services: [
+                  %{
+                    name: svc2.name,
+                    handle: svc2.cluster.handle,
+                    criteria: %{
+                      name: svc.name,
+                      handle: svc.cluster.handle,
+                      secrets: ["test-secret"]
+                    }
+                  }
+                ]
+              }
+            ],
+            edges: [%{from: "dev", to: "prod"}]
+          },
+          "new-pipeline-2",
+          user
+        )
     end
   end
 
@@ -227,7 +306,8 @@ defmodule Console.Deployments.PipelinesTest do
       edge = insert(:pipeline_edge, from: dev, to: prod, pipeline: pipe)
       insert(:pipeline_gate, edge: edge, type: :approval, name: "approve")
 
-      {:ok, ctx} = Pipelines.create_pipeline_context(%{context: %{some: "context"}}, pipe.id, user)
+      {:ok, ctx} =
+        Pipelines.create_pipeline_context(%{context: %{some: "context"}}, pipe.id, user)
 
       assert ctx.pipeline_id == pipe.id
       assert refetch(dev).context_id == ctx.id
@@ -242,12 +322,19 @@ defmodule Console.Deployments.PipelinesTest do
       insert(:user, bot_name: "console", roles: %{admin: true})
 
       conn = insert(:scm_connection, token: "some-pat")
-      pra = insert(:pr_automation,
-        identifier: "pluralsh/console",
-        cluster: build(:cluster),
-        connection: conn,
-        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
-      )
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
 
       svc = insert(:service)
       pipe = insert(:pipeline, name: "my-pipeline")
@@ -256,12 +343,20 @@ defmodule Console.Deployments.PipelinesTest do
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
-      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} ->
+        {:ok, %{title: "some", url: "url"}}
+      end)
 
       {:ok, %{stg: %{id: id} = stage}} = Pipelines.apply_pipeline_context(dev)
 
       assert stage.applied_context_id == ctx.id
-      pipe_pr = Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
+
+      pipe_pr =
+        Console.Repo.get_by(Console.Schema.PipelinePullRequest,
+          context_id: ctx.id,
+          service_id: svc.id
+        )
+
       %{pull_request: pr} = Console.Repo.preload(pipe_pr, [:pull_request])
       assert pipe_pr.stage_id == stage.id
 
@@ -276,28 +371,46 @@ defmodule Console.Deployments.PipelinesTest do
       insert(:user, bot_name: "console", roles: %{admin: true})
 
       conn = insert(:scm_connection, token: "some-pat")
-      pra = insert(:pr_automation,
-        identifier: "pluralsh/console",
-        cluster: build(:cluster),
-        connection: conn,
-        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
-      )
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
 
       svc = insert(:service)
       pipe = insert(:pipeline, name: "my-pipeline")
       ctx = insert(:pipeline_context, context: %{some: "context"})
-      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+
+      dev =
+        insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
       assert Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
 
-      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} ->
+        {:ok, %{title: "some", url: "url"}}
+      end)
 
       {:ok, %{stg: %{id: id} = stage}} = Pipelines.apply_pipeline_context(dev)
 
       assert stage.applied_context_id == ctx.id
-      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id, stage_id: dev.id)
+
+      assert Console.Repo.get_by(Console.Schema.PipelinePullRequest,
+               context_id: ctx.id,
+               service_id: svc.id,
+               stage_id: dev.id
+             )
+
       refute Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
       assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
     end
@@ -306,17 +419,27 @@ defmodule Console.Deployments.PipelinesTest do
       insert(:user, bot_name: "console", roles: %{admin: true})
 
       conn = insert(:scm_connection, token: "some-pat")
-      pra = insert(:pr_automation,
-        identifier: "pluralsh/console",
-        cluster: build(:cluster),
-        connection: conn,
-        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
-      )
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
 
       svc = insert(:service)
       pipe = insert(:pipeline, name: "my-pipeline")
       ctx = insert(:pipeline_context, context: %{some: "context"})
-      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+
+      dev =
+        insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
@@ -336,11 +459,12 @@ defmodule Console.Deployments.PipelinesTest do
 
       {:ok, %{stg: stage}} = Pipelines.apply_pipeline_context(dev)
 
-      ptr = Console.Repo.get_by!(Console.Schema.PipelinePullRequest,
-        context_id: ctx.id,
-        service_id: svc.id,
-        stage_id: dev.id
-      )
+      ptr =
+        Console.Repo.get_by!(Console.Schema.PipelinePullRequest,
+          context_id: ctx.id,
+          service_id: svc.id,
+          stage_id: dev.id
+        )
 
       assert ptr.pull_request_id
       assert stage.applied_context_id == ctx.id
@@ -353,23 +477,45 @@ defmodule Console.Deployments.PipelinesTest do
       insert(:user, bot_name: "console", roles: %{admin: true})
 
       conn = insert(:scm_connection, token: "some-pat")
-      pra = insert(:pr_automation,
-        identifier: "pluralsh/console",
-        cluster: build(:cluster),
-        connection: conn,
-        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
-      )
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
 
       svc = insert(:service)
       pipe = insert(:pipeline, name: "my-pipeline")
       ctx = insert(:pipeline_context, context: %{some: "context"})
-      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", applied_context: build(:pipeline_context))
+
+      dev =
+        insert(:pipeline_stage,
+          pipeline: pipe,
+          name: "dev",
+          applied_context: build(:pipeline_context)
+        )
+
       ss = insert(:stage_service, service: svc, stage: dev)
       insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
 
       insert(:pipeline_context_history, stage: dev, context: dev.applied_context)
-      insert(:pipeline_context_history, stage: dev, context: ctx, inserted_at: Timex.now() |> Timex.shift(days: -1))
-      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
+
+      insert(:pipeline_context_history,
+        stage: dev,
+        context: ctx,
+        inserted_at: Timex.now() |> Timex.shift(days: -1)
+      )
+
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} ->
+        {:ok, %{title: "some", url: "url"}}
+      end)
 
       {:ok, _} = Pipelines.revert_pipeline_context(dev)
 
@@ -382,14 +528,20 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will create a new promotion for a pipeline stage and mark all gates pending" do
       admin = admin_user()
       git = insert(:git_repository)
-      {:ok, svc} = create_service(%{
-        name: "my-service",
-        namespace: "my-service",
-        repository_id: git.id,
-        status: :healthy,
-        git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
-      }, insert(:cluster), admin)
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
 
       stage = insert(:pipeline_stage)
       prod = insert(:pipeline_stage)
@@ -414,31 +566,43 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will handle a new promotion via pipeline context" do
       admin = admin_user()
       git = insert(:git_repository)
-      {:ok, svc} = create_service(%{
-        name: "my-service",
-        namespace: "my-service",
-        repository_id: git.id,
-        status: :healthy,
-        git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
-      }, insert(:cluster), admin)
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
 
       pipeline = insert(:pipeline)
-      ctx = insert(:pipeline_context,
-        pipeline: pipeline,
-        context: %{name: "context"},
-        inserted_at: Timex.now() |> Timex.shift(minutes: -1)
-      )
+
+      ctx =
+        insert(:pipeline_context,
+          pipeline: pipeline,
+          context: %{name: "context"},
+          inserted_at: Timex.now() |> Timex.shift(minutes: -1)
+        )
+
       stage = insert(:pipeline_stage, context: ctx, pipeline: pipeline)
       prod = insert(:pipeline_stage)
       insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
       edge = insert(:pipeline_edge, from: stage, to: prod)
-      %{id: gate_id} = gate = insert(:pipeline_gate,
-        edge: edge,
-        state: :open,
-        updated_at: Timex.now() |> Timex.shift(hours: -2)
-      )
+
+      %{id: gate_id} =
+        gate =
+        insert(:pipeline_gate,
+          edge: edge,
+          state: :open,
+          updated_at: Timex.now() |> Timex.shift(hours: -2)
+        )
 
       {:ok, promo} = Pipelines.build_promotion(stage)
 
@@ -457,38 +621,53 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will not revise promotions if gates are unchanged" do
       admin = admin_user()
       git = insert(:git_repository)
-      {:ok, svc} = create_service(%{
-        name: "my-service",
-        namespace: "my-service",
-        repository_id: git.id,
-        status: :healthy,
-        git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
-      }, insert(:cluster), admin)
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
+
       svc = Console.Repo.preload(svc, [:revision])
 
       pipeline = insert(:pipeline)
-      ctx = insert(:pipeline_context,
-        pipeline: pipeline,
-        context: %{name: "context"},
-        inserted_at: Timex.now() |> Timex.shift(minutes: -1)
-      )
+
+      ctx =
+        insert(:pipeline_context,
+          pipeline: pipeline,
+          context: %{name: "context"},
+          inserted_at: Timex.now() |> Timex.shift(minutes: -1)
+        )
+
       stage = insert(:pipeline_stage, pipeline: pipeline, context: ctx)
       prod = insert(:pipeline_stage, pipeline: pipeline)
       insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
       edge = insert(:pipeline_edge, from: stage, to: prod)
-      gate = insert(:pipeline_gate,
-        edge: edge,
-        state: :open,
-        context: ctx
-      )
-      promo = insert(:pipeline_promotion,
-        stage: stage,
-        revised_at: Timex.now()  |> Timex.shift(minutes: -1),
-        context: ctx,
-        promoted_at: Timex.now()
-      )
+
+      gate =
+        insert(:pipeline_gate,
+          edge: edge,
+          state: :open,
+          context: ctx
+        )
+
+      promo =
+        insert(:pipeline_promotion,
+          stage: stage,
+          revised_at: Timex.now() |> Timex.shift(minutes: -1),
+          context: ctx,
+          promoted_at: Timex.now()
+        )
+
       insert(:promotion_service, promotion: promo, service: svc, revision: svc.revision)
 
       {:ok, promo} = Pipelines.build_promotion(stage)
@@ -507,19 +686,31 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will revise a promotion if there is a change" do
       admin = admin_user()
       git = insert(:git_repository)
-      {:ok, svc} = create_service(%{
-        name: "my-service",
-        namespace: "my-service",
-        repository_id: git.id,
-        status: :healthy,
-        git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
-      }, insert(:cluster), admin)
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
 
       stage = insert(:pipeline_stage)
       insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
-      promotion = insert(:pipeline_promotion, stage: stage, revised_at: Timex.now()  |> Timex.shift(minutes: -1))
+
+      promotion =
+        insert(:pipeline_promotion,
+          stage: stage,
+          revised_at: Timex.now() |> Timex.shift(minutes: -1)
+        )
+
       insert(:promotion_service, promotion: promotion, service: svc, revision: build(:revision))
       other = insert(:promotion_service, promotion: promotion)
 
@@ -528,10 +719,10 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.id == promotion.id
       assert promo.stage_id == stage.id
       refute promo.revised_at == promotion.revised_at
-      service = Enum.find(promo.services, & &1.service_id == svc.id)
+      service = Enum.find(promo.services, &(&1.service_id == svc.id))
       assert service.revision_id == svc.revision_id
 
-      assert Enum.find(promo.services, & &1.id == other.id).revision_id == other.revision_id
+      assert Enum.find(promo.services, &(&1.id == other.id)).revision_id == other.revision_id
 
       assert_receive {:event, %PubSub.PromotionCreated{item: ^promo}}
     end
@@ -540,21 +731,38 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will revise a promotion if there is a sha change" do
       admin = admin_user()
       git = insert(:git_repository)
-      {:ok, svc} = create_service(%{
-        name: "my-service",
-        namespace: "my-service",
-        repository_id: git.id,
-        status: :healthy,
-        git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
-      }, insert(:cluster), admin)
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
 
       svc = Console.Repo.preload(svc, [:revision])
       stage = insert(:pipeline_stage)
       insert(:pipeline_edge, from: stage)
       insert(:stage_service, stage: stage, service: svc)
-      promotion = insert(:pipeline_promotion, stage: stage, revised_at: Timex.now()  |> Timex.shift(minutes: -1))
-      insert(:promotion_service, promotion: promotion, service: svc, revision: svc.revision, sha: "old")
+
+      promotion =
+        insert(:pipeline_promotion,
+          stage: stage,
+          revised_at: Timex.now() |> Timex.shift(minutes: -1)
+        )
+
+      insert(:promotion_service,
+        promotion: promotion,
+        service: svc,
+        revision: svc.revision,
+        sha: "old"
+      )
 
       {:ok, promo} = Pipelines.build_promotion(stage)
 
@@ -562,7 +770,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.stage_id == stage.id
       refute promo.revised_at == promotion.revised_at
       assert promo.revised
-      service = Enum.find(promo.services, & &1.service_id == svc.id)
+      service = Enum.find(promo.services, &(&1.service_id == svc.id))
       assert service.revision_id == svc.revision_id
 
       assert_receive {:event, %PubSub.PromotionCreated{item: ^promo}}
@@ -571,14 +779,20 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will ignore if the stage has no successors" do
       admin = admin_user()
       git = insert(:git_repository)
-      {:ok, svc} = create_service(%{
-        name: "my-service",
-        namespace: "my-service",
-        repository_id: git.id,
-        status: :healthy,
-        git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
-      }, insert(:cluster), admin)
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
 
       stage = insert(:pipeline_stage)
       insert(:stage_service, stage: stage, service: svc)
@@ -592,11 +806,14 @@ defmodule Console.Deployments.PipelinesTest do
       svc = insert(:service, sha: "test-sha", status: :stale)
       insert(:revision, service: svc, sha: "test-sha")
       insert(:stage_service, stage: stage, service: svc)
-      promotion = insert(:pipeline_promotion,
-        stage: stage,
-        revised_at: Timex.now()  |> Timex.shift(minutes: -1),
-        promoted_at: Timex.now() |> Timex.shift(minutes: -2)
-      )
+
+      promotion =
+        insert(:pipeline_promotion,
+          stage: stage,
+          revised_at: Timex.now() |> Timex.shift(minutes: -1),
+          promoted_at: Timex.now() |> Timex.shift(minutes: -2)
+        )
+
       insert(:promotion_service, promotion: promotion, service: svc, revision: build(:revision))
       insert(:promotion_service, promotion: promotion)
 
@@ -614,7 +831,14 @@ defmodule Console.Deployments.PipelinesTest do
       svc = insert(:service, sha: "test-sha", status: :healthy)
       rev = insert(:revision, service: svc, sha: "test-sha")
       insert(:stage_service, stage: stage, service: svc)
-      promotion = insert(:pipeline_promotion, stage: stage, promoted_at: Timex.now(), revised_at: Timex.now() |> Timex.shift(minutes: -1))
+
+      promotion =
+        insert(:pipeline_promotion,
+          stage: stage,
+          promoted_at: Timex.now(),
+          revised_at: Timex.now() |> Timex.shift(minutes: -1)
+        )
+
       insert(:promotion_service, promotion: promotion, service: svc, revision: rev)
 
       stage2 = insert(:pipeline_stage, pipeline: stage.pipeline)
@@ -636,7 +860,9 @@ defmodule Console.Deployments.PipelinesTest do
     test "approvals respect rbac" do
       user = insert(:user)
       pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
-      gate = insert(:pipeline_gate, state: :pending, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      gate =
+        insert(:pipeline_gate, state: :pending, edge: build(:pipeline_edge, pipeline: pipeline))
 
       {:ok, approved} = Pipelines.approve_gate(gate.id, user)
 
@@ -652,7 +878,9 @@ defmodule Console.Deployments.PipelinesTest do
     test "you cannot approve closed gates" do
       user = insert(:user)
       pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
-      gate = insert(:pipeline_gate, state: :closed, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      gate =
+        insert(:pipeline_gate, state: :closed, edge: build(:pipeline_edge, pipeline: pipeline))
 
       {:error, _} = Pipelines.approve_gate(gate.id, user)
     end
@@ -660,7 +888,9 @@ defmodule Console.Deployments.PipelinesTest do
     test "you cannot approve non-approval gates" do
       user = insert(:user)
       pipeline = insert(:pipeline, write_bindings: [%{user_id: user.id}])
-      gate = insert(:pipeline_gate, type: :window, edge: build(:pipeline_edge, pipeline: pipeline))
+
+      gate =
+        insert(:pipeline_gate, type: :window, edge: build(:pipeline_edge, pipeline: pipeline))
 
       {:error, _} = Pipelines.approve_gate(gate.id, user)
     end
@@ -687,7 +917,7 @@ defmodule Console.Deployments.PipelinesTest do
   describe "#for_cluster/1" do
     test "it will fetch eligible gates for a cluster" do
       cluster = insert(:cluster)
-      other   = insert(:cluster)
+      other = insert(:cluster)
       job = insert(:pipeline_gate, type: :job, state: :pending, cluster: cluster)
       insert(:pipeline_gate, type: :job, state: :pending, cluster: other)
       insert(:pipeline_gate, type: :job, state: :open, cluster: cluster)
@@ -746,23 +976,26 @@ defmodule Console.Deployments.PipelinesTest do
       prod = insert(:pipeline_stage, pipeline: pipe)
       edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
 
-      {:ok, dev_svc} = create_service(cluster, admin, [
-        name: "dev",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        sha: "test-sha",
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "new-value"}]
-      ])
+      {:ok, dev_svc} =
+        create_service(cluster, admin,
+          name: "dev",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          sha: "test-sha",
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "new-value"}]
+        )
+
       dev_svc = Console.Repo.preload(dev_svc, [:revision])
 
-      {:ok, prod_svc} = create_service(cluster, admin, [
-        name: "prod",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
-      ])
+      {:ok, prod_svc} =
+        create_service(cluster, admin,
+          name: "prod",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
+        )
 
       insert(:stage_service, stage: dev, service: dev_svc)
       ss = insert(:stage_service, stage: prod, service: prod_svc)
@@ -796,23 +1029,26 @@ defmodule Console.Deployments.PipelinesTest do
       %{id: prd_id} = prod = insert(:pipeline_stage, pipeline: pipe)
       edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
 
-      {:ok, dev_svc} = create_service(cluster, admin, [
-        name: "dev",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        sha: "test-sha",
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "new-value"}]
-      ])
+      {:ok, dev_svc} =
+        create_service(cluster, admin,
+          name: "dev",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          sha: "test-sha",
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "new-value"}]
+        )
+
       dev_svc = Console.Repo.preload(dev_svc, [:revision])
 
-      {:ok, prod_svc} = create_service(cluster, admin, [
-        name: "prod",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
-      ])
+      {:ok, prod_svc} =
+        create_service(cluster, admin,
+          name: "prod",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
+        )
 
       insert(:stage_service, stage: dev, service: dev_svc)
       insert(:stage_service, stage: prod, service: prod_svc)
@@ -833,12 +1069,19 @@ defmodule Console.Deployments.PipelinesTest do
     test "it will block pr promotion until stage pull requests are merged" do
       admin = admin_user()
       conn = insert(:scm_connection, token: "some-pat")
-      pra = insert(:pr_automation,
-        identifier: "pluralsh/console",
-        cluster: build(:cluster),
-        connection: conn,
-        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
-      )
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
 
       pipe = insert(:pipeline)
       ctx = insert(:pipeline_context, pipeline: pipe)
@@ -871,23 +1114,26 @@ defmodule Console.Deployments.PipelinesTest do
       edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
       gate = insert(:pipeline_gate, edge: edge, type: :approval, state: :pending)
 
-      {:ok, dev_svc} = create_service(cluster, admin, [
-        name: "dev",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        sha: "test-sha",
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "new-value"}]
-      ])
+      {:ok, dev_svc} =
+        create_service(cluster, admin,
+          name: "dev",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          sha: "test-sha",
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "new-value"}]
+        )
+
       dev_svc = Console.Repo.preload(dev_svc, [:revision])
 
-      {:ok, prod_svc} = create_service(cluster, admin, [
-        name: "prod",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "value"}]
-      ])
+      {:ok, prod_svc} =
+        create_service(cluster, admin,
+          name: "prod",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "value"}]
+        )
 
       insert(:stage_service, stage: dev, service: dev_svc)
       ss = insert(:stage_service, stage: prod, service: prod_svc)
@@ -918,30 +1164,35 @@ defmodule Console.Deployments.PipelinesTest do
       dev = insert(:pipeline_stage, pipeline: pipe, context: ctx)
       prod = insert(:pipeline_stage, pipeline: pipe)
       edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
-      gate = insert(:pipeline_gate,
-        edge: edge,
-        type: :approval,
-        state: :open,
-        updated_at: Timex.now() |> Timex.shift(hours: -1)
-      )
 
-      {:ok, dev_svc} = create_service(cluster, admin, [
-        name: "dev",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        sha: "test-sha",
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "new-value"}]
-      ])
+      gate =
+        insert(:pipeline_gate,
+          edge: edge,
+          type: :approval,
+          state: :open,
+          updated_at: Timex.now() |> Timex.shift(hours: -1)
+        )
+
+      {:ok, dev_svc} =
+        create_service(cluster, admin,
+          name: "dev",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          sha: "test-sha",
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "new-value"}]
+        )
+
       dev_svc = Console.Repo.preload(dev_svc, [:revision])
 
-      {:ok, prod_svc} = create_service(cluster, admin, [
-        name: "prod",
-        namespace: "test",
-        git: %{ref: "master", folder: "k8s"},
-        repository_id: repository.id,
-        configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
-      ])
+      {:ok, prod_svc} =
+        create_service(cluster, admin,
+          name: "prod",
+          namespace: "test",
+          git: %{ref: "master", folder: "k8s"},
+          repository_id: repository.id,
+          configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
+        )
 
       insert(:stage_service, stage: dev, service: dev_svc)
       insert(:stage_service, stage: prod, service: prod_svc)
