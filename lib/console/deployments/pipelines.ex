@@ -19,6 +19,7 @@ defmodule Console.Deployments.Pipelines do
     PipelineContext,
     PipelineContextHistory,
     PipelinePullRequest,
+    PullRequest,
     User,
     Cluster,
     SentinelRun,
@@ -166,10 +167,6 @@ defmodule Console.Deployments.Pipelines do
         {:ok, stage}
     end
   end
-  def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage) do
-    Logger.info "ignoring applying existing context to stage #{stage.id}"
-    {:ok, stage}
-  end
   def apply_pipeline_context(%PipelineStage{} = stage), do: do_apply_pipeline_context(stage)
 
   defp do_apply_pipeline_context(%PipelineStage{} = stage) do
@@ -181,9 +178,21 @@ defmodule Console.Deployments.Pipelines do
       |> add_operation({:pull, svc.id}, fn _ -> create_stage_pull_request(stage, svc, Users.admin_bot()) end)
       |> add_operation({:ptr, svc.id}, fn res ->
         pr = Map.get(res, {:pull, svc.id})
-        %PipelinePullRequest{service_id: service.id, stage_id: stage.id}
-        |> PipelinePullRequest.changeset(%{context_id: ctx.id, pull_request_id: pr.id})
-        |> Repo.insert()
+        attrs = %{context_id: ctx.id, pull_request_id: pr.id}
+
+        case Repo.get_by(PipelinePullRequest,
+               context_id: ctx.id,
+               service_id: service.id,
+               stage_id: stage.id
+             ) do
+          %PipelinePullRequest{} = existing ->
+            PipelinePullRequest.changeset(existing, attrs) |> Repo.update()
+
+          nil ->
+            %PipelinePullRequest{service_id: service.id, stage_id: stage.id}
+            |> PipelinePullRequest.changeset(attrs)
+            |> Repo.insert()
+        end
       end)
     end)
     |> add_operation(:stg, fn _ ->
@@ -211,7 +220,38 @@ defmodule Console.Deployments.Pipelines do
   defp requires_context_pull?(_), do: false
 
   defp existing_context_pull?(%StageService{service_id: service_id}, %PipelineStage{id: stage_id}, %PipelineContext{id: ctx_id}) do
-    Repo.get_by(PipelinePullRequest, context_id: ctx_id, service_id: service_id, stage_id: stage_id)
+    case Repo.get_by(PipelinePullRequest, context_id: ctx_id, service_id: service_id, stage_id: stage_id) do
+      %PipelinePullRequest{pull_request_id: id} when is_binary(id) -> true
+      _ -> false
+    end
+  end
+
+  defp stage_context_prs_merged?(%PipelineStage{} = stage, %PipelineContext{id: ctx_id}) do
+    case Repo.preload(stage, [services: :criteria], force: true) do
+      %{services: services} ->
+        services
+        |> Enum.filter(&requires_context_pull?/1)
+        |> case do
+          [] -> true
+          required ->
+            Enum.all?(required, fn %StageService{service_id: service_id} ->
+              case Repo.get_by(PipelinePullRequest,
+                     context_id: ctx_id,
+                     service_id: service_id,
+                     stage_id: stage.id
+                   ) do
+                %PipelinePullRequest{pull_request_id: pr_id} when is_binary(pr_id) ->
+                  case Repo.get(PullRequest, pr_id) do
+                    %PullRequest{status: :merged} -> true
+                    _ -> false
+                  end
+
+                _ ->
+                  false
+              end
+            end)
+        end
+    end
   end
 
   defp create_stage_pull_request(
@@ -286,9 +326,9 @@ defmodule Console.Deployments.Pipelines do
     |> Console.string_map()
   end
 
-  defp prs_merged?(_, %PipelinePromotion{context: %PipelineContext{pull_requests: [_ | _] = prs}}) do
-    Enum.all?(prs, & &1.status == :merged)
-  end
+  defp prs_merged?(_, %PipelinePromotion{stage: stage, context: %PipelineContext{} = ctx}),
+    do: stage_context_prs_merged?(stage, ctx)
+
   defp prs_merged?(_, _), do: true
 
   @doc """
@@ -320,8 +360,11 @@ defmodule Console.Deployments.Pipelines do
   Validate if we've already done the promotion for this stage for pr pipelines
   """
   @spec pr_promoted?(PipelineEdge.t, PipelinePromotion.t) :: boolean
-  def pr_promoted?(%PipelineEdge{to: %PipelineStage{context_id: id}}, %PipelinePromotion{context_id: id})
-    when is_binary(id), do: true
+  def pr_promoted?(%PipelineEdge{to: %PipelineStage{} = to}, %PipelinePromotion{context_id: id})
+    when is_binary(id) do
+    to.context_id == id && to.applied_context_id == id && !missing_context_pulls?(to)
+  end
+
   def pr_promoted?(_, _), do: false
 
   @doc """
@@ -592,7 +635,7 @@ defmodule Console.Deployments.Pipelines do
            |> Map.get(:services)
     (Enum.all?(svcs, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) &&
       gates_stale?(stage) && Enum.all?(stage.services, & &1.service.status == :healthy) &&
-      Enum.all?(ctx.pull_requests, & &1.status == :merged))
+      stage_context_prs_merged?(stage, ctx))
   end
   defp diff?(_, _, _), do: false
 

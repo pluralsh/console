@@ -301,6 +301,51 @@ defmodule Console.Deployments.PipelinesTest do
       refute Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
       assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
     end
+
+    test "it can repair an applied stage with an orphaned pipeline pull request record" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      %Console.Schema.PipelinePullRequest{}
+      |> Console.Schema.PipelinePullRequest.changeset(%{
+        context_id: ctx.id,
+        service_id: svc.id,
+        stage_id: dev.id
+      })
+      |> Console.Repo.insert!()
+
+      assert Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
+
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} ->
+        {:ok, %{title: "some", url: "url"}}
+      end)
+
+      {:ok, %{stg: stage}} = Pipelines.apply_pipeline_context(dev)
+
+      ptr = Console.Repo.get_by!(Console.Schema.PipelinePullRequest,
+        context_id: ctx.id,
+        service_id: svc.id,
+        stage_id: dev.id
+      )
+
+      assert ptr.pull_request_id
+      assert stage.applied_context_id == ctx.id
+      refute Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
+    end
   end
 
   describe "#revert_pipeline_context/1" do
@@ -785,7 +830,37 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^prd_id}}}
     end
 
-    test "it will block promotion if a gate is not open" do
+    test "it will block pr promotion until stage pull requests are merged" do
+      admin = admin_user()
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      pipe = insert(:pipeline)
+      ctx = insert(:pipeline_context, pipeline: pipe)
+      dev = insert(:pipeline_stage, pipeline: pipe, context: ctx)
+      prod = insert(:pipeline_stage, pipeline: pipe)
+      edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
+
+      dev_svc = insert(:service, status: :healthy)
+      ss = insert(:stage_service, stage: dev, service: dev_svc)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      promo = insert(:pipeline_promotion, stage: dev, revised_at: Timex.now(), context: ctx)
+      insert(:promotion_service, promotion: promo, service: dev_svc, revision: dev_svc.revision)
+
+      {:ok, promod} = Pipelines.apply_promotion(promo)
+
+      refute promod.promoted_at
+      refute refetch(edge).promoted_at
+      refute refetch(prod).context_id
+    end
+
+    test "it will block pr promotion if a gate is not open" do
       admin = admin_user()
       cluster = insert(:cluster)
       repository = insert(:git_repository)

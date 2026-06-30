@@ -38,7 +38,7 @@ defmodule Console.Schema.PipelineStage do
         on: pr.stage_id == s.id and pr.service_id == ss.service_id and pr.context_id == s.context_id,
       where: not is_nil(s.context_id) and (
         is_nil(s.applied_context_id) or s.context_id != s.applied_context_id or
-        (not is_nil(c.pr_automation_id) and is_nil(pr.id))
+        (not is_nil(c.pr_automation_id) and (is_nil(pr.id) or is_nil(pr.pull_request_id)))
       ),
       distinct: true
     )
