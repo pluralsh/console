@@ -22104,7 +22104,7 @@ addons:
           (metamodel refactor + stricter validation options like strictValidatePathType);
           some ingresses may be skipped or routed differently when referenced secrets/config
           cannot be resolved.]
-    chart_version: 41.0.0
+    chart_version: 41.0.1
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -24092,7 +24092,7 @@ addons:
           Generator setups that filter by Kubernetes version when using auto-labeled
           cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
           format.']
-    chart_version: 10.0.0
+    chart_version: 10.0.1
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.4']
   - version: 3.4.1
