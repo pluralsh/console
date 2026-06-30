@@ -470,6 +470,65 @@ defmodule Console.Deployments.PipelinesTest do
       assert stage.applied_context_id == ctx.id
       refute Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
     end
+
+    test "it can repair an applied stage with a closed pipeline pull request" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+
+      dev =
+        insert(:pipeline_stage, pipeline: pipe, name: "dev", context: ctx, applied_context: ctx)
+
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+      closed_pr = insert(:pull_request, status: :closed)
+
+      %Console.Schema.PipelinePullRequest{}
+      |> Console.Schema.PipelinePullRequest.changeset(%{
+        context_id: ctx.id,
+        service_id: svc.id,
+        stage_id: dev.id,
+        pull_request_id: closed_pr.id
+      })
+      |> Console.Repo.insert!()
+
+      assert Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
+
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} ->
+        {:ok, %{title: "some", url: "url"}}
+      end)
+
+      {:ok, %{stg: stage}} = Pipelines.apply_pipeline_context(dev)
+
+      ptr =
+        Console.Repo.get_by!(Console.Schema.PipelinePullRequest,
+          context_id: ctx.id,
+          service_id: svc.id,
+          stage_id: dev.id
+        )
+
+      assert ptr.pull_request_id
+      refute ptr.pull_request_id == closed_pr.id
+      assert stage.applied_context_id == ctx.id
+      refute Console.Repo.get_by(Console.Schema.PipelineStage.pending_context(), id: dev.id)
+    end
   end
 
   describe "#revert_pipeline_context/1" do

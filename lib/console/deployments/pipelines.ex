@@ -265,8 +265,14 @@ defmodule Console.Deployments.Pipelines do
            service_id: service_id,
            stage_id: stage_id
          ) do
-      %PipelinePullRequest{pull_request_id: id} when is_binary(id) -> true
-      _ -> false
+      %PipelinePullRequest{pull_request_id: id} when is_binary(id) ->
+        case Repo.get(PullRequest, id) do
+          %PullRequest{status: status} when status in [:open, :merged] -> true
+          _ -> false
+        end
+
+      _ ->
+        false
     end
   end
 
@@ -432,7 +438,13 @@ defmodule Console.Deployments.Pipelines do
   @spec pr_promoted?(PipelineEdge.t(), PipelinePromotion.t()) :: boolean
   def pr_promoted?(%PipelineEdge{to: %PipelineStage{} = to}, %PipelinePromotion{context_id: id})
       when is_binary(id) do
-    to.context_id == id && to.applied_context_id == id && !missing_context_pulls?(to)
+    case Repo.get(PipelineContext, id) do
+      %PipelineContext{} = ctx ->
+        to.context_id == id && to.applied_context_id == id && stage_context_prs_merged?(to, ctx)
+
+      _ ->
+        false
+    end
   end
 
   def pr_promoted?(_, _), do: false
