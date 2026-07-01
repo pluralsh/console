@@ -283,11 +283,25 @@ function UsageLineChart({
                 )
               },
             }}
-            enableArea={!isSinglePoint}
+            enableArea={true}
             areaOpacity={0.18}
             enableGridX={false}
             enableGridY={false}
-            enablePoints={isSinglePoint}
+            markers={
+              isSinglePoint
+                ? [
+                    {
+                      axis: 'y',
+                      value: singlePointYValue,
+                      lineStyle: {
+                        stroke: color,
+                        strokeWidth: 1,
+                      },
+                    },
+                  ]
+                : []
+            }
+            enablePoints={false}
             lineWidth={1}
             pointSize={theme.spacing.small}
             pointBorderWidth={theme.spacing.xxxsmall}
