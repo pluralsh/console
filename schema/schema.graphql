@@ -9493,6 +9493,9 @@ type PromotionCriteria {
   "the scm connection to use for service promotion"
   connection: ScmConnection
 
+  "the pr automation to use when promoting this service"
+  prAutomation: PrAutomation
+
   "the source service in a prior stage to promote settings from"
   source: ServiceDeployment
 

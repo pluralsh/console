@@ -338,6 +338,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :connection, :scm_connection,
       description: "the scm connection to use for service promotion",
       resolve: dataloader(Deployments)
+    field :pr_automation, :pr_automation,
+      description: "the pr automation to use when promoting this service",
+      resolve: dataloader(Deployments)
     field :source,     :service_deployment,
       description: "the source service in a prior stage to promote settings from",
       resolve: dataloader(Deployments)

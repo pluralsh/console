@@ -106,7 +106,9 @@ export function getStageStatus(stage: PipelineStageFragment) {
 
   if (!servicesHealthy) return StageStatus.Pending
 
-  const prServices = (stage.services || []).filter((svc) => svc?.criteria)
+  const prServices = (stage.services || []).filter(
+    (svc) => !!svc?.criteria?.prAutomation?.id
+  )
 
   if (isEmpty(prServices)) return StageStatus.Complete
 
