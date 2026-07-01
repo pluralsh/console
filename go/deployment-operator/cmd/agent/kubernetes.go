@@ -336,6 +336,13 @@ func registerKubeReconcilersOrDie(
 	}).SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PluralCAPIClusterController")
 	}
+	if err := (&controller.PluralCrossplaneClusterController{
+		Client:     manager.GetClient(),
+		Scheme:     manager.GetScheme(),
+		ConsoleUrl: consoleURL,
+	}).SetupWithManager(manager); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "PluralCrossplaneClusterController")
+	}
 	if err := (&controller.SentinelRunJobReconciler{
 		Client:        manager.GetClient(),
 		Scheme:        manager.GetScheme(),

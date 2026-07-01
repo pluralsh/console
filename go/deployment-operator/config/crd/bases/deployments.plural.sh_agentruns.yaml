@@ -44,6 +44,10 @@ spec:
           spec:
             description: AgentRunSpec defines the desired state of AgentRun
             properties:
+              branch:
+                description: Branch is the repository branch the agent should operate
+                  on. If omitted, the repository default branch is used.
+                type: string
               flowId:
                 description: FlowID is the flow this agent run is associated with
                   (optional)
@@ -51,11 +55,13 @@ spec:
               language:
                 description: |-
                   Language is the programming language used in the agent run.
+
                   Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
                 type: string
               languageVersion:
                 description: |-
                   LanguageVersion is the version of the language to use, if you wish to specify.
+
                   Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
                 type: string
               mode:
@@ -67,10 +73,6 @@ spec:
               repository:
                 description: Repository is the git repository the agent will work
                   with
-                type: string
-              branch:
-                description: Branch is the repository branch the agent should operate
-                  on. If omitted, the repository default branch is used.
                 type: string
               runtimeRef:
                 properties:

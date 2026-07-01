@@ -34,6 +34,7 @@ import (
 	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/crossplane"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
@@ -66,6 +67,7 @@ func init() {
 	utilruntime.Must(openshift.AddToScheme(scheme))
 	utilruntime.Must(fluxcd.AddToScheme(scheme))
 	utilruntime.Must(clusterv1.AddToScheme(scheme))
+	utilruntime.Must(crossplane.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
