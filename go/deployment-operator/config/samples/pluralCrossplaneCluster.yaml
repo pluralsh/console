@@ -1,0 +1,16 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: PluralCrossplaneCluster
+metadata:
+  name: crossplane-eks-quickstart
+  namespace: default
+spec:
+  cluster:
+    handle: crossplane-eks-quickstart
+  consoleTokenSecretRef:
+    name: crossplane-eks-quickstart-console-token
+    key: token
+  crossplaneClusterRef:
+    apiVersion: eks.aws.upbound.io/v1beta2
+    kind: Cluster
+    name: cp-eks-small
+    namespace: default
