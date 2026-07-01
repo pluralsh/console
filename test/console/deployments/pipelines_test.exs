@@ -676,7 +676,7 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
     end
 
-    test "it will revise promotions for gateless edges after context pull requests merge" do
+    test "it will revise promotions for gateless edges after context pull requests and child stacks complete" do
       admin = admin_user()
       git = insert(:git_repository)
       conn = insert(:scm_connection, token: "some-pat")
@@ -741,6 +741,22 @@ defmodule Console.Deployments.PipelinesTest do
         pull_request_id: pr.id
       })
       |> Console.Repo.insert!()
+
+      stack =
+        insert(:stack,
+          parent: svc,
+          status: :successful,
+          sha: "new-sha",
+          last_successful: "new-sha"
+        )
+
+      insert(:stack_run,
+        stack: stack,
+        status: :successful,
+        git: %{ref: "new-sha"},
+        inserted_at: Timex.now(),
+        updated_at: Timex.now()
+      )
 
       promo =
         insert(:pipeline_promotion,
