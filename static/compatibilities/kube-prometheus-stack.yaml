@@ -5,6 +5,30 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 87.4.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped kube-prometheus-stack chart dependencies with non-major
+        updates (renovate-driven)., 'Chart templating behavior (from 87.3.0) renders
+        `containers` and `initContainers` fields via `tpl`, which can change how values
+        are evaluated/rendered. (No additional chart-level change details were provided
+        for 87.4.0 beyond dependency bumps.)']
+    features: ['Chart dependencies received non-major version bumps, which may bring
+        minor fixes/improvements from subcharts without a major upgrade.']
+    breaking_changes: ["Because `containers` and `initContainers` are now rendered\
+        \ with `tpl` (introduced in 87.3.0), any values containing `{{ }}` templating\
+        \ will be evaluated; this can change rendered manifests or cause template\
+        \ errors if the content wasn\u2019t valid Helm templating. Review any custom\
+        \ extra containers/initContainers values for unintended template evaluation."]
+  chart_version: 87.4.0
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.0', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
 - version: 87.3.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
