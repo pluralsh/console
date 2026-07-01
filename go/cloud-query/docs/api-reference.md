@@ -289,17 +289,17 @@ ToolQuery exposes a gRPC service for querying external observability tools (metr
 
 ToolQuery support varies by operation:
 
-| Tool | Metrics | Logs | Traces | Notes |
-|------|---------|------|--------|-------|
-| Prometheus | Yes | No | No | Prometheus HTTP API range queries and metric name search |
-| Datadog | Yes | Yes | Yes | Datadog Metrics (v1), Logs (v2), Spans (v2) APIs, plus metric search (v2 HTTP) |
-| Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
-| Loki | No | Yes | No | Loki HTTP `query_range` API |
-| Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
-| Jaeger | No | No | Yes | Jaeger Query v3 REST API with structured filters |
-| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
-| CloudWatch | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
-| Azure | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs` |
+| Tool | Metrics | Metric Label Search | Logs | Traces | Notes |
+|------|---------|---------------------|------|--------|-------|
+| Prometheus | Yes | Yes | No | No | Prometheus HTTP API range queries, metric name search, and metric-scoped label search |
+| Datadog | Yes | Yes | Yes | Yes | Datadog Metrics (v1), Logs (v2), Spans (v2) APIs, metric search, and metric tag search |
+| Elasticsearch | No | No | Yes | No | Elasticsearch typed Search API with query string |
+| Loki | No | No | Yes | No | Loki HTTP `query_range` API |
+| Tempo | No | No | No | Yes | Tempo HTTP search + trace fetch |
+| Jaeger | No | No | No | Yes | Jaeger Query v3 REST API with structured filters |
+| Dynatrace | Yes | No | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
+| CloudWatch | Yes | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
+| Azure | Yes | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs`; Managed Prometheus delegates to Prometheus |
 
 ## Client and Endpoint Details
 
@@ -308,6 +308,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Prometheus: `prometheus/client_golang` HTTP API client, `QueryRange` (Prometheus `/api/v1/query_range`). Supports bearer token or basic auth.
 - Datadog: `datadog-api-client-go` v2 SDK.
   - Metrics: v1 `QueryMetrics`.
+  - Metrics label search: v2 `ListTagsByMetricName`.
   - Logs: v2 `ListLogs`.
   - Traces: v2 `ListSpans`.
 - Elasticsearch: `elastic/go-elasticsearch` v9 typed client, `Search` (Elasticsearch `/_search`) with a `query_string` query and `@timestamp` range filter. Requires API key.
@@ -319,9 +320,11 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
   - Logs: CloudWatch Logs Insights `StartQuery` + `GetQueryResults`.
   - Metrics: CloudWatch `GetMetricData` (query expression).
   - Metrics search: CloudWatch `ListMetrics` with bounded pagination and local filtering.
+  - Metrics label search: CloudWatch `ListMetrics` dimensions with bounded pagination.
 - Azure: Azure Monitor Go SDK via Azure AD client credentials.
   - Metrics: `monitor/query/azmetrics` `QueryResources`.
   - Metrics search: `resourcemanager/monitor/armmonitor` metric definitions pager.
+  - Metrics label search: metric definitions dimensions for label names; `azmetrics.QueryResources` time-series metadata for native Azure label values; Managed Prometheus delegates to Prometheus label APIs.
   - Logs: `monitor/query/azlogs` `QueryResource`.
 
 ## Service Definition
@@ -330,6 +333,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
+  rpc MetricsLabelSearch(MetricsLabelSearchInput) returns (MetricsLabelSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
@@ -475,6 +479,7 @@ message AzureMetricsOptions {
   optional string order_by = 5;
   optional string roll_up_by = 6;
   optional string metrics_endpoint = 7;
+  optional string prometheus_url = 8;
 }
 ```
 
@@ -505,6 +510,7 @@ message MetricsSearchOptions {
 
 message AzureMetricsSearchOptions {
   string resource_id = 1;
+  optional string prometheus_url = 2;
 }
 
 message MetricsSearchResult {
@@ -513,6 +519,34 @@ message MetricsSearchResult {
 
 message MetricsSearchOutput {
   repeated MetricsSearchResult metrics = 1;
+}
+
+message MetricsLabelSearchInput {
+  ToolConnection connection = 1;
+  string metric = 2;
+  optional string query = 3;
+  optional string label = 4;
+  optional int64 limit = 5;
+  optional MetricsLabelSearchOptions options = 6;
+}
+
+message MetricsLabelSearchOptions {
+  optional AzureMetricsLabelSearchOptions azure = 1;
+}
+
+message AzureMetricsLabelSearchOptions {
+  string resource_id = 1;
+  optional string metrics_namespace = 2;
+  optional string prometheus_url = 3;
+  optional string metrics_endpoint = 4;
+}
+
+message MetricsLabelSearchResult {
+  string name = 1;
+}
+
+message MetricsLabelSearchOutput {
+  repeated MetricsLabelSearchResult results = 1;
 }
 ```
 
@@ -794,7 +828,10 @@ grpcurl -d '{
 
 ## Metrics Search
 
-`MetricsSearch` returns metric names only.
+`MetricsSearch` returns metric names or provider-specific metric identifiers that can be passed to `MetricsLabelSearch`.
+- `query` is the search term. Most providers apply it as a plain substring or provider-native search filter.
+- `limit` defaults to a provider-specific conservative value.
+- Results contain only metric names. Use `Metrics` to query time-series data and `MetricsLabelSearch` to inspect available labels for a specific metric.
 
 ### Prometheus
 
@@ -953,6 +990,112 @@ grpcurl -d '{
   "metrics": [
     { "name": "node_cpu_usage_percentage" },
     { "name": "node_memory_working_set" }
+  ]
+}
+```
+
+## Metrics Label Search
+
+`MetricsLabelSearch` returns metric-scoped label metadata.
+- `metric` is required. Use a metric name or provider-specific metric identifier, typically from `MetricsSearch`.
+- If `label` is omitted, results are label names for `metric`.
+- If `label` is provided, results are values for that label on `metric`.
+- `query` is an optional case-insensitive substring filter applied locally to returned names or values.
+- `limit` defaults to a provider-specific conservative value.
+
+Provider notes:
+- Prometheus and Azure Managed Prometheus use Prometheus label APIs over a recent 24-hour window.
+- Datadog uses indexed metric tags from `ListTagsByMetricName`.
+- CloudWatch uses `ListMetrics` dimensions for recently active metrics. CloudWatch metric identifiers should match `MetricsSearch` output, for example `AWS/EC2/CPUUtilization`.
+- Native Azure Monitor uses metric-definition dimensions for label names. Label values require `options.azure.metrics_namespace` and are inferred from recent metric time-series metadata.
+- Dynatrace metric label search is currently unsupported.
+
+### Prometheus label names
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://vmauth-vm-auth.monitoring:8427/select/0/prometheus",
+      "username": "<USERNAME>",
+      "password": "<PASSWORD>"
+    }
+  },
+  "metric": "container_cpu_usage_seconds_total",
+  "query": "pod",
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsLabelSearch
+```
+
+#### Output
+
+```json
+{
+  "results": [
+    { "name": "pod" },
+    { "name": "pod_name" }
+  ]
+}
+```
+
+### Prometheus label values
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://vmauth-vm-auth.monitoring:8427/select/0/prometheus",
+      "username": "<USERNAME>",
+      "password": "<PASSWORD>"
+    }
+  },
+  "metric": "container_cpu_usage_seconds_total",
+  "label": "namespace",
+  "query": "prod",
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsLabelSearch
+```
+
+#### Output
+
+```json
+{
+  "results": [
+    { "name": "prod" },
+    { "name": "prod-system" }
+  ]
+}
+```
+
+### Azure native label names
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>"
+    }
+  },
+  "metric": "node_cpu_usage_percentage",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod",
+      "metrics_namespace": "Microsoft.ContainerService/managedClusters"
+    }
+  },
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsLabelSearch
+```
+
+#### Output
+
+```json
+{
+  "results": [
+    { "name": "node" }
   ]
 }
 ```

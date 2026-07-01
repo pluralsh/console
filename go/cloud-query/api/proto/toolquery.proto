@@ -225,6 +225,35 @@ message MetricsSearchOutput {
   repeated MetricsSearchResult metrics = 1;
 }
 
+message MetricsLabelSearchInput {
+  ToolConnection connection = 1;
+  string metric = 2;
+  optional string query = 3;
+  optional string label = 4;
+  optional int64 limit = 5;
+  optional MetricsLabelSearchOptions options = 6;
+}
+
+message MetricsLabelSearchOptions {
+  optional AzureMetricsLabelSearchOptions azure = 1;
+}
+
+message AzureMetricsLabelSearchOptions {
+  string resource_id = 1;
+  optional string metrics_namespace = 2;
+  optional string prometheus_url = 3;
+  optional string metrics_endpoint = 4;
+}
+
+message MetricsLabelSearchResult {
+  // Name of the matching label or label value.
+  string name = 1;
+}
+
+message MetricsLabelSearchOutput {
+  repeated MetricsLabelSearchResult results = 1;
+}
+
 message LogEntry {
   google.protobuf.Timestamp timestamp = 1;
   string message = 2;
@@ -274,6 +303,7 @@ message RunLuaOutput {
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
+  rpc MetricsLabelSearch(MetricsLabelSearchInput) returns (MetricsLabelSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
