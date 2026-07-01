@@ -2,6 +2,7 @@ defmodule Console.Deployments.Pipelines do
   use Console.Services.Base
   require Logger
   use Nebulex.Caching
+  import Ecto.Query
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
   alias Console.PubSub
@@ -21,6 +22,8 @@ defmodule Console.Deployments.Pipelines do
     PipelineContextHistory,
     PipelinePullRequest,
     PullRequest,
+    Stack,
+    StackRun,
     User,
     Cluster,
     SentinelRun,
@@ -768,10 +771,49 @@ defmodule Console.Deployments.Pipelines do
 
     Enum.all?(svcs, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) &&
       gates_stale?(stage) && Enum.all?(stage.services, &(&1.service.status == :healthy)) &&
-      stage_context_prs_merged?(stage, ctx)
+      stage_context_prs_merged?(stage, ctx) && stage_stacks_ready?(stage, ctx)
   end
 
   defp diff?(_, _, _), do: false
+
+  defp stage_stacks_ready?(%PipelineStage{services: [_ | _] = services}, %PipelineContext{} = ctx) do
+    service_ids =
+      services
+      |> Enum.map(& &1.service_id)
+      |> Enum.filter(&is_binary/1)
+
+    Stack
+    |> where([s], s.parent_id in ^service_ids and is_nil(s.deleted_at))
+    |> Repo.all()
+    |> case do
+      [] -> true
+      stacks -> Enum.all?(stacks, &stack_ready?(&1, ctx))
+    end
+  end
+
+  defp stage_stacks_ready?(_, _), do: true
+
+  defp stack_ready?(
+         %Stack{id: id, status: :successful, sha: sha, last_successful: sha},
+         %PipelineContext{inserted_at: at}
+       )
+       when is_binary(id) and is_binary(sha) do
+    StackRun.for_stack(id)
+    |> StackRun.wet()
+    |> StackRun.for_status(:successful)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+    |> case do
+      %StackRun{git: %{ref: ^sha}} = run ->
+        Timex.after?(coalesce(run.updated_at, run.inserted_at), at)
+
+      _ ->
+        false
+    end
+  end
+
+  defp stack_ready?(_, _), do: false
 
   defp gates_stale?(%PipelineStage{context: %PipelineContext{id: id}, from_edges: edges}) do
     case Enum.flat_map(edges, & &1.gates) do
