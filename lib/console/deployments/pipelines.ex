@@ -729,27 +729,27 @@ defmodule Console.Deployments.Pipelines do
   defp stage_stacks_ready?(%PipelineStage{} = stage, %PipelineContext{} = ctx) do
     case Repo.preload(stage, [services: :criteria], force: true) do
       %{services: [_ | _] = services} ->
-        service_ids =
-          services
-          |> Enum.map(& &1.service_id)
-          |> Enum.filter(&is_binary/1)
-
         context_service_ids =
           services
           |> Enum.filter(&requires_context_pull?/1)
           |> Enum.map(& &1.service_id)
           |> Enum.filter(&is_binary/1)
-          |> MapSet.new()
 
-        stacks =
-          Stack
-          |> where([s], s.parent_id in ^service_ids and is_nil(s.deleted_at))
-          |> Repo.all()
+        case context_service_ids do
+          [] ->
+            true
 
-        stack_parent_ids = MapSet.new(stacks, & &1.parent_id)
+          ids ->
+            stacks =
+              Stack
+              |> where([s], s.parent_id in ^ids and is_nil(s.deleted_at))
+              |> Repo.all()
 
-        Enum.all?(context_service_ids, &MapSet.member?(stack_parent_ids, &1)) &&
-          Enum.all?(stacks, &stack_ready?(&1, ctx))
+            stack_parent_ids = MapSet.new(stacks, & &1.parent_id)
+
+            Enum.all?(ids, &MapSet.member?(stack_parent_ids, &1)) &&
+              Enum.all?(stacks, &stack_ready?(&1, ctx))
+        end
 
       _ ->
         true

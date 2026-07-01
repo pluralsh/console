@@ -1038,6 +1038,138 @@ defmodule Console.Deployments.PipelinesTest do
       assert promo.revised
     end
 
+    test "it will revise promotions when only pr-automation child stacks must be ready" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      conn = insert(:scm_connection, token: "some-pat")
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
+
+      {:ok, pr_svc} =
+        create_service(
+          %{
+            name: "pr-service",
+            namespace: "pr-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
+
+      {:ok, source_svc} =
+        create_service(
+          %{
+            name: "source-service",
+            namespace: "source-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
+
+      pr_svc = Console.Repo.preload(pr_svc, [:revision])
+      source_svc = Console.Repo.preload(source_svc, [:revision])
+      pipeline = insert(:pipeline)
+
+      ctx =
+        insert(:pipeline_context,
+          pipeline: pipeline,
+          context: %{fleet: "mar", version: "1.35"},
+          inserted_at: Timex.now() |> Timex.shift(minutes: -5)
+        )
+
+      dev_cp =
+        insert(:pipeline_stage,
+          name: "dev-cp",
+          pipeline: pipeline,
+          context: ctx,
+          applied_context: ctx
+        )
+
+      dev_nodes = insert(:pipeline_stage, name: "dev-nodes", pipeline: pipeline)
+      insert(:pipeline_edge, from: dev_cp, to: dev_nodes)
+
+      pr_ss = insert(:stage_service, stage: dev_cp, service: pr_svc)
+      insert(:promotion_criteria, stage_service: pr_ss, pr_automation: pra)
+
+      source_ss = insert(:stage_service, stage: dev_cp, service: source_svc)
+      insert(:promotion_criteria, stage_service: source_ss, source: pr_svc, secrets: ["name"])
+
+      pr = insert(:pull_request, status: :merged, service: pr_svc)
+
+      %Console.Schema.PipelinePullRequest{}
+      |> Console.Schema.PipelinePullRequest.changeset(%{
+        context_id: ctx.id,
+        service_id: pr_svc.id,
+        stage_id: dev_cp.id,
+        pull_request_id: pr.id
+      })
+      |> Console.Repo.insert!()
+
+      pr_stack =
+        insert(:stack,
+          parent: pr_svc,
+          status: :successful,
+          sha: "new-sha",
+          last_successful: "new-sha"
+        )
+
+      insert(:stack_run,
+        stack: pr_stack,
+        status: :successful,
+        git: %{ref: "new-sha"},
+        inserted_at: Timex.now(),
+        updated_at: Timex.now()
+      )
+
+      stale_stack =
+        insert(:stack,
+          parent: source_svc,
+          status: :successful,
+          sha: "old-sha",
+          last_successful: "old-sha"
+        )
+
+      insert(:stack_run,
+        stack: stale_stack,
+        status: :successful,
+        git: %{ref: "old-sha"},
+        inserted_at: Timex.now() |> Timex.shift(hours: -1),
+        updated_at: Timex.now() |> Timex.shift(hours: -1)
+      )
+
+      promo =
+        insert(:pipeline_promotion,
+          stage: dev_cp,
+          context: ctx
+        )
+
+      insert(:promotion_service, promotion: promo, service: pr_svc, revision: pr_svc.revision)
+      insert(:promotion_service, promotion: promo, service: source_svc, revision: source_svc.revision)
+
+      {:ok, promo} = Pipelines.build_promotion(dev_cp)
+
+      assert promo.revised_at
+      assert promo.revised
+    end
+
     test "it will not revise promotions if gates are unchanged" do
       admin = admin_user()
       git = insert(:git_repository)
