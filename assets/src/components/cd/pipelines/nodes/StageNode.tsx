@@ -108,7 +108,9 @@ export function getStageStatus(stage: PipelineStageFragment) {
 
   const prServices = (stage.services || []).filter((svc) => svc?.criteria)
 
-  if (isEmpty(prServices) || !stage.context) return StageStatus.Complete
+  if (isEmpty(prServices)) return StageStatus.Complete
+
+  if (!stage.context) return StageStatus.Pending
 
   const stagePullRequests = stage.context.pipelinePullRequests || []
 

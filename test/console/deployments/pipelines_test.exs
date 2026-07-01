@@ -677,6 +677,86 @@ defmodule Console.Deployments.PipelinesTest do
       assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
     end
 
+    test "it will revise promotions for gateless edges after context pull requests merge" do
+      admin = admin_user()
+      git = insert(:git_repository)
+      conn = insert(:scm_connection, token: "some-pat")
+
+      pra =
+        insert(:pr_automation,
+          identifier: "pluralsh/console",
+          cluster: build(:cluster),
+          connection: conn,
+          updates: %{
+            regexes: ["regex"],
+            match_strategy: :any,
+            files: ["file.yaml"],
+            replace_template: "replace"
+          }
+        )
+
+      {:ok, svc} =
+        create_service(
+          %{
+            name: "my-service",
+            namespace: "my-service",
+            repository_id: git.id,
+            status: :healthy,
+            git: %{ref: "main", folder: "k8s"},
+            configuration: [%{name: "name", value: "value"}]
+          },
+          insert(:cluster),
+          admin
+        )
+
+      svc = Console.Repo.preload(svc, [:revision])
+      pipeline = insert(:pipeline)
+
+      ctx =
+        insert(:pipeline_context,
+          pipeline: pipeline,
+          context: %{fleet: "mar", version: "1.35"},
+          inserted_at: Timex.now() |> Timex.shift(minutes: -5)
+        )
+
+      dev_cp =
+        insert(:pipeline_stage,
+          name: "dev-cp",
+          pipeline: pipeline,
+          context: ctx,
+          applied_context: ctx
+        )
+
+      dev_nodes = insert(:pipeline_stage, name: "dev-nodes", pipeline: pipeline)
+      insert(:pipeline_edge, from: dev_cp, to: dev_nodes)
+      ss = insert(:stage_service, stage: dev_cp, service: svc)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      pr = insert(:pull_request, status: :merged, service: svc)
+
+      %Console.Schema.PipelinePullRequest{}
+      |> Console.Schema.PipelinePullRequest.changeset(%{
+        context_id: ctx.id,
+        service_id: svc.id,
+        stage_id: dev_cp.id,
+        pull_request_id: pr.id
+      })
+      |> Console.Repo.insert!()
+
+      promo =
+        insert(:pipeline_promotion,
+          stage: dev_cp,
+          context: ctx
+        )
+
+      insert(:promotion_service, promotion: promo, service: svc, revision: svc.revision)
+
+      {:ok, promo} = Pipelines.build_promotion(dev_cp)
+
+      assert promo.revised_at
+      assert promo.context_id == ctx.id
+    end
+
     test "it will not revise promotions if gates are unchanged" do
       admin = admin_user()
       git = insert(:git_repository)

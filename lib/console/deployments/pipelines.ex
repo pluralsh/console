@@ -774,8 +774,10 @@ defmodule Console.Deployments.Pipelines do
   defp diff?(_, _, _), do: false
 
   defp gates_stale?(%PipelineStage{context: %PipelineContext{id: id}, from_edges: edges}) do
-    Enum.flat_map(edges, & &1.gates)
-    |> Enum.any?(&(&1.context_id != id))
+    case Enum.flat_map(edges, & &1.gates) do
+      [] -> true
+      gates -> Enum.any?(gates, &(&1.context_id != id))
+    end
   end
 
   defp gates_stale?(_), do: true
