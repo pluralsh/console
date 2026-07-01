@@ -745,10 +745,10 @@ defmodule Console.Deployments.Pipelines do
               |> where([s], s.parent_id in ^ids and is_nil(s.deleted_at))
               |> Repo.all()
 
-            stack_parent_ids = MapSet.new(stacks, & &1.parent_id)
-
-            Enum.all?(ids, &MapSet.member?(stack_parent_ids, &1)) &&
-              Enum.all?(stacks, &stack_ready?(&1, ctx))
+            case stacks do
+              [] -> true
+              _ -> Enum.all?(stacks, &stack_ready?(&1, ctx))
+            end
         end
 
       _ ->

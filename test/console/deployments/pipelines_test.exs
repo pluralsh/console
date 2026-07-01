@@ -862,7 +862,7 @@ defmodule Console.Deployments.PipelinesTest do
       refute promo.revised
     end
 
-    test "it will not revise promotions before child stacks are created" do
+    test "it will revise pr automation promotions without child stacks" do
       admin = admin_user()
       git = insert(:git_repository)
       conn = insert(:scm_connection, token: "some-pat")
@@ -938,8 +938,8 @@ defmodule Console.Deployments.PipelinesTest do
 
       {:ok, promo} = Pipelines.build_promotion(dev_cp)
 
-      refute promo.revised_at
-      refute promo.revised
+      assert promo.revised_at
+      assert promo.revised
     end
 
     test "it will revise promotions after child stacks finish successfully" do
