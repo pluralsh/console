@@ -16795,6 +16795,11 @@ addons:
   chart_name: flux2
   eolApiSlug: flux
   versions:
+  - version: 2.9.0
+    kube: ['1.36', '1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 2.8.0
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
@@ -18336,6 +18341,30 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 87.4.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumped kube-prometheus-stack chart dependencies with non-major
+          updates (renovate-driven)., 'Chart templating behavior (from 87.3.0) renders
+          `containers` and `initContainers` fields via `tpl`, which can change how
+          values are evaluated/rendered. (No additional chart-level change details
+          were provided for 87.4.0 beyond dependency bumps.)']
+      features: ['Chart dependencies received non-major version bumps, which may bring
+          minor fixes/improvements from subcharts without a major upgrade.']
+      breaking_changes: ["Because `containers` and `initContainers` are now rendered\
+          \ with `tpl` (introduced in 87.3.0), any values containing `{{ }}` templating\
+          \ will be evaluated; this can change rendered manifests or cause template\
+          \ errors if the content wasn\u2019t valid Helm templating. Review any custom\
+          \ extra containers/initContainers values for unintended template evaluation."]
+    chart_version: 87.4.0
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.0', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+      'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.3.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -22104,7 +22133,7 @@ addons:
           (metamodel refactor + stricter validation options like strictValidatePathType);
           some ingresses may be skipped or routed differently when referenced secrets/config
           cannot be resolved.]
-    chart_version: 41.0.0
+    chart_version: 41.0.1
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -24092,7 +24121,7 @@ addons:
           Generator setups that filter by Kubernetes version when using auto-labeled
           cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
           format.']
-    chart_version: 10.0.0
+    chart_version: 10.0.1
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.4']
   - version: 3.4.1
@@ -27474,13 +27503,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 9.4.2
+  - version: 9.4.3
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 9.4.2
-    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.4.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+    chart_version: 9.4.3
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.4.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.4.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
