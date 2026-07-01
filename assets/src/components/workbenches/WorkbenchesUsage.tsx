@@ -1,4 +1,4 @@
-import { ResponsiveLine } from '@nivo/line'
+import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line'
 import { Card, Flex, ProgressBar } from '@pluralsh/design-system'
 import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
@@ -32,6 +32,11 @@ type UsageTotals = {
   totalTokens: number
   totalCost: number
   hasCost: boolean
+}
+
+type UsageLineSeries = {
+  id: string
+  data: Array<{ x: string; y: number }>
 }
 
 export function WorkbenchesUsage() {
@@ -206,6 +211,26 @@ function UsageLineChart({
   const hasData = series.length > 0
   const isSinglePoint = series.length === 1
   const singlePointYValue = isSinglePoint ? Number(series[0]?.y ?? 0) : 0
+  const singlePointAreaLayer = ({
+    points,
+    innerWidth,
+    innerHeight,
+  }: LineCustomSvgLayerProps<UsageLineSeries>) => {
+    const point = points[0]
+    if (!isSinglePoint || !point) return null
+
+    return (
+      <rect
+        x={0}
+        y={point.y}
+        width={innerWidth}
+        height={innerHeight - point.y}
+        fill={color}
+        opacity={0.18}
+        pointerEvents="none"
+      />
+    )
+  }
 
   return (
     <Card
@@ -233,7 +258,7 @@ function UsageLineChart({
       <div css={{ minHeight: layout.lineChartMinHeight }}>
         {hasData ? (
           <ResponsiveLine
-            data={[{ id: title, data: series }]}
+            data={[{ id: title, data: series } satisfies UsageLineSeries]}
             animate
             theme={lineChartTheme}
             colors={[color]}
@@ -283,11 +308,37 @@ function UsageLineChart({
                 )
               },
             }}
+            layers={[
+              'grid',
+              singlePointAreaLayer,
+              'markers',
+              'axes',
+              'areas',
+              'crosshair',
+              'lines',
+              'points',
+              'mesh',
+              'legends',
+            ]}
             enableArea={!isSinglePoint}
             areaOpacity={0.18}
             enableGridX={false}
             enableGridY={false}
-            enablePoints={isSinglePoint}
+            markers={
+              isSinglePoint
+                ? [
+                    {
+                      axis: 'y',
+                      value: singlePointYValue,
+                      lineStyle: {
+                        stroke: color,
+                        strokeWidth: 1,
+                      },
+                    },
+                  ]
+                : []
+            }
+            enablePoints={false}
             lineWidth={1}
             pointSize={theme.spacing.small}
             pointBorderWidth={theme.spacing.xxxsmall}
