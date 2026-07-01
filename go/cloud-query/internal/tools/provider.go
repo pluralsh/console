@@ -15,6 +15,7 @@ var (
 type MetricsProvider interface {
 	Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error)
 	MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error)
+	MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error)
 }
 
 func newMetricsProvider(conn *toolquery.ToolConnection) (MetricsProvider, error) {
@@ -106,6 +107,14 @@ func (p *toolProvider) MetricsSearch(ctx context.Context, input *toolquery.Metri
 	}
 
 	return p.metrics.MetricsSearch(ctx, input)
+}
+
+func (p *toolProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	if p.metrics == nil {
+		return nil, ErrUnsupportedOperation
+	}
+
+	return p.metrics.MetricsLabelSearch(ctx, input)
 }
 
 func (p *toolProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {

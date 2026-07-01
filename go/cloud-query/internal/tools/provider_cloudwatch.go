@@ -160,6 +160,59 @@ func (in *CloudwatchProvider) MetricsSearch(ctx context.Context, searchInput *to
 	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
 }
 
+func (in *CloudwatchProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	if in.conn == nil {
+		return nil, fmt.Errorf("%w: cloudwatch connection is required", ErrInvalidArgument)
+	}
+	namespace, metricName, err := cloudwatchMetricIdentifier(input.GetMetric())
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, err := in.newAWSConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	listInput := &cloudwatch.ListMetricsInput{
+		MetricName:     aws.String(metricName),
+		RecentlyActive: cloudwatchtypes.RecentlyActivePt3h,
+	}
+	if namespace != "" {
+		listInput.Namespace = aws.String(namespace)
+	}
+
+	label := strings.TrimSpace(input.GetLabel())
+	if label != "" {
+		listInput.Dimensions = []cloudwatchtypes.DimensionFilter{{Name: aws.String(label)}}
+	}
+
+	const maxPages = 6
+	limit := metricsLabelSearchLimit(input.GetLimit())
+	values := make([]string, 0, limit)
+	paginator := cloudwatch.NewListMetricsPaginator(cloudwatch.NewFromConfig(cfg), listInput)
+	for pageNum := 0; paginator.HasMorePages() && pageNum < maxPages && len(values) < limit; pageNum++ {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, metric := range page.Metrics {
+			for _, dimension := range metric.Dimensions {
+				if label == "" {
+					values = append(values, aws.ToString(dimension.Name))
+					continue
+				}
+				if aws.ToString(dimension.Name) == label {
+					values = append(values, aws.ToString(dimension.Value))
+				}
+			}
+		}
+	}
+
+	return newMetricsLabelSearchOutput(values, input.GetQuery(), limit), nil
+}
+
 func (in *CloudwatchProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
 	if in.conn == nil {
 		return nil, fmt.Errorf("%w: cloudwatch connection is required", ErrInvalidArgument)
@@ -233,8 +286,9 @@ func (in *CloudwatchProvider) newAWSConfig(ctx context.Context) (aws.Config, err
 	}
 
 	if roleARN := strings.TrimSpace(in.conn.GetRoleArn()); roleARN != "" {
+		baseCfg := cfg
 		cfg.Credentials = aws.NewCredentialsCache(aws.CredentialsProviderFunc(func(ctx context.Context) (aws.Credentials, error) {
-			return cachedAssumeRoleCredentials(ctx, cfg, roleARN, func(input *sts.AssumeRoleInput) {
+			return cachedAssumeRoleCredentials(ctx, baseCfg, roleARN, func(input *sts.AssumeRoleInput) {
 				if externalID := strings.TrimSpace(in.conn.GetExternalId()); externalID != "" {
 					input.ExternalId = aws.String(externalID)
 				}
@@ -448,4 +502,21 @@ func cloudwatchMetricResultName(metric cloudwatchtypes.Metric) string {
 	default:
 		return ""
 	}
+}
+
+func cloudwatchMetricIdentifier(metric string) (namespace string, name string, err error) {
+	metric = strings.TrimSpace(metric)
+	if metric == "" {
+		return "", "", fmt.Errorf("%w: metric is required", ErrInvalidArgument)
+	}
+
+	idx := strings.LastIndex(metric, "/")
+	if idx == -1 {
+		return "", metric, nil
+	}
+	if idx == 0 || idx == len(metric)-1 {
+		return "", "", fmt.Errorf("%w: cloudwatch metric must be formatted as namespace/metric", ErrInvalidArgument)
+	}
+
+	return metric[:idx], metric[idx+1:], nil
 }

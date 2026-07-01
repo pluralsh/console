@@ -450,6 +450,69 @@ defmodule Toolquery.MetricsSearchOutput do
   field :metrics, 1, repeated: true, type: Toolquery.MetricsSearchResult
 end
 
+defmodule Toolquery.MetricsLabelSearchInput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricsLabelSearchInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :connection, 1, type: Toolquery.ToolConnection
+  field :metric, 2, type: :string
+  field :query, 3, proto3_optional: true, type: :string
+  field :label, 4, proto3_optional: true, type: :string
+  field :limit, 5, proto3_optional: true, type: :int64
+  field :options, 6, proto3_optional: true, type: Toolquery.MetricsLabelSearchOptions
+end
+
+defmodule Toolquery.MetricsLabelSearchOptions do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricsLabelSearchOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :azure, 1, proto3_optional: true, type: Toolquery.AzureMetricsLabelSearchOptions
+end
+
+defmodule Toolquery.AzureMetricsLabelSearchOptions do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.AzureMetricsLabelSearchOptions",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :resource_id, 1, type: :string, json_name: "resourceId"
+  field :metrics_namespace, 2, proto3_optional: true, type: :string, json_name: "metricsNamespace"
+  field :prometheus_url, 3, proto3_optional: true, type: :string, json_name: "prometheusUrl"
+  field :metrics_endpoint, 4, proto3_optional: true, type: :string, json_name: "metricsEndpoint"
+end
+
+defmodule Toolquery.MetricsLabelSearchResult do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricsLabelSearchResult",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :name, 1, type: :string
+end
+
+defmodule Toolquery.MetricsLabelSearchOutput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.MetricsLabelSearchOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :results, 1, repeated: true, type: Toolquery.MetricsLabelSearchResult
+end
+
 defmodule Toolquery.LogEntry.LabelsEntry do
   @moduledoc false
 
@@ -584,6 +647,8 @@ defmodule Toolquery.ToolQuery.Service do
   rpc :Metrics, Toolquery.MetricsQueryInput, Toolquery.MetricsQueryOutput
 
   rpc :MetricsSearch, Toolquery.MetricsSearchInput, Toolquery.MetricsSearchOutput
+
+  rpc :MetricsLabelSearch, Toolquery.MetricsLabelSearchInput, Toolquery.MetricsLabelSearchOutput
 
   rpc :Logs, Toolquery.LogsQueryInput, Toolquery.LogsQueryOutput
 

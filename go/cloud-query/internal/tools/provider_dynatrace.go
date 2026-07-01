@@ -59,6 +59,10 @@ func (in *DynatraceProvider) MetricsSearch(ctx context.Context, input *toolquery
 	return result.ToMetricsSearchOutput(), nil
 }
 
+func (in *DynatraceProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	return nil, ErrUnsupportedOperation
+}
+
 func (in *DynatraceProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
 	if in.client == nil {
 		return nil, ErrInvalidArgument
