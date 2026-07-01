@@ -732,13 +732,22 @@ defmodule Console.Deployments.Pipelines do
       |> Enum.map(& &1.service_id)
       |> Enum.filter(&is_binary/1)
 
-    Stack
-    |> where([s], s.parent_id in ^service_ids and is_nil(s.deleted_at))
-    |> Repo.all()
-    |> case do
-      [] -> true
-      stacks -> Enum.all?(stacks, &stack_ready?(&1, ctx))
-    end
+    context_service_ids =
+      services
+      |> Enum.filter(&requires_context_pull?/1)
+      |> Enum.map(& &1.service_id)
+      |> Enum.filter(&is_binary/1)
+      |> MapSet.new()
+
+    stacks =
+      Stack
+      |> where([s], s.parent_id in ^service_ids and is_nil(s.deleted_at))
+      |> Repo.all()
+
+    stack_parent_ids = MapSet.new(stacks, & &1.parent_id)
+
+    Enum.all?(context_service_ids, &MapSet.member?(stack_parent_ids, &1)) &&
+      Enum.all?(stacks, &stack_ready?(&1, ctx))
   end
 
   defp stage_stacks_ready?(_, _), do: true
