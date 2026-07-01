@@ -76,10 +76,9 @@ func (in *AzureProvider) metricsManagedPrometheus(ctx context.Context, input *to
 		return nil, err
 	}
 
-	tok := token
 	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
 		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
-		Token: &tok,
+		Token: new(token),
 	})
 
 	return prom.Metrics(ctx, input)
@@ -124,10 +123,9 @@ func (in *AzureProvider) metricsSearchManagedPrometheus(ctx context.Context, inp
 		return nil, err
 	}
 
-	tok := token
 	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
 		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
-		Token: &tok,
+		Token: new(token),
 	})
 
 	return prom.MetricsSearch(ctx, input)
@@ -201,10 +199,6 @@ func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *to
 
 	end := time.Now().UTC()
 	start := end.Add(-24 * time.Hour)
-	startStr := start.Format(time.RFC3339Nano)
-	endStr := end.Format(time.RFC3339Nano)
-	interval := "PT1M"
-
 	resp, err := in.client.Metrics(
 		ctx,
 		strings.TrimSpace(opts.GetMetricsEndpoint()),
@@ -212,9 +206,9 @@ func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *to
 		[]string{strings.TrimSpace(input.GetMetric())},
 		azmetrics.ResourceIDList{ResourceIDs: []string{resourceID}},
 		&azmetrics.QueryResourcesOptions{
-			StartTime: &startStr,
-			EndTime:   &endStr,
-			Interval:  &interval,
+			StartTime: new(start.Format(time.RFC3339Nano)),
+			EndTime:   new(end.Format(time.RFC3339Nano)),
+			Interval:  new("PT1M"),
 		},
 	)
 	if err != nil {
