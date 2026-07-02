@@ -31,6 +31,7 @@ import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
+import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
 
 export function WorkbenchJob() {
   const theme = useTheme()
@@ -48,8 +49,11 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
+  const hasResultContent = hasWorkbenchJobResultContent(job)
 
-  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id)
+  const { isOpen, setOpen } = useWorkbenchJobPanel(
+    !!job?.id && hasResultContent
+  )
   useSidePanelWidth({
     maxWidthVw: 60,
     initialWidthVw:
@@ -192,7 +196,7 @@ export function WorkbenchJob() {
           workbenchName={workbenchName}
         />
       </WrapperSC>
-      {!isOpen && (
+      {hasResultContent && !isOpen && (
         <PanelOpenBtnSC
           tertiary
           onClick={() => setOpen(true)}

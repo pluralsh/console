@@ -126,6 +126,12 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	AgentHelmValues *runtime.RawExtension `json:"agentHelmValues,omitempty"`
 
+	// AgentHelmValuesTemplateable indicates whether to render
+	// agent helm values as a template.
+	//
+	// +kubebuilder:validation:Optional
+	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
+
 	// ManagementRepo is the root repo for setting up
 	// your infrastructure with Plural. Usually this
 	// will be your `plural up repo`

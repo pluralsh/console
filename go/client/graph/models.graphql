@@ -236,6 +236,7 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
     id
     name
     agentHelmValues
+    agentHelmValuesTemplateable
     agentVsn
     writeBindings { ...PolicyBindingFragment }
     readBindings { ...PolicyBindingFragment }

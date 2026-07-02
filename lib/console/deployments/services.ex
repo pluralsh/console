@@ -374,7 +374,7 @@ defmodule Console.Deployments.Services do
       name: "deploy-operator",
       namespace: "plrl-deploy-operator",
       git: %{ref: Settings.agent_ref(), folder: "charts/deployment-operator"},
-      helm: (case Settings.agent_helm_values() do
+      helm: (case Clusters.agent_helm_values(cluster) do
         nil -> nil
         vals when is_binary(vals) -> %{values: vals}
       end),
