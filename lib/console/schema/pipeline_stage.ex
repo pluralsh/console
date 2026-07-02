@@ -44,8 +44,7 @@ defmodule Console.Schema.PipelineStage do
         not is_nil(s.context_id) and
           (is_nil(s.applied_context_id) or s.context_id != s.applied_context_id or
              (not is_nil(c.pr_automation_id) and
-                (is_nil(pr.id) or is_nil(pr.pull_request_id) or is_nil(pull.id) or
-                   pull.status == ^:closed))),
+                (is_nil(pr.id) or is_nil(pr.pull_request_id) or pull.status == ^:closed))),
       distinct: true
     )
   end
