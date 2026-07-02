@@ -68,6 +68,7 @@ export const getAgentRunBreadcrumbs = (
 
 export function AIAgentRun() {
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
+  const theme = useTheme()
 
   const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
     useCancelAgentRunMutation({
@@ -97,6 +98,11 @@ export function AIAgentRun() {
     run?.status == AgentRunStatus.Pending
   const isApprovable =
     run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
+  const showStatusCallout =
+    !!run &&
+    ((run.pullRequests ?? []).some(Boolean) ||
+      !!run.analysis?.summary ||
+      isApprovable)
   const isCancellable =
     isRunning ||
     run?.status == AgentRunStatus.Babysitting ||
@@ -140,6 +146,7 @@ export function AIAgentRun() {
             <StretchedFlex
               gap="medium"
               alignItems="start"
+              css={{ paddingBottom: theme.spacing.medium }}
             >
               <StackedText
                 truncate
@@ -175,7 +182,7 @@ export function AIAgentRun() {
               </Flex>
             </StretchedFlex>
 
-            {run && (
+            {showStatusCallout && (
               <AgentRunStatusCallout
                 run={run}
                 isApprovable={isApprovable}

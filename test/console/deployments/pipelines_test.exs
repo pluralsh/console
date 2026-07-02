@@ -1616,7 +1616,6 @@ defmodule Console.Deployments.PipelinesTest do
     end
 
     test "it will block pr promotion until stage pull requests are merged" do
-      admin = admin_user()
       conn = insert(:scm_connection, token: "some-pat")
 
       pra =

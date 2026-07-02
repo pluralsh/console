@@ -207,7 +207,7 @@ const TodoBodySC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   minWidth: 0,
-  paddingBottom: theme.spacing.large,
+  paddingBottom: theme.spacing.small,
 }))
 
 const DescriptionSC = styled(Body2P)<{ $expanded?: boolean }>(

@@ -1,18 +1,7 @@
 import { AgentTodosTimeline } from 'components/ai/common/AgentTodosTimeline'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { WorkbenchJobResultFragment } from 'generated/graphql'
-import { isNonNullable } from 'utils/isNonNullable'
-
-function toTodos(result?: WorkbenchJobResultFragment | null) {
-  return (result?.todos ?? [])
-    .filter(isNonNullable)
-    .map((todo) => ({
-      title: todo.name?.trim() ?? '',
-      description: todo.description?.trim() ?? '',
-      done: !!todo.done,
-    }))
-    .filter((todo) => todo.title.length > 0 || todo.description.length > 0)
-}
+import { getWorkbenchJobTodos } from './workbenchJobResultUtils'
 
 export function WorkbenchJobTodos({
   loading,
@@ -21,7 +10,7 @@ export function WorkbenchJobTodos({
   loading: boolean
   result?: WorkbenchJobResultFragment | null
 }) {
-  const todos = toTodos(result)
+  const todos = getWorkbenchJobTodos(result)
 
   if (loading)
     return (

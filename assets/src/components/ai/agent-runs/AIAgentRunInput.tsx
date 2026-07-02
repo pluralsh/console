@@ -109,7 +109,7 @@ export function AIAgentRunInput() {
                   </Checkbox>
                 </Tooltip>
                 <Tooltip
-                  label="Pause for your sign-off before the agent edits anything or opens a PR."
+                  label="Require manual approval to create prs, and allow follow up prompting to get things right if needed"
                   css={{ width: 320 }}
                 >
                   <Checkbox
