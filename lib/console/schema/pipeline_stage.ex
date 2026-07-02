@@ -6,6 +6,8 @@ defmodule Console.Schema.PipelineStage do
     PipelinePromotion,
     PipelineEdge,
     PipelineContext,
+    PipelinePullRequest,
+    PullRequest,
     ServiceError
   }
 
@@ -30,7 +32,21 @@ defmodule Console.Schema.PipelineStage do
   end
 
   def pending_context(query \\ __MODULE__) do
-    from(s in query, where: not is_nil(s.context_id) and (is_nil(s.applied_context_id) or s.context_id != s.applied_context_id))
+    from(s in query,
+      left_join: ss in assoc(s, :services),
+      left_join: c in assoc(ss, :criteria),
+      left_join: pr in PipelinePullRequest,
+      on:
+        pr.stage_id == s.id and pr.service_id == ss.service_id and pr.context_id == s.context_id,
+      left_join: pull in PullRequest,
+      on: pull.id == pr.pull_request_id,
+      where:
+        not is_nil(s.context_id) and
+          (is_nil(s.applied_context_id) or s.context_id != s.applied_context_id or
+             (not is_nil(c.pr_automation_id) and
+                (is_nil(pr.id) or is_nil(pr.pull_request_id) or pull.status == ^:closed))),
+      distinct: true
+    )
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do

@@ -2,6 +2,7 @@ defmodule Console.Deployments.Pipelines do
   use Console.Services.Base
   require Logger
   use Nebulex.Caching
+  import Ecto.Query
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
   alias Console.PubSub
@@ -9,6 +10,7 @@ defmodule Console.Deployments.Pipelines do
   alias Console.Services.Users
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.AI.Tool
+
   alias Console.Schema.{
     Pipeline,
     PipelineStage,
@@ -19,6 +21,9 @@ defmodule Console.Deployments.Pipelines do
     PipelineContext,
     PipelineContextHistory,
     PipelinePullRequest,
+    PullRequest,
+    Stack,
+    StackRun,
     User,
     Cluster,
     SentinelRun,
@@ -49,12 +54,14 @@ defmodule Console.Deployments.Pipelines do
 
   def gate_job(%PipelineGate{status: %{job_ref: %{namespace: ns, name: name}}} = gate) do
     %{cluster: cluster} = Repo.preload(gate, [:cluster])
+
     Clusters.control_plane(cluster)
     |> Kube.Utils.save_kubeconfig()
 
     BatchV1.read_namespaced_job!(ns, name)
     |> Kube.Utils.run()
   end
+
   def gate_job(_), do: {:ok, nil}
 
   @doc """
@@ -63,6 +70,7 @@ defmodule Console.Deployments.Pipelines do
   @spec upsert(map, binary, User.t) :: pipeline_resp
   def upsert(attrs, name, %User{} = user) do
     pipe = get_pipeline_by_name(name) |> Repo.preload(@preload)
+
     start_transaction()
     |> add_operation(:pipe, fn _ ->
       case pipe do
@@ -74,6 +82,7 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:base, fn %{pipe: pipeline} ->
       attrs = stabilize(pipeline, Map.put(attrs, :name, name))
               |> Map.drop([:edges])
+
       pipeline
       |> allow(user, (if pipe, do: :write, else: :create))
       |> when_ok(&Pipeline.changeset(&1, attrs))
@@ -81,6 +90,7 @@ defmodule Console.Deployments.Pipelines do
     end)
     |> add_operation(:edges, fn %{base: base} ->
       base = Repo.preload(base, [:edges])
+
       base
       |> Pipeline.changeset(stabilize_edges(base, attrs))
       |> Repo.update()
@@ -132,7 +142,9 @@ defmodule Console.Deployments.Pipelines do
     |> flush_context_events(fn %{link: links} -> Map.values(links) end, :ctx)
     |> notify(:create, user)
   end
+
   def create_pipeline_context(_, nil, _), do: {:error, "Pipeline not found"}
+
   def create_pipeline_context(attrs, pipe_id, %User{} = user) when is_binary(pipe_id),
     do: create_pipeline_context(attrs, get_pipeline!(pipe_id), user)
 
@@ -156,22 +168,52 @@ defmodule Console.Deployments.Pipelines do
     |> Repo.update()
   end
 
-  def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage) do
-    Logger.info "ignoring applying existing context to stage #{stage.id}"
+  def apply_pipeline_context(%PipelineStage{context_id: nil} = stage) do
+    Logger.info "ignoring applying missing context to stage #{stage.id}"
     {:ok, stage}
   end
 
-  def apply_pipeline_context(%PipelineStage{} = stage) do
+  def apply_pipeline_context(
+        %PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage
+      )
+      when is_binary(ctx_id) do
+    case missing_context_pulls?(stage) do
+      true ->
+        Logger.info "reapplying missing context pull requests to stage #{stage.id}"
+        do_apply_pipeline_context(stage)
+
+      _ ->
+        Logger.info "ignoring applying existing context to stage #{stage.id}"
+        {:ok, stage}
+    end
+  end
+
+  def apply_pipeline_context(%PipelineStage{} = stage), do: do_apply_pipeline_context(stage)
+
+  defp do_apply_pipeline_context(%PipelineStage{} = stage) do
     %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, :errors, services: [:service, criteria: :pr_automation]])
     Enum.filter(stage.services, & &1.criteria && &1.criteria.pr_automation_id)
+    |> Enum.reject(&existing_context_pull?(&1, stage, ctx))
     |> Enum.reduce(start_transaction(), fn %{service: service} = svc, xact ->
       xact
       |> add_operation({:pull, svc.id}, fn _ -> create_stage_pull_request(stage, svc, Users.admin_bot()) end)
       |> add_operation({:ptr, svc.id}, fn res ->
         pr = Map.get(res, {:pull, svc.id})
-        %PipelinePullRequest{service_id: service.id, stage_id: stage.id}
-        |> PipelinePullRequest.changeset(%{context_id: ctx.id, pull_request_id: pr.id})
-        |> Repo.insert()
+        attrs = %{context_id: ctx.id, pull_request_id: pr.id}
+
+        case Repo.get_by(PipelinePullRequest,
+               context_id: ctx.id,
+               service_id: service.id,
+               stage_id: stage.id
+             ) do
+          %PipelinePullRequest{} = existing ->
+            PipelinePullRequest.changeset(existing, attrs) |> Repo.update()
+
+          nil ->
+            %PipelinePullRequest{service_id: service.id, stage_id: stage.id}
+            |> PipelinePullRequest.changeset(attrs)
+            |> Repo.insert()
+        end
       end)
     end)
     |> add_operation(:stg, fn _ ->
@@ -187,6 +229,79 @@ defmodule Console.Deployments.Pipelines do
     |> notify(:context)
   end
 
+  defp missing_context_pulls?(%PipelineStage{} = stage) do
+    case Repo.preload(stage, [:context, services: [:service, :criteria]], force: true) do
+      %{context: %PipelineContext{} = ctx, services: services} ->
+        Enum.any?(
+          services,
+          &(requires_context_pull?(&1) && !existing_context_pull?(&1, stage, ctx))
+        )
+
+      _ ->
+        false
+    end
+  end
+
+  defp requires_context_pull?(%StageService{criteria: %{pr_automation_id: id}})
+       when is_binary(id), do: true
+
+  defp requires_context_pull?(_), do: false
+
+  defp existing_context_pull?(
+         %StageService{service_id: service_id},
+         %PipelineStage{id: stage_id},
+         %PipelineContext{id: ctx_id}
+       ) do
+    case Repo.get_by(PipelinePullRequest,
+           context_id: ctx_id,
+           service_id: service_id,
+           stage_id: stage_id
+         ) do
+      %PipelinePullRequest{pull_request_id: id} when is_binary(id) ->
+        case Repo.get(PullRequest, id) do
+          %PullRequest{status: status} when status in [:open, :merged] -> true
+          _ -> false
+        end
+
+      _ ->
+        false
+    end
+  end
+
+  defp existing_context_pull?(_, _, _), do: false
+
+  defp stage_context_prs_merged?(%PipelineStage{} = stage, %PipelineContext{id: ctx_id}) do
+    case Repo.preload(stage, [services: :criteria], force: true) do
+      %{services: services} ->
+        services
+        |> Enum.filter(&requires_context_pull?/1)
+        |> case do
+          [] ->
+            true
+
+          required ->
+            Enum.all?(required, fn %StageService{service_id: service_id} ->
+              case Repo.get_by(PipelinePullRequest,
+                     context_id: ctx_id,
+                     service_id: service_id,
+                     stage_id: stage.id
+                   ) do
+                %PipelinePullRequest{pull_request_id: pr_id} when is_binary(pr_id) ->
+                  case Repo.get(PullRequest, pr_id) do
+                    %PullRequest{status: :merged} -> true
+                    _ -> false
+                  end
+
+                _ ->
+                  false
+              end
+            end)
+        end
+    end
+  end
+
+  defp stage_context_prs_merged?(_, _), do: false
+
   defp create_stage_pull_request(
     %PipelineStage{context: %PipelineContext{} = ctx} = stage,
     %StageService{service: service, criteria: %{ai: %{enabled: true, prompt: prompt} = ai, repository: repository}} = svc,
@@ -194,7 +309,9 @@ defmodule Console.Deployments.Pipelines do
   ) do
     with %ScmConnection{} = conn <- promotion_connection(svc) do
       branch  = "plrl/ai/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
+
       context = build_pr_context(ctx.context, svc, stage)
+
       pra     = %PrAutomation{
         ai: %PrAutomation.AI{enabled: true, prompt: prompt},
         title: ai.title,
@@ -203,6 +320,7 @@ defmodule Console.Deployments.Pipelines do
         write_bindings: [],
         create_bindings: []
       }
+
       Git.create_pull_request(%{service_id: service.id}, context, pra, branch, repository, bot)
     else
       _ -> {:error, "no scm connection configured for promotion"}
@@ -215,6 +333,7 @@ defmodule Console.Deployments.Pipelines do
     %User{} = bot
   ) do
     branch = "plrl/promo/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
+
     context = build_pr_context(ctx.context, svc, stage)
     Git.create_pull_request(%{service_id: service.id}, context, pra, branch, repo, bot)
   end
@@ -239,6 +358,7 @@ defmodule Console.Deployments.Pipelines do
         |> add_operation(:bind, fn _ -> create_context_binding(ctx_id, stage) end)
         |> add_operation(:apply, fn %{bind: stage} -> apply_pipeline_context(stage) end)
         |> execute(extract: :apply, timeout: 60_000)
+
       _ ->
         {:error, "no prior context"}
     end
@@ -259,9 +379,9 @@ defmodule Console.Deployments.Pipelines do
     |> Console.string_map()
   end
 
-  defp prs_merged?(_, %PipelinePromotion{context: %PipelineContext{pull_requests: [_ | _] = prs}}) do
-    Enum.all?(prs, & &1.status == :merged)
-  end
+  defp prs_merged?(_, %PipelinePromotion{stage: stage, context: %PipelineContext{} = ctx}),
+    do: stage_context_prs_merged?(stage, ctx)
+
   defp prs_merged?(_, _), do: true
 
   @doc """
@@ -273,28 +393,43 @@ defmodule Console.Deployments.Pipelines do
       %PipelineGate{state: :open} = g ->
         ts = coalesce(g.updated_at, g.inserted_at)
         Timex.after?(ts, r) && after_context?(ts, promo)
+
       _ -> false
     end)
   end
+
   def open?(_, _), do: true
 
   defp after_context?(ts, %PipelinePromotion{context: %PipelineContext{inserted_at: at}}), do: Timex.after?(ts, at)
+
   defp after_context?(_, _), do: true
 
   @doc """
   Whether an edge was promoted after the given dt
   """
   @spec promoted?(PipelineEdge.t, term) :: boolean
+  def promoted?(_, nil), do: false
+
   def promoted?(%PipelineEdge{promoted_at: at}, dt) when not is_nil(at),
     do: Timex.after?(at, dt)
+
   def promoted?(_, _), do: false
 
   @doc """
   Validate if we've already done the promotion for this stage for pr pipelines
   """
   @spec pr_promoted?(PipelineEdge.t, PipelinePromotion.t) :: boolean
-  def pr_promoted?(%PipelineEdge{to: %PipelineStage{context_id: id}}, %PipelinePromotion{context_id: id})
-    when is_binary(id), do: true
+  def pr_promoted?(%PipelineEdge{to: %PipelineStage{} = to}, %PipelinePromotion{context_id: id})
+      when is_binary(id) do
+    case Repo.get(PipelineContext, id) do
+      %PipelineContext{} = ctx ->
+        to.context_id == id && to.applied_context_id == id && stage_context_prs_merged?(to, ctx)
+
+      _ ->
+        false
+    end
+  end
+
   def pr_promoted?(_, _), do: false
 
   @doc """
@@ -399,6 +534,7 @@ defmodule Console.Deployments.Pipelines do
   @spec build_promotion(PipelineStage.t) :: promotion_resp
   def build_promotion(%PipelineStage{id: id} = stage) do
     preloads = [context: :pull_requests, from_edges: :gates, promotion: [services: :revision], services: [service: :revision]]
+
     start_transaction()
     |> add_operation(:stage, fn _ ->
       case Repo.preload(stage, preloads) do
@@ -415,11 +551,13 @@ defmodule Console.Deployments.Pipelines do
     end)
     |> add_operation(:build, fn %{services: svcs, stage: %{promotion: promo} = stage} ->
       old = extant(promo)
-            |> Map.drop(Enum.map(svcs, fn {%{id: id}, _} -> id end))
-            |> Map.values()
-            |> Console.mapify() # prior services to promote w/o a healthy revision yet
+        |> Map.drop(Enum.map(svcs, fn {%{id: id}, _} -> id end))
+        |> Map.values()
+        |> Console.mapify() # prior services to promote w/o a healthy revision yet
+
       # services w/ a new healthy revision
       new = Enum.map(svcs, fn {%{id: id, sha: sha}, %{id: rid}} -> %{service_id: id, revision_id: rid, sha: sha} end)
+
       case promo do
         nil -> %PipelinePromotion{stage_id: id}
         %PipelinePromotion{} = promo -> promo
@@ -445,6 +583,7 @@ defmodule Console.Deployments.Pipelines do
         |> elem(1)
         |> send_updates()
         |> ok()
+
       _ -> {:ok, 0}
     end)
     |> execute(extract: :revised)
@@ -456,6 +595,8 @@ defmodule Console.Deployments.Pipelines do
   all edges were processed, the promotion record is marked as having been promoteds
   """
   @spec apply_promotion(PipelinePromotion.t) :: promotion_resp
+  def apply_promotion(%PipelinePromotion{revised_at: nil} = promo), do: {:ok, promo}
+
   def apply_promotion(%PipelinePromotion{} = promo) do
     start_transaction()
     |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, context: :pull_requests, services: [:service, :revision]])} end)
@@ -482,6 +623,7 @@ defmodule Console.Deployments.Pipelines do
             promoted_at: Timex.now()
           })
           |> Repo.update()
+
         _ -> {:ok, promo}
       end
     end)
@@ -511,8 +653,10 @@ defmodule Console.Deployments.Pipelines do
     end)
     |> execute(extract: :update)
   end
+
   def run_sentinel(%PipelineGate{sentinel_id: id}) when is_binary(id),
     do: {:error, "this gate has already been run"}
+
   def run_sentinel(_, _), do: {:error, "this gate has no sentinel"}
 
   @spec broadcast_gate(SentinelRun.t) :: gate_resp | :ok
@@ -525,6 +669,7 @@ defmodule Console.Deployments.Pipelines do
       _ -> :ok
     end
   end
+
   def broadcast_gate(_), do: :ok
 
   defp run_to_gate_status(:success), do: :open
@@ -534,6 +679,7 @@ defmodule Console.Deployments.Pipelines do
     destinations = MapSet.new(edges, & &1.to_id)
     Enum.filter(stages, & !MapSet.member?(destinations, &1.id))
   end
+
   defp entry_stages(_), do: []
 
   defp promote_edge(xact, promotion, %PipelineEdge{to: %PipelineStage{} = stage} = edge) do
@@ -548,31 +694,99 @@ defmodule Console.Deployments.Pipelines do
       |> Repo.update()
     end)
   end
+
   defp promote_edge(xact, _, _), do: xact
 
   defp extant(%PipelinePromotion{services: [_ | _] = promos}),
     do: Map.new(promos, & {&1.service_id, &1})
+
   defp extant(_), do: %{}
 
   defp add_revised(attrs, true), do: Map.merge(attrs, %{revised_at: Timex.now(), revised: true})
   defp add_revised(attrs, _), do: attrs
 
   defp diff?(_, [], _), do: false
+
   defp diff?(%PipelineStage{context_id: id}, _, %PipelinePromotion{applied_context_id: id})
     when is_binary(id), do: false
-  defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at} = ctx} = stage, _, %PipelinePromotion{} = next) do
-    svcs = Repo.preload(next, [services: :revision], force: true)
-           |> Map.get(:services)
-    (Enum.all?(svcs, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) &&
-      gates_stale?(stage) && Enum.all?(stage.services, & &1.service.status == :healthy) &&
-      Enum.all?(ctx.pull_requests, & &1.status == :merged))
+
+  defp diff?(
+         %PipelineStage{context: %PipelineContext{inserted_at: at} = ctx} = stage,
+         _,
+         %PipelinePromotion{} = next
+       ) do
+    svcs =
+      Repo.preload(next, [services: :revision], force: true)
+      |> Map.get(:services)
+
+    Enum.all?(svcs, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) &&
+      gates_stale?(stage) && Enum.all?(stage.services, &(&1.service.status == :healthy)) &&
+      stage_context_prs_merged?(stage, ctx) && stage_stacks_ready?(stage, ctx)
   end
+
   defp diff?(_, _, _), do: false
 
-  defp gates_stale?(%PipelineStage{context: %PipelineContext{id: id}, from_edges: edges}) do
-    Enum.flat_map(edges, & &1.gates)
-    |> Enum.any?(& &1.context_id != id)
+  defp stage_stacks_ready?(%PipelineStage{} = stage, %PipelineContext{} = ctx) do
+    case Repo.preload(stage, [services: :criteria], force: true) do
+      %{services: [_ | _] = services} ->
+        context_service_ids =
+          services
+          |> Enum.filter(&requires_context_pull?/1)
+          |> Enum.map(& &1.service_id)
+          |> Enum.filter(&is_binary/1)
+
+        case context_service_ids do
+          [] ->
+            true
+
+          ids ->
+            stacks =
+              Stack
+              |> where([s], s.parent_id in ^ids and is_nil(s.deleted_at))
+              |> Repo.all()
+
+            case stacks do
+              [] -> true
+              _ -> Enum.all?(stacks, &stack_ready?(&1, ctx))
+            end
+        end
+
+      _ ->
+        true
+    end
   end
+
+  defp stage_stacks_ready?(_, _), do: true
+
+  defp stack_ready?(
+         %Stack{id: id, status: :successful, sha: sha, last_successful: sha},
+         %PipelineContext{inserted_at: at}
+       )
+       when is_binary(id) and is_binary(sha) do
+    StackRun.for_stack(id)
+    |> StackRun.wet()
+    |> StackRun.for_status(:successful)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+    |> case do
+      %StackRun{git: %{ref: ^sha}} = run ->
+        Timex.after?(coalesce(run.updated_at, run.inserted_at), at)
+
+      _ ->
+        false
+    end
+  end
+
+  defp stack_ready?(_, _), do: false
+
+  defp gates_stale?(%PipelineStage{context: %PipelineContext{id: id}, from_edges: edges}) do
+    case Enum.flat_map(edges, & &1.gates) do
+      [] -> true
+      gates -> Enum.any?(gates, &(&1.context_id != id))
+    end
+  end
+
   defp gates_stale?(_), do: true
 
   defp send_updates(gates) do
@@ -586,22 +800,29 @@ defmodule Console.Deployments.Pipelines do
       %PipelineStage{} = stage -> handle_notify(PubSub.PipelineStageUpdated, stage)
       _ -> :ok
     end
+
     {:ok, result[extract]}
   end
+
   defp flush_context_events(err, _, _), do: err
 
   defp notify({:ok, %PipelinePromotion{} = promo}, :create),
     do: handle_notify(PubSub.PromotionCreated, promo)
+
   defp notify({:ok, %PipelineStage{} = stage}, :update),
     do: handle_notify(PubSub.PipelineStageUpdated, stage)
+
   defp notify({:ok, %PipelineEdge{} = edge}, :update),
     do: handle_notify(PubSub.PipelineEdgeUpdated, edge)
+
   defp notify({:ok, %PipelineGate{} = edge}, :update),
     do: handle_notify(PubSub.PipelineGateUpdated, edge)
+
   defp notify({:ok, %{stg: %PipelineStage{} = stage}} = res, :context) do
     handle_notify(PubSub.PipelineStageUpdated, stage)
     res
   end
+
   defp notify(pass, _), do: pass
 
   defp notify({:ok, %PipelineContext{} = ctx}, :create, user),
@@ -609,6 +830,7 @@ defmodule Console.Deployments.Pipelines do
 
   defp notify({:ok, %Pipeline{} = pipe}, :delete, user),
     do: handle_notify(PubSub.PipelineDeleted, pipe, actor: user)
+
   defp notify({:ok, %Pipeline{} = pipe}, :create, user),
     do: handle_notify(PubSub.PipelineUpserted, pipe, actor: user)
 

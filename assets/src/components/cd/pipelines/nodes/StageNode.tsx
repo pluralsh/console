@@ -100,8 +100,29 @@ const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
 }))
 
 export function getStageStatus(stage: PipelineStageFragment) {
-  return (stage.services || []).every(
+  const servicesHealthy = (stage.services || []).every(
     (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
+  )
+
+  if (!servicesHealthy) return StageStatus.Pending
+
+  const prServices = (stage.services || []).filter(
+    (svc) => !!svc?.criteria?.prAutomation?.id
+  )
+
+  if (isEmpty(prServices)) return StageStatus.Complete
+
+  if (!stage.context) return StageStatus.Pending
+
+  const stagePullRequests = stage.context.pipelinePullRequests || []
+
+  return prServices.every((stageService) =>
+    stagePullRequests.some(
+      (pipelinePr) =>
+        pipelinePr?.stage?.id === stage.id &&
+        pipelinePr?.service?.id === stageService?.service?.id &&
+        pipelinePr?.pullRequest?.status === PrStatus.Merged
+    )
   )
     ? StageStatus.Complete
     : StageStatus.Pending
