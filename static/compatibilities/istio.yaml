@@ -57,7 +57,7 @@ versions:
         here.]
   chart_version: 1.28.0
   images: ['docker.io/istio/pilot:1.28.0']
-  eolAt: '2026-06-28'
+  eolAt: '2026-07-01'
 - version: 1.27.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
