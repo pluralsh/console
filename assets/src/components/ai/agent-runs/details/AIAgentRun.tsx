@@ -97,6 +97,11 @@ export function AIAgentRun() {
     run?.status == AgentRunStatus.Pending
   const isApprovable =
     run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
+  const showStatusCallout =
+    !!run &&
+    ((run.pullRequests ?? []).some(Boolean) ||
+      !!run.analysis?.summary ||
+      isApprovable)
   const isCancellable =
     isRunning ||
     run?.status == AgentRunStatus.Babysitting ||
@@ -175,7 +180,7 @@ export function AIAgentRun() {
               </Flex>
             </StretchedFlex>
 
-            {run && (
+            {showStatusCallout && (
               <AgentRunStatusCallout
                 run={run}
                 isApprovable={isApprovable}
