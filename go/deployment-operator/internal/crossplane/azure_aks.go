@@ -14,10 +14,10 @@ import (
 )
 
 var (
-	azureAKSClusterGVK         = schema.GroupVersion{Group: "containerservice.azure.upbound.io", Version: "v1beta1"}.WithKind("KubernetesCluster")
-	azureAKSClusterV2GVK       = schema.GroupVersion{Group: "containerservice.azure.upbound.io", Version: "v1beta2"}.WithKind("KubernetesCluster")
-	azureAKSClusterListGVK     = azureAKSClusterGVK.GroupVersion().WithKind("KubernetesClusterList")
-	azureAKSClusterV2ListGVK   = azureAKSClusterV2GVK.GroupVersion().WithKind("KubernetesClusterList")
+	azureAKSClusterGVK       = schema.GroupVersion{Group: "containerservice.azure.upbound.io", Version: "v1beta1"}.WithKind("KubernetesCluster")
+	azureAKSClusterV2GVK     = schema.GroupVersion{Group: "containerservice.azure.upbound.io", Version: "v1beta2"}.WithKind("KubernetesCluster")
+	azureAKSClusterListGVK   = azureAKSClusterGVK.GroupVersion().WithKind("KubernetesClusterList")
+	azureAKSClusterV2ListGVK = azureAKSClusterV2GVK.GroupVersion().WithKind("KubernetesClusterList")
 )
 
 func isAzureAKSClusterGVK(gvk schema.GroupVersionKind) bool {
