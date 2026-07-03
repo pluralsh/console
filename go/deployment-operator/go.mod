@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.21
 	github.com/aws/aws-sdk-go-v2/service/eks v1.81.2
 	github.com/cert-manager/cert-manager v1.19.3
-	github.com/crossplane/crossplane-runtime v1.20.0
+	github.com/crossplane/crossplane-runtime v1.20.10
 	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fluxcd/flagger v1.41.0
