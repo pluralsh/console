@@ -60,11 +60,6 @@ func getAWSCluster(ctx context.Context, c k8sClient.Client, ref corev1.ObjectRef
 	return cluster, nil
 }
 
-// AWSClusterGVK returns the GVK for eks.aws.crossplane.io/v1beta1 Cluster.
-func AWSClusterGVK() schema.GroupVersionKind {
-	return awsEKSClusterGVK
-}
-
 // AWSCluster mirrors github.com/crossplane-contrib/provider-aws/apis/eks/v1beta1 Cluster.
 // Only fields required for readiness and connection secret resolution are modeled.
 type AWSCluster struct {

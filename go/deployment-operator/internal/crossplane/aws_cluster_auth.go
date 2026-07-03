@@ -16,7 +16,7 @@ func hydrateAWSClusterConnectionSpecFromClusterAuth(ctx context.Context, c k8sCl
 		return nil
 	}
 
-	ref, ok, err := clusterAuthConnectionSecretRef(ctx, c, gv, cluster.GetName())
+	ref, ok, err := clusterAuthConnectionSecretRef(ctx, c, gv, cluster.GetName(), cluster.GetNamespace())
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func hydrateAWSClusterConnectionSpecFromClusterAuth(ctx context.Context, c k8sCl
 	return nil
 }
 
-func clusterAuthConnectionSecretRef(ctx context.Context, c k8sClient.Client, gv schema.GroupVersion, clusterName string) (*xpv1.SecretReference, bool, error) {
+func clusterAuthConnectionSecretRef(ctx context.Context, c k8sClient.Client, gv schema.GroupVersion, clusterName, namespace string) (*xpv1.SecretReference, bool, error) {
 	authGV := gv
 	if authGV.Group == awsEKSUpboundClusterV1Beta2GVK.Group {
 		authGV.Version = awsEKSUpboundClusterAuthGVK.Version
@@ -36,7 +36,12 @@ func clusterAuthConnectionSecretRef(ctx context.Context, c k8sClient.Client, gv 
 
 	list := &unstructured.UnstructuredList{}
 	list.SetGroupVersionKind(authGV.WithKind("ClusterAuthList"))
-	if err := c.List(ctx, list); err != nil {
+
+	listOpts := make([]k8sClient.ListOption, 0, 1)
+	if namespace != "" {
+		listOpts = append(listOpts, k8sClient.InNamespace(namespace))
+	}
+	if err := c.List(ctx, list, listOpts...); err != nil {
 		return nil, false, err
 	}
 
@@ -51,7 +56,6 @@ func clusterAuthConnectionSecretRef(ctx context.Context, c k8sClient.Client, gv 
 			continue
 		}
 
-		namespace, _, _ := unstructured.NestedString(item.Object, "spec", "writeConnectionSecretToRef", "namespace")
 		return &xpv1.SecretReference{Name: name, Namespace: namespace}, true, nil
 	}
 
