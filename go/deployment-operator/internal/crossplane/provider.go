@@ -12,10 +12,10 @@ import (
 
 var ErrUnsupportedProvider = errors.New("unsupported crossplane cluster provider")
 
-// Supported Crossplane Cluster API groups for future providers:
+// Supported Crossplane Cluster API groups:
 //   - AWS EKS: eks.aws.crossplane.io/v1beta1 and eks.aws.upbound.io/v1beta1/v1beta2 Cluster
-//   - GKE:     container.gcp.crossplane.io/v1beta1 Cluster
-//   - AKS:     containerservice.azure.crossplane.io/v1beta1 Cluster
+//   - Azure AKS: containerservice.azure.upbound.io/v1beta1/v1beta2 KubernetesCluster
+//   - GKE:     container.gcp.crossplane.io/v1beta1 Cluster (not yet supported)
 
 // GetCluster fetches the Crossplane managed Cluster referenced by ref.
 func GetCluster(ctx context.Context, c k8sClient.Client, ref corev1.ObjectReference) (ManagedCluster, error) {
@@ -27,6 +27,8 @@ func GetCluster(ctx context.Context, c k8sClient.Client, ref corev1.ObjectRefere
 	switch {
 	case isAWSEKSClusterGVK(gvk):
 		return getAWSCluster(ctx, c, ref)
+	case isAzureAKSClusterGVK(gvk):
+		return getAzureAKSCluster(ctx, c, ref)
 	default:
 		return nil, fmt.Errorf("%w: %s", ErrUnsupportedProvider, gvk.String())
 	}
