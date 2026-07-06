@@ -66,6 +66,7 @@ export function LogsMetricsChart({
   pollInterval?: number
 }) {
   const theme = useTheme()
+  const chartWrapperRef = useRef<HTMLDivElement>(null)
   const barsAreaRef = useRef<HTMLDivElement>(null)
   const rowRef = useRef<HTMLDivElement>(null)
   const [rowWidth, setRowWidth] = useState(0)
@@ -220,7 +221,7 @@ export function LogsMetricsChart({
 
   if (initialLoading) {
     return (
-      <ChartWrapperSC>
+      <ChartWrapperSC ref={chartWrapperRef}>
         <RectangleSkeleton
           $height={CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT + CHART_PADDING_BOTTOM}
           $width="100%"
@@ -232,7 +233,7 @@ export function LogsMetricsChart({
   if (isEmpty(buckets)) return null
 
   return (
-    <ChartWrapperSC>
+    <ChartWrapperSC ref={chartWrapperRef}>
       <ChartCanvasSC>
         <YAxisSC>
           <span>{formatCompactCount(yMax)}</span>
@@ -293,9 +294,10 @@ export function LogsMetricsChart({
       </XAxisSC>
       {chartTooltip && (
         <ChartRangeTooltip
+          anchorRef={chartWrapperRef}
+          offsetX={chartTooltip.left}
           range={chartTooltip.range}
           stats={chartTooltip.stats}
-          style={{ left: chartTooltip.left }}
         />
       )}
     </ChartWrapperSC>

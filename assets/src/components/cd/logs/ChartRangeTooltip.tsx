@@ -1,4 +1,8 @@
+import { Flex } from '@pluralsh/design-system'
+import { useCallback, useRef, useSyncExternalStore } from 'react'
+import { createPortal } from 'react-dom'
 import { useTheme } from 'styled-components'
+
 import { LogLevel, logLevelToColor } from './LogLine'
 import { LegendColor } from './LogsLegend'
 import {
@@ -7,7 +11,6 @@ import {
   formatRangeTime,
   LogsTimeRange,
 } from './logsMetricsUtils'
-import { Flex } from '@pluralsh/design-system'
 
 const X_AXIS_HEIGHT = 28
 
@@ -19,24 +22,63 @@ const STACK_ORDER = [
   LogLevel.UNKNOWN,
 ] as const
 
+function usePortalCoords(
+  anchorRef: React.RefObject<HTMLElement | null>,
+  offsetX: number
+) {
+  const cached = useRef<{ x: number; y: number } | null>(null)
+
+  const subscribe = useCallback((onStoreChange: () => void) => {
+    window.addEventListener('scroll', onStoreChange, true)
+    window.addEventListener('resize', onStoreChange)
+    return () => {
+      window.removeEventListener('scroll', onStoreChange, true)
+      window.removeEventListener('resize', onStoreChange)
+    }
+  }, [])
+
+  const getSnapshot = useCallback(() => {
+    const anchor = anchorRef.current
+    if (!anchor) {
+      cached.current = null
+      return null
+    }
+    const rect = anchor.getBoundingClientRect()
+    const x = rect.left + offsetX
+    const y = rect.top + CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
+    if (cached.current?.x === x && cached.current?.y === y)
+      return cached.current
+    cached.current = { x, y }
+    return cached.current
+  }, [anchorRef, offsetX])
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => null)
+}
+
 export function ChartRangeTooltip({
   range,
   stats,
-  style,
+  anchorRef,
+  offsetX,
 }: {
   range: LogsTimeRange
   stats: BucketRangeStats
-  style?: React.CSSProperties
+  anchorRef: React.RefObject<HTMLElement | null>
+  offsetX: number
 }) {
   const theme = useTheme()
+  const coords = usePortalCoords(anchorRef, offsetX)
 
   const visibleLevels = STACK_ORDER.filter((level) => stats.levels[level] > 0)
 
-  return (
+  if (!coords) return null
+
+  return createPortal(
     <div
       css={{
-        position: 'absolute',
-        top: CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT,
+        position: 'fixed',
+        left: coords.x,
+        top: coords.y,
         transform: 'translate(-50%, 0)',
         minWidth: 195,
         border: theme.borders['fill-two'],
@@ -47,7 +89,6 @@ export function ChartRangeTooltip({
         pointerEvents: 'none',
         zIndex: theme.zIndexes.tooltip,
       }}
-      style={style}
     >
       <div
         css={{
@@ -130,6 +171,7 @@ export function ChartRangeTooltip({
           <span>{stats.total}</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
