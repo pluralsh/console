@@ -254,4 +254,6 @@ const LogsTableWrapSC = styled.div({
   flexDirection: 'column',
   flex: 1,
   minHeight: 0,
+  position: 'relative',
+  zIndex: 0,
 })

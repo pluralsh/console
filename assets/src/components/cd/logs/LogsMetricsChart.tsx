@@ -3,10 +3,11 @@ import {
   LogQueryOperator,
   LogTimeRange,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { clamp, isEmpty } from 'lodash'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { ChartRangeTooltip } from './ChartRangeTooltip'
 import { LogLevel, logLevelToColor } from './LogLine'
 import {
   bucketTimeRange,
@@ -16,13 +17,13 @@ import {
   chartYMax,
   formatChartAxisTime,
   formatCompactCount,
-  formatRangeTime,
   indexToBucketX,
   LOG_LEVEL_SELECTION_EDGE,
   LOG_LEVEL_SELECTION_SHADOW,
   LogsTimeRange,
   rangeBucketIndices,
   StackedBucket,
+  sumBucketRange,
   xToBucketIndex,
 } from './logsMetricsUtils'
 import { useLogsChartBuckets } from './useLogsChartBuckets'
@@ -65,9 +66,11 @@ export function LogsMetricsChart({
   pollInterval?: number
 }) {
   const theme = useTheme()
+  const barsAreaRef = useRef<HTMLDivElement>(null)
   const rowRef = useRef<HTMLDivElement>(null)
   const [rowWidth, setRowWidth] = useState(0)
   const [drag, setDrag] = useState<DragState | null>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const { buckets, bucketMs, initialLoading } = useLogsChartBuckets({
     clusterId,
@@ -94,43 +97,126 @@ export function LogsMetricsChart({
     return () => observer.disconnect()
   }, [bucketCount])
 
-  const toX = (index: number) => indexToBucketX(index, rowWidth, bucketCount)
-  const toIndex = (x: number) => xToBucketIndex(x, rowWidth, bucketCount)
+  const toX = useCallback(
+    (index: number) => indexToBucketX(index, rowWidth, bucketCount),
+    [rowWidth, bucketCount]
+  )
+  const toIndex = useCallback(
+    (x: number) => xToBucketIndex(x, rowWidth, bucketCount),
+    [rowWidth, bucketCount]
+  )
 
   const rangeIndices = useMemo(
     () => rangeBucketIndices(buckets, rangeFilter, bucketMs),
     [buckets, rangeFilter, bucketMs]
   )
 
-  const dragIndices = drag
-    ? {
-        startIdx: toIndex(Math.min(drag.startX, drag.currentX)),
-        endIdx: toIndex(Math.max(drag.startX, drag.currentX)),
-      }
-    : null
+  const dragIndices = useMemo(
+    () =>
+      drag
+        ? {
+            startIdx: toIndex(Math.min(drag.startX, drag.currentX)),
+            endIdx: toIndex(Math.max(drag.startX, drag.currentX)),
+          }
+        : null,
+    [drag, toIndex]
+  )
 
   const selectionIndices = dragIndices ?? rangeIndices
 
-  const selectionBounds = selectionIndices
-    ? {
-        left: toX(selectionIndices.startIdx),
-        width:
-          toX(selectionIndices.endIdx + 1) - toX(selectionIndices.startIdx),
-      }
-    : null
+  const selectionBounds = useMemo(() => {
+    if (!selectionIndices) return null
+    const left = toX(selectionIndices.startIdx)
+    return {
+      left,
+      width: toX(selectionIndices.endIdx + 1) - left,
+    }
+  }, [selectionIndices, toX])
 
-  const dragPreview =
-    drag && dragIndices && buckets.length
-      ? bucketTimeRange(
+  const chartTooltip = useMemo(() => {
+    if (dragIndices && selectionBounds) {
+      return {
+        range: bucketTimeRange(
           buckets,
           dragIndices.startIdx,
           dragIndices.endIdx,
           bucketMs
-        )
-      : null
+        ),
+        stats: sumBucketRange(
+          buckets,
+          dragIndices.startIdx,
+          dragIndices.endIdx
+        ),
+        left: Y_AXIS_WIDTH + selectionBounds.left + selectionBounds.width / 2,
+      }
+    }
+
+    if (hoveredIndex === null || !buckets[hoveredIndex]) return null
+
+    const bucketLeft = indexToBucketX(hoveredIndex, rowWidth, bucketCount)
+    const bucketRight = indexToBucketX(hoveredIndex + 1, rowWidth, bucketCount)
+
+    return {
+      range: bucketTimeRange(buckets, hoveredIndex, hoveredIndex, bucketMs),
+      stats: sumBucketRange(buckets, hoveredIndex, hoveredIndex),
+      left: Y_AXIS_WIDTH + (bucketLeft + bucketRight) / 2,
+    }
+  }, [
+    dragIndices,
+    selectionBounds,
+    hoveredIndex,
+    buckets,
+    bucketMs,
+    rowWidth,
+    bucketCount,
+  ])
 
   const relativeX = (e: React.MouseEvent<HTMLDivElement>) =>
     e.clientX - e.currentTarget.getBoundingClientRect().left
+
+  const relativeXFromClient = useCallback((clientX: number) => {
+    const area = barsAreaRef.current
+    if (!area) return 0
+    const rect = area.getBoundingClientRect()
+    return clamp(clientX - rect.left, 0, rect.width)
+  }, [])
+
+  const isDragging = drag !== null
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    const onMove = (e: MouseEvent) => {
+      const x = relativeXFromClient(e.clientX)
+      setDrag((current) => (current ? { ...current, currentX: x } : current))
+    }
+
+    const onUp = (e: MouseEvent) => {
+      const x = relativeXFromClient(e.clientX)
+      setDrag((current) => {
+        if (!current) return null
+        const startIdx = toIndex(Math.min(current.startX, x))
+        const endIdx = toIndex(Math.max(current.startX, x))
+        if (Math.abs(current.startX - x) > 3)
+          onRangeSelect(bucketTimeRange(buckets, startIdx, endIdx, bucketMs))
+        return null
+      })
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+    return () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+    }
+  }, [
+    isDragging,
+    buckets,
+    bucketMs,
+    onRangeSelect,
+    relativeXFromClient,
+    toIndex,
+  ])
 
   if (initialLoading) {
     return (
@@ -153,26 +239,19 @@ export function LogsMetricsChart({
           <span>0</span>
         </YAxisSC>
         <BarsAreaSC
+          ref={barsAreaRef}
           onMouseDown={(e) => {
+            setHoveredIndex(null)
             const x = relativeX(e)
             setDrag({ startX: x, currentX: x })
           }}
           onMouseMove={(e) => {
-            if (!drag) return
-            setDrag({ ...drag, currentX: relativeX(e) })
+            if (drag) return
+            setHoveredIndex(toIndex(relativeX(e)))
           }}
-          onMouseUp={(e) => {
-            if (!drag) return
-            const x = relativeX(e)
-            const startIdx = toIndex(Math.min(drag.startX, x))
-            const endIdx = toIndex(Math.max(drag.startX, x))
-            if (Math.abs(drag.startX - x) > 3)
-              onRangeSelect(
-                bucketTimeRange(buckets, startIdx, endIdx, bucketMs)
-              )
-            setDrag(null)
+          onMouseLeave={() => {
+            if (!drag) setHoveredIndex(null)
           }}
-          onMouseLeave={() => setDrag(null)}
         >
           <BarsRowSC ref={rowRef}>
             {selectionBounds && (
@@ -200,16 +279,6 @@ export function LogsMetricsChart({
               />
             ))}
           </BarsRowSC>
-          {dragPreview && selectionBounds && (
-            <DragTooltipSC
-              style={{
-                left: selectionBounds.left + selectionBounds.width / 2,
-              }}
-            >
-              {formatRangeTime(dragPreview.start)} –{' '}
-              {formatRangeTime(dragPreview.end)}
-            </DragTooltipSC>
-          )}
         </BarsAreaSC>
       </ChartCanvasSC>
       <XAxisSC style={{ paddingLeft: Y_AXIS_WIDTH + theme.spacing.medium }}>
@@ -222,6 +291,13 @@ export function LogsMetricsChart({
           </XTickSC>
         ))}
       </XAxisSC>
+      {chartTooltip && (
+        <ChartRangeTooltip
+          range={chartTooltip.range}
+          stats={chartTooltip.stats}
+          style={{ left: chartTooltip.left }}
+        />
+      )}
     </ChartWrapperSC>
   )
 }
@@ -259,6 +335,7 @@ function ChartBarStack({
 
 const ChartWrapperSC = styled.div(({ theme }) => ({
   position: 'relative',
+  zIndex: 1,
   width: '100%',
   background: theme.colors['fill-one'],
   borderBottom: theme.borders['fill-two'],
@@ -266,6 +343,7 @@ const ChartWrapperSC = styled.div(({ theme }) => ({
 }))
 
 const ChartCanvasSC = styled.div({
+  position: 'relative',
   display: 'flex',
   alignItems: 'flex-end',
   height: CHART_CANVAS_HEIGHT,
@@ -329,21 +407,6 @@ const SelectionEdgeSC = styled.div<{ $side: 'start' | 'end' }>(({ $side }) => ({
   width: 2,
   backgroundColor: LOG_LEVEL_SELECTION_EDGE,
   ...($side === 'start' ? { left: 0 } : { right: 0 }),
-}))
-
-const DragTooltipSC = styled.div(({ theme }) => ({
-  position: 'absolute',
-  top: 0,
-  transform: 'translate(-50%, -100%)',
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-  borderRadius: theme.borderRadiuses.medium,
-  background: theme.colors['fill-two'],
-  border: theme.borders['on-fill-two'],
-  ...theme.partials.text.caption,
-  color: theme.colors.text,
-  pointerEvents: 'none',
-  whiteSpace: 'nowrap',
-  zIndex: 3,
 }))
 
 const BarStackSC = styled.div({

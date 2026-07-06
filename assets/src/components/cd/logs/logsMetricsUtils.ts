@@ -5,6 +5,11 @@ import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { LogLevel } from './LogLine'
 
+export type BucketRangeStats = {
+  levels: Record<LogLevel, number>
+  total: number
+}
+
 export type LogsTimeRange = {
   start: Date
   end: Date
@@ -39,6 +44,30 @@ const LEVEL_PARTITION_ORDER = [
   LogLevel.INFO,
   LogLevel.SUCCESS,
 ] as const
+
+export function sumBucketRange(
+  buckets: StackedBucket[],
+  startIdx: number,
+  endIdx: number
+): BucketRangeStats {
+  const levels = {
+    [LogLevel.SUCCESS]: 0,
+    [LogLevel.WARN]: 0,
+    [LogLevel.ERROR]: 0,
+    [LogLevel.INFO]: 0,
+    [LogLevel.FATAL]: 0,
+    [LogLevel.UNKNOWN]: 0,
+  }
+  let total = 0
+  for (let i = startIdx; i <= endIdx; i++) {
+    const bucket = buckets[i]
+    if (!bucket) continue
+    total += bucket.total
+    for (const level of Object.values(LogLevel))
+      levels[level] += bucket.levels[level] ?? 0
+  }
+  return { levels, total }
+}
 
 export function bucketSizeForWindow(seconds: number): string {
   if (seconds <= 60) return '5s'
