@@ -143,11 +143,13 @@ export function Logs({
                     setSinceSeconds={(sinceSeconds) =>
                       setFilters({ ...filters, sinceSeconds })
                     }
+                    disabled={live}
                   />
                   <LogsDateDropdown
                     initialDate={filters.date}
                     setDate={(date) => setFilters({ ...filters, date })}
                     setLive={setLive}
+                    disabled={live}
                   />
                 </Flex>
                 <LogsStreamingStatus
