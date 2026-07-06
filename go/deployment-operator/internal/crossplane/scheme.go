@@ -30,5 +30,12 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypeWithName(azureAKSClusterV2ListGVK, &AzureAKSClusterList{})
 	metav1.AddToGroupVersion(scheme, azureAKSClusterGVK.GroupVersion())
 	metav1.AddToGroupVersion(scheme, azureAKSClusterV2GVK.GroupVersion())
+	// The Go type is GKECluster but the CRD kind is Cluster.
+	scheme.AddKnownTypeWithName(gkeClusterGVK, &GKECluster{})
+	scheme.AddKnownTypeWithName(gkeClusterListGVK, &GKEClusterList{})
+	scheme.AddKnownTypeWithName(gkeClusterV2GVK, &GKECluster{})
+	scheme.AddKnownTypeWithName(gkeClusterV2ListGVK, &GKEClusterList{})
+	metav1.AddToGroupVersion(scheme, gkeClusterGVK.GroupVersion())
+	metav1.AddToGroupVersion(scheme, gkeClusterV2GVK.GroupVersion())
 	return nil
 }

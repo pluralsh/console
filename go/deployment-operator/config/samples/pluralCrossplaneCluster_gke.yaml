@@ -1,0 +1,15 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: PluralCrossplaneCluster
+metadata:
+  name: crossplane-gke-quickstart
+  namespace: default
+spec:
+  cluster:
+    handle: crossplane-gke-quickstart
+  consoleTokenSecretRef:
+    name: crossplane-gke-quickstart-console-token
+    key: token
+  crossplaneClusterRef:
+    apiVersion: container.gcp.upbound.io/v1beta2
+    kind: Cluster
+    name: cp-gke-small
