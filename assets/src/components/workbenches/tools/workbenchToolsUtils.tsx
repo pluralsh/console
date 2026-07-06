@@ -3,7 +3,6 @@ import {
   AwsLogoIcon,
   AzureLogoIcon,
   BitBucketIcon,
-  ClusterIcon,
   DatadogLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
@@ -23,6 +22,7 @@ import {
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
+  VmwareLogoIcon,
 } from '@pluralsh/design-system'
 import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
@@ -342,7 +342,7 @@ export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
   [Provider.Aws]: AwsLogoIcon,
   [Provider.Gcp]: GoogleCloudLogoIcon,
   [Provider.Azure]: AzureLogoIcon,
-  [Provider.Vsphere]: ClusterIcon,
+  [Provider.Vsphere]: VmwareLogoIcon,
 }
 
 export const isProvider = (value: Nullable<string>): value is Provider =>

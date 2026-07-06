@@ -1,4 +1,4 @@
-import { ClusterIcon, DatabaseIcon } from '@pluralsh/design-system'
+import { DatabaseIcon, VmwareLogoIcon } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { ProviderObjectType } from '../CloudObjectsCard.tsx'
@@ -34,7 +34,7 @@ function icon(type: ProviderObjectType): ReactElement {
     case ProviderObjectType.VSphereDatastore:
       return <DatabaseIcon />
     default:
-      return <ClusterIcon />
+      return <VmwareLogoIcon fullColor />
   }
 }
 

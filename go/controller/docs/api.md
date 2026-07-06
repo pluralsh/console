@@ -583,6 +583,7 @@ _Appears in:_
 | `aws` _[AWSCloudConnection](#awscloudconnection)_ |  |  |  |
 | `gcp` _[GCPCloudConnection](#gcpcloudconnection)_ |  |  |  |
 | `azure` _[AzureCloudConnection](#azurecloudconnection)_ |  |  |  |
+| `vsphere` _[VsphereCloudConnection](#vspherecloudconnection)_ |  |  |  |
 
 
 
@@ -601,7 +602,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this CloudConnection. If not provided CloudConnection's own name<br />from CloudConnection.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure] |  | Enum: [gcp aws azure] <br />Required: \{\} <br />Type: string <br /> |
+| `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure, vsphere] |  | Enum: [gcp aws azure vsphere] <br />Required: \{\} <br />Type: string <br /> |
 | `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ | Configuration contains the cloud connection configuration. |  | Required: \{\} <br /> |
 | `readBindings` _[Binding](#binding) array_ | ReadBindings is a list of bindings that defines<br />who can use this CloudConnection. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -623,6 +624,7 @@ _Appears in:_
 | `aws` | AWS represents Amazon Web Services as a cloud provider<br /> |
 | `azure` | Azure represents Microsoft Azure as a cloud provider<br /> |
 | `gcp` | GCP represents Google Cloud Platform as a cloud provider<br /> |
+| `vsphere` | Vsphere represents VMware vSphere as a cloud provider<br /> |
 
 
 #### Cluster
@@ -2624,6 +2626,7 @@ _Appears in:_
 - [AWSCloudConnection](#awscloudconnection)
 - [AzureCloudConnection](#azurecloudconnection)
 - [GCPCloudConnection](#gcpcloudconnection)
+- [VsphereCloudConnection](#vspherecloudconnection)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -5405,6 +5408,26 @@ _Appears in:_
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is a custom endpoint for self-deployed models |  | Optional: \{\} <br /> |
 | `serviceAccountJsonSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ServiceAccountJsonSecretRef is a Service Account json file stored w/in a kubernetes secret to use for authentication to GCP |  | Optional: \{\} <br /> |
+
+
+#### VsphereCloudConnection
+
+
+
+VsphereCloudConnection contains VMware vSphere authentication configuration.
+Provides credentials for discovering and querying vSphere resources.
+
+
+
+_Appears in:_
+- [CloudConnectionConfiguration](#cloudconnectionconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `server` _string_ | The vCenter SDK endpoint, for example https://vcenter.example.com/sdk |  |  |
+| `user` _string_ | The vCenter user |  |  |
+| `password` _[ObjectKeyReference](#objectkeyreference)_ | The vCenter password |  |  |
+| `allowUnverifiedSsl` _boolean_ | Whether to allow unverified vCenter TLS certificates |  | Optional: \{\} <br /> |
 
 
 #### Workbench
