@@ -1,4 +1,7 @@
 import parseDuration from 'parse-duration-ms'
+import { useLogAggregationBucketsQuery } from 'generated/graphql'
+import { toDateOrUndef } from 'utils/datetime'
+import { isNonNullable } from 'utils/isNonNullable'
 import { LogLevel } from './LogLine'
 
 export type LogsTimeRange = {
@@ -6,9 +9,20 @@ export type LogsTimeRange = {
   end: Date
 }
 
+export type AggregationBucket = {
+  timestamp: Date
+  count: number
+}
+
+export type StackedBucket = {
+  timestamp: Date
+  total: number
+  levels: Record<LogLevel, number>
+}
+
 export const CHART_CANVAS_HEIGHT = 162
-export const CHART_TOTAL_HEIGHT = 210
 export const CHART_BAR_GAP = 2
+export const LOG_LEVEL_SELECTION_OVERLAY = 'rgba(93, 99, 244, 0.2)'
 
 export const LOG_LEVEL_CHART_LAYERS = [
   { level: LogLevel.SUCCESS, query: 'success' },
@@ -17,15 +31,12 @@ export const LOG_LEVEL_CHART_LAYERS = [
   { level: LogLevel.INFO, query: 'info' },
 ] as const
 
-// Matches determineLevel() in LogLine.tsx — higher severity wins when queries overlap.
 const LEVEL_PARTITION_ORDER = [
   LogLevel.ERROR,
   LogLevel.WARN,
   LogLevel.INFO,
   LogLevel.SUCCESS,
 ] as const
-
-export const LOG_LEVEL_SELECTION_OVERLAY = 'rgba(93, 99, 244, 0.2)'
 
 export function bucketSizeForWindow(seconds: number): string {
   if (seconds <= 60) return '5s'
@@ -44,6 +55,64 @@ export function combineLogQuery(base: string, levelQuery: string): string {
   const trimmed = base.trim()
   if (!trimmed) return levelQuery
   return `(${trimmed}) AND (${levelQuery})`
+}
+
+export function parseAggregationBuckets(
+  data: ReturnType<typeof useLogAggregationBucketsQuery>['data']
+): AggregationBucket[] {
+  return (data?.logAggregationBuckets?.filter(isNonNullable) ?? [])
+    .map((b) => ({
+      timestamp: toDateOrUndef(b.timestamp)!,
+      count: b.count ?? 0,
+    }))
+    .filter((b) => b.timestamp)
+}
+
+export function mergeStackedBuckets(
+  totalBuckets: AggregationBucket[],
+  levelBuckets: AggregationBucket[][]
+): StackedBucket[] {
+  const countForTs = (set: AggregationBucket[], ts: number) =>
+    set.find((b) => b.timestamp.getTime() === ts)?.count ?? 0
+
+  return totalBuckets.map((bucket) => {
+    const ts = bucket.timestamp.getTime()
+    const raw = Object.fromEntries(
+      LOG_LEVEL_CHART_LAYERS.map(({ level }, i) => [
+        level,
+        countForTs(levelBuckets[i] ?? [], ts),
+      ])
+    ) as Record<(typeof LOG_LEVEL_CHART_LAYERS)[number]['level'], number>
+
+    let remaining = bucket.count
+    const levels = {
+      [LogLevel.SUCCESS]: 0,
+      [LogLevel.WARN]: 0,
+      [LogLevel.ERROR]: 0,
+      [LogLevel.INFO]: 0,
+      [LogLevel.FATAL]: 0,
+      [LogLevel.UNKNOWN]: 0,
+    }
+
+    for (const level of LEVEL_PARTITION_ORDER) {
+      const assigned = Math.min(raw[level], remaining)
+      levels[level] = assigned
+      remaining -= assigned
+    }
+    levels[LogLevel.UNKNOWN] = remaining
+
+    return { timestamp: bucket.timestamp, total: bucket.count, levels }
+  })
+}
+
+export function niceMax(value: number): number {
+  if (value <= 10) return 10
+  if (value <= 20) return 20
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)))
+  const normalized = value / magnitude
+  const nice =
+    normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10
+  return nice * magnitude
 }
 
 export function formatCompactCount(count: number): string {
@@ -83,51 +152,5 @@ export function formatChartAxisTime(date: Date, sinceSeconds: number): string {
     minute: '2-digit',
     hour12: false,
     timeZone: 'UTC',
-  })
-}
-
-export type StackedBucket = {
-  timestamp: Date
-  total: number
-  levels: Record<LogLevel, number>
-}
-
-export function mergeStackedBuckets(
-  totalBuckets: Array<{ timestamp: Date; count: number }>,
-  levelBuckets: Array<Array<{ timestamp: Date; count: number }>>
-): StackedBucket[] {
-  const countForTs = (
-    set: Array<{ timestamp: Date; count: number }>,
-    ts: number
-  ) => set.find((b) => b.timestamp.getTime() === ts)?.count ?? 0
-
-  return totalBuckets.map((bucket) => {
-    const ts = bucket.timestamp.getTime()
-    const raw = {
-      [LogLevel.SUCCESS]: countForTs(levelBuckets[0] ?? [], ts),
-      [LogLevel.WARN]: countForTs(levelBuckets[1] ?? [], ts),
-      [LogLevel.ERROR]: countForTs(levelBuckets[2] ?? [], ts),
-      [LogLevel.INFO]: countForTs(levelBuckets[3] ?? [], ts),
-    }
-
-    let remaining = bucket.count
-    const levels = {
-      [LogLevel.SUCCESS]: 0,
-      [LogLevel.WARN]: 0,
-      [LogLevel.ERROR]: 0,
-      [LogLevel.INFO]: 0,
-      [LogLevel.FATAL]: 0,
-      [LogLevel.UNKNOWN]: 0,
-    }
-
-    for (const level of LEVEL_PARTITION_ORDER) {
-      const assigned = Math.min(raw[level], remaining)
-      levels[level] = assigned
-      remaining -= assigned
-    }
-
-    levels[LogLevel.UNKNOWN] = remaining
-
-    return { timestamp: bucket.timestamp, total: bucket.count, levels }
   })
 }
