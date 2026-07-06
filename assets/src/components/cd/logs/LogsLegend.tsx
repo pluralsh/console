@@ -1,10 +1,12 @@
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { Flex } from '@pluralsh/design-system'
 
 import { logLevelToColor } from './LogLine'
 
 export function LogsLegend() {
+  const theme = useTheme()
+
   return (
     <Flex gap="medium">
       {Object.entries(logLevelToColor).map(([level, color]) => (
@@ -14,7 +16,7 @@ export function LogsLegend() {
           align="center"
         >
           <LegendColor color={color} />
-          {level}
+          <div css={{ ...theme.partials.text.caption }}>{level}</div>
         </Flex>
       ))}
     </Flex>
@@ -24,6 +26,6 @@ export function LogsLegend() {
 export const LegendColor = styled.div(({ theme, color = 'border' }) => ({
   backgroundColor: theme.colors[color],
   borderRadius: theme.borderRadiuses.medium,
-  height: 12,
-  width: 12,
+  height: 10,
+  width: 10,
 }))
