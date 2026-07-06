@@ -5609,6 +5609,7 @@ enum Provider {
   AWS
   GCP
   AZURE
+  VSPHERE
 }
 
 input ProjectAttributes {
@@ -5977,6 +5978,7 @@ input CloudConnectionConfigurationAttributes {
   aws: AwsCloudConnectionAttributes
   gcp: GcpCloudConnectionAttributes
   azure: AzureCloudConnectionAttributes
+  vsphere: VsphereCloudConnectionAttributes
 }
 
 input AwsCloudConnectionAttributes {
@@ -6002,6 +6004,20 @@ input AzureCloudConnectionAttributes {
   tenantId: String!
   clientId: String!
   clientSecret: String!
+}
+
+input VsphereCloudConnectionAttributes {
+  "the vCenter SDK endpoint, for example https:\/\/vcenter.example.com\/sdk"
+  server: String!
+
+  "the vCenter user"
+  user: String!
+
+  "the vCenter password"
+  password: String!
+
+  "whether to allow unverified vCenter TLS certificates"
+  allowUnverifiedSsl: Boolean
 }
 
 "A federated credential is a way to authenticate users from an external identity provider"
@@ -6421,6 +6437,9 @@ type CloudConnectionConfiguration {
 
   "the credentials for azure"
   azure: AzureConnectionAttributes
+
+  "the credentials for vSphere"
+  vsphere: VsphereConnectionAttributes
 }
 
 "The configuration for a cloud provider"
@@ -6454,6 +6473,18 @@ type AzureConnectionAttributes {
 
   "the client id for azure"
   clientId: String!
+}
+
+"The configuration for a vSphere cloud provider"
+type VsphereConnectionAttributes {
+  "the vCenter SDK endpoint"
+  server: String!
+
+  "the vCenter user"
+  user: String!
+
+  "whether unverified vCenter TLS certificates are allowed"
+  allowUnverifiedSsl: Boolean
 }
 
 "A federated credential is a way to authenticate users from an external identity provider"

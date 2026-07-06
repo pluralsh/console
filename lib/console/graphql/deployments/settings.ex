@@ -334,6 +334,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :aws, :aws_cloud_connection_attributes
     field :gcp, :gcp_cloud_connection_attributes
     field :azure, :azure_cloud_connection_attributes
+    field :vsphere, :vsphere_cloud_connection_attributes
   end
 
   input_object :aws_cloud_connection_attributes do
@@ -356,6 +357,17 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tenant_id, non_null(:string)
     field :client_id, non_null(:string)
     field :client_secret, non_null(:string)
+  end
+
+  input_object :vsphere_cloud_connection_attributes do
+    field :server, non_null(:string),
+      description: "the vCenter SDK endpoint, for example https://vcenter.example.com/sdk"
+
+    field :user, non_null(:string), description: "the vCenter user"
+    field :password, non_null(:string), description: "the vCenter password"
+
+    field :allow_unverified_ssl, :boolean,
+      description: "whether to allow unverified vCenter TLS certificates"
   end
 
   @desc "A federated credential is a way to authenticate users from an external identity provider"
@@ -726,6 +738,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :aws, :aws_connection_attributes, description: "the credentials for aws"
     field :gcp, :gcp_connection_attributes, description: "the credentials for gcp"
     field :azure, :azure_connection_attributes, description: "the credentials for azure"
+    field :vsphere, :vsphere_connection_attributes, description: "the credentials for vSphere"
   end
 
   @desc "The configuration for a cloud provider"
@@ -748,6 +761,15 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :subscription_id, non_null(:string), description: "the subscription id for azure"
     field :tenant_id, non_null(:string), description: "the tenant id for azure"
     field :client_id, non_null(:string), description: "the client id for azure"
+  end
+
+  @desc "The configuration for a vSphere cloud provider"
+  object :vsphere_connection_attributes do
+    field :server, non_null(:string), description: "the vCenter SDK endpoint"
+    field :user, non_null(:string), description: "the vCenter user"
+
+    field :allow_unverified_ssl, :boolean,
+      description: "whether unverified vCenter TLS certificates are allowed"
   end
 
   @desc "A federated credential is a way to authenticate users from an external identity provider"

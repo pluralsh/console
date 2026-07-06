@@ -4,6 +4,7 @@ const CLOUD_CONNECTION_SETUP_GUIDE_PATHS: Record<Provider, string> = {
   [Provider.Aws]: '/setup-guides/cloud-connections/aws.md',
   [Provider.Gcp]: '/setup-guides/cloud-connections/gcp.md',
   [Provider.Azure]: '/setup-guides/cloud-connections/azure.md',
+  [Provider.Vsphere]: '/setup-guides/cloud-connections/vsphere.md',
 }
 
 const CLOUD_CONNECTION_SETUP_GUIDE_DOC_URLS: Record<Provider, string> = {
@@ -12,6 +13,8 @@ const CLOUD_CONNECTION_SETUP_GUIDE_DOC_URLS: Record<Provider, string> = {
   [Provider.Gcp]: 'https://cloud.google.com/iam/docs/service-account-overview',
   [Provider.Azure]:
     'https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#reader',
+  [Provider.Vsphere]:
+    'https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/',
 }
 
 export function getCloudConnectionSetupGuideMarkdownPath(provider: Provider) {

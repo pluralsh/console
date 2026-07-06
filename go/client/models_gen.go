@@ -1779,12 +1779,15 @@ type CloudConnectionConfiguration struct {
 	GCP *GCPConnectionAttributes `json:"gcp,omitempty"`
 	// the credentials for azure
 	Azure *AzureConnectionAttributes `json:"azure,omitempty"`
+	// the credentials for vSphere
+	Vsphere *VsphereConnectionAttributes `json:"vsphere,omitempty"`
 }
 
 type CloudConnectionConfigurationAttributes struct {
-	AWS   *AWSCloudConnectionAttributes   `json:"aws,omitempty"`
-	GCP   *GCPCloudConnectionAttributes   `json:"gcp,omitempty"`
-	Azure *AzureCloudConnectionAttributes `json:"azure,omitempty"`
+	AWS     *AWSCloudConnectionAttributes     `json:"aws,omitempty"`
+	GCP     *GCPCloudConnectionAttributes     `json:"gcp,omitempty"`
+	Azure   *AzureCloudConnectionAttributes   `json:"azure,omitempty"`
+	Vsphere *VsphereCloudConnectionAttributes `json:"vsphere,omitempty"`
 }
 
 type CloudConnectionConnection struct {
@@ -7040,6 +7043,8 @@ type PromotionCriteria struct {
 	Ai *AiPromotionCriteria `json:"ai,omitempty"`
 	// the scm connection to use for service promotion
 	Connection *ScmConnection `json:"connection,omitempty"`
+	// the pr automation to use when promoting this service
+	PrAutomation *PrAutomation `json:"prAutomation,omitempty"`
 	// the source service in a prior stage to promote settings from
 	Source *ServiceDeployment `json:"source,omitempty"`
 	// whether you want to copy any configuration values from the source service
@@ -9608,6 +9613,27 @@ type ViolationStatistic struct {
 	Violations *int64 `json:"violations,omitempty"`
 	// the total number of policy constraints
 	Count *int64 `json:"count,omitempty"`
+}
+
+type VsphereCloudConnectionAttributes struct {
+	// the vCenter SDK endpoint, for example https://vcenter.example.com/sdk
+	Server string `json:"server"`
+	// the vCenter user
+	User string `json:"user"`
+	// the vCenter password
+	Password string `json:"password"`
+	// whether to allow unverified vCenter TLS certificates
+	AllowUnverifiedSsl *bool `json:"allowUnverifiedSsl,omitempty"`
+}
+
+// The configuration for a vSphere cloud provider
+type VsphereConnectionAttributes struct {
+	// the vCenter SDK endpoint
+	Server string `json:"server"`
+	// the vCenter user
+	User string `json:"user"`
+	// whether unverified vCenter TLS certificates are allowed
+	AllowUnverifiedSsl *bool `json:"allowUnverifiedSsl,omitempty"`
 }
 
 type VulnArtifact struct {
@@ -15446,20 +15472,22 @@ func (e PrStatus) MarshalJSON() ([]byte, error) {
 type Provider string
 
 const (
-	ProviderAWS   Provider = "AWS"
-	ProviderGCP   Provider = "GCP"
-	ProviderAzure Provider = "AZURE"
+	ProviderAWS     Provider = "AWS"
+	ProviderGCP     Provider = "GCP"
+	ProviderAzure   Provider = "AZURE"
+	ProviderVsphere Provider = "VSPHERE"
 )
 
 var AllProvider = []Provider{
 	ProviderAWS,
 	ProviderGCP,
 	ProviderAzure,
+	ProviderVsphere,
 }
 
 func (e Provider) IsValid() bool {
 	switch e {
-	case ProviderAWS, ProviderGCP, ProviderAzure:
+	case ProviderAWS, ProviderGCP, ProviderAzure, ProviderVsphere:
 		return true
 	}
 	return false

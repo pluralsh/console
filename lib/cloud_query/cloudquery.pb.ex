@@ -39,6 +39,24 @@ defmodule Cloudquery.GcpCredentials do
   field :project, 2, type: :string
 end
 
+defmodule Cloudquery.VSphereCredentials do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "cloudquery.VSphereCredentials",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :server, 1, type: :string
+  field :user, 2, type: :string
+  field :password, 3, type: :string
+
+  field :allow_unverified_ssl, 4,
+    proto3_optional: true,
+    type: :string,
+    json_name: "allowUnverifiedSsl"
+end
+
 defmodule Cloudquery.Connection do
   @moduledoc false
 
@@ -53,6 +71,7 @@ defmodule Cloudquery.Connection do
   field :aws, 2, type: Cloudquery.AwsCredentials, oneof: 0
   field :azure, 3, type: Cloudquery.AzureCredentials, oneof: 0
   field :gcp, 4, type: Cloudquery.GcpCredentials, oneof: 0
+  field :vsphere, 5, type: Cloudquery.VSphereCredentials, oneof: 0
 end
 
 defmodule Cloudquery.QueryInput do

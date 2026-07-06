@@ -4,7 +4,7 @@ defmodule Console.Schema.CloudConnection do
   alias Console.Deployments.Policies.Rbac
   alias Console.Schema.{User, PolicyBinding}
 
-  defenum Provider, aws: 0, gcp: 1, azure: 2
+  defenum Provider, aws: 0, gcp: 1, azure: 2, vsphere: 3
 
   schema "cloud_connections" do
     field :provider, Provider
@@ -30,6 +30,13 @@ defmodule Console.Schema.CloudConnection do
         field :tenant_id,       :string
         field :client_id,       :string
         field :client_secret,   EncryptedString
+      end
+
+      embeds_one :vsphere, VSphere, on_replace: :update do
+        field :server,               :string
+        field :user,                 :string
+        field :password,             EncryptedString
+        field :allow_unverified_ssl, :boolean, default: false
       end
     end
 
@@ -79,6 +86,7 @@ defmodule Console.Schema.CloudConnection do
     |> cast_embed(:aws, with: &aws_changeset/2)
     |> cast_embed(:gcp, with: &gcp_changeset/2)
     |> cast_embed(:azure, with: &azure_changeset/2)
+    |> cast_embed(:vsphere, with: &vsphere_changeset/2)
   end
 
   defp aws_changeset(model, attrs) do
@@ -96,5 +104,11 @@ defmodule Console.Schema.CloudConnection do
     model
     |> cast(attrs, [:subscription_id, :tenant_id, :client_id, :client_secret])
     |> validate_required([:subscription_id, :tenant_id, :client_id, :client_secret])
+  end
+
+  defp vsphere_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:server, :user, :password, :allow_unverified_ssl])
+    |> validate_required([:server, :user, :password])
   end
 end

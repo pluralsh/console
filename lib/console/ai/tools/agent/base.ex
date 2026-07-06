@@ -4,7 +4,7 @@ defmodule Console.AI.Tools.Agent.Base do
   alias Console.AI.{Tool, Stream}
   alias Console.Repo
   alias Console.Schema.{AgentSession, CloudConnection, CloudConnection.Configuration}
-  alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials}
+  alias Cloudquery.{Connection, GcpCredentials, AwsCredentials, AzureCredentials, VSphereCredentials}
 
   defmacro __using__(_) do
     quote do
@@ -82,6 +82,13 @@ defmodule Console.AI.Tools.Agent.Base do
     }
   end
 
+  def to_pb(%CloudConnection{provider: :vsphere} = connection) do
+    %Connection{
+      provider:    "#{connection.provider}",
+      credentials: {:vsphere, to_pb(connection.configuration.vsphere)},
+    }
+  end
+
   def to_pb(%Configuration.Aws{} = aws) do
     %AwsCredentials{
       access_key_id:     aws.access_key_id,
@@ -105,6 +112,15 @@ defmodule Console.AI.Tools.Agent.Base do
       tenant_id:       azure.tenant_id,
       client_id:       azure.client_id,
       client_secret:   azure.client_secret
+    }
+  end
+
+  def to_pb(%Configuration.VSphere{} = vsphere) do
+    %VSphereCredentials{
+      server:               vsphere.server,
+      user:                 vsphere.user,
+      password:             vsphere.password,
+      allow_unverified_ssl: "#{vsphere.allow_unverified_ssl || false}"
     }
   end
 

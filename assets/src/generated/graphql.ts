@@ -2155,12 +2155,15 @@ export type CloudConnectionConfiguration = {
   azure?: Maybe<AzureConnectionAttributes>;
   /** the credentials for gcp */
   gcp?: Maybe<GcpConnectionAttributes>;
+  /** the credentials for vSphere */
+  vsphere?: Maybe<VsphereConnectionAttributes>;
 };
 
 export type CloudConnectionConfigurationAttributes = {
   aws?: InputMaybe<AwsCloudConnectionAttributes>;
   azure?: InputMaybe<AzureCloudConnectionAttributes>;
   gcp?: InputMaybe<GcpCloudConnectionAttributes>;
+  vsphere?: InputMaybe<VsphereCloudConnectionAttributes>;
 };
 
 export type CloudConnectionConnection = {
@@ -8516,7 +8519,8 @@ export type PromotionService = {
 export enum Provider {
   Aws = 'AWS',
   Azure = 'AZURE',
-  Gcp = 'GCP'
+  Gcp = 'GCP',
+  Vsphere = 'VSPHERE'
 }
 
 /** a cloud credential that can be used while creating new clusters */
@@ -15095,6 +15099,28 @@ export type ViolationStatistic = {
   value?: Maybe<Scalars['String']['output']>;
   /** the total number of violations found */
   violations?: Maybe<Scalars['Int']['output']>;
+};
+
+export type VsphereCloudConnectionAttributes = {
+  /** whether to allow unverified vCenter TLS certificates */
+  allowUnverifiedSsl?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the vCenter password */
+  password: Scalars['String']['input'];
+  /** the vCenter SDK endpoint, for example https://vcenter.example.com/sdk */
+  server: Scalars['String']['input'];
+  /** the vCenter user */
+  user: Scalars['String']['input'];
+};
+
+/** The configuration for a vSphere cloud provider */
+export type VsphereConnectionAttributes = {
+  __typename?: 'VsphereConnectionAttributes';
+  /** whether unverified vCenter TLS certificates are allowed */
+  allowUnverifiedSsl?: Maybe<Scalars['Boolean']['output']>;
+  /** the vCenter SDK endpoint */
+  server: Scalars['String']['output'];
+  /** the vCenter user */
+  user: Scalars['String']['output'];
 };
 
 export type VulnArtifact = {

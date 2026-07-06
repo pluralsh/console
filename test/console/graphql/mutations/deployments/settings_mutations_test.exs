@@ -133,6 +133,41 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
              |> MapSet.equal?(MapSet.new([group.name, other_group.name]))
     end
 
+    test "admins can upsert a vsphere cloud connection" do
+      {:ok, %{data: %{"upsertCloudConnection" => upserted}}} = run_query("""
+        mutation upsertCloudConnection($attrs: CloudConnectionAttributes!) {
+          upsertCloudConnection(attributes: $attrs) {
+            id
+            name
+            provider
+            configuration { vsphere { server user allowUnverifiedSsl } }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "vsphere",
+          "provider" => "VSPHERE",
+          "configuration" => %{
+            "vsphere" => %{
+              "server" => "https://vcenter.example.com/sdk",
+              "user" => "administrator@vsphere.local",
+              "password" => "password",
+              "allowUnverifiedSsl" => true
+            }
+          }
+        }
+      }, %{current_user: admin_user()})
+
+      assert upserted["id"]
+      assert upserted["name"] == "vsphere"
+      assert upserted["provider"] == "VSPHERE"
+      assert upserted["configuration"]["vsphere"] == %{
+               "server" => "https://vcenter.example.com/sdk",
+               "user" => "administrator@vsphere.local",
+               "allowUnverifiedSsl" => true
+             }
+    end
+
     test "nonadmins cannot upsert a cloud connection" do
       {:ok, %{errors: [_ | _]}} = run_query("""
         mutation upsertCloudConnection($attrs: CloudConnectionAttributes!) {

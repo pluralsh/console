@@ -6,12 +6,13 @@ Note: the CloudQuery service requires PostgreSQL-backed features to be enabled. 
 
 ## Service Definition
 
-Cloud-Query exposes a gRPC service with three main endpoints for querying, schema retrieval, and data extraction across different cloud providers.
+Cloud-Query exposes a gRPC service with endpoints for querying, schema retrieval, table listing, and data extraction across different cloud providers.
 
 ```protobuf
 service CloudQuery {
-  rpc Query(QueryInput) returns (stream QueryOutput) {}
-  rpc Schema(SchemaInput) returns (stream SchemaOutput) {}
+  rpc Query(QueryInput) returns (QueryResult) {}
+  rpc Schema(SchemaInput) returns (SchemaOutput) {}
+  rpc Tables(TablesInput) returns (TablesOutput) {}
   rpc Extract(ExtractInput) returns (stream ExtractOutput) {}
 }
 ```
@@ -22,6 +23,7 @@ The service supports the following cloud providers:
 - AWS
 - Azure
 - GCP
+- vSphere
 
 ## Data Models
 
@@ -38,6 +40,7 @@ message Connection {
     AwsCredentials aws = 2;
     AzureCredentials azure = 3;
     GcpCredentials gcp = 4;
+    VSphereCredentials vsphere = 5;
   }
 }
 ```
@@ -48,9 +51,15 @@ message Connection {
 
 ```protobuf
 message AwsCredentials {
-  string access_key_id = 1;
-  string secret_access_key = 2;
+  optional string access_key_id = 1;
+  optional string secret_access_key = 2;
+  optional string region = 3;
+  repeated string regions = 4;
+  optional string assume_role_arn = 5;
 }
+```
+
+AWS can also use the default AWS credential chain when static credentials are omitted.
 ```
 
 #### Azure Credentials
@@ -68,9 +77,23 @@ message AzureCredentials {
 
 ```protobuf
 message GcpCredentials {
-  string impersonation_token = 1;
+  string service_account_json_b64 = 1;
+  string project = 2;
 }
 ```
+
+#### vSphere Credentials
+
+```protobuf
+message VSphereCredentials {
+  string server = 1;
+  string user = 2;
+  string password = 3;
+  optional string allow_unverified_ssl = 4;
+}
+```
+
+`allow_unverified_ssl` accepts boolean string values such as `"true"` or `"false"`. When omitted, the vSphere plugin default is used.
 
 ## API Endpoints
 
@@ -87,14 +110,15 @@ message QueryInput {
 }
 ```
 
-#### Response: QueryOutput (Streamed)
+#### Response: QueryResult
 
 ```protobuf
-message QueryOutput {
-  repeated string columns = 1;
-  map<string, string> result = 2;
+message QueryResult {
+  string result = 2;
 }
 ```
+
+`result` is a JSON array of row objects.
 
 #### Example Usage
 
@@ -135,6 +159,23 @@ Using Postman:
 }
 ```
 
+vSphere example:
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "provider": "vsphere",
+    "vsphere": {
+      "server": "https://vcenter.example.com/sdk",
+      "user": "administrator@vsphere.local",
+      "password": "YOUR_PASSWORD",
+      "allow_unverified_ssl": "true"
+    }
+  },
+  "query": "SELECT name, power, guest_full_name FROM vsphere_vm"
+}' -plaintext localhost:9192 cloudquery.CloudQuery/Query
+```
+
 ### Schema
 
 The Schema method retrieves the schema information for cloud resources.
@@ -144,11 +185,11 @@ The Schema method retrieves the schema information for cloud resources.
 ```protobuf
 message SchemaInput {
   Connection connection = 1;
-  optional string query = 2;
+  optional string table = 2;
 }
 ```
 
-#### Response: SchemaOutput (Streamed)
+#### Response: SchemaOutput
 
 ```protobuf
 message SchemaColumn {
@@ -157,6 +198,10 @@ message SchemaColumn {
 }
 
 message SchemaOutput {
+  repeated SchemaResult result = 1;
+}
+
+message SchemaResult {
   string table = 1;
   repeated SchemaColumn columns = 2;
 }
@@ -176,7 +221,7 @@ grpcurl -d '{
       "secret_access_key": "YOUR_SECRET_KEY"
     }
   },
-  "query": "aws_ec2_%"
+  "table": "aws_ec2_%"
 }' -plaintext localhost:9192 cloudquery.CloudQuery/Schema
 ```
 
@@ -197,7 +242,28 @@ Using Postman:
       "secret_access_key": "YOUR_SECRET_KEY"
     }
   },
-  "query": "aws_ec2_%"
+  "table": "aws_ec2_%"
+}
+```
+
+### Tables
+
+The Tables method lists imported foreign tables for a provider connection.
+
+#### Request: TablesInput
+
+```protobuf
+message TablesInput {
+  Connection connection = 1;
+  optional string table = 2;
+}
+```
+
+#### Response: TablesOutput
+
+```protobuf
+message TablesOutput {
+  repeated string result = 1;
 }
 ```
 
@@ -218,11 +284,13 @@ message ExtractInput {
 ```protobuf
 message ExtractOutput {
   string type = 1;
-  map<string, string> result = 2;
+  string result = 2;
   string id = 3;
   repeated string links = 4;
 }
 ```
+
+Extract is currently implemented for AWS resources. Other providers, including vSphere, return `UNIMPLEMENTED` for this endpoint.
 
 #### Example Usage
 

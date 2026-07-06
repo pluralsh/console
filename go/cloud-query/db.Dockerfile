@@ -8,6 +8,7 @@ FROM golang:1.26.4 AS libraries
 ARG AWS_VERSION=1.30.7
 ARG AZURE_VERSION=1.12.3
 ARG GCP_VERSION=1.13.4
+ARG VSPHERE_VERSION=0.1.0
 
 WORKDIR /workspace
 
@@ -38,7 +39,8 @@ RUN case ${TARGETARCH} in \
 RUN mkdir -p /workspace/lib && \
     /workspace/hack/postgres.sh -p aws -v ${AWS_VERSION} -d /workspace/lib/ && \
     /workspace/hack/postgres.sh -p azure -v ${AZURE_VERSION} -d /workspace/lib/ && \
-    /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/
+    /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/ && \
+    /workspace/hack/postgres.sh -p vsphere -v ${VSPHERE_VERSION} -d /workspace/lib/
 
 FROM dhi.io/postgres:${POSTGRES_VERSION}
 
