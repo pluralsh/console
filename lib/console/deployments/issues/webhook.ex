@@ -77,6 +77,14 @@ defmodule Console.Deployments.Issues.Webhook do
     |> ok()
   end
 
+  def payload(%IssueWebhook{provider: :gitlab} = webhook, %{"object_attributes" => _, "object_kind" => "work_item"} = payload) do
+    build_attributes(Gitlab, payload)
+    |> Map.put(:provider, :gitlab)
+    |> with_payload(payload)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
   def payload(
         %IssueWebhook{provider: :gitlab} = webhook,
         %{"object_kind" => "note", "object_attributes" => %{"noteable_type" => "MergeRequest"}} = payload

@@ -78,6 +78,31 @@ func (in *ToolQueryService) MetricsSearch(ctx context.Context, input *toolquery.
 	return output, nil
 }
 
+func (in *ToolQueryService) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+
+	if err := in.validateSearchInput(input.GetConnection()); err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(input.GetMetric()) == "" {
+		return nil, status.Error(codes.InvalidArgument, "metric is required")
+	}
+
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("metrics_label_search", err)
+	}
+
+	output, err := provider.MetricsLabelSearch(ctx, input)
+	if err != nil {
+		return nil, in.mapError("metrics_label_search", err)
+	}
+
+	return output, nil
+}
+
 func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
 	if input == nil {
 		return nil, status.Error(codes.InvalidArgument, "input is required")

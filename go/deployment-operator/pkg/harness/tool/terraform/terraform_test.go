@@ -145,3 +145,60 @@ func TestHasChanges(t *testing.T) {
 		})
 	}
 }
+
+func TestHasChangesUsesCachedPlanJSON(t *testing.T) {
+	tf := &Terraform{
+		planJSONCache: &tfjson.Plan{
+			FormatVersion: "1.0",
+			ResourceChanges: []*tfjson.ResourceChange{
+				{
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{tfjson.ActionCreate},
+					},
+				},
+			},
+		},
+	}
+
+	hasChanges, err := tf.HasChanges()
+
+	assert.NoError(t, err)
+	assert.True(t, hasChanges)
+}
+
+func TestPlanUsesCachedText(t *testing.T) {
+	setupMockTerraform(t)
+
+	t.Setenv(mockTerraformOutputEnv, "first")
+	tf := &Terraform{
+		dir:          t.TempDir(),
+		planFileName: "terraform.tfplan",
+	}
+
+	first, err := tf.Plan()
+	assert.NoError(t, err)
+	assert.Equal(t, "first\n", *first.Plan)
+
+	t.Setenv(mockTerraformOutputEnv, "second")
+	second, err := tf.Plan()
+	assert.NoError(t, err)
+	assert.Equal(t, "first\n", *second.Plan)
+}
+
+func TestStateUsesCachedJSON(t *testing.T) {
+	setupMockTerraform(t)
+
+	t.Setenv(mockTerraformOutputEnv, `{"format_version":"1.0","values":{"root_module":{"resources":[{"address":"aws_s3_bucket.example"}]}}}`)
+	tf := &Terraform{
+		dir: t.TempDir(),
+	}
+
+	first, err := tf.state()
+	assert.NoError(t, err)
+	assert.Equal(t, "aws_s3_bucket.example", first.Values.RootModule.Resources[0].Address)
+
+	t.Setenv(mockTerraformOutputEnv, `{"format_version":"1.0","values":{"root_module":{"resources":[{"address":"aws_s3_bucket.other"}]}}}`)
+	second, err := tf.state()
+	assert.NoError(t, err)
+	assert.Equal(t, "aws_s3_bucket.example", second.Values.RootModule.Resources[0].Address)
+}

@@ -109,6 +109,7 @@ defmodule ConsoleWeb.Router do
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
       get "/git/sentinels/tarballs", GitController, :sentinel_tarball
+
     end
 
     scope "/v1", ConsoleWeb do
@@ -201,6 +202,8 @@ defmodule ConsoleWeb.Router do
           post "/runs",       AgentRunController, :create
           get "/runs",        AgentRunController, :index
           get "/runs/:id",    AgentRunController, :show
+
+          get "/runs/:id/downloads/:name", AgentRunController, :download
 
           post "/sessions",    AgentSessionController, :create
           get "/sessions",     AgentSessionController, :index

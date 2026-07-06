@@ -110,6 +110,10 @@ func (in *Terraform) ConfigureStateBackend(actor, deployToken string, urls *cons
 }
 
 func (in *Terraform) state() (*tfjson.State, error) {
+	if in.stateCache != nil {
+		return in.stateCache, nil
+	}
+
 	state := new(tfjson.State)
 	output, err := exec.NewExecutable(
 		"terraform",
@@ -125,8 +129,17 @@ func (in *Terraform) state() (*tfjson.State, error) {
 		return nil, err
 	}
 
-	klog.V(log.LogLevelTrace).InfoS("terraform state read successfully", "state", state)
+	in.stateCache = state
+	klog.V(log.LogLevelTrace).InfoS("terraform state read successfully", "resourceCount", stateResourceCount(state))
 	return state, nil
+}
+
+func stateResourceCount(state *tfjson.State) int {
+	if state == nil || state.Values == nil || state.Values.RootModule == nil {
+		return 0
+	}
+
+	return len(state.Values.RootModule.Resources)
 }
 
 func (in *Terraform) Scan() ([]*console.StackPolicyViolationAttributes, error) {
@@ -142,12 +155,16 @@ func (in *Terraform) Scan() ([]*console.StackPolicyViolationAttributes, error) {
 		PlanFileName:      in.planFileName,
 		VariablesFileName: in.variablesFileName,
 	}))
-	klog.V(log.LogLevelTrace).InfoS("terraform scanner scan", "result", result)
+	klog.V(log.LogLevelTrace).InfoS("terraform scanner scan completed", "violationCount", len(result))
 
 	return result, err
 }
 
 func (in *Terraform) plan() (string, error) {
+	if in.planTextCache != nil {
+		return *in.planTextCache, nil
+	}
+
 	output, err := exec.NewExecutable(
 		"terraform",
 		exec.WithArgs([]string{"show", in.planFileName}),
@@ -157,13 +174,19 @@ func (in *Terraform) plan() (string, error) {
 		return "", fmt.Errorf("failed executing terraform show: %s: %w", string(output), err)
 	}
 
-	klog.V(log.LogLevelTrace).InfoS("terraform plan file read successfully", "file", in.planFileName, "output", string(output))
-	return string(output), nil
+	planText := string(output)
+	in.planTextCache = &planText
+	klog.V(log.LogLevelTrace).InfoS("terraform plan file read successfully", "file", in.planFileName, "bytes", len(output))
+	return planText, nil
 }
 
 // planJSON parses the terraform plan file as JSON and returns a structured plan.
 // This provides deterministic access to plan details including resource changes.
 func (in *Terraform) planJSON() (*tfjson.Plan, error) {
+	if in.planJSONCache != nil {
+		return in.planJSONCache, nil
+	}
+
 	plan := new(tfjson.Plan)
 	output, err := exec.NewExecutable(
 		"terraform",
@@ -179,6 +202,7 @@ func (in *Terraform) planJSON() (*tfjson.Plan, error) {
 		return nil, fmt.Errorf("failed unmarshaling terraform plan JSON: %w", err)
 	}
 
+	in.planJSONCache = plan
 	klog.V(log.LogLevelTrace).InfoS("terraform plan JSON parsed successfully", "file", in.planFileName)
 	return plan, nil
 }
@@ -197,10 +221,14 @@ func (in *Terraform) HasChanges() (bool, error) {
 		return false, err
 	}
 
+	return hasChanges(plan), nil
+}
+
+func hasChanges(plan *tfjson.Plan) bool {
 	// If there are deferred changes, we should consider this as having changes
 	if len(plan.DeferredChanges) > 0 {
 		klog.V(log.LogLevelDebug).InfoS("plan has deferred changes", "count", len(plan.DeferredChanges))
-		return true, nil
+		return true
 	}
 
 	// Check resource changes
@@ -216,7 +244,7 @@ func (in *Terraform) HasChanges() (bool, error) {
 	}
 
 	if hasResourceChanges {
-		return true, nil
+		return true
 	}
 
 	// Check output changes
@@ -232,7 +260,7 @@ func (in *Terraform) HasChanges() (bool, error) {
 	}
 
 	if hasOutputChanges {
-		return true, nil
+		return true
 	}
 
 	// Check resource drift
@@ -242,11 +270,11 @@ func (in *Terraform) HasChanges() (bool, error) {
 	if len(plan.ResourceDrift) > 0 {
 		klog.V(log.LogLevelDebug).InfoS("plan detected resource drift",
 			"count", len(plan.ResourceDrift))
-		return true, nil
+		return true
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("terraform plan has no changes")
-	return false, nil
+	return false
 }
 
 func (in *Terraform) init() v1.Tool {

@@ -10,7 +10,7 @@ import { Outlet } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
-import { PendingApprovalStacksProvider } from 'components/contexts/PendingApprovalStacksContext'
+import { AwaitingReviewProvider } from 'components/contexts/AwaitingReviewContext'
 
 import { useCloudSetupUnfinished } from 'components/contexts'
 
@@ -55,7 +55,7 @@ export default function Console() {
                         <ShareSecretProvider>
                           <AccessTokenProvider>
                             <DeploymentSettingsProvider>
-                              <PendingApprovalStacksProvider>
+                              <AwaitingReviewProvider>
                                 <SidebarProvider>
                                   <TopLevelSidePanelProviders>
                                     <FeatureFlagProvider>
@@ -67,7 +67,7 @@ export default function Console() {
                                     </FeatureFlagProvider>
                                   </TopLevelSidePanelProviders>
                                 </SidebarProvider>
-                              </PendingApprovalStacksProvider>
+                              </AwaitingReviewProvider>
                             </DeploymentSettingsProvider>
                           </AccessTokenProvider>
                         </ShareSecretProvider>

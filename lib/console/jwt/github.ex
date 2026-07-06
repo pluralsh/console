@@ -40,7 +40,7 @@ defmodule Console.Jwt.Github do
       |> Tentacat.App.Installations.token(inst_id)
       |> case do
         {_, %{"token" => token}, _} -> {:ok, token}
-        _ -> {:error, "could not fetch installation token for #{app_id}"}
+        _ -> {:error, "could not fetch installation token for application #{app_id}, your github app is likely misconfigured"}
       end
     end
   end

@@ -1,0 +1,22 @@
+{
+    "type": "object",
+    "properties": {
+        "metric": {
+            "type": "string",
+            "description": "The metric name to inspect for labels."
+        },
+        "query": {
+            "type": "string",
+            "description": "Optional substring filter for returned label names or label values."
+        },
+        "label": {
+            "type": "string",
+            "description": "Optional label name. Omit this to search label names for the metric; provide it to search values for this label."
+        },
+        "limit": {
+            "type": "integer",
+            "description": "The maximum number of label names or values to return."
+        }
+    },
+    "required": ["metric"]
+}

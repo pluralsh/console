@@ -1,4 +1,5 @@
 import { Button, Flex } from '@pluralsh/design-system'
+import { useAiModels } from 'components/contexts/DeploymentSettingsContext'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -23,6 +24,7 @@ export function AISettingsModelRouting() {
   const { data: deploymentSettings, error: deploymentSettingsError } =
     useDeploymentSettingsSuspenseQuery()
   const ai = deploymentSettings.deploymentSettings?.ai
+  const { defaultsByProvider: modelDefaultsByProvider } = useAiModels()
 
   const initialRouting = useMemo(() => initialModelRoutingState(ai), [ai])
 
@@ -86,6 +88,7 @@ export function AISettingsModelRouting() {
             routing={routing}
             onRoutingChange={setRouting}
             configuredProviders={configuredProviders}
+            modelDefaultsByProvider={modelDefaultsByProvider}
           />
         ))}
         <ActionsSC>

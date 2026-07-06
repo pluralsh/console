@@ -22,6 +22,7 @@ import {
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
+import { WorkbenchUsageSummaryChip } from 'components/workbenches/common/WorkbenchUsageChips'
 import {
   PageInfoFragment,
   WorkbenchJobTinyFragment,
@@ -87,7 +88,9 @@ export function WorkbenchJobsTableContent({
       fullHeightWrap
       virtualizeRows
       data={jobs}
-      columns={columns ?? [userColumn, promptColumn, ...actionColumns]}
+      columns={
+        columns ?? [userColumn, promptColumn, usageColumn, ...actionColumns]
+      }
       loading={!loaded && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
@@ -164,6 +167,12 @@ export const workbenchColumn = columnHelper.accessor(
     },
   }
 )
+
+export const usageColumn = columnHelper.accessor(({ usage }) => usage, {
+  id: 'usage',
+  meta: { gridTemplate: '120px' },
+  cell: ({ getValue }) => <WorkbenchUsageSummaryChip usage={getValue()} />,
+})
 
 function JobSourceChips({
   job,

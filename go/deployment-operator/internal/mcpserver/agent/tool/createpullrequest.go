@@ -50,6 +50,12 @@ func (in *CreatePullRequest) handler(ctx context.Context, request mcp.CallToolRe
 		return mcp.NewToolResultError(fmt.Sprintf("failed to persist head branch: %v", err)), nil
 	}
 
+	if blocked, err := in.pullRequestBlockedByApproval(ctx); err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("failed to check agent run approval: %v", err)), nil
+	} else if blocked {
+		return mcp.NewToolResultError("pull request creation is blocked until this agent run is approved. End this turn now; the harness will wait for approval and reprompt you when PR creation is allowed."), nil
+	}
+
 	pr, err := in.client.CreateAgentPullRequest(ctx, in.agentRunID, attrs)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("failed to create pull request: %v", err)), nil
@@ -86,6 +92,28 @@ func (in *CreatePullRequest) persistRemoteHeadBranch(ctx context.Context, branch
 		HeadBranch: &branch,
 	})
 	return err
+}
+
+func (in *CreatePullRequest) pullRequestBlockedByApproval(ctx context.Context) (bool, error) {
+	if in.runtimeClient == nil {
+		return false, fmt.Errorf("runtime client is required to verify agent run approval")
+	}
+
+	run, err := in.runtimeClient.GetAgentRun(ctx, in.agentRunID)
+	if err != nil {
+		return false, err
+	}
+	if run == nil {
+		return false, fmt.Errorf("agent run %q was not found while verifying approval", in.agentRunID)
+	}
+	if run.Approval == nil || !*run.Approval || run.ApprovedAt != nil {
+		return false, nil
+	}
+
+	_, err = in.runtimeClient.UpdateAgentRun(ctx, in.agentRunID, client.AgentRunStatusAttributes{
+		Status: client.AgentRunStatusPendingApproval,
+	})
+	return true, err
 }
 
 func (in *CreatePullRequest) persistHeadBranch(branch string) error {

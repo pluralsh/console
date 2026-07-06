@@ -4,6 +4,39 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
+- version: 1.19.5
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **Helm value removed:** `loadBalancer.standalone` was removed.
+      If your values file sets it, delete it and rely on the remaining `loadBalancer.*`
+      settings.
+
+      - **Helm value removed (L2 announcements):** `l2podAnnouncements.interface`
+      was removed because it could render an agent config key that is no longer recognized
+      and may cause agent crash-loops when L2 pod announcements are enabled. **Use
+      `l2podAnnouncements.interfacePattern` instead.**
+
+      - **Helm chart improvement:** charts now allow overriding a `registry_prefix`
+      (useful for private registries/mirrors). (No action needed unless you want to
+      adopt it.)
+
+      '
+    chart_updates: [Removed deprecated/unused Helm options related to Service LB and
+        L2 pod announcements to prevent misconfiguration and crash-loops., Helm chart
+        now supports overriding `registry_prefix` for image registry customization.,
+      Helm packaging updated to ignore `tmpl` files via `.helmignore` (no user action).]
+    features: ['Troubleshoot commands for kvstore and clustermesh report more information,
+        which can help during incident response and upgrade validation.', Internal
+        load-balancer backend representation was refactored to scale better when many
+        Services share the same backend (helps large clusters with shared backends).]
+    breaking_changes: ['`loadBalancer.standalone` Helm option was removed; upgrades
+        will fail or behave unexpectedly if your values still reference it.', '`l2podAnnouncements.interface`
+        Helm value was removed; if you used it (especially with L2 pod announcements
+        enabled), switch to `l2podAnnouncements.interfacePattern` to avoid agent crash-loops.']
+  chart_version: 1.19.5
+  images: []
 - version: 1.19.4
   kube: ['1.36', '1.35', '1.34']
   requirements: []

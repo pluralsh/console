@@ -1,5 +1,12 @@
 defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
-  use ConsoleWeb.ConnCase, async: true
+  use ConsoleWeb.ConnCase, async: false
+  use Mimic
+
+  @compatibilities_url "https://assets.plural.sh/matrices/compatability/static/compatibilities.yaml"
+
+  alias Console.Schema.AgentRunUpload
+
+  setup :set_mimic_global
 
   describe "#show/2" do
     test "returns the agent run if user owns it", %{conn: conn} do
@@ -40,6 +47,110 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       |> add_auth_headers(user)
       |> get("/v1/api/ai/runs/#{run.id}")
       |> json_response(403)
+    end
+  end
+
+  describe "#download/2" do
+    test "it 403s if user does not own the run", %{conn: conn} do
+      user = insert(:user)
+      run = insert(:agent_run)
+      insert(:agent_run_upload, agent_run: run)
+
+      conn
+      |> add_auth_headers(user)
+      |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
+      |> json_response(403)
+    end
+
+    test "downloads a signed upload url", %{conn: conn} do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      upload = insert(:agent_run_upload, agent_run: run, session: nil, screen_recording: nil)
+
+      expect(Console.Uploads, :url, fn {file, %AgentRunUpload{id: id}}, :original, signed: true ->
+        assert id == upload.id
+        assert file.file_name == "agent.patch"
+        "https://example.com"
+      end)
+
+      conn =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
+
+      assert response(conn, 200) =~ "Example Domain"
+      assert ["text/html" <> _] = get_resp_header(conn, "content-type")
+    end
+
+    test "downloads a multi-chunk public upload url", %{conn: conn} do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      upload = insert(:agent_run_upload, agent_run: run, session: nil, screen_recording: nil)
+
+      expect(Console.Uploads, :url, fn {file, %AgentRunUpload{id: id}}, :original, signed: true ->
+        assert id == upload.id
+        assert file.file_name == "agent.patch"
+        @compatibilities_url
+      end)
+
+      conn =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
+
+      response = response(conn, 200)
+
+      assert [_ | _] = get_resp_header(conn, "content-type")
+      assert response =~ "addons:"
+      assert byte_size(response) > 100_000
+    end
+
+    test "accepts upload type names from the agent run upload schema" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      upload = insert(:agent_run_upload, agent_run: run)
+
+      expect(Console.Uploads, :url, 3, fn {file, %AgentRunUpload{id: id}}, :original, signed: true ->
+        assert id == upload.id
+        assert file.file_name in ~w(agent.patch agent-session.json recording.mp4)
+        "https://example.com"
+      end)
+
+      for name <- ~w(patch session screen_recording) do
+        response =
+          build_conn()
+          |> add_auth_headers(user)
+          |> get("/v1/api/ai/runs/#{run.id}/downloads/#{name}")
+          |> response(200)
+
+        assert response =~ "Example Domain"
+      end
+    end
+
+    test "returns an error when the signed upload request fails", %{conn: conn} do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+      insert(:agent_run_upload, agent_run: run, session: nil, screen_recording: nil)
+
+      expect(Console.Uploads, :url, fn {_file, %AgentRunUpload{}}, :original, signed: true ->
+        "https://example.com"
+      end)
+
+      expect(Req, :get, fn %Req.Request{}, opts ->
+        assert Keyword.get(opts, :url) == "https://example.com"
+        assert Keyword.get(opts, :into) == :self
+        assert Keyword.get(opts, :redirect) == true
+
+        {:error, :econnrefused}
+      end)
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/ai/runs/#{run.id}/downloads/patch")
+        |> json_response(401)
+
+      assert result["error"] == "Agent Run upload failed to download: :econnrefused"
     end
   end
 
@@ -164,4 +275,5 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       |> json_response(403)
     end
   end
+
 end

@@ -61,11 +61,12 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   defp tool_msg(content, _), do: {:user, content}
 
   defp tools(activity, %Environment{skills: skills, job: job, activities: activities}) do
+    skills = Environment.subagent_skills(skills, :coding)
     [
-      %CodingAgent{activity: activity, workbench: job.workbench, job: job},
+      %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},
       %PullRequests{job: job},
-      %Skills{skills: Environment.subagent_skills(skills, :coding)},
-      %Skill{skills: Environment.subagent_skills(skills, :coding)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       %History{job: job, activities: activities},
       Result

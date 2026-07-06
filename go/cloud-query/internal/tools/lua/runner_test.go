@@ -203,4 +203,3 @@ func TestEmptyOutputIsEmptyObject(t *testing.T) {
 		t.Errorf("expected {}, got %s", out.ResultJSON)
 	}
 }
-

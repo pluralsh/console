@@ -50,6 +50,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
         (run.messages ?? [])
           .concat(subscribedMessages)
           .filter(isNonNullable)
+          .filter((msg) => !isHiddenAgentMessage(msg))
           .map(agentMsgToChatMsg),
         (a, b) => a.id === b.id
       ),
@@ -73,7 +74,9 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
           Array.isArray(row) ? (row[0]?.id ?? 'tool-group') : (row.id ?? '')
         }
         itemGap="small"
-        style={{ padding: spacing.large }}
+        style={{
+          padding: `0 ${spacing.large}px ${spacing.large}px`,
+        }}
         renderer={({ rowData }) =>
           Array.isArray(rowData) ? (
             <ChatToolCallGroup
@@ -116,10 +119,16 @@ const chatMessagePropsShared = {
   style: { padding: 0 },
 }
 
+const isHiddenAgentMessage = (msg: AgentMessageFragment) =>
+  msg.message === '__plrl_ignore__' &&
+  !msg.metadata?.tool &&
+  !msg.metadata?.file
+
 const agentMsgToChatMsg = (msg: AgentMessageFragment): ChatFragment => ({
   id: msg.id,
   seq: msg.seq,
   role: msg.role,
+  insertedAt: msg.insertedAt,
   content: msg.metadata?.tool
     ? msg.metadata.tool.output
     : msg.metadata?.file

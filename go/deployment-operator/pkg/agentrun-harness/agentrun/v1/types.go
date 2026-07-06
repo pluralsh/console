@@ -3,6 +3,8 @@ package v1
 import (
 	"time"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
@@ -23,7 +25,7 @@ const (
 	// tool call, or session if there is no output or input detected.
 	defaultInactivityTimeout = defaultBashTimeout
 
-	defaultBabysitInterval = int64(60)
+	defaultBabysitInterval = int64(60) // seconds between PR/SCM babysit checks
 )
 
 type AgentRun struct {
@@ -42,21 +44,34 @@ type AgentRun struct {
 
 	// Runtime information
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
+	Prompts []*console.AgentPromptFragment
+	Skills  []AgentSkill
 
 	DindEnabled    bool
 	BrowserEnabled bool
+	MemoryEnabled  bool
 
 	Babysit         bool
 	BabysitInterval int64
+	Approval        bool
+	ApprovedAt      *string
+}
+
+type AgentSkill struct {
+	Name        string
+	Description *string
+	Contents    string
 }
 
 type AgentRuntime struct {
-	ID            string                   `json:"id"`
-	Name          string                   `json:"name"`
-	Type          console.AgentRuntimeType `json:"type"`
-	AiProxy       bool                     `json:"aiProxy"`
-	Config        *AgentRuntimeConfig      `json:"config,omitempty"`
-	ExaConnection bool                     `json:"exaConnection,omitempty"`
+	ID             string                   `json:"id"`
+	Name           string                   `json:"name"`
+	Type           console.AgentRuntimeType `json:"type"`
+	AiProxy        bool                     `json:"aiProxy"`
+	Memory         bool                     `json:"memory"`
+	StreamingProxy bool                     `json:"streamingProxy"`
+	Config         *AgentRuntimeConfig      `json:"config,omitempty"`
+	ExaConnection  bool                     `json:"exaConnection,omitempty"`
 }
 
 type AgentRuntimeConfig struct {
@@ -114,6 +129,16 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		ScmCreds:    fragment.ScmCreds,
 		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
+		Prompts:     fragment.Prompts,
+		Skills: lo.Map(
+			lo.Filter(fragment.Skills, func(skill *console.AgentRunFragment_Skills, _ int) bool { return skill != nil }),
+			func(skill *console.AgentRunFragment_Skills, _ int) AgentSkill {
+				return AgentSkill{
+					Name:        skill.Name,
+					Description: skill.Description,
+					Contents:    skill.Contents,
+				}
+			}),
 	}
 
 	if fragment.Flow != nil {
@@ -130,6 +155,10 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		run.BrowserEnabled = true
 	}
 
+	if helpers.GetPluralEnvBool(controller.EnvMemoryEnabled, false) {
+		run.MemoryEnabled = true
+	}
+
 	if fragment.Babysit != nil {
 		run.Babysit = *fragment.Babysit
 	}
@@ -137,6 +166,10 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 	if fragment.BabysitInterval != nil {
 		run.BabysitInterval = *fragment.BabysitInterval
 	}
+	if fragment.Approval != nil {
+		run.Approval = *fragment.Approval
+	}
+	run.ApprovedAt = fragment.ApprovedAt
 
 	return run
 }
@@ -152,6 +185,8 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 	result.Name = runtime.Name
 	result.Type = runtime.Type
 	result.AiProxy = runtime.AiProxy != nil && *runtime.AiProxy
+	result.Memory = helpers.GetPluralEnvBool(controller.EnvMemoryEnabled, false)
+	result.StreamingProxy = helpers.GetPluralEnvBool(controller.EnvStreamingProxy, false)
 	result.ExaConnection = helpers.GetPluralEnv(controller.EnvExaConnection, "") != ""
 
 	config := &AgentRuntimeConfig{}
@@ -205,6 +240,10 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 
 func (ar *AgentRun) IsProxyEnabled() bool {
 	return ar.Runtime != nil && ar.Runtime.AiProxy
+}
+
+func (ar *AgentRun) IsStreamingProxyEnabled() bool {
+	return ar.IsProxyEnabled() && ar.Runtime != nil && ar.Runtime.StreamingProxy
 }
 
 func (ar *AgentRun) ExaConnectionEnabled() bool {

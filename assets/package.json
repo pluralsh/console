@@ -100,6 +100,7 @@
     "qs": "6.14.1",
     "query-string": "8.1.0",
     "react": "19.2.3",
+    "react-diff-view": "3.3.3",
     "react-diff-viewer-continued": "4.2.2",
     "react-dom": "19.2.3",
     "react-dropzone": "14.2.3",

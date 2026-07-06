@@ -78,6 +78,37 @@ func (in *DatadogProvider) MetricsSearch(ctx context.Context, input *toolquery.M
 	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
 }
 
+func (in *DatadogProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	if in.conn == nil {
+		return nil, ErrInvalidArgument
+	}
+	if input == nil || strings.TrimSpace(input.GetMetric()) == "" {
+		return nil, fmt.Errorf("%w: metric is required", ErrInvalidArgument)
+	}
+
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
+	if err != nil {
+		return nil, err
+	}
+
+	api := datadogV2.NewMetricsApi(client)
+	resp, _, err := api.ListTagsByMetricName(ctx, strings.TrimSpace(input.GetMetric()))
+	if err != nil {
+		return nil, err
+	}
+
+	data := resp.GetData()
+	attributes := data.GetAttributes()
+	tags := attributes.GetTags()
+	label := strings.TrimSpace(input.GetLabel())
+	values := in.datadogMetricLabelNames(tags)
+	if label != "" {
+		values = in.datadogMetricLabelValues(tags, label)
+	}
+
+	return newMetricsLabelSearchOutput(values, input.GetQuery(), metricsLabelSearchLimit(input.GetLimit())), nil
+}
+
 func (in *DatadogProvider) toMetricsQueryOutput(resp datadogV1.MetricsQueryResponse) *toolquery.MetricsQueryOutput {
 	metrics := make([]*toolquery.MetricPoint, 0)
 
@@ -299,4 +330,26 @@ func (in *DatadogProvider) tagsToLabels(tags []string) map[string]string {
 		}
 	}
 	return labels
+}
+
+func (in *DatadogProvider) datadogMetricLabelNames(tags []string) []string {
+	labels := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		key, _, _ := strings.Cut(tag, ":")
+		labels = append(labels, key)
+	}
+
+	return labels
+}
+
+func (in *DatadogProvider) datadogMetricLabelValues(tags []string, label string) []string {
+	values := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		key, value, ok := strings.Cut(tag, ":")
+		if ok && key == label {
+			values = append(values, value)
+		}
+	}
+
+	return values
 }

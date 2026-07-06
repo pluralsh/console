@@ -2,12 +2,16 @@ package agent
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	"github.com/mark3labs/mcp-go/server"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/openaiproxy"
 	"github.com/pluralsh/console/go/deployment-operator/internal/mcpserver/agent/tool"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -22,8 +26,11 @@ type Server struct {
 	// server is the MCP server instance
 	server *server.MCPServer
 
-	// httpServer is the streamable HTTP transport server
-	httpServer *server.StreamableHTTPServer
+	// mcpHandler serves MCP streamable HTTP requests
+	mcpHandler *server.StreamableHTTPServer
+
+	// httpServer serves MCP and auxiliary HTTP endpoints
+	httpServer *http.Server
 
 	// client is the Plural console client
 	client console.Client
@@ -33,12 +40,23 @@ type Server struct {
 
 	// tools is a list of tools supported by the MCP server
 	tools []tool.Tool
+
+	// openaiProxy optionally exposes a local OpenAI chat completion endpoint
+	openaiProxy *openaiproxy.Handler
+
+	// openaiResponsesProxy optionally exposes a local OpenAI responses endpoint
+	openaiResponsesProxy *openaiproxy.ResponsesHandler
 }
 
 // Start starts the MCP server with streamable HTTP transport
 func (in *Server) Start(addr string) error {
-	klog.V(log.LogLevelDefault).InfoS("started plural console mcp server", "version", in.version)
-	return in.httpServer.Start(addr)
+	if in.httpServer == nil {
+		return fmt.Errorf("http server is not initialized")
+	}
+
+	in.httpServer.Addr = addr
+	klog.V(log.LogLevelDefault).InfoS("started plural console mcp server", "version", in.version, "address", addr)
+	return in.httpServer.ListenAndServe()
 }
 
 // Shutdown gracefully stops the MCP HTTP server.
@@ -62,7 +80,20 @@ func (in *Server) init() *Server {
 		klog.V(log.LogLevelDefault).InfoS("registered tool with mcp server", "tool", tool.ID())
 	}
 
-	in.httpServer = server.NewStreamableHTTPServer(in.server)
+	in.mcpHandler = server.NewStreamableHTTPServer(in.server)
+
+	mux := http.NewServeMux()
+	mux.Handle("/mcp", in.mcpHandler)
+	if in.openaiProxy != nil {
+		mux.Handle(common.AgentOpenAIChatCompletionsPath, in.openaiProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered openai chat completion proxy", "path", common.AgentOpenAIChatCompletionsPath)
+	}
+	if in.openaiResponsesProxy != nil {
+		mux.Handle(common.AgentOpenAIResponsesPath, in.openaiResponsesProxy)
+		klog.V(log.LogLevelDefault).InfoS("registered openai responses proxy", "path", common.AgentOpenAIResponsesPath)
+	}
+
+	in.httpServer = &http.Server{Handler: mux}
 	return in
 }
 

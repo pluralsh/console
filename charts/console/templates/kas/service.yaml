@@ -23,6 +23,9 @@ spec:
       targetPort: {{ .Values.kas.service.agentProxyPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-agent-proxy
+      {{- if and .Values.gatewayApi.enabled .Values.gatewayApi.appProtocol }}
+      appProtocol: {{ .Values.gatewayApi.appProtocol | quote }}
+      {{- end }}
     - port: {{ .Values.kas.api.port }}
       targetPort: {{ .Values.kas.api.port }}
       protocol: TCP

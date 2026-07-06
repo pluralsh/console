@@ -4,26 +4,33 @@ import styled from 'styled-components'
 const HANDLE_THICKNESS = 20
 export const SIDE_PANEL_HEADER_HEIGHT = 55
 
-export function SidePanelContent({ children }: { children: ReactNode }) {
+export function SidePanelContent({
+  children,
+  hideResizeChrome = false,
+}: {
+  children: ReactNode
+  hideResizeChrome?: boolean
+}) {
   return (
-    <SidePanelWrapperSC>
-      <ResizeGripSC />
+    <SidePanelWrapperSC $hideResizeChrome={hideResizeChrome}>
+      {!hideResizeChrome && <ResizeGripSC />}
       {children}
     </SidePanelWrapperSC>
   )
 }
 
-const SidePanelWrapperSC = styled.div(({ theme }) => ({
-  position: 'relative',
-  zIndex: theme.zIndexes.modal,
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  width: 'var(--side-panel-width)',
-  transition: 'width calc((1 - var(--is-dragging)) * 0.2s) ease-in-out',
-  borderLeft: theme.borders.default,
-  background: theme.colors['fill-accent'],
-}))
+const SidePanelWrapperSC = styled.div<{ $hideResizeChrome?: boolean }>(
+  ({ theme, $hideResizeChrome }) => ({
+    position: 'relative',
+    zIndex: theme.zIndexes.modal,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: 'var(--side-panel-width)',
+    borderLeft: $hideResizeChrome ? 'none' : theme.borders.default,
+    background: theme.colors['fill-accent'],
+  })
+)
 
 export const PanelHeaderSC = styled.div(({ theme }) => ({
   color: theme.colors['text-xlight'],

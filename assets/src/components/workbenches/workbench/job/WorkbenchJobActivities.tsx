@@ -28,7 +28,15 @@ import {
 
 export const ACTIVITY_GAP = 'medium' as const
 
-export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
+export function WorkbenchJobActivities({
+  jobId,
+  workbenchId,
+  workbenchName,
+}: {
+  jobId: string
+  workbenchId: string
+  workbenchName: string
+}) {
   const { spacing } = useTheme()
 
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
@@ -144,6 +152,8 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
                 }
                 activity={rowData}
                 jobId={jobId}
+                workbenchId={workbenchId}
+                workbenchName={workbenchName}
                 textStream={textStreamMap[rowData.id] ?? ''}
               />
             )}

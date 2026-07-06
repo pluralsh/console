@@ -22,8 +22,8 @@ export function AwaitingReviewLauncherButton({
           open
             ? undefined
             : count > 0
-              ? `${count} stack${count === 1 ? '' : 's'} awaiting review`
-              : 'No stacks awaiting review'
+              ? `${count} item${count === 1 ? '' : 's'} awaiting review`
+              : 'Nothing awaiting review'
         }
         {...props}
       />

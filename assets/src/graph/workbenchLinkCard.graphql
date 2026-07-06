@@ -1,0 +1,40 @@
+fragment WorkbenchLinkCard on Workbench {
+  id
+  name
+  repository {
+    url
+    httpsPath
+  }
+  botUser {
+    name
+  }
+  agentRuntime {
+    id
+    cluster {
+      id
+      name
+      handle
+    }
+  }
+}
+
+query WorkbenchLinkCard($id: ID!) {
+  workbench(id: $id) {
+    ...WorkbenchLinkCard
+  }
+}
+
+query WorkbenchLinkCardPendingAgentRuns($first: Int = 100) {
+  agentRuns(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        id
+        workbenchJob {
+          workbench {
+            id
+          }
+        }
+      }
+    }
+  }
+}

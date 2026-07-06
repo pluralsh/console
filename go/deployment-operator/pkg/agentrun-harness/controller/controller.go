@@ -12,9 +12,11 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -46,7 +48,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 		return retErr
 	}
 
-	in.preStart()
+	if retErr = in.preStart(ctx); retErr != nil {
+		return retErr
+	}
 
 	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes) {
 		if message == nil {
@@ -94,6 +98,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 func (in *agentRunController) prepare() error {
 	var err error
 	repositoryDir := filepath.Join(in.dir, "shared", "repository")
+	if err := environment.ConfigureGitSafeDirectory(repositoryDir); err != nil {
+		return fmt.Errorf("configure git safe directory: %w", err)
+	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
 		RepositoryDir: repositoryDir,
@@ -141,6 +148,7 @@ func (in *agentRunController) init() (Controller, error) {
 
 	// Convert console fragment to harness type
 	in.agentRun = (&agentrunv1.AgentRun{}).FromAgentRunFragment(agentRunFragment)
+	in.initializePromptCursor()
 
 	klog.V(log.LogLevelInfo).InfoS("found agent run",
 		"id", in.agentRun.ID,
@@ -152,11 +160,19 @@ func (in *agentRunController) init() (Controller, error) {
 	return in, nil
 }
 
-// babysitLoop runs the callback periodically while babysit is enabled.
-// It stops when ctx is done, the done channel is closed, or all PRs are terminal.
+// babysitLoop waits for the initial autonomous run, then optionally enters
+// post-run phases:
+//
+//  1. Analysis persistence (if configured)
+//  2. Post-run poll (approval mode): queued user prompts or approval → PR prompt
+//  3. Babysit loop (if enabled): user prompts every promptPollInterval (5s),
+//     PR/SCM checks every babysitInterval (default 60s)
+//
+// When both approval and babysit are enabled, approval follow-up creates the PR
+// before step 3; babysit then monitors PRs and continues accepting user prompts.
 func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool,
 ) {
-	d := time.Duration(in.agentRun.BabysitInterval) * time.Second
+	prInterval := time.Duration(in.agentRun.BabysitInterval) * time.Second
 
 	// Wait for initial Run() to complete.
 	select {
@@ -167,6 +183,7 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.runDone:
 		klog.Info("initial agent run completed, starting babysit loop")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
+		in.runPostRunPollLoop(ctx)
 		if !in.agentRun.Babysit {
 			return
 		}
@@ -175,23 +192,63 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 		}
 	}
 
-	// Run immediately, then wait d after each call completes before running again.
 	for {
-		if in.runBabysit(ctx, callback) {
+		agentRun, err := in.consoleClient.GetAgentRun(ctx, in.agentRunID)
+		if err != nil {
+			klog.ErrorS(err, "could not poll agent run during babysit", "id", in.agentRunID)
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+		if agentRun == nil {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+		if agentRun.Status == gqlclient.AgentRunStatusCancelled && !environment.IsDev() {
+			in.errChan <- internalerrors.ErrRemoteCancel
 			return
 		}
 
-		select {
-		case <-ctx.Done():
+		if in.tryDispatchQueuedUserPrompt(ctx, agentRun, false) {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+
+		if !in.lastBabysitPRPollAt.IsZero() && time.Since(in.lastBabysitPRPollAt) < prInterval {
+			if in.waitBabysit(ctx, promptPollInterval) {
+				return
+			}
+			continue
+		}
+
+		in.lastBabysitPRPollAt = time.Now()
+		if in.runBabysitPR(ctx, callback) {
 			return
-		case <-in.done:
+		}
+
+		if in.waitBabysit(ctx, promptPollInterval) {
 			return
-		case <-time.After(d):
 		}
 	}
 }
 
-func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
+func (in *agentRunController) waitBabysit(ctx context.Context, d time.Duration) bool {
+	select {
+	case <-ctx.Done():
+		return true
+	case <-in.done:
+		return true
+	case <-time.After(d):
+		return false
+	}
+}
+
+func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
 	agentRun, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusBabysitting})
 	if err != nil {
 		klog.ErrorS(err, "failed to update agent run status during babysit")
@@ -236,17 +293,17 @@ func (in *agentRunController) runBabysit(ctx context.Context, callback func(ctx 
 	}
 
 	bCtx := in.buildBabysitContext(ctx, agentRun, babysitClient)
-	if bCtx != nil {
-		if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
-			klog.ErrorS(err, "failed to update agent run status during babysit")
-			return false
-		}
+	if bCtx == nil {
+		return false
+	}
+
+	if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+		klog.ErrorS(err, "failed to update agent run status during babysit")
+		return false
 	}
 
 	stop := callback(ctx, bCtx)
-	if bCtx != nil {
-		in.uploadAgentRunArtifacts(context.Background())
-	}
+	in.uploadAgentRunArtifacts(context.Background())
 	return stop
 }
 
@@ -273,9 +330,10 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 			title = *pr.Title
 		}
 		enriched = append(enriched, toolv1.EnrichedPR{
-			URL:     pr.URL,
-			Title:   title,
-			Details: d,
+			URL:         pr.URL,
+			Title:       title,
+			Details:     d,
+			NewComments: in.newOrUpdatedPRComments(pr.URL, d.Comments),
 		})
 		details = append(details, d)
 	}
@@ -290,10 +348,20 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 		return nil
 	}
 
-	// SHA unchanged or empty
-	if sha == in.lastPRSHA || in.lastPRSHA == "" {
+	if in.lastPRSHA == "" {
+		for _, e := range enriched {
+			in.recordSeenPRComments(e.URL, e.Details.Comments)
+		}
 		in.lastPRSHA = sha
 		in.lastPRCheckAt = time.Now()
+		klog.V(log.LogLevelExtended).InfoS("PR state baseline recorded, skipping reprompt")
+		return nil
+	}
+
+	if sha == in.lastPRSHA {
+		for _, e := range enriched {
+			in.recordSeenPRComments(e.URL, e.Details.Comments)
+		}
 		klog.V(log.LogLevelExtended).InfoS("PR state unchanged, skipping reprompt")
 		return nil
 	}
@@ -312,6 +380,9 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 	prompt := buildBabysitPrompt(branch, repositoryDir, enriched, in.lastPRCheckAt)
 
 	// Persist the new SHA and timestamp so the next tick can diff against it.
+	for _, e := range enriched {
+		in.recordSeenPRComments(e.URL, e.Details.Comments)
+	}
 	in.lastPRSHA = sha
 	in.lastPRCheckAt = time.Now()
 
@@ -341,22 +412,15 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 	for _, e := range prs {
 		_, _ = fmt.Fprintf(&sb, "## PR: %s\nURL: %s\n", e.Title, e.URL)
 		_, _ = fmt.Fprintf(&sb, "### Branch: %s\n", branch)
-		// New comments since last check.
-		var newComments []scm.PRComment
-		for _, c := range e.Details.Comments {
-			if c.CreatedAt.After(lastChecked) {
-				newComments = append(newComments, c)
-			}
-		}
-		if len(newComments) > 0 {
-			sb.WriteString("### New comments since last check\n\n")
-			for _, c := range newComments {
+		if len(e.NewComments) > 0 {
+			sb.WriteString("### New or updated comments since last reprompt\n\n")
+			for _, c := range e.NewComments {
 				body := strings.ReplaceAll(c.Body, "\n", "\n  > ")
 				_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
 					c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
 			}
 		} else {
-			sb.WriteString("No new comments since last check.\n\n")
+			sb.WriteString("No new or updated comments since last reprompt.\n\n")
 		}
 
 		// CI check status.
@@ -390,6 +454,38 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 		}
 	}
 	return sb.String()
+}
+
+func (in *agentRunController) newOrUpdatedPRComments(prURL string, comments []scm.PRComment) []scm.PRComment {
+	in.ensureSeenPRCommentBodies()
+
+	var result []scm.PRComment
+	for _, comment := range comments {
+		key := prCommentKey(prURL, comment)
+		if body, ok := in.seenPRCommentBodies[key]; !ok || body != comment.Body {
+			result = append(result, comment)
+		}
+	}
+
+	return result
+}
+
+func (in *agentRunController) recordSeenPRComments(prURL string, comments []scm.PRComment) {
+	in.ensureSeenPRCommentBodies()
+
+	for _, comment := range comments {
+		in.seenPRCommentBodies[prCommentKey(prURL, comment)] = comment.Body
+	}
+}
+
+func (in *agentRunController) ensureSeenPRCommentBodies() {
+	if in.seenPRCommentBodies == nil {
+		in.seenPRCommentBodies = make(map[string]string)
+	}
+}
+
+func prCommentKey(prURL string, comment scm.PRComment) string {
+	return prURL + "|" + comment.ReactableID()
 }
 
 // NewAgentRunController creates a new agent run controller

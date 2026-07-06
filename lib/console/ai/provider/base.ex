@@ -1,6 +1,7 @@
 defmodule Console.AI.Provider.Base do
   alias ReqLLM.{Context, Response, ToolCall, StreamResponse}
   alias Console.AI.{Tool, Stream}
+  alias Console.Prom.Meter
 
   def select_model(_, model, _) when is_binary(model), do: model
   def select_model(prov, _, type), do: select_model(prov, type)
@@ -20,6 +21,11 @@ defmodule Console.AI.Provider.Base do
     end
   end
 
+  def base_opts(overrides, opts) do
+    Keyword.take(opts, [:usage_callback])
+    |> Keyword.merge(overrides)
+  end
+
   def tools(opts) do
     plural = Keyword.get(opts, :plural)
     tools  = Keyword.get(opts, :tools)
@@ -29,17 +35,23 @@ defmodule Console.AI.Provider.Base do
   end
 
   def generate_text(messages, model, %Stream{} = s, opts) do
+    {callback, opts} = Keyword.pop(opts, :usage_callback)
     with {:ok, model} <- model(model),
          {:ok, stream} <- stream_retrier(model, messages, opts),
          {:ok, result} <- StreamResponse.process_stream(stream, Stream.stream_options(s)) do
       Stream.offset(1)
+      usage_callback(result, callback)
       {:ok, result}
     end
   end
 
   def generate_text(messages, model, _, opts) do
+    {callback, opts} = Keyword.pop(opts, :usage_callback)
     with {:ok, model} <- model(model),
-      do: ReqLLM.generate_text(model, messages, opts)
+         {:ok, result} <- ReqLLM.generate_text(model, messages, opts) do
+      usage_callback(result, callback)
+      {:ok, result}
+    end
   end
 
   def reqllm_messages(messages) do
@@ -57,6 +69,14 @@ defmodule Console.AI.Provider.Base do
     end)
     |> Context.new()
   end
+
+  defp usage_callback(result, callback) when is_function(callback, 1) do
+    Meter.incr_tokens(result)
+
+    ReqLLM.Response.usage(result)
+    |> callback.()
+  end
+  defp usage_callback(result, _), do: Meter.incr_tokens(result)
 
   defp tid(id) when is_binary(id), do: id
   defp tid(_id), do: Ecto.UUID.generate()

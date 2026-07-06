@@ -1,6 +1,7 @@
 defmodule Console.AI.Chat.Tools do
   alias Console.AI.Tools
   alias Console.AI.Tools.{Agent, Explain}
+  import Console.AI.Workbench.Subagents.Base, only: [if_vector_store_enabled: 1]
   alias Console.Schema.{
     ChatThread,
     AgentSession,
@@ -34,12 +35,11 @@ defmodule Console.AI.Chat.Tools do
   @agent_pre_tools [Agent.Role]
 
   @agent_search_tools [
-    Agent.ServiceComponent,
-    Agent.Stack,
     Agent.SwitchCluster,
     Agent.Role,
     Agent.KubeResource
   ]
+  @agent_vector_search_tools [Agent.ServiceComponent, Agent.Stack]
 
   @cloudquery_tools []
 
@@ -55,9 +55,7 @@ defmodule Console.AI.Chat.Tools do
     Agent.Catalogs,
     Agent.PrAutomations,
     Agent.Clusters,
-    Agent.ServiceComponent,
     # Agent.Search,
-    Agent.Stack,
     Agent.CallPr,
     Agent.Role
   ]
@@ -70,11 +68,11 @@ defmodule Console.AI.Chat.Tools do
     Agent.Role
   ]
 
-  @code_pre_tools [Agent.Stack, Agent.Coding.StackFiles]
+  @code_pre_tools [Agent.Coding.StackFiles]
   @code_pr_tools [Agent.Coding.GenericPr]
   @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles]
 
-  @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles, Agent.ApiSpec, Agent.Discovery]
+  @kubernetes_code_pre_tools [Agent.Coding.ServiceFiles, Agent.ApiSpec, Agent.Discovery]
   @kubernetes_code_post_tools [Agent.Coding.GenericPr, Agent.ApiSpec, Agent.Discovery]
 
   @cluster_tools [Agent.Discovery, Agent.ApiSpec]
@@ -83,9 +81,7 @@ defmodule Console.AI.Chat.Tools do
 
   @research_tools [
     Agent.ReadGraph,
-    Agent.UpdateGraph,
-    Agent.ServiceComponent,
-    Agent.Stack
+    Agent.UpdateGraph
   ]
 
   @service_tools [
@@ -120,14 +116,15 @@ defmodule Console.AI.Chat.Tools do
   end
 
 
-  defp agent_tools(%ChatThread{research_id: id}) when is_binary(id), do: @research_tools
+  defp agent_tools(%ChatThread{research_id: id}) when is_binary(id),
+    do: @research_tools ++ if_vector_store_enabled(@agent_vector_search_tools)
   defp agent_tools(%ChatThread{flow_id: id}) when is_binary(id), do: []
   defp agent_tools(%ChatThread{service_id: id}) when is_binary(id), do: []
 
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id, tf_booted: true}}) when is_binary(id),
     do: @kubernetes_code_post_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes}}),
-    do: @kubernetes_code_pre_tools
+    do: if_vector_store_enabled(Agent.ServiceComponent) ++ @kubernetes_code_pre_tools
 
   defp agent_tools(%ChatThread{session: %AgentSession{
     type: :terraform,
@@ -139,14 +136,18 @@ defmodule Console.AI.Chat.Tools do
     when is_binary(id), do: @code_pr_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform, stack_id: id, pull_request_id: pr_id}})
     when is_binary(id) and is_binary(pr_id), do: @code_post_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform}}), do: @code_pre_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :terraform}}),
+    do: if_vector_store_enabled(Agent.Stack) ++ @code_pre_tools
 
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools
 
   defp agent_tools(%ChatThread{session: %AgentSession{type: :search} = session}),
-    do: @agent_search_tools ++ cloudquery_tools(session) ++ coding_tools(session)
+    do:
+      if_vector_store_enabled(@agent_vector_search_tools) ++
+        @agent_search_tools ++ cloudquery_tools(session) ++ coding_tools(session)
   defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning, plan_confirmed: true}}), do: @agent_planned_tools
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning}}), do: @agent_provisioning_tools
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning}}),
+    do: if_vector_store_enabled(@agent_vector_search_tools) ++ @agent_provisioning_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :manifests}}), do: @agent_manifests_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :configure}}), do: @configure_tools
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_pre_tools

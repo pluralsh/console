@@ -33,7 +33,7 @@ versions:
         is deprecated; plan to remove/replace usage in automation/scripts.', AWS provider
         switches to AWS SDK v2 and deprecates v1; custom builds/plugins depending
         on v1 need adjustment.]
-  chart_version: 9.57.0
+  chart_version: 9.58.0
   images: ['registry.k8s.io/autoscaling/cluster-autoscaler:v1.35.0']
 - version: 1.34.2
   kube: ['1.34']

@@ -53,9 +53,23 @@ type agentRunController struct {
 	// The babysit loop skips reprompting when this matches the current state.
 	lastPRSHA string
 
-	// lastPRCheckAt is the time the agent was last reprompted about PR status.
-	// Passed to the AI so it knows which comments are new since the last check.
+	// lastPRCheckAt is the time the agent last established or updated its PR baseline.
 	lastPRCheckAt time.Time
+
+	// lastPromptSeq is the latest follow-up prompt sequence the controller sent
+	// back to the agent after the initial run.
+	lastPromptSeq int64
+
+	// lastBabysitPRPollAt is when PR/SCM babysit work last ran. Queued user
+	// prompts are polled more frequently via promptPollInterval.
+	lastBabysitPRPollAt time.Time
+
+	// approvalPromptSent ensures the approval-unblocked prompt is only sent once.
+	approvalPromptSent bool
+
+	// seenPRCommentBodies tracks comment IDs and bodies already considered by
+	// babysit. This catches delayed SCM API visibility even when created_at is old.
+	seenPRCommentBodies map[string]string
 }
 
 type Option func(*agentRunController)

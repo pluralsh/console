@@ -35,7 +35,9 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
+  useCallback,
   useEffect,
+  useId,
   useMemo,
   useState,
 } from 'react'
@@ -47,9 +49,18 @@ import {
   ServiceGitFolderField,
   ServiceGitRefField,
 } from 'components/cd/services/deployModal/DeployServiceSettingsGit'
+import {
+  GitRepositoryImportFields,
+  useGitRepositoryImport,
+} from 'components/cd/repos/GitRepositoriesImportGit'
 import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { CaptionP, InlineA, OverlineH3 } from 'components/utils/typography/Text'
+import {
+  Body1BoldP,
+  CaptionP,
+  InlineA,
+  OverlineH3,
+} from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -79,6 +90,7 @@ import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredTo
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
   useWorkbenchFormCardTabs,
+  useWorkbenchFormFooterActions,
   WorkbenchFormState,
 } from './WorkbenchCreateOrEdit'
 
@@ -324,7 +336,21 @@ export function WorkbenchSkillsConfigStep({
 }
 
 function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
+  const theme = useTheme()
   const update = createFormUpdater(setFormState)
+  const [subView, setSubView] = useState<'select' | 'import'>('select')
+  const closeImport = useCallback(() => setSubView('select'), [])
+  const handleImported = useCallback(
+    (repositoryId: string) => {
+      setFormState(
+        produce((d) => {
+          d.repositoryId = repositoryId
+        })
+      )
+      setSubView('select')
+    },
+    [setFormState]
+  )
   const { data: reposData, loading: reposLoading } = useGitRepositoriesQuery({
     variables: { first: 500 },
     fetchPolicy: 'cache-and-network',
@@ -341,6 +367,15 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
   const skillsRef = formState.skills?.ref
   const gitRef = skillsRef?.ref ?? ''
   const gitFolder = skillsRef?.folder ?? ''
+
+  if (subView === 'import') {
+    return (
+      <GitRepositoryImportSubStep
+        onBack={closeImport}
+        onImported={handleImported}
+      />
+    )
+  }
 
   return (
     <>
@@ -359,6 +394,28 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
           }
         />
       </FormField>
+      {!formState.repositoryId && (
+        <Card
+          css={{
+            alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+            padding: theme.spacing.xxlarge,
+            border: 'none',
+            height: '100%',
+          }}
+        >
+          <Body1BoldP $color="text-light">No matching repository?</Body1BoldP>
+          <Button
+            small
+            secondary
+            onClick={() => setSubView('import')}
+          >
+            Import git repository
+          </Button>
+        </Card>
+      )}
       {formState.repositoryId && (
         <>
           <ServiceGitRefField
@@ -411,6 +468,86 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
         </>
       )}
     </>
+  )
+}
+
+function GitRepositoryImportSubStep({
+  onBack,
+  onImported,
+}: {
+  onBack: () => void
+  onImported: (repositoryId: string) => void
+}) {
+  const theme = useTheme()
+  const formId = useId()
+  const { setFooterActions } = useWorkbenchFormFooterActions()
+  const importFormState = useGitRepositoryImport({
+    onCompleted: onBack,
+    onImported: (repository) => onImported(repository.id),
+  })
+  const { disabled, loading, setShowAdvanced, showAdvanced } = importFormState
+
+  useEffect(() => {
+    setFooterActions(
+      <>
+        <Button
+          type="button"
+          secondary
+          onClick={onBack}
+        >
+          Back
+        </Button>
+        <div
+          css={{
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'end',
+          }}
+        >
+          <Switch
+            checked={showAdvanced}
+            onChange={(val) => setShowAdvanced(val)}
+            css={{ width: 'fit-content' }}
+          >
+            Advanced configuration
+          </Switch>
+        </div>
+        <Button
+          type="submit"
+          form={formId}
+          disabled={disabled}
+          loading={loading}
+          primary
+        >
+          Import
+        </Button>
+      </>
+    )
+
+    return () => setFooterActions(null)
+  }, [
+    formId,
+    disabled,
+    loading,
+    onBack,
+    setFooterActions,
+    setShowAdvanced,
+    showAdvanced,
+  ])
+
+  return (
+    <form
+      id={formId}
+      onSubmit={importFormState.onSubmit}
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+      }}
+    >
+      <GitRepositoryImportFields formState={importFormState} />
+    </form>
   )
 }
 

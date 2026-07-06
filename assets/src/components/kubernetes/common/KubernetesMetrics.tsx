@@ -1,168 +1,21 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
-import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
 
 import RangePicker from 'components/utils/RangePicker'
 
-import {
-  MetricResponseFragment,
-  useClusterKubernetesMetricsQuery,
-} from 'generated/graphql'
+import { useClusterKubernetesMetricsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
 import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
 import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
-import { Prometheus } from '../../../utils/prometheus.ts'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { MetricsEmptyState } from '../../cd/cluster/ClusterMetrics.tsx'
 import { RectangleSkeleton } from '../../utils/SkeletonLoaders.tsx'
-
-const convertVals = (values) =>
-  values.map(({ timestamp, value }) => ({
-    x: new Date(timestamp * 1000),
-    y: parseFloat(value),
-  }))
-
-function Graphs({
-  cpu: [cpu],
-  mem: [mem],
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-}) {
-  const theme = useTheme()
-
-  const { cpuValues, memValues } = useMemo(
-    () => ({
-      cpuValues: cpu?.values ? convertVals(cpu?.values) : null,
-      memValues: mem?.values ? convertVals(mem?.values) : null,
-    }),
-    [cpu, mem]
-  )
-
-  if (!memValues && !cpuValues) {
-    return null
-  }
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
-      {cpuValues && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
-        >
-          <GraphHeader title="Overall CPU Usage (cores)" />
-          <Graph
-            data={[{ id: 'cpu', data: cpuValues }]}
-            yFormat={(v) => Prometheus.format(v, 'cpu')}
-            tickRotation={undefined}
-          />
-        </div>
-      )}
-      {memValues && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
-        >
-          <GraphHeader title="Overall Memory Usage (bytes)" />
-          <Graph
-            data={[{ id: 'memory', data: memValues }]}
-            yFormat={(v) => Prometheus.format(v, 'memory')}
-            tickRotation={undefined}
-          />
-        </div>
-      )}
-    </div>
-  )
-}
-
-function PodGraphs({
-  cpu,
-  mem,
-}: {
-  cpu: MetricResponseFragment[]
-  mem: MetricResponseFragment[]
-}) {
-  const theme = useTheme()
-  const { cpuGraph, memGraph } = useMemo(() => {
-    const cpuGraph = cpu.map(({ metric, values }) => ({
-      id: (metric as any)?.pod,
-      data: convertVals(values),
-    }))
-    const memGraph = mem.map(({ metric, values }) => ({
-      id: (metric as any)?.pod,
-      data: convertVals(values),
-    }))
-
-    return { cpuGraph, memGraph }
-  }, [cpu, mem])
-
-  if (!memGraph && !cpuGraph) {
-    return null
-  }
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
-    >
-      {!isEmpty(cpuGraph) && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
-        >
-          <GraphHeader title="Pod CPU Usage (cores)" />
-          <Graph
-            data={cpuGraph}
-            yFormat={(v) => Prometheus.format(v, 'cpu')}
-            tickRotation={undefined}
-          />
-        </div>
-      )}
-      {!isEmpty(memGraph) && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
-        >
-          <GraphHeader title="Pod Memory Usage (bytes)" />
-          <Graph
-            data={memGraph}
-            yFormat={(v) => Prometheus.format(v, 'memory')}
-            tickRotation={undefined}
-          />
-        </div>
-      )}
-    </div>
-  )
-}
+import { PodResourceReservation } from 'components/utils/metrics/podResourceReservations.ts'
+import { ResourceMetricsGraphs } from 'components/utils/metrics/ResourceMetricsGraphs.tsx'
+import { useKubernetesPodResourceReservations } from 'components/utils/metrics/useKubernetesPodResourceReservations.ts'
 
 function Metric({
   clusterId,
@@ -171,6 +24,7 @@ function Metric({
   kind,
   name,
   namespace,
+  podReservations,
   duration: { step, offset },
   ...props
 }: {
@@ -180,6 +34,7 @@ function Metric({
   kind: string
   name: string
   namespace: string
+  podReservations?: PodResourceReservation[]
   duration: { step: string; offset: number }
 }) {
   const theme = useTheme()
@@ -222,16 +77,13 @@ function Metric({
 
   if (!isEmpty(cpu) || !isEmpty(mem) || !isEmpty(podCpu) || !isEmpty(podMem)) {
     content = (
-      <>
-        <Graphs
-          cpu={cpu}
-          mem={mem}
-        />
-        <PodGraphs
-          cpu={podCpu}
-          mem={podMem}
-        />
-      </>
+      <ResourceMetricsGraphs
+        cpu={cpu}
+        mem={mem}
+        podCpu={podCpu}
+        podMem={podMem}
+        podReservations={podReservations}
+      />
     )
   }
 
@@ -275,6 +127,13 @@ export default function KubernetesMetrics({
   const theme = useTheme()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
   const metricsEnabled = useMetricsEnabled()
+  const podReservations = useKubernetesPodResourceReservations({
+    clusterId,
+    enabled: metricsEnabled,
+    kind,
+    name,
+    namespace,
+  })
 
   if (!metricsEnabled) return <MetricsEmptyState />
 
@@ -299,6 +158,7 @@ export default function KubernetesMetrics({
         kind={kind}
         name={name}
         namespace={namespace}
+        podReservations={podReservations}
         duration={duration}
       />
     </div>

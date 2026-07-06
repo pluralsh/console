@@ -6,6 +6,17 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.Deployments.Workbenches
   alias Console.Schema.{WorkbenchJob}
 
+  @usage %{
+    input_tokens: 100,
+    output_tokens: 25,
+    total_tokens: 125,
+    cached_tokens: 10,
+    reasoning_tokens: 5,
+    input_cost: 0.01,
+    output_cost: 0.02,
+    total_cost: 0.03
+  }
+
   describe "create_workbench/2" do
     test "project writers can create a workbench" do
       user = insert(:user)
@@ -481,6 +492,40 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
     end
 
+    test "users with flow read access can create associated flow jobs without workbench read access" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench)
+      insert(:flow_workbench, flow: flow, workbench: workbench)
+
+      {:ok, job} =
+        Workbenches.create_workbench_job(
+          %{prompt: "test prompt", flow_id: flow.id},
+          workbench.id,
+          user
+        )
+
+      assert job.workbench_id == workbench.id
+      assert job.flow_id == flow.id
+      assert job.user_id == user.id
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+
+    test "users with flow read access cannot create flow jobs for unrelated workbenches" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench)
+
+      assert {:error, "this flow is not associated with the workbench"} =
+               Workbenches.create_workbench_job(
+                 %{prompt: "test prompt", flow_id: flow.id},
+                 workbench.id,
+                 user
+               )
+
+      refute_receive {:event, %PubSub.WorkbenchJobCreated{}}
+    end
+
     test "creates a workbench job with an associated chatbot message" do
       user = insert(:user)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
@@ -641,6 +686,31 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert refetch(job).status == :paused
       assert refetch(activity).status == :cancelled
       assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
+    end
+
+    test "persists usage when provided" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, paused} = Workbenches.pause_job(job, @usage)
+
+      assert paused.status == :paused
+      assert_usage(paused.usage, @usage)
+      assert_usage(refetch(job).usage, @usage)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^paused}}
+    end
+  end
+
+  describe "save_usage/2" do
+    test "persists token and cost usage for a job" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, updated} = Workbenches.save_usage(job, @usage)
+
+      assert updated.id == job.id
+      assert updated.status == :running
+      assert_usage(updated.usage, @usage)
+      assert_usage(refetch(job).usage, @usage)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^updated}}
     end
   end
 
@@ -993,6 +1063,30 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert failed.completed_at
       assert failed.error == "Something went wrong."
     end
+
+    test "persists usage when provided" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, failed} = Workbenches.fail_job("Something went wrong.", job, @usage)
+
+      assert failed.status == :failed
+      assert failed.completed_at
+      assert failed.error == "Something went wrong."
+      assert_usage(failed.usage, @usage)
+      assert_usage(refetch(job).usage, @usage)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^failed}}
+    end
+  end
+
+  defp assert_usage(usage, expected) do
+    assert usage.input_tokens == expected.input_tokens
+    assert usage.output_tokens == expected.output_tokens
+    assert usage.total_tokens == expected.total_tokens
+    assert usage.cached_tokens == expected.cached_tokens
+    assert usage.reasoning_tokens == expected.reasoning_tokens
+    assert usage.input_cost == expected.input_cost
+    assert usage.output_cost == expected.output_cost
+    assert usage.total_cost == expected.total_cost
   end
 
   describe "create_workbench_cron/3" do

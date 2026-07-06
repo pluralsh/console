@@ -11,6 +11,7 @@ defmodule Console.Deployments.Agents do
   alias Console.Schema.{
     AgentRuntime,
     AgentRun,
+    AgentPrompt,
     AgentPromptHistory,
     Cluster,
     User,
@@ -29,7 +30,7 @@ defmodule Console.Deployments.Agents do
   @type agent_run_upload_resp :: {:ok, AgentRunUpload.t} | error
   @type agent_runtime_resp :: {:ok, AgentRuntime.t} | error
   @type agent_msg_resp :: {:ok, AgentMessage.t} | error
-  @type history_resp :: {:ok, AgentPromptHistory.t} | error
+  @type prompt_resp :: {:ok, AgentPromptHistory.t} | error
 
   def default_runtime(), do: Repo.get_by(AgentRuntime, default: true)
 
@@ -293,13 +294,59 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
+  Approves an agent run that is paused pending user approval.
+  """
+  @spec approve_agent_run(binary, User.t) :: agent_run_resp
+  def approve_agent_run(run_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(run_id)
+      |> allow(user, :update)
+    end)
+    |> add_operation(:update, fn
+      %{run: %AgentRun{approval: false}} ->
+        {:error, "agent run does not require approval"}
+
+      %{run: %AgentRun{status: :pending_approval, approved_at: nil} = run} ->
+        AgentRun.changeset(run, %{approved_at: Timex.now()})
+        |> Repo.update()
+
+      %{run: %AgentRun{status: :pending_approval} = run} ->
+        {:ok, run}
+
+      %{run: %AgentRun{}} ->
+        {:error, "agent run is not pending approval"}
+    end)
+    |> execute(extract: :update)
+    |> notify(:update)
+  end
+
+  @doc """
   Creates a new prompt for this agent run
   """
-  @spec create_prompt(binary, binary) :: history_resp
-  def create_prompt(prompt, run_id) do
-    %AgentPromptHistory{}
-    |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
-    |> Repo.insert()
+  @spec create_prompt(binary, binary, User.t) :: prompt_resp
+  def create_prompt(prompt, run_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(run_id)
+      |> allow(user, :update)
+    end)
+    |> add_operation(:prompt, fn _ ->
+      %AgentPromptHistory{}
+      |> AgentPromptHistory.changeset(%{prompt: prompt, agent_run_id: run_id})
+      |> Repo.insert()
+    end)
+    |> add_operation(:agent_prompt, fn _ ->
+      %AgentPrompt{}
+      |> AgentPrompt.changeset(%{prompt: prompt, agent_run_id: run_id})
+      |> Repo.insert()
+    end)
+    |> add_operation(:message, fn _ ->
+      %AgentMessage{}
+      |> AgentMessage.changeset(%{role: :user, message: prompt, agent_run_id: run_id})
+      |> Repo.insert()
+    end)
+    |> execute(extract: :prompt)
   end
 
   @doc """
@@ -315,6 +362,7 @@ defmodule Console.Deployments.Agents do
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
          {:ok, run} <- persist_pr_branches(run, ba, he),
+         {:ok, run} <- ensure_pr_approved(run),
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
       %PullRequest{fresh: true}
       |> PullRequest.changeset(
@@ -329,6 +377,16 @@ defmodule Console.Deployments.Agents do
       err -> err
     end
   end
+
+  defp ensure_pr_approved(%AgentRun{approval: true, approved_at: nil} = run) do
+    case AgentRun.changeset(run, %{status: :pending_approval})
+         |> Repo.update()
+         |> notify(:update) do
+      {:ok, _} -> {:error, "agent run must be approved before creating a pull request"}
+      err -> err
+    end
+  end
+  defp ensure_pr_approved(%AgentRun{} = run), do: {:ok, run}
 
   defp persist_pr_branches(%AgentRun{} = run, base, head) when is_binary(head) do
     Console.drop_nils(%{

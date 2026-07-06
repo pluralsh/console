@@ -329,6 +329,15 @@ type AgentPrompt struct {
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+// A history of prompts attached to this agent run.  The ids are unique and monotonic, and can be used for ordering
+type AgentPromptHistory struct {
+	ID string `json:"id"`
+	// the prompt to give this agent run
+	Prompt     string  `json:"prompt"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
 type AgentPullRequestAttributes struct {
 	// the title of the pull request
 	Title string `json:"title"`
@@ -378,6 +387,8 @@ type AgentRun struct {
 	LanguageVersion *string `json:"languageVersion,omitempty"`
 	// the analysis of the agent run
 	Analysis *AgentAnalysis `json:"analysis,omitempty"`
+	// the skills available to this agent run
+	Skills []*AgentSkill `json:"skills,omitempty"`
 	// the todos of the agent run
 	Todos       []*AgentTodo `json:"todos,omitempty"`
 	ScmCreds    *ScmCreds    `json:"scmCreds,omitempty"`
@@ -396,6 +407,8 @@ type AgentRun struct {
 	User *User `json:"user,omitempty"`
 	// the flow this agent is associated with
 	Flow *Flow `json:"flow,omitempty"`
+	// the workbench job this agent run was spawned from, if any
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the pull requests this agent run has created
 	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	InsertedAt   *string        `json:"insertedAt,omitempty"`
@@ -482,6 +495,8 @@ type AgentRunStatusAttributes struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// the skills available to this agent run
+	Skills []*AgentSkillAttributes `json:"skills,omitempty"`
 }
 
 type AgentRunUpload struct {
@@ -613,6 +628,24 @@ type AgentSessionConnection struct {
 type AgentSessionEdge struct {
 	Node   *AgentSession `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type AgentSkill struct {
+	// the name of the skill
+	Name string `json:"name"`
+	// the description of the skill
+	Description *string `json:"description,omitempty"`
+	// the contents of the skill
+	Contents string `json:"contents"`
+}
+
+type AgentSkillAttributes struct {
+	// the name of the skill
+	Name string `json:"name"`
+	// the description of the skill
+	Description *string `json:"description,omitempty"`
+	// the contents of the skill
+	Contents string `json:"contents"`
 }
 
 type AgentTodo struct {
@@ -3201,6 +3234,8 @@ type DeploymentSettings struct {
 	PrometheusConnection *HTTPConnection `json:"prometheusConnection,omitempty"`
 	// custom helm values to apply to all agents (useful for things like adding customary annotations/labels)
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
+	// whether to render agent helm values as a template
+	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
 	// global settings for stack configuration
 	Stacks *StackSettings `json:"stacks,omitempty"`
 	// smtp server configuration for email notifications
@@ -3244,6 +3279,8 @@ type DeploymentSettingsAttributes struct {
 	DeployerRepositoryID *string `json:"deployerRepositoryId,omitempty"`
 	// custom helm values to apply to all agents (useful for things like adding customary annotations/labels)
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
+	// whether to render agent helm values as a template
+	AgentHelmValuesTemplateable *bool `json:"agentHelmValuesTemplateable,omitempty"`
 	// global configuration for stack execution
 	Stacks *StackSettingsAttributes `json:"stacks,omitempty"`
 	// connection details for a prometheus instance to use
@@ -4844,6 +4881,13 @@ type MetricsSettingsAttributes struct {
 	Endpoint *string `json:"endpoint,omitempty"`
 	// cron expression for how often to export metrics (e.g. '*/5 * * * *')
 	Crontab *string `json:"crontab,omitempty"`
+}
+
+type ModelDefault struct {
+	Provider       AiProvider `json:"provider"`
+	Model          string     `json:"model"`
+	ToolModel      string     `json:"toolModel"`
+	EmbeddingModel *string    `json:"embeddingModel,omitempty"`
 }
 
 // A monitor defines a recurring check over observability data that can raise alerts
@@ -10092,12 +10136,18 @@ type WorkbenchJob struct {
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// error message when the job failed
 	Error *string `json:"error,omitempty"`
+	// the flow this job is associated with
+	FlowID *string `json:"flowId,omitempty"`
 	// mode-specific options for this job
 	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+	// token and cost usage for this job
+	Usage *WorkbenchJobUsage `json:"usage,omitempty"`
 	// chatbot integration metadata for this job, when present
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
+	// the flow this job is associated with
+	Flow *Flow `json:"flow,omitempty"`
 	// the user who created this run
 	User *User `json:"user,omitempty"`
 	// the result for this job (sideloadable)
@@ -10229,6 +10279,8 @@ type WorkbenchJobActivityTrace struct {
 type WorkbenchJobAttributes struct {
 	// the prompt for this job
 	Prompt *string `json:"prompt,omitempty"`
+	// the flow this job is associated with
+	FlowID *string `json:"flowId,omitempty"`
 	// mode-specific options for this job
 	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
@@ -10379,6 +10431,25 @@ type WorkbenchJobThoughtDelta struct {
 type WorkbenchJobUpdateAttributes struct {
 	// the result for this job
 	Result *WorkbenchResultAttributes `json:"result,omitempty"`
+}
+
+type WorkbenchJobUsage struct {
+	// input tokens consumed by this job
+	InputTokens *int64 `json:"inputTokens,omitempty"`
+	// output tokens produced by this job
+	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total tokens consumed by this job
+	TotalTokens *int64 `json:"totalTokens,omitempty"`
+	// cached input tokens used by this job
+	CachedTokens *int64 `json:"cachedTokens,omitempty"`
+	// reasoning tokens produced by this job
+	ReasoningTokens *int64 `json:"reasoningTokens,omitempty"`
+	// input token cost for this job
+	InputCost *float64 `json:"inputCost,omitempty"`
+	// output token cost for this job
+	OutputCost *float64 `json:"outputCost,omitempty"`
+	// total token cost for this job
+	TotalCost *float64 `json:"totalCost,omitempty"`
 }
 
 type WorkbenchMessageAttributes struct {
@@ -11130,6 +11201,19 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchUsageTimeseries struct {
+	// UTC timestamp for this data point
+	Timestamp *string `json:"timestamp,omitempty"`
+	// the workbench this usage data is associated with
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// number of input tokens consumed during this interval
+	InputTokens *int64 `json:"inputTokens,omitempty"`
+	// number of output tokens produced during this interval
+	OutputTokens *int64 `json:"outputTokens,omitempty"`
+	// total cost for this interval, in USD
+	TotalCost *float64 `json:"totalCost,omitempty"`
 }
 
 type WorkbenchWebhook struct {

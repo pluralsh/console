@@ -12,6 +12,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -27,18 +28,23 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeOpencode); err != nil {
 		return err
 	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
+		return err
+	}
 
 	input := &ConfigTemplateInput{
-		ConsoleURL:       consoleURL,
-		ConsoleToken:     consoleToken,
-		AgentRunID:       in.Config.Run.ID,
-		Provider:         in.provider,
-		OpenAICompatible: in.openaiCompatible,
-		Endpoint:         in.Config.Run.Runtime.Config.OpenCode.Endpoint,
-		Model:            in.model,
-		Token:            in.Config.Run.Runtime.Config.OpenCode.Token,
-		Mode:             in.Config.Run.Mode,
-		DindEnabled:      in.Config.Run.DindEnabled,
+		ConsoleURL:            consoleURL,
+		ConsoleToken:          consoleToken,
+		AgentRunID:            in.Config.Run.ID,
+		Provider:              in.provider,
+		OpenAICompatible:      in.openaiCompatible,
+		Endpoint:              in.Config.Run.Runtime.Config.OpenCode.Endpoint,
+		Model:                 in.model,
+		Token:                 in.Config.Run.Runtime.Config.OpenCode.Token,
+		Mode:                  in.Config.Run.Mode,
+		DindEnabled:           in.Config.Run.DindEnabled,
+		StreamingProxy:        in.Config.Run.IsStreamingProxyEnabled(),
+		StreamingProxyBaseURL: common.AgentOpenAIBaseURL,
 	}
 
 	_, content, err := configTemplate(input)
@@ -81,7 +87,7 @@ func (in *Opencode) start(ctx context.Context, options ...exec.Option) {
 		append(
 			options,
 			exec.WithEnv(in.env(configFilePath)),
-			exec.WithArgs(in.args("")),
+			exec.WithArgs(in.args("", false)),
 			exec.WithDir(in.Config.RepositoryDir),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 		)...,
@@ -243,7 +249,7 @@ func (in *Opencode) getID(e EventListResponse) string {
 	return e.Part.MessageID
 }
 
-func (in *Opencode) args(prompt string) []string {
+func (in *Opencode) args(prompt string, resume bool) []string {
 	if len(prompt) == 0 {
 		prompt = in.Config.Run.Prompt
 		if overridePrompt := os.Getenv(environment.EnvOverrideSystemPrompt); len(overridePrompt) > 0 {
@@ -251,13 +257,16 @@ func (in *Opencode) args(prompt string) []string {
 		}
 	}
 
-	return []string{
+	args := []string{
 		"run",
 		"--format", "json",
 		"--agent", in.agent(),
 		"--model", fmt.Sprintf("%s/%s", in.provider, in.model),
-		prompt,
 	}
+	if resume && in.sessionID != "" {
+		args = append(args, "--session", in.sessionID)
+	}
+	return append(args, prompt)
 }
 
 func (in *Opencode) agent() string {
@@ -270,6 +279,10 @@ func (in *Opencode) agent() string {
 
 func (in *Opencode) configFilePath() string {
 	return path.Join(in.providerPath(), ConfigFileName)
+}
+
+func (in *Opencode) skillsPath() string {
+	return path.Join(in.providerPath(), "skills")
 }
 
 func (in *Opencode) providerPath() string {
@@ -324,7 +337,7 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 	in.executable = exec.NewExecutable(
 		"opencode",
 		exec.WithEnv(in.env(configFilePath)),
-		exec.WithArgs(in.args(bCtx.Prompt)),
+		exec.WithArgs(in.args(bCtx.Prompt, true)),
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 	)
@@ -357,14 +370,19 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 	return false
 }
 
-// AnalysisFollowUpRun re-runs OpenCode with followUpPrompt. Errors are
-// returned to the caller and must not be sent on ErrorChan.
-func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting opencode", "prompt_len", len(followUpPrompt))
+// FollowUpRun re-runs OpenCode with followUpPrompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Opencode) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting opencode",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.sessionID != "",
+		"sessionID", in.sessionID,
+	)
 
 	configFilePath, err := filepath.Abs(in.configFilePath())
 	if err != nil {
-		return fmt.Errorf("opencode analysis follow-up: %w", err)
+		return fmt.Errorf("opencode follow-up: %w", err)
 	}
 
 	runCtx, cancel := context.WithCancelCause(ctx)
@@ -373,14 +391,10 @@ func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt stri
 	in.executable = exec.NewExecutable(
 		"opencode",
 		exec.WithEnv(in.env(configFilePath)),
-		exec.WithArgs(in.args(followUpPrompt)),
+		exec.WithArgs(in.args(followUpPrompt, true)),
 		exec.WithDir(in.Config.RepositoryDir),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.OpenCode.Timeout),
 	)
-
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
-	}
 
 	state := &streamState{
 		events: make(map[string]*Event),
@@ -388,24 +402,33 @@ func (in *Opencode) AnalysisFollowUpRun(ctx context.Context, followUpPrompt stri
 
 	err = in.executable.RunStream(runCtx, in.streamLineHandler(state, cancel))
 	if ctxErr := context.Cause(runCtx); ctxErr != nil {
-		return fmt.Errorf("opencode analysis follow-up execution failed: %w", ctxErr)
+		return fmt.Errorf("opencode follow-up execution failed: %w", ctxErr)
 	}
 	if err != nil {
-		return fmt.Errorf("opencode analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("opencode follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("opencode analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("opencode follow-up execution finished")
 	return nil
 }
 
 func (in *Opencode) ConfigureBabysitRun() error {
-	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeOpencode)
+	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeOpencode); err != nil {
+		return err
+	}
+
+	return in.ConfigureSkills(in.skillsPath())
 }
 
 func (in *Opencode) env(configFilePath string) []string {
 	return []string{
 		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
+		fmt.Sprintf("XDG_CONFIG_HOME=%s", in.configHome()),
 		fmt.Sprintf("XDG_DATA_HOME=%s", in.dataHome()),
 	}
+}
+
+func (in *Opencode) configHome() string {
+	return filepath.Join(in.Config.WorkDir, ".config")
 }
 
 func (in *Opencode) dataPath() string {

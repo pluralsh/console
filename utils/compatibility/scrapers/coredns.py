@@ -3,6 +3,8 @@ from utils import (
     fetch_page,
     update_compatibility_info,
     get_chart_versions,
+    current_kube_version,
+    expand_kube_versions,
 )
 from collections import OrderedDict
 import re
@@ -31,6 +33,27 @@ def parse_markdown_table(markdown: str) -> list[tuple[str, str]]:
     return rows
 
 
+def kube_version_key(version: str) -> tuple[int, int]:
+    major, minor = version.split(".")
+    return int(major), int(minor)
+
+
+def expand_min_kube_versions(kubernetes_versions: str) -> list[str]:
+    latest_kube_version = current_kube_version()
+    if not latest_kube_version:
+        print_error("Could not determine current Kubernetes version.")
+        return []
+
+    versions = set()
+    for version in re.split(r"&|,", kubernetes_versions):
+        minimum = re.sub(r"^v", "", version.strip())
+        if not minimum:
+            continue
+        versions.update(expand_kube_versions(minimum, latest_kube_version))
+
+    return sorted(versions, key=kube_version_key)
+
+
 def extract_table_data(table_rows: list[tuple[str, str]], chart_versions):
     combined: dict[str, dict[str, object]] = {}
     for kube_cell, coredns_cell in table_rows:
@@ -47,11 +70,10 @@ def extract_table_data(table_rows: list[tuple[str, str]], chart_versions):
             )
             continue
 
-        # Remove leading 'v' from Kubernetes versions
-        kubernetes_versions_list = [
-            re.sub(r"^v", "", version.strip())
-            for version in re.split(r"&|,", kubernetes_versions)
-        ]
+        kubernetes_versions_list = expand_min_kube_versions(kubernetes_versions)
+        if not kubernetes_versions_list:
+            continue
+
         chart_version = chart_versions.get(coredns_version)
         if not chart_version:
             continue
@@ -68,7 +90,7 @@ def extract_table_data(table_rows: list[tuple[str, str]], chart_versions):
             OrderedDict(
                 [
                     ("version", version),
-                    ("kube", sorted(entry["kube"])),
+                    ("kube", sorted(entry["kube"], key=kube_version_key)),
                     ("chart_version", entry["chart_version"]),
                     ("images", []),
                     ("requirements", []),

@@ -110,6 +110,50 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
 }
 
+func (in *PrometheusProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	if in.conn == nil {
+		return nil, fmt.Errorf("%w: prometheus connection is required", ErrInvalidArgument)
+	}
+	if input == nil || strings.TrimSpace(input.GetMetric()) == "" {
+		return nil, fmt.Errorf("%w: metric is required", ErrInvalidArgument)
+	}
+
+	client, err := in.newClient()
+	if err != nil {
+		return nil, err
+	}
+
+	end := time.Now()
+	start := end.Add(-24 * time.Hour)
+	limit := metricsLabelSearchLimit(input.GetLimit())
+	matches := []string{fmt.Sprintf(`{__name__=%q}`, strings.TrimSpace(input.GetMetric()))}
+
+	label := strings.TrimSpace(input.GetLabel())
+	if label == "" {
+		names, _, err := client.LabelNames(ctx, matches, start, end, v1.WithLimit(uint64(limit)))
+		if err != nil {
+			return nil, err
+		}
+
+		names = lo.Filter(names, func(name string, _ int) bool {
+			return name != model.MetricNameLabel
+		})
+
+		return newMetricsLabelSearchOutput(names, input.GetQuery(), limit), nil
+	}
+
+	values, _, err := client.LabelValues(ctx, label, matches, start, end, v1.WithLimit(uint64(limit)))
+	if err != nil {
+		return nil, err
+	}
+
+	resultValues := lo.Map(values, func(value model.LabelValue, _ int) string {
+		return string(value)
+	})
+
+	return newMetricsLabelSearchOutput(resultValues, input.GetQuery(), limit), nil
+}
+
 func (in *PrometheusProvider) toStep(input *toolquery.MetricsQueryInput) (time.Duration, error) {
 	step := 30 * time.Second
 	if len(input.GetStep()) == 0 {

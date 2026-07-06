@@ -52,7 +52,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, provider_opts ++ [tools: tools(opts)])
+      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, base_opts(provider_opts ++ [tools: tools(opts)], opts))
       |> reqllm_result()
     end
   end
@@ -68,7 +68,7 @@ defmodule Console.AI.OpenAI do
     with {:ok, provider_opts} <- provider_options(openai) do
       messages
       |> reqllm_messages()
-      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required])
+      |> generate_text(openai_model(openai, opts[:model], model_type(opts[:client])), openai.stream, base_opts(provider_opts ++ [tools: reqllm_tools(tools), tool_choice: :required], opts))
       |> reqllm_result()
       |> tool_calls()
     end

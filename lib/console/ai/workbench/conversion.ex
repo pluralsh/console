@@ -15,7 +15,9 @@ defmodule Console.AI.Workbench.Conversion do
     AzureConnection,
   }
 
-  @spec to_proto(WorkbenchTool.t()) :: {:ok, %ToolConnection{}} | {:error, String.t()}
+  @spec to_proto(WorkbenchTool.t() | ToolConnection.t()) :: {:ok, %ToolConnection{}} | {:error, String.t()}
+  def to_proto(%ToolConnection{} = conn), do: {:ok, conn}
+
   def to_proto(%WorkbenchTool{tool: :datadog, configuration: %{datadog: %{} = dd}}) do
     {:ok, %ToolConnection{
       connection: {:datadog, %DatadogConnection{

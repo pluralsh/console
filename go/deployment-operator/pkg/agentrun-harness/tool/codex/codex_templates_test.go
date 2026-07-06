@@ -7,6 +7,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/dind"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
@@ -27,6 +28,9 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCodexConfig() failed: %v", err)
 	}
+	if cfg.Features == nil || !cfg.Features.Skills {
+		t.Fatal("expected Codex skills feature to be enabled")
+	}
 
 	provider := cfg.ModelProviders["plural"]
 	if provider == nil {
@@ -43,15 +47,67 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 	}
 }
 
+func TestBuildCodexConfig_CodebaseMemoryMCPServer(t *testing.T) {
+	cfg, err := BuildCodexConfig("/repo", []AgentInput{{
+		Name:        autonomousProfile,
+		SandboxMode: sandboxModeHarness,
+		Model:       string(ModelGPT54),
+	}}, []MCPInput{{
+		Name:    common.CodebaseMemoryMCPServerName,
+		Type:    "stdio",
+		Command: common.CodebaseMemoryMCPCommand,
+		Env:     map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir},
+	}}, nil)
+	if err != nil {
+		t.Fatalf("BuildCodexConfig() failed: %v", err)
+	}
+
+	server := cfg.MCPServers[common.CodebaseMemoryMCPServerName]
+	if server == nil {
+		t.Fatal("expected codebase memory MCP server")
+	}
+	if server.Type != "stdio" {
+		t.Fatalf("type = %q, want stdio", server.Type)
+	}
+	if server.Command != common.CodebaseMemoryMCPCommand {
+		t.Fatalf("command = %q, want %q", server.Command, common.CodebaseMemoryMCPCommand)
+	}
+	if server.Env[common.CodebaseMemoryCacheEnv] != common.CodebaseMemoryCacheDir {
+		t.Fatalf("env[%s] = %q, want %q", common.CodebaseMemoryCacheEnv, server.Env[common.CodebaseMemoryCacheEnv], common.CodebaseMemoryCacheDir)
+	}
+}
+
 func TestCodexExecArgs(t *testing.T) {
 	repositoryDir := dind.RepositoryDir()
-	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests")
+	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests", "")
 	want := []string{
 		"exec",
 		"--sandbox", sandboxModeHarness,
 		"--cd", repositoryDir,
 		"--profile", autonomousProfile,
 		"--json", "run tests",
+	}
+	if len(args) != len(want) {
+		t.Fatalf("expected %d args, got %d: %v", len(want), len(args), args)
+	}
+	for i := range want {
+		if args[i] != want[i] {
+			t.Fatalf("arg[%d]: expected %q, got %q (full: %v)", i, want[i], args[i], args)
+		}
+	}
+}
+
+func TestCodexExecArgsResume(t *testing.T) {
+	repositoryDir := dind.RepositoryDir()
+	sessionID := "thr_abc123"
+	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests", sessionID)
+	want := []string{
+		"exec",
+		"--sandbox", sandboxModeHarness,
+		"--cd", repositoryDir,
+		"--profile", autonomousProfile,
+		"--json",
+		"resume", sessionID, "run tests",
 	}
 	if len(args) != len(want) {
 		t.Fatalf("expected %d args, got %d: %v", len(want), len(args), args)

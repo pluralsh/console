@@ -47,12 +47,30 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
 # Final stage - minimal image with all three binaries
 FROM gcr.io/distroless/static-debian12:nonroot AS final
 
+ARG BUILD_TIME=1970-01-01T00:00:00Z
+ARG GIT_COMMIT=unknown
+ARG VERSION=dev
+
 LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       name="Kubernetes Agent" \
       maintainer="Plural::sre" \
       vendor="Plural" \
       summary="Kubernetes Agent Image" \
-      description="Image containing agentk binary for Plural CD"
+      description="Image containing agentk binary for Plural CD" \
+      org.opencontainers.image.created="${BUILD_TIME}" \
+      org.opencontainers.image.authors="Plural Labs, Inc." \
+      org.opencontainers.image.url="https://www.plural.sh" \
+      org.opencontainers.image.documentation="https://github.com/pluralsh/console/tree/master/go/kubernetes-agent" \
+      org.opencontainers.image.source="https://github.com/pluralsh/console/tree/master/go/kubernetes-agent" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.ref.name="${VERSION}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}" \
+      org.opencontainers.image.vendor="Plural" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.title="Kubernetes Agent" \
+      org.opencontainers.image.description="Agentk image for Plural CD" \
+      org.opencontainers.image.base.name="gcr.io/distroless/static-debian12:nonroot" \
+      org.opencontainers.image.rebuild-trigger="2026-06-26-agentk"
 
 # Copy all binaries from builder
 COPY --from=builder /binaries/agentk /agentk

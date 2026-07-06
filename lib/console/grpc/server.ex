@@ -4,6 +4,8 @@ defmodule Console.GRPC.Server do
   alias Console.Deployments.{Settings, Agents}
   alias Console.Schema.{DeploymentSettings, User, Cluster}
 
+  @dummy_key "ignore"
+
   def meter_metrics(%Plrl.MeterMetricsRequest{bytes: bytes}, _) do
     Console.Prom.Meter.incr(max(bytes, 0))
     %Plrl.MeterMetricsResponse{success: true}
@@ -71,7 +73,7 @@ defmodule Console.GRPC.Server do
     defaults = Provider.defaults(:openai)
 
     %Plrl.OpenAiConfig{
-      apiKey: Map.get(openai, :access_token),
+      apiKey: openai_api_key(openai),
       model: Map.get(openai, :model) || defaults[:model],
       embeddingModel: Map.get(openai, :embedding_model) || defaults[:embedding_model],
       toolModel: Map.get(openai, :tool_model) || defaults[:tool_model],
@@ -82,6 +84,8 @@ defmodule Console.GRPC.Server do
     }
   end
   defp to_openai_pb(_), do: nil
+
+  defp openai_api_key(%{} = openai), do: Map.get(openai, :access_token) || @dummy_key
 
   defp to_openai_token_exchange_pb(%{} = token_exchange) do
     case {Map.get(token_exchange, :enabled), Map.get(token_exchange, :token_url),

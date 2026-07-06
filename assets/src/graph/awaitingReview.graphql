@@ -26,11 +26,47 @@ fragment AwaitingReviewStack on InfrastructureStack {
   }
 }
 
+fragment AwaitingReviewAgentRun on AgentRun {
+  id
+  status
+  approvedAt
+  prompt
+  repository
+  runtime {
+    id
+    name
+    type
+  }
+  analysis {
+    summary
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  workbenchJob {
+    id
+    workbench {
+      id
+      name
+    }
+  }
+}
+
 query PendingApprovalStacks($first: Int = 50) {
   infrastructureStacks(first: $first, status: PENDING_APPROVAL) {
     edges {
       node {
         ...AwaitingReviewStack
+      }
+    }
+  }
+}
+
+query PendingApprovalAgentRuns($first: Int = 100) {
+  agentRuns(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewAgentRun
       }
     }
   }

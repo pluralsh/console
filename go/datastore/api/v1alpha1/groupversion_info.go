@@ -4,16 +4,31 @@
 package v1alpha1
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
+
+type schemeBuilder struct {
+	GroupVersion schema.GroupVersion
+	runtime.SchemeBuilder
+}
+
+func (bld *schemeBuilder) Register(object ...runtime.Object) *schemeBuilder {
+	bld.SchemeBuilder.Register(func(scheme *runtime.Scheme) error {
+		scheme.AddKnownTypes(bld.GroupVersion, object...)
+		metav1.AddToGroupVersion(scheme, bld.GroupVersion)
+		return nil
+	})
+	return bld
+}
 
 var (
 	// GroupVersion is group version used to register these objects
 	GroupVersion = schema.GroupVersion{Group: "dbs.plural.sh", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
+	SchemeBuilder = &schemeBuilder{GroupVersion: GroupVersion, SchemeBuilder: runtime.NewSchemeBuilder()}
 
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme

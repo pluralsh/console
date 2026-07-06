@@ -54,7 +54,7 @@ func (in *Codex) mapStreamEvent(event *StreamEvent) *console.AgentMessageAttribu
 		totalTokens := float64(event.Usage.InputTokens + event.Usage.OutputTokens)
 		return &console.AgentMessageAttributes{
 			Role:    console.AiRoleAssistant,
-			Message: "turn.completed",
+			Message: ignoredAgentMessage,
 			Cost: &console.AgentMessageCostAttributes{
 				Total: totalTokens,
 				Tokens: &console.AgentMessageTokensAttributes{

@@ -95,3 +95,39 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
       key: {{ .Values.postgres.dsnKey | quote }}
       optional: true
 {{- end -}}
+
+{{- define "console.gatewayApi.hostnames" -}}
+{{- if . }}
+hostnames:
+- {{ . | quote }}
+{{- end }}
+{{- end }}
+
+{{- define "console.gatewayApi.parentRefs" }}
+{{- $parentRefs := .parentRefs | default .Values.gatewayApi.parentRefs }}
+{{- range $parentRefs }}
+- name: {{ .name }}
+  {{- with .namespace }}
+  namespace: {{ . }}
+  {{- end }}
+  {{- with .sectionName }}
+  sectionName: {{ . }}
+  {{- end }}
+  {{- with .group }}
+  group: {{ . }}
+  {{- end }}
+  {{- with .kind }}
+  kind: {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "console.gatewayApi.annotations" -}}
+{{- $base := default dict .base -}}
+{{- $extra := default dict .extra -}}
+{{- $merged := mergeOverwrite (deepCopy $base) $extra -}}
+{{- if $merged }}
+annotations:
+{{ toYaml $merged | indent 2 }}
+{{- end }}
+{{- end }}

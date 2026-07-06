@@ -18,6 +18,8 @@ func secretKeySelectorSet(ref *corev1.SecretKeySelector) bool {
 }
 
 // AgentRuntimeSpec defines the desired state of AgentRuntime
+//
+// +kubebuilder:validation:XValidation:rule="!has(self.streamingProxy) || !self.streamingProxy || (has(self.aiProxy) && self.aiProxy)",message="streamingProxy requires aiProxy to be enabled"
 type AgentRuntimeSpec struct {
 	// Name of this AgentRuntime.
 	// If not provided, the name from AgentRuntime.ObjectMeta will be used.
@@ -63,10 +65,24 @@ type AgentRuntimeSpec struct {
 	//   - CUSTOM: no automatic prefix; use provider/name explicitly
 	AiProxy *bool `json:"aiProxy,omitempty"`
 
+	// StreamingProxy routes OpenAI-compatible LLM requests through the in-pod mcpserver
+	// sse conversion proxy before they reach the Console AI proxy (/ext/ai). Only valid when aiProxy
+	// is enabled. Applies to CODEX and OPENCODE runtimes.
+	// +kubebuilder:validation:Optional
+	StreamingProxy *bool `json:"streamingProxy,omitempty"`
+
 	// Dind enables Docker-in-Docker for this agent runtime.
 	// When true, the runtime will be configured to run with DinD support.
 	// +kubebuilder:validation:Optional
 	Dind *bool `json:"dind,omitempty"`
+
+	// Memory enables team-shared codebase-memory persistence for this agent runtime.
+	// When true, agents may create and commit .codebase-memory/ graph artifacts
+	// by default so future runs can bootstrap from the persisted index. When false
+	// or unset, codebase-memory indexes stay in the pod-local cache and generated
+	// .codebase-memory/ artifacts are excluded from commits.
+	// +kubebuilder:validation:Optional
+	Memory *bool `json:"memory,omitempty"`
 
 	// AllowedRepositories the git repositories allowed to be used with this runtime.
 	// +kubebuilder:validation:Optional
@@ -744,6 +760,10 @@ func (in *AgentRuntime) Diff(hasher Hasher) (changed bool, sha string, err error
 
 func (in *AgentRuntime) IsAiProxyEnabled() bool {
 	return in != nil && in.Spec.AiProxy != nil && *in.Spec.AiProxy
+}
+
+func (in *AgentRuntime) IsStreamingProxyEnabled() bool {
+	return in.IsAiProxyEnabled() && in.Spec.StreamingProxy != nil && *in.Spec.StreamingProxy
 }
 
 func (in *AgentRuntime) ConsoleName() string {

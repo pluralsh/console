@@ -51,7 +51,7 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 
 	in.executable = exec.NewExecutable(
 		"gemini",
-		exec.WithArgs(in.args(bCtx.Prompt)),
+		exec.WithArgs(in.args(bCtx.Prompt, true)),
 		exec.WithDir(in.Config.WorkDir),
 		exec.WithEnv(env),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -97,15 +97,16 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 	return false
 }
 
-// AnalysisFollowUpRun re-runs the Gemini CLI with the same settings as the
-// initial run, using followUpPrompt as the user prompt. Errors are returned
-// to the caller and must not be sent on ErrorChan.
-func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string) error {
-	klog.V(log.LogLevelInfo).InfoS("analysis follow-up: reprompting gemini", "prompt_len", len(followUpPrompt))
-
-	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: followUpPrompt, Role: console.AiRoleUser})
-	}
+// FollowUpRun re-runs the Gemini CLI with the same settings as the initial
+// run, using followUpPrompt as the user prompt. Errors are returned to the
+// caller and must not be sent on ErrorChan.
+func (in *Gemini) FollowUpRun(ctx context.Context, followUpPrompt string) error {
+	klog.V(log.LogLevelInfo).InfoS(
+		"follow-up: reprompting gemini",
+		"prompt_len", len(followUpPrompt),
+		"resumeSession", in.sessionID != "",
+		"sessionID", in.sessionID,
+	)
 
 	env := in.env()
 	if in.Config.Run.Runtime.Config.Gemini.Endpoint != nil {
@@ -114,14 +115,14 @@ func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 
 	in.executable = exec.NewExecutable(
 		"gemini",
-		exec.WithArgs(in.args(followUpPrompt)),
+		exec.WithArgs(in.args(followUpPrompt, true)),
 		exec.WithDir(in.Config.WorkDir),
 		exec.WithEnv(env),
 		exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
 	)
 
 	err := in.executable.RunStream(ctx, func(line []byte) {
-		klog.V(log.LogLevelTrace).InfoS("Gemini stream event (analysis follow-up)", "line", string(line))
+		klog.V(log.LogLevelTrace).InfoS("Gemini stream event (follow-up)", "line", string(line))
 
 		trimmed := strings.TrimSpace(string(line))
 		if !strings.HasPrefix(trimmed, "{") {
@@ -131,24 +132,28 @@ func (in *Gemini) AnalysisFollowUpRun(ctx context.Context, followUpPrompt string
 
 		event := &events.EventBase{}
 		if err := json.Unmarshal(line, event); err != nil {
-			klog.ErrorS(err, "failed to unmarshal Gemini stream event (analysis follow-up)", "line", line)
+			klog.ErrorS(err, "failed to unmarshal Gemini stream event (follow-up)", "line", line)
 			return
 		}
 		in.recordSessionID(line, event.Type)
 
 		if err := event.OnMessage(line, in.onMessage); err != nil {
-			klog.ErrorS(err, "failed to process Gemini stream event (analysis follow-up)", "line", string(line))
+			klog.ErrorS(err, "failed to process Gemini stream event (follow-up)", "line", string(line))
 		}
 	})
 	if err != nil {
-		return fmt.Errorf("gemini analysis follow-up execution failed: %w", err)
+		return fmt.Errorf("gemini follow-up execution failed: %w", err)
 	}
-	klog.V(log.LogLevelExtended).InfoS("Gemini analysis follow-up execution finished")
+	klog.V(log.LogLevelExtended).InfoS("Gemini follow-up execution finished")
 	return nil
 }
 
 func (in *Gemini) ConfigureBabysitRun() error {
-	return in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeGemini)
+	if err := in.ConfigureSystemPromptForBabysitRun(console.AgentRuntimeTypeGemini); err != nil {
+		return err
+	}
+
+	return in.ConfigureSkills(in.skillsPath())
 }
 
 func (in *Gemini) Run(ctx context.Context, options ...exec.Option) {
@@ -165,7 +170,7 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 		"gemini",
 		append(
 			options,
-			exec.WithArgs(in.args("")),
+			exec.WithArgs(in.args("", false)),
 			exec.WithDir(in.Config.WorkDir),
 			exec.WithEnv(env),
 			exec.WithTimeout(in.Config.Run.Runtime.Config.Gemini.Timeout),
@@ -212,26 +217,26 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 	// FinishedChan is closed by the controller after the babysit loop exits.
 }
 
-func (in *Gemini) args(prompt string) []string {
+func (in *Gemini) args(prompt string, resume bool) []string {
 	if len(prompt) > 0 {
 		in.Config.Run.Prompt = prompt
 	}
-	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		return []string{
-			"--approval-mode", "yolo",
-			"--output-format", "stream-json", "--prompt",
-			in.Config.Run.Prompt,
-		}
-	}
 
-	return []string{
-		"--output-format", "stream-json", "--prompt",
-		in.Config.Run.Prompt,
+	args := []string{"--output-format", "stream-json"}
+	if in.Config.Run.Mode == console.AgentRunModeWrite {
+		args = append([]string{"--approval-mode", "yolo"}, args...)
 	}
+	if resume && in.sessionID != "" {
+		return append(args, "--resume", in.sessionID, "--prompt", in.Config.Run.Prompt)
+	}
+	return append(args, "--prompt", in.Config.Run.Prompt)
 }
 
 func (in *Gemini) Configure(_, _ string) error {
 	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeGemini); err != nil {
+		return err
+	}
+	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
 		return err
 	}
 
@@ -259,6 +264,10 @@ func (in *Gemini) Configure(_, _ string) error {
 
 func (in *Gemini) settingsPath() string {
 	return path.Join(in.providerPath(), SettingsFileName)
+}
+
+func (in *Gemini) skillsPath() string {
+	return path.Join(in.providerPath(), "skills")
 }
 
 func (in *Gemini) providerPath() string {

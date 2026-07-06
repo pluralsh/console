@@ -16,8 +16,9 @@ const (
 )
 
 var (
-	analyzePluralMCPTools = []string{mcpGetPRState, mcpUpdateAnalysis}
-	writePluralMCPTools   = []string{
+	analyzePluralMCPTools  = []string{mcpGetPRState, mcpUpdateAnalysis}
+	codebaseMemoryMCPTools = []string{CodebaseMemoryMCPToolsWildcard}
+	writePluralMCPTools    = []string{
 		mcpAgentPullRequest,
 		mcpCreateBranch,
 		mcpFetchTodos,
@@ -62,14 +63,14 @@ var (
 	analysisAgent = agentJSON("analysis", agentDef{
 		Description: "Analyze code for potential issues, vulnerabilities and improvements. Use PROACTIVELY.",
 		Prompt:      "You are a read-only autonomous analysis agent.",
-		Tools:       appendTools([]string{"Read", "Grep", "Glob", "Bash"}, analyzePluralMCPTools),
+		Tools:       appendTools(appendTools([]string{"Read", "Grep", "Glob", "Bash"}, analyzePluralMCPTools), codebaseMemoryMCPTools),
 	})
 	autonomousAgent = agentJSON("autonomous", agentDef{
 		Description: "Autonomous agent for making code changes and creating pull requests. Use PROACTIVELY.",
 		Prompt:      "You are an autonomous coding agent, highly skilled in coding and code analysis.",
 		Tools: appendTools(
 			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch"},
-			writePluralMCPTools,
+			appendTools(writePluralMCPTools, codebaseMemoryMCPTools),
 		),
 	})
 	babysitAgent = agentJSON("babysit", agentDef{
@@ -77,7 +78,7 @@ var (
 		Prompt:      "You are an autonomous coding agent. Your pull request is already open. Address reviewer comments and fix CI failures, then commit to the existing branch.",
 		Tools: appendTools(
 			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch"},
-			babysitPluralMCPTools,
+			appendTools(babysitPluralMCPTools, codebaseMemoryMCPTools),
 		),
 	})
 )

@@ -2,9 +2,13 @@ package opencode
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
 const (
@@ -53,6 +57,24 @@ func TestConfigTemplate_PluralMcpServer(t *testing.T) {
 			t.Fatalf("expected plural MCP url http://127.0.0.1:8080/mcp, got %v", plural["url"])
 		}
 	})
+
+	t.Run("codebase memory MCP server uses local stdio command", func(t *testing.T) {
+		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+		mcp := out["mcp"].(map[string]any)
+		codebaseMemory := mcp[common.CodebaseMemoryMCPServerName].(map[string]any)
+		if codebaseMemory["type"] != "local" {
+			t.Fatalf("expected codebase memory MCP type local, got %v", codebaseMemory["type"])
+		}
+		command := codebaseMemory["command"].([]any)
+		if len(command) != 1 || command[0] != common.CodebaseMemoryMCPCommand {
+			t.Fatalf("expected codebase memory command [%q], got %v", common.CodebaseMemoryMCPCommand, command)
+		}
+		environment := codebaseMemory["environment"].(map[string]any)
+		if environment[common.CodebaseMemoryCacheEnv] != common.CodebaseMemoryCacheDir {
+			t.Fatalf("expected %s=%s, got %v", common.CodebaseMemoryCacheEnv, common.CodebaseMemoryCacheDir, environment[common.CodebaseMemoryCacheEnv])
+		}
+	})
 }
 
 func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
@@ -63,6 +85,36 @@ func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
 	}
 	if out["snapshot"] != false {
 		t.Fatalf("expected snapshot=false, got %v", out["snapshot"])
+	}
+}
+
+func TestConfigTemplate_AllowsSkillLoading(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+	permission := out["permission"].(map[string]any)
+	skill := permission["skill"].(map[string]any)
+	if skill["*"] != "allow" {
+		t.Fatalf("expected skill wildcard permission to be allow, got %v", skill["*"])
+	}
+}
+
+func TestEnvUsesHarnessHomeAndConfigHome(t *testing.T) {
+	workDir := t.TempDir()
+	tool := &Opencode{DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{
+		WorkDir: workDir,
+		Run: &agentrunv1.AgentRun{
+			Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{OpenCode: &agentrunv1.OpencodeConfig{}}},
+		},
+	}}}
+
+	env := strings.Join(tool.env("/tmp/opencode.json"), "\n")
+	for _, want := range []string{
+		"XDG_CONFIG_HOME=" + workDir + "/.config",
+		"XDG_DATA_HOME=" + workDir + "/.local/share",
+	} {
+		if !strings.Contains(env, want) {
+			t.Fatalf("expected env to contain %q, got:\n%s", want, env)
+		}
 	}
 }
 
@@ -106,6 +158,23 @@ func TestConfigTemplate_DindPermissions(t *testing.T) {
 	})
 }
 
+func TestConfigTemplate_SkillPermissions(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+	agents := out["agent"].(map[string]any)
+	for _, name := range []string{"analysis", "autonomous"} {
+		agent := agents[name].(map[string]any)
+		permission := agent["permission"].(map[string]any)
+		skill, ok := permission["skill"].(map[string]any)
+		if !ok {
+			t.Fatalf("expected %s skill permission map, got %T %v", name, permission["skill"], permission["skill"])
+		}
+		if skill["*"] != "allow" {
+			t.Fatalf("expected %s skill wildcard allow, got %v", name, skill["*"])
+		}
+	}
+}
+
 func TestConfigTemplate_PluraMcpExcludeTools(t *testing.T) {
 	t.Run("WRITE mode omits PLRL_EXCLUDE_TOOLS from plural MCP env", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
@@ -137,6 +206,39 @@ func TestConfigTemplate_Provider(t *testing.T) {
 		}
 		if options["apiKey"] != testConsoleToken {
 			t.Errorf("expected apiKey=%s, got %v", testConsoleToken, options["apiKey"])
+		}
+	})
+
+	t.Run("plural provider with streaming proxy uses mcpserver base URL", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+		input.StreamingProxy = true
+		input.StreamingProxyBaseURL = common.AgentOpenAIBaseURL
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai" {
+			t.Fatalf("expected npm=@ai-sdk/openai for streaming proxy, got %v", plural["npm"])
+		}
+		options := plural["options"].(map[string]any)
+
+		if options["baseURL"] != common.AgentOpenAIBaseURL {
+			t.Errorf("expected mcpserver baseURL %s, got %v", common.AgentOpenAIBaseURL, options["baseURL"])
+		}
+	})
+
+	t.Run("plural provider without streaming proxy uses responses sdk", func(t *testing.T) {
+		input := baseInput(console.AgentRunModeWrite)
+		input.Provider = ProviderPlural
+
+		out := renderJSON(t, input)
+
+		providers := out["provider"].(map[string]any)
+		plural := providers["plural"].(map[string]any)
+		if plural["npm"] != "@ai-sdk/openai" {
+			t.Fatalf("expected npm=@ai-sdk/openai, got %v", plural["npm"])
 		}
 	})
 
@@ -202,7 +304,7 @@ func TestConfigTemplate_Provider(t *testing.T) {
 }
 
 func TestConfigTemplate_AgentTools(t *testing.T) {
-	t.Run("analysis agent has plural* tool only", func(t *testing.T) {
+	t.Run("analysis agent has MCP tools", func(t *testing.T) {
 		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
 
 		agent := out["agent"].(map[string]any)
@@ -212,8 +314,11 @@ func TestConfigTemplate_AgentTools(t *testing.T) {
 		if _, ok := tools["plural*"]; !ok {
 			t.Error("agent.analysis.tools should contain plural*")
 		}
+		if _, ok := tools["codebase-memory-mcp*"]; !ok {
+			t.Error("agent.analysis.tools should contain codebase-memory-mcp*")
+		}
 		for k := range tools {
-			if k != "plural*" {
+			if k != "plural*" && k != "codebase-memory-mcp*" {
 				t.Errorf("unexpected tool %q in analysis agent tools", k)
 			}
 		}

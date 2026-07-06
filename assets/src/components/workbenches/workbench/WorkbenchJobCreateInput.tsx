@@ -23,7 +23,9 @@ import {
   useWorkbenchPromptsQuery,
   useWorkbenchQuery,
   WorkbenchJobFragment,
+  WorkbenchJobModelAttributes,
   WorkbenchPromptFragment,
+  WorkbenchTinyFragment,
 } from 'generated/graphql'
 import capitalize from 'lodash/capitalize'
 import groupBy from 'lodash/groupBy'
@@ -40,6 +42,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
+import { WorkbenchModelSelector } from './WorkbenchModelSelector'
 import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
 import {
   defaultPromptModesFromWorkbench,
@@ -52,7 +55,9 @@ const MAX_WIDTH = 924
 
 export function WorkbenchJobCreateInput({
   workbenchId,
+  flowId,
   setWorkbenchId,
+  workbenchOptions,
   workbenchLoading,
   disabled = false,
   onCreated,
@@ -60,7 +65,9 @@ export function WorkbenchJobCreateInput({
   wrapperStyles,
 }: {
   workbenchId: Nullable<string>
+  flowId?: Nullable<string>
   setWorkbenchId?: (id: Nullable<string>) => void
+  workbenchOptions?: WorkbenchTinyFragment[]
   workbenchLoading: boolean
   disabled?: boolean
   onCreated?: (job: WorkbenchJobFragment) => void
@@ -73,7 +80,16 @@ export function WorkbenchJobCreateInput({
   const [promptSyncKey, setPromptSyncKey] = useState(0)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
+  const [selectedModelState, setSelectedModelState] = useState<{
+    workbenchId: Nullable<string>
+    model: Nullable<WorkbenchJobModelAttributes>
+  }>({ workbenchId, model: null })
   const initializedWorkbenchIdRef = useRef<string | null>(null)
+  const prevWorkbenchIdRef = useRef<string | null>(null)
+  const selectedModel =
+    selectedModelState.workbenchId === workbenchId
+      ? selectedModelState.model
+      : null
 
   const { data } = useWorkbenchQuery({
     variables: { id: workbenchId },
@@ -83,14 +99,18 @@ export function WorkbenchJobCreateInput({
   useEffect(() => {
     if (!workbenchId) {
       initializedWorkbenchIdRef.current = null
+      prevWorkbenchIdRef.current = null
       setPromptModes(null)
       return
     }
 
-    if (initializedWorkbenchIdRef.current === workbenchId) return
+    if (prevWorkbenchIdRef.current !== workbenchId) {
+      prevWorkbenchIdRef.current = workbenchId
+      initializedWorkbenchIdRef.current = null
+      setPromptModes(null)
+    }
 
-    initializedWorkbenchIdRef.current = null
-    setPromptModes(null)
+    if (initializedWorkbenchIdRef.current === workbenchId) return
 
     const defaults = defaultPromptModesFromWorkbench(
       data?.workbench,
@@ -99,7 +119,7 @@ export function WorkbenchJobCreateInput({
     if (defaults === undefined) return
 
     initializedWorkbenchIdRef.current = workbenchId
-    setPromptModes(defaults)
+    setPromptModes((current) => current ?? defaults)
   }, [workbenchId, data?.workbench])
 
   useEffect(() => {
@@ -111,6 +131,8 @@ export function WorkbenchJobCreateInput({
       onCompleted: ({ createWorkbenchJob }) => {
         if (!createWorkbenchJob?.id) return
         if (onCreated) {
+          inputRef.current?.resetInput()
+          setPrompt('')
           onCreated(createWorkbenchJob)
           return
         }
@@ -135,12 +157,20 @@ export function WorkbenchJobCreateInput({
     const trimmedPrompt = (nextPrompt ?? prompt).trim()
     if (!trimmedPrompt || !workbenchId) return
     setPrompt(trimmedPrompt)
-    const modes = modesAttributes(promptModes)
+    const promptModeAttributes = modesAttributes(promptModes)
+    const modes =
+      promptModeAttributes || selectedModel
+        ? {
+            ...(promptModeAttributes ?? {}),
+            ...(selectedModel ? { model: selectedModel } : {}),
+          }
+        : undefined
     createWorkbenchJob({
       variables: {
         workbenchId,
         attributes: {
           prompt: trimmedPrompt,
+          ...(flowId ? { flowId } : {}),
           ...(modes ? { modes } : {}),
         },
       },
@@ -173,6 +203,7 @@ export function WorkbenchJobCreateInput({
           allowSubmit={!!prompt.trim() && !!workbenchId && !disabled}
           enableAutoComplete
           workbenchId={workbenchId}
+          flowId={flowId}
           options={
             <Flex
               gap="xsmall"
@@ -183,10 +214,18 @@ export function WorkbenchJobCreateInput({
                 onChange={setPromptModes}
                 disabled={disabled || loading}
               />
+              <WorkbenchModelSelector
+                value={selectedModel}
+                onChange={(model) =>
+                  setSelectedModelState({ workbenchId, model })
+                }
+                disabled={disabled || loading}
+              />
               {setWorkbenchId && (
                 <WorkbenchPillSelector
                   workbenchId={workbenchId}
                   setWorkbenchId={setWorkbenchId}
+                  workbenchOptions={workbenchOptions}
                 />
               )}
               {workbenchId && (
@@ -209,21 +248,28 @@ export function WorkbenchJobCreateInput({
 function WorkbenchPillSelector({
   workbenchId,
   setWorkbenchId,
+  workbenchOptions,
 }: {
   workbenchId: Nullable<string>
   setWorkbenchId: (id: Nullable<string>) => void
+  workbenchOptions?: WorkbenchTinyFragment[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const { data, loading } = useWorkbenchesQuery({
     fetchPolicy: 'cache-and-network',
+    skip: !!workbenchOptions,
   })
-  const workbenches = useMemo(() => mapExistingNodes(data?.workbenches), [data])
+  const workbenches = useMemo(
+    () => workbenchOptions ?? mapExistingNodes(data?.workbenches),
+    [data, workbenchOptions]
+  )
   const selectedWorkbench = workbenches.find((w) => w.id === workbenchId)
+  const loaded = !!workbenchOptions || !!data
 
   // clear a persisted id that no longer maps to an existing workbench
   useEffect(() => {
-    if (data && workbenchId && !selectedWorkbench) setWorkbenchId(null)
-  }, [data, workbenchId, selectedWorkbench, setWorkbenchId])
+    if (loaded && workbenchId && !selectedWorkbench) setWorkbenchId(null)
+  }, [loaded, workbenchId, selectedWorkbench, setWorkbenchId])
 
   return (
     <Select
@@ -233,6 +279,7 @@ function WorkbenchPillSelector({
       width={240}
       placement="left"
       label="Select workbench"
+      isDisabled={loaded && !workbenches.length}
       selectedKey={workbenchId ?? ''}
       onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
       triggerButton={
@@ -241,7 +288,7 @@ function WorkbenchPillSelector({
           css={{ height: '100%' }}
         >
           <WorkbenchIcon size={12} />
-          {!data && loading ? (
+          {!loaded && loading ? (
             <RectangleSkeleton
               $bright
               $width={75}

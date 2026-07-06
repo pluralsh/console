@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -22,6 +24,7 @@ import (
 // Defined in pkg/common to stay in sync with the controller's agentrun_pod.go.
 const gitSigningKeyPath = common.GitSigningKeyMountPath
 const gitAskpassFileName = ".git-askpass"
+const codebaseMemoryGitExcludePattern = ".codebase-memory/"
 
 // Setup implements Environment interface.
 func (in *environment) Setup() error {
@@ -55,6 +58,9 @@ func (in *environment) cloneRepository() error {
 	repoDirPath := path.Join(in.dir, repoDir)
 	if _, err := in.configureGitCredentials(); err != nil {
 		return err
+	}
+	if err := ConfigureGitSafeDirectory(repoDirPath); err != nil {
+		return fmt.Errorf("failed to configure git safe directory: %w", err)
 	}
 
 	if _, err := os.Stat(path.Join(repoDirPath, ".git")); err == nil {
@@ -165,6 +171,12 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 		return fmt.Errorf("failed to configure git proxy: %w", err)
 	}
 
+	if !helpers.GetPluralEnvBool(controller.EnvMemoryEnabled, false) {
+		if err := configureCodebaseMemoryGitExclude(repoDirPath); err != nil {
+			return fmt.Errorf("failed to configure codebase-memory git exclude: %w", err)
+		}
+	}
+
 	cmd := exec.NewExecutable("git", exec.WithArgs([]string{"branch", "--show-current"}), exec.WithDir(repoDirPath))
 	output, err := cmd.RunWithOutput(context.Background())
 	if err != nil {
@@ -186,6 +198,25 @@ func (in *environment) configureRepository(repoDirPath, userName, userEmail stri
 
 	klog.V(log.LogLevelInfo).InfoS("repository ready", "url", in.agentRun.Repository, "dir", repoDirPath)
 	return config.Save()
+}
+
+// ConfigureGitSafeDirectory marks the repository as trusted for git when the
+// directory is owned by a different user than the current process (for example
+// when agent-bootstrap clones into a shared volume and the harness runs later).
+func ConfigureGitSafeDirectory(repoDirPath string) error {
+	abs, err := filepath.Abs(repoDirPath)
+	if err != nil {
+		return fmt.Errorf("resolve repository path: %w", err)
+	}
+
+	if err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"config", "--global", "--add", "safe.directory", abs}),
+	).Run(context.Background()); err != nil {
+		return fmt.Errorf("git config safe.directory %q: %w", abs, err)
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("configured git safe directory", "path", abs)
+	return nil
 }
 
 func (in *environment) configureGitCredentials() (string, error) {
@@ -260,6 +291,30 @@ func (in *environment) configureGitProxy(repoDirPath string) error {
 		exec.WithArgs([]string{"config", "http.proxy", proxy}),
 		exec.WithDir(repoDirPath),
 	).Run(context.Background())
+}
+
+func configureCodebaseMemoryGitExclude(repoDirPath string) error {
+	excludePath := path.Join(repoDirPath, ".git", "info", "exclude")
+	if err := os.MkdirAll(path.Dir(excludePath), 0755); err != nil {
+		return err
+	}
+
+	contents, err := os.ReadFile(excludePath)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	for _, line := range strings.Split(string(contents), "\n") {
+		if strings.TrimSpace(line) == codebaseMemoryGitExcludePattern {
+			return nil
+		}
+	}
+
+	prefix := ""
+	if len(contents) > 0 && !strings.HasSuffix(string(contents), "\n") {
+		prefix = "\n"
+	}
+	return os.WriteFile(excludePath, append(contents, []byte(prefix+codebaseMemoryGitExcludePattern+"\n")...), 0644)
 }
 
 // init ensures that all required values are initialized

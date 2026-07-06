@@ -20,6 +20,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     :callback,
     :provider,
     :model,
+    :usage_callback,
     continue_msg: "looks like we aren't done let's continue",
     messages: [],
     pre_enable: [],
@@ -75,7 +76,13 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> append_continue(engine)
     |> Enum.map(&msg(&1, :tool))
     |> fit_context_window(preface)
-    |> Provider.completion(preface: preface, plural: tools, model: engine.model, client: engine.provider || :tool)
+    |> Provider.completion(
+      preface: preface,
+      plural: tools,
+      model: engine.model,
+      client: engine.provider || :tool,
+      usage_callback: engine.usage_callback
+    )
     |> case do
       {:ok, content} -> {[callback(engine, {:assistant, content})], engine}
       {:ok, content, calls} ->

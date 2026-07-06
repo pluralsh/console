@@ -2,8 +2,17 @@ defmodule Console.AI.Workbench.ConversionTest do
   use Console.DataCase, async: true
   alias Console.Schema.WorkbenchTool
   alias Console.AI.Workbench.Conversion
+  alias Toolquery.{PrometheusConnection, ToolConnection}
 
   describe "to_proto/1" do
+    test "passes through an already built tool connection" do
+      conn = %ToolConnection{
+        connection: {:prometheus, %PrometheusConnection{url: "https://prometheus.example.com"}}
+      }
+
+      assert {:ok, ^conn} = Conversion.to_proto(conn)
+    end
+
     test "converts elastic tool to proto" do
       tool = %WorkbenchTool{
         tool: :elastic,

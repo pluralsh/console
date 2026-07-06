@@ -11,6 +11,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
     ServiceInspect,
     StackInspect,
     StackList,
+    StateSearch,
     VulnReports,
     Vulns
   }
@@ -280,6 +281,45 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert content =~ run.id
       assert content =~ "terraform"
       assert content =~ "Error: something broke"
+    end
+  end
+
+  describe "StateSearch (plrl_state_search)" do
+    test "returns matching stack state resources when the user can read the stack" do
+      user = insert(:user)
+      stack = insert(:stack, read_bindings: [%{user_id: user.id}])
+
+      insert(:stack_state,
+        stack: stack,
+        state: [
+          %{
+            identifier: "aws_s3_bucket.logs",
+            resource: "aws_s3_bucket",
+            name: "logs",
+            configuration: %{"bucket" => "app-logs"},
+            links: ["https://example.com/logs"]
+          },
+          %{
+            identifier: "aws_iam_role.worker",
+            resource: "aws_iam_role",
+            name: "worker",
+            configuration: %{"name" => "worker"},
+            links: []
+          }
+        ]
+      )
+
+      assert {:ok, parsed} =
+               Tool.validate(%StateSearch{user: user}, %{
+                 "stack_id" => stack.id,
+                 "query" => "logs"
+               })
+
+      assert {:ok, json} = StateSearch.implement(parsed)
+      assert {:ok, [match]} = Jason.decode(json)
+      assert match["identifier"] == "aws_s3_bucket.logs"
+      assert match["resource"] == "aws_s3_bucket"
+      assert match["name"] == "logs"
     end
   end
 

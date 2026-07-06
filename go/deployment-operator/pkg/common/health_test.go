@@ -10,6 +10,7 @@ import (
 	deploymentsv1alpha1 "github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 var _ = Describe("Health Test", Ordered, func() {
@@ -124,6 +125,35 @@ var _ = Describe("Health Test", Ordered, func() {
 			Expect(*status).To(Equal(common.HealthStatus{
 				Status: common.HealthStatusProgressing,
 			}))
+		})
+
+		It("should get beta HPA status from unstructured conditions", func() {
+			for _, apiVersion := range []string{"autoscaling/v2beta1", "autoscaling/v2beta2"} {
+				obj := &unstructured.Unstructured{
+					Object: map[string]interface{}{
+						"apiVersion": apiVersion,
+						"kind":       common.HorizontalPodAutoscalerKind,
+						"status": map[string]interface{}{
+							"conditions": []interface{}{
+								map[string]interface{}{
+									"type":    "AbleToScale",
+									"status":  "True",
+									"reason":  "SucceededGetScale",
+									"message": "recommended size matches current size",
+								},
+							},
+						},
+					},
+				}
+
+				status, err := common.GetResourceHealth(obj)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(status).To(Not(BeNil()))
+				Expect(*status).To(Equal(common.HealthStatus{
+					Status:  common.HealthStatusHealthy,
+					Message: "recommended size matches current size",
+				}))
+			}
 		})
 
 	})

@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
   use Console.AI.Tools.Agent.Base
+  import Console.AI.Tools.Workbench.Base
   alias Console.Repo
   alias Console.Deployments.{Policies, Services}
   alias Console.Schema.{User, Service, VulnerabilityReport}
@@ -8,6 +9,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
   require EEx
 
   embedded_schema do
+    field :job,          :map, virtual: true
     field :user,         :map, virtual: true
     field :service_id,   :string
     field :vuln_reports, :boolean
@@ -28,14 +30,16 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
   def name(_), do: "plrl_service"
   def description(_), do: "Get detailed information about a Plural service by id (from plrl_cluster_services)."
 
+  @preloads [:repository, :cluster, :errors, owner: [parent: :cluster], parent: [:cluster]]
+
   def implement(%__MODULE__{user: %User{} = user, service_id: id} = model) do
-    Services.get_service(id)
-    |> Repo.preload([:repository, :cluster, :errors, owner: [parent: :cluster], parent: [:cluster]])
-    |> Policies.allow(user, :read)
-    |> case do
-      {:ok, nil} -> {:error, "could not find service with id #{id}"}
-      {:ok, svc} -> {:ok, String.trim(service_prompt(service: svc, vulns: sideload_vulns(svc, model.vuln_reports)))}
+    with %Service{} = svc <- Services.get_service(id) |> Repo.preload(@preloads),
+         {:ok, svc} <- Policies.allow(svc, user, :read),
+         {:ok, svc} <- check_flow(svc, model.job) do
+      {:ok, String.trim(service_prompt(service: svc, vulns: sideload_vulns(svc, model.vuln_reports)))}
+    else
       nil -> {:error, "could not find service with id #{id}"}
+      {:error, err} -> {:error, "failed to inspect service, reason: #{inspect(err)}"}
       error -> error
     end
   end

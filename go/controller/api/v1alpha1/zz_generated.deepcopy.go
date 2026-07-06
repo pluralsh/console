@@ -2361,6 +2361,11 @@ func (in *DeploymentSettingsSpec) DeepCopyInto(out *DeploymentSettingsSpec) {
 		*out = new(runtime.RawExtension)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.AgentHelmValuesTemplateable != nil {
+		in, out := &in.AgentHelmValuesTemplateable, &out.AgentHelmValuesTemplateable
+		*out = new(bool)
+		**out = **in
+	}
 	if in.ManagementRepo != nil {
 		in, out := &in.ManagementRepo, &out.ManagementRepo
 		*out = new(string)

@@ -112,6 +112,9 @@ fragment PipelinePromotion on PipelinePromotion {
 fragment PromotionCriteria on PromotionCriteria {
   id
   secrets
+  prAutomation {
+    id
+  }
   source {
     ...PipelineServiceDeployment
   }

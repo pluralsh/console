@@ -223,6 +223,8 @@ export function WorkbenchPageLayout({
           gap="large"
           css={{
             padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <Flex

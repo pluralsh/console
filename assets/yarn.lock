@@ -10062,7 +10062,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:^2.5.1":
+"classnames@npm:^2.3.2, classnames@npm:^2.5.1":
   version: 2.5.1
   resolution: "classnames@npm:2.5.1"
   checksum: da424a8a6f3a96a2e87d01a432ba19315503294ac7e025f9fece656db6b6a0f7b5003bb1fbb51cbb0d9624d964f1b9bb35a51c73af9b2434c7b292c42231c1e5
@@ -10402,6 +10402,7 @@ __metadata:
     qs: 6.14.1
     query-string: 8.1.0
     react: 19.2.3
+    react-diff-view: 3.3.3
     react-diff-viewer-continued: 4.2.2
     react-dom: 19.2.3
     react-dropzone: 14.2.3
@@ -11534,6 +11535,13 @@ __metadata:
   dependencies:
     dequal: ^2.0.0
   checksum: d2ff650bac0bb6ef08c48f3ba98640bb5fec5cce81e9957eb620408d1bab1204d382a45b785c6b3314dc867bb0684936b84c6867820da6db97cbb5d3c15dd185
+  languageName: node
+  linkType: hard
+
+"diff-match-patch@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "diff-match-patch@npm:1.0.5"
+  checksum: 841522d01b09cccbc4e4402cf61514a81b906349a7d97b67222390f2d35cf5df277cb23959eeed212d5e46afb5629cebab41b87918672c5a05c11c73688630e3
   languageName: node
   linkType: hard
 
@@ -13054,6 +13062,13 @@ __metadata:
   bin:
     giget: dist/cli.mjs
   checksum: 9957b75bc52e0c49203208e6d1e40511dacd0654e3f664323997eaeffb8b30080db393a44d206039f12bb5a29250546f574316e0593c42b9daae056f522d1603
+  languageName: node
+  linkType: hard
+
+"gitdiff-parser@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "gitdiff-parser@npm:0.3.1"
+  checksum: 579c009055f9dac93c6e416aa5bbd85aa096c48787b7678f9daa0d3d6c04e04c59b7722197cd3697097446c3eca002321d19a557f12ea6808abf17cd5fafc560
   languageName: node
   linkType: hard
 
@@ -17486,6 +17501,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-diff-view@npm:3.3.3":
+  version: 3.3.3
+  resolution: "react-diff-view@npm:3.3.3"
+  dependencies:
+    classnames: ^2.3.2
+    diff-match-patch: ^1.0.5
+    gitdiff-parser: ^0.3.1
+    lodash: ^4.17.21
+    shallow-equal: ^3.1.0
+    warning: ^4.0.3
+  peerDependencies:
+    react: ">=16.14.0"
+  checksum: 85f093e354933b74a8e9dd89a36baa5078a531b98c530cc92c9c48406e40b7f7378a9d7c533fe523f50811708d4d9f72b024502af88a3dd39092953cfc77e97f
+  languageName: node
+  linkType: hard
+
 "react-diff-viewer-continued@npm:4.2.2":
   version: 4.2.2
   resolution: "react-diff-viewer-continued@npm:4.2.2"
@@ -18750,6 +18781,13 @@ __metadata:
   bin:
     sha.js: bin.js
   checksum: 9ec0fe39cc402acb33ffb18d261b52013485a2a9569a1873ff1861510a67b9ea2b3ccc78ab8aa09c34e1e85a5f06e18ab83637715509c6153ba8d537bbd2c29d
+  languageName: node
+  linkType: hard
+
+"shallow-equal@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "shallow-equal@npm:3.1.0"
+  checksum: 7eab4ae9fbd79c8913a88d6af873548b6ce619baab2e9e0a2f11696881cdaae289d51423837f6aca38de874581609c8e5e2fa052d8b79c10b55ac9fe7bd2f2f2
   languageName: node
   linkType: hard
 
@@ -20813,6 +20851,15 @@ __metadata:
   dependencies:
     xml-name-validator: ^5.0.0
   checksum: 593acc1fdab3f3207ec39d851e6df0f3fa41a36b5809b0ace364c7a6d92e351938c53424a7618ce8e0fbaffee8be2e8e070a5734d05ee54666a8bdf1a376cc40
+  languageName: node
+  linkType: hard
+
+"warning@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "warning@npm:4.0.3"
+  dependencies:
+    loose-envify: ^1.0.0
+  checksum: 4f2cb6a9575e4faf71ddad9ad1ae7a00d0a75d24521c193fa464f30e6b04027bd97aa5d9546b0e13d3a150ab402eda216d59c1d0f2d6ca60124d96cd40dfa35c
   languageName: node
   linkType: hard
 

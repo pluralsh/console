@@ -84,7 +84,7 @@ RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 FROM alpine:3.21.3 as tools
 
 ARG TARGETARCH=amd64
-ENV CLI_VERSION=v0.12.54
+ENV CLI_VERSION=v0.12.56
 
 COPY AGENT_VERSION AGENT_VERSION
 
@@ -111,7 +111,7 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache zlib musl-utils || true
+RUN [ "$OS_VARIANT" = "alpine" ] && apk update && apk upgrade --no-cache libexpat zlib musl musl-utils || true
 
 COPY bin/setup/${OS_VARIANT}.sh /opt/app/bin/setup.sh
 RUN /bin/sh /opt/app/bin/setup.sh && rm /opt/app/bin/setup.sh

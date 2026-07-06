@@ -38,7 +38,7 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	case console.AgentRuntimeTypeClaude:
 		providerDir = ".claude/prompts"
 	case console.AgentRuntimeTypeGemini:
-		providerDir = ".gemini/contexts"
+		providerDir = ".gemini"
 	case console.AgentRuntimeTypeOpencode:
 		providerDir = ".opencode/prompts"
 	case console.AgentRuntimeTypeCodex:
@@ -74,7 +74,7 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 	case console.AgentRuntimeTypeClaude:
 		providerDir = ".claude/prompts"
 	case console.AgentRuntimeTypeGemini:
-		providerDir = ".gemini/contexts"
+		providerDir = ".gemini"
 	case console.AgentRuntimeTypeOpencode:
 		providerDir = ".opencode/prompts"
 	case console.AgentRuntimeTypeCodex:
@@ -106,6 +106,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		Mode:           in.Config.Run.Mode,
 		BrowserEnabled: in.Config.Run.BrowserEnabled,
 		DindEnabled:    in.Config.Run.DindEnabled,
+		MemoryEnabled:  in.Config.Run.MemoryEnabled,
 		WorkDir:        in.Config.WorkDir,
 		RepositoryDir:  in.Config.RepositoryDir,
 		Prompt:         in.Config.Run.Prompt,

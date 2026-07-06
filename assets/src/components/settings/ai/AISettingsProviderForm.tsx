@@ -5,7 +5,11 @@ import {
   SelectPropsSingle,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert.tsx'
-import { AiProvider, AiSettingsAttributes } from 'generated/graphql'
+import {
+  AiProvider,
+  AiSettingsAttributes,
+  ModelDefault,
+} from 'generated/graphql'
 import { ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
@@ -19,25 +23,13 @@ import {
   VertexSettings,
 } from './AISettingsProviders.tsx'
 
-export const providerSettingsKey: Record<
-  AiProvider,
-  keyof Omit<AiSettingsAttributes, 'enabled' | 'provider'>
-> = {
-  [AiProvider.Openai]: 'openai',
-  [AiProvider.OpenaiCompatible]: 'openaiCompatible',
-  [AiProvider.Anthropic]: 'anthropic',
-  [AiProvider.Bedrock]: 'bedrock',
-  [AiProvider.Ollama]: 'ollama',
-  [AiProvider.Azure]: 'azure',
-  [AiProvider.Vertex]: 'vertex',
-}
-
 export function AISettingsProviderForm({
   enabled,
   provider,
   onProviderChange,
   providerSettings,
   updateProviderSettings,
+  modelDefaultsByProvider,
   error,
   deploymentSettingsError,
   hideProviderSelect = false,
@@ -51,6 +43,7 @@ export function AISettingsProviderForm({
   updateProviderSettings: (
     update: PartialDeep<Omit<AiSettingsAttributes, 'enabled' | 'provider'>>
   ) => void
+  modelDefaultsByProvider?: Partial<Record<AiProvider, ModelDefault>>
   error?: Error | null
   deploymentSettingsError?: Error | null
   hideProviderSelect?: boolean
@@ -65,6 +58,7 @@ export function AISettingsProviderForm({
         <OpenAISettings
           enabled={enabled}
           settings={providerSettings.openai}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Openai]}
           updateSettings={(settings) =>
             updateProviderSettings({ openai: settings })
           }
@@ -76,6 +70,7 @@ export function AISettingsProviderForm({
         <OpenAISettings
           enabled={enabled}
           settings={providerSettings.openaiCompatible}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.OpenaiCompatible]}
           updateSettings={(settings) =>
             updateProviderSettings({ openaiCompatible: settings })
           }
@@ -87,6 +82,7 @@ export function AISettingsProviderForm({
         <AnthropicSettings
           enabled={enabled}
           settings={providerSettings.anthropic}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Anthropic]}
           updateSettings={(settings) =>
             updateProviderSettings({ anthropic: settings })
           }
@@ -98,6 +94,7 @@ export function AISettingsProviderForm({
         <BedrockSettings
           enabled={enabled}
           settings={providerSettings.bedrock}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Bedrock]}
           updateSettings={(settings) =>
             updateProviderSettings({ bedrock: settings })
           }
@@ -109,6 +106,7 @@ export function AISettingsProviderForm({
         <OllamaSettings
           enabled={enabled}
           settings={providerSettings.ollama}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Ollama]}
           updateSettings={(settings) =>
             updateProviderSettings({ ollama: settings })
           }
@@ -120,6 +118,7 @@ export function AISettingsProviderForm({
         <AzureSettings
           enabled={enabled}
           settings={providerSettings.azure}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Azure]}
           updateSettings={(settings) =>
             updateProviderSettings({ azure: settings })
           }
@@ -131,6 +130,7 @@ export function AISettingsProviderForm({
         <VertexSettings
           enabled={enabled}
           settings={providerSettings.vertex}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Vertex]}
           updateSettings={(settings) =>
             updateProviderSettings({ vertex: settings })
           }

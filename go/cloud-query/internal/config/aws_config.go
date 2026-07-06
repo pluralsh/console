@@ -17,6 +17,11 @@ import (
 const (
 	envAWSConfigFile            = "AWS_CONFIG_FILE"
 	envAWSSharedCredentialsFile = "AWS_SHARED_CREDENTIALS_FILE"
+	envAWSRoleArn               = "AWS_ROLE_ARN"
+	envAWSRoleSessionName       = "AWS_ROLE_SESSION_NAME"
+	envAWSWebIdentityTokenFile  = "AWS_WEB_IDENTITY_TOKEN_FILE"
+
+	awsWebIdentitySourceProfileName = "plural-cloud-query-irsa"
 )
 
 var (
@@ -58,7 +63,8 @@ func init() {
 	}
 
 	manager = &awsConfigManager{
-		profiles: make(map[string]AWSProfile),
+		profiles:           make(map[string]AWSProfile),
+		webIdentityProfile: newAWSWebIdentityProfileFromEnv(),
 	}
 }
 
@@ -69,6 +75,12 @@ type AWSProfile struct {
 	RoleArn         string // empty if not assuming a role
 }
 
+type AWSWebIdentityProfile struct {
+	RoleArn              string
+	RoleSessionName      string
+	WebIdentityTokenFile string
+}
+
 type AWSConfigManager interface {
 	Add(name string, p AWSProfile) error
 	Remove(name string) error
@@ -77,8 +89,9 @@ type AWSConfigManager interface {
 // AWSConfigManager maintains an in-memory copy of ~/.aws/config and writes
 // through to disk on every mutation.
 type awsConfigManager struct {
-	mu       sync.RWMutex
-	profiles map[string]AWSProfile
+	mu                 sync.RWMutex
+	profiles           map[string]AWSProfile
+	webIdentityProfile *AWSWebIdentityProfile
 }
 
 func GetAWSConfigManager() AWSConfigManager {
@@ -158,11 +171,17 @@ func (in *awsConfigManager) serializeConfigFile() string {
 	sortedKeys := lo.Keys(in.profiles)
 	sort.Strings(sortedKeys)
 
+	if in.usesWebIdentityProfile(sortedKeys) {
+		in.writeWebIdentityProfile(&sb)
+	}
+
 	for _, name := range sortedKeys {
 		p := in.profiles[name]
 		fmt.Fprintf(&sb, "[profile %s]\n", name)
-		if len(p.SecretAccessKey) > 0 && len(p.AccessKeyId) > 0 {
+		if p.hasCredentials() {
 			fmt.Fprintf(&sb, "source_profile = %s\n", name)
+		} else if in.webIdentityProfile != nil && p.RoleArn != "" {
+			fmt.Fprintf(&sb, "source_profile = %s\n", awsWebIdentitySourceProfileName)
 		}
 
 		if p.RoleArn != "" {
@@ -172,6 +191,49 @@ func (in *awsConfigManager) serializeConfigFile() string {
 	}
 
 	return sb.String()
+}
+
+func (in *awsConfigManager) usesWebIdentityProfile(profileNames []string) bool {
+	if in.webIdentityProfile == nil {
+		return false
+	}
+
+	for _, name := range profileNames {
+		p := in.profiles[name]
+		if p.RoleArn != "" && !p.hasCredentials() {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (in *awsConfigManager) writeWebIdentityProfile(sb *strings.Builder) {
+	fmt.Fprintf(sb, "[profile %s]\n", awsWebIdentitySourceProfileName)
+	fmt.Fprintf(sb, "role_arn = %s\n", in.webIdentityProfile.RoleArn)
+	fmt.Fprintf(sb, "web_identity_token_file = %s\n", in.webIdentityProfile.WebIdentityTokenFile)
+	if in.webIdentityProfile.RoleSessionName != "" {
+		fmt.Fprintf(sb, "role_session_name = %s\n", in.webIdentityProfile.RoleSessionName)
+	}
+	fmt.Fprintf(sb, "\n")
+}
+
+func (p AWSProfile) hasCredentials() bool {
+	return len(p.AccessKeyId) > 0 && len(p.SecretAccessKey) > 0
+}
+
+func newAWSWebIdentityProfileFromEnv() *AWSWebIdentityProfile {
+	roleArn := strings.TrimSpace(os.Getenv(envAWSRoleArn))
+	webIdentityTokenFile := strings.TrimSpace(os.Getenv(envAWSWebIdentityTokenFile))
+	if roleArn == "" || webIdentityTokenFile == "" {
+		return nil
+	}
+
+	return &AWSWebIdentityProfile{
+		RoleArn:              roleArn,
+		RoleSessionName:      strings.TrimSpace(os.Getenv(envAWSRoleSessionName)),
+		WebIdentityTokenFile: webIdentityTokenFile,
+	}
 }
 
 func (in *awsConfigManager) serializeSharedCredentialsFile() string {
@@ -184,7 +246,7 @@ func (in *awsConfigManager) serializeSharedCredentialsFile() string {
 		p := in.profiles[name]
 
 		// Skip empty profiles
-		if len(p.AccessKeyId) == 0 || len(p.SecretAccessKey) == 0 {
+		if !p.hasCredentials() {
 			continue
 		}
 

@@ -1,8 +1,9 @@
 import { Card } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body1P, CaptionP } from 'components/utils/typography/Text'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
+import { StackedText } from '../../utils/table/StackedText'
+import { Body1P } from '../../utils/typography/Text'
 
 export function WorkbenchGraphCard({
   title,
@@ -15,7 +16,7 @@ export function WorkbenchGraphCard({
   title: string
   rightContent?: ReactNode
   children: ReactNode
-  hint?: string
+  hint?: ReactNode
   loading?: boolean
   minContentHeight?: number
 }) {
@@ -39,7 +40,11 @@ export function WorkbenchGraphCard({
           gap: theme.spacing.medium,
         }}
       >
-        <Body1P>{title}</Body1P>
+        <StackedText
+          first={<Body1P>{title}</Body1P>}
+          second={hint}
+          secondColor="text-xlight"
+        ></StackedText>
         {rightContent}
       </div>
       <div css={{ minHeight: minContentHeight, flex: 1 }}>
@@ -52,7 +57,6 @@ export function WorkbenchGraphCard({
           children
         )}
       </div>
-      {hint && <CaptionP $color="text-xlight">{hint}</CaptionP>}
     </Card>
   )
 }

@@ -56,10 +56,12 @@ function triggerHasValidContext(textNode: Text, offset: number): boolean {
 export function useMentionAutocomplete({
   containerRef,
   workbenchId,
+  flowId,
   enabled,
 }: {
   containerRef: RefObject<HTMLElement | null>
   workbenchId?: Nullable<string>
+  flowId?: Nullable<string>
   enabled: boolean
 }) {
   const triggerPosRef = useRef<TriggerPosition | null>(null)
@@ -72,6 +74,7 @@ export function useMentionAutocomplete({
     trigger,
     query,
     workbenchId,
+    flowId,
     enabled,
   })
 

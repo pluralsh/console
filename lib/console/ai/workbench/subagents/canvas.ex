@@ -42,9 +42,10 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
   end
 
   defp tools(%Environment{skills: skills, job: job, activities: activities} = env) do
+    skills = Environment.subagent_skills(skills, :canvas)
     [
-      %Skills{skills: Environment.subagent_skills(skills, :canvas)},
-      %Skill{skills: Environment.subagent_skills(skills, :canvas)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       Result,
       Canvas,

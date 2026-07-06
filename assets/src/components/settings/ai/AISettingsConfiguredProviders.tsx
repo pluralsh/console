@@ -1,6 +1,6 @@
 import {
-  AwsLogoIcon,
   AzureLogoIcon,
+  BedrockLogoIcon,
   ClaudeLogoIcon,
   Flex,
   IconFrame,
@@ -16,8 +16,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { AiProvider, AiSettings } from 'generated/graphql'
 import { ComponentType, useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { providerSettingsKey } from './AISettingsProviderForm.tsx'
 import { aiProviderToLabel } from './AISettingsProviders.tsx'
+import { providerSettingsKey } from './aiModelRoutingUtils'
 
 type ConfiguredAiProvider = {
   provider: AiProvider
@@ -33,7 +33,7 @@ export const aiProviderToIcon = {
   [AiProvider.OpenaiCompatible]: OpenCodeLogoIcon,
   [AiProvider.Anthropic]: ClaudeLogoIcon,
   [AiProvider.Azure]: AzureLogoIcon,
-  [AiProvider.Bedrock]: AwsLogoIcon,
+  [AiProvider.Bedrock]: BedrockLogoIcon,
   [AiProvider.Ollama]: OllamaLogoIcon,
   [AiProvider.Vertex]: VertexLogoIcon,
 } as const satisfies Record<AiProvider, ComponentType<IconProps>>

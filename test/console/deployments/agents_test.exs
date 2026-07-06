@@ -2,7 +2,7 @@ defmodule Console.Deployments.AgentsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Agents
   alias Console.PubSub
-  alias Console.Schema.{WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
+  alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
 
   describe "upsert_agent_runtime/3" do
@@ -296,6 +296,52 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
+  describe "approve_agent_run/2" do
+    test "users can approve their own pending approval agent runs" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: user,
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:ok, approved} = Agents.approve_agent_run(run.id, user)
+
+      assert approved.id == run.id
+      assert approved.approved_at
+      assert_receive {:event, %PubSub.AgentRunUpdated{item: ^approved}}
+    end
+
+    test "users cannot approve other's agent runs" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: insert(:user),
+        approval: true,
+        status: :pending_approval
+      )
+
+      {:error, _} = Agents.approve_agent_run(run.id, user)
+    end
+
+    test "users cannot approve runs that do not require approval" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      run = insert(:agent_run,
+        runtime: runtime,
+        user: user,
+        approval: false,
+        status: :pending_approval
+      )
+
+      assert {:error, "agent run does not require approval"} =
+               Agents.approve_agent_run(run.id, user)
+    end
+  end
+
   describe "agent_pull_request/3" do
     test "it can create a pull request" do
       user    = insert(:user)
@@ -324,6 +370,61 @@ defmodule Console.Deployments.AgentsTest do
       assert updated.head_branch == "plrl/ai/pr-test"
 
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
+    end
+
+    test "it blocks pull requests until runs requiring approval are approved" do
+      user    = insert(:user)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run     = insert(:agent_run,
+        runtime: runtime,
+        flow: insert(:flow),
+        user: user,
+        approval: true,
+        approved_at: nil
+      )
+      insert(:scm_connection, default: true)
+
+      assert {:error, "agent run must be approved before creating a pull request"} =
+               Agents.agent_pull_request(%{
+                 title: "a pr",
+                 body: "a body",
+                 repository: "https://github.com/pluralsh/console.git",
+                 base: "main",
+                 head: "plrl/ai/pr-test"
+               }, run.id, user)
+
+      updated = refetch(run)
+      assert updated.status == :pending_approval
+      assert updated.branch == "main"
+      assert updated.head_branch == "plrl/ai/pr-test"
+    end
+
+    test "it allows pull requests for approved runs" do
+      user    = insert(:user)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run     = insert(:agent_run,
+        runtime: runtime,
+        flow: insert(:flow),
+        user: user,
+        approval: true,
+        approved_at: Timex.now()
+      )
+      insert(:scm_connection, default: true)
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr, fn _, "a pr", "a body", "https://github.com/pluralsh/console.git", "main", "plrl/ai/pr-test" ->
+        {:ok, %{url: "https://github.com/pr/url", title: "a pr"}}
+      end)
+
+      {:ok, pr} = Agents.agent_pull_request(%{
+        title: "a pr",
+        body: "a body",
+        repository: "https://github.com/pluralsh/console.git",
+        base: "main",
+        head: "plrl/ai/pr-test"
+      }, run.id, user)
+
+      assert pr.status == :open
+      assert pr.agent_run_id == run.id
     end
 
     test "it can create a pull request associated with a runs agent session" do
@@ -518,14 +619,40 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
-  describe "#create_prompt/2" do
-    test "it can create a prompt" do
-      run = insert(:agent_run)
+  describe "#create_prompt/3" do
+    test "it can create a prompt history record" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
 
-      {:ok, prompt} = Agents.create_prompt("a prompt", run.id)
+      {:ok, prompt} = Agents.create_prompt("a prompt", run.id, user)
 
       assert prompt.prompt == "a prompt"
       assert prompt.agent_run_id == run.id
+      assert Repo.get(AgentPromptHistory, prompt.id)
+
+      agent_prompt = Repo.get_by(AgentPrompt, agent_run_id: run.id)
+      assert agent_prompt.prompt == "a prompt"
+
+      agent_message = Repo.get_by(AgentMessage, agent_run_id: run.id)
+      assert agent_message.message == "a prompt"
+      assert agent_message.role == :user
+    end
+
+    test "it uses monotonic ids for prompt ordering" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user)
+
+      {:ok, first} = Agents.create_prompt("first prompt", run.id, user)
+      {:ok, second} = Agents.create_prompt("second prompt", run.id, user)
+
+      assert first.id < second.id
+    end
+
+    test "non initiated users cannot create prompts" do
+      user = insert(:user)
+      run = insert(:agent_run, user: insert(:user))
+
+      {:error, _} = Agents.create_prompt("a prompt", run.id, user)
     end
   end
 

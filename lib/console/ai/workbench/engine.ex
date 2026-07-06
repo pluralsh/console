@@ -285,7 +285,7 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp backfill_chat(tools, _), do: tools
 
-  @preloads [:result, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
+  @preloads [:result, :flow, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
 
   defp preload_job(%WorkbenchJob{type: :skill} = job),
     do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])

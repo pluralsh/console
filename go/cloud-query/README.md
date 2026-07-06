@@ -70,18 +70,18 @@ For detailed information about the API endpoints, request/response schemas, and 
 
 Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metrics, logs, traces). Compatibility is per operation:
 
-| Tool | Metrics | Logs | Traces | Notes                                                                                                |
-|------|---------|------|--------|------------------------------------------------------------------------------------------------------|
-| Prometheus | Yes | No | No | Prometheus HTTP API via `prometheus/client_golang` with optional bearer token or basic auth          |
-| Datadog | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional)            |
-| Elasticsearch | No | Yes | No | Elasticsearch typed client v9 Search API (API key required)                                          |
-| Loki | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`)                   |
-| Splunk | No | Yes | No | Splunk export search API (token or basic auth)                                                       |
-| Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`)    |
-| Jaeger | No | No | Yes | Jaeger Query v3 REST API (`GET /api/v3/traces`) with structured trace filters                        |
-| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required)      |
-| CloudWatch | Yes | Yes | No | AWS SDK v2 (`GetMetricData`, Logs Insights `StartQuery`/`GetQueryResults`) with optional assume-role |
-| Azure | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials                                                |
+| Tool | Metrics | Metric Label Search | Logs | Traces | Notes                                                                                                |
+|------|---------|---------------------|------|--------|------------------------------------------------------------------------------------------------------|
+| Prometheus | Yes | Yes | No | No | Prometheus HTTP API via `prometheus/client_golang` with optional bearer token or basic auth          |
+| Datadog | Yes | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional)            |
+| Elasticsearch | No | No | Yes | No | Elasticsearch typed client v9 Search API (API key required)                                          |
+| Loki | No | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`)                   |
+| Splunk | No | No | Yes | No | Splunk export search API (token or basic auth)                                                       |
+| Tempo | No | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`)    |
+| Jaeger | No | No | No | Yes | Jaeger Query v3 REST API (`GET /api/v3/traces`) with structured trace filters                        |
+| Dynatrace | Yes | No | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required)      |
+| CloudWatch | Yes | Yes | Yes | No | AWS SDK v2 (`GetMetricData`, `ListMetrics`, Logs Insights) with optional assume-role                 |
+| Azure | Yes | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials                                                |
 
 ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lambda, GCP Cloud Run services (Gen2), and Azure Functions using canonical identifiers and cloud connection credentials.
 
@@ -97,6 +97,7 @@ ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lam
     - `storage:buckets:read`
 - `Datadog`:
   - Requires `apiKey` and `appKey` for ToolQuery operations.
+  - Metric label search returns indexed metric tags from the previous hour.
 - `Elasticsearch`:
   - Requires URL + username/password + index.
 - `Prometheus` / `Loki` / `Tempo`:
@@ -119,6 +120,7 @@ ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lam
     - Logs with provider log groups: set `"log_group_names": ["/aws/eks/prod/app"]` and use query like `"fields @timestamp, @message | sort @timestamp desc"`.
     - Logs without provider log groups: omit `log_group_names` and use query like `"SOURCE logGroups(namePrefix: [\"/aws/eks/prod/app\"]) | fields @timestamp, @message | sort @timestamp desc"`.
     - Metrics: use CloudWatch metric math expression, for example `SEARCH("{AWS/EC2,InstanceId} MetricName=\"CPUUtilization\"", "Average", 300)`.
+    - Metric label search: use the `MetricsSearch` result format `<namespace>/<metric>`, for example `"AWS/EC2/CPUUtilization"`; labels are CloudWatch dimensions.
 - `Azure`:
   - Connection requires `subscription_id`, `tenant_id`, `client_id`, and `client_secret`.
   - Metrics use `azmetrics.QueryResources`:
@@ -126,6 +128,10 @@ ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lam
     - `options.azure.resource_id` and `options.azure.metrics_namespace` are required.
     - Optional Azure metrics options: `aggregation`, `filter`, `order_by`, `roll_up_by`, `metrics_endpoint`.
     - `options.azure.metrics_endpoint` overrides the metrics endpoint per request. If omitted, Cloud Query falls back to `https://global.metrics.monitor.azure.com`.
+  - Metric label search:
+    - Azure Managed Prometheus (`options.azure.prometheus_url`) delegates to Prometheus label APIs.
+    - Native Azure Monitor label names come from metric-definition dimensions.
+    - Native Azure Monitor label values require `options.azure.metrics_namespace` and are inferred from recent metric time-series metadata.
   - Logs use `azlogs.QueryResource`:
     - `query` is Azure Log Analytics query syntax (KQL).
 

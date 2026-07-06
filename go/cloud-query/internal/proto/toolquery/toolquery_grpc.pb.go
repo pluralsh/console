@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ToolQuery_Metrics_FullMethodName       = "/toolquery.ToolQuery/Metrics"
-	ToolQuery_MetricsSearch_FullMethodName = "/toolquery.ToolQuery/MetricsSearch"
-	ToolQuery_Logs_FullMethodName          = "/toolquery.ToolQuery/Logs"
-	ToolQuery_Traces_FullMethodName        = "/toolquery.ToolQuery/Traces"
-	ToolQuery_InvokeLambda_FullMethodName  = "/toolquery.ToolQuery/InvokeLambda"
-	ToolQuery_RunLua_FullMethodName        = "/toolquery.ToolQuery/RunLua"
+	ToolQuery_Metrics_FullMethodName            = "/toolquery.ToolQuery/Metrics"
+	ToolQuery_MetricsSearch_FullMethodName      = "/toolquery.ToolQuery/MetricsSearch"
+	ToolQuery_MetricsLabelSearch_FullMethodName = "/toolquery.ToolQuery/MetricsLabelSearch"
+	ToolQuery_Logs_FullMethodName               = "/toolquery.ToolQuery/Logs"
+	ToolQuery_Traces_FullMethodName             = "/toolquery.ToolQuery/Traces"
+	ToolQuery_InvokeLambda_FullMethodName       = "/toolquery.ToolQuery/InvokeLambda"
+	ToolQuery_RunLua_FullMethodName             = "/toolquery.ToolQuery/RunLua"
 )
 
 // ToolQueryClient is the client API for ToolQuery service.
@@ -33,6 +34,7 @@ const (
 type ToolQueryClient interface {
 	Metrics(ctx context.Context, in *MetricsQueryInput, opts ...grpc.CallOption) (*MetricsQueryOutput, error)
 	MetricsSearch(ctx context.Context, in *MetricsSearchInput, opts ...grpc.CallOption) (*MetricsSearchOutput, error)
+	MetricsLabelSearch(ctx context.Context, in *MetricsLabelSearchInput, opts ...grpc.CallOption) (*MetricsLabelSearchOutput, error)
 	Logs(ctx context.Context, in *LogsQueryInput, opts ...grpc.CallOption) (*LogsQueryOutput, error)
 	Traces(ctx context.Context, in *TracesQueryInput, opts ...grpc.CallOption) (*TracesQueryOutput, error)
 	InvokeLambda(ctx context.Context, in *InvokeLambdaInput, opts ...grpc.CallOption) (*InvokeLambdaOutput, error)
@@ -61,6 +63,16 @@ func (c *toolQueryClient) MetricsSearch(ctx context.Context, in *MetricsSearchIn
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MetricsSearchOutput)
 	err := c.cc.Invoke(ctx, ToolQuery_MetricsSearch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *toolQueryClient) MetricsLabelSearch(ctx context.Context, in *MetricsLabelSearchInput, opts ...grpc.CallOption) (*MetricsLabelSearchOutput, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MetricsLabelSearchOutput)
+	err := c.cc.Invoke(ctx, ToolQuery_MetricsLabelSearch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +125,7 @@ func (c *toolQueryClient) RunLua(ctx context.Context, in *RunLuaInput, opts ...g
 type ToolQueryServer interface {
 	Metrics(context.Context, *MetricsQueryInput) (*MetricsQueryOutput, error)
 	MetricsSearch(context.Context, *MetricsSearchInput) (*MetricsSearchOutput, error)
+	MetricsLabelSearch(context.Context, *MetricsLabelSearchInput) (*MetricsLabelSearchOutput, error)
 	Logs(context.Context, *LogsQueryInput) (*LogsQueryOutput, error)
 	Traces(context.Context, *TracesQueryInput) (*TracesQueryOutput, error)
 	InvokeLambda(context.Context, *InvokeLambdaInput) (*InvokeLambdaOutput, error)
@@ -132,6 +145,9 @@ func (UnimplementedToolQueryServer) Metrics(context.Context, *MetricsQueryInput)
 }
 func (UnimplementedToolQueryServer) MetricsSearch(context.Context, *MetricsSearchInput) (*MetricsSearchOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method MetricsSearch not implemented")
+}
+func (UnimplementedToolQueryServer) MetricsLabelSearch(context.Context, *MetricsLabelSearchInput) (*MetricsLabelSearchOutput, error) {
+	return nil, status.Error(codes.Unimplemented, "method MetricsLabelSearch not implemented")
 }
 func (UnimplementedToolQueryServer) Logs(context.Context, *LogsQueryInput) (*LogsQueryOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method Logs not implemented")
@@ -198,6 +214,24 @@ func _ToolQuery_MetricsSearch_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ToolQueryServer).MetricsSearch(ctx, req.(*MetricsSearchInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ToolQuery_MetricsLabelSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MetricsLabelSearchInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ToolQueryServer).MetricsLabelSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ToolQuery_MetricsLabelSearch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ToolQueryServer).MetricsLabelSearch(ctx, req.(*MetricsLabelSearchInput))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -288,6 +322,10 @@ var ToolQuery_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MetricsSearch",
 			Handler:    _ToolQuery_MetricsSearch_Handler,
+		},
+		{
+			MethodName: "MetricsLabelSearch",
+			Handler:    _ToolQuery_MetricsLabelSearch_Handler,
 		},
 		{
 			MethodName: "Logs",

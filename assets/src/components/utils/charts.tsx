@@ -21,5 +21,6 @@ export const useChartTheme = () => {
         stroke: theme.colors['border-fill-three'],
       },
     },
+    crosshair: { line: { stroke: theme.colors['icon-light'] } },
   }
 }

@@ -58,6 +58,16 @@ defmodule Console.AI.Provider do
 
   def model_defaults(provider), do: Console.conf(:ai_defaults)[provider] || %{}
 
+  def model_defaults() do
+    Enum.map(@providers, fn provider ->
+      case model_defaults(provider) do
+        %{} = defaults -> Map.put(defaults, :provider, provider)
+        _ -> nil
+      end
+    end)
+    |> Enum.reject(&is_nil/1)
+  end
+
   @doc """
   Built-in system prompts
   """

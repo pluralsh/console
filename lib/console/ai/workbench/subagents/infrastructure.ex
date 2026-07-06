@@ -24,7 +24,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
-    Infrastructure.Manifests
+    Infrastructure.Manifests,
+    Infrastructure.StateSearch
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.{Environment, FileCache}
@@ -63,16 +64,18 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
 
   defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
-    svc_tools(bench, user)
+    skills = Environment.subagent_skills(skills, :infrastructure)
+
+    svc_tools(bench, job, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(pod_logs_tools(bench, user))
     |> Enum.concat(vuln_tools(bench, user))
     |> Enum.concat(cloud_tools(environment))
-    |> Enum.concat(manifests_tools(bench, user, cache))
+    |> Enum.concat(manifests_tools(bench, job, user, cache))
     |> Enum.concat([
-      %Skills{skills: Environment.subagent_skills(skills, :infrastructure)},
-      %Skill{skills: Environment.subagent_skills(skills, :infrastructure)},
+      %Skills{skills: skills},
+      %Skill{skills: skills},
       Scratchpad,
       Lua,
       %History{job: job, activities: activities},
@@ -98,22 +101,23 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end)
   end
 
-  defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, user) do
+  defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, %WorkbenchJob{} = job, user) do
     if_vector_store_enabled(ServiceComponent) ++ [
-      %ServiceInspect{user: user},
-      %ClusterServices{user: user},
+      %ServiceInspect{user: user, job: job},
+      %ClusterServices{user: user, job: job},
       %Cluster{user: user},
       %ClusterList{user: user},
       %ClusterTags{user: user},
       %Projects{user: user}
     ]
   end
-  defp svc_tools(_, _), do: []
+  defp svc_tools(_, _, _), do: []
 
   defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}, user) do
     if_vector_store_enabled(Stack) ++ [
       %StackInspect{user: user},
-      %StackList{user: user}
+      %StackList{user: user},
+      %StateSearch{user: user}
     ]
   end
   defp stack_tools(_, _), do: []
@@ -131,13 +135,13 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     do: [%PodLogs{user: user}]
   defp pod_logs_tools(_, _), do: []
 
-  defp manifests_tools(%Workbench{configuration: %{infrastructure: %{services: s, stacks: st}}}, %User{} = user, %FileCache{} = cache) do
+  defp manifests_tools(%Workbench{configuration: %{infrastructure: %{services: s, stacks: st}}}, %WorkbenchJob{} = job, %User{} = user, %FileCache{} = cache) do
     case s || st do
-      true -> [%Manifests{user: user, cache: cache}]
+      true -> [%Manifests{user: user, cache: cache, job: job}]
       _ -> []
     end
   end
-  defp manifests_tools(_, _, _), do: []
+  defp manifests_tools(_, _, _, _), do: []
 
   defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user), do: [%Vulns{user: user}]
   defp vuln_tools(_, _), do: []

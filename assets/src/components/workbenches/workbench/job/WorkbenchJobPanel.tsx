@@ -1,11 +1,12 @@
 import {
   CloseIcon,
+  CostManagementIcon,
   DashboardIcon,
   GaugeIcon,
   GraphIcon,
   IconFrame,
   PaperCheckIcon,
-  PrOpenIcon,
+  PrIcon,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
@@ -17,12 +18,21 @@ import {
   SidePanel,
   useTopLevelSidePanel,
 } from 'components/layout/TopLevelSidePanel'
-import { useWorkbenchJobQuery, WorkbenchJobFragment } from 'generated/graphql'
-import { isEmpty, isNil } from 'lodash'
+import { TabLabelWithIndicatorDot } from 'components/workbenches/common/TabLabelWithIndicatorDot'
+import {
+  AgentRunStatus,
+  PullRequestBasicFragment,
+  useWorkbenchJobActivitiesQuery,
+  useWorkbenchJobQuery,
+  WorkbenchJobFragment,
+} from 'generated/graphql'
+import { isEmpty, isNil, uniqBy } from 'lodash'
 import {
   ReactElement,
+  useCallback,
   useEffect,
   useEffectEvent,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -36,14 +46,24 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import {
-  WorkbenchJobPrs,
+  PATCH_PR_URL,
+  WorkbenchJobDraftPr,
   WorkbenchJobEval,
+  WorkbenchJobPrs,
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
+import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
+import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
-type JobPanelTab = 'Result' | 'Dashboard' | 'Topology' | 'PRs' | 'Eval'
+type JobPanelTab =
+  | 'Result'
+  | 'Dashboard'
+  | 'Topology'
+  | 'Pull requests'
+  | 'Eval'
+  | 'Usage'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -62,10 +82,84 @@ export function WorkbenchJobPanelContent() {
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
   })
+  const { data: activitiesData } = useWorkbenchJobActivitiesQuery({
+    skip: !jobId,
+    variables: { id: jobId },
+    fetchPolicy: 'cache-first',
+  })
   const job = data?.workbenchJob
   const isLoading = loading && !job
+  const activities = useMemo(
+    () =>
+      activitiesData?.workbenchJob?.activities?.edges
+        ?.map((edge) => edge?.node)
+        .filter(isNonNullable) ?? [],
+    [activitiesData]
+  )
+  const pullRequests = job?.pullRequests?.filter(isNonNullable) ?? []
+  const generatedPrs = useMemo(
+    () =>
+      pullRequests.filter(
+        (pr): pr is PullRequestBasicFragment =>
+          isNonNullable(pr) && pr.url !== PATCH_PR_URL
+      ),
+    [pullRequests]
+  )
+  const draftPrs = useMemo((): WorkbenchJobDraftPr[] => {
+    const agentRuns = uniqBy(
+      activities
+        .flatMap((activity) =>
+          [activity.agentRun, ...(activity.agentRuns ?? [])].filter(
+            isNonNullable
+          )
+        )
+        .filter(isNonNullable),
+      'id'
+    ).filter(
+      (run) =>
+        run.status === AgentRunStatus.PendingApproval &&
+        !run.approvedAt &&
+        !!run.upload?.patch
+    )
 
-  const tabs = getPanelTabs(job)
+    const agentRunDrafts: WorkbenchJobDraftPr[] = agentRuns.map((agentRun) => ({
+      type: 'agentRun',
+      agentRun,
+    }))
+
+    const linkedPrIds = new Set(
+      agentRuns.flatMap(
+        (run) =>
+          run.pullRequests?.map((pr) => pr?.id).filter(isNonNullable) ?? []
+      )
+    )
+
+    const patchPrDrafts: WorkbenchJobDraftPr[] = pullRequests
+      .filter(
+        (pr): pr is PullRequestBasicFragment =>
+          isNonNullable(pr) && pr.url === PATCH_PR_URL
+      )
+      .filter((pr) => !linkedPrIds.has(pr.id))
+      .map((pullRequest) => ({ type: 'patchPr', pullRequest }))
+
+    return [...agentRunDrafts, ...patchPrDrafts]
+  }, [activities, pullRequests])
+  const hasDraftPrsAwaitingApproval = draftPrs.length > 0
+
+  const tabs = useMemo(
+    () => getPanelTabs(job, hasDraftPrsAwaitingApproval, isLoading),
+    [hasDraftPrsAwaitingApproval, isLoading, job]
+  )
+
+  useEffect(() => {
+    if (tabs.some(({ label }) => label === selectedTab)) return
+
+    if (tabs[0]) setSelectedTab(tabs[0].label)
+  }, [selectedTab, tabs])
+
+  useEffect(() => {
+    if (!isLoading && job && isEmpty(tabs)) setOpen(false)
+  }, [isLoading, job, setOpen, tabs])
 
   return (
     <SidePanelContent>
@@ -82,17 +176,25 @@ export function WorkbenchJobPanelContent() {
             }}
             css={{ gap: spacing.small, width: '100%' }}
           >
-            {tabs.map(({ label, icon }) => (
+            {tabs.map(({ label, icon, showDot }) => (
               <PanelSubTabSC
                 key={label}
                 textValue={label}
               >
                 {icon}
-                {label !== 'Result'
-                  ? label
-                  : !isJobRunning(job?.status) && job?.result?.conclusion
-                    ? 'Conclusion'
-                    : 'Working theory'}
+                {label !== 'Result' ? (
+                  showDot ? (
+                    <TabLabelWithIndicatorDot showDot>
+                      {label}
+                    </TabLabelWithIndicatorDot>
+                  ) : (
+                    label
+                  )
+                ) : !isJobRunning(job?.status) && job?.result?.conclusion ? (
+                  'Conclusion'
+                ) : (
+                  'Working theory'
+                )}
               </PanelSubTabSC>
             ))}
           </TabList>
@@ -107,12 +209,13 @@ export function WorkbenchJobPanelContent() {
       </PanelHeaderSC>
       <ContentWrapperSC>
         <ContentInnerSC>
-          {selectedTab === 'Result' && (
-            <WorkbenchJobResult
-              job={job}
-              loading={isLoading}
-            />
-          )}
+          {selectedTab === 'Result' &&
+            (isLoading || hasWorkbenchJobResultContent(job)) && (
+              <WorkbenchJobResult
+                job={job}
+                loading={isLoading}
+              />
+            )}
           {selectedTab === 'Dashboard' && job?.id && (
             <WorkbenchJobCanvas
               jobId={job.id}
@@ -122,13 +225,20 @@ export function WorkbenchJobPanelContent() {
           {selectedTab === 'Topology' && (
             <WorkbenchJobTopology topology={job?.result?.topology ?? ''} />
           )}
-          {selectedTab === 'PRs' && (
+          {selectedTab === 'Pull requests' && job?.id && (
             <WorkbenchJobPrs
-              prs={job?.pullRequests?.filter(isNonNullable) ?? []}
+              generatedPrs={generatedPrs}
+              draftPrs={draftPrs}
+              workbenchId={job.workbench?.id ?? ''}
+              workbenchName={job.workbench?.name ?? ''}
+              jobId={job.id}
             />
           )}
           {selectedTab === 'Eval' && job?.evalResult && (
             <WorkbenchJobEval job={job} />
+          )}
+          {selectedTab === 'Usage' && job?.usage && (
+            <WorkbenchJobUsage usage={job?.usage} />
           )}
         </ContentInnerSC>
       </ContentWrapperSC>
@@ -139,7 +249,10 @@ export function WorkbenchJobPanelContent() {
 export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
   const { sidePanel, setSidePanel } = useTopLevelSidePanel()
   const isOpen = sidePanel === SIDE_PANEL_TYPE
-  const setOpen = (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null)
+  const setOpen = useCallback(
+    (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null),
+    [setSidePanel]
+  )
 
   const onAutoOpen = useEffectEvent(() => setOpen(true))
   const onUnmount = useEffectEvent(() => setOpen(false))
@@ -190,9 +303,16 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
   '&:focus-visible': { outline: theme.borders['outline-focused'] },
 }))
 
-const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
+const getPanelTabs = (
+  job: Nullable<WorkbenchJobFragment>,
+  hasDraftPrsAwaitingApproval: boolean,
+  isLoading: boolean
+) =>
   [
-    { label: 'Result', icon: <PaperCheckIcon size={12} /> },
+    (isLoading || hasWorkbenchJobResultContent(job)) && {
+      label: 'Result',
+      icon: <PaperCheckIcon size={12} />,
+    },
     !isEmpty(job?.result?.canvas) && {
       label: 'Dashboard',
       icon: <DashboardIcon size={12} />,
@@ -201,14 +321,25 @@ const getPanelTabs = (job: Nullable<WorkbenchJobFragment>) =>
       label: 'Topology',
       icon: <GraphIcon size={12} />,
     },
-    !isEmpty(job?.pullRequests) && {
-      label: 'PRs',
-      icon: <PrOpenIcon size={12} />,
+    (!isEmpty(job?.pullRequests) || hasDraftPrsAwaitingApproval) && {
+      label: 'Pull requests',
+      icon: <PrIcon size={12} />,
+      showDot: hasDraftPrsAwaitingApproval,
     },
     job?.evalResult && {
       label: 'Eval',
       icon: <GaugeIcon size={12} />,
     },
-  ].filter((tab): tab is { label: JobPanelTab; icon: ReactElement } =>
-    Boolean(tab)
+    job?.usage && {
+      label: 'Usage',
+      icon: <CostManagementIcon size={12} />,
+    },
+  ].filter(
+    (
+      tab
+    ): tab is {
+      label: JobPanelTab
+      icon: ReactElement
+      showDot?: boolean
+    } => Boolean(tab)
   )

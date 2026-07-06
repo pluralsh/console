@@ -20,8 +20,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_job_attributes do
-    field :prompt, :string, description: "the prompt for this job"
-    field :modes,  :workbench_job_modes_attributes, description: "mode-specific options for this job"
+    field :prompt,  :string, description: "the prompt for this job"
+    field :flow_id, :id, description: "the flow this job is associated with"
+    field :modes,   :workbench_job_modes_attributes, description: "mode-specific options for this job"
   end
 
   input_object :workbench_job_modes_attributes do
@@ -467,13 +468,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
     field :error,        :string, description: "error message when the job failed"
+    field :flow_id,      :id, description: "the flow this job is associated with"
     field :modes,        :workbench_job_modes, description: "mode-specific options for this job"
+    field :usage,        :workbench_job_usage, description: "token and cost usage for this job"
 
     field :chatbot_message, :chatbot_message,
       resolve: dataloader(Deployments),
       description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
+    field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
     field :eval_result,  :workbench_eval_result, resolve: dataloader(Deployments), description: "the eval result for this job (sideloadable)"
@@ -527,6 +531,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_coding_modes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  object :workbench_job_usage do
+    field :input_tokens,     :integer, description: "input tokens consumed by this job"
+    field :output_tokens,    :integer, description: "output tokens produced by this job"
+    field :total_tokens,     :integer, description: "total tokens consumed by this job"
+    field :cached_tokens,    :integer, description: "cached input tokens used by this job"
+    field :reasoning_tokens, :integer, description: "reasoning tokens produced by this job"
+    field :input_cost,       :float, description: "input token cost for this job"
+    field :output_cost,      :float, description: "output token cost for this job"
+    field :total_cost,       :float, description: "total token cost for this job"
   end
 
   object :workbench_job_activity do
@@ -837,6 +852,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :eval_results, :float,
       description: "average eval grade across workbench eval results"
+  end
+
+  object :workbench_usage_timeseries do
+    field :timestamp,     :datetime, description: "UTC timestamp for this data point"
+    field :workbench,     :workbench, description: "the workbench this usage data is associated with"
+    field :input_tokens,  :integer, description: "number of input tokens consumed during this interval"
+    field :output_tokens, :integer, description: "number of output tokens produced during this interval"
+    field :total_cost,    :float, description: "total cost for this interval, in USD"
   end
 
   object :workbench_webhook_matches do
@@ -1268,6 +1291,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
         action: :read
 
       resolve &Deployments.aggregates/2
+    end
+
+    field :workbench_usage, list_of(:workbench_usage_timeseries) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :period,     :eval_results_period
+      arg :q,          :string
+      arg :project_id, :id, description: "filter workbenches by project"
+
+      resolve &Deployments.workbench_usage/2
     end
 
     field :workbench_pr_merge_rates, list_of(:workbench_pr_merge_rate_entry) do

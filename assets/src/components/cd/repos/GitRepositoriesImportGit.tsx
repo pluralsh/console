@@ -7,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import {
   AuthMethod,
+  CreateGitRepositoryMutation,
   GitAttributes,
   useCreateGitRepositoryMutation,
 } from 'generated/graphql'
@@ -14,6 +15,7 @@ import { useTheme } from 'styled-components'
 import {
   Dispatch,
   FormEvent,
+  RefObject,
   SetStateAction,
   useCallback,
   useEffect,
@@ -27,6 +29,10 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
 import SshKeyUpload from '../utils/SshKeyUpload'
+
+export type ImportedGitRepository = NonNullable<
+  CreateGitRepositoryMutation['createGitRepository']
+>
 
 export function ImportGit() {
   const [isOpen, setIsOpen] = useState(false)
@@ -60,7 +66,69 @@ export function ImportGitModal({
   open: boolean
   onClose: () => void
 }) {
-  const theme = useTheme()
+  const formState = useGitRepositoryImport({
+    onCompleted: onClose,
+  })
+
+  const initialFocusRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (open) {
+      initialFocusRef.current?.focus?.()
+    }
+  }, [open])
+
+  return (
+    <ModalAlt
+      header="Import Git"
+      open={open}
+      onClose={onClose}
+      asForm
+      formProps={{ onSubmit: formState.onSubmit }}
+      actions={
+        <>
+          <Button
+            type="submit"
+            disabled={formState.disabled}
+            loading={formState.loading}
+            primary
+          >
+            Import
+          </Button>
+          <Button
+            type="button"
+            secondary
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <div css={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+            <Switch
+              checked={formState.showAdvanced}
+              onChange={(val) => formState.setShowAdvanced(val)}
+              css={{ width: 'fit-content' }}
+            >
+              Advanced configuration
+            </Switch>
+          </div>
+        </>
+      }
+    >
+      <GitRepositoryImportFields
+        formState={formState}
+        inputRef={initialFocusRef}
+      />
+    </ModalAlt>
+  )
+}
+
+export function useGitRepositoryImport({
+  onCompleted,
+  onImported,
+}: {
+  onCompleted?: () => void
+  onImported?: (repository: ImportedGitRepository) => void
+} = {}) {
   const [gitUrl, setGitUrl] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
   const authMethod = getAuthMethodFromGitUrl(gitUrl)
@@ -82,7 +150,10 @@ export function ImportGitModal({
           : {}),
       },
     },
-    onCompleted: () => onClose(),
+    onCompleted: (data) => {
+      onCompleted?.()
+      if (data.createGitRepository) onImported?.(data.createGitRepository)
+    },
     awaitRefetchQueries: true,
     refetchQueries: [
       'GitRepositories',
@@ -108,104 +179,91 @@ export function ImportGitModal({
     [disabled, loading, mutation]
   )
 
-  useEffect(() => {}, [gitUrl])
+  return {
+    authMethod,
+    disabled,
+    error,
+    gitUrl,
+    loading,
+    passphrase,
+    password,
+    privateKey,
+    recurseSubmodules,
+    setGitUrl,
+    setPassphrase,
+    setPassword,
+    setPrivateKey,
+    setRecurseSubmodules,
+    setShowAdvanced,
+    setUsername,
+    showAdvanced,
+    username,
+    onSubmit,
+  }
+}
 
-  const initialFocusRef = useRef<HTMLInputElement>(undefined)
+export type GitRepositoryImportFormState = ReturnType<
+  typeof useGitRepositoryImport
+>
 
-  useEffect(() => {
-    if (open) {
-      initialFocusRef.current?.focus?.()
-    }
-  }, [open])
+export function GitRepositoryImportFields({
+  formState,
+  inputRef,
+}: {
+  formState: GitRepositoryImportFormState
+  inputRef?: RefObject<HTMLInputElement | null>
+}) {
+  const theme = useTheme()
 
   return (
-    <ModalAlt
-      header="Import Git"
-      open={open}
-      onClose={onClose}
-      asForm
-      formProps={{ onSubmit }}
-      actions={
-        <>
-          <Button
-            type="submit"
-            disabled={disabled}
-            loading={loading}
-            primary
-          >
-            Import
-          </Button>
-          <Button
-            type="button"
-            secondary
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <div css={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-            <Switch
-              checked={showAdvanced}
-              onChange={(val) => setShowAdvanced(val)}
-              css={{ width: 'fit-content' }}
-            >
-              Advanced configuration
-            </Switch>
-          </div>
-        </>
-      }
-    >
-      <>
-        <PrepareGitStep />
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.xsmall,
+    <>
+      <PrepareGitStep />
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.xsmall,
+        }}
+      >
+        <StepH>Step 2. Connect your repository</StepH>
+        <Input
+          inputProps={{ ref: inputRef }}
+          value={formState.gitUrl}
+          onChange={(e) => {
+            formState.setGitUrl(e.currentTarget.value)
           }}
-        >
-          <StepH>Step 2. Connect your repository</StepH>
-          <Input
-            inputProps={{ ref: initialFocusRef }}
-            value={gitUrl}
-            onChange={(e) => {
-              setGitUrl(e.currentTarget.value)
-            }}
-            placeholder="https://host.com/your-repo.git"
-            titleContent={<GitHubLogoIcon />}
+          placeholder="https://host.com/your-repo.git"
+          titleContent={<GitHubLogoIcon />}
+        />
+      </div>
+      {formState.showAdvanced && (
+        <>
+          <GitAuthFields
+            authMethod={formState.authMethod}
+            privateKey={formState.privateKey}
+            setPrivateKey={formState.setPrivateKey}
+            passphrase={formState.passphrase}
+            setPassphrase={formState.setPassphrase}
+            username={formState.username}
+            setUsername={formState.setUsername}
+            password={formState.password}
+            setPassword={formState.setPassword}
           />
-        </div>
-        {showAdvanced && (
-          <>
-            <GitAuthFields
-              {...{
-                authMethod,
-                theme,
-                privateKey,
-                setPrivateKey,
-                passphrase,
-                setPassphrase,
-                username,
-                setUsername,
-                password,
-                setPassword,
-              }}
-            />
-            <Switch
-              checked={recurseSubmodules}
-              onChange={setRecurseSubmodules}
-            >
-              Recurse submodules
-            </Switch>
-          </>
-        )}
-        {error && (
-          <GqlError
-            header="Problem importing repository"
-            error={error}
-          />
-        )}
-      </>
-    </ModalAlt>
+          <Switch
+            checked={formState.recurseSubmodules}
+            onChange={formState.setRecurseSubmodules}
+          >
+            Recurse submodules
+          </Switch>
+        </>
+      )}
+      {formState.error && (
+        <GqlError
+          header="Problem importing repository"
+          error={formState.error}
+        />
+      )}
+    </>
   )
 }
 

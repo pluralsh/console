@@ -1,3 +1,4 @@
+{{- if and .Values.ingress.enabled .Values.kas.ingress.kas_dns }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -41,3 +42,4 @@ spec:
         - {{ .Values.kas.ingress.kas_dns | quote }}
       secretName: {{ .Values.kas.ingress.tlsSecretName }}
   {{ end }}
+{{- end }}

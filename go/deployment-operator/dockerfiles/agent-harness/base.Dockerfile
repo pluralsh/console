@@ -53,6 +53,10 @@ RUN CGO_ENABLED=0 \
 
 FROM debian:13-slim
 
+ARG TARGETARCH
+ARG TARGETOS
+ARG CODEBASE_MEMORY_MCP_VERSION=0.8.1
+
 RUN apt update && apt install -y \
     ca-certificates \
     curl \
@@ -61,6 +65,21 @@ RUN apt update && apt install -y \
     jq \
     make \
     tar
+
+RUN set -eux; \
+    portable=""; \
+    if [ "${TARGETOS}" = "linux" ]; then portable="-portable"; fi; \
+    archive="codebase-memory-mcp-${TARGETOS}-${TARGETARCH}${portable}.tar.gz"; \
+    base_url="https://github.com/DeusData/codebase-memory-mcp/releases/download/v${CODEBASE_MEMORY_MCP_VERSION}"; \
+    curl -fsSL "${base_url}/${archive}" -o "/tmp/${archive}"; \
+    curl -fsSL "${base_url}/checksums.txt" -o /tmp/codebase-memory-mcp-checksums.txt; \
+    expected="$(awk -v archive="${archive}" '$2 == archive {print $1}' /tmp/codebase-memory-mcp-checksums.txt)"; \
+    test -n "${expected}"; \
+    echo "${expected}  /tmp/${archive}" | sha256sum -c -; \
+    mkdir -p /tmp/codebase-memory-mcp; \
+    tar xzf "/tmp/${archive}" -C /tmp/codebase-memory-mcp; \
+    install -m 0755 /tmp/codebase-memory-mcp/codebase-memory-mcp /usr/local/bin/codebase-memory-mcp && \
+    rm -rf /tmp/codebase-memory-mcp "/tmp/${archive}" /tmp/codebase-memory-mcp-checksums.txt
 
 # Install Docker CLI + Compose (no daemon)
 RUN install -m 0755 -d /etc/apt/keyrings && \
@@ -109,7 +128,8 @@ COPY deployment-operator/dockerfiles/agent-harness/system /plural/system
 RUN mkdir -p /plural/.opencode && \
     mkdir -p /plural/.claude && \
     mkdir -p /plural/.gemini && \
-    mkdir -p /plural/.codex
+    mkdir -p /plural/.codex && \
+    mkdir -p /plural/.cache/codebase-memory-mcp
 
 RUN chown -R 65532:65532 /plural && \
     mkdir -p /run/user/65532 && \

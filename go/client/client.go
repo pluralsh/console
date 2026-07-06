@@ -482,6 +482,31 @@ func (t *AgentTodoFragment) GetTitle() string {
 	return t.Title
 }
 
+type AgentPromptFragment struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Prompt string "json:\"prompt\" graphql:\"prompt\""
+	Seq    int64  "json:\"seq\" graphql:\"seq\""
+}
+
+func (t *AgentPromptFragment) GetID() string {
+	if t == nil {
+		t = &AgentPromptFragment{}
+	}
+	return t.ID
+}
+func (t *AgentPromptFragment) GetPrompt() string {
+	if t == nil {
+		t = &AgentPromptFragment{}
+	}
+	return t.Prompt
+}
+func (t *AgentPromptFragment) GetSeq() int64 {
+	if t == nil {
+		t = &AgentPromptFragment{}
+	}
+	return t.Seq
+}
+
 type ScmCredentialFragment struct {
 	Token    string  "json:\"token\" graphql:\"token\""
 	Username string  "json:\"username\" graphql:\"username\""
@@ -620,6 +645,8 @@ type AgentRunFragment struct {
 	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
 	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
+	Prompts         []*AgentPromptFragment     "json:\"prompts,omitempty\" graphql:\"prompts\""
+	Skills          []*AgentRunFragment_Skills "json:\"skills,omitempty\" graphql:\"skills\""
 	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
@@ -633,6 +660,8 @@ type AgentRunFragment struct {
 	Upload          *AgentRunUploadFragment    "json:\"upload,omitempty\" graphql:\"upload\""
 	Babysit         *bool                      "json:\"babysit,omitempty\" graphql:\"babysit\""
 	BabysitInterval *int64                     "json:\"babysitInterval,omitempty\" graphql:\"babysitInterval\""
+	Approval        *bool                      "json:\"approval,omitempty\" graphql:\"approval\""
+	ApprovedAt      *string                    "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -688,6 +717,18 @@ func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Todos
+}
+func (t *AgentRunFragment) GetPrompts() []*AgentPromptFragment {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Prompts
+}
+func (t *AgentRunFragment) GetSkills() []*AgentRunFragment_Skills {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Skills
 }
 func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
 	if t == nil {
@@ -766,6 +807,18 @@ func (t *AgentRunFragment) GetBabysitInterval() *int64 {
 		t = &AgentRunFragment{}
 	}
 	return t.BabysitInterval
+}
+func (t *AgentRunFragment) GetApproval() *bool {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Approval
+}
+func (t *AgentRunFragment) GetApprovedAt() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ApprovedAt
 }
 
 type AgentRunMinimalFragment struct {
@@ -3277,16 +3330,17 @@ func (t *GitRepositoryEdgeFragment) GetCursor() *string {
 }
 
 type DeploymentSettingsFragment struct {
-	ID                 string                   "json:\"id\" graphql:\"id\""
-	Name               string                   "json:\"name\" graphql:\"name\""
-	AgentHelmValues    *string                  "json:\"agentHelmValues,omitempty\" graphql:\"agentHelmValues\""
-	AgentVsn           string                   "json:\"agentVsn\" graphql:\"agentVsn\""
-	WriteBindings      []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
-	ReadBindings       []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
-	CreateBindings     []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
-	ArtifactRepository *GitRepositoryFragment   "json:\"artifactRepository,omitempty\" graphql:\"artifactRepository\""
-	DeployerRepository *GitRepositoryFragment   "json:\"deployerRepository,omitempty\" graphql:\"deployerRepository\""
-	Ai                 *AISettingsFragment      "json:\"ai,omitempty\" graphql:\"ai\""
+	ID                          string                   "json:\"id\" graphql:\"id\""
+	Name                        string                   "json:\"name\" graphql:\"name\""
+	AgentHelmValues             *string                  "json:\"agentHelmValues,omitempty\" graphql:\"agentHelmValues\""
+	AgentHelmValuesTemplateable *bool                    "json:\"agentHelmValuesTemplateable,omitempty\" graphql:\"agentHelmValuesTemplateable\""
+	AgentVsn                    string                   "json:\"agentVsn\" graphql:\"agentVsn\""
+	WriteBindings               []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ReadBindings                []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	CreateBindings              []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
+	ArtifactRepository          *GitRepositoryFragment   "json:\"artifactRepository,omitempty\" graphql:\"artifactRepository\""
+	DeployerRepository          *GitRepositoryFragment   "json:\"deployerRepository,omitempty\" graphql:\"deployerRepository\""
+	Ai                          *AISettingsFragment      "json:\"ai,omitempty\" graphql:\"ai\""
 }
 
 func (t *DeploymentSettingsFragment) GetID() string {
@@ -3306,6 +3360,12 @@ func (t *DeploymentSettingsFragment) GetAgentHelmValues() *string {
 		t = &DeploymentSettingsFragment{}
 	}
 	return t.AgentHelmValues
+}
+func (t *DeploymentSettingsFragment) GetAgentHelmValuesTemplateable() *bool {
+	if t == nil {
+		t = &DeploymentSettingsFragment{}
+	}
+	return t.AgentHelmValuesTemplateable
 }
 func (t *DeploymentSettingsFragment) GetAgentVsn() string {
 	if t == nil {
@@ -7102,6 +7162,31 @@ func (t *TinyAgentRuntimeFragment_Cluster) GetID() string {
 func (t *TinyAgentRuntimeFragment_Cluster) GetName() string {
 	if t == nil {
 		t = &TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
+}
+
+type AgentRunFragment_Skills struct {
+	Contents    string  "json:\"contents\" graphql:\"contents\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Name        string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *AgentRunFragment_Skills) GetContents() string {
+	if t == nil {
+		t = &AgentRunFragment_Skills{}
+	}
+	return t.Contents
+}
+func (t *AgentRunFragment_Skills) GetDescription() *string {
+	if t == nil {
+		t = &AgentRunFragment_Skills{}
+	}
+	return t.Description
+}
+func (t *AgentRunFragment_Skills) GetName() string {
+	if t == nil {
+		t = &AgentRunFragment_Skills{}
 	}
 	return t.Name
 }
@@ -14637,6 +14722,31 @@ func (t *ListAgentRuntimes_AgentRuntimes) GetPageInfo() *PageInfoFragment {
 	return &t.PageInfo
 }
 
+type GetAgentRun_AgentRun_AgentRunFragment_Skills struct {
+	Contents    string  "json:\"contents\" graphql:\"contents\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Name        string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Skills) GetContents() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Contents
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Skills) GetDescription() *string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Description
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Skills) GetName() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Name
+}
+
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14753,6 +14863,31 @@ func (t *GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload) GetSession(
 		t = &GetAgentRunMinimal_AgentRun_AgentRunMinimalFragment_Upload{}
 	}
 	return t.Session
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills struct {
+	Contents    string  "json:\"contents\" graphql:\"contents\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Name        string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills) GetContents() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills{}
+	}
+	return t.Contents
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills) GetDescription() *string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills{}
+	}
+	return t.Description
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills) GetName() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills{}
+	}
+	return t.Name
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -14931,6 +15066,31 @@ func (t *ListAgentRunsMinimal_AgentRuns) GetPageInfo() *PageInfoFragment {
 	return &t.PageInfo
 }
 
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills struct {
+	Contents    string  "json:\"contents\" graphql:\"contents\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Name        string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetContents() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
+	}
+	return t.Contents
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetDescription() *string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
+	}
+	return t.Description
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills) GetName() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Skills{}
+	}
+	return t.Name
+}
+
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15036,6 +15196,31 @@ func (t *CancelAgentRun_CancelAgentRun) GetID() string {
 	return t.ID
 }
 
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills struct {
+	Contents    string  "json:\"contents\" graphql:\"contents\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Name        string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills) GetContents() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Contents
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills) GetDescription() *string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Description
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills) GetName() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Name
+}
+
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15075,6 +15260,31 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetID() string {
 func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
 	if t == nil {
 		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow{}
+	}
+	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills struct {
+	Contents    string  "json:\"contents\" graphql:\"contents\""
+	Description *string "json:\"description,omitempty\" graphql:\"description\""
+	Name        string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetContents() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Contents
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetDescription() *string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
+	}
+	return t.Description
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetName() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
 	}
 	return t.Name
 }
@@ -40345,6 +40555,14 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		... AgentPromptFragment
+	}
+	skills {
+		name
+		description
+		contents
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -40379,11 +40597,18 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
+}
+fragment AgentPromptFragment on AgentPrompt {
+	id
+	prompt
+	seq
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -40553,6 +40778,14 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		... AgentPromptFragment
+	}
+	skills {
+		name
+		description
+		contents
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -40587,11 +40820,18 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
+}
+fragment AgentPromptFragment on AgentPrompt {
+	id
+	prompt
+	seq
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -40784,6 +41024,14 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		... AgentPromptFragment
+	}
+	skills {
+		name
+		description
+		contents
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -40818,11 +41066,18 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
+}
+fragment AgentPromptFragment on AgentPrompt {
+	id
+	prompt
+	seq
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -41002,6 +41257,14 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		... AgentPromptFragment
+	}
+	skills {
+		name
+		description
+		contents
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -41036,11 +41299,18 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
+}
+fragment AgentPromptFragment on AgentPrompt {
+	id
+	prompt
+	seq
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -41158,6 +41428,14 @@ fragment AgentRunFragment on AgentRun {
 	todos {
 		... AgentTodoFragment
 	}
+	prompts {
+		... AgentPromptFragment
+	}
+	skills {
+		name
+		description
+		contents
+	}
 	status
 	podReference {
 		... AgentPodReferenceFragment
@@ -41192,11 +41470,18 @@ fragment AgentRunFragment on AgentRun {
 	}
 	babysit
 	babysitInterval
+	approval
+	approvedAt
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
 	done
 	title
+}
+fragment AgentPromptFragment on AgentPrompt {
+	id
+	prompt
+	seq
 }
 fragment AgentPodReferenceFragment on AgentPodReference {
 	name
@@ -47691,6 +47976,7 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
 	id
 	name
 	agentHelmValues
+	agentHelmValuesTemplateable
 	agentVsn
 	writeBindings {
 		... PolicyBindingFragment
@@ -47778,6 +48064,7 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
 	id
 	name
 	agentHelmValues
+	agentHelmValuesTemplateable
 	agentVsn
 	writeBindings {
 		... PolicyBindingFragment

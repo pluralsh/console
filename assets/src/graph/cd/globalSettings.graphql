@@ -82,6 +82,7 @@ fragment DeploymentSettings on DeploymentSettings {
   updatedAt
   onboarded
   agentHelmValues
+  agentHelmValuesTemplateable
   logging {
     enabled
     driver
@@ -145,6 +146,16 @@ fragment ObservabilityWebhook on ObservabilityWebhook {
 query DeploymentSettings {
   deploymentSettings {
     ...DeploymentSettings
+  }
+  availableModels {
+    provider
+    model
+  }
+  defaultModels {
+    provider
+    model
+    toolModel
+    embeddingModel
   }
 }
 

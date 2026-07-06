@@ -13,6 +13,11 @@ func StartAgentRun(client console.Client, id string) error {
 	return err
 }
 
+func MarkAgentRunPendingApproval(ctx context.Context, client console.Client, id string) error {
+	_, err := client.UpdateAgentRun(ctx, id, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusPendingApproval})
+	return err
+}
+
 func FailAgentRun(client console.Client, id string, errorMsg string) error {
 	_, err := client.UpdateAgentRun(context.Background(), id, gqlclient.AgentRunStatusAttributes{
 		Status: gqlclient.AgentRunStatusFailed,

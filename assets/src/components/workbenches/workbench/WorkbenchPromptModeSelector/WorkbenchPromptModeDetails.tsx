@@ -14,6 +14,7 @@ export const WORKBENCH_PROMPT_MODE_ICON_SIZE_HEADER = 16
 
 export type WorkbenchPromptModeConfig = {
   label: string
+  triggerLabel?: string
   Icon: React.ComponentType<{ size: number; color: string }>
   iconColor?: SemanticColorKey
   iconFill?: string
@@ -88,7 +89,7 @@ export function WorkbenchPromptModeDetails({
                 />
               }
               label="Requires approval"
-              hint="Pause for your sign-off before it edits anything or opens a PR."
+              hint="Require manual approval to create prs, and allow follow up prompting to get things right if needed"
               checked={approval}
               onChange={onApprovalChange}
             />

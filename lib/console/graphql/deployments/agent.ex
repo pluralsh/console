@@ -52,6 +52,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approval,         :boolean, description: "whether this run requires approval before continuing"
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
+    field :skills,           list_of(:agent_skill_attributes), description: "the skills available to this agent run"
   end
 
   input_object :agent_pull_request_attributes do
@@ -77,6 +78,12 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :summary,  non_null(:string), description: "the summary of the analysis"
     field :analysis, non_null(:string), description: "the analysis of the agent run"
     field :bullets,  list_of(:string), description: "the bullets of the analysis"
+  end
+
+  input_object :agent_skill_attributes do
+    field :name,        non_null(:string), description: "the name of the skill"
+    field :description, :string, description: "the description of the skill"
+    field :contents,    non_null(:string), description: "the contents of the skill"
   end
 
   input_object :agent_run_upload_attributes do
@@ -171,6 +178,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
 
     field :analysis, :agent_analysis, description: "the analysis of the agent run"
+    field :skills,   list_of(:agent_skill), description: "the skills available to this agent run"
     field :todos,    list_of(:agent_todo), description: "the todos of the agent run"
 
     field :scm_creds,    :scm_creds, resolve: &Deployments.agent_scm_credentials/3
@@ -188,6 +196,10 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :runtime,  :agent_runtime, resolve: dataloader(Deployments), description: "the runtime this agent is using"
     field :user,     :user,          resolve: dataloader(User), description: "the user who initiated this agent run"
     field :flow,     :flow,          resolve: dataloader(Deployments), description: "the flow this agent is associated with"
+
+    field :workbench_job, :workbench_job,
+      resolve: dataloader(Deployments),
+      description: "the workbench job this agent run was spawned from, if any"
 
     field :pull_requests, list_of(:pull_request),
       resolve: dataloader(Deployments),
@@ -224,6 +236,12 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :summary,  non_null(:string), description: "the summary of the analysis"
     field :analysis, non_null(:string), description: "the analysis of the agent run"
     field :bullets,  list_of(:string), description: "quick bullet points to summarize the analysis"
+  end
+
+  object :agent_skill do
+    field :name,        non_null(:string), description: "the name of the skill"
+    field :description, :string, description: "the description of the skill"
+    field :contents,    non_null(:string), description: "the contents of the skill"
   end
 
   object :agent_todo do
@@ -422,6 +440,7 @@ defmodule Console.GraphQl.Deployments.Agent do
         resource: :agent,
         action: :read
       arg :runtime_id, :id
+      arg :status,     :agent_run_status, description: "filter runs by status"
 
       resolve &Deployments.agent_runs/2
     end
@@ -448,6 +467,16 @@ defmodule Console.GraphQl.Deployments.Agent do
       resolve &Deployments.cancel_agent_run/2
     end
 
+    field :approve_agent_run, :agent_run do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.approve_agent_run/2
+    end
+
     field :create_agent_run, :agent_run do
       middleware Authenticated
       middleware Scope,
@@ -457,6 +486,17 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_run_attributes)
 
       resolve &Deployments.create_agent_run/2
+    end
+
+    field :create_agent_run_prompt, :agent_prompt_history do
+      middleware Authenticated
+      middleware Scope,
+        resource: :agent,
+        action: :write
+      arg :id,     non_null(:id)
+      arg :prompt, non_null(:string)
+
+      resolve &Deployments.create_agent_run_prompt/2
     end
 
     field :share_agent_run, :agent_run do
