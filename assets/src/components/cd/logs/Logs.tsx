@@ -21,7 +21,7 @@ import {
 } from './LogsFilters'
 import { LogsLabels } from './LogsLabels'
 import { LegendColor } from './LogsLegend'
-import { LogsScrollIndicator } from './LogsScrollIndicator'
+import { LogsStreamingStatus } from './LogsStreamingStatus'
 import { LogsTable } from './LogsTable'
 
 export const DEFAULT_LOG_QUERY_LENGTH = 250
@@ -150,7 +150,7 @@ export function Logs({
                     setLive={setLive}
                   />
                 </Flex>
-                <LogsScrollIndicator
+                <LogsStreamingStatus
                   live={live}
                   setLive={setLive}
                 />
