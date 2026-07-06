@@ -2,27 +2,28 @@ import {
   LogFacetInput,
   LogQueryOperator,
   LogTimeRange,
-  useLogAggregationBucketsQuery,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { LogLevel, logLevelToColor } from './LogLine'
 import {
-  bucketDurationMs,
-  bucketSizeForWindow,
+  bucketTimeRange,
   CHART_BAR_GAP,
   CHART_CANVAS_HEIGHT,
-  combineLogQuery,
+  chartTickIndices,
+  chartYMax,
   formatChartAxisTime,
   formatCompactCount,
-  LOG_LEVEL_CHART_LAYERS,
+  indexToBucketX,
   LOG_LEVEL_SELECTION_OVERLAY,
   LogsTimeRange,
-  mergeStackedBuckets,
-  niceMax,
-  parseAggregationBuckets,
+  rangeBucketIndices,
+  StackedBucket,
+  xToBucketIndex,
 } from './logsMetricsUtils'
+import { useLogsChartBuckets } from './useLogsChartBuckets'
 
 const Y_AXIS_WIDTH = 36
 const X_AXIS_HEIGHT = 28
@@ -66,68 +67,19 @@ export function LogsMetricsChart({
   const [rowWidth, setRowWidth] = useState(0)
   const [drag, setDrag] = useState<DragState | null>(null)
 
-  const bucketSize = bucketSizeForWindow(sinceSeconds)
-  const bucketMs = bucketDurationMs(bucketSize)
-  const skip = !(clusterId || serviceId)
-  const baseVars = {
+  const { buckets, bucketMs, initialLoading } = useLogsChartBuckets({
     clusterId,
     serviceId,
+    query,
     time,
-    aggregation: { bucketSize },
     operator,
     facets,
-  }
-  const queryOpts = {
-    fetchPolicy: 'cache-and-network' as const,
+    sinceSeconds,
     pollInterval,
-    skip,
-  }
-
-  const { data: totalData, loading } = useLogAggregationBucketsQuery({
-    variables: { ...baseVars, query },
-    ...queryOpts,
-  })
-  const { data: successData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[0].query),
-    },
-    ...queryOpts,
-  })
-  const { data: warnData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[1].query),
-    },
-    ...queryOpts,
-  })
-  const { data: errorData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[2].query),
-    },
-    ...queryOpts,
-  })
-  const { data: infoData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[3].query),
-    },
-    ...queryOpts,
   })
 
-  const buckets = useMemo(() => {
-    const total = parseAggregationBuckets(totalData)
-    if (!total.length) return []
-    return mergeStackedBuckets(total, [
-      parseAggregationBuckets(successData),
-      parseAggregationBuckets(warnData),
-      parseAggregationBuckets(errorData),
-      parseAggregationBuckets(infoData),
-    ])
-  }, [totalData, successData, warnData, errorData, infoData])
-
-  const yMax = niceMax(Math.max(...buckets.map((b) => b.total), 1))
+  const bucketCount = buckets.length
+  const yMax = chartYMax(buckets)
 
   useEffect(() => {
     const node = rowRef.current
@@ -138,51 +90,29 @@ export function LogsMetricsChart({
     observer.observe(node)
     setRowWidth(node.clientWidth)
     return () => observer.disconnect()
-  }, [buckets.length])
+  }, [bucketCount])
 
-  const indexToX = (index: number) =>
-    buckets.length ? (index / buckets.length) * rowWidth : 0
+  const toX = (index: number) => indexToBucketX(index, rowWidth, bucketCount)
+  const toIndex = (x: number) => xToBucketIndex(x, rowWidth, bucketCount)
 
-  const xToIndex = (x: number) => {
-    if (!rowWidth || !buckets.length) return 0
-    return Math.max(
-      0,
-      Math.min(buckets.length - 1, Math.floor((x / rowWidth) * buckets.length))
-    )
-  }
-
-  const rangeIndices = useMemo(() => {
-    if (!rangeFilter || !buckets.length) return null
-    const startMs = rangeFilter.start.getTime()
-    const endMs = rangeFilter.end.getTime()
-    let startIdx = buckets.findIndex((b) => b.timestamp.getTime() >= startMs)
-    if (startIdx === -1) startIdx = 0
-    let endIdx = buckets.findIndex(
-      (b) => b.timestamp.getTime() + bucketMs > endMs
-    )
-    if (endIdx === -1) endIdx = buckets.length - 1
-    else endIdx = Math.max(startIdx, endIdx - 1)
-    return { startIdx, endIdx }
-  }, [rangeFilter, buckets, bucketMs])
+  const rangeIndices = useMemo(
+    () => rangeBucketIndices(buckets, rangeFilter, bucketMs),
+    [buckets, rangeFilter, bucketMs]
+  )
 
   const dragIndices = drag
     ? {
-        startIdx: xToIndex(Math.min(drag.startX, drag.currentX)),
-        endIdx: xToIndex(Math.max(drag.startX, drag.currentX)),
+        startIdx: toIndex(Math.min(drag.startX, drag.currentX)),
+        endIdx: toIndex(Math.max(drag.startX, drag.currentX)),
       }
     : null
 
   const selectionIndices = dragIndices ?? rangeIndices
 
-  const bucketRange = (startIdx: number, endIdx: number) => ({
-    start: buckets[startIdx].timestamp,
-    end: new Date(buckets[endIdx].timestamp.getTime() + bucketMs),
-  })
-
   const relativeX = (e: React.MouseEvent<HTMLDivElement>) =>
     e.clientX - e.currentTarget.getBoundingClientRect().left
 
-  if (loading && !totalData) {
+  if (initialLoading) {
     return (
       <ChartWrapperSC>
         <RectangleSkeleton
@@ -193,16 +123,7 @@ export function LogsMetricsChart({
     )
   }
 
-  if (!buckets.length) return null
-
-  const xTickIndices =
-    buckets.length <= 1
-      ? [0]
-      : Array.from({ length: Math.min(5, buckets.length) }, (_, i) =>
-          Math.round(
-            (i / (Math.min(5, buckets.length) - 1)) * (buckets.length - 1)
-          )
-        )
+  if (isEmpty(buckets)) return null
 
   return (
     <ChartWrapperSC>
@@ -223,10 +144,12 @@ export function LogsMetricsChart({
           onMouseUp={(e) => {
             if (!drag) return
             const x = relativeX(e)
-            const startIdx = xToIndex(Math.min(drag.startX, x))
-            const endIdx = xToIndex(Math.max(drag.startX, x))
+            const startIdx = toIndex(Math.min(drag.startX, x))
+            const endIdx = toIndex(Math.max(drag.startX, x))
             if (Math.abs(drag.startX - x) > 3)
-              onRangeSelect(bucketRange(startIdx, endIdx))
+              onRangeSelect(
+                bucketTimeRange(buckets, startIdx, endIdx, bucketMs)
+              )
             setDrag(null)
           }}
           onMouseLeave={() => setDrag(null)}
@@ -235,54 +158,65 @@ export function LogsMetricsChart({
             {selectionIndices && (
               <SelectionOverlaySC
                 style={{
-                  left: indexToX(selectionIndices.startIdx),
+                  left: toX(selectionIndices.startIdx),
                   width:
-                    indexToX(selectionIndices.endIdx + 1) -
-                    indexToX(selectionIndices.startIdx),
+                    toX(selectionIndices.endIdx + 1) -
+                    toX(selectionIndices.startIdx),
                 }}
               />
             )}
-            {buckets.map((bucket) => {
-              const scale = (count: number) =>
-                (count / yMax) * CHART_CANVAS_HEIGHT
-              const topLevel = [...STACK_ORDER]
-                .reverse()
-                .find((level) => bucket.levels[level] > 0)
-              return (
-                <BarStackSC key={bucket.timestamp.getTime()}>
-                  {STACK_ORDER.map((level) => {
-                    const count = bucket.levels[level]
-                    if (!count) return null
-                    return (
-                      <BarSegmentSC
-                        key={level}
-                        $roundedTop={level === topLevel}
-                        style={{
-                          height: scale(count),
-                          backgroundColor: theme.colors[logLevelToColor[level]],
-                        }}
-                      />
-                    )
-                  })}
-                </BarStackSC>
-              )
-            })}
+            {buckets.map((bucket) => (
+              <ChartBarStack
+                key={bucket.timestamp.getTime()}
+                bucket={bucket}
+                yMax={yMax}
+              />
+            ))}
           </BarsRowSC>
         </BarsAreaSC>
       </ChartCanvasSC>
       <XAxisSC style={{ paddingLeft: Y_AXIS_WIDTH + theme.spacing.medium }}>
-        {xTickIndices.map((i) => (
+        {chartTickIndices(bucketCount).map((i) => (
           <XTickSC
             key={i}
-            style={{
-              left: indexToX(i) + rowWidth / buckets.length / 2,
-            }}
+            style={{ left: toX(i) + rowWidth / bucketCount / 2 }}
           >
             {formatChartAxisTime(buckets[i].timestamp, sinceSeconds)}
           </XTickSC>
         ))}
       </XAxisSC>
     </ChartWrapperSC>
+  )
+}
+
+function ChartBarStack({
+  bucket,
+  yMax,
+}: {
+  bucket: StackedBucket
+  yMax: number
+}) {
+  const { colors } = useTheme()
+  const scale = (count: number) => (count / yMax) * CHART_CANVAS_HEIGHT
+  const topLevel = STACK_ORDER.findLast((level) => bucket.levels[level] > 0)
+
+  return (
+    <BarStackSC>
+      {STACK_ORDER.map((level) => {
+        const count = bucket.levels[level]
+        if (!count) return null
+        return (
+          <BarSegmentSC
+            key={level}
+            $roundedTop={level === topLevel}
+            style={{
+              height: scale(count),
+              backgroundColor: colors[logLevelToColor[level]],
+            }}
+          />
+        )
+      })}
+    </BarStackSC>
   )
 }
 

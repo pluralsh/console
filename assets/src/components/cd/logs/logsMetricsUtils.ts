@@ -1,4 +1,5 @@
 import parseDuration from 'parse-duration-ms'
+import { clamp, isEmpty, keyBy, max, range } from 'lodash'
 import { useLogAggregationBucketsQuery } from 'generated/graphql'
 import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -72,15 +73,16 @@ export function mergeStackedBuckets(
   totalBuckets: AggregationBucket[],
   levelBuckets: AggregationBucket[][]
 ): StackedBucket[] {
-  const countForTs = (set: AggregationBucket[], ts: number) =>
-    set.find((b) => b.timestamp.getTime() === ts)?.count ?? 0
+  const levelCountsByTs = levelBuckets.map((buckets) =>
+    keyBy(buckets, (b) => b.timestamp.getTime())
+  )
 
   return totalBuckets.map((bucket) => {
     const ts = bucket.timestamp.getTime()
     const raw = Object.fromEntries(
       LOG_LEVEL_CHART_LAYERS.map(({ level }, i) => [
         level,
-        countForTs(levelBuckets[i] ?? [], ts),
+        levelCountsByTs[i]?.[ts]?.count ?? 0,
       ])
     ) as Record<(typeof LOG_LEVEL_CHART_LAYERS)[number]['level'], number>
 
@@ -103,6 +105,68 @@ export function mergeStackedBuckets(
 
     return { timestamp: bucket.timestamp, total: bucket.count, levels }
   })
+}
+
+export function chartYMax(buckets: StackedBucket[]): number {
+  return niceMax(max([1, ...buckets.map((b) => b.total)]) ?? 1)
+}
+
+export function chartTickIndices(bucketCount: number, maxTicks = 5): number[] {
+  if (bucketCount <= 1) return [0]
+  const tickCount = Math.min(maxTicks, bucketCount)
+  return range(tickCount).map((i) =>
+    Math.round((i / (tickCount - 1)) * (bucketCount - 1))
+  )
+}
+
+export function indexToBucketX(
+  index: number,
+  rowWidth: number,
+  bucketCount: number
+): number {
+  return bucketCount ? (index / bucketCount) * rowWidth : 0
+}
+
+export function xToBucketIndex(
+  x: number,
+  rowWidth: number,
+  bucketCount: number
+): number {
+  if (!rowWidth || !bucketCount) return 0
+  return clamp(Math.floor((x / rowWidth) * bucketCount), 0, bucketCount - 1)
+}
+
+export function rangeBucketIndices(
+  buckets: StackedBucket[],
+  rangeFilter: LogsTimeRange | null,
+  bucketMs: number
+): { startIdx: number; endIdx: number } | null {
+  if (!rangeFilter || isEmpty(buckets)) return null
+
+  const startMs = rangeFilter.start.getTime()
+  const endMs = rangeFilter.end.getTime()
+  let startIdx = buckets.findIndex((b) => b.timestamp.getTime() >= startMs)
+  if (startIdx === -1) startIdx = 0
+
+  let endIdx = buckets.findIndex(
+    (b) => b.timestamp.getTime() + bucketMs > endMs
+  )
+  if (endIdx === -1) endIdx = buckets.length - 1
+  else endIdx = Math.max(startIdx, endIdx - 1)
+
+  return { startIdx, endIdx }
+}
+
+export function bucketTimeRange(
+  buckets: StackedBucket[],
+  startIdx: number,
+  endIdx: number,
+  bucketMs: number
+): LogsTimeRange {
+  return {
+    start: buckets[startIdx].timestamp,
+    end: new Date(buckets[endIdx].timestamp.getTime() + bucketMs),
+  }
 }
 
 export function niceMax(value: number): number {
