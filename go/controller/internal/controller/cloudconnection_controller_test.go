@@ -28,14 +28,18 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 		const (
 			connectionName              = "connection-name"
 			connectionSecretName        = "connection-credentials"
+			vsphereConnectionSecretName = "vsphere-connection-credentials"
 			namespace                   = "default"
 			connectionConsoleID         = "123"
+			vsphereConnectionName       = "vsphere-connection"
+			vsphereConnectionConsoleID  = "vsphere-connection-console-id"
 			readonlyConnectionName      = "readonly-connection"
 			readonlyConnectionConsoleID = "readonly-connection-console-id"
 		)
 
 		ctx := context.Background()
 		namespacedName := types.NamespacedName{Name: connectionName, Namespace: namespace}
+		vsphereNamespacedName := types.NamespacedName{Name: vsphereConnectionName, Namespace: namespace}
 		readonlyNamespacedName := types.NamespacedName{Name: readonlyConnectionName, Namespace: namespace}
 
 		BeforeAll(func() {
@@ -47,6 +51,17 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 				},
 				Data: map[string][]byte{
 					"applicationCredentials": []byte("mock"),
+				},
+			}, nil)).To(Succeed())
+
+			By("Creating vSphere connection secret")
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      vsphereConnectionSecretName,
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"password": []byte("vsphere-password"),
 				},
 			}, nil)).To(Succeed())
 
@@ -76,6 +91,30 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 				p.Status.ID = lo.ToPtr(connectionConsoleID)
 			})).To(Succeed())
 
+			By("Creating vSphere connection")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.CloudConnection{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      vsphereConnectionName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.CloudConnectionSpec{
+					Name:     lo.ToPtr(vsphereConnectionName),
+					Provider: v1alpha1.Vsphere,
+					Configuration: v1alpha1.CloudConnectionConfiguration{
+						Vsphere: &v1alpha1.VsphereCloudConnection{
+							Server:             "https://vcenter.example.com/sdk",
+							User:               "administrator@vsphere.local",
+							AllowUnverifiedSsl: lo.ToPtr(true),
+							Password: v1alpha1.ObjectKeyReference{
+								Name:      vsphereConnectionSecretName,
+								Namespace: namespace,
+								Key:       "password",
+							},
+						},
+					},
+				},
+			}, nil)).To(Succeed())
+
 			By("Creating readonly connection")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.CloudConnection{
 				ObjectMeta: metav1.ObjectMeta{
@@ -96,6 +135,12 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(k8sClient.Delete(ctx, connection)).To(Succeed())
 
+			By("Cleanup vSphere connection")
+			vsphereConnection := &v1alpha1.CloudConnection{}
+			err = k8sClient.Get(ctx, vsphereNamespacedName, vsphereConnection)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(k8sClient.Delete(ctx, vsphereConnection)).To(Succeed())
+
 			By("Cleanup readonly connection")
 			readonlyProvider := &v1alpha1.CloudConnection{}
 			err = k8sClient.Get(ctx, readonlyNamespacedName, readonlyProvider)
@@ -107,6 +152,12 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: connectionSecretName, Namespace: namespace}, secret)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
+
+			By("Cleanup vSphere secret")
+			vsphereSecret := &corev1.Secret{}
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: vsphereConnectionSecretName, Namespace: namespace}, vsphereSecret)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(k8sClient.Delete(ctx, vsphereSecret)).To(Succeed())
 		})
 
 		It("should successfully reconcile connection", func() {
@@ -152,6 +203,45 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 					},
 				},
 			})))
+		})
+
+		It("should successfully reconcile vSphere connection", func() {
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetCloudConnection", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, vsphereConnectionName))
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			fakeConsoleClient.On("IsCloudConnection", mock.Anything, mock.AnythingOfType("string")).Return(false, nil)
+			fakeConsoleClient.On("UpsertCloudConnection", mock.Anything, mock.Anything).
+				Run(func(args mock.Arguments) {
+					attributes := args.Get(1).(gqlclient.CloudConnectionAttributes)
+					Expect(attributes.Name).To(Equal(vsphereConnectionName))
+					Expect(attributes.Provider).To(Equal(gqlclient.ProviderVsphere))
+					Expect(attributes.Configuration.Vsphere).NotTo(BeNil())
+					Expect(attributes.Configuration.Vsphere.Server).To(Equal("https://vcenter.example.com/sdk"))
+					Expect(attributes.Configuration.Vsphere.User).To(Equal("administrator@vsphere.local"))
+					Expect(attributes.Configuration.Vsphere.Password).To(Equal("vsphere-password"))
+					Expect(attributes.Configuration.Vsphere.AllowUnverifiedSsl).To(Equal(lo.ToPtr(true)))
+				}).
+				Return(&gqlclient.CloudConnectionFragment{
+					ID:   vsphereConnectionConsoleID,
+					Name: vsphereConnectionName,
+				}, nil)
+
+			controllerReconciler := &controller.CloudConnectionReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: vsphereNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			connection := &v1alpha1.CloudConnection{}
+			err = k8sClient.Get(ctx, vsphereNamespacedName, connection)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(connection.Status.GetID()).To(Equal(vsphereConnectionConsoleID))
+			Expect(connection.Status.IsReadonly()).To(BeFalse())
+			Expect(connection.Status.IsStatusConditionTrue(v1alpha1.ReadyConditionType)).To(BeTrue())
+			Expect(connection.Status.IsStatusConditionTrue(v1alpha1.SynchronizedConditionType)).To(BeTrue())
 		})
 
 		It("should successfully reconcile and update previously created connection", func() {
