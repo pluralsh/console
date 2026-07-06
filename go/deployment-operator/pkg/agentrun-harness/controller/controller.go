@@ -181,8 +181,12 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.done:
 		return
 	case <-in.runDone:
-		klog.Info("initial agent run completed, starting babysit loop")
+		klog.Info("initial agent run completed, evaluating post-run work")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
+		if in.agentRun.Mode == gqlclient.AgentRunModeAnalyze {
+			klog.V(log.LogLevelInfo).InfoS("analyze mode complete, skipping babysit loop")
+			return
+		}
 		in.runPostRunPollLoop(ctx)
 		if !in.agentRun.Babysit {
 			return
@@ -416,8 +420,13 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			sb.WriteString("### New or updated comments since last reprompt\n\n")
 			for _, c := range e.NewComments {
 				body := strings.ReplaceAll(c.Body, "\n", "\n  > ")
-				_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
-					c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+				if c.Reactable() {
+					_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
+						c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+				} else {
+					_, _ = fmt.Fprintf(&sb, "- **%s** at %s (reviewId: `%s`, not reactable):\n  > %s\n\n",
+						c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+				}
 			}
 		} else {
 			sb.WriteString("No new or updated comments since last reprompt.\n\n")
