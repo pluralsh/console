@@ -16,8 +16,10 @@ import {
   chartYMax,
   formatChartAxisTime,
   formatCompactCount,
+  formatRangeTime,
   indexToBucketX,
-  LOG_LEVEL_SELECTION_OVERLAY,
+  LOG_LEVEL_SELECTION_EDGE,
+  LOG_LEVEL_SELECTION_SHADOW,
   LogsTimeRange,
   rangeBucketIndices,
   StackedBucket,
@@ -109,6 +111,24 @@ export function LogsMetricsChart({
 
   const selectionIndices = dragIndices ?? rangeIndices
 
+  const selectionBounds = selectionIndices
+    ? {
+        left: toX(selectionIndices.startIdx),
+        width:
+          toX(selectionIndices.endIdx + 1) - toX(selectionIndices.startIdx),
+      }
+    : null
+
+  const dragPreview =
+    drag && dragIndices && buckets.length
+      ? bucketTimeRange(
+          buckets,
+          dragIndices.startIdx,
+          dragIndices.endIdx,
+          bucketMs
+        )
+      : null
+
   const relativeX = (e: React.MouseEvent<HTMLDivElement>) =>
     e.clientX - e.currentTarget.getBoundingClientRect().left
 
@@ -155,15 +175,22 @@ export function LogsMetricsChart({
           onMouseLeave={() => setDrag(null)}
         >
           <BarsRowSC ref={rowRef}>
-            {selectionIndices && (
-              <SelectionOverlaySC
-                style={{
-                  left: toX(selectionIndices.startIdx),
-                  width:
-                    toX(selectionIndices.endIdx + 1) -
-                    toX(selectionIndices.startIdx),
-                }}
-              />
+            {selectionBounds && (
+              <>
+                <SelectionShadowSC
+                  style={{ left: 0, width: selectionBounds.left }}
+                />
+                <SelectionShadowSC
+                  style={{
+                    left: selectionBounds.left + selectionBounds.width,
+                    right: 0,
+                  }}
+                />
+                <ChartSelectionSC style={selectionBounds}>
+                  <SelectionEdgeSC $side="start" />
+                  <SelectionEdgeSC $side="end" />
+                </ChartSelectionSC>
+              </>
             )}
             {buckets.map((bucket) => (
               <ChartBarStack
@@ -173,6 +200,16 @@ export function LogsMetricsChart({
               />
             ))}
           </BarsRowSC>
+          {dragPreview && selectionBounds && (
+            <DragTooltipSC
+              style={{
+                left: selectionBounds.left + selectionBounds.width / 2,
+              }}
+            >
+              {formatRangeTime(dragPreview.start)} –{' '}
+              {formatRangeTime(dragPreview.end)}
+            </DragTooltipSC>
+          )}
         </BarsAreaSC>
       </ChartCanvasSC>
       <XAxisSC style={{ paddingLeft: Y_AXIS_WIDTH + theme.spacing.medium }}>
@@ -268,14 +305,46 @@ const BarsRowSC = styled.div({
   height: '100%',
 })
 
-const SelectionOverlaySC = styled.div({
+const SelectionShadowSC = styled.div({
   position: 'absolute',
   top: 0,
   bottom: 0,
-  background: LOG_LEVEL_SELECTION_OVERLAY,
+  background: LOG_LEVEL_SELECTION_SHADOW,
   pointerEvents: 'none',
-  zIndex: 0,
+  zIndex: 2,
 })
+
+const ChartSelectionSC = styled.div({
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  pointerEvents: 'none',
+  zIndex: 3,
+})
+
+const SelectionEdgeSC = styled.div<{ $side: 'start' | 'end' }>(({ $side }) => ({
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  width: 2,
+  backgroundColor: LOG_LEVEL_SELECTION_EDGE,
+  ...($side === 'start' ? { left: 0 } : { right: 0 }),
+}))
+
+const DragTooltipSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  transform: 'translate(-50%, -100%)',
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+  borderRadius: theme.borderRadiuses.medium,
+  background: theme.colors['fill-two'],
+  border: theme.borders['on-fill-two'],
+  ...theme.partials.text.caption,
+  color: theme.colors.text,
+  pointerEvents: 'none',
+  whiteSpace: 'nowrap',
+  zIndex: 3,
+}))
 
 const BarStackSC = styled.div({
   position: 'relative',

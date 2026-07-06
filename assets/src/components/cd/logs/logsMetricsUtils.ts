@@ -23,7 +23,8 @@ export type StackedBucket = {
 
 export const CHART_CANVAS_HEIGHT = 162
 export const CHART_BAR_GAP = 2
-export const LOG_LEVEL_SELECTION_OVERLAY = 'rgba(93, 99, 244, 0.2)'
+export const LOG_LEVEL_SELECTION_SHADOW = 'rgba(2, 3, 24, 0.55)'
+export const LOG_LEVEL_SELECTION_EDGE = '#747af6'
 
 export const LOG_LEVEL_CHART_LAYERS = [
   { level: LogLevel.SUCCESS, query: 'success' },
