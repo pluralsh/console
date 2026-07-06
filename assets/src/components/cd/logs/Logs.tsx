@@ -10,7 +10,6 @@ import { LogFacetInput, useLogAggregationQuery } from 'generated/graphql'
 import styled from 'styled-components'
 import { toISOStringOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { logLevelToColor } from './LogLine'
 import {
   DEFAULT_LOG_FILTERS,
   LogsDateDropdown,
@@ -20,7 +19,10 @@ import {
   LogsSinceSecondsSelect,
 } from './LogsFilters'
 import { LogsLabels } from './LogsLabels'
-import { LegendColor } from './LogsLegend'
+import { LogsLegend } from './LogsLegend'
+import { LogsMetricsChart } from './LogsMetricsChart'
+import { LogsTimeRange } from './logsMetricsUtils'
+import { LogsRangeBanner } from './LogsRangeBanner'
 import { LogsStreamingStatus } from './LogsStreamingStatus'
 import { LogsTable } from './LogsTable'
 
@@ -39,21 +41,45 @@ export function Logs({
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 1000)
   const [filters, setFilters] = useState<LogsFiltersT>(DEFAULT_LOG_FILTERS)
+  const [rangeFilter, setRangeFilter] = useState<LogsTimeRange | null>(null)
 
   const [live, setLiveState] = useState(true)
-  const setLive = useCallback(
-    (live: boolean) => {
-      setLiveState(live)
-      if (live) setFilters({ ...filters, date: null })
-    },
-    [filters, setFilters]
+  const setLive = useCallback((live: boolean) => {
+    setLiveState(live)
+    if (live) {
+      setFilters((prev) => ({ ...prev, date: null }))
+      setRangeFilter(null)
+    }
+  }, [])
+
+  const clearRangeFilter = useCallback(() => setRangeFilter(null), [])
+
+  const handleRangeSelect = useCallback((range: LogsTimeRange) => {
+    setLiveState(false)
+    setRangeFilter(range)
+  }, [])
+
+  const chartTime = useMemo(
+    () => ({
+      before: live ? undefined : toISOStringOrUndef(filters.date, true),
+      duration: secondsToDuration(filters.sinceSeconds),
+      reverse: false,
+    }),
+    [live, filters.date, filters.sinceSeconds]
   )
 
-  const time = {
-    before: live ? undefined : toISOStringOrUndef(filters.date, true),
-    duration: secondsToDuration(filters.sinceSeconds),
-    reverse: false,
-  }
+  const time = useMemo(() => {
+    if (rangeFilter) {
+      return {
+        after: toISOStringOrUndef(rangeFilter.start),
+        before: toISOStringOrUndef(rangeFilter.end),
+        reverse: false,
+      }
+    }
+    return chartTime
+  }, [rangeFilter, chartTime])
+
+  const timeFiltersDisabled = live || !!rangeFilter
 
   const { data, loading, error, fetchMore } = useLogAggregationQuery({
     variables: {
@@ -143,13 +169,13 @@ export function Logs({
                     setSinceSeconds={(sinceSeconds) =>
                       setFilters({ ...filters, sinceSeconds })
                     }
-                    disabled={live}
+                    disabled={timeFiltersDisabled}
                   />
                   <LogsDateDropdown
                     initialDate={filters.date}
                     setDate={(date) => setFilters({ ...filters, date })}
                     setLive={setLive}
-                    disabled={live}
+                    disabled={timeFiltersDisabled}
                   />
                 </Flex>
                 <LogsStreamingStatus
@@ -160,34 +186,43 @@ export function Logs({
             ),
           }}
         >
-          <LogsTable
-            logs={logs}
-            loading={loading}
-            initialLoading={initialLoading}
-            fetchMore={fetchMore}
-            filters={filters}
-            live={live}
-            setLive={setLive}
-            addLabel={addLabel}
-            labels={labels}
-            clusterId={clusterId}
-            serviceId={serviceId}
-          />
+          <LogsBodySC>
+            <LogsRangeBanner
+              rangeFilter={rangeFilter}
+              onClear={clearRangeFilter}
+            />
+            <LogsMetricsChart
+              clusterId={clusterId}
+              serviceId={serviceId}
+              query={throttledQ}
+              time={chartTime}
+              operator={filters.queryOperator}
+              facets={labels}
+              sinceSeconds={filters.sinceSeconds}
+              rangeFilter={rangeFilter}
+              onRangeSelect={handleRangeSelect}
+              pollInterval={live ? POLL_INTERVAL : 0}
+            />
+            <LogsTableWrapSC>
+              <LogsTable
+                logs={logs}
+                loading={loading}
+                initialLoading={initialLoading}
+                fetchMore={fetchMore}
+                filters={filters}
+                live={live}
+                setLive={setLive}
+                addLabel={addLabel}
+                labels={labels}
+                clusterId={clusterId}
+                serviceId={serviceId}
+                rangeFilter={rangeFilter}
+              />
+            </LogsTableWrapSC>
+          </LogsBodySC>
         </Card>
       )}
-      <Flex gap="medium">
-        {!(error || initialLoading) &&
-          Object.entries(logLevelToColor).map(([level, color]) => (
-            <Flex
-              key={level}
-              gap="xsmall"
-              align="center"
-            >
-              <LegendColor color={color} />
-              {level}
-            </Flex>
-          ))}
-      </Flex>
+      {!(error || initialLoading) && <LogsLegend />}
     </MainContentWrapperSC>
   )
 }
@@ -204,3 +239,19 @@ const MainContentWrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
 }))
+
+const LogsBodySC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  height: '100%',
+  overflow: 'hidden',
+})
+
+const LogsTableWrapSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+})
