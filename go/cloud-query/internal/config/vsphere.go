@@ -34,14 +34,13 @@ func (c *VSphereConfiguration) Query(connectionName string) (string, error) {
 
 func (c *VSphereConfiguration) buildQuery(connectionName string) string {
 	query := fmt.Sprintf(`
-		DROP SERVER IF EXISTS %[2]s;
-		CREATE SERVER %[2]s FOREIGN DATA WRAPPER steampipe_postgres_vsphere OPTIONS (
+		DROP SERVER IF EXISTS %[1]s;
+		CREATE SERVER %[1]s FOREIGN DATA WRAPPER steampipe_postgres_vsphere OPTIONS (
 			config '
-				vsphere_server=%[3]q
-				user=%[4]q
-				password=%[5]q
+				vsphere_server=%[2]q
+				user=%[3]q
+				password=%[4]q
 	`,
-		pq.QuoteIdentifier(connectionName),
 		pq.QuoteIdentifier("steampipe_"+connectionName),
 		lo.FromPtr(c.server),
 		lo.FromPtr(c.user),

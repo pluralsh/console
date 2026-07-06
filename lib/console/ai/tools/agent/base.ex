@@ -120,9 +120,12 @@ defmodule Console.AI.Tools.Agent.Base do
       server:               vsphere.server,
       user:                 vsphere.user,
       password:             vsphere.password,
-      allow_unverified_ssl: "#{vsphere.allow_unverified_ssl || false}"
+      allow_unverified_ssl: optional_bool_string(vsphere.allow_unverified_ssl)
     }
   end
 
   def to_pb(_), do: nil
+
+  defp optional_bool_string(nil), do: nil
+  defp optional_bool_string(value) when is_boolean(value), do: "#{value}"
 end

@@ -22,7 +22,7 @@ import {
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
-  VmwareLogoIcon,
+  VSphereLogoIcon,
 } from '@pluralsh/design-system'
 import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
@@ -342,7 +342,7 @@ export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
   [Provider.Aws]: AwsLogoIcon,
   [Provider.Gcp]: GoogleCloudLogoIcon,
   [Provider.Azure]: AzureLogoIcon,
-  [Provider.Vsphere]: VmwareLogoIcon,
+  [Provider.Vsphere]: VSphereLogoIcon,
 }
 
 export const isProvider = (value: Nullable<string>): value is Provider =>
