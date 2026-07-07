@@ -29,7 +29,7 @@ export function LogsRangeBanner({
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: theme.spacing.xlarge,
-          minHeight: 44,
+          minHeight: 48,
           padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
           borderRadius: theme.borderRadiuses.large,
           background: theme.colors['fill-two'],
