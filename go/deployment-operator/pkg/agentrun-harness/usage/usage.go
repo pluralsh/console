@@ -19,8 +19,6 @@ type Usage struct {
 	inputCost       float64
 	outputCost      float64
 	totalCost       float64
-
-	onRecord func(*console.AiUsageAttributes)
 }
 
 // Record contains a single provider usage event, normalized to the Console schema.
@@ -35,8 +33,8 @@ type Record struct {
 	TotalCost       float64
 }
 
-func New(existing *console.AgentRunUsage, onRecord func(*console.AiUsageAttributes)) *Usage {
-	u := &Usage{onRecord: onRecord}
+func New(existing *console.AgentRunUsage) *Usage {
+	u := &Usage{}
 	if existing == nil {
 		return u
 	}
@@ -85,13 +83,7 @@ func (u *Usage) RecordUsage(record Record) {
 	} else {
 		u.totalTokens += record.InputTokens + record.OutputTokens
 	}
-	attrs := u.attributesLocked()
-	onRecord := u.onRecord
 	u.mu.Unlock()
-
-	if onRecord != nil {
-		onRecord(attrs)
-	}
 }
 
 func (u *Usage) Attributes() *console.AiUsageAttributes {

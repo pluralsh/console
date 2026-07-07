@@ -15,6 +15,7 @@ import (
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
@@ -57,6 +58,42 @@ func TestBuildAnalysisFollowUpPrompt(t *testing.T) {
 	p := buildAnalysisFollowUpPrompt(2)
 	require.Contains(t, p, "follow-up 2/3")
 	require.Contains(t, p, "updateAgentRunAnalysis")
+}
+
+func TestUpdateAgentRunPersistsBufferedUsageWithoutMutatingFetchedRun(t *testing.T) {
+	t.Parallel()
+
+	recorder := usage.New(nil)
+	recorder.RecordUsage(usage.Record{InputTokens: 10, OutputTokens: 5})
+
+	m := mocks.NewClientMock(t)
+	m.On("UpdateAgentRun", mock.Anything, "r1", mock.MatchedBy(func(attrs gqlclient.AgentRunStatusAttributes) bool {
+		return attrs.Status == gqlclient.AgentRunStatusRunning &&
+			attrs.Usage != nil &&
+			attrs.Usage.InputTokens != nil &&
+			*attrs.Usage.InputTokens == 10
+	})).Return(&gqlclient.AgentRunFragment{ID: "r1"}, nil).Once()
+
+	in := &agentRunController{
+		agentRun:      &agentrunv1.AgentRun{Status: gqlclient.AgentRunStatusPending},
+		agentRunID:    "r1",
+		consoleClient: m,
+		usage:         recorder,
+	}
+
+	_, err := in.updateAgentRun(context.Background(), gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning})
+	require.NoError(t, err)
+	require.Equal(t, gqlclient.AgentRunStatusPending, in.agentRun.Status)
+}
+
+func TestCanStartStatusStillRejectsRunning(t *testing.T) {
+	t.Parallel()
+
+	in := &agentRunController{
+		agentRun: &agentrunv1.AgentRun{Status: gqlclient.AgentRunStatusRunning},
+	}
+
+	require.False(t, in.canStartStatus())
 }
 
 type recordingTool struct {

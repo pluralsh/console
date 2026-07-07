@@ -140,31 +140,7 @@ func (in *agentRunController) updateAgentRun(ctx context.Context, attrs gqlclien
 	if err != nil {
 		return nil, err
 	}
-	if in.agentRun != nil {
-		in.agentRun.Status = attrs.Status
-	}
 	return agentRun, nil
-}
-
-func (in *agentRunController) persistUsage(attrs *gqlclient.AiUsageAttributes) {
-	if attrs == nil {
-		return
-	}
-
-	status := gqlclient.AgentRunStatusRunning
-	if in.agentRun != nil {
-		status = in.agentRun.Status
-	}
-	if status == "" {
-		status = gqlclient.AgentRunStatusRunning
-	}
-
-	if _, err := in.consoleClient.UpdateAgentRun(context.Background(), in.agentRunID, gqlclient.AgentRunStatusAttributes{
-		Status: status,
-		Usage:  attrs,
-	}); err != nil {
-		klog.ErrorS(err, "failed to persist agent run usage", "id", in.agentRunID)
-	}
 }
 
 // init initializes the controller with the agent run data from Console API
@@ -186,7 +162,7 @@ func (in *agentRunController) init() (Controller, error) {
 	// Convert console fragment to harness type
 	in.agentRun = (&agentrunv1.AgentRun{}).FromAgentRunFragment(agentRunFragment)
 	in.initializePromptCursor()
-	in.usage = usage.New(in.agentRun.Usage, in.persistUsage)
+	in.usage = usage.New(in.agentRun.Usage)
 
 	klog.V(log.LogLevelInfo).InfoS("found agent run",
 		"id", in.agentRun.ID,

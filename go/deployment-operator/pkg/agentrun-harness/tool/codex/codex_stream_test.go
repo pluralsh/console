@@ -105,7 +105,7 @@ func TestMapTurnCompletedPersistsCostWithoutChatContent(t *testing.T) {
 	line := `{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":20,"output_tokens":50,"reasoning_output_tokens":12}}`
 
 	c := &Codex{toolItems: make(map[string]*StreamItem)}
-	c.Config.Usage = harnessusage.New(nil, nil)
+	c.Config.Usage = harnessusage.New(nil)
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 

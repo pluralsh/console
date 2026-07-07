@@ -9,7 +9,7 @@ import (
 )
 
 func TestClaudeUsageRecordsCacheTokensAsInput(t *testing.T) {
-	recorder := harnessusage.New(nil, nil)
+	recorder := harnessusage.New(nil)
 	msg := mapClaudeContentToAgentMessage(&StreamEvent{
 		Message: &MessageEvent{
 			Role: string(console.AiRoleAssistant),

@@ -14,7 +14,7 @@ func TestStepFinishRecordsUsage(t *testing.T) {
 	event := &EventListResponse{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	recorder := harnessusage.New(nil, nil)
+	recorder := harnessusage.New(nil)
 	aggregated := &Event{}
 	aggregated.FromEventResponse(*event, recorder)
 

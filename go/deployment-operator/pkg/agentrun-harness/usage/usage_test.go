@@ -7,11 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRecordUsageAccumulatesAndCallbacks(t *testing.T) {
-	var callback *console.AiUsageAttributes
-	u := New(nil, func(attrs *console.AiUsageAttributes) {
-		callback = attrs
-	})
+func TestRecordUsageAccumulates(t *testing.T) {
+	u := New(nil)
 
 	u.RecordUsage(Record{
 		InputTokens:     10,
@@ -37,7 +34,6 @@ func TestRecordUsageAccumulatesAndCallbacks(t *testing.T) {
 	require.Equal(t, 0.1, *attrs.InputCost)
 	require.Equal(t, 0.2, *attrs.OutputCost)
 	require.Equal(t, 0.25, *attrs.TotalCost)
-	require.Equal(t, attrs, callback)
 }
 
 func TestNewPreservesExistingUsage(t *testing.T) {
@@ -46,7 +42,7 @@ func TestNewPreservesExistingUsage(t *testing.T) {
 	u := New(&console.AgentRunUsage{
 		InputTokens: &input,
 		TotalCost:   &totalCost,
-	}, nil)
+	})
 
 	attrs := u.Attributes()
 	require.NotNil(t, attrs)
