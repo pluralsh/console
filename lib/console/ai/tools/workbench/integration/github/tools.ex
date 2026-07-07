@@ -13,6 +13,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
   @pull_requests [
     Console.AI.Tools.Workbench.Integration.Github.AddCommentToPendingReview,
     Console.AI.Tools.Workbench.Integration.Github.AddReactionToPullRequestComment,
+    Console.AI.Tools.Workbench.Integration.Github.RemoveReactionFromPullRequestComment,
     Console.AI.Tools.Workbench.Integration.Github.AddReplyToPullRequestComment,
     Console.AI.Tools.Workbench.Integration.Github.ListPullRequests,
     Console.AI.Tools.Workbench.Integration.Github.PullRequestRead,
@@ -30,7 +31,16 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
     Console.AI.Tools.Workbench.Integration.Github.SearchRepositories
   ]
 
-  @default @issues ++ @pull_requests ++ @repos
+  @security [
+    Console.AI.Tools.Workbench.Integration.Github.GetCodeScanningAlert,
+    Console.AI.Tools.Workbench.Integration.Github.GetDependabotAlert,
+    Console.AI.Tools.Workbench.Integration.Github.GetSecretScanningAlert,
+    Console.AI.Tools.Workbench.Integration.Github.ListCodeScanningAlerts,
+    Console.AI.Tools.Workbench.Integration.Github.ListDependabotAlerts,
+    Console.AI.Tools.Workbench.Integration.Github.ListSecretScanningAlerts
+  ]
+
+  @default @issues ++ @pull_requests ++ @repos ++ @security
 
   def expand(%WorkbenchTool{} = tool) do
     Enum.map(modules_for(tool), &struct(&1, tool: tool))
@@ -42,6 +52,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
       %{toolset: "issues"} -> @issues
       %{toolset: "pull_requests"} -> @pull_requests
       %{toolset: "repos"} -> @repos
+      %{toolset: "security"} -> @security
       %{toolset: _} -> @default
       _ -> @default
     end

@@ -12,16 +12,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
           {:ok, String.t()} | {:error, String.t()}
   def plain_get(%Tentacat.Client{} = client, path, extra_headers \\ []) when is_binary(path) do
     url = client.endpoint <> path
-    tentacat_extra = Application.get_env(:tentacat, :extra_headers, [])
 
-    req_opts =
-      (client.request_options || []) ++ Application.get_env(:tentacat, :request_options, [])
-
-    headers =
-      tentacat_extra ++
-        Tentacat.authorization_header(client.auth, extra_headers ++ [{"User-agent", "tentacat"}])
-
-    case HTTPoison.request(:get, url, "", headers, req_opts) do
+    case HTTPoison.request(:get, url, "", request_headers(client, extra_headers), request_options(client)) do
       {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
         {:ok, body}
 
@@ -32,6 +24,14 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
         Http.error("GitHub", reason)
     end
   end
+
+  @spec json_get(Tentacat.Client.t(), String.t()) :: Tentacat.response() | {:error, String.t()}
+  def json_get(%Tentacat.Client{} = client, path) when is_binary(path),
+    do: json_request(:get, client, path)
+
+  @spec json_delete(Tentacat.Client.t(), String.t()) :: Tentacat.response() | {:error, String.t()}
+  def json_delete(%Tentacat.Client{} = client, path) when is_binary(path),
+    do: json_request(:delete, client, path)
 
   @spec build(WorkbenchTool.t()) :: {:ok, Tentacat.Client.t()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{github: gh} = conn})
@@ -108,4 +108,61 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   defp ensure_trailing_slash(url) do
     if String.ends_with?(url, "/"), do: url, else: url <> "/"
   end
+
+  defp json_request(method, %Tentacat.Client{} = client, path) do
+    url = client.endpoint <> path
+
+    case HTTPoison.request(method, url, "", json_headers(client), request_options(client)) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body} = resp} ->
+        response(method, code, decode_json_body(body), resp)
+
+      {:error, reason} ->
+        Http.error("GitHub", reason)
+    end
+  end
+
+  defp decode_json_body(body) when body in [nil, ""], do: %{}
+
+  defp decode_json_body(body) do
+    case Jason.decode(body) do
+      {:ok, decoded} -> decoded
+      _ -> body
+    end
+  end
+
+  defp response(:get, code, body, %HTTPoison.Response{} = resp) when is_list(body),
+    do: {{code, body, resp}, next_url(resp), nil}
+
+  defp response(_, code, body, %HTTPoison.Response{} = resp),
+    do: {code, body, resp}
+
+  defp next_url(%HTTPoison.Response{headers: headers}) do
+    Enum.find_value(headers, fn
+      {"Link", value} -> next_url(value)
+      {"link", value} -> next_url(value)
+      _ -> nil
+    end)
+  end
+
+  defp next_url(value) when is_binary(value) do
+    case Regex.run(~r/<([^>]+)>;\s*rel="next"/, value) do
+      [_, url] -> url
+      _ -> nil
+    end
+  end
+
+  defp json_headers(%Tentacat.Client{} = client) do
+    request_headers(client, [
+      {"Accept", "application/vnd.github+json"},
+      {"X-GitHub-Api-Version", "2022-11-28"}
+    ])
+  end
+
+  defp request_headers(%Tentacat.Client{} = client, extra_headers) do
+    Application.get_env(:tentacat, :extra_headers, []) ++
+      Tentacat.authorization_header(client.auth, extra_headers ++ [{"User-agent", "tentacat"}])
+  end
+
+  defp request_options(%Tentacat.Client{} = client),
+    do: (client.request_options || []) ++ Application.get_env(:tentacat, :request_options, [])
 end

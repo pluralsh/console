@@ -326,7 +326,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :access_token, :string,
       description: "optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)"
     field :toolset,      :string,
-      description: "optional native tool subset: issues, pull_requests, repos, default/all, or omit for all tools"
+      description: "optional native tool subset: issues, pull_requests, repos, security, default/all, or omit for all tools"
     field :app_id,           :string,
       description: "GitHub App ID (use with installation_id and private_key instead of access_token)"
     field :installation_id, :string, description: "GitHub App installation ID for this organization or account"

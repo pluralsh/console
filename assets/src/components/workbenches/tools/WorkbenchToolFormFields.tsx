@@ -644,11 +644,12 @@ function ExaFormFields({
 const GITHUB_NATIVE_TOOLSET_OPTIONS = [
   {
     key: 'default',
-    label: 'All (issues, pull requests, repos)',
+    label: 'All (issues, pull requests, repos, security)',
   },
   { key: 'issues', label: 'Issues only' },
   { key: 'pull_requests', label: 'Pull requests only' },
   { key: 'repos', label: 'Repos only' },
+  { key: 'security', label: 'Security only' },
 ] as const
 
 function githubNativeToolsetSelectKey(
@@ -665,7 +666,8 @@ function githubNativeToolsetSelectKey(
   if (
     toolset === 'issues' ||
     toolset === 'pull_requests' ||
-    toolset === 'repos'
+    toolset === 'repos' ||
+    toolset === 'security'
   ) {
     return toolset
   }
@@ -795,7 +797,7 @@ function GithubFormFields({
             if (typeof key !== 'string') return
             set({
               ...c,
-              toolset: key === 'default' ? undefined : key,
+              toolset: key === 'default' ? 'all' : key,
             })
           }}
           selectionMode="single"

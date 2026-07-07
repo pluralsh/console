@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Remove a reaction from an issue comment, pull request review comment, or repository commit comment.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment id for the chosen comment_type."
+    },
+    "reaction_id": {
+      "type": "integer",
+      "description": "Reaction id to remove."
+    },
+    "comment_type": {
+      "type": "string",
+      "enum": ["issue_comment", "pull_request_review", "commit"],
+      "description": "issue_comment: comment on an issue or PR conversation thread; pull_request_review: inline review comment on a diff; commit: comment on a commit. Defaults to pull_request_review."
+    }
+  },
+  "required": ["owner", "repo", "comment_id", "reaction_id"],
+  "additionalProperties": false
+}

@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "description": "List code scanning alerts for a repository via GitHub REST.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "state": {
+      "type": "string",
+      "enum": ["open", "dismissed", "fixed"],
+      "description": "Filter alerts by state."
+    },
+    "ref": {
+      "type": "string",
+      "description": "Git ref to filter by, such as refs/heads/main."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low", "warning", "note", "error"],
+      "description": "Filter by alert severity."
+    },
+    "tool_name": {
+      "type": "string",
+      "description": "Filter by code scanning tool name."
+    },
+    "page": {
+      "type": "integer",
+      "description": "Page number. Defaults to 1."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page. Defaults to 30."
+    }
+  },
+  "required": ["owner", "repo"],
+  "additionalProperties": false
+}
