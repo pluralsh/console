@@ -219,8 +219,7 @@ export function LogsMetricsChart({
       const x = getBarAreaX(e.clientX)
       const startIdx = toIndex(Math.min(current.startX, x))
       const endIdx = toIndex(Math.max(current.startX, x))
-      if (Math.abs(current.startX - x) > 3)
-        onRangeSelect(bucketRange(buckets, startIdx, endIdx, bucketMs))
+      onRangeSelect(bucketRange(buckets, startIdx, endIdx, bucketMs))
       setDrag(null)
     }
 
