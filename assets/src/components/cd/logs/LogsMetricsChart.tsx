@@ -47,6 +47,7 @@ export function LogsMetricsChart({
   sinceSeconds,
   rangeFilter,
   onRangeSelect,
+  onHasBucketsChange,
   pollInterval = 0,
 }: {
   clusterId?: string
@@ -58,6 +59,7 @@ export function LogsMetricsChart({
   sinceSeconds: number
   rangeFilter: LogsTimeRange | null
   onRangeSelect: (range: LogsTimeRange) => void
+  onHasBucketsChange?: (hasBuckets: boolean) => void
   pollInterval?: number
 }) {
   const theme = useTheme()
@@ -100,6 +102,10 @@ export function LogsMetricsChart({
   )
   const initialLoading = loading && !data
   const yMax = Math.max(1, ...buckets.map((b) => b.count))
+
+  useEffect(() => {
+    onHasBucketsChange?.(buckets.length > 0)
+  }, [buckets.length, onHasBucketsChange])
 
   useEffect(() => {
     const node = rowRef.current

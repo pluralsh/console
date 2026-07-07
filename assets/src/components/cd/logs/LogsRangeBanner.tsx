@@ -6,11 +6,15 @@ import type { LogsTimeRange } from './Logs'
 export function LogsRangeBanner({
   rangeFilter,
   onClear,
+  hasBuckets,
 }: {
   rangeFilter: LogsTimeRange | null
   onClear: () => void
+  hasBuckets: boolean
 }) {
   const theme = useTheme()
+
+  if (!rangeFilter && !hasBuckets) return null
 
   return (
     <div

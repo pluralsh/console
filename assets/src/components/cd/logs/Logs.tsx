@@ -46,6 +46,7 @@ export function Logs({
   const throttledQ = useThrottle(q, 1000)
   const [filters, setFilters] = useState<LogsFiltersT>(DEFAULT_LOG_FILTERS)
   const [rangeFilter, setRangeFilter] = useState<LogsTimeRange | null>(null)
+  const [chartHasBuckets, setChartHasBuckets] = useState(false)
 
   const [live, setLiveState] = useState(true)
   const setLive = useCallback((live: boolean) => {
@@ -194,6 +195,7 @@ export function Logs({
             <LogsRangeBanner
               rangeFilter={rangeFilter}
               onClear={clearRangeFilter}
+              hasBuckets={chartHasBuckets}
             />
             <LogsMetricsChart
               clusterId={clusterId}
@@ -205,6 +207,7 @@ export function Logs({
               sinceSeconds={filters.sinceSeconds}
               rangeFilter={rangeFilter}
               onRangeSelect={handleRangeSelect}
+              onHasBucketsChange={setChartHasBuckets}
               pollInterval={live ? POLL_INTERVAL : 0}
             />
             <LogsTableWrapSC>
