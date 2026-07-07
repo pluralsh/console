@@ -11,7 +11,6 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 
-	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
@@ -28,7 +27,11 @@ func (in *agentRunController) preStart(ctx context.Context) error {
 
 	// When in dev mode, restart agent run and clear all messages and errors.
 	if in.agentRun.Status != gqlclient.AgentRunStatusPending && environment.IsDev() {
-		_ = agentrun.RestartAgentRun(in.consoleClient, in.agentRunID)
+		_, _ = in.updateAgentRun(ctx, gqlclient.AgentRunStatusAttributes{
+			Status:   gqlclient.AgentRunStatusPending,
+			Messages: nil, // clear messages
+			Error:    nil, // clear error
+		})
 		klog.V(log.LogLevelInfo).InfoS("agent run restarted",
 			"id", in.agentRunID,
 			"status", in.agentRun.Status,
@@ -38,7 +41,7 @@ func (in *agentRunController) preStart(ctx context.Context) error {
 		)
 	}
 
-	if err := agentrun.StartAgentRun(in.consoleClient, in.agentRunID); err != nil {
+	if _, err := in.updateAgentRun(ctx, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
 		klog.ErrorS(err, "could not update agent run status to running")
 	}
 
@@ -61,7 +64,11 @@ func (in *agentRunController) postStart(err error) {
 	}
 
 	if err := in.completeAgentRun(status, err); err != nil {
-		if updateErr := agentrun.FailAgentRun(in.consoleClient, in.agentRunID, err.Error()); updateErr != nil {
+		errorMsg := err.Error()
+		if _, updateErr := in.updateAgentRun(context.Background(), gqlclient.AgentRunStatusAttributes{
+			Status: gqlclient.AgentRunStatusFailed,
+			Error:  &errorMsg,
+		}); updateErr != nil {
 			klog.ErrorS(updateErr, "could not mark agent run as failed")
 		}
 		klog.ErrorS(err, "could not complete agent run")

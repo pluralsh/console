@@ -9,6 +9,7 @@ import (
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -51,6 +52,12 @@ func (in *Codex) mapStreamEvent(event *StreamEvent) *console.AgentMessageAttribu
 		if event.Usage == nil {
 			return nil
 		}
+		in.Config.Usage.RecordUsage(usage.Record{
+			InputTokens:     event.Usage.InputTokens,
+			OutputTokens:    event.Usage.OutputTokens,
+			CachedTokens:    event.Usage.CachedInputTokens,
+			ReasoningTokens: event.Usage.ReasoningOutputTokens,
+		})
 		totalTokens := float64(event.Usage.InputTokens + event.Usage.OutputTokens)
 		return &console.AgentMessageAttributes{
 			Role:    console.AiRoleAssistant,

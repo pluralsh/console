@@ -651,6 +651,7 @@ type AgentRunFragment struct {
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
 	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
@@ -753,6 +754,12 @@ func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Analysis
+}
+func (t *AgentRunFragment) GetUsage() *AgentRunFragment_Usage {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Usage
 }
 func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
 	if t == nil {
@@ -7189,6 +7196,66 @@ func (t *AgentRunFragment_Skills) GetName() string {
 		t = &AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type AgentRunFragment_User struct {
@@ -14747,6 +14814,66 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Skills) GetName() string {
 	return t.Name
 }
 
+type GetAgentRun_AgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14888,6 +15015,66 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills) GetName() s
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -15091,6 +15278,66 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 	return t.Name
 }
 
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15221,6 +15468,66 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills) GetName() string
 	return t.Name
 }
 
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15287,6 +15594,66 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetName() string
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -40571,6 +40938,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -40793,6 +41170,16 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -41040,6 +41427,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41273,6 +41670,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41443,6 +41850,16 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
 	}
 	scmCreds {
 		... ScmCredentialFragment

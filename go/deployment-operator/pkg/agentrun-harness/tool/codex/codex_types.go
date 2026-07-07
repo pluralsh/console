@@ -86,9 +86,10 @@ type TurnError struct {
 
 // TurnUsage holds token usage statistics emitted in the "turn.completed" event.
 type TurnUsage struct {
-	InputTokens       int `json:"input_tokens"`
-	CachedInputTokens int `json:"cached_input_tokens"`
-	OutputTokens      int `json:"output_tokens"`
+	InputTokens           int64 `json:"input_tokens"`
+	CachedInputTokens     int64 `json:"cached_input_tokens"`
+	OutputTokens          int64 `json:"output_tokens"`
+	ReasoningOutputTokens int64 `json:"reasoning_output_tokens"`
 }
 
 // StreamItem is the payload carried inside "item.started" / "item.completed" events.

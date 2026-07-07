@@ -46,6 +46,7 @@ type AgentRun struct {
 	Runtime *AgentRuntime `json:"runtime,omitempty"`
 	Prompts []*console.AgentPromptFragment
 	Skills  []AgentSkill
+	Usage   *console.AgentRunUsage
 
 	DindEnabled    bool
 	BrowserEnabled bool
@@ -130,6 +131,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		PluralCreds: fragment.PluralCreds,
 		Runtime:     &AgentRuntime{},
 		Prompts:     fragment.Prompts,
+		Usage:       usageFromFragment(fragment.Usage),
 		Skills: lo.Map(
 			lo.Filter(fragment.Skills, func(skill *console.AgentRunFragment_Skills, _ int) bool { return skill != nil }),
 			func(skill *console.AgentRunFragment_Skills, _ int) AgentSkill {
@@ -172,6 +174,23 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 	run.ApprovedAt = fragment.ApprovedAt
 
 	return run
+}
+
+func usageFromFragment(usage *console.AgentRunFragment_Usage) *console.AgentRunUsage {
+	if usage == nil {
+		return nil
+	}
+
+	return &console.AgentRunUsage{
+		InputTokens:     usage.InputTokens,
+		OutputTokens:    usage.OutputTokens,
+		TotalTokens:     usage.TotalTokens,
+		CachedTokens:    usage.CachedTokens,
+		ReasoningTokens: usage.ReasoningTokens,
+		InputCost:       usage.InputCost,
+		OutputCost:      usage.OutputCost,
+		TotalCost:       usage.TotalCost,
+	}
 }
 
 func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime {

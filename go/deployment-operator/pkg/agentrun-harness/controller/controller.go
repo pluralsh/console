@@ -15,6 +15,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -107,6 +108,7 @@ func (in *agentRunController) prepare() error {
 		FinishedChan:  in.done,
 		ErrorChan:     in.errChan,
 		Run:           in.agentRun,
+		Usage:         in.usage,
 	}); err != nil {
 		klog.Fatal(err)
 	}
@@ -126,8 +128,43 @@ func (in *agentRunController) completeAgentRun(status gqlclient.AgentRunStatus, 
 		Error:  errorMsg,
 	}
 
-	_, err := in.consoleClient.UpdateAgentRun(context.Background(), in.agentRunID, statusAttrs)
+	_, err := in.updateAgentRun(context.Background(), statusAttrs)
 	return err
+}
+
+func (in *agentRunController) updateAgentRun(ctx context.Context, attrs gqlclient.AgentRunStatusAttributes) (*gqlclient.AgentRunFragment, error) {
+	if in.usage != nil {
+		attrs.Usage = in.usage.Attributes()
+	}
+	agentRun, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, attrs)
+	if err != nil {
+		return nil, err
+	}
+	if in.agentRun != nil {
+		in.agentRun.Status = attrs.Status
+	}
+	return agentRun, nil
+}
+
+func (in *agentRunController) persistUsage(attrs *gqlclient.AiUsageAttributes) {
+	if attrs == nil {
+		return
+	}
+
+	status := gqlclient.AgentRunStatusRunning
+	if in.agentRun != nil {
+		status = in.agentRun.Status
+	}
+	if status == "" {
+		status = gqlclient.AgentRunStatusRunning
+	}
+
+	if _, err := in.consoleClient.UpdateAgentRun(context.Background(), in.agentRunID, gqlclient.AgentRunStatusAttributes{
+		Status: status,
+		Usage:  attrs,
+	}); err != nil {
+		klog.ErrorS(err, "failed to persist agent run usage", "id", in.agentRunID)
+	}
 }
 
 // init initializes the controller with the agent run data from Console API
@@ -149,6 +186,7 @@ func (in *agentRunController) init() (Controller, error) {
 	// Convert console fragment to harness type
 	in.agentRun = (&agentrunv1.AgentRun{}).FromAgentRunFragment(agentRunFragment)
 	in.initializePromptCursor()
+	in.usage = usage.New(in.agentRun.Usage, in.persistUsage)
 
 	klog.V(log.LogLevelInfo).InfoS("found agent run",
 		"id", in.agentRun.ID,
@@ -253,7 +291,7 @@ func (in *agentRunController) waitBabysit(ctx context.Context, d time.Duration) 
 }
 
 func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ctx context.Context, bCtx *toolv1.BabysitContext) bool) bool {
-	agentRun, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusBabysitting})
+	agentRun, err := in.updateAgentRun(ctx, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusBabysitting})
 	if err != nil {
 		klog.ErrorS(err, "failed to update agent run status during babysit")
 		return false
@@ -301,7 +339,7 @@ func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ct
 		return false
 	}
 
-	if _, err = in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+	if _, err = in.updateAgentRun(ctx, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
 		klog.ErrorS(err, "failed to update agent run status during babysit")
 		return false
 	}
