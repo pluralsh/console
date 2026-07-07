@@ -273,14 +273,28 @@ export function LogsMetricsChart({
         </BarsAreaSC>
       </ChartCanvasSC>
       <XAxisSC style={{ paddingLeft: Y_AXIS_WIDTH + theme.spacing.medium }}>
-        {chartTickIndices(bucketCount).map((i) => (
-          <XTickSC
-            key={i}
-            style={{ left: toX(i) + rowWidth / bucketCount / 2 }}
-          >
-            {formatChartAxisTime(buckets[i].timestamp, sinceSeconds)}
-          </XTickSC>
-        ))}
+        {chartTickIndices(bucketCount).map((i, tickIdx, tickIndices) => {
+          const isFirst = tickIdx === 0
+          const isLast = tickIdx === tickIndices.length - 1
+
+          return (
+            <XTickSC
+              key={i}
+              $align={
+                isFirst && isLast
+                  ? 'center'
+                  : isFirst
+                    ? 'start'
+                    : isLast
+                      ? 'end'
+                      : 'center'
+              }
+              style={{ left: toX(i) + rowWidth / bucketCount / 2 }}
+            >
+              {formatChartAxisTime(buckets[i].timestamp, sinceSeconds)}
+            </XTickSC>
+          )
+        })}
       </XAxisSC>
       {chartTooltip && (
         <ChartRangeTooltip
@@ -385,17 +399,25 @@ const BarSC = styled.div<{ $height: number }>(({ theme, $height }) => ({
   borderTopRightRadius: 1,
 }))
 
-const XAxisSC = styled.div({
+const XAxisSC = styled.div(({ theme }) => ({
   position: 'relative',
   height: X_AXIS_HEIGHT,
   marginTop: 4,
-})
-
-const XTickSC = styled.span(({ theme }) => ({
-  position: 'absolute',
-  transform: 'translateX(-50%)',
-  color: theme.colors['text-xlight'],
-  fontSize: 10,
-  lineHeight: '14px',
-  whiteSpace: 'nowrap',
+  paddingRight: theme.spacing.medium,
 }))
+
+const XTickSC = styled.span<{ $align: 'start' | 'center' | 'end' }>(
+  ({ theme, $align }) => ({
+    position: 'absolute',
+    transform:
+      $align === 'start'
+        ? 'none'
+        : $align === 'end'
+          ? 'translateX(-100%)'
+          : 'translateX(-50%)',
+    color: theme.colors['text-xlight'],
+    fontSize: 10,
+    lineHeight: '14px',
+    whiteSpace: 'nowrap',
+  })
+)
