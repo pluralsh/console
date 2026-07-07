@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Repository name."
     },
+    "classification": {
+      "type": "string",
+      "description": "Comma-separated vulnerability classifications, such as malware or general."
+    },
     "state": {
       "type": "string",
       "enum": ["auto_dismissed", "dismissed", "fixed", "open"],
@@ -32,6 +36,18 @@
       "type": "string",
       "description": "Filter by manifest path."
     },
+    "epss_percentage": {
+      "type": "string",
+      "description": "Filter by EPSS percentage, such as >0.5, <=0.1, or 0.1..0.9."
+    },
+    "has": {
+      "type": "string",
+      "description": "Filter by available alert metadata. Currently GitHub supports patch."
+    },
+    "assignee": {
+      "type": "string",
+      "description": "Filter by assignees, such as octocat, octocat,hubot, *, or none."
+    },
     "scope": {
       "type": "string",
       "enum": ["development", "runtime"],
@@ -47,9 +63,13 @@
       "enum": ["asc", "desc"],
       "description": "Sort direction."
     },
-    "page": {
-      "type": "integer",
-      "description": "Page number. Defaults to 1."
+    "before": {
+      "type": "string",
+      "description": "Cursor for results before this value from the Link header."
+    },
+    "after": {
+      "type": "string",
+      "description": "Cursor for results after this value from the Link header."
     },
     "per_page": {
       "type": "integer",

@@ -11,15 +11,20 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListDependabotAlerts do
     field :tool,       :map, virtual: true
     field :owner,      :string
     field :repo,       :string
+    field :classification, :string
     field :state,      :string
     field :severity,   :string
     field :ecosystem,  :string
     field :package,    :string
     field :manifest,   :string
+    field :epss_percentage, :string
+    field :has,        :string
+    field :assignee,   :string
     field :scope,      :string
     field :sort,       :string
     field :direction,  :string
-    field :page,       :integer
+    field :before,     :string
+    field :after,      :string
     field :per_page,   :integer
   end
 
@@ -39,15 +44,20 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListDependabotAlerts do
     |> cast(attrs, [
       :owner,
       :repo,
+      :classification,
       :state,
       :severity,
       :ecosystem,
       :package,
       :manifest,
+      :epss_percentage,
+      :has,
+      :assignee,
       :scope,
       :sort,
       :direction,
-      :page,
+      :before,
+      :after,
       :per_page
     ])
     |> validate_required([:owner, :repo])
@@ -61,18 +71,22 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ListDependabotAlerts do
     with {:ok, client} <- Client.build(m.tool) do
       %{}
       |> Query.merge_optional(m, [
+        :classification,
         :state,
         :severity,
         :ecosystem,
         :package,
         :manifest,
+        :epss_percentage,
+        :has,
+        :assignee,
         :scope,
         :sort,
         :direction,
-        :page,
+        :before,
+        :after,
         :per_page
       ])
-      |> Query.paginated()
       |> Query.stringify_params()
       |> then(&Client.json_get(client, "repos/#{m.owner}/#{m.repo}/dependabot/alerts#{Query.qp(&1)}"))
       |> Response.json()
