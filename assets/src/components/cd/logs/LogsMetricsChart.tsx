@@ -394,7 +394,7 @@ const BarSC = styled.div<{ $height: number }>(({ theme, $height }) => ({
   flex: 1,
   minWidth: 0,
   height: $height,
-  backgroundColor: theme.colors['icon-success'],
+  backgroundColor: theme.colors['graph-blue'],
   borderTopLeftRadius: 1,
   borderTopRightRadius: 1,
 }))
