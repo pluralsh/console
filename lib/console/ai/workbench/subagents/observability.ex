@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Lua, History, Infrastructure.PodLogs, Scratchpad}
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Plrl}
+  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
@@ -71,7 +71,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp pod_logs_tools(_, _), do: []
 
   defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{metrics: true}}}}),
-    do: [Plrl.Metrics, Plrl.MetricsSearch]
+    do: [Plrl.Metrics, Plrl.MetricsSearch, Plrl.MetricsLabelSearch]
   defp plrl_metric_tools(_), do: []
 
   @allowed_tools MapSet.new(~w(metrics logs traces error_tracking)a)
@@ -91,7 +91,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end)
   end
 
-  defp to_tool(%WorkbenchTool{} = tool, :metrics), do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}]
+  defp to_tool(%WorkbenchTool{} = tool, :metrics), do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}, %MetricsLabelSearch{tool: tool}]
   defp to_tool(%WorkbenchTool{} = tool, :logs), do: [%Logs{tool: tool}]
   defp to_tool(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
   defp to_tool(_, _), do: []

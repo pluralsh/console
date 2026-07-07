@@ -35,6 +35,9 @@ fragment AgentRunTiny on AgentRun {
     session
     patch
   }
+  todos {
+    ...AgentTodo
+  }
   insertedAt
   updatedAt
 }
@@ -43,9 +46,6 @@ fragment AgentRun on AgentRun {
   ...AgentRunTiny
   messages {
     ...AgentMessage
-  }
-  todos {
-    ...AgentTodo
   }
   analysis {
     ...AgentAnalysis

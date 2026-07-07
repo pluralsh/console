@@ -4,8 +4,12 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azlogs"
+	"github.com/Azure/azure-sdk-for-go/sdk/monitor/query/azmetrics"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor"
+	"github.com/samber/lo"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
@@ -72,10 +76,9 @@ func (in *AzureProvider) metricsManagedPrometheus(ctx context.Context, input *to
 		return nil, err
 	}
 
-	tok := token
 	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
 		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
-		Token: &tok,
+		Token: new(token),
 	})
 
 	return prom.Metrics(ctx, input)
@@ -120,13 +123,105 @@ func (in *AzureProvider) metricsSearchManagedPrometheus(ctx context.Context, inp
 		return nil, err
 	}
 
-	tok := token
 	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
 		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
-		Token: &tok,
+		Token: new(token),
 	})
 
 	return prom.MetricsSearch(ctx, input)
+}
+
+func (in *AzureProvider) MetricsLabelSearch(ctx context.Context, input *toolquery.MetricsLabelSearchInput) (*toolquery.MetricsLabelSearchOutput, error) {
+	if input == nil || strings.TrimSpace(input.GetMetric()) == "" {
+		return nil, fmt.Errorf("%w: metric is required", ErrInvalidArgument)
+	}
+	if input.GetOptions() == nil || input.GetOptions().GetAzure() == nil {
+		return nil, fmt.Errorf("%w: azure metrics label search options are required", ErrInvalidArgument)
+	}
+
+	opts := input.GetOptions().GetAzure()
+	if u := opts.GetPrometheusUrl(); u != "" {
+		return in.metricsLabelSearchManagedPrometheus(ctx, input, u)
+	}
+
+	resourceID := strings.TrimSpace(opts.GetResourceId())
+	if resourceID == "" {
+		return nil, fmt.Errorf("%w: azure metrics label search requires resource_id unless prometheus_url is set", ErrInvalidArgument)
+	}
+
+	if strings.TrimSpace(input.GetLabel()) != "" {
+		return in.metricsLabelSearchValues(ctx, input, opts, resourceID)
+	}
+
+	listOptions := &armmonitor.MetricDefinitionsClientListOptions{}
+	if namespace := strings.TrimSpace(opts.GetMetricsNamespace()); namespace != "" {
+		listOptions.Metricnamespace = &namespace
+	}
+
+	definitions, err := in.client.MetricsSearch(ctx, resourceID, listOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	values := make([]string, 0)
+	metricName := strings.TrimSpace(input.GetMetric())
+	for _, definition := range definitions {
+		if definition == nil || lo.FromPtr(definition.Name.Value) != metricName {
+			continue
+		}
+		for _, dimension := range definition.Dimensions {
+			values = append(values, lo.FromPtr(dimension.Value))
+		}
+	}
+
+	return newMetricsLabelSearchOutput(values, input.GetQuery(), metricsLabelSearchLimit(input.GetLimit())), nil
+}
+
+func (in *AzureProvider) metricsLabelSearchManagedPrometheus(ctx context.Context, input *toolquery.MetricsLabelSearchInput, url string) (*toolquery.MetricsLabelSearchOutput, error) {
+	token, err := in.client.PrometheusAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	prom := NewPrometheusProvider(&toolquery.PrometheusConnection{
+		Url:   strings.TrimRight(strings.TrimSpace(url), "/"),
+		Token: new(token),
+	})
+
+	return prom.MetricsLabelSearch(ctx, input)
+}
+
+func (in *AzureProvider) metricsLabelSearchValues(ctx context.Context, input *toolquery.MetricsLabelSearchInput, opts *toolquery.AzureMetricsLabelSearchOptions, resourceID string) (*toolquery.MetricsLabelSearchOutput, error) {
+	namespace := strings.TrimSpace(opts.GetMetricsNamespace())
+	if namespace == "" {
+		return nil, fmt.Errorf("%w: azure metrics label value search requires metrics_namespace", ErrInvalidArgument)
+	}
+
+	end := time.Now().UTC()
+	start := end.Add(-24 * time.Hour)
+	resp, err := in.client.Metrics(
+		ctx,
+		strings.TrimSpace(opts.GetMetricsEndpoint()),
+		namespace,
+		[]string{strings.TrimSpace(input.GetMetric())},
+		azmetrics.ResourceIDList{ResourceIDs: []string{resourceID}},
+		&azmetrics.QueryResourcesOptions{
+			StartTime: new(start.Format(time.RFC3339Nano)),
+			EndTime:   new(end.Format(time.RFC3339Nano)),
+			Interval:  new("PT1M"),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	label := strings.TrimSpace(input.GetLabel())
+	values := make([]string, 0)
+	for _, point := range datasource.NewAzureMetricsResponse(resp).ToMetricsQueryOutput().GetMetrics() {
+		values = append(values, point.GetLabels()[label])
+	}
+
+	return newMetricsLabelSearchOutput(values, input.GetQuery(), metricsLabelSearchLimit(input.GetLimit())), nil
 }
 
 func (in *AzureProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {

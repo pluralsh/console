@@ -35,6 +35,10 @@ import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerChatbot } from './WorkbenchJobTriggerChatbot'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
+import {
+  getWorkbenchJobResultText,
+  getWorkbenchJobTodos,
+} from './workbenchJobResultUtils'
 
 export const PATCH_PR_URL = '<patch>'
 
@@ -53,8 +57,9 @@ export function WorkbenchJobResult({
   loading: boolean
 }) {
   const { spacing } = useTheme()
-  const conclusion = isJobRunning(job?.status) ? null : job?.result?.conclusion
-  const workingTheory = job?.result?.workingTheory
+  const resultText = getWorkbenchJobResultText(job)
+  const hasConclusion =
+    !isJobRunning(job?.status) && !!job?.result?.conclusion?.trim()
 
   if (loading)
     return (
@@ -76,13 +81,15 @@ export function WorkbenchJobResult({
       <WorkbenchJobTriggerAlert alert={job?.alert} />
       <WorkbenchJobTriggerIssue issue={job?.issue} />
       <WorkbenchJobTriggerChatbot job={job} />
-      <Flex
-        direction="column"
-        overflow="auto"
-      >
-        <Markdown text={conclusion || workingTheory || 'No output yet.'} />
-      </Flex>
-      {!isEmpty(job?.result?.todos) && !conclusion && (
+      {resultText && (
+        <Flex
+          direction="column"
+          overflow="auto"
+        >
+          <Markdown text={resultText} />
+        </Flex>
+      )}
+      {!isEmpty(getWorkbenchJobTodos(job?.result)) && !hasConclusion && (
         <WorkbenchJobTodos
           loading={loading}
           result={job?.result}

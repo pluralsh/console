@@ -29,6 +29,7 @@ import {
 import { isEmpty, isNil, uniqBy } from 'lodash'
 import {
   ReactElement,
+  useCallback,
   useEffect,
   useEffectEvent,
   useMemo,
@@ -52,6 +53,7 @@ import {
   WorkbenchJobResult,
   WorkbenchJobTopology,
 } from './WorkbenchJobResult'
+import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
 import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
@@ -144,7 +146,20 @@ export function WorkbenchJobPanelContent() {
   }, [activities, pullRequests])
   const hasDraftPrsAwaitingApproval = draftPrs.length > 0
 
-  const tabs = getPanelTabs(job, hasDraftPrsAwaitingApproval)
+  const tabs = useMemo(
+    () => getPanelTabs(job, hasDraftPrsAwaitingApproval, isLoading),
+    [hasDraftPrsAwaitingApproval, isLoading, job]
+  )
+
+  useEffect(() => {
+    if (tabs.some(({ label }) => label === selectedTab)) return
+
+    if (tabs[0]) setSelectedTab(tabs[0].label)
+  }, [selectedTab, tabs])
+
+  useEffect(() => {
+    if (!isLoading && job && isEmpty(tabs)) setOpen(false)
+  }, [isLoading, job, setOpen, tabs])
 
   return (
     <SidePanelContent>
@@ -194,12 +209,13 @@ export function WorkbenchJobPanelContent() {
       </PanelHeaderSC>
       <ContentWrapperSC>
         <ContentInnerSC>
-          {selectedTab === 'Result' && (
-            <WorkbenchJobResult
-              job={job}
-              loading={isLoading}
-            />
-          )}
+          {selectedTab === 'Result' &&
+            (isLoading || hasWorkbenchJobResultContent(job)) && (
+              <WorkbenchJobResult
+                job={job}
+                loading={isLoading}
+              />
+            )}
           {selectedTab === 'Dashboard' && job?.id && (
             <WorkbenchJobCanvas
               jobId={job.id}
@@ -233,7 +249,10 @@ export function WorkbenchJobPanelContent() {
 export function useWorkbenchJobPanel(autoOpen?: Nullable<boolean>) {
   const { sidePanel, setSidePanel } = useTopLevelSidePanel()
   const isOpen = sidePanel === SIDE_PANEL_TYPE
-  const setOpen = (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null)
+  const setOpen = useCallback(
+    (open: boolean) => setSidePanel(open ? SIDE_PANEL_TYPE : null),
+    [setSidePanel]
+  )
 
   const onAutoOpen = useEffectEvent(() => setOpen(true))
   const onUnmount = useEffectEvent(() => setOpen(false))
@@ -286,10 +305,14 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
 
 const getPanelTabs = (
   job: Nullable<WorkbenchJobFragment>,
-  hasDraftPrsAwaitingApproval: boolean
+  hasDraftPrsAwaitingApproval: boolean,
+  isLoading: boolean
 ) =>
   [
-    { label: 'Result', icon: <PaperCheckIcon size={12} /> },
+    (isLoading || hasWorkbenchJobResultContent(job)) && {
+      label: 'Result',
+      icon: <PaperCheckIcon size={12} />,
+    },
     !isEmpty(job?.result?.canvas) && {
       label: 'Dashboard',
       icon: <DashboardIcon size={12} />,

@@ -167,6 +167,44 @@ spec:
                     - projectId
                     - serviceAccountKey
                     type: object
+                  vsphere:
+                    description: |-
+                      VsphereCloudConnection contains VMware vSphere authentication configuration.
+                      Provides credentials for discovering and querying vSphere resources.
+                    properties:
+                      allowUnverifiedSsl:
+                        description: Whether to allow unverified vCenter TLS certificates
+                        type: boolean
+                      password:
+                        description: The vCenter password
+                        properties:
+                          key:
+                            description: Key is the key of the object to use.
+                            type: string
+                          name:
+                            description: Name is unique within a namespace to reference
+                              a resource.
+                            type: string
+                          namespace:
+                            description: Namespace defines the space within which
+                              the resource name must be unique.
+                            type: string
+                        required:
+                        - key
+                        - name
+                        - namespace
+                        type: object
+                      server:
+                        description: The vCenter SDK endpoint, for example https://vcenter.example.com/sdk
+                        type: string
+                      user:
+                        description: The vCenter user
+                        type: string
+                    required:
+                    - password
+                    - server
+                    - user
+                    type: object
                 type: object
               name:
                 description: |-
@@ -176,11 +214,12 @@ spec:
               provider:
                 description: |-
                   Provider is the name of the cloud service for the Provider.
-                  One of (CloudProvider): [gcp, aws, azure]
+                  One of (CloudProvider): [gcp, aws, azure, vsphere]
                 enum:
                 - gcp
                 - aws
                 - azure
+                - vsphere
                 example: aws
                 type: string
                 x-kubernetes-validations:

@@ -22,6 +22,7 @@ import {
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
+  VSphereLogoIcon,
 } from '@pluralsh/design-system'
 import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
@@ -160,6 +161,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
   [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
   [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
+  [`${WorkbenchToolType.Cloud}:${Provider.Vsphere}`]: 'vSphere',
 }
 
 export const getWorkbenchToolLabel = (
@@ -318,6 +320,14 @@ export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
       'Query Azure infrastructure (VMs, storage accounts, resource groups, and more) via CloudQuery.',
     categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
   },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Vsphere,
+    label: 'vSphere',
+    description:
+      'Query vSphere infrastructure (datacenters, clusters, hosts, VMs, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
   ...CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
     type,
     description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
@@ -332,6 +342,7 @@ export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
   [Provider.Aws]: AwsLogoIcon,
   [Provider.Gcp]: GoogleCloudLogoIcon,
   [Provider.Azure]: AzureLogoIcon,
+  [Provider.Vsphere]: VSphereLogoIcon,
 }
 
 export const isProvider = (value: Nullable<string>): value is Provider =>

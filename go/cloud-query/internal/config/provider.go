@@ -6,5 +6,6 @@ const (
 	ProviderAWS     Provider = "aws"
 	ProviderAzure   Provider = "azure"
 	ProviderGCP     Provider = "gcp"
+	ProviderVSphere Provider = "vsphere"
 	ProviderUnknown Provider = ""
 )

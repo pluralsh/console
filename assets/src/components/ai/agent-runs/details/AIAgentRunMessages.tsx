@@ -74,7 +74,9 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
           Array.isArray(row) ? (row[0]?.id ?? 'tool-group') : (row.id ?? '')
         }
         itemGap="small"
-        style={{ padding: spacing.large }}
+        style={{
+          padding: `0 ${spacing.large}px ${spacing.large}px`,
+        }}
         renderer={({ rowData }) =>
           Array.isArray(rowData) ? (
             <ChatToolCallGroup

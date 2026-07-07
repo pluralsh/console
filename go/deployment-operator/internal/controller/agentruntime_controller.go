@@ -28,9 +28,12 @@ import (
 )
 
 const (
-	AgentRuntimeFinalizer    = "deployments.plural.sh/agent-runtime-protection"
-	requeueAfterAgentRuntime = 2 * time.Minute
+	AgentRuntimeFinalizer       = "deployments.plural.sh/agent-runtime-protection"
+	requeueAfterAgentRuntime    = 2 * time.Minute
+	pendingAgentRunFetchRetries = 3
 )
+
+var pendingAgentRunFetchDelay = 2 * time.Second
 
 // AgentRuntimeReconciler reconciles a AgentRuntime object
 type AgentRuntimeReconciler struct {
@@ -224,9 +227,12 @@ func (r *AgentRuntimeReconciler) Publish(runID string, kick bool) {
 
 func (r *AgentRuntimeReconciler) createRunFromID(runID string) error {
 	logger := log.FromContext(r.Ctx)
-	run, err := r.ConsoleClient.GetAgentRun(r.Ctx, runID)
+	run, err := r.getPendingAgentRunWithRetry(r.Ctx, runID)
 	if err != nil {
-		return fmt.Errorf("failed to get agent run: %w", err)
+		if failErr := r.failPendingAgentRunFetch(r.Ctx, runID, err); failErr != nil {
+			return fmt.Errorf("failed to get agent run after retries: %w; failed to mark agent run failed: %w", err, failErr)
+		}
+		return fmt.Errorf("failed to get agent run after retries: %w", err)
 	}
 	if run.Runtime == nil || run.Runtime.Name == "" {
 		return fmt.Errorf("agent run %q runtime details are missing", runID)
@@ -241,6 +247,50 @@ func (r *AgentRuntimeReconciler) createRunFromID(runID string) error {
 	}
 
 	return r.createAgentRun(r.Ctx, agentRuntime, run)
+}
+
+func (r *AgentRuntimeReconciler) getPendingAgentRunWithRetry(ctx context.Context, runID string) (*console.AgentRunFragment, error) {
+	logger := log.FromContext(ctx)
+	var lastErr error
+
+	for attempt := 0; attempt <= pendingAgentRunFetchRetries; attempt++ {
+		run, err := r.ConsoleClient.GetAgentRun(ctx, runID)
+		if err == nil {
+			return run, nil
+		}
+
+		lastErr = err
+		if attempt == pendingAgentRunFetchRetries {
+			break
+		}
+
+		logger.Error(err, "failed to fetch pending agent run, retrying", "id", runID, "attempt", attempt+1, "retriesLeft", pendingAgentRunFetchRetries-attempt)
+		if pendingAgentRunFetchDelay <= 0 {
+			continue
+		}
+
+		timer := time.NewTimer(pendingAgentRunFetchDelay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			if ctxErr := context.Cause(ctx); ctxErr != nil {
+				return nil, ctxErr
+			}
+			return nil, ctx.Err()
+		case <-timer.C:
+		}
+	}
+
+	return nil, lastErr
+}
+
+func (r *AgentRuntimeReconciler) failPendingAgentRunFetch(ctx context.Context, runID string, err error) error {
+	errorMessage := err.Error()
+	_, updateErr := r.ConsoleClient.UpdateAgentRun(ctx, runID, console.AgentRunStatusAttributes{
+		Status: console.AgentRunStatusFailed,
+		Error:  &errorMessage,
+	})
+	return updateErr
 }
 
 func (r *AgentRuntimeReconciler) createAgentRun(ctx context.Context, agentRuntime *v1alpha1.AgentRuntime, run *console.AgentRunFragment) error {

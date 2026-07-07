@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/base64"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -66,6 +67,8 @@ func (in *CloudQueryService) toProvider(conn *cloudquery.Connection) (config.Pro
 		return config.ProviderAzure, nil
 	case config.ProviderGCP:
 		return config.ProviderGCP, nil
+	case config.ProviderVSphere:
+		return config.ProviderVSphere, nil
 	default:
 		return config.ProviderUnknown, fmt.Errorf("unsupported provider: %s", conn.GetProvider())
 	}
@@ -98,6 +101,23 @@ func (in *CloudQueryService) toConnectionConfiguration(provider config.Provider,
 			config.WithGCPServiceAccountJSON(string(serviceAccountJSON)),
 			config.WithGCPProject(connection.GetGcp().GetProject()),
 		), nil
+	case config.ProviderVSphere:
+		opts := []config.Option{
+			config.WithVSphereServer(connection.GetVsphere().GetServer()),
+			config.WithVSphereUser(connection.GetVsphere().GetUser()),
+			config.WithVSpherePassword(connection.GetVsphere().GetPassword()),
+		}
+
+		if allowUnverifiedSSL := strings.TrimSpace(connection.GetVsphere().GetAllowUnverifiedSsl()); allowUnverifiedSSL != "" {
+			parsed, err := strconv.ParseBool(allowUnverifiedSSL)
+			if err != nil {
+				return c, fmt.Errorf("failed to parse vSphere allow_unverified_ssl: %w", err)
+			}
+
+			opts = append(opts, config.WithVSphereAllowUnverifiedSSL(parsed))
+		}
+
+		return config.NewVSphereConfiguration(opts...), nil
 	default:
 		return c, fmt.Errorf("unsupported provider: %s", provider)
 	}

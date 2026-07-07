@@ -143,6 +143,7 @@ export function WorkbenchLinkChip({
             <WorkbenchLinkHoverCard
               workbenchName={workbenchName}
               workbenchId={workbenchId}
+              workbenchJobId={workbenchJobId}
               workbench={data?.workbench}
               pendingAgentRuns={pendingAgentRuns}
               onNavigate={() => {

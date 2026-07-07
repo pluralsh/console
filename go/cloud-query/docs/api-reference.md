@@ -6,12 +6,13 @@ Note: the CloudQuery service requires PostgreSQL-backed features to be enabled. 
 
 ## Service Definition
 
-Cloud-Query exposes a gRPC service with three main endpoints for querying, schema retrieval, and data extraction across different cloud providers.
+Cloud-Query exposes a gRPC service with endpoints for querying, schema retrieval, table listing, and data extraction across different cloud providers.
 
 ```protobuf
 service CloudQuery {
-  rpc Query(QueryInput) returns (stream QueryOutput) {}
-  rpc Schema(SchemaInput) returns (stream SchemaOutput) {}
+  rpc Query(QueryInput) returns (QueryResult) {}
+  rpc Schema(SchemaInput) returns (SchemaOutput) {}
+  rpc Tables(TablesInput) returns (TablesOutput) {}
   rpc Extract(ExtractInput) returns (stream ExtractOutput) {}
 }
 ```
@@ -22,6 +23,7 @@ The service supports the following cloud providers:
 - AWS
 - Azure
 - GCP
+- vSphere
 
 ## Data Models
 
@@ -38,6 +40,7 @@ message Connection {
     AwsCredentials aws = 2;
     AzureCredentials azure = 3;
     GcpCredentials gcp = 4;
+    VSphereCredentials vsphere = 5;
   }
 }
 ```
@@ -48,9 +51,15 @@ message Connection {
 
 ```protobuf
 message AwsCredentials {
-  string access_key_id = 1;
-  string secret_access_key = 2;
+  optional string access_key_id = 1;
+  optional string secret_access_key = 2;
+  optional string region = 3;
+  repeated string regions = 4;
+  optional string assume_role_arn = 5;
 }
+```
+
+AWS can also use the default AWS credential chain when static credentials are omitted.
 ```
 
 #### Azure Credentials
@@ -68,9 +77,23 @@ message AzureCredentials {
 
 ```protobuf
 message GcpCredentials {
-  string impersonation_token = 1;
+  string service_account_json_b64 = 1;
+  string project = 2;
 }
 ```
+
+#### vSphere Credentials
+
+```protobuf
+message VSphereCredentials {
+  string server = 1;
+  string user = 2;
+  string password = 3;
+  optional string allow_unverified_ssl = 4;
+}
+```
+
+`allow_unverified_ssl` accepts boolean string values such as `"true"` or `"false"`. When omitted, the vSphere plugin default is used.
 
 ## API Endpoints
 
@@ -87,14 +110,15 @@ message QueryInput {
 }
 ```
 
-#### Response: QueryOutput (Streamed)
+#### Response: QueryResult
 
 ```protobuf
-message QueryOutput {
-  repeated string columns = 1;
-  map<string, string> result = 2;
+message QueryResult {
+  string result = 2;
 }
 ```
+
+`result` is a JSON array of row objects.
 
 #### Example Usage
 
@@ -135,6 +159,23 @@ Using Postman:
 }
 ```
 
+vSphere example:
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "provider": "vsphere",
+    "vsphere": {
+      "server": "https://vcenter.example.com/sdk",
+      "user": "administrator@vsphere.local",
+      "password": "YOUR_PASSWORD",
+      "allow_unverified_ssl": "true"
+    }
+  },
+  "query": "SELECT name, power, guest_full_name FROM vsphere_vm"
+}' -plaintext localhost:9192 cloudquery.CloudQuery/Query
+```
+
 ### Schema
 
 The Schema method retrieves the schema information for cloud resources.
@@ -144,11 +185,11 @@ The Schema method retrieves the schema information for cloud resources.
 ```protobuf
 message SchemaInput {
   Connection connection = 1;
-  optional string query = 2;
+  optional string table = 2;
 }
 ```
 
-#### Response: SchemaOutput (Streamed)
+#### Response: SchemaOutput
 
 ```protobuf
 message SchemaColumn {
@@ -157,6 +198,10 @@ message SchemaColumn {
 }
 
 message SchemaOutput {
+  repeated SchemaResult result = 1;
+}
+
+message SchemaResult {
   string table = 1;
   repeated SchemaColumn columns = 2;
 }
@@ -176,7 +221,7 @@ grpcurl -d '{
       "secret_access_key": "YOUR_SECRET_KEY"
     }
   },
-  "query": "aws_ec2_%"
+  "table": "aws_ec2_%"
 }' -plaintext localhost:9192 cloudquery.CloudQuery/Schema
 ```
 
@@ -197,7 +242,28 @@ Using Postman:
       "secret_access_key": "YOUR_SECRET_KEY"
     }
   },
-  "query": "aws_ec2_%"
+  "table": "aws_ec2_%"
+}
+```
+
+### Tables
+
+The Tables method lists imported foreign tables for a provider connection.
+
+#### Request: TablesInput
+
+```protobuf
+message TablesInput {
+  Connection connection = 1;
+  optional string table = 2;
+}
+```
+
+#### Response: TablesOutput
+
+```protobuf
+message TablesOutput {
+  repeated string result = 1;
 }
 ```
 
@@ -218,11 +284,13 @@ message ExtractInput {
 ```protobuf
 message ExtractOutput {
   string type = 1;
-  map<string, string> result = 2;
+  string result = 2;
   string id = 3;
   repeated string links = 4;
 }
 ```
+
+Extract is currently implemented for AWS resources. Other providers, including vSphere, return `UNIMPLEMENTED` for this endpoint.
 
 #### Example Usage
 
@@ -289,17 +357,17 @@ ToolQuery exposes a gRPC service for querying external observability tools (metr
 
 ToolQuery support varies by operation:
 
-| Tool | Metrics | Logs | Traces | Notes |
-|------|---------|------|--------|-------|
-| Prometheus | Yes | No | No | Prometheus HTTP API range queries and metric name search |
-| Datadog | Yes | Yes | Yes | Datadog Metrics (v1), Logs (v2), Spans (v2) APIs, plus metric search (v2 HTTP) |
-| Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
-| Loki | No | Yes | No | Loki HTTP `query_range` API |
-| Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
-| Jaeger | No | No | Yes | Jaeger Query v3 REST API with structured filters |
-| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
-| CloudWatch | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
-| Azure | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs` |
+| Tool | Metrics | Metric Label Search | Logs | Traces | Notes |
+|------|---------|---------------------|------|--------|-------|
+| Prometheus | Yes | Yes | No | No | Prometheus HTTP API range queries, metric name search, and metric-scoped label search |
+| Datadog | Yes | Yes | Yes | Yes | Datadog Metrics (v1), Logs (v2), Spans (v2) APIs, metric search, and metric tag search |
+| Elasticsearch | No | No | Yes | No | Elasticsearch typed Search API with query string |
+| Loki | No | No | Yes | No | Loki HTTP `query_range` API |
+| Tempo | No | No | No | Yes | Tempo HTTP search + trace fetch |
+| Jaeger | No | No | No | Yes | Jaeger Query v3 REST API with structured filters |
+| Dynatrace | Yes | No | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
+| CloudWatch | Yes | Yes | Yes | No | AWS SDK v2 CloudWatch + Logs Insights |
+| Azure | Yes | Yes | Yes | No | Azure Monitor `azmetrics` + `azlogs`; Managed Prometheus delegates to Prometheus |
 
 ## Client and Endpoint Details
 
@@ -308,6 +376,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Prometheus: `prometheus/client_golang` HTTP API client, `QueryRange` (Prometheus `/api/v1/query_range`). Supports bearer token or basic auth.
 - Datadog: `datadog-api-client-go` v2 SDK.
   - Metrics: v1 `QueryMetrics`.
+  - Metrics label search: v2 `ListTagsByMetricName`.
   - Logs: v2 `ListLogs`.
   - Traces: v2 `ListSpans`.
 - Elasticsearch: `elastic/go-elasticsearch` v9 typed client, `Search` (Elasticsearch `/_search`) with a `query_string` query and `@timestamp` range filter. Requires API key.
@@ -319,9 +388,11 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
   - Logs: CloudWatch Logs Insights `StartQuery` + `GetQueryResults`.
   - Metrics: CloudWatch `GetMetricData` (query expression).
   - Metrics search: CloudWatch `ListMetrics` with bounded pagination and local filtering.
+  - Metrics label search: CloudWatch `ListMetrics` dimensions with bounded pagination.
 - Azure: Azure Monitor Go SDK via Azure AD client credentials.
   - Metrics: `monitor/query/azmetrics` `QueryResources`.
   - Metrics search: `resourcemanager/monitor/armmonitor` metric definitions pager.
+  - Metrics label search: metric definitions dimensions for label names; `azmetrics.QueryResources` time-series metadata for native Azure label values; Managed Prometheus delegates to Prometheus label APIs.
   - Logs: `monitor/query/azlogs` `QueryResource`.
 
 ## Service Definition
@@ -330,6 +401,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
+  rpc MetricsLabelSearch(MetricsLabelSearchInput) returns (MetricsLabelSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
@@ -475,6 +547,7 @@ message AzureMetricsOptions {
   optional string order_by = 5;
   optional string roll_up_by = 6;
   optional string metrics_endpoint = 7;
+  optional string prometheus_url = 8;
 }
 ```
 
@@ -505,6 +578,7 @@ message MetricsSearchOptions {
 
 message AzureMetricsSearchOptions {
   string resource_id = 1;
+  optional string prometheus_url = 2;
 }
 
 message MetricsSearchResult {
@@ -513,6 +587,34 @@ message MetricsSearchResult {
 
 message MetricsSearchOutput {
   repeated MetricsSearchResult metrics = 1;
+}
+
+message MetricsLabelSearchInput {
+  ToolConnection connection = 1;
+  string metric = 2;
+  optional string query = 3;
+  optional string label = 4;
+  optional int64 limit = 5;
+  optional MetricsLabelSearchOptions options = 6;
+}
+
+message MetricsLabelSearchOptions {
+  optional AzureMetricsLabelSearchOptions azure = 1;
+}
+
+message AzureMetricsLabelSearchOptions {
+  string resource_id = 1;
+  optional string metrics_namespace = 2;
+  optional string prometheus_url = 3;
+  optional string metrics_endpoint = 4;
+}
+
+message MetricsLabelSearchResult {
+  string name = 1;
+}
+
+message MetricsLabelSearchOutput {
+  repeated MetricsLabelSearchResult results = 1;
 }
 ```
 
@@ -794,7 +896,10 @@ grpcurl -d '{
 
 ## Metrics Search
 
-`MetricsSearch` returns metric names only.
+`MetricsSearch` returns metric names or provider-specific metric identifiers that can be passed to `MetricsLabelSearch`.
+- `query` is the search term. Most providers apply it as a plain substring or provider-native search filter.
+- `limit` defaults to a provider-specific conservative value.
+- Results contain only metric names. Use `Metrics` to query time-series data and `MetricsLabelSearch` to inspect available labels for a specific metric.
 
 ### Prometheus
 
@@ -953,6 +1058,112 @@ grpcurl -d '{
   "metrics": [
     { "name": "node_cpu_usage_percentage" },
     { "name": "node_memory_working_set" }
+  ]
+}
+```
+
+## Metrics Label Search
+
+`MetricsLabelSearch` returns metric-scoped label metadata.
+- `metric` is required. Use a metric name or provider-specific metric identifier, typically from `MetricsSearch`.
+- If `label` is omitted, results are label names for `metric`.
+- If `label` is provided, results are values for that label on `metric`.
+- `query` is an optional case-insensitive substring filter applied locally to returned names or values.
+- `limit` defaults to a provider-specific conservative value.
+
+Provider notes:
+- Prometheus and Azure Managed Prometheus use Prometheus label APIs over a recent 24-hour window.
+- Datadog uses indexed metric tags from `ListTagsByMetricName`.
+- CloudWatch uses `ListMetrics` dimensions for recently active metrics. CloudWatch metric identifiers should match `MetricsSearch` output, for example `AWS/EC2/CPUUtilization`.
+- Native Azure Monitor uses metric-definition dimensions for label names. Label values require `options.azure.metrics_namespace` and are inferred from recent metric time-series metadata.
+- Dynatrace metric label search is currently unsupported.
+
+### Prometheus label names
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://vmauth-vm-auth.monitoring:8427/select/0/prometheus",
+      "username": "<USERNAME>",
+      "password": "<PASSWORD>"
+    }
+  },
+  "metric": "container_cpu_usage_seconds_total",
+  "query": "pod",
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsLabelSearch
+```
+
+#### Output
+
+```json
+{
+  "results": [
+    { "name": "pod" },
+    { "name": "pod_name" }
+  ]
+}
+```
+
+### Prometheus label values
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://vmauth-vm-auth.monitoring:8427/select/0/prometheus",
+      "username": "<USERNAME>",
+      "password": "<PASSWORD>"
+    }
+  },
+  "metric": "container_cpu_usage_seconds_total",
+  "label": "namespace",
+  "query": "prod",
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsLabelSearch
+```
+
+#### Output
+
+```json
+{
+  "results": [
+    { "name": "prod" },
+    { "name": "prod-system" }
+  ]
+}
+```
+
+### Azure native label names
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "azure": {
+      "subscription_id": "<SUBSCRIPTION_ID>",
+      "tenant_id": "<TENANT_ID>",
+      "client_id": "<CLIENT_ID>",
+      "client_secret": "<CLIENT_SECRET>"
+    }
+  },
+  "metric": "node_cpu_usage_percentage",
+  "options": {
+    "azure": {
+      "resource_id": "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/rg-prod/providers/Microsoft.ContainerService/managedClusters/aks-prod",
+      "metrics_namespace": "Microsoft.ContainerService/managedClusters"
+    }
+  },
+  "limit": 10
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsLabelSearch
+```
+
+#### Output
+
+```json
+{
+  "results": [
+    { "name": "node" }
   ]
 }
 ```

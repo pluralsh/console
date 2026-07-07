@@ -92,11 +92,11 @@ type CloudConnectionSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Provider is the name of the cloud service for the Provider.
-	// One of (CloudProvider): [gcp, aws, azure]
+	// One of (CloudProvider): [gcp, aws, azure, vsphere]
 	// +kubebuilder:example:=aws
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=gcp;aws;azure
+	// +kubebuilder:validation:Enum:=gcp;aws;azure;vsphere
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Provider is immutable"
 	Provider CloudProvider `json:"provider"`
 
@@ -130,14 +130,17 @@ const (
 	Azure CloudProvider = "azure"
 	// GCP represents Google Cloud Platform as a cloud provider
 	GCP CloudProvider = "gcp"
+	// Vsphere represents VMware vSphere as a cloud provider
+	Vsphere CloudProvider = "vsphere"
 )
 
 // CloudConnectionConfiguration contains provider-specific credential configurations.
 // Only one provider configuration should be specified per CloudConnection instance.
 type CloudConnectionConfiguration struct {
-	AWS   *AWSCloudConnection   `json:"aws,omitempty"`
-	GCP   *GCPCloudConnection   `json:"gcp,omitempty"`
-	Azure *AzureCloudConnection `json:"azure,omitempty"`
+	AWS     *AWSCloudConnection     `json:"aws,omitempty"`
+	GCP     *GCPCloudConnection     `json:"gcp,omitempty"`
+	Azure   *AzureCloudConnection   `json:"azure,omitempty"`
+	Vsphere *VsphereCloudConnection `json:"vsphere,omitempty"`
 }
 
 // AWSCloudConnection contains AWS-specific authentication configuration.
@@ -169,4 +172,21 @@ type AzureCloudConnection struct {
 	TenantId       string             `json:"tenantId"`
 	ClientId       string             `json:"clientId"`
 	ClientSecret   ObjectKeyReference `json:"clientSecret"`
+}
+
+// VsphereCloudConnection contains VMware vSphere authentication configuration.
+// Provides credentials for discovering and querying vSphere resources.
+type VsphereCloudConnection struct {
+	// The vCenter SDK endpoint, for example https://vcenter.example.com/sdk
+	Server string `json:"server"`
+
+	// The vCenter user
+	User string `json:"user"`
+
+	// The vCenter password
+	Password ObjectKeyReference `json:"password"`
+
+	// Whether to allow unverified vCenter TLS certificates
+	// +kubebuilder:validation:Optional
+	AllowUnverifiedSsl *bool `json:"allowUnverifiedSsl,omitempty"`
 }

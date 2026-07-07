@@ -297,6 +297,26 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.helm.values == "bogus: values"
     end
 
+    test "it can template agent helm values if configured" do
+      user = admin_user()
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      insert(:deployment_settings,
+        agent_helm_values: "cluster:\n  name: {{ cluster.name }}\n",
+        agent_helm_values_templateable: true,
+        deployer_repository: git
+      )
+
+      {:ok, cluster} = Clusters.create_cluster(%{name: "test"}, user)
+
+      [svc] = Clusters.services(cluster)
+
+      assert svc.repository_id == git.id
+      assert svc.git.ref == Console.Deployments.Settings.agent_ref()
+      assert svc.git.folder == "charts/deployment-operator"
+      assert svc.helm.values == "cluster:\n  name: test\n"
+    end
+
     test "it will error if the cluster limit is exceeded" do
       user = admin_user()
       insert(:user, bot_name: "console", roles: %{admin: true})

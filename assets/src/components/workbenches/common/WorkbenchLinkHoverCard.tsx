@@ -9,7 +9,10 @@ import {
 import { CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchLinkCardFragment } from 'generated/graphql'
 import { Link } from 'react-router-dom'
-import { getWorkbenchAbsPath } from 'routes/workbenchesRoutesConsts'
+import {
+  getWorkbenchAbsPath,
+  getWorkbenchJobAbsPath,
+} from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 
 export const WORKBENCH_LINK_HOVER_CARD_WIDTH = 220
@@ -17,6 +20,7 @@ export const WORKBENCH_LINK_HOVER_CARD_WIDTH = 220
 type WorkbenchLinkHoverCardProps = {
   workbenchName: string
   workbenchId?: string
+  workbenchJobId?: string
   workbench?: WorkbenchLinkCardFragment | null
   pendingAgentRuns?: number
   onNavigate?: () => void
@@ -43,6 +47,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 export function WorkbenchLinkHoverCard({
   workbenchName,
   workbenchId,
+  workbenchJobId,
   workbench,
   pendingAgentRuns = 0,
   onNavigate,
@@ -56,6 +61,12 @@ export function WorkbenchLinkHoverCard({
     workbench?.repository?.httpsPath ?? workbench?.repository?.url ?? ''
   )
   const pendingCount = pendingAgentRuns
+  const workbenchPath =
+    workbenchId && workbenchJobId
+      ? getWorkbenchJobAbsPath({ workbenchId, jobId: workbenchJobId })
+      : workbenchId
+        ? getWorkbenchAbsPath(workbenchId)
+        : undefined
 
   return (
     <CardSC fillLevel={2}>
@@ -107,20 +118,20 @@ export function WorkbenchLinkHoverCard({
           </Flex>
         )}
       </Flex>
-      {workbenchId && (
+      {workbenchPath && (
         <Button
           small
           secondary
           width="100%"
           as={Link}
-          to={getWorkbenchAbsPath(workbenchId)}
+          to={workbenchPath}
           onClick={(event) => {
             event.stopPropagation()
             onNavigate?.()
           }}
           endIcon={<ArrowTopRightIcon />}
         >
-          Open workbench
+          {workbenchJobId ? 'Open job' : 'Open workbench'}
         </Button>
       )}
     </CardSC>
