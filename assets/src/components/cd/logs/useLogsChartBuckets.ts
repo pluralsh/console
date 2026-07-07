@@ -4,14 +4,10 @@ import {
   LogTimeRange,
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import {
   bucketDurationMs,
   bucketSizeForWindow,
-  combineLogQuery,
-  LOG_LEVEL_CHART_LAYERS,
-  mergeStackedBuckets,
   parseAggregationBuckets,
 } from './logsMetricsUtils'
 
@@ -37,67 +33,27 @@ export function useLogsChartBuckets({
   const bucketSize = bucketSizeForWindow(sinceSeconds)
   const bucketMs = bucketDurationMs(bucketSize)
   const skip = !(clusterId || serviceId)
-  const baseVars = {
-    clusterId,
-    serviceId,
-    time,
-    aggregation: { bucketSize },
-    operator,
-    facets,
-  }
-  const queryOpts = {
-    fetchPolicy: 'cache-and-network' as const,
+
+  const { data, loading } = useLogAggregationBucketsQuery({
+    variables: {
+      clusterId,
+      serviceId,
+      query,
+      time,
+      aggregation: { bucketSize },
+      operator,
+      facets,
+    },
+    fetchPolicy: 'cache-and-network',
     pollInterval,
     skip,
-  }
-
-  const { data: totalData, loading } = useLogAggregationBucketsQuery({
-    variables: { ...baseVars, query },
-    ...queryOpts,
-  })
-  const { data: successData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[0].query),
-    },
-    ...queryOpts,
-  })
-  const { data: warnData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[1].query),
-    },
-    ...queryOpts,
-  })
-  const { data: errorData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[2].query),
-    },
-    ...queryOpts,
-  })
-  const { data: infoData } = useLogAggregationBucketsQuery({
-    variables: {
-      ...baseVars,
-      query: combineLogQuery(query, LOG_LEVEL_CHART_LAYERS[3].query),
-    },
-    ...queryOpts,
   })
 
-  const buckets = useMemo(() => {
-    const total = parseAggregationBuckets(totalData)
-    if (isEmpty(total)) return []
-    return mergeStackedBuckets(total, [
-      parseAggregationBuckets(successData),
-      parseAggregationBuckets(warnData),
-      parseAggregationBuckets(errorData),
-      parseAggregationBuckets(infoData),
-    ])
-  }, [totalData, successData, warnData, errorData, infoData])
+  const buckets = useMemo(() => parseAggregationBuckets(data), [data])
 
   return {
     buckets,
     bucketMs,
-    initialLoading: loading && !totalData,
+    initialLoading: loading && !data,
   }
 }

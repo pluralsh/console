@@ -8,7 +8,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { ChartRangeTooltip } from './ChartRangeTooltip'
-import { LogLevel, logLevelToColor } from './LogLine'
 import {
   bucketTimeRange,
   CHART_BAR_GAP,
@@ -22,8 +21,7 @@ import {
   LOG_LEVEL_SELECTION_SHADOW,
   LogsTimeRange,
   rangeBucketIndices,
-  StackedBucket,
-  sumBucketRange,
+  sumBucketCounts,
   xToBucketIndex,
 } from './logsMetricsUtils'
 import { useLogsChartBuckets } from './useLogsChartBuckets'
@@ -31,14 +29,6 @@ import { useLogsChartBuckets } from './useLogsChartBuckets'
 const Y_AXIS_WIDTH = 36
 const X_AXIS_HEIGHT = 28
 const CHART_PADDING_BOTTOM = 8
-
-const STACK_ORDER = [
-  LogLevel.SUCCESS,
-  LogLevel.WARN,
-  LogLevel.ERROR,
-  LogLevel.INFO,
-  LogLevel.UNKNOWN,
-] as const
 
 type DragState = { startX: number; currentX: number }
 
@@ -143,7 +133,7 @@ export function LogsMetricsChart({
           dragIndices.endIdx,
           bucketMs
         ),
-        stats: sumBucketRange(
+        stats: sumBucketCounts(
           buckets,
           dragIndices.startIdx,
           dragIndices.endIdx
@@ -159,7 +149,7 @@ export function LogsMetricsChart({
 
     return {
       range: bucketTimeRange(buckets, hoveredIndex, hoveredIndex, bucketMs),
-      stats: sumBucketRange(buckets, hoveredIndex, hoveredIndex),
+      stats: sumBucketCounts(buckets, hoveredIndex, hoveredIndex),
       left: Y_AXIS_WIDTH + (bucketLeft + bucketRight) / 2,
     }
   }, [
@@ -273,9 +263,9 @@ export function LogsMetricsChart({
               </>
             )}
             {buckets.map((bucket) => (
-              <ChartBarStack
+              <ChartBar
                 key={bucket.timestamp.getTime()}
-                bucket={bucket}
+                count={bucket.count}
                 yMax={yMax}
               />
             ))}
@@ -304,35 +294,8 @@ export function LogsMetricsChart({
   )
 }
 
-function ChartBarStack({
-  bucket,
-  yMax,
-}: {
-  bucket: StackedBucket
-  yMax: number
-}) {
-  const { colors } = useTheme()
-  const scale = (count: number) => (count / yMax) * CHART_CANVAS_HEIGHT
-  const topLevel = STACK_ORDER.findLast((level) => bucket.levels[level] > 0)
-
-  return (
-    <BarStackSC>
-      {STACK_ORDER.map((level) => {
-        const count = bucket.levels[level]
-        if (!count) return null
-        return (
-          <BarSegmentSC
-            key={level}
-            $roundedTop={level === topLevel}
-            style={{
-              height: scale(count),
-              backgroundColor: colors[logLevelToColor[level]],
-            }}
-          />
-        )
-      })}
-    </BarStackSC>
-  )
+function ChartBar({ count, yMax }: { count: number; yMax: number }) {
+  return <BarSC $height={(count / yMax) * CHART_CANVAS_HEIGHT} />
 }
 
 const ChartWrapperSC = styled.div(({ theme }) => ({
@@ -411,27 +374,16 @@ const SelectionEdgeSC = styled.div<{ $side: 'start' | 'end' }>(({ $side }) => ({
   ...($side === 'start' ? { left: 0 } : { right: 0 }),
 }))
 
-const BarStackSC = styled.div({
+const BarSC = styled.div<{ $height: number }>(({ theme, $height }) => ({
   position: 'relative',
   zIndex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'flex-end',
   flex: 1,
   minWidth: 0,
-  height: '100%',
-})
-
-const BarSegmentSC = styled.div<{ $roundedTop: boolean }>(
-  ({ $roundedTop }) => ({
-    width: '100%',
-    flexShrink: 0,
-    ...($roundedTop && {
-      borderTopLeftRadius: 1,
-      borderTopRightRadius: 1,
-    }),
-  })
-)
+  height: $height,
+  backgroundColor: theme.colors['icon-success'],
+  borderTopLeftRadius: 1,
+  borderTopRightRadius: 1,
+}))
 
 const XAxisSC = styled.div({
   position: 'relative',

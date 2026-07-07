@@ -1,26 +1,14 @@
-import { Flex } from '@pluralsh/design-system'
 import { useCallback, useRef, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { useTheme } from 'styled-components'
 
-import { LogLevel, logLevelToColor } from './LogLine'
-import { LegendColor } from './LogsLegend'
 import {
-  BucketRangeStats,
   CHART_CANVAS_HEIGHT,
   formatRangeTime,
   LogsTimeRange,
 } from './logsMetricsUtils'
 
 const X_AXIS_HEIGHT = 28
-
-const STACK_ORDER = [
-  LogLevel.SUCCESS,
-  LogLevel.WARN,
-  LogLevel.ERROR,
-  LogLevel.INFO,
-  LogLevel.UNKNOWN,
-] as const
 
 function usePortalCoords(
   anchorRef: React.RefObject<HTMLElement | null>,
@@ -62,14 +50,12 @@ export function ChartRangeTooltip({
   offsetX,
 }: {
   range: LogsTimeRange
-  stats: BucketRangeStats
+  stats: number
   anchorRef: React.RefObject<HTMLElement | null>
   offsetX: number
 }) {
   const theme = useTheme()
   const coords = usePortalCoords(anchorRef, offsetX)
-
-  const visibleLevels = STACK_ORDER.filter((level) => stats.levels[level] > 0)
 
   if (!coords) return null
 
@@ -103,73 +89,23 @@ export function ChartRangeTooltip({
       <div
         css={{
           display: 'flex',
-          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           gap: theme.spacing.medium,
           padding: theme.spacing.small,
+          ...theme.partials.text.caption,
+
+          '& > span:first-child': {
+            color: theme.colors['text-long-form'],
+          },
+
+          '& > span:last-child': {
+            color: theme.colors.text,
+          },
         }}
       >
-        {visibleLevels.length > 0 && (
-          <Flex
-            gap="medium"
-            alignItems="flex-start"
-            justifyContent="space-between"
-          >
-            <Flex
-              direction="column"
-              css={{
-                ...theme.partials.text.caption,
-                color: theme.colors['text-light'],
-                gap: 10,
-              }}
-            >
-              {visibleLevels.map((level) => (
-                <Flex
-                  gap="xsmall"
-                  alignItems="center"
-                  key={level}
-                >
-                  <LegendColor color={logLevelToColor[level]} />
-                  <span>{level}</span>
-                </Flex>
-              ))}
-            </Flex>
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                alignItems: 'flex-end',
-                ...theme.partials.text.caption,
-                color: theme.colors['text-xlight'],
-              }}
-            >
-              {visibleLevels.map((level) => (
-                <span key={level}>{stats.levels[level]}</span>
-              ))}
-            </div>
-          </Flex>
-        )}
-        <div
-          css={{
-            ...theme.partials.text.caption,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: theme.spacing.small,
-            borderTop: theme.borders['fill-two'],
-
-            '& > span:first-child': {
-              color: theme.colors['text-long-form'],
-            },
-
-            '& > span:last-child': {
-              color: theme.colors.text,
-            },
-          }}
-        >
-          <span>Total</span>
-          <span>{stats.total}</span>
-        </div>
+        <span>Total</span>
+        <span>{stats}</span>
       </div>
     </div>,
     document.body

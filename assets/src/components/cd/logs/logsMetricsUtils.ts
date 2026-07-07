@@ -1,14 +1,8 @@
 import parseDuration from 'parse-duration-ms'
-import { clamp, isEmpty, keyBy, max, range } from 'lodash'
+import { clamp, isEmpty, max, range } from 'lodash'
 import { useLogAggregationBucketsQuery } from 'generated/graphql'
 import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { LogLevel } from './LogLine'
-
-export type BucketRangeStats = {
-  levels: Record<LogLevel, number>
-  total: number
-}
 
 export type LogsTimeRange = {
   start: Date
@@ -20,53 +14,19 @@ export type AggregationBucket = {
   count: number
 }
 
-export type StackedBucket = {
-  timestamp: Date
-  total: number
-  levels: Record<LogLevel, number>
-}
-
 export const CHART_CANVAS_HEIGHT = 162
 export const CHART_BAR_GAP = 2
 export const LOG_LEVEL_SELECTION_SHADOW = 'rgba(2, 3, 24, 0.55)'
 export const LOG_LEVEL_SELECTION_EDGE = '#747af6'
 
-export const LOG_LEVEL_CHART_LAYERS = [
-  { level: LogLevel.SUCCESS, query: 'success' },
-  { level: LogLevel.WARN, query: 'warn OR warning' },
-  { level: LogLevel.ERROR, query: 'error OR fatal' },
-  { level: LogLevel.INFO, query: 'info' },
-] as const
-
-const LEVEL_PARTITION_ORDER = [
-  LogLevel.ERROR,
-  LogLevel.WARN,
-  LogLevel.INFO,
-  LogLevel.SUCCESS,
-] as const
-
-export function sumBucketRange(
-  buckets: StackedBucket[],
+export function sumBucketCounts(
+  buckets: AggregationBucket[],
   startIdx: number,
   endIdx: number
-): BucketRangeStats {
-  const levels = {
-    [LogLevel.SUCCESS]: 0,
-    [LogLevel.WARN]: 0,
-    [LogLevel.ERROR]: 0,
-    [LogLevel.INFO]: 0,
-    [LogLevel.FATAL]: 0,
-    [LogLevel.UNKNOWN]: 0,
-  }
+): number {
   let total = 0
-  for (let i = startIdx; i <= endIdx; i++) {
-    const bucket = buckets[i]
-    if (!bucket) continue
-    total += bucket.total
-    for (const level of Object.values(LogLevel))
-      levels[level] += bucket.levels[level] ?? 0
-  }
-  return { levels, total }
+  for (let i = startIdx; i <= endIdx; i++) total += buckets[i]?.count ?? 0
+  return total
 }
 
 export function bucketSizeForWindow(seconds: number): string {
@@ -82,12 +42,6 @@ export function bucketDurationMs(bucketSize: string): number {
   return parseDuration(bucketSize) ?? 60_000
 }
 
-export function combineLogQuery(base: string, levelQuery: string): string {
-  const trimmed = base.trim()
-  if (!trimmed) return levelQuery
-  return `(${trimmed}) AND (${levelQuery})`
-}
-
 export function parseAggregationBuckets(
   data: ReturnType<typeof useLogAggregationBucketsQuery>['data']
 ): AggregationBucket[] {
@@ -99,46 +53,8 @@ export function parseAggregationBuckets(
     .filter((b) => b.timestamp)
 }
 
-export function mergeStackedBuckets(
-  totalBuckets: AggregationBucket[],
-  levelBuckets: AggregationBucket[][]
-): StackedBucket[] {
-  const levelCountsByTs = levelBuckets.map((buckets) =>
-    keyBy(buckets, (b) => b.timestamp.getTime())
-  )
-
-  return totalBuckets.map((bucket) => {
-    const ts = bucket.timestamp.getTime()
-    const raw = Object.fromEntries(
-      LOG_LEVEL_CHART_LAYERS.map(({ level }, i) => [
-        level,
-        levelCountsByTs[i]?.[ts]?.count ?? 0,
-      ])
-    ) as Record<(typeof LOG_LEVEL_CHART_LAYERS)[number]['level'], number>
-
-    let remaining = bucket.count
-    const levels = {
-      [LogLevel.SUCCESS]: 0,
-      [LogLevel.WARN]: 0,
-      [LogLevel.ERROR]: 0,
-      [LogLevel.INFO]: 0,
-      [LogLevel.FATAL]: 0,
-      [LogLevel.UNKNOWN]: 0,
-    }
-
-    for (const level of LEVEL_PARTITION_ORDER) {
-      const assigned = Math.min(raw[level], remaining)
-      levels[level] = assigned
-      remaining -= assigned
-    }
-    levels[LogLevel.UNKNOWN] = remaining
-
-    return { timestamp: bucket.timestamp, total: bucket.count, levels }
-  })
-}
-
-export function chartYMax(buckets: StackedBucket[]): number {
-  return niceMax(max([1, ...buckets.map((b) => b.total)]) ?? 1)
+export function chartYMax(buckets: AggregationBucket[]): number {
+  return niceMax(max([1, ...buckets.map((b) => b.count)]) ?? 1)
 }
 
 export function chartTickIndices(bucketCount: number, maxTicks = 5): number[] {
@@ -167,7 +83,7 @@ export function xToBucketIndex(
 }
 
 export function rangeBucketIndices(
-  buckets: StackedBucket[],
+  buckets: AggregationBucket[],
   rangeFilter: LogsTimeRange | null,
   bucketMs: number
 ): { startIdx: number; endIdx: number } | null {
@@ -188,7 +104,7 @@ export function rangeBucketIndices(
 }
 
 export function bucketTimeRange(
-  buckets: StackedBucket[],
+  buckets: AggregationBucket[],
   startIdx: number,
   endIdx: number,
   bucketMs: number
