@@ -21,10 +21,14 @@ import {
 import { LogsLabels } from './LogsLabels'
 import { LogsLegend } from './LogsLegend'
 import { LogsMetricsChart } from './LogsMetricsChart'
-import { LogsTimeRange } from './logsMetricsUtils'
 import { LogsRangeBanner } from './LogsRangeBanner'
 import { LogsStreamingStatus } from './LogsStreamingStatus'
 import { LogsTable } from './LogsTable'
+
+export type LogsTimeRange = {
+  start: Date
+  end: Date
+}
 
 export const DEFAULT_LOG_QUERY_LENGTH = 250
 

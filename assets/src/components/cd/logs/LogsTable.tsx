@@ -12,7 +12,7 @@ import { LogContextPanel } from './LogContextPanel'
 import { LogLine } from './LogLine'
 import { DEFAULT_LOG_QUERY_LENGTH, secondsToDuration } from './Logs'
 import { LogsFiltersT } from './LogsFilters'
-import { LogsTimeRange } from './logsMetricsUtils'
+import type { LogsTimeRange } from './Logs'
 
 const columnHelper = createColumnHelper<LogLineFragment>()
 

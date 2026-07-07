@@ -1,10 +1,7 @@
 import { CloseIcon, Flex } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
-import {
-  formatRangeTime,
-  formatRangeWindow,
-  LogsTimeRange,
-} from './logsMetricsUtils'
+import { duration, formatDateTime } from 'utils/datetime'
+import type { LogsTimeRange } from './Logs'
 
 export function LogsRangeBanner({
   rangeFilter,
@@ -51,8 +48,8 @@ export function LogsRangeBanner({
                 Filtered to
               </span>
               <span css={{ ...theme.partials.text.code }}>
-                {formatRangeTime(rangeFilter.start)} –{' '}
-                {formatRangeTime(rangeFilter.end)}
+                {formatDateTime(rangeFilter.start, 'HH:mm:ss', true, true)} –{' '}
+                {formatDateTime(rangeFilter.end, 'HH:mm:ss', true, true)}
               </span>
               <span
                 css={{
@@ -60,7 +57,7 @@ export function LogsRangeBanner({
                   color: theme.colors['text-long-form'],
                 }}
               >
-                {formatRangeWindow(rangeFilter.start, rangeFilter.end)}
+                {duration(rangeFilter.start, rangeFilter.end)} window
               </span>
             </Flex>
             <ClearFilterButtonSC

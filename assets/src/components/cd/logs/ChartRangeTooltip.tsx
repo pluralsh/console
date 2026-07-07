@@ -1,18 +1,14 @@
 import { useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 
-import {
-  CHART_CANVAS_HEIGHT,
-  formatRangeTime,
-  LogsTimeRange,
-} from './logsMetricsUtils'
-
-const X_AXIS_HEIGHT = 28
+import type { LogsTimeRange } from './Logs'
 
 function useFixedCoords(
   anchorRef: React.RefObject<HTMLElement | null>,
-  offsetX: number
+  offsetX: number,
+  offsetY: number
 ) {
   const [coords, setCoords] = useState<{ x: number; y: number } | null>(null)
 
@@ -25,7 +21,7 @@ function useFixedCoords(
       }
       const rect = anchor.getBoundingClientRect()
       const x = rect.left + offsetX
-      const y = rect.top + CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
+      const y = rect.top + offsetY
       setCoords((prev) => (prev?.x === x && prev?.y === y ? prev : { x, y }))
     }
 
@@ -36,7 +32,7 @@ function useFixedCoords(
       window.removeEventListener('scroll', update, true)
       window.removeEventListener('resize', update)
     }
-  }, [anchorRef, offsetX])
+  }, [anchorRef, offsetX, offsetY])
 
   return coords
 }
@@ -44,15 +40,17 @@ function useFixedCoords(
 export function ChartRangeTooltip({
   anchorRef,
   left,
+  top,
   range,
   count,
 }: {
   anchorRef: React.RefObject<HTMLElement | null>
   left: number
+  top: number
   range: LogsTimeRange
   count: number
 }) {
-  const coords = useFixedCoords(anchorRef, left)
+  const coords = useFixedCoords(anchorRef, left, top)
 
   if (!coords) return null
 
@@ -62,7 +60,8 @@ export function ChartRangeTooltip({
       $y={coords.y}
     >
       <TimeSC>
-        {formatRangeTime(range.start)} - {formatRangeTime(range.end)}
+        {formatDateTime(range.start, 'HH:mm:ss', true, true)} -{' '}
+        {formatDateTime(range.end, 'HH:mm:ss', true, true)}
       </TimeSC>
       <TotalSC>
         <span>Total</span>

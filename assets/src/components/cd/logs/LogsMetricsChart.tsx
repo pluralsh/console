@@ -4,34 +4,25 @@ import {
   LogTimeRange,
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
-import { clamp, isEmpty } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { toDateOrUndef, formatDateTime } from 'utils/datetime'
+import { isNonNullable } from 'utils/isNonNullable'
+import parseDuration from 'parse-duration-ms'
 import { ChartRangeTooltip } from './ChartRangeTooltip'
-import {
-  bucketDurationMs,
-  bucketSizeForWindow,
-  bucketTimeRange,
-  CHART_BAR_GAP,
-  CHART_CANVAS_HEIGHT,
-  chartTickIndices,
-  chartYMax,
-  formatChartAxisTime,
-  formatCompactCount,
-  indexToBucketX,
-  LOG_LEVEL_SELECTION_EDGE,
-  LOG_LEVEL_SELECTION_SHADOW,
-  LogsTimeRange,
-  parseAggregationBuckets,
-  rangeBucketIndices,
-  sumBucketCounts,
-  xToBucketIndex,
-} from './logsMetricsUtils'
+import type { LogsTimeRange } from './Logs'
 
 const Y_AXIS_WIDTH = 36
 const X_AXIS_HEIGHT = 28
 const CHART_PADDING_BOTTOM = 8
+const CHART_CANVAS_HEIGHT = 162
+const CHART_BAR_GAP = 2
+const SELECTION_SHADOW = 'rgba(2, 3, 24, 0.55)'
+const SELECTION_EDGE = '#747af6'
+const TOOLTIP_TOP = CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
+
+type ChartBucket = { timestamp: Date; count: number }
 
 type DragState = { startX: number; currentX: number }
 
@@ -85,11 +76,11 @@ export function LogsMetricsChart({
     skip,
   })
 
-  const buckets = useMemo(() => parseAggregationBuckets(data), [data])
+  const buckets = useMemo(() => parseBuckets(data), [data])
   const initialLoading = loading && !data
 
   const bucketCount = buckets.length
-  const yMax = chartYMax(buckets)
+  const yMax = Math.max(1, ...buckets.map((b) => b.count))
 
   useEffect(() => {
     const node = rowRef.current
@@ -103,16 +94,16 @@ export function LogsMetricsChart({
   }, [bucketCount])
 
   const toX = useCallback(
-    (index: number) => indexToBucketX(index, rowWidth, bucketCount),
+    (index: number) => bucketX(index, rowWidth, bucketCount),
     [rowWidth, bucketCount]
   )
   const toIndex = useCallback(
-    (x: number) => xToBucketIndex(x, rowWidth, bucketCount),
+    (x: number) => xToIndex(x, rowWidth, bucketCount),
     [rowWidth, bucketCount]
   )
 
   const rangeIndices = useMemo(
-    () => rangeBucketIndices(buckets, rangeFilter, bucketMs),
+    () => rangeIndicesForFilter(buckets, rangeFilter, bucketMs),
     [buckets, rangeFilter, bucketMs]
   )
 
@@ -141,29 +132,27 @@ export function LogsMetricsChart({
   const chartTooltip = useMemo(() => {
     if (dragIndices && selectionBounds) {
       return {
-        range: bucketTimeRange(
+        range: bucketRange(
           buckets,
           dragIndices.startIdx,
           dragIndices.endIdx,
           bucketMs
         ),
-        stats: sumBucketCounts(
-          buckets,
-          dragIndices.startIdx,
-          dragIndices.endIdx
-        ),
+        stats: buckets
+          .slice(dragIndices.startIdx, dragIndices.endIdx + 1)
+          .reduce((sum, b) => sum + b.count, 0),
         left: Y_AXIS_WIDTH + selectionBounds.left + selectionBounds.width / 2,
       }
     }
 
     if (hoveredIndex === null || !buckets[hoveredIndex]) return null
 
-    const bucketLeft = indexToBucketX(hoveredIndex, rowWidth, bucketCount)
-    const bucketRight = indexToBucketX(hoveredIndex + 1, rowWidth, bucketCount)
+    const bucketLeft = bucketX(hoveredIndex, rowWidth, bucketCount)
+    const bucketRight = bucketX(hoveredIndex + 1, rowWidth, bucketCount)
 
     return {
-      range: bucketTimeRange(buckets, hoveredIndex, hoveredIndex, bucketMs),
-      stats: sumBucketCounts(buckets, hoveredIndex, hoveredIndex),
+      range: bucketRange(buckets, hoveredIndex, hoveredIndex, bucketMs),
+      stats: buckets[hoveredIndex].count,
       left: Y_AXIS_WIDTH + (bucketLeft + bucketRight) / 2,
     }
   }, [
@@ -183,7 +172,7 @@ export function LogsMetricsChart({
     const area = barsAreaRef.current
     if (!area) return 0
     const rect = area.getBoundingClientRect()
-    return clamp(clientX - rect.left, 0, rect.width)
+    return Math.min(Math.max(clientX - rect.left, 0), rect.width)
   }, [])
 
   const isDragging = drag !== null
@@ -203,7 +192,7 @@ export function LogsMetricsChart({
         const startIdx = toIndex(Math.min(current.startX, x))
         const endIdx = toIndex(Math.max(current.startX, x))
         if (Math.abs(current.startX - x) > 3)
-          onRangeSelect(bucketTimeRange(buckets, startIdx, endIdx, bucketMs))
+          onRangeSelect(bucketRange(buckets, startIdx, endIdx, bucketMs))
         return null
       })
     }
@@ -234,13 +223,13 @@ export function LogsMetricsChart({
     )
   }
 
-  if (isEmpty(buckets)) return null
+  if (buckets.length === 0) return null
 
   return (
     <ChartWrapperSC ref={chartWrapperRef}>
       <ChartCanvasSC>
         <YAxisSC>
-          <span>{formatCompactCount(yMax)}</span>
+          <span>{compactCount(yMax)}</span>
           <span>0</span>
         </YAxisSC>
         <BarsAreaSC
@@ -287,9 +276,9 @@ export function LogsMetricsChart({
         </BarsAreaSC>
       </ChartCanvasSC>
       <XAxisSC style={{ paddingLeft: Y_AXIS_WIDTH + theme.spacing.medium }}>
-        {chartTickIndices(bucketCount).map((i, tickIdx, tickIndices) => {
+        {tickIndices(bucketCount).map((i, tickIdx, indices) => {
           const isFirst = tickIdx === 0
-          const isLast = tickIdx === tickIndices.length - 1
+          const isLast = tickIdx === indices.length - 1
 
           return (
             <XTickSC
@@ -305,7 +294,12 @@ export function LogsMetricsChart({
               }
               style={{ left: toX(i) + rowWidth / bucketCount / 2 }}
             >
-              {formatChartAxisTime(buckets[i].timestamp, sinceSeconds)}
+              {formatDateTime(
+                buckets[i].timestamp,
+                sinceSeconds >= 86400 ? 'MM/DD' : 'HH:mm',
+                true,
+                true
+              )}
             </XTickSC>
           )
         })}
@@ -314,6 +308,7 @@ export function LogsMetricsChart({
         <ChartRangeTooltip
           anchorRef={chartWrapperRef}
           left={chartTooltip.left}
+          top={TOOLTIP_TOP}
           range={chartTooltip.range}
           count={chartTooltip.stats}
         />
@@ -380,7 +375,7 @@ const SelectionShadowSC = styled.div({
   position: 'absolute',
   top: 0,
   bottom: 0,
-  background: LOG_LEVEL_SELECTION_SHADOW,
+  background: SELECTION_SHADOW,
   pointerEvents: 'none',
   zIndex: 2,
 })
@@ -398,7 +393,7 @@ const SelectionEdgeSC = styled.div<{ $side: 'start' | 'end' }>(({ $side }) => ({
   top: 0,
   bottom: 0,
   width: 2,
-  backgroundColor: LOG_LEVEL_SELECTION_EDGE,
+  backgroundColor: SELECTION_EDGE,
   ...($side === 'start' ? { left: 0 } : { right: 0 }),
 }))
 
@@ -435,3 +430,86 @@ const XTickSC = styled.span<{ $align: 'start' | 'center' | 'end' }>(
     whiteSpace: 'nowrap',
   })
 )
+
+function bucketSizeForWindow(seconds: number): string {
+  if (seconds <= 60) return '1s'
+  if (seconds <= 900) return '15s'
+  if (seconds <= 1800) return '30s'
+  if (seconds <= 3600) return '1m'
+  if (seconds <= 86400) return '30m'
+  return '6h'
+}
+
+function bucketDurationMs(bucketSize: string): number {
+  return parseDuration(bucketSize) ?? 60_000
+}
+
+function parseBuckets(
+  data: ReturnType<typeof useLogAggregationBucketsQuery>['data']
+): ChartBucket[] {
+  return (data?.logAggregationBuckets?.filter(isNonNullable) ?? [])
+    .map((b) => ({
+      timestamp: toDateOrUndef(b.timestamp)!,
+      count: b.count ?? 0,
+    }))
+    .filter((b) => b.timestamp)
+}
+
+function bucketX(index: number, rowWidth: number, bucketCount: number): number {
+  return bucketCount ? (index / bucketCount) * rowWidth : 0
+}
+
+function xToIndex(x: number, rowWidth: number, bucketCount: number): number {
+  if (!rowWidth || !bucketCount) return 0
+  return Math.min(
+    Math.max(Math.floor((x / rowWidth) * bucketCount), 0),
+    bucketCount - 1
+  )
+}
+
+function tickIndices(bucketCount: number, maxTicks = 5): number[] {
+  if (bucketCount <= 1) return [0]
+  const n = Math.min(maxTicks, bucketCount)
+  return Array.from({ length: n }, (_, i) =>
+    Math.round((i / (n - 1)) * (bucketCount - 1))
+  )
+}
+
+function rangeIndicesForFilter(
+  buckets: ChartBucket[],
+  rangeFilter: LogsTimeRange | null,
+  bucketMs: number
+): { startIdx: number; endIdx: number } | null {
+  if (!rangeFilter || buckets.length === 0) return null
+
+  const startMs = rangeFilter.start.getTime()
+  const endMs = rangeFilter.end.getTime()
+  let startIdx = buckets.findIndex((b) => b.timestamp.getTime() >= startMs)
+  if (startIdx === -1) startIdx = 0
+
+  let endIdx = buckets.findIndex(
+    (b) => b.timestamp.getTime() + bucketMs > endMs
+  )
+  if (endIdx === -1) endIdx = buckets.length - 1
+  else endIdx = Math.max(startIdx, endIdx - 1)
+
+  return { startIdx, endIdx }
+}
+
+function bucketRange(
+  buckets: ChartBucket[],
+  startIdx: number,
+  endIdx: number,
+  bucketMs: number
+): LogsTimeRange {
+  return {
+    start: buckets[startIdx].timestamp,
+    end: new Date(buckets[endIdx].timestamp.getTime() + bucketMs),
+  }
+}
+
+const compactCount = (count: number) =>
+  new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(count)
