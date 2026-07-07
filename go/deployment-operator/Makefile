@@ -36,6 +36,7 @@ VELERO_CHART_URL := https://github.com/vmware-tanzu/helm-charts/releases/downloa
 
 ENVTEST_K8S_VERSION := 1.35.0
 CONTROLLER_GEN_PATHS ?= ./api/...;./internal/...;./pkg/...
+CONTROLLER_GEN_CRD_PATHS ?= ./api/...
 
 PRE = --ensure
 
@@ -44,7 +45,8 @@ PRE = --ensure
 .PHONY: manifests
 manifests: TOOL = controller-gen
 manifests: --tool ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="$(CONTROLLER_GEN_PATHS)" output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) rbac:roleName=manager-role webhook paths="$(CONTROLLER_GEN_PATHS)"
+	$(CONTROLLER_GEN) crd paths="$(CONTROLLER_GEN_CRD_PATHS)" output:crd:artifacts:config=config/crd/bases
 	@$(MAKE) -s codegen-chart-crds
 
 .PHONY: generate

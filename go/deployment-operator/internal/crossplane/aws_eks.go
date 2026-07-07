@@ -62,6 +62,8 @@ func getAWSCluster(ctx context.Context, c k8sClient.Client, ref corev1.ObjectRef
 
 // AWSCluster mirrors github.com/crossplane-contrib/provider-aws/apis/eks/v1beta1 Cluster.
 // Only fields required for readiness and connection secret resolution are modeled.
+//
+// +kubebuilder:object:generate=false
 type AWSCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -96,6 +98,8 @@ type AWSClusterCertificateAuthority struct {
 }
 
 // AWSClusterList contains a list of AWSCluster.
+//
+// +kubebuilder:object:generate=false
 type AWSClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

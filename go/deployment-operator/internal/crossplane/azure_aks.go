@@ -53,6 +53,8 @@ func getAzureAKSCluster(ctx context.Context, c k8sClient.Client, ref corev1.Obje
 
 // AzureAKSCluster mirrors containerservice.azure.upbound.io KubernetesCluster.
 // Only fields required for readiness and connection secret resolution are modeled.
+//
+// +kubebuilder:object:generate=false
 type AzureAKSCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -70,6 +72,8 @@ type AzureAKSClusterStatus struct {
 }
 
 // AzureAKSClusterList contains a list of AzureAKSCluster.
+//
+// +kubebuilder:object:generate=false
 type AzureAKSClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

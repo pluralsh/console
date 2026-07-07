@@ -52,6 +52,8 @@ func getGKECluster(ctx context.Context, c k8sClient.Client, ref corev1.ObjectRef
 
 // GKECluster mirrors container.gcp.upbound.io Cluster.
 // Only fields required for readiness and connection secret resolution are modeled.
+//
+// +kubebuilder:object:generate=false
 type GKECluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -69,6 +71,8 @@ type GKEClusterStatus struct {
 }
 
 // GKEClusterList contains a list of GKECluster.
+//
+// +kubebuilder:object:generate=false
 type GKEClusterList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
