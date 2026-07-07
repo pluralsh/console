@@ -50,8 +50,7 @@ export function MentionResults({
 
   useEffect(() => {
     const row = listRef.current?.children[highlightedIndex] as
-      | HTMLElement
-      | undefined
+      HTMLElement | undefined
     row?.scrollIntoView({ block: 'nearest' })
   }, [highlightedIndex])
 

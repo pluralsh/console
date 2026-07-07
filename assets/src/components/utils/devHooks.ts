@@ -1,12 +1,11 @@
-// useful hooks to use in development (generally meant to be removed beforemerging code)
-import { useEffect, useMemo } from 'react'
+// useful hooks to use in development (generally meant to be removed before merging code)
+import { useEffect, useId, useMemo } from 'react'
 
 // for debugging things like modals
 // will label a component and log when it mounts and unmounts
 export function useMountLogging(name?: string) {
-  const id = `${name ? `${name}-` : 'component-'}${Math.round(
-    Math.random() * 1000
-  )}`
+  const reactId = useId()
+  const id = `${name ? `${name}-` : 'component-'}${reactId}`
 
   useEffect(() => {
     console.log(id, 'mounted')
@@ -14,8 +13,7 @@ export function useMountLogging(name?: string) {
     return () => {
       console.log(id, 'unmounted')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [id])
 }
 
 // for making sure things like tables work correctly with lots of items

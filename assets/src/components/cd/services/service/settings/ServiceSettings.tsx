@@ -22,10 +22,7 @@ import { useServiceSubPageBreadcrumbs } from '../ServiceDetails'
 import { useServiceContext } from '../ServiceDetailsContext'
 
 type ServicePersonaType =
-  | 'all-settings'
-  | 'secrets-only'
-  | 'exclude-secrets'
-  | 'no-settings'
+  'all-settings' | 'secrets-only' | 'exclude-secrets' | 'no-settings'
 
 const getDirectory = ({
   service,

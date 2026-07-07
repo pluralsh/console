@@ -50,9 +50,7 @@ import { ServiceMonitorPreview } from './ServiceMonitorPreview'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export type ServiceMonitorStepKey =
-  | 'description'
-  | 'threshold-config'
-  | 'log-query'
+  'description' | 'threshold-config' | 'log-query'
 
 const STEPS: { key: ServiceMonitorStepKey; label: string }[] = [
   { key: 'log-query', label: 'Log query' },

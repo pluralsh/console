@@ -68,9 +68,9 @@ export function UpgradesConsolidatedTableExpander({
             >
               Images needed to procure:
             </CaptionP>
-            {images
-              ?.filter(isNonNullable)
-              .map((image) => <Body2P key={image}>{image}</Body2P>)}
+            {images?.filter(isNonNullable).map((image) => (
+              <Body2P key={image}>{image}</Body2P>
+            ))}
           </Card>
         )}
         {selectedTab !== ExpanderTab.Images && !isEmpty(summary) && (

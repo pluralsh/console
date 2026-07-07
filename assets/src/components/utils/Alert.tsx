@@ -4,12 +4,7 @@ import { HTMLAttributes, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
 export type GqlErrorType =
-  | boolean
-  | string
-  | ApolloError
-  | null
-  | undefined
-  | Error
+  boolean | string | ApolloError | null | undefined | Error
 
 export function GqlError({
   header,
