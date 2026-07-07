@@ -30,11 +30,11 @@ export function sumBucketCounts(
 }
 
 export function bucketSizeForWindow(seconds: number): string {
-  if (seconds <= 60) return '5s'
-  if (seconds <= 900) return '1m'
-  if (seconds <= 1800) return '2m'
-  if (seconds <= 3600) return '5m'
-  if (seconds <= 86400) return '1h'
+  if (seconds <= 60) return '1s'
+  if (seconds <= 900) return '15s'
+  if (seconds <= 1800) return '30s'
+  if (seconds <= 3600) return '1m'
+  if (seconds <= 86400) return '30m'
   return '6h'
 }
 
