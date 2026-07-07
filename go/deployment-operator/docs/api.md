@@ -19,6 +19,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [MetricsAggregate](#metricsaggregate)
 - [PipelineGate](#pipelinegate)
 - [PluralCAPICluster](#pluralcapicluster)
+- [PluralCrossplaneCluster](#pluralcrossplanecluster)
 - [SentinelRunJob](#sentinelrunjob)
 - [StackRunJob](#stackrunjob)
 - [UpgradeInsights](#upgradeinsights)
@@ -99,6 +100,7 @@ _Appears in:_
 
 _Appears in:_
 - [CapiConfigurationClusterSpec](#capiconfigurationclusterspec)
+- [CrossplaneConfigurationClusterSpec](#crossplaneconfigurationclusterspec)
 - [HelmSpec](#helmspec)
 
 | Field | Description | Default | Validation |
@@ -475,6 +477,7 @@ _Appears in:_
 
 _Appears in:_
 - [CapiConfigurationClusterSpec](#capiconfigurationclusterspec)
+- [CrossplaneConfigurationClusterSpec](#crossplaneconfigurationclusterspec)
 - [VirtualClusterSpec](#virtualclusterspec)
 
 | Field | Description | Default | Validation |
@@ -546,6 +549,25 @@ _Appears in:_
 | --- | --- |
 | `Kubecost` |  |
 | `OpenCost` |  |
+
+
+#### CrossplaneConfigurationClusterSpec
+
+
+
+
+
+
+
+_Appears in:_
+- [PluralCrossplaneCluster](#pluralcrossplanecluster)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cluster` _[ClusterSpec](#clusterspec)_ | Cluster is a simplified representation of the Console API cluster<br />object. See [ClusterSpec] for more information. |  | Optional: \{\} <br /> |
+| `consoleTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef contains the reference to the secret holding the token to access the Console API |  | Required: \{\} <br /> |
+| `crossplaneClusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | CrossplaneClusterRef contains the reference to the Crossplane cluster |  | Required: \{\} <br /> |
+| `agent` _[AgentHelmConfiguration](#agenthelmconfiguration)_ | Agent allows configuring agent specific helm chart options. |  | Optional: \{\} <br /> |
 
 
 #### CustomHealth
@@ -989,6 +1011,24 @@ PluralCAPICluster is the Schema for the CAPI cluster configuration
 | `kind` _string_ | `PluralCAPICluster` | | |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[CapiConfigurationClusterSpec](#capiconfigurationclusterspec)_ | Spec of the CAPI cluster configuration |  | Required: \{\} <br /> |
+
+
+#### PluralCrossplaneCluster
+
+
+
+PluralCrossplaneCluster is the Schema for the Crossplane cluster configuration
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `PluralCrossplaneCluster` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[CrossplaneConfigurationClusterSpec](#crossplaneconfigurationclusterspec)_ | Spec of the Crossplane cluster configuration |  | Required: \{\} <br /> |
 
 
 
