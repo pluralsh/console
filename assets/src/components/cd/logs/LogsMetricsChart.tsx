@@ -123,10 +123,7 @@ export function LogsMetricsChart({
   const selectionBounds = useMemo(() => {
     if (!selectionIndices) return null
     const left = toX(selectionIndices.startIdx)
-    return {
-      left,
-      width: toX(selectionIndices.endIdx + 1) - left,
-    }
+    return { left, width: toX(selectionIndices.endIdx + 1) - left }
   }, [selectionIndices, toX])
 
   const chartTooltip = useMemo(() => {
