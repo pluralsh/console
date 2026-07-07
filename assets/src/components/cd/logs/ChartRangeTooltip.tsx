@@ -1,105 +1,108 @@
-import { useCallback, useRef, useSyncExternalStore } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 import {
   CHART_CANVAS_HEIGHT,
   formatRangeTime,
   LogsTimeRange,
 } from './logsMetricsUtils'
-import { Flex } from '@pluralsh/design-system'
-import { CaptionP } from 'components/utils/typography/Text'
 
 const X_AXIS_HEIGHT = 28
 
-function usePortalCoords(
+function useFixedCoords(
   anchorRef: React.RefObject<HTMLElement | null>,
   offsetX: number
 ) {
-  const cached = useRef<{ x: number; y: number } | null>(null)
+  const [coords, setCoords] = useState<{ x: number; y: number } | null>(null)
 
-  const subscribe = useCallback((onStoreChange: () => void) => {
-    window.addEventListener('scroll', onStoreChange, true)
-    window.addEventListener('resize', onStoreChange)
+  useLayoutEffect(() => {
+    const update = () => {
+      const anchor = anchorRef.current
+      if (!anchor) {
+        setCoords(null)
+        return
+      }
+      const rect = anchor.getBoundingClientRect()
+      const x = rect.left + offsetX
+      const y = rect.top + CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
+      setCoords((prev) => (prev?.x === x && prev?.y === y ? prev : { x, y }))
+    }
+
+    update()
+    window.addEventListener('scroll', update, true)
+    window.addEventListener('resize', update)
     return () => {
-      window.removeEventListener('scroll', onStoreChange, true)
-      window.removeEventListener('resize', onStoreChange)
+      window.removeEventListener('scroll', update, true)
+      window.removeEventListener('resize', update)
     }
-  }, [])
-
-  const getSnapshot = useCallback(() => {
-    const anchor = anchorRef.current
-    if (!anchor) {
-      cached.current = null
-      return null
-    }
-    const rect = anchor.getBoundingClientRect()
-    const x = rect.left + offsetX
-    const y = rect.top + CHART_CANVAS_HEIGHT + X_AXIS_HEIGHT
-    if (cached.current?.x === x && cached.current?.y === y)
-      return cached.current
-    cached.current = { x, y }
-    return cached.current
   }, [anchorRef, offsetX])
 
-  return useSyncExternalStore(subscribe, getSnapshot, () => null)
+  return coords
 }
 
 export function ChartRangeTooltip({
-  range,
-  stats,
   anchorRef,
-  offsetX,
+  left,
+  range,
+  count,
 }: {
-  range: LogsTimeRange
-  stats: number
   anchorRef: React.RefObject<HTMLElement | null>
-  offsetX: number
+  left: number
+  range: LogsTimeRange
+  count: number
 }) {
-  const theme = useTheme()
-  const coords = usePortalCoords(anchorRef, offsetX)
+  const coords = useFixedCoords(anchorRef, left)
 
   if (!coords) return null
 
   return createPortal(
-    <div
-      css={{
-        position: 'fixed',
-        left: coords.x,
-        top: coords.y,
-        transform: 'translate(-50%, 0)',
-        minWidth: 100,
-        border: theme.borders['fill-two'],
-        borderRadius: theme.borderRadiuses.medium,
-        background: theme.colors['fill-one'],
-        boxShadow: theme.boxShadows.moderate,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-        zIndex: theme.zIndexes.tooltip,
-      }}
+    <TooltipSC
+      $x={coords.x}
+      $y={coords.y}
     >
-      <div
-        css={{
-          ...theme.partials.text.code,
-          fontSize: 12,
-          color: theme.colors['text-xlight'],
-          padding: theme.spacing.xsmall,
-        }}
-      >
+      <TimeSC>
         {formatRangeTime(range.start)} - {formatRangeTime(range.end)}
-      </div>
-      <Flex
-        alignItems="center"
-        justify="space-between"
-        gap="medium"
-        padding="xsmall"
-      >
-        <CaptionP css={{ color: theme.colors['text-long-form'] }}>
-          Total
-        </CaptionP>
-        <CaptionP>{stats}</CaptionP>
-      </Flex>
-    </div>,
+      </TimeSC>
+      <TotalSC>
+        <span>Total</span>
+        <span>{count}</span>
+      </TotalSC>
+    </TooltipSC>,
     document.body
   )
 }
+
+const TooltipSC = styled.div<{ $x: number; $y: number }>(
+  ({ theme, $x, $y }) => ({
+    position: 'fixed',
+    left: $x,
+    top: $y,
+    transform: 'translateX(-50%)',
+    minWidth: 100,
+    border: theme.borders['fill-two'],
+    borderRadius: theme.borderRadiuses.medium,
+    background: theme.colors['fill-one'],
+    boxShadow: theme.boxShadows.moderate,
+    pointerEvents: 'none',
+    zIndex: theme.zIndexes.tooltip,
+  })
+)
+
+const TimeSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.code,
+  fontSize: 12,
+  color: theme.colors['text-xlight'],
+  padding: theme.spacing.xsmall,
+}))
+
+const TotalSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing.medium,
+  padding: theme.spacing.xsmall,
+  ...theme.partials.text.caption,
+  '& > span:first-child': { color: theme.colors['text-long-form'] },
+  '& > span:last-child': { color: theme.colors.text },
+}))

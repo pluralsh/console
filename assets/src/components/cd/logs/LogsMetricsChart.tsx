@@ -313,9 +313,9 @@ export function LogsMetricsChart({
       {chartTooltip && (
         <ChartRangeTooltip
           anchorRef={chartWrapperRef}
-          offsetX={chartTooltip.left}
+          left={chartTooltip.left}
           range={chartTooltip.range}
-          stats={chartTooltip.stats}
+          count={chartTooltip.stats}
         />
       )}
     </ChartWrapperSC>
