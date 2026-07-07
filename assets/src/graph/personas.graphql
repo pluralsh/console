@@ -12,13 +12,20 @@ fragment PersonaConfiguration on PersonaConfiguration {
     manager
     security
   }
+  flows {
+    pipelines
+    previews
+    workbenches
+  }
   sidebar {
     audits
+    flows
     kubernetes
     pullRequests
     settings
     backups
     stacks
+    workbenches
   }
   services {
     configuration

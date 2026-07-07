@@ -23,6 +23,8 @@ defmodule Console.Schema.AIUsage do
     total_cost
   )a
 
+  def to_map(%__MODULE__{} = model), do: Map.take(model, @valid)
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)

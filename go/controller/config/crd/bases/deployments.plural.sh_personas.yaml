@@ -150,6 +150,27 @@ spec:
                           and performing service-level operations and troubleshooting.
                         type: boolean
                     type: object
+                  flows:
+                    description: |-
+                      Flows controls access to flow-related features and sections.
+                      This includes workbenches, pipelines, and preview environments grouped under flows.
+                    properties:
+                      pipelines:
+                        description: |-
+                          Pipelines enables access to flow pipeline features when set to true.
+                          This includes viewing and managing pipelines associated with flows.
+                        type: boolean
+                      previews:
+                        description: |-
+                          Previews enables access to flow preview environment features when set to true.
+                          This includes viewing and managing preview environments associated with flows.
+                        type: boolean
+                      workbenches:
+                        description: |-
+                          Workbenches enables access to flow workbench features when set to true.
+                          This includes viewing and using workbenches associated with flows.
+                        type: boolean
+                    type: object
                   home:
                     description: |-
                       Home configures the homepage layout and content for this persona.
@@ -211,6 +232,11 @@ spec:
                           Cost enables access to cost management and optimization features when set to true.
                           This includes cost tracking or resource optimization recommendations.
                         type: boolean
+                      flows:
+                        description: |-
+                          Flows enables access to the flows navigation item when set to true.
+                          This includes viewing and managing flow resources from the main sidebar.
+                        type: boolean
                       kubernetes:
                         description: |-
                           Kubernetes enables access to direct Kubernetes management features when set to true.
@@ -239,6 +265,11 @@ spec:
                           Stacks enables access to Infrastructure as Code (IaC) stack management when set to true.
                           This includes managing Terraform stacks and other IaC
                           automation tools for infrastructure provisioning and management.
+                        type: boolean
+                      workbenches:
+                        description: |-
+                          Workbenches enables access to the workbenches navigation item when set to true.
+                          This includes viewing and managing workbenches from the main sidebar.
                         type: boolean
                     type: object
                 type: object

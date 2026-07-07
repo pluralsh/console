@@ -4659,6 +4659,7 @@ type PersonaConfigurationFragment struct {
 	All         *bool                                     "json:\"all,omitempty\" graphql:\"all\""
 	Deployments *PersonaConfigurationFragment_Deployments "json:\"deployments,omitempty\" graphql:\"deployments\""
 	Home        *PersonaConfigurationFragment_Home        "json:\"home,omitempty\" graphql:\"home\""
+	Flows       *PersonaConfigurationFragment_Flows       "json:\"flows,omitempty\" graphql:\"flows\""
 	Sidebar     *PersonaConfigurationFragment_Sidebar     "json:\"sidebar,omitempty\" graphql:\"sidebar\""
 }
 
@@ -4679,6 +4680,12 @@ func (t *PersonaConfigurationFragment) GetHome() *PersonaConfigurationFragment_H
 		t = &PersonaConfigurationFragment{}
 	}
 	return t.Home
+}
+func (t *PersonaConfigurationFragment) GetFlows() *PersonaConfigurationFragment_Flows {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Flows
 }
 func (t *PersonaConfigurationFragment) GetSidebar() *PersonaConfigurationFragment_Sidebar {
 	if t == nil {
@@ -9479,13 +9486,40 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 	return t.Security
 }
 
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -9499,6 +9533,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -9523,6 +9563,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type PersonaConfigurationFragment_Deployments struct {
@@ -9589,13 +9635,40 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 	return t.Security
 }
 
+type PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -9609,6 +9682,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -9633,6 +9712,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -23764,13 +23849,40 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 	return t.Security
 }
 
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23784,6 +23896,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23808,6 +23926,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type GetPersonaTiny_Persona struct {
@@ -23892,13 +24016,40 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23912,6 +24063,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23936,6 +24093,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -24002,13 +24165,40 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -24022,6 +24212,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -24046,6 +24242,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -24112,13 +24314,40 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -24132,6 +24361,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -24156,6 +24391,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -54899,13 +55140,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -55002,13 +55250,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -55080,13 +55335,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -55159,13 +55421,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {

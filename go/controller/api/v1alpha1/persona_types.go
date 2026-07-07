@@ -162,6 +162,11 @@ type PersonaConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Deployments *PersonaDeployment `json:"deployments,omitempty"`
 
+	// Flows controls access to flow-related features and sections.
+	// This includes workbenches, pipelines, and preview environments grouped under flows.
+	// +kubebuilder:validation:Optional
+	Flows *PersonaFlows `json:"flows,omitempty"`
+
 	// Sidebar configures which navigation items and sections are visible in the main sidebar.
 	// This allows personas to have streamlined navigation focused on their primary workflows
 	// while hiding irrelevant or restricted functionality.
@@ -189,6 +194,7 @@ func (in *PersonaConfiguration) Attributes() *console.PersonaConfigurationAttrib
 		All:         in.All,
 		Home:        in.Home.Attributes(),
 		Deployments: in.Deployments.Attributes(),
+		Flows:       in.Flows.Attributes(),
 		Sidebar:     in.Sidebar.Attributes(),
 		Services:    in.Services.Attributes(),
 		Ai:          in.AI.Attributes(),
@@ -338,6 +344,39 @@ func (in *PersonaDeployment) Attributes() *console.PersonaDeploymentAttributes {
 	}
 }
 
+// PersonaFlows defines access controls for flow-related features and views.
+// These settings determine which flow management capabilities are visible and
+// accessible to users assigned to this persona.
+type PersonaFlows struct {
+	// Workbenches enables access to flow workbench features when set to true.
+	// This includes viewing and using workbenches associated with flows.
+	// +kubebuilder:validation:Optional
+	Workbenches *bool `json:"workbenches,omitempty"`
+
+	// Pipelines enables access to flow pipeline features when set to true.
+	// This includes viewing and managing pipelines associated with flows.
+	// +kubebuilder:validation:Optional
+	Pipelines *bool `json:"pipelines,omitempty"`
+
+	// Previews enables access to flow preview environment features when set to true.
+	// This includes viewing and managing preview environments associated with flows.
+	// +kubebuilder:validation:Optional
+	Previews *bool `json:"previews,omitempty"`
+}
+
+// Attributes converts the PersonaFlows to Console API attributes.
+func (in *PersonaFlows) Attributes() *console.PersonaFlowsAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PersonaFlowsAttributes{
+		Workbenches: in.Workbenches,
+		Pipelines:   in.Pipelines,
+		Previews:    in.Previews,
+	}
+}
+
 // PersonaSidebar defines which navigation items and sections are visible in the main Console sidebar.
 // These settings allow personas to have customized navigation focused on their primary workflows
 // while hiding irrelevant or restricted functionality from the user interface.
@@ -358,6 +397,16 @@ type PersonaSidebar struct {
 	// This includes viewing and managing pull requests and Git-based deployment automation features.
 	// +kubebuilder:validation:Optional
 	PullRequests *bool `json:"pullRequests,omitempty"`
+
+	// Flows enables access to the flows navigation item when set to true.
+	// This includes viewing and managing flow resources from the main sidebar.
+	// +kubebuilder:validation:Optional
+	Flows *bool `json:"flows,omitempty"`
+
+	// Workbenches enables access to the workbenches navigation item when set to true.
+	// This includes viewing and managing workbenches from the main sidebar.
+	// +kubebuilder:validation:Optional
+	Workbenches *bool `json:"workbenches,omitempty"`
 
 	// Settings enables access to system configuration and administrative settings when set to true.
 	// This includes user management, system configuration, integration settings,
@@ -399,6 +448,8 @@ func (in *PersonaSidebar) Attributes() *console.PersonaSidebarAttributes {
 		Audits:       in.Audits,
 		Kubernetes:   in.Kubernetes,
 		PullRequests: in.PullRequests,
+		Flows:        in.Flows,
+		Workbenches:  in.Workbenches,
 		Settings:     in.Settings,
 		Backups:      in.Backups,
 		Stacks:       in.Stacks,

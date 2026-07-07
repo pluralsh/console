@@ -5969,6 +5969,8 @@ type PersonaConfiguration struct {
 	Home *PersonaHome `json:"home,omitempty"`
 	// enable individual parts of the deployments views
 	Deployments *PersonaDeployment `json:"deployments,omitempty"`
+	// enable individual parts of the flows views
+	Flows *PersonaFlows `json:"flows,omitempty"`
 	// enable individual aspects of the sidebar
 	Sidebar *PersonaSidebar `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
@@ -5984,6 +5986,8 @@ type PersonaConfigurationAttributes struct {
 	Home *PersonaHomeAttributes `json:"home,omitempty"`
 	// enable individual parts of the deployments views
 	Deployments *PersonaDeploymentAttributes `json:"deployments,omitempty"`
+	// enable individual parts of the flows views
+	Flows *PersonaFlowsAttributes `json:"flows,omitempty"`
 	// enable individual aspects of the sidebar
 	Sidebar *PersonaSidebarAttributes `json:"sidebar,omitempty"`
 	// enable individual parts of the services views
@@ -6022,6 +6026,18 @@ type PersonaEdge struct {
 	Cursor *string  `json:"cursor,omitempty"`
 }
 
+type PersonaFlows struct {
+	Workbenches *bool `json:"workbenches,omitempty"`
+	Pipelines   *bool `json:"pipelines,omitempty"`
+	Previews    *bool `json:"previews,omitempty"`
+}
+
+type PersonaFlowsAttributes struct {
+	Workbenches *bool `json:"workbenches,omitempty"`
+	Pipelines   *bool `json:"pipelines,omitempty"`
+	Previews    *bool `json:"previews,omitempty"`
+}
+
 type PersonaHome struct {
 	Manager  *bool `json:"manager,omitempty"`
 	Security *bool `json:"security,omitempty"`
@@ -6046,6 +6062,8 @@ type PersonaSidebar struct {
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
 	PullRequests *bool `json:"pullRequests,omitempty"`
+	Flows        *bool `json:"flows,omitempty"`
+	Workbenches  *bool `json:"workbenches,omitempty"`
 	Settings     *bool `json:"settings,omitempty"`
 	Backups      *bool `json:"backups,omitempty"`
 	Stacks       *bool `json:"stacks,omitempty"`
@@ -6057,6 +6075,8 @@ type PersonaSidebarAttributes struct {
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
 	PullRequests *bool `json:"pullRequests,omitempty"`
+	Flows        *bool `json:"flows,omitempty"`
+	Workbenches  *bool `json:"workbenches,omitempty"`
 	Settings     *bool `json:"settings,omitempty"`
 	Backups      *bool `json:"backups,omitempty"`
 	Stacks       *bool `json:"stacks,omitempty"`

@@ -83,6 +83,7 @@ defmodule Console.GraphQl.Users do
     field :all,         :boolean, description: "enable full ui for this persona"
     field :home,        :persona_home_attributes, description: "configuration for the homepage for the given persona"
     field :deployments, :persona_deployment_attributes, description: "enable individual parts of the deployments views"
+    field :flows,       :persona_flows_attributes, description: "enable individual parts of the flows views"
     field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services_attributes, description: "enable individual parts of the services views"
     field :ai,          :persona_ai_attributes, description: "enable individual parts of the ai views"
@@ -98,10 +99,18 @@ defmodule Console.GraphQl.Users do
     field :add_ons,      :boolean
   end
 
+  input_object :persona_flows_attributes do
+    field :workbenches, :boolean
+    field :pipelines,   :boolean
+    field :previews,    :boolean
+  end
+
   input_object :persona_sidebar_attributes do
     field :audits,        :boolean
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
+    field :flows,         :boolean
+    field :workbenches,   :boolean
     field :settings,      :boolean
     field :backups,       :boolean
     field :stacks,        :boolean
@@ -302,6 +311,7 @@ defmodule Console.GraphQl.Users do
     field :all,         :boolean, description: "enable full ui for this persona"
     field :home,        :persona_home, description: "settings for the home page for this persona"
     field :deployments, :persona_deployment, description: "enable individual parts of the deployments views"
+    field :flows,       :persona_flows, description: "enable individual parts of the flows views"
     field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
     field :services,    :persona_services, description: "enable individual parts of the services views"
     field :ai,          :persona_ai, description: "enable individual parts of the ai views"
@@ -317,10 +327,18 @@ defmodule Console.GraphQl.Users do
     field :add_ons,      :boolean
   end
 
+  object :persona_flows do
+    field :workbenches, :boolean
+    field :pipelines,   :boolean
+    field :previews,    :boolean
+  end
+
   object :persona_sidebar do
     field :audits,        :boolean
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
+    field :flows,         :boolean
+    field :workbenches,   :boolean
     field :settings,      :boolean
     field :backups,       :boolean
     field :stacks,        :boolean

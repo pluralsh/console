@@ -15704,6 +15704,9 @@ input PersonaConfigurationAttributes {
   "enable individual parts of the deployments views"
   deployments: PersonaDeploymentAttributes
 
+  "enable individual parts of the flows views"
+  flows: PersonaFlowsAttributes
+
   "enable individual aspects of the sidebar"
   sidebar: PersonaSidebarAttributes
 
@@ -15724,10 +15727,18 @@ input PersonaDeploymentAttributes {
   addOns: Boolean
 }
 
+input PersonaFlowsAttributes {
+  workbenches: Boolean
+  pipelines: Boolean
+  previews: Boolean
+}
+
 input PersonaSidebarAttributes {
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
+  flows: Boolean
+  workbenches: Boolean
   settings: Boolean
   backups: Boolean
   stacks: Boolean
@@ -15939,6 +15950,9 @@ type PersonaConfiguration {
   "enable individual parts of the deployments views"
   deployments: PersonaDeployment
 
+  "enable individual parts of the flows views"
+  flows: PersonaFlows
+
   "enable individual aspects of the sidebar"
   sidebar: PersonaSidebar
 
@@ -15959,10 +15973,18 @@ type PersonaDeployment {
   addOns: Boolean
 }
 
+type PersonaFlows {
+  workbenches: Boolean
+  pipelines: Boolean
+  previews: Boolean
+}
+
 type PersonaSidebar {
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
+  flows: Boolean
+  workbenches: Boolean
   settings: Boolean
   backups: Boolean
   stacks: Boolean

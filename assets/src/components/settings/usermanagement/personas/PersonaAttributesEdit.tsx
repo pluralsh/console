@@ -50,11 +50,18 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     repositories: false,
     services: false,
   },
+  flows: {
+    pipelines: false,
+    previews: false,
+    workbenches: false,
+  },
   sidebar: {
     audits: false,
+    flows: false,
     kubernetes: false,
     pullRequests: false,
     settings: false,
+    workbenches: false,
     stacks: true,
     backups: true,
     cost: true,
@@ -184,7 +191,7 @@ export function EditPersonaAttributesModal({
         name,
         description,
         configuration: configuration.all
-          ? { all: true, deployments: null, sidebar: null }
+          ? { all: true, deployments: null, flows: null, sidebar: null }
           : configuration,
       },
     },
