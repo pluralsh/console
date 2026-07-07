@@ -16708,7 +16708,7 @@ export type WorkbenchToolGithubConnectionAttributes = {
   installationId?: InputMaybe<Scalars['String']['input']>;
   /** PEM private key for the GitHub App (encrypted at rest); alternative to access_token */
   privateKey?: InputMaybe<Scalars['String']['input']>;
-  /** optional native tool subset: issues, pull_requests, repos, default/all, or omit for all tools */
+  /** optional native tool subset: issues, pull_requests, repos, security, default/all, or omit for all tools */
   toolset?: InputMaybe<Scalars['String']['input']>;
   /** optional GitHub REST API base URL (defaults to https://api.github.com/; set for GitHub Enterprise Server) */
   url?: InputMaybe<Scalars['String']['input']>;

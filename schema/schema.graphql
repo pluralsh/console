@@ -3236,7 +3236,7 @@ input WorkbenchToolGithubConnectionAttributes {
   "optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)"
   accessToken: String
 
-  "optional native tool subset: issues, pull_requests, repos, default\/all, or omit for all tools"
+  "optional native tool subset: issues, pull_requests, repos, security, default\/all, or omit for all tools"
   toolset: String
 
   "GitHub App ID (use with installation_id and private_key instead of access_token)"
