@@ -1992,6 +1992,35 @@ input AgentRunStatusAttributes {
 
   "the skills available to this agent run"
   skills: [AgentSkillAttributes]
+
+  "token and cost usage for this agent run"
+  usage: AiUsageAttributes
+}
+
+input AiUsageAttributes {
+  "input tokens consumed by this run"
+  inputTokens: Int
+
+  "output tokens produced by this run"
+  outputTokens: Int
+
+  "total tokens consumed by this run"
+  totalTokens: Int
+
+  "cached input tokens used by this run"
+  cachedTokens: Int
+
+  "reasoning tokens produced by this run"
+  reasoningTokens: Int
+
+  "input token cost for this run"
+  inputCost: Float
+
+  "output token cost for this run"
+  outputCost: Float
+
+  "total token cost for this run"
+  totalCost: Float
 }
 
 input AgentPullRequestAttributes {
@@ -2229,6 +2258,9 @@ type AgentRun {
   "the version of the language to use, if you wish to specify"
   languageVersion: String
 
+  "token and cost usage for this agent run"
+  usage: AgentRunUsage
+
   "the analysis of the agent run"
   analysis: AgentAnalysis
 
@@ -2304,6 +2336,32 @@ type ScmCreds {
 type AgentPodReference {
   name: String!
   namespace: String!
+}
+
+type AgentRunUsage {
+  "input tokens consumed by this run"
+  inputTokens: Int
+
+  "output tokens produced by this run"
+  outputTokens: Int
+
+  "total tokens consumed by this run"
+  totalTokens: Int
+
+  "cached input tokens used by this run"
+  cachedTokens: Int
+
+  "reasoning tokens produced by this run"
+  reasoningTokens: Int
+
+  "input token cost for this run"
+  inputCost: Float
+
+  "output token cost for this run"
+  outputCost: Float
+
+  "total token cost for this run"
+  totalCost: Float
 }
 
 type AgentAnalysis {

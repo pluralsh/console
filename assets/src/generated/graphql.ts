@@ -482,6 +482,8 @@ export type AgentRun = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the upload bundle this agent run has generated */
   upload?: Maybe<AgentRunUpload>;
+  /** token and cost usage for this agent run */
+  usage?: Maybe<AgentRunUsage>;
   /** the user who initiated this agent run */
   user?: Maybe<User>;
   /** the workbench job this agent run was spawned from, if any */
@@ -603,6 +605,8 @@ export type AgentRunStatusAttributes = {
   skills?: InputMaybe<Array<InputMaybe<AgentSkillAttributes>>>;
   /** the status of this agent run */
   status: AgentRunStatus;
+  /** token and cost usage for this agent run */
+  usage?: InputMaybe<AiUsageAttributes>;
 };
 
 export type AgentRunUpload = {
@@ -627,6 +631,26 @@ export type AgentRunUploadAttributes = {
   screenRecording?: InputMaybe<Scalars['Upload']['input']>;
   /** the agent session recording */
   session?: InputMaybe<Scalars['Upload']['input']>;
+};
+
+export type AgentRunUsage = {
+  __typename?: 'AgentRunUsage';
+  /** cached input tokens used by this run */
+  cachedTokens?: Maybe<Scalars['Int']['output']>;
+  /** input token cost for this run */
+  inputCost?: Maybe<Scalars['Float']['output']>;
+  /** input tokens consumed by this run */
+  inputTokens?: Maybe<Scalars['Int']['output']>;
+  /** output token cost for this run */
+  outputCost?: Maybe<Scalars['Float']['output']>;
+  /** output tokens produced by this run */
+  outputTokens?: Maybe<Scalars['Int']['output']>;
+  /** reasoning tokens produced by this run */
+  reasoningTokens?: Maybe<Scalars['Int']['output']>;
+  /** total token cost for this run */
+  totalCost?: Maybe<Scalars['Float']['output']>;
+  /** total tokens consumed by this run */
+  totalTokens?: Maybe<Scalars['Int']['output']>;
 };
 
 export type AgentRuntime = {
@@ -1045,6 +1069,25 @@ export type AiSettingsAttributes = {
   tools?: InputMaybe<ToolConfigAttributes>;
   vectorStore?: InputMaybe<VectorStoreAttributes>;
   vertex?: InputMaybe<VertexAiAttributes>;
+};
+
+export type AiUsageAttributes = {
+  /** cached input tokens used by this run */
+  cachedTokens?: InputMaybe<Scalars['Int']['input']>;
+  /** input token cost for this run */
+  inputCost?: InputMaybe<Scalars['Float']['input']>;
+  /** input tokens consumed by this run */
+  inputTokens?: InputMaybe<Scalars['Int']['input']>;
+  /** output token cost for this run */
+  outputCost?: InputMaybe<Scalars['Float']['input']>;
+  /** output tokens produced by this run */
+  outputTokens?: InputMaybe<Scalars['Int']['input']>;
+  /** reasoning tokens produced by this run */
+  reasoningTokens?: InputMaybe<Scalars['Int']['input']>;
+  /** total token cost for this run */
+  totalCost?: InputMaybe<Scalars['Float']['input']>;
+  /** total tokens consumed by this run */
+  totalTokens?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** An individual alert raised from an observability provider or monitor */

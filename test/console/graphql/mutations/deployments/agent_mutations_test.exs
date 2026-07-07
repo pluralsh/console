@@ -183,6 +183,56 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert found["status"] == "RUNNING"
       assert found["headBranch"] == "agent/example"
     end
+
+    test "a cluster can set agent run usage" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+
+      {:ok, %{data: %{"updateAgentRun" => found}}} = run_query("""
+        mutation Update($id: ID!, $attrs: AgentRunStatusAttributes!) {
+          updateAgentRun(id: $id, attributes: $attrs) {
+            id
+            usage {
+              inputTokens
+              outputTokens
+              totalTokens
+              cachedTokens
+              reasoningTokens
+              inputCost
+              outputCost
+              totalCost
+            }
+          }
+        }
+      """, %{
+        "id" => run.id,
+        "attrs" => %{
+          "status" => "RUNNING",
+          "usage" => %{
+            "inputTokens" => 10,
+            "outputTokens" => 5,
+            "totalTokens" => 15,
+            "cachedTokens" => 3,
+            "reasoningTokens" => 2,
+            "inputCost" => 0.1,
+            "outputCost" => 0.2,
+            "totalCost" => 0.3
+          }
+        }
+      }, %{cluster: cluster})
+
+      assert found["id"] == run.id
+      assert found["usage"]["inputTokens"] == 10
+      assert found["usage"]["outputTokens"] == 5
+      assert found["usage"]["totalTokens"] == 15
+      assert found["usage"]["cachedTokens"] == 3
+      assert found["usage"]["reasoningTokens"] == 2
+      assert found["usage"]["inputCost"] == 0.1
+      assert found["usage"]["outputCost"] == 0.2
+      assert found["usage"]["totalCost"] == 0.3
+      assert refetch(run).usage.total_tokens == 15
+    end
   end
 
   describe "cancelAgentRun" do
