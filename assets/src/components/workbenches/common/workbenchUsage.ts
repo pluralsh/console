@@ -14,7 +14,7 @@ export function formatTokenCount(value: Nullable<number>) {
 }
 
 export function formatTokenCost(value: Nullable<number>) {
-  if (value == null) return undefined
+  if (value == null || value === 0) return undefined
 
   return new Intl.NumberFormat('en-US', {
     style: 'currency',

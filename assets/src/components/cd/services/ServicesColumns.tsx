@@ -218,7 +218,7 @@ export const ColLastActivity = columnHelper.accessor(
   },
   {
     id: 'lastActivity',
-    header: 'Activity ',
+    header: 'Last updated',
     sortingFn: 'datetime',
     meta: { gridTemplate: '150px' },
     cell: ({ getValue }) => <DateTimeCol date={getValue()?.toISOString()} />,
