@@ -7,6 +7,8 @@ import {
   formatRangeTime,
   LogsTimeRange,
 } from './logsMetricsUtils'
+import { Flex } from '@pluralsh/design-system'
+import { CaptionP } from 'components/utils/typography/Text'
 
 const X_AXIS_HEIGHT = 28
 
@@ -66,7 +68,7 @@ export function ChartRangeTooltip({
         left: coords.x,
         top: coords.y,
         transform: 'translate(-50%, 0)',
-        minWidth: 195,
+        minWidth: 100,
         border: theme.borders['fill-two'],
         borderRadius: theme.borderRadiuses.medium,
         background: theme.colors['fill-one'],
@@ -78,35 +80,25 @@ export function ChartRangeTooltip({
     >
       <div
         css={{
-          padding: `${theme.spacing.xsmall}px 10px`,
           ...theme.partials.text.code,
           fontSize: 12,
           color: theme.colors['text-xlight'],
+          padding: theme.spacing.xsmall,
         }}
       >
         {formatRangeTime(range.start)} - {formatRangeTime(range.end)}
       </div>
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: theme.spacing.medium,
-          padding: theme.spacing.small,
-          ...theme.partials.text.caption,
-
-          '& > span:first-child': {
-            color: theme.colors['text-long-form'],
-          },
-
-          '& > span:last-child': {
-            color: theme.colors.text,
-          },
-        }}
+      <Flex
+        alignItems="center"
+        justify="space-between"
+        gap="medium"
+        padding="xsmall"
       >
-        <span>Total</span>
-        <span>{stats}</span>
-      </div>
+        <CaptionP css={{ color: theme.colors['text-long-form'] }}>
+          Total
+        </CaptionP>
+        <CaptionP>{stats}</CaptionP>
+      </Flex>
     </div>,
     document.body
   )

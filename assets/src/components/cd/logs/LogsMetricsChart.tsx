@@ -2,6 +2,7 @@ import {
   LogFacetInput,
   LogQueryOperator,
   LogTimeRange,
+  useLogAggregationBucketsQuery,
 } from 'generated/graphql'
 import { clamp, isEmpty } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -9,6 +10,8 @@ import styled, { useTheme } from 'styled-components'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { ChartRangeTooltip } from './ChartRangeTooltip'
 import {
+  bucketDurationMs,
+  bucketSizeForWindow,
   bucketTimeRange,
   CHART_BAR_GAP,
   CHART_CANVAS_HEIGHT,
@@ -20,11 +23,11 @@ import {
   LOG_LEVEL_SELECTION_EDGE,
   LOG_LEVEL_SELECTION_SHADOW,
   LogsTimeRange,
+  parseAggregationBuckets,
   rangeBucketIndices,
   sumBucketCounts,
   xToBucketIndex,
 } from './logsMetricsUtils'
-import { useLogsChartBuckets } from './useLogsChartBuckets'
 
 const Y_AXIS_WIDTH = 36
 const X_AXIS_HEIGHT = 28
@@ -63,16 +66,27 @@ export function LogsMetricsChart({
   const [drag, setDrag] = useState<DragState | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  const { buckets, bucketMs, initialLoading } = useLogsChartBuckets({
-    clusterId,
-    serviceId,
-    query,
-    time,
-    operator,
-    facets,
-    sinceSeconds,
+  const bucketSize = bucketSizeForWindow(sinceSeconds)
+  const bucketMs = bucketDurationMs(bucketSize)
+  const skip = !(clusterId || serviceId)
+
+  const { data, loading } = useLogAggregationBucketsQuery({
+    variables: {
+      clusterId,
+      serviceId,
+      query,
+      time,
+      aggregation: { bucketSize },
+      operator,
+      facets,
+    },
+    fetchPolicy: 'cache-and-network',
     pollInterval,
+    skip,
   })
+
+  const buckets = useMemo(() => parseAggregationBuckets(data), [data])
+  const initialLoading = loading && !data
 
   const bucketCount = buckets.length
   const yMax = chartYMax(buckets)
