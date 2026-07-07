@@ -11,13 +11,7 @@ import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 type AppIconHue = 'default' | 'lighter' | 'lightest'
 type AppIconSize =
-  | 'xxxsmall'
-  | 'xxsmall'
-  | 'xsmall'
-  | 'small'
-  | 'medium'
-  | 'large'
-  | 'xlarge'
+  'xxxsmall' | 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type AppIconSpacing = 'none' | 'padding'
 
 type AppIconProps = {

@@ -117,8 +117,8 @@ const LogoWrapper = styled.div<{ $scale?: number }>`
 `
 
 const LoadingText = styled.div<{ $scale?: number }>`
-  font-family: 'Monument Semi-Mono', 'Monument', 'Inter', 'Helvetica', 'Arial',
-    sans-serif;
+  font-family:
+    'Monument Semi-Mono', 'Monument', 'Inter', 'Helvetica', 'Arial', sans-serif;
   font-size: ${({ $scale = 1 }) => 24 * $scale}px;
   font-weight: 400;
   white-space: nowrap;

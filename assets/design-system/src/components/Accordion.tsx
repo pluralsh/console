@@ -23,19 +23,14 @@ export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
   ComponentProps<typeof Card>
 
 export type AccordionCaret =
-  | 'none'
-  | 'left'
-  | 'right'
-  | 'right-quarter'
-  | 'right-quarter-mirror'
+  'none' | 'left' | 'right' | 'right-quarter' | 'right-quarter-mirror'
 
 function Accordion({
   children,
   ...props
 }: {
   children?:
-    | ReactElement<typeof AccordionItem>
-    | ReactElement<typeof AccordionItem>[]
+    ReactElement<typeof AccordionItem> | ReactElement<typeof AccordionItem>[]
   collapsible?: boolean
 } & AccordionProps) {
   return (
@@ -210,19 +205,27 @@ const ContentSC = styled(RadixAccordion.Content)`
   }
   &[data-state='open'][data-orientation='vertical'] {
     animation: ${css`
-        ${slideAnimation('out', 'height')}`} 300ms ease-out;
+      ${slideAnimation('out', 'height')}
+    `}
+      300ms ease-out;
   }
   &[data-state='closed'][data-orientation='vertical'] {
     animation: ${css`
-        ${slideAnimation('in', 'height')}`} 300ms ease-out;
+      ${slideAnimation('in', 'height')}
+    `}
+      300ms ease-out;
   }
   &[data-state='open'][data-orientation='horizontal'] {
     animation: ${css`
-        ${slideAnimation('out', 'width')}`} 300ms ease-out;
+      ${slideAnimation('out', 'width')}
+    `}
+      300ms ease-out;
   }
   &[data-state='closed'][data-orientation='horizontal'] {
     animation: ${css`
-        ${slideAnimation('in', 'width')}`} 300ms ease-out;
+      ${slideAnimation('in', 'width')}
+    `}
+      300ms ease-out;
   }
 `
 
