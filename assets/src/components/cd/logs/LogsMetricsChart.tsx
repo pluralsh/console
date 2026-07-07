@@ -4,7 +4,14 @@ import {
   LogTimeRange,
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { toDateOrUndef, formatDateTime } from 'utils/datetime'
@@ -120,6 +127,28 @@ export function LogsMetricsChart({
     return Math.min(Math.max(clientX - rect.left, 0), rect.width)
   }, [])
 
+  const dragRef = useRef(drag)
+  const dragContextRef = useRef({
+    getBarAreaX,
+    toIndex,
+    buckets,
+    bucketMs,
+    onRangeSelect,
+  })
+
+  useLayoutEffect(() => {
+    dragRef.current = drag
+    dragContextRef.current = {
+      getBarAreaX,
+      toIndex,
+      buckets,
+      bucketMs,
+      onRangeSelect,
+    }
+  })
+
+  const isDragging = drag !== null
+
   const rangeIndices = useMemo(
     () => rangeIndicesForFilter(buckets, rangeFilter, bucketMs),
     [buckets, rangeFilter, bucketMs]
@@ -174,23 +203,25 @@ export function LogsMetricsChart({
   ])
 
   useEffect(() => {
-    if (!drag) return
+    if (!isDragging) return
 
     const onMove = (e: MouseEvent) => {
-      const x = getBarAreaX(e.clientX)
+      const x = dragContextRef.current.getBarAreaX(e.clientX)
       setDrag((current) => (current ? { ...current, currentX: x } : current))
     }
 
     const onUp = (e: MouseEvent) => {
+      const current = dragRef.current
+      if (!current) return
+
+      const { getBarAreaX, toIndex, buckets, bucketMs, onRangeSelect } =
+        dragContextRef.current
       const x = getBarAreaX(e.clientX)
-      setDrag((current) => {
-        if (!current) return null
-        const startIdx = toIndex(Math.min(current.startX, x))
-        const endIdx = toIndex(Math.max(current.startX, x))
-        if (Math.abs(current.startX - x) > 3)
-          onRangeSelect(bucketRange(buckets, startIdx, endIdx, bucketMs))
-        return null
-      })
+      const startIdx = toIndex(Math.min(current.startX, x))
+      const endIdx = toIndex(Math.max(current.startX, x))
+      if (Math.abs(current.startX - x) > 3)
+        onRangeSelect(bucketRange(buckets, startIdx, endIdx, bucketMs))
+      setDrag(null)
     }
 
     document.addEventListener('mousemove', onMove)
@@ -199,7 +230,7 @@ export function LogsMetricsChart({
       document.removeEventListener('mousemove', onMove)
       document.removeEventListener('mouseup', onUp)
     }
-  }, [drag, buckets, bucketMs, onRangeSelect, getBarAreaX, toIndex])
+  }, [isDragging])
 
   if (initialLoading) {
     return (
