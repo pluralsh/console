@@ -4,35 +4,30 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.5
+- version: 3.7.6
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Ingress-NGINX provider gained many new supported annotations and a
-        metamodel-based config generator, including rate/connection limiting, auth
-        options, buffering/canary redirects, rewrites, custom headers, and entrypoint
-        selection.', Gateway API improvements include support for multiple certificateRefs
-        on listeners and secret-based caCertificateRefs for BackendTLSPolicy., 'New
-        routing/config capabilities: provider routing precedence setting, wildcard
-        Host/HostSNI matchers, service-level middleware/HTTP backend filters, TraefikService
-        failover enhancements, and ServersTransport cipher suite configuration.',
-      'Security/operational enhancements include stricter encoded-character handling
-        (opt-in controls), better access logging for rejected requests, additional
-        forwardAuth options, and retries based on status codes/timeouts/non-idempotent
-        methods.', 'UI/observability updates: dashboard improvements (certificates
-        view, naming), extra Kubernetes ingress log fields, and OTel/access log enhancements.']
-    breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated in v3.7.0; plan
-        to migrate configurations away from it before a future removal., Security
-        behavior around encoded/suspicious characters was tightened and made opt-in
-        via settings; this can change request acceptance/normalization compared to
-        previous behavior., Ingress-NGINX provider behavior changed significantly
-        (metamodel refactor + stricter validation options like strictValidatePathType);
-        some ingresses may be skipped or routed differently when referenced secrets/config
-        cannot be resolved.]
-  chart_version: 41.0.1
+    features: ['Security update: v3.7.6 fixes three CVEs (CVE-2026-54763/54764/54765);
+        upgrading reduces exposure to known vulnerabilities.', 'Operational hardening:
+        v3.7.6 adds options to cap request header size and to drop request headers
+        with underscores, helping mitigate header-based attacks and control resource
+        usage.', 'Kubernetes reliability improvements: EndpointSlice indexing/sorting/condition
+        change detection reduce backend churn and make IP selection more consistent
+        across config rebuilds.', 'Gateway API stability improvements: better conformance
+        coverage, fewer service-name collisions, and route parent status updates limited
+        to Traefik-managed Gateways.', 'Ingress-NGINX compatibility improvements:
+        retry behavior aligned with buffering settings and fixes for SSL passthrough
+        status updates and force-ssl-redirect edge cases.', 'TLS behavior improvement:
+        deterministic certificate selection when multiple certs share SANs.', 'Middleware
+        correctness: multiple CORS fixes (Max-Age default and wildcard+credentials)
+        and forward-auth fixes for x-forwarded-port.', 'WebSocket/h2c fix: connection
+        upgrades to backends using h2c are corrected.']
+    breaking_changes: []
+  chart_version: 41.0.2
   images: []
 - version: 3.7.0
   kube: ['1.35', '1.34', '1.33', '1.32']
@@ -97,6 +92,7 @@ versions:
         3.6).']
   chart_version: 37.3.0
   images: ['docker.io/traefik:v3.6.0']
+  eolAt: '2026-05-05'
 - version: 3.5.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
