@@ -23,12 +23,6 @@ export function fetchToken() {
   return encryptStorage.getItem(AUTH_TOKEN)
 }
 
-export function authorizationHeader(token: string | null | undefined) {
-  if (!token) return undefined
-
-  return token.startsWith('console-') ? `Token ${token}` : `Bearer ${token}`
-}
-
 export function setToken(token: string | null | undefined) {
   encryptStorage.setItem(AUTH_TOKEN, token || '')
 }

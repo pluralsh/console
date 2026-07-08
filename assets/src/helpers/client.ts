@@ -15,7 +15,7 @@ import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
 
 import fragments from '../generated/fragments.json'
-import { authorizationHeader, fetchToken } from './auth'
+import { fetchToken } from './auth'
 
 import { onErrorHandler } from './refreshToken'
 
@@ -55,7 +55,11 @@ export function buildClient(
   { gql: gqlUrl, ws: wsUrl, gqlws: gqlwsUrl },
   fetchToken
 ) {
-  const currentAuthorization = () => authorizationHeader(fetchToken())
+  const currentAuthorization = () => {
+    const token = fetchToken()
+
+    return token ? `Bearer ${token}` : undefined
+  }
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   const authLink = setContext((_, { headers }) => {
