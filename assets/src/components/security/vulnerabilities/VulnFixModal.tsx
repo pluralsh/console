@@ -1,7 +1,5 @@
 import {
-  AiSparkleFilledIcon,
   Button,
-  ButtonProps,
   Card,
   CloseIcon,
   DiscoverIcon,
@@ -21,6 +19,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
+import pluralize from 'pluralize'
 import {
   AgentRuntimeType,
   useCreateWorkbenchJobMutation,
@@ -30,78 +29,72 @@ import {
   WorkbenchTinyFragment,
 } from 'generated/graphql'
 import { useEffect, useMemo, useState } from 'react'
-
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
-export function VulnFixButton({
-  headerTitle,
+export function VulnFixModal({
+  open,
+  onClose,
+  vulnCount,
   initialPrompt,
   flowId,
-  ...props
 }: {
-  headerTitle: string
+  open: boolean
+  onClose: () => void
+  vulnCount: number
   initialPrompt: string
   flowId?: Nullable<string>
-} & ButtonProps) {
+}) {
   const { colors } = useTheme()
-  const [modalOpen, setModalOpen] = useState(false)
+  const headerTitle = `Fix ${pluralize('vulnerability', vulnCount, vulnCount !== 1)}`
   const [prompt, setPrompt] = useState(initialPrompt)
   const [workbenchJob, setWorkbenchJob] = useState<WorkbenchJobFragment | null>(
     null
   )
 
   return (
-    <>
-      <Button
-        onClick={() => setModalOpen(true)}
-        startIcon={<AiSparkleFilledIcon />}
-        disabled={!!modalOpen}
-        {...props}
-      />
-      <Modal
-        size="large"
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        scrollable
+    <Modal
+      size="large"
+      open={open}
+      onClose={onClose}
+      scrollable
+    >
+      <Flex
+        direction="column"
+        gap="large"
       >
-        <Flex
-          direction="column"
-          gap="large"
-        >
-          <StretchedFlex>
-            <StackedText
-              first={headerTitle}
-              firstPartialType="body1"
-              firstColor="text-light"
-              icon={<DiscoverIcon />}
-              iconGap="xsmall"
-            />
-            <IconFrame
-              clickable
-              size="small"
-              icon={<CloseIcon color={colors['icon-light']} />}
-              onClick={() => setModalOpen(false)}
-            />
-          </StretchedFlex>
-          {!!workbenchJob ? (
-            <WorkbenchStartedJobPanel
-              initialJob={workbenchJob}
-              jobId={workbenchJob.id}
-              workbenchId={workbenchJob.workbench?.id ?? ''}
-            />
-          ) : (
-            <VulnFixForm
-              flowId={flowId}
-              prompt={prompt}
-              setPrompt={setPrompt}
-              setWorkbenchJob={setWorkbenchJob}
-            />
-          )}
-        </Flex>
-      </Modal>
-    </>
+        <StretchedFlex>
+          <StackedText
+            first={headerTitle}
+            firstPartialType="body1"
+            firstColor="text-light"
+            icon={<DiscoverIcon />}
+            iconGap="xsmall"
+          />
+          <IconFrame
+            clickable
+            size="small"
+            icon={<CloseIcon color={colors['icon-light']} />}
+            onClick={onClose}
+          />
+        </StretchedFlex>
+        {!!workbenchJob ? (
+          <WorkbenchStartedJobPanel
+            initialJob={workbenchJob}
+            jobId={workbenchJob.id}
+            workbenchId={workbenchJob.workbench?.id ?? ''}
+          />
+        ) : (
+          <VulnFixForm
+            flowId={flowId}
+            prompt={prompt}
+            setPrompt={setPrompt}
+            setWorkbenchJob={setWorkbenchJob}
+          />
+        )}
+      </Flex>
+    </Modal>
   )
 }
 
@@ -120,14 +113,13 @@ function VulnFixForm({
   const { workbenches, loading } = useWorkbenchOptions(flowId)
 
   useEffect(() => {
-    if (!workbenches.length) {
-      setWorkbenchId(null)
-      return
-    }
-
-    if (!workbenches.some((workbench) => workbench.id === workbenchId))
-      setWorkbenchId(workbenches[0]?.id ?? null)
-  }, [workbenchId, workbenches])
+    setWorkbenchId((current) => {
+      if (!workbenches.length) return null
+      if (workbenches.some((workbench) => workbench.id === current))
+        return current
+      return workbenches[0]?.id ?? null
+    })
+  }, [workbenches])
 
   const [createWorkbenchJob, { loading: mutationLoading, error }] =
     useCreateWorkbenchJobMutation({

@@ -72,6 +72,7 @@ export type VulnerabilityChipAttrs =
     'installed-version'?: Nullable<string>
     'fixed-version'?: Nullable<string>
     'primary-link'?: Nullable<string>
+    description?: Nullable<string>
   }
 
 export type ChipAttrsByKind = {
@@ -120,6 +121,7 @@ export const CHIP_ATTRIBUTE_SCHEMA: {
     'installed-version',
     'fixed-version',
     'primary-link',
+    'description',
   ],
 }
 

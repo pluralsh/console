@@ -6,12 +6,17 @@ import {
   Flex,
   Button,
   CopyIcon,
+  AiSparkleFilledIcon,
 } from '@pluralsh/design-system'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import pluralize from 'pluralize'
-import { useClusterQuery, useVulnerabilityReportQuery } from 'generated/graphql'
+import {
+  useClusterQuery,
+  useVulnerabilityReportQuery,
+  VulnerabilityFragment,
+} from 'generated/graphql'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { Link, useParams } from 'react-router-dom'
 import {
@@ -31,9 +36,9 @@ import {
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { securityVulnReportsCrumbs } from './VulnReports'
 import { useMemo, useState } from 'react'
-import { VulnFixButton } from './VulnFixButton'
+import { VulnFixModal } from './VulnFixModal'
 import { RowSelectionState } from '@tanstack/react-table'
-import { buildVulnerabilityBatchPrompt } from './vulnerabilityMention'
+import { buildVulnerabilityFixPrompt } from './vulnerabilityMention'
 
 export function VulnerabilityReportDetails() {
   const { vulnerabilityReportId, clusterId } = useParams()
@@ -60,6 +65,7 @@ export function VulnerabilityReportDetails() {
 
   const [bulkSelectMode, setBulkSelectMode] = useState(false)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [fixVulns, setFixVulns] = useState<VulnerabilityFragment[] | null>(null)
 
   const vulnerabilities = useMemo(
     () =>
@@ -72,10 +78,17 @@ export function VulnerabilityReportDetails() {
     () => vulnerabilities.filter((v) => rowSelection[v.id]),
     [vulnerabilities, rowSelection]
   )
-  const batchPrompt = useMemo(
+  const openFix = (vulns: VulnerabilityFragment[]) => {
+    if (!vulns.length) return
+    setFixVulns(vulns)
+  }
+
+  const fixPrompt = useMemo(
     () =>
-      buildVulnerabilityBatchPrompt(selectedVulns, data?.vulnerabilityReport),
-    [selectedVulns, data?.vulnerabilityReport]
+      fixVulns
+        ? buildVulnerabilityFixPrompt(fixVulns, data?.vulnerabilityReport)
+        : '',
+    [fixVulns, data?.vulnerabilityReport]
   )
 
   const columns = useMemo(
@@ -160,7 +173,7 @@ export function VulnerabilityReportDetails() {
           renderExpanded={({ row }) => (
             <VulnDetailExpanded
               row={row}
-              parentReport={data?.vulnerabilityReport}
+              onFixVulnerability={(vuln) => openFix([vuln])}
             />
           )}
           onRowClick={(_, row) => row.getToggleExpandedHandler()()}
@@ -177,19 +190,26 @@ export function VulnerabilityReportDetails() {
         {bulkSelectMode && (
           <BulkSelectionBarSC>
             <SelectionCountSC>{selectedVulns.length} selected</SelectionCountSC>
-            <VulnFixButton
-              key={selectedVulns.map((v) => v.id).join(',')}
+            <Button
               small
-              headerTitle={`Fix ${pluralize('vulnerability', selectedVulns.length)}`}
-              initialPrompt={batchPrompt}
-              flowId={flowData?.flow?.id}
-              disabled={selectedVulns.length === 0}
+              startIcon={<AiSparkleFilledIcon />}
+              disabled={selectedVulns.length === 0 || !!fixVulns}
+              onClick={() => openFix(selectedVulns)}
             >
               Fix {pluralize('vulnerability', selectedVulns.length)}
-            </VulnFixButton>
+            </Button>
           </BulkSelectionBarSC>
         )}
       </TableWrapperSC>
+      {fixVulns && (
+        <VulnFixModal
+          open
+          onClose={() => setFixVulns(null)}
+          vulnCount={fixVulns.length}
+          initialPrompt={fixPrompt}
+          flowId={flowData?.flow?.id}
+        />
+      )}
     </WrapperSC>
   )
 }
