@@ -23,6 +23,11 @@ import {
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
 import styled from 'styled-components'
 import { chipDisplayText, ChipAttrsByKind, MentionKind } from './mentionTypes'
+import {
+  hasVulnerabilityChipTooltip,
+  VulnerabilityChipTooltipLabel,
+  vulnerabilityChipTooltipText,
+} from './VulnerabilityChipTooltipLabel'
 
 // span-only so chips can safely render inside markdown <p> (as opposed to our DS chip)
 type ChipBodyProps = {
@@ -151,19 +156,42 @@ function PlrlVulnerabilityChip(
     props['item-name'] ||
     props['item-id']
   const link = props['primary-link']
+  const title = props.title
+  const description = props.description
+  const hasTooltip = hasVulnerabilityChipTooltip({ title, description })
+  const chip = (
+    <ChipBody icon={<WarningShieldIcon size={12} />}>{label}</ChipBody>
+  )
 
   return (
     <WrapWithIf
-      condition={!!link}
+      condition={hasTooltip}
       wrapper={
-        <ChipExternalLinkSC
-          href={link!}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Tooltip
+          label={
+            <VulnerabilityChipTooltipLabel
+              title={title}
+              description={description}
+            />
+          }
+          textValue={vulnerabilityChipTooltipText({ title, description })}
+          placement="top"
+          style={{ maxWidth: 500, overflowWrap: 'break-word' }}
         />
       }
     >
-      <ChipBody icon={<WarningShieldIcon size={12} />}>{label}</ChipBody>
+      <WrapWithIf
+        condition={!!link}
+        wrapper={
+          <ChipExternalLinkSC
+            href={link!}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        }
+      >
+        {chip}
+      </WrapWithIf>
     </WrapWithIf>
   )
 }

@@ -13,6 +13,7 @@ import {
 } from '@pluralsh/design-system'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
+import { EditableSkillChipTooltip } from 'components/ai/chatbot/input/autocomplete/EditableSkillChipTooltip'
 import { GqlError } from 'components/utils/Alert'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
@@ -28,7 +29,7 @@ import {
   WorkbenchJobFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -131,6 +132,7 @@ function VulnFixForm({
 
   const canSubmit =
     !!workbenchId && !!prompt.trim() && !mutationLoading && !loading
+  const promptInputRef = useRef<HTMLDivElement>(null)
 
   return (
     <>
@@ -147,6 +149,7 @@ function VulnFixForm({
       </FormField>
       <PromptInputBoxSC>
         <EditableDiv
+          ref={promptInputRef}
           initialValue={prompt}
           setValue={setPrompt}
           deserializePlrlInitialValue
@@ -154,6 +157,7 @@ function VulnFixForm({
           disabled={mutationLoading}
           css={{ height: 140 }}
         />
+        <EditableSkillChipTooltip containerRef={promptInputRef} />
       </PromptInputBoxSC>
       <Button
         disabled={!canSubmit}
