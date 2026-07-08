@@ -20344,6 +20344,13 @@ export type UpdateServiceAccountMutationVariables = Exact<{
 
 export type UpdateServiceAccountMutation = { __typename?: 'RootMutationType', updateServiceAccount?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
 
+export type ImpersonateServiceAccountMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type ImpersonateServiceAccountMutation = { __typename?: 'RootMutationType', impersonateServiceAccount?: { __typename?: 'User', id: string, email: string, jwt?: string | null } | null };
+
 export type ServiceAccountAccessTokenMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   attributes: AccessTokenAttributes;
@@ -41087,6 +41094,41 @@ export function useUpdateServiceAccountMutation(baseOptions?: Apollo.MutationHoo
 export type UpdateServiceAccountMutationHookResult = ReturnType<typeof useUpdateServiceAccountMutation>;
 export type UpdateServiceAccountMutationResult = Apollo.MutationResult<UpdateServiceAccountMutation>;
 export type UpdateServiceAccountMutationOptions = Apollo.BaseMutationOptions<UpdateServiceAccountMutation, UpdateServiceAccountMutationVariables>;
+export const ImpersonateServiceAccountDocument = gql`
+    mutation ImpersonateServiceAccount($email: String!) {
+  impersonateServiceAccount(email: $email) {
+    id
+    email
+    jwt
+  }
+}
+    `;
+export type ImpersonateServiceAccountMutationFn = Apollo.MutationFunction<ImpersonateServiceAccountMutation, ImpersonateServiceAccountMutationVariables>;
+
+/**
+ * __useImpersonateServiceAccountMutation__
+ *
+ * To run a mutation, you first call `useImpersonateServiceAccountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useImpersonateServiceAccountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [impersonateServiceAccountMutation, { data, loading, error }] = useImpersonateServiceAccountMutation({
+ *   variables: {
+ *      email: // value for 'email'
+ *   },
+ * });
+ */
+export function useImpersonateServiceAccountMutation(baseOptions?: Apollo.MutationHookOptions<ImpersonateServiceAccountMutation, ImpersonateServiceAccountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ImpersonateServiceAccountMutation, ImpersonateServiceAccountMutationVariables>(ImpersonateServiceAccountDocument, options);
+      }
+export type ImpersonateServiceAccountMutationHookResult = ReturnType<typeof useImpersonateServiceAccountMutation>;
+export type ImpersonateServiceAccountMutationResult = Apollo.MutationResult<ImpersonateServiceAccountMutation>;
+export type ImpersonateServiceAccountMutationOptions = Apollo.BaseMutationOptions<ImpersonateServiceAccountMutation, ImpersonateServiceAccountMutationVariables>;
 export const ServiceAccountAccessTokenDocument = gql`
     mutation ServiceAccountAccessToken($id: ID!, $attributes: AccessTokenAttributes!, $refresh: Boolean) {
   serviceAccountAccessToken(id: $id, attributes: $attributes, refresh: $refresh) {
@@ -46613,6 +46655,7 @@ export const namedOperations = {
     UpdateRbac: 'UpdateRbac',
     CreateServiceAccount: 'CreateServiceAccount',
     UpdateServiceAccount: 'UpdateServiceAccount',
+    ImpersonateServiceAccount: 'ImpersonateServiceAccount',
     ServiceAccountAccessToken: 'ServiceAccountAccessToken',
     CreateStack: 'CreateStack',
     CreateOnDemandRun: 'CreateOnDemandRun',

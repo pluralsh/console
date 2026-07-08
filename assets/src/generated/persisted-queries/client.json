@@ -1617,6 +1617,11 @@
          "name": "UpdateServiceAccount",
          "body": "mutation UpdateServiceAccount($id: ID!, $attributes: ServiceAccountAttributes!) {\n  updateServiceAccount(id: $id, attributes: $attributes) {\n    ...User\n    __typename\n  }\n}\n\nfragment User on User {\n  id\n  pluralId\n  name\n  email\n  emailSettings {\n    digest\n    __typename\n  }\n  profile\n  backgroundColor\n  readTimestamp\n  roles {\n    admin\n    __typename\n  }\n  personas {\n    ...Persona\n    __typename\n  }\n  homepage\n  __typename\n}\n\nfragment Persona on Persona {\n  id\n  name\n  description\n  bindings {\n    ...PolicyBinding\n    __typename\n  }\n  configuration {\n    ...PersonaConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment PersonaConfiguration on PersonaConfiguration {\n  all\n  deployments {\n    addOns\n    clusters\n    pipelines\n    providers\n    repositories\n    services\n    __typename\n  }\n  home {\n    manager\n    security\n    __typename\n  }\n  sidebar {\n    audits\n    kubernetes\n    pullRequests\n    settings\n    backups\n    stacks\n    __typename\n  }\n  services {\n    configuration\n    secrets\n    __typename\n  }\n  ai {\n    pr\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:010d2f4b5a59fbb2220852e5fd8e9616dd7ff1fac290d74a28aa99b18ef13519": {
+         "type": "mutation",
+         "name": "ImpersonateServiceAccount",
+         "body": "mutation ImpersonateServiceAccount($email: String!) {\n  impersonateServiceAccount(email: $email) {\n    id\n    email\n    jwt\n    __typename\n  }\n}"
+      },
       "sha256:3217a1f3f8aa657430221923f2f5e9d7c79864316a74130fc09c994347709812": {
          "type": "mutation",
          "name": "ServiceAccountAccessToken",

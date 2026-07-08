@@ -15,7 +15,7 @@ import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
 
 import fragments from '../generated/fragments.json'
-import { fetchToken } from './auth'
+import { authorizationHeader, fetchToken } from './auth'
 
 import { onErrorHandler } from './refreshToken'
 
@@ -55,11 +55,12 @@ export function buildClient(
   { gql: gqlUrl, ws: wsUrl, gqlws: gqlwsUrl },
   fetchToken
 ) {
+  const currentAuthorization = () => authorizationHeader(fetchToken())
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   const authLink = setContext((_, { headers }) => {
-    const token = fetchToken()
-    const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
+    const authorization = currentAuthorization()
+    const authHeaders = authorization ? { authorization } : {}
 
     return { headers: { ...headers, ...authHeaders } }
   })
@@ -77,9 +78,9 @@ export function buildClient(
 
   const socket = new PhoenixSocket(wsUrl, {
     params: () => {
-      const token = fetchToken()
+      const authorization = currentAuthorization()
 
-      return token ? { Authorization: `Bearer ${token}` } : {}
+      return authorization ? { Authorization: authorization } : {}
     },
   })
 
@@ -88,8 +89,8 @@ export function buildClient(
       url: gqlwsUrl,
       lazy: true,
       connectionParams: () => {
-        const token = fetchToken()
-        return token ? { token: `Bearer ${token}` } : {}
+        const authorization = currentAuthorization()
+        return authorization ? { token: authorization } : {}
       },
       // Send a JSON-level ping every 5s so Bandit's 60s read_timeout is never hit
       // and silent TCP drops (from LBs / NAT) are detected within one interval.
