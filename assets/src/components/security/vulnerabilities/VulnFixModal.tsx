@@ -219,7 +219,6 @@ function WorkbenchSelector({
   const selectedWorkbench = workbenches.find(
     (workbench) => workbench.id === workbenchId
   )
-  const loaded = !loading
   const SelectedIcon = selectedWorkbench
     ? runtimeToIcon[
         selectedWorkbench.agentRuntime?.type ?? AgentRuntimeType.Custom
@@ -232,7 +231,7 @@ function WorkbenchSelector({
       onOpenChange={setIsOpen}
       width={500}
       label="Select workbench"
-      isDisabled={loaded && !workbenches.length}
+      isDisabled={!loading && !workbenches.length}
       selectedKey={workbenchId ?? ''}
       onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
       triggerButton={
@@ -247,7 +246,7 @@ function WorkbenchSelector({
             ) : undefined
           }
         >
-          {!loaded && loading ? (
+          {loading ? (
             <RectangleSkeleton
               $bright
               $width={120}

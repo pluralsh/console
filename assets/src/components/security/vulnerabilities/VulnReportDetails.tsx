@@ -163,7 +163,6 @@ export function VulnerabilityReportDetails() {
       </HeaderSC>
       <TableWrapperSC>
         <Table
-          key={bulkSelectMode ? 'bulk-select' : 'default'}
           fullHeightWrap
           virtualizeRows
           data={vulnerabilities}
