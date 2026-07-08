@@ -1,9 +1,15 @@
 import { Input, ListBoxItem, Select } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
-import { useAiModels } from 'components/contexts/DeploymentSettingsContext'
+import {
+  useDeploymentSettings,
+  useAiModels,
+  useAvailableAiModelOptions,
+} from 'components/contexts/DeploymentSettingsContext'
 import { aiProviderToIcon } from 'components/settings/ai/AISettingsConfiguredProviders'
 import { aiProviderToLabel } from 'components/settings/ai/AISettingsProviders'
 import {
+  effectiveProviderForRole,
+  initialModelRoutingState,
   modelForRole,
   ModelRoutingRole,
 } from 'components/settings/ai/aiModelRoutingUtils'
@@ -19,8 +25,6 @@ const SELECTED_MODEL_PANEL_MAX_WIDTH = 150
 const PANEL_WIDTH = 320
 const PANEL_MAX_HEIGHT = 560
 const SEARCH_THRESHOLD = 8
-const MAX_SINGLE_PROVIDER_ITEMS = 8
-const MAX_MULTI_PROVIDER_ITEMS = 4
 const DEFAULT_MODEL_KEY = '__default__'
 
 export function WorkbenchModelSelector({
@@ -35,38 +39,42 @@ export function WorkbenchModelSelector({
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const { default: defaultModelDefault, available, loading } = useAiModels()
+  const { ai } = useDeploymentSettings()
+  const {
+    default: defaultModelDefault,
+    available: availableModelDefaults,
+    loading,
+  } = useAiModels()
+  const allAvailableModels = useAvailableAiModelOptions()
   const defaultModel = useMemo(() => {
+    const defaultToolProvider = effectiveProviderForRole(
+      ModelRoutingRole.Tool,
+      initialModelRoutingState(ai)
+    )
+    const defaultToolModelDefault =
+      availableModelDefaults.find(
+        ({ provider }) => provider === defaultToolProvider
+      ) ?? defaultModelDefault
     const model = modelForRole(
-      ModelRoutingRole.Chat,
-      defaultModelDefault
+      ModelRoutingRole.Tool,
+      defaultToolModelDefault
     )?.trim()
 
-    return defaultModelDefault && model
+    return defaultToolModelDefault && model
       ? {
-          provider: defaultModelDefault.provider,
+          provider: defaultToolModelDefault.provider,
           model,
         }
       : null
-  }, [defaultModelDefault])
+  }, [ai, availableModelDefaults, defaultModelDefault])
   const availableModels = useMemo(
     () =>
-      available.flatMap((modelDefault) => {
-        const model = modelForRole(ModelRoutingRole.Chat, modelDefault)?.trim()
-        if (!model) return []
-
-        const option = {
-          provider: modelDefault.provider,
-          model,
-        }
-
-        return isSameModelOption(option, defaultModel) ? [] : [option]
-      }),
-    [available, defaultModel]
+      allAvailableModels.filter(
+        (option) => !isSameModelOption(option, defaultModel)
+      ),
+    [allAvailableModels, defaultModel]
   )
 
-  const hasMultipleProviders =
-    new Set(availableModels.map(({ provider }) => provider)).size > 1
   const shouldShowSearch = availableModels.length > SEARCH_THRESHOLD
   const normalizedQuery = query.trim().toLowerCase()
 
@@ -92,24 +100,6 @@ export function WorkbenchModelSelector({
     }))
   }, [filteredModels])
 
-  const displayedGroupedModels = useMemo(() => {
-    if (!shouldShowSearch || normalizedQuery) return groupedFilteredModels
-
-    const limit = hasMultipleProviders
-      ? MAX_MULTI_PROVIDER_ITEMS
-      : MAX_SINGLE_PROVIDER_ITEMS
-
-    return groupedFilteredModels.map(({ provider, models }) => ({
-      provider,
-      models: models.slice(0, limit),
-    }))
-  }, [
-    groupedFilteredModels,
-    hasMultipleProviders,
-    normalizedQuery,
-    shouldShowSearch,
-  ])
-
   const hasSelectableModels = !!defaultModel || availableModels.length > 0
   const triggerDisabled = disabled || (!loading && !hasSelectableModels)
   const triggerModel = value ?? defaultModel
@@ -120,7 +110,7 @@ export function WorkbenchModelSelector({
       : null
   const shownCount = normalizedQuery
     ? filteredModels.length
-    : displayedGroupedModels.reduce(
+    : groupedFilteredModels.reduce(
         (count, { models }) => count + models.length,
         0
       )
@@ -141,7 +131,7 @@ export function WorkbenchModelSelector({
       )
     }
 
-    displayedGroupedModels.forEach(({ provider, models }) => {
+    groupedFilteredModels.forEach(({ provider, models }) => {
       if (!models.length) return
 
       nextItems.push(
@@ -179,7 +169,7 @@ export function WorkbenchModelSelector({
     return nextItems
   }, [
     defaultModel,
-    displayedGroupedModels,
+    groupedFilteredModels,
     loading,
     normalizedQuery,
     shownCount,

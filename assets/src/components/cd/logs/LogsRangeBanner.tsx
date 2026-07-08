@@ -15,6 +15,7 @@ export function LogsRangeBanner({
   const theme = useTheme()
 
   if (!rangeFilter && !hasBuckets) return null
+  if (!rangeFilter) return null
 
   return (
     <div
@@ -37,51 +38,38 @@ export function LogsRangeBanner({
           border: theme.borders['fill-two'],
         }}
       >
-        {rangeFilter ? (
-          <>
-            <Flex
-              gap="xsmall"
-              grow={1}
-            >
-              <span
-                css={{
-                  ...theme.partials.text.body2,
-                  color: theme.colors['text-xlight'],
-                }}
-              >
-                Filtered to
-              </span>
-              <span css={{ ...theme.partials.text.code }}>
-                {formatDateTime(rangeFilter.start, 'HH:mm:ss', true, true)} –{' '}
-                {formatDateTime(rangeFilter.end, 'HH:mm:ss', true, true)}
-              </span>
-              <span
-                css={{
-                  ...theme.partials.text.body2,
-                  color: theme.colors['text-long-form'],
-                }}
-              >
-                {duration(rangeFilter.start, rangeFilter.end)} window
-              </span>
-            </Flex>
-            <ClearFilterButtonSC
-              type="button"
-              onClick={onClear}
-            >
-              <CloseIcon size={10} />
-              Clear
-            </ClearFilterButtonSC>
-          </>
-        ) : (
+        <Flex
+          gap="xsmall"
+          grow={1}
+        >
           <span
             css={{
               ...theme.partials.text.body2,
-              color: theme.colors['text-light'],
+              color: theme.colors['text-xlight'],
             }}
           >
-            Drag across the chart to filter by time
+            Filtered to
           </span>
-        )}
+          <span css={{ ...theme.partials.text.code }}>
+            {formatDateTime(rangeFilter.start, 'HH:mm:ss', true, true)} –{' '}
+            {formatDateTime(rangeFilter.end, 'HH:mm:ss', true, true)}
+          </span>
+          <span
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-long-form'],
+            }}
+          >
+            {duration(rangeFilter.start, rangeFilter.end)} window
+          </span>
+        </Flex>
+        <ClearFilterButtonSC
+          type="button"
+          onClick={onClear}
+        >
+          <CloseIcon size={10} />
+          Clear
+        </ClearFilterButtonSC>
       </div>
     </div>
   )

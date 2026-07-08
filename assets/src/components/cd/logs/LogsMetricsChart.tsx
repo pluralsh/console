@@ -23,7 +23,7 @@ import type { LogsTimeRange } from './Logs'
 const Y_AXIS_WIDTH = 36
 const X_AXIS_HEIGHT = 28
 const CHART_PADDING_BOTTOM = 8
-const CHART_CANVAS_HEIGHT = 162
+const CHART_CANVAS_HEIGHT = 130
 const CHART_BAR_GAP = 2
 const SELECTION_SHADOW = 'rgba(2, 3, 24, 0.55)'
 const SELECTION_EDGE = '#747af6'

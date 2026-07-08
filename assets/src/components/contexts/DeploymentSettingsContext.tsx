@@ -4,6 +4,7 @@ import {
   DeploymentSettingsFragment,
   ModelDefault,
   useDeploymentSettingsQuery,
+  WorkbenchJobModelAttributes,
 } from 'generated/graphql'
 import { createContext, ReactNode, use, useMemo } from 'react'
 
@@ -102,6 +103,27 @@ export function useAiModels(): {
       defaultsByProvider,
     }
   }, [data, availableModels, defaultModels, loading])
+}
+
+export function useAvailableAiModelOptions(): WorkbenchJobModelAttributes[] {
+  const { availableModels } = use(DeploymentSettingsContext)
+
+  return useMemo(() => {
+    const seen = new Set<string>()
+
+    return (availableModels ?? []).flatMap((option) => {
+      const provider = option?.provider
+      const model = option?.model?.trim()
+      if (!provider || !model) return []
+
+      const key = `${provider}:${model}`
+      if (seen.has(key)) return []
+
+      seen.add(key)
+
+      return [{ provider, model }]
+    })
+  }, [availableModels])
 }
 
 export function useLogsEnabled() {

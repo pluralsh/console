@@ -109,6 +109,8 @@ defmodule Console.AI.Workbench.Engine do
         })
         |> Workbenches.complete_job(job)
       {:ok, {msgs, l}} when is_list(l) -> spawn_activities(l, msgs, engine)
+      {:ok, %Acc{messages: msgs}} when is_list(msgs) ->
+        Workbenches.fail_job("Workbench job was not properly completed, last messsage: #{inspect(elem(List.last(msgs), 1))}", job)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
   end

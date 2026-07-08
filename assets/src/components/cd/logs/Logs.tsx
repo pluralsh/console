@@ -1,4 +1,10 @@
-import { Card, Flex, Input2, SearchIcon } from '@pluralsh/design-system'
+import {
+  Card,
+  ChartIcon,
+  Flex,
+  Input2,
+  SearchIcon,
+} from '@pluralsh/design-system'
 import { useCallback, useMemo, useState } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
@@ -19,7 +25,6 @@ import {
   LogsSinceSecondsSelect,
 } from './LogsFilters'
 import { LogsLabels } from './LogsLabels'
-import { LogsLegend } from './LogsLegend'
 import { LogsMetricsChart } from './LogsMetricsChart'
 import { LogsRangeBanner } from './LogsRangeBanner'
 import { LogsStreamingStatus } from './LogsStreamingStatus'
@@ -47,6 +52,7 @@ export function Logs({
   const [filters, setFilters] = useState<LogsFiltersT>(DEFAULT_LOG_FILTERS)
   const [rangeFilter, setRangeFilter] = useState<LogsTimeRange | null>(null)
   const [chartHasBuckets, setChartHasBuckets] = useState(false)
+  const [showMetricsChart, setShowMetricsChart] = useState(true)
 
   const [live, setLiveState] = useState(true)
   const setLive = useCallback((live: boolean) => {
@@ -183,10 +189,19 @@ export function Logs({
                     disabled={timeFiltersDisabled}
                   />
                 </Flex>
-                <LogsStreamingStatus
-                  live={live}
-                  setLive={setLive}
-                />
+                <Flex gap="small">
+                  <MetricsChartToggleSC
+                    type="button"
+                    onClick={() => setShowMetricsChart((show) => !show)}
+                  >
+                    <ChartIcon size={14} />
+                    {showMetricsChart ? 'Hide' : 'Show'}
+                  </MetricsChartToggleSC>
+                  <LogsStreamingStatus
+                    live={live}
+                    setLive={setLive}
+                  />
+                </Flex>
               </StretchedFlex>
             ),
           }}
@@ -197,19 +212,21 @@ export function Logs({
               onClear={clearRangeFilter}
               hasBuckets={chartHasBuckets}
             />
-            <LogsMetricsChart
-              clusterId={clusterId}
-              serviceId={serviceId}
-              query={throttledQ}
-              time={chartTime}
-              operator={filters.queryOperator}
-              facets={labels}
-              sinceSeconds={filters.sinceSeconds}
-              rangeFilter={rangeFilter}
-              onRangeSelect={handleRangeSelect}
-              onHasBucketsChange={setChartHasBuckets}
-              pollInterval={live ? POLL_INTERVAL : 0}
-            />
+            {showMetricsChart && (
+              <LogsMetricsChart
+                clusterId={clusterId}
+                serviceId={serviceId}
+                query={throttledQ}
+                time={chartTime}
+                operator={filters.queryOperator}
+                facets={labels}
+                sinceSeconds={filters.sinceSeconds}
+                rangeFilter={rangeFilter}
+                onRangeSelect={handleRangeSelect}
+                onHasBucketsChange={setChartHasBuckets}
+                pollInterval={live ? POLL_INTERVAL : 0}
+              />
+            )}
             <LogsTableWrapSC>
               <LogsTable
                 logs={logs}
@@ -229,7 +246,6 @@ export function Logs({
           </LogsBodySC>
         </Card>
       )}
-      {!(error || initialLoading) && <LogsLegend />}
     </MainContentWrapperSC>
   )
 }
@@ -264,3 +280,18 @@ const LogsTableWrapSC = styled.div({
   position: 'relative',
   zIndex: 0,
 })
+
+const MetricsChartToggleSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
+  ...theme.partials.text.body2Bold,
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.small,
+  minHeight: 32,
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+  borderRadius: theme.borderRadiuses.medium,
+  border: theme.borders.input,
+  backgroundColor: theme.colors['fill-one'],
+  color: theme.colors['text-xlight'],
+  cursor: 'pointer',
+}))
