@@ -90,7 +90,7 @@ export const onErrorHandler: ErrorHandler = ({
     })
   }
 
-  if (is401 && isImpersonatingServiceAccount()) {
+  if ((is401 || isUnauthenticated) && isImpersonatingServiceAccount()) {
     stopServiceAccountImpersonation()
     ;(window as Window).location.reload()
 
