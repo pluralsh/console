@@ -12,7 +12,8 @@ import {
   VulnerabilityFragment,
   VulnerabilityReportFragment,
 } from 'generated/graphql'
-import { AgentRunFixButton } from 'components/ai/agent-runs/AgentRunFixButton'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
+import { VulnFixButton } from './VulnFixButton'
 import { useMemo } from 'react'
 import ejs from 'ejs'
 import vulnPromptTemplate from './vulnerability-prompt.ejs?raw'
@@ -25,6 +26,8 @@ export function VulnDetailExpanded({
   parentReport: Nullable<VulnerabilityReportFragment>
 }) {
   const { original: v } = row
+
+  const { flowData } = useCurrentFlow()
 
   const initialPrompt = useMemo(
     () => ejs.render(vulnPromptTemplate, { vuln: v, report: parentReport }),
@@ -45,13 +48,13 @@ export function VulnDetailExpanded({
           secondPartialType="body2"
           css={{ maxWidth: 900 }}
         />
-        <AgentRunFixButton
+        <VulnFixButton
           headerTitle="Fix vulnerability"
           initialPrompt={initialPrompt}
-          initialRepo={parentReport?.artifactRepoUrl}
+          flowId={flowData?.flow?.id}
         >
           Fix vulnerability
-        </AgentRunFixButton>
+        </VulnFixButton>
       </StretchedFlex>
       <CVSSSection
         bundle={v.cvss}

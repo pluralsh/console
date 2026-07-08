@@ -3,6 +3,7 @@ import {
   AccordionItem,
   AiSparkleFilledIcon,
   Button,
+  Card,
   Chip,
   CloseIcon,
   DiscoverIcon,
@@ -14,12 +15,9 @@ import {
   ReloadIcon,
   SpinnerAlt,
 } from '@pluralsh/design-system'
-import {
-  AgentRunFormPopupSC,
-  PromptInputBoxSC,
-} from 'components/ai/agent-runs/AgentRunFixButton'
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector'
 import { useOutsideClick } from 'components/hooks/useOutsideClick'
+import { SimplePopupMenu } from 'components/layout/HeaderPopupMenu'
 import { GqlError } from 'components/utils/Alert'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
@@ -35,7 +33,7 @@ import {
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 type CurUpgradeStatus = 'none' | 'running' | 'completed' | 'failed'
 
@@ -226,3 +224,20 @@ const getCurUpgradeStatus = (
       return 'failed'
   }
 }
+
+const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
+  width: 578,
+  padding: theme.spacing.medium,
+  gap: theme.spacing.large,
+  transform: 'translateY(20px)',
+  marginBottom: theme.spacing.xxlarge,
+  boxShadow: theme.boxShadows.moderate,
+  zIndex: theme.zIndexes.toast,
+}))
+
+const PromptInputBoxSC = styled(Card)(({ theme }) => ({
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  '&:focus-within': {
+    border: theme.borders['outline-focused'],
+  },
+}))
