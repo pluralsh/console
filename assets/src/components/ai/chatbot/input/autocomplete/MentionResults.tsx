@@ -2,6 +2,7 @@ import {
   ClusterIcon,
   GitPullIcon,
   StackIcon,
+  WarningShieldIcon,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { ReactNode, useEffect, useRef } from 'react'
@@ -17,6 +18,7 @@ const itemToIcon: Record<MentionKind, ReactNode> = {
   [MentionKind.Service]: <GitPullIcon size={14} />,
   [MentionKind.Stack]: <StackIcon size={14} />,
   [MentionKind.Skill]: <WorkbenchIcon size={14} />,
+  [MentionKind.Vulnerability]: <WarningShieldIcon size={14} />,
 }
 
 function subtitleForItem(item: ChipAttrs) {
@@ -29,6 +31,8 @@ function subtitleForItem(item: ChipAttrs) {
       return item.type ? stackTypeLabel(item.type as StackType) : undefined
     case MentionKind.Skill:
       return item.description
+    case MentionKind.Vulnerability:
+      return item.resource ?? item['vuln-id'] ?? undefined
   }
 }
 

@@ -2,6 +2,7 @@ import {
   GitPullIcon,
   StackIcon,
   Tooltip,
+  WarningShieldIcon,
   WorkbenchIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
@@ -139,11 +140,40 @@ function PlrlSkillChip(props: RenderedChipProps<MentionKind.Skill>) {
   )
 }
 
+function PlrlVulnerabilityChip(
+  props: RenderedChipProps<MentionKind.Vulnerability>
+) {
+  const label =
+    chipDisplayText(MentionKind.Vulnerability, {
+      'item-name': props['item-name'],
+      severity: props.severity,
+    }) ||
+    props['item-name'] ||
+    props['item-id']
+  const link = props['primary-link']
+
+  return (
+    <WrapWithIf
+      condition={!!link}
+      wrapper={
+        <ChipExternalLinkSC
+          href={link!}
+          target="_blank"
+          rel="noopener noreferrer"
+        />
+      }
+    >
+      <ChipBody icon={<WarningShieldIcon size={12} />}>{label}</ChipBody>
+    </WrapWithIf>
+  )
+}
+
 export const plrlChipComponents = {
   [MentionKind.Cluster]: PlrlClusterChip,
   [MentionKind.Service]: PlrlServiceChip,
   [MentionKind.Stack]: PlrlStackChip,
   [MentionKind.Skill]: PlrlSkillChip,
+  [MentionKind.Vulnerability]: PlrlVulnerabilityChip,
 } satisfies {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }
@@ -166,6 +196,11 @@ const ChipBodySC = styled.span(({ theme }) => ({
 }))
 
 const ChipLinkSC = styled(Link)(({ theme }) => ({
+  textDecoration: 'none',
+  '&:hover > *': { background: theme.colors['fill-two-hover'] },
+}))
+
+const ChipExternalLinkSC = styled.a(({ theme }) => ({
   textDecoration: 'none',
   '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))
