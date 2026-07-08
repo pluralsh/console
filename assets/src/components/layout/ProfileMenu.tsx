@@ -36,10 +36,6 @@ export function ProfileMenu() {
     logout?.()
   }, [logout])
 
-  const handleRestoreSession = useCallback(async () => {
-    if (await restoreSession()) setIsMenuOpen(false)
-  }, [restoreSession])
-
   const profileLabel = impersonating
     ? `Impersonating service account${impersonatedEmail ? `: ${impersonatedEmail}` : ''}`
     : 'Open profile menu'
@@ -109,7 +105,7 @@ export function ProfileMenu() {
               justifyContent="flex-start"
               startIcon={!restoring ? <KeyIcon /> : undefined}
               loading={restoring}
-              onClick={handleRestoreSession}
+              onClick={restoreSession}
               innerFlexProps={{
                 gap: 'xsmall',
                 minWidth: 0,
