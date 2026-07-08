@@ -157,6 +157,7 @@ function VulnFixForm({
         <EditableDiv
           initialValue={prompt}
           setValue={setPrompt}
+          deserializePlrlInitialValue
           placeholder="Enter a prompt for the workbench"
           disabled={mutationLoading}
           css={{ height: 140 }}

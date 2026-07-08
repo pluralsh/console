@@ -33,8 +33,7 @@ import { securityVulnReportsCrumbs } from './VulnReports'
 import { useMemo, useState } from 'react'
 import { VulnFixButton } from './VulnFixButton'
 import { RowSelectionState } from '@tanstack/react-table'
-import ejs from 'ejs'
-import vulnBatchPromptTemplate from './vulnerability-batch-prompt.ejs?raw'
+import { buildVulnerabilityBatchPrompt } from './vulnerabilityMention'
 
 export function VulnerabilityReportDetails() {
   const { vulnerabilityReportId, clusterId } = useParams()
@@ -75,12 +74,7 @@ export function VulnerabilityReportDetails() {
   )
   const batchPrompt = useMemo(
     () =>
-      selectedVulns.length > 0
-        ? ejs.render(vulnBatchPromptTemplate, {
-            vulns: selectedVulns,
-            report: data?.vulnerabilityReport,
-          })
-        : '',
+      buildVulnerabilityBatchPrompt(selectedVulns, data?.vulnerabilityReport),
     [selectedVulns, data?.vulnerabilityReport]
   )
 
