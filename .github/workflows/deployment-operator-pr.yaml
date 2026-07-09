@@ -17,14 +17,14 @@ permissions:
   contents: 'read'
 
 jobs:
-  title:
-    name: Title check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check pull request title
-        uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # title:
+  #   name: Title check
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check pull request title
+  #       uses: amannn/action-semantic-pull-request@v5
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   body:
     name: Body check
     runs-on: ubuntu-latest

@@ -27,6 +27,21 @@ export function setToken(token: string | null | undefined) {
   encryptStorage.setItem(AUTH_TOKEN, token || '')
 }
 
+export function getEncryptedAuthValue(key: string) {
+  return encryptStorage.getItem(key)
+}
+
+export function setEncryptedAuthValue(
+  key: string,
+  value: string | null | undefined
+) {
+  encryptStorage.setItem(key, value || '')
+}
+
+export function removeEncryptedAuthValue(key: string) {
+  encryptStorage.removeItem(key)
+}
+
 export const saveChallenge = (challenge) =>
   localStorage.setItem(CHALLENGE_KEY, challenge)
 export const getChallenge = () => localStorage.getItem(CHALLENGE_KEY)
@@ -39,6 +54,14 @@ export function setRefreshToken(token: string | null | undefined) {
     sameSite: 'strict',
     expires: 30,
   })
+}
+
+export function setRefreshTokenForStorage(token: string | null | undefined) {
+  if (token) {
+    setRefreshToken(token)
+  } else {
+    wipeRefreshToken()
+  }
 }
 
 export function wipeRefreshToken() {

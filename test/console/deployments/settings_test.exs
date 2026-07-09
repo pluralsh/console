@@ -42,7 +42,7 @@ defmodule Console.Deployments.SettingsTest do
                %{provider: :openai, model: "gpt-tool"},
                %{provider: :openai, model: "gpt-proxy"},
                %{provider: :bedrock, model: "anthropic.custom"},
-               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
+               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-5"},
                %{provider: :bedrock, model: "anthropic.proxy"}
              ]
     end
@@ -77,11 +77,11 @@ defmodule Console.Deployments.SettingsTest do
                %{provider: :openai, model: "gpt-5.4-mini"},
                %{provider: :openai, model: "gpt-5.4"},
                %{provider: :anthropic, model: "claude-4-5-haiku-latest"},
-               %{provider: :anthropic, model: "claude-4-6-sonnet-latest"},
+               %{provider: :anthropic, model: "claude-sonnet-5-latest"},
                %{provider: :vertex, model: "claude-haiku-4-5@20251001"},
-               %{provider: :vertex, model: "claude-sonnet-4-6@20260114"},
+               %{provider: :vertex, model: "claude-sonnet-5@default"},
                %{provider: :bedrock, model: "global.anthropic.claude-haiku-4-5-20251001-v1:0"},
-               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
+               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-5"},
                %{provider: :azure, model: "gpt-5.4-mini"},
                %{provider: :azure, model: "gpt-5.4"}
              ]

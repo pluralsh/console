@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -96,6 +97,9 @@ type Config struct {
 
 	// Run is the agent run that is being processed.
 	Run *v1.AgentRun
+
+	// Usage accumulates run-level token and cost usage emitted by provider streams.
+	Usage *usage.Usage
 
 	// SkipInitialRun skips the actual AI CLI execution in Run() and signals
 	// completion immediately. Use this in tests to jump straight to babysitLoop

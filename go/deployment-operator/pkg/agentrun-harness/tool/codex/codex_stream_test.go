@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	harnessusage "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/stretchr/testify/require"
 )
 
@@ -101,9 +102,10 @@ func TestMapCommandExecutionIncludesInput(t *testing.T) {
 }
 
 func TestMapTurnCompletedPersistsCostWithoutChatContent(t *testing.T) {
-	line := `{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":20,"output_tokens":50}}`
+	line := `{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":20,"output_tokens":50,"reasoning_output_tokens":12}}`
 
 	c := &Codex{toolItems: make(map[string]*StreamItem)}
+	c.Config.Usage = harnessusage.New(nil)
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
@@ -114,6 +116,14 @@ func TestMapTurnCompletedPersistsCostWithoutChatContent(t *testing.T) {
 	require.Equal(t, float64(150), msg.Cost.Total)
 	require.Equal(t, float64(100), *msg.Cost.Tokens.Input)
 	require.Equal(t, float64(50), *msg.Cost.Tokens.Output)
+
+	attrs := c.Config.Usage.Attributes()
+	require.NotNil(t, attrs)
+	require.Equal(t, int64(100), *attrs.InputTokens)
+	require.Equal(t, int64(50), *attrs.OutputTokens)
+	require.Equal(t, int64(150), *attrs.TotalTokens)
+	require.Equal(t, int64(20), *attrs.CachedTokens)
+	require.Equal(t, int64(12), *attrs.ReasoningTokens)
 }
 
 func TestMapWebSearchIncludesQueryAsInput(t *testing.T) {

@@ -3175,6 +3175,7 @@ _Appears in:_
 | `all` _boolean_ | All enables the complete UI interface for this persona when set to true.<br />This overrides individual feature settings and provides full access to all Console features.<br />Useful for administrative personas that need unrestricted access to all functionality. |  | Optional: \{\} <br /> |
 | `home` _[PersonaHome](#personahome)_ | Home configures the homepage layout and content for this persona.<br />Different personas can have customized homepages that highlight the most relevant<br />information and workflows for their specific role and responsibilities. |  | Optional: \{\} <br /> |
 | `deployments` _[PersonaDeployment](#personadeployment)_ | Deployments controls access to deployment-related features and sections.<br />This includes clusters, services, pipelines, and other deployment management tools.<br />Useful for controlling which teams can view or manage different aspects of deployments. |  | Optional: \{\} <br /> |
+| `flows` _[PersonaFlows](#personaflows)_ | Flows controls access to flow-related features and sections.<br />This includes workbenches, pipelines, and preview environments grouped under flows. |  | Optional: \{\} <br /> |
 | `sidebar` _[PersonaSidebar](#personasidebar)_ | Sidebar configures which navigation items and sections are visible in the main sidebar.<br />This allows personas to have streamlined navigation focused on their primary workflows<br />while hiding irrelevant or restricted functionality. |  | Optional: \{\} <br /> |
 | `services` _[PersonaServices](#personaservices)_ | Services controls access to service-specific features and configuration options.<br />This includes service configuration, secrets management, and other service-level operations. |  | Optional: \{\} <br /> |
 | `ai` _[PersonaAI](#personaai)_ | AI configures access to AI-powered features and capabilities within the Console.<br />This includes AI-assisted operations, automated suggestions, and other intelligent features. |  | Optional: \{\} <br /> |
@@ -3202,6 +3203,26 @@ _Appears in:_
 | `pipelines` _boolean_ | Pipelines enables access to CI/CD pipeline features when set to true.<br />This includes viewing pipeline status, managing pipeline configurations,<br />and triggering pipeline executions for automated deployments. |  | Optional: \{\} <br /> |
 | `providers` _boolean_ | Providers enables access to cloud provider management features when set to true.<br />This includes managing cloud provider credentials, configuring provider settings,<br />and other provider-related operations for infrastructure management. |  | Optional: \{\} <br /> |
 | `addOns` _boolean_ | AddOns enables access to Kubernetes add-on management features when set to true.<br />This includes installing, configuring, and managing cluster add-ons. |  | Optional: \{\} <br /> |
+
+
+#### PersonaFlows
+
+
+
+PersonaFlows defines access controls for flow-related features and views.
+These settings determine which flow management capabilities are visible and
+accessible to users assigned to this persona.
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbenches` _boolean_ | Workbenches enables access to flow workbench features when set to true.<br />This includes viewing and using workbenches associated with flows. |  | Optional: \{\} <br /> |
+| `pipelines` _boolean_ | Pipelines enables access to flow pipeline features when set to true.<br />This includes viewing and managing pipelines associated with flows. |  | Optional: \{\} <br /> |
+| `previews` _boolean_ | Previews enables access to flow preview environment features when set to true.<br />This includes viewing and managing preview environments associated with flows. |  | Optional: \{\} <br /> |
 
 
 #### PersonaHome
@@ -3260,6 +3281,8 @@ _Appears in:_
 | `audits` _boolean_ | Audits enables access to audit logs and compliance reporting features when set to true.<br />This includes viewing system audit trails, user activity logs, and compliance reports.<br />Typically enabled for security teams and compliance officers. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables access to direct Kubernetes management features when set to true.<br />This includes raw Kubernetes resource management, kubectl-like operations,<br />and low-level cluster administration tasks. |  | Optional: \{\} <br /> |
 | `pullRequests` _boolean_ | PullRequests enables access to pull request management features when set to true.<br />This includes viewing and managing pull requests and Git-based deployment automation features. |  | Optional: \{\} <br /> |
+| `flows` _boolean_ | Flows enables access to the flows navigation item when set to true.<br />This includes viewing and managing flow resources from the main sidebar. |  | Optional: \{\} <br /> |
+| `workbenches` _boolean_ | Workbenches enables access to the workbenches navigation item when set to true.<br />This includes viewing and managing workbenches from the main sidebar. |  | Optional: \{\} <br /> |
 | `settings` _boolean_ | Settings enables access to system configuration and administrative settings when set to true.<br />This includes user management, system configuration, integration settings,<br />and other administrative functions. Typically restricted to administrators. |  | Optional: \{\} <br /> |
 | `backups` _boolean_ | Backups enables access to backup and restore management features when set to true.<br />This includes configuring backup policies, managing backup storage,<br />and performing restore operations for disaster recovery. |  | Optional: \{\} <br /> |
 | `stacks` _boolean_ | Stacks enables access to Infrastructure as Code (IaC) stack management when set to true.<br />This includes managing Terraform stacks and other IaC<br />automation tools for infrastructure provisioning and management. |  | Optional: \{\} <br /> |

@@ -19,10 +19,7 @@ import {
 } from 'components/cd/utils/PermissionsModal'
 
 export type McpTableAction =
-  | 'audit'
-  | 'permissions'
-  | 'view'
-  | 'removeConnection'
+  'audit' | 'permissions' | 'view' | 'removeConnection'
 
 const columnHelper = createColumnHelper<McpServerFragment>()
 

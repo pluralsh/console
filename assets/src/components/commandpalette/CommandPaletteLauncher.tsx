@@ -17,8 +17,15 @@ export function CommandPaletteLauncher() {
   const commands = useCommandsWithHotkeys()
   const { setCmdkOpen } = use(CommandPaletteContext)
 
-  useHotkeys(['cmd K', 'ctrl K'], () =>
-    setCmdkOpen(true, CommandPaletteTab.Commands)
+  useHotkeys(
+    ['cmd K', 'ctrl K'],
+    () => setCmdkOpen(true, CommandPaletteTab.Commands),
+    {
+      enableOnContentEditable: true,
+      ignoreTags: [],
+      preventDefault: true,
+    },
+    [setCmdkOpen]
   )
 
   return (

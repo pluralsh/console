@@ -77,6 +77,7 @@ export default [
       'react-hooks/refs': 'warn',
       'react-hooks/set-state-in-effect': 'warn',
       'react-hooks/set-state-in-render': 'warn',
+      'react-hooks/purity': 'warn',
 
       // Prettier
       'prettier/prettier': 'error',

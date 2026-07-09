@@ -28,7 +28,7 @@ export function NamespaceFilter({
   namespaces: string[]
   namespace?: string
   onChange: Dispatch<SetStateAction<string | undefined>>
-} & Partial<ComponentProps<typeof ComboBox>>) {
+} & Partial<Omit<ComponentProps<typeof ComboBox>, 'onChange'>>) {
   const theme = useTheme()
   const [value, setValue] = useState<string | undefined>(namespace)
 

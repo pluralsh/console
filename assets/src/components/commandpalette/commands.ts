@@ -139,9 +139,11 @@ export function useCommandsWithHotkeys() {
 export function useCommands({
   showHidden = false,
   filter = '',
+  openServiceAccountImpersonation,
 }: {
   showHidden?: boolean
   filter?: string
+  openServiceAccountImpersonation?: () => void
 }): CommandGroup[] {
   const openShareSecret = useShareSecretOpen()
   const openAccessTokenModal = useOpenAccessTokenModal()
@@ -210,10 +212,21 @@ export function useCommands({
                 },
               ]
             : []),
+          ...(openServiceAccountImpersonation
+            ? [
+                {
+                  id: 'impersonate-service-account',
+                  label: 'Impersonate service account',
+                  icon: KeyIcon,
+                  callback: openServiceAccountImpersonation,
+                  deps: [openServiceAccountImpersonation],
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [featureFlags, setFeatureFlag]
+    [featureFlags, openServiceAccountImpersonation, setFeatureFlag]
   )
 
   const commands = useMemo(
@@ -433,7 +446,6 @@ export function useCommands({
     [
       navigate,
       featureFlags.Edge,
-      featureFlags.WorkbenchChatbots,
       cluster?.id,
       openShareSecret,
       openAccessTokenModal,

@@ -651,6 +651,7 @@ type AgentRunFragment struct {
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
 	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
@@ -753,6 +754,12 @@ func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Analysis
+}
+func (t *AgentRunFragment) GetUsage() *AgentRunFragment_Usage {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Usage
 }
 func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
 	if t == nil {
@@ -4652,6 +4659,7 @@ type PersonaConfigurationFragment struct {
 	All         *bool                                     "json:\"all,omitempty\" graphql:\"all\""
 	Deployments *PersonaConfigurationFragment_Deployments "json:\"deployments,omitempty\" graphql:\"deployments\""
 	Home        *PersonaConfigurationFragment_Home        "json:\"home,omitempty\" graphql:\"home\""
+	Flows       *PersonaConfigurationFragment_Flows       "json:\"flows,omitempty\" graphql:\"flows\""
 	Sidebar     *PersonaConfigurationFragment_Sidebar     "json:\"sidebar,omitempty\" graphql:\"sidebar\""
 }
 
@@ -4672,6 +4680,12 @@ func (t *PersonaConfigurationFragment) GetHome() *PersonaConfigurationFragment_H
 		t = &PersonaConfigurationFragment{}
 	}
 	return t.Home
+}
+func (t *PersonaConfigurationFragment) GetFlows() *PersonaConfigurationFragment_Flows {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Flows
 }
 func (t *PersonaConfigurationFragment) GetSidebar() *PersonaConfigurationFragment_Sidebar {
 	if t == nil {
@@ -7191,6 +7205,66 @@ func (t *AgentRunFragment_Skills) GetName() string {
 	return t.Name
 }
 
+type AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -9412,13 +9486,40 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 	return t.Security
 }
 
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -9432,6 +9533,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -9456,6 +9563,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type PersonaConfigurationFragment_Deployments struct {
@@ -9522,13 +9635,40 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 	return t.Security
 }
 
+type PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -9542,6 +9682,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -9566,6 +9712,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -14747,6 +14899,66 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Skills) GetName() string {
 	return t.Name
 }
 
+type GetAgentRun_AgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14888,6 +15100,66 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills) GetName() s
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -15091,6 +15363,66 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 	return t.Name
 }
 
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15221,6 +15553,66 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills) GetName() string
 	return t.Name
 }
 
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15287,6 +15679,66 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetName() string
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -23397,13 +23849,40 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 	return t.Security
 }
 
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23417,6 +23896,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23441,6 +23926,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type GetPersonaTiny_Persona struct {
@@ -23525,13 +24016,40 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23545,6 +24063,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23569,6 +24093,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -23635,13 +24165,40 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23655,6 +24212,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23679,6 +24242,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -23745,13 +24314,40 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23765,6 +24361,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23789,6 +24391,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -40571,6 +41179,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -40793,6 +41411,16 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -41040,6 +41668,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41273,6 +41911,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41443,6 +42091,16 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -54482,13 +55140,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -54585,13 +55250,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -54663,13 +55335,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -54742,13 +55421,20 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {

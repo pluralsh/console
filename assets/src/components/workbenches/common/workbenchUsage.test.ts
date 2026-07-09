@@ -17,4 +17,8 @@ describe('workbench usage formatting', () => {
     expect(formatTokenCount(null)).toBeUndefined()
     expect(formatTokenCost(undefined)).toBeUndefined()
   })
+
+  it('does not format zero cost values', () => {
+    expect(formatTokenCost(0)).toBeUndefined()
+  })
 })

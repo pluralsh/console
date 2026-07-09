@@ -12,6 +12,7 @@ import { LogContextPanel } from './LogContextPanel'
 import { LogLine } from './LogLine'
 import { DEFAULT_LOG_QUERY_LENGTH, secondsToDuration } from './Logs'
 import { LogsFiltersT } from './LogsFilters'
+import type { LogsTimeRange } from './Logs'
 
 const columnHelper = createColumnHelper<LogLineFragment>()
 
@@ -26,6 +27,7 @@ export function LogsTable({
   labels,
   clusterId,
   serviceId,
+  rangeFilter,
 }: {
   logs: LogLineFragment[]
   loading?: boolean
@@ -38,6 +40,7 @@ export function LogsTable({
   labels: LogFacetInput[]
   clusterId?: string
   serviceId?: string
+  rangeFilter?: LogsTimeRange | null
 }) {
   const theme = useTheme()
   const [contextPanelOpen, setContextPanelOpen] = useState(false)
@@ -78,12 +81,12 @@ export function LogsTable({
   const onScrollCapture = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const scrollTop = e.currentTarget.scrollTop
-      if (scrollTop === 0 && !filters.date) setLive(true)
+      if (scrollTop === 0 && !filters.date && !rangeFilter) setLive(true)
       // if user scrolls away from the top, disable live logs
       else if (scrollTop > 0 && lastScrollTop.current === 0) setLive(false)
       lastScrollTop.current = scrollTop
     },
-    [setLive, filters.date]
+    [setLive, filters.date, rangeFilter]
   )
 
   return (
@@ -99,6 +102,7 @@ export function LogsTable({
         columns={cols}
         isFetchingNextPage={loading}
         hasNextPage={
+          !rangeFilter &&
           hasNextPage &&
           logs.length >= (queryLength || DEFAULT_LOG_QUERY_LENGTH)
         }

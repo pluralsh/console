@@ -1056,6 +1056,28 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
+  - version: 3.4.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- **CRDs must be updated** for v3.4.1: run:\n  ```sh\n  kubectl\
+        \ apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
+        \n  ```\n- **IAM policy:** no changes required.\n- **Gateway API CRDs:** no\
+        \ updates required.\n- **New Helm value/flag exposed:** `enableCertificateManagement`\
+        \ (adds a corresponding controller flag via the chart)."
+      chart_updates: [Helm chart now exposes an `enableCertificateManagement` flag
+          (controller flag wiring) so certificate management behavior can be toggled
+          via values.]
+      features: ['Ingress: Auto-discovery of both ECDSA and RSA ACM certificates for
+          Ingress TLS, enabling dual-certificate setups for better client compatibility/performance.',
+        'Gateway API: HTTPRoute and GRPCRoute can share the same hostname on a Gateway
+          listener (overlap restriction removed), enabling mixed HTTP + gRPC on one
+          domain.']
+      breaking_changes: []
+    chart_version: 3.4.1
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.1']
   - version: 3.4.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -10459,6 +10481,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.22.3
   - version: 1.22.1
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -24688,22 +24711,22 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.0.6
+  - version: 4.0.7
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [No substantive new features are listed in the provided release notes
-          excerpts; both versions point to the blog/changelog for details., Primary
-          changes for operators are updated binaries and manifests at v4.0.6 download/install
-          URLs.]
-      breaking_changes: [No breaking changes are described in the provided notes;
-          both releases instruct readers to consult the upgrading guide and main changelog
-          for breaking/known issues.]
-    chart_version: 1.0.18
-    images: ['quay.io/argoproj/argocli:v4.0.6', 'quay.io/argoproj/workflow-controller:v4.0.6',
+      features: ["Release notes provided for v4.0.2 and v4.0.7 are \u201CQuick Start\u201D\
+          \ boilerplate (install/CLI download instructions) and do not enumerate feature-level\
+          \ changes between these patch versions.", 'Operationally, v4.0.7 updates
+          the controller/server manifests (install.yaml) and CLI binaries to the v4.0.7
+          tag; treat it as a patch upgrade within 4.0.x.']
+      breaking_changes: [No breaking changes are listed in the provided notes; they
+          only point to the upstream upgrading guide and main CHANGELOG for details.]
+    chart_version: 1.0.19
+    images: ['quay.io/argoproj/argocli:v4.0.7', 'quay.io/argoproj/workflow-controller:v4.0.7',
       'registry.k8s.io/kubectl:v1.36.2']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']

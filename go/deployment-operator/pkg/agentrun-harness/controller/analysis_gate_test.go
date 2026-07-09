@@ -15,6 +15,7 @@ import (
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/test/mocks"
@@ -59,16 +60,60 @@ func TestBuildAnalysisFollowUpPrompt(t *testing.T) {
 	require.Contains(t, p, "updateAgentRunAnalysis")
 }
 
+func TestUpdateAgentRunPersistsBufferedUsageWithoutMutatingFetchedRun(t *testing.T) {
+	t.Parallel()
+
+	recorder := usage.New(nil)
+	recorder.RecordUsage(usage.Record{InputTokens: 10, OutputTokens: 5})
+
+	m := mocks.NewClientMock(t)
+	m.On("UpdateAgentRun", mock.Anything, "r1", mock.MatchedBy(func(attrs gqlclient.AgentRunStatusAttributes) bool {
+		return attrs.Status == gqlclient.AgentRunStatusRunning &&
+			attrs.Usage != nil &&
+			attrs.Usage.InputTokens != nil &&
+			*attrs.Usage.InputTokens == 10
+	})).Return(&gqlclient.AgentRunFragment{ID: "r1"}, nil).Once()
+
+	in := &agentRunController{
+		agentRun:      &agentrunv1.AgentRun{Status: gqlclient.AgentRunStatusPending},
+		agentRunID:    "r1",
+		consoleClient: m,
+		usage:         recorder,
+	}
+
+	_, err := in.updateAgentRun(context.Background(), gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning})
+	require.NoError(t, err)
+	require.Equal(t, gqlclient.AgentRunStatusPending, in.agentRun.Status)
+}
+
+func TestCanStartStatusStillRejectsRunning(t *testing.T) {
+	t.Parallel()
+
+	in := &agentRunController{
+		agentRun: &agentrunv1.AgentRun{Status: gqlclient.AgentRunStatusRunning},
+	}
+
+	require.False(t, in.canStartStatus())
+}
+
 type recordingTool struct {
 	analysisFollowUps int
+	babysitRuns       int
+	configureBabysit  int
 	followErr         error
 }
 
 func (t *recordingTool) Run(context.Context, ...exec.Option) {}
 
-func (t *recordingTool) BabysitRun(context.Context, *toolv1.BabysitContext) bool { return false }
+func (t *recordingTool) BabysitRun(context.Context, *toolv1.BabysitContext) bool {
+	t.babysitRuns++
+	return false
+}
 
-func (t *recordingTool) ConfigureBabysitRun() error { return nil }
+func (t *recordingTool) ConfigureBabysitRun() error {
+	t.configureBabysit++
+	return nil
+}
 
 func (t *recordingTool) Configure(_, _ string) error { return nil }
 
@@ -138,6 +183,46 @@ func TestEnsureAnalysisPersistedAfterInitialRun_runsInWriteMode(t *testing.T) {
 		tool:          &recordingTool{},
 	}
 	in.ensureAnalysisPersistedAfterInitialRun(context.Background())
+	m.AssertExpectations(t)
+}
+
+func TestBabysitLoopSkipsBabysitForAnalyzeMode(t *testing.T) {
+	t.Parallel()
+
+	m := mocks.NewClientMock(t)
+	full := &gqlclient.AgentRunFragment{
+		ID: "r1",
+		Analysis: &gqlclient.AgentAnalysisFragment{
+			Summary:  "sum",
+			Analysis: "details",
+		},
+	}
+	m.On("GetAgentRun", mock.Anything, "r1").Return(full, nil).Once()
+
+	rt := &recordingTool{}
+	in := &agentRunController{
+		consoleClient: m,
+		agentRun: &agentrunv1.AgentRun{
+			Mode:    gqlclient.AgentRunModeAnalyze,
+			Babysit: true,
+		},
+		agentRunID: "r1",
+		done:       make(chan struct{}),
+		runDone:    make(chan struct{}),
+		errChan:    make(chan error, 1),
+		tool:       rt,
+	}
+	close(in.runDone)
+
+	in.babysitLoop(context.Background(), rt.BabysitRun)
+
+	require.Equal(t, 0, rt.configureBabysit)
+	require.Equal(t, 0, rt.babysitRuns)
+	select {
+	case e := <-in.errChan:
+		t.Fatalf("unexpected error: %v", e)
+	default:
+	}
 	m.AssertExpectations(t)
 }
 
@@ -318,4 +403,46 @@ func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
 	require.Equal(t, "late visible comment", bCtx.PRs[0].NewComments[0].Body)
 	require.Contains(t, bCtx.Prompt, "late visible comment")
 	require.Contains(t, bCtx.Prompt, "review:2")
+}
+
+func TestBuildBabysitContextIncludesReviewSummariesAsNonReactable(t *testing.T) {
+	t.Parallel()
+
+	prURL := "https://github.com/pluralsh/console/pull/1"
+	in := &agentRunController{dir: t.TempDir()}
+	agentRun := &gqlclient.AgentRunFragment{
+		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
+	}
+	client := &fakeBabysitGRPCClient{
+		details: map[string]*scm.PRDetails{
+			prURL: {
+				Title:   "Fix babysit",
+				HeadRef: "fix/babysit",
+				State:   scm.PRStateOpen,
+			},
+		},
+	}
+
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+
+	client.details[prURL] = &scm.PRDetails{
+		Title:   "Fix babysit",
+		HeadRef: "fix/babysit",
+		State:   scm.PRStateOpen,
+		Comments: []scm.PRComment{{
+			ID:        "3",
+			Type:      scm.PRCommentTypeReviewSummary,
+			Author:    "bot-reviewer",
+			Body:      "summary review feedback",
+			CreatedAt: time.Unix(20, 0),
+		}},
+	}
+
+	bCtx := in.buildBabysitContext(context.Background(), agentRun, client)
+	require.NotNil(t, bCtx)
+	require.Len(t, bCtx.PRs[0].NewComments, 1)
+	require.Equal(t, scm.PRCommentTypeReviewSummary, bCtx.PRs[0].NewComments[0].Type)
+	require.Contains(t, bCtx.Prompt, "summary review feedback")
+	require.Contains(t, bCtx.Prompt, "review_summary:3")
+	require.Contains(t, bCtx.Prompt, "not reactable")
 }

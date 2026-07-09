@@ -244,7 +244,7 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Exa]:
     'Search the web with Exa to fetch high-signal context for tasks.',
   [WorkbenchToolType.Github]:
-    'Use the GitHub REST API for repository, issue, and pull request workflows.',
+    'Use the GitHub REST API for repository, issue, pull request, and security workflows.',
   [WorkbenchToolType.Gitlab]:
     'Connect to GitLab for repository and merge request workflows via the GitLab API.',
   [WorkbenchToolType.Bitbucket]:

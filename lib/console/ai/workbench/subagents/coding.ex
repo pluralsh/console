@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Subagents.Coding do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun, AIUsage}
   alias Console.AI.Tools.Workbench.{
     Skills,
     History,
@@ -10,7 +10,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     Result,
     Coding.PullRequests
   }
-  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.{Environment, Heartbeat}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -25,16 +25,16 @@ defmodule Console.AI.Workbench.Subagents.Coding do
         continue_msg: cont_msg()
       ]
     )
-    |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
+    |> MemoryEngine.reduce([{:user, prompt}], &reducer(&1, &2, job))
     |> case do
       {:ok, attrs} -> attrs
       {:error, error} -> %{status: :failed, result: %{error: "error running infrastructure subagent: #{inspect(error)}"}}
     end
   end
 
-  defp reducer(messages, _) do
+  defp reducer(messages, _, job) do
     case Enum.find(messages, &stop_msg/1) do
-      %AgentRun{} = run -> {:message, persist_and_poll_run(run)}
+      %AgentRun{} = run -> {:message, persist_and_poll_run(run, job)}
       %Result{output: output} -> {:halt, %{status: :successful, result: %{output: output}}}
       _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
@@ -44,8 +44,10 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   defp stop_msg(%Result{}), do: true
   defp stop_msg(_), do: false
 
-  defp persist_and_poll_run(%AgentRun{id: id, tool: tool} = run) do
-    case poll_run(run) do
+  defp persist_and_poll_run(%AgentRun{id: id, tool: tool} = run, job) do
+    poll_run(run)
+    |> record_usage(job)
+    |> case do
       {:timeout, _} -> {:user, "agent run #{id} timed out"}
       {:failed, %AgentRun{error: error}} -> tool_msg("Agent run failed: #{error}", tool)
       {:success, %AgentRun{mode: :write, pull_requests: prs, analysis: analysis}} when is_list(prs) ->
@@ -55,6 +57,12 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       {:success, _} -> {:user, "Agent run completed successfully, but no output was generated"}
     end
   end
+
+  defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage}} = pass, job) when result in [:failed, :success] do
+    Heartbeat.usage_callback(job, AIUsage.to_map(usage))
+    pass
+  end
+  defp record_usage(result, _), do: result
 
   defp tool_msg(content, %Console.AI.Tool{id: id, name: name, arguments: args}),
     do: {:tool, content, %{call_id: id, name: name, arguments: args}}

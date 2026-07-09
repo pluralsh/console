@@ -30,20 +30,23 @@ type PRDetails struct {
 	CIChecks []CICheck
 }
 
-// PRCommentType distinguishes top-level issue comments from inline review comments.
+// PRCommentType distinguishes top-level issue comments, inline review comments,
+// and pull request review summaries.
 type PRCommentType string
 
 const (
-	PRCommentTypeIssue  PRCommentType = "issue"
-	PRCommentTypeReview PRCommentType = "review"
+	PRCommentTypeIssue         PRCommentType = "issue"
+	PRCommentTypeReview        PRCommentType = "review"
+	PRCommentTypeReviewSummary PRCommentType = "review_summary"
 )
 
 // PRComment is a single review or issue comment on the PR.
 type PRComment struct {
 	// ID is the numeric provider comment ID
 	ID string
-	// Type distinguishes top level issue comments from inline review comments, which have separate reaction endpoints in GitHub's API.
-	// Used to route react API calls to the correct endpoint.
+	// Type routes react API calls for comments that support reactions. Review
+	// summaries are included for context but are not reactable through GitHub's
+	// comment reaction endpoints.
 	Type      PRCommentType
 	Author    string
 	Body      string
@@ -55,6 +58,15 @@ type PRComment struct {
 // This is the value the agent should pass to the reactToComment MCP tool.
 func (c PRComment) ReactableID() string {
 	return string(c.Type) + ":" + c.ID
+}
+
+func (c PRComment) Reactable() bool {
+	switch c.Type {
+	case PRCommentTypeIssue, PRCommentTypeReview:
+		return true
+	default:
+		return false
+	}
 }
 
 // CICheckStatus values for CICheck.Status.
@@ -184,7 +196,7 @@ func PRStateHash(details ...*PRDetails) (string, error) {
 		}
 		h := hashable{Title: d.Title, Body: d.Body}
 		for _, c := range d.Comments {
-			h.Comments = append(h.Comments, c.ID+":"+c.Body)
+			h.Comments = append(h.Comments, c.ReactableID()+":"+c.Body)
 		}
 		for _, ci := range d.CIChecks {
 			h.CIChecks = append(h.CIChecks, ci.Name+":"+ci.Conclusion)

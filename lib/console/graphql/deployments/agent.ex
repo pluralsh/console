@@ -53,6 +53,18 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
     field :skills,           list_of(:agent_skill_attributes), description: "the skills available to this agent run"
+    field :usage,            :ai_usage_attributes, description: "token and cost usage for this agent run"
+  end
+
+  input_object :ai_usage_attributes do
+    field :input_tokens,     :integer, description: "input tokens consumed by this run"
+    field :output_tokens,    :integer, description: "output tokens produced by this run"
+    field :total_tokens,     :integer, description: "total tokens consumed by this run"
+    field :cached_tokens,    :integer, description: "cached input tokens used by this run"
+    field :reasoning_tokens, :integer, description: "reasoning tokens produced by this run"
+    field :input_cost,       :float, description: "input token cost for this run"
+    field :output_cost,      :float, description: "output token cost for this run"
+    field :total_cost,       :float, description: "total token cost for this run"
   end
 
   input_object :agent_pull_request_attributes do
@@ -176,6 +188,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :consumed,         :id, description: "the agent run this run consumed"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
+    field :usage,            :agent_run_usage, description: "token and cost usage for this agent run"
 
     field :analysis, :agent_analysis, description: "the analysis of the agent run"
     field :skills,   list_of(:agent_skill), description: "the skills available to this agent run"
@@ -230,6 +243,17 @@ defmodule Console.GraphQl.Deployments.Agent do
   object :agent_pod_reference do
     field :name,      non_null(:string)
     field :namespace, non_null(:string)
+  end
+
+  object :agent_run_usage do
+    field :input_tokens,     :integer, description: "input tokens consumed by this run"
+    field :output_tokens,    :integer, description: "output tokens produced by this run"
+    field :total_tokens,     :integer, description: "total tokens consumed by this run"
+    field :cached_tokens,    :integer, description: "cached input tokens used by this run"
+    field :reasoning_tokens, :integer, description: "reasoning tokens produced by this run"
+    field :input_cost,       :float, description: "input token cost for this run"
+    field :output_cost,      :float, description: "output token cost for this run"
+    field :total_cost,       :float, description: "total token cost for this run"
   end
 
   object :agent_analysis do

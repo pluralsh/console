@@ -5,6 +5,10 @@ import {
   wipeRefreshToken,
   wipeToken,
 } from 'helpers/auth'
+import {
+  clearServiceAccountImpersonation,
+  isImpersonatingServiceAccount,
+} from 'helpers/impersonation'
 import { jwtDecode } from 'jwt-decode'
 import {
   ComponentProps,
@@ -58,6 +62,7 @@ export function useCloudSetupUnfinished() {
 }
 
 function completeLogout() {
+  clearServiceAccountImpersonation()
   wipeToken()
   wipeRefreshToken()
   ;(window as Window).location = '/login'
@@ -91,20 +96,23 @@ export function LoginContextProvider({
     fetchPolicy: 'network-only',
   })
   const jwt = fetchToken()
+  const impersonating = isImpersonatingServiceAccount()
 
   const refresh = useCallback(() => {
     refreshQuery({ variables: { token: fetchRefreshToken() || '' } })
   }, [refreshQuery])
 
   useEffect(() => {
+    if (impersonating) return
+
     if (
       !refreshLoading &&
       (!jwt ||
-        (jwtDecode(jwt)?.exp ?? 0) * 1000 < Date.now() + JWT_REFRESH_THRESHOLD)
+        (getJwtExpiry(jwt) ?? 0) * 1000 < Date.now() + JWT_REFRESH_THRESHOLD)
     ) {
       refresh()
     }
-  }, [jwt, refresh, refreshLoading, refreshQuery])
+  }, [impersonating, jwt, refresh, refreshLoading, refreshQuery])
 
   const value = useMemo(
     () =>
@@ -128,3 +136,11 @@ export function LoginContextProvider({
 }
 
 export { LoginContext }
+
+function getJwtExpiry(jwt: string) {
+  try {
+    return jwtDecode(jwt)?.exp
+  } catch {
+    return undefined
+  }
+}

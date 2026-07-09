@@ -9,6 +9,11 @@ import {
   wipeRefreshToken,
   wipeToken,
 } from './auth'
+import {
+  clearServiceAccountImpersonation,
+  isImpersonatingServiceAccount,
+  stopServiceAccountImpersonation,
+} from './impersonation'
 import { authlessClient } from './client'
 
 const RETURN_TO_KEY = 'plural-return-to'
@@ -85,6 +90,13 @@ export const onErrorHandler: ErrorHandler = ({
     })
   }
 
+  if ((is401 || isUnauthenticated) && isImpersonatingServiceAccount()) {
+    stopServiceAccountImpersonation()
+    ;(window as Window).location.reload()
+
+    return
+  }
+
   if (is401) {
     logoutWithReturnTo()
   }
@@ -94,6 +106,7 @@ export function logoutWithReturnTo() {
   const returnPath = window.location.pathname + window.location.search
   if (returnPath) localStorage.setItem(RETURN_TO_KEY, returnPath)
 
+  clearServiceAccountImpersonation()
   wipeToken()
   wipeRefreshToken()
   ;(window as Window).location = '/login'

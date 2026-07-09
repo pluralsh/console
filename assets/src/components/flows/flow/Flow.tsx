@@ -14,12 +14,16 @@ import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
+import { useLogin } from 'components/contexts'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
-import { FlowBasicWithBindingsFragment } from 'generated/graphql'
+import {
+  FlowBasicWithBindingsFragment,
+  PersonaConfigurationFragment,
+} from 'generated/graphql'
 import { ReactNode, createContext, use, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
@@ -30,14 +34,37 @@ import { VULNERABILITY_REPORTS_REL_PATH } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
 import { FlowWorkbenchJobLauncher } from './FlowWorkbenchJobLauncher'
 
-const baseDirectory: SubtabDirectory = [
-  { path: 'services', label: 'Services' },
-  { path: FLOW_WORKBENCHES_REL_PATH, label: 'Workbenches' },
-  { path: 'pipelines', label: 'Pipelines' },
-  { path: 'previews', label: 'Previews' },
-  { path: 'alerts', label: 'Alerts' },
-  { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerabilities' },
-]
+function getDirectory(
+  personaConfiguration: Nullable<PersonaConfigurationFragment>
+): SubtabDirectory {
+  const all = !!personaConfiguration?.all
+  const flows = personaConfiguration?.flows
+
+  return [
+    { path: 'services', label: 'Services', enabled: true },
+    {
+      path: FLOW_WORKBENCHES_REL_PATH,
+      label: 'Workbenches',
+      enabled: all || !!flows?.workbenches,
+    },
+    {
+      path: 'pipelines',
+      label: 'Pipelines',
+      enabled: all || !!flows?.pipelines,
+    },
+    {
+      path: 'previews',
+      label: 'Previews',
+      enabled: all || !!flows?.previews,
+    },
+    { path: 'alerts', label: 'Alerts', enabled: true },
+    {
+      path: VULNERABILITY_REPORTS_REL_PATH,
+      label: 'Vulnerabilities',
+      enabled: true,
+    },
+  ]
+}
 
 export type FlowOutletContext = {
   flow: Nullable<FlowBasicWithBindingsFragment>
@@ -69,6 +96,7 @@ export function Flow() {
   const [sidePanelContent, setSidePanelContent] = useState<ReactNode | null>(
     null
   )
+  const { personaConfiguration } = useLogin()
   const { flowIdOrName, flowData, loading, error, refetch } = useCurrentFlow()
   const tab = useMatch(`${FLOWS_ABS_PATH}/${flowIdOrName}/:tab/*`)?.params.tab
   const flow = flowData?.flow
@@ -80,6 +108,10 @@ export function Flow() {
     [setSidePanelContent]
   )
   const outletCtx: FlowOutletContext = useMemo(() => ({ flow }), [flow])
+  const directory = useMemo(
+    () => getDirectory(personaConfiguration),
+    [personaConfiguration]
+  )
 
   useSetBreadcrumbs(
     useMemo(() => getFlowBreadcrumbs(flow?.name || '', tab), [flow?.name, tab])
@@ -150,7 +182,7 @@ export function Flow() {
                 <FlowWorkbenchJobLauncher flow={flow} />
               </HeaderSC>
               <Flex justify="space-between">
-                <SubTabs directory={baseDirectory} />
+                <SubTabs directory={directory} />
                 {headerContent}
               </Flex>
               <OutletWrapSC>

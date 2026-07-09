@@ -226,7 +226,9 @@ function NewReplicaSet(): ReactElement<any> {
           />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {formatLocalizedDateTime(replicaSet?.objectMeta?.creationTimestamp)}{' '}
+          {formatLocalizedDateTime(
+            replicaSet?.objectMeta?.creationTimestamp
+          )}{' '}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Pods">
           <PodInfo info={replicaSet?.podInfo} />

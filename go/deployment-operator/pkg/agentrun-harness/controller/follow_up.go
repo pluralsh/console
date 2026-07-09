@@ -21,7 +21,7 @@ func (in *agentRunController) runFollowUpPrompt(ctx context.Context, prompt stri
 		return true
 	}
 
-	if _, err := in.consoleClient.UpdateAgentRun(ctx, in.agentRunID, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
+	if _, err := in.updateAgentRun(ctx, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusRunning}); err != nil {
 		in.errChan <- fmt.Errorf("could not update agent run status before follow-up: %w", err)
 		return false
 	}

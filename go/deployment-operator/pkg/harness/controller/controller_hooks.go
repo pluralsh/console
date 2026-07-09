@@ -29,7 +29,7 @@ func (in *stackRunController) preStart() error {
 		klog.Fatalf("could not start stack run: invalid status: %s", in.stackRun.Status)
 	}
 
-	if err := stackrun.StartStackRun(in.consoleClient, in.stackRunID); err != nil {
+	if err := stackrun.MarkStackRunWithRetryTimeout(in.consoleClient, in.stackRunID, gqlclient.StackStatusRunning, 5*time.Second, 30*time.Second); err != nil {
 		if clienterrors.IsUnauthenticated(err) {
 			return harnesserrors.WrapUnauthenticated("could not update stack run status", err)
 		}
@@ -151,7 +151,7 @@ func (in *stackRunController) requiresApproval() bool {
 
 func (in *stackRunController) waitForApproval(ctx context.Context) error {
 	// Retry here to make sure that the pending approval status will be set before we start waiting.
-	stackrun.MarkStackRunWithRetry(in.consoleClient, in.stackRunID, gqlclient.StackStatusPendingApproval, 5*time.Second)
+	_ = stackrun.MarkStackRunWithRetry(in.consoleClient, in.stackRunID, gqlclient.StackStatusPendingApproval, 5*time.Second)
 
 	klog.V(log.LogLevelInfo).InfoS("waiting for approval to proceed")
 
@@ -215,7 +215,7 @@ func (in *stackRunController) waitForApproval(ctx context.Context) error {
 	}
 
 	// Retry here to make sure that we resume the stack run status to running after it has been approved.
-	stackrun.MarkStackRunWithRetry(in.consoleClient, in.stackRunID, gqlclient.StackStatusRunning, 5*time.Second)
+	_ = stackrun.MarkStackRunWithRetry(in.consoleClient, in.stackRunID, gqlclient.StackStatusRunning, 5*time.Second)
 	return nil
 }
 

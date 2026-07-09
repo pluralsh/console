@@ -5,6 +5,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/samber/lo"
 
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -160,10 +161,16 @@ type StreamPart struct {
 }
 
 type StreamTokens struct {
-	Total     float64 `json:"total"`
-	Input     float64 `json:"input"`
-	Output    float64 `json:"output"`
-	Reasoning float64 `json:"reasoning"`
+	Total     float64           `json:"total"`
+	Input     float64           `json:"input"`
+	Output    float64           `json:"output"`
+	Reasoning float64           `json:"reasoning"`
+	Cache     *StreamTokenCache `json:"cache,omitempty"`
+}
+
+type StreamTokenCache struct {
+	Read  float64 `json:"read"`
+	Write float64 `json:"write"`
 }
 
 type StreamToolState struct {
@@ -193,7 +200,7 @@ type streamState struct {
 	events map[string]*Event
 }
 
-func (in *Event) FromEventResponse(e EventListResponse) {
+func (in *Event) FromEventResponse(e EventListResponse, recorder *usage.Usage) {
 	if in.Message == nil {
 		in.Message = &console.AgentMessageAttributes{}
 	}
@@ -216,7 +223,7 @@ func (in *Event) FromEventResponse(e EventListResponse) {
 			in.Message.Message = "Called tool"
 		}
 	case StreamPartTypeStepFinish:
-		in.fromTokens(e.Part.Tokens, e.Part.Cost)
+		in.fromTokens(e.Part.Tokens, e.Part.Cost, recorder)
 		in.Done = true
 	}
 }
@@ -262,7 +269,7 @@ func (in *Event) fromToolState(part *StreamPart) {
 	in.seenToolCalls[callID] = struct{}{}
 }
 
-func (in *Event) fromTokens(tokens *StreamTokens, cost float64) {
+func (in *Event) fromTokens(tokens *StreamTokens, cost float64, recorder *usage.Usage) {
 	if in.Message.Cost == nil {
 		in.Message.Cost = &console.AgentMessageCostAttributes{}
 	}
@@ -272,8 +279,26 @@ func (in *Event) fromTokens(tokens *StreamTokens, cost float64) {
 	}
 
 	if tokens == nil {
+		recorder.RecordUsage(usage.Record{TotalCost: cost})
 		return
 	}
+
+	cachedTokens := int64(0)
+	if tokens.Cache != nil {
+		cachedTokens = int64(tokens.Cache.Read + tokens.Cache.Write)
+	}
+	totalTokens := int64(tokens.Total)
+	if totalTokens == 0 {
+		totalTokens = int64(tokens.Input + tokens.Output)
+	}
+	recorder.RecordUsage(usage.Record{
+		InputTokens:     int64(tokens.Input),
+		OutputTokens:    int64(tokens.Output),
+		TotalTokens:     totalTokens,
+		CachedTokens:    cachedTokens,
+		ReasoningTokens: int64(tokens.Reasoning),
+		TotalCost:       cost,
+	})
 
 	if in.Message.Cost.Tokens == nil {
 		in.Message.Cost.Tokens = &console.AgentMessageTokensAttributes{}

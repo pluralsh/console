@@ -10,7 +10,7 @@ defmodule Console.Schema.Persona do
     embedded_schema do
       field :all, :boolean
       embeds_one :home, Home, on_replace: :update do
-        boolean_fields [:manager, :security]
+        boolean_fields [:manager, :security, :developer]
       end
 
       embeds_one :deployments, Deployments, on_replace: :update do
@@ -21,8 +21,12 @@ defmodule Console.Schema.Persona do
         boolean_fields [:secrets, :configuration]
       end
 
+      embeds_one :flows, Flows, on_replace: :update do
+        boolean_fields [:workbenches, :pipelines, :previews]
+      end
+
       embeds_one :sidebar, Sidebar, on_replace: :update do
-        boolean_fields [:all, :kubernetes, :audits, :pull_requests, :settings, :backups, :stacks, :security, :cost]
+        boolean_fields [:all, :kubernetes, :audits, :pull_requests, :flows, :workbenches, :settings, :backups, :stacks, :security, :cost]
       end
 
       embeds_one :ai, AI, on_replace: :update do
@@ -37,6 +41,7 @@ defmodule Console.Schema.Persona do
       |> cast_embed(:sidebar, with: &sidebar_cs/2)
       |> cast_embed(:home, with: &home_cs/2)
       |> cast_embed(:services, with: &services_cs/2)
+      |> cast_embed(:flows, with: &flows_cs/2)
       |> cast_embed(:ai, with: &ai_cs/2)
     end
 
@@ -65,11 +70,17 @@ defmodule Console.Schema.Persona do
       |> cast(attrs, ai_fields())
     end
 
+    defp flows_cs(model, attrs) do
+      model
+      |> cast(attrs, flows_fields())
+    end
+
     defp deployments_fields(), do: __MODULE__.Deployments.__schema__(:fields) -- [:id]
     defp sidebar_fields(), do: __MODULE__.Sidebar.__schema__(:fields) -- [:id]
     defp home_fields(), do: __MODULE__.Home.__schema__(:fields) -- [:id]
     defp services_fields(), do: __MODULE__.Services.__schema__(:fields) -- [:id]
     defp ai_fields(), do: __MODULE__.AI.__schema__(:fields) -- [:id]
+    defp flows_fields(), do: __MODULE__.Flows.__schema__(:fields) -- [:id]
   end
 
   schema "personas" do

@@ -50,11 +50,18 @@ const DEFAULT_CONFIGURATION = {
     repositories: true,
     services: true,
   },
+  flows: {
+    pipelines: true,
+    previews: true,
+    workbenches: true,
+  },
   sidebar: {
     audits: true,
+    flows: true,
     kubernetes: true,
     pullRequests: true,
     settings: true,
+    workbenches: true,
     stacks: true,
     backups: true,
     cost: true,
@@ -72,6 +79,7 @@ const DEFAULT_CONFIGURATION = {
 export const configTabs = {
   home: 'Homepage',
   deployments: 'Continuous deployment',
+  flows: 'Flows',
   sidebar: 'Sidebar',
   services: 'Services',
   ai: 'AI',

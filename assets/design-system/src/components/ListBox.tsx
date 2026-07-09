@@ -205,7 +205,7 @@ function ListBox({
     children: useItemWrappedChildren(children, header, footer),
   }
 
-  const state = useListState(listStateProps as any)
+  const state = useListState<object>(listStateProps as any)
 
   stateRef.current = state
 

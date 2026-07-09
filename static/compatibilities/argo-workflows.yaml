@@ -4,22 +4,22 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.0.6
+- version: 4.0.7
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [No substantive new features are listed in the provided release notes
-        excerpts; both versions point to the blog/changelog for details., Primary
-        changes for operators are updated binaries and manifests at v4.0.6 download/install
-        URLs.]
-    breaking_changes: [No breaking changes are described in the provided notes; both
-        releases instruct readers to consult the upgrading guide and main changelog
-        for breaking/known issues.]
-  chart_version: 1.0.18
-  images: ['quay.io/argoproj/argocli:v4.0.6', 'quay.io/argoproj/workflow-controller:v4.0.6',
+    features: ["Release notes provided for v4.0.2 and v4.0.7 are \u201CQuick Start\u201D\
+        \ boilerplate (install/CLI download instructions) and do not enumerate feature-level\
+        \ changes between these patch versions.", 'Operationally, v4.0.7 updates the
+        controller/server manifests (install.yaml) and CLI binaries to the v4.0.7
+        tag; treat it as a patch upgrade within 4.0.x.']
+    breaking_changes: [No breaking changes are listed in the provided notes; they
+        only point to the upstream upgrading guide and main CHANGELOG for details.]
+  chart_version: 1.0.19
+  images: ['quay.io/argoproj/argocli:v4.0.7', 'quay.io/argoproj/workflow-controller:v4.0.7',
     'registry.k8s.io/kubectl:v1.36.2']
 - version: 4.0.2
   kube: ['1.33', '1.32', '1.31']

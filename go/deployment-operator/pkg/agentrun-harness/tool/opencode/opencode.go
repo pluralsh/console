@@ -193,7 +193,7 @@ func (in *Opencode) processEvent(state *streamState, event EventListResponse) {
 		aggregated = &Event{}
 	}
 
-	aggregated.FromEventResponse(event)
+	aggregated.FromEventResponse(event, in.Config.Usage)
 	state.events[id] = aggregated
 
 	if !aggregated.Done {
@@ -231,7 +231,7 @@ func (in *Opencode) emitCompletedToolEvent(event EventListResponse) bool {
 	}
 
 	toolEvent := &Event{}
-	toolEvent.FromEventResponse(event)
+	toolEvent.FromEventResponse(event, in.Config.Usage)
 	toolEvent.Sanitize()
 
 	if in.onMessage != nil {

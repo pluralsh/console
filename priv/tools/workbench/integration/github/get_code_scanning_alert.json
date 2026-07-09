@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Get a single code scanning alert for a repository via GitHub REST.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "alert_number": {
+      "type": "integer",
+      "description": "Code scanning alert number."
+    }
+  },
+  "required": ["owner", "repo", "alert_number"],
+  "additionalProperties": false
+}

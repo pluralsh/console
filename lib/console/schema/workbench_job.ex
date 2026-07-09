@@ -7,6 +7,7 @@ defmodule Console.Schema.WorkbenchJob do
     WorkbenchEvalResult,
     WorkbenchJobResult,
     WorkbenchJobActivity,
+    AIUsage,
     User,
     Alert,
     Issue,
@@ -66,16 +67,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     embeds_one :modes, Modes, on_replace: :update
 
-    embeds_one :usage, Usage, on_replace: :update do
-      field :input_tokens,     :integer
-      field :output_tokens,    :integer
-      field :total_tokens,     :integer
-      field :cached_tokens,    :integer
-      field :reasoning_tokens, :integer
-      field :input_cost,       :float
-      field :output_cost,      :float
-      field :total_cost,       :float
-    end
+    embeds_one :usage, AIUsage, on_replace: :update
 
     belongs_to :workbench,      Workbench
     belongs_to :user,           User
@@ -231,7 +223,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
     |> cast_embed(:modes)
-    |> cast_embed(:usage, with: &usage_changeset/2)
+    |> cast_embed(:usage)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
@@ -246,20 +238,6 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, [])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
-  end
-
-  defp usage_changeset(model, attrs) do
-    model
-    |> cast(attrs, ~w(
-      input_tokens
-      output_tokens
-      total_tokens
-      cached_tokens
-      reasoning_tokens
-      input_cost
-      output_cost
-      total_cost
-    )a)
   end
 end
 
