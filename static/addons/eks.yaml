@@ -6508,6 +6508,15 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.0.9-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v5.0.8-eksbuild.1
     compatibilities:
     - '1.36'
@@ -8651,6 +8660,17 @@
   publisher: eks
 - name: kubecost_kubecost
   versions:
+  - version: v3.2.1-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v3.2.0-eksbuild.1
     compatibilities:
     - '1.35'
@@ -9986,6 +10006,17 @@
   publisher: Spacelift Inc.
 - name: splunk_splunk-otel-collector-chart
   versions:
+  - version: v0.155.0-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.153.0-eksbuild.1
     compatibilities:
     - '1.35'
