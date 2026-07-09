@@ -37,7 +37,7 @@ import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { securityVulnReportsCrumbs } from './VulnReports'
 import { useMemo, useState } from 'react'
 import { VulnFixModal } from './VulnFixModal'
-import { RowSelectionState } from '@tanstack/react-table'
+import { RowSelectionState, ExpandedState } from '@tanstack/react-table'
 import { buildVulnerabilityFixPrompt } from './vulnerabilityMention'
 
 export function VulnerabilityReportDetails() {
@@ -65,6 +65,7 @@ export function VulnerabilityReportDetails() {
 
   const [bulkSelectMode, setBulkSelectMode] = useState(false)
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [expanded, setExpanded] = useState<ExpandedState>({})
   const [fixVulns, setFixVulns] = useState<VulnerabilityFragment[] | null>(null)
 
   const vulnerabilities = useMemo(
@@ -163,6 +164,7 @@ export function VulnerabilityReportDetails() {
       </HeaderSC>
       <TableWrapperSC>
         <Table
+          key={bulkSelectMode ? 'bulk-select' : 'default'}
           fullHeightWrap
           virtualizeRows
           data={vulnerabilities}
@@ -183,7 +185,8 @@ export function VulnerabilityReportDetails() {
             enableRowSelection: bulkSelectMode,
             enableMultiRowSelection: true,
             onRowSelectionChange: setRowSelection,
-            state: { rowSelection },
+            onExpandedChange: setExpanded,
+            state: { rowSelection, expanded },
           }}
         />
         {bulkSelectMode && (
