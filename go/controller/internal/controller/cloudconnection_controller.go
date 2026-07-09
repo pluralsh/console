@@ -2,11 +2,7 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/pluralsh/console/go/controller/internal/common"
-	"github.com/samber/lo"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -18,6 +14,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/go/controller/internal/common"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -84,10 +82,6 @@ func (r *CloudConnectionReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(connection.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-	err = r.tryAddControllerRef(ctx, connection)
-	if err != nil {
-		return common.HandleRequeue(nil, err, connection.SetCondition)
-	}
 
 	// Get Connection SHA that can be saved back in the status to check for changes
 	changed, sha, err := connection.Diff(ctx, r.toCloudConnectionAttributes, utils.HashObject)
@@ -113,6 +107,19 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	if !changed {
 		return r.ConsoleClient.GetCloudConnection(ctx, connection.Status.ID, nil)
 	}
+
+	if connection.Status.HasID() {
+		existing, err := r.ConsoleClient.GetCloudConnection(ctx, connection.Status.ID, nil)
+		if err != nil && !errors.IsNotFound(err) {
+			return nil, err
+		}
+		if err == nil && existing.Name != connection.CloudConnectionName() {
+			if err = r.ConsoleClient.DeleteCloudConnection(ctx, connection.Status.GetID()); err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	attr, err := r.toCloudConnectionAttributes(ctx, *connection)
 	if err != nil {
 		return nil, err
@@ -128,22 +135,8 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)
 }
 
-func (r *CloudConnectionReconciler) tryAddControllerRef(ctx context.Context, connection *v1alpha1.CloudConnection) error {
-	secretRef := r.getProviderSettingsSecretRef(connection.Spec)
-	if secretRef.Name == "" || secretRef.Namespace == "" || secretRef.Key == "" {
-		return fmt.Errorf("the provider configuration secret ref for provider %q is incorrect", connection.Spec.Provider)
-	}
-
-	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: secretRef.Name, Namespace: secretRef.Namespace})
-	if err != nil {
-		return err
-	}
-
-	return utils.TryAddControllerRef(ctx, r.Client, connection, secret, r.Scheme)
-}
-
 func (r *CloudConnectionReconciler) handleExistingConnection(ctx context.Context, connection *v1alpha1.CloudConnection) (reconcile.Result, error) {
-	apiConnection, err := r.ConsoleClient.GetCloudConnection(ctx, nil, lo.ToPtr(connection.CloudConnectionName()))
+	apiConnection, err := r.ConsoleClient.GetCloudConnection(ctx, nil, new(connection.CloudConnectionName()))
 	if err != nil {
 		if errors.IsNotFound(err) {
 			connection.Status.ID = nil
@@ -163,7 +156,16 @@ func (r *CloudConnectionReconciler) isAlreadyExists(ctx context.Context, connect
 		return connection.Status.IsReadonly(), nil
 	}
 
-	_, err := r.ConsoleClient.GetCloudConnection(ctx, nil, lo.ToPtr(connection.CloudConnectionName()))
+	if connection.Status.HasID() {
+		_, err := r.ConsoleClient.GetCloudConnection(ctx, connection.Status.ID, nil)
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	_, err := r.ConsoleClient.GetCloudConnection(ctx, nil, new(connection.CloudConnectionName()))
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -209,7 +211,7 @@ func (r *CloudConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, co
 
 			// If deletion process started requeue so that we can make sure connection
 			// has been deleted from Console API before removing the finalizer.
-			return lo.ToPtr(common.WaitForResources()), nil
+			return new(common.WaitForResources()), nil
 		}
 
 		// Stop reconciliation as the item is being deleted
@@ -225,6 +227,5 @@ func (r *CloudConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.CloudConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

@@ -295,6 +295,133 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			})))
 		})
 
+		It("should update managed connection even when a Console connection exists by name", func() {
+			const managedName = "managed-existing-connection"
+			const managedID = "managed-existing-connection-id"
+			const managedSecret = "managed-existing-connection-secret"
+
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      managedSecret,
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"secretAccessKey": []byte("managed-secret-key"),
+				},
+			}, nil)).To(Succeed())
+
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.CloudConnection{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      managedName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.CloudConnectionSpec{
+					Name:     lo.ToPtr(managedName),
+					Provider: v1alpha1.AWS,
+					Configuration: v1alpha1.CloudConnectionConfiguration{
+						AWS: &v1alpha1.AWSCloudConnection{
+							AccessKeyId: "managed-access-key",
+							SecretAccessKey: v1alpha1.ObjectKeyReference{
+								Name:      managedSecret,
+								Namespace: namespace,
+								Key:       "secretAccessKey",
+							},
+						},
+					},
+				},
+			}, func(p *v1alpha1.CloudConnection) {
+				p.Status.ID = lo.ToPtr(managedID)
+				p.Status.SHA = lo.ToPtr("old-sha")
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			fakeConsoleClient.On("GetCloudConnection", mock.Anything, lo.ToPtr(managedID), mock.Anything).Return(&gqlclient.CloudConnectionFragment{
+				ID:   managedID,
+				Name: managedName,
+			}, nil)
+			fakeConsoleClient.On("UpsertCloudConnection", mock.Anything, mock.MatchedBy(func(attrs gqlclient.CloudConnectionAttributes) bool {
+				return attrs.Name == managedName
+			})).Return(&gqlclient.CloudConnectionFragment{
+				ID:   managedID,
+				Name: managedName,
+			}, nil)
+
+			controllerReconciler := &controller.CloudConnectionReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: managedName, Namespace: namespace}})
+			Expect(err).NotTo(HaveOccurred())
+
+			connection := &v1alpha1.CloudConnection{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: managedName, Namespace: namespace}, connection)).To(Succeed())
+			Expect(connection.Status.GetID()).To(Equal(managedID))
+			Expect(connection.Status.IsReadonly()).To(BeFalse())
+			Expect(connection.Status.IsStatusConditionTrue(v1alpha1.ReadyConditionType)).To(BeTrue())
+			Expect(connection.Status.IsStatusConditionTrue(v1alpha1.SynchronizedConditionType)).To(BeTrue())
+		})
+
+		It("should not add an owner reference to referenced credential secret", func() {
+			const unownedConnectionName = "unowned-secret-connection"
+			const unownedSecretName = "unowned-secret-credentials"
+			const unownedConnectionID = "unowned-secret-connection-id"
+
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      unownedSecretName,
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"secretAccessKey": []byte("unowned-secret-key"),
+				},
+			}, nil)).To(Succeed())
+
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.CloudConnection{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      unownedConnectionName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.CloudConnectionSpec{
+					Name:     lo.ToPtr(unownedConnectionName),
+					Provider: v1alpha1.AWS,
+					Configuration: v1alpha1.CloudConnectionConfiguration{
+						AWS: &v1alpha1.AWSCloudConnection{
+							AccessKeyId: "unowned-access-key",
+							SecretAccessKey: v1alpha1.ObjectKeyReference{
+								Name:      unownedSecretName,
+								Namespace: namespace,
+								Key:       "secretAccessKey",
+							},
+						},
+					},
+				},
+			}, nil)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetCloudConnection", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, unownedConnectionName))
+			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
+			fakeConsoleClient.On("UpsertCloudConnection", mock.Anything, mock.Anything).Return(&gqlclient.CloudConnectionFragment{
+				ID:   unownedConnectionID,
+				Name: unownedConnectionName,
+			}, nil)
+
+			controllerReconciler := &controller.CloudConnectionReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: types.NamespacedName{Name: unownedConnectionName, Namespace: namespace}})
+			Expect(err).NotTo(HaveOccurred())
+
+			secret := &corev1.Secret{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: unownedSecretName, Namespace: namespace}, secret)).To(Succeed())
+			Expect(secret.OwnerReferences).To(BeEmpty())
+		})
+
 		It("should successfully reconcile readonly connection", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetCloudConnection", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil).Once()
