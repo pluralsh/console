@@ -1616,6 +1616,123 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.28.0
+    kube: ['1.35']
+    requirements:
+    - name: Alloy
+      version: 4.1.7-bb.0
+    - name: Anchore Enterprise
+      version: 3.25.0-bb.0
+    - name: Argocd
+      version: 9.7.0-bb.0
+    - name: Authservice
+      version: 1.1.5-bb.5
+    - name: Bbctl
+      version: 3.0.1-bb.3
+    - name: Eck Operator
+      version: 3.4.1-bb.0
+    - name: Elasticsearch Kibana
+      version: 1.39.0-bb.0
+    - name: External Secrets Operator
+      version: 1.3.1-bb.2
+    - name: Fluentbit
+      version: 0.57.3-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.0
+    - name: Gatekeeper
+      version: 3.22.2-bb.1
+    - name: Gateway Api
+      version: 1.5.1-bb.1
+    - name: Gitlab
+      version: 9.11.7-bb.0
+    - name: Gitlab Runner
+      version: 0.88.3-bb.1
+    - name: Grafana
+      version: 10.5.15-bb.3
+    - name: Harbor
+      version: 1.19.1-bb.0
+    - name: Headlamp
+      version: 0.40.0-bb.1
+    - name: Istio Cni
+      version: 1.30.2-bb.0
+    - name: Istio Crds
+      version: 1.30.2-bb.0
+    - name: Istio Gateway
+      version: 1.30.2-bb.0
+    - name: Istiod
+      version: 1.30.2-bb.0
+    - name: Keycloak
+      version: 7.2.0-bb.2
+    - name: Kiali
+      version: 2.28.0-bb.0
+    - name: Kyverno
+      version: 3.8.1-bb.4
+    - name: Kyverno Policies
+      version: 3.3.4-bb.65
+    - name: Kyverno Reporter
+      version: 3.7.4-bb.3
+    - name: Loki
+      version: 6.55.0-bb.2
+    - name: Mattermost
+      version: 11.8.2-bb.0
+    - name: Mattermost Operator
+      version: 1.25.7-bb.0
+    - name: Metrics Server
+      version: 3.13.0-bb.6
+    - name: Mimir
+      version: 6.0.6-bb.3
+    - name: Minio
+      version: 7.1.1-bb.19
+    - name: Minio Operator
+      version: 7.1.1-bb.6
+    - name: Monitoring
+      version: 85.3.3-bb.2
+    - name: Neuvector
+      version: 2.10.3-bb.0
+    - name: Prometheus Operator Crds
+      version: 28.0.1-bb.0
+    - name: Renovate
+      version: 46.31.6-bb.5
+    - name: Sonarqube
+      version: 2026.3.1-bb.1
+    - name: Tempo
+      version: 2.1.0-bb.1
+    - name: Thanos
+      version: 17.4.0-bb.2
+    - name: Twistlock
+      version: 0.27.0-bb.2
+    - name: Vault
+      version: 0.33.0-bb.2
+    - name: Velero
+      version: 12.1.0-bb.1
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.2-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["BigBang 3.28.0 bumps a wide set of packaged components; use\
+          \ this as an upgrade checklist and validate each component\u2019s own release\
+          \ notes for additional required value changes or migrations.", 'Backstage
+          is removed in 3.28.0; you must remove/disable any Backstage-related values,
+          namespaces, and dependent integrations before or during the upgrade.', 'Most
+          changes are patch-level bumps, but some are minor releases (e.g., Argo CD,
+          Kiali, Vault, Velero, Fortify, Twistlock) and may include behavior changes;
+          run in a staging cluster and verify RBAC, CRDs, and webhook behavior.']
+      features: ['Updated platform component bundle with newer versions of Argo CD,
+          Istio 1.30.2, Vault 0.33.x, Velero 12.1.x, and other supporting services.',
+        'Security and bugfix updates across multiple components (Kyverno, Harbor,
+          NeuVector, monitoring stack, etc.) via chart bumps.', Backstage is no longer
+          included in the default BigBang package set.]
+      breaking_changes: ['Backstage component removed: existing Backstage deployments
+          managed by BigBang will no longer be upgraded/maintained; you must migrate
+          or manage it separately if still needed.', 'Potential minor-version behavior
+          changes in Argo CD, Vault, Velero, Fortify, and Twistlock may require config
+          validation and post-upgrade testing (SSO/OIDC, policies, CRDs, backups/restores,
+          scanners).']
+    chart_version: 3.28.0
+    images: []
   - version: 3.27.0
     kube: ['1.35']
     requirements:
@@ -10846,6 +10963,76 @@ addons:
   helm_repository_url: https://charts.jetstack.io
   eolApiSlug: cert-manager
   versions:
+  - version: 1.21.0
+    kube: ['1.36', '1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "## Helm values / chart behavior changes to apply before upgrading\n\
+        \n- **Remove deprecated metrics override values (hard fail if present)**\n\
+        \  - Delete these keys from your `values.yaml`/overrides before running `helm\
+        \ upgrade` (schema has `additionalProperties: false`):\n    - `prometheus.servicemonitor.targetPort`\n\
+        \    - `prometheus.servicemonitor.path`\n    - `prometheus.podmonitor.path`\n\
+        \  - Metrics path is now always **`/metrics`** and target port is always **`http-metrics`**.\n\
+        \n- **Metrics Service port rename**\n  - Controller Service metrics port name\
+        \ changed from **`tcp-prometheus-servicemonitor`** \u2192 **`http-metrics`**.\n\
+        \  - If you reference the old port name anywhere (ServiceMonitor/PodMonitor,\
+        \ Prometheus scrape config, NetworkPolicy, etc.), update it.\n\n- **RBAC:\
+        \ default tokenrequest Role/RoleBinding removed**\n  - The chart no longer\
+        \ creates a default `Role`/`RoleBinding` that grants the controller SA `serviceaccounts/token:\
+        \ create` on itself.\n  - If you had an Issuer/ClusterIssuer using `serviceAccountRef.name`\
+        \ set to the *controller* ServiceAccount (undocumented pattern), you must:\n\
+        \    - create your own Role/RoleBinding granting `serviceaccounts/token: create`,\
+        \ **or**\n    - migrate to a dedicated ServiceAccount (recommended) / documented\
+        \ auth patterns (e.g., IRSA/ambient for AWS, Vault docs).\n\n- **RBAC tightening\
+        \ in `cert-manager-edit` aggregate ClusterRole**\n  - `cert-manager-edit`\
+        \ no longer grants:\n    - `create` on `challenges.acme.cert-manager.io`\n\
+        \    - `create`, `patch`, `update` on `orders.acme.cert-manager.io`\n  - If\
+        \ you have automation that directly creates/updates these internal resources,\
+        \ add explicit RBAC outside of the aggregate role.\n\n- **Gateway API config\
+        \ fields deprecated (still works)**\n  - `enableGatewayAPI` and `enableGatewayAPIListenerSet`\
+        \ are deprecated in favor of:\n    - `gatewayAPI.enabled`\n    - `gatewayAPI.enableListenerSet`\n\
+        \  - No immediate change required, but plan to migrate values/config to the\
+        \ new struct.\n\n- **New/updated values you may want to adopt**\n  - `config.certificateRequestMaximumBackoffDuration`\
+        \ (default 32h)\n  - `startupapicheck.ttlSecondsAfterFinished`\n  - `acmesolver.runtimeClassName`\
+        \ and component `runtimeClassName` settings\n  - (If using common labels)\
+        \ ensure `global.commonLabels` propagation fits your expectations with the\
+        \ new HTTP01 solver extra-labels behavior."
+      chart_updates: ['Helm chart removed the default tokenrequest Role/RoleBinding
+          for the controller ServiceAccount (`serviceaccounts/token: create`).', Controller
+          Service metrics port name changed from `tcp-prometheus-servicemonitor` to
+          `http-metrics`., 'Removed Helm values `prometheus.servicemonitor.targetPort`,
+          `prometheus.servicemonitor.path`, and `prometheus.podmonitor.path` (schema
+          will reject them).', '`cert-manager-edit` aggregate ClusterRole permissions
+          reduced for ACME Challenge/Order resources (security hardening).', Gateway
+          API configuration fields `enableGatewayAPI*` deprecated in favor of `gatewayAPI.*`
+          (old fields still supported).]
+      features: [Experimental ACME Renewal Information (ARI) support behind the `ACMEUseARI`
+          feature gate to honor CA-provided renewal windows., New `waitInsteadOfSelfCheck`
+          option for ACME solvers to skip self-check and wait before asking the ACME
+          server to validate., Vault issuer can now use AWS IAM authentication (IRSA/EKS
+          Pod Identity/ambient EC2/ECS credentials) to avoid long-lived AWS secrets.,
+        New `renewalPolicies` field on Certificates for more expressive renewal scheduling.,
+        Configurable cap for CertificateRequest retry backoff via `--certificate-request-maximum-backoff-duration`
+          / `config.certificateRequestMaximumBackoffDuration` (default 32h)., Gateway
+          API improvements including HTTP01 parentRef fallback for ListenerSets and
+          an annotation to ignore selected TLS listeners., 'Cainjector improvements:
+          `CAInjectorMerging` is GA and server-side apply is now unconditional; new
+          `--ignore-namespaces` flag.', 'Operational improvements: `runtimeClassName`
+          support, startupapicheck TTL cleanup, and better observability for Venafi/CyberArk
+          OAuth auth failures.']
+      breaking_changes: [Helm chart no longer creates default RBAC allowing the controller
+          ServiceAccount to `create` `serviceaccounts/token`; workloads relying on
+          that undocumented pattern must add RBAC or switch to a dedicated ServiceAccount.,
+        '`cert-manager-edit` aggregate ClusterRole no longer grants create/update
+          permissions for ACME Challenge/Order resources; any tooling that manipulates
+          these resources directly needs explicit RBAC.', 'Helm values `prometheus.servicemonitor.targetPort`,
+          `prometheus.servicemonitor.path`, and `prometheus.podmonitor.path` were
+          removed and will cause schema validation failure if still present; controller
+          metrics port name is now `http-metrics`.']
+    chart_version: 1.21.0
+    images: ['quay.io/jetstack/cert-manager-cainjector:v1.21.0', 'quay.io/jetstack/cert-manager-controller:v1.21.0',
+      'quay.io/jetstack/cert-manager-startupapicheck:v1.21.0', 'quay.io/jetstack/cert-manager-webhook:v1.21.0']
   - version: 1.20.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -13278,42 +13465,45 @@ addons:
     images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
       'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
     eolAt: '2024-07-24'
-  - version: 1.13.4
+  - version: 1.13.5
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: '- **Potential Helm value / flag to be aware of (new in 1.13.4):**
-        `enable-ipsec-key-watcher` (agent flag). This allows disabling the IPsec key
-        watcher (key rotation then requires an agent restart).
-
-        - **Helm/chart validation tightened:** Helm will fail if `kube-proxy-replacement`
-        is not valid; additionally, invalid combinations are rejected (e.g., `enable-host-legacy-routing=false`
-        with `kube-proxy-replacement=partial`).
-
-        - **Ingress Helm validation typo fixed** (no action expected unless you were
-        hitting validation issues).
-
-        '
-      chart_updates: [Helm install/upgrade behavior is stricter around kube-proxy-replacement
-          validity checks (upgrade may fail early if values are inconsistent)., Documentation
-          helm values generation now works on arm64 (docs/build tooling).]
-      features: ['v1.13.0 introduced several new capabilities (not added in 1.13.4):
-          LB-IPAM for LoadBalancer IP management; BGP Control Plane announcement of
-          LoadBalancer services; IPv6 BIG TCP; partial SCTP support; Gateway API v0.5.1
-          support; CiliumNodeConfig per-node configuration overrides; SNI-based TLS
-          enforcement in CiliumNetworkPolicy; and initial datapath support for Cilium
-          mTLS.', v1.13.4 adds a new agent flag to control IPsec key watcher behavior
-          (`enable-ipsec-key-watcher`).]
-      breaking_changes: ['**Do not upgrade to v1.13.4 if you are using IPsec** (release
-          note warning). The release includes multiple IPsec-related fixes, but upstream
-          explicitly warns against upgrading due to IPsec issues.', "Helm/agent validation\
-          \ is stricter for kube-proxy replacement settings; upgrades that previously\
-          \ \u201Cworked\u201D with inconsistent values may now fail until values\
-          \ are corrected."]
-    chart_version: 1.13.4
-    images: ['quay.io/cilium/cilium:v1.13.4@sha256:bde8800d61aaad8b8451b10e247ac7bdeb7af187bb698f83d40ad75a38c1ee6b',
-      'quay.io/cilium/operator-generic:v1.13.4@sha256:09ab77d324ef4d31f7d341f97ec5a2a4860910076046d57a2d61494d426c6301']
+      helm_changes: "- **New Helm value:** `envoyConfig.enabled` lets you enable the\
+        \ **CiliumEnvoyConfig (CEC) CRD** independently of the Cilium Ingress Controller.\
+        \ This matters if you use CEC for Envoy/L7 features but don\u2019t want to\
+        \ run Cilium Ingress.\n- **Ingress Service options:** Ingress now supports\
+        \ setting `loadBalancerIP` and `loadBalancerClass` on the created LoadBalancer\
+        \ Service, and Helm adds support for **nodePort allocation** for the Ingress\
+        \ LB service (useful when you run Ingress behind specific LB implementations\
+        \ or need fixed ports).\n- **Bugfix in chart behavior:** `cni.install=false`\
+        \ is now respected (previously CNI could still be installed). If you manage\
+        \ CNI config externally, re-check your values and rendered manifests to ensure\
+        \ the desired behavior.\n- **Operational note:** v1.13.5 includes an explicit\
+        \ warning to **not upgrade if using IPsec** (see breaking/upgrade blockers\
+        \ below)."
+      chart_updates: ['Ingress chart wiring updated to allow `loadBalancerIP`, `loadBalancerClass`,
+          and NodePort allocation for the Ingress LB Service.', Helm chart includes
+          support to toggle CiliumEnvoyConfig CRD via `envoyConfig.enabled` separate
+          from enabling Ingress., Chart behavior fixed to avoid installing the CNI
+          configuration when `cni.install=false`.]
+      features: ['Security: Envoy security fixes via bump to Envoy v1.24.x (includes
+          fixes for multiple Envoy CVEs/advisories listed in the release).', 'Ingress:
+          ability to set `loadBalancerIP` and `loadBalancerClass` on ingress services;
+          optional NodePort allocation for the ingress LB service.', 'Clustermesh:
+          option to disable external workloads support in clustermesh-apiserver for
+          performance when not needed.', 'Policy/L7 plumbing: ability to enable CiliumEnvoyConfig
+          CRD independently of Ingress controller (helps run CEC without Cilium Ingress).']
+      breaking_changes: ['Upgrade blocker: **Do NOT upgrade to v1.13.5 if you are
+          using IPsec** (release note warning). Treat as a hard stop until you identify
+          the recommended fixed version/mitigation from Cilium docs/issues.', 'Behavioral
+          change to be aware of: `cni.install=false` is enforced; if you previously
+          relied on the buggy behavior, upgrading may stop Cilium from writing/owning
+          the CNI config and could break node networking unless managed elsewhere.']
+    chart_version: 1.13.5
+    images: ['quay.io/cilium/cilium:v1.13.5@sha256:e02744b4413824093d25a6fb35e2e418f7301e55825fa53a8e1943fe7e9e5aef',
+      'quay.io/cilium/operator-generic:v1.13.5@sha256:d77f3e1472725b3c28b5d88d6a49c7fcba3072c0c08a26e2e16c1e9139c96207']
     eolAt: '2024-07-24'
   - version: 1.13.0
     kube: ['1.26', '1.25', '1.24']
@@ -13410,46 +13600,40 @@ addons:
     chart_version: 1.12.14
     images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
       'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
-  - version: 1.12.11
+  - version: 1.12.12
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm values / chart-behavior changes to review\n\n- **kube-proxy\
-        \ replacement validation becomes stricter (v1.12.11):** Helm install/upgrade\
-        \ now **fails** if `kubeProxyReplacement` is set to an invalid value. Verify\
-        \ your current `values.yaml` uses a supported value (commonly `disabled`,\
-        \ `partial`, or `strict` depending on your deployment).\n- **Ingress Helm\
-        \ validation typo fixed (v1.12.11):** If you use the integrated Ingress controller,\
-        \ there is a chart-side validation fix; re-run `helm template`/`helm upgrade\
-        \ --dry-run` to catch any values issues.\n- **New/changed knobs introduced\
-        \ in 1.12 baseline (from v1.12.0 notes):**\n  - **Ingress controller values**\
-        \ and **IngressClass creation** were added in 1.12.\n  - **Hubble Relay/UI\
-        \ service exposure options** (service type / nodePort) were added.\n  - **TLS-related\
-        \ Helm options** were reorganized for 1.12 (ensure your TLS settings match\
-        \ the 1.12 upgrade docs).\n  - **`bpf-root`** value was added.\n  - **Linux\
-        \ nodeSelectors** were set for nodeinit/preflight.\n  - **Prometheus ports\
-        \ default changed** to reserved Cilium ports (if you scrape metrics, confirm\
-        \ your ServiceMonitor/Prometheus config matches).\n\n> Note: You only provided\
-        \ app release notes for 1.12.0 and 1.12.11; intermediate chart/value changes\
-        \ between 1.12.1\u20131.12.10 are not visible here, so validate with `helm\
-        \ diff` against your current values."
-      chart_updates: ['Integrated Ingress Controller introduced in 1.12 (agent + chart
-          wiring, including IngressClass support).', 'Chart creates/adjusts resources
-          for Hubble (Relay/UI metrics, service exposure options).', 'Chart behavior
-          tightened in 1.12.11: Helm upgrade/install fails fast on invalid `kubeProxyReplacement`
-          value.', Validation fix for Ingress-related chart logic in 1.12.11.]
-      features: [Deny Policies are promoted from beta to stable by v1.12.11 (policy
-          behavior/feature maturity change)., 'Cilium 1.12 introduced the integrated
-          Ingress Controller and initial Service Mesh support (Envoy/CEC), plus multiple
-          networking/IPAM enhancements (e.g., egress gateway stable, BGP control plane,
-          NAT46/64).']
-      breaking_changes: [Do **not** upgrade to v1.12.11 if you are using **IPsec**
-          (explicit release warning)., 'If your Helm values contain an invalid `kubeProxyReplacement`
-          setting, upgrades may now **fail** at Helm time due to new validation (v1.12.11).']
-    chart_version: 1.12.11
-    images: ['quay.io/cilium/cilium:v1.12.11@sha256:3fd8d9a6130783c245d90658ca379a7db88f249ec69464450fb53490cfbd7c55',
-      'quay.io/cilium/operator-generic:v1.12.11@sha256:8fad1da87c9f308c21ad54784c91c0fc92dc620e2781561473e2c8e4f871eb29']
+      helm_changes: ''
+      chart_updates: [No Helm chart changelog was provided in the notes you pasted;
+          the items below are chart-adjacent behaviors/values mentioned in the application
+          notes., 'If you had `cni.install=false`, v1.12.12 includes a fix where CNI
+          could still be installed; after upgrade confirm your chart values still
+          reflect the intended behavior.', 'Egress Gateway is now explicitly incompatible
+          with KVStore-backed identity allocation; if your deployment uses kvstore
+          identity allocation, you must keep EgressGW disabled (or change identity
+          allocation mode) before upgrading.']
+      features: [(From 1.12.0) Integrated Cilium Ingress Controller for Kubernetes
+          ingress handling., (From 1.12.0) Service Mesh capabilities with Cilium Envoy
+          Config (CEC) / Envoy CRDs and sidecar/sidecar-free options., (From 1.12.0)
+          Stable Egress Gateway plus additional service/LB features like backend quarantine/maintenance
+          states and initial NAT46/64 support., (From 1.12.0) New/expanded IPAM options
+          including delegated IPAM and dynamic PodCIDR allocation in cluster pool
+          v2., '(From 1.12.0) New GoBGP-backed BGP control plane and related enhancements
+          (IPv6 for BGP, PodCIDR announcements).', (From 1.12.12) Security fixes via
+          Envoy bumps (v1.24.9/1.24.10) and multiple improvements in network policy
+          and BGP stability.]
+      breaking_changes: ['v1.12.12: **Do NOT upgrade if you are using IPsec** (release
+          notes explicitly warn against upgrading with IPsec enabled).', 'v1.12.12:
+          Egress Gateway cannot be used with KVStore identity allocation; upgrading
+          without aligning configuration can break egress gateway behavior.', v1.12.0
+          introduced a new Egress Gateway CRD `CiliumEgressGatewayPolicy` and deprecated
+          `CiliumEgressNATPolicy`; older manifests may need migration before/after
+          upgrade.]
+    chart_version: 1.12.12
+    images: ['quay.io/cilium/cilium:v1.12.12@sha256:3cafa76253881a77c3613ed2967776b83b81fcdffcd2a90dae13b175297b92dd',
+      'quay.io/cilium/operator-generic:v1.12.12@sha256:fb2b1ef65fda0f102ef533f354a5cc462076bd70b281ce0eee71fc34badf551a']
   - version: 1.12.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -13512,23 +13696,25 @@ addons:
     chart_version: 1.12.0
     images: ['quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade',
       'quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410']
-  - version: 1.11.18
+  - version: 1.11.19
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Deny Policies are promoted from beta to stable in v1.11.18, which
-          may affect how you document and rely on deny rules in CiliumNetworkPolicy/CiliumClusterwideNetworkPolicy.',
-        New agent flag `enable-ipsec-key-watcher` allows disabling the IPsec key watcher
-          so IPsec key rotation only takes effect after an agent restart (opt-in behavior
-          change for operators who set it).]
-      breaking_changes: [Do not upgrade to v1.11.18 if you are using IPsec; the release
-          notes explicitly warn against upgrading in IPsec deployments.]
-    chart_version: 1.11.18
-    images: ['quay.io/cilium/cilium:v1.11.18@sha256:dda94072012c328fe0d00838f2f7d8ead071019d1d1950ecf44060640bf93cae',
-      'quay.io/cilium/operator-generic:v1.11.18@sha256:bccdcc3036b38581fd44bf7154255956a58d7d13006aae44f419378911dec986']
+      features: [v1.11.19 includes security fixes by updating the embedded Envoy proxy
+          to patched releases (Envoy 1.23.10 / 1.24.x up to 1.24.10)., 'Network Policy
+          behavior received improvements and multiple policy/proxy related bugfixes
+          (e.g., handling of deny rules and missing Envoy listeners without crashing).',
+        'Operational tooling improved slightly (bugtool additions like BPF nodeid
+          list, extra tc data) and some documentation/CI refreshes landed.']
+      breaking_changes: [Do not upgrade to v1.11.19 if your cluster uses Cilium IPsec;
+          this release is explicitly flagged as unsafe for IPsec upgrades due to upgrade-time
+          packet drop issues in certain tunneling/encryption scenarios.]
+    chart_version: 1.11.19
+    images: ['quay.io/cilium/cilium:v1.11.19@sha256:f71c973a9159158704012e1a065a3d484353ff4c2b4e05e10a03382f055adad4',
+      'quay.io/cilium/operator-generic:v1.11.19@sha256:79b622067205037489dcfc3280a2b9a19b0ede9a1c83eb5b3064926fa6af6a23']
   - version: 1.11.6
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -18188,7 +18374,7 @@ addons:
       breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which
           requires upgrading CRDs as part of the upgrade.']
     chart_version: 1.0.5
-    images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
+    images: []
   - version: 0.37.0
     kube: ['1.30']
     requirements: []
@@ -18387,6 +18573,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 87.12.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Bumped Alertmanager image tag to `quay.io/prometheus/alertmanager:v0.33.1`
+          (as of kube-prometheus-stack 87.10.1).', Updated the etcd `PrometheusRule`
+          annotation `runbook_url` (as of kube-prometheus-stack 87.12.1).]
+      features: [Updated/standardized etcd alert runbook URL annotation in PrometheusRule
+          manifests.]
+      breaking_changes: []
+    chart_version: 87.12.1
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.13.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.10.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -24745,6 +24949,36 @@ addons:
     chart_version: 1.0.4
     images: ['quay.io/argoproj/argocli:v4.0.2', 'quay.io/argoproj/workflow-controller:v4.0.2',
       'registry.k8s.io/kubectl:v1.35.3']
+  - version: 3.7.7
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Release notes for v3.7.7 do not enumerate specific feature changes
+          vs v3.7.6; they mainly point to the blog/changelog for details.]
+      breaking_changes: [No breaking changes are listed in the provided release notes;
+          consult the official upgrading guide and GitHub issues for any known issues
+          between 3.7.6 and 3.7.7.]
+    chart_version: 0.47.0
+    images: ['quay.io/argoproj/argocli:v3.7.7', 'quay.io/argoproj/workflow-controller:v3.7.7']
+  - version: 3.7.6
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No concrete feature details were included in the provided release
+          notes snippets for v3.7.0 or v3.7.6 beyond installation/asset information;
+          consult the upstream CHANGELOG.md for actual functional changes between
+          3.7.0 and 3.7.6.]
+      breaking_changes: [No breaking changes were listed in the provided release notes
+          content; you must review the Argo Workflows upgrading guide and the main
+          CHANGELOG.md for any breaking changes introduced between v3.7.0 and v3.7.6.]
+    chart_version: 0.46.3
+    images: ['quay.io/argoproj/argocli:v3.7.6', 'quay.io/argoproj/workflow-controller:v3.7.6']
   - version: 3.7.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -24761,23 +24995,38 @@ addons:
           for v3.7.0 to identify any required manifest/CRD/API changes.]
     chart_version: 0.45.21
     images: ['quay.io/argoproj/argocli:v3.7.0', 'quay.io/argoproj/workflow-controller:v3.7.0']
-  - version: 3.6.5
+  - version: 3.6.10
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Release notes provided for v3.6.10 and v3.6.7 contain mainly installation/asset
+          information and links to the full changelog/upgrading guide, but do not
+          list concrete feature changes between 3.6.7 and 3.6.10.']
+      breaking_changes: [No breaking changes are called out in the provided notes;
+          consult the Argo Workflows upgrading guide and CHANGELOG.md for any changes
+          between v3.6.7 and v3.6.10.]
+    chart_version: 0.45.20
+    images: ['quay.io/argoproj/argocli:v3.6.10', 'quay.io/argoproj/workflow-controller:v3.6.10']
+  - version: 3.6.7
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ["v3.6.3 was explicitly marked as \u201CDo not use\u201D; the main\
-          \ actionable change is to move off 3.6.3 to a later patch (3.6.4+) and proceed\
-          \ to 3.6.5.", 'v3.6.5 provides updated controller/server manifests (install.yaml)
-          and updated CLI binaries for all supported platforms (same install process,
-          newer artifacts).']
-      breaking_changes: ["No breaking changes were listed in the provided notes for\
-          \ 3.6.3\u21923.6.5; however 3.6.3 is a known-bad release and should not\
-          \ be deployed."]
-    chart_version: 0.45.12
-    images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
+      features: ["v3.6.7 is a patch release over 3.6.3; release notes provided here\
+          \ don\u2019t enumerate feature-level changes beyond standard install/CLI\
+          \ artifacts."]
+      breaking_changes: ["v3.6.3 is explicitly called out as a version you should\
+          \ not use; upgrade should target >= v3.6.4 (and you\u2019re planning v3.6.7).\
+          \ No other breaking changes are listed in the provided notes; consult the\
+          \ upstream upgrading guide/changelog for any hidden breaking changes between\
+          \ 3.6.3 and 3.6.7."]
+    chart_version: 0.45.15
+    images: ['quay.io/argoproj/argocli:v3.6.7', 'quay.io/argoproj/workflow-controller:v3.6.7']
   - version: 3.6.3
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -25454,7 +25703,7 @@ addons:
     chart_version: 0.24.0
     images: ['timberio/vector:0.32.0-distroless-libc']
   - version: 0.31.0
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:

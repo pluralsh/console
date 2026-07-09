@@ -4,6 +4,76 @@ release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
 helm_repository_url: https://charts.jetstack.io
 eolApiSlug: cert-manager
 versions:
+- version: 1.21.0
+  kube: ['1.36', '1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior changes to apply before upgrading\n\
+      \n- **Remove deprecated metrics override values (hard fail if present)**\n \
+      \ - Delete these keys from your `values.yaml`/overrides before running `helm\
+      \ upgrade` (schema has `additionalProperties: false`):\n    - `prometheus.servicemonitor.targetPort`\n\
+      \    - `prometheus.servicemonitor.path`\n    - `prometheus.podmonitor.path`\n\
+      \  - Metrics path is now always **`/metrics`** and target port is always **`http-metrics`**.\n\
+      \n- **Metrics Service port rename**\n  - Controller Service metrics port name\
+      \ changed from **`tcp-prometheus-servicemonitor`** \u2192 **`http-metrics`**.\n\
+      \  - If you reference the old port name anywhere (ServiceMonitor/PodMonitor,\
+      \ Prometheus scrape config, NetworkPolicy, etc.), update it.\n\n- **RBAC: default\
+      \ tokenrequest Role/RoleBinding removed**\n  - The chart no longer creates a\
+      \ default `Role`/`RoleBinding` that grants the controller SA `serviceaccounts/token:\
+      \ create` on itself.\n  - If you had an Issuer/ClusterIssuer using `serviceAccountRef.name`\
+      \ set to the *controller* ServiceAccount (undocumented pattern), you must:\n\
+      \    - create your own Role/RoleBinding granting `serviceaccounts/token: create`,\
+      \ **or**\n    - migrate to a dedicated ServiceAccount (recommended) / documented\
+      \ auth patterns (e.g., IRSA/ambient for AWS, Vault docs).\n\n- **RBAC tightening\
+      \ in `cert-manager-edit` aggregate ClusterRole**\n  - `cert-manager-edit` no\
+      \ longer grants:\n    - `create` on `challenges.acme.cert-manager.io`\n    -\
+      \ `create`, `patch`, `update` on `orders.acme.cert-manager.io`\n  - If you have\
+      \ automation that directly creates/updates these internal resources, add explicit\
+      \ RBAC outside of the aggregate role.\n\n- **Gateway API config fields deprecated\
+      \ (still works)**\n  - `enableGatewayAPI` and `enableGatewayAPIListenerSet`\
+      \ are deprecated in favor of:\n    - `gatewayAPI.enabled`\n    - `gatewayAPI.enableListenerSet`\n\
+      \  - No immediate change required, but plan to migrate values/config to the\
+      \ new struct.\n\n- **New/updated values you may want to adopt**\n  - `config.certificateRequestMaximumBackoffDuration`\
+      \ (default 32h)\n  - `startupapicheck.ttlSecondsAfterFinished`\n  - `acmesolver.runtimeClassName`\
+      \ and component `runtimeClassName` settings\n  - (If using common labels) ensure\
+      \ `global.commonLabels` propagation fits your expectations with the new HTTP01\
+      \ solver extra-labels behavior."
+    chart_updates: ['Helm chart removed the default tokenrequest Role/RoleBinding
+        for the controller ServiceAccount (`serviceaccounts/token: create`).', Controller
+        Service metrics port name changed from `tcp-prometheus-servicemonitor` to
+        `http-metrics`., 'Removed Helm values `prometheus.servicemonitor.targetPort`,
+        `prometheus.servicemonitor.path`, and `prometheus.podmonitor.path` (schema
+        will reject them).', '`cert-manager-edit` aggregate ClusterRole permissions
+        reduced for ACME Challenge/Order resources (security hardening).', Gateway
+        API configuration fields `enableGatewayAPI*` deprecated in favor of `gatewayAPI.*`
+        (old fields still supported).]
+    features: [Experimental ACME Renewal Information (ARI) support behind the `ACMEUseARI`
+        feature gate to honor CA-provided renewal windows., New `waitInsteadOfSelfCheck`
+        option for ACME solvers to skip self-check and wait before asking the ACME
+        server to validate., Vault issuer can now use AWS IAM authentication (IRSA/EKS
+        Pod Identity/ambient EC2/ECS credentials) to avoid long-lived AWS secrets.,
+      New `renewalPolicies` field on Certificates for more expressive renewal scheduling.,
+      Configurable cap for CertificateRequest retry backoff via `--certificate-request-maximum-backoff-duration`
+        / `config.certificateRequestMaximumBackoffDuration` (default 32h)., Gateway
+        API improvements including HTTP01 parentRef fallback for ListenerSets and
+        an annotation to ignore selected TLS listeners., 'Cainjector improvements:
+        `CAInjectorMerging` is GA and server-side apply is now unconditional; new
+        `--ignore-namespaces` flag.', 'Operational improvements: `runtimeClassName`
+        support, startupapicheck TTL cleanup, and better observability for Venafi/CyberArk
+        OAuth auth failures.']
+    breaking_changes: [Helm chart no longer creates default RBAC allowing the controller
+        ServiceAccount to `create` `serviceaccounts/token`; workloads relying on that
+        undocumented pattern must add RBAC or switch to a dedicated ServiceAccount.,
+      '`cert-manager-edit` aggregate ClusterRole no longer grants create/update permissions
+        for ACME Challenge/Order resources; any tooling that manipulates these resources
+        directly needs explicit RBAC.', 'Helm values `prometheus.servicemonitor.targetPort`,
+        `prometheus.servicemonitor.path`, and `prometheus.podmonitor.path` were removed
+        and will cause schema validation failure if still present; controller metrics
+        port name is now `http-metrics`.']
+  chart_version: 1.21.0
+  images: ['quay.io/jetstack/cert-manager-cainjector:v1.21.0', 'quay.io/jetstack/cert-manager-controller:v1.21.0',
+    'quay.io/jetstack/cert-manager-startupapicheck:v1.21.0', 'quay.io/jetstack/cert-manager-webhook:v1.21.0']
 - version: 1.20.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []

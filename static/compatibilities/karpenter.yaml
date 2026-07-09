@@ -150,7 +150,7 @@ versions:
     breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which requires
         upgrading CRDs as part of the upgrade.']
   chart_version: 1.0.5
-  images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
+  images: []
 - version: 0.37.0
   kube: ['1.30']
   requirements: []
