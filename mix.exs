@@ -182,7 +182,7 @@ defmodule Console.MixProject do
       {:tesla, "~> 1.13"},
       {:oidcc, "~> 3.3"},
       {:hackney, "~> 1.21"},
-      {:bandit, "~> 1.8"},
+      {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
       {:req_llm, "~> 1.17"},
       {:sweet_xml, ">= 0.0.0"},

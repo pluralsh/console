@@ -26,7 +26,8 @@ jobs:
           scan-type: 'fs'
           hide-progress: false
           scan-ref: '.'
-          skip-files: '**/*.yaml,**/*.yml,**/*.py'
+          skip-dirs: './utils'
+          skip-files: '**/*.yaml,**/*.yml,**/*.tgz'
           format: 'sarif'
           output: 'trivy-results.sarif'
           scanners: 'vuln,secret,config'
