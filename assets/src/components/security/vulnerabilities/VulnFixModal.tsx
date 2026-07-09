@@ -155,7 +155,7 @@ function VulnFixForm({
           deserializePlrlInitialValue
           placeholder="Enter a prompt for the workbench"
           disabled={mutationLoading}
-          css={{ height: 140 }}
+          css={{ height: 280 }}
         />
         <EditableSkillChipTooltip containerRef={promptInputRef} />
       </PromptInputBoxSC>
