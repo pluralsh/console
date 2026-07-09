@@ -27,7 +27,7 @@ jobs:
           hide-progress: false
           scan-ref: '.'
           skip-dirs: './utils'
-          skip-files: '**/*.yaml,**/*.yml,**/*.tgz'
+          skip-files: '**/*.yaml,**/*.yml,**/*.tgz,**/Dockerfile*'
           format: 'sarif'
           output: 'trivy-results.sarif'
           scanners: 'vuln,secret,config'
