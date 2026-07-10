@@ -7574,12 +7574,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:22.20.0":
-  version: 22.20.0
-  resolution: "@types/node@npm:22.20.0"
+"@types/node@npm:24.10.1":
+  version: 24.10.1
+  resolution: "@types/node@npm:24.10.1"
   dependencies:
-    undici-types: ~6.21.0
-  checksum: 1e8bb0122ef8a1cccd396e785a371d3a662a475996d34730c97b0f3c5a696b469d69751001698a965c4c1d1c229e2140cb795d730e56e2b3f984229b3774cf9c
+    undici-types: ~7.16.0
+  checksum: c2f370ae7a97c04991e0eee6b57e588a2abef0814a5f6e41fda5a9200cf02ae6654fad51c8372ee203ae4134bab80f5bf441c586f7f50e0fda3ba422f35eb3c0
   languageName: node
   linkType: hard
 
@@ -9625,7 +9625,7 @@ __metadata:
     "@types/humanize-duration": 3.27.4
     "@types/jsdom": 21.1.7
     "@types/lodash": 4.17.24
-    "@types/node": 22.20.0
+    "@types/node": 24.10.1
     "@types/react": 19.2.17
     "@types/react-dom": 19.2.3
     "@typescript-eslint/eslint-plugin": 8.63.0
@@ -19393,17 +19393,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.21.0":
-  version: 6.21.0
-  resolution: "undici-types@npm:6.21.0"
-  checksum: 46331c7d6016bf85b3e8f20c159d62f5ae471aba1eb3dc52fff35a0259d58dcc7d592d4cc4f00c5f9243fa738a11cfa48bd20203040d4a9e6bc25e807fab7ab3
-  languageName: node
-  linkType: hard
-
 "undici-types@npm:~7.10.0":
   version: 7.10.0
   resolution: "undici-types@npm:7.10.0"
   checksum: 6917fcd8c80963919fe918952f9243a6749af0e3f759a39f8d2c2486144a66c86ae4125aebbce700b636cb1dcd45e85eb8c49c60d60738a97b63f0e89ef9b053
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.16.0":
+  version: 7.16.0
+  resolution: "undici-types@npm:7.16.0"
+  checksum: 1ef68fc6c5bad200c8b6f17de8e5bc5cfdcadc164ba8d7208cd087cfa8583d922d8316a7fd76c9a658c22b4123d3ff847429185094484fbc65377d695c905857
   languageName: node
   linkType: hard
 
