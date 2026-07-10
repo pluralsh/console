@@ -30,7 +30,7 @@ jobs:
     name: Output versions
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: 24
+      NODE_VERSION: 24.11.1
       CLAUDE_VERSION: 2.1.72
       GEMINI_VERSION: 0.44.1
       OPENCODE_VERSION: 1.17.3
