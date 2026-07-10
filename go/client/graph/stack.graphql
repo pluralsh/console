@@ -240,6 +240,12 @@ fragment StackConfigurationFragment on StackConfiguration {
         refresh
         approveEmpty
     }
+    pulumi {
+        parallel
+        refresh
+        approveEmpty
+        stack
+    }
     ansible {
         inventory
         playbook

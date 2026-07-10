@@ -49,6 +49,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :hooks,       list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
     field :terraform,   :terraform_configuration_attributes, description: "the terraform configuration for this stack"
     field :terragrunt,  :terragrunt_configuration_attributes, description: "the terragrunt configuration for this stack"
+    field :pulumi,      :pulumi_configuration_attributes, description: "the pulumi configuration for this stack"
     field :ansible,     :ansible_configuration_attributes, description: "the ansible configuration for this stack"
     field :ai_approval, :ai_approval_attributes, description: "the ai approval configuration for this stack"
   end
@@ -56,6 +57,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   input_object :stack_overrides_attributes do
     field :terraform,  :terraform_configuration_attributes, description: "the terraform configuration for this stack"
     field :terragrunt, :terragrunt_configuration_attributes, description: "the terragrunt configuration for this stack"
+    field :pulumi,     :pulumi_configuration_attributes, description: "the pulumi configuration for this stack"
   end
 
   input_object :stack_hook_attributes do
@@ -76,6 +78,13 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :parallelism,   :integer, description: "equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation"
     field :refresh,       :boolean, description: "equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  end
+
+  input_object :pulumi_configuration_attributes do
+    field :parallel,      :integer, description: "equivalent to the --parallel flag in pulumi preview, up, and destroy"
+    field :refresh,       :boolean, description: "equivalent to the --refresh flag in pulumi preview, up, and destroy"
+    field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+    field :stack,         :string, description: "equivalent to the --stack flag in pulumi preview, up, and destroy"
   end
 
   input_object :ansible_configuration_attributes do
@@ -319,6 +328,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_overrides do
     field :terraform,  :terraform_configuration, description: "the terraform configuration for this stack"
     field :terragrunt, :terragrunt_configuration, description: "the terragrunt configuration for this stack"
+    field :pulumi,     :pulumi_configuration, description: "the pulumi configuration for this stack"
   end
 
   @desc "Urls for configuring terraform HTTP remote state"
@@ -341,6 +351,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :hooks,       list_of(:stack_hook), description: "the hooks to customize execution for this stack"
     field :terraform,   :terraform_configuration, description: "the terraform configuration for this stack"
     field :terragrunt,  :terragrunt_configuration, description: "the terragrunt configuration for this stack"
+    field :pulumi,      :pulumi_configuration, description: "the pulumi configuration for this stack"
     field :ansible,     :ansible_configuration, description: "the ansible configuration for this stack"
     field :ai_approval, :ai_approval_configuration, description: "the ai approval configuration for this stack"
   end
@@ -378,6 +389,13 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :parallelism,   :integer, description: "equivalent to the -parallelism flag passed through to the underlying terraform/tofu invocation"
     field :refresh,       :boolean, description: "equivalent to the -refresh flag passed through to the underlying terraform/tofu invocation"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  end
+
+  object :pulumi_configuration do
+    field :parallel,      :integer, description: "equivalent to the --parallel flag in pulumi preview, up, and destroy"
+    field :refresh,       :boolean, description: "equivalent to the --refresh flag in pulumi preview, up, and destroy"
+    field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+    field :stack,         :string, description: "equivalent to the --stack flag in pulumi preview, up, and destroy"
   end
 
   object :ansible_configuration do

@@ -13,6 +13,11 @@ defmodule Console.Deployments.Stacks.Commands do
     |> stitch_hooks(stack, dry)
   end
 
+  def commands(%Stack{type: :pulumi} = stack, dry) do
+    pulumi_commands(stack, dry)
+    |> stitch_hooks(stack, dry)
+  end
+
   def commands(%Stack{type: :ansible} = stack, dry) do
     ansible_commands(stack, dry)
     |> stitch_hooks(stack, dry)
@@ -144,6 +149,30 @@ defmodule Console.Deployments.Stacks.Commands do
   end
 
   defp tg_command(), do: "terragrunt"
+
+  defp pulumi_commands(%Stack{}, true) do
+    indexed([
+      cmd("preview", pulumi_command(), ["preview", "--save-plan", pulumi_plan_file()], :plan),
+    ])
+  end
+
+  defp pulumi_commands(%Stack{deleted_at: d}, _) when not is_nil(d) do
+    indexed([
+      cmd("destroy", pulumi_command(), ["destroy", "--preview-only"], :plan),
+      cmd("destroy", pulumi_command(), ["destroy", "--yes"], :destroy)
+    ])
+  end
+
+  defp pulumi_commands(%Stack{}, _) do
+    indexed([
+      cmd("preview", pulumi_command(), ["preview", "--save-plan", pulumi_plan_file()], :plan),
+      cmd("up", pulumi_command(), ["up", "--yes"], :apply)
+    ])
+  end
+
+  defp pulumi_plan_file(), do: "pulumi.plan"
+
+  defp pulumi_command(), do: "pulumi"
 
   defp cmd(name, command, args, stage) do
     %{status: :pending, name: name, cmd: command, args: args, stage: stage}

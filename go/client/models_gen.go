@@ -7234,6 +7234,28 @@ type PullabilityStatistic struct {
 	Count  int64      `json:"count"`
 }
 
+type PulumiConfiguration struct {
+	// equivalent to the --parallel flag in pulumi preview, up, and destroy
+	Parallel *int64 `json:"parallel,omitempty"`
+	// equivalent to the --refresh flag in pulumi preview, up, and destroy
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// equivalent to the --stack flag in pulumi preview, up, and destroy
+	Stack *string `json:"stack,omitempty"`
+}
+
+type PulumiConfigurationAttributes struct {
+	// equivalent to the --parallel flag in pulumi preview, up, and destroy
+	Parallel *int64 `json:"parallel,omitempty"`
+	// equivalent to the --refresh flag in pulumi preview, up, and destroy
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// equivalent to the --stack flag in pulumi preview, up, and destroy
+	Stack *string `json:"stack,omitempty"`
+}
+
 type RbacAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
@@ -8724,6 +8746,8 @@ type StackConfiguration struct {
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8743,6 +8767,8 @@ type StackConfigurationAttributes struct {
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8888,6 +8914,8 @@ type StackOverrides struct {
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 }
 
 type StackOverridesAttributes struct {
@@ -8895,6 +8923,8 @@ type StackOverridesAttributes struct {
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -16592,6 +16622,7 @@ const (
 	StackTypeAnsible    StackType = "ANSIBLE"
 	StackTypeCustom     StackType = "CUSTOM"
 	StackTypeTerragrunt StackType = "TERRAGRUNT"
+	StackTypePulumi     StackType = "PULUMI"
 )
 
 var AllStackType = []StackType{
@@ -16599,11 +16630,12 @@ var AllStackType = []StackType{
 	StackTypeAnsible,
 	StackTypeCustom,
 	StackTypeTerragrunt,
+	StackTypePulumi,
 }
 
 func (e StackType) IsValid() bool {
 	switch e {
-	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom, StackTypeTerragrunt:
+	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom, StackTypeTerragrunt, StackTypePulumi:
 		return true
 	}
 	return false

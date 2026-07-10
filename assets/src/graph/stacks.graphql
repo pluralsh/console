@@ -73,6 +73,11 @@ fragment Stack on InfrastructureStack {
       parallelism
       refresh
     }
+    pulumi {
+      parallel
+      refresh
+      stack
+    }
   }
   repository {
     id
@@ -271,6 +276,11 @@ fragment StackConfiguration on StackConfiguration {
   terragrunt {
     parallelism
     refresh
+  }
+  pulumi {
+    parallel
+    refresh
+    stack
   }
   aiApproval {
     enabled

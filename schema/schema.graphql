@@ -7061,6 +7061,7 @@ enum StackType {
   ANSIBLE
   CUSTOM
   TERRAGRUNT
+  PULUMI
 }
 
 enum StepStatus {
@@ -7180,6 +7181,9 @@ input StackConfigurationAttributes {
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfigurationAttributes
 
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfigurationAttributes
+
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
 
@@ -7193,6 +7197,9 @@ input StackOverridesAttributes {
 
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfigurationAttributes
+
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfigurationAttributes
 }
 
 input StackHookAttributes {
@@ -7232,6 +7239,20 @@ input TerragruntConfigurationAttributes {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+}
+
+input PulumiConfigurationAttributes {
+  "equivalent to the --parallel flag in pulumi preview, up, and destroy"
+  parallel: Int
+
+  "equivalent to the --refresh flag in pulumi preview, up, and destroy"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
+
+  "equivalent to the --stack flag in pulumi preview, up, and destroy"
+  stack: String
 }
 
 input AnsibleConfigurationAttributes {
@@ -7595,6 +7616,9 @@ type StackOverrides {
 
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfiguration
+
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfiguration
 }
 
 "Urls for configuring terraform HTTP remote state"
@@ -7636,6 +7660,9 @@ type StackConfiguration {
 
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfiguration
+
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfiguration
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfiguration
@@ -7708,6 +7735,20 @@ type TerragruntConfiguration {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+}
+
+type PulumiConfiguration {
+  "equivalent to the --parallel flag in pulumi preview, up, and destroy"
+  parallel: Int
+
+  "equivalent to the --refresh flag in pulumi preview, up, and destroy"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
+
+  "equivalent to the --stack flag in pulumi preview, up, and destroy"
+  stack: String
 }
 
 type AnsibleConfiguration {
