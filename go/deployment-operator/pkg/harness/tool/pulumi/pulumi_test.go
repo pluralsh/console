@@ -103,6 +103,10 @@ if [ "$1" = "stack" ] && [ "$2" = "output" ]; then
   exit 0
 fi
 if [ "$1" = "stack" ] && [ "$2" = "export" ]; then
+  if [ "$PULUMI_TEST_ENV" != "available" ]; then
+    echo "missing stack environment" >&2
+    exit 1
+  fi
   echo '{"deployment":{"resources":[{"type":"pulumi:pulumi:Stack","additionalSecretOutputs":["secret"]}]}}'
   exit 0
 fi
@@ -115,7 +119,11 @@ exit 1
 	t.Cleanup(func() { _ = os.Setenv("PATH", oldPath) })
 	require.NoError(t, os.Setenv("PATH", tmpDir+":"+oldPath))
 
-	outputs, err := (&Pulumi{dir: tmpDir, stackName: "dev"}).init().(*Pulumi).Output()
+	outputs, err := (&Pulumi{
+		dir:       tmpDir,
+		stackName: "dev",
+		env:       []string{"PULUMI_TEST_ENV=available"},
+	}).init().(*Pulumi).Output()
 	require.NoError(t, err)
 
 	byName := make(map[string]string)

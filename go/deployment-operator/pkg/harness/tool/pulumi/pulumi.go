@@ -279,6 +279,7 @@ func (in *Pulumi) stackExport() (*stackExport, error) {
 		"pulumi",
 		exec.WithArgs([]string{"stack", "export", "--stack", in.stackName}),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed executing pulumi stack export: %s: %w", string(output), err)
