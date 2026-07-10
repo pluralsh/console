@@ -33,8 +33,11 @@ type StackRun struct {
 	Environment []*gqlclient.StackEnvironmentFragment
 
 	Parallelism  *int64
+	Parallel     *int64
 	Refresh      *bool
 	ApproveEmpty *bool
+
+	PulumiStack *string
 
 	InventoryFile *string
 	PlaybookFile  *string
@@ -87,6 +90,12 @@ func (in *StackRun) FromStackRunBaseFragment(fragment *gqlclient.StackRunBaseFra
 		run.Parallelism = tg.Parallelism
 		run.Refresh = tg.Refresh
 		run.ApproveEmpty = tg.ApproveEmpty
+	}
+	if pl := fragment.Configuration.Pulumi; pl != nil {
+		run.Parallel = pl.Parallel
+		run.Refresh = pl.Refresh
+		run.ApproveEmpty = pl.ApproveEmpty
+		run.PulumiStack = pl.Stack
 	}
 	if ans := fragment.Configuration.Ansible; ans != nil {
 		run.InventoryFile = ans.Inventory
