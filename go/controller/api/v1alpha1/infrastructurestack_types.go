@@ -64,8 +64,8 @@ type InfrastructureStackSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Type specifies the IaC tool to use for executing the stack.
-	// One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM.
-	// +kubebuilder:validation:Enum=TERRAFORM;TERRAGRUNT;ANSIBLE;CUSTOM
+	// One of TERRAFORM, TERRAGRUNT, PULUMI, ANSIBLE, CUSTOM.
+	// +kubebuilder:validation:Enum=TERRAFORM;TERRAGRUNT;PULUMI;ANSIBLE;CUSTOM
 	// +kubebuilder:validation:Required
 	Type console.StackType `json:"type"`
 
@@ -211,6 +211,10 @@ type StackConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
 
+	// Pulumi configuration for this stack.
+	// +kubebuilder:validation:Optional
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
+
 	// Ansible configuration for this stack.
 	// +kubebuilder:validation:Optional
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
@@ -258,6 +262,27 @@ type TerragruntConfiguration struct {
 	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
 	// +kubebuilder:validation:Optional
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+}
+
+type PulumiConfiguration struct {
+	// Parallel is the number of resource operations to run concurrently,
+	// equivalent to the --parallel flag in pulumi preview, up, and destroy.
+	// +kubebuilder:validation:Optional
+	Parallel *int64 `json:"parallel,omitempty"`
+
+	// Refresh is whether to refresh the state of the stack,
+	// equivalent to the --refresh flag in pulumi preview, up, and destroy.
+	// +kubebuilder:validation:Optional
+	Refresh *bool `json:"refresh,omitempty"`
+
+	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
+	// +kubebuilder:validation:Optional
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+
+	// Stack is the pulumi stack name to operate on,
+	// equivalent to the --stack flag in pulumi preview, up, and destroy.
+	// +kubebuilder:validation:Optional
+	Stack *string `json:"stack,omitempty"`
 }
 
 type AnsibleConfiguration struct {
@@ -351,6 +376,10 @@ type StackOverrides struct {
 	// Terragrunt is the terragrunt configuration for this stack
 	// +kubebuilder:validation:Optional
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+
+	// Pulumi is the pulumi configuration for this stack
+	// +kubebuilder:validation:Optional
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 }
 
 type StackHook struct {

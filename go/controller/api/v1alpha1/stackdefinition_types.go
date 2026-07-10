@@ -112,6 +112,14 @@ func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 				ApproveEmpty: conf.Terragrunt.ApproveEmpty,
 			}
 		}
+		if conf.Pulumi != nil {
+			result.Configuration.Pulumi = &console.PulumiConfigurationAttributes{
+				Parallel:     conf.Pulumi.Parallel,
+				Refresh:      conf.Pulumi.Refresh,
+				ApproveEmpty: conf.Pulumi.ApproveEmpty,
+				Stack:        conf.Pulumi.Stack,
+			}
+		}
 	}
 
 	return result
