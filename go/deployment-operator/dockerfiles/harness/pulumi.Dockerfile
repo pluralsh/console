@@ -28,6 +28,7 @@ RUN set -eux; \
 
 FROM $HARNESS_BASE_IMAGE AS final
 
+# Node.js and Go only; Python omitted for now.
 ARG NODEJS_VERSION
 ARG GO_VERSION
 

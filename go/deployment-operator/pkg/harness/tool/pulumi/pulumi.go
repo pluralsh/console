@@ -295,6 +295,7 @@ func (in *Pulumi) runPulumi(args []string) ([]byte, error) {
 }
 
 func (in *Pulumi) installDependencies() error {
+	// Node.js and Go dependencies only.
 	if helpers.Exists(path.Join(in.dir, "package.json")) {
 		output, err := exec.NewExecutable(
 			"npm",
