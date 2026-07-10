@@ -373,3 +373,10 @@ if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
     container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
     access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
 end
+
+if is_set("CONSOLE_INSTANCE_DETAILS") do
+  case JSON.decode(get_env("CONSOLE_INSTANCE_DETAILS")) do
+    {:ok, %{} = details} -> config :console, :details, details
+    _ -> :ok
+  end
+end

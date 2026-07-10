@@ -16097,6 +16097,11 @@ type AvailableFeatures {
   databaseManagement: Boolean
 }
 
+type ConsoleConfigurationDetails {
+  assumeRoleArn: String
+  egressIps: [String]
+}
+
 type ConsoleConfiguration {
   gitCommit: String
 
@@ -16126,6 +16131,8 @@ type ConsoleConfiguration {
   qoveKey: String
 
   features: AvailableFeatures
+
+  details: ConsoleConfigurationDetails
 
   licenseExpiry: DateTime
 

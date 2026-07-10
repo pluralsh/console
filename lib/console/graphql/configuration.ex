@@ -32,6 +32,11 @@ defmodule Console.GraphQl.Configuration do
     key_func :database_management, :boolean, :databaseManagement
   end
 
+  object :console_configuration_details do
+    field :assume_role_arn, :string
+    field :egress_ips,      list_of(:string)
+  end
+
   object :console_configuration do
     field :git_commit,      :string
     field :console_version, :string, resolve: fn _, _, _ -> {:ok, Console.version()} end
@@ -61,6 +66,7 @@ defmodule Console.GraphQl.Configuration do
         end
       end
     field :features,        :available_features
+    field :details,         :console_configuration_details
     field :license_expiry,  :datetime, resolve: fn _, _, _ -> {:ok, Console.Features.expiry()} end
 
     field :manifest,        :plural_manifest, resolve: fn
