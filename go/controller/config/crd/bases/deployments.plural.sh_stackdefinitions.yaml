@@ -170,6 +170,11 @@ spec:
                         description: ApproveEmpty is whether to auto-approve a plan
                           if there are no changes, preventing a stack from being blocked.
                         type: boolean
+                      backendUrl:
+                        description: |-
+                          BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.
+                          It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs.
+                        type: string
                       parallel:
                         description: |-
                           Parallel is the number of resource operations to run concurrently,

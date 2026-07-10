@@ -3,10 +3,13 @@ package pulumi
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	osexec "os/exec"
 	"path"
+	"sort"
+	"strconv"
 	"strings"
 
 	console "github.com/pluralsh/console/go/client"
@@ -15,19 +18,12 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
-	stackrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 type previewJSON struct {
-	ChangeSummary struct {
-		Create  int `json:"create"`
-		Update  int `json:"update"`
-		Delete  int `json:"delete"`
-		Replace int `json:"replace"`
-		Same    int `json:"same"`
-	} `json:"changeSummary"`
+	ChangeSummary map[string]int `json:"changeSummary"`
 }
 
 type stackExport struct {
@@ -37,9 +33,11 @@ type stackExport struct {
 }
 
 type stackResource struct {
-	URN    string         `json:"urn"`
-	Type   string         `json:"type"`
-	Inputs map[string]any `json:"inputs"`
+	URN                     string         `json:"urn"`
+	Type                    string         `json:"type"`
+	Inputs                  map[string]any `json:"inputs"`
+	Outputs                 map[string]any `json:"outputs"`
+	AdditionalSecretOutputs []string       `json:"additionalSecretOutputs"`
 }
 
 // State implements [v1.Tool] interface.
@@ -90,11 +88,7 @@ func (in *Pulumi) Plan() (*console.StackStateAttributes, error) {
 
 // Output implements [v1.Tool] interface.
 func (in *Pulumi) Output() ([]*console.StackOutputAttributes, error) {
-	output, err := exec.NewExecutable(
-		"pulumi",
-		exec.WithArgs([]string{"stack", "output", "--json", "--show-secrets", "--stack", in.stackName}),
-		exec.WithDir(in.dir),
-	).RunWithOutput(context.Background())
+	output, err := in.runPulumi([]string{"stack", "output", "--json", "--stack", in.stackName})
 	if err != nil {
 		return nil, fmt.Errorf("failed executing pulumi stack output --json: %s: %w", string(output), err)
 	}
@@ -108,11 +102,23 @@ func (in *Pulumi) Output() ([]*console.StackOutputAttributes, error) {
 		return nil, fmt.Errorf("failed unmarshaling pulumi stack output JSON: %w", err)
 	}
 
+	secretOutputs, err := in.secretOutputNames()
+	if err != nil {
+		return nil, err
+	}
+
 	result := make([]*console.StackOutputAttributes, 0, len(values))
 	for name, value := range values {
+		secret := secretOutputs[name]
+		outputValue := outputValueString(value)
+		if secret {
+			outputValue = "[secret]"
+		}
+
 		result = append(result, &console.StackOutputAttributes{
-			Name:  name,
-			Value: outputValueString(value),
+			Name:   name,
+			Value:  outputValue,
+			Secret: lo.ToPtr(secret),
 		})
 	}
 
@@ -137,23 +143,18 @@ func (in *Pulumi) Modifier(stage console.StepStage) v1.Modifier {
 	return v1.NewDefaultModifier()
 }
 
-// ConfigureStateBackend implements [v1.Tool] interface.
-func (in *Pulumi) ConfigureStateBackend(_, _ string, _ *console.StackRunBaseFragment_StateUrls) error {
-	if err := os.MkdirAll("/plural/.pulumi", 0o755); err != nil {
-		return fmt.Errorf("failed creating pulumi backend directory: %w", err)
-	}
-
-	if output, err := in.runPulumi([]string{"login", defaultBackendURL, "--non-interactive"}); err != nil {
+// Prepare implements [v1.Tool] interface.
+func (in *Pulumi) Prepare() error {
+	if output, err := in.runPulumi([]string{"login", in.backendURL, "--non-interactive"}); err != nil {
 		return fmt.Errorf("failed executing pulumi login: %s: %w", string(output), err)
 	}
 
-	initOutput, initErr := in.runPulumi([]string{"stack", "init", in.stackName, "--non-interactive"})
-	if initErr != nil && !strings.Contains(string(initOutput), "already exists") {
-		return fmt.Errorf("failed executing pulumi stack init: %s: %w", string(initOutput), initErr)
+	if output, err := in.runPulumi([]string{"stack", "select", in.stackName, "--create", "--non-interactive"}); err != nil {
+		return fmt.Errorf("failed executing pulumi stack select: %s: %w", string(output), err)
 	}
 
-	if output, err := in.runPulumi([]string{"stack", "select", in.stackName, "--non-interactive"}); err != nil {
-		return fmt.Errorf("failed executing pulumi stack select: %s: %w", string(output), err)
+	if err := in.configureVariables(); err != nil {
+		return err
 	}
 
 	return in.installDependencies()
@@ -161,6 +162,10 @@ func (in *Pulumi) ConfigureStateBackend(_, _ string, _ *console.StackRunBaseFrag
 
 // Scan implements [v1.Tool] interface.
 func (in *Pulumi) Scan() ([]*console.StackPolicyViolationAttributes, error) {
+	if in.Scanner != nil {
+		return nil, errors.New("policy enforcement is not supported for Pulumi stacks")
+	}
+
 	klog.V(log.LogLevelDebug).Info("pulumi scanner not configured, skipping")
 	return []*console.StackPolicyViolationAttributes{}, nil
 }
@@ -179,13 +184,10 @@ func (in *Pulumi) HasChanges() (bool, error) {
 		return false, err
 	}
 
-	changes := preview.ChangeSummary.Create +
-		preview.ChangeSummary.Update +
-		preview.ChangeSummary.Delete +
-		preview.ChangeSummary.Replace
-
-	if changes > 0 {
-		return true, nil
+	for operation, count := range preview.ChangeSummary {
+		if operation != "same" && count > 0 {
+			return true, nil
+		}
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("pulumi preview has no changes")
@@ -197,6 +199,7 @@ func (in *Pulumi) previewJSON() (*previewJSON, error) {
 		"pulumi",
 		exec.WithArgs(in.previewArgs("--json")),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed executing pulumi preview --json: %s: %w", string(output), err)
@@ -215,6 +218,7 @@ func (in *Pulumi) previewText() (string, error) {
 		"pulumi",
 		exec.WithArgs(in.previewArgs("--diff")),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return "", fmt.Errorf("failed executing pulumi preview --diff: %s: %w", string(output), err)
@@ -228,6 +232,7 @@ func (in *Pulumi) destroyPreviewText() (string, error) {
 		"pulumi",
 		exec.WithArgs(in.destroyPreviewArgs("--diff")),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return "", fmt.Errorf("failed executing pulumi destroy --preview-only --diff: %s: %w", string(output), err)
@@ -255,6 +260,7 @@ func (in *Pulumi) destroyPreviewJSON() (*previewJSON, error) {
 		"pulumi",
 		exec.WithArgs(in.destroyPreviewArgs("--json")),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed executing pulumi destroy --preview-only --json: %s: %w", string(output), err)
@@ -291,6 +297,7 @@ func (in *Pulumi) runPulumi(args []string) ([]byte, error) {
 		"pulumi",
 		exec.WithArgs(args),
 		exec.WithDir(in.dir),
+		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
 }
 
@@ -301,6 +308,7 @@ func (in *Pulumi) installDependencies() error {
 			"npm",
 			exec.WithArgs([]string{"install", "--no-audit", "--no-fund"}),
 			exec.WithDir(in.dir),
+			exec.WithEnv(in.env),
 		).RunWithOutput(context.Background())
 		if err != nil {
 			return fmt.Errorf("failed executing npm install: %s: %w", string(output), err)
@@ -310,6 +318,7 @@ func (in *Pulumi) installDependencies() error {
 	if helpers.Exists(path.Join(in.dir, "go.mod")) {
 		cmd := osexec.Command("go", "mod", "download")
 		cmd.Dir = in.dir
+		cmd.Env = append(os.Environ(), in.env...)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("failed executing go mod download: %s: %w", string(output), err)
@@ -319,6 +328,101 @@ func (in *Pulumi) installDependencies() error {
 	return nil
 }
 
+func (in *Pulumi) configureVariables() error {
+	if in.variables == nil {
+		return nil
+	}
+
+	var variables map[string]any
+	if err := json.Unmarshal([]byte(*in.variables), &variables); err != nil {
+		return fmt.Errorf("failed unmarshaling Pulumi variables: %w", err)
+	}
+
+	keys := make([]string, 0, len(variables))
+	for key := range variables {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		value, valueType := pulumiConfigValue(variables[key])
+		args := []string{"config", "set", key, value, "--stack", in.stackName, "--plaintext", "--type", valueType, "--non-interactive"}
+		if output, err := in.runPulumi(args); err != nil {
+			return fmt.Errorf("failed configuring Pulumi variable %q: %s: %w", key, string(output), err)
+		}
+	}
+
+	return nil
+}
+
+func pulumiConfigValue(value any) (string, string) {
+	switch typed := value.(type) {
+	case bool:
+		return strconv.FormatBool(typed), "bool"
+	case float64:
+		if typed == float64(int64(typed)) {
+			return strconv.FormatInt(int64(typed), 10), "int"
+		}
+		return strconv.FormatFloat(typed, 'f', -1, 64), "float"
+	case string:
+		return typed, "string"
+	default:
+		encoded, err := json.Marshal(typed)
+		if err != nil {
+			return "", "string"
+		}
+		return string(encoded), "string"
+	}
+}
+
+func (in *Pulumi) secretOutputNames() (map[string]bool, error) {
+	export, err := in.stackExport()
+	if err != nil {
+		return nil, err
+	}
+
+	secrets := make(map[string]bool)
+	for _, resource := range export.Deployment.Resources {
+		if resource.Type != "pulumi:pulumi:Stack" {
+			continue
+		}
+		for _, name := range resource.AdditionalSecretOutputs {
+			secrets[name] = true
+		}
+		for name, value := range resource.Outputs {
+			if isSecretValue(value) {
+				secrets[name] = true
+			}
+		}
+	}
+
+	return secrets, nil
+}
+
+func isSecretValue(value any) bool {
+	const secretSignature = "4dabf18193072939515e22adb298388d"
+
+	switch typed := value.(type) {
+	case map[string]any:
+		if _, ok := typed[secretSignature]; ok {
+			return true
+		}
+		for _, child := range typed {
+			if isSecretValue(child) {
+				return true
+			}
+		}
+	case []any:
+		for _, child := range typed {
+			if isSecretValue(child) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (in *Pulumi) init() v1.Tool {
 	if len(in.dir) == 0 {
 		klog.Fatal("dir is required")
@@ -326,6 +430,9 @@ func (in *Pulumi) init() v1.Tool {
 
 	if in.stackName == "" {
 		in.stackName = defaultStackName
+	}
+	if in.backendURL == "" {
+		in.backendURL = defaultBackendURL
 	}
 
 	in.planFile = planFileName
@@ -337,6 +444,7 @@ func New(config v1.Config) v1.Tool {
 	stackName := defaultStackName
 	var parallel *int64
 	var refresh *bool
+	var backendURL string
 
 	if config.Run != nil {
 		if config.Run.PulumiStack != nil && len(*config.Run.PulumiStack) > 0 {
@@ -345,6 +453,7 @@ func New(config v1.Config) v1.Tool {
 
 		parallel = config.Run.Parallel
 		refresh = config.Run.Refresh
+		backendURL = lo.FromPtr(config.Run.PulumiBackendURL)
 	}
 
 	return (&Pulumi{
@@ -352,24 +461,13 @@ func New(config v1.Config) v1.Tool {
 		workDir:     config.WorkDir,
 		dir:         config.ExecDir,
 		stackName:   stackName,
-		destroy:     isDestroyRun(config.Run),
+		backendURL:  backendURL,
+		destroy:     config.Run != nil && config.Run.Deleted,
 		parallel:    parallel,
 		refresh:     refresh,
+		env:         config.Env,
+		variables:   config.Variables,
 	}).init()
-}
-
-func isDestroyRun(run *stackrunv1.StackRun) bool {
-	if run == nil {
-		return false
-	}
-
-	for _, step := range run.Steps {
-		if step.Stage == console.StepStageDestroy {
-			return true
-		}
-	}
-
-	return false
 }
 
 func outputValueString(value any) string {

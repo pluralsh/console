@@ -85,6 +85,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :refresh,       :boolean, description: "equivalent to the --refresh flag in pulumi preview, up, and destroy"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
     field :stack,         :string, description: "equivalent to the --stack flag in pulumi preview, up, and destroy"
+    field :backend_url,   :string, description: "optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs"
   end
 
   input_object :ansible_configuration_attributes do
@@ -396,6 +397,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :refresh,       :boolean, description: "equivalent to the --refresh flag in pulumi preview, up, and destroy"
     field :approve_empty, :boolean, description: "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
     field :stack,         :string, description: "equivalent to the --stack flag in pulumi preview, up, and destroy"
+    field :backend_url,   :string, description: "optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs"
   end
 
   object :ansible_configuration do

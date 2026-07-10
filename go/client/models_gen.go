@@ -7243,6 +7243,8 @@ type PulumiConfiguration struct {
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 	// equivalent to the --stack flag in pulumi preview, up, and destroy
 	Stack *string `json:"stack,omitempty"`
+	// optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs
+	BackendURL *string `json:"backendUrl,omitempty"`
 }
 
 type PulumiConfigurationAttributes struct {
@@ -7254,6 +7256,8 @@ type PulumiConfigurationAttributes struct {
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
 	// equivalent to the --stack flag in pulumi preview, up, and destroy
 	Stack *string `json:"stack,omitempty"`
+	// optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs
+	BackendURL *string `json:"backendUrl,omitempty"`
 }
 
 type RbacAttributes struct {

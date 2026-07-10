@@ -4149,6 +4149,7 @@ _Appears in:_
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the --refresh flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
 | `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 | `stack` _string_ | Stack is the pulumi stack name to operate on,<br />equivalent to the --stack flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `backendUrl` _string_ | BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.<br />It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs. |  | Optional: \{\} <br /> |
 
 
 

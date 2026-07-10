@@ -50,6 +50,32 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       assert file["content"] == "test"
     end
 
+    test "it can create a Pulumi stack with a backend URL" do
+      repo = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"createStack" => found}}} = run_query("""
+        mutation Create($attrs: StackAttributes!) {
+          createStack(attributes: $attrs) {
+            configuration {
+              pulumi {
+                backendUrl
+              }
+            }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "pulumi-stack",
+        "type" => "PULUMI",
+        "repositoryId" => repo.id,
+        "clusterId" => cluster.id,
+        "git" => %{"ref" => "main", "folder" => "pulumi"},
+        "configuration" => %{"pulumi" => %{"backendUrl" => "s3://pulumi-state"}}
+      }}, %{current_user: admin_user()})
+
+      assert found["configuration"]["pulumi"]["backendUrl"] == "s3://pulumi-state"
+    end
+
     test "it can create a stack for a project" do
       project = insert(:project)
       repo = insert(:git_repository)

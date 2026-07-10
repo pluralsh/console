@@ -6,7 +6,7 @@ import (
 
 const (
 	defaultStackName  = "dev"
-	defaultBackendURL = "file:///plural/.pulumi"
+	defaultBackendURL = "https://api.pulumi.com"
 	planFileName      = "pulumi.plan"
 )
 
@@ -17,9 +17,12 @@ type Pulumi struct {
 	workDir string
 	dir     string
 
-	stackName string
-	planFile  string
-	destroy   bool
+	stackName  string
+	backendURL string
+	planFile   string
+	destroy    bool
+	env        []string
+	variables  *string
 
 	parallel *int64
 	refresh  *bool

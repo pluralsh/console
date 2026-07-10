@@ -514,6 +514,7 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 			Refresh:      overrides.Pulumi.Refresh,
 			ApproveEmpty: overrides.Pulumi.ApproveEmpty,
 			Stack:        overrides.Pulumi.Stack,
+			BackendURL:   overrides.Pulumi.BackendUrl,
 		}
 	}
 
@@ -556,6 +557,7 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Refresh:      conf.Pulumi.Refresh,
 			ApproveEmpty: conf.Pulumi.ApproveEmpty,
 			Stack:        conf.Pulumi.Stack,
+			BackendURL:   conf.Pulumi.BackendUrl,
 		}
 	}
 

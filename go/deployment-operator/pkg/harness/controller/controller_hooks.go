@@ -37,6 +37,10 @@ func (in *stackRunController) preStart() error {
 		klog.ErrorS(err, "could not update stack run status")
 	}
 
+	if err := in.tool.Prepare(); err != nil {
+		return fmt.Errorf("could not prepare tool: %w", err)
+	}
+
 	if in.stackRun.ManageState {
 		err := in.tool.ConfigureStateBackend("harness", in.consoleToken, in.stackRun.StateUrls)
 		if err != nil {
@@ -229,7 +233,7 @@ func (in *stackRunController) afterPlan() error {
 	// Run security scan if enabled
 	violations, err := in.tool.Scan()
 	if err != nil {
-		klog.ErrorS(err, "could not run security scan")
+		return fmt.Errorf("could not run security scan: %w", err)
 	}
 
 	if err = in.consoleClient.UpdateStackRun(in.stackRunID, gqlclient.StackRunAttributes{

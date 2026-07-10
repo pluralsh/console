@@ -283,6 +283,11 @@ type PulumiConfiguration struct {
 	// equivalent to the --stack flag in pulumi preview, up, and destroy.
 	// +kubebuilder:validation:Optional
 	Stack *string `json:"stack,omitempty"`
+
+	// BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.
+	// It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs.
+	// +kubebuilder:validation:Optional
+	BackendUrl *string `json:"backendUrl,omitempty"`
 }
 
 type AnsibleConfiguration struct {

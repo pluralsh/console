@@ -245,6 +245,7 @@ fragment StackConfigurationFragment on StackConfiguration {
         refresh
         approveEmpty
         stack
+        backendUrl
     }
     ansible {
         inventory

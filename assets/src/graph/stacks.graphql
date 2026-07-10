@@ -77,6 +77,7 @@ fragment Stack on InfrastructureStack {
       parallel
       refresh
       stack
+      backendUrl
     }
   }
   repository {
@@ -281,6 +282,7 @@ fragment StackConfiguration on StackConfiguration {
     parallel
     refresh
     stack
+    backendUrl
   }
   aiApproval {
     enabled

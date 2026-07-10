@@ -7253,6 +7253,9 @@ input PulumiConfigurationAttributes {
 
   "equivalent to the --stack flag in pulumi preview, up, and destroy"
   stack: String
+
+  "optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs"
+  backendUrl: String
 }
 
 input AnsibleConfigurationAttributes {
@@ -7749,6 +7752,9 @@ type PulumiConfiguration {
 
   "equivalent to the --stack flag in pulumi preview, up, and destroy"
   stack: String
+
+  "optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs"
+  backendUrl: String
 }
 
 type AnsibleConfiguration {

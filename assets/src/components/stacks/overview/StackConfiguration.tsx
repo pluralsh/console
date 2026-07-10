@@ -30,6 +30,8 @@ export default function StackConfiguration() {
       : null
   )
   const [parallel, setParallel] = useState(pulumiConfig?.parallel ?? null)
+  const [pulumiStack, setPulumiStack] = useState(pulumiConfig?.stack ?? '')
+  const [backendUrl, setBackendUrl] = useState(pulumiConfig?.backendUrl ?? '')
   const [refresh, setRefresh] = useState(
     isTerragrunt
       ? terragruntConfig?.refresh
@@ -47,6 +49,8 @@ export default function StackConfiguration() {
           ? terragruntConfig?.parallelism
           : terraformConfig?.parallelism)) ||
     (isPulumi && parallel !== pulumiConfig?.parallel) ||
+    (isPulumi && pulumiStack !== (pulumiConfig?.stack ?? '')) ||
+    (isPulumi && backendUrl !== (pulumiConfig?.backendUrl ?? '')) ||
     refresh !==
       (isTerragrunt
         ? terragruntConfig?.refresh
@@ -69,7 +73,14 @@ export default function StackConfiguration() {
           ...(isTerragrunt
             ? { terragrunt: { refresh, parallelism } }
             : isPulumi
-              ? { pulumi: { refresh, parallel } }
+              ? {
+                  pulumi: {
+                    refresh,
+                    parallel,
+                    stack: pulumiStack || null,
+                    backendUrl: backendUrl || null,
+                  },
+                }
               : isTerraformFamilyStackType(stack.type)
                 ? { terraform: { refresh, parallelism } }
                 : {}),
@@ -161,6 +172,24 @@ export default function StackConfiguration() {
                 const value = e.currentTarget.value.replace(/[^0-9]/g, '')
                 setParallel(value === '' ? null : parseInt(value, 10))
               }}
+            />
+          </FormField>
+        )}
+        {isPulumi && (
+          <FormField label="Stack">
+            <Input
+              value={pulumiStack}
+              placeholder="dev"
+              onChange={(e) => setPulumiStack(e.currentTarget.value)}
+            />
+          </FormField>
+        )}
+        {isPulumi && (
+          <FormField label="Backend URL">
+            <Input
+              value={backendUrl}
+              placeholder="Pulumi Cloud (default), s3://bucket, or https://..."
+              onChange={(e) => setBackendUrl(e.currentTarget.value)}
             />
           </FormField>
         )}

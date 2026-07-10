@@ -71,6 +71,7 @@ defmodule Console.Schema.Stack do
         field :refresh,       :boolean
         field :approve_empty, :boolean
         field :stack,         :string
+        field :backend_url,   :string
       end
 
       embeds_one :ansible, Ansible, on_replace: :update do
@@ -120,7 +121,7 @@ defmodule Console.Schema.Stack do
 
     def pulumi_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(parallel refresh approve_empty stack)a)
+      |> cast(attrs, ~w(parallel refresh approve_empty stack backend_url)a)
     end
 
     def ansible_changeset(model, attrs) do

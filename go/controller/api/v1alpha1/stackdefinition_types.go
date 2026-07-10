@@ -118,6 +118,7 @@ func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 				Refresh:      conf.Pulumi.Refresh,
 				ApproveEmpty: conf.Pulumi.ApproveEmpty,
 				Stack:        conf.Pulumi.Stack,
+				BackendURL:   conf.Pulumi.BackendUrl,
 			}
 		}
 	}

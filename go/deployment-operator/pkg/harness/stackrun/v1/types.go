@@ -37,7 +37,9 @@ type StackRun struct {
 	Refresh      *bool
 	ApproveEmpty *bool
 
-	PulumiStack *string
+	PulumiStack      *string
+	PulumiBackendURL *string
+	Deleted          bool
 
 	InventoryFile *string
 	PlaybookFile  *string
@@ -74,6 +76,7 @@ func (in *StackRun) FromStackRunBaseFragment(fragment *gqlclient.StackRunBaseFra
 		Variables:    fragment.Variables,
 		PolicyEngine: fragment.PolicyEngine,
 		DryRun:       fragment.DryRun,
+		Deleted:      fragment.Stack != nil && fragment.Stack.DeletedAt != nil,
 	}
 
 	if fragment.PluralCreds != nil {
@@ -96,6 +99,7 @@ func (in *StackRun) FromStackRunBaseFragment(fragment *gqlclient.StackRunBaseFra
 		run.Refresh = pl.Refresh
 		run.ApproveEmpty = pl.ApproveEmpty
 		run.PulumiStack = pl.Stack
+		run.PulumiBackendURL = pl.BackendURL
 	}
 	if ans := fragment.Configuration.Ansible; ans != nil {
 		run.InventoryFile = ans.Inventory
