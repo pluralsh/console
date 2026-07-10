@@ -91,6 +91,7 @@ export function ComponentDetails({
       data ? Object.values(data).find((value) => value !== undefined) : null,
     [data]
   )
+  const visibleError = data ? undefined : error
 
   useExplainWithAI(
     value
@@ -115,8 +116,8 @@ export function ComponentDetails({
     value?.__typename === 'PluralServiceDeployment' ? value.reference : null
 
   const hasNotFoundError = useMemo(
-    () => !data && error && error?.message?.includes('not found'),
-    [data, error]
+    () => visibleError?.message?.includes('not found'),
+    [visibleError]
   )
 
   const filteredDirectory = getDirectory(component?.insight).filter(
@@ -202,9 +203,9 @@ export function ComponentDetails({
           </Flex>
         }
       >
-        {error && currentTab?.path !== 'dryrun' && (
+        {visibleError && currentTab?.path !== 'dryrun' && (
           <div css={{ marginBottom: theme.spacing.medium }}>
-            <GqlError error={error} />
+            <GqlError error={visibleError} />
           </div>
         )}
         <TabPanel
