@@ -510,7 +510,7 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 
 	if overrides.Pulumi != nil {
 		result.Pulumi = &console.PulumiConfigurationAttributes{
-			Parallelism:  overrides.Pulumi.Parallelism,
+			Parallel:     overrides.Pulumi.Parallel,
 			Refresh:      overrides.Pulumi.Refresh,
 			ApproveEmpty: overrides.Pulumi.ApproveEmpty,
 			Stack:        overrides.Pulumi.Stack,
@@ -552,7 +552,7 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 
 	if conf.Pulumi != nil {
 		attrs.Pulumi = &console.PulumiConfigurationAttributes{
-			Parallelism:  conf.Pulumi.Parallelism,
+			Parallel:     conf.Pulumi.Parallel,
 			Refresh:      conf.Pulumi.Refresh,
 			ApproveEmpty: conf.Pulumi.ApproveEmpty,
 			Stack:        conf.Pulumi.Stack,
