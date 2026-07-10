@@ -1,0 +1,96 @@
+# https://github.com/pluralsh/pulumi-samples
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: target-cluster
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: pulumi-samples
+  namespace: default
+spec:
+  url: https://github.com/pluralsh/pulumi-samples.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: pulumi-sample-typescript-aws-s3
+  namespace: default
+spec:
+  type: PULUMI
+  approval: true
+  repositoryRef:
+    name: pulumi-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: typescript-aws-s3
+  configuration:
+    tag: 0.6.18-pulumi-3.251
+    pulumi:
+      parallel: 10
+      refresh: true
+      approveEmpty: true
+      stack: dev
+  jobSpec:
+    namespace: plrl-deploy-operator
+    serviceAccount: stacks
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: pulumi-sample-typescript-local-file
+  namespace: default
+spec:
+  type: PULUMI
+  approval: true
+  repositoryRef:
+    name: pulumi-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: typescript-local-file
+  configuration:
+    tag: 0.6.18-pulumi-3.251
+    pulumi:
+      parallel: 10
+      refresh: true
+      approveEmpty: true
+      stack: dev
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: pulumi-sample-typescript-random
+  namespace: default
+spec:
+  type: PULUMI
+  repositoryRef:
+    name: pulumi-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: typescript-random
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: pulumi-sample-go-random
+  namespace: default
+spec:
+  type: PULUMI
+  repositoryRef:
+    name: pulumi-samples
+  clusterRef:
+    name: target-cluster
+  git:
+    ref: main
+    folder: go-random
