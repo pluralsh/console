@@ -2990,7 +2990,8 @@
               "terraform",
               "ansible",
               "custom",
-              "terragrunt"
+              "terragrunt",
+              "pulumi"
             ],
             "type": "string"
           },
@@ -3046,7 +3047,8 @@
               "terraform",
               "ansible",
               "custom",
-              "terragrunt"
+              "terragrunt",
+              "pulumi"
             ],
             "type": "string"
           },
@@ -3118,7 +3120,8 @@
               "terraform",
               "ansible",
               "custom",
-              "terragrunt"
+              "terragrunt",
+              "pulumi"
             ],
             "type": "string"
           },

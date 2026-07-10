@@ -17,28 +17,42 @@ export default function StackConfiguration() {
   const { stack, refetch } = useOutletContext() as StackOutletContextT
   const isTerragrunt = stack.type === StackType.Terragrunt
   const isPulumi = stack.type === StackType.Pulumi
-  const toolConfig = isTerragrunt
-    ? stack.configuration.terragrunt
-    : isPulumi
-      ? stack.configuration.pulumi
-      : stack.configuration.terraform
+  const terraformConfig = stack.configuration.terraform
+  const terragruntConfig = stack.configuration.terragrunt
+  const pulumiConfig = stack.configuration.pulumi
   const [image, setImage] = useState(stack.configuration.image)
   const [version, setVersion] = useState(stack.configuration.version)
   const [parallelism, setParallelism] = useState(
-    isTerraformFamilyStackType(stack.type) ? toolConfig?.parallelism : null
+    isTerraformFamilyStackType(stack.type)
+      ? isTerragrunt
+        ? terragruntConfig?.parallelism
+        : terraformConfig?.parallelism
+      : null
   )
-  const [parallel, setParallel] = useState(
-    isPulumi ? toolConfig?.parallel : null
+  const [parallel, setParallel] = useState(pulumiConfig?.parallel ?? null)
+  const [refresh, setRefresh] = useState(
+    isTerragrunt
+      ? terragruntConfig?.refresh
+      : isPulumi
+        ? pulumiConfig?.refresh
+        : terraformConfig?.refresh
   )
-  const [refresh, setRefresh] = useState(toolConfig?.refresh)
 
   const changed =
     image !== stack.configuration.image ||
     version !== stack.configuration.version ||
     (isTerraformFamilyStackType(stack.type) &&
-      parallelism !== toolConfig?.parallelism) ||
-    (isPulumi && parallel !== toolConfig?.parallel) ||
-    refresh !== toolConfig?.refresh
+      parallelism !==
+        (isTerragrunt
+          ? terragruntConfig?.parallelism
+          : terraformConfig?.parallelism)) ||
+    (isPulumi && parallel !== pulumiConfig?.parallel) ||
+    refresh !==
+      (isTerragrunt
+        ? terragruntConfig?.refresh
+        : isPulumi
+          ? pulumiConfig?.refresh
+          : terraformConfig?.refresh)
 
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
