@@ -4,39 +4,43 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.4.4
+- version: 3.4.5
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- **If you use ApplicationSet Cluster Generator filtering by Kubernetes\
-      \ version:** Argo CD 3.4 aligns Kubernetes version parsing with Helm 3.19 behavior.\
-      \ If you rely on `argocd.argoproj.io/auto-label-cluster-info` on cluster secrets,\
-      \ update consumers to read `argocd.argoproj.io/kubernetes-version` in **`vMajor.Minor.Patch`**\
-      \ format (e.g., `v1.30.2`) instead of the prior `Major.Minor` format.\n  - Upgrade\
-      \ guide: https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/3.3-3.4/#cluster-version-format-change\n\
-      \n- **Helm source behavior improvements to be aware of (no action required unless\
-      \ you depend on old behavior):**\n  - `valueFiles` now supports wildcard glob\
-      \ patterns.\n  - `helm version --client` deprecation handled/removed in Argo\
-      \ CD (compatibility with newer Helm).\n  - `repo.insecure` is passed to `helm\
-      \ dependency build` (matters for insecure Helm repos)."
-    chart_updates: []
-    features: ['ApplicationSet/cluster-generator behavior changed around Kubernetes
-        version labeling: cluster secrets now expose `argocd.argoproj.io/kubernetes-version`
-        using `vMajor.Minor.Patch` formatting; selectors/filters should be updated
-        accordingly.', 'Support wildcard glob patterns for Helm `valueFiles`, simplifying
-        complex Helm-based app definitions.', 'Controller adds an annotation to pause
-        reconciliation for a specific cluster, useful during maintenance or incident
-        response.', Adds application-level sync option to allow Prune and Delete behavior
-        to be set per-Application., 'Multiple UI enhancements for ApplicationSet views
-        and filtering, plus Source Hydrator support surfaced in the UI.']
-    breaking_changes: ['Cluster version format change impacts ApplicationSet Cluster
-        Generator setups that filter by Kubernetes version when using auto-labeled
-        cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
-        format.']
-  chart_version: 10.1.2
+    helm_changes: ''
+    chart_updates: ['This input only includes Argo CD *application* release notes,
+        not the Helm chart changelog. No chart-specific changes (templates/CRDs/values)
+        can be confirmed from the provided notes.', 'From v3.4.1: cluster version
+        label format alignment with Helm (see below) may affect ApplicationSet Cluster
+        Generator behavior; treat this as an operator-facing behavior change to validate
+        during upgrade.', 'From v3.4.5: dependency updates include Ubuntu base image
+        to 26.04 LTS and golang.org/x/crypto bump; plan for image rebuild/digest changes
+        and re-run vulnerability scans if you pin images.']
+    features: ['(Introduced in 3.4.1) ApplicationSet status now includes a Health
+        field, and several AppSet UI enhancements (list view, filters, tree/details,
+        slide-out summary) improve visibility and operations.', '(Introduced in 3.4.1)
+        Controller can pause reconciliation per target cluster via annotation, giving
+        finer operational control during incidents/maintenance.', '(Introduced in
+        3.4.1) Helm rendering supports wildcard glob patterns in valueFiles, making
+        multi-environment value file selection easier.', '(Introduced in 3.4.1) Added
+        application-level sync option to allow Prune and Delete, and improvements
+        around Source Hydrator configuration and UI support.', '(Introduced in 3.4.1)
+        Added OTEL instrumentation in auth/handlers and exposed additional config/env
+        knobs (e.g., K8s API client env vars) for observability and tuning.']
+    breaking_changes: ['(3.4.1) Kubernetes cluster version label format change for
+        ApplicationSet Cluster Generator when using auto-label-cluster-info: switch
+        from argocd.argoproj.io/auto-label-cluster-info producing Major.Minor to using
+        argocd.argoproj.io/kubernetes-version in vMajor.Minor.Patch format (e.g.,
+        v1.30.1). This can break cluster selection logic until labels/selectors/expressions
+        are updated.', '(Potential behavior change) Because Argo CD now aligns its
+        Kubernetes version parsing with Helm 3.19+, any custom logic depending on
+        the old version interpretation should be re-validated (especially AppSet cluster
+        generators and templating conditions).']
+  chart_version: 10.1.3
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-    'quay.io/argoproj/argocd:v3.4.4']
+    'quay.io/argoproj/argocd:v3.4.5']
 - version: 3.4.1
   kube: ['1.36', '1.35', '1.34']
   requirements: []

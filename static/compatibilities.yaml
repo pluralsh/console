@@ -18374,7 +18374,7 @@ addons:
       breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which
           requires upgrading CRDs as part of the upgrade.']
     chart_version: 1.0.5
-    images: []
+    images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
   - version: 0.37.0
     kube: ['1.30']
     requirements: []
@@ -18573,6 +18573,32 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 87.12.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "- If you currently set `prometheus.prometheusSpec.shards: null`,\
+        \ the chart will now **omit** `spec.shards` from the generated Prometheus\
+        \ CR instead of rendering it as `shards: null`.\n  - **Action:** No change\
+        \ needed for most users. If you were relying on `shards: null` being explicitly\
+        \ present (uncommon), be aware it will no longer be rendered.\n  - **Recommendation:**\
+        \ Keep using `null`/unset if you want the default Operator behavior; set an\
+        \ integer if you want sharding."
+      chart_updates: ['Prometheus CR rendering: `spec.shards` is no longer emitted
+          when the Helm value is `null` (PR #7085).', 'PrometheusRule for etcd: annotation
+          `runbook_url` updated/added (PR #7082).']
+      features: ['Prometheus manifest rendering is improved to avoid producing an
+          explicit `shards: null` field when sharding is not configured.', 'etcd PrometheusRule
+          annotations now include/adjust a `runbook_url`, improving runbook discoverability
+          in alerts.']
+      breaking_changes: []
+    chart_version: 87.12.2
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+      'quay.io/prometheus/prometheus:v3.13.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.12.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -23004,6 +23030,22 @@ addons:
   chart_name: gatekeeper
   eolApiSlug: gatekeeper
   versions:
+  - version: 3.23.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Semantic log lines now include a structured marker field to help\
+          \ log parsers distinguish \u201Csemantic\u201D entries.", 'Remote cluster
+          mode now supports status resource routing, improving how status objects
+          are handled across clusters.', 'Mutation ApplyTo specs support a new `operations`
+          field so you can scope mutations by admission operation (e.g., CREATE/UPDATE/DELETE).']
+      breaking_changes: []
+    chart_version: 3.23.0
+    images: ['curlimages/curl:8.20.0', 'openpolicyagent/gatekeeper-crds:v3.23.0',
+      'openpolicyagent/gatekeeper:v3.23.0']
   - version: 3.22.2
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -24373,40 +24415,43 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
-  - version: 3.4.4
+  - version: 3.4.5
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- **If you use ApplicationSet Cluster Generator filtering by\
-        \ Kubernetes version:** Argo CD 3.4 aligns Kubernetes version parsing with\
-        \ Helm 3.19 behavior. If you rely on `argocd.argoproj.io/auto-label-cluster-info`\
-        \ on cluster secrets, update consumers to read `argocd.argoproj.io/kubernetes-version`\
-        \ in **`vMajor.Minor.Patch`** format (e.g., `v1.30.2`) instead of the prior\
-        \ `Major.Minor` format.\n  - Upgrade guide: https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/3.3-3.4/#cluster-version-format-change\n\
-        \n- **Helm source behavior improvements to be aware of (no action required\
-        \ unless you depend on old behavior):**\n  - `valueFiles` now supports wildcard\
-        \ glob patterns.\n  - `helm version --client` deprecation handled/removed\
-        \ in Argo CD (compatibility with newer Helm).\n  - `repo.insecure` is passed\
-        \ to `helm dependency build` (matters for insecure Helm repos)."
-      chart_updates: []
-      features: ['ApplicationSet/cluster-generator behavior changed around Kubernetes
-          version labeling: cluster secrets now expose `argocd.argoproj.io/kubernetes-version`
-          using `vMajor.Minor.Patch` formatting; selectors/filters should be updated
-          accordingly.', 'Support wildcard glob patterns for Helm `valueFiles`, simplifying
-          complex Helm-based app definitions.', 'Controller adds an annotation to
-          pause reconciliation for a specific cluster, useful during maintenance or
-          incident response.', Adds application-level sync option to allow Prune and
-          Delete behavior to be set per-Application., 'Multiple UI enhancements for
-          ApplicationSet views and filtering, plus Source Hydrator support surfaced
-          in the UI.']
-      breaking_changes: ['Cluster version format change impacts ApplicationSet Cluster
-          Generator setups that filter by Kubernetes version when using auto-labeled
-          cluster info: update to `argocd.argoproj.io/kubernetes-version` with `vMajor.Minor.Patch`
-          format.']
-    chart_version: 10.1.2
+      helm_changes: ''
+      chart_updates: ['This input only includes Argo CD *application* release notes,
+          not the Helm chart changelog. No chart-specific changes (templates/CRDs/values)
+          can be confirmed from the provided notes.', 'From v3.4.1: cluster version
+          label format alignment with Helm (see below) may affect ApplicationSet Cluster
+          Generator behavior; treat this as an operator-facing behavior change to
+          validate during upgrade.', 'From v3.4.5: dependency updates include Ubuntu
+          base image to 26.04 LTS and golang.org/x/crypto bump; plan for image rebuild/digest
+          changes and re-run vulnerability scans if you pin images.']
+      features: ['(Introduced in 3.4.1) ApplicationSet status now includes a Health
+          field, and several AppSet UI enhancements (list view, filters, tree/details,
+          slide-out summary) improve visibility and operations.', '(Introduced in
+          3.4.1) Controller can pause reconciliation per target cluster via annotation,
+          giving finer operational control during incidents/maintenance.', '(Introduced
+          in 3.4.1) Helm rendering supports wildcard glob patterns in valueFiles,
+          making multi-environment value file selection easier.', '(Introduced in
+          3.4.1) Added application-level sync option to allow Prune and Delete, and
+          improvements around Source Hydrator configuration and UI support.', '(Introduced
+          in 3.4.1) Added OTEL instrumentation in auth/handlers and exposed additional
+          config/env knobs (e.g., K8s API client env vars) for observability and tuning.']
+      breaking_changes: ['(3.4.1) Kubernetes cluster version label format change for
+          ApplicationSet Cluster Generator when using auto-label-cluster-info: switch
+          from argocd.argoproj.io/auto-label-cluster-info producing Major.Minor to
+          using argocd.argoproj.io/kubernetes-version in vMajor.Minor.Patch format
+          (e.g., v1.30.1). This can break cluster selection logic until labels/selectors/expressions
+          are updated.', '(Potential behavior change) Because Argo CD now aligns its
+          Kubernetes version parsing with Helm 3.19+, any custom logic depending on
+          the old version interpretation should be re-validated (especially AppSet
+          cluster generators and templating conditions).']
+    chart_version: 10.1.3
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-      'quay.io/argoproj/argocd:v3.4.4']
+      'quay.io/argoproj/argocd:v3.4.5']
   - version: 3.4.1
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -24949,36 +24994,6 @@ addons:
     chart_version: 1.0.4
     images: ['quay.io/argoproj/argocli:v4.0.2', 'quay.io/argoproj/workflow-controller:v4.0.2',
       'registry.k8s.io/kubectl:v1.35.3']
-  - version: 3.7.7
-    kube: ['1.33', '1.32', '1.31']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [Release notes for v3.7.7 do not enumerate specific feature changes
-          vs v3.7.6; they mainly point to the blog/changelog for details.]
-      breaking_changes: [No breaking changes are listed in the provided release notes;
-          consult the official upgrading guide and GitHub issues for any known issues
-          between 3.7.6 and 3.7.7.]
-    chart_version: 0.47.0
-    images: ['quay.io/argoproj/argocli:v3.7.7', 'quay.io/argoproj/workflow-controller:v3.7.7']
-  - version: 3.7.6
-    kube: ['1.34', '1.33', '1.32']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [No concrete feature details were included in the provided release
-          notes snippets for v3.7.0 or v3.7.6 beyond installation/asset information;
-          consult the upstream CHANGELOG.md for actual functional changes between
-          3.7.0 and 3.7.6.]
-      breaking_changes: [No breaking changes were listed in the provided release notes
-          content; you must review the Argo Workflows upgrading guide and the main
-          CHANGELOG.md for any breaking changes introduced between v3.7.0 and v3.7.6.]
-    chart_version: 0.46.3
-    images: ['quay.io/argoproj/argocli:v3.7.6', 'quay.io/argoproj/workflow-controller:v3.7.6']
   - version: 3.7.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -24995,38 +25010,19 @@ addons:
           for v3.7.0 to identify any required manifest/CRD/API changes.]
     chart_version: 0.45.21
     images: ['quay.io/argoproj/argocli:v3.7.0', 'quay.io/argoproj/workflow-controller:v3.7.0']
-  - version: 3.6.10
-    kube: ['1.33', '1.32', '1.31']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ['Release notes provided for v3.6.10 and v3.6.7 contain mainly installation/asset
-          information and links to the full changelog/upgrading guide, but do not
-          list concrete feature changes between 3.6.7 and 3.6.10.']
-      breaking_changes: [No breaking changes are called out in the provided notes;
-          consult the Argo Workflows upgrading guide and CHANGELOG.md for any changes
-          between v3.6.7 and v3.6.10.]
-    chart_version: 0.45.20
-    images: ['quay.io/argoproj/argocli:v3.6.10', 'quay.io/argoproj/workflow-controller:v3.6.10']
-  - version: 3.6.7
+  - version: 3.6.5
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ["v3.6.7 is a patch release over 3.6.3; release notes provided here\
-          \ don\u2019t enumerate feature-level changes beyond standard install/CLI\
-          \ artifacts."]
-      breaking_changes: ["v3.6.3 is explicitly called out as a version you should\
-          \ not use; upgrade should target >= v3.6.4 (and you\u2019re planning v3.6.7).\
-          \ No other breaking changes are listed in the provided notes; consult the\
-          \ upstream upgrading guide/changelog for any hidden breaking changes between\
-          \ 3.6.3 and 3.6.7."]
-    chart_version: 0.45.15
-    images: ['quay.io/argoproj/argocli:v3.6.7', 'quay.io/argoproj/workflow-controller:v3.6.7']
+      features: [v3.6.5 is the recommended patch level versus v3.6.3 (which is explicitly
+          flagged as 'Do not use'; prefer v3.6.4 or later).]
+      breaking_changes: [v3.6.3 is marked as a known-bad release; treat upgrading
+          away from it as urgent and avoid deploying/rolling back to it.]
+    chart_version: 0.45.12
+    images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
   - version: 3.6.3
     kube: ['1.32', '1.31', '1.30']
     requirements: []
