@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -84,4 +85,17 @@ exit 1
 	hasChanges, err := tool.HasChanges()
 	require.NoError(t, err)
 	assert.False(t, hasChanges)
+}
+
+func TestNewWithNilRun(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	tool := New(v1.Config{
+		ExecDir: tmpDir,
+	}).(*Pulumi)
+
+	assert.Equal(t, defaultStackName, tool.stackName)
+	assert.Nil(t, tool.parallel)
+	assert.Nil(t, tool.refresh)
+	assert.False(t, tool.destroy)
 }

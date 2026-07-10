@@ -334,8 +334,16 @@ func (in *Pulumi) init() v1.Tool {
 // New creates a Pulumi structure that implements v1.Tool interface.
 func New(config v1.Config) v1.Tool {
 	stackName := defaultStackName
-	if config.Run != nil && config.Run.PulumiStack != nil && len(*config.Run.PulumiStack) > 0 {
-		stackName = *config.Run.PulumiStack
+	var parallel *int64
+	var refresh *bool
+
+	if config.Run != nil {
+		if config.Run.PulumiStack != nil && len(*config.Run.PulumiStack) > 0 {
+			stackName = *config.Run.PulumiStack
+		}
+
+		parallel = config.Run.Parallel
+		refresh = config.Run.Refresh
 	}
 
 	return (&Pulumi{
@@ -344,8 +352,8 @@ func New(config v1.Config) v1.Tool {
 		dir:         config.ExecDir,
 		stackName:   stackName,
 		destroy:     isDestroyRun(config.Run),
-		parallel:    config.Run.Parallel,
-		refresh:     config.Run.Refresh,
+		parallel:    parallel,
+		refresh:     refresh,
 	}).init()
 }
 
