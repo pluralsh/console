@@ -69,6 +69,10 @@ func (in *UpArgsModifier) Args(args []string) []string {
 	args = appendParallel(args, in.parallel)
 	args = appendRefresh(args, in.refresh)
 
+	if !lo.Contains(args, "--plan") {
+		args = append(args, "--plan", in.planFile)
+	}
+
 	if !lo.Contains(args, "--yes") {
 		args = append(args, "--yes")
 	}
