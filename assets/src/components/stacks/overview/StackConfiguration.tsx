@@ -16,19 +16,28 @@ export default function StackConfiguration() {
   const { stackId = '' } = useParams()
   const { stack, refetch } = useOutletContext() as StackOutletContextT
   const isTerragrunt = stack.type === StackType.Terragrunt
-  // Terragrunt has its own configuration block; Terraform uses the terraform one.
+  const isPulumi = stack.type === StackType.Pulumi
   const toolConfig = isTerragrunt
     ? stack.configuration.terragrunt
-    : stack.configuration.terraform
+    : isPulumi
+      ? stack.configuration.pulumi
+      : stack.configuration.terraform
   const [image, setImage] = useState(stack.configuration.image)
   const [version, setVersion] = useState(stack.configuration.version)
-  const [parallelism, setParallelism] = useState(toolConfig?.parallelism)
+  const [parallelism, setParallelism] = useState(
+    isTerraformFamilyStackType(stack.type) ? toolConfig?.parallelism : null
+  )
+  const [parallel, setParallel] = useState(
+    isPulumi ? toolConfig?.parallel : null
+  )
   const [refresh, setRefresh] = useState(toolConfig?.refresh)
 
   const changed =
     image !== stack.configuration.image ||
     version !== stack.configuration.version ||
-    parallelism !== toolConfig?.parallelism ||
+    (isTerraformFamilyStackType(stack.type) &&
+      parallelism !== toolConfig?.parallelism) ||
+    (isPulumi && parallel !== toolConfig?.parallel) ||
     refresh !== toolConfig?.refresh
 
   const [mutation, { loading, error }] = useUpdateStackMutation({
@@ -45,9 +54,11 @@ export default function StackConfiguration() {
           version,
           ...(isTerragrunt
             ? { terragrunt: { refresh, parallelism } }
-            : isTerraformFamilyStackType(stack.type)
-              ? { terraform: { refresh, parallelism } }
-              : {}),
+            : isPulumi
+              ? { pulumi: { refresh, parallel } }
+              : isTerraformFamilyStackType(stack.type)
+                ? { terraform: { refresh, parallelism } }
+                : {}),
         },
       },
     },
@@ -95,37 +106,49 @@ export default function StackConfiguration() {
             onChange={(e) => setVersion(e.currentTarget.value)}
           />
         </FormField>
-        {isTerraformFamilyStackType(stack.type) && (
-          <>
-            <FormField label="Parallelism">
-              <Input
-                value={parallelism?.toString() ?? ''}
-                placeholder="Enter integer"
-                onChange={(e) => {
-                  const value = e.currentTarget.value.replace(/[^0-9]/g, '')
-                  setParallelism(value === '' ? null : parseInt(value, 10))
-                }}
+        {(isTerraformFamilyStackType(stack.type) || isPulumi) && (
+          <FormField label="Refresh">
+            <div
+              css={{
+                display: 'flex',
+                gap: theme.spacing.small,
+                alignItems: 'center',
+                height: '38px',
+              }}
+            >
+              <span>Off</span>
+              <Switch
+                checked={refresh ?? false}
+                onChange={(checked) => setRefresh(checked)}
+                css={{ gap: 0 }}
               />
-            </FormField>
-            <FormField label="Refresh">
-              <div
-                css={{
-                  display: 'flex',
-                  gap: theme.spacing.small,
-                  alignItems: 'center',
-                  height: '38px',
-                }}
-              >
-                <span>Off</span>
-                <Switch
-                  checked={refresh ?? false}
-                  onChange={(checked) => setRefresh(checked)}
-                  css={{ gap: 0 }}
-                />
-                <span>On</span>
-              </div>
-            </FormField>
-          </>
+              <span>On</span>
+            </div>
+          </FormField>
+        )}
+        {isTerraformFamilyStackType(stack.type) && (
+          <FormField label="Parallelism">
+            <Input
+              value={parallelism?.toString() ?? ''}
+              placeholder="Enter integer"
+              onChange={(e) => {
+                const value = e.currentTarget.value.replace(/[^0-9]/g, '')
+                setParallelism(value === '' ? null : parseInt(value, 10))
+              }}
+            />
+          </FormField>
+        )}
+        {isPulumi && (
+          <FormField label="Parallel">
+            <Input
+              value={parallel?.toString() ?? ''}
+              placeholder="Enter integer"
+              onChange={(e) => {
+                const value = e.currentTarget.value.replace(/[^0-9]/g, '')
+                setParallel(value === '' ? null : parseInt(value, 10))
+              }}
+            />
+          </FormField>
         )}
       </div>
       {error && <GqlError error={error} />}
