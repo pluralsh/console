@@ -5,32 +5,23 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
-- version: 87.12.2
+- version: 87.14.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "- If you currently set `prometheus.prometheusSpec.shards: null`,\
-      \ the chart will now **omit** `spec.shards` from the generated Prometheus CR\
-      \ instead of rendering it as `shards: null`.\n  - **Action:** No change needed\
-      \ for most users. If you were relying on `shards: null` being explicitly present\
-      \ (uncommon), be aware it will no longer be rendered.\n  - **Recommendation:**\
-      \ Keep using `null`/unset if you want the default Operator behavior; set an\
-      \ integer if you want sharding."
-    chart_updates: ['Prometheus CR rendering: `spec.shards` is no longer emitted when
-        the Helm value is `null` (PR #7085).', 'PrometheusRule for etcd: annotation
-        `runbook_url` updated/added (PR #7082).']
-    features: ['Prometheus manifest rendering is improved to avoid producing an explicit
-        `shards: null` field when sharding is not configured.', 'etcd PrometheusRule
-        annotations now include/adjust a `runbook_url`, improving runbook discoverability
-        in alerts.']
+    helm_changes: ''
+    chart_updates: ['PrometheusRule: etcd alert/runbook annotations updated (runbook_url).',
+      'Dependency update: kube-state-metrics chart/release bumped to v7.8.0.']
+    features: [Updated bundled kube-state-metrics dependency to v7.8.0 (may include
+        new metrics/labels/fixes from that component).]
     breaking_changes: []
-  chart_version: 87.12.2
+  chart_version: 87.14.0
   images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
     'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
     'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
-    'quay.io/prometheus/prometheus:v3.13.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+    'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
 - version: 87.12.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
