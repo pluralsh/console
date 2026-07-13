@@ -158,13 +158,17 @@ export const ColActions = columnHelper.display({
     gridTemplate: 'minmax(auto, 80px)',
   },
   cell: function Cell({ row: { original } }) {
-    const { clusterId = '' } = useParams()
+    const { clusterId = '', flowIdOrName } = useParams<{
+      clusterId?: string
+      flowIdOrName?: string
+    }>()
     const vulnerabilityReportId = original?.id ?? ''
     return (
       <TableCaretLink
         css={{ alignSelf: 'end' }}
         to={getVulnerabilityReportDetailsPath({
           clusterId,
+          flowIdOrName,
           vulnerabilityReportId,
         })}
         textValue={`View details`}

@@ -150,6 +150,9 @@ const getQueryOptions = ({
     skip: kind !== queryKind || !component,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network' as WatchQueryFetchPolicy,
+    ...(queryKind === 'servicedeployment'
+      ? { errorPolicy: 'all' as const }
+      : {}),
     variables: {
       name: component?.name ?? '',
       namespace: component?.namespace ?? '',

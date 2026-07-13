@@ -1,4 +1,10 @@
-import { Chip, ChipProps, Flex } from '@pluralsh/design-system'
+import {
+  AiSparkleFilledIcon,
+  Button,
+  Chip,
+  ChipProps,
+  Flex,
+} from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 
 import { Row } from '@tanstack/react-table'
@@ -10,26 +16,16 @@ import {
   CvssBundle,
   VulnAttackVector,
   VulnerabilityFragment,
-  VulnerabilityReportFragment,
 } from 'generated/graphql'
-import { AgentRunFixButton } from 'components/ai/agent-runs/AgentRunFixButton'
-import { useMemo } from 'react'
-import ejs from 'ejs'
-import vulnPromptTemplate from './vulnerability-prompt.ejs?raw'
 
 export function VulnDetailExpanded({
   row,
-  parentReport,
+  onFixVulnerability,
 }: {
   row: Row<VulnerabilityFragment>
-  parentReport: Nullable<VulnerabilityReportFragment>
+  onFixVulnerability: (vuln: VulnerabilityFragment) => void
 }) {
   const { original: v } = row
-
-  const initialPrompt = useMemo(
-    () => ejs.render(vulnPromptTemplate, { vuln: v, report: parentReport }),
-    [v, parentReport]
-  )
 
   if (!v.title && !v.description && !v.cvssSource && !v.score && !v.cvss)
     return <VulnerabilityDetailSC>No details available.</VulnerabilityDetailSC>
@@ -45,13 +41,15 @@ export function VulnDetailExpanded({
           secondPartialType="body2"
           css={{ maxWidth: 900 }}
         />
-        <AgentRunFixButton
-          headerTitle="Fix vulnerability"
-          initialPrompt={initialPrompt}
-          initialRepo={parentReport?.artifactRepoUrl}
+        <Button
+          startIcon={<AiSparkleFilledIcon />}
+          onClick={(e) => {
+            e.stopPropagation()
+            onFixVulnerability(v)
+          }}
         >
           Fix vulnerability
-        </AgentRunFixButton>
+        </Button>
       </StretchedFlex>
       <CVSSSection
         bundle={v.cvss}

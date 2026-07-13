@@ -1,10 +1,40 @@
-import { Chip, ChipProps, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+import {
+  Checkbox,
+  Chip,
+  ChipProps,
+  Tooltip,
+  WrapWithIf,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { VulnerabilityFragment, VulnSeverity } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { useTheme } from 'styled-components'
 
 const columnHelper = createColumnHelper<VulnerabilityFragment>()
+
+export const ColVulnSelect = columnHelper.display({
+  id: 'select',
+  header: ({ table }) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Checkbox
+        small
+        checked={table.getIsAllRowsSelected()}
+        indeterminate={table.getIsSomeRowsSelected()}
+        onChange={table.getToggleAllRowsSelectedHandler()}
+      />
+    </div>
+  ),
+  cell: ({ row }) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <Checkbox
+        small
+        checked={row.getIsSelected()}
+        onChange={row.getToggleSelectedHandler()}
+      />
+    </div>
+  ),
+  meta: { gridTemplate: '48px' },
+})
 
 export const ColID = columnHelper.accessor((report) => report, {
   id: 'id',

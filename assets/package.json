@@ -185,6 +185,7 @@
     "./design-system/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
   },
   "resolutions": {
-    "elkjs": "0.11.0"
+    "elkjs": "0.11.0",
+    "shell-quote": "1.8.4"
   }
 }
