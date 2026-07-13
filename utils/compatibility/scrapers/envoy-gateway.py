@@ -4,12 +4,14 @@ from collections import OrderedDict
 
 from bs4 import BeautifulSoup
 
-from utils import fetch_page, print_error, update_compatibility_info
+from utils import fetch_page, get_chart_images, print_error, update_compatibility_info
 
 
 APP_NAME = "envoy-gateway"
 COMPATIBILITY_URL = "https://gateway.envoyproxy.io/news/releases/matrix/"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
+CHART_URL = "oci://docker.io/envoyproxy/gateway-helm"
+CHART_NAME = "gateway-helm"
 
 
 def _decode(content):
@@ -41,9 +43,6 @@ def _parse_kube_versions(value: str) -> list[str]:
 def _find_compatibility_table(soup: BeautifulSoup):
     required_headers = [
         "Envoy Gateway version",
-        "Envoy Proxy version",
-        "Rate Limit version",
-        "Gateway API version",
         "Kubernetes version",
     ]
 
@@ -54,11 +53,8 @@ def _find_compatibility_table(soup: BeautifulSoup):
     return None, []
 
 
-def _requirement(label: str, value: str) -> str | None:
-    cleaned = value.strip()
-    if not cleaned:
-        return None
-    return f"{label} {cleaned}"
+def _chart_images(chart_version: str) -> list[str]:
+    return get_chart_images(CHART_URL, CHART_NAME, chart_version) or []
 
 
 def scrape():
@@ -74,15 +70,12 @@ def scrape():
         return
 
     gateway_idx = headers.index("Envoy Gateway version")
-    proxy_idx = headers.index("Envoy Proxy version")
-    rate_limit_idx = headers.index("Rate Limit version")
-    gateway_api_idx = headers.index("Gateway API version")
     kube_idx = headers.index("Kubernetes version")
 
     versions = []
     for row in table.find_all("tr")[1:]:
         cells = [td.get_text(" ", strip=True) for td in row.find_all("td")]
-        if len(cells) <= max(gateway_idx, proxy_idx, rate_limit_idx, gateway_api_idx, kube_idx):
+        if len(cells) <= max(gateway_idx, kube_idx):
             continue
 
         version = _clean_version(cells[gateway_idx])
@@ -93,22 +86,14 @@ def scrape():
         if not kube_versions:
             continue
 
-        requirements = [
-            requirement
-            for requirement in [
-                _requirement("Envoy Proxy", cells[proxy_idx]),
-                _requirement("Rate Limit", cells[rate_limit_idx]),
-                _requirement("Gateway API", cells[gateway_api_idx]),
-            ]
-            if requirement
-        ]
-
         versions.append(
             OrderedDict(
                 [
                     ("version", version),
                     ("kube", kube_versions),
-                    ("requirements", requirements),
+                    ("requirements", []),
+                    ("chart_version", version),
+                    ("images", _chart_images(version)),
                     ("incompatibilities", []),
                 ]
             )
