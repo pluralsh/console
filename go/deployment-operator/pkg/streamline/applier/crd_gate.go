@@ -214,6 +214,6 @@ func (in *crdGate) resolve(ctx context.Context, gvk schema.GroupVersionKind, crd
 		lastErr = err
 	}
 
-	return nil, fmt.Errorf("timed out waiting for CRD %s to establish REST mapping for %s after %s: %v: %w",
+	return nil, fmt.Errorf("timed out waiting for CRD %s to establish REST mapping for %s after %s: %w: %w",
 		crd.GetName(), gvk.String(), in.waitTimeout, lastErr, err)
 }
