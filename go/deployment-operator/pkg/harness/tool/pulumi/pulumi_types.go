@@ -8,6 +8,8 @@ const (
 	defaultStackName  = "dev"
 	defaultBackendURL = "https://api.pulumi.com"
 	planFileName      = "pulumi.plan"
+
+	pulumiConfigTypeString = "string"
 )
 
 // Pulumi implements tool.Tool interface.

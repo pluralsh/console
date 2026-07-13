@@ -366,13 +366,13 @@ func pulumiConfigValue(value any) (string, string) {
 		}
 		return strconv.FormatFloat(typed, 'f', -1, 64), "float"
 	case string:
-		return typed, "string"
+		return typed, pulumiConfigTypeString
 	default:
 		encoded, err := json.Marshal(typed)
 		if err != nil {
-			return "", "string"
+			return "", pulumiConfigTypeString
 		}
-		return string(encoded), "string"
+		return string(encoded), pulumiConfigTypeString
 	}
 }
 
