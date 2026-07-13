@@ -3512,6 +3512,7 @@ export type ConsoleConfiguration = {
   byok?: Maybe<Scalars['Boolean']['output']>;
   cloud?: Maybe<Scalars['Boolean']['output']>;
   consoleVersion?: Maybe<Scalars['String']['output']>;
+  details?: Maybe<ConsoleConfigurationDetails>;
   externalOidc?: Maybe<Scalars['Boolean']['output']>;
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
@@ -3527,6 +3528,12 @@ export type ConsoleConfiguration = {
   qoveKey?: Maybe<Scalars['String']['output']>;
   sentryEnabled?: Maybe<Scalars['Boolean']['output']>;
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type ConsoleConfigurationDetails = {
+  __typename?: 'ConsoleConfigurationDetails';
+  assumeRoleArn?: Maybe<Scalars['String']['output']>;
+  egressIps?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
 export enum ConstraintEnforcement {
@@ -19434,7 +19441,7 @@ export type FlowVulnerabilityReportsQueryVariables = Exact<{
 }>;
 
 
-export type FlowVulnerabilityReportsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null } | null };
+export type FlowVulnerabilityReportsQuery = { __typename?: 'RootQueryType', flow?: { __typename?: 'Flow', id: string, vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null } | null };
 
 export type UpsertFlowMutationVariables = Exact<{
   attributes: FlowAttributes;
@@ -19755,7 +19762,7 @@ export type NodeMetricQuery = { __typename?: 'RootQueryType', nodeMetric?: { __t
 
 export type PluralObjectStatusFragment = { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
-export type PluralServiceDeploymentFragment = { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string, httpsPath?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } };
+export type PluralServiceDeploymentFragment = { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } };
 
 export type PluralServiceDeploymentQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -19764,7 +19771,7 @@ export type PluralServiceDeploymentQueryVariables = Exact<{
 }>;
 
 
-export type PluralServiceDeploymentQuery = { __typename?: 'RootQueryType', pluralServiceDeployment?: { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', namespace: string, message?: string | null, version: string, id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, operationalLayout?: { __typename?: 'OperationalLayout', serviceMesh?: ServiceMesh | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helm?: { __typename?: 'HelmSpec', values?: string | null, valuesFiles?: Array<string | null> | null, chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, uid?: string | null, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null> | null, contexts?: Array<{ __typename?: 'ServiceContext', id: string, configuration?: Record<string, unknown> | null, name: string, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string } | null, secrets?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null } | null> | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null, updatedAt?: string | null } | null> | null, repository?: { __typename?: 'GitRepository', pulledAt?: string | null, id: string, url: string, httpsPath?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, imports?: Array<{ __typename?: 'ServiceImport', stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null } | null } | null> | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null, scalingRecommendations?: Array<{ __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, type?: ScalingRecommendationType | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', distro?: ClusterDistro | null, id: string, name: string, handle?: string | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null> | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } } | null };
+export type PluralServiceDeploymentQuery = { __typename?: 'RootQueryType', pluralServiceDeployment?: { __typename?: 'PluralServiceDeployment', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, reference?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, status: { __typename?: 'PluralObjectStatus', id?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null } } | null };
 
 export type PodWithEventsFragment = { __typename?: 'Pod', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } };
 
@@ -19852,7 +19859,7 @@ export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, qoveKey?: string | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, boundRoles?: Array<{ __typename?: 'Role', id: string, name: string, description?: string | null, repositories?: Array<string | null> | null, permissions?: Array<Permission | null> | null, roleBindings?: Array<{ __typename?: 'RoleBinding', id: string, user?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, group?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null> | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, qoveKey?: string | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null, details?: { __typename?: 'ConsoleConfigurationDetails', assumeRoleArn?: string | null, egressIps?: Array<string | null> | null } | null } | null };
 
 export type LoginInfoQueryVariables = Exact<{
   redirect?: InputMaybe<Scalars['String']['input']>;
@@ -20780,11 +20787,11 @@ export type CreateInviteMutationVariables = Exact<{
 
 export type CreateInviteMutation = { __typename?: 'RootMutationType', createInvite?: { __typename?: 'Invite', secureId: string } | null };
 
-export type VulnerabilityReportTinyFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
+export type VulnerabilityReportTinyFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
 
-export type VulnerabilityReportFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
+export type VulnerabilityReportFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, vulnId?: string | null, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
 
-export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null };
+export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, vulnId?: string | null, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null };
 
 export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade };
 
@@ -20792,7 +20799,7 @@ export type ClusterVulnAggregateFragment = { __typename?: 'ClusterVulnAggregate'
 
 export type CvssBundleFragment = { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
 
-export type VulnerabilityReportConnectionFragment = { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null };
+export type VulnerabilityReportConnectionFragment = { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null };
 
 export type VulnerabilityReportsQueryVariables = Exact<{
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
@@ -20804,14 +20811,14 @@ export type VulnerabilityReportsQueryVariables = Exact<{
 }>;
 
 
-export type VulnerabilityReportsQuery = { __typename?: 'RootQueryType', vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null };
+export type VulnerabilityReportsQuery = { __typename?: 'RootQueryType', vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null };
 
 export type VulnerabilityReportQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type VulnerabilityReportQuery = { __typename?: 'RootQueryType', vulnerabilityReport?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null };
+export type VulnerabilityReportQuery = { __typename?: 'RootQueryType', vulnerabilityReport?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, artifactRepoUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, vulnId?: string | null, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'CvssBundle', attackComplexity?: VulnSeverity | null, attackVector?: VulnAttackVector | null, availability?: VulnSeverity | null, confidentiality?: VulnSeverity | null, integrity?: VulnSeverity | null, privilegesRequired?: VulnSeverity | null, userInteraction?: VulnUserInteraction | null, nvidia?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null, redhat?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null };
 
 export type VulnerabilityStatisticsQueryVariables = Exact<{
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
@@ -24155,6 +24162,122 @@ export const ServiceDeploymentComponentFragmentDoc = gql`
 }
     ${ApiDeprecationFragmentDoc}
 ${AiInsightFragmentDoc}`;
+export const ServiceContextFragmentDoc = gql`
+    fragment ServiceContext on ServiceContext {
+  id
+  configuration
+  name
+  project {
+    id
+    name
+  }
+  secrets {
+    name
+    value
+  }
+  insertedAt
+  updatedAt
+}
+    `;
+export const ServiceDependencyFragmentDoc = gql`
+    fragment ServiceDependency on ServiceDependency {
+  id
+  name
+  status
+  updatedAt
+}
+    `;
+export const ClusterScalingRecommendationFragmentDoc = gql`
+    fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
+  id
+  namespace
+  name
+  type
+  container
+  cpuCost
+  cpuRequest
+  cpuRecommendation
+  memoryCost
+  memoryRequest
+  memoryRecommendation
+  service {
+    ...ServiceDeploymentTiny
+    cluster {
+      distro
+      provider {
+        id
+        cloud
+        name
+        namespace
+        supportedVersions
+      }
+    }
+  }
+}
+    ${ServiceDeploymentTinyFragmentDoc}`;
+export const ServiceDeploymentDetailsFragmentDoc = gql`
+    fragment ServiceDeploymentDetails on ServiceDeployment {
+  ...ServiceDeploymentsRow
+  cluster {
+    ...ClusterMinimal
+    operationalLayout {
+      serviceMesh
+    }
+  }
+  namespace
+  message
+  version
+  helm {
+    values
+    valuesFiles
+  }
+  components {
+    ...ServiceDeploymentComponent
+  }
+  contexts {
+    ...ServiceContext
+  }
+  dependencies {
+    ...ServiceDependency
+  }
+  repository {
+    pulledAt
+  }
+  insight {
+    ...AiInsight
+  }
+  imports {
+    stack {
+      ...StackMinimal
+    }
+  }
+  parent {
+    id
+    name
+    cluster {
+      id
+      name
+    }
+  }
+  alerts(first: 500) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+  scalingRecommendations {
+    ...ClusterScalingRecommendation
+  }
+}
+    ${ServiceDeploymentsRowFragmentDoc}
+${ClusterMinimalFragmentDoc}
+${ServiceDeploymentComponentFragmentDoc}
+${ServiceContextFragmentDoc}
+${ServiceDependencyFragmentDoc}
+${AiInsightFragmentDoc}
+${StackMinimalFragmentDoc}
+${ClusterScalingRecommendationFragmentDoc}`;
 export const ServiceComponentChildFragmentDoc = gql`
     fragment ServiceComponentChild on ServiceComponentChild {
   id
@@ -25340,122 +25463,6 @@ export const NodeFragmentDoc = gql`
     ${MetadataFragmentDoc}
 ${PodFragmentDoc}
 ${EventFragmentDoc}`;
-export const ServiceContextFragmentDoc = gql`
-    fragment ServiceContext on ServiceContext {
-  id
-  configuration
-  name
-  project {
-    id
-    name
-  }
-  secrets {
-    name
-    value
-  }
-  insertedAt
-  updatedAt
-}
-    `;
-export const ServiceDependencyFragmentDoc = gql`
-    fragment ServiceDependency on ServiceDependency {
-  id
-  name
-  status
-  updatedAt
-}
-    `;
-export const ClusterScalingRecommendationFragmentDoc = gql`
-    fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
-  id
-  namespace
-  name
-  type
-  container
-  cpuCost
-  cpuRequest
-  cpuRecommendation
-  memoryCost
-  memoryRequest
-  memoryRecommendation
-  service {
-    ...ServiceDeploymentTiny
-    cluster {
-      distro
-      provider {
-        id
-        cloud
-        name
-        namespace
-        supportedVersions
-      }
-    }
-  }
-}
-    ${ServiceDeploymentTinyFragmentDoc}`;
-export const ServiceDeploymentDetailsFragmentDoc = gql`
-    fragment ServiceDeploymentDetails on ServiceDeployment {
-  ...ServiceDeploymentsRow
-  cluster {
-    ...ClusterMinimal
-    operationalLayout {
-      serviceMesh
-    }
-  }
-  namespace
-  message
-  version
-  helm {
-    values
-    valuesFiles
-  }
-  components {
-    ...ServiceDeploymentComponent
-  }
-  contexts {
-    ...ServiceContext
-  }
-  dependencies {
-    ...ServiceDependency
-  }
-  repository {
-    pulledAt
-  }
-  insight {
-    ...AiInsight
-  }
-  imports {
-    stack {
-      ...StackMinimal
-    }
-  }
-  parent {
-    id
-    name
-    cluster {
-      id
-      name
-    }
-  }
-  alerts(first: 500) {
-    edges {
-      node {
-        id
-      }
-    }
-  }
-  scalingRecommendations {
-    ...ClusterScalingRecommendation
-  }
-}
-    ${ServiceDeploymentsRowFragmentDoc}
-${ClusterMinimalFragmentDoc}
-${ServiceDeploymentComponentFragmentDoc}
-${ServiceContextFragmentDoc}
-${ServiceDependencyFragmentDoc}
-${AiInsightFragmentDoc}
-${StackMinimalFragmentDoc}
-${ClusterScalingRecommendationFragmentDoc}`;
 export const PluralObjectStatusFragmentDoc = gql`
     fragment PluralObjectStatus on PluralObjectStatus {
   id
@@ -25473,7 +25480,11 @@ export const PluralServiceDeploymentFragmentDoc = gql`
     ...Metadata
   }
   reference {
-    ...ServiceDeploymentDetails
+    id
+    name
+    cluster {
+      id
+    }
   }
   status {
     ...PluralObjectStatus
@@ -25482,7 +25493,6 @@ export const PluralServiceDeploymentFragmentDoc = gql`
 }
     ${EventFragmentDoc}
 ${MetadataFragmentDoc}
-${ServiceDeploymentDetailsFragmentDoc}
 ${PluralObjectStatusFragmentDoc}`;
 export const PodWithEventsFragmentDoc = gql`
     fragment PodWithEvents on Pod {
@@ -26264,7 +26274,11 @@ export const VulnerabilityReportTinyFragmentDoc = gql`
   artifactUrl
   services {
     service {
+      id
       name
+      cluster {
+        id
+      }
     }
   }
   namespaces {
@@ -26311,6 +26325,7 @@ export const CvssBundleFragmentDoc = gql`
 export const VulnerabilityFragmentDoc = gql`
     fragment Vulnerability on Vulnerability {
   id
+  vulnId
   title
   description
   severity
@@ -38498,6 +38513,10 @@ export const MeDocument = gql`
     }
     features {
       ...AvailableFeatures
+    }
+    details {
+      assumeRoleArn
+      egressIps
     }
     qoveKey
   }

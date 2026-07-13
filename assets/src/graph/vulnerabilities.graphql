@@ -3,7 +3,11 @@ fragment VulnerabilityReportTiny on VulnerabilityReport {
   artifactUrl
   services {
     service {
+      id
       name
+      cluster {
+        id
+      }
     }
   }
   namespaces {
@@ -29,6 +33,7 @@ fragment VulnerabilityReport on VulnerabilityReport {
 
 fragment Vulnerability on Vulnerability {
   id
+  vulnId
   title
   description
   severity

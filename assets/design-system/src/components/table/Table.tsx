@@ -129,6 +129,8 @@ function Table({
     string | null
   >(null)
 
+  useEffect(() => setFixedGridTemplateColumns(null), [columns.length])
+
   const { rows: tableRows } = table.getRowModel()
   const getItemKey = useCallback<
     Parameters<typeof useVirtualizer>[0]['getItemKey']

@@ -73,7 +73,8 @@ config :console,
   refresh_token_expiry: "7d",
   workbench_default: false,
   qove_key: nil,
-  cloud_override: "ignore"
+  cloud_override: "ignore",
+  details: %{}
 
 config :console, :ai_defaults,
   openai: %{

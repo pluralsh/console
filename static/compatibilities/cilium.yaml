@@ -1187,42 +1187,44 @@ versions:
   images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
     'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
   eolAt: '2024-07-24'
-- version: 1.13.4
+- version: 1.13.5
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: '- **Potential Helm value / flag to be aware of (new in 1.13.4):**
-      `enable-ipsec-key-watcher` (agent flag). This allows disabling the IPsec key
-      watcher (key rotation then requires an agent restart).
-
-      - **Helm/chart validation tightened:** Helm will fail if `kube-proxy-replacement`
-      is not valid; additionally, invalid combinations are rejected (e.g., `enable-host-legacy-routing=false`
-      with `kube-proxy-replacement=partial`).
-
-      - **Ingress Helm validation typo fixed** (no action expected unless you were
-      hitting validation issues).
-
-      '
-    chart_updates: [Helm install/upgrade behavior is stricter around kube-proxy-replacement
-        validity checks (upgrade may fail early if values are inconsistent)., Documentation
-        helm values generation now works on arm64 (docs/build tooling).]
-    features: ['v1.13.0 introduced several new capabilities (not added in 1.13.4):
-        LB-IPAM for LoadBalancer IP management; BGP Control Plane announcement of
-        LoadBalancer services; IPv6 BIG TCP; partial SCTP support; Gateway API v0.5.1
-        support; CiliumNodeConfig per-node configuration overrides; SNI-based TLS
-        enforcement in CiliumNetworkPolicy; and initial datapath support for Cilium
-        mTLS.', v1.13.4 adds a new agent flag to control IPsec key watcher behavior
-        (`enable-ipsec-key-watcher`).]
-    breaking_changes: ['**Do not upgrade to v1.13.4 if you are using IPsec** (release
-        note warning). The release includes multiple IPsec-related fixes, but upstream
-        explicitly warns against upgrading due to IPsec issues.', "Helm/agent validation\
-        \ is stricter for kube-proxy replacement settings; upgrades that previously\
-        \ \u201Cworked\u201D with inconsistent values may now fail until values are\
-        \ corrected."]
-  chart_version: 1.13.4
-  images: ['quay.io/cilium/cilium:v1.13.4@sha256:bde8800d61aaad8b8451b10e247ac7bdeb7af187bb698f83d40ad75a38c1ee6b',
-    'quay.io/cilium/operator-generic:v1.13.4@sha256:09ab77d324ef4d31f7d341f97ec5a2a4860910076046d57a2d61494d426c6301']
+    helm_changes: "- **New Helm value:** `envoyConfig.enabled` lets you enable the\
+      \ **CiliumEnvoyConfig (CEC) CRD** independently of the Cilium Ingress Controller.\
+      \ This matters if you use CEC for Envoy/L7 features but don\u2019t want to run\
+      \ Cilium Ingress.\n- **Ingress Service options:** Ingress now supports setting\
+      \ `loadBalancerIP` and `loadBalancerClass` on the created LoadBalancer Service,\
+      \ and Helm adds support for **nodePort allocation** for the Ingress LB service\
+      \ (useful when you run Ingress behind specific LB implementations or need fixed\
+      \ ports).\n- **Bugfix in chart behavior:** `cni.install=false` is now respected\
+      \ (previously CNI could still be installed). If you manage CNI config externally,\
+      \ re-check your values and rendered manifests to ensure the desired behavior.\n\
+      - **Operational note:** v1.13.5 includes an explicit warning to **not upgrade\
+      \ if using IPsec** (see breaking/upgrade blockers below)."
+    chart_updates: ['Ingress chart wiring updated to allow `loadBalancerIP`, `loadBalancerClass`,
+        and NodePort allocation for the Ingress LB Service.', Helm chart includes
+        support to toggle CiliumEnvoyConfig CRD via `envoyConfig.enabled` separate
+        from enabling Ingress., Chart behavior fixed to avoid installing the CNI configuration
+        when `cni.install=false`.]
+    features: ['Security: Envoy security fixes via bump to Envoy v1.24.x (includes
+        fixes for multiple Envoy CVEs/advisories listed in the release).', 'Ingress:
+        ability to set `loadBalancerIP` and `loadBalancerClass` on ingress services;
+        optional NodePort allocation for the ingress LB service.', 'Clustermesh: option
+        to disable external workloads support in clustermesh-apiserver for performance
+        when not needed.', 'Policy/L7 plumbing: ability to enable CiliumEnvoyConfig
+        CRD independently of Ingress controller (helps run CEC without Cilium Ingress).']
+    breaking_changes: ['Upgrade blocker: **Do NOT upgrade to v1.13.5 if you are using
+        IPsec** (release note warning). Treat as a hard stop until you identify the
+        recommended fixed version/mitigation from Cilium docs/issues.', 'Behavioral
+        change to be aware of: `cni.install=false` is enforced; if you previously
+        relied on the buggy behavior, upgrading may stop Cilium from writing/owning
+        the CNI config and could break node networking unless managed elsewhere.']
+  chart_version: 1.13.5
+  images: ['quay.io/cilium/cilium:v1.13.5@sha256:e02744b4413824093d25a6fb35e2e418f7301e55825fa53a8e1943fe7e9e5aef',
+    'quay.io/cilium/operator-generic:v1.13.5@sha256:d77f3e1472725b3c28b5d88d6a49c7fcba3072c0c08a26e2e16c1e9139c96207']
   eolAt: '2024-07-24'
 - version: 1.13.0
   kube: ['1.26', '1.25', '1.24']
@@ -1318,45 +1320,39 @@ versions:
   chart_version: 1.12.14
   images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
     'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
-- version: 1.12.11
+- version: 1.12.12
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "## Helm values / chart-behavior changes to review\n\n- **kube-proxy\
-      \ replacement validation becomes stricter (v1.12.11):** Helm install/upgrade\
-      \ now **fails** if `kubeProxyReplacement` is set to an invalid value. Verify\
-      \ your current `values.yaml` uses a supported value (commonly `disabled`, `partial`,\
-      \ or `strict` depending on your deployment).\n- **Ingress Helm validation typo\
-      \ fixed (v1.12.11):** If you use the integrated Ingress controller, there is\
-      \ a chart-side validation fix; re-run `helm template`/`helm upgrade --dry-run`\
-      \ to catch any values issues.\n- **New/changed knobs introduced in 1.12 baseline\
-      \ (from v1.12.0 notes):**\n  - **Ingress controller values** and **IngressClass\
-      \ creation** were added in 1.12.\n  - **Hubble Relay/UI service exposure options**\
-      \ (service type / nodePort) were added.\n  - **TLS-related Helm options** were\
-      \ reorganized for 1.12 (ensure your TLS settings match the 1.12 upgrade docs).\n\
-      \  - **`bpf-root`** value was added.\n  - **Linux nodeSelectors** were set for\
-      \ nodeinit/preflight.\n  - **Prometheus ports default changed** to reserved\
-      \ Cilium ports (if you scrape metrics, confirm your ServiceMonitor/Prometheus\
-      \ config matches).\n\n> Note: You only provided app release notes for 1.12.0\
-      \ and 1.12.11; intermediate chart/value changes between 1.12.1\u20131.12.10\
-      \ are not visible here, so validate with `helm diff` against your current values."
-    chart_updates: ['Integrated Ingress Controller introduced in 1.12 (agent + chart
-        wiring, including IngressClass support).', 'Chart creates/adjusts resources
-        for Hubble (Relay/UI metrics, service exposure options).', 'Chart behavior
-        tightened in 1.12.11: Helm upgrade/install fails fast on invalid `kubeProxyReplacement`
-        value.', Validation fix for Ingress-related chart logic in 1.12.11.]
-    features: [Deny Policies are promoted from beta to stable by v1.12.11 (policy
-        behavior/feature maturity change)., 'Cilium 1.12 introduced the integrated
-        Ingress Controller and initial Service Mesh support (Envoy/CEC), plus multiple
-        networking/IPAM enhancements (e.g., egress gateway stable, BGP control plane,
-        NAT46/64).']
-    breaking_changes: [Do **not** upgrade to v1.12.11 if you are using **IPsec** (explicit
-        release warning)., 'If your Helm values contain an invalid `kubeProxyReplacement`
-        setting, upgrades may now **fail** at Helm time due to new validation (v1.12.11).']
-  chart_version: 1.12.11
-  images: ['quay.io/cilium/cilium:v1.12.11@sha256:3fd8d9a6130783c245d90658ca379a7db88f249ec69464450fb53490cfbd7c55',
-    'quay.io/cilium/operator-generic:v1.12.11@sha256:8fad1da87c9f308c21ad54784c91c0fc92dc620e2781561473e2c8e4f871eb29']
+    helm_changes: ''
+    chart_updates: [No Helm chart changelog was provided in the notes you pasted;
+        the items below are chart-adjacent behaviors/values mentioned in the application
+        notes., 'If you had `cni.install=false`, v1.12.12 includes a fix where CNI
+        could still be installed; after upgrade confirm your chart values still reflect
+        the intended behavior.', 'Egress Gateway is now explicitly incompatible with
+        KVStore-backed identity allocation; if your deployment uses kvstore identity
+        allocation, you must keep EgressGW disabled (or change identity allocation
+        mode) before upgrading.']
+    features: [(From 1.12.0) Integrated Cilium Ingress Controller for Kubernetes ingress
+        handling., (From 1.12.0) Service Mesh capabilities with Cilium Envoy Config
+        (CEC) / Envoy CRDs and sidecar/sidecar-free options., (From 1.12.0) Stable
+        Egress Gateway plus additional service/LB features like backend quarantine/maintenance
+        states and initial NAT46/64 support., (From 1.12.0) New/expanded IPAM options
+        including delegated IPAM and dynamic PodCIDR allocation in cluster pool v2.,
+      '(From 1.12.0) New GoBGP-backed BGP control plane and related enhancements (IPv6
+        for BGP, PodCIDR announcements).', (From 1.12.12) Security fixes via Envoy
+        bumps (v1.24.9/1.24.10) and multiple improvements in network policy and BGP
+        stability.]
+    breaking_changes: ['v1.12.12: **Do NOT upgrade if you are using IPsec** (release
+        notes explicitly warn against upgrading with IPsec enabled).', 'v1.12.12:
+        Egress Gateway cannot be used with KVStore identity allocation; upgrading
+        without aligning configuration can break egress gateway behavior.', v1.12.0
+        introduced a new Egress Gateway CRD `CiliumEgressGatewayPolicy` and deprecated
+        `CiliumEgressNATPolicy`; older manifests may need migration before/after upgrade.]
+  chart_version: 1.12.12
+  images: ['quay.io/cilium/cilium:v1.12.12@sha256:3cafa76253881a77c3613ed2967776b83b81fcdffcd2a90dae13b175297b92dd',
+    'quay.io/cilium/operator-generic:v1.12.12@sha256:fb2b1ef65fda0f102ef533f354a5cc462076bd70b281ce0eee71fc34badf551a']
 - version: 1.12.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1417,23 +1413,25 @@ versions:
   chart_version: 1.12.0
   images: ['quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade',
     'quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410']
-- version: 1.11.18
+- version: 1.11.19
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Deny Policies are promoted from beta to stable in v1.11.18, which
-        may affect how you document and rely on deny rules in CiliumNetworkPolicy/CiliumClusterwideNetworkPolicy.',
-      New agent flag `enable-ipsec-key-watcher` allows disabling the IPsec key watcher
-        so IPsec key rotation only takes effect after an agent restart (opt-in behavior
-        change for operators who set it).]
-    breaking_changes: [Do not upgrade to v1.11.18 if you are using IPsec; the release
-        notes explicitly warn against upgrading in IPsec deployments.]
-  chart_version: 1.11.18
-  images: ['quay.io/cilium/cilium:v1.11.18@sha256:dda94072012c328fe0d00838f2f7d8ead071019d1d1950ecf44060640bf93cae',
-    'quay.io/cilium/operator-generic:v1.11.18@sha256:bccdcc3036b38581fd44bf7154255956a58d7d13006aae44f419378911dec986']
+    features: [v1.11.19 includes security fixes by updating the embedded Envoy proxy
+        to patched releases (Envoy 1.23.10 / 1.24.x up to 1.24.10)., 'Network Policy
+        behavior received improvements and multiple policy/proxy related bugfixes
+        (e.g., handling of deny rules and missing Envoy listeners without crashing).',
+      'Operational tooling improved slightly (bugtool additions like BPF nodeid list,
+        extra tc data) and some documentation/CI refreshes landed.']
+    breaking_changes: [Do not upgrade to v1.11.19 if your cluster uses Cilium IPsec;
+        this release is explicitly flagged as unsafe for IPsec upgrades due to upgrade-time
+        packet drop issues in certain tunneling/encryption scenarios.]
+  chart_version: 1.11.19
+  images: ['quay.io/cilium/cilium:v1.11.19@sha256:f71c973a9159158704012e1a065a3d484353ff4c2b4e05e10a03382f055adad4',
+    'quay.io/cilium/operator-generic:v1.11.19@sha256:79b622067205037489dcfc3280a2b9a19b0ede9a1c83eb5b3064926fa6af6a23']
 - version: 1.11.6
   kube: ['1.26', '1.25', '1.24']
   requirements: []

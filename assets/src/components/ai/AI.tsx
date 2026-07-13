@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Flex,
   GearTrainIcon,
   IconFrame,
@@ -10,8 +11,7 @@ import usePersistedState from 'components/hooks/usePersistedState'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
-import { isNil } from 'lodash'
-import { useLayoutEffect, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
@@ -46,16 +46,22 @@ export const getAIBreadcrumbs = (tab: string = '') => [
 export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
-  const [showEnableAIDialog, setShowEnableAIDialog] = usePersistedState(
+  const [dismissedAIDialog, setDismissedAIDialog] = usePersistedState(
     DISMISSED_AI_ENABLED_DIALOG_KEY,
     false
   )
+  const [sessionDismissed, setSessionDismissed] = useState(false)
+  const [dontShowAgain, setDontShowAgain] = useState(false)
+  const showEnableAIDialog =
+    aiEnabled === false && !dismissedAIDialog && !sessionDismissed
   const loading = useLoadingDeploymentSettings()
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
 
-  useLayoutEffect(() => {
-    if (!isNil(aiEnabled)) setShowEnableAIDialog(!aiEnabled)
-  }, [aiEnabled, setShowEnableAIDialog])
+  const handleDismiss = () => {
+    if (dontShowAgain) setDismissedAIDialog(true)
+    else setSessionDismissed(true)
+    setDontShowAgain(false)
+  }
 
   return (
     <WrapperSC>
@@ -85,19 +91,34 @@ export function AI() {
         header="Enable Plural AI"
         size="large"
         actions={
-          <Flex gap="medium">
-            <Button
-              secondary
-              onClick={() => setShowEnableAIDialog(false)}
+          <Flex
+            align="center"
+            gap="medium"
+            width="100%"
+          >
+            <Checkbox
+              checked={dontShowAgain}
+              onChange={(e) => setDontShowAgain(e.target.checked)}
             >
-              Dismiss
-            </Button>
-            <Button
-              as={Link}
-              to={AI_SETTINGS_AI_PROVIDER_ABS_PATH}
+              Don&apos;t show me this message again
+            </Checkbox>
+            <Flex
+              gap="medium"
+              marginLeft="auto"
             >
-              Go to settings
-            </Button>
+              <Button
+                secondary
+                onClick={handleDismiss}
+              >
+                Dismiss
+              </Button>
+              <Button
+                as={Link}
+                to={AI_SETTINGS_AI_PROVIDER_ABS_PATH}
+              >
+                Go to settings
+              </Button>
+            </Flex>
           </Flex>
         }
       >

@@ -25,6 +25,17 @@ const CHIP_ATTR_REGEX = /([a-z-]+)\s*=\s*"([^"]*)"/g
 
 const ZWSP = '​'
 
+/** Encode a value for storage in chip XML / `data-attr-*` attributes. */
+export function encodeChipAttrValue(value: string): string {
+  const normalized = value.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+  return escape(normalized).replace(/\n/g, '&#10;').replace(/\t/g, '&#9;')
+}
+
+/** Decode a chip XML / `data-attr-*` attribute value. */
+export function decodeChipAttrValue(value: string): string {
+  return unescape(value.replace(/&#10;/g, '\n').replace(/&#9;/g, '\t'))
+}
+
 export const stripZwsp = (text: string): string => text.replace(/​/g, '')
 export const isChipNode = (node: Nullable<Node>): boolean =>
   !!node &&
@@ -47,7 +58,7 @@ export function serializeChip(el: HTMLElement): string {
   for (const attr of Array.from(el.attributes)) {
     if (!attr.name.startsWith(CHIP_ATTR_PREFIX)) continue
     const xmlName = attr.name.slice(CHIP_ATTR_PREFIX.length)
-    attrs.push(`${xmlName}="${escape(attr.value)}"`)
+    attrs.push(`${xmlName}="${encodeChipAttrValue(attr.value)}"`)
   }
   return `<${tag}${attrs.length ? ' ' + attrs.join(' ') : ''}></${tag}>`
 }
@@ -290,7 +301,7 @@ function walkPlrlText(text: string): WalkedPlrlNode[] {
     const tag = match[1].toLowerCase() as MentionKind
     const attrs: Record<string, string> = {}
     for (const attrMatch of match[2].matchAll(CHIP_ATTR_REGEX))
-      attrs[attrMatch[1]] = unescape(attrMatch[2])
+      attrs[attrMatch[1]] = decodeChipAttrValue(attrMatch[2])
     if (attrs['item-id'] && attrs['item-name'])
       out.push({ type: 'chip', tag, attrs, raw: match[0] })
     else out.push({ type: 'text', text: match[0] })
