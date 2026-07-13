@@ -5,7 +5,6 @@ import {
   Flex,
   IconFrame,
   PrIcon,
-  Toast,
 } from '@pluralsh/design-system'
 import { AgentTodosTimeline } from 'components/ai/common/AgentTodosTimeline'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
@@ -16,7 +15,6 @@ import {
   AgentRunFragment,
   AgentRunStatus,
   AgentTodoFragment,
-  useApproveAgentRunMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -37,17 +35,15 @@ export function AgentRunWorkingTheory({
   run,
   todos: rawTodos,
   onViewDiff,
+  onApprove,
+  approving,
 }: {
   run: AgentRunFragment
   todos: AgentTodoFragment[]
   onViewDiff: () => void
+  onApprove: () => void
+  approving: boolean
 }) {
-  const [approveAgentRun, { loading: approving, error: approvingError }] =
-    useApproveAgentRunMutation({
-      variables: { id: run.id },
-      refetchQueries: ['AgentRun', 'PendingApprovalAgentRuns'],
-    })
-
   const isApprovable =
     run.status === AgentRunStatus.PendingApproval && !run.approvedAt
 
@@ -62,7 +58,7 @@ export function AgentRunWorkingTheory({
         run={run}
         isApprovable={isApprovable}
         approving={approving}
-        onApprove={() => approveAgentRun()}
+        onApprove={onApprove}
         onViewDiff={onViewDiff}
       />
       {todos.length > 0 && (
@@ -71,16 +67,6 @@ export function AgentRunWorkingTheory({
           todos={todos}
         />
       )}
-      <Toast
-        error="Approving agent run failed"
-        show={!!approvingError}
-        closeTimeout={5000}
-        severity="danger"
-        position="bottom"
-        marginBottom="medium"
-      >
-        {approvingError?.message}
-      </Toast>
     </Flex>
   )
 }

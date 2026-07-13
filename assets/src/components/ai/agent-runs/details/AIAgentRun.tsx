@@ -23,6 +23,7 @@ import {
   AgentRunFragment,
   AgentRunStatus,
   useAgentRunQuery,
+  useApproveAgentRunMutation,
   useCancelAgentRunMutation,
   useCreateAgentRunPromptMutation,
 } from 'generated/graphql'
@@ -75,6 +76,11 @@ export function AIAgentRun() {
     useCancelAgentRunMutation({
       variables: { id },
     })
+  const [approveAgentRun, { loading: approving, error: approvingError }] =
+    useApproveAgentRunMutation({
+      variables: { id },
+      refetchQueries: ['AgentRun', 'PendingApprovalAgentRuns'],
+    })
 
   const { data, error, loading } = useAgentRunQuery({
     variables: { id },
@@ -86,7 +92,18 @@ export function AIAgentRun() {
   const runLoading = !data && loading
   const run = data?.agentRun
   const showSidePanel = shouldShowAgentRunSidePanel(run, runLoading)
-  const { isOpen, setOpen } = useAgentRunPanel(showSidePanel)
+  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel)
+
+  useEffect(() => {
+    if (!id) return
+
+    setApproval({
+      onApprove: () => approveAgentRun(),
+      approving,
+    })
+
+    return () => setApproval(null)
+  }, [id, approving, setApproval, approveAgentRun])
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
@@ -206,14 +223,18 @@ export function AIAgentRun() {
         )}
       </StretchedFlex>
       <Toast
-        error="Cancelling agent run failed"
-        show={!!cancellingError}
+        error={
+          cancellingError
+            ? 'Cancelling agent run failed'
+            : 'Approving agent run failed'
+        }
+        show={!!cancellingError || !!approvingError}
         closeTimeout={5000}
         severity="danger"
         position="bottom"
         marginBottom="medium"
       >
-        {cancellingError?.message}
+        {(cancellingError || approvingError)?.message}
       </Toast>
     </>
   )

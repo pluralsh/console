@@ -65,38 +65,13 @@ export function shouldShowAgentRunSidePanel(
   isLoading = false
 ) {
   if (isLoading) return true
-  if (!run?.id) return false
 
-  const pullRequests = (run.pullRequests ?? []).filter(
-    (pr): pr is NonNullable<typeof pr> =>
-      isNonNullable(pr) && Boolean(pr.id && pr.url)
-  )
-  const hasPullRequests = !isEmpty(pullRequests)
-  const isTerminalStatus =
-    run.status === AgentRunStatus.Successful ||
-    run.status === AgentRunStatus.Failed ||
-    run.status === AgentRunStatus.Cancelled
-  const showAnalysisTab =
-    !!run.analysis &&
-    (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
-  const showDiffTab = !!run.upload?.patch
-  const isActiveRun =
-    isJobRunning(run.status) ||
-    run.status === AgentRunStatus.Babysitting ||
-    run.status === AgentRunStatus.PendingApproval
-  const showWorkingTheoryTab = true
-  const hasContentTabs =
-    showDiffTab || showAnalysisTab || showWorkingTheoryTab || hasPullRequests
+  return !!run?.id
+}
 
-  const isWriteMode = run.mode === AgentRunMode.Write
-  const expectsPullRequests = isActiveRun && isWriteMode && !hasPullRequests
-  const expectsAnalysis =
-    !showAnalysisTab &&
-    (isActiveRun ||
-      (run.status === AgentRunStatus.Successful &&
-        !(isWriteMode && hasPullRequests)))
-
-  return hasContentTabs || expectsPullRequests || expectsAnalysis
+type AgentRunApprovalActions = {
+  onApprove: () => void
+  approving: boolean
 }
 
 type AgentRunPanelContextT = {
@@ -106,6 +81,8 @@ type AgentRunPanelContextT = {
   requestedTab: AgentRunPanelTab | null
   clearRequestedTab: () => void
   setOpen: (open: boolean, tab?: AgentRunPanelTab) => void
+  approval: Nullable<AgentRunApprovalActions>
+  setApproval: (approval: Nullable<AgentRunApprovalActions>) => void
 }
 
 const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
@@ -118,6 +95,9 @@ const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
     console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
   setOpen: () =>
     console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
+  approval: null,
+  setApproval: () =>
+    console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
 })
 
 export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
@@ -128,6 +108,8 @@ export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
   const [requestedTab, setRequestedTab] = useState<AgentRunPanelTab | null>(
     null
   )
+  const [approval, setApproval] =
+    useState<Nullable<AgentRunApprovalActions>>(null)
   const isOpen = sidePanel === SIDE_PANEL_TYPE
 
   const clearRequestedTab = useCallback(() => setRequestedTab(null), [])
@@ -152,8 +134,10 @@ export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
       requestedTab,
       clearRequestedTab,
       setOpen,
+      approval,
+      setApproval,
     }),
-    [isOpen, selectedTab, requestedTab, clearRequestedTab, setOpen]
+    [isOpen, selectedTab, requestedTab, clearRequestedTab, setOpen, approval]
   )
 
   return <AgentRunPanelContext value={ctx}>{children}</AgentRunPanelContext>
@@ -172,6 +156,7 @@ export function AgentRunPanelContent() {
     setSelectedTab,
     requestedTab,
     clearRequestedTab,
+    approval,
   } = useAgentRunPanel()
   const tabStateRef = useRef<any>(null)
   const [diffFullscreen, setDiffFullscreen] = useState(false)
@@ -421,6 +406,8 @@ export function AgentRunPanelContent() {
                 run={run}
                 todos={todos}
                 onViewDiff={() => setSelectedTab(AgentRunPanelTab.Diff)}
+                onApprove={() => approval?.onApprove()}
+                approving={approval?.approving ?? false}
               />
             </ContentInnerSC>
           </ContentWrapperSC>
