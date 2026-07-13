@@ -38,8 +38,8 @@ RUN apk add --no-cache \
     nodejs-${NODEJS_VERSION} \
     go-${GO_VERSION} \
     npm && \
-    mkdir -p /plural/.cache/go /plural/.cache/go-build /plural/.cache/npm && \
-    chown -R 65532:65532 /plural/.cache
+    mkdir -p /plural/.cache/go /plural/.cache/go-build /plural/.cache/npm /plural/.pulumi && \
+    chown -R 65532:65532 /plural/.cache /plural/.pulumi
 
 COPY --from=pulumi /pulumi/pulumi /bin/pulumi
 COPY --from=pulumi /pulumi/pulumi-language-nodejs /bin/pulumi-language-nodejs
@@ -48,5 +48,6 @@ COPY --from=pulumi /pulumi/pulumi-language-go /bin/pulumi-language-go
 ENV GOPATH="/plural/.cache/go"
 ENV GOCACHE="/plural/.cache/go-build"
 ENV NPM_CONFIG_CACHE="/plural/.cache/npm"
+ENV PULUMI_HOME="/plural/.pulumi"
 
 USER 65532:65532

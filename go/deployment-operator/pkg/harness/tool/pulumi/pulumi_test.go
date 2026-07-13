@@ -171,6 +171,7 @@ printf '%s|%s\n' "$PULUMI_TEST_ENV" "$*" >> "$PULUMI_COMMAND_LOG"
 		stackName:  "dev",
 		backendURL: "s3://pulumi-state",
 		env: []string{
+			"PULUMI_HOME=" + filepath.Join(tmpDir, ".pulumi"),
 			"PULUMI_TEST_ENV=available",
 			"PULUMI_COMMAND_LOG=" + logFile,
 		},
@@ -183,6 +184,14 @@ printf '%s|%s\n' "$PULUMI_TEST_ENV" "$*" >> "$PULUMI_COMMAND_LOG"
 	assert.Contains(t, string(commands), "available|stack select dev --create --non-interactive")
 }
 
+func TestPulumiEnvPreservesCustomHome(t *testing.T) {
+	env := pulumiEnv([]string{"PULUMI_HOME=/custom/pulumi"})
+	assert.Equal(t, []string{"PULUMI_HOME=/custom/pulumi"}, env)
+
+	env = pulumiEnv(nil)
+	assert.Equal(t, []string{"PULUMI_HOME=" + defaultPulumiHome}, env)
+}
+
 func TestNewWithNilRun(t *testing.T) {
 	tmpDir := t.TempDir()
 
@@ -192,6 +201,7 @@ func TestNewWithNilRun(t *testing.T) {
 
 	assert.Equal(t, defaultStackName, tool.stackName)
 	assert.Equal(t, defaultBackendURL, tool.backendURL)
+	assert.Contains(t, tool.env, "PULUMI_HOME="+defaultPulumiHome)
 	assert.Nil(t, tool.parallel)
 	assert.Nil(t, tool.refresh)
 	assert.False(t, tool.destroy)

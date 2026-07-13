@@ -145,6 +145,10 @@ func (in *Pulumi) Modifier(stage console.StepStage) v1.Modifier {
 
 // Prepare implements [v1.Tool] interface.
 func (in *Pulumi) Prepare() error {
+	if err := in.ensurePulumiHome(); err != nil {
+		return err
+	}
+
 	if output, err := in.runPulumi([]string{"login", in.backendURL, "--non-interactive"}); err != nil {
 		return fmt.Errorf("failed executing pulumi login: %s: %w", string(output), err)
 	}
@@ -424,6 +428,38 @@ func isSecretValue(value any) bool {
 	return false
 }
 
+func (in *Pulumi) ensurePulumiHome() error {
+	home := pulumiHomeFromEnv(in.env)
+	if home == "" {
+		home = defaultPulumiHome
+	}
+
+	if err := os.MkdirAll(home, 0o755); err != nil {
+		return fmt.Errorf("failed creating pulumi home directory %q: %w", home, err)
+	}
+
+	return nil
+}
+
+func pulumiEnv(env []string) []string {
+	if pulumiHomeFromEnv(env) != "" {
+		return env
+	}
+
+	return append(env, pulumiHomeEnvVar+"="+defaultPulumiHome)
+}
+
+func pulumiHomeFromEnv(env []string) string {
+	prefix := pulumiHomeEnvVar + "="
+	for _, entry := range env {
+		if strings.HasPrefix(entry, prefix) {
+			return strings.TrimPrefix(entry, prefix)
+		}
+	}
+
+	return ""
+}
+
 func (in *Pulumi) init() v1.Tool {
 	if len(in.dir) == 0 {
 		klog.Fatal("dir is required")
@@ -436,6 +472,7 @@ func (in *Pulumi) init() v1.Tool {
 		in.backendURL = defaultBackendURL
 	}
 
+	in.env = pulumiEnv(in.env)
 	in.planFile = planFileName
 	return in
 }

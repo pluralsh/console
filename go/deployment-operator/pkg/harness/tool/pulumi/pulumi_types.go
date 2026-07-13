@@ -8,7 +8,9 @@ const (
 	defaultStackName  = "dev"
 	defaultBackendURL = "https://api.pulumi.com"
 	planFileName      = "pulumi.plan"
+	defaultPulumiHome = "/plural/.pulumi"
 
+	pulumiHomeEnvVar       = "PULUMI_HOME"
 	pulumiConfigTypeString = "string"
 )
 
