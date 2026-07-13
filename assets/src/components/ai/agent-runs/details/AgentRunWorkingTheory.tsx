@@ -11,7 +11,7 @@ import { AgentTodosTimeline } from 'components/ai/common/AgentTodosTimeline'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Body2P, Subtitle1H1 } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunStatus,
@@ -69,8 +69,12 @@ export function AgentRunWorkingTheory({
           onViewDiff={onViewDiff}
         />
       )}
-      <Subtitle1H1>Agent todos</Subtitle1H1>
-      <AgentTodosTimeline todos={todos} />
+      {todos.length > 0 && (
+        <AgentTodosTimeline
+          title="Agent todos"
+          todos={todos}
+        />
+      )}
       <Toast
         error="Approving agent run failed"
         show={!!approvingError}

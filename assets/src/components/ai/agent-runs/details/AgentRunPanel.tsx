@@ -22,6 +22,7 @@ import {
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
+  AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
@@ -60,6 +61,55 @@ export enum AgentRunPanelTab {
   Analysis = 'Analysis',
   WorkingTheory = 'Working theory',
   PullRequests = 'Pull requests',
+}
+
+function hasAgentRunTodos(run: Nullable<AgentRunFragment>) {
+  return (run?.todos ?? []).some((todo) => {
+    const title = todo?.title?.trim() ?? ''
+    const description = todo?.description?.trim() ?? ''
+
+    return title.length > 0 || description.length > 0
+  })
+}
+
+export function shouldShowAgentRunSidePanel(
+  run: Nullable<AgentRunFragment>,
+  isLoading = false
+) {
+  if (isLoading) return true
+  if (!run?.id) return false
+
+  const pullRequests = (run.pullRequests ?? []).filter(
+    (pr): pr is NonNullable<typeof pr> =>
+      isNonNullable(pr) && Boolean(pr.id && pr.url)
+  )
+  const hasPullRequests = !isEmpty(pullRequests)
+  const isTerminalStatus =
+    run.status === AgentRunStatus.Successful ||
+    run.status === AgentRunStatus.Failed ||
+    run.status === AgentRunStatus.Cancelled
+  const showAnalysisTab =
+    !!run.analysis &&
+    (run.mode !== AgentRunMode.Write || (!hasPullRequests && isTerminalStatus))
+  const showDiffTab = !!run.upload?.patch
+  const isActiveRun =
+    isJobRunning(run.status) ||
+    run.status === AgentRunStatus.Babysitting ||
+    run.status === AgentRunStatus.PendingApproval
+  const showWorkingTheoryTab =
+    hasAgentRunTodos(run) || shouldShowAgentRunStatusCallout(run) || isActiveRun
+  const hasContentTabs =
+    showDiffTab || showAnalysisTab || showWorkingTheoryTab || hasPullRequests
+
+  const isWriteMode = run.mode === AgentRunMode.Write
+  const expectsPullRequests = isActiveRun && isWriteMode && !hasPullRequests
+  const expectsAnalysis =
+    !showAnalysisTab &&
+    (isActiveRun ||
+      (run.status === AgentRunStatus.Successful &&
+        !(isWriteMode && hasPullRequests)))
+
+  return hasContentTabs || expectsPullRequests || expectsAnalysis
 }
 
 type AgentRunPanelContextT = {
@@ -188,16 +238,16 @@ export function AgentRunPanelContent() {
         ? { maxWidthVw: 60, initialWidthVw: 60 }
         : { maxWidthVw: 50, initialWidthVw: 45 }
   )
-  const showWorkingTheoryTab =
-    !isEmpty(todos) || shouldShowAgentRunStatusCallout(run)
-  const showPrsTab = hasPullRequests
-  const hasContentTabs =
-    showDiffTab || showAnalysisTab || showWorkingTheoryTab || showPrsTab
-  const isWriteMode = run?.mode === AgentRunMode.Write
   const isActiveRun =
     isJobRunning(run?.status) ||
     run?.status === AgentRunStatus.Babysitting ||
     run?.status === AgentRunStatus.PendingApproval
+  const showWorkingTheoryTab =
+    !isEmpty(todos) || shouldShowAgentRunStatusCallout(run) || isActiveRun
+  const showPrsTab = hasPullRequests
+  const hasContentTabs =
+    showDiffTab || showAnalysisTab || showWorkingTheoryTab || showPrsTab
+  const isWriteMode = run?.mode === AgentRunMode.Write
   const expectsWorkingTheory =
     (isLoading || isActiveRun) && !showWorkingTheoryTab
   const expectsPullRequests =

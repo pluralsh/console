@@ -46,8 +46,10 @@ import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
-import { useAgentRunPanel } from './AgentRunPanel.tsx'
-import { shouldShowAgentRunStatusCallout } from './AgentRunWorkingTheory.tsx'
+import {
+  shouldShowAgentRunSidePanel,
+  useAgentRunPanel,
+} from './AgentRunPanel.tsx'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -82,11 +84,8 @@ export function AIAgentRun() {
 
   const runLoading = !data && loading
   const run = data?.agentRun
-  const hasWorkingTheoryContent =
-    hasAgentRunTodos(run) || shouldShowAgentRunStatusCallout(run)
-  const { isOpen, setOpen } = useAgentRunPanel(
-    !!run?.id && hasWorkingTheoryContent
-  )
+  const showSidePanel = shouldShowAgentRunSidePanel(run, runLoading)
+  const { isOpen, setOpen } = useAgentRunPanel(showSidePanel)
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
@@ -196,7 +195,7 @@ export function AIAgentRun() {
             {run && canReprompt && <AgentRunRepromptInput run={run} />}
           </Flex>
         </WrapperSC>
-        {hasWorkingTheoryContent && !isOpen && (
+        {showSidePanel && !isOpen && (
           <PanelOpenBtnSC
             tertiary
             onClick={() => setOpen(true)}
@@ -217,15 +216,6 @@ export function AIAgentRun() {
       </Toast>
     </>
   )
-}
-
-function hasAgentRunTodos(run: Nullable<AgentRunFragment>) {
-  return (run?.todos ?? []).some((todo) => {
-    const title = todo?.title?.trim() ?? ''
-    const description = todo?.description?.trim() ?? ''
-
-    return title.length > 0 || description.length > 0
-  })
 }
 
 function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
