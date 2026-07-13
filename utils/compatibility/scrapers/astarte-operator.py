@@ -55,7 +55,11 @@ def _parse_min_kube(value: str) -> list[str]:
     match = re.search(r"v?(\d+\.\d+)\+", value)
     if not match:
         return []
-    return expand_kube_versions(match.group(1), current_kube_version())
+    end = current_kube_version()
+    if not end:
+        print_error("KUBE_VERSION not available; cannot expand kube versions.")
+        return []
+    return expand_kube_versions(match.group(1), end)
 
 
 def _latest_chart_entries(entries) -> dict[str, dict[str, str]]:
@@ -88,7 +92,11 @@ def _latest_chart_entries(entries) -> dict[str, dict[str, str]]:
 def _find_compatibility_table(soup: BeautifulSoup):
     for table in soup.find_all("table"):
         headers = [th.get_text(" ", strip=True) for th in table.find_all("th")]
-        if "Astarte Operator Version" in headers and "Kubernetes Version" in headers:
+        if (
+            "Astarte Operator Version" in headers
+            and "Astarte Version" in headers
+            and "Kubernetes Version" in headers
+        ):
             return table, headers
     return None, []
 
