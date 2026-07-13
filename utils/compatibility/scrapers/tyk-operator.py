@@ -166,7 +166,8 @@ def scrape() -> None:
     for version_info in parse_kube_compatibility(kube_table, gateway_requirements):
         version = version_info["version"]
         if version in version_map:
-            version_map[version]["requirements"] = version_info["requirements"]
+            # Release notes provide the broader tested/compatible Kubernetes range.
+            # Keep that range when both sources mention the same operator version.
             continue
         version_map[version] = version_info
 
