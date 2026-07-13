@@ -23,7 +23,8 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobThought,
     FlowWorkbench
   }
-  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt, VectorStore}
+  alias Console.AI.{Provider, VectorStore}
+  alias Console.AI.Tools.Workbench.{FunctionCall, SavedPrompt}
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -810,6 +811,49 @@ defmodule Console.Deployments.Workbenches do
     activity
     |> WorkbenchJobActivity.changeset(attrs)
     |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Approves and calls a workbench function call encapsulated in the current activity
+  """
+  @spec approve_job_activity(binary, User.t()) :: activity_resp
+  def approve_job_activity(activity_id, %User{} = user) when is_binary(activity_id) do
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      get_workbench_job_activity!(activity_id)
+      |> allow(user, :approve)
+    end)
+    |> add_operation(:exec, fn
+      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = call}} = activity} ->
+        get_workbench_tool!(call.tool_id)
+        |> FunctionCall.call_function(call.input)
+        |> case do
+          {:ok, output} -> output
+          {:error, err} -> "Internal function calling error: #{inspect(err)}"
+        end
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+        |> Repo.update()
+      _ -> {:error, "activity does not support function calling"}
+    end)
+    |> execute(extract: :exec)
+    |> notify(:update)
+  end
+
+  @doc """
+  Rejects a job activity by setting status to successful and setting the output to the reason.
+  """
+  @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
+  def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
+    get_workbench_job_activity!(activity_id)
+    |> allow(user, :approve)
+    |> when_ok(fn activity ->
+      WorkbenchJobActivity.changeset(activity, %{
+        status: :successful,
+        result: %{output: reason || "Execution rejected by user"}
+      })
+    end)
+    |> when_ok(:update)
     |> notify(:update)
   end
 

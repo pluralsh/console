@@ -158,6 +158,9 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.BitbucketDatacenter]: 'Bitbucket Data Center',
   [WorkbenchToolType.AzureDevops]: 'Azure DevOps',
   [WorkbenchToolType.Cloud]: 'Cloud',
+  [WorkbenchToolType.Lambda]: 'AWS Lambda',
+  [WorkbenchToolType.CloudRun]: 'GCP Cloud Run',
+  [WorkbenchToolType.AzureFunction]: 'Azure Function',
   [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
   [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
   [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
@@ -213,6 +216,9 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
   ],
+  [WorkbenchToolType.Lambda]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.CloudRun]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.AzureFunction]: [WorkbenchToolCategory.Function],
   [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
 }
@@ -278,6 +284,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Chat]: 'Chat',
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
+  [WorkbenchToolCategory.Function]: 'Cloud Function',
 }
 
 export type WorkbenchToolCard = {

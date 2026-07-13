@@ -34,7 +34,8 @@ defmodule Console.AI.Workbench.Engine do
     Skill,
     Notes,
     FetchNotes,
-    SkillBackfill
+    SkillBackfill,
+    FunctionCall
   }
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
@@ -119,12 +120,14 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
   defp tool_fmt(%CanvasTool{}), do: "launched canvas subagent, waiting for the result"
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
+  defp tool_fmt(%FunctionCall{} = call), do: "launched function call #{call.tool.name}, waiting for the result"
   defp tool_fmt(pass), do: pass
 
   defp reducer(messages, %Acc{messages: msgs}) do
     Enum.reduce_while(messages, {[], []}, fn
       %Complete{} = complete, _ -> {:halt, complete}
       %Subagent{} = subagent, {msgs, acts} -> {:cont, {msgs, [subagent | acts]}}
+      %FunctionCall{} = function_call, {msgs, acts} -> {:cont, {msgs, [function_call | acts]}}
       %CanvasTool{} = canvas, {msgs, acts} -> {:cont, {msgs, [canvas | acts]}}
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
@@ -214,7 +217,30 @@ defmodule Console.AI.Workbench.Engine do
     |> Workbenches.update_job_status(job)
   end
 
+  defp spawn_activity(%FunctionCall{} = call, _) do
+    case FunctionCall.invoke(call) do
+      {:ok, %WorkbenchJobActivity{status: :successful} = activity} -> {:ok, activity}
+      {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity)
+      {:error, error} -> {:error, error}
+    end
+  end
+
   defp spawn_activity(_, _), do: :ignore
+
+  @max_poll_iterations 60
+  @poll_interval :timer.seconds(10)
+
+  defp poll_activity(activity, iter \\ 0)
+  defp poll_activity(%WorkbenchJobActivity{status: :needs_approval} = activity, iter) when iter < @max_poll_iterations do
+    case Repo.get(WorkbenchJobActivity, activity.id) do
+      %WorkbenchJobActivity{status: :needs_approval} = activity ->
+        :timer.sleep(@poll_interval)
+        poll_activity(activity, iter + 1)
+      %WorkbenchJobActivity{} = activity -> {:ok, activity}
+      nil -> {:error, "the activity was deleted before completion"}
+    end
+  end
+  defp poll_activity(activity, _), do: {:ok, activity}
 
   defp existing_canvas(%WorkbenchJob{result: %Console.Schema.WorkbenchJobResult{canvas: canvas}}) when is_list(canvas), do: canvas
   defp existing_canvas(_), do: []
@@ -248,7 +274,7 @@ defmodule Console.AI.Workbench.Engine do
     |> preload_job()
   end
 
-  defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}, activities) do
+  defp tools(%WorkbenchJob{} = job, %Environment{skills: skills} = env, activities) do
     subagents = Environment.subagents(job) |> maybe_add_memory(activities)
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
@@ -263,6 +289,7 @@ defmodule Console.AI.Workbench.Engine do
       Notes,
       Complete,
     ] ++ type_tools(job)
+      ++ function_tools(env)
       ++ include_backfill(job)
   end
 
@@ -271,6 +298,10 @@ defmodule Console.AI.Workbench.Engine do
 
   defp type_tools(%WorkbenchJob{type: :skill}), do: []
   defp type_tools(_), do: [CanvasTool]
+
+  defp function_tools(%Environment{job: job, functions: [_ | _] = funcs}),
+    do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
+  defp function_tools(_), do: []
 
   defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
   defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))

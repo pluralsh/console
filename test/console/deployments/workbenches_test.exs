@@ -4,7 +4,9 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
   alias Console.PubSub
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{WorkbenchJob}
+  alias Console.Schema.WorkbenchJob
+  alias CloudQuery.Client
+  alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput, ToolQuery.Stub}
 
   @usage %{
     input_tokens: 100,
@@ -232,6 +234,7 @@ defmodule Console.Deployments.WorkbenchesTest do
     test "project writers can create each tool type with a likely configuration" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
+      cloud_connection = insert(:cloud_connection)
 
       cases = [
         {:http, [configuration: %{http: %{
@@ -337,7 +340,22 @@ defmodule Console.Deployments.WorkbenchesTest do
           url: "https://dev.azure.com/plural",
           token: "azure-devops-token"
         }}], [:scm]},
-        {:cloud, [cloud_connection_id: insert(:cloud_connection).id], [:infrastructure]},
+        {:lambda, [configuration: %{lambda: %{
+          lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+          description: "Invoke the Plural workbench Lambda function",
+          input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+        }}, cloud_connection_id: cloud_connection.id], [:function]},
+        {:cloud_run, [configuration: %{cloud_run: %{
+          identifier: "projects/plural/locations/us-central1/services/workbench-tool",
+          description: "Invoke the Plural workbench Cloud Run service",
+          input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+        }}, cloud_connection_id: cloud_connection.id], [:function]},
+        {:azure_function, [configuration: %{azure_function: %{
+          identifier: "projects/plural/locations/us-central1/functions/workbench-tool",
+          description: "Invoke the Plural workbench Cloud Function",
+          input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+        }}, cloud_connection_id: cloud_connection.id], [:function]},
+        {:cloud, [cloud_connection_id: cloud_connection.id], [:infrastructure]},
         {:mcp, [mcp_server_id: insert(:mcp_server, project: project).id], [:integration]}
       ]
 
@@ -353,6 +371,40 @@ defmodule Console.Deployments.WorkbenchesTest do
         assert tool.tool == tool_type
         assert tool.categories == categories
         assert_receive {:event, %PubSub.WorkbenchToolCreated{item: ^tool}}
+      end
+    end
+
+    test "cloud-backed tools require a cloud connection" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      input_schema = %{"type" => "object", "properties" => %{}, "required" => []}
+
+      cases = [
+        {:cloud, %{}},
+        {:lambda, %{configuration: %{lambda: %{
+          lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+          description: "Invoke the Plural workbench Lambda function",
+          input_schema: input_schema
+        }}}},
+        {:cloud_run, %{configuration: %{cloud_run: %{
+          identifier: "projects/plural/locations/us-central1/services/workbench-tool",
+          description: "Invoke the Plural workbench Cloud Run service",
+          input_schema: input_schema
+        }}}},
+        {:azure_function, %{configuration: %{azure_function: %{
+          identifier: "projects/plural/locations/us-central1/functions/workbench-tool",
+          description: "Invoke the Plural workbench Cloud Function",
+          input_schema: input_schema
+        }}}}
+      ]
+
+      for {tool_type, attrs} <- cases do
+        {:error, changeset} =
+          attrs
+          |> Map.merge(%{name: "#{tool_type}_tool", tool: tool_type, project_id: project.id})
+          |> Workbenches.create_tool(user)
+
+        assert %{cloud_connection_id: ["can't be blank"]} = errors_on(changeset)
       end
     end
 
@@ -757,6 +809,30 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_usage(refetch(job).usage, @usage)
       assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^updated}}
     end
+
+    test "sanitizes mixed-key usage before persisting" do
+      job = insert(:workbench_job, status: :running)
+
+      usage =
+        @usage
+        |> Map.delete(:total_cost)
+        |> Map.merge(%{
+          "total_cost" => 0.04,
+          "cost_in_usd_ticks" => 49_976_000,
+          "num_sources_used" => 0,
+          cache_creation_tokens: 0,
+          image_usage: %{},
+          tool_usage: %{}
+        })
+
+      expected = Map.put(@usage, :total_cost, 0.04)
+
+      {:ok, updated} = Workbenches.save_usage(job, usage)
+
+      assert_usage(updated.usage, expected)
+      assert_usage(refetch(job).usage, expected)
+      assert_receive {:event, %PubSub.WorkbenchJobUpdated{item: ^updated}}
+    end
   end
 
   describe "create_message/3" do
@@ -939,6 +1015,399 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       reloaded = refetch(updated)
       assert reloaded.result.error == error_msg
+    end
+  end
+
+  describe "approve_job_activity/2" do
+    test "users with read access approve a function activity and invoke the underlying grpc function" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          cloud_connection: insert(:cloud_connection),
+          tool: :lambda,
+          name: "lambda_tool_#{System.unique_integer([:positive])}",
+          configuration: %{
+            lambda: %{
+              lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              description: "Invoke the Plural workbench Lambda function",
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      input = %{"namespace" => "default", "deployment" => "api"}
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          prompt: "approve the function",
+          result: %{
+            output: "waiting for user approval",
+            function_call: %{
+              name: tool.name,
+              tool_id: tool.id,
+              input: input
+            }
+          }
+        )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :invoke_lambda, fn :mock_conn, %InvokeLambdaInput{} = request, opts ->
+        assert request.identifier == "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool"
+        assert Jason.decode!(request.payload_json) == input
+        assert opts == Client.lambda_rpc_opts()
+
+        {:ok, %InvokeLambdaOutput{result: "complete"}}
+      end)
+
+      assert activity.status == :needs_approval
+
+      {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
+
+      assert updated.id == activity.id
+      assert updated.status == :successful
+      assert updated.result.function_call.tool_id == tool.id
+
+      assert {:ok, output} = Jason.decode(updated.result.output)
+      assert output["result"] == "complete"
+
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+    end
+
+    test "persists an internal error message when grpc invocation fails" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          cloud_connection: insert(:cloud_connection),
+          tool: :lambda,
+          name: "lambda_tool_#{System.unique_integer([:positive])}",
+          configuration: %{
+            lambda: %{
+              lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              description: "Invoke the Plural workbench Lambda function",
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          prompt: "approve the function",
+          result: %{
+            output: "waiting for user approval",
+            function_call: %{
+              name: tool.name,
+              tool_id: tool.id,
+              input: %{"namespace" => "default"}
+            }
+          }
+        )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+      expect(Stub, :invoke_lambda, fn :mock_conn, %InvokeLambdaInput{}, _ -> {:error, :timeout} end)
+
+      assert activity.status == :needs_approval
+
+      {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
+
+      assert updated.status == :successful
+      assert updated.result.output == "Internal function calling error: :timeout"
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+    end
+
+    test "users without read access cannot approve or invoke a function activity" do
+      user = insert(:user)
+      project = insert(:project)
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          cloud_connection: insert(:cloud_connection),
+          tool: :lambda,
+          name: "lambda_tool_#{System.unique_integer([:positive])}",
+          configuration: %{
+            lambda: %{
+              lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              description: "Invoke the Plural workbench Lambda function",
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          prompt: "approve the function",
+          result: %{
+            output: "waiting for user approval",
+            function_call: %{
+              name: tool.name,
+              tool_id: tool.id,
+              input: %{"namespace" => "default"}
+            }
+          }
+        )
+
+      stub(Client, :connect, fn ->
+        send(self(), {:function_call_attempted, activity.id})
+        {:ok, :mock_conn}
+      end)
+
+      assert {:error, "forbidden"} = Workbenches.approve_job_activity(activity.id, user)
+      refute_receive {:function_call_attempted, _}
+      refute_receive {:event, %PubSub.WorkbenchJobActivityUpdated{}}
+
+      assert refetch(activity).result.output == "waiting for user approval"
+    end
+
+    test "cannot approve an activity that does not need approval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          cloud_connection: insert(:cloud_connection),
+          tool: :lambda,
+          name: "lambda_tool_#{System.unique_integer([:positive])}",
+          configuration: %{
+            lambda: %{
+              lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              description: "Invoke the Plural workbench Lambda function",
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :successful,
+          prompt: "approve the function",
+          result: %{
+            output: "already complete",
+            function_call: %{
+              name: tool.name,
+              tool_id: tool.id,
+              input: %{"namespace" => "default"}
+            }
+          }
+        )
+
+      stub(Client, :connect, fn ->
+        send(self(), {:function_call_attempted, activity.id})
+        {:ok, :mock_conn}
+      end)
+
+      assert {:error, "activity must be in needs approval status to be approved"} =
+               Workbenches.approve_job_activity(activity.id, user)
+
+      refute_receive {:function_call_attempted, _}
+      refute_receive {:event, %PubSub.WorkbenchJobActivityUpdated{}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert reloaded.result.output == "already complete"
+    end
+
+    test "does not invoke grpc for a non-function activity even with function call metadata" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          cloud_connection: insert(:cloud_connection),
+          tool: :lambda,
+          name: "lambda_tool_#{System.unique_integer([:positive])}",
+          configuration: %{
+            lambda: %{
+              lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              description: "Invoke the Plural workbench Lambda function",
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          prompt: "approve the function",
+          result: %{
+            output: "waiting for user approval",
+            function_call: %{
+              name: tool.name,
+              tool_id: tool.id,
+              input: %{"namespace" => "default"}
+            }
+          }
+        )
+        |> Ecto.Changeset.change(%{type: :coding})
+        |> Repo.update!()
+
+      stub(Client, :connect, fn ->
+        send(self(), {:function_call_attempted, activity.id})
+        {:ok, :mock_conn}
+      end)
+
+      assert {:error, "activity does not support function calling"} =
+               Workbenches.approve_job_activity(activity.id, user)
+
+      refute_receive {:function_call_attempted, _}
+      refute_receive {:event, %PubSub.WorkbenchJobActivityUpdated{}}
+      assert refetch(activity).result.output == "waiting for user approval"
+    end
+
+    test "does not invoke grpc for a function activity without function call metadata" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          prompt: "approve the function",
+          result: %{output: "waiting for user approval"}
+        )
+
+      stub(Client, :connect, fn ->
+        send(self(), {:function_call_attempted, activity.id})
+        {:ok, :mock_conn}
+      end)
+
+      assert {:error, "activity does not support function calling"} =
+               Workbenches.approve_job_activity(activity.id, user)
+
+      refute_receive {:function_call_attempted, _}
+      refute_receive {:event, %PubSub.WorkbenchJobActivityUpdated{}}
+      assert refetch(activity).result.output == "waiting for user approval"
+    end
+  end
+
+  describe "reject_job_activity/3" do
+    test "project readers can reject an activity with a custom reason" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          result: %{output: "waiting for user approval"}
+        )
+
+      {:ok, updated} = Workbenches.reject_job_activity("too risky", activity.id, user)
+
+      assert updated.id == activity.id
+      assert updated.status == :successful
+      assert updated.result.output == "too risky"
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert reloaded.result.output == "too risky"
+    end
+
+    test "direct workbench readers can reject an activity with the default reason" do
+      user = insert(:user)
+      project = insert(:project)
+      workbench = insert(:workbench, project: project, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          result: %{output: "waiting for user approval"}
+        )
+
+      {:ok, updated} = Workbenches.reject_job_activity(activity.id, user)
+
+      assert updated.id == activity.id
+      assert updated.status == :successful
+      assert updated.result.output == "Execution rejected by user"
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+    end
+
+    test "users without read access cannot reject an activity" do
+      user = insert(:user)
+      project = insert(:project)
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          result: %{output: "waiting for user approval"}
+        )
+
+      assert {:error, "forbidden"} = Workbenches.reject_job_activity("nope", activity.id, user)
+      refute_receive {:event, %PubSub.WorkbenchJobActivityUpdated{}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :needs_approval
+      assert reloaded.result.output == "waiting for user approval"
+    end
+
+    test "cannot reject an activity that does not need approval" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :successful,
+          result: %{output: "already complete"}
+        )
+
+      assert {:error, "activity must be in needs approval status to be approved"} =
+               Workbenches.reject_job_activity("too late", activity.id, user)
+
+      refute_receive {:event, %PubSub.WorkbenchJobActivityUpdated{}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert reloaded.result.output == "already complete"
     end
   end
 
@@ -2008,4 +2477,5 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert refetch(bot)
     end
   end
+
 end

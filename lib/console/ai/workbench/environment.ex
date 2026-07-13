@@ -6,19 +6,27 @@ defmodule Console.AI.Workbench.Environment do
     user: User.t,
     job: WorkbenchJob.t,
     tools: %{binary => WorkbenchTool.t},
+    functions: [WorkbenchTool.t],
     skills: %{binary => Skill.t},
     activities: [WorkbenchJobActivity.t]
   }
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :user, activities: []]
+  defstruct [:job, :tools, :skills, :user, functions: [], activities: []]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
+    {functions, tools} = Enum.split_with(to_l(tools), fn
+      %WorkbenchTool{categories: [_ | _] = categories} -> :function in categories
+      %WorkbenchTool{tool: :http, configuration: %{http: %{function: true}}} -> true
+      _ -> false
+    end)
+
     %__MODULE__{
       user: job.user,
       job: job,
       tools: to_map(tools),
+      functions: functions,
       skills: to_map(skills)
     }
     |> save()
@@ -60,6 +68,9 @@ defmodule Console.AI.Workbench.Environment do
 
   defp to_map(m) when is_map(m), do: m
   defp to_map(l) when is_list(l), do: Map.new(l, & {&1.name, &1})
+
+  defp to_l(m) when is_map(m), do: Map.values(m)
+  defp to_l(l) when is_list(l), do: l
 
   def upsert(fields), do: upsert(environment(), fields)
 

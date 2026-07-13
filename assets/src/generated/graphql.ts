@@ -8964,6 +8964,8 @@ export type RootMutationType = {
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
+  /** Approves and invokes a pending workbench function activity. Requires read access to the job's workbench. */
+  approveWorkbenchJobActivity?: Maybe<WorkbenchJobActivity>;
   cancelAgentRun?: Maybe<AgentRun>;
   /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
   cancelChat?: Maybe<Chat>;
@@ -9170,6 +9172,8 @@ export type RootMutationType = {
   registerGithubApp?: Maybe<ScmConnection>;
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
+  /** Rejects a pending workbench activity. Requires read access to the job's workbench. */
+  rejectWorkbenchJobActivity?: Maybe<WorkbenchJobActivity>;
   resetObserver?: Maybe<Observer>;
   restartStackRun?: Maybe<StackRun>;
   /** un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure */
@@ -9338,6 +9342,11 @@ export type RootMutationTypeApproveGateArgs = {
 
 
 export type RootMutationTypeApproveStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeApproveWorkbenchJobActivityArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10228,6 +10237,12 @@ export type RootMutationTypeRegisterRuntimeServicesArgs = {
   layout?: InputMaybe<OperationalLayoutAttributes>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   services?: InputMaybe<Array<InputMaybe<RuntimeServiceAttributes>>>;
+};
+
+
+export type RootMutationTypeRejectWorkbenchJobActivityArgs = {
+  id: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -16089,6 +16104,7 @@ export type WorkbenchJobActivityResult = {
 export enum WorkbenchJobActivityStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
+  NeedsApproval = 'NEEDS_APPROVAL',
   Pending = 'PENDING',
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
@@ -16110,6 +16126,7 @@ export enum WorkbenchJobActivityType {
   Canvas = 'CANVAS',
   Coding = 'CODING',
   Conclusion = 'CONCLUSION',
+  Function = 'FUNCTION',
   History = 'HISTORY',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
@@ -16614,6 +16631,25 @@ export type WorkbenchToolAzureDevopsConnectionAttributes = {
   url?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type WorkbenchToolAzureFunctionConnection = {
+  __typename?: 'WorkbenchToolAzureFunctionConnection';
+  /** description of the function exposed to the agent */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Cloud Function identifier */
+  identifier?: Maybe<Scalars['String']['output']>;
+  /** JSON schema for the tool input */
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+};
+
+export type WorkbenchToolAzureFunctionConnectionAttributes = {
+  /** description of the function exposed to the agent */
+  description: Scalars['String']['input'];
+  /** Cloud Function identifier */
+  identifier: Scalars['String']['input'];
+  /** JSON schema for the tool input */
+  inputSchema?: InputMaybe<Scalars['Json']['input']>;
+};
+
 export type WorkbenchToolBitbucketConnection = {
   __typename?: 'WorkbenchToolBitbucketConnection';
   /** Bitbucket Cloud API base URL when set (tokens never exposed) */
@@ -16643,6 +16679,7 @@ export type WorkbenchToolBitbucketDatacenterConnectionAttributes = {
 export enum WorkbenchToolCategory {
   Chat = 'CHAT',
   ErrorTracking = 'ERROR_TRACKING',
+  Function = 'FUNCTION',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
@@ -16652,6 +16689,25 @@ export enum WorkbenchToolCategory {
   Ticketing = 'TICKETING',
   Traces = 'TRACES'
 }
+
+export type WorkbenchToolCloudRunConnection = {
+  __typename?: 'WorkbenchToolCloudRunConnection';
+  /** description of the function exposed to the agent */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Cloud Run service identifier */
+  identifier?: Maybe<Scalars['String']['output']>;
+  /** JSON schema for the tool input */
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+};
+
+export type WorkbenchToolCloudRunConnectionAttributes = {
+  /** description of the function exposed to the agent */
+  description: Scalars['String']['input'];
+  /** Cloud Run service identifier */
+  identifier: Scalars['String']['input'];
+  /** JSON schema for the tool input */
+  inputSchema?: InputMaybe<Scalars['Json']['input']>;
+};
 
 export type WorkbenchToolCloudwatchConnection = {
   __typename?: 'WorkbenchToolCloudwatchConnection';
@@ -16690,10 +16746,14 @@ export type WorkbenchToolConfiguration = {
   azure?: Maybe<WorkbenchToolAzureConnection>;
   /** azure devops connection (no secrets) */
   azureDevops?: Maybe<WorkbenchToolAzureDevopsConnection>;
+  /** google cloud function configuration */
+  azureFunction?: Maybe<WorkbenchToolAzureFunctionConnection>;
   /** bitbucket cloud connection (no secrets) */
   bitbucket?: Maybe<WorkbenchToolBitbucketConnection>;
   /** bitbucket data center connection (no secrets) */
   bitbucketDatacenter?: Maybe<WorkbenchToolBitbucketDatacenterConnection>;
+  /** google cloud run service configuration */
+  cloudRun?: Maybe<WorkbenchToolCloudRunConnection>;
   /** cloudwatch connection (no secrets) */
   cloudwatch?: Maybe<WorkbenchToolCloudwatchConnection>;
   /** datadog connection (no secrets) */
@@ -16712,6 +16772,8 @@ export type WorkbenchToolConfiguration = {
   http?: Maybe<WorkbenchToolHttpConfiguration>;
   /** jaeger connection (no secrets) */
   jaeger?: Maybe<WorkbenchToolJaegerConnection>;
+  /** aws lambda function configuration */
+  lambda?: Maybe<WorkbenchToolLambdaConnection>;
   /** linear connection (no secrets) */
   linear?: Maybe<WorkbenchToolLinearConnection>;
   /** loki connection (no secrets) */
@@ -16741,10 +16803,14 @@ export type WorkbenchToolConfigurationAttributes = {
   azure?: InputMaybe<WorkbenchToolAzureConnectionAttributes>;
   /** azure devops connection (scm) */
   azureDevops?: InputMaybe<WorkbenchToolAzureDevopsConnectionAttributes>;
+  /** google cloud function configuration */
+  azureFunction?: InputMaybe<WorkbenchToolAzureFunctionConnectionAttributes>;
   /** bitbucket cloud connection (scm) */
   bitbucket?: InputMaybe<WorkbenchToolBitbucketConnectionAttributes>;
   /** bitbucket data center connection (scm) */
   bitbucketDatacenter?: InputMaybe<WorkbenchToolBitbucketDatacenterConnectionAttributes>;
+  /** google cloud run service configuration */
+  cloudRun?: InputMaybe<WorkbenchToolCloudRunConnectionAttributes>;
   /** cloudwatch connection (metrics, logs) */
   cloudwatch?: InputMaybe<WorkbenchToolCloudwatchConnectionAttributes>;
   /** datadog connection (metrics, logs) */
@@ -16763,6 +16829,8 @@ export type WorkbenchToolConfigurationAttributes = {
   http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
   /** jaeger connection (traces) */
   jaeger?: InputMaybe<WorkbenchToolJaegerConnectionAttributes>;
+  /** aws lambda function configuration */
+  lambda?: InputMaybe<WorkbenchToolLambdaConnectionAttributes>;
   /** linear connection (ticketing) */
   linear?: InputMaybe<WorkbenchToolLinearConnectionAttributes>;
   /** loki connection (logs) */
@@ -16901,6 +16969,8 @@ export type WorkbenchToolHttpConfiguration = {
   __typename?: 'WorkbenchToolHttpConfiguration';
   /** request body */
   body?: Maybe<Scalars['String']['output']>;
+  /** when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled */
+  function?: Maybe<Scalars['Boolean']['output']>;
   /** request headers */
   headers?: Maybe<Array<Maybe<WorkbenchToolHttpHeader>>>;
   /** JSON schema for the tool input */
@@ -16914,6 +16984,8 @@ export type WorkbenchToolHttpConfiguration = {
 export type WorkbenchToolHttpConfigurationAttributes = {
   /** request body */
   body?: InputMaybe<Scalars['String']['input']>;
+  /** when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled */
+  function?: InputMaybe<Scalars['Boolean']['input']>;
   /** request headers */
   headers?: InputMaybe<Array<InputMaybe<WorkbenchToolHttpHeaderAttributes>>>;
   /** JSON schema for the tool input */
@@ -16960,6 +17032,25 @@ export type WorkbenchToolJaegerConnectionAttributes = {
   url: Scalars['String']['input'];
   /** basic auth username */
   username?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchToolLambdaConnection = {
+  __typename?: 'WorkbenchToolLambdaConnection';
+  /** description of the function exposed to the agent */
+  description?: Maybe<Scalars['String']['output']>;
+  /** JSON schema for the tool input */
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+  /** AWS Lambda function ARN */
+  lambdaArn?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolLambdaConnectionAttributes = {
+  /** description of the function exposed to the agent */
+  description: Scalars['String']['input'];
+  /** JSON schema for the tool input */
+  inputSchema?: InputMaybe<Scalars['Json']['input']>;
+  /** AWS Lambda function ARN */
+  lambdaArn: Scalars['String']['input'];
 };
 
 export type WorkbenchToolLinearConnection = {
@@ -17174,10 +17265,12 @@ export enum WorkbenchToolType {
   Atlassian = 'ATLASSIAN',
   Azure = 'AZURE',
   AzureDevops = 'AZURE_DEVOPS',
+  AzureFunction = 'AZURE_FUNCTION',
   Bitbucket = 'BITBUCKET',
   BitbucketDatacenter = 'BITBUCKET_DATACENTER',
   Cloud = 'CLOUD',
   Cloudwatch = 'CLOUDWATCH',
+  CloudRun = 'CLOUD_RUN',
   Datadog = 'DATADOG',
   Dynatrace = 'DYNATRACE',
   Elastic = 'ELASTIC',
@@ -17186,6 +17279,7 @@ export enum WorkbenchToolType {
   Gitlab = 'GITLAB',
   Http = 'HTTP',
   Jaeger = 'JAEGER',
+  Lambda = 'LAMBDA',
   Linear = 'LINEAR',
   Loki = 'LOKI',
   Mcp = 'MCP',

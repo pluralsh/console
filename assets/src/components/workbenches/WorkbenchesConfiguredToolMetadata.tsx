@@ -44,6 +44,9 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.BitbucketDatacenter]: extractBitbucketDatacenterMetadata,
   [WorkbenchToolType.AzureDevops]: extractAzureDevopsMetadata,
   [WorkbenchToolType.Cloud]: () => [],
+  [WorkbenchToolType.Lambda]: () => [],
+  [WorkbenchToolType.CloudRun]: () => [],
+  [WorkbenchToolType.AzureFunction]: () => [],
 }
 
 export function WorkbenchesConfiguredToolMetadata({

@@ -1406,6 +1406,21 @@ type RootMutationType {
     attributes: WorkbenchMessageAttributes!
   ): WorkbenchJobActivity
 
+  "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
+  approveWorkbenchJobActivity(
+    "the workbench job activity to approve"
+    id: ID!
+  ): WorkbenchJobActivity
+
+  "Rejects a pending workbench activity. Requires read access to the job's workbench."
+  rejectWorkbenchJobActivity(
+    "the workbench job activity to reject"
+    id: ID!
+
+    "optional reason to store as the rejection output"
+    reason: String
+  ): WorkbenchJobActivity
+
   "Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update."
   updateWorkbenchJob(
     "the workbench job to update"
@@ -2592,6 +2607,9 @@ enum WorkbenchToolType {
   AZURE_DEVOPS
   PAGERDUTY
   OPENSEARCH
+  LAMBDA
+  CLOUD_RUN
+  AZURE_FUNCTION
 }
 
 enum WorkbenchToolCategory {
@@ -2605,6 +2623,7 @@ enum WorkbenchToolCategory {
   SEARCH
   SCM
   CHAT
+  FUNCTION
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2630,6 +2649,7 @@ enum WorkbenchJobActivityStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  NEEDS_APPROVAL
 }
 
 enum WorkbenchJobActivityType {
@@ -2647,6 +2667,7 @@ enum WorkbenchJobActivityType {
   SKILL
   HISTORY
   SEARCH
+  FUNCTION
 }
 
 enum WorkbenchCanvasBlockType {
@@ -3062,6 +3083,15 @@ input WorkbenchToolConfigurationAttributes {
   "bitbucket cloud connection (scm)"
   bitbucket: WorkbenchToolBitbucketConnectionAttributes
 
+  "aws lambda function configuration"
+  lambda: WorkbenchToolLambdaConnectionAttributes
+
+  "google cloud run service configuration"
+  cloudRun: WorkbenchToolCloudRunConnectionAttributes
+
+  "google cloud function configuration"
+  azureFunction: WorkbenchToolAzureFunctionConnectionAttributes
+
   "bitbucket data center connection (scm)"
   bitbucketDatacenter: WorkbenchToolBitbucketDatacenterConnectionAttributes
 
@@ -3365,11 +3395,47 @@ input WorkbenchToolHttpConfigurationAttributes {
   "the http method"
   method: WorkbenchToolHttpMethod!
 
+  "when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled"
+  function: Boolean
+
   "request headers"
   headers: [WorkbenchToolHttpHeaderAttributes]
 
   "request body"
   body: String
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolLambdaConnectionAttributes {
+  "AWS Lambda function ARN"
+  lambdaArn: String!
+
+  "description of the function exposed to the agent"
+  description: String!
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolCloudRunConnectionAttributes {
+  "Cloud Run service identifier"
+  identifier: String!
+
+  "description of the function exposed to the agent"
+  description: String!
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolAzureFunctionConnectionAttributes {
+  "Cloud Function identifier"
+  identifier: String!
+
+  "description of the function exposed to the agent"
+  description: String!
 
   "JSON schema for the tool input"
   inputSchema: Json
@@ -4369,6 +4435,15 @@ type WorkbenchToolConfiguration {
 
   "azure devops connection (no secrets)"
   azureDevops: WorkbenchToolAzureDevopsConnection
+
+  "aws lambda function configuration"
+  lambda: WorkbenchToolLambdaConnection
+
+  "google cloud run service configuration"
+  cloudRun: WorkbenchToolCloudRunConnection
+
+  "google cloud function configuration"
+  azureFunction: WorkbenchToolAzureFunctionConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -4580,11 +4655,47 @@ type WorkbenchToolHttpConfiguration {
   "the http method"
   method: String
 
+  "when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled"
+  function: Boolean
+
   "request headers"
   headers: [WorkbenchToolHttpHeader]
 
   "request body"
   body: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolLambdaConnection {
+  "AWS Lambda function ARN"
+  lambdaArn: String
+
+  "description of the function exposed to the agent"
+  description: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolCloudRunConnection {
+  "Cloud Run service identifier"
+  identifier: String
+
+  "description of the function exposed to the agent"
+  description: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolAzureFunctionConnection {
+  "Cloud Function identifier"
+  identifier: String
+
+  "description of the function exposed to the agent"
+  description: String
 
   "JSON schema for the tool input"
   inputSchema: Map
