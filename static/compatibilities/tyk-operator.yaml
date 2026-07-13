@@ -1,0 +1,83 @@
+icon: https://avatars.githubusercontent.com/u/16858821?s=200&v=4
+git_url: https://github.com/TykTechnologies/tyk-operator
+release_url: https://github.com/TykTechnologies/tyk-operator/releases/tag/v{vsn}
+readme_url: https://tyk.io/docs/api-management/automations/operator
+helm_repository_url: https://helm.tyk.io/public/helm/charts
+chart_name: tyk-operator
+versions:
+- version: 1.4.2
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.4.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+    '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.3.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+    '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.2.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+    '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  summary: null
+- version: 1.1.0
+  kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+    '1.20', '1.19']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 5.0, Tyk Gateway 5.3,
+    Tyk Gateway 5.5, Tyk Gateway 5.6, Tyk Gateway 5.7]
+  incompatibilities: []
+  summary: null
+- version: 1.0.0
+  kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21',
+    '1.20', '1.19']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 5.0, Tyk Gateway 5.3,
+    Tyk Gateway 5.5, Tyk Gateway 5.6]
+  incompatibilities: []
+  summary: null
+- version: 0.18.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 5.0, Tyk Gateway 5.2,
+    Tyk Gateway 5.3, Tyk Gateway 5.4]
+  incompatibilities: []
+  summary: null
+- version: 0.17.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 4.3, Tyk Gateway 5.0,
+    Tyk Gateway 5.2, Tyk Gateway 5.3]
+  incompatibilities: []
+  summary: null
+- version: 0.16.0
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 4.3, Tyk Gateway 5.0,
+    Tyk Gateway 5.2]
+  incompatibilities: []
+  summary: null
+- version: 0.15.0
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 4.3, Tyk Gateway 5.0]
+  incompatibilities: []
+  summary: null
+- version: 0.14.1
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 4.3, Tyk Gateway 5.0]
+  incompatibilities: []
+  summary: null
+- version: 0.14.0
+  kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.0, Tyk Gateway 4.3, Tyk Gateway 5.0]
+  incompatibilities: []
+  summary: null
+- version: 0.13.0
+  kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: [Tyk Gateway 3.2, Tyk Gateway 4.3]
+  incompatibilities: []
+  summary: null
