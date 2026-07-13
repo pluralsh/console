@@ -1,5 +1,5 @@
 # https://github.com/pluralsh/pulumi-samples
-# Harness image from https://github.com/pluralsh/console/pull/3820 (sha-206ec98)
+# Harness image from https://github.com/pluralsh/console/pull/3820 (sha-a9fadd4)
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Cluster
@@ -33,7 +33,7 @@ spec:
     ref: main
     folder: typescript-aws-s3
   configuration:
-    tag: sha-206ec98-pulumi-3.251
+    tag: sha-a9fadd4-pulumi-3.251
     pulumi:
       parallel: 10
       refresh: true
@@ -59,7 +59,7 @@ spec:
     ref: main
     folder: typescript-local-file
   configuration:
-    tag: sha-206ec98-pulumi-3.251
+    tag: sha-a9fadd4-pulumi-3.251
     pulumi:
       parallel: 10
       refresh: true
@@ -81,7 +81,7 @@ spec:
     ref: main
     folder: typescript-random
   configuration:
-    tag: sha-206ec98-pulumi-3.251
+    tag: sha-a9fadd4-pulumi-3.251
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: InfrastructureStack
@@ -98,4 +98,4 @@ spec:
     ref: main
     folder: go-random
   configuration:
-    tag: sha-206ec98-pulumi-3.251
+    tag: sha-a9fadd4-pulumi-3.251
