@@ -49,10 +49,7 @@ import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AgentRunDiff } from './AgentRunDiff.tsx'
 import { AgentRunPullRequests } from './AgentRunPullRequests.tsx'
-import {
-  AgentRunWorkingTheory,
-  shouldShowAgentRunStatusCallout,
-} from './AgentRunWorkingTheory.tsx'
+import { AgentRunWorkingTheory } from './AgentRunWorkingTheory.tsx'
 import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
@@ -61,15 +58,6 @@ export enum AgentRunPanelTab {
   Analysis = 'Analysis',
   WorkingTheory = 'Working theory',
   PullRequests = 'Pull requests',
-}
-
-function hasAgentRunTodos(run: Nullable<AgentRunFragment>) {
-  return (run?.todos ?? []).some((todo) => {
-    const title = todo?.title?.trim() ?? ''
-    const description = todo?.description?.trim() ?? ''
-
-    return title.length > 0 || description.length > 0
-  })
 }
 
 export function shouldShowAgentRunSidePanel(
@@ -96,8 +84,7 @@ export function shouldShowAgentRunSidePanel(
     isJobRunning(run.status) ||
     run.status === AgentRunStatus.Babysitting ||
     run.status === AgentRunStatus.PendingApproval
-  const showWorkingTheoryTab =
-    hasAgentRunTodos(run) || shouldShowAgentRunStatusCallout(run) || isActiveRun
+  const showWorkingTheoryTab = true
   const hasContentTabs =
     showDiffTab || showAnalysisTab || showWorkingTheoryTab || hasPullRequests
 
@@ -242,8 +229,8 @@ export function AgentRunPanelContent() {
     isJobRunning(run?.status) ||
     run?.status === AgentRunStatus.Babysitting ||
     run?.status === AgentRunStatus.PendingApproval
-  const showWorkingTheoryTab =
-    !isEmpty(todos) || shouldShowAgentRunStatusCallout(run) || isActiveRun
+  const hasRun: boolean = Boolean(run)
+  const showWorkingTheoryTab = !isEmpty(todos) || hasRun || isActiveRun
   const showPrsTab = hasPullRequests
   const hasContentTabs =
     showDiffTab || showAnalysisTab || showWorkingTheoryTab || showPrsTab
@@ -270,7 +257,7 @@ export function AgentRunPanelContent() {
       !!run?.analysis) ||
     (showWorkingTheoryTab &&
       selectedTab === AgentRunPanelTab.WorkingTheory &&
-      !!run) ||
+      hasRun) ||
     (showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {

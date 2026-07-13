@@ -51,8 +51,6 @@ export function AgentRunWorkingTheory({
   const isApprovable =
     run.status === AgentRunStatus.PendingApproval && !run.approvedAt
 
-  const showStatusCallout = shouldShowAgentRunStatusCallout(run)
-
   const todos = normalizeTodos(rawTodos)
 
   return (
@@ -60,15 +58,13 @@ export function AgentRunWorkingTheory({
       direction="column"
       gap="xlarge"
     >
-      {showStatusCallout && (
-        <AgentRunStatusCallout
-          run={run}
-          isApprovable={isApprovable}
-          approving={approving}
-          onApprove={() => approveAgentRun()}
-          onViewDiff={onViewDiff}
-        />
-      )}
+      <AgentRunStatusCallout
+        run={run}
+        isApprovable={isApprovable}
+        approving={approving}
+        onApprove={() => approveAgentRun()}
+        onViewDiff={onViewDiff}
+      />
       {todos.length > 0 && (
         <AgentTodosTimeline
           title="Agent todos"
@@ -86,17 +82,6 @@ export function AgentRunWorkingTheory({
         {approvingError?.message}
       </Toast>
     </Flex>
-  )
-}
-
-export function shouldShowAgentRunStatusCallout(
-  run: Nullable<AgentRunFragment>
-) {
-  return (
-    !!run &&
-    ((run.pullRequests ?? []).some(Boolean) ||
-      !!run.analysis?.summary ||
-      (run.status === AgentRunStatus.PendingApproval && !run.approvedAt))
   )
 }
 

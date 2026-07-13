@@ -11,7 +11,6 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
@@ -51,6 +50,8 @@ import {
   useAgentRunPanel,
 } from './AgentRunPanel.tsx'
 
+const AGENT_RUN_POLL_INTERVAL = 5_000
+
 export const getAgentRunBreadcrumbs = (
   runId: string,
   prompt: string,
@@ -78,7 +79,7 @@ export function AIAgentRun() {
   const { data, error, loading } = useAgentRunQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGENT_RUN_POLL_INTERVAL,
     skip: !id,
   })
 
