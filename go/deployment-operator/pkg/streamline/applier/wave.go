@@ -6,17 +6,6 @@ import (
 	"sync"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
-	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
-	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
-	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
-	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/console/go/polly/cache"
 	"github.com/samber/lo"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -28,6 +17,18 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog/v2"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/errors"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/manifests/template"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/polly/cache"
 )
 
 type WaveType string
@@ -110,8 +111,12 @@ type WaveProcessor struct {
 	// client is the dynamic client used to apply the resources.
 	client dynamic.Interface
 
-	// discoveryCache is the discovery discoveryCache used to get information about the API resources.
+	// discoveryCache is the discovery cache used to get information about the API resources.
 	discoveryCache discoverycache.Cache
+
+	// gates is a list of gates executed during the wave processing.
+	// Each gate is executed in order and can block the processing of the wave until it is satisfied.
+	gates []Gate
 
 	phase smcommon.SyncPhase
 
@@ -282,6 +287,24 @@ func (in *WaveProcessor) clientForResource(resource unstructured.Unstructured) (
 		return nil, err
 	}
 
+	return in.clientForMapping(resource, mapping), nil
+}
+
+func (in *WaveProcessor) runGates(ctx context.Context, condition GateCondition, resource unstructured.Unstructured) error {
+	for _, gate := range in.gates {
+		if gate == nil {
+			continue
+		}
+
+		if err := gate.Run(ctx, condition, resource); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (in *WaveProcessor) clientForMapping(resource unstructured.Unstructured, mapping *meta.RESTMapping) dynamic.ResourceInterface {
 	gvr := schema.GroupVersionResource{
 		Group:    mapping.Resource.Group,
 		Version:  mapping.Resource.Version,
@@ -290,10 +313,10 @@ func (in *WaveProcessor) clientForResource(resource unstructured.Unstructured) (
 
 	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
 		namespace := lo.Ternary(len(resource.GetNamespace()) == 0, "default", resource.GetNamespace())
-		return in.client.Resource(gvr).Namespace(namespace), nil
+		return in.client.Resource(gvr).Namespace(namespace)
 	}
 
-	return in.client.Resource(gvr), nil
+	return in.client.Resource(gvr)
 }
 
 func (in *WaveProcessor) onDelete(ctx context.Context, resource unstructured.Unstructured) {
@@ -359,12 +382,22 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 		warning := fmt.Sprintf("resource %s/%s is already managed by another service %s", resource.GetKind(), resource.GetName(), entry.ServiceID)
 		klog.V(log.LogLevelDebug).Info(warning)
 		if !template.IsCRD(&resource) {
-			in.errorsChan <- console.ServiceErrorAttributes{Source: "apply", Message: warning, Warning: lo.ToPtr(true)}
+			in.errorsChan <- console.ServiceErrorAttributes{Source: "apply", Message: warning, Warning: new(true)}
 		}
 
 		resource.SetUID(types.UID(entry.UID))
 		in.componentChan <- lo.FromPtr(common.ToComponentAttributes(&resource))
 		return
+	}
+
+	if in.gatesEnabled() {
+		if gateErr := in.runGates(ctx, GateConditionPreApply, resource); gateErr != nil {
+			in.errorsChan <- console.ServiceErrorAttributes{
+				Source:  in.phase.String(),
+				Message: fmt.Sprintf("pre-apply gate failed for %s/%s: %s", resource.GetNamespace(), resource.GetName(), gateErr.Error()),
+			}
+			return
+		}
 	}
 
 	c, err := in.clientForResource(resource)
@@ -395,6 +428,14 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 	}
 
 	in.waveStatistics.applied++
+	if in.gatesEnabled() {
+		if gateErr := in.runGates(ctx, GateConditionPostApply, lo.FromPtr(appliedResource)); gateErr != nil {
+			in.errorsChan <- console.ServiceErrorAttributes{
+				Source:  in.phase.String(),
+				Message: fmt.Sprintf("post-apply gate failed for %s/%s: %s", resource.GetNamespace(), resource.GetName(), gateErr.Error()),
+			}
+		}
+	}
 
 	if in.onApplyCallback != nil {
 		in.onApplyCallback(resource)
@@ -423,6 +464,10 @@ func (in *WaveProcessor) onApply(ctx context.Context, resource unstructured.Unst
 	}
 
 	in.componentChan <- lo.FromPtr(common.ToComponentAttributes(appliedResource))
+}
+
+func (in *WaveProcessor) gatesEnabled() bool {
+	return !in.dryRun && len(in.gates) > 0
 }
 
 // doReplace uses full PUT instead of SSA, creating the resource if it is missing.
@@ -490,8 +535,8 @@ func (in *WaveProcessor) forceRecreate(ctx context.Context, c dynamic.ResourceIn
 
 	// Force sync by deleting the resource and letting it recreate next.
 	if err := c.Delete(ctx, u.GetName(), metav1.DeleteOptions{
-		GracePeriodSeconds: lo.ToPtr(int64(0)),
-		PropagationPolicy:  lo.ToPtr(metav1.DeletePropagationForeground),
+		GracePeriodSeconds: new(int64(0)),
+		PropagationPolicy:  new(metav1.DeletePropagationForeground),
 	}); err != nil {
 		return nil, err
 	}
@@ -604,6 +649,13 @@ func WithWaveOnApply(onApply func(resource unstructured.Unstructured)) WaveProce
 func WithWaveSvcCache(c *cache.Cache[console.ServiceDeploymentForAgent]) WaveProcessorOption {
 	return func(w *WaveProcessor) {
 		w.svcCache = c
+	}
+}
+
+// WithWaveGates adds gates to a wave processor in execution order.
+func WithWaveGates(gates ...Gate) WaveProcessorOption {
+	return func(w *WaveProcessor) {
+		w.gates = append(w.gates, gates...)
 	}
 }
 

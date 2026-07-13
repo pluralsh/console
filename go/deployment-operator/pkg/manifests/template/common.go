@@ -16,11 +16,8 @@ import (
 	"sigs.k8s.io/kustomize/kyaml/kio/kioutil"
 	"sigs.k8s.io/kustomize/kyaml/yaml"
 
+	commonpkg "github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-)
-
-var (
-	crdGK = schema.GroupKind{Group: "apiextensions.k8s.io", Kind: "CustomResourceDefinition"}
 )
 
 func setNamespaces(mapper meta.RESTMapper, objs []unstructured.Unstructured,
@@ -134,8 +131,7 @@ func IsCRD(u *unstructured.Unstructured) bool {
 	if u == nil {
 		return false
 	}
-	gvk := u.GroupVersionKind()
-	return crdGK == gvk.GroupKind()
+	return commonpkg.IsCRD(*u)
 }
 
 // LookupResourceScope tries to look up the scope of the type of the provided

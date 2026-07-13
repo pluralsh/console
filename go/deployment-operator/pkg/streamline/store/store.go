@@ -36,6 +36,9 @@ type Store interface {
 
 	GetAppliedComponent(obj unstructured.Unstructured) (*smcommon.Component, error)
 
+	// IsCRDEstablished returns whether the exact CRD object observed by the watch is established.
+	IsCRDEstablished(obj unstructured.Unstructured) (bool, error)
+
 	GetAppliedComponentByUID(uid types.UID) (*client.ComponentChildAttributes, error)
 
 	// GetAppliedComponentsByGVK returns all applied components matching provided GVK.

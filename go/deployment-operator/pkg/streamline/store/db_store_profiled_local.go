@@ -96,6 +96,14 @@ func (p *ProfiledStoreLocal) GetAppliedComponent(obj unstructured.Unstructured) 
 	return res, err
 }
 
+func (p *ProfiledStoreLocal) IsCRDEstablished(obj unstructured.Unstructured) (established bool, err error) {
+	_ = traceLocal(context.Background(), "IsCRDEstablished", func() error {
+		established, err = p.inner.IsCRDEstablished(obj)
+		return err
+	})
+	return
+}
+
 // GetAppliedComponentByUID wraps Store.GetAppliedComponentByUID with tracing.
 func (p *ProfiledStoreLocal) GetAppliedComponentByUID(uid types.UID) (*client.ComponentChildAttributes, error) {
 	var (

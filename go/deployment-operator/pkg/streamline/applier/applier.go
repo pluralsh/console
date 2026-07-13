@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/polly/containers"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,11 +11,13 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
+	"github.com/pluralsh/console/go/polly/containers"
 )
 
 type Applier struct {
@@ -41,6 +41,8 @@ func (in *Applier) Apply(ctx context.Context,
 	opts ...WaveProcessorOption,
 ) ([]client.ComponentAttributes, []client.ServiceErrorAttributes, error) {
 	resources = in.ensureServiceAnnotation(resources, service.ID)
+	gates := []Gate{newCRDGate(in.store, in.discoveryCache, withCRDGateResources(resources, lo.FromPtr(service.DryRun)))}
+	opts = append(opts, WithWaveGates(lo.Filter(gates, func(g Gate, _ int) bool { return g.Enabled() })...))
 
 	if err := in.store.SyncServiceComponents(service.ID, resources); err != nil {
 		return nil, nil, err
@@ -72,7 +74,7 @@ func (in *Applier) Apply(ctx context.Context,
 		}
 
 		now := time.Now()
-		syncPhase = lo.ToPtr(phase.Name())
+		syncPhase = new(phase.Name())
 
 		if !phase.HasWaves() {
 			klog.V(log.LogLevelDefault).InfoS(
@@ -134,7 +136,7 @@ func (in *Applier) Apply(ctx context.Context,
 			serviceErrorList = append(serviceErrorList, client.ServiceErrorAttributes{
 				Source:  string(phase.Name()),
 				Message: "waiting for resources to be ready",
-				Warning: lo.ToPtr(true),
+				Warning: new(true),
 			})
 			klog.V(log.LogLevelTrace).InfoS("waiting for resources to be ready", "phase", phase.Name())
 			break
@@ -198,8 +200,8 @@ func (in *Applier) Destroy(ctx context.Context, serviceID string) ([]client.Comp
 		err = in.client.
 			Resource(helpers.GVRFromGVK(live.GroupVersionKind())).
 			Namespace(live.GetNamespace()).Delete(ctx, live.GetName(), metav1.DeleteOptions{
-			GracePeriodSeconds: lo.ToPtr(int64(0)),
-			PropagationPolicy:  lo.ToPtr(metav1.DeletePropagationBackground),
+			GracePeriodSeconds: new(int64(0)),
+			PropagationPolicy:  new(metav1.DeletePropagationBackground),
 		})
 		if errors.IsNotFound(err) {
 			if err := in.store.DeleteComponent(smcommon.NewStoreKeyFromUnstructured(lo.FromPtr(live))); err != nil {

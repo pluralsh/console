@@ -101,6 +101,14 @@ func (p *ProfiledStore) GetAppliedComponent(obj unstructured.Unstructured) (*smc
 	return res, err
 }
 
+func (p *ProfiledStore) IsCRDEstablished(obj unstructured.Unstructured) (established bool, err error) {
+	_ = trace(context.Background(), "IsCRDEstablished", func() error {
+		established, err = p.inner.IsCRDEstablished(obj)
+		return err
+	})
+	return
+}
+
 // GetAppliedComponentByUID wraps Store.GetAppliedComponentByUID with tracing.
 func (p *ProfiledStore) GetAppliedComponentByUID(uid types.UID) (*client.ComponentChildAttributes, error) {
 	var (

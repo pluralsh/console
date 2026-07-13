@@ -123,6 +123,104 @@ func TestComponentCache_Init(t *testing.T) {
 	})
 }
 
+func TestComponentCache_CRDEstablished(t *testing.T) {
+	newStore := func(t *testing.T) store.Store {
+		t.Helper()
+		result, err := store.NewDatabaseStore(context.Background())
+		require.NoError(t, err)
+		t.Cleanup(func() { require.NoError(t, result.Shutdown()) })
+		return result
+	}
+
+	makeCRD := func(name, uid, status string) unstructured.Unstructured {
+		result := createUnstructuredResource("apiextensions.k8s.io", "v1", "CustomResourceDefinition", "", name)
+		result.SetUID(types.UID(uid))
+		if status != "" {
+			result.Object["status"] = map[string]any{
+				"conditions": []any{map[string]any{"type": "Established", "status": status}},
+			}
+		}
+		return result
+	}
+
+	t.Run("tracks watch status transitions and exact UID", func(t *testing.T) {
+		storeInstance := newStore(t)
+		crd := makeCRD("widgets.example.com", "uid-1", "False")
+
+		require.NoError(t, storeInstance.SaveComponent(crd))
+		established, err := storeInstance.IsCRDEstablished(crd)
+		require.NoError(t, err)
+		assert.False(t, established)
+
+		crd.Object["status"] = map[string]any{
+			"conditions": []any{map[string]any{"type": "Established", "status": "True"}},
+		}
+		require.NoError(t, storeInstance.SaveComponent(crd))
+		established, err = storeInstance.IsCRDEstablished(crd)
+		require.NoError(t, err)
+		assert.True(t, established)
+
+		stale := crd.DeepCopy()
+		stale.SetUID("uid-2")
+		established, err = storeInstance.IsCRDEstablished(*stale)
+		require.NoError(t, err)
+		assert.False(t, established)
+
+		crd.Object["status"] = map[string]any{
+			"conditions": []any{map[string]any{"type": "Established", "status": "Unknown"}},
+		}
+		require.NoError(t, storeInstance.SaveComponent(crd))
+		established, err = storeInstance.IsCRDEstablished(crd)
+		require.NoError(t, err)
+		assert.False(t, established)
+	})
+
+	t.Run("defaults missing status and clears readiness when unsynced", func(t *testing.T) {
+		storeInstance := newStore(t)
+		crd := makeCRD("missing.example.com", "uid-missing", "")
+		require.NoError(t, storeInstance.SaveComponent(crd))
+
+		established, err := storeInstance.IsCRDEstablished(crd)
+		require.NoError(t, err)
+		assert.False(t, established)
+
+		crd.Object["status"] = map[string]any{
+			"conditions": []any{map[string]any{"type": "Established", "status": "True"}},
+		}
+		require.NoError(t, storeInstance.SaveComponent(crd))
+		require.NoError(t, storeInstance.SetComponentUnsynced(crd))
+
+		established, err = storeInstance.IsCRDEstablished(crd)
+		require.NoError(t, err)
+		assert.False(t, established)
+	})
+
+	t.Run("persists batch status and preserves it when syncing apply metadata", func(t *testing.T) {
+		storeInstance := newStore(t)
+		crd := makeCRD("gadgets.example.com", "uid-batch", "True")
+
+		require.NoError(t, storeInstance.SaveComponents([]unstructured.Unstructured{crd}))
+		require.NoError(t, storeInstance.SyncAppliedResource(crd))
+
+		established, err := storeInstance.IsCRDEstablished(crd)
+		require.NoError(t, err)
+		assert.True(t, established)
+	})
+
+	t.Run("ignores established-like conditions on non-CRDs", func(t *testing.T) {
+		storeInstance := newStore(t)
+		resource := createComponent("uid-other")
+		resource.Object["status"] = map[string]any{
+			"conditions": []any{map[string]any{"type": "Established", "status": "True"}},
+		}
+
+		require.NoError(t, storeInstance.SaveComponent(resource))
+		established, err := storeInstance.IsCRDEstablished(resource)
+		require.NoError(t, err)
+		assert.False(t, established)
+	})
+}
+
 func TestComponentCache_SetComponent(t *testing.T) {
 	t.Run("cache should save and return simple parent and child structure", func(t *testing.T) {
 		storeInstance, err := store.NewDatabaseStore(context.Background(), store.WithStorage(api.StorageFile))

@@ -22,7 +22,8 @@ const (
 			apply_sha TEXT,
 			server_sha TEXT,
 			manifest BOOLEAN DEFAULT 0, -- Indicates if the component was created from an original manifest set of a service
-			applied BOOLEAN DEFAULT 0 -- Indicates if the component was already applied to the cluster
+			applied BOOLEAN DEFAULT 0, -- Indicates if the component was already applied to the cluster
+			established BOOLEAN NOT NULL DEFAULT 0 -- Indicates if a CRD has been established
 		);
 		CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_component ON component("group", version, kind, namespace, name);
 		CREATE INDEX IF NOT EXISTS idx_parent ON component(parent_uid);
@@ -85,6 +86,14 @@ const (
 		WHERE "group" = ? AND version = ? AND kind = ? AND applied = 1
 	`
 
+	getCRDEstablished = `
+		SELECT EXISTS(
+			SELECT 1
+			FROM component
+			WHERE name = ? AND namespace = ? AND "group" = ? AND version = ? AND kind = ? AND uid = ? AND established = 1
+		)
+	`
+
 	setComponentWithSHA = `
 		INSERT INTO component (
 			uid,
@@ -100,7 +109,8 @@ const (
 		    service_id,
 		    delete_phase,
 		    server_sha,
-		    applied
+		    applied,
+		    established
 		) VALUES (
 			?,
 			?,
@@ -115,6 +125,7 @@ const (
 		    ?,
 		    ?,
 		    ?,
+		    ?,
 		    ?
 		) ON CONFLICT("group", version, kind, namespace, name) DO UPDATE SET
 			uid = excluded.uid,
@@ -125,12 +136,14 @@ const (
 			service_id = excluded.service_id,
 			delete_phase = excluded.delete_phase,
 			server_sha = excluded.server_sha,
-		    applied = excluded.applied
+		    applied = excluded.applied,
+		    established = excluded.established
 	`
 
 	setComponentUnsynced = `
 		UPDATE component
 		SET applied = 0,
+		    established = 0,
 		    uid = '',
 		    health = 1,
 		    created_at = NULL,

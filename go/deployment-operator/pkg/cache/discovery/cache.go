@@ -37,6 +37,9 @@ type Cache interface {
 	// MaybeResetRESTMapper resets the RESTMapper if the provided GVKs are CustomResourceDefinitions.
 	MaybeResetRESTMapper(...schema.GroupVersionKind)
 
+	// ResetRESTMapper resets cached discovery used by the RESTMapper.
+	ResetRESTMapper()
+
 	// GroupVersionKind returns the set of GroupVersionKinds in the cache.
 	GroupVersionKind() containers.Set[schema.GroupVersionKind]
 
@@ -149,6 +152,19 @@ func (in *cache) MaybeResetRESTMapper(crds ...schema.GroupVersionKind) {
 		klog.V(log.LogLevelExtended).InfoS("resetting RESTMapper", "gvk", gvk)
 		return
 	}
+}
+
+func (in *cache) ResetRESTMapper() {
+	in.mu.Lock()
+	defer in.mu.Unlock()
+
+	if in.mapper == nil {
+		klog.V(log.LogLevelVerbose).ErrorS(fmt.Errorf("no RESTMapper provided, cannot reset"), "unable to reset RESTMapper")
+		return
+	}
+
+	meta.MaybeResetRESTMapper(in.mapper)
+	klog.V(log.LogLevelExtended).InfoS("resetting RESTMapper")
 }
 
 func (in *cache) RestMapping(gvk schema.GroupVersionKind) (*meta.RESTMapping, error) {
