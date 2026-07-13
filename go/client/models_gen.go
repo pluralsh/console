@@ -9873,6 +9873,8 @@ type Workbench struct {
 	SystemPrompt *string `json:"systemPrompt,omitempty"`
 	// workbench configuration
 	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
+	// default mode-specific options for jobs created by this workbench
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// skills configuration
 	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// the project of this workbench
@@ -9933,6 +9935,8 @@ type WorkbenchAttributes struct {
 	OverrideBotUser *bool `json:"overrideBotUser,omitempty"`
 	// workbench configuration
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
+	// default mode-specific options for jobs created by this workbench
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// skills configuration (ref and files)
 	Skills *WorkbenchSkillsAttributes `json:"skills,omitempty"`
 	// users who can read and execute this workbench
@@ -10710,6 +10714,8 @@ type WorkbenchTool struct {
 	Tool WorkbenchToolType `json:"tool"`
 	// categories for the tool
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
+	// whether this tool requires approval before execution
+	Approval *bool `json:"approval,omitempty"`
 	// the project of this tool
 	Project *Project `json:"project,omitempty"`
 	// read policy for this tool
@@ -10764,6 +10770,8 @@ type WorkbenchToolAttributes struct {
 	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
 	// the SCM connection for this tool (e.g. shared Git provider credentials)
 	ScmConnectionID *string `json:"scmConnectionId,omitempty"`
+	// whether this tool requires approval before execution
+	Approval *bool `json:"approval,omitempty"`
 	// users who can read and execute this tool
 	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	// users who can modify this tool

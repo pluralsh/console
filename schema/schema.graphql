@@ -2763,6 +2763,9 @@ input WorkbenchAttributes {
   "workbench configuration"
   configuration: WorkbenchConfigurationAttributes
 
+  "default mode-specific options for jobs created by this workbench"
+  modes: WorkbenchJobModesAttributes
+
   "skills configuration (ref and files)"
   skills: WorkbenchSkillsAttributes
 
@@ -2976,6 +2979,9 @@ input WorkbenchToolAttributes {
 
   "the SCM connection for this tool (e.g. shared Git provider credentials)"
   scmConnectionId: ID
+
+  "whether this tool requires approval before execution"
+  approval: Boolean
 
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
@@ -3392,6 +3398,9 @@ type Workbench {
 
   "workbench configuration"
   configuration: WorkbenchConfiguration
+
+  "default mode-specific options for jobs created by this workbench"
+  modes: WorkbenchJobModes
 
   "skills configuration"
   skills: WorkbenchSkills
@@ -4256,6 +4265,9 @@ type WorkbenchTool {
 
   "categories for the tool"
   categories: [WorkbenchToolCategory]
+
+  "whether this tool requires approval before execution"
+  approval: Boolean
 
   "the project of this tool"
   project: Project

@@ -50,6 +50,8 @@ defmodule Console.Schema.Workbench do
       end
     end
 
+    embeds_one :modes, WorkbenchJob.Modes, on_replace: :update
+
     embeds_one :skills, Skills, on_replace: :update do
       embeds_one :ref, Service.Git, on_replace: :update
       field :files, {:array, :string}
@@ -130,6 +132,7 @@ defmodule Console.Schema.Workbench do
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:tool_associations)
+    |> cast_embed(:modes)
     |> cast_embed(:skills, with: &skills_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
     |> unique_constraint(:name)
