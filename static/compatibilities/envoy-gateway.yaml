@@ -5,98 +5,98 @@ readme_url: https://gateway.envoyproxy.io/news/releases/matrix/
 helm_repository_url: oci://docker.io/envoyproxy/gateway-helm
 chart_name: gateway-helm
 versions:
-- version: 1.8
+- version: 1.8.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements:
   - Envoy Proxy distroless-v1.38.0
   - Rate Limit fe26676d
   - Gateway API v1.5.1
   incompatibilities: []
-- version: 1.7
+- version: 1.7.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements:
   - Envoy Proxy distroless-v1.37.0
   - Rate Limit 3fb70258
   - Gateway API v1.4.1
   incompatibilities: []
-- version: 1.6
+- version: 1.6.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements:
   - Envoy Proxy distroless-v1.36.4
   - Rate Limit 3fb70258
   - Gateway API v1.4.0
   incompatibilities: []
-- version: 1.5
+- version: 1.5.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements:
   - Envoy Proxy distroless-v1.35.0
   - Rate Limit a90e0e5d
   - Gateway API v1.3.0
   incompatibilities: []
-- version: 1.4
+- version: 1.4.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements:
   - Envoy Proxy distroless-v1.34.1
   - Rate Limit 3e085e5b
   - Gateway API v1.3.0
   incompatibilities: []
-- version: 1.3
+- version: 1.3.0
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements:
   - Envoy Proxy distroless-v1.33.0
   - Rate Limit 60d8e81b
   - Gateway API v1.2.1
   incompatibilities: []
-- version: 1.2
+- version: 1.2.0
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements:
   - Envoy Proxy distroless-v1.32.1
   - Rate Limit 28b1629a
   - Gateway API v1.2.0
   incompatibilities: []
-- version: 1.1
+- version: 1.1.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements:
   - Envoy Proxy distroless-v1.31.0
   - Rate Limit 91484c59
   - Gateway API v1.1.0
   incompatibilities: []
-- version: 1.0
+- version: 1.0.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements:
   - Envoy Proxy distroless-v1.29.2
   - Rate Limit 19f2079f
   - Gateway API v1.0.0
   incompatibilities: []
-- version: 0.6
+- version: 0.6.0
   kube: ['1.28', '1.27', '1.26']
   requirements:
   - Envoy Proxy distroless-v1.28-latest
   - Rate Limit b9796237
   - Gateway API v1.0.0
   incompatibilities: []
-- version: 0.5
+- version: 0.5.0
   kube: ['1.27', '1.26', '1.25']
   requirements:
   - Envoy Proxy v1.27-latest
   - Rate Limit e059638d
   - Gateway API v0.7.1
   incompatibilities: []
-- version: 0.4
+- version: 0.4.0
   kube: ['1.27', '1.26', '1.25']
   requirements:
   - Envoy Proxy v1.26-latest
   - Rate Limit 542a6047
   - Gateway API v0.6.2
   incompatibilities: []
-- version: 0.3
+- version: 0.3.0
   kube: ['1.26', '1.25', '1.24']
   requirements:
   - Envoy Proxy v1.25-latest
   - Rate Limit f28024e3
   - Gateway API v0.6.1
   incompatibilities: []
-- version: 0.2
+- version: 0.2.0
   kube: ['1.24']
   requirements:
   - Envoy Proxy v1.23-latest

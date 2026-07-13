@@ -17,22 +17,39 @@ def _decode(content):
 
 
 def _clean_version(value: str) -> str:
+    version = value.strip().lstrip("v")
+    if version == "latest":
+        return version
+    if version and version.count(".") == 1:
+        return f"{version}.0"
+    return version
+
+
+def _clean_kube_version(value: str) -> str:
     return value.strip().lstrip("v")
 
 
 def _parse_kube_versions(value: str) -> list[str]:
     versions = []
     for raw_version in value.split(","):
-        version = _clean_version(raw_version)
+        version = _clean_kube_version(raw_version)
         if version:
             versions.append(version)
     return versions
 
 
 def _find_compatibility_table(soup: BeautifulSoup):
+    required_headers = [
+        "Envoy Gateway version",
+        "Envoy Proxy version",
+        "Rate Limit version",
+        "Gateway API version",
+        "Kubernetes version",
+    ]
+
     for table in soup.find_all("table"):
         headers = [th.get_text(" ", strip=True) for th in table.find_all("th")]
-        if "Envoy Gateway version" in headers and "Kubernetes version" in headers:
+        if all(header in headers for header in required_headers):
             return table, headers
     return None, []
 
