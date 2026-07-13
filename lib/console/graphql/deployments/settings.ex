@@ -963,6 +963,20 @@ defmodule Console.GraphQl.Deployments.Settings do
       resolve &Deployments.upsert_cloud_connection/2
     end
 
+    field :update_cloud_connection, :cloud_connection do
+      middleware Authenticated
+
+      middleware Scope,
+        resource: :settings,
+        action: :write,
+        api: "updateCloudConnection"
+
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:cloud_connection_attributes)
+
+      resolve &Deployments.update_cloud_connection/2
+    end
+
     field :delete_cloud_connection, :cloud_connection do
       middleware Authenticated
 

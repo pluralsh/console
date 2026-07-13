@@ -108,18 +108,6 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 		return r.ConsoleClient.GetCloudConnection(ctx, connection.Status.ID, nil)
 	}
 
-	if connection.Status.HasID() {
-		existing, err := r.ConsoleClient.GetCloudConnection(ctx, connection.Status.ID, nil)
-		if err != nil && !errors.IsNotFound(err) {
-			return nil, err
-		}
-		if err == nil && existing.Name != connection.CloudConnectionName() {
-			if err = r.ConsoleClient.DeleteCloudConnection(ctx, connection.Status.GetID()); err != nil {
-				return nil, err
-			}
-		}
-	}
-
 	attr, err := r.toCloudConnectionAttributes(ctx, *connection)
 	if err != nil {
 		return nil, err
@@ -130,6 +118,13 @@ func (r *CloudConnectionReconciler) sync(ctx context.Context, connection *v1alph
 	attr.ReadBindings, err = common.BindingsAttributes(connection.Spec.ReadBindings)
 	if err != nil {
 		return nil, err
+	}
+
+	if connection.Status.HasID() {
+		apiConnection, err := r.ConsoleClient.UpdateCloudConnection(ctx, connection.Status.GetID(), *attr)
+		if !errors.IsNotFound(err) {
+			return apiConnection, err
+		}
 	}
 
 	return r.ConsoleClient.UpsertCloudConnection(ctx, *attr)

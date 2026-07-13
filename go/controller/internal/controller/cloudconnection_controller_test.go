@@ -340,7 +340,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 				ID:   managedID,
 				Name: managedName,
 			}, nil)
-			fakeConsoleClient.On("UpsertCloudConnection", mock.Anything, mock.MatchedBy(func(attrs gqlclient.CloudConnectionAttributes) bool {
+			fakeConsoleClient.On("UpdateCloudConnection", mock.Anything, managedID, mock.MatchedBy(func(attrs gqlclient.CloudConnectionAttributes) bool {
 				return attrs.Name == managedName
 			})).Return(&gqlclient.CloudConnectionFragment{
 				ID:   managedID,

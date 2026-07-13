@@ -352,6 +352,78 @@ defmodule Console.Deployments.SettingsTest do
     end
   end
 
+  describe "#update_cloud_connection/3" do
+    test "admins can update a cloud connection by id" do
+      conn = insert(:cloud_connection)
+
+      {:ok, updated} =
+        Settings.update_cloud_connection(
+          %{
+            name: "updated-cloud-connection",
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          conn.id,
+          admin_user()
+        )
+
+      assert updated.id == conn.id
+      assert updated.name == "updated-cloud-connection"
+      assert updated.provider == :aws
+      assert updated.configuration.aws.access_key_id == "access-key-id"
+      assert updated.configuration.aws.secret_access_key == "new-secret-access-key"
+      assert updated.configuration.aws.region == "us-east-1"
+    end
+
+    test "admins cannot rename a cloud connection to an existing name" do
+      conn = insert(:cloud_connection)
+      existing = insert(:cloud_connection)
+
+      {:error, changeset} =
+        Settings.update_cloud_connection(
+          %{
+            name: existing.name,
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          conn.id,
+          admin_user()
+        )
+
+      assert %{name: [_ | _]} = errors_on(changeset)
+    end
+
+    test "nonadmins cannot update cloud connections" do
+      conn = insert(:cloud_connection)
+
+      {:error, _} =
+        Settings.update_cloud_connection(
+          %{
+            name: "test",
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          conn.id,
+          insert(:user)
+        )
+    end
+  end
+
   describe "#delete_cloud_connection/2" do
     test "admins can delete a cloud connection" do
       conn = insert(:cloud_connection)

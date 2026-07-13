@@ -14,6 +14,12 @@ mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {
     }
 }
 
+mutation UpdateCloudConnection($id: ID!, $attributes: CloudConnectionAttributes!) {
+    updateCloudConnection(id: $id, attributes: $attributes) {
+        ...CloudConnectionFragment
+    }
+}
+
 mutation DeleteCloudConnection($id: ID!) {
     deleteCloudConnection(id: $id) {
         ...CloudConnectionFragment

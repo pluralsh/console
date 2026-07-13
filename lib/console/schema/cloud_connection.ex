@@ -77,6 +77,7 @@ defmodule Console.Schema.CloudConnection do
     |> cast_assoc(:read_bindings)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
+    |> unique_constraint(:name)
     |> validate_required([:provider, :name])
   end
 

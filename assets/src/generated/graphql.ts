@@ -9168,6 +9168,7 @@ export type RootMutationType = {
   updateAgentRun?: Maybe<AgentRun>;
   updateAgentRunAnalysis?: Maybe<AgentRun>;
   updateAgentRunTodos?: Maybe<AgentRun>;
+  updateCloudConnection?: Maybe<CloudConnection>;
   updateCluster?: Maybe<Cluster>;
   updateClusterIsoImage?: Maybe<ClusterIsoImage>;
   updateClusterProvider?: Maybe<ClusterProvider>;
@@ -10332,6 +10333,12 @@ export type RootMutationTypeUpdateAgentRunAnalysisArgs = {
 export type RootMutationTypeUpdateAgentRunTodosArgs = {
   id: Scalars['ID']['input'];
   todos?: InputMaybe<Array<InputMaybe<AgentTodoAttributes>>>;
+};
+
+
+export type RootMutationTypeUpdateCloudConnectionArgs = {
+  attributes: CloudConnectionAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
