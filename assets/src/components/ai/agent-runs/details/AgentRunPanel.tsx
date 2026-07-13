@@ -3,8 +3,8 @@ import {
   CloseIcon,
   FileDiffIcon,
   Flex,
+  HourglassIcon,
   IconFrame,
-  ListIcon,
   Markdown,
   PrIcon,
   SubTab,
@@ -48,14 +48,17 @@ import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AgentRunDiff } from './AgentRunDiff.tsx'
 import { AgentRunPullRequests } from './AgentRunPullRequests.tsx'
-import { AgentRunTodos } from './AgentRunTodos.tsx'
+import {
+  AgentRunWorkingTheory,
+  shouldShowAgentRunStatusCallout,
+} from './AgentRunWorkingTheory.tsx'
 import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
 export enum AgentRunPanelTab {
   Diff = 'Diff',
   Analysis = 'Analysis',
-  AgentTodos = 'Agent todos',
+  WorkingTheory = 'Working theory',
   PullRequests = 'Pull requests',
 }
 
@@ -185,16 +188,18 @@ export function AgentRunPanelContent() {
         ? { maxWidthVw: 60, initialWidthVw: 60 }
         : { maxWidthVw: 50, initialWidthVw: 45 }
   )
-  const showAgentTodosTab = !isEmpty(todos)
+  const showWorkingTheoryTab =
+    !isEmpty(todos) || shouldShowAgentRunStatusCallout(run)
   const showPrsTab = hasPullRequests
   const hasContentTabs =
-    showDiffTab || showAnalysisTab || showAgentTodosTab || showPrsTab
+    showDiffTab || showAnalysisTab || showWorkingTheoryTab || showPrsTab
   const isWriteMode = run?.mode === AgentRunMode.Write
   const isActiveRun =
     isJobRunning(run?.status) ||
     run?.status === AgentRunStatus.Babysitting ||
     run?.status === AgentRunStatus.PendingApproval
-  const expectsTodos = (isLoading || isActiveRun) && !showAgentTodosTab
+  const expectsWorkingTheory =
+    (isLoading || isActiveRun) && !showWorkingTheoryTab
   const expectsPullRequests =
     (isLoading || (isActiveRun && isWriteMode)) && !showPrsTab
   const expectsAnalysis =
@@ -204,7 +209,8 @@ export function AgentRunPanelContent() {
       (run?.status === AgentRunStatus.Successful &&
         !(isWriteMode && hasPullRequests)))
   const showTabSkeleton =
-    !hasContentTabs && (expectsTodos || expectsPullRequests || expectsAnalysis)
+    !hasContentTabs &&
+    (expectsWorkingTheory || expectsPullRequests || expectsAnalysis)
   const showingTabContent =
     (showDiffTab &&
       selectedTab === AgentRunPanelTab.Diff &&
@@ -212,18 +218,18 @@ export function AgentRunPanelContent() {
     (showAnalysisTab &&
       selectedTab === AgentRunPanelTab.Analysis &&
       !!run?.analysis) ||
-    (showAgentTodosTab &&
-      selectedTab === AgentRunPanelTab.AgentTodos &&
+    (showWorkingTheoryTab &&
+      selectedTab === AgentRunPanelTab.WorkingTheory &&
       !!run) ||
     (showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
     if (showDiffTab) return AgentRunPanelTab.Diff
     if (showAnalysisTab) return AgentRunPanelTab.Analysis
-    if (showAgentTodosTab) return AgentRunPanelTab.AgentTodos
+    if (showWorkingTheoryTab) return AgentRunPanelTab.WorkingTheory
     if (showPrsTab) return AgentRunPanelTab.PullRequests
     return null
-  }, [showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
+  }, [showDiffTab, showAnalysisTab, showWorkingTheoryTab, showPrsTab])
 
   useEffect(() => {
     if (!runId || !defaultTab) return
@@ -280,13 +286,13 @@ export function AgentRunPanelContent() {
                       Analysis
                     </PanelSubTabSC>
                   )}
-                  {showAgentTodosTab && (
+                  {showWorkingTheoryTab && (
                     <PanelSubTabSC
-                      key={AgentRunPanelTab.AgentTodos}
-                      textValue={AgentRunPanelTab.AgentTodos}
+                      key={AgentRunPanelTab.WorkingTheory}
+                      textValue={AgentRunPanelTab.WorkingTheory}
                     >
-                      <ListIcon size={12} />
-                      Agent todos
+                      <HourglassIcon size={12} />
+                      {AgentRunPanelTab.WorkingTheory}
                     </PanelSubTabSC>
                   )}
                   {showPrsTab && (
@@ -306,7 +312,7 @@ export function AgentRunPanelContent() {
                     gap="small"
                   >
                     {expectsAnalysis && <TabSkeletonSC $width={72} />}
-                    {expectsTodos && <TabSkeletonSC $width={96} />}
+                    {expectsWorkingTheory && <TabSkeletonSC $width={96} />}
                     {expectsPullRequests && <TabSkeletonSC $width={108} />}
                   </Flex>
                 )
@@ -369,12 +375,16 @@ export function AgentRunPanelContent() {
             </ContentInnerSC>
           </ContentWrapperSC>
         )}
-      {showAgentTodosTab &&
-        selectedTab === AgentRunPanelTab.AgentTodos &&
+      {showWorkingTheoryTab &&
+        selectedTab === AgentRunPanelTab.WorkingTheory &&
         run && (
           <ContentWrapperSC>
             <ContentInnerSC>
-              <AgentRunTodos todos={todos} />
+              <AgentRunWorkingTheory
+                run={run}
+                todos={todos}
+                onViewDiff={() => setSelectedTab(AgentRunPanelTab.Diff)}
+              />
             </ContentInnerSC>
           </ContentWrapperSC>
         )}
@@ -404,7 +414,7 @@ export function AgentRunPanelContent() {
                 />
               </>
             )}
-            {expectsTodos && (
+            {expectsWorkingTheory && (
               <RectangleSkeleton
                 $height="180px"
                 $width="100%"
