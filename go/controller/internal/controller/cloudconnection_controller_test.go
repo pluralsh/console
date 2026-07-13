@@ -165,6 +165,7 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			fakeConsoleClient.On("GetCloudConnection", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, connectionName))
 			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
 			fakeConsoleClient.On("IsCloudConnection", mock.Anything, mock.AnythingOfType("string")).Return(false, nil)
+			fakeConsoleClient.On("UpdateCloudConnection", mock.Anything, connectionConsoleID, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, connectionName))
 			fakeConsoleClient.On("UpsertCloudConnection", mock.Anything, mock.Anything).Return(&gqlclient.CloudConnectionFragment{
 				ID:   connectionConsoleID,
 				Name: connectionName,
@@ -252,10 +253,13 @@ var _ = Describe("CloudConnection Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetCloudConnection", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, connectionName))
+			fakeConsoleClient.On("GetCloudConnection", mock.Anything, lo.ToPtr(connectionConsoleID), mock.Anything).Return(&gqlclient.CloudConnectionFragment{
+				ID:   connectionConsoleID,
+				Name: connectionName,
+			}, nil)
 			fakeConsoleClient.On("GetUser", mock.Anything).Return(&gqlclient.UserFragment{ID: "id"}, nil)
 			fakeConsoleClient.On("IsCloudConnection", mock.Anything, mock.AnythingOfType("string")).Return(false, nil)
-			fakeConsoleClient.On("UpsertCloudConnection", mock.Anything, mock.Anything).Return(&gqlclient.CloudConnectionFragment{
+			fakeConsoleClient.On("UpdateCloudConnection", mock.Anything, connectionConsoleID, mock.Anything).Return(&gqlclient.CloudConnectionFragment{
 				ID:   connectionConsoleID,
 				Name: connectionName,
 			}, nil)
