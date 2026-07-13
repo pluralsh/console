@@ -1,4 +1,5 @@
 names:
+- envoy-gateway
 - argo-rollouts
 - aws-ebs-csi-driver
 - aws-efs-csi-driver
