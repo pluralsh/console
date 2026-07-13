@@ -14,6 +14,7 @@ from utils import (
 
 app_name = "kubevirt"
 matrix_url = "https://raw.githubusercontent.com/kubevirt/sig-release/main/releases/k8s-support-matrix.md"
+REQUEST_TIMEOUT = 30
 
 
 def decode_markdown(content: bytes) -> str | None:
@@ -38,6 +39,7 @@ def latest_stable_release_by_minor() -> dict[str, str]:
         response = requests.get(
             "https://api.github.com/repos/kubevirt/kubevirt/releases",
             params={"page": page, "per_page": 100},
+            timeout=REQUEST_TIMEOUT,
         )
         if response.status_code != 200:
             raise Exception(f"Failed to fetch KubeVirt releases: {response.status_code}")
@@ -61,8 +63,29 @@ def latest_stable_release_by_minor() -> dict[str, str]:
     return latest
 
 
+def extract_support_matrix_table(markdown: str) -> list[str]:
+    lines = markdown.splitlines()
+    table_lines: list[str] = []
+    found_heading = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("# KubeVirt to Kubernetes version support matrix"):
+            found_heading = True
+            continue
+        if not found_heading:
+            continue
+
+        if stripped.startswith("|"):
+            table_lines.append(stripped)
+        elif table_lines:
+            break
+
+    return table_lines
+
+
 def parse_matrix(markdown: str, release_versions: dict[str, str]) -> list[OrderedDict[str, object]]:
-    table_lines = [line.strip() for line in markdown.splitlines() if line.strip().startswith("|")]
+    table_lines = extract_support_matrix_table(markdown)
     if len(table_lines) < 3:
         return []
 
@@ -83,7 +106,7 @@ def parse_matrix(markdown: str, release_versions: dict[str, str]) -> list[Ordere
         supported_kube_versions = [
             kube_version
             for kube_version, value in zip(kube_versions, cells[1:])
-            if value in {"✓", "EOL"}
+            if value == "\u2713"
         ]
         if not supported_kube_versions:
             continue
