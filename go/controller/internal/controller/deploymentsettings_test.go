@@ -432,5 +432,69 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			Expect(k8sClient.Get(ctx, typeNamespacedName, ds)).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(ds.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
+
+		It("should set xAI settings", func() {
+			xaiSecret := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "xai-secret",
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"token": []byte("xai-token"),
+				},
+			}
+			Expect(k8sClient.Create(ctx, xaiSecret)).To(Succeed())
+			DeferCleanup(func() {
+				_ = k8sClient.Delete(ctx, xaiSecret)
+			})
+
+			Expect(k8sClient.Get(ctx, typeNamespacedName, ds)).NotTo(HaveOccurred())
+			ds.Spec.PrometheusConnection = nil
+			ds.Spec.LokiConnection = nil
+			ds.Spec.AI = &v1alpha1.AISettings{
+				Enabled:  lo.ToPtr(true),
+				Provider: lo.ToPtr(gqlclient.AiProviderXai),
+				XAI: &v1alpha1.OpenAISettings{
+					Model:     lo.ToPtr("grok-4.5"),
+					ToolModel: lo.ToPtr("grok-4.5"),
+					BaseUrl:   lo.ToPtr("https://api.x.ai/v1"),
+					TokenSecretRef: corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: "xai-secret",
+						},
+						Key: "token",
+					},
+				},
+			}
+			Expect(k8sClient.Update(ctx, ds)).NotTo(HaveOccurred())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetDeploymentSettings", mock.Anything).Return(&gqlclient.DeploymentSettingsFragment{ID: id}, nil)
+			fakeConsoleClient.On("UpdateDeploymentSettings", mock.Anything, mock.MatchedBy(func(attr gqlclient.DeploymentSettingsAttributes) bool {
+				if attr.Ai == nil || attr.Ai.Provider == nil || *attr.Ai.Provider != gqlclient.AiProviderXai {
+					return false
+				}
+				if attr.Ai.Xai == nil || attr.Ai.Xai.AccessToken == nil {
+					return false
+				}
+				return *attr.Ai.Xai.AccessToken == "xai-token" &&
+					lo.FromPtr(attr.Ai.Xai.Model) == "grok-4.5" &&
+					lo.FromPtr(attr.Ai.Xai.ToolModel) == "grok-4.5" &&
+					lo.FromPtr(attr.Ai.Xai.BaseURL) == "https://api.x.ai/v1"
+			})).Return(nil, nil)
+
+			controllerReconciler := &controller.DeploymentSettingsReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 })

@@ -29,6 +29,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
     field :model,  :workbench_job_model_attributes, description: "model override for this job"
     field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+    field :budget, :workbench_job_budget_attributes, description: "budget limits for this job"
   end
 
   input_object :workbench_job_model_attributes do
@@ -39,6 +40,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_coding_modes_attributes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  input_object :workbench_job_budget_attributes do
+    field :cost,   :float, description: "maximum cost budget for this job"
+    field :tokens, :integer, description: "maximum token budget for this job"
   end
 
   input_object :workbench_job_update_attributes do
@@ -521,6 +527,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
     field :model,  :workbench_job_model, description: "model override for this job"
     field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+    field :budget, :workbench_job_budget, description: "budget limits for this job"
   end
 
   object :workbench_job_model do
@@ -531,6 +538,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_coding_modes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  object :workbench_job_budget do
+    field :cost,   :float, description: "maximum cost budget for this job"
+    field :tokens, :integer, description: "maximum token budget for this job"
   end
 
   object :workbench_job_usage do

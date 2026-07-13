@@ -101,6 +101,10 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 		providers = append(providers, openAICompatibleProvider)
 	}
 
+	if cfg := aiConfig.GetXai(); cfg != nil {
+		providers = append(providers, schemas.XAI)
+	}
+
 	if cfg := aiConfig.GetAnthropic(); cfg != nil {
 		providers = append(providers, schemas.Anthropic)
 	}
@@ -161,6 +165,11 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 				BaseProviderType: schemas.OpenAI,
 				AllowedRequests:  openAIAllowedRequests(cfg),
 			}
+		}
+
+	case schemas.XAI:
+		if cfg := aiConfig.GetXai(); cfg != nil && cfg.GetBaseUrl() != "" {
+			config.NetworkConfig.BaseURL = bifrostNetworkBaseURL(cfg.GetBaseUrl())
 		}
 
 	case schemas.Anthropic:

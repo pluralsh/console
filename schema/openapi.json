@@ -3378,7 +3378,8 @@
               "azure",
               "bedrock",
               "vertex",
-              "openai_compatible"
+              "openai_compatible",
+              "xai"
             ],
             "type": "string"
           }

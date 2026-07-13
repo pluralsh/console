@@ -828,6 +828,7 @@ type AiSettings struct {
 	VectorStore      *VectorStoreSettings `json:"vectorStore,omitempty"`
 	Openai           *OpenaiSettings      `json:"openai,omitempty"`
 	OpenaiCompatible *OpenaiSettings      `json:"openaiCompatible,omitempty"`
+	Xai              *OpenaiSettings      `json:"xai,omitempty"`
 	Anthropic        *AnthropicSettings   `json:"anthropic,omitempty"`
 	Ollama           *OllamaSettings      `json:"ollama,omitempty"`
 	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
@@ -850,6 +851,7 @@ type AiSettingsAttributes struct {
 	LogAnalysis      *bool                        `json:"logAnalysis,omitempty"`
 	Openai           *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	OpenaiCompatible *OpenaiSettingsAttributes    `json:"openaiCompatible,omitempty"`
+	Xai              *OpenaiSettingsAttributes    `json:"xai,omitempty"`
 	Anthropic        *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
 	Ollama           *OllamaAttributes            `json:"ollama,omitempty"`
 	Azure            *AzureOpenaiAttributes       `json:"azure,omitempty"`
@@ -2866,16 +2868,22 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed     *bool              `json:"installed,omitempty"`
-	Cloud         *bool              `json:"cloud,omitempty"`
-	Byok          *bool              `json:"byok,omitempty"`
-	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
-	OidcName      *string            `json:"oidcName,omitempty"`
-	QoveKey       *string            `json:"qoveKey,omitempty"`
-	Features      *AvailableFeatures `json:"features,omitempty"`
-	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
-	Manifest      *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
+	Installed     *bool                        `json:"installed,omitempty"`
+	Cloud         *bool                        `json:"cloud,omitempty"`
+	Byok          *bool                        `json:"byok,omitempty"`
+	ExternalOidc  *bool                        `json:"externalOidc,omitempty"`
+	OidcName      *string                      `json:"oidcName,omitempty"`
+	QoveKey       *string                      `json:"qoveKey,omitempty"`
+	Features      *AvailableFeatures           `json:"features,omitempty"`
+	Details       *ConsoleConfigurationDetails `json:"details,omitempty"`
+	LicenseExpiry *string                      `json:"licenseExpiry,omitempty"`
+	Manifest      *PluralManifest              `json:"manifest,omitempty"`
+	GitStatus     *GitStatus                   `json:"gitStatus,omitempty"`
+}
+
+type ConsoleConfigurationDetails struct {
+	AssumeRoleArn *string   `json:"assumeRoleArn,omitempty"`
+	EgressIps     []*string `json:"egressIps,omitempty"`
 }
 
 type ConstraintRef struct {
@@ -10373,6 +10381,20 @@ type WorkbenchJobAttributes struct {
 	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
+type WorkbenchJobBudget struct {
+	// maximum cost budget for this job
+	Cost *float64 `json:"cost,omitempty"`
+	// maximum token budget for this job
+	Tokens *int64 `json:"tokens,omitempty"`
+}
+
+type WorkbenchJobBudgetAttributes struct {
+	// maximum cost budget for this job
+	Cost *float64 `json:"cost,omitempty"`
+	// maximum token budget for this job
+	Tokens *int64 `json:"tokens,omitempty"`
+}
+
 type WorkbenchJobCodingModes struct {
 	// whether babysit mode is enabled for coding agent runs
 	Babysit *bool `json:"babysit,omitempty"`
@@ -10423,6 +10445,8 @@ type WorkbenchJobModes struct {
 	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
+	// budget limits for this job
+	Budget *WorkbenchJobBudget `json:"budget,omitempty"`
 }
 
 type WorkbenchJobModesAttributes struct {
@@ -10432,6 +10456,8 @@ type WorkbenchJobModesAttributes struct {
 	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
+	// budget limits for this job
+	Budget *WorkbenchJobBudgetAttributes `json:"budget,omitempty"`
 }
 
 type WorkbenchJobProgress struct {
@@ -11788,6 +11814,7 @@ const (
 	AiProviderBedrock          AiProvider = "BEDROCK"
 	AiProviderVertex           AiProvider = "VERTEX"
 	AiProviderOpenaiCompatible AiProvider = "OPENAI_COMPATIBLE"
+	AiProviderXai              AiProvider = "XAI"
 )
 
 var AllAiProvider = []AiProvider{
@@ -11798,11 +11825,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderBedrock,
 	AiProviderVertex,
 	AiProviderOpenaiCompatible,
+	AiProviderXai,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible, AiProviderXai:
 		return true
 	}
 	return false

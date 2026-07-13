@@ -16,6 +16,7 @@ message AiConfig {
   BedrockConfig bedrock = 5;
   AzureOpenAiConfig azure = 6;
   OpenAiConfig openaiCompatible = 7;
+  OpenAiConfig xai = 8;
 }
 
 message OpenAiTokenExchange {
