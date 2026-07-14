@@ -321,6 +321,7 @@ defmodule Console.Schema.Stack do
     |> cast_embed(:job_spec)
     |> cast_embed(:configuration)
     |> cast_embed(:policy_engine)
+    |> validate_policy_engine()
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:environment)
@@ -351,6 +352,16 @@ defmodule Console.Schema.Stack do
         _ -> add_error(cs, field, "Field is immutable")
       end
     end)
+  end
+
+  defp validate_policy_engine(changeset) do
+    case {get_field(changeset, :type), get_field(changeset, :policy_engine)} do
+      {:pulumi, %{type: _}} ->
+        add_error(changeset, :policy_engine, "policy engine is not supported for Pulumi stacks")
+
+      _ ->
+        changeset
+    end
   end
 
   def next_poll_changeset(model, interval) do

@@ -119,6 +119,11 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
+	if err := stack.Spec.Validate(); err != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	attributes, result, err := r.getDynamicAttributes(ctx, stack)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, stack.SetCondition)

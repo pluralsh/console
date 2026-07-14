@@ -3,7 +3,6 @@ package pulumi
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	osexec "os/exec"
@@ -167,7 +166,8 @@ func (in *Pulumi) Prepare() error {
 // Scan implements [v1.Tool] interface.
 func (in *Pulumi) Scan() ([]*console.StackPolicyViolationAttributes, error) {
 	if in.Scanner != nil {
-		return nil, errors.New("policy enforcement is not supported for Pulumi stacks")
+		klog.V(log.LogLevelInfo).Info("pulumi policy enforcement is not supported, skipping scan")
+		return []*console.StackPolicyViolationAttributes{}, nil
 	}
 
 	klog.V(log.LogLevelDebug).Info("pulumi scanner not configured, skipping")

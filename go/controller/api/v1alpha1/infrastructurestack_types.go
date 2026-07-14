@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -174,6 +176,14 @@ type InfrastructureStackSpec struct {
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+}
+
+func (s *InfrastructureStackSpec) Validate() error {
+	if s.Type == console.StackTypePulumi && s.PolicyEngine != nil {
+		return fmt.Errorf("policyEngine is not supported for PULUMI stacks")
+	}
+
+	return nil
 }
 
 // StackFile represents	a file to mount from secrets into the stack execution environment.

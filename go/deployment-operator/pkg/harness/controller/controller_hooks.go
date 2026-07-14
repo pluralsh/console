@@ -233,7 +233,7 @@ func (in *stackRunController) afterPlan() error {
 	// Run security scan if enabled
 	violations, err := in.tool.Scan()
 	if err != nil {
-		return fmt.Errorf("could not run security scan: %w", err)
+		klog.ErrorS(err, "could not run security scan")
 	}
 
 	if err = in.consoleClient.UpdateStackRun(in.stackRunID, gqlclient.StackRunAttributes{
