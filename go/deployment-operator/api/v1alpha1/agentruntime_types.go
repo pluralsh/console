@@ -106,6 +106,10 @@ type AgentRuntimeSpec struct {
 	// BabysitInterval configures the interval for the operator to check on the health of the agent runtime and perform necessary babysitting actions (e.g. restarting unhealthy runtimes). When not provided, a default interval of 1 minute will be used.
 	BabysitInterval *metav1.Duration `json:"babysitInterval,omitempty"`
 
+	// AgentTTL configures the maximum lifetime for agent run pods on this runtime. When not provided, a default TTL of 12 hours will be used.
+	// +kubebuilder:validation:Optional
+	AgentTTL *metav1.Duration `json:"agentTTL,omitempty"`
+
 	// ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.
 	// This should match the name of an existing ScmConnection resource or connection created in the Plural UI.
 	// +kubebuilder:validation:Optional

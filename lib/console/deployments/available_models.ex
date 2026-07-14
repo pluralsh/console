@@ -7,7 +7,7 @@ defmodule Console.Deployments.AvailableModels do
     defstruct [:provider, :model]
   end
 
-  @providers [:openai, :openai_compatible, :anthropic, :vertex, :bedrock, :azure]
+  @providers [:openai, :openai_compatible, :xai, :anthropic, :vertex, :bedrock, :azure]
 
   @spec list(DeploymentSettings.t() | nil) :: [Model.t()]
   def list(%DeploymentSettings{ai: %AI{enabled: true} = ai}) do
@@ -31,6 +31,7 @@ defmodule Console.Deployments.AvailableModels do
 
   defp configured_models(:openai, config), do: openai_models(:openai, config)
   defp configured_models(:openai_compatible, config), do: openai_models(:openai, config)
+  defp configured_models(:xai, config), do: openai_models(:xai, config)
 
   defp configured_models(:anthropic, config) do
     defaults = Provider.defaults(:anthropic)

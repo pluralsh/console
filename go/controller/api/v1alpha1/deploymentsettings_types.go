@@ -463,14 +463,14 @@ type AISettings struct {
 
 	// Provider defines which of the supported LLM providers should be used.
 	//
-	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;XAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:default=OPENAI
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
 
 	// ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks
 	//
-	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Enum=OPENAI;OPENAI_COMPATIBLE;XAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:validation:Optional
 	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
 
@@ -501,6 +501,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	OpenAICompatible *OpenAISettings `json:"openAICompatible,omitempty"`
+
+	// XAI holds the xAI provider configuration.  This is OpenAI compatible, so uses an equivalent typing.
+	//
+	// +kubebuilder:validation:Optional
+	XAI *OpenAISettings `json:"xai,omitempty"`
 
 	// Anthropic holds the Anthropic provider configuration.
 	//
@@ -602,6 +607,7 @@ func (in *LoggingSettings) Attributes(ctx context.Context, c client.Client, name
 	return attr, nil
 }
 
+//nolint:gocyclo // AI settings conversion maps a broad CRD schema into GraphQL attributes.
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
 	vectorStoreAttributes, err := in.VectorStore.Attributes(ctx, c, namespace)
 	if err != nil {
@@ -666,6 +672,15 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.OpenaiCompatible = openaiCompatible
+	}
+
+	if in.XAI != nil {
+		xai, err := in.XAI.Attributes(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Xai = xai
 	}
 
 	if in.Anthropic != nil {
@@ -816,8 +831,14 @@ func (in *AISettings) validateProviders() error {
 		return err
 	}
 
-	if err := in.checkProvider(in.EmbeddingProvider, "embedding provider"); err != nil {
-		return err
+	if in.EmbeddingProvider != nil {
+		if *in.EmbeddingProvider == console.AiProviderXai {
+			return fmt.Errorf("xai does not support embeddings and cannot be set as the embedding provider")
+		}
+
+		if err := in.checkProvider(in.EmbeddingProvider, "embedding provider"); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -836,6 +857,10 @@ func (in *AISettings) checkProvider(provider *console.AiProvider, ptype string) 
 	case console.AiProviderOpenaiCompatible:
 		if in.OpenAICompatible == nil {
 			return fmt.Errorf("must provide openai compatible configuration to set the %s to OPENAI_COMPATIBLE", ptype)
+		}
+	case console.AiProviderXai:
+		if in.XAI == nil {
+			return fmt.Errorf("must provide xai configuration to set the %s to XAI", ptype)
 		}
 	case console.AiProviderAnthropic:
 		if in.Anthropic == nil {

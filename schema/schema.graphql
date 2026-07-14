@@ -2699,6 +2699,9 @@ input WorkbenchJobModesAttributes {
 
   "coding mode options for this job"
   coding: WorkbenchJobCodingModesAttributes
+
+  "budget limits for this job"
+  budget: WorkbenchJobBudgetAttributes
 }
 
 input WorkbenchJobModelAttributes {
@@ -2715,6 +2718,14 @@ input WorkbenchJobCodingModesAttributes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+}
+
+input WorkbenchJobBudgetAttributes {
+  "maximum cost budget for this job"
+  cost: Float
+
+  "maximum token budget for this job"
+  tokens: Int
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -2751,6 +2762,9 @@ input WorkbenchAttributes {
 
   "workbench configuration"
   configuration: WorkbenchConfigurationAttributes
+
+  "default mode-specific options for jobs created by this workbench"
+  modes: WorkbenchJobModesAttributes
 
   "skills configuration (ref and files)"
   skills: WorkbenchSkillsAttributes
@@ -2965,6 +2979,9 @@ input WorkbenchToolAttributes {
 
   "the SCM connection for this tool (e.g. shared Git provider credentials)"
   scmConnectionId: ID
+
+  "whether this tool requires approval before execution"
+  approval: Boolean
 
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
@@ -3382,6 +3399,9 @@ type Workbench {
   "workbench configuration"
   configuration: WorkbenchConfiguration
 
+  "default mode-specific options for jobs created by this workbench"
+  modes: WorkbenchJobModes
+
   "skills configuration"
   skills: WorkbenchSkills
 
@@ -3573,6 +3593,9 @@ type WorkbenchJobModes {
 
   "coding mode options for this job"
   coding: WorkbenchJobCodingModes
+
+  "budget limits for this job"
+  budget: WorkbenchJobBudget
 }
 
 type WorkbenchJobModel {
@@ -3589,6 +3612,14 @@ type WorkbenchJobCodingModes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+}
+
+type WorkbenchJobBudget {
+  "maximum cost budget for this job"
+  cost: Float
+
+  "maximum token budget for this job"
+  tokens: Int
 }
 
 type WorkbenchJobUsage {
@@ -4234,6 +4265,9 @@ type WorkbenchTool {
 
   "categories for the tool"
   categories: [WorkbenchToolCategory]
+
+  "whether this tool requires approval before execution"
+  approval: Boolean
 
   "the project of this tool"
   project: Project
@@ -5643,6 +5677,7 @@ enum AiProvider {
   BEDROCK
   VERTEX
   OPENAI_COMPATIBLE
+  XAI
 }
 
 enum LogDriver {
@@ -5814,6 +5849,8 @@ input AiSettingsAttributes {
   openai: OpenaiSettingsAttributes
 
   openaiCompatible: OpenaiSettingsAttributes
+
+  xai: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
 
@@ -6263,6 +6300,8 @@ type AiSettings {
   openai: OpenaiSettings
 
   openaiCompatible: OpenaiSettings
+
+  xai: OpenaiSettings
 
   anthropic: AnthropicSettings
 

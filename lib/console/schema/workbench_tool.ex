@@ -40,6 +40,7 @@ defmodule Console.Schema.WorkbenchTool do
     field :tool,            Tool
     field :categories,      {:array, Category}
     field :name,            :string
+    field :approval,        :boolean, default: false
 
     embeds_one :oauth_token, OauthToken, on_replace: :update do
       field :access_token,  :string
@@ -262,7 +263,7 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
-  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id scm_connection_id)a
+  @valid ~w(tool categories name project_id approval cloud_connection_id mcp_server_id scm_connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

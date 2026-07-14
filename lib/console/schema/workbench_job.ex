@@ -28,9 +28,15 @@ defmodule Console.Schema.WorkbenchJob do
       end
 
       field :plan, :boolean
+
       embeds_one :coding, Coding, on_replace: :update do
         field :babysit,  :boolean
         field :approval, :boolean
+      end
+
+      embeds_one :budget, Budget, on_replace: :update do
+        field :cost,   :float
+        field :tokens, :integer
       end
     end
 
@@ -39,6 +45,7 @@ defmodule Console.Schema.WorkbenchJob do
       |> cast(attrs, [:plan])
       |> cast_embed(:model, with: &model_changeset/2)
       |> cast_embed(:coding, with: &coding_changeset/2)
+      |> cast_embed(:budget, with: &budget_changeset/2)
     end
 
     defp model_changeset(model, attrs) do
@@ -50,6 +57,11 @@ defmodule Console.Schema.WorkbenchJob do
     defp coding_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(babysit approval)a)
+    end
+
+    defp budget_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(cost tokens)a)
     end
   end
 

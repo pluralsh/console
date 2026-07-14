@@ -59,6 +59,15 @@ func (in *OpenAIRouter) resolveModel(ctx context.Context, model string) (schemas
 			return "", "", nil, fmt.Errorf("provider not configured: %s", provider)
 		}
 		return provider, parts[1], aiConfig.GetOpenaiCompatible(), nil
+	case schemas.XAI:
+		aiConfig, err := in.consoleClient.GetAiConfig(ctx)
+		if err != nil {
+			return "", "", nil, fmt.Errorf("failed to load AI config: %w", err)
+		}
+		if aiConfig.GetXai() == nil {
+			return "", "", nil, fmt.Errorf("provider not configured: %s", provider)
+		}
+		return provider, parts[1], aiConfig.GetXai(), nil
 	}
 
 	if !schemas.IsKnownProvider(parts[0]) {
@@ -71,11 +80,21 @@ func (in *OpenAIRouter) resolveModel(ctx context.Context, model string) (schemas
 func resolveOpenAIProviderForModel(aiConfig *pb.AiConfig, model string) (schemas.ModelProvider, *pb.OpenAiConfig) {
 	openAIConfig := aiConfig.GetOpenai()
 	compatibleConfig := aiConfig.GetOpenaiCompatible()
+	xaiConfig := aiConfig.GetXai()
 	if compatibleConfig == nil {
+		if xaiConfig != nil && openAIConfigHasModel(xaiConfig, model) && !openAIConfigHasModel(openAIConfig, model) {
+			return schemas.XAI, xaiConfig
+		}
 		return schemas.OpenAI, openAIConfig
 	}
 	if openAIConfig == nil {
+		if xaiConfig != nil && openAIConfigHasModel(xaiConfig, model) && !openAIConfigHasModel(compatibleConfig, model) {
+			return schemas.XAI, xaiConfig
+		}
 		return openAICompatibleProvider, compatibleConfig
+	}
+	if xaiConfig != nil && openAIConfigHasModel(xaiConfig, model) && !openAIConfigHasModel(openAIConfig, model) && !openAIConfigHasModel(compatibleConfig, model) {
+		return schemas.XAI, xaiConfig
 	}
 	if openAIConfigHasModel(compatibleConfig, model) && !openAIConfigHasModel(openAIConfig, model) {
 		return openAICompatibleProvider, compatibleConfig

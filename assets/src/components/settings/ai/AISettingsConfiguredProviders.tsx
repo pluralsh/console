@@ -11,6 +11,7 @@ import {
   PencilIcon,
   Table,
   VertexLogoIcon,
+  XAILogoIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { AiProvider, AiSettings } from 'generated/graphql'
@@ -31,6 +32,7 @@ type AISettingsProvidersTableMeta = {
 export const aiProviderToIcon = {
   [AiProvider.Openai]: OpenAILogoIcon,
   [AiProvider.OpenaiCompatible]: OpenCodeLogoIcon,
+  [AiProvider.Xai]: XAILogoIcon,
   [AiProvider.Anthropic]: ClaudeLogoIcon,
   [AiProvider.Azure]: AzureLogoIcon,
   [AiProvider.Bedrock]: BedrockLogoIcon,

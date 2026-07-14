@@ -111,6 +111,7 @@ versions:
         notes compared to 3.21.0.]
   chart_version: 3.21.1
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.1', 'openpolicyagent/gatekeeper:v3.21.1']
+  eolAt: '2026-07-09'
 - version: 3.21.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -154,6 +155,7 @@ versions:
         then be removed).']
   chart_version: 3.21.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0', 'openpolicyagent/gatekeeper:v3.21.0']
+  eolAt: '2026-07-09'
 - version: 3.20.1
   kube: ['1.34', '1.33', '1.32']
   requirements: []

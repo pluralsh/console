@@ -160,3 +160,36 @@ func TestAccountOpenAICompatibleProvider(t *testing.T) {
 	require.True(t, providerConfig.CustomProviderConfig.AllowedRequests.ChatCompletion)
 	require.False(t, providerConfig.CustomProviderConfig.AllowedRequests.Responses)
 }
+
+func TestAccountXAIProvider(t *testing.T) {
+	cfg := &pb.AiConfig{
+		Enabled: true,
+		Xai: &pb.OpenAiConfig{
+			Model:       lo.ToPtr("grok-4.5"),
+			ToolModel:   lo.ToPtr("grok-4.5"),
+			BaseUrl:     lo.ToPtr("https://api.x.ai/v1"),
+			ApiKey:      lo.ToPtr("xai-key"),
+			ProxyModels: []string{"grok-4"},
+		},
+	}
+	acct := &Account{
+		consoleClient: &mockConsoleClient{cfg: cfg},
+		tokenCache:    tokenexchange.NewCache(),
+		logger:        zap.NewNop(),
+	}
+
+	providers, err := acct.GetConfiguredProviders()
+	require.NoError(t, err)
+	require.Contains(t, providers, schemas.XAI)
+
+	keys, err := acct.GetKeysForProvider(context.Background(), schemas.XAI)
+	require.NoError(t, err)
+	require.Len(t, keys, 1)
+	require.Equal(t, "xai-key", keys[0].Value.Val)
+	require.ElementsMatch(t, []string{"grok-4.5", "grok-4.5", "grok-4"}, keys[0].Models)
+
+	providerConfig, err := acct.GetConfigForProvider(schemas.XAI)
+	require.NoError(t, err)
+	require.Equal(t, "https://api.x.ai", providerConfig.NetworkConfig.BaseURL)
+	require.Nil(t, providerConfig.CustomProviderConfig)
+}

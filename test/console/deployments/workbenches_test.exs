@@ -485,6 +485,51 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
     end
 
+    test "uses workbench modes when job modes are not provided" do
+      user = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: user.id}],
+          modes: %WorkbenchJob.Modes{
+            plan: true,
+            coding: %WorkbenchJob.Modes.Coding{approval: true, babysit: true},
+            budget: %WorkbenchJob.Modes.Budget{tokens: 100}
+          }
+        )
+
+      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+
+      assert job.modes.plan == true
+      assert job.modes.coding.approval == true
+      assert job.modes.coding.babysit == true
+      assert job.modes.budget.tokens == 100
+    end
+
+    test "uses explicit job modes instead of workbench modes" do
+      user = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: user.id}],
+          modes: %WorkbenchJob.Modes{
+            plan: true,
+            coding: %WorkbenchJob.Modes.Coding{approval: true, babysit: true}
+          }
+        )
+
+      {:ok, job} =
+        Workbenches.create_workbench_job(
+          %{prompt: "test prompt", modes: %{coding: %{approval: false}}},
+          workbench.id,
+          user
+        )
+
+      assert job.modes.plan == nil
+      assert job.modes.coding.approval == false
+      assert job.modes.coding.babysit == nil
+    end
+
     test "users without read access cannot create a job" do
       user = insert(:user)
       workbench = insert(:workbench)

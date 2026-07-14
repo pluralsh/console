@@ -1210,6 +1210,41 @@ defmodule Console.Deployments.ClustersTest do
       assert second.helm.values == "bogus: val"
     end
 
+    test "it can template helm vals migrations" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      insert(:deployment_settings,
+        agent_helm_values: "initial:\n  cluster: {{ cluster.name }}\n",
+        agent_helm_values_templateable: true,
+        deployer_repository: git
+      )
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test"}, user)
+      {:ok, _} = Clusters.create_cluster(%{name: "test2"}, user)
+
+      migration =
+        insert(:agent_migration,
+          ref: nil,
+          helm_values: "migrated:\n  cluster: {{ cluster.name }}\n"
+        )
+
+      {:ok, completed} = Clusters.apply_migration(migration)
+
+      assert completed.id == migration.id
+      assert completed.completed
+
+      services =
+        Console.Schema.Service.agent()
+        |> Console.Repo.all()
+        |> Console.Repo.preload([:cluster])
+        |> Map.new(fn svc -> {svc.cluster.name, svc} end)
+
+      assert services["test"].helm.values == "migrated:\n  cluster: test\n"
+      assert services["test2"].helm.values == "migrated:\n  cluster: test2\n"
+    end
+
     test "it can migrate helm vals and ref" do
       user = admin_user()
       insert(:user, bot_name: "console", roles: %{admin: true})

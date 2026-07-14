@@ -199,7 +199,7 @@ func (r *AgentRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return ctrl.Result{}, err
 	}
 
-	if completion, ok, delay := getAgentRunPodCompletion(pod); ok {
+	if completion, ok, delay := getAgentRunPodCompletion(pod, agentRunMaxLifetimeForRuntime(agentRuntime)); ok {
 		run.Status.Phase = completion.phase
 		run.Status.Error = completion.reason
 
@@ -287,8 +287,8 @@ type agentRunPodCompletion struct {
 	reason *string
 }
 
-func getAgentRunPodCompletion(pod *corev1.Pod) (*agentRunPodCompletion, bool, bool) {
-	if isAgentRunPodTimedOut(pod) {
+func getAgentRunPodCompletion(pod *corev1.Pod, ttl time.Duration) (*agentRunPodCompletion, bool, bool) {
+	if isAgentRunPodTimedOut(pod, ttl) {
 		return &agentRunPodCompletion{
 			status: console.AgentRunStatusCancelled,
 			phase:  v1alpha1.AgentRunPhaseCancelled,
@@ -313,19 +313,29 @@ func delayInitContainerFailurePodDeletion(finishedAt *metav1.Time) bool {
 	return time.Since(finishedAt.Time) < initContainerFailurePodDeletionDelay
 }
 
-func isAgentRunPodTimedOut(pod *corev1.Pod) bool {
+func agentRunMaxLifetimeForRuntime(runtime *v1alpha1.AgentRuntime) time.Duration {
+	if runtime != nil && runtime.Spec.AgentTTL != nil {
+		return runtime.Spec.AgentTTL.Duration
+	}
+	return agentRunMaxLifetime
+}
+
+func isAgentRunPodTimedOut(pod *corev1.Pod, ttl time.Duration) bool {
 	if pod == nil {
 		return false
+	}
+	if ttl <= 0 {
+		ttl = agentRunMaxLifetime
 	}
 	// Don't time out pods that have already reached a terminal phase.
 	if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed {
 		return false
 	}
 	if !pod.Status.StartTime.IsZero() {
-		return time.Now().After(pod.Status.StartTime.Add(agentRunMaxLifetime))
+		return time.Now().After(pod.Status.StartTime.Add(ttl))
 	}
 	if !pod.CreationTimestamp.IsZero() {
-		return time.Now().After(pod.CreationTimestamp.Add(agentRunMaxLifetime))
+		return time.Now().After(pod.CreationTimestamp.Add(ttl))
 	}
 	return false
 }
