@@ -128,6 +128,8 @@ func openAIConfigForRequestModel(aiConfig *pb.AiConfig, model string) *pb.OpenAi
 	switch schemas.ModelProvider(parts[0]) {
 	case openAICompatibleProvider:
 		return aiConfig.GetOpenaiCompatible()
+	case schemas.XAI:
+		return aiConfig.GetXai()
 	case schemas.OpenAI:
 		_, cfg := resolveOpenAIProviderForModel(aiConfig, parts[1])
 		return cfg

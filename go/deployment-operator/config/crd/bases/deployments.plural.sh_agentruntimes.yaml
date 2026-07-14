@@ -78,6 +78,11 @@ spec:
                   babysitting actions (e.g. restarting unhealthy runtimes). When not
                   provided, a default interval of 1 minute will be used.
                 type: string
+              agentTTL:
+                description: AgentTTL configures the maximum lifetime for agent run
+                  pods on this runtime. When not provided, a default TTL of 12 hours
+                  will be used.
+                type: string
               scmConnection:
                 description: |-
                   ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.

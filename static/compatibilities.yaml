@@ -1,4 +1,35 @@
 addons:
+- icon: https://raw.githubusercontent.com/kubevirt/community/main/logo/KubeVirt_icon.png
+  git_url: https://github.com/kubevirt/kubevirt
+  release_url: https://github.com/kubevirt/kubevirt/releases/tag/v{vsn}
+  readme_url: https://github.com/kubevirt/sig-release/blob/main/releases/k8s-support-matrix.md
+  versions:
+  - version: 1.8.4
+    kube: ['1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 1.7.4
+    kube: ['1.34']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 1.6.6
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 1.5.3
+    kube: ['1.32', '1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  - version: 1.4.1
+    kube: ['1.31']
+    requirements: []
+    incompatibilities: []
+    summary: null
+  name: kubevirt
 - icon: https://avatars.githubusercontent.com/u/30269780?s=200&v=4
   git_url: https://github.com/argoproj/argo-rollouts
   release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
@@ -1056,28 +1087,35 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
-  - version: 3.4.1
+  - version: 3.4.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "- **CRDs must be updated** for v3.4.1: run:\n  ```sh\n  kubectl\
-        \ apply -k \"github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master\"\
-        \n  ```\n- **IAM policy:** no changes required.\n- **Gateway API CRDs:** no\
-        \ updates required.\n- **New Helm value/flag exposed:** `enableCertificateManagement`\
-        \ (adds a corresponding controller flag via the chart)."
-      chart_updates: [Helm chart now exposes an `enableCertificateManagement` flag
-          (controller flag wiring) so certificate management behavior can be toggled
-          via values.]
-      features: ['Ingress: Auto-discovery of both ECDSA and RSA ACM certificates for
-          Ingress TLS, enabling dual-certificate setups for better client compatibility/performance.',
-        'Gateway API: HTTPRoute and GRPCRoute can share the same hostname on a Gateway
-          listener (overlap restriction removed), enabling mixed HTTP + gRPC on one
-          domain.']
-      breaking_changes: []
-    chart_version: 3.4.1
-    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.1']
+      helm_changes: ''
+      chart_updates: ['Application image should be updated from `public.ecr.aws/eks/aws-load-balancer-controller:v3.4.0`
+          to `:v3.4.2` (via Helm chart values such as `image.tag`, depending on your
+          chart).', No CRD updates required for v3.4.2 per release notes (still verify
+          your installed CRDs match chart-managed CRDs if you manage them separately).,
+        No IAM policy changes required for v3.4.2 per release notes., No Gateway API
+          CRD updates required for v3.4.2 per release notes.]
+      features: ['Ingress to Gateway Migration Tool introduced in v3.4.0: `lbc-migrate`
+          CLI to translate Ingress manifests to Gateway API YAML and an in-cluster
+          Migration Console to compare resulting AWS resources.', 'Improved readiness
+          gate handling: TargetGroupBinding controller watches Pod events instead
+          of fixed-timer requeues, speeding readiness reconciliation and reducing
+          churn.', NLB weighted target groups now allow weight 0 (with validation
+          that at least one target group has non-zero weight).]
+      breaking_changes: ['Gateway API behavior change in v3.4.0: for an NLB Gateway,
+          only one L4 (TCP/UDP/TLS) route per listener will receive traffic; when
+          multiple routes target the same listener, the oldest route wins. Consolidate
+          to a single L4 route per listener to avoid unexpected traffic loss.', 'Security-related
+          behavior change in v3.4.2: unified cross-kind route precedence for HTTPRoute/GRPCRoute;
+          rule ordering now based on specificity rather than route kind, which can
+          change which route matches first if you relied on the old (buggy) ordering.']
+    chart_version: 3.4.2
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.2']
   - version: 3.4.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -18598,6 +18636,23 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 87.15.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Fixes `externalUrl` generation for Alertmanager and Prometheus
+          when an ingress/route is configured (chart template logic fix)., (From 87.15.1)
+          Bumps the bundled `kube-state-metrics` subchart/release to v7.8.1.]
+      features: []
+      breaking_changes: []
+    chart_version: 87.15.2
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.0-distroless',
+      'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.15.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -20210,6 +20265,7 @@ addons:
           together may behave differently.]
     chart_version: 3.5.0
     images: []
+    eolAt: '2026-04-29'
   - version: 1.14.0
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -23176,6 +23232,7 @@ addons:
     chart_version: 3.21.1
     images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.1',
       'openpolicyagent/gatekeeper:v3.21.1']
+    eolAt: '2026-07-09'
   - version: 3.21.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -23221,6 +23278,7 @@ addons:
     chart_version: 3.21.0
     images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.0',
       'openpolicyagent/gatekeeper:v3.21.0']
+    eolAt: '2026-07-09'
   - version: 3.20.1
     kube: ['1.34', '1.33', '1.32']
     requirements: []

@@ -40,6 +40,7 @@ export const providerSettingsKey: Record<
 > = {
   [AiProvider.Openai]: 'openai',
   [AiProvider.OpenaiCompatible]: 'openaiCompatible',
+  [AiProvider.Xai]: 'xai',
   [AiProvider.Anthropic]: 'anthropic',
   [AiProvider.Bedrock]: 'bedrock',
   [AiProvider.Ollama]: 'ollama',

@@ -469,6 +469,7 @@ function sanitizeInitialForm({
   agentRuntime,
   repository,
   skills,
+  modes,
   workbenchSkills,
   tools,
   readBindings,
@@ -511,6 +512,7 @@ function sanitizeInitialForm({
       observability: { logs, metrics },
       coding: { mode, repositories, enableBabysitting },
     },
+    modes: workbenchModesToAttributes(modes),
     skills: { ref, files },
     toolAssociations:
       tools?.flatMap((t) => (t ? [{ toolId: t.id }] : [])) ?? [],
@@ -531,5 +533,39 @@ function sanitizeInitialForm({
         },
       ]) ?? [],
     workbenchSkills: resolvedWorkbenchSkills,
+  }
+}
+
+function workbenchModesToAttributes(
+  modes: WorkbenchFragment['modes']
+): WorkbenchFormState['modes'] {
+  if (!modes) return null
+
+  return {
+    plan: modes.plan,
+    ...(modes.model?.provider && modes.model.model
+      ? {
+          model: {
+            provider: modes.model.provider,
+            model: modes.model.model,
+          },
+        }
+      : {}),
+    ...(modes.coding
+      ? {
+          coding: {
+            approval: modes.coding.approval,
+            babysit: modes.coding.babysit,
+          },
+        }
+      : {}),
+    ...(modes.budget
+      ? {
+          budget: {
+            cost: modes.budget.cost,
+            tokens: modes.budget.tokens,
+          },
+        }
+      : {}),
   }
 }

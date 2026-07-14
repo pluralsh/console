@@ -512,7 +512,7 @@ func TestGetAgentRunPodCompletion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			completion, ok, delay := getAgentRunPodCompletion(tt.pod)
+			completion, ok, delay := getAgentRunPodCompletion(tt.pod, agentRunMaxLifetime)
 			assert.Equal(t, tt.wantOK, ok)
 			assert.Equal(t, tt.wantDelay, delay)
 			if !tt.wantOK {

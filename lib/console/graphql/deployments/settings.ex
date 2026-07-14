@@ -140,6 +140,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :openai, :openai_settings_attributes
     field :openai_compatible, :openai_settings_attributes
+    field :xai, :openai_settings_attributes
     field :anthropic, :anthropic_settings_attributes
     field :ollama, :ollama_attributes
     field :azure, :azure_openai_attributes
@@ -537,6 +538,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :vector_store, :vector_store_settings, description: "settings for vector-backed search"
     field :openai, :openai_settings
     field :openai_compatible, :openai_settings
+    field :xai, :openai_settings
     field :anthropic, :anthropic_settings
     field :ollama, :ollama_settings
     field :azure, :azure_openai_settings

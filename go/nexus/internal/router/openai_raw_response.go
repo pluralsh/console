@@ -38,5 +38,5 @@ func openaiResponsesStreamRawResponse(ctx *schemas.BifrostContext, resp *schemas
 }
 
 func isOpenAIBackedProvider(provider schemas.ModelProvider) bool {
-	return provider == schemas.OpenAI || provider == openAICompatibleProvider
+	return provider == schemas.OpenAI || provider == openAICompatibleProvider || provider == schemas.XAI
 }

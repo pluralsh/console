@@ -113,6 +113,10 @@ defmodule Console.Deployments.SettingsTest do
             model: "custom-default",
             proxy_models: ["custom-proxy", "custom-default", nil, "  "]
           },
+          xai: %{
+            model: "grok-custom",
+            proxy_models: ["grok-proxy", "grok-custom"]
+          },
           azure: %{
             access_token: "azure-key",
             endpoint: "https://example.com/openai/deployments",
@@ -126,6 +130,9 @@ defmodule Console.Deployments.SettingsTest do
                %{provider: :openai_compatible, model: "custom-default"},
                %{provider: :openai_compatible, model: "gpt-5.4"},
                %{provider: :openai_compatible, model: "custom-proxy"},
+               %{provider: :xai, model: "grok-custom"},
+               %{provider: :xai, model: "grok-4.5"},
+               %{provider: :xai, model: "grok-proxy"},
                %{provider: :azure, model: "gpt-5.4-mini"},
                %{provider: :azure, model: "azure-tool"},
                %{provider: :azure, model: "azure-proxy"}

@@ -1198,14 +1198,21 @@ defmodule Console.Deployments.Clusters do
 
   def apply_migration(%AgentMigration{id: id} = migration) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    settings = Settings.fetch_consistent()
     # can't make this a transaction because there's no true time boundary on it
     Service.agent()
     |> Service.stream()
+    |> Service.preloaded([:cluster])
     |> Repo.stream(method: :keyset)
     |> Console.throttle(count: 100, pause: 100)
     |> Task.async_stream(fn svc ->
       Logger.info "applying agent migration #{id} for #{svc.id}"
-      updates = AgentMigration.updates(migration, svc)
+
+      updates =
+        migration
+        |> maybe_template_migration(settings, svc)
+        |> AgentMigration.updates(svc)
+
       case Service.changeset(svc, updates) do
         %Ecto.Changeset{changes: %{} = changes} when map_size(changes) > 0 ->
           Services.update_service(updates, svc.id, bot)
@@ -1223,6 +1230,17 @@ defmodule Console.Deployments.Clusters do
     end
   end
   def apply_migration(_), do: :ok
+
+  defp maybe_template_migration(
+         %AgentMigration{helm_values: vals} = migration,
+         %DeploymentSettings{agent_helm_values_templateable: true},
+         %Service{cluster: %Cluster{} = cluster}
+       )
+       when is_binary(vals) and byte_size(vals) > 0 do
+    %{migration | helm_values: template_values(vals, cluster)}
+  end
+
+  defp maybe_template_migration(migration, _, _), do: migration
 
   defp complete_migration(%AgentMigration{} = migration) do
     AgentMigration.changeset(migration, %{completed: true})

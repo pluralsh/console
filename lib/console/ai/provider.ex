@@ -4,7 +4,7 @@ defmodule Console.AI.Provider do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Nexus, Tool}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, XAI, Nexus, Tool}
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
@@ -17,7 +17,7 @@ defmodule Console.AI.Provider do
   @default_context_window 128_000 * 4
   @local_cache Console.conf(:local_cache)
 
-  @providers ~w(openai openai_compatible anthropic ollama azure bedrock vertex nexus)a
+  @providers ~w(openai openai_compatible xai anthropic ollama azure bedrock vertex nexus)a
 
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
@@ -150,6 +150,7 @@ defmodule Console.AI.Provider do
   def summary(text), do: completion([{:user, text}], preface: @summary)
 
   def defaults(:openai), do: OpenAI.defaults()
+  def defaults(:xai), do: XAI.defaults()
   def defaults(:anthropic), do: Anthropic.defaults()
   def defaults(:ollama), do: Ollama.defaults()
   def defaults(:azure), do: Azure.defaults()
@@ -184,6 +185,8 @@ defmodule Console.AI.Provider do
     do: {:ok, OpenAI.new(openai)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai_compatible, openai_compatible: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :xai, xai: %{} = xai}}),
+    do: {:ok, XAI.new(xai)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :anthropic, anthropic: %{} = anthropic}}),
     do: {:ok, Anthropic.new(anthropic)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :ollama, ollama: %{} = ollama}}),
