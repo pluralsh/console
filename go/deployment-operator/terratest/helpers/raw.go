@@ -95,29 +95,29 @@ func (in RawResource) WaitUntilReady(t *testing.T, timeout time.Duration) {
 
 	switch kind {
 	case "pod":
-		k8s.WaitUntilPodAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilPodAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "deployment":
-		k8s.WaitUntilDeploymentAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilDeploymentAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "job":
-		k8s.WaitUntilJobSucceed(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilJobSucceedContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "cronjob":
-		k8s.WaitUntilCronJobSucceed(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilCronJobSucceedContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "service":
-		k8s.WaitUntilServiceAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilServiceAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "ingress":
-		k8s.WaitUntilIngressAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilIngressAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "persistentvolumeclaim":
 		bound := corev1.ClaimBound
-		k8s.WaitUntilPersistentVolumeClaimInStatus(t, options, name, &bound, retries, defaultTickerInterval)
+		k8s.WaitUntilPersistentVolumeClaimInStatusContext(t, t.Context(), options, name, &bound, retries, defaultTickerInterval)
 	case "persistentvolume":
 		available := corev1.VolumeAvailable
-		k8s.WaitUntilPersistentVolumeInStatus(t, options, name, &available, retries, defaultTickerInterval)
+		k8s.WaitUntilPersistentVolumeInStatusContext(t, t.Context(), options, name, &available, retries, defaultTickerInterval)
 	case "configmap":
-		k8s.WaitUntilConfigMapAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilConfigMapAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "secret":
-		k8s.WaitUntilSecretAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilSecretAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	case "networkpolicy":
-		k8s.WaitUntilNetworkPolicyAvailable(t, options, name, retries, defaultTickerInterval)
+		k8s.WaitUntilNetworkPolicyAvailableContext(t, t.Context(), options, name, retries, defaultTickerInterval)
 	default:
 		in.waitUntilReadyByCondition(t, options, timeout)
 	}
@@ -218,7 +218,7 @@ func restConfigFromOptions(t *testing.T, options *k8s.KubectlOptions) (*rest.Con
 		return nil, err
 	}
 
-	config, err := k8s.LoadApiClientConfigE(kubeConfigPath, options.ContextName)
+	config, err := k8s.LoadAPIClientConfigE(kubeConfigPath, options.ContextName)
 	if err != nil {
 		t.Logf("failed to load kubeconfig: %v, falling back to in-cluster config", err)
 		return rest.InClusterConfig()
