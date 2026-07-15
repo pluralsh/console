@@ -2668,6 +2668,7 @@ enum WorkbenchJobActivityType {
   HISTORY
   SEARCH
   FUNCTION
+  KUBERNETES
 }
 
 enum WorkbenchCanvasBlockType {

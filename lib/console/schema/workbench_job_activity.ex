@@ -18,7 +18,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     skill: 11,
     history: 12,
     search: 13,
-    function: 14
+    function: 14,
+    kubernetes: 15
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending
@@ -41,6 +42,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
         field :tool_id, :binary_id
       end
 
+      embeds_one :kube_request, Console.AI.Tools.Workbench.KubeRequest, on_replace: :update
       embeds_many :canvas, Console.Schema.WorkbenchJobResult.CanvasBlock, on_replace: :delete
 
       embeds_one :job_update, JobUpdate, on_replace: :update do
@@ -155,6 +157,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast_embed(:logs_queries)
     |> cast_embed(:traces_queries)
     |> cast_embed(:canvas)
+    |> cast_embed(:kube_request)
   end
 
   defp function_call_changeset(model, attrs) do

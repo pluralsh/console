@@ -35,7 +35,10 @@ defmodule Console.AI.Workbench.Engine do
     Notes,
     FetchNotes,
     SkillBackfill,
-    FunctionCall
+    FunctionCall,
+    KubeRequest,
+    Infrastructure.KubeUpdate,
+    Infrastructure.KubeDelete
   }
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
@@ -121,6 +124,7 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%CanvasTool{}), do: "launched canvas subagent, waiting for the result"
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(%FunctionCall{} = call), do: "launched function call #{call.tool.name}, waiting for the result"
+  defp tool_fmt(%KubeRequest{method: m, path: p}), do: "launched kubernetes #{m} request against #{p}, waiting for the result"
   defp tool_fmt(pass), do: pass
 
   defp reducer(messages, %Acc{messages: msgs}) do
@@ -131,6 +135,7 @@ defmodule Console.AI.Workbench.Engine do
       %CanvasTool{} = canvas, {msgs, acts} -> {:cont, {msgs, [canvas | acts]}}
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
+      %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
       msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
     |> case do
@@ -225,6 +230,21 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
+  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{job: job}) do
+    attrs = %{
+      type: :kubernetes,
+      status: :needs_approval,
+      prompt: "dispatching kubernetes #{m} request against #{p} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result: %{
+        output: "request pending user approval",
+        kube_request: Console.mapify(request)
+      }
+    }
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+      do: poll_activity(activity)
+  end
+
   defp spawn_activity(_, _), do: :ignore
 
   @max_poll_iterations 60
@@ -290,6 +310,7 @@ defmodule Console.AI.Workbench.Engine do
       Complete,
     ] ++ type_tools(job)
       ++ function_tools(env)
+      ++ kube_tools(job)
       ++ include_backfill(job)
   end
 
@@ -302,6 +323,14 @@ defmodule Console.AI.Workbench.Engine do
   defp function_tools(%Environment{job: job, functions: [_ | _] = funcs}),
     do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
   defp function_tools(_), do: []
+
+  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}} = job) do
+    Enum.reject([
+      (if u, do: %KubeUpdate{job: job}, else: nil),
+      (if d, do: %KubeDelete{job: job}, else: nil)
+    ], &is_nil/1)
+  end
+  defp kube_tools(_), do: []
 
   defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
   defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))

@@ -2,6 +2,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
+  alias Console.AI.Tools.Workbench.KubeRequest
   alias Console.PubSub
   alias Console.Deployments.Workbenches
   alias Console.Schema.WorkbenchJob
@@ -558,7 +559,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert job.modes.budget.tokens == 100
     end
 
-    test "uses explicit job modes instead of workbench modes" do
+    test "merges explicit job modes on top of workbench modes" do
       user = insert(:user)
 
       workbench =
@@ -566,20 +567,38 @@ defmodule Console.Deployments.WorkbenchesTest do
           read_bindings: [%{user_id: user.id}],
           modes: %WorkbenchJob.Modes{
             plan: true,
-            coding: %WorkbenchJob.Modes.Coding{approval: true, babysit: true}
+            coding: %WorkbenchJob.Modes.Coding{approval: true, babysit: true},
+            kubernetes: %WorkbenchJob.Modes.Kubernetes{
+              update: true,
+              delete: false,
+              require_namespaces: ["default"]
+            },
+            budget: %WorkbenchJob.Modes.Budget{tokens: 100}
           }
         )
 
       {:ok, job} =
         Workbenches.create_workbench_job(
-          %{prompt: "test prompt", modes: %{coding: %{approval: false}}},
+          %{
+            prompt: "test prompt",
+            modes: %{
+              coding: %{approval: false},
+              kubernetes: %{delete: true},
+              budget: %{cost: 1.5}
+            }
+          },
           workbench.id,
           user
         )
 
-      assert job.modes.plan == nil
+      assert job.modes.plan == true
       assert job.modes.coding.approval == false
-      assert job.modes.coding.babysit == nil
+      assert job.modes.coding.babysit == true
+      assert job.modes.kubernetes.update == true
+      assert job.modes.kubernetes.delete == true
+      assert job.modes.kubernetes.require_namespaces == ["default"]
+      assert job.modes.budget.tokens == 100
+      assert job.modes.budget.cost == 1.5
     end
 
     test "users without read access cannot create a job" do
@@ -1019,6 +1038,59 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "approve_job_activity/2" do
+    test "users with read access approve a kubernetes activity and invoke the kube request" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "approval-cluster")
+
+      request = %{
+        handle: cluster.handle,
+        method: "delete",
+        path: "/apis/apps/v1/namespaces/default/deployments/api",
+        content_type: "application/json"
+      }
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          status: :needs_approval,
+          prompt: "approve the kubernetes request",
+          result: %{
+            output: "request pending user approval",
+            kube_request: request
+          }
+        )
+
+      expect(Kazan, :run, fn %Kazan.Request{} = request, opts ->
+        assert request.method == "delete"
+        assert request.path == "/apis/apps/v1/namespaces/default/deployments/api"
+        assert request.body == nil
+        assert request.content_type == "application/json"
+        assert request.query_params == %{}
+        assert request.response_model == Kube.Client.EchoModel
+        assert %Kazan.Server{} = opts[:server]
+
+        {:ok, %{"kind" => "Status", "status" => "Success"}}
+      end)
+
+      assert activity.status == :needs_approval
+      assert %KubeRequest{handle: "approval-cluster"} = activity.result.kube_request
+
+      {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
+
+      assert updated.id == activity.id
+      assert updated.status == :successful
+      assert Jason.decode!(updated.result.output) == %{"kind" => "Status", "status" => "Success"}
+
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+    end
+
     test "users with read access approve a function activity and invoke the underlying grpc function" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])

@@ -16130,6 +16130,7 @@ export enum WorkbenchJobActivityType {
   History = 'HISTORY',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
+  Kubernetes = 'KUBERNETES',
   Memo = 'MEMO',
   Memory = 'MEMORY',
   Observability = 'OBSERVABILITY',

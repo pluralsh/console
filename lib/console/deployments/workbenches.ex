@@ -24,7 +24,7 @@ defmodule Console.Deployments.Workbenches do
     FlowWorkbench
   }
   alias Console.AI.{Provider, VectorStore}
-  alias Console.AI.Tools.Workbench.{FunctionCall, SavedPrompt}
+  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -614,7 +614,7 @@ defmodule Console.Deployments.Workbenches do
     %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
     |> WorkbenchJob.changeset(
       attrs
-      |> maybe_put_workbench_modes(wb)
+      |> merge_modes(wb)
       |> Map.put(:result, %{working_theory: "", conclusion: ""})
     )
     |> allow(user, :read)
@@ -626,10 +626,11 @@ defmodule Console.Deployments.Workbenches do
     |> then(&create_workbench_job(attrs, &1, user))
   end
 
-  defp maybe_put_workbench_modes(%{modes: %{}} = attrs, _), do: attrs
-  defp maybe_put_workbench_modes(attrs, %Workbench{modes: %{} = modes}),
-    do: Map.put(attrs, :modes, Console.mapify(modes))
-  defp maybe_put_workbench_modes(attrs, _), do: attrs
+  defp merge_modes(attrs, %Workbench{modes: modes}) do
+    Console.mapify(modes || %{})
+    |> DeepMerge.deep_merge(attrs[:modes] || %{})
+    |> then(&Map.put(attrs, :modes, &1))
+  end
 
   def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
     hook = Repo.preload(hook, [:user])
@@ -831,6 +832,16 @@ defmodule Console.Deployments.Workbenches do
         |> case do
           {:ok, output} -> output
           {:error, err} -> "Internal function calling error: #{inspect(err)}"
+        end
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+        |> Repo.update()
+      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity} ->
+        KubeRequest.invoke(request, user)
+        |> case do
+          {:ok, %{} = output} -> JSON.encode!(output)
+          {:error, {:http_error, _, %{"message" => msg}}} -> "K8s request failed: #{msg}"
+          {:error, {:http_error, _, err}} -> "K8s request failed: #{inspect(err)}"
+          {:error, err} -> "Internal kubernetes request error: #{inspect(err)}"
         end
         |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
         |> Repo.update()
