@@ -326,8 +326,8 @@ defmodule Console.AI.Workbench.Engine do
 
   defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}} = job) do
     Enum.reject([
-      (if u, do: %KubeUpdate{job: job}, else: nil),
-      (if d, do: %KubeDelete{job: job}, else: nil)
+      (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
+      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []
