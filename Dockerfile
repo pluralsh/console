@@ -5,7 +5,7 @@ ARG OS_VERSION=3.23.4
 ARG TOOLS_IMAGE=${OS_VARIANT}:${OS_VERSION}
 ARG RUNNER_IMAGE=alpine:3.23.4 # TODO: change back to ${OS_VARIANT}:${OS_VERSION}
 
-FROM node:22.22.0-alpine as node
+FROM node:24.11.1-alpine as node
 
 WORKDIR /app
 

@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v3
         with:
-          node-version: 22.22.0
+          node-version: 24.11.1
       - run: yarn --immutable
       - run: yarn test
   lint:
@@ -39,6 +39,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v3
         with:
-          node-version: 22.22.0
+          node-version: 24.11.1
       - run: yarn --immutable
       - run: yarn lint

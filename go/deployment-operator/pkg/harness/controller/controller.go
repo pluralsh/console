@@ -223,6 +223,7 @@ func (in *stackRunController) prepare() error {
 		Variables:    variables,
 		Scanner:      security.NewScanner(in.stackRun.PolicyEngine),
 		Run:          in.stackRun,
+		Env:          in.stackRun.Env(),
 		ConsoleURL:   in.stackRun.ConsoleURL,
 		ConsoleToken: in.stackRun.ConsoleToken,
 	})

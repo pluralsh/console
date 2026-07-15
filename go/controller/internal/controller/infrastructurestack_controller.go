@@ -119,6 +119,11 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
+	if err := stack.Spec.Validate(); err != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	attributes, result, err := r.getDynamicAttributes(ctx, stack)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, stack.SetCondition)
@@ -508,6 +513,16 @@ func (r *InfrastructureStackReconciler) stackOverridesAttributes(overrides *v1al
 		}
 	}
 
+	if overrides.Pulumi != nil {
+		result.Pulumi = &console.PulumiConfigurationAttributes{
+			Parallel:     overrides.Pulumi.Parallel,
+			Refresh:      overrides.Pulumi.Refresh,
+			ApproveEmpty: overrides.Pulumi.ApproveEmpty,
+			Stack:        overrides.Pulumi.Stack,
+			BackendURL:   overrides.Pulumi.BackendUrl,
+		}
+	}
+
 	return result
 }
 
@@ -538,6 +553,16 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Parallelism:  conf.Terragrunt.Parallelism,
 			Refresh:      conf.Terragrunt.Refresh,
 			ApproveEmpty: conf.Terragrunt.ApproveEmpty,
+		}
+	}
+
+	if conf.Pulumi != nil {
+		attrs.Pulumi = &console.PulumiConfigurationAttributes{
+			Parallel:     conf.Pulumi.Parallel,
+			Refresh:      conf.Pulumi.Refresh,
+			ApproveEmpty: conf.Pulumi.ApproveEmpty,
+			Stack:        conf.Pulumi.Stack,
+			BackendURL:   conf.Pulumi.BackendUrl,
 		}
 	}
 

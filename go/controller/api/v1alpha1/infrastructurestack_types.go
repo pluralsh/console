@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -64,8 +66,8 @@ type InfrastructureStackSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Type specifies the IaC tool to use for executing the stack.
-	// One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM.
-	// +kubebuilder:validation:Enum=TERRAFORM;TERRAGRUNT;ANSIBLE;CUSTOM
+	// One of TERRAFORM, TERRAGRUNT, PULUMI, ANSIBLE, CUSTOM.
+	// +kubebuilder:validation:Enum=TERRAFORM;TERRAGRUNT;PULUMI;ANSIBLE;CUSTOM
 	// +kubebuilder:validation:Required
 	Type console.StackType `json:"type"`
 
@@ -176,6 +178,14 @@ type InfrastructureStackSpec struct {
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
+func (s *InfrastructureStackSpec) Validate() error {
+	if s.Type == console.StackTypePulumi && s.PolicyEngine != nil {
+		return fmt.Errorf("policyEngine is not supported for PULUMI stacks")
+	}
+
+	return nil
+}
+
 // StackFile represents	a file to mount from secrets into the stack execution environment.
 type StackFile struct {
 	// MountPath is the path where the file will be mounted in the stack execution environment.
@@ -210,6 +220,10 @@ type StackConfiguration struct {
 	// Terragrunt configuration for this stack.
 	// +kubebuilder:validation:Optional
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+
+	// Pulumi configuration for this stack.
+	// +kubebuilder:validation:Optional
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 
 	// Ansible configuration for this stack.
 	// +kubebuilder:validation:Optional
@@ -258,6 +272,32 @@ type TerragruntConfiguration struct {
 	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
 	// +kubebuilder:validation:Optional
 	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+}
+
+type PulumiConfiguration struct {
+	// Parallel is the number of resource operations to run concurrently,
+	// equivalent to the --parallel flag in pulumi preview, up, and destroy.
+	// +kubebuilder:validation:Optional
+	Parallel *int64 `json:"parallel,omitempty"`
+
+	// Refresh is whether to refresh the state of the stack,
+	// equivalent to the --refresh flag in pulumi preview, up, and destroy.
+	// +kubebuilder:validation:Optional
+	Refresh *bool `json:"refresh,omitempty"`
+
+	// ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked.
+	// +kubebuilder:validation:Optional
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+
+	// Stack is the pulumi stack name to operate on,
+	// equivalent to the --stack flag in pulumi preview, up, and destroy.
+	// +kubebuilder:validation:Optional
+	Stack *string `json:"stack,omitempty"`
+
+	// BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.
+	// It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs.
+	// +kubebuilder:validation:Optional
+	BackendUrl *string `json:"backendUrl,omitempty"`
 }
 
 type AnsibleConfiguration struct {
@@ -351,6 +391,10 @@ type StackOverrides struct {
 	// Terragrunt is the terragrunt configuration for this stack
 	// +kubebuilder:validation:Optional
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+
+	// Pulumi is the pulumi configuration for this stack
+	// +kubebuilder:validation:Optional
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 }
 
 type StackHook struct {

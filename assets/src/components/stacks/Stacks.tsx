@@ -47,6 +47,7 @@ import {
   Conjunction,
   StackFragment,
   StackTinyFragment,
+  StackType,
   TagType,
   useStackQuery,
   useStacksQuery,
@@ -111,12 +112,16 @@ const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   {
     path: STACK_STATE_REL_PATH,
     label: 'State',
-    enabled: isTerraformFamilyStackType(stack?.type),
+    enabled:
+      isTerraformFamilyStackType(stack?.type) ||
+      stack?.type === StackType.Pulumi,
   },
   {
     path: STACK_OUTPUT_REL_PATH,
     label: 'Output',
-    enabled: isTerraformFamilyStackType(stack?.type),
+    enabled:
+      isTerraformFamilyStackType(stack?.type) ||
+      stack?.type === StackType.Pulumi,
   },
   { path: STACK_VARS_REL_PATH, label: 'Variables', enabled: true },
   {

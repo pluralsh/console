@@ -163,6 +163,35 @@ spec:
                       Image contains the optional Docker image to use for the IaC tool.
                       If not provided, the default image for the tool will be used.
                     type: string
+                  pulumi:
+                    description: Pulumi configuration for this stack.
+                    properties:
+                      approveEmpty:
+                        description: ApproveEmpty is whether to auto-approve a plan
+                          if there are no changes, preventing a stack from being blocked.
+                        type: boolean
+                      backendUrl:
+                        description: |-
+                          BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.
+                          It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs.
+                        type: string
+                      parallel:
+                        description: |-
+                          Parallel is the number of resource operations to run concurrently,
+                          equivalent to the --parallel flag in pulumi preview, up, and destroy.
+                        format: int64
+                        type: integer
+                      refresh:
+                        description: |-
+                          Refresh is whether to refresh the state of the stack,
+                          equivalent to the --refresh flag in pulumi preview, up, and destroy.
+                        type: boolean
+                      stack:
+                        description: |-
+                          Stack is the pulumi stack name to operate on,
+                          equivalent to the --stack flag in pulumi preview, up, and destroy.
+                        type: string
+                    type: object
                   tag:
                     description: Tag of the IaC tool Docker image to use.
                     type: string
