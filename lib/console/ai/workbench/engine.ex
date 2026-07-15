@@ -86,7 +86,7 @@ defmodule Console.AI.Workbench.Engine do
     end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
+    |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
     |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{
@@ -332,8 +332,16 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp kube_tools(_), do: []
 
-  defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _), do: String.trim(skill_system_prompt(job: job, prompt: prompt))
-  defp sysprompt(%WorkbenchJob{prompt: prompt} = job, engine), do: String.trim(system_prompt(job: job, prompt: prompt, engine: engine))
+  defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _, _),
+    do: String.trim(skill_system_prompt(job: job, prompt: prompt))
+  defp sysprompt(%WorkbenchJob{prompt: prompt} = job, environment, engine) do
+    String.trim(system_prompt(
+      job: job,
+      prompt: prompt,
+      engine: engine,
+      actions: Environment.actions(environment)
+    ))
+  end
 
   defp backfill_chat(tools, %WorkbenchJob{chatbot_message: %ChatbotMessage{chat_connection: %{type: t} = conn}}) do
     Enum.any?(tools, fn

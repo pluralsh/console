@@ -1,5 +1,11 @@
 defmodule Console.AI.Workbench.Environment do
-  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity, User}
+  alias Console.Schema.{
+    WorkbenchJob,
+    Workbench,
+    WorkbenchTool,
+    WorkbenchJobActivity,
+    User
+  }
   alias Console.AI.Workbench.{Skill, Skills.Builtins, Heartbeat}
 
   @type t :: %__MODULE__{
@@ -10,6 +16,8 @@ defmodule Console.AI.Workbench.Environment do
     skills: %{binary => Skill.t},
     activities: [WorkbenchJobActivity.t]
   }
+
+  defmodule Actions, do: defstruct [:functions, :kubernetes]
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
@@ -35,6 +43,16 @@ defmodule Console.AI.Workbench.Environment do
   def engine_opts(%WorkbenchJob{modes: %{model: %{model: m, provider: p}}} = job) when is_binary(m),
     do: [model: m, provider: p, usage_callback: &Heartbeat.usage_callback(job, &1)]
   def engine_opts(%WorkbenchJob{} = job), do: [usage_callback: &Heartbeat.usage_callback(job, &1)]
+
+  def actions(%__MODULE__{functions: funcs, job: job}) do
+    %Actions{
+      functions: is_list(funcs) && !Enum.empty?(funcs),
+      kubernetes: has_k8s?(job)
+    }
+  end
+
+  defp has_k8s?(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}}), do: (u || d)
+  defp has_k8s?(_), do: false
 
   def with_builtins(skills) when is_map(skills) do
     Builtins.builtins()
