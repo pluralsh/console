@@ -10348,6 +10348,15 @@ type WorkbenchJobActivityEdge struct {
 	Cursor *string               `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobActivityFunctionCall struct {
+	// the function name to invoke
+	Name *string `json:"name,omitempty"`
+	// input passed to the function
+	Input map[string]any `json:"input,omitempty"`
+	// the workbench tool id backing this function
+	ToolID *string `json:"toolId,omitempty"`
+}
+
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
@@ -10355,6 +10364,21 @@ type WorkbenchJobActivityJobUpdate struct {
 	Conclusion    *string                   `json:"conclusion,omitempty"`
 	Topology      *string                   `json:"topology,omitempty"`
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+}
+
+type WorkbenchJobActivityKubeRequest struct {
+	// the target cluster handle
+	Handle *string `json:"handle,omitempty"`
+	// the Kubernetes API HTTP method
+	Method *string `json:"method,omitempty"`
+	// the Kubernetes API request path
+	Path *string `json:"path,omitempty"`
+	// the Kubernetes API request body
+	Body *string `json:"body,omitempty"`
+	// query parameters sent with the Kubernetes API request
+	QueryParams map[string]any `json:"queryParams,omitempty"`
+	// the Kubernetes API request content type
+	ContentType *string `json:"contentType,omitempty"`
 }
 
 type WorkbenchJobActivityLog struct {
@@ -10375,6 +10399,10 @@ type WorkbenchJobActivityResult struct {
 	Output *string `json:"output,omitempty"`
 	// error from the activity
 	Error *string `json:"error,omitempty"`
+	// function call approval payload when present
+	FunctionCall *WorkbenchJobActivityFunctionCall `json:"functionCall,omitempty"`
+	// kubernetes request approval payload when present
+	KubeRequest *WorkbenchJobActivityKubeRequest `json:"kubeRequest,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
 	// dashboard canvas blocks for this activity

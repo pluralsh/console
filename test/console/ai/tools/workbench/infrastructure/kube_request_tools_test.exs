@@ -34,10 +34,12 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
 
     test "returns kube request structs for allowed update and delete requests" do
       job = job_with_kubernetes_policy(require_namespaces: ["production"])
-      cluster = build(:cluster, handle: "cluster-a")
+      cluster = insert(:cluster, handle: "cluster-a")
 
-      expect(Clusters, :get_cluster_by_handle, 2, fn "cluster-a" -> cluster end)
-      expect(Clusters, :api_discovery, 2, fn ^cluster ->
+      expect(Clusters, :api_discovery, 2, fn fetched_cluster ->
+        assert fetched_cluster.id == cluster.id
+        assert fetched_cluster.handle == "cluster-a"
+
         %{{"apps", "v1", "Deployment"} => "deployments"}
       end)
 
@@ -50,6 +52,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 method: "put",
                 path: "/apis/apps/v1/namespaces/production/deployments/api",
                 content_type: "application/json",
+                query_params: %{},
                 body: body
               }} = KubeUpdate.implement(update)
 
@@ -70,6 +73,41 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 content_type: "application/json",
                 body: nil
               }} = KubeDelete.implement(delete)
+    end
+
+    test "builds server-side apply requests for update operations" do
+      job = job_with_kubernetes_policy(require_namespaces: ["production"])
+      cluster = insert(:cluster, handle: "cluster-a")
+
+      expect(Clusters, :api_discovery, fn fetched_cluster ->
+        assert fetched_cluster.id == cluster.id
+        assert fetched_cluster.handle == "cluster-a"
+
+        %{{"apps", "v1", "Deployment"} => "deployments"}
+      end)
+
+      assert {:ok, update} =
+               Tool.validate(
+                 %KubeUpdate{job: job},
+                 attrs("production")
+                 |> Map.put("operation", "apply")
+               )
+
+      assert {:ok,
+              %KubeRequest{
+                handle: "cluster-a",
+                method: "patch",
+                path: "/apis/apps/v1/namespaces/production/deployments/api",
+                content_type: "application/apply-patch+yaml",
+                query_params: %{"fieldManager" => "plural"},
+                body: body
+              }} = KubeUpdate.implement(update)
+
+      assert Jason.decode!(body) == %{
+               "apiVersion" => "apps/v1",
+               "kind" => "Deployment",
+               "metadata" => %{"name" => "api", "namespace" => "production"}
+             }
     end
   end
 

@@ -5,6 +5,12 @@
             "type": "string",
             "description": "The Plural cluster handle identifying which cluster to query"
         },
+        "operation": {
+            "type": "string",
+            "enum": ["replace", "apply"],
+            "default": "replace",
+            "description": "How to update the resource. Use replace to PUT the full desired resource definition. Use apply to perform Kubernetes server-side apply for only the fields present in the provided resource, with Plural as the field manager"
+        },
         "group": {
             "type": "string",
             "description": "The kubernetes API group (e.g. apps, networking.k8s.io). Use an empty string for the core API group"
@@ -27,7 +33,7 @@
         },
         "json": {
             "type": "string",
-            "description": "The full JSON resource definition to apply to kubernetes"
+            "description": "The JSON resource definition to send to kubernetes. For replace this should be the full desired resource. For apply this may contain only the fields to manage via server-side apply. The status field is ignored"
         }
     },
     "required": ["cluster", "version", "kind", "name", "json"]

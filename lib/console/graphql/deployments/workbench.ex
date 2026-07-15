@@ -620,6 +620,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_activity_result do
     field :output,          :string, description: "output from the activity"
     field :error,           :string, description: "error from the activity"
+    field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
+    field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
     field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
@@ -631,6 +633,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :metrics_query,   :workbench_tool_query_data, description: "primary metrics tool query for this activity"
     field :logs_query,      :workbench_tool_query_data, description: "primary logs tool query for this activity"
     field :traces_query,    :workbench_tool_query_data, description: "primary traces tool query for this activity"
+  end
+
+  object :workbench_job_activity_function_call do
+    field :name,    :string, description: "the function name to invoke"
+    field :input,   :map, description: "input passed to the function"
+    field :tool_id, :id, description: "the workbench tool id backing this function"
+  end
+
+  object :workbench_job_activity_kube_request do
+    field :handle,       :string, description: "the target cluster handle"
+    field :method,       :string, description: "the Kubernetes API HTTP method"
+    field :path,         :string, description: "the Kubernetes API request path"
+    field :body,         :string, description: "the Kubernetes API request body"
+    field :query_params, :map, description: "query parameters sent with the Kubernetes API request"
+    field :content_type, :string, description: "the Kubernetes API request content type"
   end
 
   object :workbench_job_activity_job_update do

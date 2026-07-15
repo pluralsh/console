@@ -3798,6 +3798,12 @@ type WorkbenchJobActivityResult {
   "error from the activity"
   error: String
 
+  "function call approval payload when present"
+  functionCall: WorkbenchJobActivityFunctionCall
+
+  "kubernetes request approval payload when present"
+  kubeRequest: WorkbenchJobActivityKubeRequest
+
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
 
@@ -3830,6 +3836,37 @@ type WorkbenchJobActivityResult {
 
   "primary traces tool query for this activity"
   tracesQuery: WorkbenchToolQueryData
+}
+
+type WorkbenchJobActivityFunctionCall {
+  "the function name to invoke"
+  name: String
+
+  "input passed to the function"
+  input: Map
+
+  "the workbench tool id backing this function"
+  toolId: ID
+}
+
+type WorkbenchJobActivityKubeRequest {
+  "the target cluster handle"
+  handle: String
+
+  "the Kubernetes API HTTP method"
+  method: String
+
+  "the Kubernetes API request path"
+  path: String
+
+  "the Kubernetes API request body"
+  body: String
+
+  "query parameters sent with the Kubernetes API request"
+  queryParams: Map
+
+  "the Kubernetes API request content type"
+  contentType: String
 }
 
 type WorkbenchJobActivityJobUpdate {
