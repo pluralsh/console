@@ -11185,6 +11185,7 @@ addons:
     chart_version: 1.19.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.19.0', 'quay.io/jetstack/cert-manager-controller:v1.19.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.19.0', 'quay.io/jetstack/cert-manager-webhook:v1.19.0']
+    eolAt: '2026-07-08'
   - version: 1.18.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -18636,22 +18637,22 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 87.15.2
+  - version: 87.16.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Fixes `externalUrl` generation for Alertmanager and Prometheus
-          when an ingress/route is configured (chart template logic fix)., (From 87.15.1)
-          Bumps the bundled `kube-state-metrics` subchart/release to v7.8.1.]
-      features: []
+      chart_updates: [Bumps kube-state-metrics chart dependency to v7.8.1 (in 87.15.1).,
+        Bumps prometheus-node-exporter chart dependency to v4.56.1 (in 87.16.1).]
+      features: ['Updated embedded dependencies: kube-state-metrics to v7.8.1 and
+          prometheus-node-exporter to v4.56.1.']
       breaking_changes: []
-    chart_version: 87.15.2
+    chart_version: 87.16.1
     images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
       'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
-      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.0-distroless',
+      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
       'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.15.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
@@ -25328,6 +25329,21 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.57.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [v0.57.0 is described as a security-focused release with changes intended
+          to improve security posture., The release notes indicate there are opt-in/compatibility
+          mechanisms to restore previous behavior after the security changes.]
+      breaking_changes: [v0.57.0 includes breaking changes related to the security-focused
+          updates; users may need to adjust configuration to preserve prior behavior
+          (exact items not provided in the excerpt).]
+    chart_version: 0.57.0
+    images: ['docker.io/timberio/vector:0.57.0-distroless-libc']
   - version: 0.56.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28486,6 +28502,36 @@ addons:
   helm_repository_url: oci://ghcr.io/kserve/charts/kserve
   chart_name: kserve
   versions:
+  - version: 0.18.1
+    kube: ['1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Release notes provided are for **v0.18.0**, not v0.18.1; you\
+          \ still need the v0.18.1 changelog (and helm chart changelog) to accurately\
+          \ summarize the 0.18.0 \u2192 0.18.1 upgrade.", 'v0.18.0 includes helm packaging/chart
+          restructuring: chart renamed to **kserve-resources** and multiple charts
+          are published (CRDs, resources, runtime-configs, llmisvc/localmodel variants).
+          Ensure your upgrade plan accounts for the chart split/rename and installs
+          the correct artifacts in the right order (CRDs before controllers/resources).']
+      features: [Namespace-scoped ModelCache support (download jobs can run in a jobNamespace).,
+        Added CSV and Parquet marshallers., CloudEvents logging enhancements (log
+          occurrence and record time)., OpenAI Responses API support via a new /v1/responses
+          HTTPRoute., Added output offset_mapping for HuggingFace token classification.,
+        'LLMInferenceService: autoscaling improvements (KEDA/HPA integration, LWS
+          target for multi-node workloads), config updates including TLS flag and
+          extra_headers support, and multiple dependency upgrades (LLM-D, vLLM, WVA).',
+        'Ingress/Gateway: added DisableHTTPRouteTimeout flag for GKE Gateway and enhanced
+          Gateway refs (SectionName support).']
+      breaking_changes: ['Potentially breaking packaging change: helm chart rename
+          to **kserve-resources** and publication of multiple chart artifacts may
+          require changing the chart name/reference in your helm commands and CI pipelines.',
+        'LLMInferenceService scaling fields changed: default for MinReplicas and MaxReplicas
+          made a required int32; manifests/values depending on previous behavior may
+          fail validation.']
+    chart_version: v0.18.1
+    images: []
   - version: 0.18.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
