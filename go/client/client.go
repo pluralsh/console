@@ -100,6 +100,7 @@ type ConsoleClient interface {
 	AddServiceError(ctx context.Context, id string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*AddServiceError, error)
 	UpdateDeploymentSettings(ctx context.Context, attributes DeploymentSettingsAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettings, error)
+	GetDeploymentSettingsMinimal(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettingsMinimal, error)
 	GetServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeployment, error)
 	GetServiceDeploymentTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTiny, error)
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
@@ -3415,6 +3416,24 @@ func (t *DeploymentSettingsFragment) GetAi() *AISettingsFragment {
 		t = &DeploymentSettingsFragment{}
 	}
 	return t.Ai
+}
+
+type DeploymentSettingsMinimalFragment struct {
+	AgentHelmValues *string "json:\"agentHelmValues,omitempty\" graphql:\"agentHelmValues\""
+	AgentVsn        string  "json:\"agentVsn\" graphql:\"agentVsn\""
+}
+
+func (t *DeploymentSettingsMinimalFragment) GetAgentHelmValues() *string {
+	if t == nil {
+		t = &DeploymentSettingsMinimalFragment{}
+	}
+	return t.AgentHelmValues
+}
+func (t *DeploymentSettingsMinimalFragment) GetAgentVsn() string {
+	if t == nil {
+		t = &DeploymentSettingsMinimalFragment{}
+	}
+	return t.AgentVsn
 }
 
 type ClusterEdgeFragment struct {
@@ -38335,6 +38354,17 @@ func (t *GetDeploymentSettings) GetDeploymentSettings() *DeploymentSettingsFragm
 	return t.DeploymentSettings
 }
 
+type GetDeploymentSettingsMinimal struct {
+	DeploymentSettings *DeploymentSettingsMinimalFragment "json:\"deploymentSettings,omitempty\" graphql:\"deploymentSettings\""
+}
+
+func (t *GetDeploymentSettingsMinimal) GetDeploymentSettings() *DeploymentSettingsMinimalFragment {
+	if t == nil {
+		t = &GetDeploymentSettingsMinimal{}
+	}
+	return t.DeploymentSettings
+}
+
 type GetServiceDeployment struct {
 	ServiceDeployment *ServiceDeploymentExtended "json:\"serviceDeployment,omitempty\" graphql:\"serviceDeployment\""
 }
@@ -48789,6 +48819,32 @@ func (c *Client) GetDeploymentSettings(ctx context.Context, interceptors ...clie
 
 	var res GetDeploymentSettings
 	if err := c.Client.Post(ctx, "GetDeploymentSettings", GetDeploymentSettingsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetDeploymentSettingsMinimalDocument = `query GetDeploymentSettingsMinimal {
+	deploymentSettings {
+		... DeploymentSettingsMinimalFragment
+	}
+}
+fragment DeploymentSettingsMinimalFragment on DeploymentSettings {
+	agentHelmValues
+	agentVsn
+}
+`
+
+func (c *Client) GetDeploymentSettingsMinimal(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettingsMinimal, error) {
+	vars := map[string]any{}
+
+	var res GetDeploymentSettingsMinimal
+	if err := c.Client.Post(ctx, "GetDeploymentSettingsMinimal", GetDeploymentSettingsMinimalDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -65419,6 +65475,7 @@ var DocumentOperationNames = map[string]string{
 	AddServiceErrorDocument:                           "AddServiceError",
 	UpdateDeploymentSettingsDocument:                  "UpdateDeploymentSettings",
 	GetDeploymentSettingsDocument:                     "GetDeploymentSettings",
+	GetDeploymentSettingsMinimalDocument:              "GetDeploymentSettingsMinimal",
 	GetServiceDeploymentDocument:                      "GetServiceDeployment",
 	GetServiceDeploymentTinyDocument:                  "GetServiceDeploymentTiny",
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",
