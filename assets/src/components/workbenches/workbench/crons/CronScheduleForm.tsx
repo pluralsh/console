@@ -42,7 +42,10 @@ import {
   WorkbenchSplitLayoutSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
-import { modesAttributes } from '../WorkbenchPromptModeSelector/workbenchPromptModes'
+import {
+  modesAttributes,
+  modesFormValue,
+} from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
   buildCronPreview,
   CRON_PLACEHOLDER,
@@ -485,29 +488,6 @@ function getInitialFormState(
     prompt: cron?.prompt ?? '',
     crontab: cron?.crontab ?? '',
     userId: cron?.userId ?? defaultUserIdForCreate ?? '',
-    modes: cron?.modes
-      ? {
-          plan: cron.modes.plan,
-          model:
-            cron.modes.model?.provider && cron.modes.model.model
-              ? {
-                  provider: cron.modes.model.provider,
-                  model: cron.modes.model.model,
-                }
-              : undefined,
-          coding: cron.modes.coding
-            ? {
-                approval: cron.modes.coding.approval,
-                babysit: cron.modes.coding.babysit,
-              }
-            : undefined,
-          budget: cron.modes.budget
-            ? {
-                cost: cron.modes.budget.cost,
-                tokens: cron.modes.budget.tokens,
-              }
-            : undefined,
-        }
-      : null,
+    modes: modesFormValue(cron?.modes),
   }
 }

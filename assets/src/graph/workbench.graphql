@@ -486,6 +486,21 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   prompt
   priority
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   matches {
     regex
     substring

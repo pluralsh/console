@@ -1,6 +1,7 @@
 import type {
   WorkbenchJobBudgetAttributes,
   WorkbenchJobCodingModesAttributes,
+  WorkbenchJobModes,
   WorkbenchJobModesAttributes,
 } from 'generated/graphql'
 
@@ -33,6 +34,35 @@ export function modesAttributes(
   if (modes.plan) return { ...shared, plan: true }
   if (modes.coding != null) return { ...shared, coding: modes.coding }
   if (budget != null || modes.model != null) return shared
+}
+
+export function modesFormValue(
+  modes: WorkbenchJobModes | null | undefined
+): WorkbenchJobModesAttributes | null {
+  if (!modes) return null
+
+  return {
+    plan: modes.plan,
+    model:
+      modes.model?.provider && modes.model.model
+        ? {
+            provider: modes.model.provider,
+            model: modes.model.model,
+          }
+        : undefined,
+    coding: modes.coding
+      ? {
+          approval: modes.coding.approval,
+          babysit: modes.coding.babysit,
+        }
+      : undefined,
+    budget: modes.budget
+      ? {
+          cost: modes.budget.cost,
+          tokens: modes.budget.tokens,
+        }
+      : undefined,
+  }
 }
 
 function budgetAttributes(
