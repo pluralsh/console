@@ -1,4 +1,5 @@
 import type {
+  WorkbenchJobBudgetAttributes,
   WorkbenchJobCodingModesAttributes,
   WorkbenchJobModesAttributes,
 } from 'generated/graphql'
@@ -11,17 +12,41 @@ export function attributesForPromptMode(
 ): WorkbenchJobModesAttributes {
   switch (mode) {
     case 'plan':
-      return { plan: true }
+      return { budget: current?.budget, model: current?.model, plan: true }
     case 'agent':
-      return { coding: current?.coding ?? {} }
+      return {
+        budget: current?.budget,
+        model: current?.model,
+        coding: current?.coding ?? {},
+      }
   }
 }
 
 export function modesAttributes(
   modes: WorkbenchJobModesAttributes | null | undefined
 ): WorkbenchJobModesAttributes | undefined {
-  if (modes?.plan) return { plan: true }
-  if (modes?.coding != null) return { coding: modes.coding }
+  if (!modes) return
+
+  const budget = budgetAttributes(modes.budget)
+  const shared = { budget, model: modes.model }
+
+  if (modes.plan) return { ...shared, plan: true }
+  if (modes.coding != null) return { ...shared, coding: modes.coding }
+  if (budget != null || modes.model != null) return shared
+}
+
+function budgetAttributes(
+  budget: WorkbenchJobBudgetAttributes | null | undefined
+): WorkbenchJobBudgetAttributes | undefined {
+  if (!budget) return
+
+  const cost = budget.cost != null && budget.cost > 0 ? budget.cost : undefined
+  const tokens =
+    budget.tokens != null && budget.tokens > 0 ? budget.tokens : undefined
+
+  if (cost == null && tokens == null) return
+
+  return { cost, tokens }
 }
 
 export function updateCodingModes(
