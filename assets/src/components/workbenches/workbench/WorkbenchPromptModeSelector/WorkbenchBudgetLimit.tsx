@@ -17,6 +17,7 @@ const TOKEN_THOUSAND = 1_000
 const TOKEN_HUNDRED_THOUSAND = 100_000
 const TOKEN_MILLION = 1_000_000
 const DEFAULT_TOKEN_LIMIT = 400_000
+const DOLLAR_DIME = 0.1
 const DOLLAR_INCREMENT = 1
 const DEFAULT_DOLLAR_LIMIT = 5
 const MAX_DOLLAR_LIMIT = 1_000_000
@@ -34,6 +35,10 @@ const tokenStepSize = (amount: number) => {
   // Match formatTokenCount compact notation (1 fraction digit).
   return 10 ** (Math.floor(Math.log10(amount)) - 1)
 }
+
+/** Whole dollars at/above $1; dimes below $1. */
+const dollarStepSize = (amount: number) =>
+  amount > 0 && amount < 1 ? DOLLAR_DIME : DOLLAR_INCREMENT
 
 export function WorkbenchBudgetLimitControl({
   value,
@@ -122,7 +127,7 @@ export function WorkbenchBudgetAmountControl({
   const increment =
     unit === 'tokens'
       ? tokenStepSize(amount > 0 ? amount : TOKEN_THOUSAND)
-      : DOLLAR_INCREMENT
+      : dollarStepSize(amount)
   const displayAmount = draft ?? formatBudgetAmount(unit, amount)
   const amountRef = useRef(amount)
   const unitRef = useRef(unit)
