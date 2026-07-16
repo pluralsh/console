@@ -95,8 +95,8 @@ do
     else
         PSQL_EXIT_CODE=$?
         echo "ERROR: failed to create extension ${extension} with exit code $PSQL_EXIT_CODE"
-        kill $PG_PID
-        exit $PSQL_EXIT_CODE
+        kill "$PG_PID" 2>/dev/null || true
+        exit "$PSQL_EXIT_CODE"
     fi
 done
 
@@ -109,8 +109,8 @@ then
 else
     PSQL_EXIT_CODE=$?
     echo "ERROR: failed to create PostgreSQL extensions with exit code $PSQL_EXIT_CODE"
-    kill $PG_PID
-    exit $PSQL_EXIT_CODE
+    kill "$PG_PID" 2>/dev/null || true
+    exit "$PSQL_EXIT_CODE"
 fi
 
 # Keep PostgreSQL running in foreground
