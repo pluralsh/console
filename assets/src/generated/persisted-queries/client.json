@@ -1922,15 +1922,15 @@
          "name": "WorkbenchIssues",
          "body": "query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    issues(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchIssue\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchIssue on Issue {\n  id\n  title\n  externalId\n  provider\n  status\n  url\n  insertedAt\n  updatedAt\n  workbench {\n    id\n    __typename\n  }\n  workbenchJob {\n    id\n    status\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:26817b7fe1c06863a56b7315ed3a62f231cca094b2b1f095f0f1158866c35dfb": {
+      "sha256:1b8e05e6859f73309fcfc4eb2566c85a3a11d87aaac11f70927ba933ab92d0d6": {
          "type": "mutation",
          "name": "GetWorkbenchCron",
-         "body": "mutation GetWorkbenchCron($id: ID!) {\n  workbenchCron(id: $id) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
+         "body": "mutation GetWorkbenchCron($id: ID!) {\n  workbenchCron(id: $id) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  modes {\n    plan\n    model {\n      provider\n      model\n      __typename\n    }\n    coding {\n      approval\n      babysit\n      __typename\n    }\n    budget {\n      cost\n      tokens\n      __typename\n    }\n    __typename\n  }\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:073699223af626b0da4a9c620df93495e0302cc37d530c60e5d98562b097f061": {
+      "sha256:d9a7cff2a6178142013d3f86730a0c2132033f31aecfac685a52c75ef4cc86da": {
          "type": "query",
          "name": "WorkbenchCrons",
-         "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
+         "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  modes {\n    plan\n    model {\n      provider\n      model\n      __typename\n    }\n    coding {\n      approval\n      babysit\n      __typename\n    }\n    budget {\n      cost\n      tokens\n      __typename\n    }\n    __typename\n  }\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
       "sha256:827016e22fcc91757ab713668fd457d7c16f7a11e17446aaaed7b55beffbb342": {
          "type": "query",
@@ -2122,15 +2122,15 @@
          "name": "DeleteWorkbenchPrompt",
          "body": "mutation DeleteWorkbenchPrompt($id: ID!) {\n  deleteWorkbenchPrompt(id: $id) {\n    id\n    __typename\n  }\n}"
       },
-      "sha256:096f02df62104553b580b857a3edcc4ed82221b24f791446193f003481d52f85": {
+      "sha256:618ad84f413fb8b1df58059e84f24e834138207e4b86c091882e2030d9c23381": {
          "type": "mutation",
          "name": "CreateWorkbenchCron",
-         "body": "mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {\n  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
+         "body": "mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {\n  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  modes {\n    plan\n    model {\n      provider\n      model\n      __typename\n    }\n    coding {\n      approval\n      babysit\n      __typename\n    }\n    budget {\n      cost\n      tokens\n      __typename\n    }\n    __typename\n  }\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:51e6655862a7567ccb5543bb356b88074d64b48e6fa6b60fed2d4c0ae772bb93": {
+      "sha256:80e159f6d94125332c4f947c5ae663e704feb9e33cc8fa0bd653868b8b9f70a7": {
          "type": "mutation",
          "name": "UpdateWorkbenchCron",
-         "body": "mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {\n  updateWorkbenchCron(id: $id, attributes: $attributes) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
+         "body": "mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {\n  updateWorkbenchCron(id: $id, attributes: $attributes) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  userId\n  modes {\n    plan\n    model {\n      provider\n      model\n      __typename\n    }\n    coding {\n      approval\n      babysit\n      __typename\n    }\n    budget {\n      cost\n      tokens\n      __typename\n    }\n    __typename\n  }\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
       "sha256:b3965ac95b88758d9754efae4af12fc0cea16c124dd7fdd6dba1c30bcab3ad28": {
          "type": "mutation",

@@ -20939,7 +20939,7 @@ export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress'
 
 export type WorkbenchTextStreamFragment = { __typename?: 'WorkbenchTextStream', activityId?: string | null, text?: string | null };
 
-export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null };
 
 export type WorkbenchPromptFragment = { __typename?: 'WorkbenchPrompt', id: string, title: string, category: string, prompt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -21104,7 +21104,7 @@ export type GetWorkbenchCronMutationVariables = Exact<{
 }>;
 
 
-export type GetWorkbenchCronMutation = { __typename?: 'RootMutationType', workbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type GetWorkbenchCronMutation = { __typename?: 'RootMutationType', workbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null } | null };
 
 export type WorkbenchCronsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21113,7 +21113,7 @@ export type WorkbenchCronsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type UnifiedWorkbenchSkillTinyFragment = { __typename?: 'UnifiedWorkbenchSkill', id?: string | null, name?: string | null, description?: string | null, subagents?: Array<WorkbenchSkillSubagent | null> | null };
 
@@ -21418,7 +21418,7 @@ export type CreateWorkbenchCronMutationVariables = Exact<{
 }>;
 
 
-export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null } | null };
 
 export type UpdateWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -21426,7 +21426,7 @@ export type UpdateWorkbenchCronMutationVariables = Exact<{
 }>;
 
 
-export type UpdateWorkbenchCronMutation = { __typename?: 'RootMutationType', updateWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type UpdateWorkbenchCronMutation = { __typename?: 'RootMutationType', updateWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, userId?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null } | null } | null };
 
 export type DeleteWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -26924,6 +26924,21 @@ export const WorkbenchCronFragmentDoc = gql`
   crontab
   prompt
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   lastRunAt
   nextRunAt
   insertedAt

@@ -450,6 +450,21 @@ fragment WorkbenchCron on WorkbenchCron {
   crontab
   prompt
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   lastRunAt
   nextRunAt
   insertedAt
