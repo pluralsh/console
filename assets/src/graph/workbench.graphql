@@ -80,6 +80,21 @@ fragment Workbench on Workbench {
       enableBabysitting
     }
   }
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   skills {
     ref {
       ref

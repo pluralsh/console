@@ -29,6 +29,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
     field :model,  :workbench_job_model_attributes, description: "model override for this job"
     field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+    field :budget, :workbench_job_budget_attributes, description: "budget limits for this job"
   end
 
   input_object :workbench_job_model_attributes do
@@ -39,6 +40,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_coding_modes_attributes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  input_object :workbench_job_budget_attributes do
+    field :cost,   :float, description: "maximum cost budget for this job"
+    field :tokens, :integer, description: "maximum token budget for this job"
   end
 
   input_object :workbench_job_update_attributes do
@@ -59,6 +65,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :agent_runtime_id,  :id, description: "the agent runtime for this workbench"
     field :override_bot_user, :boolean, description: "when true on update, sets botUserId to the authenticated user"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
+    field :modes,             :workbench_job_modes_attributes, description: "default mode-specific options for jobs created by this workbench"
     field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
     field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
@@ -163,6 +170,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :mcp_server_id,        :id, description: "the mcp server for this tool"
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
     field :scm_connection_id,    :id, description: "the SCM connection for this tool (e.g. shared Git provider credentials)"
+    field :approval,             :boolean, description: "whether this tool requires approval before execution"
     field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
     field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
@@ -380,6 +388,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :description,   :string, description: "the description of the workbench"
     field :system_prompt, :string, description: "the system prompt for the workbench"
     field :configuration, :workbench_configuration, description: "workbench configuration"
+    field :modes,         :workbench_job_modes, description: "default mode-specific options for jobs created by this workbench"
     field :skills,        :workbench_skills, description: "skills configuration"
 
     field :project,       :project,                  resolve: dataloader(Deployments), description: "the project of this workbench"
@@ -521,6 +530,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
     field :model,  :workbench_job_model, description: "model override for this job"
     field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+    field :budget, :workbench_job_budget, description: "budget limits for this job"
   end
 
   object :workbench_job_model do
@@ -531,6 +541,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_coding_modes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  object :workbench_job_budget do
+    field :cost,   :float, description: "maximum cost budget for this job"
+    field :tokens, :integer, description: "maximum token budget for this job"
   end
 
   object :workbench_job_usage do
@@ -905,6 +920,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,             non_null(:string), description: "the name of the tool"
     field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
+    field :approval,         :boolean, description: "whether this tool requires approval before execution"
     field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
     field :read_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this tool"
     field :write_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this tool"

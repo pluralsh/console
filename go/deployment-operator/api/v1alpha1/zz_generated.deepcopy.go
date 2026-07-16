@@ -562,6 +562,11 @@ func (in *AgentRuntimeSpec) DeepCopyInto(out *AgentRuntimeSpec) {
 		*out = new(metav1.Duration)
 		**out = **in
 	}
+	if in.AgentTTL != nil {
+		in, out := &in.AgentTTL, &out.AgentTTL
+		*out = new(metav1.Duration)
+		**out = **in
+	}
 	if in.ScmConnection != nil {
 		in, out := &in.ScmConnection, &out.ScmConnection
 		*out = new(string)

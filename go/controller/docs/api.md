@@ -97,13 +97,14 @@ _Appears in:_
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: \{\} <br /> |
 | `analysisRates` _[AnalysisRates](#analysisrates)_ | Configure the pace at which AI insight analysis should run. Useful if you want to minimize impacts on inference costs. |  | Optional: \{\} <br /> |
 | `tools` _[Tools](#tools)_ | Tools holds the configuration for the tools that can be used with the AI integration. |  | Optional: \{\} <br /> |
-| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
-| `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI OPENAI_COMPATIBLE XAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE XAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `streaming` _boolean_ | Streaming defines whether to stream responses from LLM providers. | true | Optional: \{\} <br /> |
 | `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `logAnalysis` _boolean_ | LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs) |  | Optional: \{\} <br /> |
 | `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
 | `openAICompatible` _[OpenAISettings](#openaisettings)_ | OpenAICompatible holds the OpenAI-compatible provider configuration. |  | Optional: \{\} <br /> |
+| `xai` _[OpenAISettings](#openaisettings)_ | XAI holds the xAI provider configuration.  This is OpenAI compatible, so uses an equivalent typing. |  | Optional: \{\} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: \{\} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment,<br />more details available at https://github.com/ollama/ollama |  | Optional: \{\} <br /> |
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: \{\} <br /> |
@@ -2158,7 +2159,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM TERRAGRUNT ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, TERRAGRUNT, PULUMI, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM TERRAGRUNT PULUMI ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Optional: \{\} <br /> |
@@ -4131,6 +4132,27 @@ _Appears in:_
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
+#### PulumiConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+- [StackOverrides](#stackoverrides)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `parallel` _integer_ | Parallel is the number of resource operations to run concurrently,<br />equivalent to the --parallel flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the --refresh flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
+| `stack` _string_ | Stack is the pulumi stack name to operate on,<br />equivalent to the --stack flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `backendUrl` _string_ | BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.<br />It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs. |  | Optional: \{\} <br /> |
+
+
 
 
 #### Reconciliation
@@ -5051,6 +5073,7 @@ _Appears in:_
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
 | `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt configuration for this stack. |  | Optional: \{\} <br /> |
+| `pulumi` _[PulumiConfiguration](#pulumiconfiguration)_ | Pulumi configuration for this stack. |  | Optional: \{\} <br /> |
 | `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
 | `aiApproval` _[AiApprovalConfiguration](#aiapprovalconfiguration)_ | AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git. |  | Optional: \{\} <br /> |
 
@@ -5185,6 +5208,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: \{\} <br /> |
 | `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt is the terragrunt configuration for this stack |  | Optional: \{\} <br /> |
+| `pulumi` _[PulumiConfiguration](#pulumiconfiguration)_ | Pulumi is the pulumi configuration for this stack |  | Optional: \{\} <br /> |
 
 
 #### StackSettings

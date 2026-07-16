@@ -50,6 +50,54 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       assert file["content"] == "test"
     end
 
+    test "it can create a Pulumi stack with a backend URL" do
+      repo = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"createStack" => found}}} = run_query("""
+        mutation Create($attrs: StackAttributes!) {
+          createStack(attributes: $attrs) {
+            configuration {
+              pulumi {
+                backendUrl
+              }
+            }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "pulumi-stack",
+        "type" => "PULUMI",
+        "repositoryId" => repo.id,
+        "clusterId" => cluster.id,
+        "git" => %{"ref" => "main", "folder" => "pulumi"},
+        "configuration" => %{"pulumi" => %{"backendUrl" => "s3://pulumi-state"}}
+      }}, %{current_user: admin_user()})
+
+      assert found["configuration"]["pulumi"]["backendUrl"] == "s3://pulumi-state"
+    end
+
+    test "it rejects a Pulumi stack with a policy engine" do
+      repo = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation Create($attrs: StackAttributes!) {
+          createStack(attributes: $attrs) {
+            id
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "pulumi-policy-stack",
+        "type" => "PULUMI",
+        "repositoryId" => repo.id,
+        "clusterId" => cluster.id,
+        "git" => %{"ref" => "main", "folder" => "pulumi"},
+        "policyEngine" => %{"type" => "TRIVY", "maxSeverity" => "HIGH"}
+      }}, %{current_user: admin_user()})
+
+      assert error.message =~ "policy engine is not supported for Pulumi stacks"
+    end
+
     test "it can create a stack for a project" do
       project = insert(:project)
       repo = insert(:git_repository)

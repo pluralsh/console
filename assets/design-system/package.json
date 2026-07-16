@@ -37,7 +37,7 @@
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
-    "node": ">=22.22.0"
+    "node": ">=24.11.1"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

@@ -5,6 +5,7 @@ export enum MentionKind {
   Service = 'plrl-service',
   Stack = 'plrl-stack',
   Skill = 'plrl-skill',
+  Vulnerability = 'plrl-vulnerability',
 }
 
 export const PLRL_CHIP_TAG_NAMES: readonly MentionKind[] =
@@ -15,6 +16,7 @@ export const KIND_LABELS: Record<MentionKind, string> = {
   [MentionKind.Service]: 'service',
   [MentionKind.Stack]: 'stack',
   [MentionKind.Skill]: 'skill',
+  [MentionKind.Vulnerability]: 'vulnerability',
 }
 
 // --- Triggers ---
@@ -57,11 +59,28 @@ export type SkillChipAttrs = BaseChipAttrs<MentionKind.Skill> & {
   subagents?: string
 }
 
+export type VulnerabilityChipAttrs =
+  BaseChipAttrs<MentionKind.Vulnerability> & {
+    severity?: Nullable<string>
+    'vuln-id'?: Nullable<string>
+    title?: Nullable<string>
+    'report-id'?: string
+    'service-ids'?: string
+    'service-names'?: string
+    'cluster-ids'?: string
+    resource?: Nullable<string>
+    'installed-version'?: Nullable<string>
+    'fixed-version'?: Nullable<string>
+    'primary-link'?: Nullable<string>
+    description?: Nullable<string>
+  }
+
 export type ChipAttrsByKind = {
   [MentionKind.Cluster]: ClusterChipAttrs
   [MentionKind.Service]: ServiceChipAttrs
   [MentionKind.Stack]: StackChipAttrs
   [MentionKind.Skill]: SkillChipAttrs
+  [MentionKind.Vulnerability]: VulnerabilityChipAttrs
 }
 
 export type ChipAttrs = ChipAttrsByKind[MentionKind]
@@ -88,6 +107,22 @@ export const CHIP_ATTRIBUTE_SCHEMA: {
   ],
   [MentionKind.Stack]: ['item-id', 'item-name', 'type'],
   [MentionKind.Skill]: ['item-id', 'item-name', 'description', 'subagents'],
+  [MentionKind.Vulnerability]: [
+    'item-id',
+    'item-name',
+    'severity',
+    'vuln-id',
+    'title',
+    'report-id',
+    'service-ids',
+    'service-names',
+    'cluster-ids',
+    'resource',
+    'installed-version',
+    'fixed-version',
+    'primary-link',
+    'description',
+  ],
 }
 
 type ChipAttrRecord = Record<string, string | null | undefined>
@@ -109,6 +144,11 @@ export function chipDisplayText(
     case MentionKind.Service: {
       const ch = attrs['cluster-handle'] ?? attrs['cluster-name']
       if (ch && name) return `${name} (${ch})`
+      return name
+    }
+    case MentionKind.Vulnerability: {
+      const severity = attrs.severity
+      if (severity && name) return `${name} (${severity})`
       return name
     }
     case MentionKind.Stack:

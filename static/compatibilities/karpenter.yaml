@@ -4,6 +4,31 @@ release_url: https://github.com/aws/karpenter-provider-aws/releases/tag/v{vsn}
 helm_repository_url: oci://public.ecr.aws/karpenter/karpenter
 helm_values: settings.clusterName=example
 versions:
+- version: 1.13.0
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['(From the notes provided: v1.13.0) Improved handling of IP unavailability
+        by working at the subnet level (ICE subnets) instead of only Availability
+        Zones, and added logic to skip EC2 API calls for zonally-shifted AZs.', (v1.13.0)
+        More flexible IAM instance profile creation by allowing a custom IAM path
+        for instance profiles., '(v1.13.0) New configuration knobs to control refresh
+        intervals for AMIs and subnets, letting operators tune AWS API churn vs freshness.',
+      '(v1.13.0) Expanded EC2NodeClass capabilities, including nested virtualization
+        support and new connection-tracking-related fields.', (v1.9.0) Added ICE filtering
+        for MaxFleetCountExceeded errors and added support for a tenancy label to
+        influence/describe node tenancy., (v1.9.0) Added Windows Server 2025 (WS2025)
+        support for Karpenter-managed nodes.]
+    breaking_changes: ["No explicit breaking changes were shown in the provided excerpts\
+        \ for v1.9.0 or v1.13.0; however upgrading across multiple minor versions\
+        \ (1.9 \u2192 1.13) typically implies CRD/schema and controller behavior changes\u2014\
+        confirm by reviewing intermediate versions\u2019 upgrade guides and CRD diffs\
+        \ before applying in production."]
+  chart_version: 1.13.0
+  images: ['public.ecr.aws/karpenter/controller:1.13.0@sha256:ea731b0cd813add8b2947a76bfe861c38069d85922b01d0c1647d1466279b7fe']
 - version: 1.9.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []

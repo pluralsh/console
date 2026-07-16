@@ -58,7 +58,7 @@ func (in *Namespace) Namespace() string {
 }
 
 func (in *Namespace) Create(t *testing.T) error {
-	err := k8s.CreateNamespaceWithMetadataE(t, in.toKubectlOptions(), in.ObjectMeta)
+	err := k8s.CreateNamespaceWithMetadataContextE(t, t.Context(), in.toKubectlOptions(), in.ObjectMeta)
 
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return err
@@ -68,7 +68,7 @@ func (in *Namespace) Create(t *testing.T) error {
 }
 
 func (in *Namespace) Delete(t *testing.T) error {
-	err := k8s.DeleteNamespaceE(t, in.toKubectlOptions(), in.Name())
+	err := k8s.DeleteNamespaceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return err
@@ -78,11 +78,11 @@ func (in *Namespace) Delete(t *testing.T) error {
 }
 
 func (in *Namespace) Get(t *testing.T) (*corev1.Namespace, error) {
-	return k8s.GetNamespaceE(t, in.toKubectlOptions(), in.Name())
+	return k8s.GetNamespaceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
 func (in *Namespace) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetNamespaceE(t, in.toKubectlOptions(), in.Name())
+	_, err := k8s.GetNamespaceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}

@@ -1,70 +1,16 @@
 import createIcon from './createIcon'
 
-export default createIcon(({ size, color, fullColor }) => {
-  const frame = fullColor ? '#78BE20' : color
-  const block = fullColor ? '#FDBD2C' : color
-  const cutout = fullColor ? '#FFFFFF' : 'transparent'
-
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        x="2"
-        y="7"
-        width="13"
-        height="13"
-        rx="2.6"
-        fill={frame}
-      />
-      <rect
-        x="5.4"
-        y="10.4"
-        width="9.6"
-        height="9.6"
-        rx="2"
-        fill={cutout}
-        stroke={fullColor ? 'none' : color}
-        strokeWidth="1.8"
-      />
-      <rect
-        x="9"
-        y="3"
-        width="13"
-        height="13"
-        rx="2.6"
-        fill={frame}
-      />
-      <rect
-        x="12.4"
-        y="6.4"
-        width="9.6"
-        height="9.6"
-        rx="2"
-        fill={cutout}
-        stroke={fullColor ? 'none' : color}
-        strokeWidth="1.8"
-      />
-      <rect
-        x="6.7"
-        y="12.7"
-        width="5.5"
-        height="5.5"
-        rx="1.3"
-        fill={block}
-      />
-      <rect
-        x="13.8"
-        y="7.8"
-        width="5.5"
-        height="5.5"
-        rx="1.3"
-        fill={block}
-      />
-    </svg>
-  )
-})
+export default createIcon(({ size, color, fullColor }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill={fullColor ? '#879AC3' : color}
+      fillRule="evenodd"
+      d="M5.574 0c-.959 0-1.728.754-1.728 1.68v5.744H1.728C.77 7.424 0 8.18 0 9.104v12.438c0 .926.77 1.68 1.728 1.68H14.58c.96 0 1.753-.754 1.753-1.68v-2.045h5.939c.958 0 1.728-.757 1.728-1.68V5.38c0-.924-.77-1.655-1.728-1.655h-2.118V1.68c0-.926-.771-1.68-1.728-1.68zm0 .95h12.852c.42 0 .755.323.755.73v2.044H9.42c-.957 0-1.753.731-1.753 1.655v2.045H4.82V1.68c0-.407.332-.73.755-.73m3.846 3.7h9.76v9.443a.76.76 0 0 1-.754.755h-2.093V9.103c0-.923-.794-1.68-1.753-1.68h-5.94V5.38c0-.406.36-.73.779-.73m10.734 0h2.118c.42 0 .754.323.754.73v12.437c0 .406-.334.73-.754.73h-5.94v-2.75h2.094c.957 0 1.728-.778 1.728-1.704zM1.728 8.372h2.118v5.72c0 .926.769 1.704 1.728 1.704h2.093v2.02c0 .923.796 1.68 1.753 1.68h5.939v2.045c0 .406-.356.73-.779.73H1.728a.735.735 0 0 1-.754-.73V9.103c0-.405.329-.73.754-.73m3.091 0h2.848v6.475H5.574a.757.757 0 0 1-.755-.755zm3.822 0h5.94c.422 0 .778.325.778.73v5.745H8.641zm0 7.424h6.718v2.75h-5.94c-.419 0-.778-.324-.778-.73z"
+    />
+  </svg>
+))

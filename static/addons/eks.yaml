@@ -1088,6 +1088,22 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.0.9-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v1.0.8-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.7-eksbuild.1
     compatibilities:
     - '1.35'
@@ -3707,6 +3723,17 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.6-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v1.1.4-eksbuild.1
     compatibilities:
     - '1.36'
@@ -3909,6 +3936,15 @@
   publisher: aws-privateca
 - name: aws-secrets-store-csi-driver-provider
   versions:
+  - version: v3.1.1-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.1.1-eksbuild.1
     compatibilities:
     - '1.36'
@@ -5366,6 +5402,17 @@
   publisher: CyberArk
 - name: datadog_operator
   versions:
+  - version: v0.1.29-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.1.28-eksbuild.1
     compatibilities:
     - '1.35'
@@ -6508,6 +6555,15 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.0.9-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v5.0.8-eksbuild.1
     compatibilities:
     - '1.36'
@@ -6581,6 +6637,15 @@
     - '1.31'
     - '1.30'
   - version: v5.0.1-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.2.7-eksbuild.1
     compatibilities:
     - '1.36'
     - '1.35'
@@ -8418,6 +8483,15 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.19.1-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.19.1-eksbuild.1
     compatibilities:
     - '1.36'
@@ -8651,6 +8725,17 @@
   publisher: eks
 - name: kubecost_kubecost
   versions:
+  - version: v3.2.1-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v3.2.0-eksbuild.1
     compatibilities:
     - '1.35'
@@ -9209,6 +9294,15 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.11.1-eksbuild.7
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.11.1-eksbuild.6
     compatibilities:
     - '1.36'
@@ -9986,6 +10080,17 @@
   publisher: Spacelift Inc.
 - name: splunk_splunk-otel-collector-chart
   versions:
+  - version: v0.155.0-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v0.153.0-eksbuild.1
     compatibilities:
     - '1.35'

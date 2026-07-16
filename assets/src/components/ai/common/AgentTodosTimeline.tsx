@@ -6,7 +6,6 @@ import {
 import {
   Body2BoldP,
   Body2P,
-  CaptionP,
   Subtitle1H1,
 } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
@@ -31,52 +30,50 @@ export function AgentTodosTimeline({
   const { colors } = useTheme()
   const activePendingIndex = todos.findIndex((todo) => !todo.done)
 
+  if (isEmpty(todos)) return null
+
   return (
     <TimelineWrapperSC>
       {title && <Subtitle1H1 $color="text">{title}</Subtitle1H1>}
-      {isEmpty(todos) ? (
-        <CaptionP $color="text-xlight">No to-do items yet.</CaptionP>
-      ) : (
-        <TimelineListSC>
-          {todos.map((todo, index) => {
-            const description = todo.description
-            const isActivePending = !todo.done && index === activePendingIndex
-            const todoKey = getTodoKey(todo, index)
+      <TimelineListSC>
+        {todos.map((todo, index) => {
+          const description = todo.description
+          const isActivePending = !todo.done && index === activePendingIndex
+          const todoKey = getTodoKey(todo, index)
 
-            return (
-              <TimelineItemSC key={todoKey}>
-                <SpineSC>
-                  <NodeSC>
-                    {todo.done ? (
-                      <CheckOutlineIcon
+          return (
+            <TimelineItemSC key={todoKey}>
+              <SpineSC>
+                <NodeSC>
+                  {todo.done ? (
+                    <CheckOutlineIcon
+                      color={colors['icon-light']}
+                      size={16}
+                    />
+                  ) : isActivePending ? (
+                    <ActivePendingNodeSC>
+                      <ArrowRightIcon
                         color={colors['icon-light']}
-                        size={16}
+                        size={10}
                       />
-                    ) : isActivePending ? (
-                      <ActivePendingNodeSC>
-                        <ArrowRightIcon
-                          color={colors['icon-light']}
-                          size={10}
-                        />
-                      </ActivePendingNodeSC>
-                    ) : (
-                      <CircleDashIcon
-                        color={colors['icon-light']}
-                        size={16}
-                      />
-                    )}
-                  </NodeSC>
-                  {index < todos.length - 1 && <ConnectorSC />}
-                </SpineSC>
-                <TodoBodySC>
-                  <Body2BoldP $color="text">{todo.title}</Body2BoldP>
-                  {description && <TodoDescription description={description} />}
-                </TodoBodySC>
-              </TimelineItemSC>
-            )
-          })}
-        </TimelineListSC>
-      )}
+                    </ActivePendingNodeSC>
+                  ) : (
+                    <CircleDashIcon
+                      color={colors['icon-light']}
+                      size={16}
+                    />
+                  )}
+                </NodeSC>
+                {index < todos.length - 1 && <ConnectorSC />}
+              </SpineSC>
+              <TodoBodySC>
+                <Body2BoldP $color="text">{todo.title}</Body2BoldP>
+                {description && <TodoDescription description={description} />}
+              </TodoBodySC>
+            </TimelineItemSC>
+          )
+        })}
+      </TimelineListSC>
     </TimelineWrapperSC>
   )
 }

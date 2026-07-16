@@ -27,6 +27,8 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 		return in.handleOpenAIKeys(ctx, aiConfig.GetOpenai())
 	case openAICompatibleProvider:
 		return in.handleOpenAIKeys(ctx, aiConfig.GetOpenaiCompatible())
+	case schemas.XAI:
+		return in.handleOpenAIKeys(ctx, aiConfig.GetXai())
 	case schemas.Anthropic:
 		return in.handleAnthropicKeys(aiConfig.GetAnthropic())
 	case schemas.Vertex:

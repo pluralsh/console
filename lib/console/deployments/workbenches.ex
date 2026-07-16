@@ -608,14 +608,27 @@ defmodule Console.Deployments.Workbenches do
   @doc """
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
-  @spec create_workbench_job(map, binary, User.t()) :: job_resp
-  def create_workbench_job(attrs, workbench_id, %User{} = user) do
-    %WorkbenchJob{user_id: user.id, workbench_id: workbench_id}
-    |> WorkbenchJob.changeset(Map.put(attrs, :result, %{working_theory: "", conclusion: ""}))
+  @spec create_workbench_job(map, binary | Workbench.t(), User.t()) :: job_resp
+  def create_workbench_job(attrs, %Workbench{id: wb_id} = wb, %User{} = user) do
+    %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
+    |> WorkbenchJob.changeset(
+      attrs
+      |> maybe_put_workbench_modes(wb)
+      |> Map.put(:result, %{working_theory: "", conclusion: ""})
+    )
     |> allow(user, :read)
     |> when_ok(:insert)
     |> notify(:create, user)
   end
+  def create_workbench_job(attrs, workbench_id, %User{} = user) when is_binary(workbench_id) do
+    get_workbench!(workbench_id)
+    |> then(&create_workbench_job(attrs, &1, user))
+  end
+
+  defp maybe_put_workbench_modes(%{modes: %{}} = attrs, _), do: attrs
+  defp maybe_put_workbench_modes(attrs, %Workbench{modes: %{} = modes}),
+    do: Map.put(attrs, :modes, Console.mapify(modes))
+  defp maybe_put_workbench_modes(attrs, _), do: attrs
 
   def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
     hook = Repo.preload(hook, [:user])
@@ -630,7 +643,7 @@ defmodule Console.Deployments.Workbenches do
     end)
     |> add_operation(:job, fn %{actor: user} ->
       Map.put(attrs, :modes, Console.mapify(modes))
-      |> create_workbench_job(workbench_id, user)
+      |> create_workbench_job(bench, user)
     end)
     |> execute(extract: :job)
   end

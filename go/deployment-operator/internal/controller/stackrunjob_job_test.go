@@ -58,6 +58,14 @@ func TestGetDefaultContainerImage(t *testing.T) {
 			expectedImage: "ghcr.io/pluralsh/harness:0.6.18-terragrunt-1.8",
 		},
 		{
+			name: "pulumi_defaults",
+			run: &console.StackRunMinimalFragment{
+				Type:          console.StackTypePulumi,
+				Configuration: console.StackConfigurationFragment{},
+			},
+			expectedImage: "ghcr.io/pluralsh/harness:0.6.18-pulumi-3.251",
+		},
+		{
 			name: "custom_tag_provided",
 			run: &console.StackRunMinimalFragment{
 				Type: console.StackTypeTerraform,

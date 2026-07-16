@@ -120,7 +120,7 @@ func (in *Pod) Namespace() string {
 }
 
 func (in *Pod) Create(t *testing.T) error {
-	return k8s.KubectlApplyFromStringE(t,
+	return k8s.KubectlApplyFromStringContextE(t, t.Context(),
 		in.toKubectlOptions(),
 		in.toJSON(in.toPod()),
 	)
@@ -138,11 +138,11 @@ func (in *Pod) Delete(t *testing.T) error {
 }
 
 func (in *Pod) Get(t *testing.T) (*corev1.Pod, error) {
-	return k8s.GetPodE(t, in.toKubectlOptions(), in.Name())
+	return k8s.GetPodContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
 func (in *Pod) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetPodE(t, in.toKubectlOptions(), in.Name())
+	_, err := k8s.GetPodContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}
@@ -162,7 +162,7 @@ func (in *Pod) WaitForReady(t *testing.T, timeout time.Duration) error {
 		case <-timer.C:
 			return fmt.Errorf("timeout waiting for pod %s/%s to succeed", in.Namespace(), in.Name())
 		case <-ticker.C:
-			pod, err := k8s.GetPodE(t, in.toKubectlOptions(), in.Name())
+			pod, err := k8s.GetPodContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 			if err != nil {
 				t.Logf("failed to get pod %s/%s: %v", in.Namespace(), in.Name(), err)
 				continue
@@ -172,7 +172,7 @@ func (in *Pod) WaitForReady(t *testing.T, timeout time.Duration) error {
 			case corev1.PodSucceeded:
 				return nil
 			case corev1.PodFailed:
-				logs := k8s.GetPodLogs(t, in.toKubectlOptions(), pod, defaultPodContainerName)
+				logs := k8s.GetPodLogsContext(t, t.Context(), in.toKubectlOptions(), pod, defaultPodContainerName)
 				return fmt.Errorf("pod %s/%s failed: %s\nlogs:\n%s", in.Namespace(), in.Name(), pod.Status.Reason, logs)
 			}
 		}

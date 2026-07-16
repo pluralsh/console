@@ -73,13 +73,18 @@ config :console,
   refresh_token_expiry: "7d",
   workbench_default: false,
   qove_key: nil,
-  cloud_override: "ignore"
+  cloud_override: "ignore",
+  details: %{}
 
 config :console, :ai_defaults,
   openai: %{
     model: "gpt-5.4-mini",
     tool_model: "gpt-5.4",
     embedding_model: "text-embedding-3-large"
+  },
+  xai: %{
+    model: "grok-4.5",
+    tool_model: "grok-4.5"
   },
   azure: %{
     model: "gpt-5.4-mini",

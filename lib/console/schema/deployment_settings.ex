@@ -3,7 +3,7 @@ defmodule Console.Schema.DeploymentSettings do
   alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
   alias Piazza.Ecto.EncryptedString
 
-  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5, openai_compatible: 6
+  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5, openai_compatible: 6, xai: 7
   defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
   defenum VectorStore, elastic: 0, opensearch: 1, postgres: 2
   defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
@@ -286,6 +286,8 @@ defmodule Console.Schema.DeploymentSettings do
         field :proxy_models,    {:array, :string}
       end
 
+      embeds_one :xai, OpenAI, on_replace: :update
+
       embeds_one :ollama, Ollama, on_replace: :update do
         field :model,           :string
         field :tool_model,      :string
@@ -418,6 +420,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:graph, with: &graph_store_changeset/2)
     |> cast_embed(:openai, with: &OpenAI.changeset/2)
     |> cast_embed(:openai_compatible, with: &OpenAI.changeset/2)
+    |> cast_embed(:xai, with: &OpenAI.changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
     |> cast_embed(:ollama, with: &ollama_changeset/2)
     |> cast_embed(:azure, with: &azure_openai_changeset/2)

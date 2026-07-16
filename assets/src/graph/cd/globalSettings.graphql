@@ -30,6 +30,13 @@ fragment AiSettings on AiSettings {
     embeddingModel
     method
   }
+  xai {
+    baseUrl
+    model
+    toolModel
+    embeddingModel
+    method
+  }
   azure {
     apiVersion
     endpoint

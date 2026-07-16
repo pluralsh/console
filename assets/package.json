@@ -35,7 +35,7 @@
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
-    "node": ">=22.22.0"
+    "node": ">=24.11.1"
   },
   "packageManager": "yarn@3.6.0",
   "dependencies": {
@@ -127,11 +127,11 @@
   "devDependencies": {
     "@apollo/sandbox": "2.7.4",
     "@babel/core": "7.29.7",
-    "@graphql-codegen/add": "5.0.3",
+    "@graphql-codegen/add": "7.1.0",
     "@graphql-codegen/cli": "6.3.1",
     "@graphql-codegen/fragment-matcher": "6.0.1",
-    "@graphql-codegen/named-operations-object": "3.1.1",
-    "@graphql-codegen/plugin-helpers": "5.1.1",
+    "@graphql-codegen/named-operations-object": "4.0.1",
+    "@graphql-codegen/plugin-helpers": "7.1.0",
     "@graphql-codegen/typescript": "5.0.10",
     "@graphql-codegen/typescript-operations": "5.1.0",
     "@graphql-codegen/typescript-react-apollo": "4.4.2",
@@ -148,7 +148,7 @@
     "@types/humanize-duration": "3.27.4",
     "@types/jsdom": "21.1.7",
     "@types/lodash": "4.17.24",
-    "@types/node": "22.20.0",
+    "@types/node": "24.10.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@typescript-eslint/eslint-plugin": "8.63.0",
@@ -185,6 +185,7 @@
     "./design-system/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
   },
   "resolutions": {
-    "elkjs": "0.11.0"
+    "elkjs": "0.11.0",
+    "shell-quote": "1.8.4"
   }
 }

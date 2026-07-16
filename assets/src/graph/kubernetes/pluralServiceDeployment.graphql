@@ -13,7 +13,11 @@ fragment PluralServiceDeployment on PluralServiceDeployment {
     ...Metadata
   }
   reference {
-    ...ServiceDeploymentDetails
+    id
+    name
+    cluster {
+      id
+    }
   }
   status {
     ...PluralObjectStatus

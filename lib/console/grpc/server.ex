@@ -61,6 +61,7 @@ defmodule Console.GRPC.Server do
       enabled: true,
       openai: to_openai_pb(Map.get(ai, :openai)),
       openaiCompatible: to_openai_pb(Map.get(ai, :openai_compatible)),
+      xai: to_openai_pb(Map.get(ai, :xai), :xai),
       anthropic: to_anthropic_pb(Map.get(ai, :anthropic)),
       vertexAi: to_vertex_pb(Map.get(ai, :vertex)),
       bedrock: to_bedrock_pb(Map.get(ai, :bedrock)),
@@ -69,8 +70,9 @@ defmodule Console.GRPC.Server do
   end
   defp to_pb(_), do: %Plrl.AiConfig{enabled: false}
 
-  defp to_openai_pb(%{} = openai) do
-    defaults = Provider.defaults(:openai)
+  defp to_openai_pb(openai, defaults_provider \\ :openai)
+  defp to_openai_pb(%{} = openai, defaults_provider) do
+    defaults = Provider.defaults(defaults_provider)
 
     %Plrl.OpenAiConfig{
       apiKey: openai_api_key(openai),
@@ -83,7 +85,7 @@ defmodule Console.GRPC.Server do
       method: openai_method_to_pb(Map.get(openai, :method))
     }
   end
-  defp to_openai_pb(_), do: nil
+  defp to_openai_pb(_, _), do: nil
 
   defp openai_api_key(%{} = openai), do: Map.get(openai, :access_token) || @dummy_key
 

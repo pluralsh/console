@@ -23,49 +23,55 @@ const (
 func TestKubernetesHealthSuite(t *testing.T) {
 	namespace := "test-" + rand.String(6)
 	options := k8s.NewKubectlOptions("", "", namespace)
+	ctx := t.Context()
 
 	// Deploy manifests
-	defer k8s.KubectlDelete(t, options, helloWorldFile)
-	defer k8s.KubectlDelete(t, options, nginxFile)
-	defer k8s.KubectlDelete(t, options, jobFile)
-	defer k8s.KubectlDelete(t, options, statefulFile)
-	defer k8s.DeleteNamespace(t, options, namespace)
+	defer func() { require.NoError(t, k8s.KubectlDeleteContextE(t, ctx, options, helloWorldFile)) }()
+	defer func() { require.NoError(t, k8s.KubectlDeleteContextE(t, ctx, options, nginxFile)) }()
+	defer func() { require.NoError(t, k8s.KubectlDeleteContextE(t, ctx, options, jobFile)) }()
+	defer func() { require.NoError(t, k8s.KubectlDeleteContextE(t, ctx, options, statefulFile)) }()
+	defer func() { require.NoError(t, k8s.DeleteNamespaceContextE(t, ctx, options, namespace)) }()
 
-	k8s.CreateNamespace(t, options, namespace)
-	k8s.KubectlApply(t, options, helloWorldFile)
-	k8s.KubectlApply(t, options, nginxFile)
-	k8s.KubectlApply(t, options, jobFile)
-	k8s.KubectlApply(t, options, statefulFile)
+	require.NoError(t, k8s.CreateNamespaceContextE(t, ctx, options, namespace))
+	require.NoError(t, k8s.KubectlApplyContextE(t, ctx, options, helloWorldFile))
+	require.NoError(t, k8s.KubectlApplyContextE(t, ctx, options, nginxFile))
+	require.NoError(t, k8s.KubectlApplyContextE(t, ctx, options, jobFile))
+	require.NoError(t, k8s.KubectlApplyContextE(t, ctx, options, statefulFile))
 
 	// --- Check Hello-World Pod ---
 	t.Run("HelloWorldPod-"+rand.String(5), func(t *testing.T) {
 		selector := metav1.ListOptions{LabelSelector: "app=hello-world"}
-		k8s.WaitUntilNumPodsCreated(t, options, selector, 1, 60, 5*time.Second)
-		pods := k8s.ListPods(t, options, selector)
+		require.NoError(t, k8s.WaitUntilNumPodsCreatedContextE(t, t.Context(), options, selector, 1, 60, 5*time.Second))
+		pods, err := k8s.ListPodsContextE(t, t.Context(), options, selector)
+		require.NoError(t, err)
 		require.Len(t, pods, 1)
-		k8s.WaitUntilPodAvailable(t, options, pods[0].Name, 60, 5*time.Second)
+		k8s.WaitUntilPodAvailableContext(t, t.Context(), options, pods[0].Name, 60, 5*time.Second)
 
-		logs := k8s.GetPodLogs(t, options, &pods[0], pods[0].Spec.Containers[0].Name)
+		logs, err := k8s.GetPodLogsContextE(t, t.Context(), options, &pods[0], pods[0].Spec.Containers[0].Name)
+		require.NoError(t, err)
 		assert.Contains(t, logs, "started") // Adjust to your container output
 	})
 
 	// --- Check Nginx Deployment + Service ---
 	t.Run("NginxDeploymentAndService-"+rand.String(5), func(t *testing.T) {
 		selector := metav1.ListOptions{LabelSelector: "app=nginx"}
-		k8s.WaitUntilNumPodsCreated(t, options, selector, 1, 60, 5*time.Second)
-		pods := k8s.ListPods(t, options, selector)
+		require.NoError(t, k8s.WaitUntilNumPodsCreatedContextE(t, t.Context(), options, selector, 1, 60, 5*time.Second))
+		pods, err := k8s.ListPodsContextE(t, t.Context(), options, selector)
+		require.NoError(t, err)
 		require.NotEmpty(t, pods)
-		k8s.WaitUntilPodAvailable(t, options, pods[0].Name, 60, 5*time.Second)
+		k8s.WaitUntilPodAvailableContext(t, t.Context(), options, pods[0].Name, 60, 5*time.Second)
 
 		// Verify service exists
-		service := k8s.GetService(t, options, "nginx-svc")
+		service, err := k8s.GetServiceContextE(t, t.Context(), options, "nginx-svc")
+		require.NoError(t, err)
 		assert.Equal(t, int32(80), service.Spec.Ports[0].Port)
 	})
 
 	// --- Check Job Completion ---
 	t.Run("PingJob-"+rand.String(5), func(t *testing.T) {
-		k8s.WaitUntilJobSucceed(t, options, "ping-nginx", 90, 5*time.Second)
-		job := k8s.GetJob(t, options, "ping-nginx")
+		k8s.WaitUntilJobSucceedContext(t, t.Context(), options, "ping-nginx", 90, 5*time.Second)
+		job, err := k8s.GetJobContextE(t, t.Context(), options, "ping-nginx")
+		require.NoError(t, err)
 		assert.Equal(t, int32(1), job.Status.Succeeded)
 	})
 
@@ -76,22 +82,23 @@ func TestKubernetesHealthSuite(t *testing.T) {
 
 		selector := metav1.ListOptions{LabelSelector: "app=stateful"}
 
-		k8s.WaitUntilNumPodsCreated(t, options, selector, 1, 60, 5*time.Second)
-		pods := k8s.ListPods(t, options, selector)
+		require.NoError(t, k8s.WaitUntilNumPodsCreatedContextE(t, t.Context(), options, selector, 1, 60, 5*time.Second))
+		pods, err := k8s.ListPodsContextE(t, t.Context(), options, selector)
+		require.NoError(t, err)
 		require.Len(t, pods, 1)
 
-		k8s.WaitUntilPodAvailable(t, options, pods[0].Name, 60, 5*time.Second)
+		k8s.WaitUntilPodAvailableContext(t, t.Context(), options, pods[0].Name, 60, 5*time.Second)
 
 		// Optional: verify data was written to volume
 		cmd := []string{"cat", "/data/hello.txt"}
-		output, err := k8s.RunKubectlAndGetOutputE(t, options, append([]string{"exec", pods[0].Name, "--"}, cmd...)...)
+		output, err := k8s.RunKubectlAndGetOutputContextE(t, t.Context(), options, append([]string{"exec", pods[0].Name, "--"}, cmd...)...)
 		require.NoError(t, err)
 		assert.Contains(t, output, "hello")
 	})
 }
 
 func GetStatefulSet(t *testing.T, options *k8s.KubectlOptions, name string) *appsv1.StatefulSet {
-	clientset, err := k8s.GetKubernetesClientFromOptionsE(t, options)
+	clientset, err := k8s.GetKubernetesClientFromOptionsContextE(t, t.Context(), options)
 	require.NoError(t, err)
 
 	ss, err := clientset.AppsV1().StatefulSets(options.Namespace).Get(t.Context(), name, metav1.GetOptions{})

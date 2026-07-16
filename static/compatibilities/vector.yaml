@@ -3,6 +3,21 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.57.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [v0.57.0 is described as a security-focused release with changes intended
+        to improve security posture., The release notes indicate there are opt-in/compatibility
+        mechanisms to restore previous behavior after the security changes.]
+    breaking_changes: [v0.57.0 includes breaking changes related to the security-focused
+        updates; users may need to adjust configuration to preserve prior behavior
+        (exact items not provided in the excerpt).]
+  chart_version: 0.57.0
+  images: ['docker.io/timberio/vector:0.57.0-distroless-libc']
 - version: 0.56.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -459,7 +474,7 @@ versions:
   chart_version: 0.24.0
   images: ['timberio/vector:0.32.0-distroless-libc']
 - version: 0.31.0
-  kube: ['1.27', '1.26', '1.25']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:

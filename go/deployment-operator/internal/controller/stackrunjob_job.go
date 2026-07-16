@@ -30,6 +30,7 @@ var (
 		console.StackTypeTerraform:  "1.8",
 		console.StackTypeAnsible:    "latest",
 		console.StackTypeTerragrunt: "1.8",
+		console.StackTypePulumi:     "3.251",
 	}
 
 	stackRunDefaultJobVolume = corev1.Volume{

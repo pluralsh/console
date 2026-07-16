@@ -37,6 +37,10 @@ func (in *stackRunController) preStart() error {
 		klog.ErrorS(err, "could not update stack run status")
 	}
 
+	if err := in.tool.Prepare(); err != nil {
+		return fmt.Errorf("could not prepare tool: %w", err)
+	}
+
 	if in.stackRun.ManageState {
 		err := in.tool.ConfigureStateBackend("harness", in.consoleToken, in.stackRun.StateUrls)
 		if err != nil {

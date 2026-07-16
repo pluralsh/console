@@ -70,6 +70,10 @@ query Me {
     features {
       ...AvailableFeatures
     }
+    details {
+      assumeRoleArn
+      egressIps
+    }
     qoveKey
   }
 }

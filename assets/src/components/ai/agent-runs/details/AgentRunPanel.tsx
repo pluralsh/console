@@ -3,8 +3,8 @@ import {
   CloseIcon,
   FileDiffIcon,
   Flex,
+  HourglassIcon,
   IconFrame,
-  ListIcon,
   Markdown,
   PrIcon,
   SubTab,
@@ -22,6 +22,7 @@ import {
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { isJobRunning } from 'components/workbenches/workbench/job/WorkbenchJobActivity'
 import {
+  AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
@@ -48,15 +49,29 @@ import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AgentRunDiff } from './AgentRunDiff.tsx'
 import { AgentRunPullRequests } from './AgentRunPullRequests.tsx'
-import { AgentRunTodos } from './AgentRunTodos.tsx'
+import { AgentRunWorkingTheory } from './AgentRunWorkingTheory.tsx'
 import { useAgentRunTodos } from './AIAgentRunSidecar.tsx'
 
 const SIDE_PANEL_TYPE: SidePanel = 'agent-run'
 export enum AgentRunPanelTab {
   Diff = 'Diff',
   Analysis = 'Analysis',
-  AgentTodos = 'Agent todos',
+  WorkingTheory = 'Working theory',
   PullRequests = 'Pull requests',
+}
+
+export function shouldShowAgentRunSidePanel(
+  run: Nullable<AgentRunFragment>,
+  isLoading = false
+) {
+  if (isLoading) return true
+
+  return !!run?.id
+}
+
+type AgentRunApprovalActions = {
+  onApprove: () => void
+  approving: boolean
 }
 
 type AgentRunPanelContextT = {
@@ -66,6 +81,8 @@ type AgentRunPanelContextT = {
   requestedTab: AgentRunPanelTab | null
   clearRequestedTab: () => void
   setOpen: (open: boolean, tab?: AgentRunPanelTab) => void
+  approval: Nullable<AgentRunApprovalActions>
+  setApproval: (approval: Nullable<AgentRunApprovalActions>) => void
 }
 
 const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
@@ -78,6 +95,9 @@ const AgentRunPanelContext = createContext<AgentRunPanelContextT>({
     console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
   setOpen: () =>
     console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
+  approval: null,
+  setApproval: () =>
+    console.error('useAgentRunPanel must be used within AgentRunPanelProvider'),
 })
 
 export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
@@ -88,6 +108,8 @@ export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
   const [requestedTab, setRequestedTab] = useState<AgentRunPanelTab | null>(
     null
   )
+  const [approval, setApproval] =
+    useState<Nullable<AgentRunApprovalActions>>(null)
   const isOpen = sidePanel === SIDE_PANEL_TYPE
 
   const clearRequestedTab = useCallback(() => setRequestedTab(null), [])
@@ -112,8 +134,10 @@ export function AgentRunPanelProvider({ children }: { children: ReactNode }) {
       requestedTab,
       clearRequestedTab,
       setOpen,
+      approval,
+      setApproval,
     }),
-    [isOpen, selectedTab, requestedTab, clearRequestedTab, setOpen]
+    [isOpen, selectedTab, requestedTab, clearRequestedTab, setOpen, approval]
   )
 
   return <AgentRunPanelContext value={ctx}>{children}</AgentRunPanelContext>
@@ -132,6 +156,7 @@ export function AgentRunPanelContent() {
     setSelectedTab,
     requestedTab,
     clearRequestedTab,
+    approval,
   } = useAgentRunPanel()
   const tabStateRef = useRef<any>(null)
   const [diffFullscreen, setDiffFullscreen] = useState(false)
@@ -185,16 +210,18 @@ export function AgentRunPanelContent() {
         ? { maxWidthVw: 60, initialWidthVw: 60 }
         : { maxWidthVw: 50, initialWidthVw: 45 }
   )
-  const showAgentTodosTab = !isEmpty(todos)
-  const showPrsTab = hasPullRequests
-  const hasContentTabs =
-    showDiffTab || showAnalysisTab || showAgentTodosTab || showPrsTab
-  const isWriteMode = run?.mode === AgentRunMode.Write
   const isActiveRun =
     isJobRunning(run?.status) ||
     run?.status === AgentRunStatus.Babysitting ||
     run?.status === AgentRunStatus.PendingApproval
-  const expectsTodos = (isLoading || isActiveRun) && !showAgentTodosTab
+  const hasRun: boolean = Boolean(run)
+  const showWorkingTheoryTab = !isEmpty(todos) || hasRun || isActiveRun
+  const showPrsTab = hasPullRequests
+  const hasContentTabs =
+    showDiffTab || showAnalysisTab || showWorkingTheoryTab || showPrsTab
+  const isWriteMode = run?.mode === AgentRunMode.Write
+  const expectsWorkingTheory =
+    (isLoading || isActiveRun) && !showWorkingTheoryTab
   const expectsPullRequests =
     (isLoading || (isActiveRun && isWriteMode)) && !showPrsTab
   const expectsAnalysis =
@@ -204,7 +231,8 @@ export function AgentRunPanelContent() {
       (run?.status === AgentRunStatus.Successful &&
         !(isWriteMode && hasPullRequests)))
   const showTabSkeleton =
-    !hasContentTabs && (expectsTodos || expectsPullRequests || expectsAnalysis)
+    !hasContentTabs &&
+    (expectsWorkingTheory || expectsPullRequests || expectsAnalysis)
   const showingTabContent =
     (showDiffTab &&
       selectedTab === AgentRunPanelTab.Diff &&
@@ -212,18 +240,18 @@ export function AgentRunPanelContent() {
     (showAnalysisTab &&
       selectedTab === AgentRunPanelTab.Analysis &&
       !!run?.analysis) ||
-    (showAgentTodosTab &&
-      selectedTab === AgentRunPanelTab.AgentTodos &&
-      !!run) ||
+    (showWorkingTheoryTab &&
+      selectedTab === AgentRunPanelTab.WorkingTheory &&
+      hasRun) ||
     (showPrsTab && selectedTab === AgentRunPanelTab.PullRequests && !!run)
   const showContentPlaceholder = showTabSkeleton && !showingTabContent
   const defaultTab = useMemo((): Nullable<AgentRunPanelTab> => {
     if (showDiffTab) return AgentRunPanelTab.Diff
     if (showAnalysisTab) return AgentRunPanelTab.Analysis
-    if (showAgentTodosTab) return AgentRunPanelTab.AgentTodos
+    if (showWorkingTheoryTab) return AgentRunPanelTab.WorkingTheory
     if (showPrsTab) return AgentRunPanelTab.PullRequests
     return null
-  }, [showDiffTab, showAnalysisTab, showAgentTodosTab, showPrsTab])
+  }, [showDiffTab, showAnalysisTab, showWorkingTheoryTab, showPrsTab])
 
   useEffect(() => {
     if (!runId || !defaultTab) return
@@ -280,13 +308,13 @@ export function AgentRunPanelContent() {
                       Analysis
                     </PanelSubTabSC>
                   )}
-                  {showAgentTodosTab && (
+                  {showWorkingTheoryTab && (
                     <PanelSubTabSC
-                      key={AgentRunPanelTab.AgentTodos}
-                      textValue={AgentRunPanelTab.AgentTodos}
+                      key={AgentRunPanelTab.WorkingTheory}
+                      textValue={AgentRunPanelTab.WorkingTheory}
                     >
-                      <ListIcon size={12} />
-                      Agent todos
+                      <HourglassIcon size={12} />
+                      {AgentRunPanelTab.WorkingTheory}
                     </PanelSubTabSC>
                   )}
                   {showPrsTab && (
@@ -306,7 +334,7 @@ export function AgentRunPanelContent() {
                     gap="small"
                   >
                     {expectsAnalysis && <TabSkeletonSC $width={72} />}
-                    {expectsTodos && <TabSkeletonSC $width={96} />}
+                    {expectsWorkingTheory && <TabSkeletonSC $width={96} />}
                     {expectsPullRequests && <TabSkeletonSC $width={108} />}
                   </Flex>
                 )
@@ -369,12 +397,18 @@ export function AgentRunPanelContent() {
             </ContentInnerSC>
           </ContentWrapperSC>
         )}
-      {showAgentTodosTab &&
-        selectedTab === AgentRunPanelTab.AgentTodos &&
+      {showWorkingTheoryTab &&
+        selectedTab === AgentRunPanelTab.WorkingTheory &&
         run && (
           <ContentWrapperSC>
             <ContentInnerSC>
-              <AgentRunTodos todos={todos} />
+              <AgentRunWorkingTheory
+                run={run}
+                todos={todos}
+                onViewDiff={() => setSelectedTab(AgentRunPanelTab.Diff)}
+                onApprove={() => approval?.onApprove()}
+                approving={approval?.approving ?? false}
+              />
             </ContentInnerSC>
           </ContentWrapperSC>
         )}
@@ -404,7 +438,7 @@ export function AgentRunPanelContent() {
                 />
               </>
             )}
-            {expectsTodos && (
+            {expectsWorkingTheory && (
               <RectangleSkeleton
                 $height="180px"
                 $width="100%"

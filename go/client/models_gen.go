@@ -828,6 +828,7 @@ type AiSettings struct {
 	VectorStore      *VectorStoreSettings `json:"vectorStore,omitempty"`
 	Openai           *OpenaiSettings      `json:"openai,omitempty"`
 	OpenaiCompatible *OpenaiSettings      `json:"openaiCompatible,omitempty"`
+	Xai              *OpenaiSettings      `json:"xai,omitempty"`
 	Anthropic        *AnthropicSettings   `json:"anthropic,omitempty"`
 	Ollama           *OllamaSettings      `json:"ollama,omitempty"`
 	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
@@ -850,6 +851,7 @@ type AiSettingsAttributes struct {
 	LogAnalysis      *bool                        `json:"logAnalysis,omitempty"`
 	Openai           *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	OpenaiCompatible *OpenaiSettingsAttributes    `json:"openaiCompatible,omitempty"`
+	Xai              *OpenaiSettingsAttributes    `json:"xai,omitempty"`
 	Anthropic        *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
 	Ollama           *OllamaAttributes            `json:"ollama,omitempty"`
 	Azure            *AzureOpenaiAttributes       `json:"azure,omitempty"`
@@ -2866,16 +2868,22 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed     *bool              `json:"installed,omitempty"`
-	Cloud         *bool              `json:"cloud,omitempty"`
-	Byok          *bool              `json:"byok,omitempty"`
-	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
-	OidcName      *string            `json:"oidcName,omitempty"`
-	QoveKey       *string            `json:"qoveKey,omitempty"`
-	Features      *AvailableFeatures `json:"features,omitempty"`
-	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
-	Manifest      *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
+	Installed     *bool                        `json:"installed,omitempty"`
+	Cloud         *bool                        `json:"cloud,omitempty"`
+	Byok          *bool                        `json:"byok,omitempty"`
+	ExternalOidc  *bool                        `json:"externalOidc,omitempty"`
+	OidcName      *string                      `json:"oidcName,omitempty"`
+	QoveKey       *string                      `json:"qoveKey,omitempty"`
+	Features      *AvailableFeatures           `json:"features,omitempty"`
+	Details       *ConsoleConfigurationDetails `json:"details,omitempty"`
+	LicenseExpiry *string                      `json:"licenseExpiry,omitempty"`
+	Manifest      *PluralManifest              `json:"manifest,omitempty"`
+	GitStatus     *GitStatus                   `json:"gitStatus,omitempty"`
+}
+
+type ConsoleConfigurationDetails struct {
+	AssumeRoleArn *string   `json:"assumeRoleArn,omitempty"`
+	EgressIps     []*string `json:"egressIps,omitempty"`
 }
 
 type ConstraintRef struct {
@@ -7234,6 +7242,32 @@ type PullabilityStatistic struct {
 	Count  int64      `json:"count"`
 }
 
+type PulumiConfiguration struct {
+	// equivalent to the --parallel flag in pulumi preview, up, and destroy
+	Parallel *int64 `json:"parallel,omitempty"`
+	// equivalent to the --refresh flag in pulumi preview, up, and destroy
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// equivalent to the --stack flag in pulumi preview, up, and destroy
+	Stack *string `json:"stack,omitempty"`
+	// optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs
+	BackendURL *string `json:"backendUrl,omitempty"`
+}
+
+type PulumiConfigurationAttributes struct {
+	// equivalent to the --parallel flag in pulumi preview, up, and destroy
+	Parallel *int64 `json:"parallel,omitempty"`
+	// equivalent to the --refresh flag in pulumi preview, up, and destroy
+	Refresh *bool `json:"refresh,omitempty"`
+	// whether to auto-approve a plan if there are no changes, preventing a stack from being blocked
+	ApproveEmpty *bool `json:"approveEmpty,omitempty"`
+	// equivalent to the --stack flag in pulumi preview, up, and destroy
+	Stack *string `json:"stack,omitempty"`
+	// optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs
+	BackendURL *string `json:"backendUrl,omitempty"`
+}
+
 type RbacAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
@@ -8724,6 +8758,8 @@ type StackConfiguration struct {
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfiguration `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8743,6 +8779,8 @@ type StackConfigurationAttributes struct {
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
 	// the ansible configuration for this stack
 	Ansible *AnsibleConfigurationAttributes `json:"ansible,omitempty"`
 	// the ai approval configuration for this stack
@@ -8888,6 +8926,8 @@ type StackOverrides struct {
 	Terraform *TerraformConfiguration `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfiguration `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfiguration `json:"pulumi,omitempty"`
 }
 
 type StackOverridesAttributes struct {
@@ -8895,6 +8935,8 @@ type StackOverridesAttributes struct {
 	Terraform *TerraformConfigurationAttributes `json:"terraform,omitempty"`
 	// the terragrunt configuration for this stack
 	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
+	// the pulumi configuration for this stack
+	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -9865,6 +9907,8 @@ type Workbench struct {
 	SystemPrompt *string `json:"systemPrompt,omitempty"`
 	// workbench configuration
 	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
+	// default mode-specific options for jobs created by this workbench
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// skills configuration
 	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// the project of this workbench
@@ -9925,6 +9969,8 @@ type WorkbenchAttributes struct {
 	OverrideBotUser *bool `json:"overrideBotUser,omitempty"`
 	// workbench configuration
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
+	// default mode-specific options for jobs created by this workbench
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 	// skills configuration (ref and files)
 	Skills *WorkbenchSkillsAttributes `json:"skills,omitempty"`
 	// users who can read and execute this workbench
@@ -10373,6 +10419,20 @@ type WorkbenchJobAttributes struct {
 	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
+type WorkbenchJobBudget struct {
+	// maximum cost budget for this job
+	Cost *float64 `json:"cost,omitempty"`
+	// maximum token budget for this job
+	Tokens *int64 `json:"tokens,omitempty"`
+}
+
+type WorkbenchJobBudgetAttributes struct {
+	// maximum cost budget for this job
+	Cost *float64 `json:"cost,omitempty"`
+	// maximum token budget for this job
+	Tokens *int64 `json:"tokens,omitempty"`
+}
+
 type WorkbenchJobCodingModes struct {
 	// whether babysit mode is enabled for coding agent runs
 	Babysit *bool `json:"babysit,omitempty"`
@@ -10423,6 +10483,8 @@ type WorkbenchJobModes struct {
 	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
+	// budget limits for this job
+	Budget *WorkbenchJobBudget `json:"budget,omitempty"`
 }
 
 type WorkbenchJobModesAttributes struct {
@@ -10432,6 +10494,8 @@ type WorkbenchJobModesAttributes struct {
 	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
+	// budget limits for this job
+	Budget *WorkbenchJobBudgetAttributes `json:"budget,omitempty"`
 }
 
 type WorkbenchJobProgress struct {
@@ -10684,6 +10748,8 @@ type WorkbenchTool struct {
 	Tool WorkbenchToolType `json:"tool"`
 	// categories for the tool
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
+	// whether this tool requires approval before execution
+	Approval *bool `json:"approval,omitempty"`
 	// the project of this tool
 	Project *Project `json:"project,omitempty"`
 	// read policy for this tool
@@ -10738,6 +10804,8 @@ type WorkbenchToolAttributes struct {
 	CloudConnectionID *string `json:"cloudConnectionId,omitempty"`
 	// the SCM connection for this tool (e.g. shared Git provider credentials)
 	ScmConnectionID *string `json:"scmConnectionId,omitempty"`
+	// whether this tool requires approval before execution
+	Approval *bool `json:"approval,omitempty"`
 	// users who can read and execute this tool
 	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	// users who can modify this tool
@@ -11788,6 +11856,7 @@ const (
 	AiProviderBedrock          AiProvider = "BEDROCK"
 	AiProviderVertex           AiProvider = "VERTEX"
 	AiProviderOpenaiCompatible AiProvider = "OPENAI_COMPATIBLE"
+	AiProviderXai              AiProvider = "XAI"
 )
 
 var AllAiProvider = []AiProvider{
@@ -11798,11 +11867,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderBedrock,
 	AiProviderVertex,
 	AiProviderOpenaiCompatible,
+	AiProviderXai,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex, AiProviderOpenaiCompatible, AiProviderXai:
 		return true
 	}
 	return false
@@ -16592,6 +16662,7 @@ const (
 	StackTypeAnsible    StackType = "ANSIBLE"
 	StackTypeCustom     StackType = "CUSTOM"
 	StackTypeTerragrunt StackType = "TERRAGRUNT"
+	StackTypePulumi     StackType = "PULUMI"
 )
 
 var AllStackType = []StackType{
@@ -16599,11 +16670,12 @@ var AllStackType = []StackType{
 	StackTypeAnsible,
 	StackTypeCustom,
 	StackTypeTerragrunt,
+	StackTypePulumi,
 }
 
 func (e StackType) IsValid() bool {
 	switch e {
-	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom, StackTypeTerragrunt:
+	case StackTypeTerraform, StackTypeAnsible, StackTypeCustom, StackTypeTerragrunt, StackTypePulumi:
 		return true
 	}
 	return false

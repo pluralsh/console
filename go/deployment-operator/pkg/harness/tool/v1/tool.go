@@ -4,6 +4,11 @@ import (
 	console "github.com/pluralsh/console/go/client"
 )
 
+// Prepare implements [Tool] interface.
+func (in *DefaultTool) Prepare() error {
+	return nil
+}
+
 // State implements [Tool] interface.
 func (in *DefaultTool) State() (*console.StackStateAttributes, error) {
 	return nil, nil

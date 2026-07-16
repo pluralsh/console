@@ -2,15 +2,23 @@ export const USAGE_RANGE_OPTIONS = ['1D', '1W', '1M'] as const
 
 export type UsageRangeOption = (typeof USAGE_RANGE_OPTIONS)[number]
 
+const THOUSAND = 1_000
+const MILLION = 1_000_000
+
 export function formatTokenCount(value: Nullable<number>) {
   if (value == null) return undefined
+  if (value === 0) return '0'
 
-  const formatter = new Intl.NumberFormat('en-US', {
+  if (value < MILLION) {
+    const thousands = Math.max(1, Math.round(value / THOUSAND))
+    if (thousands >= 1000) return '1M'
+    return `${thousands}K`
+  }
+
+  return new Intl.NumberFormat('en-US', {
     notation: 'compact',
     maximumFractionDigits: 1,
-  })
-
-  return formatter.format(value)
+  }).format(value)
 }
 
 export function formatTokenCost(value: Nullable<number>) {

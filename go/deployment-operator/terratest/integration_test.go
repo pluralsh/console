@@ -135,9 +135,9 @@ func runRawTest(t *testing.T, rawFragment *client.TestCaseConfigurationFragment_
 		expected = *rawFragment.ExpectedResult
 	}
 
-	err := k8s.KubectlApplyFromStringE(t, k8s.NewKubectlOptions("", "", ""), rawFragment.Yaml)
+	err := k8s.KubectlApplyFromStringContextE(t, t.Context(), k8s.NewKubectlOptions("", "", ""), rawFragment.Yaml)
 	t.Cleanup(func() {
-		_ = k8s.KubectlDeleteFromStringE(t, k8s.NewKubectlOptions("", "", ""), rawFragment.Yaml)
+		_ = k8s.KubectlDeleteFromStringContextE(t, t.Context(), k8s.NewKubectlOptions("", "", ""), rawFragment.Yaml)
 	})
 
 	switch {

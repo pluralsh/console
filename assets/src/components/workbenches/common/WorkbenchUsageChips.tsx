@@ -27,9 +27,16 @@ export function WorkbenchUsageSummaryChip({
       severity="neutral"
       fillLevel={fillLevel}
       css={{
+        maxWidth: '100%',
+        minWidth: 0,
         display: 'flex',
         flexWrap: 'nowrap',
         gap: theme.spacing.xxsmall,
+        '.children': {
+          minWidth: 0,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+        },
       }}
     >
       <CaptionP>{cost}</CaptionP>

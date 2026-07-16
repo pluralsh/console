@@ -44,6 +44,20 @@ func TestOpenAIRawResponsePassthrough(t *testing.T) {
 		require.Equal(t, raw, got)
 	})
 
+	t.Run("xai chat passthrough", func(t *testing.T) {
+		t.Parallel()
+		ctx := newCtx()
+		resp := &schemas.BifrostChatResponse{
+			ExtraFields: schemas.BifrostResponseExtraFields{
+				Provider:    schemas.XAI,
+				RawResponse: raw,
+			},
+		}
+		got, ok := openaiChatRawResponse(ctx, resp)
+		require.True(t, ok)
+		require.Equal(t, raw, got)
+	})
+
 	t.Run("chat via responses skips passthrough", func(t *testing.T) {
 		t.Parallel()
 		ctx := newCtx()

@@ -111,7 +111,7 @@ func (in *GCPProvider) validateCloudRunURL(value string) error {
 func (in *GCPProvider) getServiceURI(ctx context.Context, serviceAccountJSON []byte, serviceName string) (string, error) {
 	runService, err := runv2.NewService(
 		ctx,
-		option.WithCredentialsJSON(serviceAccountJSON),
+		option.WithAuthCredentialsJSON(option.ServiceAccount, serviceAccountJSON),
 		option.WithScopes(runv2.CloudPlatformScope),
 	)
 	if err != nil {
@@ -132,7 +132,7 @@ func (in *GCPProvider) invoke(ctx context.Context, uri string, serviceAccountJSO
 		return nil, err
 	}
 
-	httpClient, err := idtoken.NewClient(ctx, audience, option.WithCredentialsJSON(serviceAccountJSON))
+	httpClient, err := idtoken.NewClient(ctx, audience, option.WithAuthCredentialsJSON(option.ServiceAccount, serviceAccountJSON))
 	if err != nil {
 		return nil, err
 	}

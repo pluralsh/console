@@ -60,13 +60,10 @@ versions:
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ["v3.6.3 was explicitly marked as \u201CDo not use\u201D; the main actionable\
-        \ change is to move off 3.6.3 to a later patch (3.6.4+) and proceed to 3.6.5.",
-      'v3.6.5 provides updated controller/server manifests (install.yaml) and updated
-        CLI binaries for all supported platforms (same install process, newer artifacts).']
-    breaking_changes: ["No breaking changes were listed in the provided notes for\
-        \ 3.6.3\u21923.6.5; however 3.6.3 is a known-bad release and should not be\
-        \ deployed."]
+    features: [v3.6.5 is the recommended patch level versus v3.6.3 (which is explicitly
+        flagged as 'Do not use'; prefer v3.6.4 or later).]
+    breaking_changes: [v3.6.3 is marked as a known-bad release; treat upgrading away
+        from it as urgent and avoid deploying/rolling back to it.]
   chart_version: 0.45.12
   images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
 - version: 3.6.3

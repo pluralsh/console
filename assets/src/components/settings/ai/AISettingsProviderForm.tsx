@@ -77,6 +77,18 @@ export function AISettingsProviderForm({
         />
       )
       break
+    case AiProvider.Xai:
+      settings = (
+        <OpenAISettings
+          enabled={enabled}
+          settings={providerSettings.xai}
+          modelDefaults={modelDefaultsByProvider?.[AiProvider.Xai]}
+          updateSettings={(settings) =>
+            updateProviderSettings({ xai: settings })
+          }
+        />
+      )
+      break
     case AiProvider.Anthropic:
       settings = (
         <AnthropicSettings
