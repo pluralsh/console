@@ -7,7 +7,7 @@ packaging==24.1
 PyYAML==6.0.2
 requests==2.32.3
 semantic-version==2.10.0
-soupsieve==2.5
-urllib3==2.2.3
+soupsieve==2.8.4
+urllib3==2.7.0
 exa-py
 openai

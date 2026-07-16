@@ -4,6 +4,36 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
+- version: 0.18.1
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Release notes provided are for **v0.18.0**, not v0.18.1; you\
+        \ still need the v0.18.1 changelog (and helm chart changelog) to accurately\
+        \ summarize the 0.18.0 \u2192 0.18.1 upgrade.", 'v0.18.0 includes helm packaging/chart
+        restructuring: chart renamed to **kserve-resources** and multiple charts are
+        published (CRDs, resources, runtime-configs, llmisvc/localmodel variants).
+        Ensure your upgrade plan accounts for the chart split/rename and installs
+        the correct artifacts in the right order (CRDs before controllers/resources).']
+    features: [Namespace-scoped ModelCache support (download jobs can run in a jobNamespace).,
+      Added CSV and Parquet marshallers., CloudEvents logging enhancements (log occurrence
+        and record time)., OpenAI Responses API support via a new /v1/responses HTTPRoute.,
+      Added output offset_mapping for HuggingFace token classification., 'LLMInferenceService:
+        autoscaling improvements (KEDA/HPA integration, LWS target for multi-node
+        workloads), config updates including TLS flag and extra_headers support, and
+        multiple dependency upgrades (LLM-D, vLLM, WVA).', 'Ingress/Gateway: added
+        DisableHTTPRouteTimeout flag for GKE Gateway and enhanced Gateway refs (SectionName
+        support).']
+    breaking_changes: ['Potentially breaking packaging change: helm chart rename to
+        **kserve-resources** and publication of multiple chart artifacts may require
+        changing the chart name/reference in your helm commands and CI pipelines.',
+      'LLMInferenceService scaling fields changed: default for MinReplicas and MaxReplicas
+        made a required int32; manifests/values depending on previous behavior may
+        fail validation.']
+  chart_version: v0.18.1
+  images: []
 - version: 0.18.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []

@@ -5,6 +5,7 @@ export const STACK_TYPE_LABELS: Record<StackType, string> = {
   [StackType.Custom]: 'Custom',
   [StackType.Terraform]: 'Terraform',
   [StackType.Terragrunt]: 'Terragrunt',
+  [StackType.Pulumi]: 'Pulumi',
 }
 
 const TERRAFORM_FAMILY_STACK_TYPES = new Set<StackType>([

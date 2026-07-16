@@ -92,7 +92,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				ObjectMeta: metav1.ObjectMeta{Name: stackName, Namespace: namespace},
 				Spec: v1alpha1.InfrastructureStackSpec{
 					Name: lo.ToPtr(stackName),
-					Type: gqlclient.StackTypeTerraform,
+					Type: gqlclient.StackTypePulumi,
 					RepositoryRef: corev1.ObjectReference{
 						Name:      repoName,
 						Namespace: namespace,
@@ -107,6 +107,9 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 					},
 					Configuration: &v1alpha1.StackConfiguration{
 						Version: lo.ToPtr("v0.0.1"),
+						Pulumi: &v1alpha1.PulumiConfiguration{
+							BackendUrl: lo.ToPtr("s3://pulumi-state"),
+						},
 					},
 					Environment: []v1alpha1.StackEnvironment{
 						{
@@ -395,7 +398,11 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(nil, nil)
-			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
+			fakeConsoleClient.On("CreateStack", mock.Anything, mock.MatchedBy(func(attributes gqlclient.StackAttributes) bool {
+				return attributes.Configuration != nil &&
+					attributes.Configuration.Pulumi != nil &&
+					lo.FromPtr(attributes.Configuration.Pulumi.BackendURL) == "s3://pulumi-state"
+			})).Return(test.returnCreateStack, nil)
 			reconciler := &controller.InfrastructureStackReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
