@@ -14,7 +14,6 @@ import { formatTokenCount } from '../../common/workbenchUsage'
 type BudgetUnit = 'dollars' | 'tokens'
 
 const TOKEN_THOUSAND = 1_000
-const TOKEN_TEN_THOUSAND = 10_000
 const TOKEN_HUNDRED_THOUSAND = 100_000
 const TOKEN_MILLION = 1_000_000
 const DOLLAR_DIME = 0.1
@@ -28,7 +27,6 @@ const HOLD_REPEAT_INTERVAL_MS = 100
  * compact label (e.g. 1.2B steps by 0.1B, not 10M which would look like a no-op).
  */
 const tokenStepSize = (amount: number) => {
-  if (amount < TOKEN_HUNDRED_THOUSAND) return TOKEN_TEN_THOUSAND
   if (amount < TOKEN_MILLION) return TOKEN_HUNDRED_THOUSAND
 
   // Match formatTokenCount compact notation (1 fraction digit).
@@ -122,7 +120,7 @@ export function WorkbenchBudgetAmountControl({
   const amount = unit === 'tokens' ? (value?.tokens ?? 0) : (value?.cost ?? 0)
   const increment =
     unit === 'tokens'
-      ? tokenStepSize(amount > 0 ? amount : TOKEN_THOUSAND)
+      ? tokenStepSize(amount > 0 ? amount : TOKEN_HUNDRED_THOUSAND)
       : dollarStepSize(amount)
   const displayAmount = draft ?? formatBudgetAmount(unit, amount)
   const amountRef = useRef(amount)
@@ -298,8 +296,8 @@ const normalizeBudgetAmount = (unit: BudgetUnit, amount: number) => {
     return Math.min(MAX_DOLLAR_LIMIT, Math.round(amount * 100) / 100)
   }
 
-  // Under 10K → 10K; otherwise snap to the magnitude step (e.g. 1.23M → 1.2M).
-  if (amount < TOKEN_TEN_THOUSAND) return TOKEN_TEN_THOUSAND
+  // Under 100K → 100K; otherwise snap to the magnitude step (e.g. 1.23M → 1.2M).
+  if (amount < TOKEN_HUNDRED_THOUSAND) return TOKEN_HUNDRED_THOUSAND
 
   const step = tokenStepSize(amount)
   return Math.round(amount / step) * step
