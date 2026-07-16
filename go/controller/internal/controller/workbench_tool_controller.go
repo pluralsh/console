@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -156,7 +157,7 @@ func (in *WorkbenchToolReconciler) addOrRemoveFinalizer(ctx context.Context, wor
 
 		exists, err := in.ConsoleClient.IsWorkbenchToolExists(ctx, workbenchTool.Status.ID, nil)
 		if err != nil {
-			return lo.ToPtr(workbenchTool.Spec.Reconciliation.Requeue())
+			return new(workbenchTool.Spec.Reconciliation.Requeue())
 		}
 
 		// Remove the workbench tool from Console API if it exists.
@@ -165,7 +166,7 @@ func (in *WorkbenchToolReconciler) addOrRemoveFinalizer(ctx context.Context, wor
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(workbenchTool.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return lo.ToPtr(workbenchTool.Spec.Reconciliation.Requeue())
+				return new(workbenchTool.Spec.Reconciliation.Requeue())
 			}
 		}
 
@@ -184,7 +185,7 @@ func (in *WorkbenchToolReconciler) isAlreadyExists(ctx context.Context, workbenc
 		return workbenchTool.Status.IsReadonly(), nil
 	}
 
-	_, err := in.ConsoleClient.GetWorkbenchToolTiny(ctx, nil, lo.ToPtr(workbenchTool.ConsoleName()))
+	_, err := in.ConsoleClient.GetWorkbenchToolTiny(ctx, nil, new(workbenchTool.ConsoleName()))
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -201,7 +202,7 @@ func (in *WorkbenchToolReconciler) isAlreadyExists(ctx context.Context, workbenc
 }
 
 func (in *WorkbenchToolReconciler) handleExistingWorkbenchTool(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool) (ctrl.Result, error) {
-	exists, err := in.ConsoleClient.IsWorkbenchToolExists(ctx, nil, lo.ToPtr(workbenchTool.ConsoleName()))
+	exists, err := in.ConsoleClient.IsWorkbenchToolExists(ctx, nil, new(workbenchTool.ConsoleName()))
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
 	}
@@ -212,7 +213,7 @@ func (in *WorkbenchToolReconciler) handleExistingWorkbenchTool(ctx context.Conte
 		return common.Wait(), nil
 	}
 
-	apiWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, lo.ToPtr(workbenchTool.ConsoleName()))
+	apiWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, new(workbenchTool.ConsoleName()))
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
 	}
@@ -235,13 +236,13 @@ func (in *WorkbenchToolReconciler) resolveMCPServerRef(ctx context.Context, work
 	ns := lo.Ternary(ref.Namespace == "", workbenchTool.Namespace, ref.Namespace)
 	if err := in.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ns}, mcpServer); err != nil {
 		if errors.IsNotFound(err) {
-			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("MCPServer not found: %s", err.Error())
+			return nil, new(common.Wait()), fmt.Errorf("MCPServer not found: %s", err.Error())
 		}
 		return nil, nil, fmt.Errorf("failed to get MCPServer: %s", err.Error())
 	}
 
 	if !mcpServer.Status.HasID() {
-		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("MCPServer is not ready")
+		return nil, new(common.Wait()), fmt.Errorf("MCPServer is not ready")
 	}
 
 	return mcpServer.Status.ID, nil, nil
@@ -257,13 +258,13 @@ func (in *WorkbenchToolReconciler) resolveCloudConnectionRef(ctx context.Context
 	ns := lo.Ternary(ref.Namespace == "", workbenchTool.Namespace, ref.Namespace)
 	if err := in.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ns}, cloudConnection); err != nil {
 		if errors.IsNotFound(err) {
-			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("CloudConnection not found: %s", err.Error())
+			return nil, new(common.Wait()), fmt.Errorf("CloudConnection not found: %s", err.Error())
 		}
 		return nil, nil, fmt.Errorf("failed to get CloudConnection: %s", err.Error())
 	}
 
 	if !cloudConnection.Status.HasID() {
-		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("CloudConnection is not ready")
+		return nil, new(common.Wait()), fmt.Errorf("CloudConnection is not ready")
 	}
 
 	return cloudConnection.Status.ID, nil, nil
@@ -272,7 +273,7 @@ func (in *WorkbenchToolReconciler) resolveCloudConnectionRef(ctx context.Context
 func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, project *v1alpha1.Project, mcpServerID, cloudConnectionID *string, changed bool) (*console.WorkbenchToolFragment, error) {
 	logger := log.FromContext(ctx)
 
-	existingWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, lo.ToPtr(workbenchTool.ConsoleName()))
+	existingWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, new(workbenchTool.ConsoleName()))
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return nil, err
@@ -286,7 +287,7 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 		return in.ConsoleClient.CreateWorkbenchTool(ctx, attrs)
 	}
 
-	if changed {
+	if changed || in.cloudConnectionChanged(existingWorkbenchTool, cloudConnectionID) {
 		attrs, err := workbenchTool.Attributes(ctx, in.Client, project.Status.ID, mcpServerID, cloudConnectionID)
 		if err != nil {
 			return nil, err
@@ -296,6 +297,15 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 	}
 
 	return existingWorkbenchTool, nil
+}
+
+func (in *WorkbenchToolReconciler) cloudConnectionChanged(workbenchTool *console.WorkbenchToolFragment, cloudConnectionID *string) bool {
+	existingCloudConnectionID := ""
+	if workbenchTool.CloudConnection != nil {
+		existingCloudConnectionID = workbenchTool.CloudConnection.ID
+	}
+
+	return existingCloudConnectionID != lo.FromPtr(cloudConnectionID)
 }
 
 // SetupWithManager is responsible for initializing a new reconciler within the provided ctrl.Manager.

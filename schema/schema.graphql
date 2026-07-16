@@ -1250,6 +1250,8 @@ type RootMutationType {
 
   upsertCloudConnection(attributes: CloudConnectionAttributes!): CloudConnection
 
+  updateCloudConnection(id: ID!, attributes: CloudConnectionAttributes!): CloudConnection
+
   deleteCloudConnection(id: ID!): CloudConnection
 
   dismissOnboarding: DeploymentSettings

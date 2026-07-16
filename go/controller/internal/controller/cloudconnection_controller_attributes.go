@@ -6,25 +6,12 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/utils"
-	"github.com/samber/lo"
 )
-
-func (r *CloudConnectionReconciler) getProviderSettingsSecretRef(spec v1alpha1.CloudConnectionSpec) v1alpha1.ObjectKeyReference {
-	switch spec.Provider {
-	case v1alpha1.AWS:
-		return spec.Configuration.AWS.SecretAccessKey
-	case v1alpha1.Azure:
-		return spec.Configuration.Azure.ClientSecret
-	case v1alpha1.GCP:
-		return spec.Configuration.GCP.ServiceAccountKey
-	case v1alpha1.Vsphere:
-		return spec.Configuration.Vsphere.Password
-	}
-	return v1alpha1.ObjectKeyReference{}
-}
 
 func (r *CloudConnectionReconciler) toCloudConnectionAttributes(ctx context.Context, connection v1alpha1.CloudConnection) (*console.CloudConnectionAttributes, error) {
 	switch connection.Spec.Provider {
@@ -119,8 +106,8 @@ func (r *CloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx c
 		Provider: console.ProviderAWS,
 		Configuration: console.CloudConnectionConfigurationAttributes{
 			AWS: &console.AWSCloudConnectionAttributes{
-				AccessKeyID:     lo.ToPtr(aws.AccessKeyId),
-				SecretAccessKey: lo.ToPtr(string(secretAccessKey)),
+				AccessKeyID:     new(aws.AccessKeyId),
+				SecretAccessKey: new(string(secretAccessKey)),
 				Region:          aws.Region,
 				Regions:         lo.ToSlicePtr(aws.Regions),
 			},

@@ -52,6 +52,7 @@ type ConsoleClient interface {
 	GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error)
 	GetCatalogTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalogTiny, error)
 	UpsertCloudConnection(ctx context.Context, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCloudConnection, error)
+	UpdateCloudConnection(ctx context.Context, id string, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateCloudConnection, error)
 	DeleteCloudConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCloudConnection, error)
 	GetCloudConnection(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCloudConnection, error)
 	CreateCluster(ctx context.Context, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateCluster, error)
@@ -38964,6 +38965,17 @@ func (t *UpsertCloudConnection) GetUpsertCloudConnection() *CloudConnectionFragm
 	return t.UpsertCloudConnection
 }
 
+type UpdateCloudConnection struct {
+	UpdateCloudConnection *CloudConnectionFragment "json:\"updateCloudConnection,omitempty\" graphql:\"updateCloudConnection\""
+}
+
+func (t *UpdateCloudConnection) GetUpdateCloudConnection() *CloudConnectionFragment {
+	if t == nil {
+		t = &UpdateCloudConnection{}
+	}
+	return t.UpdateCloudConnection
+}
+
 type DeleteCloudConnection struct {
 	DeleteCloudConnection *CloudConnectionFragment "json:\"deleteCloudConnection,omitempty\" graphql:\"deleteCloudConnection\""
 }
@@ -44493,6 +44505,59 @@ func (c *Client) UpsertCloudConnection(ctx context.Context, attributes CloudConn
 
 	var res UpsertCloudConnection
 	if err := c.Client.Post(ctx, "UpsertCloudConnection", UpsertCloudConnectionDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateCloudConnectionDocument = `mutation UpdateCloudConnection ($id: ID!, $attributes: CloudConnectionAttributes!) {
+	updateCloudConnection(id: $id, attributes: $attributes) {
+		... CloudConnectionFragment
+	}
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpdateCloudConnection(ctx context.Context, id string, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateCloudConnection, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateCloudConnection
+	if err := c.Client.Post(ctx, "UpdateCloudConnection", UpdateCloudConnectionDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -66649,6 +66714,7 @@ var DocumentOperationNames = map[string]string{
 	GetCatalogDocument:                                "GetCatalog",
 	GetCatalogTinyDocument:                            "GetCatalogTiny",
 	UpsertCloudConnectionDocument:                     "UpsertCloudConnection",
+	UpdateCloudConnectionDocument:                     "UpdateCloudConnection",
 	DeleteCloudConnectionDocument:                     "DeleteCloudConnection",
 	GetCloudConnectionDocument:                        "GetCloudConnection",
 	CreateClusterDocument:                             "CreateCluster",

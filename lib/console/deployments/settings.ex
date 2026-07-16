@@ -318,6 +318,18 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
+  Updates a cloud connection in place, fails if a user isn't an admin
+  """
+  @spec update_cloud_connection(map, binary, User.t()) :: cloud_connection_resp
+  def update_cloud_connection(attrs, id, %User{} = user) do
+    get_cloud_connection!(id)
+    |> Repo.preload([:read_bindings])
+    |> allow(user, :write)
+    |> when_ok(&CloudConnection.changeset(&1, attrs))
+    |> when_ok(:update)
+  end
+
+  @doc """
   Deletes a cloud connection, fails if a user isn't an admin
   """
   @spec delete_cloud_connection(binary, User.t()) :: cloud_connection_resp

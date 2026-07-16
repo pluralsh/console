@@ -185,6 +185,85 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
     end
   end
 
+  describe "updateCloudConnection" do
+    test "admins can update a cloud connection by id" do
+      conn = insert(:cloud_connection)
+
+      {:ok, %{data: %{"updateCloudConnection" => updated}}} = run_query("""
+        mutation updateCloudConnection($id: ID!, $attrs: CloudConnectionAttributes!) {
+          updateCloudConnection(id: $id, attributes: $attrs) {
+            id
+            name
+            provider
+            configuration { aws { accessKeyId } }
+          }
+        }
+      """, %{
+        "id" => conn.id,
+        "attrs" => %{
+          "name" => "updated-cloud-connection",
+          "provider" => "AWS",
+          "configuration" => %{"aws" => %{"accessKeyId" => "test", "secretAccessKey" => "test", "region" => "us-east-1"}},
+        }
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == conn.id
+      assert updated["name"] == "updated-cloud-connection"
+      assert updated["provider"] == "AWS"
+      assert updated["configuration"]["aws"]["accessKeyId"] == "test"
+    end
+
+    test "admins can update bindings on a cloud connection by id" do
+      group = insert(:group)
+      other_group = insert(:group)
+      conn = insert(:cloud_connection, provider: :aws, read_bindings: [%{group_id: group.id}])
+
+      {:ok, %{data: %{"updateCloudConnection" => updated}}} = run_query("""
+        mutation updateCloudConnection($id: ID!, $attrs: CloudConnectionAttributes!) {
+          updateCloudConnection(id: $id, attributes: $attrs) {
+            id
+            name
+            readBindings { group { name } }
+          }
+        }
+      """, %{
+        "id" => conn.id,
+        "attrs" => %{
+          "name" => conn.name,
+          "provider" => "AWS",
+          "configuration" => %{"aws" => %{"accessKeyId" => "test", "secretAccessKey" => "test", "region" => "us-east-1"}},
+          "readBindings" => [%{"groupId" => group.id}, %{"groupId" => other_group.id}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == conn.id
+      assert updated["name"] == conn.name
+
+      bindings = updated["readBindings"]
+      assert MapSet.new(bindings, & &1["group"]["name"])
+             |> MapSet.equal?(MapSet.new([group.name, other_group.name]))
+    end
+
+    test "nonadmins cannot update a cloud connection" do
+      conn = insert(:cloud_connection)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation updateCloudConnection($id: ID!, $attrs: CloudConnectionAttributes!) {
+          updateCloudConnection(id: $id, attributes: $attrs) {
+            id
+          }
+        }
+      """, %{
+        "id" => conn.id,
+        "attrs" => %{
+          "name" => "test",
+          "provider" => "AWS",
+          "configuration" => %{"aws" => %{"accessKeyId" => "test", "secretAccessKey" => "test", "region" => "us-east-1"}},
+        }
+      }, %{current_user: insert(:user)})
+    end
+  end
+
   describe "deleteCloudConnection" do
     test "admins can delete a cloud connection" do
       conn = insert(:cloud_connection)
