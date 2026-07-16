@@ -217,6 +217,7 @@ export function WorkbenchJobCreateInput({
                 disabled={disabled || loading}
               />
               <WorkbenchTokenLimitSelector
+                workbenchId={workbenchId}
                 value={promptModes?.budget}
                 onChange={(budget) =>
                   setPromptModes((modes) => updateBudgetModes(modes, budget))

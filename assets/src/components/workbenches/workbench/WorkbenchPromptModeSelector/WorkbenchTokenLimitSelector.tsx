@@ -15,15 +15,18 @@ import {
   WorkbenchBudgetAmountControl,
   formatBudgetLimitLabel,
 } from './WorkbenchBudgetLimit'
+import { WorkbenchBudgetSpendCapWarning } from './WorkbenchBudgetSpendCapWarning'
 import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
 
 const PANEL_WIDTH = 308
 
 export function WorkbenchTokenLimitSelector({
+  workbenchId,
   value,
   onChange,
   disabled = false,
 }: {
+  workbenchId?: Nullable<string>
   value: WorkbenchJobBudgetAttributes | null | undefined
   onChange: (value: WorkbenchJobBudgetAttributes | undefined) => void
   disabled?: boolean
@@ -107,6 +110,8 @@ export function WorkbenchTokenLimitSelector({
             flexDirection: 'column',
             gap: theme.spacing.medium,
             width: '100%',
+            minWidth: 0,
+            overflow: 'hidden',
             padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
             backgroundColor: theme.colors['fill-one'],
             border: 'none',
@@ -128,6 +133,11 @@ export function WorkbenchTokenLimitSelector({
             onChange={onChange}
             disabled={disabled}
             stacked
+          />
+          <WorkbenchBudgetSpendCapWarning
+            workbenchId={workbenchId}
+            budget={value}
+            skip={!isOpen}
           />
         </Card>
       </WorkbenchPromptPopover>

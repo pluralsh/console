@@ -10,6 +10,7 @@ import {
 } from 'react'
 import styled from 'styled-components'
 import { formatTokenCount } from '../../common/workbenchUsage'
+import { WorkbenchBudgetSpendCapWarning } from './WorkbenchBudgetSpendCapWarning'
 
 type BudgetUnit = 'dollars' | 'tokens'
 
@@ -38,10 +39,12 @@ const dollarStepSize = (amount: number) =>
   amount > 0 && amount < 1 ? DOLLAR_DIME : DOLLAR_INCREMENT
 
 export function WorkbenchBudgetLimitControl({
+  workbenchId,
   value,
   onChange,
   disabled,
 }: {
+  workbenchId?: Nullable<string>
   value: WorkbenchJobBudgetAttributes | null | undefined
   onChange: (value: WorkbenchJobBudgetAttributes | undefined) => void
   disabled: boolean
@@ -75,12 +78,18 @@ export function WorkbenchBudgetLimitControl({
         </Body2P>
       </Flex>
       {enabled && (
-        <WorkbenchBudgetAmountControl
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          onUnitChange={setPreferredUnit}
-        />
+        <>
+          <WorkbenchBudgetAmountControl
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            onUnitChange={setPreferredUnit}
+          />
+          <WorkbenchBudgetSpendCapWarning
+            workbenchId={workbenchId}
+            budget={value}
+          />
+        </>
       )}
     </Flex>
   )

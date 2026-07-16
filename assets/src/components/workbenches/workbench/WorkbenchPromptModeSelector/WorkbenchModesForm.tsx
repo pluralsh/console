@@ -19,10 +19,12 @@ import {
 } from './workbenchPromptModes'
 
 export function WorkbenchModesForm({
+  workbenchId,
   value,
   onChange,
   disabled = false,
 }: {
+  workbenchId?: Nullable<string>
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   disabled?: boolean
@@ -96,6 +98,7 @@ export function WorkbenchModesForm({
         />
       </Flex>
       <WorkbenchBudgetLimitControl
+        workbenchId={workbenchId}
         value={value?.budget}
         onChange={(budget) => onChange(updateBudgetModes(value, budget))}
         disabled={disabled}

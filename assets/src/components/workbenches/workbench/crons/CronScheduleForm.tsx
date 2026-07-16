@@ -442,6 +442,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                 ) : (
                   <>
                     <WorkbenchModesForm
+                      workbenchId={workbenchId}
                       value={formState.modes}
                       onChange={(modes) =>
                         setFormState((prev) => ({ ...prev, modes }))
