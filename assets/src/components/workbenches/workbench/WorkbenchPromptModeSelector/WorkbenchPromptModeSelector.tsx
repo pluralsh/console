@@ -170,7 +170,7 @@ export function WorkbenchPromptModeSelector({
         ...buttonProps,
         ...(isOpen ? { style: { zIndex: theme.zIndexes.tooltip + 1 } } : {}),
       })}
-      <ModeDropdownPanel
+      <WorkbenchPromptPopover
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false)
@@ -281,12 +281,12 @@ export function WorkbenchPromptModeSelector({
             />
           </Flex>
         </Card>
-      </ModeDropdownPanel>
+      </WorkbenchPromptPopover>
     </>
   )
 }
 
-function ModeDropdownPanel({
+export function WorkbenchPromptPopover({
   isOpen,
   onClose,
   floating,

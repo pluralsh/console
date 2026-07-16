@@ -88,6 +88,17 @@ export function updateCodingModes(
   return { ...modes, coding: { ...modes?.coding, ...coding } }
 }
 
+export function updateBudgetModes(
+  modes: WorkbenchJobModesAttributes | null,
+  budget: WorkbenchJobBudgetAttributes | undefined
+): WorkbenchJobModesAttributes | null {
+  const next = { ...modes, budget }
+
+  return !budget && !next.plan && next.coding == null && next.model == null
+    ? null
+    : next
+}
+
 export function defaultPromptModesFromWorkbench(
   workbench:
     | {
