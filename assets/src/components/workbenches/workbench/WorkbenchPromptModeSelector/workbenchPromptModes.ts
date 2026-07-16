@@ -46,7 +46,9 @@ function budgetAttributes(
 
   if (cost == null && tokens == null) return
 
-  return { cost, tokens }
+  // Only one budget unit is active; explicitly clear the other on save.
+  if (cost != null) return { cost, tokens: null }
+  return { tokens, cost: null }
 }
 
 export function updateCodingModes(

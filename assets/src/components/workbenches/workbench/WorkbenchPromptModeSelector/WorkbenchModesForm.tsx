@@ -379,7 +379,9 @@ const budgetForAmount = (
   unit: BudgetUnit,
   amount: number
 ): WorkbenchJobBudgetAttributes =>
-  unit === 'tokens' ? { tokens: amount } : { cost: amount }
+  unit === 'tokens'
+    ? { tokens: amount, cost: null }
+    : { cost: amount, tokens: null }
 
 const INFINITY_SYMBOL = '∞'
 
