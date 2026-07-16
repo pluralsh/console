@@ -34,13 +34,27 @@ import {
 
 type BudgetUnit = 'dollars' | 'tokens'
 
-const TOKEN_INCREMENT = 100_000
+const TOKEN_THOUSAND = 1_000
+const TOKEN_HUNDRED_THOUSAND = 100_000
+const TOKEN_MILLION = 1_000_000
 const DEFAULT_TOKEN_LIMIT = 400_000
 const DOLLAR_INCREMENT = 1
 const DEFAULT_DOLLAR_LIMIT = 5
 const MAX_DOLLAR_LIMIT = 1_000_000
 const HOLD_REPEAT_DELAY_MS = 400
 const HOLD_REPEAT_INTERVAL_MS = 100
+
+/**
+ * Rounding / step unit scales with magnitude so each +/- click changes the
+ * compact label (e.g. 1.2B steps by 0.1B, not 10M which would look like a no-op).
+ */
+const tokenStepSize = (amount: number) => {
+  if (amount < TOKEN_HUNDRED_THOUSAND) return TOKEN_THOUSAND
+  if (amount < TOKEN_MILLION) return TOKEN_HUNDRED_THOUSAND
+
+  // Match formatTokenCount compact notation (1 fraction digit).
+  return 10 ** (Math.floor(Math.log10(amount)) - 1)
+}
 
 export function WorkbenchModesForm({
   value,
@@ -170,7 +184,10 @@ function BudgetLimitControl({
     unit === 'tokens'
       ? (value?.tokens ?? DEFAULT_TOKEN_LIMIT)
       : (value?.cost ?? DEFAULT_DOLLAR_LIMIT)
-  const increment = unit === 'tokens' ? TOKEN_INCREMENT : DOLLAR_INCREMENT
+  const increment =
+    unit === 'tokens'
+      ? tokenStepSize(amount > 0 ? amount : TOKEN_THOUSAND)
+      : DOLLAR_INCREMENT
   const displayAmount = draft ?? formatBudgetAmount(unit, amount)
   const amountRef = useRef(amount)
   const unitRef = useRef(unit)
@@ -398,11 +415,11 @@ const formatBudgetAmount = (unit: BudgetUnit, amount: number) => {
 }
 
 const parseBudgetInput = (text: string) => {
-  const trimmed = text.trim().replace(/^\$/, '').replace(/,/g, '')
+  const trimmed = text.trim().replace(/^\$/, '').replace(/[,\s]/g, '')
   if (!trimmed) return null
   if (trimmed === INFINITY_SYMBOL || /^inf(inity)?$/i.test(trimmed)) return 0
 
-  const match = trimmed.match(/^(\d+(?:\.\d+)?)\s*([kmb])?$/i)
+  const match = trimmed.match(/^(\d+(?:\.\d+)?)([kmb])?$/i)
   if (!match) return null
 
   const value = Number(match[1])
@@ -411,9 +428,9 @@ const parseBudgetInput = (text: string) => {
   const suffix = match[2]?.toLowerCase()
   const multiplier =
     suffix === 'k'
-      ? 1_000
+      ? TOKEN_THOUSAND
       : suffix === 'm'
-        ? 1_000_000
+        ? TOKEN_MILLION
         : suffix === 'b'
           ? 1_000_000_000
           : 1
@@ -429,8 +446,11 @@ const normalizeBudgetAmount = (unit: BudgetUnit, amount: number) => {
     return Math.min(MAX_DOLLAR_LIMIT, Math.round(amount * 100) / 100)
   }
 
-  const rounded = Math.round(amount / TOKEN_INCREMENT) * TOKEN_INCREMENT
-  return rounded <= 0 ? 0 : rounded
+  // Under 1K → 1K; otherwise snap to the magnitude step (e.g. 1.23M → 1.2M).
+  if (amount < TOKEN_THOUSAND) return TOKEN_THOUSAND
+
+  const step = tokenStepSize(amount)
+  return Math.round(amount / step) * step
 }
 
 const ControlsGridSC = styled.div(({ theme }) => ({
