@@ -51,6 +51,8 @@ const DEFAULT_CONFIGURATION = {
     services: true,
   },
   flows: {
+    hidePermissions: false,
+    hideStartWorkbenchJob: false,
     pipelines: true,
     previews: true,
     workbenches: true,
