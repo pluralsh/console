@@ -13,20 +13,18 @@ const RECENT_JOBS_FOR_WARNING = 3
 export function WorkbenchBudgetSpendCapWarning({
   workbenchId,
   budget,
-  skip = false,
 }: {
   workbenchId?: Nullable<string>
   budget?: WorkbenchJobBudgetAttributes | null
-  skip?: boolean
 }) {
   const theme = useTheme()
   const hasCap =
     (budget?.tokens != null && budget.tokens > 0) ||
     (budget?.cost != null && budget.cost > 0)
 
-  const { data } = useWorkbenchJobsQuery({
+  const { data, loading } = useWorkbenchJobsQuery({
     variables: { id: workbenchId ?? '', first: RECENT_JOBS_FOR_WARNING },
-    skip: skip || !workbenchId || !hasCap,
+    skip: !workbenchId || !hasCap,
     fetchPolicy: 'cache-first',
   })
 
@@ -49,7 +47,8 @@ export function WorkbenchBudgetSpendCapWarning({
     return { stopped, total: jobs.length }
   }, [budget, data?.workbench?.runs, hasCap])
 
-  if (!summary) return null
+  if (!summary)
+    return loading && hasCap && workbenchId ? <WarningPlaceholderSC /> : null
 
   return (
     <WarningSC>
@@ -79,6 +78,12 @@ const WarningSC = styled.div(({ theme }) => ({
   flexShrink: 0,
   '& > svg': { flexShrink: 0, marginTop: 1 },
 }))
+
+const WarningPlaceholderSC = styled.div({
+  width: '100%',
+  height: 72,
+  flexShrink: 0,
+})
 
 const WarningTextSC = styled.p(({ theme }) => ({
   ...theme.partials.text.caption,

@@ -38,6 +38,8 @@ export function WorkbenchTokenLimitSelector({
   const { floating, triggerRef: mergedTriggerRef } = useFloatingDropdown({
     triggerRef,
     width: PANEL_WIDTH,
+    maxHeight: 'auto',
+    minHeight: 0,
     placement: 'left',
   })
   const { buttonProps } = useButton(
@@ -137,7 +139,6 @@ export function WorkbenchTokenLimitSelector({
           <WorkbenchBudgetSpendCapWarning
             workbenchId={workbenchId}
             budget={value}
-            skip={!isOpen}
           />
         </Card>
       </WorkbenchPromptPopover>
