@@ -31,6 +31,7 @@ import {
 } from '../cluster/pod/logs/PodLogs'
 import { DateTimeFormInput } from './DateTimeFormInput'
 import { isEmpty } from 'lodash'
+import { TruncateEnd } from '../../utils/table/Truncate'
 
 export type LogsFiltersT = {
   date?: DateParam
@@ -271,7 +272,13 @@ export function LogsLabelsPicker({
           }}
           triggerButton={
             <LabelsFieldSelectButtonSC isDisabled={isEmpty(facetKeys)}>
-              {field || 'Field'}
+              <TruncateEnd
+                css={{
+                  maxWidth: 180,
+                }}
+              >
+                {field || 'Field'}
+              </TruncateEnd>
             </LabelsFieldSelectButtonSC>
           }
           dropdownFooterFixed={
