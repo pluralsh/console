@@ -617,9 +617,16 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
+  error
   insertedAt
   usage {
     ...WorkbenchJobUsageTiny
+  }
+  modes {
+    budget {
+      cost
+      tokens
+    }
   }
   user {
     id
@@ -675,7 +682,6 @@ fragment WorkbenchJob on WorkbenchJob {
       ...WorkbenchToolTiny
     }
   }
-  error
   alert {
     ...Alert
   }
