@@ -95,7 +95,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
         "policyEngine" => %{"type" => "TRIVY", "maxSeverity" => "HIGH"}
       }}, %{current_user: admin_user()})
 
-      assert error["message"] =~ "policy engine is not supported for Pulumi stacks"
+      assert error.message =~ "policy engine is not supported for Pulumi stacks"
     end
 
     test "it can create a stack for a project" do
