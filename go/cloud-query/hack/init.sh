@@ -79,11 +79,28 @@ else
   echo "Database '$POSTGRES_DB' already exists."
 fi
 
+# Each Steampipe FDW embeds a Go runtime. Loading three or more of these shared
+# libraries in one PostgreSQL backend can cause symbol collisions, so create
+# them through separate psql connections.
+for extension in \
+    steampipe_postgres_aws \
+    steampipe_postgres_azure \
+    steampipe_postgres_gcp \
+    steampipe_postgres_vsphere
+do
+    if psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+        -c "CREATE EXTENSION IF NOT EXISTS ${extension};"
+    then
+        continue
+    else
+        PSQL_EXIT_CODE=$?
+        echo "ERROR: failed to create extension ${extension} with exit code $PSQL_EXIT_CODE"
+        kill "$PG_PID" 2>/dev/null || true
+        exit "$PSQL_EXIT_CODE"
+    fi
+done
+
 if psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-  CREATE EXTENSION IF NOT EXISTS steampipe_postgres_aws;
-  CREATE EXTENSION IF NOT EXISTS steampipe_postgres_azure;
-  CREATE EXTENSION IF NOT EXISTS steampipe_postgres_gcp;
-  CREATE EXTENSION IF NOT EXISTS steampipe_postgres_vsphere;
   CREATE SCHEMA IF NOT EXISTS extensions;
   CREATE EXTENSION IF NOT EXISTS ltree WITH SCHEMA extensions;
 EOSQL
@@ -91,9 +108,9 @@ then
     echo "Extensions created successfully."
 else
     PSQL_EXIT_CODE=$?
-    echo "ERROR: psql failed with exit code $PSQL_EXIT_CODE"
-    kill $PG_PID
-    exit $PSQL_EXIT_CODE
+    echo "ERROR: failed to create PostgreSQL extensions with exit code $PSQL_EXIT_CODE"
+    kill "$PG_PID" 2>/dev/null || true
+    exit "$PSQL_EXIT_CODE"
 fi
 
 # Keep PostgreSQL running in foreground
