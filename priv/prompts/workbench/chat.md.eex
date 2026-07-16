@@ -4,11 +4,14 @@ You've been mentioned in <%= @chat.type %> with the following message (id=<%= @m
 
 Do what you can to help the user with their request.
 
-<%= if @behavior == :message do %>
-You should respond in the channel once you've completed the job, and react to the original message to indicate you're working on it.
-<% else %>
-You should reply to the original message once you've completed the job (you have the message id to use above), and react to the original message to indicate you're working on it.  All text responses should be threaded replies.
-<% end %> Once done, add a final reaction to indicate completion.
+<%= cond do %>
+<% @chat.type == :teams -> %>
+Respond in the conversation using the `teams_reply` tool once you've completed the job.  You do not need channel or message ids - just call `teams_reply` with your response text.  Microsoft Teams does not support bot-set emoji reactions, so do not attempt to react to messages.
+<% @behavior == :message -> %>
+You should respond in the channel once you've completed the job, and react to the original message to indicate you're working on it.  Once done, add a final reaction to indicate completion.
+<% true -> %>
+You should reply to the original message once you've completed the job (you have the message id to use above), and react to the original message to indicate you're working on it.  All text responses should be threaded replies.  Once done, add a final reaction to indicate completion.
+<% end %>
 
 
 <%= if is_binary(@custom) && byte_size(@custom) > 0 do %>

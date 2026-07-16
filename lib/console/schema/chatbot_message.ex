@@ -6,6 +6,11 @@ defmodule Console.Schema.ChatbotMessage do
     field :message, :binary
     field :channel, :string
 
+    # reply coordinates for providers that reply out-of-band (e.g. teams bot connector)
+    field :service_url,     :string
+    field :conversation_id, :string
+    field :activity_id,     :string
+
     belongs_to :chat_connection, ChatConnection
     belongs_to :workbench_job, WorkbenchJob
 
@@ -16,7 +21,7 @@ defmodule Console.Schema.ChatbotMessage do
     from(m in query, where: m.workbench_job_id == ^job_id)
   end
 
-  @valid ~w(message channel chat_connection_id workbench_job_id)a
+  @valid ~w(message channel service_url conversation_id activity_id chat_connection_id workbench_job_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

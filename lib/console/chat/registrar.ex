@@ -33,9 +33,11 @@ defmodule Console.Chat.Registrar do
 
   def local?(%ChatConnection{id: id}), do: Console.ClusterRing.node(id) == node()
 
+  # only slack connections run as supervised bots (outbound socket).  teams is served via inbound webhook and
+  # has no long-lived process, so it is skipped here.
   defp start_chats(chats) do
     chats
-    |> Enum.filter(&local?/1)
+    |> Enum.filter(&(local?(&1) and &1.type == :slack))
     |> Enum.reduce(%{}, fn chat, acc ->
       case DynamicSupervisor.start_child(chat) do
         {:ok, pid} -> Map.put(acc, chat.id, pid)

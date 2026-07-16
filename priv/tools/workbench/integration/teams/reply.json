@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "description": "Reply in the Teams conversation that triggered this chatbot job (via the Bot Framework connector).",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Reply body (plain text)."
+    }
+  },
+  "required": ["text"],
+  "additionalProperties": false
+}
