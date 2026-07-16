@@ -16,10 +16,8 @@ type BudgetUnit = 'dollars' | 'tokens'
 const TOKEN_THOUSAND = 1_000
 const TOKEN_HUNDRED_THOUSAND = 100_000
 const TOKEN_MILLION = 1_000_000
-const DEFAULT_TOKEN_LIMIT = 400_000
 const DOLLAR_DIME = 0.1
 const DOLLAR_INCREMENT = 1
-const DEFAULT_DOLLAR_LIMIT = 5
 const MAX_DOLLAR_LIMIT = 1_000_000
 const HOLD_REPEAT_DELAY_MS = 400
 const HOLD_REPEAT_INTERVAL_MS = 100
@@ -120,10 +118,7 @@ export function WorkbenchBudgetAmountControl({
     setDraft(null)
     onChange(defaultBudget(nextUnit))
   }
-  const amount =
-    unit === 'tokens'
-      ? (value?.tokens ?? DEFAULT_TOKEN_LIMIT)
-      : (value?.cost ?? DEFAULT_DOLLAR_LIMIT)
+  const amount = unit === 'tokens' ? (value?.tokens ?? 0) : (value?.cost ?? 0)
   const increment =
     unit === 'tokens'
       ? tokenStepSize(amount > 0 ? amount : TOKEN_THOUSAND)
@@ -246,10 +241,7 @@ export function formatBudgetLimitLabel(
 }
 
 const defaultBudget = (unit: BudgetUnit): WorkbenchJobBudgetAttributes =>
-  budgetForAmount(
-    unit,
-    unit === 'tokens' ? DEFAULT_TOKEN_LIMIT : DEFAULT_DOLLAR_LIMIT
-  )
+  budgetForAmount(unit, 0)
 
 const budgetForAmount = (
   unit: BudgetUnit,
