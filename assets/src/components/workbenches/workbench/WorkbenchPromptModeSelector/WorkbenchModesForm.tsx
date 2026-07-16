@@ -1,0 +1,425 @@
+import {
+  Flex,
+  ListBoxItem,
+  MinusIcon,
+  PlusIcon,
+  Select,
+  Switch,
+} from '@pluralsh/design-system'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import type {
+  WorkbenchJobBudgetAttributes,
+  WorkbenchJobCodingModesAttributes,
+  WorkbenchJobModesAttributes,
+} from 'generated/graphql'
+import { useRef, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { formatTokenCount } from '../../common/workbenchUsage'
+import {
+  WorkbenchPromptModeDetails,
+  workbenchPromptModeIconColor,
+} from './WorkbenchPromptModeDetails'
+import { WORKBENCH_PROMPT_MODES } from './WorkbenchPromptModeSelector'
+import {
+  attributesForPromptMode,
+  type WorkbenchPromptMode,
+  updateCodingModes,
+} from './workbenchPromptModes'
+
+type BudgetUnit = 'dollars' | 'tokens'
+
+const TOKEN_INCREMENT = 100_000
+const DEFAULT_TOKEN_LIMIT = 400_000
+const DOLLAR_INCREMENT = 1
+const DEFAULT_DOLLAR_LIMIT = 5
+const MAX_DOLLAR_LIMIT = 1_000_000
+
+export function WorkbenchModesForm({
+  value,
+  onChange,
+  disabled = false,
+}: {
+  value: WorkbenchJobModesAttributes | null
+  onChange: (value: WorkbenchJobModesAttributes | null) => void
+  disabled?: boolean
+}) {
+  const theme = useTheme()
+  const selectedMode: WorkbenchPromptMode = value?.plan ? 'plan' : 'agent'
+  const selectedConfig = WORKBENCH_PROMPT_MODES.find(
+    ({ mode }) => mode === selectedMode
+  )!
+
+  const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
+    onChange(
+      updateCodingModes(
+        value?.plan ? attributesForPromptMode('agent', value) : value,
+        coding
+      )
+    )
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+      height="100%"
+    >
+      <Flex
+        direction="column"
+        gap="small"
+      >
+        <Body2BoldP>Modes</Body2BoldP>
+        <Select
+          aria-label="Modes"
+          label="Select a mode"
+          selectedKey={selectedMode}
+          isDisabled={disabled}
+          leftContent={
+            <selectedConfig.Icon
+              size={16}
+              color={workbenchPromptModeIconColor(selectedConfig, theme)}
+            />
+          }
+          onSelectionChange={(mode) =>
+            onChange(
+              attributesForPromptMode(mode as WorkbenchPromptMode, value)
+            )
+          }
+        >
+          {WORKBENCH_PROMPT_MODES.map(({ mode, label, Icon, ...config }) => (
+            <ListBoxItem
+              key={mode}
+              label={label}
+              leftContent={
+                <Icon
+                  size={16}
+                  color={workbenchPromptModeIconColor(
+                    { label, Icon, ...config },
+                    theme
+                  )}
+                />
+              }
+            />
+          ))}
+        </Select>
+        <WorkbenchPromptModeDetails
+          config={selectedConfig}
+          mode={selectedMode}
+          approval={!!value?.coding?.approval}
+          babysit={!!value?.coding?.babysit}
+          onApprovalChange={(approval) => setCoding({ approval })}
+          onBabysitChange={(babysit) => setCoding({ babysit })}
+          showHeader={false}
+        />
+      </Flex>
+      <BudgetLimitControl
+        value={value?.budget}
+        onChange={(budget) => {
+          const nextValue = { ...value, budget }
+
+          onChange(
+            !budget &&
+              !nextValue.plan &&
+              nextValue.coding == null &&
+              nextValue.model == null
+              ? null
+              : nextValue
+          )
+        }}
+        disabled={disabled}
+      />
+    </Flex>
+  )
+}
+
+function BudgetLimitControl({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: WorkbenchJobBudgetAttributes | null | undefined
+  onChange: (value: WorkbenchJobBudgetAttributes | undefined) => void
+  disabled: boolean
+}) {
+  const enabled = value?.tokens != null || value?.cost != null
+  const [preferredUnit, setPreferredUnit] = useState<BudgetUnit>(
+    value?.cost != null ? 'dollars' : 'tokens'
+  )
+  const [draft, setDraft] = useState<string | null>(null)
+  const skipCommitRef = useRef(false)
+  const unit: BudgetUnit =
+    value?.cost != null
+      ? 'dollars'
+      : value?.tokens != null
+        ? 'tokens'
+        : preferredUnit
+
+  const setUnit = (nextUnit: BudgetUnit) => {
+    setPreferredUnit(nextUnit)
+    setDraft(null)
+    onChange(defaultBudget(nextUnit))
+  }
+  const amount =
+    unit === 'tokens'
+      ? (value?.tokens ?? DEFAULT_TOKEN_LIMIT)
+      : (value?.cost ?? DEFAULT_DOLLAR_LIMIT)
+  const increment = unit === 'tokens' ? TOKEN_INCREMENT : DOLLAR_INCREMENT
+  const displayAmount = draft ?? formatBudgetAmount(unit, amount)
+
+  const commitDraft = () => {
+    if (skipCommitRef.current) {
+      skipCommitRef.current = false
+      setDraft(null)
+      return
+    }
+    if (draft == null) return
+
+    const parsed = parseBudgetInput(unit, draft)
+    setDraft(null)
+    if (parsed == null) return
+
+    onChange(budgetForAmount(unit, normalizeBudgetAmount(unit, parsed)))
+  }
+
+  const stepBy = (delta: number) => {
+    setDraft(null)
+    if (amount <= 0 && delta < 0) return
+
+    const next =
+      amount <= 0 && delta > 0
+        ? increment
+        : normalizeBudgetAmount(unit, amount + delta)
+
+    onChange(budgetForAmount(unit, next))
+  }
+
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+      css={{ marginTop: 'auto' }}
+    >
+      <Flex
+        align="center"
+        gap="small"
+      >
+        <Switch
+          aria-label="Set token limit"
+          checked={enabled}
+          disabled={disabled}
+          onChange={(checked) => {
+            setDraft(null)
+            onChange(checked ? defaultBudget(preferredUnit) : undefined)
+          }}
+        />
+        <Body2BoldP>Set token limit</Body2BoldP>
+        <Body2P $color="text-xlight">
+          Set a dollar or token limit. Default is unlimited.
+        </Body2P>
+      </Flex>
+      {enabled && (
+        <ControlsGridSC>
+          <SegmentedControlSC>
+            <SegmentButtonSC
+              type="button"
+              $active={unit === 'dollars'}
+              disabled={disabled}
+              onClick={() => setUnit('dollars')}
+            >
+              Dollars
+            </SegmentButtonSC>
+            <SegmentButtonSC
+              type="button"
+              $active={unit === 'tokens'}
+              disabled={disabled}
+              onClick={() => setUnit('tokens')}
+            >
+              Tokens
+            </SegmentButtonSC>
+          </SegmentedControlSC>
+          <StepperSC>
+            <StepperButtonSC
+              type="button"
+              aria-label={`Decrease ${unit} limit`}
+              disabled={disabled || amount <= 0}
+              onClick={() => stepBy(-increment)}
+            >
+              <MinusIcon size={12} />
+            </StepperButtonSC>
+            <StepperValueSC>
+              <span>{unit === 'tokens' ? 'Tokens' : 'Dollars'}</span>
+              <StepperInputSC
+                aria-label={`${unit} limit`}
+                disabled={disabled}
+                value={displayAmount}
+                size={Math.max(3, displayAmount.length)}
+                onFocus={(e) => {
+                  setDraft(formatBudgetAmount(unit, amount))
+                  e.currentTarget.select()
+                }}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commitDraft}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.currentTarget.blur()
+                  if (e.key === 'Escape') {
+                    skipCommitRef.current = true
+                    e.currentTarget.blur()
+                  }
+                }}
+              />
+            </StepperValueSC>
+            <StepperButtonSC
+              type="button"
+              aria-label={`Increase ${unit} limit`}
+              disabled={
+                disabled || (unit === 'dollars' && amount >= MAX_DOLLAR_LIMIT)
+              }
+              onClick={() => stepBy(increment)}
+            >
+              <PlusIcon size={12} />
+            </StepperButtonSC>
+          </StepperSC>
+        </ControlsGridSC>
+      )}
+    </Flex>
+  )
+}
+
+const defaultBudget = (unit: BudgetUnit): WorkbenchJobBudgetAttributes =>
+  budgetForAmount(
+    unit,
+    unit === 'tokens' ? DEFAULT_TOKEN_LIMIT : DEFAULT_DOLLAR_LIMIT
+  )
+
+const budgetForAmount = (
+  unit: BudgetUnit,
+  amount: number
+): WorkbenchJobBudgetAttributes =>
+  unit === 'tokens' ? { tokens: amount } : { cost: amount }
+
+const INFINITY_SYMBOL = '∞'
+
+const formatBudgetAmount = (unit: BudgetUnit, amount: number) => {
+  if (amount <= 0) return INFINITY_SYMBOL
+  if (unit === 'tokens') return formatTokenCount(amount) ?? '0'
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}
+
+const parseBudgetInput = (unit: BudgetUnit, text: string) => {
+  const trimmed = text.trim().replace(/^\$/, '').replace(/,/g, '')
+  if (!trimmed) return null
+  if (trimmed === INFINITY_SYMBOL || /^inf(inity)?$/i.test(trimmed)) return 0
+
+  const match = trimmed.match(/^(\d+(?:\.\d+)?)\s*([kmb])?$/i)
+  if (!match) return null
+
+  const value = Number(match[1])
+  if (!Number.isFinite(value)) return null
+
+  const suffix = match[2]?.toLowerCase()
+  const multiplier =
+    suffix === 'k'
+      ? 1_000
+      : suffix === 'm'
+        ? 1_000_000
+        : suffix === 'b'
+          ? 1_000_000_000
+          : 1
+
+  return value * multiplier
+}
+
+const normalizeBudgetAmount = (unit: BudgetUnit, amount: number) => {
+  if (amount <= 0) return 0
+
+  if (unit === 'dollars') {
+    // Accept any positive dollar amount up to $1M, including cents.
+    return Math.min(MAX_DOLLAR_LIMIT, Math.round(amount * 100) / 100)
+  }
+
+  const rounded = Math.round(amount / TOKEN_INCREMENT) * TOKEN_INCREMENT
+  return rounded <= 0 ? 0 : rounded
+}
+
+const ControlsGridSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: theme.spacing.medium,
+}))
+
+const SegmentedControlSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: theme.spacing.xxsmall,
+  height: 36,
+  padding: theme.spacing.xxsmall,
+  background: theme.colors['fill-one'],
+  border: theme.borders['fill-two'],
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
+const SegmentButtonSC = styled.button<{ $active: boolean }>(
+  ({ theme, $active }) => ({
+    ...theme.partials.text.caption,
+    color: theme.colors['text-light'],
+    background: $active ? theme.colors['fill-three'] : 'transparent',
+    border: 0,
+    borderRadius: theme.borderRadiuses.medium,
+    cursor: 'pointer',
+    '&:disabled': { cursor: 'not-allowed', opacity: 0.5 },
+  })
+)
+
+const StepperSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gridTemplateColumns: '52px 1fr 52px',
+  height: 36,
+  overflow: 'hidden',
+  background: theme.colors['fill-one'],
+  border: theme.borders['fill-two'],
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
+const StepperButtonSC = styled.button(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: theme.colors['icon-light'],
+  background: theme.colors['fill-three'],
+  border: 0,
+  cursor: 'pointer',
+  '&:disabled': { cursor: 'not-allowed', opacity: 0.5 },
+}))
+
+const StepperValueSC = styled.div(({ theme }) => ({
+  ...theme.partials.text.caption,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  color: theme.colors['text-xlight'],
+  borderInline: theme.borders['fill-two'],
+}))
+
+const StepperInputSC = styled.input(({ theme }) => ({
+  ...theme.partials.text.body2Bold,
+  fieldSizing: 'content',
+  minWidth: '3ch',
+  maxWidth: '100%',
+  padding: 0,
+  border: 0,
+  outline: 'none',
+  textAlign: 'center',
+  color: theme.colors.text,
+  background: 'transparent',
+  '&:disabled': {
+    color: theme.colors['text-disabled'],
+    cursor: 'not-allowed',
+  },
+}))
