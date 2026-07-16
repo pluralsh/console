@@ -546,6 +546,21 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   prompt
   messageBehavior
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   insertedAt
   updatedAt
   chatConnection {

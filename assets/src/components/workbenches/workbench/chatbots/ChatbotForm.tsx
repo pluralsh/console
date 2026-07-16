@@ -24,6 +24,7 @@ import {
   useWorkbenchQuery,
   WorkbenchChatbotFragment,
   WorkbenchChatbotMessageBehavior,
+  WorkbenchJobModesAttributes,
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -47,8 +48,15 @@ import { getWorkbenchBreadcrumbs } from '../Workbench'
 import { WorkbenchPromptRichInput } from '../WorkbenchPromptRichInput'
 import {
   FormCardSC,
+  SidebarBtnSC,
   StickyActionsFooterSC,
+  WorkbenchSplitLayoutSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
+import {
+  modesAttributes,
+  modesFormValue,
+} from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
   chatProviderConnectionIcon,
   chatProviderConnectionLabel,
@@ -63,7 +71,10 @@ type ChatbotFormState = {
   prompt: string
   messageBehavior: WorkbenchChatbotMessageBehavior
   userId: string
+  modes: WorkbenchJobModesAttributes | null
 }
+
+type ChatbotFormStep = 'Configuration' | 'Modes & token limit'
 
 type RouteState = {
   draftState?: ChatbotFormState
@@ -80,6 +91,8 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
   const routeState = location.state as Nullable<RouteState>
   const selectedChatbotParam =
     searchParams.get(WORKBENCHES_CHATBOT_SELECTED_QUERY_PARAM) ?? undefined
+  const [currentStep, setCurrentStep] =
+    useState<ChatbotFormStep>('Configuration')
 
   const {
     data: workbenchData,
@@ -156,6 +169,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
     prompt: prompt || null,
     messageBehavior: formState.messageBehavior,
     userId: formState.userId,
+    modes: modesAttributes(formState.modes),
   }
 
   const initialFormState = getInitialFormState(
@@ -253,7 +267,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
         direction="column"
         gap="large"
         width="100%"
-        css={{ maxWidth: 750, marginInline: 'auto' }}
+        css={{ maxWidth: 968, marginInline: 'auto' }}
       >
         <StackedText
           loading={!workbenchData && workbenchLoading}
@@ -271,80 +285,56 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
             $height={300}
           />
         ) : (
-          <FormCardSC>
+          <WorkbenchSplitLayoutSC>
             <Flex
               direction="column"
-              gap="large"
-              height="100%"
-              width="100%"
+              width={200}
+              flexShrink={0}
+              gap="xxxsmall"
             >
+              {(
+                ['Configuration', 'Modes & token limit'] as ChatbotFormStep[]
+              ).map((step) => (
+                <SidebarBtnSC
+                  key={step}
+                  $active={currentStep === step}
+                  justifyContent="flex-start"
+                  onClick={() => setCurrentStep(step)}
+                >
+                  {step}
+                </SidebarBtnSC>
+              ))}
+            </Flex>
+            <FormCardSC>
               {formError && <GqlError error={formError} />}
               <Flex
                 direction="column"
-                gap="medium"
+                gap="large"
+                height="100%"
+                width="100%"
               >
-                <Flex
-                  direction="column"
-                  gap="small"
-                >
-                  <Flex
-                    align="center"
-                    justify="space-between"
-                  >
-                    <div
-                      css={{
-                        fontSize: '14px',
-                        fontWeight: 600,
-                      }}
+                {currentStep === 'Configuration' ? (
+                  <>
+                    <Flex
+                      direction="column"
+                      gap="medium"
                     >
-                      Select chatbot*
-                    </div>
-                    <InlineA
-                      href=""
-                      onClick={(e) => {
-                        e.preventDefault()
-                        navigateToCreateChatbotSettings()
-                      }}
-                      css={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      Create chatbot in settings
-                    </InlineA>
-                  </Flex>
-                  <FormField>
-                    <Select
-                      selectedKey={formState.chatConnectionId || null}
-                      isDisabled={isSaving || connectionsLoading}
-                      label={selectedConnection?.name ?? 'Select chatbot'}
-                      leftContent={
-                        selectedConnection
-                          ? chatProviderConnectionIcon(selectedConnection.type)
-                          : undefined
-                      }
-                      onSelectionChange={(key) =>
-                        setFormState((prev) => ({
-                          ...prev,
-                          chatConnectionId: key ? String(key) : '',
-                        }))
-                      }
-                    >
-                      {[
-                        ...connections.map((connection) => (
-                          <ListBoxItem
-                            key={connection.id}
-                            leftContent={chatProviderConnectionIcon(
-                              connection.type
-                            )}
-                            description={chatProviderConnectionLabel(
-                              connection.type
-                            )}
-                            label={connection.name}
-                          />
-                        )),
-                        <ListBoxFooter key="create-chatbot-footer">
+                      <Flex
+                        direction="column"
+                        gap="small"
+                      >
+                        <Flex
+                          align="center"
+                          justify="space-between"
+                        >
+                          <div
+                            css={{
+                              fontSize: '14px',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Select chatbot*
+                          </div>
                           <InlineA
                             href=""
                             onClick={(e) => {
@@ -354,101 +344,197 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                             css={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: theme.spacing.small,
+                              gap: '4px',
                             }}
                           >
-                            <AddIcon size={14} />
                             Create chatbot in settings
                           </InlineA>
-                        </ListBoxFooter>,
-                      ]}
-                    </Select>
-                  </FormField>
-                </Flex>
-                <ChatbotChannelSelect
-                  chatConnectionId={formState.chatConnectionId}
-                  channel={formState.channel}
-                  onChannelChange={(nextChannel) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      channel: nextChannel,
-                    }))
-                  }
-                  disabled={isSaving}
-                />
-                <FormField
-                  label="Message behavior"
-                  hint="How the chatbot posts responses when a job completes."
-                >
-                  <Select
-                    selectedKey={formState.messageBehavior}
-                    isDisabled={isSaving}
-                    label={messageBehaviorLabel(formState.messageBehavior)}
-                    onSelectionChange={(key) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        messageBehavior: key as WorkbenchChatbotMessageBehavior,
-                      }))
-                    }
-                  >
-                    {messageBehaviorOptions.map((option) => (
-                      <ListBoxItem
-                        key={option.value}
-                        label={option.label}
-                        description={option.description}
+                        </Flex>
+                        <FormField>
+                          <Select
+                            selectedKey={formState.chatConnectionId || null}
+                            isDisabled={isSaving || connectionsLoading}
+                            label={selectedConnection?.name ?? 'Select chatbot'}
+                            leftContent={
+                              selectedConnection
+                                ? chatProviderConnectionIcon(
+                                    selectedConnection.type
+                                  )
+                                : undefined
+                            }
+                            onSelectionChange={(key) =>
+                              setFormState((prev) => ({
+                                ...prev,
+                                chatConnectionId: key ? String(key) : '',
+                              }))
+                            }
+                          >
+                            {[
+                              ...connections.map((connection) => (
+                                <ListBoxItem
+                                  key={connection.id}
+                                  leftContent={chatProviderConnectionIcon(
+                                    connection.type
+                                  )}
+                                  description={chatProviderConnectionLabel(
+                                    connection.type
+                                  )}
+                                  label={connection.name}
+                                />
+                              )),
+                              <ListBoxFooter key="create-chatbot-footer">
+                                <InlineA
+                                  href=""
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    navigateToCreateChatbotSettings()
+                                  }}
+                                  css={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: theme.spacing.small,
+                                  }}
+                                >
+                                  <AddIcon size={14} />
+                                  Create chatbot in settings
+                                </InlineA>
+                              </ListBoxFooter>,
+                            ]}
+                          </Select>
+                        </FormField>
+                      </Flex>
+                      <ChatbotChannelSelect
+                        chatConnectionId={formState.chatConnectionId}
+                        channel={formState.channel}
+                        onChannelChange={(nextChannel) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            channel: nextChannel,
+                          }))
+                        }
+                        disabled={isSaving}
                       />
-                    ))}
-                  </Select>
-                </FormField>
-                <WorkbenchAccessibleUserSelect
-                  key={workbenchId}
-                  workbenchId={workbenchId}
-                  selectedUserId={formState.userId}
-                  onSelectionChange={(userId) =>
-                    setFormState((prev) => ({ ...prev, userId }))
-                  }
-                  disabled={isSaving}
-                  hint="User this chatbot runs as; must have read access to the workbench."
-                />
-                <FormField
-                  label="Prompt"
-                  hint="Custom prompt text applied when this chatbot runs."
-                >
-                  <WorkbenchPromptRichInput
-                    workbenchId={workbenchId}
-                    prompt={formState.prompt}
-                    onPromptChange={(nextPrompt) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        prompt: nextPrompt,
-                      }))
-                    }
-                    disabled={isSaving}
-                    syncKey={`${mode}-${chatbot?.id ?? 'create'}`}
-                  />
-                </FormField>
+                      <FormField
+                        label="Message behavior"
+                        hint="How the chatbot posts responses when a job completes."
+                      >
+                        <Select
+                          selectedKey={formState.messageBehavior}
+                          isDisabled={isSaving}
+                          label={messageBehaviorLabel(
+                            formState.messageBehavior
+                          )}
+                          onSelectionChange={(key) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              messageBehavior:
+                                key as WorkbenchChatbotMessageBehavior,
+                            }))
+                          }
+                        >
+                          {messageBehaviorOptions.map((option) => (
+                            <ListBoxItem
+                              key={option.value}
+                              label={option.label}
+                              description={option.description}
+                            />
+                          ))}
+                        </Select>
+                      </FormField>
+                      <WorkbenchAccessibleUserSelect
+                        key={workbenchId}
+                        workbenchId={workbenchId}
+                        selectedUserId={formState.userId}
+                        onSelectionChange={(userId) =>
+                          setFormState((prev) => ({ ...prev, userId }))
+                        }
+                        disabled={isSaving}
+                        hint="User this chatbot runs as; must have read access to the workbench."
+                      />
+                      <FormField
+                        label="Prompt"
+                        hint="Custom prompt text applied when this chatbot runs."
+                      >
+                        <WorkbenchPromptRichInput
+                          workbenchId={workbenchId}
+                          prompt={formState.prompt}
+                          onPromptChange={(nextPrompt) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              prompt: nextPrompt,
+                            }))
+                          }
+                          disabled={isSaving}
+                          syncKey={`${mode}-${chatbot?.id ?? 'create'}`}
+                        />
+                      </FormField>
+                    </Flex>
+                    <StickyActionsFooterSC>
+                      <Button
+                        secondary
+                        startIcon={<ReturnIcon />}
+                        onClick={() =>
+                          navigate(getWorkbenchChatbotsAbsPath(workbenchId))
+                        }
+                        disabled={isSaving}
+                      >
+                        Back to all chatbots
+                      </Button>
+                      <Flex gap="small">
+                        <Button
+                          secondary
+                          onClick={() => handleSave()}
+                          loading={isSaving}
+                          disabled={!canSave}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          onClick={() => setCurrentStep('Modes & token limit')}
+                          disabled={
+                            !formState.chatConnectionId ||
+                            !channel ||
+                            !formState.userId
+                          }
+                        >
+                          Next
+                        </Button>
+                      </Flex>
+                    </StickyActionsFooterSC>
+                  </>
+                ) : (
+                  <>
+                    <WorkbenchModesForm
+                      value={formState.modes}
+                      onChange={(modes) =>
+                        setFormState((prev) => ({ ...prev, modes }))
+                      }
+                      disabled={isSaving}
+                    />
+                    <StickyActionsFooterSC>
+                      <Button
+                        secondary
+                        startIcon={<ReturnIcon />}
+                        onClick={() =>
+                          navigate(getWorkbenchChatbotsAbsPath(workbenchId))
+                        }
+                        disabled={isSaving}
+                      >
+                        Back to all chatbots
+                      </Button>
+                      <Button
+                        onClick={() => handleSave()}
+                        loading={isSaving}
+                        disabled={!canSave}
+                      >
+                        Save
+                      </Button>
+                    </StickyActionsFooterSC>
+                  </>
+                )}
               </Flex>
-              <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
-                <Button
-                  secondary
-                  startIcon={<ReturnIcon />}
-                  onClick={() =>
-                    navigate(getWorkbenchChatbotsAbsPath(workbenchId))
-                  }
-                  disabled={isSaving}
-                >
-                  Back to all chatbots
-                </Button>
-                <Button
-                  onClick={() => handleSave()}
-                  loading={isSaving}
-                  disabled={!canSave}
-                >
-                  Save
-                </Button>
-              </StickyActionsFooterSC>
-            </Flex>
-          </FormCardSC>
+            </FormCardSC>
+          </WorkbenchSplitLayoutSC>
         )}
       </Flex>
     </Flex>
@@ -466,6 +552,7 @@ function getInitialFormState(
     messageBehavior:
       chatbot?.messageBehavior ?? WorkbenchChatbotMessageBehavior.Reply,
     userId: chatbot?.userId ?? defaultUserId ?? '',
+    modes: modesFormValue(chatbot?.modes),
   }
 }
 
@@ -478,5 +565,6 @@ function getAttributesFromState(formState: ChatbotFormState) {
     prompt: prompt || null,
     messageBehavior: formState.messageBehavior,
     userId: formState.userId,
+    modes: modesAttributes(formState.modes),
   }
 }
