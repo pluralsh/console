@@ -80,7 +80,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       repo = insert(:git_repository)
       cluster = insert(:cluster)
 
-      {:error, %{errors: [error | _]}} = run_query("""
+      {:ok, %{errors: [error | _]}} = run_query("""
         mutation Create($attrs: StackAttributes!) {
           createStack(attributes: $attrs) {
             id
