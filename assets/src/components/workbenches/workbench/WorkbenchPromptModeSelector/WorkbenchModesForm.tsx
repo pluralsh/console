@@ -12,7 +12,13 @@ import type {
   WorkbenchJobCodingModesAttributes,
   WorkbenchJobModesAttributes,
 } from 'generated/graphql'
-import { useRef, useState } from 'react'
+import {
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import styled, { useTheme } from 'styled-components'
 import { formatTokenCount } from '../../common/workbenchUsage'
 import {
@@ -33,6 +39,8 @@ const DEFAULT_TOKEN_LIMIT = 400_000
 const DOLLAR_INCREMENT = 1
 const DEFAULT_DOLLAR_LIMIT = 5
 const MAX_DOLLAR_LIMIT = 1_000_000
+const HOLD_REPEAT_DELAY_MS = 400
+const HOLD_REPEAT_INTERVAL_MS = 100
 
 export function WorkbenchModesForm({
   value,
@@ -164,6 +172,15 @@ function BudgetLimitControl({
       : (value?.cost ?? DEFAULT_DOLLAR_LIMIT)
   const increment = unit === 'tokens' ? TOKEN_INCREMENT : DOLLAR_INCREMENT
   const displayAmount = draft ?? formatBudgetAmount(unit, amount)
+  const amountRef = useRef(amount)
+  const unitRef = useRef(unit)
+  const incrementRef = useRef(increment)
+
+  useEffect(() => {
+    amountRef.current = amount
+    unitRef.current = unit
+    incrementRef.current = increment
+  }, [amount, unit, increment])
 
   const commitDraft = () => {
     if (skipCommitRef.current) {
@@ -173,7 +190,7 @@ function BudgetLimitControl({
     }
     if (draft == null) return
 
-    const parsed = parseBudgetInput(unit, draft)
+    const parsed = parseBudgetInput(draft)
     setDraft(null)
     if (parsed == null) return
 
@@ -181,15 +198,20 @@ function BudgetLimitControl({
   }
 
   const stepBy = (delta: number) => {
+    const currentAmount = amountRef.current
+    const currentUnit = unitRef.current
+    const currentIncrement = incrementRef.current
+
     setDraft(null)
-    if (amount <= 0 && delta < 0) return
+    if (currentAmount <= 0 && delta < 0) return
 
     const next =
-      amount <= 0 && delta > 0
-        ? increment
-        : normalizeBudgetAmount(unit, amount + delta)
+      currentAmount <= 0 && delta > 0
+        ? currentIncrement
+        : normalizeBudgetAmount(currentUnit, currentAmount + delta)
 
-    onChange(budgetForAmount(unit, next))
+    amountRef.current = next
+    onChange(budgetForAmount(currentUnit, next))
   }
 
   return (
@@ -237,14 +259,13 @@ function BudgetLimitControl({
             </SegmentButtonSC>
           </SegmentedControlSC>
           <StepperSC>
-            <StepperButtonSC
-              type="button"
+            <StepperButton
               aria-label={`Decrease ${unit} limit`}
               disabled={disabled || amount <= 0}
-              onClick={() => stepBy(-increment)}
+              onStep={() => stepBy(-increment)}
             >
               <MinusIcon size={12} />
-            </StepperButtonSC>
+            </StepperButton>
             <StepperValueSC>
               <span>{unit === 'tokens' ? 'Tokens' : 'Dollars'}</span>
               <StepperInputSC
@@ -267,20 +288,84 @@ function BudgetLimitControl({
                 }}
               />
             </StepperValueSC>
-            <StepperButtonSC
-              type="button"
+            <StepperButton
               aria-label={`Increase ${unit} limit`}
               disabled={
                 disabled || (unit === 'dollars' && amount >= MAX_DOLLAR_LIMIT)
               }
-              onClick={() => stepBy(increment)}
+              onStep={() => stepBy(increment)}
             >
               <PlusIcon size={12} />
-            </StepperButtonSC>
+            </StepperButton>
           </StepperSC>
         </ControlsGridSC>
       )}
     </Flex>
+  )
+}
+
+function StepperButton({
+  onStep,
+  disabled,
+  children,
+  ...props
+}: {
+  onStep: () => void
+  disabled?: boolean
+  children: ReactNode
+} & Omit<ComponentPropsWithoutRef<'button'>, 'onClick' | 'type'>) {
+  const timeoutRef = useRef<number | null>(null)
+  const intervalRef = useRef<number | null>(null)
+  const suppressClickRef = useRef(false)
+  const onStepRef = useRef(onStep)
+
+  useEffect(() => {
+    onStepRef.current = onStep
+  }, [onStep])
+
+  const clearHold = () => {
+    if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current)
+    if (intervalRef.current != null) window.clearInterval(intervalRef.current)
+    timeoutRef.current = null
+    intervalRef.current = null
+  }
+
+  useEffect(() => clearHold, [])
+  useEffect(() => {
+    if (disabled) clearHold()
+  }, [disabled])
+
+  return (
+    <StepperButtonSC
+      type="button"
+      disabled={disabled}
+      onPointerDown={(e) => {
+        if (disabled || e.button !== 0) return
+        suppressClickRef.current = true
+        e.currentTarget.setPointerCapture(e.pointerId)
+        onStepRef.current()
+        timeoutRef.current = window.setTimeout(() => {
+          intervalRef.current = window.setInterval(
+            () => onStepRef.current(),
+            HOLD_REPEAT_INTERVAL_MS
+          )
+        }, HOLD_REPEAT_DELAY_MS)
+      }}
+      onPointerUp={clearHold}
+      onPointerCancel={clearHold}
+      onLostPointerCapture={clearHold}
+      onClick={() => {
+        // Keyboard activation still needs a click path; pointer already stepped.
+        if (suppressClickRef.current) {
+          suppressClickRef.current = false
+          return
+        }
+        if (!disabled) onStep()
+      }}
+      {...props}
+    >
+      {children}
+    </StepperButtonSC>
   )
 }
 
@@ -310,7 +395,7 @@ const formatBudgetAmount = (unit: BudgetUnit, amount: number) => {
   }).format(amount)
 }
 
-const parseBudgetInput = (unit: BudgetUnit, text: string) => {
+const parseBudgetInput = (text: string) => {
   const trimmed = text.trim().replace(/^\$/, '').replace(/,/g, '')
   if (!trimmed) return null
   if (trimmed === INFINITY_SYMBOL || /^inf(inity)?$/i.test(trimmed)) return 0
@@ -393,6 +478,8 @@ const StepperButtonSC = styled.button(({ theme }) => ({
   background: theme.colors['fill-three'],
   border: 0,
   cursor: 'pointer',
+  userSelect: 'none',
+  touchAction: 'none',
   '&:disabled': { cursor: 'not-allowed', opacity: 0.5 },
 }))
 
