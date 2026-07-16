@@ -1,7 +1,8 @@
 defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
-  use Console.DataCase, async: true
+  use Console.DataCase
+  use Mimic
 
-  alias Console.AI.Tools.Workbench.Integration.Github.{Query, Response}
+  alias Console.AI.Tools.Workbench.Integration.Github.{Client, Query, Response}
 
   describe "json/1" do
     test "merges multi-page Tentacat search bodies before encoding" do
@@ -54,6 +55,74 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
       assert message =~ "GitHub request failed: TLS unknown_ca:"
       assert message =~ "certificate verify failed"
       refute message =~ "%HTTPoison.Error"
+    end
+  end
+
+  describe "client json_get/3" do
+    test "safely decodes manually paginated object responses" do
+      next = "https://api.github.com/repos/pluralsh/console/commits/sha/check-runs?page=2&per_page=30"
+
+      expect(HTTPoison, :request, fn
+        :get,
+        "https://api.github.com/repos/pluralsh/console/commits/sha/check-runs?page=1&per_page=30",
+        "",
+        _headers,
+        _opts ->
+          {:ok,
+           %HTTPoison.Response{
+             status_code: 200,
+             body: Jason.encode!(%{"total_count" => 1, "check_runs" => [%{"id" => 1}]}),
+             headers: [{"Link", "<#{next}>; rel=\"next\""}]
+           }}
+      end)
+
+      client = Tentacat.Client.new(%{access_token: "token"})
+
+      assert {:ok, json} =
+               client
+               |> Client.json_get(
+                 "repos/pluralsh/console/commits/sha/check-runs?page=1&per_page=30",
+                 pagination: :manual
+               )
+               |> Response.json()
+
+      assert Jason.decode!(json) == %{
+               "check_runs" => [%{"id" => 1}],
+               "total_count" => 1,
+               "pagination" => %{
+                 "has_next_page" => true,
+                 "link" => "<#{next}>; rel=\"next\"",
+                 "next_page" => "2",
+                 "next_url" => next,
+                 "per_page" => "30"
+               }
+             }
+    end
+
+    test "returns an error for non-json GitHub responses instead of raising a decoder error" do
+      expect(HTTPoison, :request, fn
+        :get,
+        "https://api.github.com/bad/path",
+        "",
+        _headers,
+        _opts ->
+          {:ok,
+           %HTTPoison.Response{
+             status_code: 404,
+             body: "<html>not found</html>",
+             headers: []
+           }}
+      end)
+
+      client = Tentacat.Client.new(%{access_token: "token"})
+
+      assert {:error, message} =
+               client
+               |> Client.json_get("bad/path", pagination: :manual)
+               |> Response.json()
+
+      assert message =~ "GitHub API 404"
+      assert message =~ "not found"
     end
   end
 

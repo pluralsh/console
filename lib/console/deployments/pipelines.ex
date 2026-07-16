@@ -64,6 +64,13 @@ defmodule Console.Deployments.Pipelines do
 
   def gate_job(_), do: {:ok, nil}
 
+  @decorate cacheable(cache: @cache, key: :pipelined_services, opts: [ttl: :timer.minutes(30)])
+  def pipelined_services() do
+    StageService.service_ids()
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
   @doc """
   Will either create or recreate a pipeline with the given attributes. Requires write permissions to the pipeline
   """
