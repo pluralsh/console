@@ -1025,6 +1025,14 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-inference
   versions:
+  - version: v1.3.1-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.3.0-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4086,6 +4094,13 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.21.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.20.3-eksbuild.1
     compatibilities:
     - '1.36'
