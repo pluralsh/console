@@ -38,6 +38,7 @@ export function WorkbenchPromptModeDetails({
   babysit,
   onApprovalChange,
   onBabysitChange,
+  showHeader = true,
 }: {
   config: WorkbenchPromptModeConfig
   mode: WorkbenchPromptMode
@@ -45,6 +46,7 @@ export function WorkbenchPromptModeDetails({
   babysit: boolean
   onApprovalChange: (approval: boolean) => void
   onBabysitChange: (babysit: boolean) => void
+  showHeader?: boolean
 }) {
   const theme = useTheme()
 
@@ -54,21 +56,23 @@ export function WorkbenchPromptModeDetails({
       gap="small"
       height="100%"
     >
-      <Flex
-        align="center"
-        gap="small"
-      >
-        <config.Icon
-          size={WORKBENCH_PROMPT_MODE_ICON_SIZE_HEADER}
-          color={workbenchPromptModeIconColor(config, theme)}
-        />
-        <Body2BoldP
-          $color="text"
-          css={{ flex: 1 }}
+      {showHeader && (
+        <Flex
+          align="center"
+          gap="small"
         >
-          {config.label}
-        </Body2BoldP>
-      </Flex>
+          <config.Icon
+            size={WORKBENCH_PROMPT_MODE_ICON_SIZE_HEADER}
+            color={workbenchPromptModeIconColor(config, theme)}
+          />
+          <Body2BoldP
+            $color="text"
+            css={{ flex: 1 }}
+          >
+            {config.label}
+          </Body2BoldP>
+        </Flex>
+      )}
       <Body2P $color="text-xlight">{config.description}</Body2P>
       {config.supervisionOptions && mode === 'agent' && (
         <Flex
