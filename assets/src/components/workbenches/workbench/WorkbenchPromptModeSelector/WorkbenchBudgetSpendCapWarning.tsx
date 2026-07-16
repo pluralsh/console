@@ -66,7 +66,7 @@ export function WorkbenchBudgetSpendCapWarning({
 
 const WarningSC = styled.div(({ theme }) => ({
   display: 'flex',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   gap: theme.spacing.small,
   width: '100%',
   maxWidth: '100%',
