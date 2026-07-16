@@ -487,38 +487,48 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                     ]}
                   </Select>
                 </FormField>
-                <WorkbenchAccessibleUserSelect
-                  key={workbenchId}
-                  workbenchId={workbenchId}
-                  selectedUserId={formState.userId}
-                  onSelectionChange={(userId) =>
-                    setFormState((prev) => ({ ...prev, userId }))
-                  }
-                  disabled={isSaving}
-                />
               </Flex>
-              <FormField
-                label="Priority"
-                hint="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
+              <Flex
+                align="flex-start"
+                gap="medium"
               >
-                <Input2
-                  value={String(formState.priority)}
-                  inputProps={{
-                    type: 'number',
-                    min: 0,
-                    step: 1,
-                  }}
-                  onChange={(e) => {
-                    const raw = e.target.value
-                    const parsed = parseInt(raw, 10)
-                    setFormState((prev) => ({
-                      ...prev,
-                      priority: raw === '' || Number.isNaN(parsed) ? 0 : parsed,
-                    }))
-                  }}
-                  placeholder="0"
-                />
-              </FormField>
+                <div css={{ flex: '7 1 0%', minWidth: 0 }}>
+                  <WorkbenchAccessibleUserSelect
+                    key={workbenchId}
+                    workbenchId={workbenchId}
+                    selectedUserId={formState.userId}
+                    onSelectionChange={(userId) =>
+                      setFormState((prev) => ({ ...prev, userId }))
+                    }
+                    disabled={isSaving}
+                    hint=""
+                  />
+                </div>
+                <FormField
+                  label="Priority"
+                  infoTooltip="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
+                  css={{ flex: '3 1 0%', minWidth: 0 }}
+                >
+                  <Input2
+                    value={String(formState.priority)}
+                    inputProps={{
+                      type: 'number',
+                      min: 0,
+                      step: 1,
+                    }}
+                    onChange={(e) => {
+                      const raw = e.target.value
+                      const parsed = parseInt(raw, 10)
+                      setFormState((prev) => ({
+                        ...prev,
+                        priority:
+                          raw === '' || Number.isNaN(parsed) ? 0 : parsed,
+                      }))
+                    }}
+                    placeholder="0"
+                  />
+                </FormField>
+              </Flex>
               <TabList
                 stateRef={tabStateRef}
                 stateProps={{
@@ -558,23 +568,24 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                   />
                 </FormField>
               ) : (
-                <>
-                  <FormField hint="Create a filter rule. Match events containing this exact string. Case insensitive option available below.">
-                    <Flex
-                      direction="column"
-                      gap="small"
-                    >
-                      <Input2
-                        value={formState.substring}
-                        onChange={(e) =>
-                          setFormState((prev) => ({
-                            ...prev,
-                            substring: e.target.value,
-                          }))
-                        }
-                        placeholder="Substring"
-                      />
-                    </Flex>
+                <Flex
+                  align="flex-start"
+                  gap="small"
+                >
+                  <FormField
+                    hint="Create a filter rule. Match events containing this exact string. Case insensitive option available."
+                    css={{ flex: 1, minWidth: 0 }}
+                  >
+                    <Input2
+                      value={formState.substring}
+                      onChange={(e) =>
+                        setFormState((prev) => ({
+                          ...prev,
+                          substring: e.target.value,
+                        }))
+                      }
+                      placeholder="Substring"
+                    />
                   </FormField>
                   <Checkbox
                     small
@@ -585,10 +596,16 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                         caseInsensitive: e.target.checked,
                       }))
                     }
+                    css={{
+                      flexShrink: 0,
+                      paddingTop: theme.spacing.xsmall,
+                      paddingRight: theme.spacing.xsmall,
+                      paddingBottom: theme.spacing.xsmall,
+                    }}
                   >
                     Case insensitive match
                   </Checkbox>
-                </>
+                </Flex>
               )}
               <FormField
                 infoTooltip="Optional text appended to the agent prompt when an incoming event matches this webhook."
