@@ -80,7 +80,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       repo = insert(:git_repository)
       cluster = insert(:cluster)
 
-      {:error, %{errors: [error | _]}} = run_query("""
+      {:ok, %{errors: [error | _]}} = run_query("""
         mutation Create($attrs: StackAttributes!) {
           createStack(attributes: $attrs) {
             id
@@ -95,7 +95,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
         "policyEngine" => %{"type" => "TRIVY", "maxSeverity" => "HIGH"}
       }}, %{current_user: admin_user()})
 
-      assert error["message"] =~ "policy engine is not supported for Pulumi stacks"
+      assert error.message =~ "policy engine is not supported for Pulumi stacks"
     end
 
     test "it can create a stack for a project" do

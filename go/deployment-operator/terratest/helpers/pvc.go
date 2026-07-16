@@ -97,7 +97,7 @@ func (in *PersistentVolumeClaim) Create(t *testing.T) error {
 		return err
 	}
 
-	return k8s.KubectlApplyFromStringE(t,
+	return k8s.KubectlApplyFromStringContextE(t, t.Context(),
 		in.toKubectlOptions(),
 		in.toJSON(pvc),
 	)
@@ -115,7 +115,7 @@ func (in *PersistentVolumeClaim) Delete(t *testing.T) error {
 }
 
 func (in *PersistentVolumeClaim) Get(t *testing.T) (*corev1.PersistentVolumeClaim, error) {
-	return k8s.GetPersistentVolumeClaimE(t, in.toKubectlOptions(), in.Name())
+	return k8s.GetPersistentVolumeClaimContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
 func (in *PersistentVolumeClaim) Exists(t *testing.T) (bool, error) {
@@ -148,7 +148,7 @@ func (in *PersistentVolumeClaim) WaitForReady(t *testing.T, timeout time.Duratio
 		case <-timer.C:
 			return fmt.Errorf("timed out waiting for pvc %s/%s to be bound", in.Namespace(), in.Name())
 		case <-ticker.C:
-			pvc, err := k8s.GetPersistentVolumeClaimE(t, in.toKubectlOptions(), in.Name())
+			pvc, err := k8s.GetPersistentVolumeClaimContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 			if err != nil {
 				t.Logf("failed to get pvc %s/%s: %v", in.Namespace(), in.Name(), err)
 				continue
