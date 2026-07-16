@@ -9514,11 +9514,25 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	HidePermissions       *bool "json:\"hidePermissions,omitempty\" graphql:\"hidePermissions\""
+	HideStartWorkbenchJob *bool "json:\"hideStartWorkbenchJob,omitempty\" graphql:\"hideStartWorkbenchJob\""
+	Pipelines             *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews              *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches           *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHidePermissions() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HidePermissions
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHideStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HideStartWorkbenchJob
+}
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -9663,11 +9677,25 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 }
 
 type PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	HidePermissions       *bool "json:\"hidePermissions,omitempty\" graphql:\"hidePermissions\""
+	HideStartWorkbenchJob *bool "json:\"hideStartWorkbenchJob,omitempty\" graphql:\"hideStartWorkbenchJob\""
+	Pipelines             *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews              *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches           *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaConfigurationFragment_Flows) GetHidePermissions() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.HidePermissions
+}
+func (t *PersonaConfigurationFragment_Flows) GetHideStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.HideStartWorkbenchJob
+}
 func (t *PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &PersonaConfigurationFragment_Flows{}
@@ -24306,11 +24334,25 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 }
 
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	HidePermissions       *bool "json:\"hidePermissions,omitempty\" graphql:\"hidePermissions\""
+	HideStartWorkbenchJob *bool "json:\"hideStartWorkbenchJob,omitempty\" graphql:\"hideStartWorkbenchJob\""
+	Pipelines             *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews              *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches           *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHidePermissions() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HidePermissions
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHideStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HideStartWorkbenchJob
+}
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24473,11 +24515,25 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	HidePermissions       *bool "json:\"hidePermissions,omitempty\" graphql:\"hidePermissions\""
+	HideStartWorkbenchJob *bool "json:\"hideStartWorkbenchJob,omitempty\" graphql:\"hideStartWorkbenchJob\""
+	Pipelines             *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews              *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches           *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHidePermissions() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HidePermissions
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHideStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HideStartWorkbenchJob
+}
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24622,11 +24678,25 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	HidePermissions       *bool "json:\"hidePermissions,omitempty\" graphql:\"hidePermissions\""
+	HideStartWorkbenchJob *bool "json:\"hideStartWorkbenchJob,omitempty\" graphql:\"hideStartWorkbenchJob\""
+	Pipelines             *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews              *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches           *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHidePermissions() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HidePermissions
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHideStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HideStartWorkbenchJob
+}
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24771,11 +24841,25 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	HidePermissions       *bool "json:\"hidePermissions,omitempty\" graphql:\"hidePermissions\""
+	HideStartWorkbenchJob *bool "json:\"hideStartWorkbenchJob,omitempty\" graphql:\"hideStartWorkbenchJob\""
+	Pipelines             *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews              *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	Workbenches           *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHidePermissions() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HidePermissions
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetHideStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.HideStartWorkbenchJob
+}
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -56400,6 +56484,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		hidePermissions
+		hideStartWorkbenchJob
 		pipelines
 		previews
 		workbenches
@@ -56510,6 +56596,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		hidePermissions
+		hideStartWorkbenchJob
 		pipelines
 		previews
 		workbenches
@@ -56595,6 +56683,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		hidePermissions
+		hideStartWorkbenchJob
 		pipelines
 		previews
 		workbenches
@@ -56681,6 +56771,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		hidePermissions
+		hideStartWorkbenchJob
 		pipelines
 		previews
 		workbenches
