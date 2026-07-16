@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Heartbeat do
   use GenServer
-  alias Console.Schema.WorkbenchJob
+  alias Console.Schema.{AIUsage, WorkbenchJob}
   alias Console.Schema.WorkbenchJob.{Modes, Modes.Budget}
   alias Console.Deployments.Workbenches
   alias Console.AI.Agents
@@ -24,9 +24,13 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def handle_cast({:usage, %{} = new_usage}, %State{usage: usage} = state) do
-    Enum.reduce(new_usage, usage, fn {k, v}, acc ->
+    new_usage
+    |> AIUsage.sanitize()
+    |> Enum.reduce(usage, fn {k, v}, acc ->
       case Map.get(acc, k) do
-        old when is_integer(old) or is_float(old) -> Map.put(acc, k, old + v)
+        old when (is_integer(old) or is_float(old)) and (is_integer(v) or is_float(v)) ->
+          Map.put(acc, k, old + v)
+
         _ -> Map.put(acc, k, v)
       end
     end)
@@ -64,7 +68,7 @@ defmodule Console.AI.Workbench.Heartbeat do
     when is_float(tc) and is_float(lim) and tc >= lim, do: {:stop, {:shutdown, {:budget, :cost, tc}}, s}
   defp enforce_budget(usage, %State{} = state), do: {:noreply, %{state | usage: usage}}
 
-  defp preserve_usage(%WorkbenchJob{usage: %{} = usage}), do: Console.mapify(usage)
+  defp preserve_usage(%WorkbenchJob{usage: %{} = usage}), do: AIUsage.sanitize(usage)
   defp preserve_usage(_), do: %{}
 
   defp reprompt(%WorkbenchJob{usage: %{}}), do: true

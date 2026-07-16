@@ -1,8 +1,11 @@
 defmodule Console.Cost.Cron do
   import Console.Services.Base
-  import Console.Cost.Utils, only: [batch_insert: 2]
+  import Console.Cost.Utils, only: [batch_insert: 3]
   alias Console.Repo
   alias Console.Schema.{ClusterUsage, ClusterUsageHistory}
+
+  @history_conflict_target [:cluster_id, :timestamp]
+  @history_replace_fields (ClusterUsageHistory.fields() -- @history_conflict_target) ++ [:updated_at]
 
   def history() do
     timestamp = Timex.now()
@@ -15,7 +18,11 @@ defmodule Console.Cost.Cron do
     |> Stream.map(&Map.take(&1, ClusterUsageHistory.fields()))
     |> Stream.map(&timestamped/1)
     |> Stream.map(&Map.put(&1, :timestamp, timestamp))
-    |> batch_insert(ClusterUsageHistory)
+    |> batch_insert(
+      ClusterUsageHistory,
+      conflict_target: @history_conflict_target,
+      on_conflict: {:replace, @history_replace_fields}
+    )
   end
 
   def prune() do

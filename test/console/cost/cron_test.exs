@@ -1,12 +1,15 @@
 defmodule Console.Cost.CronTest do
   use Console.DataCase, async: true
   alias Console.Cost.Cron
-  alias Console.Schema.ClusterUsageHistory
+  alias Console.Schema.{ClusterUsage, ClusterUsageHistory}
 
   describe "#history/0" do
     test "it can upsert history records from cluster usage" do
       usages = insert_list(3, :cluster_usage)
 
+      Cron.history()
+      [usage | _] = usages
+      {:ok, _} = ClusterUsage.changeset(usage, %{cpu: 200}) |> Console.Repo.update()
       Cron.history()
 
       history = Console.Repo.all(ClusterUsageHistory)
@@ -15,6 +18,8 @@ defmodule Console.Cost.CronTest do
 
       assert MapSet.new(usages, & &1.cluster_id)
              |> MapSet.equal?(MapSet.new(history, & &1.cluster_id))
+
+      assert Enum.find(history, &(&1.cluster_id == usage.cluster_id)).cpu == 200
     end
   end
 

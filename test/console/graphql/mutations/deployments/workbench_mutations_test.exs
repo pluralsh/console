@@ -1,5 +1,8 @@
 defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
   use Console.DataCase, async: true
+  use Mimic
+  alias CloudQuery.Client
+  alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput, ToolQuery.Stub}
 
   @http_tool_attrs %{
     "name" => "my_http_tool",
@@ -248,7 +251,10 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
   describe "createWorkbenchTool" do
     test "it can create a workbench tool" do
       project = insert(:project)
-      attrs = Map.put(@http_tool_attrs, "projectId", project.id)
+      attrs =
+        @http_tool_attrs
+        |> Map.put("projectId", project.id)
+        |> put_in(["configuration", "http", "function"], true)
 
       {:ok, %{data: %{"createWorkbenchTool" => tool}}} = run_query("""
         mutation WorkbenchToolCreate($attributes: WorkbenchToolAttributes!) {
@@ -256,12 +262,151 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             id
             name
             tool
+            configuration { http { function } }
           }
         }
       """, %{"attributes" => attrs}, %{current_user: admin_user()})
 
       assert tool["name"] == "my_http_tool"
       assert tool["tool"] == "HTTP"
+      assert get_in(tool, ["configuration", "http", "function"]) == true
+    end
+
+    test "it can create function workbench tools with configuration" do
+      project = insert(:project)
+      cloud_connection = insert(:cloud_connection)
+      input_schema = %{"type" => "object", "properties" => %{}, "required" => []}
+
+      cases = [
+        {
+          "lambda_tool",
+          "LAMBDA",
+          %{
+            "lambda" => %{
+              "lambdaArn" => "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              "description" => "Invoke the Plural workbench Lambda function",
+              "inputSchema" => JSON.encode!(input_schema)
+            }
+          },
+          ["lambda", "lambdaArn", "Invoke the Plural workbench Lambda function"]
+        },
+        {
+          "cloud_run_tool",
+          "CLOUD_RUN",
+          %{
+            "cloudRun" => %{
+              "identifier" => "projects/plural/locations/us-central1/services/workbench-tool",
+              "description" => "Invoke the Plural workbench Cloud Run service",
+              "inputSchema" => JSON.encode!(input_schema)
+            }
+          },
+          ["cloudRun", "identifier", "Invoke the Plural workbench Cloud Run service"]
+        },
+        {
+          "azure_function_tool",
+          "AZURE_FUNCTION",
+          %{
+            "azureFunction" => %{
+              "identifier" => "projects/plural/locations/us-central1/functions/workbench-tool",
+              "description" => "Invoke the Plural workbench Azure Function",
+              "inputSchema" => JSON.encode!(input_schema)
+            }
+          },
+          ["azureFunction", "identifier", "Invoke the Plural workbench Azure Function"]
+        }
+      ]
+
+      for {name, tool_type, configuration, [config_key, identifier_key, description]} <- cases do
+        {:ok, %{data: %{"createWorkbenchTool" => tool}}} = run_query("""
+          mutation WorkbenchToolCreate($attributes: WorkbenchToolAttributes!) {
+            createWorkbenchTool(attributes: $attributes) {
+              id
+              name
+              tool
+              categories
+              configuration {
+                lambda { lambdaArn description inputSchema }
+                cloudRun { identifier description inputSchema }
+                azureFunction { identifier description inputSchema }
+              }
+            }
+          }
+        """, %{
+          "attributes" => %{
+            "name" => name,
+            "tool" => tool_type,
+            "projectId" => project.id,
+            "cloudConnectionId" => cloud_connection.id,
+            "configuration" => configuration
+          }
+        }, %{current_user: admin_user()})
+
+        assert tool["name"] == name
+        assert tool["tool"] == tool_type
+        assert tool["categories"] == ["FUNCTION"]
+        assert get_in(tool, ["configuration", config_key, identifier_key])
+        assert get_in(tool, ["configuration", config_key, "description"]) == description
+        assert get_in(tool, ["configuration", config_key, "inputSchema"]) == input_schema
+      end
+    end
+
+    test "function workbench tool descriptions are required" do
+      project = insert(:project)
+      cloud_connection = insert(:cloud_connection)
+      input_schema = JSON.encode!(%{"type" => "object", "properties" => %{}, "required" => []})
+
+      cases = [
+        {
+          "lambda_tool_without_description",
+          "LAMBDA",
+          %{
+            "lambda" => %{
+              "lambdaArn" => "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              "inputSchema" => input_schema
+            }
+          }
+        },
+        {
+          "cloud_run_tool_without_description",
+          "CLOUD_RUN",
+          %{
+            "cloudRun" => %{
+              "identifier" => "projects/plural/locations/us-central1/services/workbench-tool",
+              "inputSchema" => input_schema
+            }
+          }
+        },
+        {
+          "azure_function_tool_without_description",
+          "AZURE_FUNCTION",
+          %{
+            "azureFunction" => %{
+              "identifier" => "projects/plural/locations/us-central1/functions/workbench-tool",
+              "inputSchema" => input_schema
+            }
+          }
+        }
+      ]
+
+      for {name, tool_type, configuration} <- cases do
+        {:ok, %{errors: [error | _]}} = run_query("""
+          mutation WorkbenchToolCreate($attributes: WorkbenchToolAttributes!) {
+            createWorkbenchTool(attributes: $attributes) {
+              id
+            }
+          }
+        """, %{
+          "attributes" => %{
+            "name" => name,
+            "tool" => tool_type,
+            "projectId" => project.id,
+            "cloudConnectionId" => cloud_connection.id,
+            "configuration" => configuration
+          }
+        }, %{current_user: admin_user()})
+
+        assert error.message =~ "description"
+      end
     end
 
     test "project writers can create a tool" do
@@ -468,6 +613,111 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert activity["prompt"] == "from graphql"
       assert activity["type"] == "USER"
       assert activity["status"] == "SUCCESSFUL"
+    end
+  end
+
+  describe "approveWorkbenchJobActivity" do
+    test "it approves and invokes a function activity" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          cloud_connection: insert(:cloud_connection),
+          tool: :lambda,
+          name: "lambda_tool_#{System.unique_integer([:positive])}",
+          configuration: %{
+            lambda: %{
+              lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+              description: "Invoke the Plural workbench Lambda function",
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      input = %{"namespace" => "default", "deployment" => "api"}
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          prompt: "approve the function",
+          result: %{
+            output: "waiting for user approval",
+            function_call: %{
+              name: tool.name,
+              tool_id: tool.id,
+              input: input
+            }
+          }
+        )
+
+      expect(Client, :connect, fn -> {:ok, :mock_conn} end)
+
+      expect(Stub, :invoke_lambda, fn :mock_conn, %InvokeLambdaInput{} = request, opts ->
+        assert request.identifier == "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool"
+        assert Jason.decode!(request.payload_json) == input
+        assert opts == Client.lambda_rpc_opts()
+
+        {:ok, %InvokeLambdaOutput{result: "complete"}}
+      end)
+
+      {:ok, %{data: %{"approveWorkbenchJobActivity" => updated}}} = run_query("""
+        mutation ApproveWorkbenchJobActivity($id: ID!) {
+          approveWorkbenchJobActivity(id: $id) {
+            id
+            status
+            result { output }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: user})
+
+      assert updated["id"] == activity.id
+      assert updated["status"] == "SUCCESSFUL"
+      assert {:ok, output} = Jason.decode(updated["result"]["output"])
+      assert output["result"] == "complete"
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+    end
+  end
+
+  describe "rejectWorkbenchJobActivity" do
+    test "it rejects an activity with a custom reason" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval,
+          result: %{output: "waiting for user approval"}
+        )
+
+      {:ok, %{data: %{"rejectWorkbenchJobActivity" => updated}}} = run_query("""
+        mutation RejectWorkbenchJobActivity($id: ID!, $reason: String) {
+          rejectWorkbenchJobActivity(id: $id, reason: $reason) {
+            id
+            status
+            result { output }
+          }
+        }
+      """, %{"id" => activity.id, "reason" => "not approved"}, %{current_user: user})
+
+      assert updated["id"] == activity.id
+      assert updated["status"] == "SUCCESSFUL"
+      assert updated["result"]["output"] == "not approved"
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert reloaded.result.output == "not approved"
     end
   end
 
