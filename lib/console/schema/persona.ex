@@ -22,7 +22,7 @@ defmodule Console.Schema.Persona do
       end
 
       embeds_one :flows, Flows, on_replace: :update do
-        boolean_fields [:hide_permissions, :hide_start_workbench_job, :workbenches, :pipelines, :previews]
+        boolean_fields [:permissions, :start_workbench_job, :workbenches, :pipelines, :previews]
       end
 
       embeds_one :sidebar, Sidebar, on_replace: :update do

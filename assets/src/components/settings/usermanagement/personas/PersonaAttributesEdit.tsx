@@ -51,8 +51,8 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     services: false,
   },
   flows: {
-    hidePermissions: false,
-    hideStartWorkbenchJob: false,
+    permissions: true,
+    startWorkbenchJob: true,
     pipelines: false,
     previews: false,
     workbenches: false,

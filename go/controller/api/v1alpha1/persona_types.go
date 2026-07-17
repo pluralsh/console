@@ -348,15 +348,15 @@ func (in *PersonaDeployment) Attributes() *console.PersonaDeploymentAttributes {
 // These settings determine which flow management capabilities are visible and
 // accessible to users assigned to this persona.
 type PersonaFlows struct {
-	// HidePermissions hides the permissions action in the flow header when set to true.
-	// This allows restricting permission management UI access for persona-specific flow views.
+	// Permissions enables the permissions action in the flow header when set to true.
+	// This allows personas to manage flow permissions from the flow detail page.
 	// +kubebuilder:validation:Optional
-	HidePermissions *bool `json:"hidePermissions,omitempty"`
+	Permissions *bool `json:"permissions,omitempty"`
 
-	// HideStartWorkbenchJob hides the "Start workbench job" action in the flow header when set to true.
-	// This allows personas to view flows without launching new workbench jobs from that page.
+	// StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.
+	// This allows personas to launch workbench jobs directly from the flow detail page.
 	// +kubebuilder:validation:Optional
-	HideStartWorkbenchJob *bool `json:"hideStartWorkbenchJob,omitempty"`
+	StartWorkbenchJob *bool `json:"startWorkbenchJob,omitempty"`
 
 	// Workbenches enables access to flow workbench features when set to true.
 	// This includes viewing and using workbenches associated with flows.
@@ -381,11 +381,11 @@ func (in *PersonaFlows) Attributes() *console.PersonaFlowsAttributes {
 	}
 
 	return &console.PersonaFlowsAttributes{
-		HidePermissions:       in.HidePermissions,
-		HideStartWorkbenchJob: in.HideStartWorkbenchJob,
-		Workbenches:           in.Workbenches,
-		Pipelines:             in.Pipelines,
-		Previews:              in.Previews,
+		Permissions:       in.Permissions,
+		StartWorkbenchJob: in.StartWorkbenchJob,
+		Workbenches:       in.Workbenches,
+		Pipelines:         in.Pipelines,
+		Previews:          in.Previews,
 	}
 }
 

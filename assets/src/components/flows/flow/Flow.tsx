@@ -98,9 +98,8 @@ export function Flow() {
   )
   const { personaConfiguration } = useLogin()
   const flowPersonaConfiguration = personaConfiguration?.flows
-  const hidePermissions = !!flowPersonaConfiguration?.hidePermissions
-  const hideStartWorkbenchJob =
-    !!flowPersonaConfiguration?.hideStartWorkbenchJob
+  const permissions = flowPersonaConfiguration?.permissions ?? true
+  const startWorkbenchJob = flowPersonaConfiguration?.startWorkbenchJob ?? true
   const { flowIdOrName, flowData, loading, error, refetch } = useCurrentFlow()
   const tab = useMatch(`${FLOWS_ABS_PATH}/${flowIdOrName}/:tab/*`)?.params.tab
   const flow = flowData?.flow
@@ -176,7 +175,7 @@ export function Flow() {
                     secondColor="text-xlight"
                   />
                 </Flex>
-                {!hidePermissions && (
+                {permissions && (
                   <Button
                     secondary
                     startIcon={<PeopleIcon />}
@@ -185,9 +184,7 @@ export function Flow() {
                     Permissions
                   </Button>
                 )}
-                {!hideStartWorkbenchJob && (
-                  <FlowWorkbenchJobLauncher flow={flow} />
-                )}
+                {startWorkbenchJob && <FlowWorkbenchJobLauncher flow={flow} />}
               </HeaderSC>
               <Flex justify="space-between">
                 <SubTabs directory={directory} />

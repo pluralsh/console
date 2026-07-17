@@ -155,15 +155,15 @@ spec:
                       Flows controls access to flow-related features and sections.
                       This includes workbenches, pipelines, and preview environments grouped under flows.
                     properties:
-                      hidePermissions:
+                      permissions:
                         description: |-
-                          HidePermissions hides the permissions action in the flow header when set to true.
-                          This allows restricting permission management UI access for persona-specific flow views.
+                          Permissions enables the permissions action in the flow header when set to true.
+                          This allows personas to manage flow permissions from the flow detail page.
                         type: boolean
-                      hideStartWorkbenchJob:
+                      startWorkbenchJob:
                         description: |-
-                          HideStartWorkbenchJob hides the "Start workbench job" action in the flow header when set to true.
-                          This allows personas to view flows without launching new workbench jobs from that page.
+                          StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.
+                          This allows personas to launch workbench jobs directly from the flow detail page.
                         type: boolean
                       pipelines:
                         description: |-

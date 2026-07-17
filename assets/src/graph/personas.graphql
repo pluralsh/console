@@ -13,8 +13,8 @@ fragment PersonaConfiguration on PersonaConfiguration {
     security
   }
   flows {
-    hidePermissions
-    hideStartWorkbenchJob
+    permissions
+    startWorkbenchJob
     pipelines
     previews
     workbenches
