@@ -38,7 +38,7 @@ versions:
         Kubernetes version parsing with Helm 3.19+, any custom logic depending on
         the old version interpretation should be re-validated (especially AppSet cluster
         generators and templating conditions).']
-  chart_version: 10.1.3
+  chart_version: 10.1.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.4.5']
 - version: 3.4.1
