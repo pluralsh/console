@@ -1,4 +1,9 @@
-import config from '../eslint.config.mjs'
+import plural from '@pluralsh/eslint-config-pluralsh'
 import storybook from 'eslint-plugin-storybook'
 
-export default [...config, { plugins: { storybook } }]
+export default [
+  ...plural({
+    tsconfigRootDir: import.meta.dirname,
+  }),
+  { plugins: { storybook } },
+]
