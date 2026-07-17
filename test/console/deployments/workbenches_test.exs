@@ -260,7 +260,7 @@ defmodule Console.Deployments.WorkbenchesTest do
           site: "datadoghq.com",
           api_key: "datadog-api-key",
           app_key: "datadog-app-key"
-        }}], [:metrics, :logs]},
+        }}], [:metrics, :logs, :traces]},
         {:prometheus, [configuration: %{prometheus: %{
           url: "https://prometheus.example.com",
           token: "prometheus-bearer-token"

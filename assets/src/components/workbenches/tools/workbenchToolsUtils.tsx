@@ -182,6 +182,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Datadog]: [
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
+    WorkbenchToolCategory.Traces,
   ],
   [WorkbenchToolType.Elastic]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Opensearch]: [WorkbenchToolCategory.Logs],

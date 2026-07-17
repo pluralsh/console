@@ -353,7 +353,7 @@ defmodule Console.Schema.WorkbenchTool do
   end
 
   defp categories(:http), do: [:integration]
-  defp categories(:datadog), do: [:metrics, :logs]
+  defp categories(:datadog), do: [:metrics, :logs, :traces]
   defp categories(:dynatrace), do: [:metrics, :logs, :traces]
   defp categories(:cloudwatch), do: [:metrics, :logs]
   defp categories(:azure), do: [:metrics, :logs]
