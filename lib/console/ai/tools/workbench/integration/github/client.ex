@@ -25,9 +25,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
     end
   end
 
-  @spec json_get(Tentacat.Client.t(), String.t()) :: Tentacat.response() | {:error, String.t()}
-  def json_get(%Tentacat.Client{} = client, path) when is_binary(path),
-    do: json_request(:get, client, path)
+  @spec json_get(Tentacat.Client.t(), String.t(), keyword()) :: Tentacat.response() | {:error, String.t()}
+  def json_get(%Tentacat.Client{} = client, path, opts \\ []) when is_binary(path),
+    do: json_request(:get, client, path, opts)
 
   @spec json_delete(Tentacat.Client.t(), String.t()) :: Tentacat.response() | {:error, String.t()}
   def json_delete(%Tentacat.Client{} = client, path) when is_binary(path),
@@ -109,12 +109,12 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
     if String.ends_with?(url, "/"), do: url, else: url <> "/"
   end
 
-  defp json_request(method, %Tentacat.Client{} = client, path) do
+  defp json_request(method, %Tentacat.Client{} = client, path, opts \\ []) do
     url = client.endpoint <> path
 
     case HTTPoison.request(method, url, "", json_headers(client), request_options(client)) do
       {:ok, %HTTPoison.Response{status_code: code, body: body} = resp} ->
-        response(method, code, decode_json_body(body), resp)
+        response(method, code, decode_json_body(body), resp, opts)
 
       {:error, reason} ->
         Http.error("GitHub", reason)
@@ -130,10 +130,13 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
     end
   end
 
-  defp response(:get, code, body, %HTTPoison.Response{} = resp) when is_list(body),
+  defp response(:get, code, body, %HTTPoison.Response{} = resp, pagination: :manual),
     do: {{code, body, resp}, next_url(resp), nil}
 
-  defp response(_, code, body, %HTTPoison.Response{} = resp),
+  defp response(:get, code, body, %HTTPoison.Response{} = resp, _) when is_list(body),
+    do: {{code, body, resp}, next_url(resp), nil}
+
+  defp response(_, code, body, %HTTPoison.Response{} = resp, _),
     do: {code, body, resp}
 
   defp next_url(%HTTPoison.Response{headers: headers}) do

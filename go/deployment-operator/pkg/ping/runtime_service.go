@@ -43,10 +43,7 @@ func RunRuntimeServicePingerInBackgroundOrDie(ctx context.Context, pinger *Pinge
 	klog.Info("starting ", runtimeServicePingerName)
 
 	interval := func() time.Duration {
-		if runtimeServicesPingInterval := common.GetConfigurationManager().GetRuntimeServicesPingInterval(); runtimeServicesPingInterval != nil && *runtimeServicesPingInterval > 0 {
-			duration = *runtimeServicesPingInterval
-		}
-		return duration
+		return runtimeServicesPingInterval(duration)
 	}
 
 	err := helpers.DynamicBackgroundPollUntilContextCancel(ctx, interval, false, func(_ context.Context) (done bool, err error) {
@@ -56,6 +53,13 @@ func RunRuntimeServicePingerInBackgroundOrDie(ctx context.Context, pinger *Pinge
 	if err != nil {
 		panic(fmt.Errorf("failed to start %s in background: %w", runtimeServicePingerName, err))
 	}
+}
+
+func runtimeServicesPingInterval(defaultDuration time.Duration) time.Duration {
+	if runtimeServicesPingInterval := common.GetConfigurationManager().GetRuntimeServicesPingInterval(); runtimeServicesPingInterval != nil {
+		return *runtimeServicesPingInterval
+	}
+	return defaultDuration
 }
 
 func (p *Pinger) PingRuntimeServices(ctx context.Context) {

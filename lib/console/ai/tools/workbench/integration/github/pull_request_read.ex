@@ -4,7 +4,6 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
   use Console.AI.Tools.Workbench.Base
 
   import EctoEnum
-  import Tentacat
 
   alias Console.Schema.WorkbenchTool
   alias Console.Schema.WorkbenchTool.{Configuration, Configuration.GithubConnection}
@@ -88,7 +87,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
     with {:ok, client} <- GhClient.build(m.tool) do
       case Tentacat.Pulls.find(client, m.owner, m.repo, m.pull_number) do
         {_, %{"head" => %{"sha" => sha}}, _} ->
-          get("repos/#{m.owner}/#{m.repo}/commits/#{sha}/status", client)
+          GhClient.json_get(client, "repos/#{m.owner}/#{m.repo}/commits/#{sha}/status")
           |> Response.json()
 
         other ->
@@ -109,10 +108,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
       |> Query.paginated()
       |> Query.stringify_params()
       |> then(
-        &get(
-          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/files#{Query.qp(&1)}",
+        &GhClient.json_get(
           client,
-          [],
+          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/files#{Query.qp(&1)}",
           Query.manual_pagination()
         )
       )
@@ -132,10 +130,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
       |> Query.paginated()
       |> Query.stringify_params()
       |> then(
-        &get(
-          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/comments#{Query.qp(&1)}",
+        &GhClient.json_get(
           client,
-          [],
+          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/comments#{Query.qp(&1)}",
           Query.manual_pagination()
         )
       )
@@ -155,10 +152,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
       |> Query.paginated()
       |> Query.stringify_params()
       |> then(
-        &get(
-          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/reviews#{Query.qp(&1)}",
+        &GhClient.json_get(
           client,
-          [],
+          "repos/#{m.owner}/#{m.repo}/pulls/#{m.pull_number}/reviews#{Query.qp(&1)}",
           Query.manual_pagination()
         )
       )
@@ -178,10 +174,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
       |> Query.paginated()
       |> Query.stringify_params()
       |> then(
-        &get(
-          "repos/#{m.owner}/#{m.repo}/issues/#{m.pull_number}/comments#{Query.qp(&1)}",
+        &GhClient.json_get(
           client,
-          [],
+          "repos/#{m.owner}/#{m.repo}/issues/#{m.pull_number}/comments#{Query.qp(&1)}",
           Query.manual_pagination()
         )
       )
@@ -203,10 +198,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.PullRequestRead do
           |> Query.paginated()
           |> Query.stringify_params()
           |> then(
-            &get(
-              "repos/#{m.owner}/#{m.repo}/commits/#{sha}/check-runs#{Query.qp(&1)}",
+            &GhClient.json_get(
               client,
-              [],
+              "repos/#{m.owner}/#{m.repo}/commits/#{sha}/check-runs#{Query.qp(&1)}",
               Query.manual_pagination()
             )
           )

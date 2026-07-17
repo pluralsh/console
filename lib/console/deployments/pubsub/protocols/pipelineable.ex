@@ -16,10 +16,14 @@ end
 defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComponentsUpdated do
   require Logger
   alias Console.Schema.Service
+  alias Console.Deployments.Pipelines
+  use Nebulex.Caching
+
+  @local_adapter Console.conf(:local_cache)
 
   def pipe(%{item: %{status: s} = svc}) when s in ~w(healthy failed)a do
     Logger.info "Kicking any pipelines associated with #{svc.id}"
-    if recent?(svc) do
+    if recent?(svc) && MapSet.member?(eligible_sids(), svc.id) do
       stages(svc)
       |> handle_status(s)
     else
@@ -27,6 +31,9 @@ defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComp
     end
   end
   def pipe(_), do: :ok
+
+  @decorate cacheable(cache: @local_adapter, key: :eligible_sids, opts: [ttl: :timer.minutes(2)])
+  def eligible_sids(), do: Pipelines.pipelined_services()
 
   defp handle_status([], _), do: :ok
   defp handle_status(stages, :healthy), do: stages
