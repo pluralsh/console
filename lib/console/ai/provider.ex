@@ -18,6 +18,7 @@ defmodule Console.AI.Provider do
   @local_cache Console.conf(:local_cache)
 
   @providers ~w(openai openai_compatible xai anthropic ollama azure bedrock vertex nexus)a
+  @model_default_providers ~w(openai openai_compatible xai anthropic ollama azure bedrock vertex)a
 
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
@@ -59,7 +60,7 @@ defmodule Console.AI.Provider do
   def model_defaults(provider), do: Console.conf(:ai_defaults)[provider] || %{}
 
   def model_defaults() do
-    Enum.map(@providers, fn provider ->
+    Enum.map(@model_default_providers, fn provider ->
       case model_defaults(provider) do
         %{} = defaults -> Map.put(defaults, :provider, provider)
         _ -> nil

@@ -21,13 +21,20 @@ fragment PinnedCustomResource on PinnedCustomResource {
   namespaced
 }
 
-query KubernetesClusters($projectId: ID) {
+query KubernetesClusters(
+  $projectId: ID
+  $currentClusterId: ID
+  $hasCurrentClusterId: Boolean!
+) {
   clusters(first: 200, projectId: $projectId) {
     edges {
       node {
         ...KubernetesCluster
       }
     }
+  }
+  cluster(id: $currentClusterId) @include(if: $hasCurrentClusterId) {
+    ...KubernetesCluster
   }
 }
 
