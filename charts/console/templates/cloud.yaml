@@ -25,9 +25,7 @@ spec:
       clusterPermissions:
       - "monitor"
       indexPermissions:
-      - names:
-        - "plrl-{{ .Values.cloud.instanceName }}*"
-        - "plrl-{{ .Values.cloud.instanceName }}-logs-write"
+      - names: ["plrl-{{ .Values.cloud.instanceName }}*"]
         privileges: [ "read", "index", "write", "create", "create_index", "manage", "manage_ilm" ]
 ---
 {{/* Legacy ILM for dated indices */}}
@@ -53,7 +51,7 @@ spec:
           actions:
             delete: {}
 ---
-{{/* Rollover ILM for plrl-{inst}-logs-00000N via write alias */}}
+{{/* Rollover ILM for plrl-{inst}-logs-00000N via write alias (same retention as legacy) */}}
 apiVersion: dbs.plural.sh/v1alpha1
 kind: ElasticsearchILMPolicy
 metadata:
@@ -72,12 +70,12 @@ spec:
               max_primary_shard_size: 50gb
               max_age: 1d
         warm:
-          min_age: 1d
+          min_age: 10d
           actions:
             forcemerge:
               max_num_segments: 1
         delete:
-          min_age: 2d
+          min_age: 30d
           actions:
             delete: {}
 ---
@@ -120,6 +118,9 @@ spec:
     template:
       settings:
         index:
+          number_of_shards: 1
+          number_of_replicas: 1
+          refresh_interval: 30s
           lifecycle:
             name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
             rollover_alias: plrl-{{ .Values.cloud.instanceName }}-logs-write
@@ -144,6 +145,7 @@ spec:
           rollover_alias: plrl-{{ .Values.cloud.instanceName }}-logs-write
         number_of_shards: 1
         number_of_replicas: 1
+        refresh_interval: 30s
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMUser
