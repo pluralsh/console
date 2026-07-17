@@ -172,7 +172,13 @@ export const workbenchColumn = columnHelper.accessor(
 export const usageColumn = columnHelper.accessor(({ usage }) => usage, {
   id: 'usage',
   meta: { gridTemplate: '120px' },
-  cell: ({ getValue }) => <WorkbenchUsageSummaryChip usage={getValue()} />,
+  cell: ({ getValue, row }) => (
+    <WorkbenchUsageSummaryChip
+      usage={getValue()}
+      budget={row.original.modes?.budget}
+      error={row.original.error}
+    />
+  ),
 })
 
 function JobSourceChips({

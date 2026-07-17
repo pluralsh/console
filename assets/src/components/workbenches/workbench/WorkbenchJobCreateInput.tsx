@@ -44,9 +44,11 @@ import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { WorkbenchModelSelector } from './WorkbenchModelSelector'
 import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
+import { WorkbenchTokenLimitSelector } from './WorkbenchPromptModeSelector/WorkbenchTokenLimitSelector'
 import {
   defaultPromptModesFromWorkbench,
   modesAttributes,
+  updateBudgetModes,
 } from './WorkbenchPromptModeSelector/workbenchPromptModes'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -212,6 +214,14 @@ export function WorkbenchJobCreateInput({
               <WorkbenchPromptModeSelector
                 value={promptModes}
                 onChange={setPromptModes}
+                disabled={disabled || loading}
+              />
+              <WorkbenchTokenLimitSelector
+                workbenchId={workbenchId}
+                value={promptModes?.budget}
+                onChange={(budget) =>
+                  setPromptModes((modes) => updateBudgetModes(modes, budget))
+                }
                 disabled={disabled || loading}
               />
               <WorkbenchModelSelector

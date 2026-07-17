@@ -42,7 +42,7 @@ const PANEL_WIDTH = 640
 const LEFT_PANE_WIDTH = 240
 const RIGHT_PANE_WIDTH = 400
 
-const PROMPT_MODES: (WorkbenchPromptModeConfig & {
+export const WORKBENCH_PROMPT_MODES: (WorkbenchPromptModeConfig & {
   mode: WorkbenchPromptMode
 })[] = [
   {
@@ -59,7 +59,7 @@ const PROMPT_MODES: (WorkbenchPromptModeConfig & {
     Icon: ListIcon,
     iconFill: orange[400],
     description:
-      'Run entirely in read-only mode.  No PRs will be created, use for exploring infrastructure or root cause analysis.',
+      'Run entirely in read-only mode. No PRs will be created, use for exploring infrastructure or root cause analysis.',
   },
 ]
 
@@ -102,9 +102,11 @@ export function WorkbenchPromptModeSelector({
   )
 
   const previewMode = hoveredMode ?? selectedMode ?? 'agent'
-  const previewConfig = PROMPT_MODES.find((m) => m.mode === previewMode)!
+  const previewConfig = WORKBENCH_PROMPT_MODES.find(
+    (m) => m.mode === previewMode
+  )!
   const selectedModeConfig = selectedMode
-    ? PROMPT_MODES.find((m) => m.mode === selectedMode)
+    ? WORKBENCH_PROMPT_MODES.find((m) => m.mode === selectedMode)
     : null
 
   const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
@@ -168,7 +170,7 @@ export function WorkbenchPromptModeSelector({
         ...buttonProps,
         ...(isOpen ? { style: { zIndex: theme.zIndexes.tooltip + 1 } } : {}),
       })}
-      <ModeDropdownPanel
+      <WorkbenchPromptPopover
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false)
@@ -202,7 +204,7 @@ export function WorkbenchPromptModeSelector({
               direction="column"
               gap="xxsmall"
             >
-              {PROMPT_MODES.map(({ mode, ...config }) => {
+              {WORKBENCH_PROMPT_MODES.map(({ mode, ...config }) => {
                 const selected = selectedMode === mode
                 const hovered = hoveredMode === mode
 
@@ -279,12 +281,12 @@ export function WorkbenchPromptModeSelector({
             />
           </Flex>
         </Card>
-      </ModeDropdownPanel>
+      </WorkbenchPromptPopover>
     </>
   )
 }
 
-function ModeDropdownPanel({
+export function WorkbenchPromptPopover({
   isOpen,
   onClose,
   floating,

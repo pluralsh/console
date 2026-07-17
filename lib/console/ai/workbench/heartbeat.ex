@@ -62,10 +62,12 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   defp enforce_budget(usage, %State{reprompt: true} = state), do: {:noreply, %{state | usage: usage}}
-  defp enforce_budget(%{total_tokens: tts}, %State{job: %WorkbenchJob{modes: %Modes{budget: %Budget{tokens: lim}}}} = s)
-    when is_integer(tts) and is_integer(lim) and tts >= lim, do: {:stop, {:shutdown, {:budget, :tokens, tts}}, s}
-  defp enforce_budget(%{total_cost: tc}, %State{job: %WorkbenchJob{modes: %Modes{budget: %Budget{cost: lim}}}} = s)
-    when is_float(tc) and is_float(lim) and tc >= lim, do: {:stop, {:shutdown, {:budget, :cost, tc}}, s}
+  defp enforce_budget(%{total_tokens: tts} = usage, %State{job: %WorkbenchJob{modes: %Modes{budget: %Budget{tokens: lim}}}} = s)
+    when is_integer(tts) and is_integer(lim) and tts >= lim,
+    do: {:stop, {:shutdown, {:budget, :tokens, tts}}, %{s | usage: usage}}
+  defp enforce_budget(%{total_cost: tc} = usage, %State{job: %WorkbenchJob{modes: %Modes{budget: %Budget{cost: lim}}}} = s)
+    when is_float(tc) and is_float(lim) and tc >= lim,
+    do: {:stop, {:shutdown, {:budget, :cost, tc}}, %{s | usage: usage}}
   defp enforce_budget(usage, %State{} = state), do: {:noreply, %{state | usage: usage}}
 
   defp preserve_usage(%WorkbenchJob{usage: %{} = usage}), do: AIUsage.sanitize(usage)
