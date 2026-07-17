@@ -14,13 +14,12 @@ import {
   WORKLOADS_REL_PATH,
 } from '../../routes/kubernetesRoutesConsts'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
-import { ClusterSelect } from '../cd/utils/ClusterSelect'
+import ClusterSelector from '../cd/utils/ClusterSelector'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 
 import { Flex } from '@pluralsh/design-system'
-import { useClusters } from './Cluster'
 import { DataSelectInputs } from './common/DataSelect'
 
 export const NAMESPACE_PARAM = 'namespace'
@@ -43,7 +42,6 @@ export default function Navigation() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId = '' } = useParams()
-  const clusters = useClusters()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [headerAction, setHeaderAction] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
@@ -69,13 +67,13 @@ export default function Navigation() {
             gap: theme.spacing.large,
           }}
         >
-          <ClusterSelect
-            clusters={clusters}
-            selectedKey={clusterId}
-            onSelectionChange={(id) =>
-              navigate(pathname.replace(clusterId, `${id}`))
-            }
-            withoutTitleContent
+          <ClusterSelector
+            clusterId={clusterId}
+            allowDeselect={false}
+            hideTitleContent
+            onClusterChange={(cluster) => {
+              if (cluster?.id) navigate(pathname.replace(clusterId, cluster.id))
+            }}
           />
           <SideNavEntries
             directory={directory}
