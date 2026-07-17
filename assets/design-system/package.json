@@ -42,7 +42,7 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
-    "@floating-ui/react-dom-interactions": "0.13.3",
+    "@floating-ui/react": "0.27.20",
     "@markdoc/markdoc": "0.4.0",
     "@mermaid-js/layout-elk": "0.2.2",
     "@monaco-editor/react": "4.7.0",
