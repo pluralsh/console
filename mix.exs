@@ -181,7 +181,8 @@ defmodule Console.MixProject do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
       {:tesla, "~> 1.18"},
       {:oidcc, "~> 3.3"},
-      {:hackney, "~> 4.0"},
+      # hackney 4.x fixes advisories, but ex_aws still requires ~> 1.16.
+      {:hackney, "~> 1.21"},
       {:protobuf, "~> 0.16.1", override: true},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
