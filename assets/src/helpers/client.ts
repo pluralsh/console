@@ -9,7 +9,7 @@ import { onError } from '@apollo/client/link/error'
 import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
 import { RetryLink } from '@apollo/client/link/retry'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
-import { hasSubscription } from '@jumpn/utils-graphql'
+import { getMainDefinition } from '@apollo/client/utilities'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
@@ -112,7 +112,14 @@ export function buildClient(
   const gqlLink = errorLink.concat(persistedQueryLink).concat(httpLink)
 
   const splitLink = split(
-    (operation) => hasSubscription(operation.query),
+    ({ query }) => {
+      const definition = getMainDefinition(query)
+
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      )
+    },
     socketLink,
     authLink.concat(retryLink).concat(gqlLink)
   )

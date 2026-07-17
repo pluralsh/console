@@ -1,10 +1,10 @@
-import 'xterm/css/xterm.css'
+import '@xterm/xterm/css/xterm.css'
 
+import { FitAddon } from '@xterm/addon-fit'
+import { Terminal } from '@xterm/xterm'
 import { debounce } from 'lodash'
 import { use, useCallback, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { Terminal } from 'xterm'
-import { FitAddon } from 'xterm-addon-fit'
 
 import { socket } from 'helpers/client'
 
