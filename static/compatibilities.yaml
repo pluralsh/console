@@ -16295,6 +16295,41 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.8.0
+    kube: ['1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm values / chart behavior changes to review
+
+        - **New chart value:** `aggregateToAdmin` toggle added (controls whether chart
+        creates/labels RBAC rules that aggregate into the built-in `admin` ClusterRole).
+        Review if you rely on Kubernetes RBAC aggregation.
+
+        - **New chart value:** optional `networkPolicy` support. If enabled, ensure
+        it allows egress to your secret backends (AWS/GCP/Vault/etc.) and ingress
+        as needed for webhook/metrics.
+
+        - **New chart value:** `webhook.startupProbe` support. If you have slow-starting
+        clusters/nodes, consider enabling/tuning to avoid premature restarts.
+
+        - **Already in 2.7.0 (carry-forward):** `storeRequeueInterval` is exposed
+        in Helm values; confirm your current value still makes sense after upgrade.
+
+        '
+      chart_updates: [Added `aggregateToAdmin` toggle for RBAC aggregation., Added
+          optional `NetworkPolicy` manifests/values support., Added `startupProbe`
+          configuration support for the webhook Deployment.]
+      features: [Added a GitLab deploy token generator (new generator option for GitLab
+          auth flows)., AWS Certificate Manager provider implemented (new backend/provider
+          for reading cert material)., Leader election lease timings are now configurable
+          (tune for HA and slow API servers)., ExternalSecrets now support a `CreateOrMerge`
+          creation policy (merge behavior when writing target Secrets)., 'SecretStore
+          `refreshInterval` now accepts a duration string (e.g., `"5m"`) in addition
+          to existing formats.']
+      breaking_changes: []
+    chart_version: 2.8.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.8.0']
   - version: 2.7.0
     kube: ['1.35']
     requirements: []
