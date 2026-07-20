@@ -132,11 +132,6 @@ function HomeClusters() {
       upgradeData?.upgradeStatistics,
     ])
 
-  const clusters = useMemo(
-    () => mapExistingNodes(tableData?.clusters),
-    [tableData]
-  )
-
   const isLoading = !tableData && tableLoading
   const noClustersYet =
     aggregatedUpgradeStats.all === 0 && !(projectId || upgradeLoading)
@@ -154,7 +149,11 @@ function HomeClusters() {
             <ClusterHealthScoresHeatmap
               clusters={heatmapList}
               onClick={(name) =>
-                setSelectedCluster(clusters.find((c) => c.name === name))
+                setSelectedCluster(
+                  heatmapList.find(
+                    (c) => c.name === name
+                  ) as Nullable<ClustersRowFragment>
+                )
               }
             />
             <ClusterHealthScoresFilterBtns

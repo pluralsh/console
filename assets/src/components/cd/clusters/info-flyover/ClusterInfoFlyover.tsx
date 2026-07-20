@@ -7,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import {
   ClustersRowFragment,
+  useClusterBasicQuery,
   useClusterOverviewDetailsQuery,
 } from 'generated/graphql'
 
@@ -97,12 +98,23 @@ export function ClusterInfoFlyover({
 
 function ClusterInfoFlyoverContent({
   initialTab,
-  clusterBasic,
+  clusterBasic: clusterBasicProp,
 }: {
   initialTab: ClusterInfoFlyoverTab
   clusterBasic: Nullable<ClustersRowFragment>
 }) {
   const [tab, setTab] = useState(initialTab)
+
+  const {
+    data: basicData,
+    loading: basicLoading,
+    error: basicError,
+  } = useClusterBasicQuery({
+    variables: { id: clusterBasicProp?.id ?? '' },
+    skip: !clusterBasicProp?.id || !!getClusterKubeVersion(clusterBasicProp),
+    fetchPolicy: 'cache-and-network',
+  })
+  const clusterBasic = basicData?.cluster ?? clusterBasicProp
 
   const kubeVersion = getClusterKubeVersion(clusterBasic) ?? ''
   const parsedKubeVersion =
@@ -121,7 +133,9 @@ function ClusterInfoFlyoverContent({
     pollInterval: POLL_INTERVAL,
   })
   const cluster = data?.cluster
+  const isLoading = !data && (loading || basicLoading)
 
+  if (basicError) return <GqlError error={basicError} />
   if (error) return <GqlError error={error} />
 
   return (
@@ -152,7 +166,7 @@ function ClusterInfoFlyoverContent({
               <HealthScoreTab cluster={cluster} />
             )}
           </>
-        ) : loading ? (
+        ) : isLoading ? (
           <RectangleSkeleton
             $width="100%"
             $height="100%"
