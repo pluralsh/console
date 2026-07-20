@@ -65,6 +65,7 @@ defmodule Console.GraphQl.Deployments.Git do
   end
 
   input_object :helm_auth_attributes do
+    field :proxy,  :http_proxy_attributes
     field :basic,  :helm_basic_auth_attributes
     field :bearer, :helm_bearer_auth_attributes
     field :aws,    :helm_aws_auth_attributes

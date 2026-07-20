@@ -1,6 +1,6 @@
 ✨ We have a new insight into an issue with your service
 
-<%= @service.name %> is currently in state <%= @service.state %>
+<%= @service.name %> is currently in state <%= @service.status %>
 
 Here's a brief summary of what we've found:
 

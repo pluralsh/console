@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient, HelmRepository, OCIAuth}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
@@ -34,7 +34,8 @@ defmodule Console.Schema.WorkbenchTool do
     opensearch: 25,
     lambda: 26,
     cloud_run: 27,
-    azure_function: 28
+    azure_function: 28,
+    docker: 29
 
   defenum Category,
     metrics: 0,
@@ -211,6 +212,12 @@ defmodule Console.Schema.WorkbenchTool do
       embeds_one :azure_devops, AzureDevopsConnection, on_replace: :update do
         field :url,   :string
         field :token, EncryptedString
+      end
+
+      embeds_one :docker, DockerConnection, on_replace: :update do
+        field :url,      :string
+        field :provider, HelmRepository.Provider, default: :basic
+        embeds_one :auth, OCIAuth, on_replace: :update
       end
 
       embeds_one :exa, ExaConnection, on_replace: :update do
@@ -408,6 +415,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
     |> cast_embed(:bitbucket_datacenter, with: &bitbucket_datacenter_configuration_changeset/2)
     |> cast_embed(:azure_devops, with: &azure_devops_configuration_changeset/2)
+    |> cast_embed(:docker, with: &docker_configuration_changeset/2)
     |> cast_embed(:lambda, with: &lambda_configuration_changeset/2)
     |> cast_embed(:cloud_run, with: &cloud_run_configuration_changeset/2)
     |> cast_embed(:azure_function, with: &azure_function_configuration_changeset/2)
@@ -612,6 +620,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url token)a)
     |> validate_required([:token])
+  end
+
+  defp docker_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url provider)a)
+    |> cast_embed(:auth)
   end
 
   defp maybe_validate_app_auth(changeset) do

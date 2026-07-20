@@ -264,6 +264,14 @@ fragment WorkbenchTool on WorkbenchTool {
     azureDevops {
       url
     }
+    docker {
+      url
+      provider
+      proxy {
+        url
+        noproxy
+      }
+    }
   }
 }
 

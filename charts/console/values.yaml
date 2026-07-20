@@ -69,6 +69,12 @@ console:
     # assetsProxyUrl use this if you need to proxy downloads of new compatibility matrices or other live updated information from our datasets
     assetsProxyUrl: ~
 
+    # tarballQps configures the global QPS limit for digest and git tarball endpoints.
+    tarballQps: 100
+
+    # dbPoolSize configures the Ecto database connection pool size.
+    dbPoolSize: 50
+
     # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
     rdsIamAuthentication: false
 

@@ -136,6 +136,10 @@ type HelmRepositorySpec struct {
 // It supports multiple authentication methods, but only one should be specified per repository.
 // The authentication method used should match the Provider specified in the HelmRepositorySpec.
 type HelmRepositoryAuth struct {
+	// Proxy configures an HTTP proxy for requests to this Helm repository or OCI registry.
+	// +kubebuilder:validation:Optional
+	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
+
 	// Basic specifies username/password authentication for repositories that support HTTP Basic Auth.
 	// Commonly used with private Helm repositories, Harbor registries, and other traditional
 	// repository managers that implement standard HTTP authentication.

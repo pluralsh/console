@@ -204,6 +204,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "google cloud function configuration"
     field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes, description: "bitbucket data center connection (scm)"
     field :azure_devops,         :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
+    field :docker,               :workbench_tool_docker_connection_attributes, description: "docker/OCI registry connection"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -365,6 +366,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
         "Optional REST API root (defaults to https://dev.azure.com). Use https://dev.azure.com/{organization} to bake the org into the URL, or an on-premises root such as https://server/tfs/Collection."
 
     field :token, :string, description: "Azure DevOps personal access token (PAT; encrypted at rest)"
+  end
+
+  input_object :workbench_tool_docker_connection_attributes do
+    field :url, :string,
+      description:
+        "Registry host or base URL (defaults to registry-1.docker.io). Repository slugs are provided to individual tools."
+
+    field :provider, :helm_auth_provider,
+      description: "registry authentication provider: basic, bearer, aws, azure, or gcp"
+
+    field :auth, :helm_auth_attributes,
+      description: "registry authentication credentials and optional proxy; secrets are encrypted at rest"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -1001,6 +1014,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :cloud_run, :workbench_tool_cloud_run_connection, description: "google cloud run service configuration"
     field :azure_function, :workbench_tool_azure_function_connection,
       description: "google cloud function configuration"
+    field :docker, :workbench_tool_docker_connection, description: "docker/OCI registry connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -1143,6 +1157,24 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_tool_azure_devops_connection do
     field :url, :string,
       description: "Azure DevOps REST API root in use (PAT never exposed); defaults to https://dev.azure.com when unset."
+  end
+
+  object :workbench_tool_docker_connection do
+    field :url, :string,
+      description: "Docker/OCI registry host in use (credentials never exposed)",
+      resolve: fn
+        %{url: url}, _ when is_binary(url) and byte_size(url) > 0 -> {:ok, url}
+        _, _ -> {:ok, "registry-1.docker.io"}
+      end
+
+    field :provider, :helm_auth_provider, description: "registry authentication provider"
+
+    field :proxy, :http_proxy_configuration,
+      description: "optional HTTP proxy for registry requests",
+      resolve: fn
+        %{auth: %{proxy: proxy}}, _ -> {:ok, proxy}
+        _, _ -> {:ok, nil}
+      end
   end
 
   object :workbench_tool_http_configuration do

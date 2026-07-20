@@ -1,5 +1,5 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { SortingFn, createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
 import { useMemo } from 'react'
 
@@ -28,6 +28,7 @@ import { getWorkloadsBreadcrumbs } from './Workloads'
 import { useTheme } from 'styled-components'
 import { groupBy } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { Readiness } from 'utils/status.ts'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -65,10 +66,21 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
+const pendingContainerCount = (pod?: PodPod) =>
+  pod?.containerStatuses?.filter((container) => {
+    const readiness = toReadiness(container.state)
+
+    return readiness === Readiness.InProgress || readiness === Readiness.Failed
+  })?.length ?? 0
+
+const pendingContainersSort: SortingFn<PodPod> = (rowA, rowB) =>
+  pendingContainerCount(rowA.original) - pendingContainerCount(rowB.original)
+
 const colContainers = columnHelper.accessor(
   (row) => row?.containerStatuses?.length,
   {
     id: 'containers',
+    sortingFn: pendingContainersSort,
     cell: ({ row: { original } }) => (
       <ContainerStatuses
         statuses={
@@ -208,12 +220,12 @@ export function usePodsColumns(): Array<object> {
       colName,
       colNamespace,
       colNode,
+      colContainers,
       colImages,
       colRestarts,
       colCpu,
       colMemory,
       colGPU,
-      colContainers,
       colCreationTimestamp,
       colAction,
     ],
