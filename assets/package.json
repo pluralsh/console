@@ -179,6 +179,7 @@
   "resolutions": {
     "dompurify": "3.4.12",
     "elkjs": "0.12.0",
-    "postcss": "8.5.19"
+    "postcss": "8.5.19",
+    "shell-quote": "1.10.0"
   }
 }
