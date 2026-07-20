@@ -32,7 +32,8 @@
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "openapi:codegen": "openapi-ts -i ./schema/swagger.json -o ./src/generated/kubernetes -p @tanstack/react-query -p @hey-api/client-axios",
-    "analyze": "vite-bundle-visualizer -o stats.html"
+    "analyze": "vite-bundle-visualizer -o stats.html",
+    "postinstall": "cd .. && husky install assets/.husky"
   },
   "engines": {
     "node": ">=24.11.1"
