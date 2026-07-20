@@ -329,6 +329,7 @@ defmodule Console.Deployments.InitTest do
       assert context.configuration["elastic"]["url"] == "https://my.plural.console:443/ext/v1/ingest/elastic"
       assert context.configuration["elastic"]["user"] == "plrl-test"
       assert context.configuration["elastic"]["password"] == "test"
+      assert context.configuration["elastic"]["index"] == "plrl-test-logs-write"
     end
   end
 
