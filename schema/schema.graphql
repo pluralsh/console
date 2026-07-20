@@ -6753,8 +6753,8 @@ type AvailableModel {
 
 type ModelDefault {
   provider: AiProvider!
-  model: String!
-  toolModel: String!
+  model: String
+  toolModel: String
   embeddingModel: String
 }
 

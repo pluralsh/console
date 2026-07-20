@@ -25,6 +25,7 @@ var configurationManager *ConfigurationManager
 // Configuration is a thread-safe structure for agent configuration
 type ConfigurationManager struct {
 	mu                          sync.RWMutex
+	defaults                    v1alpha1.AgentConfigurationSpec
 	servicePollInterval         *time.Duration
 	clusterPingInterval         *time.Duration
 	runtimeServicesPingInterval *time.Duration
@@ -48,6 +49,19 @@ func (s *ConfigurationManager) SetValue(config v1alpha1.AgentConfigurationSpec) 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	return s.setValueLocked(mergeAgentConfigurationSpec(s.defaults, config))
+}
+
+// SetDefaults configures the fallback values used when AgentConfiguration omits fields.
+func (s *ConfigurationManager) SetDefaults(config v1alpha1.AgentConfigurationSpec) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.defaults = copyAgentConfigurationSpec(config)
+	return s.setValueLocked(s.defaults)
+}
+
+func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfigurationSpec) error {
 	interval, err := setDuration(config.ClusterPingInterval)
 	if err != nil {
 		return err
@@ -92,6 +106,53 @@ func (s *ConfigurationManager) SetValue(config v1alpha1.AgentConfigurationSpec) 
 	s.disableWebsocket = config.DisableWebsocket
 
 	return nil
+}
+
+func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfigurationSpec) v1alpha1.AgentConfigurationSpec {
+	merged := copyAgentConfigurationSpec(defaults)
+
+	if overrides.ServicePollInterval != nil {
+		merged.ServicePollInterval = overrides.ServicePollInterval
+	}
+	if overrides.ClusterPingInterval != nil {
+		merged.ClusterPingInterval = overrides.ClusterPingInterval
+	}
+	if overrides.CompatibilityUploadInterval != nil {
+		merged.CompatibilityUploadInterval = overrides.CompatibilityUploadInterval
+	}
+	if overrides.StackPollInterval != nil {
+		merged.StackPollInterval = overrides.StackPollInterval
+	}
+	if overrides.PipelineGateInterval != nil {
+		merged.PipelineGateInterval = overrides.PipelineGateInterval
+	}
+	if overrides.MaxConcurrentReconciles != nil {
+		merged.MaxConcurrentReconciles = overrides.MaxConcurrentReconciles
+	}
+	if overrides.VulnerabilityReportUploadInterval != nil {
+		merged.VulnerabilityReportUploadInterval = overrides.VulnerabilityReportUploadInterval
+	}
+	if overrides.BaseRegistryURL != nil {
+		merged.BaseRegistryURL = overrides.BaseRegistryURL
+	}
+	if overrides.MaxSentinelRunJobs != nil {
+		merged.MaxSentinelRunJobs = overrides.MaxSentinelRunJobs
+	}
+	if overrides.MaxStackRunJobs != nil {
+		merged.MaxStackRunJobs = overrides.MaxStackRunJobs
+	}
+	if overrides.MaxAgentRunPods != nil {
+		merged.MaxAgentRunPods = overrides.MaxAgentRunPods
+	}
+	if overrides.DisableWebsocket != nil {
+		merged.DisableWebsocket = overrides.DisableWebsocket
+	}
+
+	return merged
+}
+
+func copyAgentConfigurationSpec(config v1alpha1.AgentConfigurationSpec) v1alpha1.AgentConfigurationSpec {
+	return *config.DeepCopy()
 }
 
 func setDuration(interval *string) (*time.Duration, error) {
