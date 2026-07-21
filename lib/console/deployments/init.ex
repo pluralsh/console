@@ -280,7 +280,13 @@ defmodule Console.Deployments.Init do
                     |> ensure_port()
       Services.save_context(%{
         configuration: %{
-          elastic: %{url: elastic_url, user: "plrl-#{inst}", password: pass},
+          elastic: %{
+            url: elastic_url,
+            user: "plrl-#{inst}",
+            password: pass,
+            # Logstash write target (ILM rollover alias). Query pattern stays plrl-#{inst}-logs-*.
+            index: "plrl-#{inst}-logs-write"
+          },
           vmetrics: %{
             query_url: Console.url("/ext/v1/query/prometheus"),
             url: Console.url("/ext/v1/ingest/prometheus"),
