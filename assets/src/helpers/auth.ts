@@ -1,10 +1,24 @@
 import Cookies from 'js-cookie'
 
 import { EncryptStorage } from 'encrypt-storage'
+import {
+  ORIGINAL_AUTH_TOKEN_KEY,
+  ORIGINAL_REFRESH_TOKEN_KEY,
+  ORIGINAL_USER_LABEL_KEY,
+} from './impersonationKeys'
 
 export const AUTH_TOKEN = 'auth-token'
 export const REFRESH_TOKEN = 'refresh-token'
 export const CHALLENGE_KEY = 'oauth-challenge'
+
+const AUTH_STORAGE_VERSION_KEY = 'auth-storage-version'
+const AUTH_STORAGE_VERSION = '3'
+const legacyEncryptedAuthKeys = [
+  AUTH_TOKEN,
+  ORIGINAL_AUTH_TOKEN_KEY,
+  ORIGINAL_REFRESH_TOKEN_KEY,
+  ORIGINAL_USER_LABEL_KEY,
+]
 
 const { MODE, VITE_DEV_SECRET_KEY, VITE_PROD_SECRET_KEY } = import.meta.env
 const secretKey =
@@ -13,7 +27,12 @@ const secretKey =
     : MODE === 'test'
       ? '1234567890'
       : VITE_DEV_SECRET_KEY
-const encryptStorage = new EncryptStorage(secretKey)
+const encryptStorage = EncryptStorage.create(secretKey, { engine: 'noble' })
+
+if (localStorage.getItem(AUTH_STORAGE_VERSION_KEY) !== AUTH_STORAGE_VERSION) {
+  legacyEncryptedAuthKeys.forEach((key) => encryptStorage.removeItem(key))
+  localStorage.setItem(AUTH_STORAGE_VERSION_KEY, AUTH_STORAGE_VERSION)
+}
 
 export function wipeToken() {
   encryptStorage.removeItem(AUTH_TOKEN)
