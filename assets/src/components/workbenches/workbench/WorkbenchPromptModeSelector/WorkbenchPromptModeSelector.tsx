@@ -18,10 +18,7 @@ import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { cloneElement, type ReactNode, useRef, useState } from 'react'
 import { useButton } from 'react-aria'
 import { to, useTransition } from '@react-spring/web'
-import {
-  FloatingPortal,
-  type UseFloatingReturn,
-} from '@floating-ui/react-dom-interactions'
+import { FloatingPortal, type UseFloatingReturn } from '@floating-ui/react'
 import { useTheme } from 'styled-components'
 import type {
   WorkbenchJobCodingModesAttributes,
@@ -314,7 +311,7 @@ export function WorkbenchPromptPopover({
       <PopoverWrapper
         $isOpen={isOpen}
         $placement={floating.placement}
-        ref={floating.floating}
+        ref={floating.refs.setFloating}
         style={{
           position: floating.strategy,
           left: floating.x ?? 0,
