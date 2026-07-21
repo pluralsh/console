@@ -1182,10 +1182,10 @@
          "name": "UpgradeStatistics",
          "body": "query UpgradeStatistics($projectId: ID, $tag: TagInput) {\n  upgradeStatistics(projectId: $projectId, tag: $tag) {\n    ...UpgradeStatistics\n    __typename\n  }\n}\n\nfragment UpgradeStatistics on UpgradeStatistics {\n  upgradeable\n  count\n  latest\n  compliant\n  __typename\n}"
       },
-      "sha256:7106532e0826c2faba1dc4042d09a58c765abe8a9f2b9e2d77b4057efc9a5582": {
+      "sha256:b9fbc6fb8f03a0146a2af1c94141c2d41233dd45be984bd52ea96c41c8d8c4e9": {
          "type": "query",
          "name": "ClusterHealthScores",
-         "body": "query ClusterHealthScores($projectId: ID) {\n  clusters(projectId: $projectId, first: 1000) {\n    edges {\n      node {\n        ...ClusterHealthScore\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ClusterHealthScore on Cluster {\n  id\n  name\n  healthScore\n  __typename\n}"
+         "body": "query ClusterHealthScores($projectId: ID) {\n  clusters(projectId: $projectId, first: 1000) {\n    edges {\n      node {\n        ...ClusterHealthScore\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ClusterHealthScore on Cluster {\n  id\n  name\n  healthScore\n  distro\n  provider {\n    cloud\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:22e8d642aa11212ae0ca3a3dee5ef82cacfc1ee9a9b13720be78e2f370460d4c": {
          "type": "query",
