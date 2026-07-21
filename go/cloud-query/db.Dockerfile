@@ -61,5 +61,8 @@ COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
 # Switch to the postgres user
 USER postgres
 
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=5 \
+  CMD pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-postgres}" || exit 1
+
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
 CMD ["postgres"]
