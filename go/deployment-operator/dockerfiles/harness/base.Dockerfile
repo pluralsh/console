@@ -24,13 +24,13 @@ COPY deployment-operator/internal ./internal
 COPY deployment-operator/api ./api
 
 RUN CGO_ENABLED=0 \
-    GOOS=${TARGETOS} \
-    GOARCH=${TARGETARCH} \
-    go build \
-    -trimpath \
-    -ldflags="-s -w -X github.com/pluralsh/deployment-operator/pkg/harness/environment.Version=${VERSION}" \
-    -o /plural/harness \
-    cmd/harness/main.go
+  GOOS=${TARGETOS} \
+  GOARCH=${TARGETARCH} \
+  go build \
+  -trimpath \
+  -ldflags="-s -w -X github.com/pluralsh/deployment-operator/pkg/harness/environment.Version=${VERSION}" \
+  -o /plural/harness \
+  cmd/harness/main.go
 
 FROM cgr.dev/chainguard/wolfi-base:latest AS final
 
@@ -48,5 +48,8 @@ COPY --from=aquasec/trivy:0.69.3 /usr/local/bin/trivy /usr/local/bin/trivy
 WORKDIR /plural
 
 ENV HELM_CACHE_HOME=/plural/.cache/helm
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
 
 ENTRYPOINT ["/harness", "--working-dir=/plural"]
