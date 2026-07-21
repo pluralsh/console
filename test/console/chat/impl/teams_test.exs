@@ -61,6 +61,7 @@ defmodule Console.Chat.Impl.TeamsTest do
       no_mention = activity(%{"entities" => [%{"type" => "mention", "mentioned" => %{"id" => "28:someone-else"}}]})
 
       assert :ok = Teams.handle_activity(conn, no_mention)
+
       assert [] = Repo.all(ChatbotMessage)
     end
 
