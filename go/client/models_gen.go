@@ -6035,15 +6035,19 @@ type PersonaEdge struct {
 }
 
 type PersonaFlows struct {
-	Workbenches *bool `json:"workbenches,omitempty"`
-	Pipelines   *bool `json:"pipelines,omitempty"`
-	Previews    *bool `json:"previews,omitempty"`
+	Permissions       *bool `json:"permissions,omitempty"`
+	StartWorkbenchJob *bool `json:"startWorkbenchJob,omitempty"`
+	Workbenches       *bool `json:"workbenches,omitempty"`
+	Pipelines         *bool `json:"pipelines,omitempty"`
+	Previews          *bool `json:"previews,omitempty"`
 }
 
 type PersonaFlowsAttributes struct {
-	Workbenches *bool `json:"workbenches,omitempty"`
-	Pipelines   *bool `json:"pipelines,omitempty"`
-	Previews    *bool `json:"previews,omitempty"`
+	Permissions       *bool `json:"permissions,omitempty"`
+	StartWorkbenchJob *bool `json:"startWorkbenchJob,omitempty"`
+	Workbenches       *bool `json:"workbenches,omitempty"`
+	Pipelines         *bool `json:"pipelines,omitempty"`
+	Previews          *bool `json:"previews,omitempty"`
 }
 
 type PersonaHome struct {

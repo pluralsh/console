@@ -18,6 +18,7 @@ import { useLogin } from 'components/contexts'
 import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { hasAccess } from 'components/utils/persona'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
@@ -97,6 +98,11 @@ export function Flow() {
     null
   )
   const { personaConfiguration } = useLogin()
+  const permissions = hasAccess(personaConfiguration, 'flows.permissions')
+  const startWorkbenchJob = hasAccess(
+    personaConfiguration,
+    'flows.startWorkbenchJob'
+  )
   const { flowIdOrName, flowData, loading, error, refetch } = useCurrentFlow()
   const tab = useMatch(`${FLOWS_ABS_PATH}/${flowIdOrName}/:tab/*`)?.params.tab
   const flow = flowData?.flow
@@ -172,14 +178,16 @@ export function Flow() {
                     secondColor="text-xlight"
                   />
                 </Flex>
-                <Button
-                  secondary
-                  startIcon={<PeopleIcon />}
-                  onClick={() => setShowPermissions(true)}
-                >
-                  Permissions
-                </Button>
-                <FlowWorkbenchJobLauncher flow={flow} />
+                {permissions && (
+                  <Button
+                    secondary
+                    startIcon={<PeopleIcon />}
+                    onClick={() => setShowPermissions(true)}
+                  >
+                    Permissions
+                  </Button>
+                )}
+                {startWorkbenchJob && <FlowWorkbenchJobLauncher flow={flow} />}
               </HeaderSC>
               <Flex justify="space-between">
                 <SubTabs directory={directory} />

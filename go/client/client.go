@@ -9514,11 +9514,19 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -9530,6 +9538,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPr
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
 	}
 	return t.Previews
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 	if t == nil {
@@ -9663,11 +9677,19 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 }
 
 type PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
 func (t *PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &PersonaConfigurationFragment_Flows{}
@@ -9679,6 +9701,12 @@ func (t *PersonaConfigurationFragment_Flows) GetPreviews() *bool {
 		t = &PersonaConfigurationFragment_Flows{}
 	}
 	return t.Previews
+}
+func (t *PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
 }
 func (t *PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 	if t == nil {
@@ -24306,11 +24334,19 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 }
 
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24322,6 +24358,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
 	}
 	return t.Previews
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 	if t == nil {
@@ -24473,11 +24515,19 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24489,6 +24539,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
 	}
 	return t.Previews
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 	if t == nil {
@@ -24622,11 +24678,19 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24638,6 +24702,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
 	}
 	return t.Previews
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 	if t == nil {
@@ -24771,11 +24841,19 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
-	Pipelines   *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
-	Previews    *bool "json:\"previews,omitempty\" graphql:\"previews\""
-	Workbenches *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
 	if t == nil {
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
@@ -24787,6 +24865,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
 	}
 	return t.Previews
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 	if t == nil {
@@ -56400,6 +56484,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		permissions
+		startWorkbenchJob
 		pipelines
 		previews
 		workbenches
@@ -56510,6 +56596,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		permissions
+		startWorkbenchJob
 		pipelines
 		previews
 		workbenches
@@ -56595,6 +56683,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		permissions
+		startWorkbenchJob
 		pipelines
 		previews
 		workbenches
@@ -56681,6 +56771,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		security
 	}
 	flows {
+		permissions
+		startWorkbenchJob
 		pipelines
 		previews
 		workbenches

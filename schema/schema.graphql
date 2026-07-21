@@ -15965,6 +15965,8 @@ input PersonaDeploymentAttributes {
 }
 
 input PersonaFlowsAttributes {
+  permissions: Boolean
+  startWorkbenchJob: Boolean
   workbenches: Boolean
   pipelines: Boolean
   previews: Boolean
@@ -16211,6 +16213,8 @@ type PersonaDeployment {
 }
 
 type PersonaFlows {
+  permissions: Boolean
+  startWorkbenchJob: Boolean
   workbenches: Boolean
   pipelines: Boolean
   previews: Boolean

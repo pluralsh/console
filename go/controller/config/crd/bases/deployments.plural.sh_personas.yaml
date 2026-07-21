@@ -155,6 +155,16 @@ spec:
                       Flows controls access to flow-related features and sections.
                       This includes workbenches, pipelines, and preview environments grouped under flows.
                     properties:
+                      permissions:
+                        description: |-
+                          Permissions enables the permissions action in the flow header when set to true.
+                          This allows personas to manage flow permissions from the flow detail page.
+                        type: boolean
+                      startWorkbenchJob:
+                        description: |-
+                          StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.
+                          This allows personas to launch workbench jobs directly from the flow detail page.
+                        type: boolean
                       pipelines:
                         description: |-
                           Pipelines enables access to flow pipeline features when set to true.

@@ -100,6 +100,8 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :persona_flows_attributes do
+    field :permissions, :boolean
+    field :start_workbench_job, :boolean
     field :workbenches, :boolean
     field :pipelines,   :boolean
     field :previews,    :boolean
@@ -328,6 +330,8 @@ defmodule Console.GraphQl.Users do
   end
 
   object :persona_flows do
+    field :permissions, :boolean
+    field :start_workbench_job, :boolean
     field :workbenches, :boolean
     field :pipelines,   :boolean
     field :previews,    :boolean
