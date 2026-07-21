@@ -1,5 +1,5 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { SortingFn, createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
 import { useMemo } from 'react'
 
@@ -66,37 +66,35 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
-const pendingContainerCount = (pod?: PodPod) =>
-  pod?.containerStatuses?.filter((container) => {
-    const readiness = toReadiness(container.state)
+const containersSortValue = (pod?: PodPod) => {
+  const statuses = pod?.containerStatuses ?? []
+  const unhealthyCount = statuses.filter((container) => {
+    const readiness = toReadiness(container!.state)
 
     return readiness === Readiness.InProgress || readiness === Readiness.Failed
-  })?.length ?? 0
+  }).length
 
-const pendingContainersSort: SortingFn<PodPod> = (rowA, rowB) =>
-  pendingContainerCount(rowA.original) - pendingContainerCount(rowB.original)
+  return unhealthyCount > 0 ? -unhealthyCount : statuses.length
+}
 
-const colContainers = columnHelper.accessor(
-  (row) => row?.containerStatuses?.length,
-  {
-    id: 'containers',
-    sortingFn: pendingContainersSort,
-    cell: ({ row: { original } }) => (
-      <ContainerStatuses
-        statuses={
-          original?.containerStatuses?.map(
-            (c) =>
-              ({
-                name: c?.name,
-                readiness: toReadiness(c!.state),
-              }) as ContainerStatusT
-          ) ?? []
-        }
-      />
-    ),
-    header: 'Containers',
-  }
-)
+const colContainers = columnHelper.accessor((row) => containersSortValue(row), {
+  id: 'containers',
+  enableSorting: true,
+  cell: ({ row: { original } }) => (
+    <ContainerStatuses
+      statuses={
+        original?.containerStatuses?.map(
+          (c) =>
+            ({
+              name: c?.name,
+              readiness: toReadiness(c!.state),
+            }) as ContainerStatusT
+        ) ?? []
+      }
+    />
+  ),
+  header: 'Containers',
+})
 
 const colCpu = columnHelper.accessor((row) => row?.allocatedResources, {
   id: 'cpu',
@@ -219,8 +217,8 @@ export function usePodsColumns(): Array<object> {
     () => [
       colName,
       colNamespace,
-      colNode,
       colContainers,
+      colNode,
       colImages,
       colRestarts,
       colCpu,
@@ -250,6 +248,7 @@ export default function Pods() {
           : getAllPodsInfiniteOptions
       }
       itemsKey="pods"
+      tableOptions={{ manualSorting: false }}
     />
   )
 }

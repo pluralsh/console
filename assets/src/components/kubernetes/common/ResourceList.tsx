@@ -91,7 +91,8 @@ export function ResourceList<
   const cluster = useCluster()
   const { filter, namespace, setNamespaced } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
-    meta: { cluster, ...tableOptions },
+    ...tableOptions,
+    meta: { cluster, ...tableOptions?.meta },
   })
 
   const options = queryOptions({
