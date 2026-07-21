@@ -89,23 +89,26 @@ defmodule Console.Deployments.Helm.AgentCache do
   def write(%__MODULE__{client: client} = cache, chart, vsn) do
     path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
     tmp = Briefly.create!()
-    with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
-         {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
-         {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
-         :ok <- validate_download(tmp),
-         :ok <- Utils.clean_chart(tmp, path, chart),
-         line <- Line.new(path, chart, vsn, digest),
-         :ok <- File.rm(tmp) do
-      cache = %{cache | client: client}
-      {:ok, line, put(cache, line)}
-    else
-      {:cache, {line, true}} ->
-        File.rm(tmp)
-        {:ok, line, cache}
-      err ->
-        Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
-        File.rm(tmp)
-        err
+    cleaned = Briefly.create!()
+    try do
+      with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
+          {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
+          {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
+          :ok <- validate_download(tmp),
+          :ok <- Utils.clean_chart(tmp, cleaned, chart),
+          :ok <- File.rename(cleaned, path),
+          line <- Line.new(path, chart, vsn, digest) do
+        cache = %{cache | client: client}
+        {:ok, line, put(cache, line)}
+      else
+        {:cache, {line, true}} ->
+          {:ok, line, cache}
+        err ->
+          Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
+          err
+      end
+    after
+      File.rm(tmp)
     end
   end
 

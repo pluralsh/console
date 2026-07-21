@@ -180,6 +180,9 @@ delete-tag:  ## deletes a tag from git locally and upstream
 latest-version: # finds latest release version
 	git tag | tr - \~ | sort -V | tr \~ -
 
+latest-agent-version: # finds latest agent release version
+	git tag | grep '^go/deployment-operator/' | tr - \~ | sort -V | tr \~ -
+
 install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir
 	@git config --local core.hooksPath ${GIT_HOOKS_PATH}/
 	@echo Successfully configured git hooks, \'core.hooksPath\' now points to \'${GIT_HOOKS_PATH}\'.

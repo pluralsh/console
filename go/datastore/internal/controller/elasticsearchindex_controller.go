@@ -118,7 +118,12 @@ func (r *ElasticSearchIndexReconciler) sync(ctx context.Context, index *v1alpha1
 		return nil
 	}
 
-	res, err := r.ElasticsearchClient.CreateIndex(index.ResourceName(), index.Spec.Definition)
+	definition, err := adjustIndexDefinitionForCreate(ctx, r.ElasticsearchClient, index.ResourceName(), index.Spec.Definition)
+	if err != nil {
+		return err
+	}
+
+	res, err := r.ElasticsearchClient.CreateIndex(index.ResourceName(), definition)
 	if err != nil {
 		return err
 	}

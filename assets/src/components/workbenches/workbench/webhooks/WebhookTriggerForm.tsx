@@ -29,6 +29,7 @@ import {
   useObservabilityWebhooksQuery,
   useUpdateWorkbenchWebhookMutation,
   useWorkbenchQuery,
+  WorkbenchJobModesAttributes,
 } from 'generated/graphql'
 import { isEmpty, isEqual } from 'lodash'
 import { InlineA } from 'components/utils/typography/Text'
@@ -54,8 +55,15 @@ import { WorkbenchPromptRichInput } from '../WorkbenchPromptRichInput'
 import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import {
   FormCardSC,
+  SidebarBtnSC,
   StickyActionsFooterSC,
+  WorkbenchSplitLayoutSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
+import {
+  modesAttributes,
+  modesFormValue,
+} from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
   getIssueWebhookProviderIcon,
   getObservabilityWebhookTypeIcon,
@@ -74,7 +82,10 @@ export type WebhookTriggerFormState = {
   prompt: string
   userId: string
   priority: number
+  modes: WorkbenchJobModesAttributes | null
 }
+
+type WebhookTriggerFormStep = 'Configuration' | 'Modes & token limit'
 
 function parseWebhookKey(key: string): {
   webhookId?: string
@@ -100,6 +111,8 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
   const routeState = location.state as Nullable<RouteState>
   const webhookKeyParam =
     searchParams.get(WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM) ?? undefined
+  const [currentStep, setCurrentStep] =
+    useState<WebhookTriggerFormStep>('Configuration')
 
   const {
     data: workbenchData,
@@ -250,6 +263,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
     prompt: promptTrimmed || null,
     userId: formState.userId,
     priority: formState.priority,
+    modes: modesAttributes(formState.modes),
   }
 
   const initialFormState = getInitialFormState(
@@ -348,7 +362,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
         direction="column"
         gap="large"
         width="100%"
-        css={{ maxWidth: 750, marginInline: 'auto' }}
+        css={{ maxWidth: 968, marginInline: 'auto' }}
       >
         <StackedText
           loading={!workbenchData && workbenchLoading}
@@ -366,108 +380,70 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
             $height={300}
           />
         ) : (
-          <FormCardSC>
+          <WorkbenchSplitLayoutSC>
             <Flex
               direction="column"
-              gap="large"
-              height="100%"
-              width="100%"
+              width={200}
+              flexShrink={0}
+              gap="xxxsmall"
             >
+              {(
+                [
+                  'Configuration',
+                  'Modes & token limit',
+                ] as WebhookTriggerFormStep[]
+              ).map((step) => (
+                <SidebarBtnSC
+                  key={step}
+                  $active={currentStep === step}
+                  justifyContent="flex-start"
+                  onClick={() => setCurrentStep(step)}
+                >
+                  {step}
+                </SidebarBtnSC>
+              ))}
+            </Flex>
+            <FormCardSC>
               {formError && <GqlError error={formError} />}
-              <FormField
-                required
-                label="Webhook label"
-              >
-                <Input2
-                  value={formState.name}
-                  onChange={(e) =>
-                    setFormState((prev) => ({ ...prev, name: e.target.value }))
-                  }
-                  placeholder="Webhook label"
-                />
-              </FormField>
               <Flex
                 direction="column"
-                gap="small"
+                gap="large"
+                height="100%"
+                width="100%"
               >
-                <Flex
-                  align="center"
-                  justify="space-between"
-                >
-                  <div
-                    css={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Select webhook*
-                  </div>
-                  <InlineA
-                    href={WEBHOOKS_SETTINGS_ABS_PATH}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      navigate(WEBHOOKS_SETTINGS_ABS_PATH)
-                    }}
-                    css={{ display: 'flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    Manage webhooks
-                    <ArrowTopRightIcon size={12} />
-                  </InlineA>
-                </Flex>
-                <FormField hint="New webhooks added will appear in this list.">
-                  <Select
-                    selectedKey={formState.selectedWebhookKey || null}
-                    leftContent={selectedWebhookIcon}
-                    onSelectionChange={(key) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        selectedWebhookKey: String(key ?? ''),
-                      }))
-                    }
-                    label="Webhook"
-                    isDisabled={
-                      webhooksLoading ||
-                      (isEmpty(observabilityWebhooks) && isEmpty(issueWebhooks))
-                    }
-                  >
-                    {[
-                      ...observabilityWebhooks.map((wh) => (
-                        <ListBoxItem
-                          key={`obs:${wh.id}`}
-                          leftContent={getObservabilityWebhookTypeIcon(wh.type)}
-                          rightContent={
-                            <Chip
-                              size="small"
-                              inactive
-                              icon={<VisualInspectionIcon />}
-                              iconColor="icon-xlight"
-                              css={{ borderRadius: 11 }}
-                            >
-                              Observability
-                            </Chip>
-                          }
-                          label={wh.name}
-                        />
-                      )),
-                      ...issueWebhooks.map((wh) => (
-                        <ListBoxItem
-                          key={`issue:${wh.id}`}
-                          leftContent={getIssueWebhookProviderIcon(wh.provider)}
-                          rightContent={
-                            <Chip
-                              size="small"
-                              inactive
-                              icon={<TicketIcon />}
-                              iconColor="icon-xlight"
-                              css={{ borderRadius: 11 }}
-                            >
-                              Ticketing
-                            </Chip>
-                          }
-                          label={wh.name}
-                        />
-                      )),
-                      <ListBoxFooter key="manage-webhooks-footer">
+                {currentStep === 'Configuration' ? (
+                  <>
+                    <FormField
+                      required
+                      label="Webhook label"
+                    >
+                      <Input2
+                        value={formState.name}
+                        onChange={(e) =>
+                          setFormState((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        placeholder="Webhook label"
+                      />
+                    </FormField>
+                    <Flex
+                      direction="column"
+                      gap="small"
+                    >
+                      <Flex
+                        align="center"
+                        justify="space-between"
+                      >
+                        <div
+                          css={{
+                            fontSize: '14px',
+                            fontWeight: 600,
+                          }}
+                        >
+                          Select webhook*
+                        </div>
                         <InlineA
                           href={WEBHOOKS_SETTINGS_ABS_PATH}
                           onClick={(e) => {
@@ -477,155 +453,298 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                           css={{
                             display: 'flex',
                             alignItems: 'center',
-                            gap: theme.spacing.small,
+                            gap: '4px',
                           }}
                         >
                           Manage webhooks
                           <ArrowTopRightIcon size={12} />
                         </InlineA>
-                      </ListBoxFooter>,
-                    ]}
-                  </Select>
-                </FormField>
-                <WorkbenchAccessibleUserSelect
-                  key={workbenchId}
-                  workbenchId={workbenchId}
-                  selectedUserId={formState.userId}
-                  onSelectionChange={(userId) =>
-                    setFormState((prev) => ({ ...prev, userId }))
-                  }
-                  disabled={isSaving}
-                />
-              </Flex>
-              <FormField
-                label="Priority"
-                hint="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
-              >
-                <Input2
-                  value={String(formState.priority)}
-                  inputProps={{
-                    type: 'number',
-                    min: 0,
-                    step: 1,
-                  }}
-                  onChange={(e) => {
-                    const raw = e.target.value
-                    const parsed = parseInt(raw, 10)
-                    setFormState((prev) => ({
-                      ...prev,
-                      priority: raw === '' || Number.isNaN(parsed) ? 0 : parsed,
-                    }))
-                  }}
-                  placeholder="0"
-                />
-              </FormField>
-              <TabList
-                stateRef={tabStateRef}
-                stateProps={{
-                  orientation: 'horizontal',
-                  selectedKey: formState.matchType,
-                  onSelectionChange: (key: Key) =>
-                    setFormState((prev) => ({
-                      ...prev,
-                      matchType: String(key) as MatchType,
-                    })),
-                }}
-              >
-                <Tab
-                  key="substring"
-                  textValue="Substring"
-                >
-                  Substring
-                </Tab>
-                <Tab
-                  key="regex"
-                  textValue="Regex"
-                >
-                  REGEX
-                </Tab>
-              </TabList>
-              {formState.matchType === 'regex' ? (
-                <FormField hint="Use a regex pattern to match against incoming event payloads. Supports syntax like ^alert\\.triggered$.">
-                  <Input2
-                    value={formState.regex}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        regex: e.target.value,
-                      }))
-                    }
-                    placeholder="REGEX"
-                  />
-                </FormField>
-              ) : (
-                <>
-                  <FormField hint="Create a filter rule. Match events containing this exact string. Case insensitive option available below.">
+                      </Flex>
+                      <FormField hint="New webhooks added will appear in this list.">
+                        <Select
+                          selectedKey={formState.selectedWebhookKey || null}
+                          leftContent={selectedWebhookIcon}
+                          onSelectionChange={(key) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              selectedWebhookKey: String(key ?? ''),
+                            }))
+                          }
+                          label="Webhook"
+                          isDisabled={
+                            webhooksLoading ||
+                            (isEmpty(observabilityWebhooks) &&
+                              isEmpty(issueWebhooks))
+                          }
+                        >
+                          {[
+                            ...observabilityWebhooks.map((wh) => (
+                              <ListBoxItem
+                                key={`obs:${wh.id}`}
+                                leftContent={getObservabilityWebhookTypeIcon(
+                                  wh.type
+                                )}
+                                rightContent={
+                                  <Chip
+                                    size="small"
+                                    inactive
+                                    icon={<VisualInspectionIcon />}
+                                    iconColor="icon-xlight"
+                                    css={{ borderRadius: 11 }}
+                                  >
+                                    Observability
+                                  </Chip>
+                                }
+                                label={wh.name}
+                              />
+                            )),
+                            ...issueWebhooks.map((wh) => (
+                              <ListBoxItem
+                                key={`issue:${wh.id}`}
+                                leftContent={getIssueWebhookProviderIcon(
+                                  wh.provider
+                                )}
+                                rightContent={
+                                  <Chip
+                                    size="small"
+                                    inactive
+                                    icon={<TicketIcon />}
+                                    iconColor="icon-xlight"
+                                    css={{ borderRadius: 11 }}
+                                  >
+                                    Ticketing
+                                  </Chip>
+                                }
+                                label={wh.name}
+                              />
+                            )),
+                            <ListBoxFooter key="manage-webhooks-footer">
+                              <InlineA
+                                href={WEBHOOKS_SETTINGS_ABS_PATH}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  navigate(WEBHOOKS_SETTINGS_ABS_PATH)
+                                }}
+                                css={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: theme.spacing.small,
+                                }}
+                              >
+                                Manage webhooks
+                                <ArrowTopRightIcon size={12} />
+                              </InlineA>
+                            </ListBoxFooter>,
+                          ]}
+                        </Select>
+                      </FormField>
+                    </Flex>
                     <Flex
-                      direction="column"
-                      gap="small"
+                      align="flex-start"
+                      gap="medium"
                     >
-                      <Input2
-                        value={formState.substring}
-                        onChange={(e) =>
+                      <div css={{ flex: '7 1 0%', minWidth: 0 }}>
+                        <WorkbenchAccessibleUserSelect
+                          key={workbenchId}
+                          workbenchId={workbenchId}
+                          selectedUserId={formState.userId}
+                          onSelectionChange={(userId) =>
+                            setFormState((prev) => ({ ...prev, userId }))
+                          }
+                          disabled={isSaving}
+                          hint=""
+                        />
+                      </div>
+                      <FormField
+                        label="Priority"
+                        infoTooltip="Higher priority webhooks take precedence when more than one trigger matches the same incoming event (larger numbers win)."
+                        css={{ flex: '3 1 0%', minWidth: 0 }}
+                      >
+                        <Input2
+                          value={String(formState.priority)}
+                          inputProps={{
+                            type: 'number',
+                            min: 0,
+                            step: 1,
+                          }}
+                          onChange={(e) => {
+                            const raw = e.target.value
+                            const parsed = parseInt(raw, 10)
+                            setFormState((prev) => ({
+                              ...prev,
+                              priority:
+                                raw === '' || Number.isNaN(parsed) ? 0 : parsed,
+                            }))
+                          }}
+                          placeholder="0"
+                        />
+                      </FormField>
+                    </Flex>
+                    <TabList
+                      stateRef={tabStateRef}
+                      stateProps={{
+                        orientation: 'horizontal',
+                        selectedKey: formState.matchType,
+                        onSelectionChange: (key: Key) =>
                           setFormState((prev) => ({
                             ...prev,
-                            substring: e.target.value,
-                          }))
+                            matchType: String(key) as MatchType,
+                          })),
+                      }}
+                    >
+                      <Tab
+                        key="substring"
+                        textValue="Substring"
+                      >
+                        Substring
+                      </Tab>
+                      <Tab
+                        key="regex"
+                        textValue="Regex"
+                      >
+                        REGEX
+                      </Tab>
+                    </TabList>
+                    {formState.matchType === 'regex' ? (
+                      <FormField hint="Use a regex pattern to match against incoming event payloads. Supports syntax like ^alert\\.triggered$.">
+                        <Input2
+                          value={formState.regex}
+                          onChange={(e) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              regex: e.target.value,
+                            }))
+                          }
+                          placeholder="REGEX"
+                        />
+                      </FormField>
+                    ) : (
+                      <Flex
+                        align="flex-start"
+                        gap="small"
+                      >
+                        <FormField
+                          hint="Create a filter rule. Match events containing this exact string. Case insensitive option available."
+                          css={{ flex: 1, minWidth: 0 }}
+                        >
+                          <Input2
+                            value={formState.substring}
+                            onChange={(e) =>
+                              setFormState((prev) => ({
+                                ...prev,
+                                substring: e.target.value,
+                              }))
+                            }
+                            placeholder="Substring"
+                          />
+                        </FormField>
+                        <Checkbox
+                          small
+                          checked={formState.caseInsensitive}
+                          onChange={(e) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              caseInsensitive: e.target.checked,
+                            }))
+                          }
+                          css={{
+                            flexShrink: 0,
+                            paddingTop: theme.spacing.xsmall,
+                            paddingRight: theme.spacing.xsmall,
+                            paddingBottom: theme.spacing.xsmall,
+                          }}
+                        >
+                          Case insensitive match
+                        </Checkbox>
+                      </Flex>
+                    )}
+                    <FormField
+                      infoTooltip="Optional text appended to the agent prompt when an incoming event matches this webhook."
+                      label="Custom instructions"
+                    >
+                      <WorkbenchPromptRichInput
+                        syncKey={`webhook-prompt-${location.key}-${promptInputSyncKeySuffix}`}
+                        workbenchId={workbenchId}
+                        prompt={formState.prompt}
+                        disabled={isSaving}
+                        onPromptChange={(next) =>
+                          setFormState((prev) => ({ ...prev, prompt: next }))
                         }
-                        placeholder="Substring"
+                        placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only. Type @ for clusters, services, and stacks, or / for skills."
                       />
-                    </Flex>
-                  </FormField>
-                  <Checkbox
-                    small
-                    checked={formState.caseInsensitive}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        caseInsensitive: e.target.checked,
-                      }))
-                    }
-                  >
-                    Case insensitive match
-                  </Checkbox>
-                </>
-              )}
-              <FormField
-                infoTooltip="Optional text appended to the agent prompt when an incoming event matches this webhook."
-                label="Custom instructions"
-              >
-                <WorkbenchPromptRichInput
-                  syncKey={`webhook-prompt-${location.key}-${promptInputSyncKeySuffix}`}
-                  workbenchId={workbenchId}
-                  prompt={formState.prompt}
-                  disabled={isSaving}
-                  onPromptChange={(next) =>
-                    setFormState((prev) => ({ ...prev, prompt: next }))
-                  }
-                  placeholder="Optional — add custom instructions for the agent when this webhook fires. Leave blank to use the default alert or issue context only. Type @ for clusters, services, and stacks, or / for skills."
-                />
-              </FormField>
-              <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
-                <Button
-                  secondary
-                  startIcon={<ReturnIcon />}
-                  onClick={() =>
-                    navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
-                  }
-                  disabled={isSaving}
-                >
-                  Back to all webhooks
-                </Button>
-                <Button
-                  onClick={() => handleSave()}
-                  loading={isSaving}
-                  disabled={!canSave}
-                >
-                  Save
-                </Button>
-              </StickyActionsFooterSC>
-            </Flex>
-          </FormCardSC>
+                    </FormField>
+                    <StickyActionsFooterSC>
+                      <Button
+                        secondary
+                        startIcon={<ReturnIcon />}
+                        onClick={() =>
+                          navigate(
+                            getWorkbenchWebhookTriggersAbsPath(workbenchId)
+                          )
+                        }
+                        disabled={isSaving}
+                      >
+                        Back to all webhooks
+                      </Button>
+                      <Flex gap="small">
+                        <Button
+                          secondary
+                          onClick={() => handleSave()}
+                          loading={isSaving}
+                          disabled={!canSave}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          onClick={() => setCurrentStep('Modes & token limit')}
+                          disabled={
+                            !label ||
+                            !selectedWebhookKeyValue ||
+                            !activeMatchValue ||
+                            !formState.userId
+                          }
+                        >
+                          Next
+                        </Button>
+                      </Flex>
+                    </StickyActionsFooterSC>
+                  </>
+                ) : (
+                  <>
+                    <WorkbenchModesForm
+                      workbenchId={workbenchId}
+                      value={formState.modes}
+                      onChange={(modes) =>
+                        setFormState((prev) => ({ ...prev, modes }))
+                      }
+                      disabled={isSaving}
+                    />
+                    <StickyActionsFooterSC>
+                      <Button
+                        secondary
+                        startIcon={<ReturnIcon />}
+                        onClick={() =>
+                          navigate(
+                            getWorkbenchWebhookTriggersAbsPath(workbenchId)
+                          )
+                        }
+                        disabled={isSaving}
+                      >
+                        Back to all webhooks
+                      </Button>
+                      <Button
+                        onClick={() => handleSave()}
+                        loading={isSaving}
+                        disabled={!canSave}
+                      >
+                        Save
+                      </Button>
+                    </StickyActionsFooterSC>
+                  </>
+                )}
+              </Flex>
+            </FormCardSC>
+          </WorkbenchSplitLayoutSC>
         )}
       </Flex>
     </Flex>
@@ -653,6 +772,7 @@ function getInitialFormState(
     prompt: webhook?.prompt ?? '',
     userId: webhook?.userId ?? defaultUserIdForCreate ?? '',
     priority: webhook?.priority ?? 0,
+    modes: modesFormValue(webhook?.modes),
   }
 }
 
@@ -677,5 +797,6 @@ function getAttributesFromState(formState: WebhookTriggerFormState) {
     prompt: promptTrimmed || null,
     userId: formState.userId,
     priority: formState.priority,
+    modes: modesAttributes(formState.modes),
   }
 }

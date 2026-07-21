@@ -2,11 +2,12 @@ We finished executing an activity for this workbench.  Here are the details:
 
 Activity type: <%= if @activity.type == :memo, do: "notes", else: @activity.type %>
 Activity status: <%= @activity.status %>
-Initial prompt:
+<%= if @activity.prompt do %>Initial prompt:
 
 ```
 <%= @activity.prompt %>
-```
+```<% end %>
+
 <%= if @activity.result do %>
 Conclusion:
 

@@ -21,6 +21,17 @@ Basic guardrails for using these subagents:
 * To bisect issues in git, you should delegate to the coding agent to do so, it can run in read-only mode if that's necessary.  It's rare to find those issues in the infrastructure agent's available data.
 * Always list subagents before selecting to run any subset of them, as it will let you know their current capabilities and how to best use them.
 
+<%= if @actions.functions || @actions.kubernetes do %>
+** Actions are available to you**
+
+You also have access to a few write only actions, either in the form of function calls or kubernetes updates/deletes.  In each case,
+these could require user approval before acting, and you should coordinate with the relevant subagents to gather whatever pre-investigation before
+delegating to them.  In general, these should be chosen last in a jobs flow, since you need context before executing them.
+
+If it's possible to make the desired change via code or git, this should be preferred before direct modification via an action.  Using these should be done in cases where
+a gitops change is unlikely to be the fix or the fix needs to be applied immediately (pod restarts, removing stray k8s config, terminating an ec2 instance, etc).
+<% end %>
+
 **You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
 
 The overarching task is as follows:

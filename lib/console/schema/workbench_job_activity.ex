@@ -2,7 +2,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
   alias Console.Schema.{User, WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult, WorkbenchJobActivityAgentRun}
 
-  defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
+  defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, needs_approval: 5
   defenum Type,
     coding: 0,
     observability: 1,
@@ -17,7 +17,9 @@ defmodule Console.Schema.WorkbenchJobActivity do
     canvas: 10,
     skill: 11,
     history: 12,
-    search: 13
+    search: 13,
+    function: 14,
+    kubernetes: 15
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending
@@ -34,6 +36,13 @@ defmodule Console.Schema.WorkbenchJobActivity do
       field :output,          :string
       field :error,           :string
 
+      embeds_one :function_call, FunctionCall, on_replace: :update do
+        field :name,    :string
+        field :input,   :map
+        field :tool_id, :binary_id
+      end
+
+      embeds_one :kube_request, Console.AI.Tools.Workbench.KubeRequest, on_replace: :update
       embeds_many :canvas, Console.Schema.WorkbenchJobResult.CanvasBlock, on_replace: :delete
 
       embeds_one :job_update, JobUpdate, on_replace: :update do
@@ -136,6 +145,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
   defp result_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(output error)a)
+    |> cast_embed(:function_call, with: &function_call_changeset/2)
     |> cast_embed(:job_update, with: &job_update_changeset/2)
     |> cast_embed(:metrics, with: &metric_changeset/2)
     |> cast_embed(:logs, with: &log_changeset/2)
@@ -147,6 +157,13 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast_embed(:logs_queries)
     |> cast_embed(:traces_queries)
     |> cast_embed(:canvas)
+    |> cast_embed(:kube_request)
+  end
+
+  defp function_call_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name input tool_id)a)
+    |> validate_required([:name, :input, :tool_id])
   end
 
   defp job_update_changeset(model, attrs) do

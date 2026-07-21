@@ -1,4 +1,4 @@
-FROM golang:1.26.4-alpine3.22 as builder
+FROM golang:1.26.5-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -32,7 +32,7 @@ RUN CGO_ENABLED=0 \
     -o /plural/harness \
     cmd/harness/main.go
 
-FROM cgr.dev/chainguard/wolfi-base:latest as final
+FROM cgr.dev/chainguard/wolfi-base:latest AS final
 
 RUN apk update --no-cache && apk add git
 

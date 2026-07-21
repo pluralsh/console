@@ -15,7 +15,7 @@ import {
   useHover,
   useInteractions,
   useRole,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react'
 import {
   ComponentPropsWithRef,
   type JSX,
@@ -106,8 +106,6 @@ function Tooltip({
     x,
     y,
     refs,
-    reference,
-    floating,
     strategy: finalStrategy,
     context,
     placement: finalPlacement,
@@ -143,8 +141,8 @@ function Tooltip({
 
   // Preserve the consumer's ref
   const childrenRef = useMemo(
-    () => mergeRefs([reference, children.props?.ref]),
-    [reference, children]
+    () => mergeRefs([refs.setReference, children.props?.ref]),
+    [refs.setReference, children]
   )
 
   const finalPlacementSide = `${finalPlacement}`.split('-')[0]
@@ -199,7 +197,7 @@ function Tooltip({
           <TipSC
             className={className}
             css={css}
-            ref={floating}
+            ref={refs.setFloating}
             style={{
               position: finalStrategy,
               left: x ?? 0,

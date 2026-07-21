@@ -171,4 +171,27 @@ defmodule Console.Deployments.PubSub.CacheableTest do
       Cache.handle_event(event)
     end
   end
+
+  describe "pipeline cache invalidation" do
+    test "PipelineUpserted deletes the pipelined services cache" do
+      expect(Console.Cache, :delete, fn :pipelined_services -> :ok end)
+
+      event = %PubSub.PipelineUpserted{item: insert(:pipeline)}
+      Cache.handle_event(event)
+    end
+
+    test "PipelineDeleted deletes the pipelined services cache" do
+      expect(Console.Cache, :delete, fn :pipelined_services -> :ok end)
+
+      event = %PubSub.PipelineDeleted{item: insert(:pipeline)}
+      Cache.handle_event(event)
+    end
+
+    test "PipelineStageUpdated deletes the pipelined services cache" do
+      expect(Console.Cache, :delete, fn :pipelined_services -> :ok end)
+
+      event = %PubSub.PipelineStageUpdated{item: insert(:pipeline_stage)}
+      Cache.handle_event(event)
+    end
+  end
 end

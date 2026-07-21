@@ -35,7 +35,9 @@ defmodule Console.AI.Tools.Workbench.Http do
     end)
   end
 
-  def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{http: http}}, input: input}) do
+  def implement(%__MODULE__{tool: %WorkbenchTool{} = tool, input: input}), do: invoke(tool, input)
+
+  def invoke(%WorkbenchTool{configuration: %Configuration{http: http}}, %{} = input) do
     with {:body, {:ok, body}} <- {:body, body(http, input)},
          {:request, {:ok, %HTTPoison.Response{body: body, status_code: code}}} <- {:request, do_request(http, body)} do
       {:ok, "http response: #{body} (status #{code})"}

@@ -5,7 +5,7 @@ import {
   FloatingPortal,
   type Placement,
   type UseFloatingReturn,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react'
 
 import { type ReactNode } from 'react'
 
@@ -101,7 +101,7 @@ function PopoverCornerScale({
         $isOpen={isOpen}
         $placement={floating.placement}
         className="popoverWrapper"
-        ref={floating.floating}
+        ref={floating.refs.setFloating}
         style={{
           // ...floating.style,
           position: floating.strategy,

@@ -66,6 +66,21 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
                "toolModel" => "claude-sonnet-5-latest",
                "embeddingModel" => nil
              }
+
+      assert Enum.find(found, &(&1["provider"] == "OPENAI_COMPATIBLE")) == %{
+               "provider" => "OPENAI_COMPATIBLE",
+               "model" => nil,
+               "toolModel" => nil,
+               "embeddingModel" => nil
+             }
+
+      assert Enum.find(found, &(&1["provider"] == "OLLAMA")) == %{
+               "provider" => "OLLAMA",
+               "model" => nil,
+               "toolModel" => nil,
+               "embeddingModel" => nil
+             }
+
     end
   end
 

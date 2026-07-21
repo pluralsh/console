@@ -11,6 +11,10 @@ defmodule Console.Schema.StageService do
     timestamps()
   end
 
+  def service_ids(query \\ __MODULE__) do
+    from(s in query, select: s.service_id, distinct: true)
+  end
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(stage_id service_id)a)

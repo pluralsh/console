@@ -3,7 +3,7 @@ import {
   useFloatingDropdown,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { FloatingPortal } from '@floating-ui/react-dom-interactions'
+import { FloatingPortal } from '@floating-ui/react'
 import {
   useWorkbenchLinkCardPendingAgentRunsQuery,
   useWorkbenchLinkCardQuery,
@@ -131,7 +131,7 @@ export function WorkbenchLinkChip({
         <FloatingPortal id={theme.portals.default.id}>
           <HoverCardFloatingSC
             data-workbench-link-hover-card
-            ref={floating.floating}
+            ref={floating.refs.setFloating}
             style={{
               position: floating.strategy,
               left: floating.x ?? 0,

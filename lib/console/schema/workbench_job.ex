@@ -29,6 +29,14 @@ defmodule Console.Schema.WorkbenchJob do
 
       field :plan, :boolean
 
+      embeds_one :kubernetes, Kubernetes, on_replace: :update do
+        field :update, :boolean, default: false
+        field :delete, :boolean, default: false
+
+        field :exclude_namespaces, {:array, :string}
+        field :require_namespaces, {:array, :string}
+      end
+
       embeds_one :coding, Coding, on_replace: :update do
         field :babysit,  :boolean
         field :approval, :boolean
@@ -46,6 +54,7 @@ defmodule Console.Schema.WorkbenchJob do
       |> cast_embed(:model, with: &model_changeset/2)
       |> cast_embed(:coding, with: &coding_changeset/2)
       |> cast_embed(:budget, with: &budget_changeset/2)
+      |> cast_embed(:kubernetes, with: &kubernetes_changeset/2)
     end
 
     defp model_changeset(model, attrs) do
@@ -62,6 +71,11 @@ defmodule Console.Schema.WorkbenchJob do
     defp budget_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(cost tokens)a)
+    end
+
+    defp kubernetes_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(update delete exclude_namespaces require_namespaces)a)
     end
   end
 

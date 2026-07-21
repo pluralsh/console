@@ -24,7 +24,8 @@ defmodule Console.Deployments.Policies do
     SentinelRunJob,
     WorkbenchJob,
     Flow,
-    FlowWorkbench
+    FlowWorkbench,
+    WorkbenchJobActivity
   }
 
   def can?(%User{bootstrap: %BootstrapToken{}} = user, res, action), do: BootstrapPolicies.can?(user, res, action)
@@ -69,6 +70,11 @@ defmodule Console.Deployments.Policies do
   def can?(%User{} = user, %WorkbenchJob{} = job, :prompt), do: can?(user, job, :read)
   def can?(%Cluster{id: id}, %SentinelRunJob{cluster_id: id}, _), do: :pass
   def can?(%Cluster{id: id}, %AgentRuntime{cluster_id: id}, _), do: :pass
+
+  def can?(%User{} = user, %WorkbenchJobActivity{status: :needs_approval} = a, :approve),
+    do: can?(user, a, :read)
+  def can?(%User{}, %WorkbenchJobActivity{}, :approve),
+    do: {:error, "activity must be in needs approval status to be approved"}
 
   def can?(%Cluster{id: id}, %AgentRun{} = run, _) do
     case Repo.preload(run, [:runtime]) do

@@ -51,3 +51,11 @@ defimpl Console.PubSub.Cacheable, for: [
     do: {:del, {:obs_webhook, ext_id}, hook}
   def cache(_), do: :ok
 end
+
+defimpl Console.PubSub.Cacheable, for: [
+  Console.PubSub.PipelineUpserted,
+  Console.PubSub.PipelineDeleted,
+  Console.PubSub.PipelineStageUpdated,
+] do
+  def cache(%@for{item: _}), do: {:del, :pipelined_services, :ignore}
+end

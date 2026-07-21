@@ -7,7 +7,7 @@ import {
   offset,
   size,
   useFloating,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react'
 import { mergeRefs } from 'react-merge-refs'
 
 import { type SelectProps } from '../components/Select'
@@ -45,8 +45,8 @@ export function useFloatingCornerScale({
     whileElementsMounted: autoUpdate,
   })
   const mergedRef = useMemo(
-    () => mergeRefs([floating.reference, triggerRef]),
-    [floating.reference, triggerRef]
+    () => mergeRefs([floating.refs.setReference, triggerRef]),
+    [floating.refs.setReference, triggerRef]
   )
 
   return { floating, triggerRef: mergedRef }

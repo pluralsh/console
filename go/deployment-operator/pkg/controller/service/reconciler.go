@@ -162,9 +162,10 @@ func (s *ServiceReconciler) Shutdown() {
 
 func (s *ServiceReconciler) GetPollInterval() func() time.Duration {
 	return func() time.Duration {
-		// poll-interval cannot be lower than 10s
-		if servicePollInterval := agentcommon.GetConfigurationManager().GetServicePollInterval(); servicePollInterval != nil && *servicePollInterval >= 10*time.Second {
-			return *servicePollInterval
+		if servicePollInterval := agentcommon.GetConfigurationManager().GetServicePollInterval(); servicePollInterval != nil {
+			if *servicePollInterval >= 10*time.Second {
+				return *servicePollInterval
+			}
 		}
 		return s.pollInterval
 	}

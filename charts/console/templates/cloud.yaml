@@ -28,6 +28,139 @@ spec:
       - names: ["plrl-{{ .Values.cloud.instanceName }}*"]
         privileges: [ "read", "index", "write", "create", "create_index", "manage", "manage_ilm" ]
 ---
+{{/* Legacy ILM for dated indices */}}
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchILMPolicy
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs
+  namespace: {{ .Values.cloud.elasticNamespace }}
+spec:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs
+  credentialsRef:
+    name: elasticsearch
+  definition:
+    policy:
+      phases:
+        warm:
+          min_age: 10d
+          actions:
+            forcemerge:
+              max_num_segments: 1
+        delete:
+          min_age: 30d
+          actions:
+            delete: {}
+---
+{{/* Rollover ILM for plrl-{inst}-logs-00000N via write alias */}}
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchILMPolicy
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
+  namespace: {{ .Values.cloud.elasticNamespace }}
+spec:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
+  credentialsRef:
+    name: elasticsearch
+  definition:
+    policy:
+      phases:
+        hot:
+          actions:
+            rollover:
+              max_primary_shard_size: 30gb
+              min_primary_shard_size: 5gb
+              max_primary_shard_docs: 5000000
+              max_size: 100gb
+        warm:
+          min_age: 1d
+          actions:
+            shrink:
+              max_primary_shard_size: 30gb
+        delete:
+          min_age: 7d
+          actions:
+            delete: {}
+---
+{{/* Lower priority: dated / catch-all indices, legacy ILM */}}
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchIndexTemplate
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs
+  namespace: {{ .Values.cloud.elasticNamespace }}
+spec:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs
+  credentialsRef:
+    name: elasticsearch
+  definition:
+    indexPatterns:
+      - "plrl-{{ .Values.cloud.instanceName }}-logs-*"
+    priority: 100
+    template:
+      settings:
+        index:
+          number_of_shards: 15
+          refresh_interval: 30s
+          lifecycle:
+            name: plrl-{{ .Values.cloud.instanceName }}-logs
+---
+{{/* Higher priority: rolled indices plrl-{inst}-logs-0*, rollover ILM */}}
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchIndexTemplate
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
+  namespace: {{ .Values.cloud.elasticNamespace }}
+spec:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
+  credentialsRef:
+    name: elasticsearch
+  definition:
+    indexPatterns:
+      - "plrl-{{ .Values.cloud.instanceName }}-logs-0*"
+    priority: 300
+    template:
+      mappings:
+        properties:
+          "@timestamp":
+            type: date
+      settings:
+        index:
+          number_of_shards: 5
+          number_of_replicas: 1
+          refresh_interval: 30s
+          sort.field: "@timestamp"
+          sort.order: desc
+          lifecycle:
+            name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
+            rollover_alias: plrl-{{ .Values.cloud.instanceName }}-logs-write
+---
+apiVersion: dbs.plural.sh/v1alpha1
+kind: ElasticsearchIndex
+metadata:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-000001
+  namespace: {{ .Values.cloud.elasticNamespace }}
+spec:
+  name: plrl-{{ .Values.cloud.instanceName }}-logs-000001
+  credentialsRef:
+    name: elasticsearch
+  definition:
+    aliases:
+      plrl-{{ .Values.cloud.instanceName }}-logs-write:
+        is_write_index: true
+    mappings:
+      properties:
+        "@timestamp":
+          type: date
+    settings:
+      index:
+        number_of_shards: 5
+        number_of_replicas: 1
+        refresh_interval: 30s
+        sort.field: "@timestamp"
+        sort.order: desc
+        lifecycle:
+          name: plrl-{{ .Values.cloud.instanceName }}-logs-rollover
+          rollover_alias: plrl-{{ .Values.cloud.instanceName }}-logs-write
+---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMUser
 metadata:
@@ -40,12 +173,12 @@ spec:
       kind: VMCluster/vminsert
       name: vm-cluster
       namespace: monitoring
-    paths: 
+    paths:
     - "/insert/{{ .Values.cloud.vmTenant }}/.*"
   - crd:
       kind: VMCluster/vmselect
       name: vm-cluster
       namespace: monitoring
-    paths: 
+    paths:
     - "/select/{{ .Values.cloud.vmTenant }}/.*"
 {{ end }}

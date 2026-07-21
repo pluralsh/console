@@ -20,6 +20,7 @@ import {
   useUpdateWorkbenchCronMutation,
   useWorkbenchQuery,
   WorkbenchCronFragment,
+  WorkbenchJobModesAttributes,
 } from 'generated/graphql'
 import { isEqual, truncate } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
@@ -36,8 +37,15 @@ import { WorkbenchAccessibleUserSelect } from '../WorkbenchAccessibleUserSelect'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import {
   FormCardSC,
+  SidebarBtnSC,
   StickyActionsFooterSC,
+  WorkbenchSplitLayoutSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
+import {
+  modesAttributes,
+  modesFormValue,
+} from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
   buildCronPreview,
   CRON_PLACEHOLDER,
@@ -52,7 +60,10 @@ type CronScheduleFormState = {
   prompt: string
   crontab: string
   userId: string
+  modes: WorkbenchJobModesAttributes | null
 }
+
+type CronScheduleFormStep = 'Configuration' | 'Modes & token limit'
 
 export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const navigate = useNavigate()
@@ -63,6 +74,8 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   const [formState, setFormState] = useState<CronScheduleFormState>(() =>
     getInitialFormState()
   )
+  const [currentStep, setCurrentStep] =
+    useState<CronScheduleFormStep>('Configuration')
   const [promptSyncKey, bumpPromptSyncKey] = useState(0)
   const { popToast } = useSimpleToast()
 
@@ -125,7 +138,12 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
     !!effectiveUserId &&
     isCronValid &&
     !isEqual(normalizedFormState, baselineState)
-  const attributes = { crontab, prompt, userId: effectiveUserId }
+  const attributes = {
+    crontab,
+    prompt,
+    userId: effectiveUserId,
+    modes: modesAttributes(formState.modes),
+  }
 
   const handleCompleted = () => {
     navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
@@ -205,7 +223,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
         direction="column"
         gap="large"
         width="100%"
-        css={{ maxWidth: 750, marginInline: 'auto' }}
+        css={{ maxWidth: 968, marginInline: 'auto' }}
       >
         <StackedText
           loading={!workbenchData && workbenchLoading}
@@ -223,163 +241,240 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
             $height={300}
           />
         ) : (
-          <FormCardSC>
-            {mutationError && <GqlError error={mutationError} />}
+          <WorkbenchSplitLayoutSC>
             <Flex
               direction="column"
-              gap="large"
-              height="100%"
-              width="100%"
+              width={200}
+              flexShrink={0}
+              gap="xxxsmall"
             >
-              <FormField
-                required
-                infoTooltip="The instruction your Workbench agent will follow each time this job runs."
-                label="Prompt"
-              >
-                <WorkbenchPromptRichInput
-                  syncKey={`cron-prompt-${promptSyncKey}`}
-                  workbenchId={workbenchId}
-                  prompt={formState.prompt}
-                  disabled={isSaving}
-                  onPromptChange={(next) =>
-                    setFormState((prev) => ({ ...prev, prompt: next }))
-                  }
-                  placeholder="Provide any task for your workbench to handle. Well-crafted tasks are concise and specific. Type @ for clusters, services, and stacks, or / for skills."
-                />
-              </FormField>
-              <WorkbenchAccessibleUserSelect
-                key={workbenchId}
-                workbenchId={workbenchId}
-                selectedUserId={effectiveUserId}
-                onSelectionChange={(userId) =>
-                  setFormState((prev) => ({ ...prev, userId }))
-                }
-                disabled={isSaving}
-              />
-              <Flex
-                align="flex-start"
-                gap="small"
-              >
-                <FormField
-                  required
-                  error={hasCronError}
-                  infoTooltip="Defines the interval at which your agent will execute the prompt."
-                  label="Cron expression"
-                  hint={
-                    hasCronError ? (
-                      <CaptionP
-                        as="span"
-                        $color="text-danger"
-                      >
-                        Enter a valid cron expression. See all{' '}
-                        <InlineA
-                          href={CRON_SHORTCUTS_URL}
-                          style={{ color: 'inherit' }}
-                        >
-                          shortcuts
-                        </InlineA>
-                        .
-                      </CaptionP>
-                    ) : (
-                      <CaptionP as="span">
-                        Enter a cron expression or use shortcuts like @hourly,
-                        @daily, @weekdays. See all{' '}
-                        <InlineA href={CRON_SHORTCUTS_URL}>shortcuts</InlineA>.
-                      </CaptionP>
-                    )
-                  }
+              {(
+                [
+                  'Configuration',
+                  'Modes & token limit',
+                ] as CronScheduleFormStep[]
+              ).map((step) => (
+                <SidebarBtnSC
+                  key={step}
+                  $active={currentStep === step}
+                  justifyContent="flex-start"
+                  onClick={() => setCurrentStep(step)}
                 >
-                  <Input2
-                    value={formState.crontab}
-                    error={hasCronError}
-                    onChange={(e) =>
-                      setFormState((prev) => ({
-                        ...prev,
-                        crontab: e.target.value,
-                      }))
-                    }
-                    placeholder={CRON_PLACEHOLDER}
-                    css={{
-                      color: theme.colors['code-block-purple'],
-                      fontFamily: theme.fontFamilies.mono,
-                      '&:focus-within': {
-                        border: theme.borders['outline-focused'],
-                        borderColor: hasCronError
-                          ? theme.colors['border-danger']
-                          : theme.colors['code-block-purple'],
-                      },
-                      '& input': {
-                        minHeight: 54,
-                        paddingLeft: 16,
-                        paddingRight: 16,
-                        fontFamily: theme.fontFamilies.mono,
-                      },
-                    }}
-                  />
-                </FormField>
-                <FormField
-                  label="Preview"
-                  css={{ minWidth: 350 }}
-                >
-                  <Card
-                    fillLevel={3}
-                    css={{
-                      padding: theme.spacing.medium,
-                      border: 'none',
-                      '& p': { lineHeight: '20px' },
-                    }}
-                  >
-                    <Body2P>{preview.description}</Body2P>
-                    {preview.nextTimes.map((time, index) => {
-                      const parsedTime = formatPreviewTimestamp(time)
-
-                      return (
-                        <Body2P key={time}>
-                          <span css={{ color: theme.colors['text-xlight'] }}>
-                            {index === 0 ? 'next at' : 'then at'}{' '}
-                          </span>
-                          {parsedTime ? (
-                            <>
-                              {parsedTime.datePart}{' '}
-                              <span
-                                css={{
-                                  color: theme.colors['code-block-purple'],
-                                }}
-                              >
-                                {parsedTime.hourPart}
-                              </span>{' '}
-                              {parsedTime.zonePart}
-                            </>
-                          ) : (
-                            time
-                          )}
-                        </Body2P>
-                      )
-                    })}
-                  </Card>
-                </FormField>
-              </Flex>
-              <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
-                <Button
-                  secondary
-                  startIcon={<ReturnIcon />}
-                  onClick={() =>
-                    navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
-                  }
-                  disabled={isSaving}
-                >
-                  Back to all schedules
-                </Button>
-                <Button
-                  onClick={() => handleSave()}
-                  loading={isSaving}
-                  disabled={!canSave}
-                >
-                  Save
-                </Button>
-              </StickyActionsFooterSC>
+                  {step}
+                </SidebarBtnSC>
+              ))}
             </Flex>
-          </FormCardSC>
+            <FormCardSC>
+              {mutationError && <GqlError error={mutationError} />}
+              <Flex
+                direction="column"
+                gap="large"
+                height="100%"
+                width="100%"
+              >
+                {currentStep === 'Configuration' ? (
+                  <>
+                    <FormField
+                      required
+                      infoTooltip="The instruction your Workbench agent will follow each time this job runs."
+                      label="Prompt"
+                    >
+                      <WorkbenchPromptRichInput
+                        syncKey={`cron-prompt-${promptSyncKey}`}
+                        workbenchId={workbenchId}
+                        prompt={formState.prompt}
+                        disabled={isSaving}
+                        onPromptChange={(next) =>
+                          setFormState((prev) => ({ ...prev, prompt: next }))
+                        }
+                        placeholder="Provide any task for your workbench to handle. Well-crafted tasks are concise and specific. Type @ for clusters, services, and stacks, or / for skills."
+                      />
+                    </FormField>
+                    <WorkbenchAccessibleUserSelect
+                      key={workbenchId}
+                      workbenchId={workbenchId}
+                      selectedUserId={effectiveUserId}
+                      onSelectionChange={(userId) =>
+                        setFormState((prev) => ({ ...prev, userId }))
+                      }
+                      disabled={isSaving}
+                    />
+                    <Flex
+                      align="flex-start"
+                      gap="small"
+                    >
+                      <FormField
+                        required
+                        error={hasCronError}
+                        infoTooltip="Defines the interval at which your agent will execute the prompt."
+                        label="Cron expression"
+                        hint={
+                          hasCronError ? (
+                            <CaptionP
+                              as="span"
+                              $color="text-danger"
+                            >
+                              Enter a valid cron expression. See all{' '}
+                              <InlineA
+                                href={CRON_SHORTCUTS_URL}
+                                style={{ color: 'inherit' }}
+                              >
+                                shortcuts
+                              </InlineA>
+                              .
+                            </CaptionP>
+                          ) : (
+                            <CaptionP as="span">
+                              Enter a cron expression or use shortcuts like
+                              @hourly, @daily, @weekdays. See all{' '}
+                              <InlineA href={CRON_SHORTCUTS_URL}>
+                                shortcuts
+                              </InlineA>
+                              .
+                            </CaptionP>
+                          )
+                        }
+                      >
+                        <Input2
+                          value={formState.crontab}
+                          error={hasCronError}
+                          onChange={(e) =>
+                            setFormState((prev) => ({
+                              ...prev,
+                              crontab: e.target.value,
+                            }))
+                          }
+                          placeholder={CRON_PLACEHOLDER}
+                          css={{
+                            color: theme.colors['code-block-purple'],
+                            fontFamily: theme.fontFamilies.mono,
+                            '&:focus-within': {
+                              border: theme.borders['outline-focused'],
+                              borderColor: hasCronError
+                                ? theme.colors['border-danger']
+                                : theme.colors['code-block-purple'],
+                            },
+                            '& input': {
+                              minHeight: 54,
+                              paddingLeft: 16,
+                              paddingRight: 16,
+                              fontFamily: theme.fontFamilies.mono,
+                            },
+                          }}
+                        />
+                      </FormField>
+                      <FormField
+                        label="Preview"
+                        css={{ minWidth: 350 }}
+                      >
+                        <Card
+                          fillLevel={3}
+                          css={{
+                            padding: theme.spacing.medium,
+                            border: 'none',
+                            '& p': { lineHeight: '20px' },
+                          }}
+                        >
+                          <Body2P>{preview.description}</Body2P>
+                          {preview.nextTimes.map((time, index) => {
+                            const parsedTime = formatPreviewTimestamp(time)
+
+                            return (
+                              <Body2P key={time}>
+                                <span
+                                  css={{ color: theme.colors['text-xlight'] }}
+                                >
+                                  {index === 0 ? 'next at' : 'then at'}{' '}
+                                </span>
+                                {parsedTime ? (
+                                  <>
+                                    {parsedTime.datePart}{' '}
+                                    <span
+                                      css={{
+                                        color:
+                                          theme.colors['code-block-purple'],
+                                      }}
+                                    >
+                                      {parsedTime.hourPart}
+                                    </span>{' '}
+                                    {parsedTime.zonePart}
+                                  </>
+                                ) : (
+                                  time
+                                )}
+                              </Body2P>
+                            )
+                          })}
+                        </Card>
+                      </FormField>
+                    </Flex>
+                    <StickyActionsFooterSC>
+                      <Button
+                        secondary
+                        startIcon={<ReturnIcon />}
+                        onClick={() =>
+                          navigate(
+                            getWorkbenchCronSchedulesAbsPath(workbenchId)
+                          )
+                        }
+                        disabled={isSaving}
+                      >
+                        Back to all schedules
+                      </Button>
+                      <Flex gap="small">
+                        <Button
+                          secondary
+                          onClick={() => handleSave()}
+                          loading={isSaving}
+                          disabled={!canSave}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          onClick={() => setCurrentStep('Modes & token limit')}
+                          disabled={!prompt || !effectiveUserId || !isCronValid}
+                        >
+                          Next
+                        </Button>
+                      </Flex>
+                    </StickyActionsFooterSC>
+                  </>
+                ) : (
+                  <>
+                    <WorkbenchModesForm
+                      workbenchId={workbenchId}
+                      value={formState.modes}
+                      onChange={(modes) =>
+                        setFormState((prev) => ({ ...prev, modes }))
+                      }
+                      disabled={isSaving}
+                    />
+                    <StickyActionsFooterSC>
+                      <Button
+                        secondary
+                        startIcon={<ReturnIcon />}
+                        onClick={() =>
+                          navigate(
+                            getWorkbenchCronSchedulesAbsPath(workbenchId)
+                          )
+                        }
+                        disabled={isSaving}
+                      >
+                        Back to all schedules
+                      </Button>
+                      <Button
+                        onClick={() => handleSave()}
+                        loading={isSaving}
+                        disabled={!canSave}
+                      >
+                        Save
+                      </Button>
+                    </StickyActionsFooterSC>
+                  </>
+                )}
+              </Flex>
+            </FormCardSC>
+          </WorkbenchSplitLayoutSC>
         )}
       </Flex>
     </Flex>
@@ -394,5 +489,6 @@ function getInitialFormState(
     prompt: cron?.prompt ?? '',
     crontab: cron?.crontab ?? '',
     userId: cron?.userId ?? defaultUserIdForCreate ?? '',
+    modes: modesFormValue(cron?.modes),
   }
 }

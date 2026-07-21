@@ -12303,39 +12303,19 @@ addons:
   helm_values: debug.verbose=flow
   eolApiSlug: cilium
   versions:
-  - version: 1.19.5
+  - version: 1.19.6
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: '- **Helm value removed:** `loadBalancer.standalone` was removed.
-        If your values file sets it, delete it and rely on the remaining `loadBalancer.*`
-        settings.
-
-        - **Helm value removed (L2 announcements):** `l2podAnnouncements.interface`
-        was removed because it could render an agent config key that is no longer
-        recognized and may cause agent crash-loops when L2 pod announcements are enabled.
-        **Use `l2podAnnouncements.interfacePattern` instead.**
-
-        - **Helm chart improvement:** charts now allow overriding a `registry_prefix`
-        (useful for private registries/mirrors). (No action needed unless you want
-        to adopt it.)
-
-        '
-      chart_updates: [Removed deprecated/unused Helm options related to Service LB
-          and L2 pod announcements to prevent misconfiguration and crash-loops., Helm
-          chart now supports overriding `registry_prefix` for image registry customization.,
-        Helm packaging updated to ignore `tmpl` files via `.helmignore` (no user action).]
-      features: ['Troubleshoot commands for kvstore and clustermesh report more information,
-          which can help during incident response and upgrade validation.', Internal
-          load-balancer backend representation was refactored to scale better when
-          many Services share the same backend (helps large clusters with shared backends).]
-      breaking_changes: ['`loadBalancer.standalone` Helm option was removed; upgrades
-          will fail or behave unexpectedly if your values still reference it.', '`l2podAnnouncements.interface`
-          Helm value was removed; if you used it (especially with L2 pod announcements
-          enabled), switch to `l2podAnnouncements.interfacePattern` to avoid agent
-          crash-loops.']
-    chart_version: 1.19.5
+      helm_changes: ''
+      chart_updates: []
+      features: ['Gateway API: support configuring Gateway access logs via `spec.telemetry.accessLogs`
+          in `CiliumGatewayClassConfig`.', 'Datapath L2 responder: uses L3 sockets
+          for solicited-node multicast signaling, improving IPv6 neighbor discovery
+          behavior in some environments.']
+      breaking_changes: []
+    chart_version: 1.19.6
     images: []
   - version: 1.19.4
     kube: ['1.36', '1.35', '1.34']
@@ -16315,6 +16295,41 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.8.0
+    kube: ['1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm values / chart behavior changes to review
+
+        - **New chart value:** `aggregateToAdmin` toggle added (controls whether chart
+        creates/labels RBAC rules that aggregate into the built-in `admin` ClusterRole).
+        Review if you rely on Kubernetes RBAC aggregation.
+
+        - **New chart value:** optional `networkPolicy` support. If enabled, ensure
+        it allows egress to your secret backends (AWS/GCP/Vault/etc.) and ingress
+        as needed for webhook/metrics.
+
+        - **New chart value:** `webhook.startupProbe` support. If you have slow-starting
+        clusters/nodes, consider enabling/tuning to avoid premature restarts.
+
+        - **Already in 2.7.0 (carry-forward):** `storeRequeueInterval` is exposed
+        in Helm values; confirm your current value still makes sense after upgrade.
+
+        '
+      chart_updates: [Added `aggregateToAdmin` toggle for RBAC aggregation., Added
+          optional `NetworkPolicy` manifests/values support., Added `startupProbe`
+          configuration support for the webhook Deployment.]
+      features: [Added a GitLab deploy token generator (new generator option for GitLab
+          auth flows)., AWS Certificate Manager provider implemented (new backend/provider
+          for reading cert material)., Leader election lease timings are now configurable
+          (tune for HA and slow API servers)., ExternalSecrets now support a `CreateOrMerge`
+          creation policy (merge behavior when writing target Secrets)., 'SecretStore
+          `refreshInterval` now accepts a duration string (e.g., `"5m"`) in addition
+          to existing formats.']
+      breaking_changes: []
+    chart_version: 2.8.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.8.0']
   - version: 2.7.0
     kube: ['1.35']
     requirements: []
@@ -18637,6 +18652,23 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 87.17.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Adds scraping of kube-scheduler resource metrics (new/updated
+          ServiceMonitor/metrics config for kube-scheduler).]
+      features: ['Kube-prometheus-stack now scrapes kube-scheduler resource metrics,
+          improving visibility into scheduler performance and resource usage.']
+      breaking_changes: []
+    chart_version: 87.17.0
+    images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.16.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -24541,7 +24573,7 @@ addons:
           Kubernetes version parsing with Helm 3.19+, any custom logic depending on
           the old version interpretation should be re-validated (especially AppSet
           cluster generators and templating conditions).']
-    chart_version: 10.1.3
+    chart_version: 10.1.4
     images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.4.5']
   - version: 3.4.1
@@ -29576,7 +29608,13 @@ addons:
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Only release metadata and chart asset are provided; no changelog
+          entries detailing chart template, values, or behavior changes were included
+          in the supplied notes.']
+      features: []
+      breaking_changes: []
     chart_version: 1.0.11678
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999

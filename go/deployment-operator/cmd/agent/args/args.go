@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/polly/containers"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
@@ -85,6 +86,9 @@ const (
 	defaultRuntimeServicePingInterval         = "3m"
 	defaultRuntimeServicePingIntervalDuration = 3 * time.Minute
 
+	defaultStackPollInterval         = "30s"
+	defaultStackPollIntervalDuration = 30 * time.Second
+
 	defaultPipelineGatesPollInterval         = "0s"
 	defaultPipelineGatesPollIntervalDuration = 0 * time.Second
 
@@ -153,7 +157,9 @@ var (
 	argWorkqueueBurst                       = flag.Int("workqueue-burst", 50, "The maximum number of items to process at a time.")
 	argClusterPingInterval                  = flag.String("cluster-ping-interval", defaultClusterPingInterval, "Time interval to ping cluster.")
 	argRuntimeServicePingInterval           = flag.String("runtime-service-ping-interval", defaultRuntimeServicePingInterval, "Time interval to register runtime services.")
+	argStackPollInterval                    = flag.String("stack-poll-interval", defaultStackPollInterval, "Time interval to poll stack resources from the Console API. Use '0s' to disable.")
 	argPipelineGatesPollInterval            = flag.String("pipline-gates-poll-interval", defaultPipelineGatesPollInterval, "Time interval to poll PipelineGates resources from the Console API. It's disabled by default.")
+	argDisableWebsocket                     = flag.Bool("disable-websocket", false, "Disable the cluster websocket connection to the Console.")
 	argDiscoveryCacheRefreshInterval        = flag.String("discovery-cache-refresh-interval", defaultDiscoveryCacheRefreshInterval, "Time interval to refresh discovery cache.")
 	argStoreStorage                         = flag.String("store-storage", defaultStoreStorage, "The storage backend to use for the agent store. Supported values are 'memory' and 'file'.")
 	argStoreFilePath                        = flag.String("store-file-path", defaultStoreFilePath, "The path to the file to use for the agent store. This is only used if the store-storage is set to 'file'.")
@@ -488,6 +494,16 @@ func RuntimeServicesPingInterval() time.Duration {
 	return duration
 }
 
+func StackPollInterval() time.Duration {
+	duration, err := time.ParseDuration(*argStackPollInterval)
+	if err != nil {
+		klog.ErrorS(err, "Could not parse stack-poll-interval", "value", *argStackPollInterval, "default", defaultStackPollInterval)
+		return defaultStackPollIntervalDuration
+	}
+
+	return duration
+}
+
 func PipelineGatesInterval() time.Duration {
 	duration, err := time.ParseDuration(*argPipelineGatesPollInterval)
 	if err != nil {
@@ -496,6 +512,28 @@ func PipelineGatesInterval() time.Duration {
 	}
 
 	return duration
+}
+
+func DisableWebsocket() bool {
+	return *argDisableWebsocket
+}
+
+func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
+	servicePollInterval := PollInterval().String()
+	clusterPingInterval := ClusterPingInterval().String()
+	compatibilityUploadInterval := RuntimeServicesPingInterval().String()
+	stackPollInterval := StackPollInterval().String()
+	pipelineGateInterval := PipelineGatesInterval().String()
+	disableWebsocket := DisableWebsocket()
+
+	return v1alpha1.AgentConfigurationSpec{
+		ServicePollInterval:         &servicePollInterval,
+		ClusterPingInterval:         &clusterPingInterval,
+		CompatibilityUploadInterval: &compatibilityUploadInterval,
+		StackPollInterval:           &stackPollInterval,
+		PipelineGateInterval:        &pipelineGateInterval,
+		DisableWebsocket:            &disableWebsocket,
+	}
 }
 
 func DiscoveryCacheRefreshInterval() time.Duration {

@@ -613,6 +613,65 @@ func (_c *ElasticsearchClientMock_ExistsIndex_Call) RunAndReturn(run func(contex
 	return _c
 }
 
+// GetAlias provides a mock function with given fields: ctx, alias
+func (_m *ElasticsearchClientMock) GetAlias(ctx context.Context, alias string) (*esapi.Response, error) {
+	ret := _m.Called(ctx, alias)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAlias")
+	}
+
+	var r0 *esapi.Response
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*esapi.Response, error)); ok {
+		return rf(ctx, alias)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *esapi.Response); ok {
+		r0 = rf(ctx, alias)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*esapi.Response)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, alias)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ElasticsearchClientMock_GetAlias_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAlias'
+type ElasticsearchClientMock_GetAlias_Call struct {
+	*mock.Call
+}
+
+// GetAlias is a helper method to define mock.On call
+//   - ctx context.Context
+//   - alias string
+func (_e *ElasticsearchClientMock_Expecter) GetAlias(ctx interface{}, alias interface{}) *ElasticsearchClientMock_GetAlias_Call {
+	return &ElasticsearchClientMock_GetAlias_Call{Call: _e.mock.On("GetAlias", ctx, alias)}
+}
+
+func (_c *ElasticsearchClientMock_GetAlias_Call) Run(run func(ctx context.Context, alias string)) *ElasticsearchClientMock_GetAlias_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_GetAlias_Call) Return(_a0 *esapi.Response, _a1 error) *ElasticsearchClientMock_GetAlias_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ElasticsearchClientMock_GetAlias_Call) RunAndReturn(run func(context.Context, string) (*esapi.Response, error)) *ElasticsearchClientMock_GetAlias_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Init provides a mock function with given fields: ctx, _a1, credentials
 func (_m *ElasticsearchClientMock) Init(ctx context.Context, _a1 client.Client, credentials *v1alpha1.ElasticsearchCredentials) error {
 	ret := _m.Called(ctx, _a1, credentials)

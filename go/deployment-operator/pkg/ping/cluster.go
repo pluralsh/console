@@ -22,10 +22,7 @@ import (
 
 func RunClusterPingerInBackgroundOrDie(ctx context.Context, pinger *Pinger, duration time.Duration) {
 	interval := func() time.Duration {
-		if clusterPingInterval := common.GetConfigurationManager().GetClusterPingInterval(); clusterPingInterval != nil && *clusterPingInterval > 0 {
-			duration = *clusterPingInterval
-		}
-		return duration
+		return clusterPingInterval(duration)
 	}
 
 	_ = helpers.DynamicBackgroundPollUntilContextCancel(ctx, interval, false, func(_ context.Context) (done bool, err error) {
@@ -36,6 +33,13 @@ func RunClusterPingerInBackgroundOrDie(ctx context.Context, pinger *Pinger, dura
 	})
 
 	klog.V(internallog.LogLevelDefault).InfoS("started cluster pinger", "interval", duration)
+}
+
+func clusterPingInterval(defaultDuration time.Duration) time.Duration {
+	if clusterPingInterval := common.GetConfigurationManager().GetClusterPingInterval(); clusterPingInterval != nil {
+		return *clusterPingInterval
+	}
+	return defaultDuration
 }
 
 func (p *Pinger) PingCluster() error {

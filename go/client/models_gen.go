@@ -10352,6 +10352,15 @@ type WorkbenchJobActivityEdge struct {
 	Cursor *string               `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobActivityFunctionCall struct {
+	// the function name to invoke
+	Name *string `json:"name,omitempty"`
+	// input passed to the function
+	Input map[string]any `json:"input,omitempty"`
+	// the workbench tool id backing this function
+	ToolID *string `json:"toolId,omitempty"`
+}
+
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
@@ -10359,6 +10368,21 @@ type WorkbenchJobActivityJobUpdate struct {
 	Conclusion    *string                   `json:"conclusion,omitempty"`
 	Topology      *string                   `json:"topology,omitempty"`
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+}
+
+type WorkbenchJobActivityKubeRequest struct {
+	// the target cluster handle
+	Handle *string `json:"handle,omitempty"`
+	// the Kubernetes API HTTP method
+	Method *string `json:"method,omitempty"`
+	// the Kubernetes API request path
+	Path *string `json:"path,omitempty"`
+	// the Kubernetes API request body
+	Body *string `json:"body,omitempty"`
+	// query parameters sent with the Kubernetes API request
+	QueryParams map[string]any `json:"queryParams,omitempty"`
+	// the Kubernetes API request content type
+	ContentType *string `json:"contentType,omitempty"`
 }
 
 type WorkbenchJobActivityLog struct {
@@ -10379,6 +10403,10 @@ type WorkbenchJobActivityResult struct {
 	Output *string `json:"output,omitempty"`
 	// error from the activity
 	Error *string `json:"error,omitempty"`
+	// function call approval payload when present
+	FunctionCall *WorkbenchJobActivityFunctionCall `json:"functionCall,omitempty"`
+	// kubernetes request approval payload when present
+	KubeRequest *WorkbenchJobActivityKubeRequest `json:"kubeRequest,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
 	// dashboard canvas blocks for this activity
@@ -10854,6 +10882,24 @@ type WorkbenchToolAzureDevopsConnectionAttributes struct {
 	Token *string `json:"token,omitempty"`
 }
 
+type WorkbenchToolAzureFunctionConnection struct {
+	// Cloud Function identifier
+	Identifier *string `json:"identifier,omitempty"`
+	// description of the function exposed to the agent
+	Description *string `json:"description,omitempty"`
+	// JSON schema for the tool input
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
+}
+
+type WorkbenchToolAzureFunctionConnectionAttributes struct {
+	// Cloud Function identifier
+	Identifier string `json:"identifier"`
+	// description of the function exposed to the agent
+	Description string `json:"description"`
+	// JSON schema for the tool input
+	InputSchema *string `json:"inputSchema,omitempty"`
+}
+
 type WorkbenchToolBitbucketConnection struct {
 	// Bitbucket Cloud API base URL when set (tokens never exposed)
 	URL *string `json:"url,omitempty"`
@@ -10876,6 +10922,24 @@ type WorkbenchToolBitbucketDatacenterConnectionAttributes struct {
 	URL string `json:"url"`
 	// HTTP access token or personal access token (encrypted at rest)
 	Token *string `json:"token,omitempty"`
+}
+
+type WorkbenchToolCloudRunConnection struct {
+	// Cloud Run service identifier
+	Identifier *string `json:"identifier,omitempty"`
+	// description of the function exposed to the agent
+	Description *string `json:"description,omitempty"`
+	// JSON schema for the tool input
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
+}
+
+type WorkbenchToolCloudRunConnectionAttributes struct {
+	// Cloud Run service identifier
+	Identifier string `json:"identifier"`
+	// description of the function exposed to the agent
+	Description string `json:"description"`
+	// JSON schema for the tool input
+	InputSchema *string `json:"inputSchema,omitempty"`
 }
 
 type WorkbenchToolCloudwatchConnection struct {
@@ -10955,6 +11019,12 @@ type WorkbenchToolConfiguration struct {
 	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnection `json:"bitbucketDatacenter,omitempty"`
 	// azure devops connection (no secrets)
 	AzureDevops *WorkbenchToolAzureDevopsConnection `json:"azureDevops,omitempty"`
+	// aws lambda function configuration
+	Lambda *WorkbenchToolLambdaConnection `json:"lambda,omitempty"`
+	// google cloud run service configuration
+	CloudRun *WorkbenchToolCloudRunConnection `json:"cloudRun,omitempty"`
+	// google cloud function configuration
+	AzureFunction *WorkbenchToolAzureFunctionConnection `json:"azureFunction,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -11002,6 +11072,12 @@ type WorkbenchToolConfigurationAttributes struct {
 	Gitlab *WorkbenchToolGitlabConnectionAttributes `json:"gitlab,omitempty"`
 	// bitbucket cloud connection (scm)
 	Bitbucket *WorkbenchToolBitbucketConnectionAttributes `json:"bitbucket,omitempty"`
+	// aws lambda function configuration
+	Lambda *WorkbenchToolLambdaConnectionAttributes `json:"lambda,omitempty"`
+	// google cloud run service configuration
+	CloudRun *WorkbenchToolCloudRunConnectionAttributes `json:"cloudRun,omitempty"`
+	// google cloud function configuration
+	AzureFunction *WorkbenchToolAzureFunctionConnectionAttributes `json:"azureFunction,omitempty"`
 	// bitbucket data center connection (scm)
 	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnectionAttributes `json:"bitbucketDatacenter,omitempty"`
 	// azure devops connection (scm)
@@ -11117,6 +11193,8 @@ type WorkbenchToolHTTPConfiguration struct {
 	URL *string `json:"url,omitempty"`
 	// the http method
 	Method *string `json:"method,omitempty"`
+	// when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled
+	Function *bool `json:"function,omitempty"`
 	// request headers
 	Headers []*WorkbenchToolHTTPHeader `json:"headers,omitempty"`
 	// request body
@@ -11130,6 +11208,8 @@ type WorkbenchToolHTTPConfigurationAttributes struct {
 	URL string `json:"url"`
 	// the http method
 	Method WorkbenchToolHTTPMethod `json:"method"`
+	// when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled
+	Function *bool `json:"function,omitempty"`
 	// request headers
 	Headers []*WorkbenchToolHTTPHeaderAttributes `json:"headers,omitempty"`
 	// request body
@@ -11164,6 +11244,24 @@ type WorkbenchToolJaegerConnectionAttributes struct {
 	Username *string `json:"username,omitempty"`
 	// basic auth password
 	Password *string `json:"password,omitempty"`
+}
+
+type WorkbenchToolLambdaConnection struct {
+	// AWS Lambda function ARN
+	LambdaArn *string `json:"lambdaArn,omitempty"`
+	// description of the function exposed to the agent
+	Description *string `json:"description,omitempty"`
+	// JSON schema for the tool input
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
+}
+
+type WorkbenchToolLambdaConnectionAttributes struct {
+	// AWS Lambda function ARN
+	LambdaArn string `json:"lambdaArn"`
+	// description of the function exposed to the agent
+	Description string `json:"description"`
+	// JSON schema for the tool input
+	InputSchema *string `json:"inputSchema,omitempty"`
 }
 
 type WorkbenchToolLinearConnection struct {
@@ -17482,11 +17580,12 @@ func (e WorkbenchChatbotMessageBehavior) MarshalJSON() ([]byte, error) {
 type WorkbenchJobActivityStatus string
 
 const (
-	WorkbenchJobActivityStatusPending    WorkbenchJobActivityStatus = "PENDING"
-	WorkbenchJobActivityStatusRunning    WorkbenchJobActivityStatus = "RUNNING"
-	WorkbenchJobActivityStatusSuccessful WorkbenchJobActivityStatus = "SUCCESSFUL"
-	WorkbenchJobActivityStatusFailed     WorkbenchJobActivityStatus = "FAILED"
-	WorkbenchJobActivityStatusCancelled  WorkbenchJobActivityStatus = "CANCELLED"
+	WorkbenchJobActivityStatusPending       WorkbenchJobActivityStatus = "PENDING"
+	WorkbenchJobActivityStatusRunning       WorkbenchJobActivityStatus = "RUNNING"
+	WorkbenchJobActivityStatusSuccessful    WorkbenchJobActivityStatus = "SUCCESSFUL"
+	WorkbenchJobActivityStatusFailed        WorkbenchJobActivityStatus = "FAILED"
+	WorkbenchJobActivityStatusCancelled     WorkbenchJobActivityStatus = "CANCELLED"
+	WorkbenchJobActivityStatusNeedsApproval WorkbenchJobActivityStatus = "NEEDS_APPROVAL"
 )
 
 var AllWorkbenchJobActivityStatus = []WorkbenchJobActivityStatus{
@@ -17495,11 +17594,12 @@ var AllWorkbenchJobActivityStatus = []WorkbenchJobActivityStatus{
 	WorkbenchJobActivityStatusSuccessful,
 	WorkbenchJobActivityStatusFailed,
 	WorkbenchJobActivityStatusCancelled,
+	WorkbenchJobActivityStatusNeedsApproval,
 }
 
 func (e WorkbenchJobActivityStatus) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityStatusPending, WorkbenchJobActivityStatusRunning, WorkbenchJobActivityStatusSuccessful, WorkbenchJobActivityStatusFailed, WorkbenchJobActivityStatusCancelled:
+	case WorkbenchJobActivityStatusPending, WorkbenchJobActivityStatusRunning, WorkbenchJobActivityStatusSuccessful, WorkbenchJobActivityStatusFailed, WorkbenchJobActivityStatusCancelled, WorkbenchJobActivityStatusNeedsApproval:
 		return true
 	}
 	return false
@@ -17557,6 +17657,8 @@ const (
 	WorkbenchJobActivityTypeSkill          WorkbenchJobActivityType = "SKILL"
 	WorkbenchJobActivityTypeHistory        WorkbenchJobActivityType = "HISTORY"
 	WorkbenchJobActivityTypeSearch         WorkbenchJobActivityType = "SEARCH"
+	WorkbenchJobActivityTypeFunction       WorkbenchJobActivityType = "FUNCTION"
+	WorkbenchJobActivityTypeKubernetes     WorkbenchJobActivityType = "KUBERNETES"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -17574,11 +17676,13 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeSkill,
 	WorkbenchJobActivityTypeHistory,
 	WorkbenchJobActivityTypeSearch,
+	WorkbenchJobActivityTypeFunction,
+	WorkbenchJobActivityTypeKubernetes,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes:
 		return true
 	}
 	return false
@@ -17764,6 +17868,7 @@ const (
 	WorkbenchToolCategorySearch         WorkbenchToolCategory = "SEARCH"
 	WorkbenchToolCategoryScm            WorkbenchToolCategory = "SCM"
 	WorkbenchToolCategoryChat           WorkbenchToolCategory = "CHAT"
+	WorkbenchToolCategoryFunction       WorkbenchToolCategory = "FUNCTION"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -17777,11 +17882,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategorySearch,
 	WorkbenchToolCategoryScm,
 	WorkbenchToolCategoryChat,
+	WorkbenchToolCategoryFunction,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction:
 		return true
 	}
 	return false
@@ -17912,6 +18018,9 @@ const (
 	WorkbenchToolTypeAzureDevops         WorkbenchToolType = "AZURE_DEVOPS"
 	WorkbenchToolTypePagerduty           WorkbenchToolType = "PAGERDUTY"
 	WorkbenchToolTypeOpensearch          WorkbenchToolType = "OPENSEARCH"
+	WorkbenchToolTypeLambda              WorkbenchToolType = "LAMBDA"
+	WorkbenchToolTypeCloudRun            WorkbenchToolType = "CLOUD_RUN"
+	WorkbenchToolTypeAzureFunction       WorkbenchToolType = "AZURE_FUNCTION"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -17941,11 +18050,14 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeAzureDevops,
 	WorkbenchToolTypePagerduty,
 	WorkbenchToolTypeOpensearch,
+	WorkbenchToolTypeLambda,
+	WorkbenchToolTypeCloudRun,
+	WorkbenchToolTypeAzureFunction,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction:
 		return true
 	}
 	return false

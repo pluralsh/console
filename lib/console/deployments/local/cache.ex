@@ -90,6 +90,7 @@ defmodule Console.Deployments.Local.Cache do
         File.close(f)
       rescue
         err ->
+          File.rm(path)
           Logger.error(Exception.format(:error, err, __STACKTRACE__))
           {:error, :stream_aborted}
       end

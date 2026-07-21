@@ -285,10 +285,14 @@ export function ChatSubmitButton({
 
 export function ChatOptionPill({
   isOpen = false,
+  showArrow = true,
   textType = 'caption',
   children,
   ...props
-}: { textType?: SemanticPartialType } & ComponentPropsWithRef<typeof Chip>) {
+}: {
+  textType?: SemanticPartialType
+  showArrow?: boolean
+} & ComponentPropsWithRef<typeof Chip>) {
   const { partials, colors } = useTheme()
   return (
     <Chip
@@ -304,13 +308,15 @@ export function ChatOptionPill({
         css={{ ...partials.text[textType], color: colors['text-xlight'] }}
       >
         {children}
-        <CaretDownIcon
-          size={10}
-          style={{
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease-in-out',
-          }}
-        />
+        {showArrow && (
+          <CaretDownIcon
+            size={10}
+            style={{
+              transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease-in-out',
+            }}
+          />
+        )}
       </Flex>
     </Chip>
   )
