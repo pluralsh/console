@@ -34,7 +34,7 @@ RUN CGO_ENABLED=0 \
 
 FROM cgr.dev/chainguard/wolfi-base:latest AS final
 
-RUN apk update --no-cache && apk add git
+RUN apk update --no-cache && apk add --no-cache git
 
 # Switch to the nonroot user
 USER 65532:65532

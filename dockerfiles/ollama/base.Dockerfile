@@ -4,7 +4,7 @@ FROM debian:12-slim AS base
 
 WORKDIR /workspace
 
-RUN apt-get -y update && apt-get -y install curl unzip
+RUN apt-get -y update && apt-get -y install --no-install-recommends ca-certificates curl unzip
 
 RUN curl -#LO https://github.com/atkrad/wait4x/releases/latest/download/wait4x-linux-amd64.tar.gz && \
   tar --one-top-level -xvf wait4x-linux-amd64.tar.gz
