@@ -276,6 +276,7 @@ func (in *DatabaseStore) SaveComponent(obj unstructured.Unstructured) error {
 			smcommon.GetDeletePhase(obj),
 			serverSHA,
 			true,
+			common.CRDEstablished(obj),
 		},
 	})
 }
@@ -315,7 +316,8 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 		  service_id,
 		  delete_phase,
 		  server_sha,
-		  applied
+		  applied,
+		  established
 		) VALUES `)
 
 	valueStrings := make([]string, 0, len(objects))
@@ -357,7 +359,7 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			continue
 		}
 
-		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s', 1)",
+		valueStrings = append(valueStrings, fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s',%d,'%s',%d,'%s','%s','%s',1,%d)",
 			obj.GetUID(),
 			lo.FromPtr(ownerRef),
 			gvk.Group,
@@ -371,6 +373,7 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 			serviceID,
 			smcommon.GetDeletePhase(obj),
 			serverSHA,
+			lo.Ternary(common.CRDEstablished(obj), 1, 0),
 		))
 	}
 
@@ -388,7 +391,8 @@ func (in *DatabaseStore) SaveComponents(objects []unstructured.Unstructured) err
 	  service_id = excluded.service_id,
       delete_phase = excluded.delete_phase,
 	  server_sha = excluded.server_sha,
-	  applied = excluded.applied
+	  applied = excluded.applied,
+	  established = excluded.established
 	`)
 
 	in.maybeSaveHookComponents(conn, objects)
@@ -719,6 +723,32 @@ func (in *DatabaseStore) GetAppliedComponent(obj unstructured.Unstructured) (res
 	})
 
 	return result, err
+}
+
+func (in *DatabaseStore) IsCRDEstablished(obj unstructured.Unstructured) (established bool, err error) {
+	if !common.IsCRD(obj) || obj.GetUID() == "" {
+		return false, nil
+	}
+
+	conn, cancelFunc, err := in.take()
+	if err != nil {
+		return false, err
+	}
+	defer func() {
+		in.pool.Put(conn)
+		cancelFunc()
+	}()
+
+	gvk := obj.GroupVersionKind()
+	err = sqlitex.ExecuteTransient(conn, getCRDEstablished, &sqlitex.ExecOptions{
+		Args: []any{obj.GetName(), obj.GetNamespace(), gvk.Group, gvk.Version, gvk.Kind, obj.GetUID()},
+		ResultFunc: func(stmt *sqlite.Stmt) error {
+			established = stmt.ColumnBool(0)
+			return nil
+		},
+	})
+
+	return established, err
 }
 
 func (in *DatabaseStore) GetAppliedComponentByUID(uid types.UID) (result *client.ComponentChildAttributes, err error) {

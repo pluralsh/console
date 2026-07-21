@@ -4,14 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
-	"github.com/pluralsh/console/go/polly/containers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	smcommon "github.com/pluralsh/console/go/deployment-operator/pkg/streamline/common"
+	"github.com/pluralsh/console/go/polly/containers"
 )
 
 var storeTimeout = 5 * time.Second
@@ -94,6 +95,14 @@ func (p *ProfiledStoreLocal) GetAppliedComponent(obj unstructured.Unstructured) 
 		return err
 	})
 	return res, err
+}
+
+func (p *ProfiledStoreLocal) IsCRDEstablished(obj unstructured.Unstructured) (established bool, err error) {
+	_ = traceLocal(context.Background(), "IsCRDEstablished", func() error {
+		established, err = p.inner.IsCRDEstablished(obj)
+		return err
+	})
+	return
 }
 
 // GetAppliedComponentByUID wraps Store.GetAppliedComponentByUID with tracing.
@@ -329,7 +338,7 @@ func (p *ProfiledStoreLocal) SetComponentUnsynced(obj unstructured.Unstructured)
 func (p *ProfiledStoreLocal) SaveComponentAttributes(obj client.ComponentChildAttributes, args ...any) error {
 	var err error
 	_ = traceLocal(context.Background(), "SaveComponentAttributes", func() error {
-		err = p.inner.SaveComponentAttributes(obj, args)
+		err = p.inner.SaveComponentAttributes(obj, args...)
 		return err
 	})
 	return err

@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
-	"github.com/pluralsh/console/go/polly/containers"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/polly/containers"
 
 	"github.com/pluralsh/console/go/client"
 
@@ -99,6 +100,14 @@ func (p *ProfiledStore) GetAppliedComponent(obj unstructured.Unstructured) (*smc
 		return err
 	})
 	return res, err
+}
+
+func (p *ProfiledStore) IsCRDEstablished(obj unstructured.Unstructured) (established bool, err error) {
+	_ = trace(context.Background(), "IsCRDEstablished", func() error {
+		established, err = p.inner.IsCRDEstablished(obj)
+		return err
+	})
+	return
 }
 
 // GetAppliedComponentByUID wraps Store.GetAppliedComponentByUID with tracing.
@@ -307,7 +316,7 @@ func (p *ProfiledStore) GetComponentInsights() ([]client.ClusterInsightComponent
 func (p *ProfiledStore) SaveComponentAttributes(obj client.ComponentChildAttributes, args ...any) error {
 	var err error
 	_ = trace(context.Background(), "SaveComponentAttributes", func() error {
-		err = p.inner.SaveComponentAttributes(obj, args)
+		err = p.inner.SaveComponentAttributes(obj, args...)
 		return err
 	})
 	return err
