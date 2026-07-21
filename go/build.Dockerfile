@@ -15,4 +15,15 @@ RUN make tools
 WORKDIR /workspace/${MODULE_PATH}
 RUN go mod download
 
+# Create nonroot user.
+RUN addgroup --gid 65532 nonroot && \
+    adduser --uid 65532 --gid 65532 --disabled-password --gecos "" --home /home/nonroot nonroot && \
+    mkdir -p /home/nonroot/.cache && \
+    chown -R 65532:65532 /workspace /go /home/nonroot
+
+ENV HOME=/home/nonroot \
+    GOCACHE=/home/nonroot/.cache/go-build
+
+USER 65532:65532
+
 CMD ["sh", "-c", "go build ./..."]
