@@ -13,9 +13,6 @@ ENV CGO_ENABLED=0 \
     GOARCH=${TARGETARCH} \
     GOCACHE=/sentinel/.cache
 
-# Create directories and fix permissions
-RUN mkdir -p /sentinel/.cache && chown -R 65532:65532 /sentinel && chown -R 65532:65532 /plural
-
 WORKDIR /sentinel/terratest
 
 # Copy test files

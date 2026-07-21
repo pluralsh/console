@@ -48,7 +48,7 @@ RUN apk add --no-cache curl ca-certificates && \
 COPY --from=builder /sentinel-harness /usr/local/bin/sentinel-harness
 RUN chmod +x /usr/local/bin/sentinel-harness
 
-RUN mkdir -p /plural && chown -R 65532:65532 /plural
+RUN mkdir -p /plural /sentinel/.cache && chown -R 65532:65532 /plural /sentinel
 
 WORKDIR /plural
 
