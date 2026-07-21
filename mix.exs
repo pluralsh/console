@@ -78,7 +78,7 @@ defmodule Console.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto, "~> 3.12.0", override: true},
+      {:ecto, "~> 3.13", override: true},
       {:ex_machina, "~> 2.8", only: :test},
       {:dns_cluster, "~> 0.2.0"},
       {:ex_aws, "~> 2.6"},
@@ -95,9 +95,10 @@ defmodule Console.MixProject do
       {:phoenix_view, "~> 2.0"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
-      {:ecto_sql, "~> 3.12.0"},
+      {:ecto_sql, "~> 3.13"},
       {:ex_aws_rds, "~> 2.0"},
-      {:ex_json_schema, "~> 0.11.2"},
+      {:ex_json_schema, "~> 0.11.5"},
+      {:decimal, "~> 3.0", override: true},
       {:text_diff, "~> 0.1"},
 
       # {:ecto_sqlite3, "~> 0.17"},
