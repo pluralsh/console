@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.FetchManifest do
   def implement(%__MODULE__{tool: tool, repository_slug: repository_slug, tag: tag}) do
     with {:ok, client} <- Client.build(tool, repository_slug),
          {:ok, manifest} <- Console.OCI.Client.manifest(client, tag) do
-      Jason.encode!(%{repository: repository_slug, tag: tag, manifest: Client.normalize(manifest)})
+      Jason.encode(%{repository: repository_slug, tag: tag, manifest: Client.normalize(manifest)})
     end
   end
 end

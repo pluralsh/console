@@ -34,7 +34,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.SearchTags do
     with {:ok, client} <- Client.build(tool, repository_slug),
          {:ok, %OCI.Tags{tags: tags, name: name}} <-
            OCI.Client.tags(client, tag_filter(query), "", %OCI.Tags{}, limit || 100) do
-      Jason.encode!(%{repository: name, tags: tags})
+      Jason.encode(%{repository: name, tags: tags})
     end
   end
 

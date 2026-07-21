@@ -15,7 +15,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
 
   describe "search_tags/1" do
     test "searches public Docker Hub tags with a limit" do
-      assert json =
+      assert {:ok, json} =
                SearchTags.implement(%SearchTags{
                  tool: docker_tool(),
                  repository_slug: @repository,
@@ -31,7 +31,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Docker.ToolsTest do
 
   describe "fetch_manifest/1" do
     test "fetches the manifest for a public Docker Hub tag" do
-      assert json =
+      assert {:ok, json} =
                FetchManifest.implement(%FetchManifest{
                  tool: docker_tool(),
                  repository_slug: @repository,
