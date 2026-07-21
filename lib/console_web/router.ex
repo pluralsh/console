@@ -11,6 +11,13 @@ defmodule ConsoleWeb.Router do
     plug ConsoleWeb.Plugs.Authorized
   end
 
+  pipeline :tarball_rate_limit do
+    plug Hammer.Plug, [
+      rate_limit: &Console.tarball_rate_limit/0,
+      by: {:conn, &Console.tarball_rate_limit_key/1}
+    ]
+  end
+
   pipeline :graphql_multipart_spec do
     plug ConsoleWeb.Plugs.GraphQLMultipartSpec
   end
@@ -79,11 +86,15 @@ defmodule ConsoleWeb.Router do
       end
 
       scope "/v1", ConsoleWeb do
+        pipe_through [:tarball_rate_limit]
+
         get "/digests", GitController, :digest
         get "/git/tarballs", GitController, :tarball
         get "/git/stacks/tarballs", GitController, :stack_tarball
         get "/git/sentinels/tarballs", GitController, :sentinel_tarball
+      end
 
+      scope "/v1", ConsoleWeb do
         post "/webhooks/:type/:id", WebhookController, :scm
 
         get "/gate/:cluster/:name", GitController, :proceed
@@ -103,13 +114,17 @@ defmodule ConsoleWeb.Router do
     pipe_through [:auth]
 
     scope "/v1", ConsoleWeb do
+      pipe_through [:tarball_rate_limit]
+
       get "/digests", GitController, :digest
-      get "/compliance/report", ComplianceController, :report
-      get "/compliance/report/:name", ComplianceController, :report
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
       get "/git/sentinels/tarballs", GitController, :sentinel_tarball
+    end
 
+    scope "/v1", ConsoleWeb do
+      get "/compliance/report", ComplianceController, :report
+      get "/compliance/report/:name", ComplianceController, :report
     end
 
     scope "/v1", ConsoleWeb do

@@ -14,8 +14,8 @@ defmodule Console.Deployments.Helm.AgentCache do
   defstruct [:repo, :client, :index, :dir, :table]
 
   defmodule Line do
-    @expiry [minutes: -30]
-    defstruct [:file, :chart, :vsn, :digest, :internal_digest, :touched]
+    @expiry -30
+    defstruct [:file, :chart, :vsn, :digest, :internal_digest, :touched, :jitter]
 
     def new(file, chart, vsn, digest) do
       %__MODULE__{
@@ -24,6 +24,7 @@ defmodule Console.Deployments.Helm.AgentCache do
         internal_digest: Console.sha_file(file),
         vsn: vsn,
         digest: digest,
+        jitter: Console.jitter(10),
         touched: Timex.now()
       }
     end
@@ -32,9 +33,9 @@ defmodule Console.Deployments.Helm.AgentCache do
 
     def expire(%__MODULE__{file: f}), do: File.rm(f)
 
-    def expired?(%__MODULE__{touched: touched}) do
+    def expired?(%__MODULE__{touched: touched, jitter: jitter}) do
       Timex.now()
-      |> Timex.shift(@expiry)
+      |> Timex.shift(minutes: @expiry - jitter)
       |> Timex.after?(touched)
     end
   end

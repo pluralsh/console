@@ -43,7 +43,7 @@ defmodule Console.AI.Cron do
     AgentRun.expired()
     |> AgentRun.ordered(desc: :id)
     |> Repo.stream(method: :keyset)
-    |> Console.throttle(count: 100, pause: 1)
+    |> Console.throttle(count: 100, pause: 10)
     |> Stream.chunk_every(20)
     |> Task.async_stream(fn chunk ->
       Logger.info "pruning #{length(chunk)} agent runs"
@@ -158,6 +158,7 @@ defmodule Console.AI.Cron do
       |> PrAutomation.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
     )
+    |> Console.throttle(count: 100, pause: 10)
     |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
     |> Stream.run()
   end
@@ -168,7 +169,7 @@ defmodule Console.AI.Cron do
       Stack.for_status(:successful)
       |> Stack.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
-      |> Console.throttle()
+      |> Console.throttle(count: 100, pause: 10)
       |> Stream.each(&Console.AI.PubSub.Vector.Bulk.insert/1)
       |> Stream.run()
     end
@@ -180,7 +181,7 @@ defmodule Console.AI.Cron do
       WorkbenchJob.resolved()
       |> WorkbenchJob.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
-      |> Console.throttle()
+      |> Console.throttle(count: 100, pause: 10)
       |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
       |> Stream.run()
     end
@@ -202,7 +203,7 @@ defmodule Console.AI.Cron do
       WorkbenchJob.indexable()
       |> WorkbenchJob.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
-      |> Console.throttle()
+      |> Console.throttle(count: 100, pause: 10)
       |> Stream.map(&Console.AI.PubSub.Vector.Bulk.insert/1)
       |> Stream.run()
     end
@@ -214,7 +215,7 @@ defmodule Console.AI.Cron do
     |> WorkbenchJob.preloaded([:result, :pull_requests, workbench: [:repository, :workbench_skills]])
     |> WorkbenchJob.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
-    |> Console.throttle()
+    |> Console.throttle(count: 100, pause: 10)
     |> Flow.from_enumerable(stages: 5)
     |> Flow.map(&Workbench.Knowledge.Backfill.skills/1)
     |> Flow.run()
@@ -225,7 +226,7 @@ defmodule Console.AI.Cron do
     |> WorkbenchJob.ordered(asc: :id)
     |> WorkbenchJob.preloaded([:activities, workbench: :eval])
     |> Repo.stream(method: :keyset)
-    |> Console.throttle()
+    |> Console.throttle(count: 100, pause: 10)
     |> Flow.from_enumerable(stages: 5)
     |> Flow.map(&Workbench.Eval.evaluate/1)
     |> Flow.run()

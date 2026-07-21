@@ -106,24 +106,38 @@ func (in *HelmRepositoryAuth) authAttributes(ctx context.Context, helmRepository
 }
 
 func (in *HelmRepositoryAuth) HelmAuthAttributes(ctx context.Context, namespace string, provider *console.HelmAuthProvider, auth *v1alpha1.HelmRepositoryAuth) (*console.HelmAuthAttributes, error) {
-	if provider == nil || auth == nil {
+	if auth == nil {
 		return nil, nil
 	}
 
-	switch *provider {
-	case console.HelmAuthProviderBasic:
-		return in.basicAuthAttributes(ctx, namespace, auth.Basic)
-	case console.HelmAuthProviderBearer:
-		return in.bearerAuthAttributes(ctx, namespace, auth.Bearer)
-	case console.HelmAuthProviderAWS:
-		return in.awsAuthAttributes(ctx, namespace, auth.Aws)
-	case console.HelmAuthProviderAzure:
-		return in.azureAuthAttributes(ctx, namespace, auth.Azure)
-	case console.HelmAuthProviderGCP:
-		return in.gcpAuthAttributes(ctx, namespace, auth.Gcp)
+	var attrs *console.HelmAuthAttributes
+	var err error
+	if provider != nil {
+		switch *provider {
+		case console.HelmAuthProviderBasic:
+			attrs, err = in.basicAuthAttributes(ctx, namespace, auth.Basic)
+		case console.HelmAuthProviderBearer:
+			attrs, err = in.bearerAuthAttributes(ctx, namespace, auth.Bearer)
+		case console.HelmAuthProviderAWS:
+			attrs, err = in.awsAuthAttributes(ctx, namespace, auth.Aws)
+		case console.HelmAuthProviderAzure:
+			attrs, err = in.azureAuthAttributes(ctx, namespace, auth.Azure)
+		case console.HelmAuthProviderGCP:
+			attrs, err = in.gcpAuthAttributes(ctx, namespace, auth.Gcp)
+		}
+	}
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, nil
+	if proxy := auth.Proxy.Attributes(); proxy != nil {
+		if attrs == nil {
+			attrs = &console.HelmAuthAttributes{}
+		}
+		attrs.Proxy = proxy
+	}
+
+	return attrs, nil
 }
 
 func (in *HelmRepositoryAuth) basicAuthAttributes(ctx context.Context, namespace string, auth *v1alpha1.HelmRepositoryAuthBasic) (*console.HelmAuthAttributes, error) {

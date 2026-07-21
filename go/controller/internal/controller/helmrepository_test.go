@@ -33,6 +33,24 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 
 		ctx := context.Background()
 
+		It("should build proxy-only auth attributes", func() {
+			noproxy := "localhost,127.0.0.1"
+			auth := &controller.HelmRepositoryAuth{}
+
+			attrs, err := auth.HelmAuthAttributes(ctx, namespace, nil, &v1alpha1.HelmRepositoryAuth{
+				Proxy: &v1alpha1.HttpProxyConfiguration{
+					URL:     "http://proxy.example.com:8080",
+					NoProxy: &noproxy,
+				},
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(attrs).NotTo(BeNil())
+			Expect(attrs.Proxy).NotTo(BeNil())
+			Expect(attrs.Proxy.URL).To(Equal("http://proxy.example.com:8080"))
+			Expect(attrs.Proxy.Noproxy).To(Equal(&noproxy))
+		})
+
 		typeNamespacedName := types.NamespacedName{
 			Name:      helmRepositoryName,
 			Namespace: namespace,

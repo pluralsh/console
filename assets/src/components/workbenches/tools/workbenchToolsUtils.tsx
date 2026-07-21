@@ -4,6 +4,7 @@ import {
   AzureLogoIcon,
   BitBucketIcon,
   DatadogLogoIcon,
+  DockerLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
   GitHubLogoIcon,
@@ -61,6 +62,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Cloudwatch,
   WorkbenchToolType.Azure,
   WorkbenchToolType.Sentry,
+  WorkbenchToolType.Docker,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -95,6 +97,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
   [WorkbenchToolType.Azure]: 'azure',
   [WorkbenchToolType.Sentry]: 'sentry',
+  [WorkbenchToolType.Docker]: 'docker',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -161,6 +164,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Lambda]: 'AWS Lambda',
   [WorkbenchToolType.CloudRun]: 'GCP Cloud Run',
   [WorkbenchToolType.AzureFunction]: 'Azure Function',
+  [WorkbenchToolType.Docker]: 'Docker / OCI registry',
   [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
   [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
   [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
@@ -222,6 +226,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.AzureFunction]: [WorkbenchToolCategory.Function],
   [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
+  [WorkbenchToolType.Docker]: [WorkbenchToolCategory.Integration],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
@@ -272,6 +277,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Query distributed traces from Jaeger with structured filters.',
   [WorkbenchToolType.Sentry]:
     'Connect to Sentry to list issues, inspect error details, and read stack traces.',
+  [WorkbenchToolType.Docker]:
+    'Inspect Docker and OCI registries by listing tags and fetching manifests.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -431,4 +438,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Azure]: AzureLogoIcon,
   [WorkbenchToolType.Jaeger]: ToolsIcon,
   [WorkbenchToolType.Sentry]: SentryLogoIcon,
+  [WorkbenchToolType.Docker]: DockerLogoIcon,
 }

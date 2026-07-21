@@ -3928,6 +3928,7 @@ type HealthRange struct {
 }
 
 type HelmAuthAttributes struct {
+	Proxy  *HTTPProxyAttributes      `json:"proxy,omitempty"`
 	Basic  *HelmBasicAuthAttributes  `json:"basic,omitempty"`
 	Bearer *HelmBearerAuthAttributes `json:"bearer,omitempty"`
 	AWS    *HelmAWSAuthAttributes    `json:"aws,omitempty"`
@@ -4938,8 +4939,8 @@ type MetricsSettingsAttributes struct {
 
 type ModelDefault struct {
 	Provider       AiProvider `json:"provider"`
-	Model          string     `json:"model"`
-	ToolModel      string     `json:"toolModel"`
+	Model          *string    `json:"model,omitempty"`
+	ToolModel      *string    `json:"toolModel,omitempty"`
 	EmbeddingModel *string    `json:"embeddingModel,omitempty"`
 }
 
@@ -11025,6 +11026,8 @@ type WorkbenchToolConfiguration struct {
 	CloudRun *WorkbenchToolCloudRunConnection `json:"cloudRun,omitempty"`
 	// google cloud function configuration
 	AzureFunction *WorkbenchToolAzureFunctionConnection `json:"azureFunction,omitempty"`
+	// docker/OCI registry connection (no secrets)
+	Docker *WorkbenchToolDockerConnection `json:"docker,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -11082,6 +11085,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnectionAttributes `json:"bitbucketDatacenter,omitempty"`
 	// azure devops connection (scm)
 	AzureDevops *WorkbenchToolAzureDevopsConnectionAttributes `json:"azureDevops,omitempty"`
+	// docker/OCI registry connection
+	Docker *WorkbenchToolDockerConnectionAttributes `json:"docker,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -11101,6 +11106,24 @@ type WorkbenchToolDatadogConnectionAttributes struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// datadog application key
 	AppKey *string `json:"appKey,omitempty"`
+}
+
+type WorkbenchToolDockerConnection struct {
+	// Docker/OCI registry host in use (credentials never exposed)
+	URL *string `json:"url,omitempty"`
+	// registry authentication provider
+	Provider *HelmAuthProvider `json:"provider,omitempty"`
+	// optional HTTP proxy for registry requests
+	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
+}
+
+type WorkbenchToolDockerConnectionAttributes struct {
+	// Registry host or base URL (defaults to registry-1.docker.io). Repository slugs are provided to individual tools.
+	URL *string `json:"url,omitempty"`
+	// registry authentication provider: basic, bearer, aws, azure, or gcp
+	Provider *HelmAuthProvider `json:"provider,omitempty"`
+	// registry authentication credentials and optional proxy; secrets are encrypted at rest
+	Auth *HelmAuthAttributes `json:"auth,omitempty"`
 }
 
 type WorkbenchToolDynatraceConnection struct {
@@ -18021,6 +18044,7 @@ const (
 	WorkbenchToolTypeLambda              WorkbenchToolType = "LAMBDA"
 	WorkbenchToolTypeCloudRun            WorkbenchToolType = "CLOUD_RUN"
 	WorkbenchToolTypeAzureFunction       WorkbenchToolType = "AZURE_FUNCTION"
+	WorkbenchToolTypeDocker              WorkbenchToolType = "DOCKER"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -18053,11 +18077,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeLambda,
 	WorkbenchToolTypeCloudRun,
 	WorkbenchToolTypeAzureFunction,
+	WorkbenchToolTypeDocker,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch, WorkbenchToolTypeAzure, WorkbenchToolTypeCloud, WorkbenchToolTypeJaeger, WorkbenchToolTypeExa, WorkbenchToolTypeGithub, WorkbenchToolTypeSLACk, WorkbenchToolTypeTeams, WorkbenchToolTypeGitlab, WorkbenchToolTypeBitbucket, WorkbenchToolTypeBitbucketDatacenter, WorkbenchToolTypeAzureDevops, WorkbenchToolTypePagerduty, WorkbenchToolTypeOpensearch, WorkbenchToolTypeLambda, WorkbenchToolTypeCloudRun, WorkbenchToolTypeAzureFunction, WorkbenchToolTypeDocker:
 		return true
 	}
 	return false

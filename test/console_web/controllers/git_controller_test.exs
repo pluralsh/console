@@ -181,6 +181,40 @@ defmodule ConsoleWeb.GitControllerTest do
     end
   end
 
+  describe "tarball rate limiting" do
+    test "it globally rate limits digest and tarball endpoints" do
+      bucket = "tarball:global"
+      previous_qps = Application.get_env(:console, :tarball_qps)
+
+      Hammer.delete_buckets(bucket)
+      Application.put_env(:console, :tarball_qps, 1)
+
+      on_exit(fn ->
+        Hammer.delete_buckets(bucket)
+
+        if is_nil(previous_qps),
+          do: Application.delete_env(:console, :tarball_qps),
+          else: Application.put_env(:console, :tarball_qps, previous_qps)
+      end)
+
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+      other_cluster = insert(:cluster)
+
+      build_conn()
+      |> Map.put(:remote_ip, {127, 0, 0, 42})
+      |> add_auth_headers(other_cluster)
+      |> get("/v1/digests", %{id: svc.id})
+      |> response(403)
+
+      build_conn()
+      |> Map.put(:remote_ip, {127, 0, 0, 43})
+      |> add_auth_headers(other_cluster)
+      |> get("/v1/git/tarballs", %{id: svc.id})
+      |> response(429)
+    end
+  end
+
   describe "#stack_tarball/2" do
     test "it will download stack git content for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")

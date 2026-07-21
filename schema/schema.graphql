@@ -2610,6 +2610,7 @@ enum WorkbenchToolType {
   LAMBDA
   CLOUD_RUN
   AZURE_FUNCTION
+  DOCKER
 }
 
 enum WorkbenchToolCategory {
@@ -3098,6 +3099,9 @@ input WorkbenchToolConfigurationAttributes {
 
   "azure devops connection (scm)"
   azureDevops: WorkbenchToolAzureDevopsConnectionAttributes
+
+  "docker\/OCI registry connection"
+  docker: WorkbenchToolDockerConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -3387,6 +3391,17 @@ input WorkbenchToolAzureDevopsConnectionAttributes {
 
   "Azure DevOps personal access token (PAT; encrypted at rest)"
   token: String
+}
+
+input WorkbenchToolDockerConnectionAttributes {
+  "Registry host or base URL (defaults to registry-1.docker.io). Repository slugs are provided to individual tools."
+  url: String
+
+  "registry authentication provider: basic, bearer, aws, azure, or gcp"
+  provider: HelmAuthProvider
+
+  "registry authentication credentials and optional proxy; secrets are encrypted at rest"
+  auth: HelmAuthAttributes
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -4482,6 +4497,9 @@ type WorkbenchToolConfiguration {
 
   "google cloud function configuration"
   azureFunction: WorkbenchToolAzureFunctionConnection
+
+  "docker\/OCI registry connection (no secrets)"
+  docker: WorkbenchToolDockerConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -4684,6 +4702,17 @@ type WorkbenchToolBitbucketDatacenterConnection {
 type WorkbenchToolAzureDevopsConnection {
   "Azure DevOps REST API root in use (PAT never exposed); defaults to https:\/\/dev.azure.com when unset."
   url: String
+}
+
+type WorkbenchToolDockerConnection {
+  "Docker\/OCI registry host in use (credentials never exposed)"
+  url: String
+
+  "registry authentication provider"
+  provider: HelmAuthProvider
+
+  "optional HTTP proxy for registry requests"
+  proxy: HttpProxyConfiguration
 }
 
 type WorkbenchToolHttpConfiguration {
@@ -13014,6 +13043,7 @@ input HelmRepositoryAttributes {
 }
 
 input HelmAuthAttributes {
+  proxy: HttpProxyAttributes
   basic: HelmBasicAuthAttributes
   bearer: HelmBearerAuthAttributes
   aws: HelmAwsAuthAttributes

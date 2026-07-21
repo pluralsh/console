@@ -5,7 +5,12 @@ defmodule Console.Helm.Interface.OCI do
   defstruct [:client, :repo, :authed, :tags, :fetched_at]
 
   def client(%HelmRepository{} = repo) do
-    %__MODULE__{client: Client.new(repo.url), tags: %{}, repo: repo, fetched_at: Timex.now() |> Timex.shift(minutes: -10)}
+    %__MODULE__{
+      client: Client.new(repo.url, proxy(repo.auth)),
+      tags: %{},
+      repo: repo,
+      fetched_at: Timex.now() |> Timex.shift(minutes: -10)
+    }
   end
 
   def authenticate(%__MODULE__{authed: true} = client), do: {:ok, client}
@@ -13,6 +18,9 @@ defmodule Console.Helm.Interface.OCI do
     with {:ok, client} <- Auth.authenticate(client, repo.provider, repo.auth),
       do: {:ok, %{oci | client: client, authed: true}}
   end
+
+  defp proxy(%{proxy: proxy}), do: proxy
+  defp proxy(_), do: nil
 end
 
 defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do

@@ -69,6 +69,12 @@ console:
     # assetsProxyUrl use this if you need to proxy downloads of new compatibility matrices or other live updated information from our datasets
     assetsProxyUrl: ~
 
+    # tarballQps configures the global QPS limit for digest and git tarball endpoints.
+    tarballQps: 100
+
+    # dbPoolSize configures the Ecto database connection pool size.
+    dbPoolSize: 50
+
     # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
     rdsIamAuthentication: false
 
@@ -299,9 +305,9 @@ livenessProbe:
     path: /health
     port: http
   initialDelaySeconds: 30
-  periodSeconds: 10
+  periodSeconds: 30
   timeoutSeconds: 1
-  failureThreshold: 3
+  failureThreshold: 5
   successThreshold: 1
 
 # readinessProbe configures the readiness probe for the console container. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
@@ -309,10 +315,10 @@ readinessProbe:
   httpGet:
     path: /health
     port: http
-  initialDelaySeconds: 15
-  periodSeconds: 15
+  initialDelaySeconds: 30
+  periodSeconds: 30
   timeoutSeconds: 1
-  failureThreshold: 3
+  failureThreshold: 5
   successThreshold: 1
 
 # imagePullSecrets is used to configure Kubernetes image pull secrets. See https://kubernetes.io/docs/concepts/containers/images/

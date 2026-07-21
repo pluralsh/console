@@ -1,8 +1,11 @@
 defmodule Console.Schema.OCIAuth do
   use Piazza.Ecto.Schema
+  alias Console.Schema.ScmConnection
   alias Piazza.Ecto.EncryptedString
 
   embedded_schema do
+    embeds_one :proxy, ScmConnection.Proxy, on_replace: :update
+
     embeds_one :basic, Basic, on_replace: :update do
       field :username,     :string
       field :password, EncryptedString
@@ -33,6 +36,7 @@ defmodule Console.Schema.OCIAuth do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [])
+    |> cast_embed(:proxy, with: &ScmConnection.proxy_changeset/2)
     |> cast_embed(:aws, with: &aws_changeset/2)
     |> cast_embed(:azure, with: &azure_changeset/2)
     |> cast_embed(:gcp, with: &gcp_changeset/2)

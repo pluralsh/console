@@ -50,6 +50,8 @@ defmodule Console do
   end
 
   def rate_limit(), do: {"global", :timer.seconds(1), Console.conf(:qps)}
+  def tarball_rate_limit(), do: {"tarball", :timer.seconds(1), Console.conf(:tarball_qps, 100)}
+  def tarball_rate_limit_key(_conn), do: "global"
 
   def provider(), do: Console.conf(:provider)
 

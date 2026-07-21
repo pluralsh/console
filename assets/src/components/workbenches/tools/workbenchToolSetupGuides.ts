@@ -28,6 +28,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Azure]: '/setup-guides/tools/azure.md',
   [WorkbenchToolType.Sentry]: '/setup-guides/tools/sentry.md',
   [WorkbenchToolType.Mcp]: '/setup-guides/tools/mcp.md',
+  [WorkbenchToolType.Docker]: '/setup-guides/tools/docker.md',
 }
 
 const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
@@ -73,6 +74,8 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/roles-permissions-security',
   [WorkbenchToolType.Sentry]: 'https://docs.sentry.io/api/permissions/',
   [WorkbenchToolType.Mcp]: 'https://modelcontextprotocol.io/introduction',
+  [WorkbenchToolType.Docker]:
+    'https://distribution.github.io/distribution/spec/api/',
 }
 
 export function getWorkbenchToolSetupGuideMarkdownPath(

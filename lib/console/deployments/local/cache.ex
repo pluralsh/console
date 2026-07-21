@@ -9,14 +9,15 @@ defmodule Console.Deployments.Local.Cache do
   defmodule Line do
     @type t :: %__MODULE__{}
 
-    @expiry [minutes: -24 * 60]
-    defstruct [:file, :digest, :touched]
+    @expiry -24 * 60
+    defstruct [:file, :digest, :touched, :jitter]
 
     def new(file, digest) do
       %__MODULE__{
         file: file,
         digest: digest,
-        touched: Timex.now()
+        touched: Timex.now(),
+        jitter: Console.jitter(30)
       }
     end
 
@@ -24,9 +25,9 @@ defmodule Console.Deployments.Local.Cache do
 
     def expire(%__MODULE__{file: f}), do: File.rm(f)
 
-    def expired?(%__MODULE__{touched: touched}) do
+    def expired?(%__MODULE__{touched: touched, jitter: jitter}) do
       Timex.now()
-      |> Timex.shift(@expiry)
+      |> Timex.shift(minutes: @expiry - jitter)
       |> Timex.after?(touched)
     end
   end

@@ -14,8 +14,8 @@ defmodule Console.Deployments.Git.Cache do
   defstruct [:git, :dir, :heads, :table]
 
   defmodule Line do
-    @expiry [minutes: -30]
-    defstruct [:key, :file, :sha, :digest, :touched, :message]
+    @expiry -30
+    defstruct [:key, :file, :sha, :digest, :touched, :message, :jitter]
 
     def new(key, file, sha, message) do
       %__MODULE__{
@@ -24,15 +24,16 @@ defmodule Console.Deployments.Git.Cache do
         digest: Console.sha_file(file),
         sha: sha,
         message: message,
-        touched: Timex.now()
+        touched: Timex.now(),
+        jitter: Console.jitter(10)
       }
     end
 
     def touch(%__MODULE__{} = mod), do: %{mod | touched: Timex.now()}
 
-    def expired?(%__MODULE__{touched: touched}) do
+    def expired?(%__MODULE__{touched: touched, jitter: jitter}) do
       Timex.now()
-      |> Timex.shift(@expiry)
+      |> Timex.shift(minutes: @expiry - jitter)
       |> Timex.after?(touched)
     end
   end

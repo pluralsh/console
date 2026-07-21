@@ -17,7 +17,11 @@ import {
 import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { EditableDiv } from 'components/utils/EditableDiv'
-import { WorkbenchToolHttpMethod, WorkbenchToolType } from 'generated/graphql'
+import {
+  HelmAuthProvider,
+  WorkbenchToolHttpMethod,
+  WorkbenchToolType,
+} from 'generated/graphql'
 import { ComponentProps, ComponentType, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -115,6 +119,8 @@ export function WorkbenchToolFormFields({
       return render(type, DynatraceFormFields)
     case WorkbenchToolType.Sentry:
       return render(type, SentryFormFields)
+    case WorkbenchToolType.Docker:
+      return render(type, DockerFormFields)
   }
 }
 
@@ -1015,6 +1021,186 @@ function SentryFormFields({
         value={c.accessToken ?? ''}
         onChange={(e) => set({ ...c, accessToken: e.target.value })}
       />
+    </>
+  )
+}
+
+const DOCKER_AUTH_OPTIONS = [
+  { key: 'none', label: 'None / public registry' },
+  { key: HelmAuthProvider.Basic, label: 'Basic auth' },
+  { key: HelmAuthProvider.Bearer, label: 'Bearer token' },
+] as const
+
+function DockerFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Docker>) {
+  const authMode = c.auth?.bearer
+    ? HelmAuthProvider.Bearer
+    : c.auth?.basic
+      ? HelmAuthProvider.Basic
+      : 'none'
+
+  return (
+    <>
+      <InputField
+        label="Registry URL"
+        hint="Optional. Defaults to Docker Hub (registry-1.docker.io). Use a registry host such as ghcr.io or registry.example.com."
+        placeholder="registry-1.docker.io"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value || undefined })}
+      />
+      <FormField
+        label="Authentication"
+        hint="Only basic auth and bearer token credentials are currently supported from the UI."
+      >
+        <Select
+          selectedKey={authMode}
+          onSelectionChange={(key) => {
+            if (
+              key === HelmAuthProvider.Basic ||
+              key === HelmAuthProvider.Bearer
+            ) {
+              set({
+                ...c,
+                provider: key,
+                auth: {
+                  proxy: c.auth?.proxy,
+                  ...(key === HelmAuthProvider.Basic
+                    ? { basic: { username: '', password: '' } }
+                    : { bearer: { token: '' } }),
+                },
+              })
+              return
+            }
+
+            set({
+              ...c,
+              provider: HelmAuthProvider.Basic,
+              auth: c.auth?.proxy ? { proxy: c.auth.proxy } : undefined,
+            })
+          }}
+          selectionMode="single"
+          label="Authentication"
+        >
+          {DOCKER_AUTH_OPTIONS.map((option) => (
+            <ListBoxItem
+              key={option.key}
+              label={option.label}
+            />
+          ))}
+        </Select>
+      </FormField>
+      {authMode === HelmAuthProvider.Basic && (
+        <>
+          <InputField
+            label="Username"
+            placeholder="Registry username"
+            value={c.auth?.basic?.username ?? ''}
+            onChange={(e) =>
+              set({
+                ...c,
+                provider: HelmAuthProvider.Basic,
+                auth: {
+                  ...c.auth,
+                  basic: {
+                    username: e.target.value,
+                    password: c.auth?.basic?.password ?? '',
+                  },
+                  bearer: undefined,
+                },
+              })
+            }
+          />
+          <InputField
+            label="Password / token"
+            hint="Leave blank when editing to keep the stored secret unless you are rotating it."
+            revealer
+            value={c.auth?.basic?.password ?? ''}
+            onChange={(e) =>
+              set({
+                ...c,
+                provider: HelmAuthProvider.Basic,
+                auth: {
+                  ...c.auth,
+                  basic: {
+                    username: c.auth?.basic?.username ?? '',
+                    password: e.target.value,
+                  },
+                  bearer: undefined,
+                },
+              })
+            }
+          />
+        </>
+      )}
+      {authMode === HelmAuthProvider.Bearer && (
+        <InputField
+          label="Bearer token"
+          hint="Leave blank when editing to keep the stored token unless you are rotating it."
+          revealer
+          value={c.auth?.bearer?.token ?? ''}
+          onChange={(e) =>
+            set({
+              ...c,
+              provider: HelmAuthProvider.Bearer,
+              auth: {
+                ...c.auth,
+                basic: undefined,
+                bearer: { token: e.target.value },
+              },
+            })
+          }
+        />
+      )}
+      <Accordion type="single">
+        <AccordionItem trigger="HTTP proxy (optional)">
+          <Flex
+            direction="column"
+            gap="medium"
+          >
+            <InputField
+              label="Proxy URL"
+              placeholder="http://proxy.example.com:8080"
+              value={c.auth?.proxy?.url ?? ''}
+              onChange={(e) =>
+                set({
+                  ...c,
+                  auth: {
+                    ...c.auth,
+                    proxy: e.target.value
+                      ? {
+                          url: e.target.value,
+                          noproxy: c.auth?.proxy?.noproxy ?? undefined,
+                        }
+                      : undefined,
+                  },
+                })
+              }
+            />
+            <InputField
+              label="No proxy"
+              hint="Comma-separated hosts or domains that should bypass the proxy."
+              placeholder="localhost,127.0.0.1,.svc,.cluster.local"
+              value={c.auth?.proxy?.noproxy ?? ''}
+              onChange={(e) =>
+                set({
+                  ...c,
+                  auth: {
+                    ...c.auth,
+                    proxy: c.auth?.proxy?.url
+                      ? {
+                          url: c.auth.proxy.url,
+                          noproxy: e.target.value || undefined,
+                        }
+                      : undefined,
+                  },
+                })
+              }
+            />
+          </Flex>
+        </AccordionItem>
+      </Accordion>
     </>
   )
 }

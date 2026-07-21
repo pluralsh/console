@@ -217,6 +217,31 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
 
       {:ok, _} = Jason.decode(body)
     end
+
+    test "it can generate a plural notification" do
+      svc = insert(:service)
+      insight = insert(:ai_insight, text: @text, summary: "service insight summary")
+      %{user: u, group: g} = insert(:group_member)
+      router = insert(:notification_router, events: ["service.insight"])
+      sink = insert(:notification_sink,
+        type: :plural,
+        notification_bindings: [%{group_id: g.id}],
+        configuration: %{plural: %{urgent: true}}
+      )
+      insert(:router_sink, router: router, sink: sink)
+      insert(:router_filter, router: router, service: svc)
+
+      event = %PubSub.ServiceInsight{item: {svc, insight}}
+      :ok = Notifications.handle_event(event)
+
+      notification =
+        Console.Schema.AppNotification.for_user(u.id)
+        |> Console.Repo.one()
+
+      assert notification.text =~ "We have a new insight into an issue with your service"
+      assert notification.text =~ svc.name
+      assert notification.text =~ "service insight summary"
+    end
   end
 
   describe "StackInsight" do

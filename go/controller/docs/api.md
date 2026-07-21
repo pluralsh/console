@@ -1979,6 +1979,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for requests to this Helm repository or OCI registry. |  | Optional: \{\} <br /> |
 | `basic` _[HelmRepositoryAuthBasic](#helmrepositoryauthbasic)_ | Basic specifies username/password authentication for repositories that support HTTP Basic Auth.<br />Commonly used with private Helm repositories, Harbor registries, and other traditional<br />repository managers that implement standard HTTP authentication. |  | Optional: \{\} <br /> |
 | `bearer` _[HelmRepositoryAuthBearer](#helmrepositoryauthbearer)_ | Bearer specifies token-based authentication for repositories that support Bearer tokens.<br />Used with modern container registries and repositories that implement OAuth2 or similar<br />token-based authentication schemes. |  | Optional: \{\} <br /> |
 | `aws` _[HelmRepositoryAuthAWS](#helmrepositoryauthaws)_ | Aws specifies AWS-specific authentication for Amazon ECR and other AWS-hosted repositories.<br />Supports both static credentials and IAM role-based authentication for secure access<br />to private repositories hosted in Amazon Web Services. |  | Optional: \{\} <br /> |
@@ -2115,6 +2116,7 @@ _Appears in:_
 
 
 _Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
 - [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
 

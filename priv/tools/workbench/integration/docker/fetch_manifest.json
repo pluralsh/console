@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Fetch a Docker/OCI image manifest for a repository tag.",
+  "properties": {
+    "repository_slug": {
+      "type": "string",
+      "description": "Repository slug within the configured registry, for example library/nginx, pluralsh/console, or my-team/my-image."
+    },
+    "tag": {
+      "type": "string",
+      "description": "Image tag or digest reference to fetch."
+    }
+  },
+  "required": ["repository_slug", "tag"],
+  "additionalProperties": false
+}
