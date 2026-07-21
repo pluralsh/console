@@ -146,4 +146,7 @@ USER 65532:65532
 
 WORKDIR /plural
 
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
+
 ENTRYPOINT ["/entrypoint.sh", "/agent-harness", "--working-dir=/plural"]

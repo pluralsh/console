@@ -51,3 +51,8 @@ RUN chmod +x /usr/local/bin/sentinel-harness
 RUN mkdir -p /plural && chown -R 65532:65532 /plural
 
 WORKDIR /plural
+
+USER 65532:65532
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1

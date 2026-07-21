@@ -21,9 +21,6 @@ WORKDIR /sentinel/terratest
 # Copy test files
 COPY deployment-operator/terratest ./
 
-# Switch to the nonroot user
-USER 65532:65532
-
 RUN go mod download
 
 ENTRYPOINT ["sentinel-harness", "--test-dir=/sentinel", "--output-dir=/plural"]
