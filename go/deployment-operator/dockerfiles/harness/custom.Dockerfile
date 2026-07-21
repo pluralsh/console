@@ -25,4 +25,7 @@ WORKDIR /plural
 
 ENV HELM_CACHE_HOME=/plural/.cache/helm
 
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
+
 ENTRYPOINT ["harness", "--working-dir=/plural"]
