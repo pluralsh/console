@@ -50,6 +50,23 @@ func (f *fakeConfigClient) Calls() int {
 	return f.calls
 }
 
+func TestReadyRemainsTrueWhenConfigIsStale(t *testing.T) {
+	client := &fakeConfigClient{resp: observabilityProto("http://prom", "http://elastic")}
+	provider := NewCachingProvider(client, 10*time.Millisecond)
+
+	if provider.Ready() {
+		t.Fatal("provider should not be ready before loading config")
+	}
+	if _, err := provider.GetConfig(context.Background()); err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	time.Sleep(15 * time.Millisecond)
+	if !provider.Ready() {
+		t.Fatal("provider should remain ready while it has a valid cached config")
+	}
+}
+
 func TestGetConfigDeduplicatesConcurrentColdStartRefresh(t *testing.T) {
 	client := &fakeConfigClient{
 		delay: 50 * time.Millisecond,
