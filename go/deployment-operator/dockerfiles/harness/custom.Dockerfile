@@ -13,7 +13,7 @@ RUN addgroup --gid 65532 nonroot && \
   adduser --uid 65532 --gid 65532 --home /home/nonroot nonroot && \
   chown -R 65532:65532 /usr/local/bin/harness
 
-RUN apt-get -y update && apt-get -y install curl unzip && \
+RUN apt-get -y update && apt-get -y install --no-install-recommends ca-certificates curl unzip && \
       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
       unzip awscliv2.zip && \
       ./aws/install
@@ -24,5 +24,8 @@ USER 65532:65532
 WORKDIR /plural
 
 ENV HELM_CACHE_HOME=/plural/.cache/helm
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
 
 ENTRYPOINT ["harness", "--working-dir=/plural"]

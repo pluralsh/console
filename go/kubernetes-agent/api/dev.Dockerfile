@@ -48,4 +48,23 @@ COPY api/main.go .
 COPY api/pkg ./pkg
 
 EXPOSE 8000 8001
+
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/home/nonroot" \
+    --shell "/sbin/nologin" \
+    --uid 65532 \
+    nonroot && \
+    mkdir -p /home/nonroot/.cache/go-build && \
+    chown -R 65532:65532 /workspace /go /home/nonroot
+
+ENV HOME=/home/nonroot \
+    GOCACHE=/home/nonroot/.cache/go-build
+
+USER 65532:65532
+
+HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8000/health >/dev/null || exit 1
+
 ENTRYPOINT ["air", "-c", ".air.toml", "--", "--insecure-bind-address=0.0.0.0", "--bind-address=0.0.0.0"]

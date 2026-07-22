@@ -60,7 +60,7 @@ RUN if [ "$OS_VARIANT" = "alpine" ]; then \
       apk update && apk upgrade --no-cache && \
       apk add --no-cache git build-base curl ca-certificates; \
     else \
-      apt-get update && apt-get install -y git build-essential curl ca-certificates; \
+      apt-get update && apt-get install -y --no-install-recommends git build-essential curl ca-certificates; \
       rm -rf "${RUSTUP_HOME}" "${CARGO_HOME}"; \
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}; \
     fi && \
@@ -88,7 +88,7 @@ ENV CLI_VERSION=v0.12.59
 
 COPY AGENT_VERSION AGENT_VERSION
 
-RUN apk update && apk add curl wget unzip
+RUN apk update && apk add --no-cache curl wget unzip
 RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION#v}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
   mv plural /usr/local/bin/plural && \
   # curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \

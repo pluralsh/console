@@ -14,11 +14,11 @@
 #
 
 root = "."
-tmp_dir = ".tmp"
+tmp_dir = "../.tmp/api"
 
 [build]
-  cmd = "go build -o .tmp/dashboard-api ."
-  bin = ".tmp/dashboard-api"
+  cmd = "go build -o ../.tmp/api/dashboard-api ."
+  bin = "../.tmp/api/dashboard-api"
   delay = 2000
   exclude_unchanged = false
   include_dir = ["pkg", "../common"]

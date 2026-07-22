@@ -86,5 +86,10 @@ COPY --from=builder /src/kubernetes-agent/hack/docker/entrypoint.debug.sh /entry
 # Environment variable for application flags
 ENV APP_FLAGS=""
 
+USER 65532:65532
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
+
 # Default to kas for backward compatibility
 ENTRYPOINT ["/entrypoint.sh"]
