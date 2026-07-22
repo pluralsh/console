@@ -86,6 +86,32 @@ export function WorkbenchJobActivity({
     )
   if (type === WorkbenchJobActivityType.User)
     return <ExpandableUserPrompt prompt={activity.prompt} />
+  if (type === WorkbenchJobActivityType.Memo)
+    return (
+      <Flex
+        gap="xsmall"
+        alignItems="center"
+        css={{ padding: `${spacing.xsmall}px 0` }}
+      >
+        <SimpleToolCall
+          content={textStream || result?.output || ''}
+          attributes={{ tool: { name: 'workbench_notes' } }}
+          isPending={isRunning}
+          customLabel={
+            <CaptionP
+              $color="text-xlight"
+              $shimmer={isRunning}
+            >
+              Memo{' '}
+              <SpanSC $color="text-light">
+                {prompt || result?.output || 'Updated workbench notes'}
+              </SpanSC>
+            </CaptionP>
+          }
+        />
+        {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
+      </Flex>
+    )
 
   return (
     <AccordionItem
@@ -181,12 +207,10 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {prompt && type !== WorkbenchJobActivityType.Memo && (
-          <JobActivityPrompt prompt={prompt} />
-        )}
+        {prompt && <JobActivityPrompt prompt={prompt} />}
         <WorkbenchJobActivityThoughts
           activityId={id}
-          skip={!isOpen || type === WorkbenchJobActivityType.Memo}
+          skip={!isOpen}
         />
         {textStream && (
           <Flex
