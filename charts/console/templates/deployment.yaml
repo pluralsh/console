@@ -8,6 +8,10 @@ metadata:
 {{ include "console.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  {{- if .Values.strategy }}
+  strategy:
+    {{- toYaml .Values.strategy | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: console

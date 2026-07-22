@@ -65,6 +65,9 @@ config :console,
   kas_dns: "https://kas.example.com",
   qps: 1_000,
   tarball_qps: 100,
+  cache_agent_qps: 50,
+  cache_agent_queue_limit: 10,
+  cache_agent_queue_shed: 5,
   nowatchers: false,
   default_project_name: "default",
   prom_plugins: [Console.Prom.Plugin],
@@ -122,7 +125,6 @@ config :console, Console.Guardian,
 
 config :console, Console.Repo,
   types: Console.PostgrexTypes,
-  queue_target: 1000,
   migration_timestamps: [type: :utc_datetime_usec]
 
 config :tzdata, :autoupdate, :disabled
