@@ -31,6 +31,7 @@ const encryptStorage = EncryptStorage.create(secretKey, { engine: 'noble' })
 
 if (localStorage.getItem(AUTH_STORAGE_VERSION_KEY) !== AUTH_STORAGE_VERSION) {
   legacyEncryptedAuthKeys.forEach((key) => encryptStorage.removeItem(key))
+  wipeRefreshToken()
   localStorage.setItem(AUTH_STORAGE_VERSION_KEY, AUTH_STORAGE_VERSION)
 }
 
