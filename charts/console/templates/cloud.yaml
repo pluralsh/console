@@ -94,7 +94,7 @@ spec:
   definition:
     indexPatterns:
       - "plrl-{{ .Values.cloud.instanceName }}-logs-*"
-    priority: 100
+    priority: 101
     template:
       settings:
         index:
