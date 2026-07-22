@@ -42,4 +42,14 @@ describe('auth storage', () => {
 
     expect(fetchToken()).toBeUndefined()
   })
+
+  it('expires incompatible auth tokens after the storage migration', async () => {
+    localStorage.setItem(AUTH_STORAGE_VERSION_KEY, '3')
+    localStorage.setItem('auth-token', 'legacy-ciphertext')
+
+    const { fetchToken } = await loadAuth()
+
+    expect(fetchToken()).toBeUndefined()
+    expect(localStorage.getItem('auth-token')).toBeNull()
+  })
 })

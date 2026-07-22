@@ -30,9 +30,19 @@ const secretKey =
 const encryptStorage = EncryptStorage.create(secretKey, { engine: 'noble' })
 
 if (localStorage.getItem(AUTH_STORAGE_VERSION_KEY) !== AUTH_STORAGE_VERSION) {
-  legacyEncryptedAuthKeys.forEach((key) => encryptStorage.removeItem(key))
+  legacyEncryptedAuthKeys.forEach((key) => localStorage.removeItem(key))
   wipeRefreshToken()
   localStorage.setItem(AUTH_STORAGE_VERSION_KEY, AUTH_STORAGE_VERSION)
+}
+
+export function getEncryptedAuthValue(key: string) {
+  try {
+    return encryptStorage.getItem(key)
+  } catch {
+    localStorage.removeItem(key)
+
+    return undefined
+  }
 }
 
 export function wipeToken() {
@@ -40,15 +50,11 @@ export function wipeToken() {
 }
 
 export function fetchToken() {
-  return encryptStorage.getItem(AUTH_TOKEN)
+  return getEncryptedAuthValue(AUTH_TOKEN)
 }
 
 export function setToken(token: string | null | undefined) {
   encryptStorage.setItem(AUTH_TOKEN, token || '')
-}
-
-export function getEncryptedAuthValue(key: string) {
-  return encryptStorage.getItem(key)
 }
 
 export function setEncryptedAuthValue(
