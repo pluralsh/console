@@ -387,7 +387,7 @@ func (s *ServiceReconciler) Poll(ctx context.Context) error {
 			logger.V(4).Info("enqueueing update for", "service", svc.Node.ID)
 			s.svcCache.Add(svc.Node.ID, svc.Node)
 			currentServices.Add(svc.Node.Name)
-			s.svcQueue.AddAfter(svc.Node.ID, utils.Jitter(15*time.Second))
+			s.svcQueue.AddAfter(svc.Node.ID, utils.Jitter(s.pollJitterWindow()))
 		}
 	}
 
@@ -489,6 +489,10 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 	dir, err := s.manifestCache.Fetch(svc)
 	if err != nil {
 		logger.Error(err, "failed to parse manifests", "service", svc.Name)
+		if common2.IsTransientFetchError(err) {
+			done = true
+			return ctrl.Result{}, nil
+		}
 		if isExpectedError(err) {
 			// mark as the expected error so that it won't get propagated to the API as a service error
 			err = plrlerrors.ErrExpected
@@ -614,4 +618,12 @@ func isExpectedError(err error) bool {
 		}
 	}
 	return false
+}
+
+func (s *ServiceReconciler) pollJitterWindow() time.Duration {
+	interval := s.GetPollInterval()()
+	if interval <= 0 {
+		return 15 * time.Second
+	}
+	return interval / 2
 }

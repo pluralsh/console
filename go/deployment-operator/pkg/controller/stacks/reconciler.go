@@ -135,7 +135,7 @@ func (r *StackReconciler) Poll(ctx context.Context) error {
 		for _, stack := range stacks {
 			logger.V(1).Info("sending update for", "stack run", stack.Node.ID)
 			r.stackCache.Add(stack.Node.ID, stack.Node)
-			r.stackQueue.AddAfter(stack.Node.ID, utils.Jitter(r.GetPollInterval()()))
+			r.stackQueue.AddAfter(stack.Node.ID, utils.Jitter(r.pollJitterWindow()))
 		}
 	}
 
@@ -149,6 +149,10 @@ func (r *StackReconciler) Reconcile(ctx context.Context, id string) (reconcile.R
 	if err != nil {
 		if clienterrors.IsNotFound(err) {
 			logger.Info("stack run already deleted", "id", id)
+			return reconcile.Result{}, nil
+		}
+		if common.IsTransientFetchError(err) {
+			logger.Error(err, fmt.Sprintf("transient fetch error for stack run: %s, ignoring for now", id))
 			return reconcile.Result{}, nil
 		}
 		logger.Error(err, fmt.Sprintf("failed to fetch stack run: %s, ignoring for now", id))
@@ -203,4 +207,12 @@ func (r *StackReconciler) GetRunResourceNamespace(jobSpec *batchv1.JobSpec) (nam
 	}
 
 	return
+}
+
+func (r *StackReconciler) pollJitterWindow() time.Duration {
+	interval := r.GetPollInterval()()
+	if interval <= 0 {
+		return 15 * time.Second
+	}
+	return interval / 2
 }
