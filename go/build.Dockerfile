@@ -18,7 +18,7 @@ RUN go mod download
 # Create nonroot user.
 RUN addgroup --gid 65532 nonroot && \
     adduser --uid 65532 --gid 65532 --disabled-password --gecos "" --home /home/nonroot nonroot && \
-    mkdir -p /home/nonroot/.cache && \
+    mkdir -p /home/nonroot/.cache /workspace/binaries && \
     chown -R 65532:65532 /workspace /go /home/nonroot
 
 ENV HOME=/home/nonroot \

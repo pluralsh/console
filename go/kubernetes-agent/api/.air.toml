@@ -14,8 +14,6 @@
 #
 
 root = "."
-# Keep generated files outside the API worktree, which may be bind-mounted read-only
-# or owned by a host user when Air runs as the nonroot container user.
 tmp_dir = "../.tmp/api"
 
 [build]
