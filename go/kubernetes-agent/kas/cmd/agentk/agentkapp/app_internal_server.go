@@ -33,7 +33,6 @@ func newInternalServer(log *zap.Logger, tp trace.TracerProvider, mp otelmetric.M
 
 	// Construct connection to internal gRPC server
 	conn, err := grpc.NewClient("passthrough:pipe", // nolint: contextcheck
-		grpc.WithSharedWriteBuffer(true),
 		grpc.WithContextDialer(listener.DialContext),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(grpctool2.RawCodec{})),
@@ -58,7 +57,6 @@ func newInternalServer(log *zap.Logger, tp trace.TracerProvider, mp otelmetric.M
 				otelgrpc.WithMessageEvents(otelgrpc.ReceivedEvents, otelgrpc.SentEvents),
 			)),
 			grpc.StatsHandler(grpctool2.ServerNoopMaxConnAgeStatsHandler{}),
-			grpc.SharedWriteBuffer(true),
 			grpc.ChainStreamInterceptor(
 				streamProm, // 1. measure all invocations
 				modagent2.StreamRpcApiInterceptor(factory), // 2. inject RPC API

@@ -340,7 +340,6 @@ func (a *App) constructKasConnection(ctx context.Context, tp trace.TracerProvide
 			Backoff:           backoff.DefaultConfig,
 			MinConnectTimeout: 20 * time.Second, // matches the default gRPC value.
 		}),
-		grpc.WithSharedWriteBuffer(true),
 		grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
 		grpc.WithUserAgent(userAgent),
 		// keepalive.ClientParameters must be specified at least as large as what is allowed by the

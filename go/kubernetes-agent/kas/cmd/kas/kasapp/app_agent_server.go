@@ -115,7 +115,6 @@ func newAgentServer(log *zap.Logger, cfg *kascfg.ConfigurationFile, srvApi modse
 		)),
 		grpc.StatsHandler(ssh),
 		grpc.StatsHandler(sh),
-		grpc.SharedWriteBuffer(true),
 		grpc.ChainStreamInterceptor(
 			streamProm, // 1. measure all invocations
 			modserver2.StreamAgentRpcApiInterceptor(factory), // 2. inject RPC API

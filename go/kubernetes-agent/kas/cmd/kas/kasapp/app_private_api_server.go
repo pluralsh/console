@@ -174,7 +174,6 @@ func newPrivateApiServerImpl(auxCtx context.Context, cfg *kascfg.ConfigurationFi
 		)),
 		grpc.StatsHandler(ssh),
 		grpc.StatsHandler(sh),
-		grpc.SharedWriteBuffer(true),
 		grpc.ChainStreamInterceptor(
 			streamProm, // 1. measure all invocations
 			modserver.StreamRpcApiInterceptor(factory),                              // 2. inject RPC API
@@ -205,7 +204,6 @@ func newKasPool(log *zap.Logger, errRep errz.ErrReporter, tp trace.TracerProvide
 	dialer func(context.Context, string) (net.Conn, error),
 	streamClientProm grpc.StreamClientInterceptor, unaryClientProm grpc.UnaryClientInterceptor) (grpctool2.PoolInterface, error) {
 	sharedPoolOpts := []grpc.DialOption{
-		grpc.WithSharedWriteBuffer(true),
 		// Default gRPC parameters are good, no need to change them at the moment.
 		// Specify them explicitly for discoverability.
 		// See https://github.com/grpc/grpc/blob/master/doc/connection-backoff.md.

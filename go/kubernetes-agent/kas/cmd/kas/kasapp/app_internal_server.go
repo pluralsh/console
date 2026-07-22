@@ -37,7 +37,6 @@ func newInternalServer(tp trace.TracerProvider, mp otelmetric.MeterProvider, p p
 			otelgrpc.WithPropagators(p),
 			otelgrpc.WithMessageEvents(otelgrpc.ReceivedEvents, otelgrpc.SentEvents),
 		)),
-		grpc.WithSharedWriteBuffer(true),
 		grpc.WithContextDialer(listener.DialContext),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithChainStreamInterceptor(
@@ -59,7 +58,6 @@ func newInternalServer(tp trace.TracerProvider, mp otelmetric.MeterProvider, p p
 				otelgrpc.WithMessageEvents(otelgrpc.ReceivedEvents, otelgrpc.SentEvents),
 			)),
 			grpc.StatsHandler(grpctool2.ServerNoopMaxConnAgeStatsHandler{}),
-			grpc.SharedWriteBuffer(true),
 			grpc.ChainStreamInterceptor(
 				modserver.StreamRpcApiInterceptor(factory), // 2. inject RPC API
 				grpctool2.StreamServerErrorReporterInterceptor(grpcServerErrorReporter),
