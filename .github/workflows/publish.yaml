@@ -229,8 +229,14 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
+      - name: update byok rapid
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console-rapid/Chart.yaml
       - name: helm-dependencies
-        run: make helm-dependencies
+        run: |
+          make helm-dependencies
+          make helm-dependencies-rapid
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:
