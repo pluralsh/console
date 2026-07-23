@@ -271,7 +271,7 @@ export function WorkbenchJobMemoGroup({
           ))}
         </Flex>
       </SimpleAccordion>
-      {!isExpanded && lastMemo && (
+      {!isExpanded && lastMemo && isJobRunning(lastMemo.status) && (
         <EaseIn currentKey={lastMemo.id}>
           <WorkbenchJobMemo
             activity={lastMemo}
