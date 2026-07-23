@@ -672,7 +672,7 @@ dex:
 
   config:
     # Set it to a valid URL
-    issuer: https://<your-console-fqdn>/dex
+    issuer: https://{your-console-fqdn}/dex
 
     # See https://dexidp.io/docs/storage/ for more options
     storage:
