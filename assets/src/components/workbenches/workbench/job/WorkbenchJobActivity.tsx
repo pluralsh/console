@@ -407,9 +407,7 @@ function WorkbenchJobActivityResult({
 const MemoGroupSC = styled.div(({ theme }) => ({
   width: '100%',
   minWidth: 0,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   borderRadius: theme.borderRadiuses.medium,
-  background: theme.colors['fill-one'],
 }))
 
 const MemoRowSC = styled.div(() => ({
