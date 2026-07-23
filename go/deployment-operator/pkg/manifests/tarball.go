@@ -14,7 +14,7 @@ import (
 const pluralDigestHeader = "x-plrl-digest"
 
 var (
-	timeout = 60 * time.Second
+	timeout = 10 * time.Second
 	client  = &http.Client{
 		Timeout: timeout,
 		Transport: &http.Transport{

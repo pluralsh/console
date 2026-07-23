@@ -22,6 +22,13 @@ type Cache[T any] struct {
 
 type Getter[T any] func(id string) (*T, error)
 
+type Store[T any] interface {
+	Get(id string) (*T, error)
+	Add(id string, resource *T)
+	Wipe()
+	Expire(id string)
+}
+
 func NewCache[T any](expiry time.Duration, clientGet Getter[T]) *Cache[T] {
 	return &Cache[T]{
 		cache:     cmap.New[*cacheLine[T]](),

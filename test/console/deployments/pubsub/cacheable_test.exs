@@ -106,6 +106,33 @@ defmodule Console.Deployments.PubSub.CacheableTest do
     end
   end
 
+  describe "WorkbenchJobCreated" do
+    test "caches chatbot messages by external id" do
+      external_id = "1730000000.000001"
+
+      job =
+        insert(:workbench_job,
+          chatbot_message:
+            build(:chatbot_message,
+              external_id: external_id,
+              external_parent_id: "1729999999.000001",
+              workbench_job: nil
+            )
+        )
+
+      job = Repo.preload(job, :chatbot_message)
+      msg = job.chatbot_message
+
+      expect(Console.Cache, :put, fn {:chatbot_msg, ^external_id}, ^msg, ttl: ttl ->
+        assert ttl == :timer.hours(24)
+        :ok
+      end)
+
+      event = %PubSub.WorkbenchJobCreated{item: job}
+      Cache.handle_event(event)
+    end
+  end
+
   describe "IssueWebhookCreated" do
     test "calls Console.Cache.delete with {:issue_webhook, external_id}" do
       %{external_id: ext_id} = hook = insert(:issue_webhook, provider: :linear)

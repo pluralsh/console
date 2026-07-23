@@ -3,8 +3,10 @@ defmodule Console.Schema.ChatbotMessage do
   alias Console.Schema.{ChatConnection, WorkbenchJob}
 
   schema "chatbot_messages" do
-    field :message, :binary
-    field :channel, :string
+    field :message,            :binary
+    field :channel,            :string
+    field :external_id,        :string
+    field :external_parent_id, :string
 
     belongs_to :chat_connection, ChatConnection
     belongs_to :workbench_job, WorkbenchJob
@@ -16,7 +18,7 @@ defmodule Console.Schema.ChatbotMessage do
     from(m in query, where: m.workbench_job_id == ^job_id)
   end
 
-  @valid ~w(message channel chat_connection_id workbench_job_id)a
+  @valid ~w(message channel chat_connection_id workbench_job_id external_id external_parent_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -153,7 +153,7 @@ type WaveProcessor struct {
 	onApplyCallback func(resource unstructured.Unstructured)
 
 	// svcCache is the discoveryCache used to get the service deployment for an agent.
-	svcCache *cache.Cache[console.ServiceDeploymentForAgent]
+	svcCache cache.Store[console.ServiceDeploymentForAgent]
 
 	// waveStatistics contains statistics about the wave that was processed.
 	// TODO: make it thread-safe
@@ -601,7 +601,7 @@ func WithWaveOnApply(onApply func(resource unstructured.Unstructured)) WaveProce
 	}
 }
 
-func WithWaveSvcCache(c *cache.Cache[console.ServiceDeploymentForAgent]) WaveProcessorOption {
+func WithWaveSvcCache(c cache.Store[console.ServiceDeploymentForAgent]) WaveProcessorOption {
 	return func(w *WaveProcessor) {
 		w.svcCache = c
 	}

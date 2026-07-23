@@ -32,6 +32,10 @@ disableAdditionalVolumes: false
 # replicaCount is the replica count for console deployment
 replicaCount: 2
 
+# strategy configures the main console Deployment strategy.
+# For rolling updates, set type to RollingUpdate and tune rollingUpdate.maxSurge/maxUnavailable.
+strategy: {}
+
 # homeDir is the prefix for the mount path for console-conf volume in console container. The actual config will go in {homeDir}/.plural
 homeDir: /home/console
 
@@ -71,6 +75,15 @@ console:
 
     # tarballQps configures the global QPS limit for digest and git tarball endpoints.
     tarballQps: 100
+
+    # cacheAgentQps configures the global QPS limit for pod-local cache agents.
+    cacheAgentQps: ~
+
+    # cacheAgentQueueLimit configures the global queue limit for pod-local cache agents.
+    cacheAgentQueueLimit: ~
+
+    # cacheAgentQueueShed configures the rate limit at which it will shed messages at the queues limit.
+    cacheAgentQueueShed: ~
 
     # dbPoolSize configures the Ecto database connection pool size.
     dbPoolSize: 50
