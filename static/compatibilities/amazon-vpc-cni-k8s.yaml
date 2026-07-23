@@ -3,12 +3,11 @@ git_url: https://github.com/aws/amazon-vpc-cni-k8s
 release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
 helm_repository_url: https://aws.github.io/eks-charts
 versions:
-- version: 1.22.3
+- version: 1.22.4
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
-  chart_version: 1.22.3
 - version: 1.22.1
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
@@ -48,8 +47,18 @@ versions:
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Reverted the CNI spec used by the bundled CNI config to 0.4.0 to maintain
+        compatibility with EKS 1.23 (v1.16.0 had moved to CNI spec 1.0.0)., 'In nftables
+        mode, increased support to up to 50 CIDRs.']
+    breaking_changes: ['Behavior change: the shipped CNI config/spec is reverted from
+        1.0.0 back to 0.4.0 for EKS 1.23 compatibility; if you rely on CNI spec 1.0.0
+        semantics, validate your CNI config/chain and cluster version expectations
+        during upgrade.']
   chart_version: 1.16.2
+  images: []
 - version: 1.16.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
   requirements: []
