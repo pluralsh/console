@@ -419,18 +419,10 @@ defmodule Console.Deployments.Settings do
   }
 
   @doc """
-  Fetches the issuer configuration from the issuer url
+  Fetches (and caches) the issuer configuration + jwks from the issuer url
   """
-  @decorate cacheable(
-              cache: @cache_adapter,
-              key: {:issuer_configuration, issuer},
-              opts: [ttl: :timer.minutes(60)]
-            )
-  def issuer_configuration(issuer) do
-    with {:ok, {conf, _}} <- Oidcc.ProviderConfiguration.load_configuration(issuer, @quirks),
-         {:ok, {jwks, _}} <- Oidcc.ProviderConfiguration.load_jwks(conf.jwks_uri),
-         do: {:ok, {conf, jwks}}
-  end
+  def issuer_configuration(issuer),
+    do: Console.OIDC.ProviderConfiguration.fetch(issuer, @quirks)
 
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs) do

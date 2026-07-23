@@ -33,14 +33,12 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.Reply do
   end
 
   def implement(%__MODULE__{tool: %WorkbenchTool{configuration: %Configuration{teams: %TeamsConnection{} = conn}}, text: text}) do
-    case reply_context() do
-      %ChatbotMessage{service_url: url, conversation_id: cid} when is_binary(url) and is_binary(cid) ->
-        case Connector.reply(conn, url, cid, text) do
-          {:ok, resp} -> Jason.encode(resp)
-          {:error, reason} -> {:error, reason}
-        end
-      _ ->
-        {:error, "no teams chat context is available for this job; use teams_post_channel_message with explicit ids instead"}
+    with %ChatbotMessage{service_url: url, conversation_id: cid} when is_binary(url) and is_binary(cid) <- reply_context(),
+         {:ok, resp} <- Connector.reply(conn, url, cid, text) do
+      Jason.encode(resp)
+    else
+      {:error, _} = err -> err
+      _ -> {:error, "no teams chat context is available for this job; use teams_post_channel_message with explicit ids instead"}
     end
   end
   def implement(%__MODULE__{}), do: {:error, "Microsoft Teams app registration is not configured for this workbench tool."}
