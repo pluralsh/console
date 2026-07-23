@@ -1,6 +1,5 @@
 import {
   AiSparkleOutlineIcon,
-  BotIcon,
   CatalogIcon,
   ChatOutlineIcon,
   ClusterIcon,
@@ -190,28 +189,6 @@ export function useCommands({
                   deps: [setFeatureFlag],
                 },
               ]),
-          ...(!featureFlags.WorkbenchChatbots
-            ? [
-                {
-                  id: 'enable-workbench-chatbots',
-                  label: 'Enable Workbench Chatbots',
-                  icon: BotIcon,
-                  callback: () => setFeatureFlag('WorkbenchChatbots', true),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
-          ...(featureFlags.WorkbenchChatbots
-            ? [
-                {
-                  id: 'disable-workbench-chatbots',
-                  label: 'Disable Workbench Chatbots',
-                  icon: BotIcon,
-                  callback: () => setFeatureFlag('WorkbenchChatbots', false),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
           ...(openServiceAccountImpersonation
             ? [
                 {
@@ -226,7 +203,7 @@ export function useCommands({
         ],
       },
     ],
-    [featureFlags, openServiceAccountImpersonation, setFeatureFlag]
+    [featureFlags.Edge, openServiceAccountImpersonation, setFeatureFlag]
   )
 
   const commands = useMemo(

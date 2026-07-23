@@ -6,9 +6,8 @@ import {
   PencilIcon,
 } from '@pluralsh/design-system'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { isEmpty } from 'lodash'
-import { PropsWithChildren, use, useMemo } from 'react'
+import { PropsWithChildren, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -36,7 +35,6 @@ export function WorkbenchSidePanel({
   onOpenToolsEdit: () => void
 }) {
   const navigate = useNavigate()
-  const { featureFlags } = use(FeatureFlagContext)
 
   const { data } = useWorkbenchTriggersSummaryQuery({
     variables: { id: workbenchId },
@@ -171,70 +169,68 @@ export function WorkbenchSidePanel({
             </ButtonSC>
           )}
         </SectionSC>
-        {featureFlags.WorkbenchChatbots && (
-          <SectionSC>
-            <HeaderSC>
-              <span>Chatbots</span>
-              {hasChatbots && (
-                <IconFrame
-                  clickable
-                  size="small"
-                  icon={<AddIcon size={12} />}
-                  tooltip="Add chatbot"
-                  onClick={() =>
-                    navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
-                  }
-                />
-              )}
-            </HeaderSC>
-            {hasChatbots ? (
-              <Flex
-                gap="xxsmall"
-                direction="column"
-              >
-                {chatbots.map((chatbot) => (
-                  <WorkbenchSidePanelEditRow
-                    key={chatbot.id}
-                    onClick={() =>
-                      navigate(
-                        getWorkbenchChatbotEditAbsPath({
-                          workbenchId,
-                          chatbotId: chatbot.id,
-                        })
-                      )
-                    }
-                  >
-                    <ItemIconContainerSC>
-                      <IconFrame
-                        icon={chatProviderConnectionIcon(
-                          chatbot.chatConnection?.type
-                        )}
-                        size="xsmall"
-                      />
-                    </ItemIconContainerSC>
-                    <ItemNameSC>
-                      {formatChatbotChannelLabel({
-                        type: chatbot.chatConnection?.type,
-                        channel: chatbot.channel,
-                      })}
-                    </ItemNameSC>
-                  </WorkbenchSidePanelEditRow>
-                ))}
-              </Flex>
-            ) : (
-              <ButtonSC
-                small
-                startIcon={<AddIcon size={12} />}
-                tertiary
+        <SectionSC>
+          <HeaderSC>
+            <span>Chatbots</span>
+            {hasChatbots && (
+              <IconFrame
+                clickable
+                size="small"
+                icon={<AddIcon size={12} />}
+                tooltip="Add chatbot"
                 onClick={() =>
                   navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
                 }
-              >
-                Add chatbot
-              </ButtonSC>
+              />
             )}
-          </SectionSC>
-        )}
+          </HeaderSC>
+          {hasChatbots ? (
+            <Flex
+              gap="xxsmall"
+              direction="column"
+            >
+              {chatbots.map((chatbot) => (
+                <WorkbenchSidePanelEditRow
+                  key={chatbot.id}
+                  onClick={() =>
+                    navigate(
+                      getWorkbenchChatbotEditAbsPath({
+                        workbenchId,
+                        chatbotId: chatbot.id,
+                      })
+                    )
+                  }
+                >
+                  <ItemIconContainerSC>
+                    <IconFrame
+                      icon={chatProviderConnectionIcon(
+                        chatbot.chatConnection?.type
+                      )}
+                      size="xsmall"
+                    />
+                  </ItemIconContainerSC>
+                  <ItemNameSC>
+                    {formatChatbotChannelLabel({
+                      type: chatbot.chatConnection?.type,
+                      channel: chatbot.channel,
+                    })}
+                  </ItemNameSC>
+                </WorkbenchSidePanelEditRow>
+              ))}
+            </Flex>
+          ) : (
+            <ButtonSC
+              small
+              startIcon={<AddIcon size={12} />}
+              tertiary
+              onClick={() =>
+                navigate(getWorkbenchChatbotCreateAbsPath(workbenchId))
+              }
+            >
+              Add chatbot
+            </ButtonSC>
+          )}
+        </SectionSC>
         <SectionSC>
           <HeaderSC>
             <span>Cron schedules</span>

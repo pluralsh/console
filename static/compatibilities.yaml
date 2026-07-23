@@ -178,6 +178,17 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.63.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.63.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.3',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.1',
+      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.63.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260720-39d457d26c-master']
   - version: 1.62.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -10639,12 +10650,11 @@ addons:
   release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
   helm_repository_url: https://aws.github.io/eks-charts
   versions:
-  - version: 1.22.3
+  - version: 1.22.4
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.22.3
   - version: 1.22.1
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -10684,8 +10694,18 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Reverted the CNI spec used by the bundled CNI config to 0.4.0 to
+          maintain compatibility with EKS 1.23 (v1.16.0 had moved to CNI spec 1.0.0).,
+        'In nftables mode, increased support to up to 50 CIDRs.']
+      breaking_changes: ['Behavior change: the shipped CNI config/spec is reverted
+          from 1.0.0 back to 0.4.0 for EKS 1.23 compatibility; if you rely on CNI
+          spec 1.0.0 semantics, validate your CNI config/chain and cluster version
+          expectations during upgrade.']
     chart_version: 1.16.2
+    images: []
   - version: 1.16.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
     requirements: []
@@ -25112,22 +25132,22 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.0.7
+  - version: 4.0.8
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ["Release notes provided for v4.0.2 and v4.0.7 are \u201CQuick Start\u201D\
-          \ boilerplate (install/CLI download instructions) and do not enumerate feature-level\
-          \ changes between these patch versions.", 'Operationally, v4.0.7 updates
-          the controller/server manifests (install.yaml) and CLI binaries to the v4.0.7
-          tag; treat it as a patch upgrade within 4.0.x.']
+      features: [Release notes provided for v4.0.8 and v4.0.2 mostly include installation/asset
+          info and pointers to the blog/changelog rather than enumerated feature changes.
+          No concrete new features between 4.0.2 and 4.0.8 are listed in the provided
+          notes.]
       breaking_changes: [No breaking changes are listed in the provided notes; they
-          only point to the upstream upgrading guide and main CHANGELOG for details.]
-    chart_version: 1.0.20
-    images: ['quay.io/argoproj/argocli:v4.0.7', 'quay.io/argoproj/workflow-controller:v4.0.7',
+          direct you to consult the upstream upgrading guide and CHANGELOG for breaking/known
+          issues. Treat this as 'unknown from provided data' and verify before upgrading.]
+    chart_version: 1.0.21
+    images: ['quay.io/argoproj/argocli:v4.0.8', 'quay.io/argoproj/workflow-controller:v4.0.8',
       'registry.k8s.io/kubectl:v1.36.2']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']
@@ -28975,63 +28995,60 @@ addons:
   helm_repository_url: https://kubescape.github.io/helm-charts
   helm_values: clusterName=example,account=example
   versions:
-  - version: 1.40.2
+  - version: 1.40.3
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm values / behavior changes to review\n\n- **New/changed\
-        \ Grype offline DB CronJob knobs** (chart 1.40.2):\n  - **CronJob schedule\
-        \ is now configurable** via `values.yaml`.\n  - **CronJob history limits are\
-        \ now configurable** via `values.yaml`.\n  - **A dedicated ServiceAccount\
-        \ is enforced/used** for the `grype-offline-db` components.\n\n- **grype-offline-db\
-        \ health probes added** (chart 1.40.2): liveness/readiness probes are now\
-        \ defined for the `grype-offline-db` Deployment (may affect clusters with\
-        \ strict probe/PSA policies or if endpoints are slow to become ready).\n\n\
-        - **kubevuln tmp-dir PVC rendering fix when disabled** (chart 1.40.2): if\
-        \ you previously disabled the tmp-dir PVC and had template/render issues,\
-        \ this should now work as expected.\n\n- **Certificate strategy hook changed\
-        \ to initContainer** (chart 1.40.2): any previous reliance on Helm hooks ordering/behavior\
-        \ for certificate strategy may change; review any customizations around cert\
-        \ provisioning.\n\n- **Service discovery components removed** (chart 1.40.2):\
-        \ if you previously enabled/relied on chart-managed service-discovery/sidecar\
-        \ behavior, verify the new model (services are now retrieved from the API\
-        \ in upstream components) and remove any values that referenced the old discovery\
-        \ components.\n"
-      chart_updates: [Removed redundant `GOMAXPROCS` setting from templates (1.40.0).,
-        Added ArgoCD GitOps support for Kubescape Helm (1.40.0)., Added artifact provenance
-          attestation for Helm chart releases (1.40.0)., Set `GOMEMLIMIT` to ~80%
-          of memory limit for node-agent + kubevuln (1.40.0) and later improved autoscaler
-          computation per node group in operator (1.40.0)., Extended rules CRD with
-          `profileDataRequired` for rule-aware profile projection (1.40.0)., Replaced
-          host sensor with node-agent sensing (1.40.0)., Ensured `grype-offline-db`
-          uses a dedicated ServiceAccount (1.40.2)., Made `grype-offline-db` CronJob
-          schedule and history limits configurable (1.40.2)., Added liveness/readiness
-          probes to `grype-offline-db` deployment (1.40.2)., Fixed kubevuln tmp-dir
-          PVC template rendering when disabled (1.40.2)., Removed service discovery
-          components from the chart (1.40.2)., Changed certificate strategy from Helm
-          hook to initContainer (1.40.2).]
-      features: [ArgoCD/GitOps-oriented Helm support was added to ease managing Kubescape
-          via GitOps workflows., Rule-aware profile projection support was introduced
-          by adding `profileDataRequired` to the rules CRD and corresponding node-agent
-          behavior., 'Resource/memory tuning improvements: chart sets `GOMEMLIMIT`
-          based on container limits (and operator autoscaler computes it per node
-          group), reducing OOM risk and improving performance.', Service discovery
-          was simplified by removing sidecar/discovery components; services are retrieved
-          from the API in the Kubescape stack., Kubescape CLI added support for TLS
-          key configuration via env vars and introduced an in-cluster ControlInput
-          CRD for control configuration.]
-      breaking_changes: ['Service discovery components/sidecars were removed; if your
-          deployment depended on the old service-discovery sidecar or chart-managed
-          discovery resources, you must validate the new API-based discovery path
-          and adjust any custom values/manifests.', 'Certificate strategy behavior
-          changed from a Helm hook to an initContainer; if you depended on hook timing
-          or had hook-related policies, re-validate startup ordering and any custom
-          certificate handling.', 'Host sensor was replaced with node-agent sensing
-          (introduced in 1.40.0); clusters relying on the old host-sensor model should
-          verify node-agent permissions, DaemonSet behavior, and expected telemetry.']
-    chart_version: 1.40.2
-    images: []
+      helm_changes: "## Helm values / deployment behavior changes to review\n\n- **Kubernetes\
+        \ version requirement**: chart now **requires Kubernetes >= 1.28** via a `kubeVersion`\
+        \ guard.\n- **OpenTelemetry**:\n  - OTEL is now **scoped to node-agent** via\
+        \ an `otelUrl` setting.\n  - The chart **drops the bundled `otel-collector`**\
+        \ (if you relied on the chart to deploy a collector, you must run your own\
+        \ collector and point node-agent at it).\n- **Prometheus monitoring**: **prometheus-exporter\
+        \ `ServiceMonitor` is decoupled** from the main kubescape `ServiceMonitor`\
+        \ (verify your monitoring setup still discovers/scrapes what you expect).\n\
+        - **New/updated config knobs (likely values.yaml additions)**:\n  - `kubevuln`:\
+        \ `proxyRegistryMap` (cluster config), `cveMatchingMode`, `trustedVendors`.\n\
+        \  - `node-agent`: `alertDeduplication.bypass` exposed.\n  - **Capabilities**:\
+        \ `capabilities.remediation` introduced as **opt-in**, with **gated mutating\
+        \ RBAC** (enabling it changes RBAC and allows remediation actions).\n- **Air-gapped\
+        \ / offline**: fixes to **offline kubescape config mount** and **keep-local\
+        \ scan defaults**; re-validate any custom offline mounts/paths.\n- **Autoscaler/node\
+        \ targeting**: node-agent targeting updated to include **label-less nodes**\
+        \ (affinity `DoesNotExist`); also mount guards aligned for the operator node-agent\
+        \ autoscaler.\n"
+      chart_updates: [Enables/ships **CEL admission rules** support in the operator
+          and adds **CEL validation** to `SecurityException` CRDs (plus a CEL rule
+          tweak for GitOps reconcilers using `oldSelf` semantics)., 'Synchronizer
+          now syncs additional resource types, including **ServiceAccounts**, **ContainerProfiles**,
+          and registers **AISandboxHeartbeats httpEndpoint** resource.', 'Node-agent
+          GKE Autopilot allowlist: default bumped to **1.40-v2**, plus drift-gating
+          tooling and optional **AllowlistSynchronizer** install when enabled.', 'Storage:
+          pod now restarts on storage config changes (to apply config reliably).',
+        'Label hygiene: sanitizes `''+''` in `app.kubernetes.io/version` label to
+          comply with label constraints.']
+      features: [Operator can run **CRD-driven CEL admission rules** (including async
+          validation) and chart enables this capability., '`SecurityException` CRDs
+          gain **CEL validation**, improving early rejection of invalid exceptions;
+          operator also watches exceptions and can rescan on change/expiry.', '**Opt-in
+          remediation capability** (`capabilities.remediation`) with the required
+          mutating RBAC gates.', 'Kubevuln gains **registry/proxy mapping and matching
+          controls** (`proxyRegistryMap`, `cveMatchingMode`, `trustedVendors`) to
+          tune vuln matching in enterprise registries.', Node-agent OTEL improvements
+          and config exposure (notably `alertDeduplication.bypass`) plus better scheduling
+          behavior on nodes missing grouping labels., 'Synchronizer expands what it
+          syncs (ServiceAccounts, ContainerProfiles) and adds optional **Kafka backend**
+          support (component-level).']
+      breaking_changes: [Chart enforces **Kubernetes >= 1.28**; installs/upgrades
+          will fail on older clusters until the cluster is upgraded., 'Chart **no
+          longer bundles an OpenTelemetry collector**; if you depended on it, you
+          must deploy/operate your own OTEL collector and configure node-agent to
+          use it via `otelUrl`.']
+    chart_version: 1.40.3
+    images: ['quay.io/kubescape/http-request:v0.2.20', 'quay.io/kubescape/kubescape:v4.0.11',
+      'quay.io/kubescape/kubevuln:v0.3.159', 'quay.io/kubescape/node-agent:v0.3.158',
+      'quay.io/kubescape/operator:v0.2.159', 'quay.io/kubescape/storage:v0.0.297']
   - version: 1.40.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []

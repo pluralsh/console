@@ -65,7 +65,7 @@ type Supervisor struct {
 	started            bool
 	client             dynamic.Interface
 	discoveryCache     discoverycache.Cache
-	svcCache           *cache.Cache[console.ServiceDeploymentForAgent]
+	svcCache           cache.Store[console.ServiceDeploymentForAgent]
 	statusSynchronizer StatusSynchronizer
 	store              store.Store
 
@@ -88,7 +88,7 @@ type Supervisor struct {
 }
 
 func NewSupervisor(client dynamic.Interface, store store.Store, statusSynchronizer StatusSynchronizer,
-	discoveryCache discoverycache.Cache, svcCache *cache.Cache[console.ServiceDeploymentForAgent], options ...Option) *Supervisor {
+	discoveryCache discoverycache.Cache, svcCache cache.Store[console.ServiceDeploymentForAgent], options ...Option) *Supervisor {
 	s := &Supervisor{
 		client:                        client,
 		statusSynchronizer:            statusSynchronizer,

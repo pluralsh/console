@@ -1,5 +1,5 @@
 defmodule Console.Pipelines.AI.Service.Pipeline do
-  use Console.Pipelines.Consumer
+  use Console.Pipelines.Consumer, demand: 20
   import Console.Pipelines.AI.Base
   alias Console.PubSub
 

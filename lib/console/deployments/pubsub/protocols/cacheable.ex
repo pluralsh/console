@@ -28,6 +28,17 @@ defimpl Console.PubSub.Cacheable, for: [
   def cache(_), do: :ok
 end
 
+defimpl Console.PubSub.Cacheable, for: Console.PubSub.WorkbenchJobCreated do
+  alias Console.Schema.{WorkbenchJob, ChatbotMessage}
+
+  def cache(%@for{item: %WorkbenchJob{chatbot_message: %ChatbotMessage{} = msg}}),
+    do: {:set, {:chatbot_msg, cache_id(msg)}, msg, ttl: :timer.hours(24)}
+  def cache(_), do: :ok
+
+  defp cache_id(%ChatbotMessage{external_id: id}) when is_binary(id), do: id
+  defp cache_id(%ChatbotMessage{id: id}), do: id
+end
+
 defimpl Console.PubSub.Cacheable, for: [
   Console.PubSub.IssueWebhookCreated,
   Console.PubSub.IssueWebhookUpdated,

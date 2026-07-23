@@ -30,8 +30,8 @@ const (
 	defaultProbeAddress   = ":9001"
 	defaultMetricsAddress = ":8000"
 
-	defaultWorkqueueBaseDelay         = "5ms"
-	defaultWorkqueueBaseDelayDuration = 5 * time.Millisecond
+	defaultWorkqueueBaseDelay         = "1s"
+	defaultWorkqueueBaseDelayDuration = time.Second
 
 	defaultWorkqueueMaxDelay         = "1000s"
 	defaultWorkqueueMaxDelayDuration = 1000 * time.Second

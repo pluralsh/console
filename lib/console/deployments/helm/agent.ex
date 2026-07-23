@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Helm.Agent do
   use GenServer, restart: :temporary
+  import Console.Deployments.Git.Agent, only: [rate_limited: 2]
   alias Console.Repo
   alias Console.Deployments.Git
   alias Console.Deployments.Helm.{AgentCache, Discovery, Supervisor}
@@ -21,7 +22,8 @@ defmodule Console.Deployments.Helm.Agent do
          _ <- touch(pid, line) do
       {:ok, opener(pid, f), d, i}
     else
-      _ -> GenServer.call(pid, {:fetch, chart, vsn}, @timeout)
+      _ ->
+        rate_limited({:helm, pid}, fn -> GenServer.call(pid, {:fetch, chart, vsn}, @timeout) end)
     end
   end
 
@@ -32,7 +34,8 @@ defmodule Console.Deployments.Helm.Agent do
          _ <- touch(pid, line) do
       {:ok, d}
     else
-      _ -> GenServer.call(pid, {:digest, chart, vsn}, @timeout)
+      _ ->
+        rate_limited({:helm, pid}, fn -> GenServer.call(pid, {:digest, chart, vsn}, @timeout) end)
     end
   end
 

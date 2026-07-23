@@ -20,17 +20,14 @@ const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
   Edge: boolean
-  WorkbenchChatbots: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
-  WorkbenchChatbots: false,
 }
 
 const FEATURE_FLAG_LABELS: Record<keyof FeatureFlags, string> = {
   Edge: 'Edge',
-  WorkbenchChatbots: 'Workbench Chatbots',
 }
 
 export const FeatureFlagContext = createContext<{
@@ -79,7 +76,6 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
         }}
       >
         {curType === 'Edge' && <EdgeBodyContent />}
-        {curType === 'WorkbenchChatbots' && <WorkbenchChatbotsBodyContent />}
       </FeatureFlagConfirmationModal>
       <Toast
         show={showToast}
@@ -174,13 +170,4 @@ function EdgeBodyContent() {
 
 function featureFlagLabel(type: keyof FeatureFlags | null) {
   return type ? FEATURE_FLAG_LABELS[type] : ''
-}
-
-function WorkbenchChatbotsBodyContent() {
-  return (
-    <span>
-      <strong>Workbench Chatbots</strong> is an experimental feature that lets
-      chat platforms trigger workbench runs.
-    </span>
-  )
 }

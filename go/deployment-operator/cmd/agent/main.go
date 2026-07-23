@@ -50,6 +50,7 @@ import (
 	deploymentsv1alpha1 "github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
 )
 
 var (
@@ -143,7 +144,8 @@ func main() {
 
 	statusSynchronizer := streamline.NewStatusSynchronizer(extConsoleClient, args.ComponentShaCacheTTL())
 
-	svcCache := pollycache.NewCache[console.ServiceDeploymentForAgent](args.ControllerCacheTTL(),
+	svcCache := pollycache.NewDynamicCache[console.ServiceDeploymentForAgent](
+		service.ControllerCacheTTLFunc(args.ControllerCacheTTL(), args.PollInterval()),
 		func(id string) (*console.ServiceDeploymentForAgent, error) {
 			return extConsoleClient.GetService(id)
 		})
@@ -273,7 +275,7 @@ func runDiscoveryManagerOrDie(ctx context.Context, cache discoverycache.Cache) {
 
 func runSynchronizerSupervisorOrDie(ctx context.Context, dynamicClient dynamic.Interface, store store.Store,
 	statusSynchronizer streamline.StatusSynchronizer, discoveryCache discoverycache.Cache,
-	namespaceCache streamline.NamespaceCache, svcCache *pollycache.Cache[console.ServiceDeploymentForAgent]) *streamline.Supervisor {
+	namespaceCache streamline.NamespaceCache, svcCache pollycache.Store[console.ServiceDeploymentForAgent]) *streamline.Supervisor {
 	now := time.Now()
 	supervisor := streamline.NewSupervisor(dynamicClient,
 		store,

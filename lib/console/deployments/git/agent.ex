@@ -18,7 +18,6 @@ defmodule Console.Deployments.Git.Agent do
 
   @poll :timer.seconds(120)
   @timeout :timer.seconds(10)
-  @limit 50
   @limit_interval :timer.seconds(1)
 
   defmodule State, do: defstruct [:git, :cache, :last_pull, :url]
@@ -269,14 +268,39 @@ defmodule Console.Deployments.Git.Agent do
 
   defp touch(pid, line), do: send(pid, {:touch, line})
 
-  defp rate_limited(key, fun) when is_function(fun, 0) do
-    :erlang.term_to_binary(key)
-    |> Hammer.check_rate(@limit_interval, @limit)
-    |> case do
-      {:allow, _} -> fun.()
-      {:deny, _} -> {:error, :rate_limited}
+  @doc false
+  def rate_limited({_, pid} = key, fun) when is_function(fun, 0) and is_pid(pid) do
+    hammer_key = :erlang.term_to_binary(key)
+    with {:allow, _} <- Hammer.check_rate(hammer_key, @limit_interval, cache_agent_qps()),
+         {:q, :ok} <- {:q, queue_limit(key, pid)} do
+      fun.()
+    else
+      {:deny, _} ->
+        Logger.warning "rate limiting git/helm agent fetch"
+        {:error, :rate_limited}
+      {:q, _} ->
+        Logger.warning "rate limiting git/helm agent fetch due to message queue length"
+        {:error, :rate_limited}
     end
   end
+
+  defp queue_limit(key, pid) when is_pid(pid) do
+    lim = cache_agent_queue_limit()
+    shed = cache_agent_queue_shed()
+    case Process.info(pid, :message_queue_len) do
+      {_, ^lim} ->
+        case Hammer.check_rate(:erlang.term_to_binary({:shed, key}), @limit_interval, shed) do
+          {:allow, _} -> :ok
+          {:deny, _} -> :error
+        end
+      {_, len} when len < lim -> :ok
+      _ -> :error
+    end
+  end
+
+  defp cache_agent_queue_limit(), do: Console.conf(:cache_agent_queue_limit)
+  defp cache_agent_queue_shed(), do: Console.conf(:cache_agent_queue_shed)
+  defp cache_agent_qps(), do: Console.conf(:cache_agent_qps)
 
   defp refresh(%GitRepository{health: :pullable} = git, cache), do: Cache.refresh(%{cache | git: git})
   defp refresh(_, cache), do: cache

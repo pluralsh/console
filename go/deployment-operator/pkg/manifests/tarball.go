@@ -14,7 +14,7 @@ import (
 const pluralDigestHeader = "x-plrl-digest"
 
 var (
-	timeout = 60 * time.Second
+	timeout = 10 * time.Second
 	client  = &http.Client{
 		Timeout: timeout,
 		Transport: &http.Transport{
@@ -46,6 +46,7 @@ func GetReader(url, token string) (io.ReadCloser, http.Header, error) {
 	}
 	req.Header.Add("Authorization", "Token "+token)
 
+	var lastErr error
 	for i := 0; i < 3; i++ {
 		resp, header, retriable, err := doRequest(req)
 		if err != nil {
@@ -53,13 +54,14 @@ func GetReader(url, token string) (io.ReadCloser, http.Header, error) {
 				return nil, nil, err
 			}
 
+			lastErr = err
 			time.Sleep(time.Duration(50*(i+1)) * time.Millisecond)
 			continue
 		}
 
 		return resp, header, nil
 	}
-	return nil, nil, fmt.Errorf("could not fetch manifest, retries exhaused: %w", err)
+	return nil, nil, fmt.Errorf("could not fetch manifest, retries exhausted: %w", lastErr)
 }
 
 func doRequest(req *http.Request) (io.ReadCloser, http.Header, bool, error) {

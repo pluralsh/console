@@ -10,10 +10,14 @@ defmodule Console.Chat.Impl.Slack do
 
   @limit 1000
 
-  def handle_event(event, %{"ts" => ts, "text" => text, "channel" => channel}, %Slack.Bot{user_id: id} = bot) do
+  def handle_event(
+    event,
+    %{"ts" => ts, "text" => text, "channel" => channel} = message,
+    %Slack.Bot{user_id: id} = bot
+  ) do
     Logger.info("incoming slack #{event}: #{text}")
     case String.contains?(text, "<@#{id}>") do
-      true -> spawn_job(ts, text, channel, bot)
+      true -> spawn_job(message, ts, text, channel, bot)
       false -> :ok
     end
   end
@@ -53,16 +57,20 @@ defmodule Console.Chat.Impl.Slack do
     ]
   end
 
-  defp spawn_job(ts, text, channel, %Slack.Bot{assigns: %{conn: %ChatConnection{} = conn}, token: token}) do
+  defp spawn_job(message, ts, text, channel, %Slack.Bot{assigns: %{conn: %ChatConnection{} = conn}, token: token}) do
     with {:ok, name} <- fetch_channel(channel, token),
-         {:ok, _} <- Utils.handle_mention(%Reference{id: ts, text: text}, %Reference{id: channel, text: name}, conn) do
+         {:ok, _} <- Utils.handle_mention(
+                      %Reference{id: ts, text: text, parent_id: parent_id(message)},
+                      %Reference{id: channel, text: name},
+                      conn
+                    ) do
       :ok
     else
       :ok -> :ok
       err -> Logger.error("failed to spawn job: #{inspect(err)}")
     end
   end
-  defp spawn_job(_, _, _, _), do: :ok
+  defp spawn_job(_, _, _, _, _), do: :ok
 
   @decorate cacheable(cache: @cache_adapter, key: {:slack_channel, id}, opts: [ttl: @ttl])
   defp fetch_channel(id, token) do
@@ -83,4 +91,8 @@ defmodule Console.Chat.Impl.Slack do
     end
   end
   defp filter(channels, _), do: channels
+
+  defp parent_id(%{"thread_ts" => thread_ts, "ts" => ts})
+    when is_binary(thread_ts) and thread_ts != ts, do: thread_ts
+  defp parent_id(_), do: nil
 end

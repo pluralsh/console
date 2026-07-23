@@ -13,7 +13,7 @@ import (
 
 type socketPublisher struct {
 	svcQueueGetter func() workqueue.TypedRateLimitingInterface[string]
-	svcCache       *cache.Cache[console.ServiceDeploymentForAgent]
+	svcCache       cache.Store[console.ServiceDeploymentForAgent]
 	manCache       *manifests.ManifestCache
 }
 

@@ -37,7 +37,7 @@ type StackReconciler struct {
 	k8sClient     ctrlclient.Client
 	scheme        *runtime.Scheme
 	stackQueue    workqueue.TypedRateLimitingInterface[string]
-	stackCache    *cache.Cache[console.StackRunMinimalFragment]
+	stackCache    cache.Store[console.StackRunMinimalFragment]
 	namespace     string
 	consoleURL    string
 	deployToken   string
@@ -50,7 +50,7 @@ func NewStackReconciler(consoleClient client.Client, k8sClient ctrlclient.Client
 		k8sClient:     k8sClient,
 		scheme:        scheme,
 		stackQueue:    workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
-		stackCache: cache.NewCache[console.StackRunMinimalFragment](refresh, func(id string) (*console.StackRunMinimalFragment, error) {
+		stackCache: cache.NewDynamicCache[console.StackRunMinimalFragment](ControllerCacheTTLFunc(refresh, pollInterval), func(id string) (*console.StackRunMinimalFragment, error) {
 			return consoleClient.GetStackRun(id)
 		}),
 		consoleURL:   consoleURL,
@@ -80,10 +80,7 @@ func (r *StackReconciler) Shutdown() {
 
 func (r *StackReconciler) GetPollInterval() func() time.Duration {
 	return func() time.Duration {
-		if stackPollInterval := pkgcommon.GetConfigurationManager().GetStackPollInterval(); stackPollInterval != nil {
-			return *stackPollInterval
-		}
-		return r.pollInterval
+		return EffectivePollInterval(r.pollInterval)
 	}
 }
 
@@ -135,7 +132,7 @@ func (r *StackReconciler) Poll(ctx context.Context) error {
 		for _, stack := range stacks {
 			logger.V(1).Info("sending update for", "stack run", stack.Node.ID)
 			r.stackCache.Add(stack.Node.ID, stack.Node)
-			r.stackQueue.AddAfter(stack.Node.ID, utils.Jitter(r.GetPollInterval()()))
+			r.stackQueue.AddAfter(stack.Node.ID, utils.Jitter(r.pollJitterWindow()))
 		}
 	}
 
@@ -149,6 +146,10 @@ func (r *StackReconciler) Reconcile(ctx context.Context, id string) (reconcile.R
 	if err != nil {
 		if clienterrors.IsNotFound(err) {
 			logger.Info("stack run already deleted", "id", id)
+			return reconcile.Result{}, nil
+		}
+		if common.IsTransientFetchError(err) {
+			logger.Error(err, fmt.Sprintf("transient fetch error for stack run: %s, ignoring for now", id))
 			return reconcile.Result{}, nil
 		}
 		logger.Error(err, fmt.Sprintf("failed to fetch stack run: %s, ignoring for now", id))
@@ -203,4 +204,25 @@ func (r *StackReconciler) GetRunResourceNamespace(jobSpec *batchv1.JobSpec) (nam
 	}
 
 	return
+}
+
+func (r *StackReconciler) pollJitterWindow() time.Duration {
+	interval := r.GetPollInterval()()
+	if interval <= 0 {
+		return 15 * time.Second
+	}
+	return interval / 2
+}
+
+func EffectivePollInterval(defaultInterval time.Duration) time.Duration {
+	if stackPollInterval := pkgcommon.GetConfigurationManager().GetStackPollInterval(); stackPollInterval != nil {
+		return *stackPollInterval
+	}
+	return defaultInterval
+}
+
+func ControllerCacheTTLFunc(baseTTL, defaultPollInterval time.Duration) func() time.Duration {
+	return func() time.Duration {
+		return common.ControllerCacheTTL(baseTTL, EffectivePollInterval(defaultPollInterval))
+	}
 }
