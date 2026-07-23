@@ -37,7 +37,7 @@ type StackReconciler struct {
 	k8sClient     ctrlclient.Client
 	scheme        *runtime.Scheme
 	stackQueue    workqueue.TypedRateLimitingInterface[string]
-	stackCache    *cache.Cache[console.StackRunMinimalFragment]
+	stackCache    cache.Store[console.StackRunMinimalFragment]
 	namespace     string
 	consoleURL    string
 	deployToken   string
@@ -50,7 +50,7 @@ func NewStackReconciler(consoleClient client.Client, k8sClient ctrlclient.Client
 		k8sClient:     k8sClient,
 		scheme:        scheme,
 		stackQueue:    workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
-		stackCache: cache.NewCache[console.StackRunMinimalFragment](refresh, func(id string) (*console.StackRunMinimalFragment, error) {
+		stackCache: cache.NewDynamicCache[console.StackRunMinimalFragment](ControllerCacheTTLFunc(refresh, pollInterval), func(id string) (*console.StackRunMinimalFragment, error) {
 			return consoleClient.GetStackRun(id)
 		}),
 		consoleURL:   consoleURL,
@@ -80,10 +80,7 @@ func (r *StackReconciler) Shutdown() {
 
 func (r *StackReconciler) GetPollInterval() func() time.Duration {
 	return func() time.Duration {
-		if stackPollInterval := pkgcommon.GetConfigurationManager().GetStackPollInterval(); stackPollInterval != nil {
-			return *stackPollInterval
-		}
-		return r.pollInterval
+		return EffectivePollInterval(r.pollInterval)
 	}
 }
 
@@ -215,4 +212,17 @@ func (r *StackReconciler) pollJitterWindow() time.Duration {
 		return 15 * time.Second
 	}
 	return interval / 2
+}
+
+func EffectivePollInterval(defaultInterval time.Duration) time.Duration {
+	if stackPollInterval := pkgcommon.GetConfigurationManager().GetStackPollInterval(); stackPollInterval != nil {
+		return *stackPollInterval
+	}
+	return defaultInterval
+}
+
+func ControllerCacheTTLFunc(baseTTL, defaultPollInterval time.Duration) func() time.Duration {
+	return func() time.Duration {
+		return common.ControllerCacheTTL(baseTTL, EffectivePollInterval(defaultPollInterval))
+	}
 }

@@ -53,6 +53,8 @@ const (
 	RestoreConfigMapName         = "restore-config-map"
 	IgnoreFieldsAnnotationName   = "deployments.plural.sh/ignore-fields"
 	BackFillFieldsAnnotationName = "deployments.plural.sh/backfill-fields"
+
+	minServicePollInterval = 10 * time.Second
 )
 
 type ServiceReconciler struct {
@@ -61,7 +63,7 @@ type ServiceReconciler struct {
 	applier                                                                                 *applier.Applier
 	svcQueue                                                                                workqueue.TypedRateLimitingInterface[string]
 	typedRateLimiter                                                                        workqueue.TypedRateLimiter[string]
-	svcCache                                                                                *cache.Cache[console.ServiceDeploymentForAgent]
+	svcCache                                                                                cache.Store[console.ServiceDeploymentForAgent]
 	manifestCache                                                                           *manis.ManifestCache
 	restoreNamespace                                                                        string
 	mapper                                                                                  meta.RESTMapper
@@ -85,7 +87,7 @@ func NewServiceReconciler(consoleClient client.Client,
 	dynamicClient dynamic.Interface,
 	discoveryCache discoverycache.Cache,
 	namespaceCache streamline.NamespaceCache,
-	svcCache *cache.Cache[console.ServiceDeploymentForAgent],
+	svcCache cache.Store[console.ServiceDeploymentForAgent],
 	store store.Store,
 	option ...ServiceReconcilerOption,
 ) (*ServiceReconciler, error) {
@@ -162,12 +164,7 @@ func (s *ServiceReconciler) Shutdown() {
 
 func (s *ServiceReconciler) GetPollInterval() func() time.Duration {
 	return func() time.Duration {
-		if servicePollInterval := agentcommon.GetConfigurationManager().GetServicePollInterval(); servicePollInterval != nil {
-			if *servicePollInterval >= 10*time.Second {
-				return *servicePollInterval
-			}
-		}
-		return s.pollInterval
+		return EffectivePollInterval(s.pollInterval)
 	}
 }
 
@@ -626,4 +623,23 @@ func (s *ServiceReconciler) pollJitterWindow() time.Duration {
 		return 15 * time.Second
 	}
 	return interval / 2
+}
+
+func EffectivePollInterval(defaultInterval time.Duration) time.Duration {
+	if servicePollInterval := agentcommon.GetConfigurationManager().GetServicePollInterval(); servicePollInterval != nil {
+		if *servicePollInterval >= minServicePollInterval {
+			return *servicePollInterval
+		}
+	}
+	return defaultInterval
+}
+
+func ControllerCacheTTL(baseTTL, pollInterval time.Duration) time.Duration {
+	return common2.ControllerCacheTTL(baseTTL, pollInterval)
+}
+
+func ControllerCacheTTLFunc(baseTTL, defaultPollInterval time.Duration) func() time.Duration {
+	return func() time.Duration {
+		return ControllerCacheTTL(baseTTL, EffectivePollInterval(defaultPollInterval))
+	}
 }

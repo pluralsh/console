@@ -26,6 +26,34 @@ func TestStackPollIntervalCanBeDisabledByConfiguration(t *testing.T) {
 	assert.Equal(t, time.Duration(0), reconciler.GetPollInterval()())
 }
 
+func TestControllerCacheTTLFuncUsesConfiguredPollInterval(t *testing.T) {
+	t.Cleanup(resetAgentConfiguration)
+	resetAgentConfiguration()
+
+	require.NoError(t, common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{
+		StackPollInterval: ptr("30s"),
+	}))
+	require.NoError(t, common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{
+		StackPollInterval: ptr("10m"),
+	}))
+
+	assert.Equal(t, 20*time.Minute+time.Second, ControllerCacheTTLFunc(2*time.Minute, 30*time.Second)())
+}
+
+func TestControllerCacheTTLFuncUsesBaseWhenPollingDisabled(t *testing.T) {
+	t.Cleanup(resetAgentConfiguration)
+	resetAgentConfiguration()
+
+	require.NoError(t, common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{
+		StackPollInterval: ptr("30s"),
+	}))
+	require.NoError(t, common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{
+		StackPollInterval: ptr("0s"),
+	}))
+
+	assert.Equal(t, 2*time.Minute, ControllerCacheTTLFunc(2*time.Minute, 30*time.Second)())
+}
+
 func resetAgentConfiguration() {
 	_ = common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{})
 }
