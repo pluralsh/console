@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const AUTH_STORAGE_VERSION_KEY = 'auth-storage-version'
+const AUTH_TOKEN = 'auth-token-v3'
 const storage = new Map<string, string>()
 const localStorageMock = {
   clear: () => storage.clear(),
@@ -30,26 +30,34 @@ describe('auth storage', () => {
     setToken('token')
 
     expect(fetchToken()).toBe('token')
-    expect(localStorage.getItem(AUTH_STORAGE_VERSION_KEY)).toBe('3')
+    expect(localStorage.getItem(AUTH_TOKEN)).not.toBeNull()
+  })
+
+  it('removes the auth token when given an empty value', async () => {
+    const { fetchToken, setToken } = await loadAuth()
+    setToken('token')
+
+    setToken(null)
+
+    expect(fetchToken()).toBeUndefined()
+    expect(localStorage.getItem(AUTH_TOKEN)).toBeNull()
   })
 
   it('expires legacy encrypted auth tokens during the v3 migration', async () => {
-    const initialAuth = await loadAuth()
-    initialAuth.setToken('legacy-token')
-    localStorage.removeItem(AUTH_STORAGE_VERSION_KEY)
-
-    const { fetchToken } = await loadAuth()
-
-    expect(fetchToken()).toBeUndefined()
-  })
-
-  it('expires incompatible auth tokens after the storage migration', async () => {
-    localStorage.setItem(AUTH_STORAGE_VERSION_KEY, '3')
     localStorage.setItem('auth-token', 'legacy-ciphertext')
 
     const { fetchToken } = await loadAuth()
 
     expect(fetchToken()).toBeUndefined()
     expect(localStorage.getItem('auth-token')).toBeNull()
+  })
+
+  it('expires incompatible v3 auth tokens', async () => {
+    localStorage.setItem(AUTH_TOKEN, 'incompatible-ciphertext')
+
+    const { fetchToken } = await loadAuth()
+
+    expect(fetchToken()).toBeUndefined()
+    expect(localStorage.getItem(AUTH_TOKEN)).toBeNull()
   })
 })
