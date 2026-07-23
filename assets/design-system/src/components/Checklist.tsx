@@ -78,8 +78,7 @@ type ChecklistProps = ComponentPropsWithRef<'div'> & {
   label: string
   stateProps: ChecklistStateProps
   footerChildren:
-    | ReactElement<ChecklistFooterProps>
-    | ReactElement<ChecklistFooterProps>[]
+    ReactElement<ChecklistFooterProps> | ReactElement<ChecklistFooterProps>[]
   completeChildren: ReactElement<any>
   children: ReactElement<ChecklistItemProps>[]
 }
