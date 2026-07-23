@@ -8,7 +8,7 @@ import (
 
 type socketPublisher struct {
 	sentinelRunQueue workqueue.TypedRateLimitingInterface[string]
-	sentinelRunCache *cache.Cache[console.SentinelRunJobFragment]
+	sentinelRunCache cache.Store[console.SentinelRunJobFragment]
 }
 
 func (sp *socketPublisher) Publish(id string, _ bool) {

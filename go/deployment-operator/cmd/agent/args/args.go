@@ -89,6 +89,9 @@ const (
 	defaultStackPollInterval         = "30s"
 	defaultStackPollIntervalDuration = 30 * time.Second
 
+	defaultSentinelPollInterval         = "30s"
+	defaultSentinelPollIntervalDuration = 30 * time.Second
+
 	defaultPipelineGatesPollInterval         = "0s"
 	defaultPipelineGatesPollIntervalDuration = 0 * time.Second
 
@@ -158,6 +161,7 @@ var (
 	argClusterPingInterval                  = flag.String("cluster-ping-interval", defaultClusterPingInterval, "Time interval to ping cluster.")
 	argRuntimeServicePingInterval           = flag.String("runtime-service-ping-interval", defaultRuntimeServicePingInterval, "Time interval to register runtime services.")
 	argStackPollInterval                    = flag.String("stack-poll-interval", defaultStackPollInterval, "Time interval to poll stack resources from the Console API. Use '0s' to disable.")
+	argSentinelPollInterval                 = flag.String("sentinel-poll-interval", defaultSentinelPollInterval, "Time interval to poll sentinel run jobs from the Console API. Use '0s' to disable.")
 	argPipelineGatesPollInterval            = flag.String("pipline-gates-poll-interval", defaultPipelineGatesPollInterval, "Time interval to poll PipelineGates resources from the Console API. It's disabled by default.")
 	argDisableWebsocket                     = flag.Bool("disable-websocket", false, "Disable the cluster websocket connection to the Console.")
 	argDiscoveryCacheRefreshInterval        = flag.String("discovery-cache-refresh-interval", defaultDiscoveryCacheRefreshInterval, "Time interval to refresh discovery cache.")
@@ -504,6 +508,16 @@ func StackPollInterval() time.Duration {
 	return duration
 }
 
+func SentinelPollInterval() time.Duration {
+	duration, err := time.ParseDuration(*argSentinelPollInterval)
+	if err != nil {
+		klog.ErrorS(err, "Could not parse sentinel-poll-interval", "value", *argSentinelPollInterval, "default", defaultSentinelPollInterval)
+		return defaultSentinelPollIntervalDuration
+	}
+
+	return duration
+}
+
 func PipelineGatesInterval() time.Duration {
 	duration, err := time.ParseDuration(*argPipelineGatesPollInterval)
 	if err != nil {
@@ -523,6 +537,7 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	clusterPingInterval := ClusterPingInterval().String()
 	compatibilityUploadInterval := RuntimeServicesPingInterval().String()
 	stackPollInterval := StackPollInterval().String()
+	sentinelPollInterval := SentinelPollInterval().String()
 	pipelineGateInterval := PipelineGatesInterval().String()
 	disableWebsocket := DisableWebsocket()
 
@@ -531,6 +546,7 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 		ClusterPingInterval:         &clusterPingInterval,
 		CompatibilityUploadInterval: &compatibilityUploadInterval,
 		StackPollInterval:           &stackPollInterval,
+		SentinelPollInterval:        &sentinelPollInterval,
 		PipelineGateInterval:        &pipelineGateInterval,
 		DisableWebsocket:            &disableWebsocket,
 	}
