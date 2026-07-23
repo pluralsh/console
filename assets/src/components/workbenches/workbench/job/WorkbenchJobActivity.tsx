@@ -224,15 +224,23 @@ export function WorkbenchJobMemoGroup({
   const { spacing } = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
   const lastMemo = activities.at(-1)
-  const isSingle = activities.length === 1
+  const shouldGroup = activities.length >= 3
 
-  if (isSingle)
+  if (!shouldGroup)
     return (
       <MemoGroupSC>
-        <WorkbenchJobMemo
-          activity={activities[0]}
-          textStream={textStreamMap[activities[0].id] ?? ''}
-        />
+        <Flex
+          direction="column"
+          gap="xsmall"
+        >
+          {activities.map((activity) => (
+            <WorkbenchJobMemo
+              key={activity.id}
+              activity={activity}
+              textStream={textStreamMap[activity.id] ?? ''}
+            />
+          ))}
+        </Flex>
       </MemoGroupSC>
     )
 
@@ -263,7 +271,7 @@ export function WorkbenchJobMemoGroup({
           ))}
         </Flex>
       </SimpleAccordion>
-      {!isExpanded && lastMemo && isJobRunning(lastMemo.status) && (
+      {!isExpanded && lastMemo && (
         <EaseIn currentKey={lastMemo.id}>
           <WorkbenchJobMemo
             activity={lastMemo}
