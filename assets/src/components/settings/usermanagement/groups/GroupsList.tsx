@@ -8,8 +8,6 @@ import { GqlError } from 'components/utils/Alert'
 
 import { LoginContext } from 'components/contexts'
 
-import { Permissions, hasRbac } from '../misc'
-
 import { useThrottle } from 'components/hooks/useThrottle'
 import { mapExistingNodes } from 'utils/graphql'
 import { ListWrapperSC } from '../users/UsersList'
@@ -39,7 +37,7 @@ export function GroupsList({
   const groups = useMemo(() => mapExistingNodes(data?.groups), [data?.groups])
 
   const meta: GroupsListMeta = {
-    editable: !!me?.roles?.admin || hasRbac(me, Permissions.USERS),
+    editable: !!me?.roles?.admin,
     setGroupEdit,
   }
 

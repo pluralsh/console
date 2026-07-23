@@ -44,9 +44,6 @@ query MeGroups {
 query Me {
   me {
     ...User
-    boundRoles {
-      ...Role
-    }
     unreadNotifications
   }
   configuration {

@@ -6,7 +6,6 @@ import { useTheme } from 'styled-components'
 import { Confirm } from 'components/utils/Confirm'
 
 import UserInfo from '../../../utils/UserInfo'
-import { Permissions, hasRbac } from '../misc'
 
 import { useUpdateUserMutation } from '../../../../generated/graphql.ts'
 
@@ -16,7 +15,7 @@ export function User({ user }: any) {
   const [mutation, { loading, error }] = useUpdateUserMutation({
     onCompleted: () => setConfirm(false),
   })
-  const editable = !!me?.roles?.admin || hasRbac(me as any, Permissions.USERS)
+  const editable = !!me?.roles?.admin
   const isAdmin = !!user.roles?.admin
   const setAdmin = useCallback(
     () =>
