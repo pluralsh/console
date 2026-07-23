@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -58,6 +59,34 @@ func TestGetBody_Success(t *testing.T) {
 	}
 	if body != "hello from server" {
 		t.Errorf("unexpected body: %v", body)
+	}
+}
+
+func TestGetReader_RateLimitRetryExhaustionPreservesHTTPError(t *testing.T) {
+	var requests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		http.Error(w, "slow down", http.StatusTooManyRequests)
+	}))
+	defer server.Close()
+
+	resp, _, err := GetReader(server.URL, "dummy-token")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if resp != nil {
+		t.Fatal("expected nil response")
+	}
+	if requests != 3 {
+		t.Fatalf("expected 3 requests, got %d", requests)
+	}
+
+	var httpErr *HTTPError
+	if !errors.As(err, &httpErr) {
+		t.Fatalf("expected wrapped HTTPError, got: %v", err)
+	}
+	if httpErr.StatusCode != http.StatusTooManyRequests {
+		t.Fatalf("expected status %d, got %d", http.StatusTooManyRequests, httpErr.StatusCode)
 	}
 }
 
