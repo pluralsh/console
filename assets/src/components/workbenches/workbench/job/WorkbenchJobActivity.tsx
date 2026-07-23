@@ -294,8 +294,12 @@ function WorkbenchJobMemo({
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const isRunning = isJobRunning(status)
+  const isFailed = status === WorkbenchJobActivityStatus.Failed
   const content = textStream || result?.output || prompt || ''
-  const label = content || 'Updated workbench notes'
+  const label =
+    content ||
+    result?.error ||
+    (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
 
   return (
     <MemoRowSC>
@@ -305,6 +309,12 @@ function WorkbenchJobMemo({
         </MemoLabelSC>
       </ClickableLabelSC>
       {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
+      {isFailed && (
+        <FailedFilledIcon
+          size={12}
+          color="icon-danger"
+        />
+      )}
       <Modal
         open={isOpen}
         onClose={() => {
@@ -316,7 +326,18 @@ function WorkbenchJobMemo({
         size="large"
       >
         {finishedAnimating ? (
-          <SimplifiedMarkdown text={content} />
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            {result?.error && (
+              <GqlError
+                error={result.error}
+                css={{ wordBreak: 'break-word' }}
+              />
+            )}
+            {content && <SimplifiedMarkdown text={content} />}
+          </Flex>
         ) : (
           <RectangleSkeleton
             $height={160}
