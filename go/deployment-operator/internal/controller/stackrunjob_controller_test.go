@@ -772,6 +772,86 @@ var _ = Describe("StackRunJob Controller", Ordered, func() {
 				Expect(kClient.Delete(ctx, secret)).To(Succeed())
 			}
 		})
+
+		It("should mark pending stack run as running when job has started", func() {
+			By("Creating StackRunJob")
+			activeName := "stack-active-pending"
+			activeID := "active-pending-123"
+			activeStackID := "stack-active-pending-456"
+			activeNamespacedName := types.NamespacedName{Name: activeName, Namespace: namespace}
+			resource := &v1alpha1.StackRunJob{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      activeName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.StackRunJobSpec{
+					RunID: activeID,
+				},
+			}
+			Expect(kClient.Create(ctx, resource)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetStackRun", activeID).Return(&console.StackRunMinimalFragment{
+				ID:     activeStackID,
+				Type:   console.StackTypeTerraform,
+				Status: console.StackStatusPending,
+				Configuration: console.StackConfigurationFragment{
+					Version: lo.ToPtr("1.8.2"),
+				},
+			}, nil)
+			fakeConsoleClient.On("UpdateStackRun", activeStackID, console.StackRunAttributes{
+				Status: console.StackStatusPending,
+				JobRef: &console.NamespacedName{
+					Name:      activeName,
+					Namespace: namespace,
+				},
+			}).Return(nil).Once()
+			fakeConsoleClient.On("UpdateStackRun", activeStackID, console.StackRunAttributes{
+				Status: console.StackStatusRunning,
+				JobRef: &console.NamespacedName{
+					Name:      activeName,
+					Namespace: namespace,
+				},
+			}).Return(nil).Once()
+
+			reconciler := &StackRunJobReconciler{
+				Client:        kClient,
+				ConsoleClient: fakeConsoleClient,
+				Scheme:        kClient.Scheme(),
+				ConsoleURL:    "https://console.test.com",
+				DeployToken:   "test-token",
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: activeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			job := &batchv1.Job{}
+			Expect(kClient.Get(ctx, activeNamespacedName, job)).NotTo(HaveOccurred())
+			Expect(common.MaybePatch(kClient, job,
+				func(p *batchv1.Job) {
+					start := metav1.NewTime(time.Now().Add(-1 * time.Minute))
+					p.Status.StartTime = &start
+				})).To(Succeed())
+
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: activeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			stackRunJob := &v1alpha1.StackRunJob{}
+			Expect(kClient.Get(ctx, activeNamespacedName, stackRunJob)).NotTo(HaveOccurred())
+			Expect(stackRunJob.Status.JobStatus).Should(Equal("Progressing"))
+
+			// Cleanup
+			err = kClient.Get(ctx, activeNamespacedName, job)
+			if err == nil {
+				Expect(kClient.Delete(ctx, job)).To(Succeed())
+			}
+			Expect(kClient.Delete(ctx, stackRunJob)).To(Succeed())
+			secret := &corev1.Secret{}
+			err = kClient.Get(ctx, activeNamespacedName, secret)
+			if err == nil {
+				Expect(kClient.Delete(ctx, secret)).To(Succeed())
+			}
+		})
 	})
 
 	Context("Job status helper functions", func() {

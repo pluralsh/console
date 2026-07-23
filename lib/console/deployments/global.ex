@@ -263,10 +263,10 @@ defmodule Console.Deployments.Global do
   def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl, id: id} = global, %Service{} = dest, %User{} = user) do
     Logger.info "Attempting to resync service #{dest.id}"
     global = Repo.preload(global, [:context])
-    dest = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
-    tpl = Repo.preload(tpl, [:dependencies])
-    tpl = dynamic_template(tpl, dest.cluster, global)
-          |> ServiceTemplate.load_contexts()
+    dest   = Repo.preload(dest, [:context_bindings, :dependencies, :cluster])
+    tpl    = Repo.preload(tpl, [:dependencies])
+    tpl    = dynamic_template(tpl, dest.cluster, global)
+             |> ServiceTemplate.load_contexts()
     case diff?(tpl, dest) do
       true -> ServiceTemplate.attributes(tpl)
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
@@ -333,7 +333,8 @@ defmodule Console.Deployments.Global do
     |> Repo.stream(method: :keyset)
     |> Stream.chunk_every(100)
     |> Stream.flat_map(&add_gs_instances(global, &1))
-    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 10)
+    |> Console.throttle(count: 100, pause: 30)
+    |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 4)
     |> Stream.map(fn
       {:ok, res} -> res
       _ -> nil

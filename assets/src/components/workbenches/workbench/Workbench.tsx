@@ -23,7 +23,6 @@ import {
   WorkbenchTinyFragment,
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -32,7 +31,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubTabs } from 'components/utils/SubTabs'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
-import { Key, ReactNode, use, useCallback, useMemo, useState } from 'react'
+import { Key, ReactNode, useCallback, useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import {
   Link,
@@ -111,7 +110,6 @@ export function WorkbenchPageLayout({
 }: WorkbenchPageLayoutProps) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { featureFlags } = use(FeatureFlagContext)
   const { workbenchId, isLoading, workbench, openToolsEdit, openDelete } =
     useOutletContext<WorkbenchOutletContext>()
 
@@ -175,7 +173,6 @@ export function WorkbenchPageLayout({
           navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
           return
         case WorkbenchMoreMenuKey.Chatbots:
-          if (!featureFlags.WorkbenchChatbots) return
           navigate(getWorkbenchChatbotsAbsPath(workbenchId))
           return
         case WorkbenchMoreMenuKey.Tools:
@@ -194,14 +191,7 @@ export function WorkbenchPageLayout({
           return
       }
     },
-    [
-      navigate,
-      workbenchBasePath,
-      workbenchId,
-      openToolsEdit,
-      openDelete,
-      featureFlags.WorkbenchChatbots,
-    ]
+    [navigate, workbenchBasePath, workbenchId, openToolsEdit, openDelete]
   )
 
   return (
@@ -278,13 +268,11 @@ export function WorkbenchPageLayout({
                 leftContent={<WebhooksIcon />}
                 label="Webhook triggers"
               />
-              {featureFlags.WorkbenchChatbots && (
-                <ListBoxItem
-                  key={WorkbenchMoreMenuKey.Chatbots}
-                  leftContent={<BotIcon />}
-                  label="Chatbots"
-                />
-              )}
+              <ListBoxItem
+                key={WorkbenchMoreMenuKey.Chatbots}
+                leftContent={<BotIcon />}
+                label="Chatbots"
+              />
               <ListBoxItem
                 key={WorkbenchMoreMenuKey.SavedPrompts}
                 leftContent={<BookmarkIcon />}

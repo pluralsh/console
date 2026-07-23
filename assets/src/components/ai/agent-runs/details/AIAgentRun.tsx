@@ -5,16 +5,13 @@ import {
   CircleDashIcon,
   Flex,
   IconFrame,
-  PrIcon,
   SidePanelOpenIcon,
   SpinnerAlt,
   Toast,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -49,7 +46,12 @@ import { AIAgentRunLocalButton } from './AIAgentRunLocalButton.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunMetadata } from './AIAgentRunSidecar.tsx'
-import { AgentRunPanelTab, useAgentRunPanel } from './AgentRunPanel.tsx'
+import {
+  shouldShowAgentRunSidePanel,
+  useAgentRunPanel,
+} from './AgentRunPanel.tsx'
+
+const AGENT_RUN_POLL_INTERVAL = 5_000
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -83,26 +85,29 @@ export function AIAgentRun() {
   const { data, error, loading } = useAgentRunQuery({
     variables: { id },
     fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
+    pollInterval: AGENT_RUN_POLL_INTERVAL,
     skip: !id,
   })
 
   const runLoading = !data && loading
   const run = data?.agentRun
-  const hasPersistedAgentTodos = hasAgentRunTodos(run)
-  const { isOpen, setOpen } = useAgentRunPanel(
-    !!run?.id && hasPersistedAgentTodos
-  )
+  const showSidePanel = shouldShowAgentRunSidePanel(run, runLoading)
+  const { isOpen, setOpen, setApproval } = useAgentRunPanel(showSidePanel)
+
+  useEffect(() => {
+    if (!id) return
+
+    setApproval({
+      onApprove: () => approveAgentRun(),
+      approving,
+    })
+
+    return () => setApproval(null)
+  }, [id, approving, setApproval, approveAgentRun])
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
-  const isApprovable =
-    run?.status === AgentRunStatus.PendingApproval && !run.approvedAt
-  const showStatusCallout =
-    !!run &&
-    ((run.pullRequests ?? []).some(Boolean) ||
-      !!run.analysis?.summary ||
-      isApprovable)
+
   const isCancellable =
     isRunning ||
     run?.status == AgentRunStatus.Babysitting ||
@@ -182,15 +187,6 @@ export function AIAgentRun() {
               </Flex>
             </StretchedFlex>
 
-            {showStatusCallout && (
-              <AgentRunStatusCallout
-                run={run}
-                isApprovable={isApprovable}
-                approving={approving}
-                onApprove={() => approveAgentRun()}
-                onViewDiff={() => setOpen(true, AgentRunPanelTab.Diff)}
-              />
-            )}
             {run?.error && (
               <GqlError
                 header="There was an error during this run."
@@ -217,7 +213,7 @@ export function AIAgentRun() {
             {run && canReprompt && <AgentRunRepromptInput run={run} />}
           </Flex>
         </WrapperSC>
-        {hasPersistedAgentTodos && !isOpen && (
+        {showSidePanel && !isOpen && (
           <PanelOpenBtnSC
             tertiary
             onClick={() => setOpen(true)}
@@ -242,15 +238,6 @@ export function AIAgentRun() {
       </Toast>
     </>
   )
-}
-
-function hasAgentRunTodos(run: Nullable<AgentRunFragment>) {
-  return (run?.todos ?? []).some((todo) => {
-    const title = todo?.title?.trim() ?? ''
-    const description = todo?.description?.trim() ?? ''
-
-    return title.length > 0 || description.length > 0
-  })
 }
 
 function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
@@ -411,142 +398,6 @@ function AgentRunRepromptInput({ run }: { run: AgentRunFragment }) {
   )
 }
 
-function AgentRunStatusCallout({
-  run,
-  isApprovable,
-  approving,
-  onApprove,
-  onViewDiff,
-}: {
-  run: AgentRunFragment
-  isApprovable: boolean
-  approving: boolean
-  onApprove: () => void
-  onViewDiff: () => void
-}) {
-  const theme = useTheme()
-  const pullRequest = run.pullRequests?.[0]
-  const title = pullRequest?.title ?? agentRunStatusTitle(run.status)
-  const summary = run.analysis?.summary
-  const hasPatch = !!run.upload?.patch
-  const workbenchJob = run.workbenchJob
-  const workbench = workbenchJob?.workbench
-  const showWorkbenchChip =
-    !!workbenchJob?.id && !!workbench?.id && !!workbench.name
-
-  return (
-    <Card
-      fillLevel={1}
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        marginBottom: theme.spacing.small,
-        marginTop: theme.spacing.small,
-        padding: theme.spacing.medium,
-        width: '100%',
-        borderLeft: `3px solid ${theme.colors[statusToBorderColor[run.status]]}`,
-      }}
-    >
-      <StretchedFlex
-        align="start"
-        gap="medium"
-      >
-        <StackedText
-          truncate
-          first={title}
-          firstPartialType="body2Bold"
-          firstColor="text-light"
-          second={pullRequest?.title ? agentRunStatusTitle(run.status) : null}
-          secondColor="text-xlight"
-          icon={
-            <IconFrame
-              circle
-              size="large"
-              type="secondary"
-              icon={
-                <PrIcon
-                  size="small"
-                  color="icon-light"
-                />
-              }
-              css={{ flexShrink: 0 }}
-            />
-          }
-          css={{ flex: 1, minWidth: 0 }}
-        />
-      </StretchedFlex>
-      {summary && (
-        <Body2P
-          $color="text-light"
-          css={{
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {summary}
-        </Body2P>
-      )}
-      {(hasPatch || pullRequest?.url || isApprovable || showWorkbenchChip) && (
-        <StretchedFlex
-          align="center"
-          gap="small"
-        >
-          {showWorkbenchChip && (
-            <WorkbenchLinkChip
-              workbenchId={workbench.id}
-              workbenchName={workbench.name}
-              workbenchJobId={workbenchJob.id}
-              css={{ flexShrink: 0 }}
-            />
-          )}
-          {(hasPatch || pullRequest?.url || isApprovable) && (
-            <Flex
-              gap="small"
-              css={{ marginLeft: 'auto' }}
-            >
-              {hasPatch ? (
-                <Button
-                  small
-                  secondary
-                  onClick={onViewDiff}
-                >
-                  View diff
-                </Button>
-              ) : (
-                pullRequest?.url && (
-                  <Button
-                    small
-                    secondary
-                    as="a"
-                    href={pullRequest.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    endIcon={<ArrowTopRightIcon size={12} />}
-                  >
-                    View PR
-                  </Button>
-                )
-              )}
-              {isApprovable && (
-                <Button
-                  small
-                  onClick={onApprove}
-                  loading={approving}
-                >
-                  Approve & create PR
-                </Button>
-              )}
-            </Flex>
-          )}
-        </StretchedFlex>
-      )}
-    </Card>
-  )
-}
-
 function agentRunRepromptPlaceholder(status: AgentRunStatus) {
   switch (status) {
     case AgentRunStatus.Running:
@@ -560,39 +411,10 @@ function agentRunRepromptPlaceholder(status: AgentRunStatus) {
   }
 }
 
-function agentRunStatusTitle(status: AgentRunStatus) {
-  switch (status) {
-    case AgentRunStatus.PendingApproval:
-      return 'Approval required'
-    case AgentRunStatus.Successful:
-      return 'Run complete'
-    case AgentRunStatus.Failed:
-      return 'Run failed'
-    case AgentRunStatus.Cancelled:
-      return 'Run cancelled'
-    case AgentRunStatus.Babysitting:
-      return 'Babysitting'
-    case AgentRunStatus.Running:
-      return 'Agent run in progress'
-    case AgentRunStatus.Pending:
-      return 'Agent run pending'
-  }
-}
-
 const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
   height: '100%',
   borderLeft: theme.borders.default,
 }))
-
-const statusToBorderColor = {
-  [AgentRunStatus.PendingApproval]: 'icon-warning',
-  [AgentRunStatus.Successful]: 'icon-success',
-  [AgentRunStatus.Failed]: 'icon-danger',
-  [AgentRunStatus.Cancelled]: 'icon-xlight',
-  [AgentRunStatus.Babysitting]: 'icon-info',
-  [AgentRunStatus.Running]: 'icon-info',
-  [AgentRunStatus.Pending]: 'icon-info',
-} as const
 
 const RepromptInputWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',

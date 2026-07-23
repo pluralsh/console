@@ -164,6 +164,7 @@ type ConsoleClient interface {
 	DeleteServiceContext(id string) error
 	IsServiceContextExists(email string) (bool, error)
 	UpsertCloudConnection(ctx context.Context, attributes console.CloudConnectionAttributes) (*console.CloudConnectionFragment, error)
+	UpdateCloudConnection(ctx context.Context, id string, attributes console.CloudConnectionAttributes) (*console.CloudConnectionFragment, error)
 	GetCloudConnection(ctx context.Context, id, name *string) (*console.CloudConnectionFragment, error)
 	DeleteCloudConnection(ctx context.Context, id string) error
 	IsCloudConnection(ctx context.Context, name string) (bool, error)

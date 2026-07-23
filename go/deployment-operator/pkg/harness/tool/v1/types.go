@@ -17,6 +17,8 @@ import (
 // - gathering any available outputs from local files
 // - providing runtime modifiers to alter step command execution arguments, env, etc.
 type Tool interface {
+	// Prepare configures the tool before any stack run step executes.
+	Prepare() error
 	// Scan tries to scan the state/plan information based on local files.
 	Scan() ([]*console.StackPolicyViolationAttributes, error)
 	// Plan tries to assemble plan information based on local files
@@ -103,6 +105,9 @@ type Config struct {
 
 	// Run is a stack run that is being processed.
 	Run *stackrunv1.StackRun
+
+	// Env contains stack run environment variables.
+	Env []string
 
 	ConsoleURL string
 

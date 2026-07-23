@@ -43,7 +43,11 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.Bitbucket]: extractBitbucketMetadata,
   [WorkbenchToolType.BitbucketDatacenter]: extractBitbucketDatacenterMetadata,
   [WorkbenchToolType.AzureDevops]: extractAzureDevopsMetadata,
+  [WorkbenchToolType.Docker]: extractDockerMetadata,
   [WorkbenchToolType.Cloud]: () => [],
+  [WorkbenchToolType.Lambda]: () => [],
+  [WorkbenchToolType.CloudRun]: () => [],
+  [WorkbenchToolType.AzureFunction]: () => [],
 }
 
 export function WorkbenchesConfiguredToolMetadata({
@@ -308,6 +312,17 @@ function extractAzureDevopsMetadata(
   configuration: WorkbenchToolConfiguration | null
 ): MetadataRow[] {
   return [{ label: 'URL', value: configuration?.azureDevops?.url }]
+}
+
+function extractDockerMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  const docker = configuration?.docker
+  return [
+    { label: 'Registry', value: docker?.url },
+    { label: 'Auth', value: docker?.provider },
+    { label: 'Proxy', value: docker?.proxy?.url },
+  ]
 }
 
 function getConfiguredHeadersCount(

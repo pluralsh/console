@@ -67,7 +67,6 @@ func newApiServer(log *zap.Logger, cfg *kascfg.ConfigurationFile, tp trace.Trace
 			)),
 			grpc.StatsHandler(ssh),
 			grpc.StatsHandler(sh),
-			grpc.SharedWriteBuffer(true),
 			grpc.ChainStreamInterceptor(
 				streamProm, // 1. measure all invocations
 				modserver.StreamRpcApiInterceptor(factory), // 2. inject RPC API

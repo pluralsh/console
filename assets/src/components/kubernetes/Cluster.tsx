@@ -1,7 +1,13 @@
 import { EmptyState } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { createContext, useContext, useEffect, useMemo } from 'react'
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
+import {
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
@@ -16,6 +22,7 @@ import {
 import { getNamespacesOptions } from '../../generated/kubernetes/@tanstack/react-query.gen'
 
 import { AxiosInstance } from '../../helpers/axios'
+import { getKubernetesAbsPath } from '../../routes/kubernetesRoutesConsts'
 
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
@@ -103,20 +110,27 @@ export default function Cluster() {
   const { data, error, refetch, loading } = useKubernetesClustersQuery({
     pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
-    variables: { projectId },
+    variables: {
+      currentClusterId: clusterId,
+      hasCurrentClusterId: !!clusterId,
+      projectId,
+    },
   })
 
   const clusters = useMemo(
     () => mapExistingNodes(data?.clusters),
     [data?.clusters]
   )
+  const currentCluster = data?.cluster
 
-  const hasCurrentClusterId = clusters.some(({ id }) => id === clusterId)
+  const hasCurrentClusterId =
+    currentCluster?.id === clusterId ||
+    clusters.some(({ id }) => id === clusterId)
 
-  const cluster = useMemo(
-    () => clusters.find(({ id }) => id === clusterId),
-    [clusterId, clusters]
-  )
+  const cluster =
+    currentCluster?.id === clusterId
+      ? currentCluster
+      : clusters.find(({ id }) => id === clusterId)
 
   const namespaceQueryOptions = getNamespacesOptions({
     client: AxiosInstance(clusterId!),
@@ -170,27 +184,31 @@ export default function Cluster() {
     [clusters, refetch, cluster, namespaces]
   )
 
+  const defaultClusterId = useMemo(() => {
+    if (isEmpty(clusters)) return undefined
+
+    const lastSelectedClusterId = sessionStorage.getItem(
+      LAST_SELECTED_CLUSTER_KEY
+    )
+    const lastSelectedClusterExists = clusters.some(
+      ({ id }) => id === lastSelectedClusterId
+    )
+    const mgmtCluster = clusters.find(({ self }) => !!self)
+
+    return lastSelectedClusterExists
+      ? lastSelectedClusterId
+      : mgmtCluster
+        ? mgmtCluster?.id
+        : clusters[0].id
+  }, [clusters])
+
   useEffect(() => {
-    if (!isEmpty(clusters) && !hasCurrentClusterId) {
-      const lastSelectedClusterId = sessionStorage.getItem(
-        LAST_SELECTED_CLUSTER_KEY
-      )
-      const lastSelectedClusterExists = clusters.some(
-        ({ id }) => id === lastSelectedClusterId
-      )
-      const mgmtCluster = clusters.find(({ self }) => !!self)
-
-      const redirectId = lastSelectedClusterExists
-        ? lastSelectedClusterId
-        : mgmtCluster
-          ? mgmtCluster?.id
-          : clusters[0].id
-
-      navigate(`${redirectId}${search}`, {
+    if (clusterId && defaultClusterId && !hasCurrentClusterId) {
+      navigate(`${defaultClusterId}${search}`, {
         replace: true,
       })
     }
-  }, [clusters, navigate, search, clusterId, hasCurrentClusterId])
+  }, [defaultClusterId, navigate, search, clusterId, hasCurrentClusterId])
 
   useEffect(() => {
     refetchNamespaces()
@@ -207,6 +225,14 @@ export default function Cluster() {
     )
 
   if (loading && !data) return <LoadingIndicator />
+
+  if (!clusterId && defaultClusterId)
+    return (
+      <Navigate
+        replace
+        to={`${getKubernetesAbsPath(defaultClusterId)}${search}`}
+      />
+    )
 
   if (!cluster) return <EmptyState message="No clusters found." />
 

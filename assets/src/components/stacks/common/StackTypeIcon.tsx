@@ -1,5 +1,6 @@
 import {
   AnsibleIcon,
+  PulumiLogoIcon,
   StackIcon,
   TerraformLogoIcon,
   TerragruntLogoIcon,
@@ -37,6 +38,14 @@ export function StackTypeIcon({
     case StackType.Terragrunt:
       return (
         <TerragruntLogoIcon
+          size={size}
+          fullColor={fullColor}
+          color={color}
+        />
+      )
+    case StackType.Pulumi:
+      return (
+        <PulumiLogoIcon
           size={size}
           fullColor={fullColor}
           color={color}

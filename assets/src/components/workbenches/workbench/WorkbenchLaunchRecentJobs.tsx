@@ -104,7 +104,11 @@ function WorkbenchLaunchRecentJobCard({
         clampLines={2}
       />
       <UsageRowSC>
-        <WorkbenchUsageChips usage={job.usage} />
+        <WorkbenchUsageChips
+          usage={job.usage}
+          budget={job.modes?.budget}
+          error={job.error}
+        />
       </UsageRowSC>
       <BottomSectionSC>
         <DividerSC />

@@ -409,10 +409,7 @@ function PluralSkillForm({
               placeholder="Short summary of what this skill does"
               value={draft.description ?? ''}
               onChange={(e) =>
-                setDraft({
-                  ...draft,
-                  description: e.target.value || null,
-                })
+                setDraft({ ...draft, description: e.target.value || null })
               }
             />
           </FormField>

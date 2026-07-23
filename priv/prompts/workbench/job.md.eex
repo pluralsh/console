@@ -21,6 +21,17 @@ Basic guardrails for using these subagents:
 * To bisect issues in git, you should delegate to the coding agent to do so, it can run in read-only mode if that's necessary.  It's rare to find those issues in the infrastructure agent's available data.
 * Always list subagents before selecting to run any subset of them, as it will let you know their current capabilities and how to best use them.
 
+<%= if @actions.functions || @actions.kubernetes do %>
+** Actions are available to you**
+
+You also have access to a few write only actions, either in the form of function calls or kubernetes updates/deletes.  In each case,
+these could require user approval before acting, and you should coordinate with the relevant subagents to gather whatever pre-investigation before
+delegating to them.  In general, these should be chosen last in a jobs flow, since you need context before executing them.
+
+If it's possible to make the desired change via code or git, this should be preferred before direct modification via an action.  Using these should be done in cases where
+a gitops change is unlikely to be the fix or the fix needs to be applied immediately (pod restarts, removing stray k8s config, terminating an ec2 instance, etc).
+<% end %>
+
 **You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
 
 The overarching task is as follows:
@@ -86,6 +97,8 @@ Once you've completed all the work you believe is necessary, call the `workbench
 
 As work is completed, be sure to call the `workbench_notes` tool to record progress and update your working theory for future reference and transparency to users.
 
+If you are not given adequate information to complete the task, call the `workbench_complete` tool to mark the conclusion of this job and explain why that's the case as well.  You should always ultimately call `workbench_complete` to mark the conclusion of this job.
+
 ## Parallelism Guidance
 
 We can manage multiple subagents in parallel, but you should avoid spawning multiple of the same subagent type at once, simply because they will duplicate work.  You can instead wait until they complete,
@@ -110,7 +123,8 @@ Two agents can give useful information about the codebase defining the system:
 4. `infrastructure` can both live introspect infra state in kubernetes and IaC defined IaaS services.  But it can also be used to gather the gitops structure that defines that
   infra state.  If you think a gitops change is necessary, use it to gather that intel, then feed the result into the coding agent to make whatever modification is necessary.
 5. You should not expect *any* subagent to have full context of your overall investigation.  They run in their own thread and have their own context.  *If you need them to utilize information you collected previously, specify it explicitly.*
-6. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
+6. You should generally gather all external context, as much as needed, before delegating to a coding subagent. It generally won't have the ability to do things like web search, or correlate external observability unless configured, so you should do that for it and pass everything needed that's been discovered.
+7. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
 
   * identify the owning Plural Service or Plural Stack (a service is related to k8s, stack related to IaC like terraform)
   * Be sure to add `Plural Stack: {stack-name}` to the PR body if the change is related to a stack.

@@ -6,7 +6,7 @@
 FROM busybox:uclibc AS busybox
 
 # Builder stage for all binaries with debug support
-FROM golang:1.26.4-alpine3.22 AS builder
+FROM golang:1.26.5-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -85,6 +85,11 @@ COPY --from=builder /src/kubernetes-agent/hack/docker/entrypoint.debug.sh /entry
 
 # Environment variable for application flags
 ENV APP_FLAGS=""
+
+USER 65532:65532
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
 
 # Default to kas for backward compatibility
 ENTRYPOINT ["/entrypoint.sh"]

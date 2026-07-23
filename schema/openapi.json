@@ -2990,7 +2990,8 @@
               "terraform",
               "ansible",
               "custom",
-              "terragrunt"
+              "terragrunt",
+              "pulumi"
             ],
             "type": "string"
           },
@@ -3046,7 +3047,8 @@
               "terraform",
               "ansible",
               "custom",
-              "terragrunt"
+              "terragrunt",
+              "pulumi"
             ],
             "type": "string"
           },
@@ -3118,7 +3120,8 @@
               "terraform",
               "ansible",
               "custom",
-              "terragrunt"
+              "terragrunt",
+              "pulumi"
             ],
             "type": "string"
           },
@@ -3378,7 +3381,8 @@
               "azure",
               "bedrock",
               "vertex",
-              "openai_compatible"
+              "openai_compatible",
+              "xai"
             ],
             "type": "string"
           }

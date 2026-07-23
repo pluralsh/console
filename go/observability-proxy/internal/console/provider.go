@@ -47,7 +47,7 @@ func (p *CachingProvider) Ready() bool {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
-	return p.config != nil && time.Since(p.updatedAt) < p.ttl
+	return p.config != nil
 }
 
 func (p *CachingProvider) GetConfig(_ context.Context) (ObservabilityConfig, error) {

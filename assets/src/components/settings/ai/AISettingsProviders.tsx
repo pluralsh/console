@@ -27,6 +27,7 @@ const bedrockToolModelTooltip =
 export const aiProviderToLabel = {
   [AiProvider.Openai]: 'OpenAI',
   [AiProvider.OpenaiCompatible]: 'OpenAI-compatible',
+  [AiProvider.Xai]: 'xAI',
   [AiProvider.Anthropic]: 'Anthropic',
   [AiProvider.Azure]: 'Azure AI',
   [AiProvider.Bedrock]: 'AWS Bedrock',
@@ -110,6 +111,18 @@ export function initialSettingsAttributes(
               },
             }
           : {}),
+        ...(ai.xai
+          ? {
+              xai: {
+                model: ai.xai.model,
+                toolModel: ai.xai.toolModel,
+                embeddingModel: ai.xai.embeddingModel,
+                baseUrl: ai.xai.baseUrl,
+                method: ai.xai.method,
+                accessToken: '',
+              },
+            }
+          : {}),
         ...(ai.vertex
           ? {
               vertex: {
@@ -139,6 +152,8 @@ export function validateAttributes(
       return !!settings.openai?.accessToken
     case AiProvider.OpenaiCompatible:
       return !!settings.openaiCompatible?.accessToken
+    case AiProvider.Xai:
+      return !!settings.xai?.accessToken
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Bedrock:

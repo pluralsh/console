@@ -1,13 +1,14 @@
 ARG POSTGRES_MAJOR_VERSION=15
-ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.17
+ARG POSTGRES_VERSION=${POSTGRES_MAJOR_VERSION}.18
 
-FROM golang:1.26.4 AS libraries
+FROM golang:1.26.5 AS libraries
 
 # Configure versions for Steampipe extensions
 # Do not use latest versions here, as they may not be compatible
-ARG AWS_VERSION=1.30.7
-ARG AZURE_VERSION=1.12.3
-ARG GCP_VERSION=1.13.4
+ARG AWS_VERSION=1.30.8
+ARG AZURE_VERSION=1.12.4
+ARG GCP_VERSION=1.13.5
+ARG VSPHERE_VERSION=0.1.1
 
 WORKDIR /workspace
 
@@ -38,7 +39,8 @@ RUN case ${TARGETARCH} in \
 RUN mkdir -p /workspace/lib && \
     /workspace/hack/postgres.sh -p aws -v ${AWS_VERSION} -d /workspace/lib/ && \
     /workspace/hack/postgres.sh -p azure -v ${AZURE_VERSION} -d /workspace/lib/ && \
-    /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/
+    /workspace/hack/postgres.sh -p gcp -v ${GCP_VERSION} -d /workspace/lib/ && \
+    /workspace/hack/postgres.sh -p vsphere -v ${VSPHERE_VERSION} -d /workspace/lib/
 
 FROM dhi.io/postgres:${POSTGRES_VERSION}
 
@@ -58,6 +60,9 @@ COPY --from=libraries /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
 
 # Switch to the postgres user
 USER postgres
+
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=5 \
+  CMD pg_isready -U "${POSTGRES_USER:-postgres}" -d "${POSTGRES_DB:-postgres}" || exit 1
 
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
 CMD ["postgres"]

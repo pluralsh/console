@@ -12,6 +12,7 @@ type Configuration struct {
 	aws      *AWSConfiguration
 	azure    *AzureConfiguration
 	gcp      *GCPConfiguration
+	vsphere  *VSphereConfiguration
 }
 
 func (c *Configuration) MarshalJSON() ([]byte, error) {
@@ -24,6 +25,8 @@ func (c *Configuration) MarshalJSON() ([]byte, error) {
 		credentials, err = c.azure.MarshalJSON()
 	case ProviderGCP:
 		credentials, err = c.gcp.MarshalJSON()
+	case ProviderVSphere:
+		credentials, err = c.vsphere.MarshalJSON()
 	}
 
 	if err != nil {
@@ -52,6 +55,8 @@ func (c *Configuration) Query(connectionName string) (string, error) {
 		return c.azure.Query(connectionName)
 	case ProviderGCP:
 		return c.gcp.Query(connectionName)
+	case ProviderVSphere:
+		return c.vsphere.Query(connectionName)
 	default:
 		return "", fmt.Errorf("unsupported provider: %s", c.provider)
 	}
@@ -99,6 +104,19 @@ func NewGCPConfiguration(options ...Option) Configuration {
 	c := Configuration{
 		provider: ProviderGCP,
 		gcp:      &GCPConfiguration{},
+	}
+
+	for _, opt := range options {
+		opt(&c)
+	}
+
+	return c
+}
+
+func NewVSphereConfiguration(options ...Option) Configuration {
+	c := Configuration{
+		provider: ProviderVSphere,
+		vsphere:  &VSphereConfiguration{},
 	}
 
 	for _, opt := range options {

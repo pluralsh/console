@@ -42,7 +42,7 @@ defmodule Console.Deployments.Observer.Poller do
   end
 
   defp poll_oci(%{oci: %{url: url} = oci} = target, last) do
-    client = OCI.Client.new(url)
+    client = OCI.Client.new(url, proxy(oci.auth))
     with {:ok, oci} <- OCI.Auth.authenticate(client, oci.provider, oci.auth),
          {:ok, %OCI.Tags{tags: [_ | _] = tags}} <- OCI.Client.tags(oci, oci_filter(target)),
          {:tag, [vsn | _]} <- {:tag, sorted(tags, target, last)},
@@ -54,6 +54,9 @@ defmodule Console.Deployments.Observer.Poller do
       err -> err
     end
   end
+
+  defp proxy(%{proxy: proxy}), do: proxy
+  defp proxy(_), do: nil
 
   def poll_git(%{git: %{repository_id: id} = git_target} = target, last) do
     with %Console.Schema.GitRepository{} = git <- Git.get_repository(id),

@@ -185,17 +185,18 @@ func (r *StackRunJobReconciler) reconcileJobStatus(ctx context.Context, run *v1a
 		run.Status.JobStatus = string(console.StackStatusCancelled)
 		logger.V(2).Info("stack run job exceeded max lifetime, cancelling", "name", job.Name, "namespace", job.Namespace)
 		status = console.StackStatusCancelled
+	case isActiveJobTimout(stackRunStatus, job) || r.isActiveJobPodFailed(ctx, stackRunStatus, job):
+		if err := r.killJob(ctx, job); err != nil {
+			return status, err
+		}
+		run.Status.JobStatus = string(console.StackStatusFailed)
+		logger.V(2).Info("stack run job failed", "name", job.Name, "namespace", job.Namespace)
+		status = console.StackStatusFailed
+	case isActiveJob(stackRunStatus, job):
+		status = console.StackStatusRunning
 	// Exit if stack run is not in running state (run status already updated),
 	// or if the job is still running (harness controls run status).
 	case stackRunStatus != console.StackStatusRunning || (job.Status.CompletionTime.IsZero() && !hasFailed(job)):
-		if isActiveJobTimout(stackRunStatus, job) || r.isActiveJobPodFailed(ctx, stackRunStatus, job) {
-			if err := r.killJob(ctx, job); err != nil {
-				return status, err
-			}
-			run.Status.JobStatus = string(console.StackStatusFailed)
-			logger.V(2).Info("stack run job failed", "name", job.Name, "namespace", job.Namespace)
-			status = console.StackStatusFailed
-		}
 	case hasSucceeded(job):
 		logger.V(2).Info("stack run job succeeded", "name", job.Name, "namespace", job.Namespace)
 		run.Status.JobStatus = string(console.StackStatusSuccessful)

@@ -2,11 +2,12 @@ import { ModalWrapper } from '@pluralsh/design-system'
 
 import chroma from 'chroma-js'
 import { Command } from 'cmdk'
-import { use } from 'react'
+import { use, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import CommandPalette from './CommandPalette'
 import { CommandPaletteContext } from './CommandPaletteContext'
+import { ServiceAccountImpersonationModal } from './ServiceAccountImpersonationModal'
 
 export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
   position: 'relative',
@@ -133,19 +134,28 @@ export const WrapperModal = styled(ModalWrapper)(({ theme }) => ({
 export function CommandPaletteDialog() {
   const theme = useTheme()
   const { cmdkOpen, setCmdkOpen } = use(CommandPaletteContext)
+  const [impersonationOpen, setImpersonationOpen] = useState(false)
 
   return (
-    <WrapperModal
-      overlayStyles={{
-        background: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
-      }}
-      open={cmdkOpen}
-      onOpenChange={(open) => setCmdkOpen(open)}
-      title="Command Palette"
-    >
-      <Command shouldFilter={false}>
-        <CommandPalette />
-      </Command>
-    </WrapperModal>
+    <>
+      <WrapperModal
+        overlayStyles={{
+          background: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
+        }}
+        open={cmdkOpen}
+        onOpenChange={(open) => setCmdkOpen(open)}
+        title="Command Palette"
+      >
+        <Command shouldFilter={false}>
+          <CommandPalette
+            openServiceAccountImpersonation={() => setImpersonationOpen(true)}
+          />
+        </Command>
+      </WrapperModal>
+      <ServiceAccountImpersonationModal
+        open={impersonationOpen}
+        setOpen={setImpersonationOpen}
+      />
+    </>
   )
 }

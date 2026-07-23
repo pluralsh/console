@@ -50,7 +50,6 @@ func initConsoleManagerOrDie() *consolectrl.Manager {
 
 const (
 	// Use custom (short) poll intervals for these reconcilers.
-	stacksPollInterval   = 30 * time.Second
 	sentinelPollInterval = 30 * time.Second
 )
 
@@ -66,7 +65,7 @@ func registerConsoleReconcilersOrDie(
 	supervisor *streamline.Supervisor,
 	discoveryCache discoverycache.Cache,
 	namespaceCache streamline.NamespaceCache,
-	svcCache *cache.Cache[console.ServiceDeploymentForAgent],
+	svcCache cache.Store[console.ServiceDeploymentForAgent],
 ) {
 	mgr.AddReconcilerOrDie(service.Identifier, func() (v1.Reconciler, error) {
 		r, err := service.NewServiceReconciler(consoleClient,
@@ -116,7 +115,7 @@ func registerConsoleReconcilersOrDie(
 			os.Exit(1)
 		}
 
-		r := stacks.NewStackReconciler(consoleClient, k8sClient, scheme, args.ControllerCacheTTL(), stacksPollInterval, namespace, args.ConsoleUrl(), args.DeployToken())
+		r := stacks.NewStackReconciler(consoleClient, k8sClient, scheme, args.ControllerCacheTTL(), args.StackPollInterval(), namespace, args.ConsoleUrl(), args.DeployToken())
 		return r, nil
 	})
 

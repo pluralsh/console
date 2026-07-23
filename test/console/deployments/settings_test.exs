@@ -42,7 +42,7 @@ defmodule Console.Deployments.SettingsTest do
                %{provider: :openai, model: "gpt-tool"},
                %{provider: :openai, model: "gpt-proxy"},
                %{provider: :bedrock, model: "anthropic.custom"},
-               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
+               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-5"},
                %{provider: :bedrock, model: "anthropic.proxy"}
              ]
     end
@@ -77,11 +77,11 @@ defmodule Console.Deployments.SettingsTest do
                %{provider: :openai, model: "gpt-5.4-mini"},
                %{provider: :openai, model: "gpt-5.4"},
                %{provider: :anthropic, model: "claude-4-5-haiku-latest"},
-               %{provider: :anthropic, model: "claude-4-6-sonnet-latest"},
+               %{provider: :anthropic, model: "claude-sonnet-5-latest"},
                %{provider: :vertex, model: "claude-haiku-4-5@20251001"},
-               %{provider: :vertex, model: "claude-sonnet-4-6@20260114"},
+               %{provider: :vertex, model: "claude-sonnet-5@default"},
                %{provider: :bedrock, model: "global.anthropic.claude-haiku-4-5-20251001-v1:0"},
-               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-4-6"},
+               %{provider: :bedrock, model: "global.anthropic.claude-sonnet-5"},
                %{provider: :azure, model: "gpt-5.4-mini"},
                %{provider: :azure, model: "gpt-5.4"}
              ]
@@ -113,6 +113,10 @@ defmodule Console.Deployments.SettingsTest do
             model: "custom-default",
             proxy_models: ["custom-proxy", "custom-default", nil, "  "]
           },
+          xai: %{
+            model: "grok-custom",
+            proxy_models: ["grok-proxy", "grok-custom"]
+          },
           azure: %{
             access_token: "azure-key",
             endpoint: "https://example.com/openai/deployments",
@@ -126,6 +130,9 @@ defmodule Console.Deployments.SettingsTest do
                %{provider: :openai_compatible, model: "custom-default"},
                %{provider: :openai_compatible, model: "gpt-5.4"},
                %{provider: :openai_compatible, model: "custom-proxy"},
+               %{provider: :xai, model: "grok-custom"},
+               %{provider: :xai, model: "grok-4.5"},
+               %{provider: :xai, model: "grok-proxy"},
                %{provider: :azure, model: "gpt-5.4-mini"},
                %{provider: :azure, model: "azure-tool"},
                %{provider: :azure, model: "azure-proxy"}
@@ -347,6 +354,78 @@ defmodule Console.Deployments.SettingsTest do
               }
             }
           },
+          insert(:user)
+        )
+    end
+  end
+
+  describe "#update_cloud_connection/3" do
+    test "admins can update a cloud connection by id" do
+      conn = insert(:cloud_connection)
+
+      {:ok, updated} =
+        Settings.update_cloud_connection(
+          %{
+            name: "updated-cloud-connection",
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          conn.id,
+          admin_user()
+        )
+
+      assert updated.id == conn.id
+      assert updated.name == "updated-cloud-connection"
+      assert updated.provider == :aws
+      assert updated.configuration.aws.access_key_id == "access-key-id"
+      assert updated.configuration.aws.secret_access_key == "new-secret-access-key"
+      assert updated.configuration.aws.region == "us-east-1"
+    end
+
+    test "admins cannot rename a cloud connection to an existing name" do
+      conn = insert(:cloud_connection)
+      existing = insert(:cloud_connection)
+
+      {:error, changeset} =
+        Settings.update_cloud_connection(
+          %{
+            name: existing.name,
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          conn.id,
+          admin_user()
+        )
+
+      assert %{name: [_ | _]} = errors_on(changeset)
+    end
+
+    test "nonadmins cannot update cloud connections" do
+      conn = insert(:cloud_connection)
+
+      {:error, _} =
+        Settings.update_cloud_connection(
+          %{
+            name: "test",
+            configuration: %{
+              aws: %{
+                access_key_id: "access-key-id",
+                secret_access_key: "new-secret-access-key",
+                region: "us-east-1"
+              }
+            }
+          },
+          conn.id,
           insert(:user)
         )
     end

@@ -104,7 +104,7 @@ func (in *baseResource) toKubectlOptions() *k8s.KubectlOptions {
 }
 
 func (in *baseResource) clientset(t *testing.T) (*kubernetes.Clientset, error) {
-	return k8s.GetKubernetesClientFromOptionsE(t, in.toKubectlOptions())
+	return k8s.GetKubernetesClientFromOptionsContextE(t, t.Context(), in.toKubectlOptions())
 }
 
 func (in *baseResource) toJSON(resource any) string {

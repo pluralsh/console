@@ -9,7 +9,7 @@ import { onError } from '@apollo/client/link/error'
 import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
 import { RetryLink } from '@apollo/client/link/retry'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
-import { hasSubscription } from '@jumpn/utils-graphql'
+import { getMainDefinition } from '@apollo/client/utilities'
 import { createLink } from 'apollo-absinthe-upload-link'
 import { createClient } from 'graphql-ws'
 import { Socket as PhoenixSocket } from 'phoenix'
@@ -55,11 +55,16 @@ export function buildClient(
   { gql: gqlUrl, ws: wsUrl, gqlws: gqlwsUrl },
   fetchToken
 ) {
+  const currentAuthorization = () => {
+    const token = fetchToken()
+
+    return token ? `Bearer ${token}` : undefined
+  }
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
   const authLink = setContext((_, { headers }) => {
-    const token = fetchToken()
-    const authHeaders = token ? { authorization: `Bearer ${token}` } : {}
+    const authorization = currentAuthorization()
+    const authHeaders = authorization ? { authorization } : {}
 
     return { headers: { ...headers, ...authHeaders } }
   })
@@ -77,9 +82,9 @@ export function buildClient(
 
   const socket = new PhoenixSocket(wsUrl, {
     params: () => {
-      const token = fetchToken()
+      const authorization = currentAuthorization()
 
-      return token ? { Authorization: `Bearer ${token}` } : {}
+      return authorization ? { Authorization: authorization } : {}
     },
   })
 
@@ -88,8 +93,8 @@ export function buildClient(
       url: gqlwsUrl,
       lazy: true,
       connectionParams: () => {
-        const token = fetchToken()
-        return token ? { token: `Bearer ${token}` } : {}
+        const authorization = currentAuthorization()
+        return authorization ? { token: authorization } : {}
       },
       // Send a JSON-level ping every 5s so Bandit's 60s read_timeout is never hit
       // and silent TCP drops (from LBs / NAT) are detected within one interval.
@@ -107,7 +112,14 @@ export function buildClient(
   const gqlLink = errorLink.concat(persistedQueryLink).concat(httpLink)
 
   const splitLink = split(
-    (operation) => hasSubscription(operation.query),
+    ({ query }) => {
+      const definition = getMainDefinition(query)
+
+      return (
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
+      )
+    },
     socketLink,
     authLink.concat(retryLink).concat(gqlLink)
   )

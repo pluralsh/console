@@ -5,6 +5,112 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 87.19.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana subchart/container version updated to **v12.8.0** (via
+        chart dependency update)., Added scraping of **kube-scheduler resource metrics**
+        (new/updated ServiceMonitor/metrics config for kube-scheduler).]
+    features: ['kube-prometheus-stack now scrapes kube-scheduler *resource* metrics,
+        improving visibility into scheduler performance and resource usage.', 'Grafana
+        is bumped to v12.8.0, bringing the latest Grafana fixes/features included
+        by that version.']
+    breaking_changes: []
+  chart_version: 87.19.0
+  images: ['docker.io/grafana/grafana:13.1.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+    'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.17.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds scraping of kube-scheduler resource metrics (new/updated
+        ServiceMonitor/metrics config for kube-scheduler).]
+    features: ['Kube-prometheus-stack now scrapes kube-scheduler resource metrics,
+        improving visibility into scheduler performance and resource usage.']
+    breaking_changes: []
+  chart_version: 87.17.0
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+    'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.16.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumps kube-state-metrics chart dependency to v7.8.1 (in 87.15.1).,
+      Bumps prometheus-node-exporter chart dependency to v4.56.1 (in 87.16.1).]
+    features: ['Updated embedded dependencies: kube-state-metrics to v7.8.1 and prometheus-node-exporter
+        to v4.56.1.']
+    breaking_changes: []
+  chart_version: 87.16.1
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+    'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.15.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Bumped the bundled/managed kube-state-metrics Helm dependency
+        from v7.8.0 to v7.8.1 (via prometheus-community/helm-charts PR #7102).']
+    features: ['Includes kube-state-metrics v7.8.1, which contains minor fixes/updates
+        compared to v7.8.0.']
+    breaking_changes: []
+  chart_version: 87.15.1
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.0-distroless',
+    'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.14.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['PrometheusRule: etcd alert/runbook annotations updated (runbook_url).',
+      'Dependency update: kube-state-metrics chart/release bumped to v7.8.0.']
+    features: [Updated bundled kube-state-metrics dependency to v7.8.0 (may include
+        new metrics/labels/fixes from that component).]
+    breaking_changes: []
+  chart_version: 87.14.0
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.13.1-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
+- version: 87.12.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Bumped Alertmanager image tag to `quay.io/prometheus/alertmanager:v0.33.1`
+        (as of kube-prometheus-stack 87.10.1).', Updated the etcd `PrometheusRule`
+        annotation `runbook_url` (as of kube-prometheus-stack 87.12.1).]
+    features: [Updated/standardized etcd alert runbook URL annotation in PrometheusRule
+        manifests.]
+    breaking_changes: []
+  chart_version: 87.12.1
+  images: ['docker.io/grafana/grafana:13.1.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.8.1', 'quay.io/prometheus-operator/prometheus-operator:v0.92.1',
+    'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
+    'quay.io/prometheus/prometheus:v3.13.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
 - version: 87.10.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']

@@ -20,8 +20,6 @@ import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFlowsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -33,7 +31,6 @@ export const FLOW_DOCS_URL = 'https://docs.plural.sh/plural-features/flows'
 export function Flows() {
   useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
-  const navigate = useNavigate()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
 
@@ -58,13 +55,6 @@ export function Flows() {
             units. <InlineA href={FLOW_DOCS_URL}>Learn more</InlineA>
           </Body2P>
         </Flex>
-        <Button
-          secondary
-          endIcon={<ArrowTopRightIcon />}
-          onClick={() => navigate(AI_MCP_SERVERS_ABS_PATH)}
-        >
-          Manage MCP Servers
-        </Button>
       </HeaderSC>
       <Input2
         showClearButton

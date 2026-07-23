@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer, ScmConnection, CloudConnection, WorkbenchOauthClient, HelmRepository, OCIAuth}
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils, only: [validate_private_key: 2]
@@ -31,15 +31,31 @@ defmodule Console.Schema.WorkbenchTool do
     bitbucket_datacenter: 22,
     azure_devops: 23,
     pagerduty: 24,
-    opensearch: 25
+    opensearch: 25,
+    lambda: 26,
+    cloud_run: 27,
+    azure_function: 28,
+    docker: 29
 
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5, infrastructure: 6, search: 7, scm: 8, chat: 9
+  defenum Category,
+    metrics: 0,
+    logs: 1,
+    integration: 2,
+    ticketing: 3,
+    traces: 4,
+    error_tracking: 5,
+    infrastructure: 6,
+    search: 7,
+    scm: 8,
+    chat: 9,
+    function: 10
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
     field :tool,            Tool
     field :categories,      {:array, Category}
     field :name,            :string
+    field :approval,        :boolean, default: false
 
     embeds_one :oauth_token, OauthToken, on_replace: :update do
       field :access_token,  :string
@@ -198,6 +214,12 @@ defmodule Console.Schema.WorkbenchTool do
         field :token, EncryptedString
       end
 
+      embeds_one :docker, DockerConnection, on_replace: :update do
+        field :url,      :string
+        field :provider, HelmRepository.Provider, default: :basic
+        embeds_one :auth, OCIAuth, on_replace: :update
+      end
+
       embeds_one :exa, ExaConnection, on_replace: :update do
         field :api_key, EncryptedString, virtual: true
       end
@@ -205,6 +227,7 @@ defmodule Console.Schema.WorkbenchTool do
       embeds_one :http, HttpConfiguration, on_replace: :update do
         field :url,          :string
         field :method,       HttpMethod
+        field :function,     :boolean, default: false
 
         embeds_many :headers, Header, on_replace: :delete do
           field :name,  :string
@@ -212,6 +235,24 @@ defmodule Console.Schema.WorkbenchTool do
         end
 
         field :body,         :string
+        field :input_schema, :map
+      end
+
+      embeds_one :lambda, LambdaConnection, on_replace: :update do
+        field :lambda_arn, :string
+        field :description, :string
+        field :input_schema, :map
+      end
+
+      embeds_one :cloud_run, CloudRunConnection, on_replace: :update do
+        field :identifier, :string
+        field :description, :string
+        field :input_schema, :map
+      end
+
+      embeds_one :azure_function, CloudFunctionConnection, on_replace: :update do
+        field :identifier,  :string
+        field :description, :string
         field :input_schema, :map
       end
     end
@@ -262,7 +303,7 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
-  @valid ~w(tool categories name project_id cloud_connection_id mcp_server_id scm_connection_id)a
+  @valid ~w(tool categories name project_id approval cloud_connection_id mcp_server_id scm_connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -282,6 +323,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> validate_required([:name, :tool])
     |> infer_categories()
     |> ensure_mcp_server()
+    |> ensure_cloud_connection()
   end
 
   defp infer_categories(changeset) do
@@ -308,8 +350,17 @@ defmodule Console.Schema.WorkbenchTool do
     end
   end
 
+  @cloud_connection_tools ~w(cloud lambda cloud_run azure_function)a
+
+  defp ensure_cloud_connection(changeset) do
+    case get_field(changeset, :tool) do
+      tool when tool in @cloud_connection_tools -> validate_required(changeset, [:cloud_connection_id])
+      _ -> changeset
+    end
+  end
+
   defp categories(:http), do: [:integration]
-  defp categories(:datadog), do: [:metrics, :logs]
+  defp categories(:datadog), do: [:metrics, :logs, :traces]
   defp categories(:dynatrace), do: [:metrics, :logs, :traces]
   defp categories(:cloudwatch), do: [:metrics, :logs]
   defp categories(:azure), do: [:metrics, :logs]
@@ -334,6 +385,7 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:bitbucket), do: [:scm]
   defp categories(:bitbucket_datacenter), do: [:scm]
   defp categories(:azure_devops), do: [:scm]
+  defp categories(l) when l in [:lambda, :cloud_run, :azure_function], do: [:function]
   defp categories(_), do: [:integration]
 
   defp configuration_changeset(model, attrs) do
@@ -363,19 +415,48 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:bitbucket, with: &bitbucket_configuration_changeset/2)
     |> cast_embed(:bitbucket_datacenter, with: &bitbucket_datacenter_configuration_changeset/2)
     |> cast_embed(:azure_devops, with: &azure_devops_configuration_changeset/2)
+    |> cast_embed(:docker, with: &docker_configuration_changeset/2)
+    |> cast_embed(:lambda, with: &lambda_configuration_changeset/2)
+    |> cast_embed(:cloud_run, with: &cloud_run_configuration_changeset/2)
+    |> cast_embed(:azure_function, with: &azure_function_configuration_changeset/2)
   end
 
   defp http_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url method body input_schema)a)
+    |> cast(attrs, ~w(url method body input_schema function)a)
     |> cast_embed(:headers, with: &header_changeset/2)
-    |> validate_change(:input_schema, fn :input_schema, input_schema ->
+    |> validate_input_schema()
+    |> validate_required([:url, :method, :input_schema])
+  end
+
+  defp lambda_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(lambda_arn description input_schema)a)
+    |> validate_input_schema()
+    |> validate_required([:lambda_arn, :description, :input_schema])
+  end
+
+  defp cloud_run_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(identifier description input_schema)a)
+    |> validate_input_schema()
+    |> validate_required([:identifier, :description, :input_schema])
+  end
+
+  defp azure_function_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(identifier description input_schema)a)
+    |> validate_input_schema()
+    |> validate_required([:identifier, :description, :input_schema])
+  end
+
+  defp validate_input_schema(changeset) do
+    validate_change(changeset, :input_schema, fn :input_schema, input_schema ->
       case ExJsonSchema.Schema.resolve(input_schema) do
         %ExJsonSchema.Schema.Root{} -> []
         {:error, errors} -> [input_schema: "is not a valid JSON schema: #{inspect(errors)}"]
       end
     end)
-    |> validate_required([:url, :method, :input_schema])
   end
 
   defp prom_configuration_changeset(model, attrs) do
@@ -539,6 +620,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url token)a)
     |> validate_required([:token])
+  end
+
+  defp docker_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url provider)a)
+    |> cast_embed(:auth)
   end
 
   defp maybe_validate_app_auth(changeset) do

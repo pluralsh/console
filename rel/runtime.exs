@@ -70,6 +70,18 @@ if get_env("CONSOLE_QPS") do
   config :console, :qps, String.to_integer(get_env("CONSOLE_QPS"))
 end
 
+if get_env("CONSOLE_TARBALL_QPS") do
+  config :console, :tarball_qps, String.to_integer(get_env("CONSOLE_TARBALL_QPS"))
+end
+
+if get_env("CONSOLE_CACHE_AGENT_QPS") do
+  config :console, :cache_agent_qps, String.to_integer(get_env("CONSOLE_CACHE_AGENT_QPS"))
+end
+
+if get_env("CONSOLE_CACHE_AGENT_QUEUE_LIMIT") do
+  config :console, :cache_agent_queue_limit, String.to_integer(get_env("CONSOLE_CACHE_AGENT_QUEUE_LIMIT"))
+end
+
 if get_env("CONSOLE_VERSION") do
   config :console, :version, get_env("CONSOLE_VERSION")
 end
@@ -145,6 +157,11 @@ else
     ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
     ssl_opts: ssl_opts,
     pool_size: pool_size
+end
+
+if get_env("DB_POOL_TARGET") do
+  config :console, Console.Repo,
+    pool_target: String.to_integer(get_env("DB_POOL_TARGET"))
 end
 
 if get_env("CONSOLE_RDS_IAM_AUTH") == "true" do
@@ -372,4 +389,11 @@ if is_set("CONSOLE_AZURE_STORAGE_ACCOUNT") do
     storage_account: get_env("CONSOLE_AZURE_STORAGE_ACCOUNT"),
     container: get_env("CONSOLE_AZURE_STORAGE_CONTAINER"),
     access_key: get_env("CONSOLE_AZURE_STORAGE_ACCESS_KEY")
+end
+
+if is_set("CONSOLE_INSTANCE_DETAILS") do
+  case JSON.decode(get_env("CONSOLE_INSTANCE_DETAILS")) do
+    {:ok, %{} = details} -> config :console, :details, details
+    _ -> :ok
+  end
 end

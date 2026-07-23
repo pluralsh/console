@@ -37,7 +37,7 @@ jobs:
         run: |
           packages=$(make --no-print-directory lint-packages)
           echo "packages=$packages" >> "$GITHUB_OUTPUT"
-      - uses: golangci/golangci-lint-action@v8
+      - uses: golangci/golangci-lint-action@v9
         with:
           working-directory: go
           version: v2.11.4

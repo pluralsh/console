@@ -13,6 +13,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -91,7 +92,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 		}
 		in.recordSessionID(event.SessionID)
 		if event.Message != nil {
-			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
+			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache, in.Config.Usage)
 			if in.onMessage != nil && msg != nil {
 				in.onMessage(msg)
 			}
@@ -157,7 +158,7 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 		}
 		in.recordSessionID(event.SessionID)
 		if event.Message != nil {
-			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
+			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache, in.Config.Usage)
 			if in.onMessage != nil && msg != nil {
 				in.onMessage(msg)
 			}
@@ -219,7 +220,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 		in.recordSessionID(event.SessionID)
 
 		if event.Message != nil {
-			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache)
+			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache, in.Config.Usage)
 			if in.onMessage != nil && msg != nil {
 				in.onMessage(msg)
 			}
@@ -369,7 +370,7 @@ func (in *Claude) ensure() error {
 	return nil
 }
 
-func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]ContentMsg) *console.AgentMessageAttributes {
+func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]ContentMsg, recorder *usage.Usage) *console.AgentMessageAttributes {
 	msg := &console.AgentMessageAttributes{
 		Role: mapRole(event.Message.Role),
 	}
@@ -434,8 +435,16 @@ func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]
 
 	// Map usage → Cost
 	if event.Message.Usage != nil {
-		total := float64(event.Message.Usage.InputTokens + event.Message.Usage.OutputTokens)
-		input := float64(event.Message.Usage.InputTokens)
+		cached := event.Message.Usage.CacheCreationInputTokens + event.Message.Usage.CacheReadInputTokens
+		inputTokens := event.Message.Usage.InputTokens + cached
+		recorder.RecordUsage(usage.Record{
+			InputTokens:  inputTokens,
+			OutputTokens: event.Message.Usage.OutputTokens,
+			CachedTokens: cached,
+		})
+
+		total := float64(inputTokens + event.Message.Usage.OutputTokens)
+		input := float64(inputTokens)
 		output := float64(event.Message.Usage.OutputTokens)
 
 		msg.Cost = &console.AgentMessageCostAttributes{

@@ -29,6 +29,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
     field :model,  :workbench_job_model_attributes, description: "model override for this job"
     field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+    field :budget, :workbench_job_budget_attributes, description: "budget limits for this job"
   end
 
   input_object :workbench_job_model_attributes do
@@ -39,6 +40,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_coding_modes_attributes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  input_object :workbench_job_budget_attributes do
+    field :cost,   :float, description: "maximum cost budget for this job"
+    field :tokens, :integer, description: "maximum token budget for this job"
   end
 
   input_object :workbench_job_update_attributes do
@@ -59,6 +65,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :agent_runtime_id,  :id, description: "the agent runtime for this workbench"
     field :override_bot_user, :boolean, description: "when true on update, sets botUserId to the authenticated user"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
+    field :modes,             :workbench_job_modes_attributes, description: "default mode-specific options for jobs created by this workbench"
     field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
     field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
@@ -163,37 +170,41 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :mcp_server_id,        :id, description: "the mcp server for this tool"
     field :cloud_connection_id,  :id, description: "the cloud connection for this tool (e.g. infrastructure cloud tools)"
     field :scm_connection_id,    :id, description: "the SCM connection for this tool (e.g. shared Git provider credentials)"
+    field :approval,             :boolean, description: "whether this tool requires approval before execution"
     field :read_bindings,        list_of(:policy_binding_attributes), description: "users who can read and execute this tool"
     field :write_bindings,       list_of(:policy_binding_attributes), description: "users who can modify this tool"
     field :configuration,        :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
   end
 
   input_object :workbench_tool_configuration_attributes do
-    field :http,       :workbench_tool_http_configuration_attributes, description: "http tool configuration"
-    field :elastic,    :workbench_tool_elastic_connection_attributes, description: "elasticsearch connection (logs)"
-    field :opensearch, :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
-    field :prometheus, :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
-    field :loki,       :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
-    field :splunk,     :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
-    field :tempo,      :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
-    field :jaeger,     :workbench_tool_jaeger_connection_attributes, description: "jaeger connection (traces)"
-    field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
-    field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
-    field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
-    field :azure,      :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
-    field :sentry,     :workbench_tool_sentry_connection_attributes, description: "sentry connection (error tracking)"
-    field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
-    field :slack,      :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
-    field :pagerduty,  :workbench_tool_pagerduty_connection_attributes, description: "pagerduty connection (integration)"
-    field :teams,      :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
-    field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
-    field :exa,        :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
-    field :github,     :workbench_tool_github_connection_attributes, description: "github connection (integration)"
-    field :gitlab,     :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
-    field :bitbucket,  :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
-    field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes,
-      description: "bitbucket data center connection (scm)"
-    field :azure_devops, :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
+    field :http,                 :workbench_tool_http_configuration_attributes, description: "http tool configuration"
+    field :elastic,              :workbench_tool_elastic_connection_attributes, description: "elasticsearch connection (logs)"
+    field :opensearch,           :workbench_tool_opensearch_connection_attributes, description: "aws opensearch connection (logs)"
+    field :prometheus,           :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
+    field :loki,                 :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
+    field :splunk,               :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
+    field :tempo,                :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
+    field :jaeger,               :workbench_tool_jaeger_connection_attributes, description: "jaeger connection (traces)"
+    field :datadog,              :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
+    field :dynatrace,            :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
+    field :cloudwatch,           :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
+    field :azure,                :workbench_tool_azure_connection_attributes, description: "azure monitor connection (metrics)"
+    field :sentry,               :workbench_tool_sentry_connection_attributes, description: "sentry connection (error tracking)"
+    field :linear,               :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
+    field :slack,                :workbench_tool_slack_connection_attributes, description: "slack connection (integration)"
+    field :pagerduty,            :workbench_tool_pagerduty_connection_attributes, description: "pagerduty connection (integration)"
+    field :teams,                :workbench_tool_teams_connection_attributes, description: "microsoft teams / graph connection (integration)"
+    field :atlassian,            :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
+    field :exa,                  :workbench_tool_exa_connection_attributes, description: "exa connection (search)"
+    field :github,               :workbench_tool_github_connection_attributes, description: "github connection (integration)"
+    field :gitlab,               :workbench_tool_gitlab_connection_attributes, description: "gitlab connection (scm)"
+    field :bitbucket,            :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
+    field :lambda,               :workbench_tool_lambda_connection_attributes, description: "aws lambda function configuration"
+    field :cloud_run,            :workbench_tool_cloud_run_connection_attributes, description: "google cloud run service configuration"
+    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "google cloud function configuration"
+    field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes, description: "bitbucket data center connection (scm)"
+    field :azure_devops,         :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
+    field :docker,               :workbench_tool_docker_connection_attributes, description: "docker/OCI registry connection"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -326,7 +337,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :access_token, :string,
       description: "optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)"
     field :toolset,      :string,
-      description: "optional native tool subset: issues, pull_requests, repos, default/all, or omit for all tools"
+      description: "optional native tool subset: issues, pull_requests, repos, security, default/all, or omit for all tools"
     field :app_id,           :string,
       description: "GitHub App ID (use with installation_id and private_key instead of access_token)"
     field :installation_id, :string, description: "GitHub App installation ID for this organization or account"
@@ -357,11 +368,43 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :token, :string, description: "Azure DevOps personal access token (PAT; encrypted at rest)"
   end
 
+  input_object :workbench_tool_docker_connection_attributes do
+    field :url, :string,
+      description:
+        "Registry host or base URL (defaults to registry-1.docker.io). Repository slugs are provided to individual tools."
+
+    field :provider, :helm_auth_provider,
+      description: "registry authentication provider: basic, bearer, aws, azure, or gcp"
+
+    field :auth, :helm_auth_attributes,
+      description: "registry authentication credentials and optional proxy; secrets are encrypted at rest"
+  end
+
   input_object :workbench_tool_http_configuration_attributes do
     field :url,          non_null(:string), description: "the request url"
     field :method,       non_null(:workbench_tool_http_method), description: "the http method"
+    field :function,     :boolean,
+      description: "when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled"
     field :headers,      list_of(:workbench_tool_http_header_attributes), description: "request headers"
     field :body,         :string, description: "request body"
+    field :input_schema, :json, description: "JSON schema for the tool input"
+  end
+
+  input_object :workbench_tool_lambda_connection_attributes do
+    field :lambda_arn,   non_null(:string), description: "AWS Lambda function ARN"
+    field :description,  non_null(:string), description: "description of the function exposed to the agent"
+    field :input_schema, :json, description: "JSON schema for the tool input"
+  end
+
+  input_object :workbench_tool_cloud_run_connection_attributes do
+    field :identifier,   non_null(:string), description: "Cloud Run service identifier"
+    field :description,  non_null(:string), description: "description of the function exposed to the agent"
+    field :input_schema, :json, description: "JSON schema for the tool input"
+  end
+
+  input_object :workbench_tool_azure_function_connection_attributes do
+    field :identifier,   non_null(:string), description: "Cloud Function identifier"
+    field :description,  non_null(:string), description: "description of the function exposed to the agent"
     field :input_schema, :json, description: "JSON schema for the tool input"
   end
 
@@ -380,6 +423,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :description,   :string, description: "the description of the workbench"
     field :system_prompt, :string, description: "the system prompt for the workbench"
     field :configuration, :workbench_configuration, description: "workbench configuration"
+    field :modes,         :workbench_job_modes, description: "default mode-specific options for jobs created by this workbench"
     field :skills,        :workbench_skills, description: "skills configuration"
 
     field :project,       :project,                  resolve: dataloader(Deployments), description: "the project of this workbench"
@@ -521,6 +565,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :plan,   :boolean, description: "whether planning mode is enabled for this job"
     field :model,  :workbench_job_model, description: "model override for this job"
     field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
+    field :budget, :workbench_job_budget, description: "budget limits for this job"
   end
 
   object :workbench_job_model do
@@ -531,6 +576,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_coding_modes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+  end
+
+  object :workbench_job_budget do
+    field :cost,   :float, description: "maximum cost budget for this job"
+    field :tokens, :integer, description: "maximum token budget for this job"
   end
 
   object :workbench_job_usage do
@@ -583,6 +633,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_activity_result do
     field :output,          :string, description: "output from the activity"
     field :error,           :string, description: "error from the activity"
+    field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
+    field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
     field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
@@ -594,6 +646,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :metrics_query,   :workbench_tool_query_data, description: "primary metrics tool query for this activity"
     field :logs_query,      :workbench_tool_query_data, description: "primary logs tool query for this activity"
     field :traces_query,    :workbench_tool_query_data, description: "primary traces tool query for this activity"
+  end
+
+  object :workbench_job_activity_function_call do
+    field :name,    :string, description: "the function name to invoke"
+    field :input,   :map, description: "input passed to the function"
+    field :tool_id, :id, description: "the workbench tool id backing this function"
+  end
+
+  object :workbench_job_activity_kube_request do
+    field :handle,       :string, description: "the target cluster handle"
+    field :method,       :string, description: "the Kubernetes API HTTP method"
+    field :path,         :string, description: "the Kubernetes API request path"
+    field :body,         :string, description: "the Kubernetes API request body"
+    field :query_params, :map, description: "query parameters sent with the Kubernetes API request"
+    field :content_type, :string, description: "the Kubernetes API request content type"
   end
 
   object :workbench_job_activity_job_update do
@@ -905,6 +972,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,             non_null(:string), description: "the name of the tool"
     field :tool,             non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,       list_of(:workbench_tool_category), description: "categories for the tool"
+    field :approval,         :boolean, description: "whether this tool requires approval before execution"
     field :project,          :project, resolve: dataloader(Deployments), description: "the project of this tool"
     field :read_bindings,    list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this tool"
     field :write_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this tool"
@@ -942,6 +1010,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection,
       description: "bitbucket data center connection (no secrets)"
     field :azure_devops, :workbench_tool_azure_devops_connection, description: "azure devops connection (no secrets)"
+    field :lambda, :workbench_tool_lambda_connection, description: "aws lambda function configuration"
+    field :cloud_run, :workbench_tool_cloud_run_connection, description: "google cloud run service configuration"
+    field :azure_function, :workbench_tool_azure_function_connection,
+      description: "google cloud function configuration"
+    field :docker, :workbench_tool_docker_connection, description: "docker/OCI registry connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -1086,11 +1159,49 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "Azure DevOps REST API root in use (PAT never exposed); defaults to https://dev.azure.com when unset."
   end
 
+  object :workbench_tool_docker_connection do
+    field :url, :string,
+      description: "Docker/OCI registry host in use (credentials never exposed)",
+      resolve: fn
+        %{url: url}, _ when is_binary(url) and byte_size(url) > 0 -> {:ok, url}
+        _, _ -> {:ok, "registry-1.docker.io"}
+      end
+
+    field :provider, :helm_auth_provider, description: "registry authentication provider"
+
+    field :proxy, :http_proxy_configuration,
+      description: "optional HTTP proxy for registry requests",
+      resolve: fn
+        %{auth: %{proxy: proxy}}, _ -> {:ok, proxy}
+        _, _ -> {:ok, nil}
+      end
+  end
+
   object :workbench_tool_http_configuration do
     field :url,          :string, description: "the request url"
     field :method,       :string, description: "the http method"
+    field :function,     :boolean,
+      description: "when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled"
     field :headers,      list_of(:workbench_tool_http_header), description: "request headers"
     field :body,         :string, description: "request body"
+    field :input_schema, :map, description: "JSON schema for the tool input"
+  end
+
+  object :workbench_tool_lambda_connection do
+    field :lambda_arn,   :string, description: "AWS Lambda function ARN"
+    field :description,  :string, description: "description of the function exposed to the agent"
+    field :input_schema, :map, description: "JSON schema for the tool input"
+  end
+
+  object :workbench_tool_cloud_run_connection do
+    field :identifier,   :string, description: "Cloud Run service identifier"
+    field :description,  :string, description: "description of the function exposed to the agent"
+    field :input_schema, :map, description: "JSON schema for the tool input"
+  end
+
+  object :workbench_tool_azure_function_connection do
+    field :identifier,   :string, description: "Cloud Function identifier"
+    field :description,  :string, description: "description of the function exposed to the agent"
     field :input_schema, :map, description: "JSON schema for the tool input"
   end
 
@@ -1645,6 +1756,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
 
       resolve &Deployments.create_workbench_message/2
+    end
+
+    @desc "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
+    field :approve_workbench_job_activity, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id), description: "the workbench job activity to approve"
+
+      resolve &Deployments.approve_workbench_job_activity/2
+    end
+
+    @desc "Rejects a pending workbench activity. Requires read access to the job's workbench."
+    field :reject_workbench_job_activity, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id,     non_null(:id), description: "the workbench job activity to reject"
+      arg :reason, :string, description: "optional reason to store as the rejection output"
+
+      resolve &Deployments.reject_workbench_job_activity/2
     end
 
     @desc "Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update."

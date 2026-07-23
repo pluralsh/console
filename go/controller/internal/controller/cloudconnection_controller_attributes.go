@@ -6,23 +6,12 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/utils"
-	"github.com/samber/lo"
 )
-
-func (r *CloudConnectionReconciler) getProviderSettingsSecretRef(spec v1alpha1.CloudConnectionSpec) v1alpha1.ObjectKeyReference {
-	switch spec.Provider {
-	case v1alpha1.AWS:
-		return spec.Configuration.AWS.SecretAccessKey
-	case v1alpha1.Azure:
-		return spec.Configuration.Azure.ClientSecret
-	case v1alpha1.GCP:
-		return spec.Configuration.GCP.ServiceAccountKey
-	}
-	return v1alpha1.ObjectKeyReference{}
-}
 
 func (r *CloudConnectionReconciler) toCloudConnectionAttributes(ctx context.Context, connection v1alpha1.CloudConnection) (*console.CloudConnectionAttributes, error) {
 	switch connection.Spec.Provider {
@@ -32,9 +21,33 @@ func (r *CloudConnectionReconciler) toCloudConnectionAttributes(ctx context.Cont
 		return r.toCloudConnectionAzureSettingsAttributes(ctx, connection.Spec.Configuration.Azure)
 	case v1alpha1.GCP:
 		return r.toCloudConnectionGCPSettingsAttributes(ctx, connection.Spec.Configuration.GCP)
+	case v1alpha1.Vsphere:
+		return r.toCloudConnectionVsphereSettingsAttributes(ctx, connection.Spec.Configuration.Vsphere)
 	}
 
 	return nil, fmt.Errorf("unsupported cloud: %q", connection.Spec.Provider)
+}
+
+func (r *CloudConnectionReconciler) toCloudConnectionVsphereSettingsAttributes(ctx context.Context, vsphere *v1alpha1.VsphereCloudConnection) (*console.CloudConnectionAttributes, error) {
+	secret, err := utils.GetSecret(ctx, r.Client, &corev1.SecretReference{Name: vsphere.Password.Name, Namespace: vsphere.Password.Namespace})
+	if err != nil {
+		return nil, err
+	}
+	password, exists := secret.Data[vsphere.Password.Key]
+	if !exists {
+		return nil, fmt.Errorf("%q key does not exist in referenced vSphere secret", vsphere.Password.Key)
+	}
+	return &console.CloudConnectionAttributes{
+		Provider: console.ProviderVsphere,
+		Configuration: console.CloudConnectionConfigurationAttributes{
+			Vsphere: &console.VsphereCloudConnectionAttributes{
+				Server:             vsphere.Server,
+				User:               vsphere.User,
+				Password:           string(password),
+				AllowUnverifiedSsl: vsphere.AllowUnverifiedSsl,
+			},
+		},
+	}, nil
 }
 
 func (r *CloudConnectionReconciler) toCloudConnectionAzureSettingsAttributes(ctx context.Context, azure *v1alpha1.AzureCloudConnection) (*console.CloudConnectionAttributes, error) {
@@ -93,8 +106,8 @@ func (r *CloudConnectionReconciler) toCloudConnectionAWSSettingsAttributes(ctx c
 		Provider: console.ProviderAWS,
 		Configuration: console.CloudConnectionConfigurationAttributes{
 			AWS: &console.AWSCloudConnectionAttributes{
-				AccessKeyID:     lo.ToPtr(aws.AccessKeyId),
-				SecretAccessKey: lo.ToPtr(string(secretAccessKey)),
+				AccessKeyID:     new(aws.AccessKeyId),
+				SecretAccessKey: new(string(secretAccessKey)),
 				Region:          aws.Region,
 				Regions:         lo.ToSlicePtr(aws.Regions),
 			},

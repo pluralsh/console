@@ -441,5 +441,49 @@ var _ = Describe("Workbench Tool Controller", Ordered, func() {
 			Expect(k8sClient.Get(ctx, typeNamespacedName, wt)).To(Succeed())
 			Expect(wt.Status.ID).To(Equal(lo.ToPtr(id)))
 		})
+
+		It("should update when resolved CloudConnection ID changes without a spec change", func() {
+			const updatedCloudConnectionID = "cloud-conn-id-456"
+
+			wt := &v1alpha1.WorkbenchTool{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, wt)).To(Succeed())
+			Expect(wt.Status.SHA).NotTo(BeNil())
+			currentSHA := *wt.Status.SHA
+
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.CloudConnection{
+				ObjectMeta: metav1.ObjectMeta{Name: cloudConnectionName, Namespace: namespace},
+			}, func(p *v1alpha1.CloudConnection) {
+				p.Status.ID = lo.ToPtr(updatedCloudConnectionID)
+			})).To(Succeed())
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.WorkbenchTool{
+				ObjectMeta: metav1.ObjectMeta{Name: workbenchToolName, Namespace: namespace},
+			}, func(p *v1alpha1.WorkbenchTool) {
+				p.Status.ID = lo.ToPtr(id)
+				p.Status.SHA = lo.ToPtr(currentSHA)
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetWorkbenchTool", mock.Anything, mock.Anything, mock.Anything).Return(&gqlclient.WorkbenchToolFragment{
+				ID: id,
+				CloudConnection: &gqlclient.CloudConnectionFragment{
+					ID:   cloudConnectionID,
+					Name: cloudConnectionName,
+				},
+			}, nil)
+			fakeConsoleClient.On("UpdateWorkbenchTool", mock.Anything, id, mock.MatchedBy(func(attrs gqlclient.WorkbenchToolAttributes) bool {
+				return attrs.CloudConnectionID != nil && *attrs.CloudConnectionID == updatedCloudConnectionID
+			})).Return(&gqlclient.WorkbenchToolFragment{ID: id}, nil)
+
+			reconciler := &controller.WorkbenchToolReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: nil,
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 })

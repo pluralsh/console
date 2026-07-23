@@ -101,7 +101,7 @@ func (in *Deployment) Namespace() string {
 }
 
 func (in *Deployment) Create(t *testing.T) error {
-	return k8s.KubectlApplyFromStringE(t,
+	return k8s.KubectlApplyFromStringContextE(t, t.Context(),
 		in.toKubectlOptions(),
 		in.toJSON(in.toDeployment()),
 	)
@@ -119,11 +119,11 @@ func (in *Deployment) Delete(t *testing.T) error {
 }
 
 func (in *Deployment) Get(t *testing.T) (*appsv1.Deployment, error) {
-	return k8s.GetDeploymentE(t, in.toKubectlOptions(), in.Name())
+	return k8s.GetDeploymentContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
 func (in *Deployment) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetDeploymentE(t, in.toKubectlOptions(), in.Name())
+	_, err := k8s.GetDeploymentContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}
@@ -143,7 +143,7 @@ func (in *Deployment) WaitForReady(t *testing.T, timeout time.Duration) error {
 		case <-timer.C:
 			return fmt.Errorf("timeout waiting for deployment %s/%s to be ready", in.Namespace(), in.Name())
 		case <-ticker.C:
-			deployment, err := k8s.GetDeploymentE(t, in.toKubectlOptions(), in.Name())
+			deployment, err := k8s.GetDeploymentContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 			if err != nil {
 				t.Logf("failed to get deployment %s/%s: %v", in.Namespace(), in.Name(), err)
 				continue

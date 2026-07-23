@@ -23,7 +23,8 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobThought,
     FlowWorkbench
   }
-  alias Console.AI.{Provider, Tools.Workbench.SavedPrompt, VectorStore}
+  alias Console.AI.{Provider, VectorStore}
+  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -608,13 +609,27 @@ defmodule Console.Deployments.Workbenches do
   @doc """
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
-  @spec create_workbench_job(map, binary, User.t()) :: job_resp
-  def create_workbench_job(attrs, workbench_id, %User{} = user) do
-    %WorkbenchJob{user_id: user.id, workbench_id: workbench_id}
-    |> WorkbenchJob.changeset(Map.put(attrs, :result, %{working_theory: "", conclusion: ""}))
+  @spec create_workbench_job(map, binary | Workbench.t(), User.t()) :: job_resp
+  def create_workbench_job(attrs, %Workbench{id: wb_id} = wb, %User{} = user) do
+    %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
+    |> WorkbenchJob.changeset(
+      attrs
+      |> merge_modes(wb)
+      |> Map.put(:result, %{working_theory: "", conclusion: ""})
+    )
     |> allow(user, :read)
     |> when_ok(:insert)
     |> notify(:create, user)
+  end
+  def create_workbench_job(attrs, workbench_id, %User{} = user) when is_binary(workbench_id) do
+    get_workbench!(workbench_id)
+    |> then(&create_workbench_job(attrs, &1, user))
+  end
+
+  defp merge_modes(attrs, %Workbench{modes: modes}) do
+    Console.mapify(modes || %{})
+    |> DeepMerge.deep_merge(attrs[:modes] || %{})
+    |> then(&Map.put(attrs, :modes, &1))
   end
 
   def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
@@ -630,7 +645,7 @@ defmodule Console.Deployments.Workbenches do
     end)
     |> add_operation(:job, fn %{actor: user} ->
       Map.put(attrs, :modes, Console.mapify(modes))
-      |> create_workbench_job(workbench_id, user)
+      |> create_workbench_job(bench, user)
     end)
     |> execute(extract: :job)
   end
@@ -797,6 +812,59 @@ defmodule Console.Deployments.Workbenches do
     activity
     |> WorkbenchJobActivity.changeset(attrs)
     |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Approves and calls a workbench function call encapsulated in the current activity
+  """
+  @spec approve_job_activity(binary, User.t()) :: activity_resp
+  def approve_job_activity(activity_id, %User{} = user) when is_binary(activity_id) do
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      get_workbench_job_activity!(activity_id)
+      |> allow(user, :approve)
+    end)
+    |> add_operation(:exec, fn
+      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = call}} = activity} ->
+        get_workbench_tool!(call.tool_id)
+        |> FunctionCall.call_function(call.input)
+        |> case do
+          {:ok, output} -> output
+          {:error, err} -> "Internal function calling error: #{inspect(err)}"
+        end
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+        |> Repo.update()
+      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity} ->
+        KubeRequest.invoke(request, user)
+        |> case do
+          {:ok, %{} = output} -> JSON.encode!(output)
+          {:error, {:http_error, _, %{"message" => msg}}} -> "K8s request failed: #{msg}"
+          {:error, {:http_error, _, err}} -> "K8s request failed: #{inspect(err)}"
+          {:error, err} -> "Internal kubernetes request error: #{inspect(err)}"
+        end
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+        |> Repo.update()
+      _ -> {:error, "activity does not support function calling"}
+    end)
+    |> execute(extract: :exec)
+    |> notify(:update)
+  end
+
+  @doc """
+  Rejects a job activity by setting status to successful and setting the output to the reason.
+  """
+  @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
+  def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
+    get_workbench_job_activity!(activity_id)
+    |> allow(user, :approve)
+    |> when_ok(fn activity ->
+      WorkbenchJobActivity.changeset(activity, %{
+        status: :successful,
+        result: %{output: reason || "Execution rejected by user"}
+      })
+    end)
+    |> when_ok(:update)
     |> notify(:update)
   end
 

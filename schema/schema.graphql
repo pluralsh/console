@@ -1250,6 +1250,8 @@ type RootMutationType {
 
   upsertCloudConnection(attributes: CloudConnectionAttributes!): CloudConnection
 
+  updateCloudConnection(id: ID!, attributes: CloudConnectionAttributes!): CloudConnection
+
   deleteCloudConnection(id: ID!): CloudConnection
 
   dismissOnboarding: DeploymentSettings
@@ -1402,6 +1404,21 @@ type RootMutationType {
 
     "message attributes (e.g. prompt)"
     attributes: WorkbenchMessageAttributes!
+  ): WorkbenchJobActivity
+
+  "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
+  approveWorkbenchJobActivity(
+    "the workbench job activity to approve"
+    id: ID!
+  ): WorkbenchJobActivity
+
+  "Rejects a pending workbench activity. Requires read access to the job's workbench."
+  rejectWorkbenchJobActivity(
+    "the workbench job activity to reject"
+    id: ID!
+
+    "optional reason to store as the rejection output"
+    reason: String
   ): WorkbenchJobActivity
 
   "Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update."
@@ -1992,6 +2009,35 @@ input AgentRunStatusAttributes {
 
   "the skills available to this agent run"
   skills: [AgentSkillAttributes]
+
+  "token and cost usage for this agent run"
+  usage: AiUsageAttributes
+}
+
+input AiUsageAttributes {
+  "input tokens consumed by this run"
+  inputTokens: Int
+
+  "output tokens produced by this run"
+  outputTokens: Int
+
+  "total tokens consumed by this run"
+  totalTokens: Int
+
+  "cached input tokens used by this run"
+  cachedTokens: Int
+
+  "reasoning tokens produced by this run"
+  reasoningTokens: Int
+
+  "input token cost for this run"
+  inputCost: Float
+
+  "output token cost for this run"
+  outputCost: Float
+
+  "total token cost for this run"
+  totalCost: Float
 }
 
 input AgentPullRequestAttributes {
@@ -2229,6 +2275,9 @@ type AgentRun {
   "the version of the language to use, if you wish to specify"
   languageVersion: String
 
+  "token and cost usage for this agent run"
+  usage: AgentRunUsage
+
   "the analysis of the agent run"
   analysis: AgentAnalysis
 
@@ -2304,6 +2353,32 @@ type ScmCreds {
 type AgentPodReference {
   name: String!
   namespace: String!
+}
+
+type AgentRunUsage {
+  "input tokens consumed by this run"
+  inputTokens: Int
+
+  "output tokens produced by this run"
+  outputTokens: Int
+
+  "total tokens consumed by this run"
+  totalTokens: Int
+
+  "cached input tokens used by this run"
+  cachedTokens: Int
+
+  "reasoning tokens produced by this run"
+  reasoningTokens: Int
+
+  "input token cost for this run"
+  inputCost: Float
+
+  "output token cost for this run"
+  outputCost: Float
+
+  "total token cost for this run"
+  totalCost: Float
 }
 
 type AgentAnalysis {
@@ -2532,6 +2607,10 @@ enum WorkbenchToolType {
   AZURE_DEVOPS
   PAGERDUTY
   OPENSEARCH
+  LAMBDA
+  CLOUD_RUN
+  AZURE_FUNCTION
+  DOCKER
 }
 
 enum WorkbenchToolCategory {
@@ -2545,6 +2624,7 @@ enum WorkbenchToolCategory {
   SEARCH
   SCM
   CHAT
+  FUNCTION
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2570,6 +2650,7 @@ enum WorkbenchJobActivityStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  NEEDS_APPROVAL
 }
 
 enum WorkbenchJobActivityType {
@@ -2587,6 +2668,8 @@ enum WorkbenchJobActivityType {
   SKILL
   HISTORY
   SEARCH
+  FUNCTION
+  KUBERNETES
 }
 
 enum WorkbenchCanvasBlockType {
@@ -2641,6 +2724,9 @@ input WorkbenchJobModesAttributes {
 
   "coding mode options for this job"
   coding: WorkbenchJobCodingModesAttributes
+
+  "budget limits for this job"
+  budget: WorkbenchJobBudgetAttributes
 }
 
 input WorkbenchJobModelAttributes {
@@ -2657,6 +2743,14 @@ input WorkbenchJobCodingModesAttributes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+}
+
+input WorkbenchJobBudgetAttributes {
+  "maximum cost budget for this job"
+  cost: Float
+
+  "maximum token budget for this job"
+  tokens: Int
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -2693,6 +2787,9 @@ input WorkbenchAttributes {
 
   "workbench configuration"
   configuration: WorkbenchConfigurationAttributes
+
+  "default mode-specific options for jobs created by this workbench"
+  modes: WorkbenchJobModesAttributes
 
   "skills configuration (ref and files)"
   skills: WorkbenchSkillsAttributes
@@ -2908,6 +3005,9 @@ input WorkbenchToolAttributes {
   "the SCM connection for this tool (e.g. shared Git provider credentials)"
   scmConnectionId: ID
 
+  "whether this tool requires approval before execution"
+  approval: Boolean
+
   "users who can read and execute this tool"
   readBindings: [PolicyBindingAttributes]
 
@@ -2985,11 +3085,23 @@ input WorkbenchToolConfigurationAttributes {
   "bitbucket cloud connection (scm)"
   bitbucket: WorkbenchToolBitbucketConnectionAttributes
 
+  "aws lambda function configuration"
+  lambda: WorkbenchToolLambdaConnectionAttributes
+
+  "google cloud run service configuration"
+  cloudRun: WorkbenchToolCloudRunConnectionAttributes
+
+  "google cloud function configuration"
+  azureFunction: WorkbenchToolAzureFunctionConnectionAttributes
+
   "bitbucket data center connection (scm)"
   bitbucketDatacenter: WorkbenchToolBitbucketDatacenterConnectionAttributes
 
   "azure devops connection (scm)"
   azureDevops: WorkbenchToolAzureDevopsConnectionAttributes
+
+  "docker\/OCI registry connection"
+  docker: WorkbenchToolDockerConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -3236,7 +3348,7 @@ input WorkbenchToolGithubConnectionAttributes {
   "optional GitHub personal access token or fine-grained token (omit when using GitHub App credentials)"
   accessToken: String
 
-  "optional native tool subset: issues, pull_requests, repos, default\/all, or omit for all tools"
+  "optional native tool subset: issues, pull_requests, repos, security, default\/all, or omit for all tools"
   toolset: String
 
   "GitHub App ID (use with installation_id and private_key instead of access_token)"
@@ -3281,6 +3393,17 @@ input WorkbenchToolAzureDevopsConnectionAttributes {
   token: String
 }
 
+input WorkbenchToolDockerConnectionAttributes {
+  "Registry host or base URL (defaults to registry-1.docker.io). Repository slugs are provided to individual tools."
+  url: String
+
+  "registry authentication provider: basic, bearer, aws, azure, or gcp"
+  provider: HelmAuthProvider
+
+  "registry authentication credentials and optional proxy; secrets are encrypted at rest"
+  auth: HelmAuthAttributes
+}
+
 input WorkbenchToolHttpConfigurationAttributes {
   "the request url"
   url: String!
@@ -3288,11 +3411,47 @@ input WorkbenchToolHttpConfigurationAttributes {
   "the http method"
   method: WorkbenchToolHttpMethod!
 
+  "when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled"
+  function: Boolean
+
   "request headers"
   headers: [WorkbenchToolHttpHeaderAttributes]
 
   "request body"
   body: String
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolLambdaConnectionAttributes {
+  "AWS Lambda function ARN"
+  lambdaArn: String!
+
+  "description of the function exposed to the agent"
+  description: String!
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolCloudRunConnectionAttributes {
+  "Cloud Run service identifier"
+  identifier: String!
+
+  "description of the function exposed to the agent"
+  description: String!
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolAzureFunctionConnectionAttributes {
+  "Cloud Function identifier"
+  identifier: String!
+
+  "description of the function exposed to the agent"
+  description: String!
 
   "JSON schema for the tool input"
   inputSchema: Json
@@ -3323,6 +3482,9 @@ type Workbench {
 
   "workbench configuration"
   configuration: WorkbenchConfiguration
+
+  "default mode-specific options for jobs created by this workbench"
+  modes: WorkbenchJobModes
 
   "skills configuration"
   skills: WorkbenchSkills
@@ -3515,6 +3677,9 @@ type WorkbenchJobModes {
 
   "coding mode options for this job"
   coding: WorkbenchJobCodingModes
+
+  "budget limits for this job"
+  budget: WorkbenchJobBudget
 }
 
 type WorkbenchJobModel {
@@ -3531,6 +3696,14 @@ type WorkbenchJobCodingModes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+}
+
+type WorkbenchJobBudget {
+  "maximum cost budget for this job"
+  cost: Float
+
+  "maximum token budget for this job"
+  tokens: Int
 }
 
 type WorkbenchJobUsage {
@@ -3640,6 +3813,12 @@ type WorkbenchJobActivityResult {
   "error from the activity"
   error: String
 
+  "function call approval payload when present"
+  functionCall: WorkbenchJobActivityFunctionCall
+
+  "kubernetes request approval payload when present"
+  kubeRequest: WorkbenchJobActivityKubeRequest
+
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
 
@@ -3672,6 +3851,37 @@ type WorkbenchJobActivityResult {
 
   "primary traces tool query for this activity"
   tracesQuery: WorkbenchToolQueryData
+}
+
+type WorkbenchJobActivityFunctionCall {
+  "the function name to invoke"
+  name: String
+
+  "input passed to the function"
+  input: Map
+
+  "the workbench tool id backing this function"
+  toolId: ID
+}
+
+type WorkbenchJobActivityKubeRequest {
+  "the target cluster handle"
+  handle: String
+
+  "the Kubernetes API HTTP method"
+  method: String
+
+  "the Kubernetes API request path"
+  path: String
+
+  "the Kubernetes API request body"
+  body: String
+
+  "query parameters sent with the Kubernetes API request"
+  queryParams: Map
+
+  "the Kubernetes API request content type"
+  contentType: String
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -4177,6 +4387,9 @@ type WorkbenchTool {
   "categories for the tool"
   categories: [WorkbenchToolCategory]
 
+  "whether this tool requires approval before execution"
+  approval: Boolean
+
   "the project of this tool"
   project: Project
 
@@ -4275,6 +4488,18 @@ type WorkbenchToolConfiguration {
 
   "azure devops connection (no secrets)"
   azureDevops: WorkbenchToolAzureDevopsConnection
+
+  "aws lambda function configuration"
+  lambda: WorkbenchToolLambdaConnection
+
+  "google cloud run service configuration"
+  cloudRun: WorkbenchToolCloudRunConnection
+
+  "google cloud function configuration"
+  azureFunction: WorkbenchToolAzureFunctionConnection
+
+  "docker\/OCI registry connection (no secrets)"
+  docker: WorkbenchToolDockerConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -4479,6 +4704,17 @@ type WorkbenchToolAzureDevopsConnection {
   url: String
 }
 
+type WorkbenchToolDockerConnection {
+  "Docker\/OCI registry host in use (credentials never exposed)"
+  url: String
+
+  "registry authentication provider"
+  provider: HelmAuthProvider
+
+  "optional HTTP proxy for registry requests"
+  proxy: HttpProxyConfiguration
+}
+
 type WorkbenchToolHttpConfiguration {
   "the request url"
   url: String
@@ -4486,11 +4722,47 @@ type WorkbenchToolHttpConfiguration {
   "the http method"
   method: String
 
+  "when true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled"
+  function: Boolean
+
   "request headers"
   headers: [WorkbenchToolHttpHeader]
 
   "request body"
   body: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolLambdaConnection {
+  "AWS Lambda function ARN"
+  lambdaArn: String
+
+  "description of the function exposed to the agent"
+  description: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolCloudRunConnection {
+  "Cloud Run service identifier"
+  identifier: String
+
+  "description of the function exposed to the agent"
+  description: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolAzureFunctionConnection {
+  "Cloud Function identifier"
+  identifier: String
+
+  "description of the function exposed to the agent"
+  description: String
 
   "JSON schema for the tool input"
   inputSchema: Map
@@ -5585,6 +5857,7 @@ enum AiProvider {
   BEDROCK
   VERTEX
   OPENAI_COMPATIBLE
+  XAI
 }
 
 enum LogDriver {
@@ -5609,6 +5882,7 @@ enum Provider {
   AWS
   GCP
   AZURE
+  VSPHERE
 }
 
 input ProjectAttributes {
@@ -5755,6 +6029,8 @@ input AiSettingsAttributes {
   openai: OpenaiSettingsAttributes
 
   openaiCompatible: OpenaiSettingsAttributes
+
+  xai: OpenaiSettingsAttributes
 
   anthropic: AnthropicSettingsAttributes
 
@@ -5977,6 +6253,7 @@ input CloudConnectionConfigurationAttributes {
   aws: AwsCloudConnectionAttributes
   gcp: GcpCloudConnectionAttributes
   azure: AzureCloudConnectionAttributes
+  vsphere: VsphereCloudConnectionAttributes
 }
 
 input AwsCloudConnectionAttributes {
@@ -6002,6 +6279,20 @@ input AzureCloudConnectionAttributes {
   tenantId: String!
   clientId: String!
   clientSecret: String!
+}
+
+input VsphereCloudConnectionAttributes {
+  "the vCenter SDK endpoint, for example https:\/\/vcenter.example.com\/sdk"
+  server: String!
+
+  "the vCenter user"
+  user: String!
+
+  "the vCenter password"
+  password: String!
+
+  "whether to allow unverified vCenter TLS certificates"
+  allowUnverifiedSsl: Boolean
 }
 
 "A federated credential is a way to authenticate users from an external identity provider"
@@ -6189,6 +6480,8 @@ type AiSettings {
   openai: OpenaiSettings
 
   openaiCompatible: OpenaiSettings
+
+  xai: OpenaiSettings
 
   anthropic: AnthropicSettings
 
@@ -6421,6 +6714,9 @@ type CloudConnectionConfiguration {
 
   "the credentials for azure"
   azure: AzureConnectionAttributes
+
+  "the credentials for vSphere"
+  vsphere: VsphereConnectionAttributes
 }
 
 "The configuration for a cloud provider"
@@ -6456,6 +6752,18 @@ type AzureConnectionAttributes {
   clientId: String!
 }
 
+"The configuration for a vSphere cloud provider"
+type VsphereConnectionAttributes {
+  "the vCenter SDK endpoint"
+  server: String!
+
+  "the vCenter user"
+  user: String!
+
+  "whether unverified vCenter TLS certificates are allowed"
+  allowUnverifiedSsl: Boolean
+}
+
 "A federated credential is a way to authenticate users from an external identity provider"
 type FederatedCredential {
   id: ID!
@@ -6474,8 +6782,8 @@ type AvailableModel {
 
 type ModelDefault {
   provider: AiProvider!
-  model: String!
-  toolModel: String!
+  model: String
+  toolModel: String
   embeddingModel: String
 }
 
@@ -6972,6 +7280,7 @@ enum StackType {
   ANSIBLE
   CUSTOM
   TERRAGRUNT
+  PULUMI
 }
 
 enum StepStatus {
@@ -7091,6 +7400,9 @@ input StackConfigurationAttributes {
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfigurationAttributes
 
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfigurationAttributes
+
   "the ansible configuration for this stack"
   ansible: AnsibleConfigurationAttributes
 
@@ -7104,6 +7416,9 @@ input StackOverridesAttributes {
 
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfigurationAttributes
+
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfigurationAttributes
 }
 
 input StackHookAttributes {
@@ -7143,6 +7458,23 @@ input TerragruntConfigurationAttributes {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+}
+
+input PulumiConfigurationAttributes {
+  "equivalent to the --parallel flag in pulumi preview, up, and destroy"
+  parallel: Int
+
+  "equivalent to the --refresh flag in pulumi preview, up, and destroy"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
+
+  "equivalent to the --stack flag in pulumi preview, up, and destroy"
+  stack: String
+
+  "optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs"
+  backendUrl: String
 }
 
 input AnsibleConfigurationAttributes {
@@ -7506,6 +7838,9 @@ type StackOverrides {
 
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfiguration
+
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfiguration
 }
 
 "Urls for configuring terraform HTTP remote state"
@@ -7547,6 +7882,9 @@ type StackConfiguration {
 
   "the terragrunt configuration for this stack"
   terragrunt: TerragruntConfiguration
+
+  "the pulumi configuration for this stack"
+  pulumi: PulumiConfiguration
 
   "the ansible configuration for this stack"
   ansible: AnsibleConfiguration
@@ -7619,6 +7957,23 @@ type TerragruntConfiguration {
 
   "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
   approveEmpty: Boolean
+}
+
+type PulumiConfiguration {
+  "equivalent to the --parallel flag in pulumi preview, up, and destroy"
+  parallel: Int
+
+  "equivalent to the --refresh flag in pulumi preview, up, and destroy"
+  refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
+
+  "equivalent to the --stack flag in pulumi preview, up, and destroy"
+  stack: String
+
+  "optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs"
+  backendUrl: String
 }
 
 type AnsibleConfiguration {
@@ -12688,6 +13043,7 @@ input HelmRepositoryAttributes {
 }
 
 input HelmAuthAttributes {
+  proxy: HttpProxyAttributes
   basic: HelmBasicAuthAttributes
   bearer: HelmBearerAuthAttributes
   aws: HelmAwsAuthAttributes
@@ -15615,6 +15971,9 @@ input PersonaConfigurationAttributes {
   "enable individual parts of the deployments views"
   deployments: PersonaDeploymentAttributes
 
+  "enable individual parts of the flows views"
+  flows: PersonaFlowsAttributes
+
   "enable individual aspects of the sidebar"
   sidebar: PersonaSidebarAttributes
 
@@ -15635,10 +15994,20 @@ input PersonaDeploymentAttributes {
   addOns: Boolean
 }
 
+input PersonaFlowsAttributes {
+  permissions: Boolean
+  startWorkbenchJob: Boolean
+  workbenches: Boolean
+  pipelines: Boolean
+  previews: Boolean
+}
+
 input PersonaSidebarAttributes {
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
+  flows: Boolean
+  workbenches: Boolean
   settings: Boolean
   backups: Boolean
   stacks: Boolean
@@ -15850,6 +16219,9 @@ type PersonaConfiguration {
   "enable individual parts of the deployments views"
   deployments: PersonaDeployment
 
+  "enable individual parts of the flows views"
+  flows: PersonaFlows
+
   "enable individual aspects of the sidebar"
   sidebar: PersonaSidebar
 
@@ -15870,10 +16242,20 @@ type PersonaDeployment {
   addOns: Boolean
 }
 
+type PersonaFlows {
+  permissions: Boolean
+  startWorkbenchJob: Boolean
+  workbenches: Boolean
+  pipelines: Boolean
+  previews: Boolean
+}
+
 type PersonaSidebar {
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
+  flows: Boolean
+  workbenches: Boolean
   settings: Boolean
   backups: Boolean
   stacks: Boolean
@@ -15986,6 +16368,11 @@ type AvailableFeatures {
   databaseManagement: Boolean
 }
 
+type ConsoleConfigurationDetails {
+  assumeRoleArn: String
+  egressIps: [String]
+}
+
 type ConsoleConfiguration {
   gitCommit: String
 
@@ -16015,6 +16402,8 @@ type ConsoleConfiguration {
   qoveKey: String
 
   features: AvailableFeatures
+
+  details: ConsoleConfigurationDetails
 
   licenseExpiry: DateTime
 

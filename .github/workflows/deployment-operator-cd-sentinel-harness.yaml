@@ -91,7 +91,7 @@ jobs:
         digest="${{ steps.build.outputs.digest }}"
         touch "${{ runner.temp }}/digests/${digest#sha256:}"
     - name: Upload digest
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: digests-${{ env.PLATFORM_PAIR }}
         path: ${{ runner.temp }}/digests/*
@@ -110,7 +110,7 @@ jobs:
       version: ${{ steps.meta.outputs.version }}
     steps:
     - name: Download digests
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         path: ${{ runner.temp }}/digests
         pattern: digests-*
@@ -151,7 +151,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [publish-base-image]
     env:
-      NODE_VERSION: 24.8.0
+      NODE_VERSION: 24.11.1
     permissions:
       contents: write
       discussions: write
@@ -202,6 +202,6 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         build-args: |
-          GO_VERSION=1.26.3
+          GO_VERSION=1.26.5
           SENTINEL_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/sentinel-harness-base
           SENTINEL_HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}

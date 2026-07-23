@@ -52,6 +52,7 @@ type ConsoleClient interface {
 	GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error)
 	GetCatalogTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalogTiny, error)
 	UpsertCloudConnection(ctx context.Context, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCloudConnection, error)
+	UpdateCloudConnection(ctx context.Context, id string, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateCloudConnection, error)
 	DeleteCloudConnection(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCloudConnection, error)
 	GetCloudConnection(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCloudConnection, error)
 	CreateCluster(ctx context.Context, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateCluster, error)
@@ -100,6 +101,7 @@ type ConsoleClient interface {
 	AddServiceError(ctx context.Context, id string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*AddServiceError, error)
 	UpdateDeploymentSettings(ctx context.Context, attributes DeploymentSettingsAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettings, error)
+	GetDeploymentSettingsMinimal(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettingsMinimal, error)
 	GetServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeployment, error)
 	GetServiceDeploymentTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentTiny, error)
 	GetServiceDeploymentComponents(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetServiceDeploymentComponents, error)
@@ -651,6 +653,7 @@ type AgentRunFragment struct {
 	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
 	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
 	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	Usage           *AgentRunFragment_Usage    "json:\"usage,omitempty\" graphql:\"usage\""
 	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
 	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
 	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
@@ -753,6 +756,12 @@ func (t *AgentRunFragment) GetAnalysis() *AgentAnalysisFragment {
 		t = &AgentRunFragment{}
 	}
 	return t.Analysis
+}
+func (t *AgentRunFragment) GetUsage() *AgentRunFragment_Usage {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.Usage
 }
 func (t *AgentRunFragment) GetScmCreds() *ScmCredentialFragment {
 	if t == nil {
@@ -3410,6 +3419,24 @@ func (t *DeploymentSettingsFragment) GetAi() *AISettingsFragment {
 	return t.Ai
 }
 
+type DeploymentSettingsMinimalFragment struct {
+	AgentHelmValues *string "json:\"agentHelmValues,omitempty\" graphql:\"agentHelmValues\""
+	AgentVsn        string  "json:\"agentVsn\" graphql:\"agentVsn\""
+}
+
+func (t *DeploymentSettingsMinimalFragment) GetAgentHelmValues() *string {
+	if t == nil {
+		t = &DeploymentSettingsMinimalFragment{}
+	}
+	return t.AgentHelmValues
+}
+func (t *DeploymentSettingsMinimalFragment) GetAgentVsn() string {
+	if t == nil {
+		t = &DeploymentSettingsMinimalFragment{}
+	}
+	return t.AgentVsn
+}
+
 type ClusterEdgeFragment struct {
 	Node *ClusterFragment "json:\"node,omitempty\" graphql:\"node\""
 }
@@ -4652,6 +4679,7 @@ type PersonaConfigurationFragment struct {
 	All         *bool                                     "json:\"all,omitempty\" graphql:\"all\""
 	Deployments *PersonaConfigurationFragment_Deployments "json:\"deployments,omitempty\" graphql:\"deployments\""
 	Home        *PersonaConfigurationFragment_Home        "json:\"home,omitempty\" graphql:\"home\""
+	Flows       *PersonaConfigurationFragment_Flows       "json:\"flows,omitempty\" graphql:\"flows\""
 	Sidebar     *PersonaConfigurationFragment_Sidebar     "json:\"sidebar,omitempty\" graphql:\"sidebar\""
 }
 
@@ -4672,6 +4700,12 @@ func (t *PersonaConfigurationFragment) GetHome() *PersonaConfigurationFragment_H
 		t = &PersonaConfigurationFragment{}
 	}
 	return t.Home
+}
+func (t *PersonaConfigurationFragment) GetFlows() *PersonaConfigurationFragment_Flows {
+	if t == nil {
+		t = &PersonaConfigurationFragment{}
+	}
+	return t.Flows
 }
 func (t *PersonaConfigurationFragment) GetSidebar() *PersonaConfigurationFragment_Sidebar {
 	if t == nil {
@@ -6536,6 +6570,7 @@ type StackConfigurationFragment struct {
 	Hooks      []*StackHookFragment                   "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Terraform  *StackConfigurationFragment_Terraform  "json:\"terraform,omitempty\" graphql:\"terraform\""
 	Terragrunt *StackConfigurationFragment_Terragrunt "json:\"terragrunt,omitempty\" graphql:\"terragrunt\""
+	Pulumi     *StackConfigurationFragment_Pulumi     "json:\"pulumi,omitempty\" graphql:\"pulumi\""
 	Ansible    *StackConfigurationFragment_Ansible    "json:\"ansible,omitempty\" graphql:\"ansible\""
 }
 
@@ -6574,6 +6609,12 @@ func (t *StackConfigurationFragment) GetTerragrunt() *StackConfigurationFragment
 		t = &StackConfigurationFragment{}
 	}
 	return t.Terragrunt
+}
+func (t *StackConfigurationFragment) GetPulumi() *StackConfigurationFragment_Pulumi {
+	if t == nil {
+		t = &StackConfigurationFragment{}
+	}
+	return t.Pulumi
 }
 func (t *StackConfigurationFragment) GetAnsible() *StackConfigurationFragment_Ansible {
 	if t == nil {
@@ -7189,6 +7230,66 @@ func (t *AgentRunFragment_Skills) GetName() string {
 		t = &AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type AgentRunFragment_User struct {
@@ -9412,13 +9513,54 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 	return t.Security
 }
 
+type PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -9432,6 +9574,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -9456,6 +9604,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type PersonaConfigurationFragment_Deployments struct {
@@ -9522,13 +9676,54 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 	return t.Security
 }
 
+type PersonaConfigurationFragment_Flows struct {
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
+func (t *PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
+}
+func (t *PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -9542,6 +9737,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -9566,6 +9767,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -11731,6 +11938,45 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Config
 	return t.Refresh
 }
 
+type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -11935,6 +12181,45 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFra
 	return t.Refresh
 }
 
+type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12083,6 +12368,45 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigura
 		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -12235,6 +12559,45 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_
 	return t.Refresh
 }
 
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12383,6 +12746,45 @@ func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Te
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -12589,6 +12991,45 @@ func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackC
 	return t.Refresh
 }
 
+type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12739,6 +13180,45 @@ func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt) G
 	return t.Refresh
 }
 
+type StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -12887,6 +13367,45 @@ func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terrag
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -13093,6 +13612,45 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_St
 	return t.Refresh
 }
 
+type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -13243,6 +13801,45 @@ func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrun
 	return t.Refresh
 }
 
+type StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -13323,6 +13920,45 @@ func (t *StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
 		t = &StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type StackConfigurationFragment_Ansible struct {
@@ -14747,6 +15383,66 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Skills) GetName() string {
 	return t.Name
 }
 
+type GetAgentRun_AgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *GetAgentRun_AgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -14888,6 +15584,66 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills) GetName() s
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
@@ -15091,6 +15847,66 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 	return t.Name
 }
 
+type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15221,6 +16037,66 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Skills) GetName() string
 	return t.Name
 }
 
+type CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
+}
+
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -15287,6 +16163,66 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills) GetName() string
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Skills{}
 	}
 	return t.Name
+}
+
+type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage struct {
+	CachedTokens    *int64   "json:\"cachedTokens,omitempty\" graphql:\"cachedTokens\""
+	InputCost       *float64 "json:\"inputCost,omitempty\" graphql:\"inputCost\""
+	InputTokens     *int64   "json:\"inputTokens,omitempty\" graphql:\"inputTokens\""
+	OutputCost      *float64 "json:\"outputCost,omitempty\" graphql:\"outputCost\""
+	OutputTokens    *int64   "json:\"outputTokens,omitempty\" graphql:\"outputTokens\""
+	ReasoningTokens *int64   "json:\"reasoningTokens,omitempty\" graphql:\"reasoningTokens\""
+	TotalCost       *float64 "json:\"totalCost,omitempty\" graphql:\"totalCost\""
+	TotalTokens     *int64   "json:\"totalTokens,omitempty\" graphql:\"totalTokens\""
+}
+
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetCachedTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.CachedTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetInputTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.InputTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetOutputTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.OutputTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetReasoningTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.ReasoningTokens
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalCost() *float64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalCost
+}
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage) GetTotalTokens() *int64 {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Usage{}
+	}
+	return t.TotalTokens
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
@@ -23397,13 +24333,54 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 	return t.Security
 }
 
+type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23417,6 +24394,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23441,6 +24424,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type GetPersonaTiny_Persona struct {
@@ -23525,13 +24514,54 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23545,6 +24575,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23569,6 +24605,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -23635,13 +24677,54 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23655,6 +24738,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23679,6 +24768,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Deployments struct {
@@ -23745,13 +24840,54 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 	return t.Security
 }
 
+type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows struct {
+	Permissions       *bool "json:\"permissions,omitempty\" graphql:\"permissions\""
+	Pipelines         *bool "json:\"pipelines,omitempty\" graphql:\"pipelines\""
+	Previews          *bool "json:\"previews,omitempty\" graphql:\"previews\""
+	StartWorkbenchJob *bool "json:\"startWorkbenchJob,omitempty\" graphql:\"startWorkbenchJob\""
+	Workbenches       *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
+}
+
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPermissions() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Permissions
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPipelines() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Pipelines
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetPreviews() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Previews
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetStartWorkbenchJob() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.StartWorkbenchJob
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Flows{}
+	}
+	return t.Workbenches
+}
+
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
+	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
@@ -23765,6 +24901,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Flows
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -23789,6 +24931,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Stacks
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetWorkbenches() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Workbenches
 }
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -26851,6 +27999,45 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 	return t.Refresh
 }
 
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -26999,6 +28186,45 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -27187,6 +28413,45 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 	return t.Refresh
 }
 
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27355,6 +28620,45 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 	return t.Refresh
 }
 
+type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27521,6 +28825,45 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -27738,6 +29081,45 @@ func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment
 	return t.Refresh
 }
 
+type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -27886,6 +29268,45 @@ func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationF
 		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -28092,6 +29513,45 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 	return t.Refresh
 }
 
+type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -28240,6 +29700,45 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -28446,6 +29945,45 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 	return t.Refresh
 }
 
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -28594,6 +30132,45 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackC
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -28746,6 +30323,45 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_Stack
 	return t.Refresh
 }
 
+type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -28896,6 +30512,45 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_Stack
 	return t.Refresh
 }
 
+type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -29044,6 +30699,45 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -29305,6 +30999,45 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 	return t.Refresh
 }
 
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -29453,6 +31186,45 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Conf
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -29699,6 +31471,45 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 	return t.Refresh
 }
 
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
+}
+
 type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
 	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
 	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
@@ -29847,6 +31658,45 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigura
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
 	}
 	return t.Refresh
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
+	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
+	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
+	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.ApproveEmpty
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.BackendURL
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Parallel
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Refresh
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
+	}
+	return t.Stack
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
@@ -37199,6 +39049,17 @@ func (t *UpsertCloudConnection) GetUpsertCloudConnection() *CloudConnectionFragm
 	return t.UpsertCloudConnection
 }
 
+type UpdateCloudConnection struct {
+	UpdateCloudConnection *CloudConnectionFragment "json:\"updateCloudConnection,omitempty\" graphql:\"updateCloudConnection\""
+}
+
+func (t *UpdateCloudConnection) GetUpdateCloudConnection() *CloudConnectionFragment {
+	if t == nil {
+		t = &UpdateCloudConnection{}
+	}
+	return t.UpdateCloudConnection
+}
+
 type DeleteCloudConnection struct {
 	DeleteCloudConnection *CloudConnectionFragment "json:\"deleteCloudConnection,omitempty\" graphql:\"deleteCloudConnection\""
 }
@@ -37723,6 +39584,17 @@ type GetDeploymentSettings struct {
 func (t *GetDeploymentSettings) GetDeploymentSettings() *DeploymentSettingsFragment {
 	if t == nil {
 		t = &GetDeploymentSettings{}
+	}
+	return t.DeploymentSettings
+}
+
+type GetDeploymentSettingsMinimal struct {
+	DeploymentSettings *DeploymentSettingsMinimalFragment "json:\"deploymentSettings,omitempty\" graphql:\"deploymentSettings\""
+}
+
+func (t *GetDeploymentSettingsMinimal) GetDeploymentSettings() *DeploymentSettingsMinimalFragment {
+	if t == nil {
+		t = &GetDeploymentSettingsMinimal{}
 	}
 	return t.DeploymentSettings
 }
@@ -40571,6 +42443,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -40793,6 +42675,16 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -41040,6 +42932,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41273,6 +43175,16 @@ fragment AgentRunFragment on AgentRun {
 	analysis {
 		... AgentAnalysisFragment
 	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
+	}
 	scmCreds {
 		... ScmCredentialFragment
 	}
@@ -41443,6 +43355,16 @@ fragment AgentRunFragment on AgentRun {
 	error
 	analysis {
 		... AgentAnalysisFragment
+	}
+	usage {
+		inputTokens
+		outputTokens
+		totalTokens
+		cachedTokens
+		reasoningTokens
+		inputCost
+		outputCost
+		totalCost
 	}
 	scmCreds {
 		... ScmCredentialFragment
@@ -42667,6 +44589,59 @@ func (c *Client) UpsertCloudConnection(ctx context.Context, attributes CloudConn
 
 	var res UpsertCloudConnection
 	if err := c.Client.Post(ctx, "UpsertCloudConnection", UpsertCloudConnectionDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateCloudConnectionDocument = `mutation UpdateCloudConnection ($id: ID!, $attributes: CloudConnectionAttributes!) {
+	updateCloudConnection(id: $id, attributes: $attributes) {
+		... CloudConnectionFragment
+	}
+}
+fragment CloudConnectionFragment on CloudConnection {
+	id
+	name
+	readBindings {
+		... PolicyBindingFragment
+	}
+	provider
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+	global
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpdateCloudConnection(ctx context.Context, id string, attributes CloudConnectionAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateCloudConnection, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateCloudConnection
+	if err := c.Client.Post(ctx, "UpdateCloudConnection", UpdateCloudConnectionDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -48131,6 +50106,32 @@ func (c *Client) GetDeploymentSettings(ctx context.Context, interceptors ...clie
 
 	var res GetDeploymentSettings
 	if err := c.Client.Post(ctx, "GetDeploymentSettings", GetDeploymentSettingsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetDeploymentSettingsMinimalDocument = `query GetDeploymentSettingsMinimal {
+	deploymentSettings {
+		... DeploymentSettingsMinimalFragment
+	}
+}
+fragment DeploymentSettingsMinimalFragment on DeploymentSettings {
+	agentHelmValues
+	agentVsn
+}
+`
+
+func (c *Client) GetDeploymentSettingsMinimal(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettingsMinimal, error) {
+	vars := map[string]any{}
+
+	var res GetDeploymentSettingsMinimal
+	if err := c.Client.Post(ctx, "GetDeploymentSettingsMinimal", GetDeploymentSettingsMinimalDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -54482,13 +56483,22 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		permissions
+		startWorkbenchJob
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -54585,13 +56595,22 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		permissions
+		startWorkbenchJob
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -54663,13 +56682,22 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		permissions
+		startWorkbenchJob
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -54742,13 +56770,22 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		manager
 		security
 	}
+	flows {
+		permissions
+		startWorkbenchJob
+		pipelines
+		previews
+		workbenches
+	}
 	sidebar {
 		audits
+		flows
 		kubernetes
 		pullRequests
 		settings
 		backups
 		stacks
+		workbenches
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -57891,6 +59928,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
+	}
 	ansible {
 		inventory
 		playbook
@@ -58180,6 +60224,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
+	}
 	ansible {
 		inventory
 		playbook
@@ -58347,6 +60398,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
 	}
 	ansible {
 		inventory
@@ -58541,6 +60599,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
 	}
 	ansible {
 		inventory
@@ -58789,6 +60854,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
 	}
 	ansible {
 		inventory
@@ -59125,6 +61197,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
+	}
 	ansible {
 		inventory
 		playbook
@@ -59460,6 +61539,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
+	}
 	ansible {
 		inventory
 		playbook
@@ -59753,6 +61839,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
+	}
 	ansible {
 		inventory
 		playbook
@@ -59980,6 +62073,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
 	}
 	ansible {
 		inventory
@@ -60263,6 +62363,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
 	}
 	ansible {
 		inventory
@@ -60964,6 +63071,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
+	}
 	ansible {
 		inventory
 		playbook
@@ -61302,6 +63416,13 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	pulumi {
+		parallel
+		refresh
+		approveEmpty
+		stack
+		backendUrl
 	}
 	ansible {
 		inventory
@@ -64685,6 +66806,7 @@ var DocumentOperationNames = map[string]string{
 	GetCatalogDocument:                                "GetCatalog",
 	GetCatalogTinyDocument:                            "GetCatalogTiny",
 	UpsertCloudConnectionDocument:                     "UpsertCloudConnection",
+	UpdateCloudConnectionDocument:                     "UpdateCloudConnection",
 	DeleteCloudConnectionDocument:                     "DeleteCloudConnection",
 	GetCloudConnectionDocument:                        "GetCloudConnection",
 	CreateClusterDocument:                             "CreateCluster",
@@ -64733,6 +66855,7 @@ var DocumentOperationNames = map[string]string{
 	AddServiceErrorDocument:                           "AddServiceError",
 	UpdateDeploymentSettingsDocument:                  "UpdateDeploymentSettings",
 	GetDeploymentSettingsDocument:                     "GetDeploymentSettings",
+	GetDeploymentSettingsMinimalDocument:              "GetDeploymentSettingsMinimal",
 	GetServiceDeploymentDocument:                      "GetServiceDeployment",
 	GetServiceDeploymentTinyDocument:                  "GetServiceDeploymentTiny",
 	GetServiceDeploymentComponentsDocument:            "GetServiceDeploymentComponents",

@@ -4,6 +4,7 @@ import {
   AzureLogoIcon,
   BitBucketIcon,
   DatadogLogoIcon,
+  DockerLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
   GitHubLogoIcon,
@@ -22,6 +23,7 @@ import {
   SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
+  VSphereLogoIcon,
 } from '@pluralsh/design-system'
 import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
@@ -60,6 +62,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Cloudwatch,
   WorkbenchToolType.Azure,
   WorkbenchToolType.Sentry,
+  WorkbenchToolType.Docker,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -94,6 +97,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
   [WorkbenchToolType.Azure]: 'azure',
   [WorkbenchToolType.Sentry]: 'sentry',
+  [WorkbenchToolType.Docker]: 'docker',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -157,9 +161,14 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.BitbucketDatacenter]: 'Bitbucket Data Center',
   [WorkbenchToolType.AzureDevops]: 'Azure DevOps',
   [WorkbenchToolType.Cloud]: 'Cloud',
+  [WorkbenchToolType.Lambda]: 'AWS Lambda',
+  [WorkbenchToolType.CloudRun]: 'GCP Cloud Run',
+  [WorkbenchToolType.AzureFunction]: 'Azure Function',
+  [WorkbenchToolType.Docker]: 'Docker / OCI registry',
   [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
   [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
   [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
+  [`${WorkbenchToolType.Cloud}:${Provider.Vsphere}`]: 'vSphere',
 }
 
 export const getWorkbenchToolLabel = (
@@ -177,6 +186,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Datadog]: [
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
+    WorkbenchToolCategory.Traces,
   ],
   [WorkbenchToolType.Elastic]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Opensearch]: [WorkbenchToolCategory.Logs],
@@ -211,8 +221,12 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
     WorkbenchToolCategory.Metrics,
     WorkbenchToolCategory.Logs,
   ],
+  [WorkbenchToolType.Lambda]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.CloudRun]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.AzureFunction]: [WorkbenchToolCategory.Function],
   [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
   [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
+  [WorkbenchToolType.Docker]: [WorkbenchToolCategory.Integration],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
@@ -242,7 +256,7 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
   [WorkbenchToolType.Exa]:
     'Search the web with Exa to fetch high-signal context for tasks.',
   [WorkbenchToolType.Github]:
-    'Use the GitHub REST API for repository, issue, and pull request workflows.',
+    'Use the GitHub REST API for repository, issue, pull request, and security workflows.',
   [WorkbenchToolType.Gitlab]:
     'Connect to GitLab for repository and merge request workflows via the GitLab API.',
   [WorkbenchToolType.Bitbucket]:
@@ -263,6 +277,8 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Query distributed traces from Jaeger with structured filters.',
   [WorkbenchToolType.Sentry]:
     'Connect to Sentry to list issues, inspect error details, and read stack traces.',
+  [WorkbenchToolType.Docker]:
+    'Inspect Docker and OCI registries by listing tags and fetching manifests.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -276,6 +292,7 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.Chat]: 'Chat',
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
+  [WorkbenchToolCategory.Function]: 'Cloud Function',
 }
 
 export type WorkbenchToolCard = {
@@ -318,6 +335,14 @@ export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
       'Query Azure infrastructure (VMs, storage accounts, resource groups, and more) via CloudQuery.',
     categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
   },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Vsphere,
+    label: 'vSphere',
+    description:
+      'Query vSphere infrastructure (datacenters, clusters, hosts, VMs, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
   ...CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
     type,
     description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
@@ -332,6 +357,7 @@ export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
   [Provider.Aws]: AwsLogoIcon,
   [Provider.Gcp]: GoogleCloudLogoIcon,
   [Provider.Azure]: AzureLogoIcon,
+  [Provider.Vsphere]: VSphereLogoIcon,
 }
 
 export const isProvider = (value: Nullable<string>): value is Provider =>
@@ -412,4 +438,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Azure]: AzureLogoIcon,
   [WorkbenchToolType.Jaeger]: ToolsIcon,
   [WorkbenchToolType.Sentry]: SentryLogoIcon,
+  [WorkbenchToolType.Docker]: DockerLogoIcon,
 }

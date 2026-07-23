@@ -7,6 +7,7 @@ defmodule Console.Schema.WorkbenchJob do
     WorkbenchEvalResult,
     WorkbenchJobResult,
     WorkbenchJobActivity,
+    AIUsage,
     User,
     Alert,
     Issue,
@@ -27,9 +28,23 @@ defmodule Console.Schema.WorkbenchJob do
       end
 
       field :plan, :boolean
+
+      embeds_one :kubernetes, Kubernetes, on_replace: :update do
+        field :update, :boolean, default: false
+        field :delete, :boolean, default: false
+
+        field :exclude_namespaces, {:array, :string}
+        field :require_namespaces, {:array, :string}
+      end
+
       embeds_one :coding, Coding, on_replace: :update do
         field :babysit,  :boolean
         field :approval, :boolean
+      end
+
+      embeds_one :budget, Budget, on_replace: :update do
+        field :cost,   :float
+        field :tokens, :integer
       end
     end
 
@@ -38,6 +53,8 @@ defmodule Console.Schema.WorkbenchJob do
       |> cast(attrs, [:plan])
       |> cast_embed(:model, with: &model_changeset/2)
       |> cast_embed(:coding, with: &coding_changeset/2)
+      |> cast_embed(:budget, with: &budget_changeset/2)
+      |> cast_embed(:kubernetes, with: &kubernetes_changeset/2)
     end
 
     defp model_changeset(model, attrs) do
@@ -49,6 +66,16 @@ defmodule Console.Schema.WorkbenchJob do
     defp coding_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(babysit approval)a)
+    end
+
+    defp budget_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(cost tokens)a)
+    end
+
+    defp kubernetes_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(update delete exclude_namespaces require_namespaces)a)
     end
   end
 
@@ -66,16 +93,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     embeds_one :modes, Modes, on_replace: :update
 
-    embeds_one :usage, Usage, on_replace: :update do
-      field :input_tokens,     :integer
-      field :output_tokens,    :integer
-      field :total_tokens,     :integer
-      field :cached_tokens,    :integer
-      field :reasoning_tokens, :integer
-      field :input_cost,       :float
-      field :output_cost,      :float
-      field :total_cost,       :float
-    end
+    embeds_one :usage, AIUsage, on_replace: :update
 
     belongs_to :workbench,      Workbench
     belongs_to :user,           User
@@ -231,7 +249,7 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
     |> cast_embed(:modes)
-    |> cast_embed(:usage, with: &usage_changeset/2)
+    |> cast_embed(:usage)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:alert_id)
@@ -246,20 +264,6 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast(attrs, [])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
-  end
-
-  defp usage_changeset(model, attrs) do
-    model
-    |> cast(attrs, ~w(
-      input_tokens
-      output_tokens
-      total_tokens
-      cached_tokens
-      reasoning_tokens
-      input_cost
-      output_cost
-      total_cost
-    )a)
   end
 end
 

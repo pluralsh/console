@@ -106,6 +106,33 @@ defmodule Console.Deployments.PubSub.CacheableTest do
     end
   end
 
+  describe "WorkbenchJobCreated" do
+    test "caches chatbot messages by external id" do
+      external_id = "1730000000.000001"
+
+      job =
+        insert(:workbench_job,
+          chatbot_message:
+            build(:chatbot_message,
+              external_id: external_id,
+              external_parent_id: "1729999999.000001",
+              workbench_job: nil
+            )
+        )
+
+      job = Repo.preload(job, :chatbot_message)
+      msg = job.chatbot_message
+
+      expect(Console.Cache, :put, fn {:chatbot_msg, ^external_id}, ^msg, ttl: ttl ->
+        assert ttl == :timer.hours(24)
+        :ok
+      end)
+
+      event = %PubSub.WorkbenchJobCreated{item: job}
+      Cache.handle_event(event)
+    end
+  end
+
   describe "IssueWebhookCreated" do
     test "calls Console.Cache.delete with {:issue_webhook, external_id}" do
       %{external_id: ext_id} = hook = insert(:issue_webhook, provider: :linear)
@@ -168,6 +195,29 @@ defmodule Console.Deployments.PubSub.CacheableTest do
       expect(Console.Cache, :delete, fn {:obs_webhook, ^ext_id} -> :ok end)
 
       event = %PubSub.ObservabilityWebhookDeleted{item: hook}
+      Cache.handle_event(event)
+    end
+  end
+
+  describe "pipeline cache invalidation" do
+    test "PipelineUpserted deletes the pipelined services cache" do
+      expect(Console.Cache, :delete, fn :pipelined_services -> :ok end)
+
+      event = %PubSub.PipelineUpserted{item: insert(:pipeline)}
+      Cache.handle_event(event)
+    end
+
+    test "PipelineDeleted deletes the pipelined services cache" do
+      expect(Console.Cache, :delete, fn :pipelined_services -> :ok end)
+
+      event = %PubSub.PipelineDeleted{item: insert(:pipeline)}
+      Cache.handle_event(event)
+    end
+
+    test "PipelineStageUpdated deletes the pipelined services cache" do
+      expect(Console.Cache, :delete, fn :pipelined_services -> :ok end)
+
+      event = %PubSub.PipelineStageUpdated{item: insert(:pipeline_stage)}
       Cache.handle_event(event)
     end
   end

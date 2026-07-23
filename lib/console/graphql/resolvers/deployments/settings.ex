@@ -53,6 +53,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
   def upsert_cloud_connection(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Settings.upsert_cloud_connection(attrs, user)
 
+  def update_cloud_connection(%{attributes: attrs, id: id}, %{context: %{current_user: user}}),
+    do: Settings.update_cloud_connection(attrs, id, user)
+
   def delete_cloud_connection(%{id: id}, %{context: %{current_user: user}}),
     do: Settings.delete_cloud_connection(id, user)
 

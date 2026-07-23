@@ -80,6 +80,21 @@ fragment Workbench on Workbench {
       enableBabysitting
     }
   }
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   skills {
     ref {
       ref
@@ -249,6 +264,14 @@ fragment WorkbenchTool on WorkbenchTool {
     azureDevops {
       url
     }
+    docker {
+      url
+      provider
+      proxy {
+        url
+        noproxy
+      }
+    }
   }
 }
 
@@ -371,6 +394,19 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
 fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   output
   error
+  functionCall {
+    name
+    input
+    toolId
+  }
+  kubeRequest {
+    handle
+    method
+    path
+    body
+    queryParams
+    contentType
+  }
   jobUpdate {
     diff
     workingTheory
@@ -435,6 +471,21 @@ fragment WorkbenchCron on WorkbenchCron {
   crontab
   prompt
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   lastRunAt
   nextRunAt
   insertedAt
@@ -456,6 +507,21 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   prompt
   priority
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   matches {
     regex
     substring
@@ -501,6 +567,21 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   prompt
   messageBehavior
   userId
+  modes {
+    plan
+    model {
+      provider
+      model
+    }
+    coding {
+      approval
+      babysit
+    }
+    budget {
+      cost
+      tokens
+    }
+  }
   insertedAt
   updatedAt
   chatConnection {
@@ -557,9 +638,16 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
+  error
   insertedAt
   usage {
     ...WorkbenchJobUsageTiny
+  }
+  modes {
+    budget {
+      cost
+      tokens
+    }
   }
   user {
     id
@@ -615,7 +703,6 @@ fragment WorkbenchJob on WorkbenchJob {
       ...WorkbenchToolTiny
     }
   }
-  error
   alert {
     ...Alert
   }

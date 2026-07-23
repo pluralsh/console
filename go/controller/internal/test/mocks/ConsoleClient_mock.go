@@ -9344,6 +9344,66 @@ func (_c *ConsoleClientMock_SaveServiceContext_Call) RunAndReturn(run func(strin
 	return _c
 }
 
+// UpdateCloudConnection provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateCloudConnection(ctx context.Context, id string, attributes client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateCloudConnection")
+	}
+
+	var r0 *client.CloudConnectionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.CloudConnectionAttributes) *client.CloudConnectionFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.CloudConnectionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.CloudConnectionAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateCloudConnection_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateCloudConnection'
+type ConsoleClientMock_UpdateCloudConnection_Call struct {
+	*mock.Call
+}
+
+// UpdateCloudConnection is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.CloudConnectionAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateCloudConnection(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateCloudConnection_Call {
+	return &ConsoleClientMock_UpdateCloudConnection_Call{Call: _e.mock.On("UpdateCloudConnection", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateCloudConnection_Call) Run(run func(ctx context.Context, id string, attributes client.CloudConnectionAttributes)) *ConsoleClientMock_UpdateCloudConnection_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.CloudConnectionAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateCloudConnection_Call) Return(_a0 *client.CloudConnectionFragment, _a1 error) *ConsoleClientMock_UpdateCloudConnection_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateCloudConnection_Call) RunAndReturn(run func(context.Context, string, client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error)) *ConsoleClientMock_UpdateCloudConnection_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateCluster provides a mock function with given fields: id, attrs
 func (_m *ConsoleClientMock) UpdateCluster(id string, attrs client.ClusterUpdateAttributes) (*client.ClusterFragment, error) {
 	ret := _m.Called(id, attrs)

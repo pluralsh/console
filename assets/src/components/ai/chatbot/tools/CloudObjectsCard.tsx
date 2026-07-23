@@ -1,6 +1,7 @@
 import { ReactElement, useMemo } from 'react'
 import styled from 'styled-components'
 import { AwsObjects } from './cloudquery/AWS.tsx'
+import { VSphereObjects } from './cloudquery/VSphere.tsx'
 
 // Cloud query uses prefixes to identify the provider and object type.
 // It should match i.e. `aws_vpc`, `gcp_vpc`, `azure_vpc` etc.
@@ -8,6 +9,7 @@ enum ProviderPrefix {
   AWS = 'aws_',
   GCP = 'gcp_',
   Azure = 'azure_',
+  VSphere = 'vsphere_',
 }
 
 export enum ProviderObjectType {
@@ -18,6 +20,10 @@ export enum ProviderObjectType {
   S3 = 's3_bucket',
   EC2 = 'ec2_instance',
   RDS = 'rds_db_instance',
+  VSphereVM = 'vm',
+  VSphereHost = 'host',
+  VSphereDatastore = 'datastore',
+  VSphereNetwork = 'network',
 }
 
 interface CloudObjectsCardProps {
@@ -111,6 +117,13 @@ function CloudObjectCard({
     case ProviderPrefix.AWS:
       return (
         <AwsObjects
+          type={type}
+          objects={objects}
+        />
+      )
+    case ProviderPrefix.VSphere:
+      return (
+        <VSphereObjects
           type={type}
           objects={objects}
         />

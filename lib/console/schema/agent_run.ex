@@ -10,6 +10,7 @@ defmodule Console.Schema.AgentRun do
     PullRequest,
     AgentSession,
     AgentRunUpload,
+    AIUsage,
     WorkbenchJobActivityAgentRun
   }
 
@@ -39,6 +40,8 @@ defmodule Console.Schema.AgentRun do
     field :tool, :map, virtual: true
 
     embeds_one :pod_reference, NamespacedName, on_replace: :update
+
+    embeds_one :usage, AIUsage, on_replace: :update
 
     embeds_many :skills, Skill, on_replace: :delete do
       field :name,        :string
@@ -111,6 +114,7 @@ defmodule Console.Schema.AgentRun do
     |> foreign_key_constraint(:flow_id)
     |> validate_repository()
     |> cast_embed(:pod_reference)
+    |> cast_embed(:usage)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:analysis, with: &analysis_changeset/2)
     |> cast_embed(:skills, with: &skill_changeset/2)

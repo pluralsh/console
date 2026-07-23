@@ -87,6 +87,7 @@ export function WorkbenchJobsTableContent({
       hideHeader
       fullHeightWrap
       virtualizeRows
+      lockColumnsOnScroll={false}
       data={jobs}
       columns={
         columns ?? [userColumn, promptColumn, usageColumn, ...actionColumns]
@@ -171,7 +172,13 @@ export const workbenchColumn = columnHelper.accessor(
 export const usageColumn = columnHelper.accessor(({ usage }) => usage, {
   id: 'usage',
   meta: { gridTemplate: '120px' },
-  cell: ({ getValue }) => <WorkbenchUsageSummaryChip usage={getValue()} />,
+  cell: ({ getValue, row }) => (
+    <WorkbenchUsageSummaryChip
+      usage={getValue()}
+      budget={row.original.modes?.budget}
+      error={row.original.error}
+    />
+  ),
 })
 
 function JobSourceChips({
@@ -306,6 +313,8 @@ export function WorkbenchJobActionsRow({
         display: 'flex',
         gap: theme.spacing.small,
         alignItems: 'center',
+        minWidth: 0,
+        overflow: 'hidden',
       }}
     >
       <JobSourceChips
@@ -327,6 +336,8 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
       onClick={(e) => e.stopPropagation()}
       css={{
         width: '100%',
+        minWidth: 0,
+        overflow: 'hidden',
         display: 'flex',
         gap: theme.spacing.small,
         alignItems: 'center',
@@ -345,7 +356,7 @@ function JobActionsCell({ job }: { job: WorkbenchJobTinyFragment }) {
 
 export const actionsColumn = columnHelper.display({
   id: 'actions',
-  meta: { gridTemplate: 'min-content' },
+  meta: { gridTemplate: 'fit-content(220px)' },
   cell: ({ row: { original } }) => <JobActionsCell job={original} />,
 })
 

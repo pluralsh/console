@@ -20,22 +20,40 @@ func MarkStackRun(client console.Client, id string, status gqlclient.StackStatus
 	})
 }
 
-func MarkStackRunWithRetry(client console.Client, id string, status gqlclient.StackStatus, interval time.Duration) {
+func MarkStackRunWithRetry(client console.Client, id string, status gqlclient.StackStatus, interval time.Duration) error {
+	return markStackRunWithRetry(context.Background(), client, id, status, interval)
+}
+
+func MarkStackRunWithRetryTimeout(client console.Client, id string, status gqlclient.StackStatus, interval, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	return markStackRunWithRetry(ctx, client, id, status, interval)
+}
+
+func markStackRunWithRetry(ctx context.Context, client console.Client, id string, status gqlclient.StackStatus, interval time.Duration) error {
+	var result error
+
 	// Ignore error since we never return it from the condition function.
-	_ = wait.PollUntilContextCancel(context.Background(), interval, true, func(ctx context.Context) (done bool, err error) {
-		err = MarkStackRun(client, id, status)
-		if err != nil {
-			if clienterrors.IsUnauthenticated(err) {
-				klog.Errorf("stack run update stopped due to console authentication failure: %v", err)
+	err := wait.PollUntilContextCancel(ctx, interval, true, func(ctx context.Context) (done bool, err error) {
+		result = MarkStackRun(client, id, status)
+		if result != nil {
+			if clienterrors.IsUnauthenticated(result) {
+				klog.Errorf("stack run update stopped due to console authentication failure: %v", result)
 				return true, nil
 			}
 
-			klog.Errorf("stack run update failed: %v", err)
+			klog.Errorf("stack run update failed: %v", result)
 			return false, nil
 		}
 
 		return true, nil
 	})
+	if result == nil {
+		result = err
+	}
+
+	return result
 }
 
 func StartStackRun(client console.Client, id string) error {

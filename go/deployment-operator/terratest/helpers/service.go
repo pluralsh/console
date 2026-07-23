@@ -98,7 +98,7 @@ func (in *Service) Namespace() string {
 }
 
 func (in *Service) Create(t *testing.T) error {
-	return k8s.KubectlApplyFromStringE(t,
+	return k8s.KubectlApplyFromStringContextE(t, t.Context(),
 		in.toKubectlOptions(),
 		in.toJSON(in.toService()),
 	)
@@ -116,11 +116,11 @@ func (in *Service) Delete(t *testing.T) error {
 }
 
 func (in *Service) Get(t *testing.T) (*corev1.Service, error) {
-	return k8s.GetServiceE(t, in.toKubectlOptions(), in.Name())
+	return k8s.GetServiceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
 func (in *Service) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetServiceE(t, in.toKubectlOptions(), in.Name())
+	_, err := k8s.GetServiceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}
@@ -140,7 +140,7 @@ func (in *Service) WaitForReady(t *testing.T, timeout time.Duration) error {
 		case <-timer.C:
 			return fmt.Errorf("timeout waiting for load balancer service %s/%s to be ready", in.Namespace(), in.Name())
 		case <-ticker.C:
-			service, err := k8s.GetServiceE(t, in.toKubectlOptions(), in.Name())
+			service, err := k8s.GetServiceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 			if err != nil {
 				t.Logf("failed to get service %s/%s: %v", in.Namespace(), in.Name(), err)
 				continue

@@ -23,9 +23,9 @@ jobs:
         working-directory: assets
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22.22.0
+          node-version: 24.11.1
       - run: yarn --immutable
       - run: yarn test
   lint:
@@ -37,8 +37,8 @@ jobs:
         working-directory: assets
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22.22.0
+          node-version: 24.11.1
       - run: yarn --immutable
       - run: yarn lint

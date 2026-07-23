@@ -9,7 +9,6 @@ import (
 	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
 	internalerrors "github.com/pluralsh/console/go/deployment-operator/pkg/harness/errors"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -30,7 +29,7 @@ func buildApprovalGrantedPrompt(headBranch string) string {
 // reviewers can inspect changes, then marks the run as pending approval.
 func (in *agentRunController) enterPendingApproval(ctx context.Context) error {
 	in.uploadAgentRunArtifacts(ctx)
-	if err := agentrun.MarkAgentRunPendingApproval(ctx, in.consoleClient, in.agentRunID); err != nil {
+	if _, err := in.updateAgentRun(ctx, gqlclient.AgentRunStatusAttributes{Status: gqlclient.AgentRunStatusPendingApproval}); err != nil {
 		return fmt.Errorf("could not update agent run status to pending approval: %w", err)
 	}
 	return nil

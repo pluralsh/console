@@ -112,6 +112,12 @@ query GetDeploymentSettings {
     }
 }
 
+query GetDeploymentSettingsMinimal {
+    deploymentSettings {
+        ...DeploymentSettingsMinimalFragment
+    }
+}
+
 query GetServiceDeployment($id: ID!) {
     serviceDeployment(id: $id) {
         ...ServiceDeploymentExtended

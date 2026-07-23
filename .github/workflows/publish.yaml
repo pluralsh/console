@@ -24,19 +24,19 @@ jobs:
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - run: make testup
       - name: Restore dependencies cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-deps-v2-${{ hashFiles('.tool-versions', '**/mix.lock') }}
           restore-keys: ${{ runner.os }}-deps-v2-
       - name: Restore NIF cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: priv/native
           key: ${{ runner.os }}-nif-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'native/**', 'lib/console/mermaid_validator.ex') }}
           restore-keys: ${{ runner.os }}-nif-v2-
       - name: Restore _build cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-build-v2-${{ hashFiles('.tool-versions', '**/mix.lock', 'mix.exs', 'lib/**/*.ex', 'config/**/*.exs', 'native/**') }}
@@ -229,8 +229,14 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
+      - name: update byok rapid
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console-rapid/Chart.yaml
       - name: helm-dependencies
-        run: make helm-dependencies
+        run: |
+          make helm-dependencies
+          make helm-dependencies-rapid
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
         with:

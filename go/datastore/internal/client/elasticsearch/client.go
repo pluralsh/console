@@ -28,6 +28,7 @@ type ElasticsearchClient interface {
 	Init(ctx context.Context, client k8sclient.Client, credentials *v1alpha1.ElasticsearchCredentials) error
 	ClusterHealth() (*esapi.Response, error)
 	ExistsIndex(ctx context.Context, index string) (*esapi.Response, error)
+	GetAlias(ctx context.Context, alias string) (*esapi.Response, error)
 	CreateIndex(index string, definition runtime.RawExtension) (*esapi.Response, error)
 	DeleteIndex(ctx context.Context, index string) (*esapi.Response, error)
 	PutILMPolicy(policy string, definition runtime.RawExtension) (*esapi.Response, error)
@@ -87,6 +88,13 @@ func (c client) ClusterHealth() (*esapi.Response, error) {
 
 func (c client) ExistsIndex(ctx context.Context, index string) (*esapi.Response, error) {
 	return c.elasticsearch.Indices.Exists([]string{index}, c.elasticsearch.Indices.Exists.WithContext(ctx))
+}
+
+func (c client) GetAlias(ctx context.Context, alias string) (*esapi.Response, error) {
+	return c.elasticsearch.Indices.GetAlias(
+		c.elasticsearch.Indices.GetAlias.WithContext(ctx),
+		c.elasticsearch.Indices.GetAlias.WithName(alias),
+	)
 }
 
 func (c client) CreateIndex(index string, definition runtime.RawExtension) (*esapi.Response, error) {

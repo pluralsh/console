@@ -1,24 +1,40 @@
 defmodule Console.AI.Workbench.Environment do
-  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity, User}
+  alias Console.Schema.{
+    WorkbenchJob,
+    Workbench,
+    WorkbenchTool,
+    WorkbenchJobActivity,
+    User
+  }
   alias Console.AI.Workbench.{Skill, Skills.Builtins, Heartbeat}
 
   @type t :: %__MODULE__{
     user: User.t,
     job: WorkbenchJob.t,
     tools: %{binary => WorkbenchTool.t},
+    functions: [WorkbenchTool.t],
     skills: %{binary => Skill.t},
     activities: [WorkbenchJobActivity.t]
   }
 
+  defmodule Actions, do: defstruct [:functions, :kubernetes]
+
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :user, activities: []]
+  defstruct [:job, :tools, :skills, :user, functions: [], activities: []]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
+    {functions, tools} = Enum.split_with(to_l(tools), fn
+      %WorkbenchTool{categories: [_ | _] = categories} -> :function in categories
+      %WorkbenchTool{tool: :http, configuration: %{http: %{function: true}}} -> true
+      _ -> false
+    end)
+
     %__MODULE__{
       user: job.user,
       job: job,
       tools: to_map(tools),
+      functions: functions,
       skills: to_map(skills)
     }
     |> save()
@@ -27,6 +43,16 @@ defmodule Console.AI.Workbench.Environment do
   def engine_opts(%WorkbenchJob{modes: %{model: %{model: m, provider: p}}} = job) when is_binary(m),
     do: [model: m, provider: p, usage_callback: &Heartbeat.usage_callback(job, &1)]
   def engine_opts(%WorkbenchJob{} = job), do: [usage_callback: &Heartbeat.usage_callback(job, &1)]
+
+  def actions(%__MODULE__{functions: funcs, job: job}) do
+    %Actions{
+      functions: is_list(funcs) && !Enum.empty?(funcs),
+      kubernetes: has_k8s?(job)
+    }
+  end
+
+  defp has_k8s?(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}}), do: (u || d)
+  defp has_k8s?(_), do: false
 
   def with_builtins(skills) when is_map(skills) do
     Builtins.builtins()
@@ -60,6 +86,9 @@ defmodule Console.AI.Workbench.Environment do
 
   defp to_map(m) when is_map(m), do: m
   defp to_map(l) when is_list(l), do: Map.new(l, & {&1.name, &1})
+
+  defp to_l(m) when is_map(m), do: Map.values(m)
+  defp to_l(l) when is_list(l), do: l
 
   def upsert(fields), do: upsert(environment(), fields)
 

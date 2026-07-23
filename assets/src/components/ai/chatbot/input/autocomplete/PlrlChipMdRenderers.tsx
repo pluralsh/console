@@ -2,6 +2,7 @@ import {
   GitPullIcon,
   StackIcon,
   Tooltip,
+  WarningShieldIcon,
   WorkbenchIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
@@ -22,6 +23,11 @@ import {
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
 import styled from 'styled-components'
 import { chipDisplayText, ChipAttrsByKind, MentionKind } from './mentionTypes'
+import {
+  hasVulnerabilityChipTooltip,
+  VulnerabilityChipTooltipLabel,
+  vulnerabilityChipTooltipText,
+} from './VulnerabilityChipTooltipLabel'
 
 // span-only so chips can safely render inside markdown <p> (as opposed to our DS chip)
 type ChipBodyProps = {
@@ -139,11 +145,63 @@ function PlrlSkillChip(props: RenderedChipProps<MentionKind.Skill>) {
   )
 }
 
+function PlrlVulnerabilityChip(
+  props: RenderedChipProps<MentionKind.Vulnerability>
+) {
+  const label =
+    chipDisplayText(MentionKind.Vulnerability, {
+      'item-name': props['item-name'],
+      severity: props.severity,
+    }) ||
+    props['item-name'] ||
+    props['item-id']
+  const link = props['primary-link']
+  const title = props.title
+  const description = props.description
+  const hasTooltip = hasVulnerabilityChipTooltip({ title, description })
+  const chip = (
+    <ChipBody icon={<WarningShieldIcon size={12} />}>{label}</ChipBody>
+  )
+
+  return (
+    <WrapWithIf
+      condition={hasTooltip}
+      wrapper={
+        <Tooltip
+          label={
+            <VulnerabilityChipTooltipLabel
+              title={title}
+              description={description}
+            />
+          }
+          textValue={vulnerabilityChipTooltipText({ title, description })}
+          placement="top"
+          style={{ maxWidth: 500, overflowWrap: 'break-word' }}
+        />
+      }
+    >
+      <WrapWithIf
+        condition={!!link}
+        wrapper={
+          <ChipExternalLinkSC
+            href={link!}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        }
+      >
+        {chip}
+      </WrapWithIf>
+    </WrapWithIf>
+  )
+}
+
 export const plrlChipComponents = {
   [MentionKind.Cluster]: PlrlClusterChip,
   [MentionKind.Service]: PlrlServiceChip,
   [MentionKind.Stack]: PlrlStackChip,
   [MentionKind.Skill]: PlrlSkillChip,
+  [MentionKind.Vulnerability]: PlrlVulnerabilityChip,
 } satisfies {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }
@@ -166,6 +224,11 @@ const ChipBodySC = styled.span(({ theme }) => ({
 }))
 
 const ChipLinkSC = styled(Link)(({ theme }) => ({
+  textDecoration: 'none',
+  '&:hover > *': { background: theme.colors['fill-two-hover'] },
+}))
+
+const ChipExternalLinkSC = styled.a(({ theme }) => ({
   textDecoration: 'none',
   '&:hover > *': { background: theme.colors['fill-two-hover'] },
 }))

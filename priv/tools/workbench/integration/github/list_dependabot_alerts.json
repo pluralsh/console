@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "description": "List dependency vulnerability alerts from Dependabot for a repository via GitHub REST.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "classification": {
+      "type": "string",
+      "description": "Comma-separated vulnerability classifications, such as malware or general."
+    },
+    "state": {
+      "type": "string",
+      "enum": ["auto_dismissed", "dismissed", "fixed", "open"],
+      "description": "Filter alerts by state."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Filter alerts by severity."
+    },
+    "ecosystem": {
+      "type": "string",
+      "description": "Filter by package ecosystem, such as npm, gomod, pip, or maven."
+    },
+    "package": {
+      "type": "string",
+      "description": "Filter by package name."
+    },
+    "manifest": {
+      "type": "string",
+      "description": "Filter by manifest path."
+    },
+    "epss_percentage": {
+      "type": "string",
+      "description": "Filter by EPSS percentage, such as >0.5, <=0.1, or 0.1..0.9."
+    },
+    "has": {
+      "type": "string",
+      "description": "Filter by available alert metadata. Currently GitHub supports patch."
+    },
+    "assignee": {
+      "type": "string",
+      "description": "Filter by assignees, such as octocat, octocat,hubot, *, or none."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["development", "runtime"],
+      "description": "Filter by dependency scope."
+    },
+    "sort": {
+      "type": "string",
+      "enum": ["created", "updated", "epss_percentage"],
+      "description": "Sort field."
+    },
+    "direction": {
+      "type": "string",
+      "enum": ["asc", "desc"],
+      "description": "Sort direction."
+    },
+    "before": {
+      "type": "string",
+      "description": "Cursor for results before this value from the Link header."
+    },
+    "after": {
+      "type": "string",
+      "description": "Cursor for results after this value from the Link header."
+    },
+    "per_page": {
+      "type": "integer",
+      "description": "Results per page. Defaults to 30."
+    }
+  },
+  "required": ["owner", "repo"],
+  "additionalProperties": false
+}

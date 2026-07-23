@@ -1,6 +1,5 @@
 import {
   AiSparkleOutlineIcon,
-  BotIcon,
   CatalogIcon,
   ChatOutlineIcon,
   ClusterIcon,
@@ -139,9 +138,11 @@ export function useCommandsWithHotkeys() {
 export function useCommands({
   showHidden = false,
   filter = '',
+  openServiceAccountImpersonation,
 }: {
   showHidden?: boolean
   filter?: string
+  openServiceAccountImpersonation?: () => void
 }): CommandGroup[] {
   const openShareSecret = useShareSecretOpen()
   const openAccessTokenModal = useOpenAccessTokenModal()
@@ -188,32 +189,21 @@ export function useCommands({
                   deps: [setFeatureFlag],
                 },
               ]),
-          ...(!featureFlags.WorkbenchChatbots
+          ...(openServiceAccountImpersonation
             ? [
                 {
-                  id: 'enable-workbench-chatbots',
-                  label: 'Enable Workbench Chatbots',
-                  icon: BotIcon,
-                  callback: () => setFeatureFlag('WorkbenchChatbots', true),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
-          ...(featureFlags.WorkbenchChatbots
-            ? [
-                {
-                  id: 'disable-workbench-chatbots',
-                  label: 'Disable Workbench Chatbots',
-                  icon: BotIcon,
-                  callback: () => setFeatureFlag('WorkbenchChatbots', false),
-                  deps: [setFeatureFlag],
+                  id: 'impersonate-service-account',
+                  label: 'Impersonate service account',
+                  icon: KeyIcon,
+                  callback: openServiceAccountImpersonation,
+                  deps: [openServiceAccountImpersonation],
                 },
               ]
             : []),
         ],
       },
     ],
-    [featureFlags, setFeatureFlag]
+    [featureFlags.Edge, openServiceAccountImpersonation, setFeatureFlag]
   )
 
   const commands = useMemo(
@@ -433,7 +423,6 @@ export function useCommands({
     [
       navigate,
       featureFlags.Edge,
-      featureFlags.WorkbenchChatbots,
       cluster?.id,
       openShareSecret,
       openAccessTokenModal,

@@ -1,4 +1,4 @@
-FROM golang:1.26.4-alpine AS builder
+FROM golang:1.26.5-alpine AS builder
 
 ARG TARGETARCH
 ARG TARGETOS  
@@ -31,7 +31,7 @@ RUN CGO_ENABLED=0 \
     -o /sentinel-harness \
     cmd/sentinel-harness/main.go
 
-FROM golang:1.26.4-alpine AS final
+FROM golang:1.26.5-alpine AS final
 
 ARG TARGETARCH
 ARG TARGETOS
@@ -48,6 +48,11 @@ RUN apk add --no-cache curl ca-certificates && \
 COPY --from=builder /sentinel-harness /usr/local/bin/sentinel-harness
 RUN chmod +x /usr/local/bin/sentinel-harness
 
-RUN mkdir -p /plural && chown -R 65532:65532 /plural
+RUN mkdir -p /plural /sentinel/.cache && chown -R 65532:65532 /plural /sentinel
 
 WORKDIR /plural
+
+USER 65532:65532
+
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1

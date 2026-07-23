@@ -153,6 +153,27 @@ var _ = Describe("Persona Controller", Ordered, func() {
 			Expect(result.RequeueAfter).ToNot(BeZero())
 		})
 
+		It("should include flow configuration attributes", func() {
+			attrs, err := (&controller.PersonaReconciler{}).Attributes(&v1alpha1.Persona{
+				ObjectMeta: metav1.ObjectMeta{Name: personaName, Namespace: namespace},
+				Spec: v1alpha1.PersonaSpec{
+					Configuration: &v1alpha1.PersonaConfiguration{
+						Flows: &v1alpha1.PersonaFlows{
+							Workbenches: lo.ToPtr(true),
+							Pipelines:   lo.ToPtr(false),
+							Previews:    lo.ToPtr(true),
+						},
+					},
+				},
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(attrs.Configuration.Flows).NotTo(BeNil())
+			Expect(attrs.Configuration.Flows.Workbenches).To(Equal(lo.ToPtr(true)))
+			Expect(attrs.Configuration.Flows.Pipelines).To(Equal(lo.ToPtr(false)))
+			Expect(attrs.Configuration.Flows.Previews).To(Equal(lo.ToPtr(true)))
+		})
+
 		It("should update existing resource when changed", func() {
 			By("Update resource")
 			Expect(common.MaybePatch(k8sClient, &v1alpha1.Persona{

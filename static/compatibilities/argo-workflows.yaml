@@ -4,22 +4,22 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.0.6
+- version: 4.0.8
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [No substantive new features are listed in the provided release notes
-        excerpts; both versions point to the blog/changelog for details., Primary
-        changes for operators are updated binaries and manifests at v4.0.6 download/install
-        URLs.]
-    breaking_changes: [No breaking changes are described in the provided notes; both
-        releases instruct readers to consult the upgrading guide and main changelog
-        for breaking/known issues.]
-  chart_version: 1.0.18
-  images: ['quay.io/argoproj/argocli:v4.0.6', 'quay.io/argoproj/workflow-controller:v4.0.6',
+    features: [Release notes provided for v4.0.8 and v4.0.2 mostly include installation/asset
+        info and pointers to the blog/changelog rather than enumerated feature changes.
+        No concrete new features between 4.0.2 and 4.0.8 are listed in the provided
+        notes.]
+    breaking_changes: [No breaking changes are listed in the provided notes; they
+        direct you to consult the upstream upgrading guide and CHANGELOG for breaking/known
+        issues. Treat this as 'unknown from provided data' and verify before upgrading.]
+  chart_version: 1.0.21
+  images: ['quay.io/argoproj/argocli:v4.0.8', 'quay.io/argoproj/workflow-controller:v4.0.8',
     'registry.k8s.io/kubectl:v1.36.2']
 - version: 4.0.2
   kube: ['1.33', '1.32', '1.31']
@@ -60,13 +60,10 @@ versions:
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ["v3.6.3 was explicitly marked as \u201CDo not use\u201D; the main actionable\
-        \ change is to move off 3.6.3 to a later patch (3.6.4+) and proceed to 3.6.5.",
-      'v3.6.5 provides updated controller/server manifests (install.yaml) and updated
-        CLI binaries for all supported platforms (same install process, newer artifacts).']
-    breaking_changes: ["No breaking changes were listed in the provided notes for\
-        \ 3.6.3\u21923.6.5; however 3.6.3 is a known-bad release and should not be\
-        \ deployed."]
+    features: [v3.6.5 is the recommended patch level versus v3.6.3 (which is explicitly
+        flagged as 'Do not use'; prefer v3.6.4 or later).]
+    breaking_changes: [v3.6.3 is marked as a known-bad release; treat upgrading away
+        from it as urgent and avoid deploying/rolling back to it.]
   chart_version: 0.45.12
   images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
 - version: 3.6.3

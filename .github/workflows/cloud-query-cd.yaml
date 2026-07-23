@@ -123,7 +123,7 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
       - name: Upload digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digests-db-${{ env.PLATFORM_PAIR }}-${{ github.run_id }}
           path: ${{ runner.temp }}/digests/*
@@ -210,7 +210,7 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
       - name: Upload digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digests-cloudquery-${{ env.PLATFORM_PAIR }}-${{ github.run_id }}
           path: ${{ runner.temp }}/digests/*
@@ -233,7 +233,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-db-*
@@ -296,7 +296,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-cloudquery-*

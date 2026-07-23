@@ -34,6 +34,7 @@ defmodule Plrl.AiConfig do
   field :bedrock, 5, type: Plrl.BedrockConfig
   field :azure, 6, type: Plrl.AzureOpenAiConfig
   field :openaiCompatible, 7, type: Plrl.OpenAiConfig
+  field :xai, 8, type: Plrl.OpenAiConfig
 end
 
 defmodule Plrl.OpenAiTokenExchange do

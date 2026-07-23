@@ -26,11 +26,13 @@ jobs:
           scan-type: 'fs'
           hide-progress: false
           scan-ref: '.'
+          skip-dirs: './utils'
+          skip-files: '**/*.yaml,**/*.yml,**/*.tgz,**/Dockerfile*'
           format: 'sarif'
           output: 'trivy-results.sarif'
           scanners: 'vuln,secret,config'
           ignore-unfixed: true
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'

@@ -12,7 +12,7 @@ import {
 import { HiddenSelect, useButton, useSelect } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
 
-import { type Placement } from '@floating-ui/react-dom-interactions'
+import { type Placement } from '@floating-ui/react'
 
 import { type Key } from '@react-types/shared'
 

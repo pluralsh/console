@@ -26,6 +26,7 @@ import {
   PrStatus,
   PullRequestBasicFragment,
 } from 'generated/graphql'
+import { WorkbenchUsageSummaryChip } from 'components/workbenches/common/WorkbenchUsageChips'
 import { capitalize, isEmpty, toLower } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link, LinkProps } from 'react-router-dom'
@@ -51,6 +52,11 @@ export const agentRunsCols = [
         </div>
       )
     },
+  }),
+  columnHelper.accessor((run) => run.usage, {
+    id: 'usage',
+    meta: { gridTemplate: '120px' },
+    cell: ({ getValue }) => <WorkbenchUsageSummaryChip usage={getValue()} />,
   }),
   columnHelper.accessor((run) => run.workbenchJob, {
     id: 'workbench',

@@ -24,7 +24,7 @@ defmodule Console.Schema.Stack do
     StackInfracostResource
   }
 
-  defenum Type, terraform: 0, ansible: 1, custom: 2, terragrunt: 3
+  defenum Type, terraform: 0, ansible: 1, custom: 2, terragrunt: 3, pulumi: 4
   defenum Status,
     queued: 0,
     pending: 1,
@@ -66,6 +66,14 @@ defmodule Console.Schema.Stack do
         field :approve_empty, :boolean
       end
 
+      embeds_one :pulumi, Pulumi, on_replace: :update do
+        field :parallel,       :integer
+        field :refresh,       :boolean
+        field :approve_empty, :boolean
+        field :stack,         :string
+        field :backend_url,   :string
+      end
+
       embeds_one :ansible, Ansible, on_replace: :update do
         field :playbook,         :string
         field :inventory,        :string
@@ -90,6 +98,7 @@ defmodule Console.Schema.Stack do
       |> cast_embed(:hooks, with: &hook_changeset/2)
       |> cast_embed(:terraform, with: &terraform_changeset/2)
       |> cast_embed(:terragrunt, with: &terragrunt_changeset/2)
+      |> cast_embed(:pulumi, with: &pulumi_changeset/2)
       |> cast_embed(:ansible, with: &ansible_changeset/2)
       |> cast_embed(:ai_approval, with: &ai_approval_changeset/2)
     end
@@ -108,6 +117,11 @@ defmodule Console.Schema.Stack do
     def terragrunt_changeset(model, attrs) do
       model
       |> cast(attrs, ~w(parallelism refresh approve_empty)a)
+    end
+
+    def pulumi_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(parallel refresh approve_empty stack backend_url)a)
     end
 
     def ansible_changeset(model, attrs) do
@@ -307,6 +321,7 @@ defmodule Console.Schema.Stack do
     |> cast_embed(:job_spec)
     |> cast_embed(:configuration)
     |> cast_embed(:policy_engine)
+    |> validate_policy_engine()
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:environment)
@@ -337,6 +352,16 @@ defmodule Console.Schema.Stack do
         _ -> add_error(cs, field, "Field is immutable")
       end
     end)
+  end
+
+  defp validate_policy_engine(changeset) do
+    case {get_field(changeset, :type), get_field(changeset, :policy_engine)} do
+      {:pulumi, %{type: _}} ->
+        add_error(changeset, :policy_engine, "policy engine is not supported for Pulumi stacks")
+
+      _ ->
+        changeset
+    end
   end
 
   def next_poll_changeset(model, interval) do

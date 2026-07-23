@@ -347,6 +347,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def create_workbench_message(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_message(attrs, job_id, user)
 
+  def approve_workbench_job_activity(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.approve_job_activity(id, user)
+
+  def reject_workbench_job_activity(%{id: id} = args, %{context: %{current_user: user}}),
+    do: Workbenches.reject_job_activity(args[:reason], id, user)
+
   def update_workbench_job(%{job_id: id, attributes: attributes}, %{context: %{current_user: user}}),
     do: Workbenches.update_workbench_job(attributes, id, user)
 

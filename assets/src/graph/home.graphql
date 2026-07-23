@@ -111,6 +111,10 @@ fragment ClusterHealthScore on Cluster {
   id
   name
   healthScore
+  distro
+  provider {
+    cloud
+  }
 }
 
 fragment KubernetesChangelog on KubernetesChangelog {

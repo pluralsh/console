@@ -16,6 +16,7 @@ import {
   WorkbenchToolFragment,
   WorkbenchToolHttpMethod,
   WorkbenchToolType,
+  HelmAuthProvider,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { useState } from 'react'
@@ -611,6 +612,18 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
   [WorkbenchToolType.Sentry]: (config) => {
     const { url } = config?.sentry ?? {}
     return { sentry: { url: url ?? undefined, accessToken: '' } }
+  },
+  [WorkbenchToolType.Docker]: (config) => {
+    const { url, provider, proxy } = config?.docker ?? {}
+    return {
+      docker: {
+        url: url ?? undefined,
+        provider: provider ?? HelmAuthProvider.Basic,
+        auth: proxy
+          ? { proxy: { url: proxy.url, noproxy: proxy.noproxy } }
+          : {},
+      },
+    }
   },
 }
 

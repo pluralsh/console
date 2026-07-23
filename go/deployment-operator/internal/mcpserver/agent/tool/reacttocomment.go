@@ -32,7 +32,7 @@ func (in *ReactToComment) Install(s *server.MCPServer) {
 			),
 			mcp.WithString("commentId",
 				mcp.Required(),
-				mcp.Description("The reactable comment ID from getPRState, in format 'issue:123456' or 'review:789012'"),
+				mcp.Description("The reactable comment ID from getPRState, in format 'issue:123456' or 'review:789012'. Review summaries marked not reactable cannot be used here."),
 			),
 			mcp.WithString("state",
 				mcp.Required(),
@@ -93,6 +93,6 @@ func NewReactToComment() Tool {
 		description: "Adds an emoji reaction to a pull request comment. " +
 			"Call with state='working' as soon as you start addressing a comment, " +
 			"and state='complete' when you have finished. " +
-			"Use the commentId from the getPRState tool.",
+			"Use the reactable commentId from the getPRState tool.",
 	}
 }

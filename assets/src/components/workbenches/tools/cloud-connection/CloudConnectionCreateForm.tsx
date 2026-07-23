@@ -6,6 +6,7 @@ import {
   Input2,
   ReturnIcon,
   SidePanelOpenIcon,
+  Switch,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { GqlError } from 'components/utils/Alert'
@@ -28,6 +29,7 @@ import {
   PolicyBindingFragment,
   Provider,
   useUpsertCloudConnectionMutation,
+  VsphereCloudConnectionAttributes,
   WorkbenchToolType,
 } from 'generated/graphql'
 import { useEffect, useMemo, useState } from 'react'
@@ -89,6 +91,12 @@ export function CloudConnectionCreateForm() {
     clientId: '',
     clientSecret: '',
   })
+  const [vsphere, setVsphere] = useState<VsphereCloudConnectionAttributes>({
+    server: '',
+    user: '',
+    password: '',
+    allowUnverifiedSsl: false,
+  })
   const [readBindings, setReadBindings] = useState<PolicyBindingFragment[]>([])
 
   const attributes = useMemo<Nullable<CloudConnectionAttributes>>(() => {
@@ -134,8 +142,20 @@ export function CloudConnectionCreateForm() {
             },
           },
         }
+      case Provider.Vsphere:
+        return {
+          ...base,
+          configuration: {
+            vsphere: {
+              server: vsphere.server.trim(),
+              user: vsphere.user.trim(),
+              password: vsphere.password,
+              allowUnverifiedSsl: !!vsphere.allowUnverifiedSsl,
+            },
+          },
+        }
     }
-  }, [provider, name, readBindings, aws, gcp, azure])
+  }, [provider, name, readBindings, aws, gcp, azure, vsphere])
 
   const [upsert, { loading, error }] = useUpsertCloudConnectionMutation({
     onCompleted: ({ upsertCloudConnection }) => {
@@ -189,7 +209,7 @@ export function CloudConnectionCreateForm() {
   const canSave =
     !!attributes &&
     !!name.trim() &&
-    providerFieldsValid(provider, { aws, gcp, azure })
+    providerFieldsValid(provider, { aws, gcp, azure, vsphere })
 
   return (
     <Flex
@@ -235,6 +255,12 @@ export function CloudConnectionCreateForm() {
             <AzureFields
               state={azure}
               setState={setAzure}
+            />
+          )}
+          {provider === Provider.Vsphere && (
+            <VSphereFields
+              state={vsphere}
+              setState={setVsphere}
             />
           )}
 
@@ -303,6 +329,7 @@ function providerFieldsValid(
     aws: AwsCloudConnectionAttributes
     gcp: GcpCloudConnectionAttributes
     azure: AzureCloudConnectionAttributes
+    vsphere: VsphereCloudConnectionAttributes
   }
 ) {
   switch (provider) {
@@ -316,6 +343,12 @@ function providerFieldsValid(
         !!fields.azure.tenantId.trim() &&
         !!fields.azure.clientId.trim() &&
         !!fields.azure.clientSecret
+      )
+    case Provider.Vsphere:
+      return (
+        !!fields.vsphere.server.trim() &&
+        !!fields.vsphere.user.trim() &&
+        !!fields.vsphere.password
       )
   }
 }
@@ -458,6 +491,57 @@ function AzureFields({
           onChange={(e) => setState({ ...state, clientSecret: e.target.value })}
         />
       </FormField>
+    </>
+  )
+}
+
+function VSphereFields({
+  state,
+  setState,
+}: {
+  state: VsphereCloudConnectionAttributes
+  setState: (next: VsphereCloudConnectionAttributes) => void
+}) {
+  return (
+    <>
+      <FormField
+        required
+        label="vCenter SDK endpoint"
+        hint="Use the vCenter SOAP SDK endpoint."
+      >
+        <Input2
+          placeholder="https://vcenter.example.com/sdk"
+          value={state.server}
+          onChange={(e) => setState({ ...state, server: e.target.value })}
+        />
+      </FormField>
+      <FormField
+        required
+        label="User"
+      >
+        <Input2
+          placeholder="administrator@vsphere.local"
+          value={state.user}
+          onChange={(e) => setState({ ...state, user: e.target.value })}
+        />
+      </FormField>
+      <FormField
+        required
+        label="Password"
+      >
+        <InputRevealer
+          value={state.password}
+          onChange={(e) => setState({ ...state, password: e.target.value })}
+        />
+      </FormField>
+      <Switch
+        checked={!!state.allowUnverifiedSsl}
+        onChange={(checked) =>
+          setState({ ...state, allowUnverifiedSsl: checked })
+        }
+      >
+        Allow unverified TLS certificates
+      </Switch>
     </>
   )
 }

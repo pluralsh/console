@@ -30,7 +30,7 @@ jobs:
     name: Output versions
     runs-on: ubuntu-latest
     env:
-      NODE_VERSION: 24
+      NODE_VERSION: 24.11.1
       CLAUDE_VERSION: 2.1.72
       GEMINI_VERSION: 0.44.1
       OPENCODE_VERSION: 1.17.3
@@ -113,7 +113,7 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           touch "${{ runner.temp }}/digests/${digest#sha256:}"
       - name: Upload digest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: digests-${{ env.PLATFORM_PAIR }}
           path: ${{ runner.temp }}/digests/*
@@ -132,7 +132,7 @@ jobs:
       version: ${{ steps.meta.outputs.version }}
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*

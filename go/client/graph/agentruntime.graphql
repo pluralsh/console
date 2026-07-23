@@ -251,6 +251,16 @@ fragment AgentRunFragment on AgentRun {
     analysis {
         ...AgentAnalysisFragment
     }
+    usage {
+        inputTokens
+        outputTokens
+        totalTokens
+        cachedTokens
+        reasoningTokens
+        inputCost
+        outputCost
+        totalCost
+    }
     scmCreds {
         ...ScmCredentialFragment
     }

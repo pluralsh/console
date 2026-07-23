@@ -1096,6 +1096,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
     test "it can fetch embedded result on a workbench job activity" do
       job = insert(:workbench_job)
+      tool = insert(:workbench_tool)
 
       activity =
         insert(:workbench_job_activity,
@@ -1103,6 +1104,18 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
           type: :coding,
           result: %{
             output: "done",
+            function_call: %{
+              name: "rollout_status",
+              input: %{"namespace" => "default", "deployment" => "api"},
+              tool_id: tool.id
+            },
+            kube_request: %{
+              handle: "prod-cluster",
+              method: "GET",
+              path: "/apis/apps/v1/namespaces/default/deployments/api",
+              query_params: %{"pretty" => "true"},
+              content_type: "application/json"
+            },
             job_update: %{diff: "a -> b", working_theory: "theory", conclusion: "ok"}
           }
         )
@@ -1113,6 +1126,19 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             id
             result {
               output
+              functionCall {
+                name
+                input
+                toolId
+              }
+              kubeRequest {
+                handle
+                method
+                path
+                body
+                queryParams
+                contentType
+              }
               jobUpdate {
                 diff
                 workingTheory
@@ -1125,6 +1151,15 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == activity.id
       assert found["result"]["output"] == "done"
+      assert found["result"]["functionCall"]["name"] == "rollout_status"
+      assert found["result"]["functionCall"]["input"] == %{"namespace" => "default", "deployment" => "api"}
+      assert found["result"]["functionCall"]["toolId"] == tool.id
+      assert found["result"]["kubeRequest"]["handle"] == "prod-cluster"
+      assert found["result"]["kubeRequest"]["method"] == "GET"
+      assert found["result"]["kubeRequest"]["path"] == "/apis/apps/v1/namespaces/default/deployments/api"
+      assert found["result"]["kubeRequest"]["body"] == nil
+      assert found["result"]["kubeRequest"]["queryParams"] == %{"pretty" => "true"}
+      assert found["result"]["kubeRequest"]["contentType"] == "application/json"
       assert found["result"]["jobUpdate"]["diff"] == "a -> b"
       assert found["result"]["jobUpdate"]["workingTheory"] == "theory"
       assert found["result"]["jobUpdate"]["conclusion"] == "ok"

@@ -5,6 +5,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/ansible"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/pulumi"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/terraform"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/terragrunt"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/tool/v1"
@@ -19,6 +20,8 @@ func New(stackType console.StackType, config v1.Config) v1.Tool {
 		t = terraform.New(config)
 	case console.StackTypeTerragrunt:
 		t = terragrunt.New(config)
+	case console.StackTypePulumi:
+		t = pulumi.New(config)
 	case console.StackTypeAnsible:
 		t = ansible.New(config)
 	case console.StackTypeCustom:

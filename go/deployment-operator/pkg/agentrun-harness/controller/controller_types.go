@@ -7,6 +7,7 @@ import (
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
@@ -34,6 +35,9 @@ type agentRunController struct {
 
 	// tool is the agent run tool that is being executed
 	tool v1.Tool
+
+	// usage tracks token and cost usage emitted by the provider stream.
+	usage *usage.Usage
 
 	// dir is the working directory where the repository will be cloned.
 	dir string

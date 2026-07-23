@@ -1,6 +1,14 @@
 defmodule Console.Schema.ManagedNamespace do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{NamespaceCluster, NamespaceInstance, GlobalService, Cluster, ServiceTemplate}
+  alias Console.Schema.{
+    NamespaceCluster,
+    NamespaceInstance,
+    GlobalService,
+    Cluster,
+    ServiceTemplate,
+    Project,
+    Service
+  }
 
   defmodule Target do
     use Piazza.Ecto.Schema

@@ -1,9 +1,9 @@
 import {
-  AppIcon,
   Flex,
   FormField,
   ListBoxItem,
   Select,
+  SelectButton,
 } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import { GqlError } from 'components/utils/Alert'
@@ -11,8 +11,55 @@ import UserInfo from 'components/utils/UserInfo'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useWorkbenchAccessibleUsersLazyQuery } from 'generated/graphql'
-import { useEffect, useMemo } from 'react'
+import { type ReactNode, useEffect, useMemo } from 'react'
+import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+
+function UserNameEmail({
+  name,
+  email,
+}: {
+  name?: string | null
+  email?: string | null
+}): ReactNode {
+  const theme = useTheme()
+
+  return (
+    <span
+      css={{
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: theme.spacing.xsmall,
+        minWidth: 0,
+        width: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      <span
+        css={{
+          color: theme.colors.text,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {name}
+      </span>
+      {email ? (
+        <span
+          css={{
+            color: theme.colors['text-xlight'],
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {email}
+        </span>
+      ) : null}
+    </span>
+  )
+}
 
 /**
  * `useBimodalSelectState.open()` refuses to open when the collection has zero
@@ -119,8 +166,13 @@ export function WorkbenchAccessibleUserSelect({
   )
 
   const resolvedHint =
-    hint ??
-    (isOrphanSelection ? orphanHint : !selectedUserId ? emptyHint : defaultHint)
+    hint !== undefined
+      ? hint || undefined
+      : isOrphanSelection
+        ? orphanHint
+        : !selectedUserId
+          ? emptyHint
+          : defaultHint
 
   if (!workbenchId) {
     return (
@@ -148,21 +200,34 @@ export function WorkbenchAccessibleUserSelect({
         <Select
           selectedKey={selectedUserId || null}
           isDisabled={disabled}
-          leftContent={
-            selectedResolved ? undefined : (
-              <AppIcon
-                size="xsmall"
-                name="?"
-                hue="lighter"
-              />
-            )
-          }
           label={
             selectedResolved
-              ? selectedResolved.name
+              ? `${selectedResolved.name ?? ''} ${selectedResolved.email ?? ''}`.trim()
               : selectedUserId
                 ? 'User no longer available'
                 : 'No user selected'
+          }
+          triggerButton={
+            <SelectButton
+              isDisabled={disabled}
+              css={{
+                '.content .children': {
+                  minWidth: 0,
+                  overflow: 'hidden',
+                },
+              }}
+            >
+              {selectedResolved ? (
+                <UserNameEmail
+                  name={selectedResolved.name}
+                  email={selectedResolved.email}
+                />
+              ) : selectedUserId ? (
+                'User no longer available'
+              ) : (
+                'No user selected'
+              )}
+            </SelectButton>
           }
           dropdownHeaderFixed={
             awaitingFirstPayload ? (

@@ -785,6 +785,21 @@ spec:
                                 type: object
                                 x-kubernetes-map-type: atomic
                             type: object
+                          proxy:
+                            description: Proxy configures an HTTP proxy for requests
+                              to this Helm repository or OCI registry.
+                            properties:
+                              noproxy:
+                                description: The comma-separated list of hosts that
+                                  should not be proxied, will behave equivalently
+                                  to a NOPROXY env var.
+                                type: string
+                              url:
+                                description: The url of your HTTP proxy.
+                                type: string
+                            required:
+                            - url
+                            type: object
                         type: object
                       chart:
                         description: |-
@@ -1112,6 +1127,21 @@ spec:
                                     type: string
                                 type: object
                                 x-kubernetes-map-type: atomic
+                            type: object
+                          proxy:
+                            description: Proxy configures an HTTP proxy for requests
+                              to this Helm repository or OCI registry.
+                            properties:
+                              noproxy:
+                                description: The comma-separated list of hosts that
+                                  should not be proxied, will behave equivalently
+                                  to a NOPROXY env var.
+                                type: string
+                              url:
+                                description: The url of your HTTP proxy.
+                                type: string
+                            required:
+                            - url
                             type: object
                         type: object
                       provider:

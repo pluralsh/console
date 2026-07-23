@@ -11,9 +11,9 @@ OS="$(go env GOOS)"
 
 # Usage function
 usage() {
-  echo "Usage: $0 -d <destination_directory> [-p aws,gcp,azure] [-v version]"
+  echo "Usage: $0 -d <destination_directory> [-p aws,gcp,azure,vsphere] [-v version]"
   echo "  -d  Destination directory where ${DB_PROVIDER} extensions will be unpacked"
-  echo "  -p  Provider to download (aws,gcp,azure)"
+  echo "  -p  Provider to download (aws,gcp,azure,vsphere)"
   echo "  -v  Specific version to download for the provider"
   echo "  -h  Display this help message"
   exit 1
@@ -56,7 +56,7 @@ mkdir -p "${DEST_DIR}"
 
 # Default to all providers if not specified
 if [ -z "${PROVIDER}" ]; then
-  echo "ERROR: Provider (-p) is required. Supported providers are: aws, gcp, azure."
+  echo "ERROR: Provider (-p) is required. Supported providers are: aws, gcp, azure, vsphere."
   usage
 fi
 

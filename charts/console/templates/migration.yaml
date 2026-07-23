@@ -43,6 +43,8 @@ spec:
             name: console-migration-env
         env:
         {{ include "console.env" . | nindent 8 }}
+        - name: DB_POOL_TARGET
+          value: '1000'
         {{- if  .Values.extraEnv }}
         {{- toYaml .Values.extraEnv | nindent 8 }}
         {{- end }}

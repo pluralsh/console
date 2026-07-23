@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -25,6 +26,7 @@ import (
 	pollycache "github.com/pluralsh/console/go/polly/cache"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/discovery"
@@ -38,14 +40,17 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/ping"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/scraper"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	deploymentsv1alpha1 "github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
 )
 
 var (
@@ -117,6 +122,7 @@ func main() {
 
 	kubeManager := initKubeManagerOrDie(config)
 	consoleManager := initConsoleManagerOrDie()
+	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
 
 	// Start the discovery cache manager in background.
 	runDiscoveryManagerOrDie(ctx, discoveryCache)
@@ -138,7 +144,8 @@ func main() {
 
 	statusSynchronizer := streamline.NewStatusSynchronizer(extConsoleClient, args.ComponentShaCacheTTL())
 
-	svcCache := pollycache.NewCache[console.ServiceDeploymentForAgent](args.ControllerCacheTTL(),
+	svcCache := pollycache.NewDynamicCache[console.ServiceDeploymentForAgent](
+		service.ControllerCacheTTLFunc(args.ControllerCacheTTL(), args.PollInterval()),
 		func(id string) (*console.ServiceDeploymentForAgent, error) {
 			return extConsoleClient.GetService(id)
 		})
@@ -168,6 +175,35 @@ func main() {
 
 	// Start the standard kubernetes manager and block the main thread until context cancel.
 	runKubeManagerOrDie(ctx, kubeManager)
+}
+
+func loadAgentConfigurationOrDie(ctx context.Context, reader ctrlclient.Reader) {
+	if err := loadAgentConfiguration(ctx, reader, args.AgentConfigurationDefaults()); err != nil {
+		setupLog.Error(err, "unable to load agent configuration")
+		os.Exit(1)
+	}
+}
+
+func loadAgentConfiguration(ctx context.Context, reader ctrlclient.Reader, defaults deploymentsv1alpha1.AgentConfigurationSpec) error {
+	if err := common.GetConfigurationManager().SetDefaults(defaults); err != nil {
+		return fmt.Errorf("set agent configuration defaults: %w", err)
+	}
+
+	config := &deploymentsv1alpha1.AgentConfiguration{}
+	if err := reader.Get(ctx, ctrlclient.ObjectKey{Name: "default"}, config); err != nil {
+		if apierrors.IsNotFound(err) {
+			setupLog.Info("AgentConfiguration/default not found, using flag defaults")
+			return nil
+		}
+
+		return fmt.Errorf("fetch AgentConfiguration/default: %w", err)
+	}
+
+	if err := common.GetConfigurationManager().SetValue(config.Spec); err != nil {
+		return fmt.Errorf("set AgentConfiguration/default: %w", err)
+	}
+
+	return nil
 }
 
 func initKubeResourcesOrDie(config *rest.Config) (meta.RESTMapper, discovery.DiscoveryInterface, kubernetes.Interface, dynamic.Interface) {
@@ -239,7 +275,7 @@ func runDiscoveryManagerOrDie(ctx context.Context, cache discoverycache.Cache) {
 
 func runSynchronizerSupervisorOrDie(ctx context.Context, dynamicClient dynamic.Interface, store store.Store,
 	statusSynchronizer streamline.StatusSynchronizer, discoveryCache discoverycache.Cache,
-	namespaceCache streamline.NamespaceCache, svcCache *pollycache.Cache[console.ServiceDeploymentForAgent]) *streamline.Supervisor {
+	namespaceCache streamline.NamespaceCache, svcCache pollycache.Store[console.ServiceDeploymentForAgent]) *streamline.Supervisor {
 	now := time.Now()
 	supervisor := streamline.NewSupervisor(dynamicClient,
 		store,

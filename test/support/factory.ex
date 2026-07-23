@@ -1218,6 +1218,32 @@ defmodule Console.Factory do
     }
   end
 
+  def workbench_function_tool_factory do
+    %Schema.WorkbenchTool{
+      name: sequence(:workbench_function_tool, & "lambda_tool_#{&1}"),
+      tool: :lambda,
+      categories: [:function],
+      project: Settings.default_project!(),
+      cloud_connection: build(:cloud_connection),
+      configuration: %{
+        lambda: %{
+          lambda_arn: "arn:aws:lambda:us-east-1:123456789012:function:plural-workbench-tool",
+          description: "Invoke the Plural workbench Lambda function",
+          input_schema: %{
+            "type" => "object",
+            "properties" => %{
+              "deployment" => %{"type" => "string"},
+              "replicas" => %{"type" => "integer"}
+            },
+            "required" => ["deployment"]
+          }
+        }
+      },
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
   def workbench_tool_association_factory do
     %Schema.WorkbenchToolAssociation{
       workbench: build(:workbench),

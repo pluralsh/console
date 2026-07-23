@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "description": "Search tags for a Docker/OCI repository slug.",
+  "properties": {
+    "repository_slug": {
+      "type": "string",
+      "description": "Repository slug within the configured registry, for example library/nginx, pluralsh/console, or my-team/my-image."
+    },
+    "query": {
+      "type": "string",
+      "description": "Optional case-insensitive substring used to filter tags in memory."
+    },
+    "limit": {
+      "type": "integer",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Maximum number of tags to return."
+    }
+  },
+  "required": ["repository_slug"],
+  "additionalProperties": false
+}

@@ -9,6 +9,8 @@ Cloud Query is a service part of the Plural Console ecosystem that provides clou
 - gRPC API for integration with other services
 - Containerized deployment for easy scaling
 
+CloudQuery provider support includes AWS, Azure, GCP, and VMware vSphere.
+
 ## Prerequisites
 
 - Go 1.24.2 or higher
@@ -65,6 +67,8 @@ For a comprehensive list of all available command-line arguments, their default 
 Cloud-Query exposes a gRPC API for querying cloud resources. Client implementations can use this API to retrieve information about cloud resources across different providers.
 
 For detailed information about the API endpoints, request/response schemas, and usage examples, see the [API Reference Documentation](docs/api-reference.md).
+
+CloudQuery vSphere connections require `server`, `user`, and `password`; `allow_unverified_ssl` can be set to `"true"` when connecting to vCenter endpoints with untrusted certificates.
 
 ## Tool Integrations (ToolQuery)
 

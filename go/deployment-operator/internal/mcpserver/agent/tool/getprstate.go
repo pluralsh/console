@@ -69,7 +69,13 @@ func (in *GetPRState) handler(ctx context.Context, request mcp.CallToolRequest) 
 	_, _ = fmt.Fprintf(&sb, "## Comments (%d)\n\n", len(details.Comments))
 	for _, c := range details.Comments {
 		body := strings.ReplaceAll(c.Body, "\n", "\n  > ")
-		_, _ = fmt.Fprintf(&sb, "- **%s** at %s:\n  > %s\n\n", c.Author, c.CreatedAt.UTC().Format("2006-01-02T15:04:05Z"), body)
+		if c.Reactable() {
+			_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
+				c.Author, c.CreatedAt.UTC().Format("2006-01-02T15:04:05Z"), c.ReactableID(), body)
+		} else {
+			_, _ = fmt.Fprintf(&sb, "- **%s** at %s (reviewId: `%s`, not reactable):\n  > %s\n\n",
+				c.Author, c.CreatedAt.UTC().Format("2006-01-02T15:04:05Z"), c.ReactableID(), body)
+		}
 	}
 
 	_, _ = fmt.Fprintf(&sb, "## CI Checks (%d)\n\n", len(details.CIChecks))

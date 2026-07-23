@@ -97,13 +97,14 @@ _Appears in:_
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: \{\} <br /> |
 | `analysisRates` _[AnalysisRates](#analysisrates)_ | Configure the pace at which AI insight analysis should run. Useful if you want to minimize impacts on inference costs. |  | Optional: \{\} <br /> |
 | `tools` _[Tools](#tools)_ | Tools holds the configuration for the tools that can be used with the AI integration. |  | Optional: \{\} <br /> |
-| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
-| `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI OPENAI_COMPATIBLE XAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
+| `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI OPENAI_COMPATIBLE XAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `streaming` _boolean_ | Streaming defines whether to stream responses from LLM providers. | true | Optional: \{\} <br /> |
 | `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI OPENAI_COMPATIBLE ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `logAnalysis` _boolean_ | LogAnalysis defines whether to enable log analysis in AI insights (turn off to save on log query costs) |  | Optional: \{\} <br /> |
 | `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
 | `openAICompatible` _[OpenAISettings](#openaisettings)_ | OpenAICompatible holds the OpenAI-compatible provider configuration. |  | Optional: \{\} <br /> |
+| `xai` _[OpenAISettings](#openaisettings)_ | XAI holds the xAI provider configuration.  This is OpenAI compatible, so uses an equivalent typing. |  | Optional: \{\} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: \{\} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment,<br />more details available at https://github.com/ollama/ollama |  | Optional: \{\} <br /> |
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: \{\} <br /> |
@@ -583,6 +584,7 @@ _Appears in:_
 | `aws` _[AWSCloudConnection](#awscloudconnection)_ |  |  |  |
 | `gcp` _[GCPCloudConnection](#gcpcloudconnection)_ |  |  |  |
 | `azure` _[AzureCloudConnection](#azurecloudconnection)_ |  |  |  |
+| `vsphere` _[VsphereCloudConnection](#vspherecloudconnection)_ |  |  |  |
 
 
 
@@ -601,7 +603,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this CloudConnection. If not provided CloudConnection's own name<br />from CloudConnection.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure] |  | Enum: [gcp aws azure] <br />Required: \{\} <br />Type: string <br /> |
+| `provider` _[CloudProvider](#cloudprovider)_ | Provider is the name of the cloud service for the Provider.<br />One of (CloudProvider): [gcp, aws, azure, vsphere] |  | Enum: [gcp aws azure vsphere] <br />Required: \{\} <br />Type: string <br /> |
 | `configuration` _[CloudConnectionConfiguration](#cloudconnectionconfiguration)_ | Configuration contains the cloud connection configuration. |  | Required: \{\} <br /> |
 | `readBindings` _[Binding](#binding) array_ | ReadBindings is a list of bindings that defines<br />who can use this CloudConnection. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -623,6 +625,7 @@ _Appears in:_
 | `aws` | AWS represents Amazon Web Services as a cloud provider<br /> |
 | `azure` | Azure represents Microsoft Azure as a cloud provider<br /> |
 | `gcp` | GCP represents Google Cloud Platform as a cloud provider<br /> |
+| `vsphere` | Vsphere represents VMware vSphere as a cloud provider<br /> |
 
 
 #### Cluster
@@ -1976,6 +1979,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Proxy configures an HTTP proxy for requests to this Helm repository or OCI registry. |  | Optional: \{\} <br /> |
 | `basic` _[HelmRepositoryAuthBasic](#helmrepositoryauthbasic)_ | Basic specifies username/password authentication for repositories that support HTTP Basic Auth.<br />Commonly used with private Helm repositories, Harbor registries, and other traditional<br />repository managers that implement standard HTTP authentication. |  | Optional: \{\} <br /> |
 | `bearer` _[HelmRepositoryAuthBearer](#helmrepositoryauthbearer)_ | Bearer specifies token-based authentication for repositories that support Bearer tokens.<br />Used with modern container registries and repositories that implement OAuth2 or similar<br />token-based authentication schemes. |  | Optional: \{\} <br /> |
 | `aws` _[HelmRepositoryAuthAWS](#helmrepositoryauthaws)_ | Aws specifies AWS-specific authentication for Amazon ECR and other AWS-hosted repositories.<br />Supports both static credentials and IAM role-based authentication for secure access<br />to private repositories hosted in Amazon Web Services. |  | Optional: \{\} <br /> |
@@ -2112,6 +2116,7 @@ _Appears in:_
 
 
 _Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
 - [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
 
@@ -2156,7 +2161,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, TERRAGRUNT, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM TERRAGRUNT ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, TERRAGRUNT, PULUMI, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM TERRAGRUNT PULUMI ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Optional: \{\} <br /> |
@@ -2624,6 +2629,7 @@ _Appears in:_
 - [AWSCloudConnection](#awscloudconnection)
 - [AzureCloudConnection](#azurecloudconnection)
 - [GCPCloudConnection](#gcpcloudconnection)
+- [VsphereCloudConnection](#vspherecloudconnection)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -3172,6 +3178,7 @@ _Appears in:_
 | `all` _boolean_ | All enables the complete UI interface for this persona when set to true.<br />This overrides individual feature settings and provides full access to all Console features.<br />Useful for administrative personas that need unrestricted access to all functionality. |  | Optional: \{\} <br /> |
 | `home` _[PersonaHome](#personahome)_ | Home configures the homepage layout and content for this persona.<br />Different personas can have customized homepages that highlight the most relevant<br />information and workflows for their specific role and responsibilities. |  | Optional: \{\} <br /> |
 | `deployments` _[PersonaDeployment](#personadeployment)_ | Deployments controls access to deployment-related features and sections.<br />This includes clusters, services, pipelines, and other deployment management tools.<br />Useful for controlling which teams can view or manage different aspects of deployments. |  | Optional: \{\} <br /> |
+| `flows` _[PersonaFlows](#personaflows)_ | Flows controls access to flow-related features and sections.<br />This includes workbenches, pipelines, and preview environments grouped under flows. |  | Optional: \{\} <br /> |
 | `sidebar` _[PersonaSidebar](#personasidebar)_ | Sidebar configures which navigation items and sections are visible in the main sidebar.<br />This allows personas to have streamlined navigation focused on their primary workflows<br />while hiding irrelevant or restricted functionality. |  | Optional: \{\} <br /> |
 | `services` _[PersonaServices](#personaservices)_ | Services controls access to service-specific features and configuration options.<br />This includes service configuration, secrets management, and other service-level operations. |  | Optional: \{\} <br /> |
 | `ai` _[PersonaAI](#personaai)_ | AI configures access to AI-powered features and capabilities within the Console.<br />This includes AI-assisted operations, automated suggestions, and other intelligent features. |  | Optional: \{\} <br /> |
@@ -3199,6 +3206,28 @@ _Appears in:_
 | `pipelines` _boolean_ | Pipelines enables access to CI/CD pipeline features when set to true.<br />This includes viewing pipeline status, managing pipeline configurations,<br />and triggering pipeline executions for automated deployments. |  | Optional: \{\} <br /> |
 | `providers` _boolean_ | Providers enables access to cloud provider management features when set to true.<br />This includes managing cloud provider credentials, configuring provider settings,<br />and other provider-related operations for infrastructure management. |  | Optional: \{\} <br /> |
 | `addOns` _boolean_ | AddOns enables access to Kubernetes add-on management features when set to true.<br />This includes installing, configuring, and managing cluster add-ons. |  | Optional: \{\} <br /> |
+
+
+#### PersonaFlows
+
+
+
+PersonaFlows defines access controls for flow-related features and views.
+These settings determine which flow management capabilities are visible and
+accessible to users assigned to this persona.
+
+
+
+_Appears in:_
+- [PersonaConfiguration](#personaconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `permissions` _boolean_ | Permissions enables the permissions action in the flow header when set to true.<br />This allows personas to manage flow permissions from the flow detail page. |  | Optional: \{\} <br /> |
+| `startWorkbenchJob` _boolean_ | StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.<br />This allows personas to launch workbench jobs directly from the flow detail page. |  | Optional: \{\} <br /> |
+| `workbenches` _boolean_ | Workbenches enables access to flow workbench features when set to true.<br />This includes viewing and using workbenches associated with flows. |  | Optional: \{\} <br /> |
+| `pipelines` _boolean_ | Pipelines enables access to flow pipeline features when set to true.<br />This includes viewing and managing pipelines associated with flows. |  | Optional: \{\} <br /> |
+| `previews` _boolean_ | Previews enables access to flow preview environment features when set to true.<br />This includes viewing and managing preview environments associated with flows. |  | Optional: \{\} <br /> |
 
 
 #### PersonaHome
@@ -3257,6 +3286,8 @@ _Appears in:_
 | `audits` _boolean_ | Audits enables access to audit logs and compliance reporting features when set to true.<br />This includes viewing system audit trails, user activity logs, and compliance reports.<br />Typically enabled for security teams and compliance officers. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables access to direct Kubernetes management features when set to true.<br />This includes raw Kubernetes resource management, kubectl-like operations,<br />and low-level cluster administration tasks. |  | Optional: \{\} <br /> |
 | `pullRequests` _boolean_ | PullRequests enables access to pull request management features when set to true.<br />This includes viewing and managing pull requests and Git-based deployment automation features. |  | Optional: \{\} <br /> |
+| `flows` _boolean_ | Flows enables access to the flows navigation item when set to true.<br />This includes viewing and managing flow resources from the main sidebar. |  | Optional: \{\} <br /> |
+| `workbenches` _boolean_ | Workbenches enables access to the workbenches navigation item when set to true.<br />This includes viewing and managing workbenches from the main sidebar. |  | Optional: \{\} <br /> |
 | `settings` _boolean_ | Settings enables access to system configuration and administrative settings when set to true.<br />This includes user management, system configuration, integration settings,<br />and other administrative functions. Typically restricted to administrators. |  | Optional: \{\} <br /> |
 | `backups` _boolean_ | Backups enables access to backup and restore management features when set to true.<br />This includes configuring backup policies, managing backup storage,<br />and performing restore operations for disaster recovery. |  | Optional: \{\} <br /> |
 | `stacks` _boolean_ | Stacks enables access to Infrastructure as Code (IaC) stack management when set to true.<br />This includes managing Terraform stacks and other IaC<br />automation tools for infrastructure provisioning and management. |  | Optional: \{\} <br /> |
@@ -4103,6 +4134,27 @@ _Appears in:_
 | `description` _string_ | Description provides a human-readable explanation of this project's purpose<br />and the resources it manages within the organizational hierarchy. |  | Optional: \{\} <br />Type: string <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+
+
+#### PulumiConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+- [StackOverrides](#stackoverrides)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `parallel` _integer_ | Parallel is the number of resource operations to run concurrently,<br />equivalent to the --parallel flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the --refresh flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
+| `stack` _string_ | Stack is the pulumi stack name to operate on,<br />equivalent to the --stack flag in pulumi preview, up, and destroy. |  | Optional: \{\} <br /> |
+| `backendUrl` _string_ | BackendUrl is an opaque URL passed to pulumi login for the state backend. When omitted, Pulumi Cloud is used.<br />It supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs. |  | Optional: \{\} <br /> |
 
 
 
@@ -5025,6 +5077,7 @@ _Appears in:_
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run. |  | Optional: \{\} <br /> |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform configuration for this stack. |  | Optional: \{\} <br /> |
 | `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt configuration for this stack. |  | Optional: \{\} <br /> |
+| `pulumi` _[PulumiConfiguration](#pulumiconfiguration)_ | Pulumi configuration for this stack. |  | Optional: \{\} <br /> |
 | `ansible` _[AnsibleConfiguration](#ansibleconfiguration)_ | Ansible configuration for this stack. |  | Optional: \{\} <br /> |
 | `aiApproval` _[AiApprovalConfiguration](#aiapprovalconfiguration)_ | AiApproval configuration for this stack to be auto-approved by AI according to rules sourced from Git. |  | Optional: \{\} <br /> |
 
@@ -5159,6 +5212,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `terraform` _[TerraformConfiguration](#terraformconfiguration)_ | Terraform is the terraform configuration for this stack |  | Optional: \{\} <br /> |
 | `terragrunt` _[TerragruntConfiguration](#terragruntconfiguration)_ | Terragrunt is the terragrunt configuration for this stack |  | Optional: \{\} <br /> |
+| `pulumi` _[PulumiConfiguration](#pulumiconfiguration)_ | Pulumi is the pulumi configuration for this stack |  | Optional: \{\} <br /> |
 
 
 #### StackSettings
@@ -5405,6 +5459,26 @@ _Appears in:_
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is a custom endpoint for self-deployed models |  | Optional: \{\} <br /> |
 | `serviceAccountJsonSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ServiceAccountJsonSecretRef is a Service Account json file stored w/in a kubernetes secret to use for authentication to GCP |  | Optional: \{\} <br /> |
+
+
+#### VsphereCloudConnection
+
+
+
+VsphereCloudConnection contains VMware vSphere authentication configuration.
+Provides credentials for discovering and querying vSphere resources.
+
+
+
+_Appears in:_
+- [CloudConnectionConfiguration](#cloudconnectionconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `server` _string_ | The vCenter SDK endpoint, for example https://vcenter.example.com/sdk |  |  |
+| `user` _string_ | The vCenter user |  |  |
+| `password` _[ObjectKeyReference](#objectkeyreference)_ | The vCenter password |  |  |
+| `allowUnverifiedSsl` _boolean_ | Whether to allow unverified vCenter TLS certificates |  | Optional: \{\} <br /> |
 
 
 #### Workbench

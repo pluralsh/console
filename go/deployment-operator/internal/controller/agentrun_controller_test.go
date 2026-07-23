@@ -885,7 +885,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 					StartTime: &metav1.Time{Time: time.Now().Add(-13 * time.Hour)},
 				},
 			}
-			Expect(isAgentRunPodTimedOut(oldPod)).To(BeTrue())
+			Expect(isAgentRunPodTimedOut(oldPod, agentRunMaxLifetime)).To(BeTrue())
 
 			recentPod := &corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
@@ -895,7 +895,21 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 					StartTime: &metav1.Time{Time: time.Now().Add(-1 * time.Hour)},
 				},
 			}
-			Expect(isAgentRunPodTimedOut(recentPod)).To(BeFalse())
+			Expect(isAgentRunPodTimedOut(recentPod, agentRunMaxLifetime)).To(BeFalse())
+		})
+
+		It("should resolve agent run max lifetime from runtime agent TTL override", func() {
+			runtime := &v1alpha1.AgentRuntime{
+				Spec: v1alpha1.AgentRuntimeSpec{
+					AgentTTL: &metav1.Duration{Duration: 2 * time.Hour},
+				},
+			}
+
+			Expect(agentRunMaxLifetimeForRuntime(runtime)).To(Equal(2 * time.Hour))
+		})
+
+		It("should use the default max lifetime when no runtime override is configured", func() {
+			Expect(agentRunMaxLifetimeForRuntime(nil)).To(Equal(agentRunMaxLifetime))
 		})
 	})
 })

@@ -28,6 +28,7 @@ import { getWorkloadsBreadcrumbs } from './Workloads'
 import { useTheme } from 'styled-components'
 import { groupBy } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { Readiness } from 'utils/status.ts'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -65,26 +66,35 @@ const colRestarts = columnHelper.accessor((pod) => pod?.restartCount, {
   cell: ({ getValue }) => getValue(),
 })
 
-const colContainers = columnHelper.accessor(
-  (row) => row?.containerStatuses?.length,
-  {
-    id: 'containers',
-    cell: ({ row: { original } }) => (
-      <ContainerStatuses
-        statuses={
-          original?.containerStatuses?.map(
-            (c) =>
-              ({
-                name: c?.name,
-                readiness: toReadiness(c!.state),
-              }) as ContainerStatusT
-          ) ?? []
-        }
-      />
-    ),
-    header: 'Containers',
-  }
-)
+const containersSortValue = (pod?: PodPod) => {
+  const statuses = pod?.containerStatuses ?? []
+  const unhealthyCount = statuses.filter((container) => {
+    const readiness = toReadiness(container!.state)
+
+    return readiness === Readiness.InProgress || readiness === Readiness.Failed
+  }).length
+
+  return unhealthyCount > 0 ? -unhealthyCount : statuses.length
+}
+
+const colContainers = columnHelper.accessor((row) => containersSortValue(row), {
+  id: 'containers',
+  enableSorting: true,
+  cell: ({ row: { original } }) => (
+    <ContainerStatuses
+      statuses={
+        original?.containerStatuses?.map(
+          (c) =>
+            ({
+              name: c?.name,
+              readiness: toReadiness(c!.state),
+            }) as ContainerStatusT
+        ) ?? []
+      }
+    />
+  ),
+  header: 'Containers',
+})
 
 const colCpu = columnHelper.accessor((row) => row?.allocatedResources, {
   id: 'cpu',
@@ -207,13 +217,13 @@ export function usePodsColumns(): Array<object> {
     () => [
       colName,
       colNamespace,
+      colContainers,
       colNode,
       colImages,
       colRestarts,
       colCpu,
       colMemory,
       colGPU,
-      colContainers,
       colCreationTimestamp,
       colAction,
     ],
@@ -238,6 +248,7 @@ export default function Pods() {
           : getAllPodsInfiniteOptions
       }
       itemsKey="pods"
+      tableOptions={{ manualSorting: false }}
     />
   )
 }

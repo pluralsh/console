@@ -246,6 +246,11 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
     ai { ...AISettingsFragment }
 }
 
+fragment DeploymentSettingsMinimalFragment on DeploymentSettings {
+    agentHelmValues
+    agentVsn
+}
+
 fragment ClusterEdgeFragment on ClusterEdge {
     node { ...ClusterFragment }
 }

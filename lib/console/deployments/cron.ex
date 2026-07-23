@@ -35,6 +35,7 @@ defmodule Console.Deployments.Cron do
     Service.deleted()
     |> Service.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn %{namespace: ns} = svc ->
       Logger.info "pruning service #{svc.id}"
       case Repo.preload(svc, [:components]) do
@@ -51,6 +52,7 @@ defmodule Console.Deployments.Cron do
     Cluster.deleted()
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn cluster ->
       Logger.info "pruning cluster #{cluster.id}"
       case Clusters.draining?(cluster) do
@@ -125,6 +127,7 @@ defmodule Console.Deployments.Cron do
     Cluster.installed()
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn cluster ->
       Logger.info "compiling upgrade plan for #{cluster.handle}"
       Clusters.update_upgrade_plan(cluster)
@@ -137,6 +140,7 @@ defmodule Console.Deployments.Cron do
 
     Service.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn svc ->
       Logger.info "checking deprecations for #{svc.id}"
       Services.add_deprecations(svc)
@@ -149,6 +153,7 @@ defmodule Console.Deployments.Cron do
 
     ManagedNamespace.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn mns ->
       Logger.info "syncing managed namespace #{mns.id}"
       Global.reconcile_namespace(mns)
@@ -162,6 +167,7 @@ defmodule Console.Deployments.Cron do
     ManagedNamespace.deleted()
     |> ManagedNamespace.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn mns ->
       Logger.info "draining managed namespace #{mns.id}"
       Global.drain_managed_namespace(mns)
@@ -174,6 +180,7 @@ defmodule Console.Deployments.Cron do
     Logger.info "rotating cluster deploy tokens"
     Cluster.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn cluster ->
       Logger.info "rotating token for #{cluster.id}"
       Clusters.rotate_deploy_token(cluster)
@@ -197,6 +204,7 @@ defmodule Console.Deployments.Cron do
   def scan_pipeline_stages() do
     PipelineStage.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn stage ->
       Logger.info "attempting to promote stage #{stage.id} (#{stage.name})"
       Discovery.stage(stage)
@@ -207,6 +215,7 @@ defmodule Console.Deployments.Cron do
   def scan_pending_promotions() do
     PipelinePromotion.pending()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn promo ->
       Logger.info "attempting to apply promotion #{promo.id}"
       Discovery.promotion(promo)
@@ -218,6 +227,7 @@ defmodule Console.Deployments.Cron do
     PipelineStage.pending_context()
     |> PipelineStage.stream()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn stage ->
       Logger.info "attempt to apply context for a stage"
       Discovery.context(stage)
@@ -234,6 +244,7 @@ defmodule Console.Deployments.Cron do
   def place_run_workers() do
     StackRun.running()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Stream.each(fn run ->
       Logger.info "ensuring run worker #{run.id} is placed"
       Stacks.Discovery.runner(run)
@@ -245,7 +256,7 @@ defmodule Console.Deployments.Cron do
     StackCron.executable()
     |> StackCron.ordered()
     |> Repo.all()
-    |> Console.throttle()
+    |> Console.throttle(count: 100, pause: 20)
     |> Stream.each(fn cron ->
       Logger.info "spawning stack cron run for #{cron.stack_id}"
       Stacks.spawn_cron(cron)
@@ -319,6 +330,7 @@ defmodule Console.Deployments.Cron do
     PullRequest.stream()
     |> PullRequest.pending_governance()
     |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 20)
     |> Task.async_stream(fn pr ->
       Logger.info "attempting to apply governance for #{pr.id}"
       Git.confirm_pull_request(pr)
@@ -343,14 +355,14 @@ defmodule Console.Deployments.Cron do
     WorkbenchJob.expired()
     |> WorkbenchJob.ordered(desc: :id)
     |> Repo.stream(method: :keyset)
-    |> Console.throttle(count: 100, pause: 1)
+    |> Console.throttle(count: 100, pause: 10)
     |> Stream.chunk_every(20)
     |> Task.async_stream(fn chunk ->
       Logger.info "pruning #{length(chunk)} workbench jobs"
       Enum.map(chunk, & &1.id)
       |> WorkbenchJob.for_ids()
       |> Repo.delete_all(timeout: 300_000)
-    end, max_concurrency: 10)
+    end, max_concurrency: 5)
     |> Stream.run()
   end
 

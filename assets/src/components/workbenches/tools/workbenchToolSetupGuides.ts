@@ -5,6 +5,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
 > = {
   [WorkbenchToolType.Http]: '/setup-guides/tools/http.md',
   [WorkbenchToolType.Elastic]: '/setup-guides/tools/elastic.md',
+  [WorkbenchToolType.Opensearch]: '/setup-guides/tools/opensearch.md',
   [WorkbenchToolType.Prometheus]: '/setup-guides/tools/prometheus.md',
   [WorkbenchToolType.Loki]: '/setup-guides/tools/loki.md',
   [WorkbenchToolType.Tempo]: '/setup-guides/tools/tempo.md',
@@ -27,6 +28,7 @@ const TOOL_SETUP_GUIDE_MARKDOWN_PATHS: Partial<
   [WorkbenchToolType.Azure]: '/setup-guides/tools/azure.md',
   [WorkbenchToolType.Sentry]: '/setup-guides/tools/sentry.md',
   [WorkbenchToolType.Mcp]: '/setup-guides/tools/mcp.md',
+  [WorkbenchToolType.Docker]: '/setup-guides/tools/docker.md',
 }
 
 const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
@@ -34,6 +36,8 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication',
   [WorkbenchToolType.Elastic]:
     'https://www.elastic.co/docs/reference/elasticsearch/security-privileges',
+  [WorkbenchToolType.Opensearch]:
+    'https://docs.aws.amazon.com/opensearch-service/latest/developerguide/ac.html',
   [WorkbenchToolType.Prometheus]:
     'https://prometheus.io/docs/guides/basic-auth/',
   [WorkbenchToolType.Loki]:
@@ -70,6 +74,8 @@ const TOOL_SETUP_GUIDE_DOC_URLS: Partial<Record<WorkbenchToolType, string>> = {
     'https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/roles-permissions-security',
   [WorkbenchToolType.Sentry]: 'https://docs.sentry.io/api/permissions/',
   [WorkbenchToolType.Mcp]: 'https://modelcontextprotocol.io/introduction',
+  [WorkbenchToolType.Docker]:
+    'https://distribution.github.io/distribution/spec/api/',
 }
 
 export function getWorkbenchToolSetupGuideMarkdownPath(

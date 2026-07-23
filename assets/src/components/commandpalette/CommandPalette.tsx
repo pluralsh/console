@@ -41,7 +41,11 @@ import {
   useHistory,
 } from './commands.ts'
 
-export default function CommandPalette() {
+export default function CommandPalette({
+  openServiceAccountImpersonation,
+}: {
+  openServiceAccountImpersonation: () => void
+}) {
   const aiEnabled = useAIEnabled()
   const theme = useTheme()
   const { setCmdkOpen, initialTab } = use(CommandPaletteContext)
@@ -55,6 +59,7 @@ export default function CommandPalette() {
   const commands = useCommands({
     showHidden: cmdValue.length > 0,
     filter: cmdValue,
+    openServiceAccountImpersonation,
   })
 
   const { loading, history, fetchNextPage, pageInfo } = useHistory({

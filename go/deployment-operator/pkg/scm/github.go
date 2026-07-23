@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -121,7 +122,7 @@ func (c *gitHubClient) allComments(ctx context.Context, owner, repo string, numb
 		opts.Page = resp.NextPage
 	}
 
-	// Also fetch inline review comments
+	// Also fetch inline review comments.
 	ropts := &gogithub.PullRequestListCommentsOptions{ListOptions: gogithub.ListOptions{PerPage: 100}}
 	for {
 		batch, resp, err := c.gh.PullRequests.ListComments(ctx, owner, repo, number, ropts)
@@ -142,6 +143,38 @@ func (c *gitHubClient) allComments(ctx context.Context, owner, repo string, numb
 		}
 		ropts.Page = resp.NextPage
 	}
+
+	// Review summaries are distinct from inline review comments. Bots often put
+	// their actionable feedback here, so include non-empty review bodies as PR
+	// activity even though GitHub does not expose the same reaction endpoint.
+	reviewOpts := &gogithub.ListOptions{PerPage: 100}
+	for {
+		batch, resp, err := c.gh.PullRequests.ListReviews(ctx, owner, repo, number, reviewOpts)
+		if err != nil {
+			return nil, fmt.Errorf("list reviews: %w", err)
+		}
+		for _, r := range batch {
+			body := strings.TrimSpace(r.GetBody())
+			if body == "" {
+				continue
+			}
+			all = append(all, PRComment{
+				ID:        strconv.FormatInt(r.GetID(), 10),
+				Type:      PRCommentTypeReviewSummary,
+				Author:    r.GetUser().GetLogin(),
+				Body:      body,
+				CreatedAt: r.GetSubmittedAt().Time,
+			})
+		}
+		if resp.NextPage == 0 {
+			break
+		}
+		reviewOpts.Page = resp.NextPage
+	}
+
+	sort.SliceStable(all, func(i, j int) bool {
+		return all[i].CreatedAt.Before(all[j].CreatedAt)
+	})
 
 	return all, nil
 }
@@ -200,7 +233,7 @@ func (c *gitHubClient) GetCILogs(ctx context.Context, prURL string, checkRunID i
 	return "", fmt.Errorf("no logs available for check run %d", checkRunID)
 }
 
-// ReactToComment adds a GitHub reaction to an issue or review comment.
+// ReactToComment adds a GitHub reaction to an issue or inline review comment.
 // reactableID format: "issue:<numericID>" or "review:<numericID>".
 // working  → adds "eyes".
 // complete → removes "eyes" if present, then adds "+1".
@@ -242,6 +275,8 @@ func (c *gitHubClient) ReactToComment(ctx context.Context, prURL string, reactab
 		_, _, err = c.gh.Reactions.CreateIssueCommentReaction(ctx, owner, repo, id, content)
 	case PRCommentTypeReview:
 		_, _, err = c.gh.Reactions.CreatePullRequestCommentReaction(ctx, owner, repo, id, content)
+	case PRCommentTypeReviewSummary:
+		return fmt.Errorf("review summaries are not reactable through GitHub comment reactions")
 	default:
 		return fmt.Errorf("unknown comment type %q in reactableID", commentType)
 	}

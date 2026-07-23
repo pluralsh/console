@@ -21,6 +21,21 @@ func (c *client) UpsertCloudConnection(ctx context.Context, attributes console.C
 	return response.UpsertCloudConnection, nil
 }
 
+func (c *client) UpdateCloudConnection(ctx context.Context, id string, attributes console.CloudConnectionAttributes) (*console.CloudConnectionFragment, error) {
+	response, err := c.consoleClient.UpdateCloudConnection(ctx, id, attributes)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if response == nil || response.UpdateCloudConnection == nil {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
+	return response.UpdateCloudConnection, nil
+}
+
 func (c *client) GetCloudConnection(ctx context.Context, id, name *string) (*console.CloudConnectionFragment, error) {
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")

@@ -64,6 +64,10 @@ config :console,
   version: Mix.Project.config[:version],
   kas_dns: "https://kas.example.com",
   qps: 1_000,
+  tarball_qps: 100,
+  cache_agent_qps: 50,
+  cache_agent_queue_limit: 20,
+  cache_agent_queue_shed: 5,
   nowatchers: false,
   default_project_name: "default",
   prom_plugins: [Console.Prom.Plugin],
@@ -73,13 +77,18 @@ config :console,
   refresh_token_expiry: "7d",
   workbench_default: false,
   qove_key: nil,
-  cloud_override: "ignore"
+  cloud_override: "ignore",
+  details: %{}
 
 config :console, :ai_defaults,
   openai: %{
     model: "gpt-5.4-mini",
     tool_model: "gpt-5.4",
     embedding_model: "text-embedding-3-large"
+  },
+  xai: %{
+    model: "grok-4.5",
+    tool_model: "grok-4.5"
   },
   azure: %{
     model: "gpt-5.4-mini",
@@ -88,16 +97,16 @@ config :console, :ai_defaults,
   },
   vertex: %{
     model: "claude-haiku-4-5@20251001",
-    tool_model: "claude-sonnet-4-6@20260114",
+    tool_model: "claude-sonnet-5@default",
     embedding_model: "gemini-embedding-001"
   },
   anthropic: %{
     model: "claude-4-5-haiku-latest",
-    tool_model: "claude-4-6-sonnet-latest"
+    tool_model: "claude-sonnet-5-latest"
   },
   bedrock: %{
     model: "global.anthropic.claude-haiku-4-5-20251001-v1:0",
-    tool_model: "global.anthropic.claude-sonnet-4-6",
+    tool_model: "global.anthropic.claude-sonnet-5",
     embedding_model: "cohere.embed-english-v3"
   },
   ollama: %{},
@@ -116,7 +125,6 @@ config :console, Console.Guardian,
 
 config :console, Console.Repo,
   types: Console.PostgrexTypes,
-  queue_target: 1000,
   migration_timestamps: [type: :utc_datetime_usec]
 
 config :tzdata, :autoupdate, :disabled

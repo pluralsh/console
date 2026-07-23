@@ -14,8 +14,8 @@ defmodule Console.Deployments.Helm.AgentCache do
   defstruct [:repo, :client, :index, :dir, :table]
 
   defmodule Line do
-    @expiry [minutes: -30]
-    defstruct [:file, :chart, :vsn, :digest, :internal_digest, :touched]
+    @expiry -30
+    defstruct [:file, :chart, :vsn, :digest, :internal_digest, :touched, :jitter]
 
     def new(file, chart, vsn, digest) do
       %__MODULE__{
@@ -24,6 +24,7 @@ defmodule Console.Deployments.Helm.AgentCache do
         internal_digest: Console.sha_file(file),
         vsn: vsn,
         digest: digest,
+        jitter: Console.jitter(10),
         touched: Timex.now()
       }
     end
@@ -32,9 +33,9 @@ defmodule Console.Deployments.Helm.AgentCache do
 
     def expire(%__MODULE__{file: f}), do: File.rm(f)
 
-    def expired?(%__MODULE__{touched: touched}) do
+    def expired?(%__MODULE__{touched: touched, jitter: jitter}) do
       Timex.now()
-      |> Timex.shift(@expiry)
+      |> Timex.shift(minutes: @expiry - jitter)
       |> Timex.after?(touched)
     end
   end
@@ -89,23 +90,26 @@ defmodule Console.Deployments.Helm.AgentCache do
   def write(%__MODULE__{client: client} = cache, chart, vsn) do
     path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
     tmp = Briefly.create!()
-    with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
-         {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
-         {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
-         :ok <- validate_download(tmp),
-         :ok <- Utils.clean_chart(tmp, path, chart),
-         line <- Line.new(path, chart, vsn, digest),
-         :ok <- File.rm(tmp) do
-      cache = %{cache | client: client}
-      {:ok, line, put(cache, line)}
-    else
-      {:cache, {line, true}} ->
-        File.rm(tmp)
-        {:ok, line, cache}
-      err ->
-        Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
-        File.rm(tmp)
-        err
+    cleaned = Briefly.create!()
+    try do
+      with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
+          {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
+          {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
+          :ok <- validate_download(tmp),
+          :ok <- Utils.clean_chart(tmp, cleaned, chart),
+          :ok <- File.rename(cleaned, path),
+          line <- Line.new(path, chart, vsn, digest) do
+        cache = %{cache | client: client}
+        {:ok, line, put(cache, line)}
+      else
+        {:cache, {line, true}} ->
+          {:ok, line, cache}
+        err ->
+          Logger.warning "failed to write helm chart to cache: #{inspect(err)}"
+          err
+      end
+    after
+      File.rm(tmp)
     end
   end
 

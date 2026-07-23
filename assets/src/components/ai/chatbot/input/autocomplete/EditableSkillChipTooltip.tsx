@@ -6,16 +6,25 @@ import {
 } from 'components/utils/contentEditableChips'
 import {
   forwardRef,
+  ReactNode,
   RefObject,
   useEffect,
   useLayoutEffect,
   useState,
 } from 'react'
 import { MentionKind } from './mentionTypes'
+import {
+  hasVulnerabilityChipTooltip,
+  VulnerabilityChipTooltipLabel,
+  vulnerabilityChipTooltipText,
+} from './VulnerabilityChipTooltipLabel'
 
-const SKILL_SELECTOR = `[${CHIP_DATA_ATTR}="true"][${CHIP_TAG_ATTR}="${MentionKind.Skill}"]`
+const PLRL_CHIP_SELECTOR = [MentionKind.Skill, MentionKind.Vulnerability]
+  .map((kind) => `[${CHIP_DATA_ATTR}="true"][${CHIP_TAG_ATTR}="${kind}"]`)
+  .join(',')
 const DESC_ATTR = `${CHIP_ATTR_PREFIX}description`
 const NAME_ATTR = `${CHIP_ATTR_PREFIX}item-name`
+const TITLE_ATTR = `${CHIP_ATTR_PREFIX}title`
 
 const TIP_ON_INPUT_STYLE = {
   maxWidth: 500,
@@ -23,18 +32,45 @@ const TIP_ON_INPUT_STYLE = {
   zIndex: 11_000,
 }
 
-/** Skill chip + tooltip label, resolved from pointer event target. */
-function skillHintFromTarget(
+function chipHintFromTarget(
   eventTarget: EventTarget | null
-): { chip: HTMLElement; label: string } | null {
+): { chip: HTMLElement; label: ReactNode; hintKey: string } | null {
   if (!(eventTarget instanceof Element)) return null
-  const chip = eventTarget.closest(SKILL_SELECTOR)
+  const chip = eventTarget.closest(PLRL_CHIP_SELECTOR)
   if (!(chip instanceof HTMLElement)) return null
-  const label =
-    chip.getAttribute(DESC_ATTR)?.trim() ||
-    chip.getAttribute(NAME_ATTR)?.trim() ||
-    null
-  return label ? { chip, label } : null
+
+  const tag = chip.getAttribute(CHIP_TAG_ATTR)
+  const itemId = chip.getAttribute(`${CHIP_ATTR_PREFIX}item-id`) ?? ''
+  const description = chip.getAttribute(DESC_ATTR)?.trim()
+  const name = chip.getAttribute(NAME_ATTR)?.trim()
+  const title = chip.getAttribute(TITLE_ATTR)?.trim()
+
+  switch (tag) {
+    case MentionKind.Skill: {
+      const label = description || name
+      if (!label) return null
+      return {
+        chip,
+        label,
+        hintKey: `${tag}|${itemId}|${description ?? ''}|${name ?? ''}`,
+      }
+    }
+    case MentionKind.Vulnerability: {
+      if (!hasVulnerabilityChipTooltip({ title, description })) return null
+      return {
+        chip,
+        label: (
+          <VulnerabilityChipTooltipLabel
+            title={title}
+            description={description}
+          />
+        ),
+        hintKey: `${tag}|${itemId}|${title ?? ''}|${description ?? ''}`,
+      }
+    }
+    default:
+      return null
+  }
 }
 
 const ChipAnchorStub = forwardRef<HTMLSpanElement, { chip: HTMLElement }>(
@@ -81,19 +117,21 @@ export function EditableSkillChipTooltip({
 }: {
   containerRef: RefObject<HTMLElement | null>
 }) {
-  const [hint, setHint] = useState<{ chip: HTMLElement; label: string } | null>(
-    null
-  )
+  const [hint, setHint] = useState<{
+    chip: HTMLElement
+    label: ReactNode
+    hintKey: string
+  } | null>(null)
 
   useEffect(() => {
     const editorRoot = containerRef.current
     if (!editorRoot) return
 
     const onPointerMove = (event: PointerEvent) => {
-      const next = skillHintFromTarget(event.target)
+      const next = chipHintFromTarget(event.target)
       setHint((current) => {
         if (!next) return null
-        return current?.chip === next.chip && current.label === next.label
+        return current?.chip === next.chip && current.hintKey === next.hintKey
           ? current
           : next
       })
@@ -111,13 +149,24 @@ export function EditableSkillChipTooltip({
 
   if (!hint) return null
 
+  const textValue =
+    hint.chip.getAttribute(CHIP_TAG_ATTR) === MentionKind.Vulnerability
+      ? vulnerabilityChipTooltipText({
+          title: hint.chip.getAttribute(TITLE_ATTR) ?? undefined,
+          description: hint.chip.getAttribute(DESC_ATTR) ?? undefined,
+        })
+      : typeof hint.label === 'string'
+        ? hint.label
+        : undefined
+
   return (
     <Tooltip
-      key={hint.chip.getAttribute(`${CHIP_ATTR_PREFIX}item-id`) ?? hint.label}
+      key={hint.hintKey}
       dismissable={false}
       displayOn="manual"
       manualOpen
       label={hint.label}
+      textValue={textValue}
       placement="top"
       style={TIP_ON_INPUT_STYLE}
     >

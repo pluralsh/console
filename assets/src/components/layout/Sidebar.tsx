@@ -138,6 +138,7 @@ function getMenuItems({
       expandedLabel: 'Flows',
       icon: <FlowIcon />,
       path: FLOWS_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.flows),
       hotkeys: ['shift F'],
     },
     {
@@ -145,6 +146,7 @@ function getMenuItems({
       expandedLabel: 'Workbenches',
       icon: <WorkbenchIcon />,
       path: WORKBENCHES_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.workbenches),
       hotkeys: ['shift W'],
     },
     {

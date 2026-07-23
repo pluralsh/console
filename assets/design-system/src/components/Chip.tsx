@@ -231,7 +231,7 @@ function Chip({
           {...{
             [CHIP_CLOSE_ATTR_KEY]: '',
           }}
-          {...(clickable ? { as: 'div' } : {})}
+          as={clickable ? 'div' : 'button'}
           {...(closeButtonProps || {})}
         >
           <CloseIcon
