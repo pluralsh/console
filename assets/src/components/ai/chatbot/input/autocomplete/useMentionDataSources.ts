@@ -129,15 +129,13 @@ export function useMentionDataSources({
   const skills = useMemo<SkillChipAttrs[]>(() => {
     const all = (skillData?.workbench?.allSkills ?? [])
       .flatMap((n) => (n ? [n] : []))
-      .map(
-        (n): SkillChipAttrs => ({
-          kind: MentionKind.Skill,
-          'item-id': n.id ?? `skill:${n.name ?? ''}`,
-          'item-name': n.name ?? '',
-          description: n.description ?? undefined,
-          subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
-        })
-      )
+      .map((n): SkillChipAttrs => ({
+        kind: MentionKind.Skill,
+        'item-id': n.id ?? `skill:${n.name ?? ''}`,
+        'item-name': n.name ?? '',
+        description: n.description ?? undefined,
+        subagents: n.subagents?.flatMap((s) => (s ? [s] : [])).join(','),
+      }))
 
     if (!throttled) return all.slice(0, MAX_PER_KIND)
     return new Fuse(all, skillFuseOptions)

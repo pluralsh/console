@@ -43,10 +43,7 @@ import {
 import styled from 'styled-components'
 
 export type SidePanel =
-  | 'agent-run'
-  | 'ai-chat'
-  | 'webhook-setup-guide'
-  | 'workbench-job'
+  'agent-run' | 'ai-chat' | 'webhook-setup-guide' | 'workbench-job'
 
 export type SidePanelWidthOverride = {
   minWidth?: number

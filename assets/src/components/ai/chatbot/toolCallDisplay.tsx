@@ -2,10 +2,7 @@ import { ChatTypeAttributes } from 'generated/graphql'
 import { truncate } from 'lodash'
 
 export type ToolArguments =
-  | Record<string, unknown>
-  | unknown[]
-  | null
-  | undefined
+  Record<string, unknown> | unknown[] | null | undefined
 
 /** Canonical tool kinds used for labels, accordions, and batch group headers. */
 export type ToolCallKind =

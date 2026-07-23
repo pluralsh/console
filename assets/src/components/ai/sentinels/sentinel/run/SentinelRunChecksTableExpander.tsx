@@ -36,8 +36,7 @@ import { sentinelRunJobsCols } from './jobs/SentinelRunJobsCols'
 import { SentinelCheckWithResult } from './SentinelRun'
 
 export type JobStatusFilterKey =
-  | 'All'
-  | Exclude<SentinelRunJobStatus, SentinelRunJobStatus.Pending>
+  'All' | Exclude<SentinelRunJobStatus, SentinelRunJobStatus.Pending>
 
 enum ExpanderTab {
   Reason = 'reason',

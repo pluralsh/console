@@ -58,12 +58,7 @@ import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
-  | 'Result'
-  | 'Dashboard'
-  | 'Topology'
-  | 'Pull requests'
-  | 'Eval'
-  | 'Usage'
+  'Result' | 'Dashboard' | 'Topology' | 'Pull requests' | 'Eval' | 'Usage'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
