@@ -1,6 +1,7 @@
 import { Accordion, Flex } from '@pluralsh/design-system'
 import {
   useWorkbenchJobActivitiesQuery,
+  WorkbenchJobActivityFragment,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
@@ -17,6 +18,7 @@ import {
   isJobRunning,
   WorkbenchJobActivity,
   WorkbenchJobJobLevelThinking,
+  WorkbenchJobMemoGroup,
 } from './WorkbenchJobActivity'
 import { WorkbenchJobEvalPromptCard } from './WorkbenchJobEvalPromptCard'
 import { ExpandableUserPrompt } from './WorkbenchJobActivityResults'
@@ -47,6 +49,10 @@ export function WorkbenchJobActivities({
 
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
+  const activityGroups = useMemo(
+    () => groupConsecutiveMemos(activities),
+    [activities]
+  )
 
   const [closedIds, setClosedIds] = useState<Set<string> | null>(null)
   if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
@@ -63,11 +69,12 @@ export function WorkbenchJobActivities({
 
   const userPromptIndices = useMemo(() => {
     const indices = [0] // 0 is initial user prompt in topContent
-    activities.forEach((a, i) => {
-      if (a.type === WorkbenchJobActivityType.User) indices.push(i + 1)
+    activityGroups.forEach(({ activities }, i) => {
+      if (activities[0]?.type === WorkbenchJobActivityType.User)
+        indices.push(i + 1)
     })
     return indices
-  }, [activities])
+  }, [activityGroups])
 
   if (!data && loading)
     return (
@@ -101,7 +108,7 @@ export function WorkbenchJobActivities({
         >
           <VirtualList
             isReversed
-            data={activities}
+            data={activityGroups}
             style={{
               padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
             }}
@@ -143,26 +150,61 @@ export function WorkbenchJobActivities({
                   )}
               </>
             }
-            renderer={({ rowData }) => (
-              <WorkbenchJobActivity
-                isOpen={
-                  openIds.includes(rowData.id) ||
-                  rowData.type === WorkbenchJobActivityType.Conclusion ||
-                  rowData.type === WorkbenchJobActivityType.User
-                }
-                activity={rowData}
-                jobId={jobId}
-                workbenchId={workbenchId}
-                workbenchName={workbenchName}
-                textStream={textStreamMap[rowData.id] ?? ''}
-              />
-            )}
+            renderer={({ rowData }) => {
+              const [activity] = rowData.activities
+
+              return activity.type === WorkbenchJobActivityType.Memo ? (
+                <WorkbenchJobMemoGroup
+                  activities={rowData.activities}
+                  textStreamMap={textStreamMap}
+                />
+              ) : (
+                <WorkbenchJobActivity
+                  isOpen={
+                    openIds.includes(activity.id) ||
+                    activity.type === WorkbenchJobActivityType.Conclusion ||
+                    activity.type === WorkbenchJobActivityType.User
+                  }
+                  activity={activity}
+                  jobId={jobId}
+                  workbenchId={workbenchId}
+                  workbenchName={workbenchName}
+                  textStream={textStreamMap[activity.id] ?? ''}
+                />
+              )
+            }}
           />
         </ActivitiesAccordionSC>
       </ActivitiesPanelSC>
       <WorkbenchJobPromptInput job={job} />
     </Flex>
   )
+}
+
+type WorkbenchJobActivityGroup = {
+  id: string
+  activities: WorkbenchJobActivityFragment[]
+}
+
+export function groupConsecutiveMemos(
+  activities: WorkbenchJobActivityFragment[]
+): WorkbenchJobActivityGroup[] {
+  return activities.reduce<WorkbenchJobActivityGroup[]>((groups, activity) => {
+    const lastGroup = groups.at(-1)
+    const isMemo = activity.type === WorkbenchJobActivityType.Memo
+    const followsMemo =
+      lastGroup?.activities[0]?.type === WorkbenchJobActivityType.Memo
+
+    if (isMemo && followsMemo) {
+      lastGroup.activities.push(activity)
+
+      return groups
+    }
+
+    groups.push({ id: activity.id, activities: [activity] })
+
+    return groups
+  }, [])
 }
 
 const ActivitiesAccordionSC = styled(Accordion)({

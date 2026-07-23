@@ -5,6 +5,7 @@ import {
   Flex,
   IconFrame,
   Markdown,
+  Modal,
   TimeSeriesIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
@@ -14,6 +15,7 @@ import {
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import {
+  ClickableLabelSC,
   SimpleAccordion,
   SimpleToolCall,
   SimplifiedMarkdown,
@@ -24,6 +26,7 @@ import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
@@ -40,7 +43,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
   ActivityModalIcon,
@@ -181,12 +184,10 @@ export function WorkbenchJobActivity({
         overflow="auto"
         css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        {prompt && type !== WorkbenchJobActivityType.Memo && (
-          <JobActivityPrompt prompt={prompt} />
-        )}
+        {prompt && <JobActivityPrompt prompt={prompt} />}
         <WorkbenchJobActivityThoughts
           activityId={id}
-          skip={!isOpen || type === WorkbenchJobActivityType.Memo}
+          skip={!isOpen}
         />
         {textStream && (
           <Flex
@@ -210,6 +211,141 @@ export function WorkbenchJobActivity({
         )}
       </Flex>
     </AccordionItem>
+  )
+}
+
+export function WorkbenchJobMemoGroup({
+  activities,
+  textStreamMap,
+}: {
+  activities: WorkbenchJobActivityFragment[]
+  textStreamMap: Record<string, string>
+}) {
+  const { spacing } = useTheme()
+  const [isExpanded, setIsExpanded] = useState(false)
+  const lastMemo = activities.at(-1)
+  const shouldGroup = activities.length >= 3
+
+  if (!shouldGroup)
+    return (
+      <MemoGroupSC>
+        <Flex
+          direction="column"
+          gap="xsmall"
+        >
+          {activities.map((activity) => (
+            <WorkbenchJobMemo
+              key={activity.id}
+              activity={activity}
+              textStream={textStreamMap[activity.id] ?? ''}
+            />
+          ))}
+        </Flex>
+      </MemoGroupSC>
+    )
+
+  return (
+    <MemoGroupSC>
+      <SimpleAccordion
+        label={`${activities.length} memos`}
+        isOpen={isExpanded}
+        setIsOpen={setIsExpanded}
+        caret="right-quarter-mirror"
+        triggerWrapperStyles={{
+          justifyContent: 'flex-start',
+          gap: spacing.xsmall,
+          '.icon': { width: 10 },
+        }}
+      >
+        <Flex
+          direction="column"
+          gap="xsmall"
+          marginTop={spacing.xsmall}
+        >
+          {activities.map((activity) => (
+            <WorkbenchJobMemo
+              key={activity.id}
+              activity={activity}
+              textStream={textStreamMap[activity.id] ?? ''}
+            />
+          ))}
+        </Flex>
+      </SimpleAccordion>
+      {!isExpanded && lastMemo && isJobRunning(lastMemo.status) && (
+        <EaseIn currentKey={lastMemo.id}>
+          <WorkbenchJobMemo
+            activity={lastMemo}
+            textStream={textStreamMap[lastMemo.id] ?? ''}
+          />
+        </EaseIn>
+      )}
+    </MemoGroupSC>
+  )
+}
+
+function WorkbenchJobMemo({
+  activity,
+  textStream,
+}: {
+  activity: WorkbenchJobActivityFragment
+  textStream: string
+}) {
+  const { prompt, result, status } = activity
+  const [isOpen, setIsOpen] = useState(false)
+  const [finishedAnimating, setFinishedAnimating] = useState(false)
+  const isRunning = isJobRunning(status)
+  const isFailed = status === WorkbenchJobActivityStatus.Failed
+  const content = textStream || result?.output || prompt || ''
+  const label =
+    content ||
+    result?.error ||
+    (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
+
+  return (
+    <MemoRowSC>
+      <ClickableLabelSC onClick={() => setIsOpen(true)}>
+        <MemoLabelSC $shimmer={isRunning}>
+          Memo <SpanSC $color="text-light">{label}</SpanSC>
+        </MemoLabelSC>
+      </ClickableLabelSC>
+      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
+      {isFailed && (
+        <FailedFilledIcon
+          size={12}
+          color="icon-danger"
+        />
+      )}
+      <Modal
+        open={isOpen}
+        onClose={() => {
+          setIsOpen(false)
+          setFinishedAnimating(false)
+        }}
+        onAnimationEnd={() => setFinishedAnimating(true)}
+        header="Memo"
+        size="large"
+      >
+        {finishedAnimating ? (
+          <Flex
+            direction="column"
+            gap="small"
+          >
+            {result?.error && (
+              <GqlError
+                error={result.error}
+                css={{ wordBreak: 'break-word' }}
+              />
+            )}
+            {content && <SimplifiedMarkdown text={content} />}
+          </Flex>
+        ) : (
+          <RectangleSkeleton
+            $height={160}
+            $width="100%"
+          />
+        )}
+      </Modal>
+    </MemoRowSC>
   )
 }
 
@@ -288,6 +424,35 @@ function WorkbenchJobActivityResult({
     </Flex>
   )
 }
+
+const MemoGroupSC = styled.div(({ theme }) => ({
+  width: '100%',
+  minWidth: 0,
+  borderRadius: theme.borderRadiuses.medium,
+}))
+
+const MemoRowSC = styled.div(() => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  minWidth: 0,
+  width: '100%',
+  '& > button': {
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+  },
+}))
+
+const MemoLabelSC = styled(CaptionP)(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  display: 'block',
+  minWidth: 0,
+  width: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
 
 function WorkbenchJobActivityThoughts({
   activityId,
