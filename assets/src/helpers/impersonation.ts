@@ -7,11 +7,10 @@ import {
   setRefreshTokenForStorage,
   setToken,
 } from './auth'
-import {
-  ORIGINAL_AUTH_TOKEN_KEY,
-  ORIGINAL_REFRESH_TOKEN_KEY,
-  ORIGINAL_USER_LABEL_KEY,
-} from './impersonationKeys'
+
+const ORIGINAL_AUTH_TOKEN_KEY = 'impersonation-original-auth-token-v3'
+const ORIGINAL_REFRESH_TOKEN_KEY = 'impersonation-original-refresh-token-v3'
+const ORIGINAL_USER_LABEL_KEY = 'impersonation-original-user-label-v3'
 
 export function isImpersonatingServiceAccount() {
   return !!getEncryptedAuthValue(ORIGINAL_AUTH_TOKEN_KEY)

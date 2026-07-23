@@ -1,23 +1,19 @@
 import Cookies from 'js-cookie'
 
 import { EncryptStorage } from 'encrypt-storage'
-import {
-  ORIGINAL_AUTH_TOKEN_KEY,
-  ORIGINAL_REFRESH_TOKEN_KEY,
-  ORIGINAL_USER_LABEL_KEY,
-} from './impersonationKeys'
 
-export const AUTH_TOKEN = 'auth-token'
-export const REFRESH_TOKEN = 'refresh-token'
+export const AUTH_TOKEN = 'auth-token-v3'
+export const REFRESH_TOKEN = 'refresh-token-v3'
 export const CHALLENGE_KEY = 'oauth-challenge'
 
-const AUTH_STORAGE_VERSION_KEY = 'auth-storage-version'
-const AUTH_STORAGE_VERSION = '3'
-const legacyEncryptedAuthKeys = [
-  AUTH_TOKEN,
-  ORIGINAL_AUTH_TOKEN_KEY,
-  ORIGINAL_REFRESH_TOKEN_KEY,
-  ORIGINAL_USER_LABEL_KEY,
+// TODO: Remove this legacy cleanup after the v3 auth storage migration rollout is complete.
+const LEGACY_REFRESH_TOKEN = 'refresh-token'
+const legacyLocalStorageKeys = [
+  'auth-token',
+  'impersonation-original-auth-token',
+  'impersonation-original-refresh-token',
+  'impersonation-original-user-label',
+  'auth-storage-version',
 ]
 
 const { MODE, VITE_DEV_SECRET_KEY, VITE_PROD_SECRET_KEY } = import.meta.env
@@ -29,11 +25,8 @@ const secretKey =
       : VITE_DEV_SECRET_KEY
 const encryptStorage = EncryptStorage.create(secretKey, { engine: 'noble' })
 
-if (localStorage.getItem(AUTH_STORAGE_VERSION_KEY) !== AUTH_STORAGE_VERSION) {
-  legacyEncryptedAuthKeys.forEach((key) => localStorage.removeItem(key))
-  wipeRefreshToken()
-  localStorage.setItem(AUTH_STORAGE_VERSION_KEY, AUTH_STORAGE_VERSION)
-}
+legacyLocalStorageKeys.forEach((key) => localStorage.removeItem(key))
+Cookies.remove(LEGACY_REFRESH_TOKEN, { path: '/' })
 
 export function getEncryptedAuthValue(key: string) {
   try {
@@ -54,7 +47,11 @@ export function fetchToken() {
 }
 
 export function setToken(token: string | null | undefined) {
-  encryptStorage.setItem(AUTH_TOKEN, token || '')
+  if (token) {
+    encryptStorage.setItem(AUTH_TOKEN, token)
+  } else {
+    wipeToken()
+  }
 }
 
 export function setEncryptedAuthValue(
@@ -91,7 +88,7 @@ export function setRefreshTokenForStorage(token: string | null | undefined) {
 }
 
 export function wipeRefreshToken() {
-  Cookies.remove(REFRESH_TOKEN)
+  Cookies.remove(REFRESH_TOKEN, { path: '/' })
 }
 
 export function fetchRefreshToken() {
