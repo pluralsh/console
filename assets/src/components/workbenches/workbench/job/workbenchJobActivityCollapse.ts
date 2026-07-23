@@ -8,7 +8,8 @@ export const isActivityTerminal = (
   status: Nullable<WorkbenchJobActivityStatus>
 ) =>
   status === WorkbenchJobActivityStatus.Successful ||
-  status === WorkbenchJobActivityStatus.Failed
+  status === WorkbenchJobActivityStatus.Failed ||
+  status === WorkbenchJobActivityStatus.Rejected
 
 const lastActivityId = (
   activities: WorkbenchJobActivityFragment[]

@@ -12,6 +12,7 @@ defmodule Console.AI.Workbench.Engine do
   import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
+  import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -45,7 +46,7 @@ defmodule Console.AI.Workbench.Engine do
   require EEx
   require Logger
 
-  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200]
+  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200, verifiable: false]
 
   defmodule Acc do
     defstruct [messages: [], activities: []]
@@ -69,12 +70,11 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   def run(%__MODULE__{job: job} = engine) do
-    # stream_callbacks(job)
-    # with {:ok, job} <- SA.Plan.run(job, engine.environment) do
-    #   loop(%{engine | activities: list_activities(job)})
-    # end
     Console.AI.Provider.external_errors()
-    loop(%{engine | activities: list_activities(job)})
+
+    list_activities(job)
+    |> then(& verifiable(%{engine | activities: &1}))
+    |> loop()
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
@@ -355,7 +355,16 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp backfill_chat(tools, _), do: tools
 
-  @preloads [:result, :flow, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
+  @preloads [:result, :flow, :pull_requests, chatbot_message: [:chat_connection], user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: [:mcp_server, :cloud_connection, :scm_connection]]]]
+
+  defp verifiable(%__MODULE__{activities: activities, job: %WorkbenchJob{pull_requests: prs}} = engine) do
+    verifiable =
+      (is_list(prs) && Enum.any?(prs, & &1.status == :merged)) ||
+      (is_list(activities) && Enum.any?(activities, & &1.status == :successful && is_action(&1.type)))
+
+    %{engine | verifiable: verifiable}
+  end
+  defp verifiable(engine), do: engine
 
   defp preload_job(%WorkbenchJob{type: :skill} = job),
     do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])

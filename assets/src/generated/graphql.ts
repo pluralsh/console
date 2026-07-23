@@ -16141,6 +16141,7 @@ export enum WorkbenchJobActivityStatus {
   Failed = 'FAILED',
   NeedsApproval = 'NEEDS_APPROVAL',
   Pending = 'PENDING',
+  Rejected = 'REJECTED',
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
 }
