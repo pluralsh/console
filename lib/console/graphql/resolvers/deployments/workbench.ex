@@ -142,7 +142,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
 
   def workbench_job_activities(args, %{context: %{current_user: user}}) do
-    WorkbenchJobActivity.ordered([desc: :inserted_at])
+    WorkbenchJobActivity.ordered(WorkbenchJobActivity, [desc: :inserted_at])
     |> WorkbenchJobActivity.for_user(user)
     |> activity_filters(args)
     |> paginate(args)
