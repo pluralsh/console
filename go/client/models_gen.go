@@ -10360,6 +10360,8 @@ type WorkbenchJobActivityFunctionCall struct {
 	Input map[string]any `json:"input,omitempty"`
 	// the workbench tool id backing this function
 	ToolID *string `json:"toolId,omitempty"`
+	// the workbench tool backing this function call
+	Tool *WorkbenchTool `json:"tool,omitempty"`
 }
 
 type WorkbenchJobActivityJobUpdate struct {
