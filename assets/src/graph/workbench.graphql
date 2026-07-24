@@ -264,6 +264,21 @@ fragment WorkbenchTool on WorkbenchTool {
     azureDevops {
       url
     }
+    lambda {
+      lambdaArn
+      description
+      inputSchema
+    }
+    cloudRun {
+      identifier
+      description
+      inputSchema
+    }
+    azureFunction {
+      identifier
+      description
+      inputSchema
+    }
     docker {
       url
       provider
