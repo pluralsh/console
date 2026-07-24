@@ -45,6 +45,7 @@ fragment AwaitingReviewAgentRun on AgentRun {
   }
   workbenchJob {
     id
+    insertedAt
     workbench {
       id
       name
@@ -88,6 +89,7 @@ fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
   workbenchJob {
     id
     prompt
+    insertedAt
     result {
       workingTheory
     }
