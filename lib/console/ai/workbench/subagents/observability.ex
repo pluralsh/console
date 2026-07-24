@@ -57,7 +57,8 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   end
 
   def core_tools(%WorkbenchJob{user: user} = job, %Environment{tools: tools}), do: core_tools(job, tools, user)
-  def core_tools(%WorkbenchJob{} = job, tools, user) do
+  def core_tools(%WorkbenchJob{} = job, %Environment{tools: tools}, user), do: core_tools(job, tools, user)
+  def core_tools(%WorkbenchJob{} = job, tools, user) when is_list(tools) or is_map(tools) do
     obs_tools(tools)
     |> Enum.concat(plrl_log_tools(job, user))
     |> Enum.concat(plrl_metric_tools(job))

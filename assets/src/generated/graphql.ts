@@ -9292,6 +9292,7 @@ export type RootMutationType = {
   /** Fetches a workbench cron by id. Requires read access to the workbench. */
   workbenchCron?: Maybe<WorkbenchCron>;
   workbenchEvalSkill?: Maybe<WorkbenchJob>;
+  workbenchPrFollowup?: Maybe<WorkbenchJobActivity>;
 };
 
 
@@ -10798,6 +10799,12 @@ export type RootMutationTypeWorkbenchCronArgs = {
 export type RootMutationTypeWorkbenchEvalSkillArgs = {
   id: Scalars['ID']['input'];
   prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootMutationTypeWorkbenchPrFollowupArgs = {
+  attributes: WorkbenchMessageAttributes;
+  url: Scalars['String']['input'];
 };
 
 export type RootQueryType = {

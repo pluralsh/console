@@ -1758,6 +1758,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.create_workbench_message/2
     end
 
+    field :workbench_pr_followup, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :url,        non_null(:string), description: "the pull request url to create a follow-up message for"
+      arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
+
+      resolve &Deployments.workbench_pr_followup/2
+    end
+
     @desc "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
     field :approve_workbench_job_activity, :workbench_job_activity do
       middleware Authenticated

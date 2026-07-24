@@ -21,6 +21,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchChatbot,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
+    PullRequest,
     FlowWorkbench
   }
   alias Console.AI.{Provider, VectorStore}
@@ -783,6 +784,21 @@ defmodule Console.Deployments.Workbenches do
   def create_message(attrs, id, %User{} = user) when is_binary(id) do
     get_workbench_job!(id)
     |> then(&create_message(attrs, &1, user))
+  end
+
+  @doc """
+  Creates a new message for the job associated with a pull request.
+  """
+  @spec pr_followup(map, binary, User.t()) :: activity_resp
+  def pr_followup(attrs, url, %User{} = user) do
+    Repo.get_by(PullRequest, url: url)
+    |> Repo.preload([:workbench_job])
+    |> case do
+      %PullRequest{workbench_job: %WorkbenchJob{} = job} ->
+        create_message(attrs, job, user)
+      _ ->
+        {:error, "pull request not found"}
+    end
   end
 
   @doc """

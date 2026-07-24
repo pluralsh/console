@@ -1406,6 +1406,14 @@ type RootMutationType {
     attributes: WorkbenchMessageAttributes!
   ): WorkbenchJobActivity
 
+  workbenchPrFollowup(
+    "the pull request url to create a follow-up message for"
+    url: String!
+
+    "message attributes (e.g. prompt)"
+    attributes: WorkbenchMessageAttributes!
+  ): WorkbenchJobActivity
+
   "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
   approveWorkbenchJobActivity(
     "the workbench job activity to approve"

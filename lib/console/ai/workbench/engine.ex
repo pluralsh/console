@@ -277,6 +277,7 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:history), do: SA.History
   defp subagent_module(:skill), do: SA.Skill
   defp subagent_module(:search), do: SA.Search
+  defp subagent_module(:verify), do: SA.Verify
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}
