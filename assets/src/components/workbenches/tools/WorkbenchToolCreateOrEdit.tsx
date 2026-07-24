@@ -34,6 +34,7 @@ import { deepOmitBlank } from 'utils/graphql'
 import { getWorkbenchesBreadcrumbs } from '../Workbenches'
 import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
+  cloudFunctionProviderForWorkbenchTool,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
@@ -283,11 +284,16 @@ function formStateToAttributes(
 
   const scmType = scmTypeForWorkbenchTool(type)
   const scmPatch = scmType ? { scmConnectionId: scmConnectionId ?? null } : {}
+  const cloudConnectionPatch =
+    type === WorkbenchToolType.Cloud ||
+    !!cloudFunctionProviderForWorkbenchTool(type)
+      ? { cloudConnectionId: cloudConnectionId ?? null }
+      : {}
 
   if (type === WorkbenchToolType.Cloud)
     return {
       ...base,
-      cloudConnectionId: cloudConnectionId ?? null,
+      ...cloudConnectionPatch,
       ...scmPatch,
     }
 
@@ -299,14 +305,20 @@ function formStateToAttributes(
     }
 
   if (!isConfigurableWorkbenchToolType(type) || !configuration)
-    return { ...base, ...scmPatch }
+    return { ...base, ...cloudConnectionPatch, ...scmPatch }
 
   const configKey = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
   const sanitized = deepOmitBlank(configuration[configKey])
 
-  if (isEmpty(sanitized)) return { ...base, ...scmPatch }
+  if (isEmpty(sanitized))
+    return { ...base, ...cloudConnectionPatch, ...scmPatch }
 
-  return { ...base, ...scmPatch, configuration: { [configKey]: sanitized } }
+  return {
+    ...base,
+    ...cloudConnectionPatch,
+    ...scmPatch,
+    configuration: { [configKey]: sanitized },
+  }
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

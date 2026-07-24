@@ -33,6 +33,7 @@ import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
   categoryToLabel,
+  cloudFunctionProviderForWorkbenchTool,
   ConfigForToolType,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
@@ -178,9 +179,11 @@ export function WorkbenchToolForm({
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
   const hasRegisteredScm = Boolean(state.scmConnectionId)
   const scmType = scmTypeForWorkbenchTool(type)
+  const cloudConnectionProvider =
+    provider ?? cloudFunctionProviderForWorkbenchTool(type)
   const configurationStepComplete =
     !!state.name.trim() &&
-    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId) &&
+    (!cloudConnectionProvider || !!state.cloudConnectionId) &&
     (type !== WorkbenchToolType.Mcp || !!state.mcpServerId) &&
     (type !== WorkbenchToolType.Github ||
       hasRegisteredScm ||
@@ -211,7 +214,19 @@ export function WorkbenchToolForm({
       pagerdutyConfigurationIsComplete(state.configuration?.pagerduty)) &&
     (type !== WorkbenchToolType.Sentry ||
       !!tool?.id ||
-      sentryConfigurationIsComplete(state.configuration?.sentry))
+      sentryConfigurationIsComplete(state.configuration?.sentry)) &&
+    (type !== WorkbenchToolType.Lambda ||
+      (!!state.configuration?.lambda?.lambdaArn.trim() &&
+        !!state.configuration.lambda.description.trim() &&
+        !!state.configuration.lambda.inputSchema)) &&
+    (type !== WorkbenchToolType.CloudRun ||
+      (!!state.configuration?.cloudRun?.identifier.trim() &&
+        !!state.configuration.cloudRun.description.trim() &&
+        !!state.configuration.cloudRun.inputSchema)) &&
+    (type !== WorkbenchToolType.AzureFunction ||
+      (!!state.configuration?.azureFunction?.identifier.trim() &&
+        !!state.configuration.azureFunction.description.trim() &&
+        !!state.configuration.azureFunction.inputSchema))
   const allowSave = hasUpdates && configurationStepComplete
   return (
     <WorkbenchSplitLayoutSC
@@ -263,18 +278,19 @@ export function WorkbenchToolForm({
                 onChange={(e) => update({ name: e.target.value })}
               />
             </FormField>
-            {type === WorkbenchToolType.Cloud && provider ? (
+            {cloudConnectionProvider && (
               <CloudConnectionSelectField
-                provider={provider}
+                provider={cloudConnectionProvider}
                 selectedId={state.cloudConnectionId ?? null}
                 onChange={(id) => update({ cloudConnectionId: id })}
               />
-            ) : type === WorkbenchToolType.Mcp ? (
+            )}
+            {type === WorkbenchToolType.Mcp ? (
               <McpServerSelectField
                 selectedId={state.mcpServerId ?? null}
                 onChange={(id) => update({ mcpServerId: id })}
               />
-            ) : (
+            ) : type !== WorkbenchToolType.Cloud ? (
               <>
                 {scmType ? (
                   <ScmConnectionWorkbenchSelect
@@ -290,7 +306,7 @@ export function WorkbenchToolForm({
                   update={update}
                 />
               </>
-            )}
+            ) : null}
             {categories.length > 1 && (
               <FormField label="Allowed capabilities (must select at least one)">
                 <Flex
@@ -622,6 +638,36 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         auth: proxy
           ? { proxy: { url: proxy.url, noproxy: proxy.noproxy } }
           : {},
+      },
+    }
+  },
+  [WorkbenchToolType.Lambda]: (config) => {
+    const { lambdaArn, description, inputSchema } = config?.lambda ?? {}
+    return {
+      lambda: {
+        lambdaArn: lambdaArn ?? '',
+        description: description ?? '',
+        inputSchema: inputSchema ?? undefined,
+      },
+    }
+  },
+  [WorkbenchToolType.CloudRun]: (config) => {
+    const { identifier, description, inputSchema } = config?.cloudRun ?? {}
+    return {
+      cloudRun: {
+        identifier: identifier ?? '',
+        description: description ?? '',
+        inputSchema: inputSchema ?? undefined,
+      },
+    }
+  },
+  [WorkbenchToolType.AzureFunction]: (config) => {
+    const { identifier, description, inputSchema } = config?.azureFunction ?? {}
+    return {
+      azureFunction: {
+        identifier: identifier ?? '',
+        description: description ?? '',
+        inputSchema: inputSchema ?? undefined,
       },
     }
   },

@@ -121,6 +121,12 @@ export function WorkbenchToolFormFields({
       return render(type, SentryFormFields)
     case WorkbenchToolType.Docker:
       return render(type, DockerFormFields)
+    case WorkbenchToolType.Lambda:
+      return render(type, LambdaFormFields)
+    case WorkbenchToolType.CloudRun:
+      return render(type, CloudRunFormFields)
+    case WorkbenchToolType.AzureFunction:
+      return render(type, AzureFunctionFormFields)
   }
 }
 
@@ -393,6 +399,99 @@ function HttpFormFields({
         hint="JSON schema for the tool input"
         value={c.inputSchema as Record<string, unknown> | string | undefined}
         onChange={(jsonStr) => set({ ...c, inputSchema: jsonStr })}
+      />
+    </>
+  )
+}
+
+function LambdaFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Lambda>) {
+  return (
+    <>
+      <InputField
+        label="Lambda ARN"
+        required
+        value={c.lambdaArn}
+        onChange={(e) => set({ ...c, lambdaArn: e.target.value })}
+      />
+      <InputField
+        multiline
+        label="Description"
+        required
+        initialValue={c.description}
+        setValue={(value) => set({ ...c, description: value ?? '' })}
+        css={{ minHeight: 80 }}
+      />
+      <JsonEditorField
+        label="Input schema (JSON)"
+        hint="JSON schema describing the function input"
+        required
+        value={c.inputSchema as Record<string, unknown> | string | undefined}
+        onChange={(inputSchema) => set({ ...c, inputSchema })}
+      />
+    </>
+  )
+}
+
+function CloudRunFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.CloudRun>) {
+  return (
+    <>
+      <InputField
+        label="Service identifier"
+        required
+        value={c.identifier}
+        onChange={(e) => set({ ...c, identifier: e.target.value })}
+      />
+      <InputField
+        multiline
+        label="Description"
+        required
+        initialValue={c.description}
+        setValue={(value) => set({ ...c, description: value ?? '' })}
+        css={{ minHeight: 80 }}
+      />
+      <JsonEditorField
+        label="Input schema (JSON)"
+        hint="JSON schema describing the service input"
+        required
+        value={c.inputSchema as Record<string, unknown> | string | undefined}
+        onChange={(inputSchema) => set({ ...c, inputSchema })}
+      />
+    </>
+  )
+}
+
+function AzureFunctionFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.AzureFunction>) {
+  return (
+    <>
+      <InputField
+        label="Function identifier"
+        required
+        value={c.identifier}
+        onChange={(e) => set({ ...c, identifier: e.target.value })}
+      />
+      <InputField
+        multiline
+        label="Description"
+        required
+        initialValue={c.description}
+        setValue={(value) => set({ ...c, description: value ?? '' })}
+        css={{ minHeight: 80 }}
+      />
+      <JsonEditorField
+        label="Input schema (JSON)"
+        hint="JSON schema describing the function input"
+        required
+        value={c.inputSchema as Record<string, unknown> | string | undefined}
+        onChange={(inputSchema) => set({ ...c, inputSchema })}
       />
     </>
   )
