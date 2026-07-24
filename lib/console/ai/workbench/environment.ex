@@ -21,7 +21,7 @@ defmodule Console.AI.Workbench.Environment do
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :user, functions: [], activities: []]
+  defstruct [:job, :tools, :skills, :user, functions: [], activities: [], verifiable: false]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     {functions, tools} = Enum.split_with(to_l(tools), fn
@@ -65,6 +65,9 @@ defmodule Console.AI.Workbench.Environment do
     Enum.filter(skills, fn {_, skill} -> Skill.subagent?(skill, subagent) end)
     |> Map.new()
   end
+
+  def subagents(%__MODULE__{verifiable: true, job: job}), do: [:verify | subagents(job)]
+  def subagents(%__MODULE__{} = environment), do: subagents(environment.job)
 
   def subagents(%WorkbenchJob{workbench: %Workbench{tools: tools} = bench} = job) do
     tool_agents(tools)
@@ -165,5 +168,9 @@ defmodule Console.AI.Workbench.Environment do
   defp category_to_subagent(:search), do: :search
   defp category_to_subagent(:scm), do: :integration
   defp category_to_subagent(:chat), do: :integration
+  defp category_to_subagent(:observability), do: :observability
+  defp category_to_subagent(:infrastructure), do: :infrastructure
+  defp category_to_subagent(:coding), do: :coding
+  defp category_to_subagent(:verification), do: :verify
   defp category_to_subagent(_), do: :integration
 end

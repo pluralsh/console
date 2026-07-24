@@ -46,7 +46,7 @@ defmodule Console.AI.Workbench.Engine do
   require EEx
   require Logger
 
-  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200, verifiable: false]
+  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200]
 
   defmodule Acc do
     defstruct [messages: [], activities: []]
@@ -295,7 +295,9 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills} = env, activities) do
-    subagents = Environment.subagents(job) |> maybe_add_memory(activities)
+    subagents = Environment.subagents(env)
+                |> maybe_add_memory(activities)
+
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
 
@@ -362,7 +364,7 @@ defmodule Console.AI.Workbench.Engine do
       (is_list(prs) && Enum.any?(prs, & &1.status == :merged)) ||
       (is_list(activities) && Enum.any?(activities, & &1.status == :successful && is_action(&1.type)))
 
-    %{engine | verifiable: verifiable}
+    put_in(engine.environment.verifiable, verifiable)
   end
   defp verifiable(engine), do: engine
 

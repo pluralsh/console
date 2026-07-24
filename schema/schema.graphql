@@ -2625,6 +2625,9 @@ enum WorkbenchToolCategory {
   SCM
   CHAT
   FUNCTION
+  CODING
+  VERIFICATION
+  OBSERVABILITY
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2671,6 +2674,7 @@ enum WorkbenchJobActivityType {
   SEARCH
   FUNCTION
   KUBERNETES
+  VERIFY
 }
 
 enum WorkbenchCanvasBlockType {

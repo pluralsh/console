@@ -19,7 +19,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
     history: 12,
     search: 13,
     function: 14,
-    kubernetes: 15
+    kubernetes: 15,
+    verify: 16
 
   defguard is_action(type) when type in [:function, :kubernetes]
 

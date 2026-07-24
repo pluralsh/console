@@ -17684,6 +17684,7 @@ const (
 	WorkbenchJobActivityTypeSearch         WorkbenchJobActivityType = "SEARCH"
 	WorkbenchJobActivityTypeFunction       WorkbenchJobActivityType = "FUNCTION"
 	WorkbenchJobActivityTypeKubernetes     WorkbenchJobActivityType = "KUBERNETES"
+	WorkbenchJobActivityTypeVerify         WorkbenchJobActivityType = "VERIFY"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -17703,11 +17704,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeSearch,
 	WorkbenchJobActivityTypeFunction,
 	WorkbenchJobActivityTypeKubernetes,
+	WorkbenchJobActivityTypeVerify,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify:
 		return true
 	}
 	return false
@@ -17894,6 +17896,9 @@ const (
 	WorkbenchToolCategoryScm            WorkbenchToolCategory = "SCM"
 	WorkbenchToolCategoryChat           WorkbenchToolCategory = "CHAT"
 	WorkbenchToolCategoryFunction       WorkbenchToolCategory = "FUNCTION"
+	WorkbenchToolCategoryCoding         WorkbenchToolCategory = "CODING"
+	WorkbenchToolCategoryVerification   WorkbenchToolCategory = "VERIFICATION"
+	WorkbenchToolCategoryObservability  WorkbenchToolCategory = "OBSERVABILITY"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -17908,11 +17913,14 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryScm,
 	WorkbenchToolCategoryChat,
 	WorkbenchToolCategoryFunction,
+	WorkbenchToolCategoryCoding,
+	WorkbenchToolCategoryVerification,
+	WorkbenchToolCategoryObservability,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction, WorkbenchToolCategoryCoding, WorkbenchToolCategoryVerification, WorkbenchToolCategoryObservability:
 		return true
 	}
 	return false

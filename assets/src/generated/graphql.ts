@@ -16174,7 +16174,8 @@ export enum WorkbenchJobActivityType {
   Search = 'SEARCH',
   Skill = 'SKILL',
   Ticketing = 'TICKETING',
-  User = 'USER'
+  User = 'USER',
+  Verify = 'VERIFY'
 }
 
 export type WorkbenchJobAttributes = {
@@ -16715,16 +16716,19 @@ export type WorkbenchToolBitbucketDatacenterConnectionAttributes = {
 
 export enum WorkbenchToolCategory {
   Chat = 'CHAT',
+  Coding = 'CODING',
   ErrorTracking = 'ERROR_TRACKING',
   Function = 'FUNCTION',
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
   Metrics = 'METRICS',
+  Observability = 'OBSERVABILITY',
   Scm = 'SCM',
   Search = 'SEARCH',
   Ticketing = 'TICKETING',
-  Traces = 'TRACES'
+  Traces = 'TRACES',
+  Verification = 'VERIFICATION'
 }
 
 export type WorkbenchToolCloudRunConnection = {

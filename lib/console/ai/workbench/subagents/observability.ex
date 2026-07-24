@@ -9,8 +9,8 @@ defmodule Console.AI.Workbench.Subagents.Observability do
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt, user: user} = job, %Environment{} = environment) do
-    tools = tools(environment, user)
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
+    tools = tools(environment)
 
     MemoryEngine.new(tools, 50,
       engine_opts(job) ++ [
@@ -39,13 +39,12 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end
   end
 
-  def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities}, user) do
+  def tools(%Environment{job: %WorkbenchJob{user: user}} = environment), do: tools(environment, user)
+  def tools(%Environment{skills: skills, tools: tools, job: job, activities: activities} = environment, user) do
     skills = Environment.subagent_skills(skills, :observability)
 
-    obs_tools(tools)
+    core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
-    |> Enum.concat(plrl_log_tools(job))
-    |> Enum.concat(plrl_metric_tools(job))
     |> Enum.concat(pod_logs_tools(job, user))
     |> Enum.concat([
       %Skills{skills: skills},
@@ -57,14 +56,21 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     ])
   end
 
-  defp plrl_log_tools(%WorkbenchJob{user: user, workbench: %Workbench{configuration: %{observability: %{logs: true}}}}) do
+  def core_tools(%WorkbenchJob{user: user} = job, %Environment{tools: tools}), do: core_tools(job, tools, user)
+  def core_tools(%WorkbenchJob{} = job, tools, user) do
+    obs_tools(tools)
+    |> Enum.concat(plrl_log_tools(job, user))
+    |> Enum.concat(plrl_metric_tools(job))
+  end
+
+  defp plrl_log_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{logs: true}}}}, %User{} = user) do
     [
       %Plrl.Logs{user: user},
       %Plrl.LogsAggregate{user: user},
       %Plrl.LogLabels{user: user}
     ]
   end
-  defp plrl_log_tools(_), do: []
+  defp plrl_log_tools(_, _), do: []
 
   defp pod_logs_tools(%Workbench{configuration: %{infrastructure: %{pod_logs: true}}}, %User{} = user),
     do: [%PodLogs{user: user}]
