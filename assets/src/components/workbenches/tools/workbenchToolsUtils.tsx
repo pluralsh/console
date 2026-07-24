@@ -152,6 +152,10 @@ export const cloudFunctionProviderForWorkbenchTool = (
   type: WorkbenchToolType
 ): Provider | undefined => CLOUD_FUNCTION_TOOL_TO_PROVIDER[type]
 
+export const workbenchToolSupportsApproval = (
+  type: WorkbenchToolType
+): boolean => !!cloudFunctionProviderForWorkbenchTool(type)
+
 const WORKBENCH_TOOL_LABELS: Record<
   WorkbenchToolType | `${WorkbenchToolType.Cloud}:${Provider}`,
   string

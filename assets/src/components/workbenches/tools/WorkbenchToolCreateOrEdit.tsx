@@ -40,6 +40,7 @@ import {
   isConfigurableWorkbenchToolType,
   isProvider,
   scmTypeForWorkbenchTool,
+  workbenchToolSupportsApproval,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
 import {
@@ -271,6 +272,7 @@ function formStateToAttributes(
     cloudConnectionId,
     mcpServerId,
     scmConnectionId,
+    approval,
     readBindings,
     writeBindings,
   } = state
@@ -278,6 +280,7 @@ function formStateToAttributes(
     tool: type,
     name,
     categories,
+    ...(workbenchToolSupportsApproval(type) ? { approval: !!approval } : {}),
     readBindings: readBindings.map(bindingToBindingAttributes),
     writeBindings: writeBindings.map(bindingToBindingAttributes),
   }

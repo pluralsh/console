@@ -5,7 +5,9 @@ import {
   Flex,
   FormField,
   Input2,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
+import { Overline } from 'components/cd/utils/PermissionsModal'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { FormBindings } from 'components/utils/bindings'
 import {
@@ -19,13 +21,14 @@ import {
   HelmAuthProvider,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   FormCardSC,
   SidebarBtnSC,
   StickyActionsFooterSC,
   WorkbenchSplitLayoutSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchPromptSupervisionOption } from '../workbench/WorkbenchPromptModeSelector/WorkbenchPromptSupervisionOption'
 import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
 import { McpServerSelectField } from './mcp-server/McpServerSelectField'
 import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
@@ -41,6 +44,7 @@ import {
   isConfigurableWorkbenchToolType,
   scmTypeForWorkbenchTool,
   TOOL_TYPE_TO_CATEGORIES,
+  workbenchToolSupportsApproval,
 } from './workbenchToolsUtils'
 import { Link } from 'react-router-dom'
 
@@ -130,6 +134,7 @@ export type WorkbenchToolFormState = Omit<
     | 'cloudConnectionId'
     | 'mcpServerId'
     | 'scmConnectionId'
+    | 'approval'
     | 'readBindings'
     | 'writeBindings'
   >,
@@ -139,12 +144,17 @@ export type WorkbenchToolFormState = Omit<
   writeBindings: PolicyBindingFragment[]
 }
 
-type WorkbenchToolFormStep = 'configuration' | 'access-policy'
+type WorkbenchToolFormStep = 'configuration' | 'access-policy' | 'approvals'
 
-const TOOL_FORM_STEPS = [
-  { key: 'configuration', label: 'Configuration' },
-  { key: 'access-policy', label: 'Access policy' },
-] as const
+const BASE_TOOL_FORM_STEPS = [
+  { key: 'configuration' as const, label: 'Configuration' },
+  { key: 'access-policy' as const, label: 'Access policy' },
+]
+
+const APPROVALS_TOOL_FORM_STEP = {
+  key: 'approvals' as const,
+  label: 'Approvals',
+}
 
 export function WorkbenchToolForm({
   type,
@@ -166,6 +176,14 @@ export function WorkbenchToolForm({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [currentStep, setCurrentStep] =
     useState<WorkbenchToolFormStep>('configuration')
+  const supportsApproval = workbenchToolSupportsApproval(type)
+  const toolFormSteps = useMemo(
+    () =>
+      supportsApproval
+        ? [...BASE_TOOL_FORM_STEPS, APPROVALS_TOOL_FORM_STEP]
+        : BASE_TOOL_FORM_STEPS,
+    [supportsApproval]
+  )
   const { state, update, hasUpdates } = useUpdateState<WorkbenchToolFormState>({
     name: tool?.name ?? '',
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
@@ -173,6 +191,7 @@ export function WorkbenchToolForm({
     cloudConnectionId: tool?.cloudConnection?.id,
     mcpServerId: tool?.mcpServer?.id,
     scmConnectionId: tool?.scmConnection?.id,
+    approval: tool?.approval ?? false,
     readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
@@ -228,6 +247,8 @@ export function WorkbenchToolForm({
         !!state.configuration.azureFunction.description.trim() &&
         !!state.configuration.azureFunction.inputSchema))
   const allowSave = hasUpdates && configurationStepComplete
+  const isLastStep =
+    currentStep === toolFormSteps[toolFormSteps.length - 1]?.key
   return (
     <WorkbenchSplitLayoutSC
       css={{
@@ -245,7 +266,7 @@ export function WorkbenchToolForm({
         flexShrink={0}
         gap="xxxsmall"
       >
-        {TOOL_FORM_STEPS.map(({ key, label }) => (
+        {toolFormSteps.map(({ key, label }) => (
           <SidebarBtnSC
             key={key}
             $active={currentStep === key}
@@ -347,10 +368,15 @@ export function WorkbenchToolForm({
               </FormField>
             )}
           </>
-        ) : (
+        ) : currentStep === 'access-policy' ? (
           <ToolAccessPolicyStep
             readBindings={state.readBindings?.filter(isNonNullable) ?? []}
             writeBindings={state.writeBindings?.filter(isNonNullable) ?? []}
+            update={update}
+          />
+        ) : (
+          <ToolApprovalsStep
+            approval={!!state.approval}
             update={update}
           />
         )}
@@ -379,18 +405,24 @@ export function WorkbenchToolForm({
               disabled={
                 currentStep === 'configuration'
                   ? !configurationStepComplete
-                  : !allowSave
+                  : isLastStep
+                    ? !allowSave
+                    : false
               }
-              loading={currentStep === 'access-policy' && mutationLoading}
+              loading={isLastStep && mutationLoading}
               onClick={() => {
                 if (currentStep === 'configuration') {
                   setCurrentStep('access-policy')
                   return
                 }
+                if (currentStep === 'access-policy' && supportsApproval) {
+                  setCurrentStep('approvals')
+                  return
+                }
                 onSave(state)
               }}
             >
-              {currentStep === 'configuration' ? 'Next' : 'Save'}
+              {isLastStep ? 'Save' : 'Next'}
             </Button>
           </Flex>
         </StickyActionsFooterSC>
@@ -402,6 +434,35 @@ export function WorkbenchToolForm({
         />
       </FormCardSC>
     </WorkbenchSplitLayoutSC>
+  )
+}
+
+function ToolApprovalsStep({
+  approval,
+  update,
+}: {
+  approval: boolean
+  update: (next: Partial<WorkbenchToolFormState>) => void
+}) {
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+    >
+      <Overline>Supervision</Overline>
+      <WorkbenchPromptSupervisionOption
+        icon={
+          <WarningShieldIcon
+            size={12}
+            color="icon-light"
+          />
+        }
+        label="Requires approval"
+        hint="Pause for your sign-off before this action executes."
+        checked={approval}
+        onChange={(checked) => update({ approval: checked })}
+      />
+    </Flex>
   )
 }
 

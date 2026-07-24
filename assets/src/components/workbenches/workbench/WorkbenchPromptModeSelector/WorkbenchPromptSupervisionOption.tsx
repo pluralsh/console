@@ -25,7 +25,7 @@ export function WorkbenchPromptSupervisionOption({
       css={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: theme.spacing.xxsmall,
+        gap: theme.spacing.xsmall,
         width: '100%',
         padding: theme.spacing.xxsmall,
         border: 'none',

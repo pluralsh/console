@@ -135,6 +135,7 @@ fragment WorkbenchToolTiny on WorkbenchTool {
   name
   tool
   categories
+  approval
   cloudConnection {
     ...CloudConnectionTiny
   }
