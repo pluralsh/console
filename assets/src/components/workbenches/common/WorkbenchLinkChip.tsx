@@ -24,6 +24,7 @@ type WorkbenchLinkChipProps = {
   workbenchId: string
   workbenchName: string
   workbenchJobId?: string
+  jobInsertedAt?: string | null
   stopPropagation?: boolean
   onNavigate?: () => void
 } & Partial<
@@ -39,6 +40,7 @@ export function WorkbenchLinkChip({
   workbenchId,
   workbenchName,
   workbenchJobId,
+  jobInsertedAt,
   stopPropagation = false,
   onNavigate,
   fillLevel = 1,
@@ -66,7 +68,7 @@ export function WorkbenchLinkChip({
   })
 
   const { data: pendingData } = useWorkbenchLinkCardPendingAgentRunsQuery({
-    skip: !open,
+    skip: !open || !!workbenchJobId,
     fetchPolicy: 'cache-first',
   })
 
@@ -144,6 +146,7 @@ export function WorkbenchLinkChip({
               workbenchName={workbenchName}
               workbenchId={workbenchId}
               workbenchJobId={workbenchJobId}
+              jobInsertedAt={jobInsertedAt}
               workbench={data?.workbench}
               pendingAgentRuns={pendingAgentRuns}
               onNavigate={() => {

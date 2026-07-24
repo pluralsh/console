@@ -122,6 +122,7 @@ export function AwaitingReviewWorkbenchActivityItem({
             workbenchId={workbench.id}
             workbenchName={workbench.name}
             workbenchJobId={workbenchJob.id}
+            jobInsertedAt={workbenchJob.insertedAt}
             onNavigate={onNavigate}
             css={{ flexShrink: 0 }}
           />
