@@ -276,17 +276,15 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 
 func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) error {
 	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
-		if service.Status.GetID() != "" {
-			existingGlobalService, err := r.ConsoleClient.GetGlobalService(service.Status.GetID())
-			if err != nil && !errors.IsNotFound(err) {
+		existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(service.ConsoleName())
+		if err != nil && !errors.IsNotFound(err) {
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return err
+		}
+		if existingGlobalService != nil {
+			if err := r.ConsoleClient.DeleteGlobalService(existingGlobalService.ID); err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return err
-			}
-			if existingGlobalService != nil {
-				if err := r.ConsoleClient.DeleteGlobalService(*service.Status.ID); err != nil {
-					utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-					return err
-				}
 			}
 		}
 		controllerutil.RemoveFinalizer(service, GlobalServiceFinalizer)

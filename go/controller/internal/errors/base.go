@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"net/http"
 	"strings"
 
 	client "github.com/Yamashou/gqlgenc/clientv2"
@@ -49,6 +50,14 @@ func (er *wrappedErrorResponse) Has(err KnownError) bool {
 	return false
 }
 
+func (er *wrappedErrorResponse) HasNetworkError(code int) bool {
+	if er.err.NetworkError == nil {
+		return false
+	}
+
+	return er.err.NetworkError.Code == code
+}
+
 func newAPIError(err *client.ErrorResponse) *wrappedErrorResponse {
 	return &wrappedErrorResponse{
 		err: err,
@@ -66,9 +75,14 @@ func IsNotFound(err error) bool {
 		return false
 	}
 
-	return (newAPIError(errorResponse).Has(ErrNotFound) ||
-		newAPIError(errorResponse).Has(ErrNotFoundOIDCProvider) ||
-		newAPIError(errorResponse).Has(ErrNotFoundAlt))
+	wrapped := newAPIError(errorResponse)
+	if wrapped.HasNetworkError(http.StatusNotFound) {
+		return true
+	}
+
+	return wrapped.Has(ErrNotFound) ||
+		wrapped.Has(ErrNotFoundOIDCProvider) ||
+		wrapped.Has(ErrNotFoundAlt)
 }
 
 func IgnoreNotFound(err error) error {
