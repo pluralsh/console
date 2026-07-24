@@ -2,7 +2,6 @@ import {
   ClockIcon,
   CloseIcon,
   Flex,
-  HamburgerMenuCollapseIcon,
   IconFrame,
   PlusIconAlt,
   Spinner,
@@ -34,8 +33,6 @@ export function ChatbotHeader() {
   const {
     currentThreadId,
     currentThread,
-    actionsPanelOpen,
-    setActionsPanelOpen,
     closeChatbot,
     createNewThread,
     mutationLoading,
@@ -58,24 +55,6 @@ export function ChatbotHeader() {
   return (
     <Flex direction="column">
       <MainHeaderSC>
-        {currentThread?.session && (
-          <div
-            css={{
-              transition: 'transform 0.16s ease-in-out',
-              transform: actionsPanelOpen ? 'scaleX(-1)' : 'scaleX(1)',
-            }}
-          >
-            <IconFrame
-              clickable
-              size="small"
-              tooltip={
-                actionsPanelOpen ? 'Close actions panel' : 'Open actions panel'
-              }
-              icon={<HamburgerMenuCollapseIcon />}
-              onClick={() => setActionsPanelOpen(!actionsPanelOpen)}
-            />
-          </div>
-        )}
         <Body2BoldP css={{ color: colors['text-light'], flex: 1 }}>
           Plural AI
         </Body2BoldP>
