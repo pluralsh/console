@@ -62,10 +62,16 @@ fragment WorkbenchToolFragment on WorkbenchTool {
     cloudConnection {
         ...CloudConnectionFragment
     }
+    scmConnection {
+        id
+        name
+        type
+    }
     configuration {
         http {
             url
             method
+            function
             headers {
                 name
                 value
@@ -78,10 +84,21 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             url
             username
         }
+        opensearch {
+            host
+            index
+            awsAccessKeyId
+            awsRegion
+            assumeRoleArn
+            usePodIdentity
+        }
         prometheus {
             url
             username
             tenantId
+            awsSigv4
+            awsAccessKeyId
+            awsRegion
         }
         loki {
             url
@@ -117,19 +134,71 @@ fragment WorkbenchToolFragment on WorkbenchTool {
             subscriptionId
             tenantId
             clientId
+            prometheusUrl
+        }
+        sentry {
+            url
         }
         linear {
             url
         }
+        slack {
+            url
+        }
+        pagerduty {
+            url
+        }
+        teams {
+            clientId
+            tenantId
+        }
         atlassian {
             url
             email
+        }
+        exa {
+            url
         }
         github {
             url
             toolset
             appId
             installationId
+        }
+        gitlab {
+            url
+        }
+        bitbucket {
+            url
+        }
+        bitbucketDatacenter {
+            url
+        }
+        azureDevops {
+            url
+        }
+        lambda {
+            lambdaArn
+            description
+            inputSchema
+        }
+        cloudRun {
+            identifier
+            description
+            inputSchema
+        }
+        azureFunction {
+            identifier
+            description
+            inputSchema
+        }
+        docker {
+            url
+            provider
+            proxy {
+                url
+                noproxy
+            }
         }
     }
     insertedAt
