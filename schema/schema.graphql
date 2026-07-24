@@ -571,6 +571,22 @@ type RootQueryType {
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
 
+  workbenchJobActivities(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter activities by status"
+    status: WorkbenchJobActivityStatus
+
+    "filter activities by type"
+    type: WorkbenchJobActivityType
+  ): WorkbenchJobActivityConnection
+
   workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   workbenchIssues(after: String, first: Int, before: String, last: Int): IssueConnection
@@ -3862,6 +3878,9 @@ type WorkbenchJobActivityFunctionCall {
 
   "the workbench tool id backing this function"
   toolId: ID
+
+  "the workbench tool backing this function call"
+  tool: WorkbenchTool
 }
 
 type WorkbenchJobActivityKubeRequest {

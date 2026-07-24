@@ -652,6 +652,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,    :string, description: "the function name to invoke"
     field :input,   :map, description: "input passed to the function"
     field :tool_id, :id, description: "the workbench tool id backing this function"
+    field :tool,    :workbench_tool, resolve: &Deployments.function_call_tool/3, description: "the workbench tool backing this function call"
   end
 
   object :workbench_job_activity_kube_request do
@@ -1346,6 +1347,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.workbench_job_activity/2
+    end
+
+    connection field :workbench_job_activities, node_type: :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :status, :workbench_job_activity_status, description: "filter activities by status"
+      arg :type, :workbench_job_activity_type, description: "filter activities by type"
+
+      resolve &Deployments.workbench_job_activities/2
     end
 
     connection field :workbench_alerts, node_type: :alert do

@@ -52,6 +52,52 @@ fragment AwaitingReviewAgentRun on AgentRun {
   }
 }
 
+fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  result {
+    functionCall {
+      name
+      input
+      toolId
+      tool {
+        id
+        name
+        tool
+        configuration {
+          lambda {
+            description
+          }
+          cloudRun {
+            description
+          }
+          azureFunction {
+            description
+          }
+        }
+      }
+    }
+    kubeRequest {
+      handle
+      method
+      path
+    }
+  }
+  workbenchJob {
+    id
+    prompt
+    result {
+      workingTheory
+    }
+    workbench {
+      id
+      name
+    }
+  }
+}
+
 query PendingApprovalStacks($first: Int = 50) {
   infrastructureStacks(first: $first, status: PENDING_APPROVAL) {
     edges {
@@ -67,6 +113,16 @@ query PendingApprovalAgentRuns($first: Int = 100) {
     edges {
       node {
         ...AwaitingReviewAgentRun
+      }
+    }
+  }
+}
+
+query PendingApprovalWorkbenchActivities($first: Int = 100) {
+  workbenchJobActivities(first: $first, status: NEEDS_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewWorkbenchActivity
       }
     }
   }

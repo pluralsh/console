@@ -11043,6 +11043,7 @@ export type RootQueryType = {
   workbenchChatbot?: Maybe<WorkbenchChatbot>;
   workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
+  workbenchJobActivities?: Maybe<WorkbenchJobActivityConnection>;
   workbenchJobActivity?: Maybe<WorkbenchJobActivity>;
   /** Semantic search over vector-indexed workbench jobs */
   workbenchJobSearch?: Maybe<Array<Maybe<WorkbenchJob>>>;
@@ -12459,6 +12460,16 @@ export type RootQueryTypeWorkbenchIssuesArgs = {
 
 export type RootQueryTypeWorkbenchJobArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeWorkbenchJobActivitiesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<WorkbenchJobActivityStatus>;
+  type?: InputMaybe<WorkbenchJobActivityType>;
 };
 
 
@@ -16057,6 +16068,8 @@ export type WorkbenchJobActivityFunctionCall = {
   input?: Maybe<Scalars['Map']['output']>;
   /** the function name to invoke */
   name?: Maybe<Scalars['String']['output']>;
+  /** the workbench tool backing this function call */
+  tool?: Maybe<WorkbenchTool>;
   /** the workbench tool id backing this function */
   toolId?: Maybe<Scalars['ID']['output']>;
 };
@@ -18257,6 +18270,8 @@ export type AwaitingReviewStackFragment = { __typename?: 'InfrastructureStack', 
 
 export type AwaitingReviewAgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, approvedAt?: string | null, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null };
 
+export type AwaitingReviewWorkbenchActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null, http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null } | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, result?: { __typename?: 'WorkbenchJobResult', workingTheory?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null };
+
 export type PendingApprovalStacksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -18270,6 +18285,13 @@ export type PendingApprovalAgentRunsQueryVariables = Exact<{
 
 
 export type PendingApprovalAgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, approvedAt?: string | null, prompt: string, repository: string, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, analysis?: { __typename?: 'AgentAnalysis', summary: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null } | null } | null> | null } | null };
+
+export type PendingApprovalWorkbenchActivitiesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type PendingApprovalWorkbenchActivitiesQuery = { __typename?: 'RootQueryType', workbenchJobActivities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null, http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null } | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, result?: { __typename?: 'WorkbenchJobResult', workingTheory?: string | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null } | null } | null> | null } | null };
 
 export type ObjectStoreFragment = { __typename?: 'ObjectStore', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, s3?: { __typename?: 'S3Store', bucket: string, region?: string | null, endpoint?: string | null, accessKeyId: string } | null, azure?: { __typename?: 'AzureStore', container: string, storageAccount: string, resourceGroup: string, subscriptionId: string, clientId: string, tenantId: string } | null, gcs?: { __typename?: 'GcsStore', bucket: string } | null };
 
@@ -22971,6 +22993,56 @@ export const AwaitingReviewAgentRunFragmentDoc = gql`
   }
 }
     ${PullRequestBasicFragmentDoc}`;
+export const AwaitingReviewWorkbenchActivityFragmentDoc = gql`
+    fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  result {
+    functionCall {
+      name
+      input
+      toolId
+      tool {
+        id
+        name
+        tool
+        configuration {
+          lambda {
+            description
+          }
+          cloudRun {
+            description
+          }
+          azureFunction {
+            description
+          }
+          http {
+            url
+          }
+        }
+      }
+    }
+    kubeRequest {
+      handle
+      method
+      path
+    }
+  }
+  workbenchJob {
+    id
+    prompt
+    result {
+      workingTheory
+    }
+    workbench {
+      id
+      name
+    }
+  }
+}
+    `;
 export const ObjectStoreFragmentDoc = gql`
     fragment ObjectStore on ObjectStore {
   id
@@ -31065,6 +31137,53 @@ export type PendingApprovalAgentRunsQueryHookResult = ReturnType<typeof usePendi
 export type PendingApprovalAgentRunsLazyQueryHookResult = ReturnType<typeof usePendingApprovalAgentRunsLazyQuery>;
 export type PendingApprovalAgentRunsSuspenseQueryHookResult = ReturnType<typeof usePendingApprovalAgentRunsSuspenseQuery>;
 export type PendingApprovalAgentRunsQueryResult = Apollo.QueryResult<PendingApprovalAgentRunsQuery, PendingApprovalAgentRunsQueryVariables>;
+export const PendingApprovalWorkbenchActivitiesDocument = gql`
+    query PendingApprovalWorkbenchActivities($first: Int = 100) {
+  workbenchJobActivities(first: $first, status: NEEDS_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewWorkbenchActivity
+      }
+    }
+  }
+}
+    ${AwaitingReviewWorkbenchActivityFragmentDoc}`;
+
+/**
+ * __usePendingApprovalWorkbenchActivitiesQuery__
+ *
+ * To run a query within a React component, call `usePendingApprovalWorkbenchActivitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePendingApprovalWorkbenchActivitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePendingApprovalWorkbenchActivitiesQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *   },
+ * });
+ */
+export function usePendingApprovalWorkbenchActivitiesQuery(baseOptions?: Apollo.QueryHookOptions<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>(PendingApprovalWorkbenchActivitiesDocument, options);
+      }
+export function usePendingApprovalWorkbenchActivitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>(PendingApprovalWorkbenchActivitiesDocument, options);
+        }
+// @ts-ignore
+export function usePendingApprovalWorkbenchActivitiesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>): Apollo.UseSuspenseQueryResult<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>;
+export function usePendingApprovalWorkbenchActivitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>): Apollo.UseSuspenseQueryResult<PendingApprovalWorkbenchActivitiesQuery | undefined, PendingApprovalWorkbenchActivitiesQueryVariables>;
+export function usePendingApprovalWorkbenchActivitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>(PendingApprovalWorkbenchActivitiesDocument, options);
+        }
+export type PendingApprovalWorkbenchActivitiesQueryHookResult = ReturnType<typeof usePendingApprovalWorkbenchActivitiesQuery>;
+export type PendingApprovalWorkbenchActivitiesLazyQueryHookResult = ReturnType<typeof usePendingApprovalWorkbenchActivitiesLazyQuery>;
+export type PendingApprovalWorkbenchActivitiesSuspenseQueryHookResult = ReturnType<typeof usePendingApprovalWorkbenchActivitiesSuspenseQuery>;
+export type PendingApprovalWorkbenchActivitiesQueryResult = Apollo.QueryResult<PendingApprovalWorkbenchActivitiesQuery, PendingApprovalWorkbenchActivitiesQueryVariables>;
 export const ObjectStoresDocument = gql`
     query ObjectStores($after: String, $first: Int = 100, $before: String, $last: Int) {
   objectStores(after: $after, first: $first, before: $before, last: $last) {
@@ -46771,6 +46890,7 @@ export const namedOperations = {
     ScmWebhooks: 'ScmWebhooks',
     PendingApprovalStacks: 'PendingApprovalStacks',
     PendingApprovalAgentRuns: 'PendingApprovalAgentRuns',
+    PendingApprovalWorkbenchActivities: 'PendingApprovalWorkbenchActivities',
     ObjectStores: 'ObjectStores',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',
@@ -47240,6 +47360,7 @@ export const namedOperations = {
     ScmWebhook: 'ScmWebhook',
     AwaitingReviewStack: 'AwaitingReviewStack',
     AwaitingReviewAgentRun: 'AwaitingReviewAgentRun',
+    AwaitingReviewWorkbenchActivity: 'AwaitingReviewWorkbenchActivity',
     ObjectStore: 'ObjectStore',
     ClustersObjectStores: 'ClustersObjectStores',
     ClusterBackup: 'ClusterBackup',

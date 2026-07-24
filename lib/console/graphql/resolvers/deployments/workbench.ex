@@ -141,6 +141,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> paginate(args)
   end
 
+  def workbench_job_activities(args, %{context: %{current_user: user}}) do
+    WorkbenchJobActivity.ordered([desc: :inserted_at])
+    |> WorkbenchJobActivity.for_user(user)
+    |> activity_filters(args)
+    |> paginate(args)
+  end
+
+  def function_call_tool(%{tool_id: id}, _, _) when is_binary(id),
+    do: {:ok, Workbenches.get_workbench_tool(id)}
+  def function_call_tool(_, _, _), do: {:ok, nil}
+
   def all_workbench_alerts(args, %{context: %{current_user: user}}) do
     Alert.for_user(user)
     |> Alert.ordered()
@@ -377,6 +388,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Enum.reduce(args, query, fn
       {:alert, true}, q -> WorkbenchJob.with_alert(q)
       {:issue, true}, q -> WorkbenchJob.with_issue(q)
+      _, q -> q
+    end)
+  end
+
+  defp activity_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:status, status}, q when not is_nil(status) -> WorkbenchJobActivity.for_status(q, status)
+      {:type, type}, q when not is_nil(type) -> WorkbenchJobActivity.for_type(q, type)
       _, q -> q
     end)
   end

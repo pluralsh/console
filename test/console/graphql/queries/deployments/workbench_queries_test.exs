@@ -1027,6 +1027,40 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
   end
 
+  describe "workbenchJobActivities" do
+    test "it can list activities needing approval for readable workbenches" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench)
+      pending =
+        insert_list(2, :workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval
+        )
+      insert(:workbench_job_activity,
+        workbench_job: job,
+        type: :function,
+        status: :successful
+      )
+      insert(:workbench_job_activity, type: :function, status: :needs_approval)
+
+      {:ok, %{data: %{"workbenchJobActivities" => found}}} = run_query("""
+        query WorkbenchJobActivities($status: WorkbenchJobActivityStatus!) {
+          workbenchJobActivities(first: 10, status: $status) {
+            edges { node { id status type } }
+          }
+        }
+      """, %{"status" => "NEEDS_APPROVAL"}, %{current_user: user})
+
+      nodes = from_connection(found)
+      assert length(nodes) == 2
+      assert Enum.all?(nodes, &(&1["status"] == "NEEDS_APPROVAL"))
+      assert ids_equal(nodes, pending)
+    end
+  end
+
   describe "workbenchJobActivity" do
     test "it can fetch a workbench job activity by id" do
       user = insert(:user)
