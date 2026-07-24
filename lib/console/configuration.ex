@@ -1,5 +1,5 @@
 defmodule Console.Configuration do
-  defstruct [:git_commit, :is_demo_project, :is_sandbox, :plural_login, :vpn_enabled, :features, :sentry_enabled, :details]
+  defstruct [:git_commit, :is_demo_project, :is_sandbox, :plural_login, :vpn_enabled, :features, :sentry_enabled, :healthmap_cluster_count, :details]
 
   defmodule Details do
     defstruct [:assume_role_arn, :egress_ips]
@@ -21,6 +21,7 @@ defmodule Console.Configuration do
       vpn_enabled: Console.Services.VPN.enabled?(),
       features: Console.Features.fetch(),
       sentry_enabled: !!Application.get_env(:sentry, :dsn),
+      healthmap_cluster_count: Application.get_env(:console, :healthmap_cluster_count) || 1000,
       details: Details.new(Application.get_env(:console, :details) || %{}),
     }
   end

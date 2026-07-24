@@ -57,6 +57,7 @@ query Me {
     installed
     consoleVersion
     sentryEnabled
+    healthmapClusterCount
     manifest {
       ...Manifest
     }

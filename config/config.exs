@@ -76,6 +76,7 @@ config :console,
   oidc_sync: :upsert,
   refresh_token_expiry: "7d",
   workbench_default: false,
+  healthmap_cluster_count: 1000,
   qove_key: nil,
   cloud_override: "ignore",
   details: %{}

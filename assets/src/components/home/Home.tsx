@@ -52,6 +52,7 @@ export function Home() {
 
 function HomeClusters() {
   const { borders } = useTheme()
+  const { configuration } = useLogin()
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)
   // we don't want a double popup, and cloud setup would come first if relevant
@@ -77,7 +78,10 @@ function HomeClusters() {
     useState<Nullable<ClustersRowFragment>>(null)
 
   const { data: healthScoresData } = useClusterHealthScoresQuery({
-    variables: { projectId },
+    variables: {
+      projectId,
+      first: configuration?.healthmapClusterCount ?? 1000,
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })

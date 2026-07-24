@@ -16412,6 +16412,8 @@ type ConsoleConfiguration {
 
   oidcName: String
 
+  healthmapClusterCount: Int
+
   qoveKey: String
 
   features: AvailableFeatures

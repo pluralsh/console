@@ -88,6 +88,9 @@ console:
     # dbPoolSize configures the Ecto database connection pool size.
     dbPoolSize: 50
 
+    # healthmapClusterCount configures the number of clusters to show in the healthmap.
+    healthmapClusterCount: ~
+
     # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
     rdsIamAuthentication: false
 

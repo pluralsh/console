@@ -3520,6 +3520,7 @@ export type ConsoleConfiguration = {
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitStatus?: Maybe<GitStatus>;
+  healthmapClusterCount?: Maybe<Scalars['Int']['output']>;
   /** whether at least one cluster has been installed, false if a user hasn't fully onboarded */
   installed?: Maybe<Scalars['Boolean']['output']>;
   isDemoProject?: Maybe<Scalars['Boolean']['output']>;
@@ -19799,6 +19800,7 @@ export type UpgradeStatisticsQuery = { __typename?: 'RootQueryType', upgradeStat
 
 export type ClusterHealthScoresQueryVariables = Exact<{
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -20093,7 +20095,7 @@ export type MeGroupsQuery = { __typename?: 'RootQueryType', me?: { __typename?: 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, qoveKey?: string | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null, details?: { __typename?: 'ConsoleConfigurationDetails', assumeRoleArn?: string | null, egressIps?: Array<string | null> | null } | null } | null };
+export type MeQuery = { __typename?: 'RootQueryType', me?: { __typename?: 'User', unreadNotifications?: number | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, homepage?: Homepage | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, flows?: { __typename?: 'PersonaFlows', permissions?: boolean | null, startWorkbenchJob?: boolean | null, pipelines?: boolean | null, previews?: boolean | null, workbenches?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, flows?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null, workbenches?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', gitCommit?: string | null, isDemoProject?: boolean | null, isSandbox?: boolean | null, pluralLogin?: boolean | null, byok?: boolean | null, externalOidc?: boolean | null, cloud?: boolean | null, installed?: boolean | null, consoleVersion?: string | null, sentryEnabled?: boolean | null, healthmapClusterCount?: number | null, qoveKey?: string | null, manifest?: { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null } | null, gitStatus?: { __typename?: 'GitStatus', cloned?: boolean | null, output?: string | null } | null, features?: { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null } | null, details?: { __typename?: 'ConsoleConfigurationDetails', assumeRoleArn?: string | null, egressIps?: Array<string | null> | null } | null } | null };
 
 export type LoginInfoQueryVariables = Exact<{
   redirect?: InputMaybe<Scalars['String']['input']>;
@@ -37703,8 +37705,8 @@ export type UpgradeStatisticsLazyQueryHookResult = ReturnType<typeof useUpgradeS
 export type UpgradeStatisticsSuspenseQueryHookResult = ReturnType<typeof useUpgradeStatisticsSuspenseQuery>;
 export type UpgradeStatisticsQueryResult = Apollo.QueryResult<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>;
 export const ClusterHealthScoresDocument = gql`
-    query ClusterHealthScores($projectId: ID) {
-  clusters(projectId: $projectId, first: 1000) {
+    query ClusterHealthScores($projectId: ID, $first: Int) {
+  clusters(projectId: $projectId, first: $first) {
     edges {
       node {
         ...ClusterHealthScore
@@ -37727,6 +37729,7 @@ export const ClusterHealthScoresDocument = gql`
  * const { data, loading, error } = useClusterHealthScoresQuery({
  *   variables: {
  *      projectId: // value for 'projectId'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -38852,6 +38855,7 @@ export const MeDocument = gql`
     installed
     consoleVersion
     sentryEnabled
+    healthmapClusterCount
     manifest {
       ...Manifest
     }
