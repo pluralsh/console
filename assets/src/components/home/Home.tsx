@@ -26,8 +26,9 @@ import {
   aggregateHealthScoreStats,
   ClusterHealthScoresFilterBtns,
   ClusterHealthScoresHeatmap,
-  HealthScoreFilterLabel,
   healthScoreLabelToRange,
+  HealthScoreFilterLabel,
+  normalizeHealthmapClusterCount,
 } from './clusteroverview/ClusterHealthScoresHeatmap.tsx'
 import {
   aggregateUpgradeStats,
@@ -76,11 +77,14 @@ function HomeClusters() {
 
   const [selectedCluster, setSelectedCluster] =
     useState<Nullable<ClustersRowFragment>>(null)
+  const healthmapClusterCount = normalizeHealthmapClusterCount(
+    configuration?.healthmapClusterCount
+  )
 
   const { data: healthScoresData } = useClusterHealthScoresQuery({
     variables: {
       projectId,
-      first: configuration?.healthmapClusterCount ?? 1000,
+      first: healthmapClusterCount,
     },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
