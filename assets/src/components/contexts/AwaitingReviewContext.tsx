@@ -2,8 +2,10 @@ import { ApolloError } from '@apollo/client'
 import {
   AwaitingReviewAgentRunFragment,
   AwaitingReviewStackFragment,
+  AwaitingReviewWorkbenchActivityFragment,
   usePendingApprovalAgentRunsQuery,
   usePendingApprovalStacksQuery,
+  usePendingApprovalWorkbenchActivitiesQuery,
 } from 'generated/graphql'
 import { createContext, ReactNode, use, useMemo } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
@@ -13,6 +15,7 @@ const POLL_INTERVAL = 60 * 1000
 type AwaitingReviewContextValue = {
   stacks: AwaitingReviewStackFragment[]
   agentRuns: AwaitingReviewAgentRunFragment[]
+  activities: AwaitingReviewWorkbenchActivityFragment[]
   count: number
   loading: boolean
   error?: ApolloError
@@ -21,6 +24,7 @@ type AwaitingReviewContextValue = {
 const AwaitingReviewContext = createContext<AwaitingReviewContextValue>({
   stacks: [],
   agentRuns: [],
+  activities: [],
   count: 0,
   loading: false,
 })
@@ -48,6 +52,15 @@ export function AwaitingReviewProvider({ children }: { children: ReactNode }) {
     fetchPolicy: 'cache-and-network',
   })
 
+  const {
+    data: activitiesData,
+    loading: activitiesLoading,
+    error: activitiesError,
+  } = usePendingApprovalWorkbenchActivitiesQuery({
+    pollInterval: POLL_INTERVAL,
+    fetchPolicy: 'cache-and-network',
+  })
+
   const stacks = useMemo(
     () => mapExistingNodes(stacksData?.infrastructureStacks),
     [stacksData?.infrastructureStacks]
@@ -58,21 +71,30 @@ export function AwaitingReviewProvider({ children }: { children: ReactNode }) {
     [agentRunsData?.agentRuns]
   )
 
+  const activities = useMemo(
+    () => mapExistingNodes(activitiesData?.workbenchJobActivities),
+    [activitiesData?.workbenchJobActivities]
+  )
+
   const value = useMemo(
     () => ({
       stacks,
       agentRuns,
-      count: stacks.length + agentRuns.length,
-      loading: stacksLoading || agentRunsLoading,
-      error: stacksError ?? agentRunsError,
+      activities,
+      count: stacks.length + agentRuns.length + activities.length,
+      loading: stacksLoading || agentRunsLoading || activitiesLoading,
+      error: stacksError ?? agentRunsError ?? activitiesError,
     }),
     [
       stacks,
       agentRuns,
+      activities,
       stacksLoading,
       agentRunsLoading,
+      activitiesLoading,
       stacksError,
       agentRunsError,
+      activitiesError,
     ]
   )
 
