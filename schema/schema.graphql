@@ -2846,6 +2846,9 @@ input WorkbenchInfrastructureAttributes {
 
   "enable vulnerabilities capability"
   vulnerabilities: Boolean
+
+  "enable sentinels capability"
+  sentinels: Boolean
 }
 
 input WorkbenchCodingAttributes {
@@ -4065,6 +4068,9 @@ type WorkbenchInfrastructure {
 
   "vulnerabilities capability enabled"
   vulnerabilities: Boolean
+
+  "sentinels capability enabled"
+  sentinels: Boolean
 }
 
 type WorkbenchCoding {

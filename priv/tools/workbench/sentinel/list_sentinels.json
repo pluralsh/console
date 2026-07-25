@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "q": {
+            "type": "string",
+            "description": "Optional search string to match sentinel names"
+        },
+        "status": {
+            "type": "string",
+            "enum": ["pending", "success", "failed"],
+            "description": "Optional filter for the sentinel's latest status"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of sentinels to return, from 1 to 50. Defaults to 25."
+        }
+    },
+    "required": []
+}

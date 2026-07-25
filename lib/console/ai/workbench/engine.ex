@@ -46,7 +46,7 @@ defmodule Console.AI.Workbench.Engine do
   require EEx
   require Logger
 
-  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200]
+  defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200, verifiable: false]
 
   defmodule Acc do
     defstruct [messages: [], activities: []]
@@ -158,7 +158,7 @@ defmodule Console.AI.Workbench.Engine do
     |> loop()
   end
 
-  @supported_subagents ~w(infrastructure integration coding observability memory skill history search)a
+  @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a
 
   defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
@@ -366,6 +366,7 @@ defmodule Console.AI.Workbench.Engine do
       (is_list(activities) && Enum.any?(activities, & &1.status == :successful && is_action(&1.type)))
 
     put_in(engine.environment.verifiable, verifiable)
+    |> Map.put(:verifiable, verifiable)
   end
   defp verifiable(engine), do: engine
 

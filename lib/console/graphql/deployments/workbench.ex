@@ -85,6 +85,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :kubernetes,      :boolean, description: "enable kubernetes capability"
     field :pod_logs,        :boolean, description: "enable pod logs capability"
     field :vulnerabilities, :boolean, description: "enable vulnerabilities capability"
+    field :sentinels,       :boolean, description: "enable sentinels capability"
   end
 
   input_object :workbench_coding_attributes do
@@ -783,6 +784,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :kubernetes,      :boolean, description: "kubernetes capability enabled"
     field :pod_logs,        :boolean, description: "pod logs capability enabled"
     field :vulnerabilities, :boolean, description: "vulnerabilities capability enabled"
+    field :sentinels,       :boolean, description: "sentinels capability enabled"
   end
 
   object :workbench_coding do
