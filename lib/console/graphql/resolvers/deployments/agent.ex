@@ -78,8 +78,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
     end
   end
 
-  def upsert_agent_runtime(%{attributes: attrs}, %{context: %{cluster: cluster}}),
-    do: Agents.upsert_agent_runtime(attrs, cluster)
+  def upsert_agent_runtime(%{attributes: attrs}, ctx),
+    do: Agents.upsert_agent_runtime(attrs, fetch_cluster(attrs, ctx), actor(ctx))
 
   def delete_agent_runtime(%{id: id}, %{context: %{cluster: cluster}}),
     do: Agents.delete_agent_runtime(id, cluster)

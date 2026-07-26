@@ -1925,6 +1925,9 @@ input AgentRuntimeAttributes {
   "the type of this runtime"
   type: AgentRuntimeType!
 
+  "the cluster this runtime is running on (required for user-authenticated upserts)"
+  clusterId: ID
+
   "the policy for creating runs on this runtime"
   createBindings: [AgentBindingAttributes]
 

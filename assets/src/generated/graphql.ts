@@ -692,6 +692,8 @@ export type AgentRuntimeAttributes = {
   allowedRepositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** default interval in seconds between babysit checks for runs on this runtime */
   babysitInterval?: InputMaybe<Scalars['Int']['input']>;
+  /** the cluster this runtime is running on (required for user-authenticated upserts) */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the policy for creating runs on this runtime */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
   /** whether this is the default runtime for coding agents */

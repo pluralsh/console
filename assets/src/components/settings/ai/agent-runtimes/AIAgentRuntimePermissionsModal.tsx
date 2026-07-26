@@ -45,12 +45,14 @@ export function AIAgentRuntimePermissionsModalInner({
   onClose,
   name,
   type,
+  clusterId,
   initialBindings,
 }: {
   onClose: () => void
   initialBindings: PolicyBindingFragment[]
   name: string
   type: AgentRuntimeType
+  clusterId?: Nullable<string>
 }) {
   const [createBindings, setCreateBindings] = useState(initialBindings)
 
@@ -64,6 +66,7 @@ export function AIAgentRuntimePermissionsModalInner({
       attributes: {
         name,
         type,
+        clusterId,
         createBindings: uniqueCreateBindings.map(({ user, group }) => ({
           ...(user?.email && { userEmail: user.email }),
           ...(group?.name && { groupName: group.name }),

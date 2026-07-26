@@ -62,11 +62,14 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
-	defaultComponentShaCacheTTL         = "1h"
-	defaultComponentShaCacheTTLDuration = 1 * time.Hour
+	defaultComponentShaCacheTTL         = "2h"
+	defaultComponentShaCacheTTLDuration = 2 * time.Hour
 
 	defaultManifestCacheJitter         = "30m"
 	defaultManifestCacheJitterDuration = 30 * time.Minute
+
+	defaultComponentShaCacheJitter         = "1h"
+	defaultComponentShaCacheJitterDuration = time.Hour
 
 	defaultControllerCacheTTL         = "2m"
 	defaultControllerCacheTTLDuration = 2 * time.Minute
@@ -148,6 +151,7 @@ var (
 	argManifestCacheTTL                     = flag.String("manifest-cache-ttl", defaultManifestCacheTTL, "The time to live of service manifests in cache entry.")
 	argManifestCacheJitter                  = flag.String("manifest-cache-jitter", defaultManifestCacheJitter, "Randomly selected jitter time up to the provided duration will be added to the manifest cache TTL.")
 	argComponentShaCacheTTL                 = flag.String("component-sha-cache-ttl", defaultComponentShaCacheTTL, "The time to live of the component sha cache entries.")
+	argComponentShaCacheJitter              = flag.String("component-sha-cache-jitter", defaultComponentShaCacheJitter, "Randomly selected jitter time up to the provided duration will be added to the component sha cache TTL.")
 	argControllerCacheTTL                   = flag.String("controller-cache-ttl", defaultControllerCacheTTL, "The time to live of console controller cache entries.")
 	argRestoreNamespace                     = flag.String("restore-namespace", defaultRestoreNamespace, "The namespace where Velero restores are located.")
 	argServices                             = flag.String("services", "", "A comma separated list of service ids to reconcile. Leave empty to reconcile all.")
@@ -384,6 +388,16 @@ func ComponentShaCacheTTL() time.Duration {
 	}
 
 	return duration
+}
+
+func ComponentShaCacheJitter() time.Duration {
+	jitter, err := time.ParseDuration(*argComponentShaCacheJitter)
+	if err != nil {
+		klog.ErrorS(err, "Could not parse component-sha-cache-jitter", "value", *argComponentShaCacheJitter, "default", defaultComponentShaCacheJitterDuration)
+		return defaultComponentShaCacheJitterDuration
+	}
+
+	return jitter
 }
 
 func ControllerCacheTTL() time.Duration {
