@@ -4564,6 +4564,14 @@
   publisher: eks
 - name: chainguard_aws-ebs-csi-driver-fips
   versions:
+  - version: v2.62.10000020260721-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.62.10000020260618-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4583,6 +4591,14 @@
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
+  - version: v4.4.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.0.20001020260428-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4602,6 +4618,15 @@
   publisher: Chainguard
 - name: chainguard_aws-vpc-cni-fips
   versions:
+  - version: v1.21.100000020260722-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.21.20001020260426-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4633,9 +4658,19 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.0.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   publisher: Chainguard
 - name: chainguard_kube-proxy-fips
   versions:
+  - version: v0.0.100009020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.0.20009020260425-eksbuild.1
     compatibilities:
     - '1.35'
