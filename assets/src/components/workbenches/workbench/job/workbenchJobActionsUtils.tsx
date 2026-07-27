@@ -40,6 +40,28 @@ export function isWorkbenchJobAction(
   return !!activity.type && ACTION_TYPES.has(activity.type)
 }
 
+export function getActionStatusBorderColor(
+  theme: DefaultTheme,
+  status: Nullable<WorkbenchJobActivityStatus>
+) {
+  switch (status) {
+    case WorkbenchJobActivityStatus.NeedsApproval:
+      return theme.colors['border-warning']
+    case WorkbenchJobActivityStatus.Pending:
+      return theme.colors['border-input']
+    case WorkbenchJobActivityStatus.Running:
+      return theme.colors['border-info']
+    case WorkbenchJobActivityStatus.Successful:
+      return theme.colors['border-success']
+    case WorkbenchJobActivityStatus.Failed:
+      return theme.colors['border-danger']
+    case WorkbenchJobActivityStatus.Cancelled:
+      return theme.colors['border-input']
+    default:
+      return theme.colors.border
+  }
+}
+
 export function getActionSectionKey(
   status: Nullable<WorkbenchJobActivityStatus>
 ): WorkbenchJobActionSectionKey | null {

@@ -10,6 +10,7 @@ import styled, { useTheme } from 'styled-components'
 import {
   getActionDetailButtonLabel,
   getActionIcon,
+  getActionStatusBorderColor,
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
@@ -25,7 +26,7 @@ export function WorkbenchJobActionCard({
   const icon = getActionIcon(activity)
 
   return (
-    <CardSC>
+    <CardSC $status={activity.status}>
       <Flex
         align="center"
         gap="small"
@@ -64,11 +65,14 @@ export function WorkbenchJobActionCard({
   )
 }
 
-const CardSC = styled.div(({ theme }) => ({
+const CardSC = styled.div<{
+  $status: WorkbenchJobActionFragment['status']
+}>(({ theme, $status }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.medium,
   padding: theme.spacing.medium,
   borderRadius: theme.borderRadiuses.large,
   background: theme.colors['fill-one'],
+  borderLeft: `2px solid ${getActionStatusBorderColor(theme, $status)}`,
 }))

@@ -18,13 +18,14 @@ import {
   WorkbenchJobActivityStatus,
 } from 'generated/graphql'
 import { useState } from 'react'
-import styled, { DefaultTheme, useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import {
   getActionDescription,
   getActionIcon,
   getActionInputJson,
   getActionResultJson,
+  getActionStatusBorderColor,
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
@@ -211,25 +212,6 @@ function InlineActionStatus({
   return <WorkbenchJobActionStatusChip status={activity.status} />
 }
 
-function statusBorderColor(
-  theme: DefaultTheme,
-  status: WorkbenchJobActivityStatus
-) {
-  switch (status) {
-    case WorkbenchJobActivityStatus.NeedsApproval:
-      return theme.colors['border-warning']
-    case WorkbenchJobActivityStatus.Pending:
-    case WorkbenchJobActivityStatus.Running:
-      return theme.colors['border-info']
-    case WorkbenchJobActivityStatus.Successful:
-      return theme.colors['border-success']
-    case WorkbenchJobActivityStatus.Failed:
-      return theme.colors['border-danger']
-    default:
-      return theme.colors.border
-  }
-}
-
 const CardSC = styled.div<{ $status: WorkbenchJobActivityStatus }>(
   ({ theme, $status }) => ({
     display: 'flex',
@@ -239,7 +221,7 @@ const CardSC = styled.div<{ $status: WorkbenchJobActivityStatus }>(
     minWidth: 0,
     padding: theme.spacing.medium,
     border: theme.borders.default,
-    borderLeft: `2px solid ${statusBorderColor(theme, $status)}`,
+    borderLeft: `2px solid ${getActionStatusBorderColor(theme, $status)}`,
     borderRadius: theme.borderRadiuses.large,
     background: theme.colors['fill-zero'],
     overflow: 'hidden',
