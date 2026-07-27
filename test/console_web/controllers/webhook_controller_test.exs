@@ -18,6 +18,29 @@ defmodule ConsoleWeb.WebhookControllerTest do
     end
   end
 
+  describe "#teams/2" do
+    test "it ignores requests for unknown chat connections", %{conn: conn} do
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/teams/#{Ecto.UUID.generate()}", Jason.encode!(%{"type" => "message"}))
+      |> json_response(200)
+      |> then(&assert(&1["ignored"]))
+    end
+
+    test "it rejects requests without a valid bot framework token", %{conn: conn} do
+      chat = insert(:chat_connection,
+        type: :teams,
+        configuration: %{teams: %{client_id: "cid", client_secret: "secret", tenant_id: "tid"}}
+      )
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> put_req_header("authorization", "Bearer not-a-real-jwt")
+      |> post("/ext/v1/webhooks/teams/#{chat.id}", Jason.encode!(%{"type" => "message"}))
+      |> response(401)
+    end
+  end
+
   describe "#scm/2" do
     test "it returns 403 for azure devops webhook without valid basic auth", %{conn: conn} do
       hook = insert(:scm_webhook, type: :azure_devops)

@@ -20,7 +20,7 @@ import {
   useUpsertChatProviderConnectionMutation,
 } from 'generated/graphql'
 import { isEqual } from 'lodash'
-import { useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CHATBOTS_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { WORKBENCHES_CHATBOT_SELECTED_QUERY_PARAM } from 'routes/workbenchesRoutesConsts'
@@ -40,11 +40,22 @@ type RouteState = {
 
 type ChatbotConnectionFormState = {
   name: string
+  type: ChatProviderConnectionType
+  // slack
   appToken: string
   botToken: string
+  // teams
+  clientId: string
+  clientSecret: string
+  tenantId: string
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
 }
+
+const SUPPORTED_TYPES = [
+  ChatProviderConnectionType.Slack,
+  ChatProviderConnectionType.Teams,
+] as const
 
 export function ChatbotConnectionForm({
   existingConnection,
@@ -64,38 +75,21 @@ export function ChatbotConnectionForm({
   const [formState, setFormState] =
     useState<ChatbotConnectionFormState>(initialFormState)
 
+  const isTeams = formState.type === ChatProviderConnectionType.Teams
   const name = formState.name.trim()
-  const appToken = formState.appToken.trim()
-  const botToken = formState.botToken.trim()
-  const hasTokenUpdate = !!appToken || !!botToken
-  const hasCompleteTokenUpdate = !!appToken && !!botToken
+
+  const attributes = useMemo(
+    () => buildAttributes(formState, mode),
+    [formState, mode]
+  )
   const canSave =
     !!name &&
-    (mode === 'create'
-      ? hasCompleteTokenUpdate
-      : !hasTokenUpdate || hasCompleteTokenUpdate) &&
+    attributes.configComplete &&
     (mode === 'create' || !isEqual(formState, initialFormState))
-
-  const attributes: ChatProviderConnectionAttributes = {
-    name,
-    type: ChatProviderConnectionType.Slack,
-    configuration: {
-      ...(mode === 'create' || hasTokenUpdate
-        ? {
-            slack: {
-              appToken,
-              botToken,
-            },
-          }
-        : {}),
-    },
-    readBindings: formState.readBindings.map(bindingToBindingAttributes),
-    writeBindings: formState.writeBindings.map(bindingToBindingAttributes),
-  }
 
   const [upsertChatProviderConnection, { loading, error }] =
     useUpsertChatProviderConnectionMutation({
-      variables: { attributes },
+      variables: { attributes: attributes.attributes },
       onCompleted: ({ upsertChatProviderConnection }) => {
         const label = upsertChatProviderConnection?.name ?? 'chatbot'
 
@@ -139,26 +133,30 @@ export function ChatbotConnectionForm({
             required
             layout="horizontal"
             label="Chat platform"
-            hint="Only Slack is supported for Workbench chatbots currently."
+            hint={
+              mode === 'edit'
+                ? 'The chat platform cannot be changed after creation.'
+                : 'Select the chat platform this connection integrates with.'
+            }
           >
             <Select
-              selectedKey="slack"
-              isDisabled={true}
-              leftContent={chatProviderConnectionIcon(
-                ChatProviderConnectionType.Slack,
-                false
-              )}
+              selectedKey={formState.type}
+              isDisabled={mode === 'edit'}
+              onSelectionChange={(key) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  type: key as ChatProviderConnectionType,
+                }))
+              }
+              leftContent={chatProviderConnectionIcon(formState.type, false)}
             >
-              <ListBoxItem
-                key="slack"
-                label={chatProviderConnectionLabel(
-                  ChatProviderConnectionType.Slack
-                )}
-                leftContent={chatProviderConnectionIcon(
-                  ChatProviderConnectionType.Slack,
-                  false
-                )}
-              />
+              {SUPPORTED_TYPES.map((type) => (
+                <ListBoxItem
+                  key={type}
+                  label={chatProviderConnectionLabel(type)}
+                  leftContent={chatProviderConnectionIcon(type, false)}
+                />
+              ))}
             </Select>
           </FormField>
           <FormField
@@ -182,50 +180,21 @@ export function ChatbotConnectionForm({
               disabled={loading || mode === 'edit'}
             />
           </FormField>
-          <FormField
-            required={mode === 'create'}
-            layout="horizontal"
-            label="App-level token"
-            hint={
-              mode === 'edit'
-                ? 'Leave blank to keep the existing app-level token.'
-                : 'Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here.'
-            }
-          >
-            <Input2
-              value={formState.appToken}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  appToken: e.target.value,
-                }))
-              }
-              inputProps={{ type: 'password' }}
-              disabled={loading}
+          {isTeams ? (
+            <TeamsFields
+              formState={formState}
+              setFormState={setFormState}
+              mode={mode}
+              loading={loading}
             />
-          </FormField>
-          <FormField
-            required={mode === 'create'}
-            layout="horizontal"
-            label="Bot user OAuth token"
-            hint={
-              mode === 'edit'
-                ? 'Leave blank to keep the existing bot user OAuth token.'
-                : 'Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode.'
-            }
-          >
-            <Input2
-              value={formState.botToken}
-              onChange={(e) =>
-                setFormState((prev) => ({
-                  ...prev,
-                  botToken: e.target.value,
-                }))
-              }
-              inputProps={{ type: 'password' }}
-              disabled={loading}
+          ) : (
+            <SlackFields
+              formState={formState}
+              setFormState={setFormState}
+              mode={mode}
+              loading={loading}
             />
-          </FormField>
+          )}
         </SettingsFormCard>
         <PolicyBindingsCardForm
           layout="horizontal"
@@ -282,13 +251,187 @@ export function ChatbotConnectionForm({
   )
 }
 
+function SlackFields({
+  formState,
+  setFormState,
+  mode,
+  loading,
+}: {
+  formState: ChatbotConnectionFormState
+  setFormState: Dispatch<SetStateAction<ChatbotConnectionFormState>>
+  mode: 'create' | 'edit'
+  loading: boolean
+}) {
+  return (
+    <>
+      <FormField
+        required={mode === 'create'}
+        layout="horizontal"
+        label="App-level token"
+        hint={
+          mode === 'edit'
+            ? 'Leave blank to keep the existing app-level token.'
+            : 'Starts with xapp-. Used for apps.connections.open (Socket Mode). Generate under Basic Information > App-Level Tokens with connections:write. Do not paste the xoxb- bot token here.'
+        }
+      >
+        <Input2
+          value={formState.appToken}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, appToken: e.target.value }))
+          }
+          inputProps={{ type: 'password' }}
+          disabled={loading}
+        />
+      </FormField>
+      <FormField
+        required={mode === 'create'}
+        layout="horizontal"
+        label="Bot user OAuth token"
+        hint={
+          mode === 'edit'
+            ? 'Leave blank to keep the existing bot user OAuth token.'
+            : 'Starts with xoxb-. Bot User OAuth Token from OAuth & Permissions after install. Used for Slack Web API calls, not Socket Mode.'
+        }
+      >
+        <Input2
+          value={formState.botToken}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, botToken: e.target.value }))
+          }
+          inputProps={{ type: 'password' }}
+          disabled={loading}
+        />
+      </FormField>
+    </>
+  )
+}
+
+function TeamsFields({
+  formState,
+  setFormState,
+  mode,
+  loading,
+}: {
+  formState: ChatbotConnectionFormState
+  setFormState: Dispatch<SetStateAction<ChatbotConnectionFormState>>
+  mode: 'create' | 'edit'
+  loading: boolean
+}) {
+  return (
+    <>
+      <FormField
+        required={mode === 'create'}
+        layout="horizontal"
+        label="Application (client) ID"
+        hint="The Microsoft App ID of your Azure Bot registration (also used to validate inbound requests)."
+      >
+        <Input2
+          value={formState.clientId}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, clientId: e.target.value }))
+          }
+          disabled={loading}
+        />
+      </FormField>
+      <FormField
+        required={mode === 'create'}
+        layout="horizontal"
+        label="Client secret"
+        hint={
+          mode === 'edit'
+            ? 'Leave blank to keep the existing client secret. Re-enter all three fields to rotate credentials.'
+            : 'A client secret generated for the bot app registration. Used to mint Bot Framework and Microsoft Graph tokens.'
+        }
+      >
+        <Input2
+          value={formState.clientSecret}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, clientSecret: e.target.value }))
+          }
+          inputProps={{ type: 'password' }}
+          disabled={loading}
+        />
+      </FormField>
+      <FormField
+        required={mode === 'create'}
+        layout="horizontal"
+        label="Directory (tenant) ID"
+        hint="The Azure AD tenant id the bot is registered in."
+      >
+        <Input2
+          value={formState.tenantId}
+          onChange={(e) =>
+            setFormState((prev) => ({ ...prev, tenantId: e.target.value }))
+          }
+          disabled={loading}
+        />
+      </FormField>
+    </>
+  )
+}
+
+function buildAttributes(
+  formState: ChatbotConnectionFormState,
+  mode: 'create' | 'edit'
+): { attributes: ChatProviderConnectionAttributes; configComplete: boolean } {
+  const name = formState.name.trim()
+  const base = {
+    name,
+    type: formState.type,
+    readBindings: formState.readBindings.map(bindingToBindingAttributes),
+    writeBindings: formState.writeBindings.map(bindingToBindingAttributes),
+  }
+
+  if (formState.type === ChatProviderConnectionType.Teams) {
+    const clientId = formState.clientId.trim()
+    const clientSecret = formState.clientSecret.trim()
+    const tenantId = formState.tenantId.trim()
+    const hasFullConfig = !!clientId && !!clientSecret && !!tenantId
+    const hasSecretUpdate = !!clientSecret
+
+    return {
+      attributes: {
+        ...base,
+        configuration: hasSecretUpdate
+          ? { teams: { clientId, clientSecret, tenantId } }
+          : {},
+      },
+      configComplete:
+        mode === 'create' ? hasFullConfig : !hasSecretUpdate || hasFullConfig,
+    }
+  }
+
+  const appToken = formState.appToken.trim()
+  const botToken = formState.botToken.trim()
+  const hasTokenUpdate = !!appToken || !!botToken
+  const hasCompleteTokenUpdate = !!appToken && !!botToken
+
+  return {
+    attributes: {
+      ...base,
+      configuration:
+        mode === 'create' || hasTokenUpdate
+          ? { slack: { appToken, botToken } }
+          : {},
+    },
+    configComplete:
+      mode === 'create'
+        ? hasCompleteTokenUpdate
+        : !hasTokenUpdate || hasCompleteTokenUpdate,
+  }
+}
+
 function getInitialFormState(
   existingConnection?: Nullable<ChatProviderConnectionFragment>
 ): ChatbotConnectionFormState {
   return {
     name: existingConnection?.name ?? '',
+    type: existingConnection?.type ?? ChatProviderConnectionType.Slack,
     appToken: '',
     botToken: '',
+    clientId: existingConnection?.configuration?.teams?.clientId ?? '',
+    clientSecret: '',
+    tenantId: existingConnection?.configuration?.teams?.tenantId ?? '',
     readBindings: existingConnection?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings:
       existingConnection?.writeBindings?.filter(isNonNullable) ?? [],

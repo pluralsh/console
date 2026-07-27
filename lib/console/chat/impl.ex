@@ -3,7 +3,7 @@ defmodule Console.Chat.Impl do
   A thin behaviour to define a chat provider implementation.
   """
   alias Console.Schema.ChatConnection
-  alias Console.Chat.{Channel, Impl.Slack}
+  alias Console.Chat.{Channel, Impl.Slack, Impl.Teams}
 
   defmacro __using__(_opts) do
     quote do
@@ -25,5 +25,6 @@ defmodule Console.Chat.Impl do
   end
 
   defp provider(%ChatConnection{type: :slack}), do: {:ok, Slack}
+  defp provider(%ChatConnection{type: :teams}), do: {:ok, Teams}
   defp provider(%ChatConnection{type: type}), do: {:error, "#{type} chat search is not implemented"}
 end
