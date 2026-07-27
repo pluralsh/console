@@ -131,9 +131,12 @@ export function WorkbenchJobInlineActionCard({
         </HeaderActionsSC>
       </HeaderSC>
 
-      {expanded ? (
+      {expanded && (
         <>
           {error && <GqlError error={error} />}
+          <CaptionP $color="text-xlight">
+            {getActionDescription(activity)}
+          </CaptionP>
           {!!inputJson && (
             <ActionData>
               <CaptionP $color="text-xlight">INPUT</CaptionP>
@@ -162,6 +165,19 @@ export function WorkbenchJobInlineActionCard({
             </ActionData>
           )}
           <WorkbenchJobActionDenialResult activity={activity} />
+          {!!activity.insertedAt && (
+            <TimeSC>
+              <span>Start time</span>
+              <strong>
+                {formatDateTime(
+                  activity.insertedAt,
+                  'YYYY-MM-DD HH:mm:ss [UTC]',
+                  false,
+                  true
+                )}
+              </strong>
+            </TimeSC>
+          )}
           {needsApproval && (
             <ApprovalActionsSC>
               <Button
@@ -195,23 +211,6 @@ export function WorkbenchJobInlineActionCard({
                 Approve
               </Button>
             </ApprovalActionsSC>
-          )}
-        </>
-      ) : (
-        <>
-          <SummarySC>{getActionDescription(activity)}</SummarySC>
-          {!!activity.insertedAt && (
-            <TimeSC>
-              <span>Start time</span>
-              <strong>
-                {formatDateTime(
-                  activity.insertedAt,
-                  'YYYY-MM-DD HH:mm:ss [UTC]',
-                  false,
-                  true
-                )}
-              </strong>
-            </TimeSC>
           )}
         </>
       )}
@@ -366,13 +365,6 @@ const ApprovalActionsSC = styled.div({
   justifyContent: 'space-between',
   width: '100%',
 })
-
-const SummarySC = styled(CaptionP)(({ theme }) => ({
-  color: theme.colors['text-xlight'],
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-}))
 
 const TimeSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,
