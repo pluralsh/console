@@ -84,7 +84,7 @@ export function WorkbenchJobActions({ jobId }: { jobId: string }) {
                 letterSpacing: '0.5px',
               }}
             >
-              {section.label} ({section.count})
+              {section.label} {section.count}
             </CaptionP>
           </Flex>
           <CardsSC>

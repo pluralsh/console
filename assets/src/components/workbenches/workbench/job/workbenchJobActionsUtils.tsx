@@ -136,7 +136,7 @@ export function getActionDetailButtonLabel(
     case WorkbenchJobActivityStatus.Failed:
       return 'View error'
     case WorkbenchJobActivityStatus.Successful:
-      return 'View json'
+      return 'View JSON'
     case WorkbenchJobActivityStatus.Cancelled:
       return 'View reason'
     default:
