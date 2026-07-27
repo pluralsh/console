@@ -1,0 +1,261 @@
+import {
+  CancelledFilledIcon,
+  StatusOkIcon,
+  WarningIcon,
+} from '@pluralsh/design-system'
+import {
+  getWorkbenchToolLabel,
+  WorkbenchToolIcon,
+} from 'components/workbenches/tools/workbenchToolsUtils'
+import {
+  WorkbenchJobActionFragment,
+  WorkbenchJobActivityStatus,
+  WorkbenchJobActivityType,
+} from 'generated/graphql'
+import { ComponentType, ReactElement } from 'react'
+import { DefaultTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+
+export type WorkbenchJobActionSectionKey =
+  'awaiting' | 'failed' | 'succeeded' | 'denied'
+
+export type WorkbenchJobActionSection = {
+  key: WorkbenchJobActionSectionKey
+  label: string
+  count: number
+  actions: WorkbenchJobActionFragment[]
+  icon: ReactElement
+  iconColor: string
+}
+
+const ACTION_TYPES = new Set([
+  WorkbenchJobActivityType.Function,
+  WorkbenchJobActivityType.Kubernetes,
+])
+
+export function isWorkbenchJobAction(
+  activity: WorkbenchJobActionFragment
+): boolean {
+  return !!activity.type && ACTION_TYPES.has(activity.type)
+}
+
+export function getActionSectionKey(
+  status: Nullable<WorkbenchJobActivityStatus>
+): WorkbenchJobActionSectionKey | null {
+  switch (status) {
+    case WorkbenchJobActivityStatus.NeedsApproval:
+      return 'awaiting'
+    case WorkbenchJobActivityStatus.Failed:
+      return 'failed'
+    case WorkbenchJobActivityStatus.Successful:
+      return 'succeeded'
+    case WorkbenchJobActivityStatus.Cancelled:
+      return 'denied'
+    default:
+      return null
+  }
+}
+
+export function groupWorkbenchJobActions(
+  activities: WorkbenchJobActionFragment[],
+  theme: DefaultTheme
+): WorkbenchJobActionSection[] {
+  const buckets: Record<
+    WorkbenchJobActionSectionKey,
+    WorkbenchJobActionFragment[]
+  > = {
+    awaiting: [],
+    failed: [],
+    succeeded: [],
+    denied: [],
+  }
+
+  for (const activity of activities) {
+    if (!isWorkbenchJobAction(activity)) continue
+    const key = getActionSectionKey(activity.status)
+    if (key) buckets[key].push(activity)
+  }
+
+  const meta: Record<
+    WorkbenchJobActionSectionKey,
+    {
+      label: string
+      icon: ComponentType<{ size?: number; color?: string }>
+      iconColor: string
+    }
+  > = {
+    awaiting: {
+      label: 'Awaiting approval',
+      icon: WarningIcon,
+      iconColor: theme.colors['icon-warning'],
+    },
+    failed: {
+      label: 'Failed',
+      icon: CancelledFilledIcon,
+      iconColor: theme.colors['icon-danger'],
+    },
+    succeeded: {
+      label: 'Succeeded',
+      icon: StatusOkIcon,
+      iconColor: theme.colors['icon-success'],
+    },
+    denied: {
+      label: 'Denied',
+      icon: CancelledFilledIcon,
+      iconColor: theme.colors['icon-light'],
+    },
+  }
+
+  return (Object.keys(buckets) as WorkbenchJobActionSectionKey[])
+    .map((key) => {
+      const actions = buckets[key]
+      const { label, icon: Icon, iconColor } = meta[key]
+      return {
+        key,
+        label,
+        count: actions.length,
+        actions,
+        icon: (
+          <Icon
+            size={16}
+            color={iconColor}
+          />
+        ),
+        iconColor,
+      }
+    })
+    .filter((section) => section.count > 0)
+}
+
+export function getActionDetailButtonLabel(
+  status: Nullable<WorkbenchJobActivityStatus>
+): string {
+  switch (status) {
+    case WorkbenchJobActivityStatus.NeedsApproval:
+      return 'View diff'
+    case WorkbenchJobActivityStatus.Failed:
+      return 'View error'
+    case WorkbenchJobActivityStatus.Successful:
+      return 'View json'
+    case WorkbenchJobActivityStatus.Cancelled:
+      return 'View reason'
+    default:
+      return 'View details'
+  }
+}
+
+export function getActionTitle(activity: WorkbenchJobActionFragment): string {
+  const toolName = activity.result?.functionCall?.tool?.name?.trim()
+  if (toolName) return toolName
+
+  if (activity.type === WorkbenchJobActivityType.Kubernetes) {
+    const path = activity.result?.kubeRequest?.path?.trim()
+    if (path) {
+      const segments = path.split('/').filter(Boolean)
+      const resource = segments.at(-2)
+      if (resource) {
+        return resource
+          .split(/[-_]/)
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join('')
+      }
+    }
+    return 'Kubernetes action'
+  }
+
+  return (
+    activity.result?.functionCall?.name?.trim() ||
+    activity.prompt?.trim() ||
+    'Action'
+  )
+}
+
+export function getActionSubtitle(
+  activity: WorkbenchJobActionFragment
+): string {
+  if (activity.type === WorkbenchJobActivityType.Kubernetes) {
+    const kube = activity.result?.kubeRequest
+    return (
+      [kube?.handle, kube?.path].filter(Boolean).join(' · ') || 'Kubernetes'
+    )
+  }
+
+  const toolType = activity.result?.functionCall?.tool?.tool
+  if (toolType) return getWorkbenchToolLabel(toolType)
+
+  return activity.result?.functionCall?.name?.trim() || 'Function'
+}
+
+export function getActionIcon(activity: WorkbenchJobActionFragment) {
+  if (activity.type === WorkbenchJobActivityType.Kubernetes) {
+    return null
+  }
+
+  const toolType = activity.result?.functionCall?.tool?.tool
+  if (!toolType) return null
+
+  return (
+    <WorkbenchToolIcon
+      type={toolType}
+      fullColor
+      size={16}
+    />
+  )
+}
+
+export function formatActionJson(value: unknown): string {
+  if (value == null) return ''
+  if (typeof value === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2)
+    } catch {
+      return value
+    }
+  }
+  try {
+    return JSON.stringify(value, null, 2)
+  } catch {
+    return String(value)
+  }
+}
+
+export function getActionInputJson(
+  activity: WorkbenchJobActionFragment
+): string {
+  const input = activity.result?.functionCall?.input
+  if (input != null) return formatActionJson(input)
+
+  const kube = activity.result?.kubeRequest
+  if (kube) {
+    return formatActionJson({
+      handle: kube.handle,
+      method: kube.method,
+      path: kube.path,
+      body: kube.body,
+      queryParams: kube.queryParams,
+      contentType: kube.contentType,
+    })
+  }
+
+  return ''
+}
+
+export function getActionResultJson(
+  activity: WorkbenchJobActionFragment
+): string {
+  if (activity.result?.error?.trim()) {
+    return activity.result.error.trim()
+  }
+  if (activity.result?.output != null) {
+    return formatActionJson(activity.result.output)
+  }
+  return ''
+}
+
+export function mapActionNodes(
+  edges: Nullable<Nullable<{ node?: Nullable<WorkbenchJobActionFragment> }>[]>
+): WorkbenchJobActionFragment[] {
+  return (edges?.map((edge) => edge?.node).filter(isNonNullable) ?? []).filter(
+    isWorkbenchJobAction
+  )
+}

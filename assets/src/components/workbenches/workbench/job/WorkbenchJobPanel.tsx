@@ -260,7 +260,9 @@ export function WorkbenchJobPanelContent() {
           {selectedTab === 'Usage' && job?.usage && (
             <WorkbenchJobUsage usage={job?.usage} />
           )}
-          {selectedTab === 'Actions' && <WorkbenchJobActions />}
+          {selectedTab === 'Actions' && job?.id && (
+            <WorkbenchJobActions jobId={job.id} />
+          )}
         </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
