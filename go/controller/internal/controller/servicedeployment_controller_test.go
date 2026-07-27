@@ -380,6 +380,45 @@ var _ = Describe("Service Controller", Ordered, func() {
 			Expect(err).To(HaveOccurred())
 
 		})
+
+		It("should delete service from API even when status id is missing", func() {
+			const orphanName = "service-delete-without-status"
+			nsn := types.NamespacedName{Name: orphanName, Namespace: namespace}
+
+			resource := &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:       orphanName,
+					Namespace:  namespace,
+					Finalizers: []string{controller.ServiceFinalizer},
+				},
+				Spec: v1alpha1.ServiceSpec{
+					Version:       lo.ToPtr("1.24"),
+					ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+					RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+
+			fallbackID := "service-id-from-lookup"
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetService", mock.Anything, orphanName).Return(&gqlclient.ServiceDeploymentExtended{ID: fallbackID}, nil).Once()
+			fakeConsoleClient.On("IsServiceDeleting", fallbackID).Return(false).Once()
+			fakeConsoleClient.On("IsServiceExisting", fallbackID).Return(true, nil).Once()
+			fakeConsoleClient.On("DeleteService", fallbackID).Return(nil).Once()
+
+			serviceReconciler := &controller.ServiceDeploymentReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			result, err := serviceReconciler.Process(ctx, reconcile.Request{NamespacedName: nsn})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.RequeueAfter).ToNot(BeZero())
+		})
 	})
 })
 
