@@ -206,6 +206,26 @@ export function getActionSubtitle(
   return activity.result?.functionCall?.name?.trim() || 'Function'
 }
 
+export function getActionDescription(
+  activity: WorkbenchJobActionFragment
+): string {
+  const tool = activity.result?.functionCall?.tool
+  const description =
+    tool?.configuration?.lambda?.description?.trim() ||
+    tool?.configuration?.cloudRun?.description?.trim() ||
+    tool?.configuration?.azureFunction?.description?.trim()
+  if (description) return description
+
+  const output = activity.result?.output?.trim()
+  if (output && output !== 'waiting for user approval') return output
+
+  const prompt = activity.prompt?.trim()
+  if (prompt && !prompt.toLowerCase().startsWith('function call:'))
+    return prompt
+
+  return `${getActionTitle(activity)} action`
+}
+
 export function getActionIcon(activity: WorkbenchJobActionFragment) {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
     return null

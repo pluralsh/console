@@ -1,8 +1,6 @@
 import {
   Button,
-  Chip,
   Code,
-  FailedFilledIcon,
   Flex,
   FormField,
   IconFrame,
@@ -10,10 +8,6 @@ import {
   KubernetesIcon,
   Modal,
   ReturnIcon,
-  SpinnerAlt,
-  StatusIpIcon,
-  StatusOkIcon,
-  WarningIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -33,6 +27,7 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
+import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
 
 export function WorkbenchJobActionDetail({
   activity,
@@ -126,7 +121,7 @@ export function WorkbenchJobActionDetail({
             css={{ minWidth: 0 }}
           />
         </Flex>
-        <ActionStatusChip status={activity.status} />
+        <WorkbenchJobActionStatusChip status={activity.status} />
       </Flex>
 
       {error && <GqlError error={error} />}
@@ -247,68 +242,6 @@ export function WorkbenchJobActionDetail({
       </Modal>
     </DetailSC>
   )
-}
-
-function ActionStatusChip({
-  status,
-}: {
-  status: Nullable<WorkbenchJobActivityStatus>
-}) {
-  switch (status) {
-    case WorkbenchJobActivityStatus.NeedsApproval:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-warning"
-          icon={<WarningIcon />}
-        >
-          Pending approval
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Pending:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-light"
-          icon={<StatusIpIcon />}
-        >
-          Pending
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Running:
-      return (
-        <Chip
-          fillLevel={2}
-          icon={<SpinnerAlt />}
-        >
-          Running
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Failed:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-danger"
-          icon={<FailedFilledIcon />}
-        >
-          Failed
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Successful:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-success"
-          icon={<StatusOkIcon />}
-        >
-          Succeeded
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Cancelled:
-      return <Chip fillLevel={2}>Denied</Chip>
-    default:
-      return null
-  }
 }
 
 const DetailSC = styled.div(({ theme }) => ({

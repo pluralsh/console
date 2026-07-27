@@ -56,6 +56,7 @@ import {
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
+import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 
 export function WorkbenchJobActivity({
   isOpen,
@@ -75,6 +76,12 @@ export function WorkbenchJobActivity({
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
+
+  if (
+    type === WorkbenchJobActivityType.Function ||
+    type === WorkbenchJobActivityType.Kubernetes
+  )
+    return <WorkbenchJobInlineActionCard activity={activity} />
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (

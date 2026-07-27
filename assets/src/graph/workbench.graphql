@@ -418,6 +418,17 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
       id
       name
       tool
+      configuration {
+        lambda {
+          description
+        }
+        cloudRun {
+          description
+        }
+        azureFunction {
+          description
+        }
+      }
     }
   }
   kubeRequest {
@@ -1279,6 +1290,17 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
         id
         name
         tool
+        configuration {
+          lambda {
+            description
+          }
+          cloudRun {
+            description
+          }
+          azureFunction {
+            description
+          }
+        }
       }
     }
     kubeRequest {
