@@ -320,7 +320,23 @@ function formStateToAttributes(
     ...base,
     ...cloudConnectionPatch,
     ...scmPatch,
-    configuration: { [configKey]: sanitized },
+    configuration: {
+      [configKey]: coerceConfigurationJsonFields(sanitized),
+    },
+  }
+}
+
+function coerceConfigurationJsonFields<T extends Record<string, unknown>>(
+  config: T
+): T {
+  if (!('inputSchema' in config)) return config
+
+  const inputSchema = config.inputSchema
+  if (inputSchema == null || typeof inputSchema === 'string') return config
+
+  return {
+    ...config,
+    inputSchema: JSON.stringify(inputSchema),
   }
 }
 

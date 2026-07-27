@@ -519,6 +519,14 @@ function ToolAccessPolicyStep({
   )
 }
 
+function normalizeJsonField(
+  value: Nullable<Record<string, unknown> | string>
+): string | undefined {
+  if (value == null || value === '') return undefined
+  if (typeof value === 'string') return value
+  return JSON.stringify(value, null, 2)
+}
+
 // done this way so TS will catch new tool types that aren't fully implemented yet
 /** Build initial form configuration from fragment data. Keyed by configurable tool type. */
 export const INITIAL_TOOL_CONFIG_BY_TYPE: {
@@ -575,7 +583,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
           WorkbenchToolHttpMethod.Get,
         body: body ?? undefined,
         headers: headers?.filter(isNonNullable),
-        inputSchema: inputSchema ?? undefined,
+        inputSchema: normalizeJsonField(inputSchema),
       },
     }
   },
@@ -708,7 +716,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
       lambda: {
         lambdaArn: lambdaArn ?? '',
         description: description ?? '',
-        inputSchema: inputSchema ?? undefined,
+        inputSchema: normalizeJsonField(inputSchema),
       },
     }
   },
@@ -718,7 +726,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
       cloudRun: {
         identifier: identifier ?? '',
         description: description ?? '',
-        inputSchema: inputSchema ?? undefined,
+        inputSchema: normalizeJsonField(inputSchema),
       },
     }
   },
@@ -728,7 +736,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
       azureFunction: {
         identifier: identifier ?? '',
         description: description ?? '',
-        inputSchema: inputSchema ?? undefined,
+        inputSchema: normalizeJsonField(inputSchema),
       },
     }
   },
