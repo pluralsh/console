@@ -5,8 +5,11 @@ import {
   Code,
   FailedFilledIcon,
   Flex,
+  FormField,
   IconFrame,
+  Input,
   KubernetesIcon,
+  Modal,
   StatusOkIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -19,7 +22,7 @@ import {
   WorkbenchJobActionFragment,
   WorkbenchJobActivityStatus,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
   getActionIcon,
@@ -38,6 +41,8 @@ export function WorkbenchJobActionDetail({
 }) {
   const theme = useTheme()
   const [error, setError] = useState<string | null>(null)
+  const [denyOpen, setDenyOpen] = useState(false)
+  const [denyReason, setDenyReason] = useState('')
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const icon = getActionIcon(activity)
@@ -52,13 +57,31 @@ export function WorkbenchJobActionDetail({
       refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobPendingActions'],
     })
 
-  const [reject, { loading: rejecting }] =
+  const [reject, { loading: rejecting, error: rejectError }] =
     useRejectWorkbenchJobActivityMutation({
-      variables: { id: activity.id },
-      onCompleted: onBack,
-      onError: (err) => setError(err.message),
+      onCompleted: () => {
+        setDenyOpen(false)
+        setDenyReason('')
+        onBack()
+      },
       refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobPendingActions'],
     })
+
+  const closeDenyModal = () => {
+    if (rejecting) return
+    setDenyOpen(false)
+    setDenyReason('')
+  }
+
+  const onDeny = (e?: FormEvent) => {
+    e?.preventDefault()
+    reject({
+      variables: {
+        id: activity.id,
+        reason: denyReason.trim() || undefined,
+      },
+    })
+  }
 
   return (
     <DetailSC>
@@ -147,11 +170,10 @@ export function WorkbenchJobActionDetail({
           <Button
             small
             secondary
-            loading={rejecting}
-            disabled={approving || rejecting}
+            disabled={approving}
             onClick={() => {
               setError(null)
-              reject()
+              setDenyOpen(true)
             }}
             css={{
               color: theme.colors['text-danger-light'],
@@ -167,7 +189,7 @@ export function WorkbenchJobActionDetail({
           <Button
             small
             loading={approving}
-            disabled={approving || rejecting}
+            disabled={approving}
             onClick={() => {
               setError(null)
               approve()
@@ -177,6 +199,50 @@ export function WorkbenchJobActionDetail({
           </Button>
         </ActionsRowSC>
       )}
+
+      <Modal
+        header="Deny action"
+        open={denyOpen}
+        onClose={closeDenyModal}
+        asForm
+        onSubmit={onDeny}
+        actions={
+          <Flex gap="small">
+            <Button
+              secondary
+              type="button"
+              disabled={rejecting}
+              onClick={closeDenyModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              destructive
+              loading={rejecting}
+            >
+              Deny
+            </Button>
+          </Flex>
+        }
+      >
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          {rejectError && <GqlError error={rejectError} />}
+          <FormField label="Reason">
+            <Input
+              multiline
+              minRows={3}
+              maxRows={6}
+              value={denyReason}
+              onChange={(e) => setDenyReason(e.target.value)}
+              placeholder="Explain why this action was denied"
+            />
+          </FormField>
+        </Flex>
+      </Modal>
     </DetailSC>
   )
 }
