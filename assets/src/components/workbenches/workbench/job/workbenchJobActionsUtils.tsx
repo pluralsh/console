@@ -1,5 +1,6 @@
 import {
   CancelledFilledIcon,
+  StatusIpIcon,
   StatusOkIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -17,7 +18,7 @@ import { DefaultTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export type WorkbenchJobActionSectionKey =
-  'awaiting' | 'failed' | 'succeeded' | 'denied'
+  'awaiting' | 'pending' | 'running' | 'failed' | 'succeeded' | 'denied'
 
 export type WorkbenchJobActionSection = {
   key: WorkbenchJobActionSectionKey
@@ -45,6 +46,10 @@ export function getActionSectionKey(
   switch (status) {
     case WorkbenchJobActivityStatus.NeedsApproval:
       return 'awaiting'
+    case WorkbenchJobActivityStatus.Pending:
+      return 'pending'
+    case WorkbenchJobActivityStatus.Running:
+      return 'running'
     case WorkbenchJobActivityStatus.Failed:
       return 'failed'
     case WorkbenchJobActivityStatus.Successful:
@@ -65,6 +70,8 @@ export function groupWorkbenchJobActions(
     WorkbenchJobActionFragment[]
   > = {
     awaiting: [],
+    pending: [],
+    running: [],
     failed: [],
     succeeded: [],
     denied: [],
@@ -88,6 +95,16 @@ export function groupWorkbenchJobActions(
       label: 'Awaiting approval',
       icon: WarningIcon,
       iconColor: theme.colors['icon-warning'],
+    },
+    pending: {
+      label: 'Pending',
+      icon: StatusIpIcon,
+      iconColor: theme.colors['icon-light'],
+    },
+    running: {
+      label: 'Running',
+      icon: StatusIpIcon,
+      iconColor: theme.colors['icon-light'],
     },
     failed: {
       label: 'Failed',
@@ -139,6 +156,9 @@ export function getActionDetailButtonLabel(
       return 'View JSON'
     case WorkbenchJobActivityStatus.Cancelled:
       return 'View reason'
+    case WorkbenchJobActivityStatus.Pending:
+    case WorkbenchJobActivityStatus.Running:
+      return 'View details'
     default:
       return 'View details'
   }

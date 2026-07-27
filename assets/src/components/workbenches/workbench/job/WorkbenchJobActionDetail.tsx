@@ -10,6 +10,8 @@ import {
   KubernetesIcon,
   Modal,
   ReturnIcon,
+  SpinnerAlt,
+  StatusIpIcon,
   StatusOkIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -261,6 +263,25 @@ function ActionStatusChip({
           icon={<WarningIcon />}
         >
           Pending approval
+        </Chip>
+      )
+    case WorkbenchJobActivityStatus.Pending:
+      return (
+        <Chip
+          fillLevel={2}
+          iconColor="icon-light"
+          icon={<StatusIpIcon />}
+        >
+          Pending
+        </Chip>
+      )
+    case WorkbenchJobActivityStatus.Running:
+      return (
+        <Chip
+          fillLevel={2}
+          icon={<SpinnerAlt />}
+        >
+          Running
         </Chip>
       )
     case WorkbenchJobActivityStatus.Failed:
