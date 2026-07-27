@@ -26,8 +26,9 @@ import {
   aggregateHealthScoreStats,
   ClusterHealthScoresFilterBtns,
   ClusterHealthScoresHeatmap,
-  HealthScoreFilterLabel,
   healthScoreLabelToRange,
+  HealthScoreFilterLabel,
+  normalizeHealthmapClusterCount,
 } from './clusteroverview/ClusterHealthScoresHeatmap.tsx'
 import {
   aggregateUpgradeStats,
@@ -52,6 +53,7 @@ export function Home() {
 
 function HomeClusters() {
   const { borders } = useTheme()
+  const { configuration } = useLogin()
   const projectId = useProjectId()
   useSetBreadcrumbs(breadcrumbs)
   // we don't want a double popup, and cloud setup would come first if relevant
@@ -75,9 +77,15 @@ function HomeClusters() {
 
   const [selectedCluster, setSelectedCluster] =
     useState<Nullable<ClustersRowFragment>>(null)
+  const healthmapClusterCount = normalizeHealthmapClusterCount(
+    configuration?.healthmapClusterCount
+  )
 
   const { data: healthScoresData } = useClusterHealthScoresQuery({
-    variables: { projectId },
+    variables: {
+      projectId,
+      first: healthmapClusterCount,
+    },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })

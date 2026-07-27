@@ -79,6 +79,7 @@ _Appears in:_
 | `clusterPingInterval` _string_ | ClusterPingInterval specifies the interval at which the agent pings the cluster.<br />Set to "0s" to disable cluster pings. |  |  |
 | `compatibilityUploadInterval` _string_ | CompatibilityUploadInterval determines how frequently the agent uploads compatibility data.<br />Set to "0s" to disable compatibility uploads. |  |  |
 | `stackPollInterval` _string_ | StackPollInterval sets how often the agent polls for stack updates or changes.<br />Set to "0s" to disable stack polling. |  |  |
+| `sentinelPollInterval` _string_ | SentinelPollInterval sets how often the agent polls for sentinel run jobs.<br />Set to "0s" to disable sentinel run job polling. |  |  |
 | `pipelineGateInterval` _string_ | PipelineGateInterval specifies how frequently the agent checks pipeline gates.<br />Set to "0s" to disable pipeline gate checks. |  |  |
 | `maxConcurrentReconciles` _integer_ | MaxConcurrentReconciles controls the maximum number of concurrent reconcile loops.<br />Higher values can increase throughput at the cost of resource usage. |  |  |
 | `vulnerabilityReportUploadInterval` _string_ | VulnerabilityReportUploadInterval sets how often vulnerability reports are uploaded.<br />Set to "0s" to disable vulnerability report uploads. |  |  |

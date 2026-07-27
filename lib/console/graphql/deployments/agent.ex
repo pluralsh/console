@@ -15,6 +15,8 @@ defmodule Console.GraphQl.Deployments.Agent do
   input_object :agent_runtime_attributes do
     field :name,                 non_null(:string), description: "the name of this runtime"
     field :type,                 non_null(:agent_runtime_type), description: "the type of this runtime"
+    field :cluster_id,           :id,
+      description: "the cluster this runtime is running on (required for user-authenticated upserts)"
     field :create_bindings,      list_of(:agent_binding_attributes), description: "the policy for creating runs on this runtime"
     field :ai_proxy,             :boolean, description: "whether this runtime uses the built-in Plural AI proxy"
     field :default,              :boolean, description: "whether this is the default runtime for coding agents"
@@ -382,7 +384,7 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   object :public_agent_mutations do
     field :upsert_agent_runtime, :agent_runtime do
-      middleware ClusterAuthenticated
+      middleware Authenticated, :cluster
       arg :attributes, non_null(:agent_runtime_attributes)
 
       resolve &Deployments.upsert_agent_runtime/2

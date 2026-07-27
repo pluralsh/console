@@ -616,6 +616,47 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "workbenchPrFollowup" do
+    test "it can create a user message on an idle pull request job" do
+      user = admin_user()
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
+      pr = insert(:pull_request, workbench_job: job)
+
+      {:ok, %{data: %{"workbenchPrFollowup" => activity}}} = run_query("""
+        mutation WorkbenchPrFollowup($url: String!, $attributes: WorkbenchMessageAttributes!) {
+          workbenchPrFollowup(url: $url, attributes: $attributes) {
+            id
+            prompt
+            type
+            status
+          }
+        }
+      """, %{"url" => pr.url, "attributes" => %{"prompt" => "from pr graphql"}}, %{current_user: user})
+
+      assert activity["prompt"] == "from pr graphql"
+      assert activity["type"] == "USER"
+      assert activity["status"] == "SUCCESSFUL"
+    end
+
+    test "it returns an error when the pull request job is active" do
+      user = admin_user()
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
+      pr = insert(:pull_request, workbench_job: job)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation WorkbenchPrFollowup($url: String!, $attributes: WorkbenchMessageAttributes!) {
+          workbenchPrFollowup(url: $url, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{"url" => pr.url, "attributes" => %{"prompt" => "while running"}}, %{current_user: user})
+
+      assert error.message == "job is currently active, please wait for it to complete before prompting"
+    end
+  end
+
   describe "approveWorkbenchJobActivity" do
     test "it approves and invokes a function activity" do
       user = insert(:user)
@@ -712,11 +753,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => activity.id, "reason" => "not approved"}, %{current_user: user})
 
       assert updated["id"] == activity.id
-      assert updated["status"] == "SUCCESSFUL"
+      assert updated["status"] == "REJECTED"
       assert updated["result"]["output"] == "not approved"
 
       reloaded = refetch(activity)
-      assert reloaded.status == :successful
+      assert reloaded.status == :rejected
       assert reloaded.result.output == "not approved"
     end
   end

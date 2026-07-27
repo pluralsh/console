@@ -8,12 +8,12 @@ var (
 	componentShaCache *SimpleCache[string]
 )
 
-func InitComponentShaCache(expireAfter time.Duration) {
+func InitComponentShaCache(expireAfter, expireJitter time.Duration) {
 	if componentShaCache != nil {
 		return
 	}
 
-	componentShaCache = NewSimpleCache[string](expireAfter)
+	componentShaCache = NewSimpleCache[string](expireAfter, expireJitter)
 }
 
 func ComponentShaCache() *SimpleCache[string] {

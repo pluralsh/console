@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "sentinel_run_job_id": {
+            "type": "string",
+            "description": "UUID of the sentinel run job to fetch"
+        }
+    },
+    "required": ["sentinel_run_job_id"]
+}

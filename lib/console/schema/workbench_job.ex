@@ -82,6 +82,8 @@ defmodule Console.Schema.WorkbenchJob do
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, paused: 5
   defenum Type, job: 0, skill: 1
 
+  defguard is_terminal(status) when status in ~w(successful failed cancelled)a
+
   schema "workbench_jobs" do
     field :status, Status, default: :pending
     field :type,   Type, default: :job

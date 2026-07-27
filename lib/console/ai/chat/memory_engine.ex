@@ -11,6 +11,8 @@ defmodule Console.AI.Chat.MemoryEngine do
 
   @type t :: %__MODULE__{}
 
+  @sleep 20
+
   defstruct [
     :tools,
     :system_prompt,
@@ -93,17 +95,17 @@ defmodule Console.AI.Chat.MemoryEngine do
       {:error, %ReqLLM.Error.API.Request{status: nil}} = err ->
         # almost certainly a llm provider failure, just retry
         Logger.warning "llm provider failure, retrying: #{inspect(err)}"
-        :timer.sleep(10)
+        sleep()
         loop(engine, iter + 1)
       {:error, %ReqLLM.Error.API.Request{status: s}} = err when s >= 500 ->
         Logger.error "llm provider HTTP 500, retrying: #{inspect(err)}"
-        :timer.sleep(10)
+        sleep()
         loop(engine, iter + 1)
       {:error, %ReqLLM.Error.API.Request{status: status, reason: body}} when status >= 400 and status < 500 ->
         {:error, "llm provider HTTP #{status} : #{Console.truncate(body, 200)}"}
       {:error, %ReqLLM.Error.API.Request{reason: reason}} ->
         Logger.warning "llm provider socket closed, retrying: #{inspect(reason)}"
-        :timer.sleep(10)
+        sleep()
         loop(engine, iter + 1)
       err -> err
     end
@@ -203,6 +205,8 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp msg_size({_, content}), do: byte_size(content)
   defp msg_size({_, content, args}), do: byte_size(content <> Jason.encode!(Map.take(args, [:name, :arguments])))
   defp msg_size(_), do: 0
+
+  defp sleep(), do: :timer.sleep(@sleep + Console.jitter(@sleep))
 
   defp setup_toolsearch(%__MODULE__{tool_search: true, pre_enable: pre_enable} = engine),
     do: %__MODULE__{engine | enabled_tools: EnabledTools.new(engine.tools, pre_enable)}

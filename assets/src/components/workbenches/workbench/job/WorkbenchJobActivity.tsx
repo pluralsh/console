@@ -75,6 +75,7 @@ export function WorkbenchJobActivity({
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
+  const isRejected = status === WorkbenchJobActivityStatus.Rejected
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
@@ -169,7 +170,7 @@ export function WorkbenchJobActivity({
               tooltip="Go to agent run details"
             />
           )}
-          {status == WorkbenchJobActivityStatus.Failed && (
+          {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
             <FailedFilledIcon
               size={12}
               color="icon-danger"
@@ -238,6 +239,7 @@ export function WorkbenchJobMemoGroup({
               key={activity.id}
               activity={activity}
               textStream={textStreamMap[activity.id] ?? ''}
+              showMemoPrefix={activities.length > 1}
             />
           ))}
         </Flex>
@@ -286,30 +288,40 @@ export function WorkbenchJobMemoGroup({
 function WorkbenchJobMemo({
   activity,
   textStream,
+  showMemoPrefix = true,
 }: {
   activity: WorkbenchJobActivityFragment
   textStream: string
+  showMemoPrefix?: boolean
 }) {
   const { prompt, result, status } = activity
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const isRunning = isJobRunning(status)
   const isFailed = status === WorkbenchJobActivityStatus.Failed
+  const isRejected = status === WorkbenchJobActivityStatus.Rejected
   const content = textStream || result?.output || prompt || ''
   const label =
     content ||
     result?.error ||
+    (isRejected ? 'Rejected workbench notes update' : null) ||
     (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
 
   return (
     <MemoRowSC>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
         <MemoLabelSC $shimmer={isRunning}>
-          Memo <SpanSC $color="text-light">{label}</SpanSC>
+          {showMemoPrefix ? (
+            <>
+              Memo <SpanSC $color="text-light">{label}</SpanSC>
+            </>
+          ) : (
+            label
+          )}
         </MemoLabelSC>
       </ClickableLabelSC>
       {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
-      {isFailed && (
+      {(isFailed || isRejected) && (
         <FailedFilledIcon
           size={12}
           color="icon-danger"

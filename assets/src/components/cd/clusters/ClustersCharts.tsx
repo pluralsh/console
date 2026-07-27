@@ -1,8 +1,12 @@
 import { Button, CaretUpIcon } from '@pluralsh/design-system'
 import { SimpleAccordion } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { useLogin } from 'components/contexts'
 import { useProjectId } from 'components/contexts/ProjectsContext'
-import { ClusterHealthScoresHeatmap } from 'components/home/clusteroverview/ClusterHealthScoresHeatmap'
+import {
+  ClusterHealthScoresHeatmap,
+  normalizeHealthmapClusterCount,
+} from 'components/home/clusteroverview/ClusterHealthScoresHeatmap'
 import {
   ClusterUpgradesChart,
   UpgradeChartFilter,
@@ -56,10 +60,14 @@ export function ClustersCharts({
 }
 
 function ClusterChartsContent() {
+  const { configuration } = useLogin()
   const projectId = useProjectId()
+  const healthmapClusterCount = normalizeHealthmapClusterCount(
+    configuration?.healthmapClusterCount
+  )
 
   const { data: healthScoresData } = useClusterHealthScoresQuery({
-    variables: { projectId },
+    variables: { projectId, first: healthmapClusterCount },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })

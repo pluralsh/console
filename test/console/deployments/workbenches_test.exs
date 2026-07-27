@@ -945,6 +945,39 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "pr_followup/3" do
+    test "creates a message for the pull request job when it is idle" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
+      pr = insert(:pull_request, workbench_job: job)
+
+      assert WorkbenchJob.idle?(job)
+
+      {:ok, activity} =
+        Workbenches.pr_followup(%{prompt: "pr follow-up"}, pr.url, user)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "pr follow-up"
+      assert activity.type == :user
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+    end
+
+    test "returns an error when the pull request job is active" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
+      pr = insert(:pull_request, workbench_job: job)
+
+      refute WorkbenchJob.idle?(job)
+
+      assert {:error, "job is currently active, please wait for it to complete before prompting"} =
+               Workbenches.pr_followup(%{prompt: "while running"}, pr.url, user)
+
+      refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
+    end
+  end
+
   describe "create_job_activity/2" do
     test "creates an activity and sets job status to running" do
       job = insert(:workbench_job, status: :pending)
@@ -1405,12 +1438,12 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, updated} = Workbenches.reject_job_activity("too risky", activity.id, user)
 
       assert updated.id == activity.id
-      assert updated.status == :successful
+      assert updated.status == :rejected
       assert updated.result.output == "too risky"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       reloaded = refetch(activity)
-      assert reloaded.status == :successful
+      assert reloaded.status == :rejected
       assert reloaded.result.output == "too risky"
     end
 
@@ -1431,7 +1464,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, updated} = Workbenches.reject_job_activity(activity.id, user)
 
       assert updated.id == activity.id
-      assert updated.status == :successful
+      assert updated.status == :rejected
       assert updated.result.output == "Execution rejected by user"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
     end

@@ -66,12 +66,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
     skills = Environment.subagent_skills(skills, :infrastructure)
 
-    svc_tools(bench, job, user)
-    |> Enum.concat(stack_tools(bench, user))
-    |> Enum.concat(k8s_tools(bench, user))
-    |> Enum.concat(pod_logs_tools(bench, user))
+    core_tools(job, environment)
     |> Enum.concat(vuln_tools(bench, user))
-    |> Enum.concat(cloud_tools(environment))
     |> Enum.concat(manifests_tools(bench, job, user, cache))
     |> Enum.concat([
       %Skills{skills: skills},
@@ -81,6 +77,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %History{job: job, activities: activities},
       Result
     ])
+  end
+
+  def core_tools(%WorkbenchJob{workbench: bench, user: user} = job, %Environment{} = environment) do
+    svc_tools(bench, job, user)
+    |> Enum.concat(stack_tools(bench, user))
+    |> Enum.concat(k8s_tools(bench, user))
+    |> Enum.concat(pod_logs_tools(bench, user))
+    |> Enum.concat(cloud_tools(environment))
   end
 
   defp cloud_tools(%Environment{tools: tools}) do

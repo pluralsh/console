@@ -8,6 +8,7 @@ metadata:
 spec:
   clusterPingInterval: "10s"
   stackPollInterval: "20s"
+  sentinelPollInterval: "20s"
   pipelineGateInterval: "0s"
   vulnerabilityReportUploadInterval: "10m"
   maxConcurrentReconciles: 5

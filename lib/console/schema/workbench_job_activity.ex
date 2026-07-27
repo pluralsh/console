@@ -2,7 +2,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
   alias Console.Schema.{User, WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult, WorkbenchJobActivityAgentRun}
 
-  defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, needs_approval: 5
+  defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, needs_approval: 5, rejected: 6
   defenum Type,
     coding: 0,
     observability: 1,
@@ -19,7 +19,10 @@ defmodule Console.Schema.WorkbenchJobActivity do
     history: 12,
     search: 13,
     function: 14,
-    kubernetes: 15
+    kubernetes: 15,
+    verify: 16
+
+  defguard is_action(type) when type in [:function, :kubernetes]
 
   schema "workbench_job_activities" do
     field :status, Status, default: :pending

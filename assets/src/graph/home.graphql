@@ -148,8 +148,8 @@ query UpgradeStatistics($projectId: ID, $tag: TagInput) {
   }
 }
 
-query ClusterHealthScores($projectId: ID) {
-  clusters(projectId: $projectId, first: 1000) {
+query ClusterHealthScores($projectId: ID, $first: Int) {
+  clusters(projectId: $projectId, first: $first) {
     edges {
       node {
         ...ClusterHealthScore

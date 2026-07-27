@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"time"
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/polly/cache"
@@ -47,11 +46,6 @@ func initConsoleManagerOrDie() *consolectrl.Manager {
 
 	return mgr
 }
-
-const (
-	// Use custom (short) poll intervals for these reconcilers.
-	sentinelPollInterval = 30 * time.Second
-)
 
 func registerConsoleReconcilersOrDie(
 	mgr *consolectrl.Manager,
@@ -125,7 +119,7 @@ func registerConsoleReconcilersOrDie(
 			setupLog.Error(err, "unable to get operator namespace")
 			os.Exit(1)
 		}
-		r := sentinel.NewSentinelReconciler(namespaceCache, consoleClient, k8sClient, scheme, args.ControllerCacheTTL(), sentinelPollInterval, namespace, args.ConsoleUrl(), args.DeployToken())
+		r := sentinel.NewSentinelReconciler(namespaceCache, consoleClient, k8sClient, scheme, args.ControllerCacheTTL(), args.SentinelPollInterval(), namespace, args.ConsoleUrl(), args.DeployToken())
 		return r, nil
 	})
 }

@@ -48,7 +48,10 @@ defmodule Console.Schema.WorkbenchTool do
     search: 7,
     scm: 8,
     chat: 9,
-    function: 10
+    function: 10,
+    coding: 11,
+    verification: 12,
+    observability: 13
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -335,7 +338,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp valid_category(changeset, tool) do
     validate_change(changeset, :categories, fn :categories, categories ->
-      cats = categories(tool)
+      cats = possible_categories(tool)
       case MapSet.subset?(MapSet.new(categories), MapSet.new(cats)) do
         true -> []
         false -> [categories: "must be a subset of [#{Enum.join(cats, ", ")}] for a #{tool} tool"]
@@ -358,6 +361,9 @@ defmodule Console.Schema.WorkbenchTool do
       _ -> changeset
     end
   end
+
+  defp possible_categories(:mcp), do: [:integration, :observability, :infrastructure, :coding, :verification]
+  defp possible_categories(t), do: categories(t)
 
   defp categories(:http), do: [:integration]
   defp categories(:datadog), do: [:metrics, :logs, :traces]

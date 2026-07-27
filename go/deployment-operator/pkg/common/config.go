@@ -30,6 +30,7 @@ type ConfigurationManager struct {
 	clusterPingInterval         *time.Duration
 	runtimeServicesPingInterval *time.Duration
 	stackPollInterval           *time.Duration
+	sentinelPollInterval        *time.Duration
 	compatibilityUploadInterval *time.Duration
 	pipelineGateInterval        *time.Duration
 	maxConcurrentReconciles     *int
@@ -86,6 +87,12 @@ func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfiguration
 	}
 	s.stackPollInterval = interval
 
+	interval, err = setDuration(config.SentinelPollInterval)
+	if err != nil {
+		return err
+	}
+	s.sentinelPollInterval = interval
+
 	interval, err = setDuration(config.VulnerabilityReportUploadInterval)
 	if err != nil {
 		return err
@@ -122,6 +129,9 @@ func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfiguration
 	}
 	if overrides.StackPollInterval != nil {
 		merged.StackPollInterval = overrides.StackPollInterval
+	}
+	if overrides.SentinelPollInterval != nil {
+		merged.SentinelPollInterval = overrides.SentinelPollInterval
 	}
 	if overrides.PipelineGateInterval != nil {
 		merged.PipelineGateInterval = overrides.PipelineGateInterval
@@ -194,6 +204,12 @@ func (s *ConfigurationManager) GetStackPollInterval() *time.Duration {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.stackPollInterval
+}
+
+func (s *ConfigurationManager) GetSentinelPollInterval() *time.Duration {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.sentinelPollInterval
 }
 
 func (s *ConfigurationManager) GetMaxConcurrentReconciles() *int {

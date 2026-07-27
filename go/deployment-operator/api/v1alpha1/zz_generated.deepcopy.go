@@ -23,7 +23,7 @@ package v1alpha1
 import (
 	"github.com/pluralsh/console/go/client"
 	batchv1 "k8s.io/api/batch/v1"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -133,6 +133,11 @@ func (in *AgentConfigurationSpec) DeepCopyInto(out *AgentConfigurationSpec) {
 	}
 	if in.StackPollInterval != nil {
 		in, out := &in.StackPollInterval, &out.StackPollInterval
+		*out = new(string)
+		**out = **in
+	}
+	if in.SentinelPollInterval != nil {
+		in, out := &in.SentinelPollInterval, &out.SentinelPollInterval
 		*out = new(string)
 		**out = **in
 	}
@@ -532,8 +537,18 @@ func (in *AgentRuntimeSpec) DeepCopyInto(out *AgentRuntimeSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.StreamingProxy != nil {
+		in, out := &in.StreamingProxy, &out.StreamingProxy
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Dind != nil {
 		in, out := &in.Dind, &out.Dind
+		*out = new(bool)
+		**out = **in
+	}
+	if in.Memory != nil {
+		in, out := &in.Memory, &out.Memory
 		*out = new(bool)
 		**out = **in
 	}

@@ -77,28 +77,37 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Upserts an agent runtime, can only be performed by deployment operators
+  Upserts an agent runtime, can only be performed by deployment operators or admins
   """
   @spec upsert_agent_runtime(map, Cluster.t) :: agent_runtime_resp
-  def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cluster_id}) do
-    runtime = get_agent_runtime(cluster_id, name) |> Repo.preload([:create_bindings])
+  def upsert_agent_runtime(attrs, %Cluster{} = cluster),
+    do: upsert_agent_runtime(attrs, cluster, cluster)
 
-    with {:ok, attrs} <- resolve_scm_connection(attrs) do
+
+  @spec upsert_agent_runtime(map, Cluster.t | nil, User.t | Cluster.t | nil) :: agent_runtime_resp
+  def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cid} = cluster, actor) do
+    runtime = get_agent_runtime(cid, name) |> Repo.preload([:create_bindings])
+
+    with {:ok, _} <- allow(runtime || %AgentRuntime{cluster_id: cid}, actor, :write),
+         {:ok, attrs} <- resolve_scm_connection(attrs) do
       case runtime do
         %AgentRuntime{} = runtime -> runtime
-        nil -> %AgentRuntime{cluster_id: cluster_id}
+        nil -> %AgentRuntime{cluster_id: cid}
       end
       |> AgentRuntime.changeset(stabilize(attrs, runtime || %AgentRuntime{create_bindings: []}))
       |> Repo.insert_or_update()
     end
   end
-  def upsert_agent_runtime(_, _), do: {:error, "name is required"}
+  def upsert_agent_runtime(_, nil, _), do: {:error, "cluster is required"}
+  def upsert_agent_runtime(_, _, _), do: {:error, "name is required"}
 
   defp resolve_scm_connection(%{scm_connection: name} = attrs) when is_binary(name) do
     case Git.get_scm_connection_by_name(name) do
       %ScmConnection{id: id} ->
-        {:ok, attrs |> Map.put(:connection_id, id) |> Map.delete(:scm_connection)}
-
+        attrs
+        |> Map.put(:connection_id, id)
+        |> Map.delete(:scm_connection)
+        |> ok()
       nil ->
         {:error, "could not find scm connection #{name}"}
     end

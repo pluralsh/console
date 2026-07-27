@@ -17,7 +17,6 @@ import {
 import { useContext, useState } from 'react'
 
 import { removeConnection, updateCache } from '../../../../utils/graphql'
-import { hasRbac, Permissions } from '../misc'
 
 import { EditPersonaAttributes } from './PersonaAttributesEdit'
 import { EditPersonaBindings } from './PersonaBindingsEdit'
@@ -25,7 +24,7 @@ import PersonaView from './PersonaView'
 
 export default function PersonaActions({ persona }: { persona: PersonaT }) {
   const { me } = useContext<any>(LoginContext)
-  const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
+  const editable = !!me.roles?.admin
 
   const [dialogKey, setDialogKey] = useState<
     'confirmDelete' | 'editAttrs' | 'editBindings' | 'viewPersona' | ''

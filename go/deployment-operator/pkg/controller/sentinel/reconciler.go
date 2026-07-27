@@ -38,7 +38,7 @@ type SentinelReconciler struct {
 	k8sClient      ctrlclient.Client
 	scheme         *runtime.Scheme
 	sentinelQueue  workqueue.TypedRateLimitingInterface[string]
-	sentinelCache  *cache.Cache[console.SentinelRunJobFragment]
+	sentinelCache  cache.Store[console.SentinelRunJobFragment]
 	namespace      string
 	consoleURL     string
 	deployToken    string
@@ -52,7 +52,7 @@ func NewSentinelReconciler(namespaceCache streamline.NamespaceCache, consoleClie
 		k8sClient:     k8sClient,
 		scheme:        scheme,
 		sentinelQueue: workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[string]()),
-		sentinelCache: cache.NewCache[console.SentinelRunJobFragment](refresh, func(id string) (*console.SentinelRunJobFragment, error) {
+		sentinelCache: cache.NewDynamicCache[console.SentinelRunJobFragment](ControllerCacheTTLFunc(refresh, pollInterval), func(id string) (*console.SentinelRunJobFragment, error) {
 			return consoleClient.GetSentinelRunJob(id)
 		}),
 		consoleURL:     consoleURL,
@@ -83,7 +83,7 @@ func (r *SentinelReconciler) Shutdown() {
 
 func (r *SentinelReconciler) GetPollInterval() func() time.Duration {
 	return func() time.Duration {
-		return r.pollInterval
+		return EffectivePollInterval(r.pollInterval)
 	}
 }
 
@@ -135,7 +135,7 @@ func (r *SentinelReconciler) Poll(ctx context.Context) error {
 		for _, run := range runs {
 			logger.V(1).Info("sending update for", "sentinel run job", run.Node.ID)
 			r.sentinelCache.Add(run.Node.ID, run.Node)
-			r.sentinelQueue.AddAfter(run.Node.ID, utils.Jitter(r.GetPollInterval()()))
+			r.sentinelQueue.AddAfter(run.Node.ID, utils.Jitter(r.pollJitterWindow()))
 		}
 	}
 
@@ -209,4 +209,25 @@ func (r *SentinelReconciler) GetRunResourceNamespace(jobSpec *batchv1.JobSpec) (
 	}
 
 	return
+}
+
+func (r *SentinelReconciler) pollJitterWindow() time.Duration {
+	interval := r.GetPollInterval()()
+	if interval <= 0 {
+		return 15 * time.Second
+	}
+	return interval / 2
+}
+
+func EffectivePollInterval(defaultInterval time.Duration) time.Duration {
+	if sentinelPollInterval := pkgcommon.GetConfigurationManager().GetSentinelPollInterval(); sentinelPollInterval != nil {
+		return *sentinelPollInterval
+	}
+	return defaultInterval
+}
+
+func ControllerCacheTTLFunc(baseTTL, defaultPollInterval time.Duration) func() time.Duration {
+	return func() time.Duration {
+		return common.ControllerCacheTTL(baseTTL, EffectivePollInterval(defaultPollInterval))
+	}
 }

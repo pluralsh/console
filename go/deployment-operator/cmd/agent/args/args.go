@@ -62,11 +62,14 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
-	defaultComponentShaCacheTTL         = "1h"
-	defaultComponentShaCacheTTLDuration = 1 * time.Hour
+	defaultComponentShaCacheTTL         = "2h"
+	defaultComponentShaCacheTTLDuration = 2 * time.Hour
 
 	defaultManifestCacheJitter         = "30m"
 	defaultManifestCacheJitterDuration = 30 * time.Minute
+
+	defaultComponentShaCacheJitter         = "1h"
+	defaultComponentShaCacheJitterDuration = time.Hour
 
 	defaultControllerCacheTTL         = "2m"
 	defaultControllerCacheTTLDuration = 2 * time.Minute
@@ -88,6 +91,9 @@ const (
 
 	defaultStackPollInterval         = "30s"
 	defaultStackPollIntervalDuration = 30 * time.Second
+
+	defaultSentinelPollInterval         = "30s"
+	defaultSentinelPollIntervalDuration = 30 * time.Second
 
 	defaultPipelineGatesPollInterval         = "0s"
 	defaultPipelineGatesPollIntervalDuration = 0 * time.Second
@@ -145,6 +151,7 @@ var (
 	argManifestCacheTTL                     = flag.String("manifest-cache-ttl", defaultManifestCacheTTL, "The time to live of service manifests in cache entry.")
 	argManifestCacheJitter                  = flag.String("manifest-cache-jitter", defaultManifestCacheJitter, "Randomly selected jitter time up to the provided duration will be added to the manifest cache TTL.")
 	argComponentShaCacheTTL                 = flag.String("component-sha-cache-ttl", defaultComponentShaCacheTTL, "The time to live of the component sha cache entries.")
+	argComponentShaCacheJitter              = flag.String("component-sha-cache-jitter", defaultComponentShaCacheJitter, "Randomly selected jitter time up to the provided duration will be added to the component sha cache TTL.")
 	argControllerCacheTTL                   = flag.String("controller-cache-ttl", defaultControllerCacheTTL, "The time to live of console controller cache entries.")
 	argRestoreNamespace                     = flag.String("restore-namespace", defaultRestoreNamespace, "The namespace where Velero restores are located.")
 	argServices                             = flag.String("services", "", "A comma separated list of service ids to reconcile. Leave empty to reconcile all.")
@@ -158,6 +165,7 @@ var (
 	argClusterPingInterval                  = flag.String("cluster-ping-interval", defaultClusterPingInterval, "Time interval to ping cluster.")
 	argRuntimeServicePingInterval           = flag.String("runtime-service-ping-interval", defaultRuntimeServicePingInterval, "Time interval to register runtime services.")
 	argStackPollInterval                    = flag.String("stack-poll-interval", defaultStackPollInterval, "Time interval to poll stack resources from the Console API. Use '0s' to disable.")
+	argSentinelPollInterval                 = flag.String("sentinel-poll-interval", defaultSentinelPollInterval, "Time interval to poll sentinel run jobs from the Console API. Use '0s' to disable.")
 	argPipelineGatesPollInterval            = flag.String("pipline-gates-poll-interval", defaultPipelineGatesPollInterval, "Time interval to poll PipelineGates resources from the Console API. It's disabled by default.")
 	argDisableWebsocket                     = flag.Bool("disable-websocket", false, "Disable the cluster websocket connection to the Console.")
 	argDiscoveryCacheRefreshInterval        = flag.String("discovery-cache-refresh-interval", defaultDiscoveryCacheRefreshInterval, "Time interval to refresh discovery cache.")
@@ -382,6 +390,16 @@ func ComponentShaCacheTTL() time.Duration {
 	return duration
 }
 
+func ComponentShaCacheJitter() time.Duration {
+	jitter, err := time.ParseDuration(*argComponentShaCacheJitter)
+	if err != nil {
+		klog.ErrorS(err, "Could not parse component-sha-cache-jitter", "value", *argComponentShaCacheJitter, "default", defaultComponentShaCacheJitterDuration)
+		return defaultComponentShaCacheJitterDuration
+	}
+
+	return jitter
+}
+
 func ControllerCacheTTL() time.Duration {
 	duration, err := time.ParseDuration(*argControllerCacheTTL)
 	if err != nil {
@@ -504,6 +522,16 @@ func StackPollInterval() time.Duration {
 	return duration
 }
 
+func SentinelPollInterval() time.Duration {
+	duration, err := time.ParseDuration(*argSentinelPollInterval)
+	if err != nil {
+		klog.ErrorS(err, "Could not parse sentinel-poll-interval", "value", *argSentinelPollInterval, "default", defaultSentinelPollInterval)
+		return defaultSentinelPollIntervalDuration
+	}
+
+	return duration
+}
+
 func PipelineGatesInterval() time.Duration {
 	duration, err := time.ParseDuration(*argPipelineGatesPollInterval)
 	if err != nil {
@@ -523,6 +551,7 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	clusterPingInterval := ClusterPingInterval().String()
 	compatibilityUploadInterval := RuntimeServicesPingInterval().String()
 	stackPollInterval := StackPollInterval().String()
+	sentinelPollInterval := SentinelPollInterval().String()
 	pipelineGateInterval := PipelineGatesInterval().String()
 	disableWebsocket := DisableWebsocket()
 
@@ -531,6 +560,7 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 		ClusterPingInterval:         &clusterPingInterval,
 		CompatibilityUploadInterval: &compatibilityUploadInterval,
 		StackPollInterval:           &stackPollInterval,
+		SentinelPollInterval:        &sentinelPollInterval,
 		PipelineGateInterval:        &pipelineGateInterval,
 		DisableWebsocket:            &disableWebsocket,
 	}
