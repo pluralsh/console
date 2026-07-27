@@ -861,6 +861,7 @@ defmodule Console.Deployments.Workbenches do
     |> when_ok(fn activity ->
       WorkbenchJobActivity.changeset(activity, %{
         status: :cancelled,
+        user_id: user.id,
         result: %{output: reason || "Execution rejected by user"}
       })
     end)

@@ -131,7 +131,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
     from(a in query, order_by: ^order)
   end
 
-  @valid ~w(status type prompt workbench_job_id agent_run_id)a
+  @valid ~w(status type prompt workbench_job_id agent_run_id user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

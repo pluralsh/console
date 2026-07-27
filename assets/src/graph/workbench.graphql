@@ -468,6 +468,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  user {
+    ...UserTiny
+  }
   result {
     ...WorkbenchJobActivityResult
   }
@@ -1278,6 +1281,9 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  user {
+    ...UserTiny
+  }
   result {
     output
     error
