@@ -109,8 +109,9 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	if !globalService.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(globalService)
+	result, err := r.addOrRemoveFinalizer(globalService)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
 
 	if globalService.Spec.ServiceRef == nil && globalService.Spec.Template == nil {
@@ -172,7 +173,6 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 	if existingGlobalService == nil {
-		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
 		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
 			return common.HandleRequeue(nil, err, globalService.SetCondition)
 		}
@@ -274,22 +274,27 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 	return nil
 }
 
-func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) error {
-	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
+func (r *GlobalServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.GlobalService) (*ctrl.Result, error) {
+	if service.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
+		controllerutil.AddFinalizer(service, GlobalServiceFinalizer)
+	}
+
+	if !service.DeletionTimestamp.IsZero() {
 		existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(service.ConsoleName())
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return err
+			return nil, err
 		}
 		if existingGlobalService != nil {
 			if err := r.ConsoleClient.DeleteGlobalService(existingGlobalService.ID); err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return err
+				return nil, err
 			}
 		}
 		controllerutil.RemoveFinalizer(service, GlobalServiceFinalizer)
+		return &ctrl.Result{}, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func (r *GlobalServiceReconciler) addConfigurationSecretRefs(ctx context.Context, globalService *v1alpha1.GlobalService) error {
