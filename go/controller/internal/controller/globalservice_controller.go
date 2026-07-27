@@ -109,8 +109,9 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	if !globalService.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(globalService)
+	result, err := r.addOrRemoveFinalizer(globalService)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
 
 	if globalService.Spec.ServiceRef == nil && globalService.Spec.Template == nil {
@@ -127,38 +128,10 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
 
-	attr := globalService.Attributes(project.Status.ID)
-
-	if id, ok := globalService.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
-		attr.ParentID = lo.ToPtr(id)
+	attr, result, err := r.attributes(ctx, globalService, project.Status.ID)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
-
-	if globalService.Spec.Template != nil {
-		repositoryID, err := r.getRepositoryID(ctx, globalService)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		st, err := common.ServiceTemplateAttributes(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repositoryID)
-		if err != nil {
-			return common.HandleRequeue(nil, err, globalService.SetCondition)
-		}
-
-		if st.Name == nil {
-			st.Name = lo.ToPtr(globalService.GetName())
-		}
-
-		if st.Namespace == nil {
-			st.Namespace = lo.ToPtr(globalService.GetNamespace())
-		}
-
-		attr.Template = st
-
-		if err := r.addConfigurationSecretRefs(ctx, globalService); err != nil {
-			return common.HandleRequeue(nil, err, globalService.SetCondition)
-		}
-	}
-
-	attr.IgnoreClusters = r.ignoreClusters(ctx, globalService)
 
 	sha, err := utils.HashObject(attr)
 	if err != nil {
@@ -166,28 +139,9 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(globalService.ConsoleName())
-	if err != nil && !errors.IsNotFound(err) {
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-	if existingGlobalService == nil {
-		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
-		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
-			return common.HandleRequeue(nil, err, globalService.SetCondition)
-		}
-		existingGlobalService, err = r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
-		if err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
-	}
-
-	if !globalService.Status.IsSHAEqual(sha) {
-		_, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr)
-		if err != nil {
-			return common.HandleRequeue(nil, err, globalService.SetCondition)
-		}
+	existingGlobalService, result, err := r.sync(sha, globalService, service, attr)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, globalService.SetCondition)
 	}
 
 	if err := r.addServiceControllerRef(ctx, service, globalService); err != nil {
@@ -200,6 +154,66 @@ func (r *GlobalServiceReconciler) Process(ctx context.Context, req ctrl.Request)
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return globalService.Spec.Reconciliation.Requeue(), nil
+}
+
+func (r *GlobalServiceReconciler) attributes(ctx context.Context, globalService *v1alpha1.GlobalService, projectID *string) (console.GlobalServiceAttributes, *ctrl.Result, error) {
+	attr := globalService.Attributes(projectID)
+
+	if id, ok := globalService.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
+		attr.ParentID = lo.ToPtr(id)
+	}
+
+	if globalService.Spec.Template != nil {
+		repositoryID, err := r.getRepositoryID(ctx, globalService)
+		if err != nil {
+			return attr, nil, err
+		}
+		st, err := common.ServiceTemplateAttributes(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repositoryID)
+		if err != nil {
+			return attr, nil, err
+		}
+
+		if st.Name == nil {
+			st.Name = lo.ToPtr(globalService.GetName())
+		}
+		if st.Namespace == nil {
+			st.Namespace = lo.ToPtr(globalService.GetNamespace())
+		}
+		attr.Template = st
+
+		if err := r.addConfigurationSecretRefs(ctx, globalService); err != nil {
+			return attr, nil, err
+		}
+	}
+
+	attr.IgnoreClusters = r.ignoreClusters(ctx, globalService)
+	return attr, nil, nil
+}
+
+func (r *GlobalServiceReconciler) sync(sha string, globalService *v1alpha1.GlobalService, service *v1alpha1.ServiceDeployment, attr console.GlobalServiceAttributes) (*console.GlobalServiceFragment, *ctrl.Result, error) {
+	existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(globalService.ConsoleName())
+	if err != nil && !errors.IsNotFound(err) {
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return nil, nil, err
+	}
+	if existingGlobalService == nil {
+		if err := r.handleCreate(sha, globalService, service, attr); err != nil {
+			return nil, nil, err
+		}
+		existingGlobalService, err = r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
+		if err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return nil, nil, err
+		}
+	}
+
+	if !globalService.Status.IsSHAEqual(sha) {
+		if _, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr); err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return existingGlobalService, nil, nil
 }
 
 func (r *GlobalServiceReconciler) addServiceControllerRef(ctx context.Context, service *v1alpha1.ServiceDeployment, globalService *v1alpha1.GlobalService) error {
@@ -274,22 +288,27 @@ func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.Glob
 	return nil
 }
 
-func (r *GlobalServiceReconciler) handleDelete(service *v1alpha1.GlobalService) error {
-	if controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
+func (r *GlobalServiceReconciler) addOrRemoveFinalizer(service *v1alpha1.GlobalService) (*ctrl.Result, error) {
+	if service.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, GlobalServiceFinalizer) {
+		controllerutil.AddFinalizer(service, GlobalServiceFinalizer)
+	}
+
+	if !service.DeletionTimestamp.IsZero() {
 		existingGlobalService, err := r.ConsoleClient.GetGlobalServiceByName(service.ConsoleName())
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return err
+			return nil, err
 		}
 		if existingGlobalService != nil {
 			if err := r.ConsoleClient.DeleteGlobalService(existingGlobalService.ID); err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return err
+				return nil, err
 			}
 		}
 		controllerutil.RemoveFinalizer(service, GlobalServiceFinalizer)
+		return &ctrl.Result{}, nil
 	}
-	return nil
+	return nil, nil
 }
 
 func (r *GlobalServiceReconciler) addConfigurationSecretRefs(ctx context.Context, globalService *v1alpha1.GlobalService) error {
