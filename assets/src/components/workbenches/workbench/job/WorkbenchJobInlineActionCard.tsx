@@ -31,6 +31,7 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
+import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
 
 export function WorkbenchJobInlineActionCard({
@@ -48,7 +49,8 @@ export function WorkbenchJobInlineActionCard({
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const inputJson = getActionInputJson(activity)
-  const resultJson = getActionResultJson(activity)
+  const isDenied = activity.status === WorkbenchJobActivityStatus.Cancelled
+  const resultJson = isDenied ? '' : getActionResultJson(activity)
   const icon = getActionIcon(activity)
 
   const refetchQueries = [
@@ -148,9 +150,7 @@ export function WorkbenchJobInlineActionCard({
               <CaptionP $color="text-xlight">
                 {activity.status === WorkbenchJobActivityStatus.Failed
                   ? 'ERROR'
-                  : activity.status === WorkbenchJobActivityStatus.Cancelled
-                    ? 'REASON'
-                    : 'RESULT'}
+                  : 'RESULT'}
               </CaptionP>
               <Code
                 language="json"
@@ -160,6 +160,7 @@ export function WorkbenchJobInlineActionCard({
               </Code>
             </ActionData>
           )}
+          <WorkbenchJobActionDenialResult activity={activity} />
           {needsApproval && (
             <ApprovalActionsSC>
               <Button

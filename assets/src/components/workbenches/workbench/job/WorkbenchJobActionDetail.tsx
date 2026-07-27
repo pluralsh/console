@@ -27,6 +27,7 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
+import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
 
 export function WorkbenchJobActionDetail({
@@ -44,7 +45,8 @@ export function WorkbenchJobActionDetail({
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const icon = getActionIcon(activity)
   const inputJson = getActionInputJson(activity)
-  const resultJson = getActionResultJson(activity)
+  const isDenied = activity.status === WorkbenchJobActivityStatus.Cancelled
+  const resultJson = isDenied ? '' : getActionResultJson(activity)
 
   const [approve, { loading: approving }] =
     useApproveWorkbenchJobActivityMutation({
@@ -149,9 +151,7 @@ export function WorkbenchJobActionDetail({
           <CaptionP $color="text-xlight">
             {activity.status === WorkbenchJobActivityStatus.Failed
               ? 'ERROR'
-              : activity.status === WorkbenchJobActivityStatus.Cancelled
-                ? 'REASON'
-                : 'RESULT'}
+              : 'RESULT'}
           </CaptionP>
           <Code
             language="json"
@@ -161,6 +161,8 @@ export function WorkbenchJobActionDetail({
           </Code>
         </Flex>
       )}
+
+      <WorkbenchJobActionDenialResult activity={activity} />
 
       {needsApproval && (
         <ActionsRowSC>
