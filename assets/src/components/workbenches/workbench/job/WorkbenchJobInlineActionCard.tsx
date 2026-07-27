@@ -47,9 +47,6 @@ export function WorkbenchJobInlineActionCard({
   const [denyReason, setDenyReason] = useState('')
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
-  const isRunning =
-    activity.status === WorkbenchJobActivityStatus.Pending ||
-    activity.status === WorkbenchJobActivityStatus.Running
   const inputJson = getActionInputJson(activity)
   const resultJson = getActionResultJson(activity)
   const icon = getActionIcon(activity)
@@ -57,7 +54,7 @@ export function WorkbenchJobInlineActionCard({
   const refetchQueries = [
     'WorkbenchJobActivities',
     'WorkbenchJobActions',
-    'WorkbenchJobPendingActions',
+    'WorkbenchJobActionSummary',
   ]
   const [approve, { loading: approving }] =
     useApproveWorkbenchJobActivityMutation({

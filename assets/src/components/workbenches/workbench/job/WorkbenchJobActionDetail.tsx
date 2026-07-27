@@ -51,7 +51,7 @@ export function WorkbenchJobActionDetail({
       variables: { id: activity.id },
       onCompleted: onBack,
       onError: (err) => setError(err.message),
-      refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobPendingActions'],
+      refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobActionSummary'],
     })
 
   const [reject, { loading: rejecting, error: rejectError }] =
@@ -61,7 +61,7 @@ export function WorkbenchJobActionDetail({
         setDenyReason('')
         onBack()
       },
-      refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobPendingActions'],
+      refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobActionSummary'],
     })
 
   const closeDenyModal = () => {

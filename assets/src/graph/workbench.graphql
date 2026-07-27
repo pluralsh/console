@@ -1245,14 +1245,13 @@ query WorkbenchJobActivities($id: ID!) {
   }
 }
 
-query WorkbenchJobPendingActions($id: ID!, $first: Int = 1) {
+query WorkbenchJobActionSummary($id: ID!, $first: Int = 1) {
   workbenchJob(id: $id) {
     id
     pendingActions: activities(first: $first, status: NEEDS_APPROVAL) {
       edges {
         node {
           id
-          type
         }
       }
     }

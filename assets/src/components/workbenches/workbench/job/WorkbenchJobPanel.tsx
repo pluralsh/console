@@ -15,7 +15,6 @@ import {
   PanelHeaderSC,
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   SidePanel,
   useTopLevelSidePanel,
@@ -25,9 +24,7 @@ import {
   AgentRunStatus,
   PullRequestBasicFragment,
   useWorkbenchJobActivitiesQuery,
-  useWorkbenchJobPendingActionsQuery,
   useWorkbenchJobQuery,
-  WorkbenchJobActivityType,
   WorkbenchJobFragment,
 } from 'generated/graphql'
 import { isEmpty, isNil, uniqBy } from 'lodash'
@@ -60,6 +57,7 @@ import {
 } from './WorkbenchJobResult'
 import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
 import { WorkbenchJobUsage } from './WorkbenchJobUsage'
+import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
@@ -93,12 +91,11 @@ export function WorkbenchJobPanelContent() {
     variables: { id: jobId },
     fetchPolicy: 'cache-first',
   })
-  const { data: pendingActionsData } = useWorkbenchJobPendingActionsQuery({
-    skip: !jobId,
-    variables: { id: jobId },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
+  const {
+    hasActions,
+    hasActionsAwaitingApproval,
+    isLoading: areActionsLoading,
+  } = useWorkbenchJobActionSummary(jobId)
   const job = data?.workbenchJob
   const isLoading = loading && !job
   const activities = useMemo(
@@ -157,23 +154,6 @@ export function WorkbenchJobPanelContent() {
     return [...agentRunDrafts, ...patchPrDrafts]
   }, [activities, pullRequests])
   const hasDraftPrsAwaitingApproval = draftPrs.length > 0
-  const actionTypes = new Set([
-    WorkbenchJobActivityType.Function,
-    WorkbenchJobActivityType.Kubernetes,
-  ])
-  const hasActions =
-    (pendingActionsData?.workbenchJob?.functionActions?.edges ?? []).some(
-      (edge) => !!edge?.node?.id
-    ) ||
-    (pendingActionsData?.workbenchJob?.kubernetesActions?.edges ?? []).some(
-      (edge) => !!edge?.node?.id
-    )
-  const hasActionsAwaitingApproval = (
-    pendingActionsData?.workbenchJob?.pendingActions?.edges ?? []
-  ).some(
-    (edge) =>
-      !!edge?.node?.id && !!edge.node.type && actionTypes.has(edge.node.type)
-  )
 
   const tabs = useMemo(
     () =>
@@ -200,8 +180,9 @@ export function WorkbenchJobPanelContent() {
   }, [selectedTab, tabs])
 
   useEffect(() => {
-    if (!isLoading && job && isEmpty(tabs)) setOpen(false)
-  }, [isLoading, job, setOpen, tabs])
+    if (isLoading || areActionsLoading) return
+    if (job && isEmpty(tabs)) setOpen(false)
+  }, [areActionsLoading, isLoading, job, setOpen, tabs])
 
   return (
     <SidePanelContent>

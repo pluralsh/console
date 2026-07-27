@@ -37,7 +37,8 @@ export function hasWorkbenchJobResultContent(
 }
 
 export function hasWorkbenchJobPanelContent(
-  job: Nullable<WorkbenchJobFragment>
+  job: Nullable<WorkbenchJobFragment>,
+  hasActions = false
 ) {
   return (
     hasWorkbenchJobResultContent(job) ||
@@ -45,6 +46,7 @@ export function hasWorkbenchJobPanelContent(
     !!job?.result?.topology ||
     !isEmpty(job?.pullRequests) ||
     !!job?.evalResult ||
-    !!job?.usage
+    !!job?.usage ||
+    hasActions
   )
 }
