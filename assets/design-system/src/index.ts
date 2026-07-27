@@ -181,8 +181,14 @@ export * from './components/TreeNavigation'
 // Theme
 export { default as GlobalStyle } from './GlobalStyle'
 export {
+  DEFAULT_SCALE_PRESET_ID,
+  SCALE_PRESET_IDS,
+  getHonorableTheme,
+  getStyledTheme,
   honorableThemeDark,
   honorableThemeLight,
+  isScalePresetId,
+  scalePresets,
   setThemeColorMode,
   styledTheme,
   styledThemeDark,
@@ -190,6 +196,13 @@ export {
   honorableThemeDark as theme,
   useThemeColorMode,
 } from './theme'
+export type { ScalePresetId } from './theme'
+export {
+  DevScaleLabToggle,
+  ScalePresetProvider,
+  useScalePreset,
+} from './components/contexts/ScalePresetContext'
+export { useScaledThemes } from './hooks/useScaledThemes'
 export type { SemanticBorderKey } from './theme/borders'
 export { green, orange } from './theme/colors-base'
 export { semanticColorCssVars, semanticColorKeys } from './theme/colors'

@@ -1,9 +1,10 @@
 import { FC, ReactNode } from 'react'
 
 import { CssBaseline, ThemeProvider, ThemeProviderProps } from 'honorable'
-import { honorableThemeDark, honorableThemeLight, useThemeColorMode } from '..'
 
-// workarounds for broken type from honorable
+import { useScalePreset } from '../components/contexts/ScalePresetContext'
+import { useScaledThemes } from '../hooks/useScaledThemes'
+
 const TypedHonorableThemeProvider = ThemeProvider as FC<ThemeProviderProps>
 const TypedCssBaseline = CssBaseline as any
 
@@ -12,10 +13,8 @@ export default function HonorableThemeProvider({
 }: {
   children: ReactNode
 }) {
-  const colorMode = useThemeColorMode()
-
-  const honorableTheme =
-    colorMode === 'light' ? honorableThemeLight : honorableThemeDark
+  const { scaleId } = useScalePreset()
+  const { honorableTheme } = useScaledThemes(scaleId)
 
   return (
     <TypedHonorableThemeProvider theme={honorableTheme}>

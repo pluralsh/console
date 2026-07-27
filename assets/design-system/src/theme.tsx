@@ -6,12 +6,8 @@ import { useState } from 'react'
 
 import { useMutationObserver } from '@react-hooks-library/core'
 
-import {
-  borderRadiuses,
-  borderStyles,
-  borderWidths,
-  borders,
-} from './theme/borders'
+import { getBorderRadiusesForScale } from './theme/borders'
+import { borderStyles, borderWidths, borders } from './theme/borders'
 import { getBoxShadows } from './theme/boxShadows'
 import { baseColors } from './theme/colors-base'
 import { semanticColorsDark } from './theme/colors-semantic-dark'
@@ -22,8 +18,13 @@ import gradients from './theme/gradients'
 import { marketingTextPartials } from './theme/marketingText'
 import { resetPartials } from './theme/resets'
 import { scrollBar } from './theme/scrollBar'
-import { spacing } from './theme/spacing'
-import { textPartials } from './theme/text'
+import { getIconSizesForScale } from './theme/iconSizes'
+import {
+  DEFAULT_SCALE_PRESET_ID,
+  type ScalePresetId,
+} from './theme/scale-presets'
+import { getSpacingForScale } from './theme/spacing'
+import { getTextPartialsForScale } from './theme/text-scales'
 import { visuallyHidden } from './theme/visuallyHidden'
 import { zIndexes } from './theme/zIndexes'
 
@@ -83,14 +84,23 @@ const getBaseTheme = ({ mode }: { mode: ColorMode }) =>
 
 // remove any unused themes as we transition off honorable
 // ultimately we'll be able to get rid of this entirely
-const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
+const getHonorableThemeProps = ({
+  mode,
+  scaleId = DEFAULT_SCALE_PRESET_ID,
+}: {
+  mode: ColorMode
+  scaleId?: ScalePresetId
+}) => {
   const boxShadows = getBoxShadows({ mode })
+  const scaleSpacing = getSpacingForScale(scaleId)
+  const scaleBorderRadiuses = getBorderRadiusesForScale(scaleId)
+  const scaleTextPartials = getTextPartialsForScale(scaleId)
 
   return {
     stylesheet: {
       html: [
         {
-          fontSize: 14,
+          fontSize: scaleTextPartials.body2.fontSize,
           fontFamily: fontFamilies.sans,
           backgroundColor: 'fill-zero',
         },
@@ -99,7 +109,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
     },
     global: [
       /* Spacing */
-      mapperRecipe('gap', spacing),
+      mapperRecipe('gap', scaleSpacing),
       ...Object.entries(spacers).map(
         ([key, nextKeys]) =>
           (props: any) =>
@@ -108,40 +118,40 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             Object.fromEntries(
               nextKeys.map((nextKey) => [
                 nextKey,
-                (spacing as any)[props[key]] || props[key],
+                (scaleSpacing as any)[props[key]] || props[key],
               ])
             )
       ),
       /* Border radiuses */
-      mapperRecipe('borderRadius', borderRadiuses),
+      mapperRecipe('borderRadius', scaleBorderRadiuses),
       /* Shadows */
       mapperRecipe('boxShadow', boxShadows),
       /* Texts */
-      ({ h1 }: any) => h1 && textPartials.h1,
-      ({ h2 }: any) => h2 && textPartials.h2,
-      ({ h3 }: any) => h3 && textPartials.h3,
-      ({ h4 }: any) => h4 && textPartials.h4,
-      ({ title1 }: any) => title1 && textPartials.title1,
-      ({ title2 }: any) => title2 && textPartials.title2,
-      ({ subtitle1 }: any) => subtitle1 && textPartials.subtitle1,
-      ({ subtitle2 }: any) => subtitle2 && textPartials.subtitle2,
+      ({ h1 }: any) => h1 && scaleTextPartials.h1,
+      ({ h2 }: any) => h2 && scaleTextPartials.h2,
+      ({ h3 }: any) => h3 && scaleTextPartials.h3,
+      ({ h4 }: any) => h4 && scaleTextPartials.h4,
+      ({ title1 }: any) => title1 && scaleTextPartials.title1,
+      ({ title2 }: any) => title2 && scaleTextPartials.title2,
+      ({ subtitle1 }: any) => subtitle1 && scaleTextPartials.subtitle1,
+      ({ subtitle2 }: any) => subtitle2 && scaleTextPartials.subtitle2,
       ({ body1, body2, bold }: any) => ({
-        ...(body1 && textPartials.body1),
-        ...(body2 && textPartials.body2),
-        ...((body1 || body2) && bold && textPartials.bodyBold),
+        ...(body1 && scaleTextPartials.body1),
+        ...(body2 && scaleTextPartials.body2),
+        ...((body1 || body2) && bold && scaleTextPartials.bodyBold),
       }),
       ({ body2LooseLineHeight, bold }: any) => ({
-        ...(body2LooseLineHeight && textPartials.body2LooseLineHeight),
-        ...(body2LooseLineHeight && bold && textPartials.bodyBold),
+        ...(body2LooseLineHeight && scaleTextPartials.body2LooseLineHeight),
+        ...(body2LooseLineHeight && bold && scaleTextPartials.bodyBold),
       }),
-      ({ caption }: any) => caption && textPartials.caption,
-      ({ overline }: any) => overline && textPartials.overline,
-      ({ truncate }: any) => truncate && textPartials.truncate,
+      ({ caption }: any) => caption && scaleTextPartials.caption,
+      ({ overline }: any) => overline && scaleTextPartials.overline,
+      ({ truncate }: any) => truncate && scaleTextPartials.truncate,
     ],
     A: {
       Root: [
         { color: 'text' },
-        ({ inline }: any) => inline && textPartials.inlineLink,
+        ({ inline }: any) => inline && scaleTextPartials.inlineLink,
       ],
     },
     Avatar: {
@@ -305,25 +315,39 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
   }
 }
 
-export const honorableThemeDark = mergeTheme(defaultTheme, {
-  ...getBaseTheme({ mode: 'dark' }),
-  colors: colorsDark,
-  ...getHonorableThemeProps({ mode: 'dark' }),
-})
+export function getHonorableTheme({
+  mode,
+  scaleId = DEFAULT_SCALE_PRESET_ID,
+}: {
+  mode: ColorMode
+  scaleId?: ScalePresetId
+}) {
+  return mergeTheme(defaultTheme, {
+    ...getBaseTheme({ mode }),
+    colors: mode === 'dark' ? colorsDark : colorsLight,
+    ...getHonorableThemeProps({ mode, scaleId }),
+  })
+}
 
-export const honorableThemeLight = mergeTheme(defaultTheme, {
-  ...getBaseTheme({ mode: 'light' }),
-  colors: colorsLight,
-  ...getHonorableThemeProps({ mode: 'light' }),
-})
+export const honorableThemeDark = getHonorableTheme({ mode: 'dark' })
 
-const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
+export const honorableThemeLight = getHonorableTheme({ mode: 'light' })
+
+export const getStyledTheme = ({
+  mode,
+  scaleId = DEFAULT_SCALE_PRESET_ID,
+}: {
+  mode: ColorMode
+  scaleId?: ScalePresetId
+}) =>
   ({
     ...getBaseTheme({ mode }),
     ...{
-      spacing,
+      scaleId,
+      spacing: getSpacingForScale(scaleId),
+      iconSizes: getIconSizesForScale(scaleId),
       boxShadows: getBoxShadows({ mode }),
-      borderRadiuses,
+      borderRadiuses: getBorderRadiusesForScale(scaleId),
       fontFamilies,
       borders,
       borderStyles,
@@ -332,7 +356,7 @@ const getStyledTheme = ({ mode }: { mode: ColorMode }) =>
       portals,
       gradients,
       partials: {
-        text: textPartials,
+        text: getTextPartialsForScale(scaleId),
         marketingText: marketingTextPartials,
         focus: getFocusPartials(),
         scrollBar,
@@ -355,6 +379,14 @@ export const styledThemeLight = {
   ...getStyledTheme({ mode: 'light' }),
   colors: colorsLight,
 } as const
+
+export {
+  DEFAULT_SCALE_PRESET_ID,
+  SCALE_PRESET_IDS,
+  isScalePresetId,
+  scalePresets,
+} from './theme/scale-presets'
+export type { ScalePresetId } from './theme/scale-presets'
 
 // Deprecate these later?
 export const styledTheme = styledThemeDark

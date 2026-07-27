@@ -4,6 +4,9 @@ import {
   useTheme,
 } from 'honorable'
 import { type ReactNode } from 'react'
+import { useTheme as useStyledTheme } from 'styled-components'
+
+import { DEFAULT_ICON_SIZE } from '../../theme/iconSizes'
 
 type IconBaseProps = {
   size?: number | string
@@ -18,14 +21,17 @@ export type IconProps = HonorableIconProps & IconBaseProps
 function createIcon(render: (props: IconBaseProps) => ReactNode) {
   function Icon({
     ref,
-    size = 16,
+    size,
     color = 'currentColor',
     fullColor,
     secondaryColor,
     ...props
   }: IconProps) {
     const theme = useTheme()
+    const styledTheme = useStyledTheme()
     const workingColor = theme.utils?.resolveColorString(color)
+    const resolvedSize =
+      size ?? styledTheme.iconSizes?.medium ?? DEFAULT_ICON_SIZE
 
     return (
       <HonorableIcon
@@ -35,7 +41,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
         {...props}
       >
         {render({
-          size,
+          size: resolvedSize,
           color: workingColor,
           secondaryColor,
           fullColor,

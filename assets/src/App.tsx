@@ -2,10 +2,12 @@ import { ApolloProvider } from '@apollo/client'
 
 import { loadDevMessages, loadErrorMessages } from '@apollo/client/dev'
 import {
+  DevScaleLabToggle,
   GlobalStyle,
   HonorableThemeProvider,
-  styledThemeDark,
-  styledThemeLight,
+  ScalePresetProvider,
+  useScalePreset,
+  useScaledThemes,
   useThemeColorMode,
 } from '@pluralsh/design-system'
 import * as Sentry from '@sentry/react'
@@ -36,22 +38,26 @@ const sentryCreateBrowserRouter =
 const router = sentryCreateBrowserRouter(rootRoutes)
 const queryClient = new QueryClient()
 
+const isDev = import.meta.env.DEV
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ApolloProvider client={client}>
-        <ThemeProviders>
-          <RouterProvider router={router} />
-        </ThemeProviders>
+        <ScalePresetProvider switcherEnabled={isDev}>
+          <ThemeProviders>
+            <RouterProvider router={router} />
+          </ThemeProviders>
+        </ScalePresetProvider>
       </ApolloProvider>
     </QueryClientProvider>
   )
 }
 
 function ThemeProviders({ children }: { children: ReactNode }) {
-  const colorMode = useThemeColorMode()
-
-  const styledTheme = colorMode === 'light' ? styledThemeLight : styledThemeDark
+  useThemeColorMode()
+  const { scaleId } = useScalePreset()
+  const { styledTheme } = useScaledThemes(scaleId)
 
   return (
     <StyleSheetManager shouldForwardProp={shouldForwardProp}>
@@ -60,6 +66,7 @@ function ThemeProviders({ children }: { children: ReactNode }) {
           <GlobalStyle />
           <DocSearchStyles />
           <PluralErrorBoundary>{children}</PluralErrorBoundary>
+          {isDev && <DevScaleLabToggle />}
         </HonorableThemeProvider>
       </StyledThemeProvider>
     </StyleSheetManager>
