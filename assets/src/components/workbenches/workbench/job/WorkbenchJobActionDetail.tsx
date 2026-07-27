@@ -148,14 +148,15 @@ export function WorkbenchJobActionDetail({
           direction="column"
           gap="xsmall"
         >
-          <CaptionP $color="text-xlight">
-            {activity.status === WorkbenchJobActivityStatus.Failed
-              ? 'ERROR'
-              : 'RESULT'}
-          </CaptionP>
+          <CaptionP $color="text-xlight">RESULT</CaptionP>
           <Code
             language="json"
             showHeader={false}
+            css={
+              activity.status === WorkbenchJobActivityStatus.Failed
+                ? { borderColor: theme.colors['border-danger'] }
+                : undefined
+            }
           >
             {resultJson}
           </Code>
