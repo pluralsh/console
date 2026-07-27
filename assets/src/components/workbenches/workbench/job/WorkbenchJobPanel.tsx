@@ -27,6 +27,7 @@ import {
   useWorkbenchJobActivitiesQuery,
   useWorkbenchJobPendingActionsQuery,
   useWorkbenchJobQuery,
+  WorkbenchJobActivityType,
   WorkbenchJobFragment,
 } from 'generated/graphql'
 import { isEmpty, isNil, uniqBy } from 'lodash'
@@ -156,19 +157,40 @@ export function WorkbenchJobPanelContent() {
     return [...agentRunDrafts, ...patchPrDrafts]
   }, [activities, pullRequests])
   const hasDraftPrsAwaitingApproval = draftPrs.length > 0
+  const actionTypes = new Set([
+    WorkbenchJobActivityType.Function,
+    WorkbenchJobActivityType.Kubernetes,
+  ])
+  const hasActions =
+    (pendingActionsData?.workbenchJob?.functionActions?.edges ?? []).some(
+      (edge) => !!edge?.node?.id
+    ) ||
+    (pendingActionsData?.workbenchJob?.kubernetesActions?.edges ?? []).some(
+      (edge) => !!edge?.node?.id
+    )
   const hasActionsAwaitingApproval = (
-    pendingActionsData?.workbenchJob?.activities?.edges ?? []
-  ).some((edge) => !!edge?.node?.id)
+    pendingActionsData?.workbenchJob?.pendingActions?.edges ?? []
+  ).some(
+    (edge) =>
+      !!edge?.node?.id && !!edge.node.type && actionTypes.has(edge.node.type)
+  )
 
   const tabs = useMemo(
     () =>
       getPanelTabs(
         job,
         hasDraftPrsAwaitingApproval,
+        hasActions,
         hasActionsAwaitingApproval,
         isLoading
       ),
-    [hasActionsAwaitingApproval, hasDraftPrsAwaitingApproval, isLoading, job]
+    [
+      hasActions,
+      hasActionsAwaitingApproval,
+      hasDraftPrsAwaitingApproval,
+      isLoading,
+      job,
+    ]
   )
 
   useEffect(() => {
@@ -329,6 +351,7 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
 const getPanelTabs = (
   job: Nullable<WorkbenchJobFragment>,
   hasDraftPrsAwaitingApproval: boolean,
+  hasActions: boolean,
   hasActionsAwaitingApproval: boolean,
   isLoading: boolean
 ) =>
@@ -358,7 +381,7 @@ const getPanelTabs = (
       label: 'Usage',
       icon: <CostManagementIcon size={12} />,
     },
-    {
+    hasActions && {
       label: 'Actions',
       icon: <LightningIcon size={12} />,
       showDot: hasActionsAwaitingApproval,

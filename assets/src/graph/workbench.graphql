@@ -1237,7 +1237,22 @@ query WorkbenchJobActivities($id: ID!) {
 query WorkbenchJobPendingActions($id: ID!, $first: Int = 1) {
   workbenchJob(id: $id) {
     id
-    activities(first: $first, status: NEEDS_APPROVAL) {
+    pendingActions: activities(first: $first, status: NEEDS_APPROVAL) {
+      edges {
+        node {
+          id
+          type
+        }
+      }
+    }
+    functionActions: activities(first: $first, type: FUNCTION) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    kubernetesActions: activities(first: $first, type: KUBERNETES) {
       edges {
         node {
           id

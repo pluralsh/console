@@ -21446,7 +21446,7 @@ export type WorkbenchJobPendingActionsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobPendingActionsQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null } | null } | null };
+export type WorkbenchJobPendingActionsQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, pendingActions?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null } | null } | null> | null } | null, functionActions?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null } | null, kubernetesActions?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobActionFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, body?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null } | null };
 
@@ -45383,7 +45383,22 @@ export const WorkbenchJobPendingActionsDocument = gql`
     query WorkbenchJobPendingActions($id: ID!, $first: Int = 1) {
   workbenchJob(id: $id) {
     id
-    activities(first: $first, status: NEEDS_APPROVAL) {
+    pendingActions: activities(first: $first, status: NEEDS_APPROVAL) {
+      edges {
+        node {
+          id
+          type
+        }
+      }
+    }
+    functionActions: activities(first: $first, type: FUNCTION) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    kubernetesActions: activities(first: $first, type: KUBERNETES) {
       edges {
         node {
           id
