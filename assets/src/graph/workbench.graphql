@@ -414,6 +414,11 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     name
     input
     toolId
+    tool {
+      id
+      name
+      tool
+    }
   }
   kubeRequest {
     handle
@@ -1239,6 +1244,61 @@ query WorkbenchJobPendingActions($id: ID!, $first: Int = 1) {
         }
       }
     }
+  }
+}
+
+fragment WorkbenchJobAction on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  insertedAt
+  result {
+    output
+    error
+    functionCall {
+      name
+      input
+      toolId
+      tool {
+        id
+        name
+        tool
+      }
+    }
+    kubeRequest {
+      handle
+      method
+      path
+      body
+      queryParams
+      contentType
+    }
+  }
+}
+
+query WorkbenchJobActions($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    activities(first: 100) {
+      edges {
+        node {
+          ...WorkbenchJobAction
+        }
+      }
+    }
+  }
+}
+
+mutation ApproveWorkbenchJobActivity($id: ID!) {
+  approveWorkbenchJobActivity(id: $id) {
+    ...WorkbenchJobAction
+  }
+}
+
+mutation RejectWorkbenchJobActivity($id: ID!, $reason: String) {
+  rejectWorkbenchJobActivity(id: $id, reason: $reason) {
+    ...WorkbenchJobAction
   }
 }
 

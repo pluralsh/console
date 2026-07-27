@@ -852,7 +852,7 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Rejects a job activity by setting status to successful and setting the output to the reason.
+  Rejects a job activity by setting status to cancelled and storing the reason as output.
   """
   @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
   def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
@@ -860,7 +860,7 @@ defmodule Console.Deployments.Workbenches do
     |> allow(user, :approve)
     |> when_ok(fn activity ->
       WorkbenchJobActivity.changeset(activity, %{
-        status: :successful,
+        status: :cancelled,
         result: %{output: reason || "Execution rejected by user"}
       })
     end)

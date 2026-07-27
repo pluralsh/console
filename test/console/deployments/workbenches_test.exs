@@ -1405,12 +1405,12 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, updated} = Workbenches.reject_job_activity("too risky", activity.id, user)
 
       assert updated.id == activity.id
-      assert updated.status == :successful
+      assert updated.status == :cancelled
       assert updated.result.output == "too risky"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       reloaded = refetch(activity)
-      assert reloaded.status == :successful
+      assert reloaded.status == :cancelled
       assert reloaded.result.output == "too risky"
     end
 
@@ -1431,7 +1431,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, updated} = Workbenches.reject_job_activity(activity.id, user)
 
       assert updated.id == activity.id
-      assert updated.status == :successful
+      assert updated.status == :cancelled
       assert updated.result.output == "Execution rejected by user"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
     end

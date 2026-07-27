@@ -712,11 +712,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"id" => activity.id, "reason" => "not approved"}, %{current_user: user})
 
       assert updated["id"] == activity.id
-      assert updated["status"] == "SUCCESSFUL"
+      assert updated["status"] == "CANCELLED"
       assert updated["result"]["output"] == "not approved"
 
       reloaded = refetch(activity)
-      assert reloaded.status == :successful
+      assert reloaded.status == :cancelled
       assert reloaded.result.output == "not approved"
     end
   end
