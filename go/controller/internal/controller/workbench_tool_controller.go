@@ -127,8 +127,20 @@ func (in *WorkbenchToolReconciler) Reconcile(ctx context.Context, req reconcile.
 		return common.HandleRequeue(res, err, workbenchTool.SetCondition)
 	}
 
+	// Resolve ScmConnectionRef to get the SCM connection ID.
+	scmConnectionID, res, err := in.resolveScmConnectionRef(ctx, workbenchTool)
+	if res != nil || err != nil {
+		return common.HandleRequeue(res, err, workbenchTool.SetCondition)
+	}
+
+	// Resolve policy bindings.
+	readBindings, writeBindings, err := in.resolveBindings(workbenchTool)
+	if err != nil {
+		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
+	}
+
 	// Sync WorkbenchTool CRD with the Console API
-	apiWorkbenchTool, err := in.sync(ctx, workbenchTool, project, mcpServerID, cloudConnectionID, changed)
+	apiWorkbenchTool, err := in.sync(ctx, workbenchTool, project, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
 	}
@@ -270,7 +282,46 @@ func (in *WorkbenchToolReconciler) resolveCloudConnectionRef(ctx context.Context
 	return cloudConnection.Status.ID, nil, nil
 }
 
-func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, project *v1alpha1.Project, mcpServerID, cloudConnectionID *string, changed bool) (*console.WorkbenchToolFragment, error) {
+func (in *WorkbenchToolReconciler) resolveScmConnectionRef(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool) (*string, *ctrl.Result, error) {
+	ref := workbenchTool.Spec.ScmConnectionRef
+	if ref == nil {
+		return nil, nil, nil
+	}
+
+	scmConnection := &v1alpha1.ScmConnection{}
+	if err := in.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, scmConnection); err != nil {
+		if errors.IsNotFound(err) {
+			return nil, new(common.Wait()), fmt.Errorf("ScmConnection not found: %s", err.Error())
+		}
+		return nil, nil, fmt.Errorf("failed to get ScmConnection: %s", err.Error())
+	}
+
+	if !scmConnection.Status.HasID() {
+		return nil, new(common.Wait()), fmt.Errorf("ScmConnection is not ready")
+	}
+
+	return scmConnection.Status.ID, nil, nil
+}
+
+func (in *WorkbenchToolReconciler) resolveBindings(workbenchTool *v1alpha1.WorkbenchTool) (readBindings, writeBindings []*console.PolicyBindingAttributes, err error) {
+	if workbenchTool.Spec.Bindings == nil {
+		return nil, nil, nil
+	}
+
+	readBindings, err = common.BindingsAttributes(workbenchTool.Spec.Bindings.Read)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	writeBindings, err = common.BindingsAttributes(workbenchTool.Spec.Bindings.Write)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return readBindings, writeBindings, nil
+}
+
+func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, project *v1alpha1.Project, mcpServerID, cloudConnectionID, scmConnectionID *string, readBindings, writeBindings []*console.PolicyBindingAttributes, changed bool) (*console.WorkbenchToolFragment, error) {
 	logger := log.FromContext(ctx)
 
 	existingWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, new(workbenchTool.ConsoleName()))
@@ -279,7 +330,7 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 			return nil, err
 		}
 
-		attrs, err := workbenchTool.Attributes(ctx, in.Client, project.Status.ID, mcpServerID, cloudConnectionID)
+		attrs, err := in.attributes(ctx, workbenchTool, project.Status.ID, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings)
 		if err != nil {
 			return nil, err
 		}
@@ -287,8 +338,8 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 		return in.ConsoleClient.CreateWorkbenchTool(ctx, attrs)
 	}
 
-	if changed || in.cloudConnectionChanged(existingWorkbenchTool, cloudConnectionID) {
-		attrs, err := workbenchTool.Attributes(ctx, in.Client, project.Status.ID, mcpServerID, cloudConnectionID)
+	if changed || in.cloudConnectionChanged(existingWorkbenchTool, cloudConnectionID) || in.scmConnectionChanged(existingWorkbenchTool, scmConnectionID) {
+		attrs, err := in.attributes(ctx, workbenchTool, project.Status.ID, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings)
 		if err != nil {
 			return nil, err
 		}
@@ -299,6 +350,47 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 	return existingWorkbenchTool, nil
 }
 
+func (in *WorkbenchToolReconciler) attributes(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, projectID, mcpServerID, cloudConnectionID, scmConnectionID *string, readBindings, writeBindings []*console.PolicyBindingAttributes) (console.WorkbenchToolAttributes, error) {
+	attrs, err := workbenchTool.Attributes(ctx, in.Client, projectID, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings)
+	if err != nil {
+		return console.WorkbenchToolAttributes{}, err
+	}
+
+	if err := in.attachDockerAuth(ctx, workbenchTool, &attrs); err != nil {
+		return console.WorkbenchToolAttributes{}, err
+	}
+
+	return attrs, nil
+}
+
+func (in *WorkbenchToolReconciler) attachDockerAuth(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, attrs *console.WorkbenchToolAttributes) error {
+	if workbenchTool.Spec.Configuration == nil || workbenchTool.Spec.Configuration.Docker == nil {
+		return nil
+	}
+
+	docker := workbenchTool.Spec.Configuration.Docker
+	authHelper := &HelmRepositoryAuth{Client: in.Client, Scheme: in.Scheme}
+	authAttrs, err := authHelper.HelmAuthAttributes(ctx, workbenchTool.Namespace, docker.Provider, docker.Auth)
+	if err != nil {
+		return err
+	}
+	if authAttrs == nil {
+		return nil
+	}
+
+	if attrs.Configuration == nil {
+		attrs.Configuration = &console.WorkbenchToolConfigurationAttributes{}
+	}
+	if attrs.Configuration.Docker == nil {
+		attrs.Configuration.Docker = &console.WorkbenchToolDockerConnectionAttributes{
+			URL:      docker.URL,
+			Provider: docker.Provider,
+		}
+	}
+	attrs.Configuration.Docker.Auth = authAttrs
+	return nil
+}
+
 func (in *WorkbenchToolReconciler) cloudConnectionChanged(workbenchTool *console.WorkbenchToolFragment, cloudConnectionID *string) bool {
 	existingCloudConnectionID := ""
 	if workbenchTool.CloudConnection != nil {
@@ -306,6 +398,15 @@ func (in *WorkbenchToolReconciler) cloudConnectionChanged(workbenchTool *console
 	}
 
 	return existingCloudConnectionID != lo.FromPtr(cloudConnectionID)
+}
+
+func (in *WorkbenchToolReconciler) scmConnectionChanged(workbenchTool *console.WorkbenchToolFragment, scmConnectionID *string) bool {
+	existingScmConnectionID := ""
+	if workbenchTool.ScmConnection != nil {
+		existingScmConnectionID = workbenchTool.ScmConnection.ID
+	}
+
+	return existingScmConnectionID != lo.FromPtr(scmConnectionID)
 }
 
 // SetupWithManager is responsible for initializing a new reconciler within the provided ctrl.Manager.
