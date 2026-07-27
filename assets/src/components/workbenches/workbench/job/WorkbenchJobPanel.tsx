@@ -15,6 +15,7 @@ import {
   PanelHeaderSC,
   SidePanelContent,
 } from 'components/ai/chatbot/SidePanelShared'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   SidePanel,
   useTopLevelSidePanel,
@@ -24,6 +25,7 @@ import {
   AgentRunStatus,
   PullRequestBasicFragment,
   useWorkbenchJobActivitiesQuery,
+  useWorkbenchJobPendingActionsQuery,
   useWorkbenchJobQuery,
   WorkbenchJobFragment,
 } from 'generated/graphql'
@@ -90,6 +92,12 @@ export function WorkbenchJobPanelContent() {
     variables: { id: jobId },
     fetchPolicy: 'cache-first',
   })
+  const { data: pendingActionsData } = useWorkbenchJobPendingActionsQuery({
+    skip: !jobId,
+    variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
   const job = data?.workbenchJob
   const isLoading = loading && !job
   const activities = useMemo(
@@ -148,10 +156,19 @@ export function WorkbenchJobPanelContent() {
     return [...agentRunDrafts, ...patchPrDrafts]
   }, [activities, pullRequests])
   const hasDraftPrsAwaitingApproval = draftPrs.length > 0
+  const hasActionsAwaitingApproval = (
+    pendingActionsData?.workbenchJob?.activities?.edges ?? []
+  ).some((edge) => !!edge?.node?.id)
 
   const tabs = useMemo(
-    () => getPanelTabs(job, hasDraftPrsAwaitingApproval, isLoading),
-    [hasDraftPrsAwaitingApproval, isLoading, job]
+    () =>
+      getPanelTabs(
+        job,
+        hasDraftPrsAwaitingApproval,
+        hasActionsAwaitingApproval,
+        isLoading
+      ),
+    [hasActionsAwaitingApproval, hasDraftPrsAwaitingApproval, isLoading, job]
   )
 
   useEffect(() => {
@@ -310,6 +327,7 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
 const getPanelTabs = (
   job: Nullable<WorkbenchJobFragment>,
   hasDraftPrsAwaitingApproval: boolean,
+  hasActionsAwaitingApproval: boolean,
   isLoading: boolean
 ) =>
   [
@@ -341,6 +359,7 @@ const getPanelTabs = (
     {
       label: 'Actions',
       icon: <LightningIcon size={12} />,
+      showDot: hasActionsAwaitingApproval,
     },
   ].filter(
     (
