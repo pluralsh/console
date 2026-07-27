@@ -70,6 +70,5 @@ const CardSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   padding: theme.spacing.medium,
   borderRadius: theme.borderRadiuses.large,
-  background: theme.colors['fill-two'],
-  border: theme.borders['fill-two'],
+  background: theme.colors['fill-one'],
 }))
