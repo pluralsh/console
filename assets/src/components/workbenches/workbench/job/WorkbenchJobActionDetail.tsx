@@ -3,9 +3,11 @@ import {
   Button,
   Chip,
   Code,
+  FailedFilledIcon,
   Flex,
   IconFrame,
   KubernetesIcon,
+  StatusOkIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -99,15 +101,7 @@ export function WorkbenchJobActionDetail({
             css={{ minWidth: 0 }}
           />
         </Flex>
-        {needsApproval && (
-          <Chip
-            size="small"
-            severity="warning"
-            icon={<WarningIcon />}
-          >
-            Pending approval
-          </Chip>
-        )}
+        <ActionStatusChip status={activity.status} />
       </Flex>
 
       {error && <GqlError error={error} />}
@@ -185,6 +179,49 @@ export function WorkbenchJobActionDetail({
       )}
     </DetailSC>
   )
+}
+
+function ActionStatusChip({
+  status,
+}: {
+  status: Nullable<WorkbenchJobActivityStatus>
+}) {
+  switch (status) {
+    case WorkbenchJobActivityStatus.NeedsApproval:
+      return (
+        <Chip
+          fillLevel={2}
+          iconColor="icon-warning"
+          icon={<WarningIcon />}
+        >
+          Pending approval
+        </Chip>
+      )
+    case WorkbenchJobActivityStatus.Failed:
+      return (
+        <Chip
+          fillLevel={2}
+          iconColor="icon-danger"
+          icon={<FailedFilledIcon />}
+        >
+          Failed
+        </Chip>
+      )
+    case WorkbenchJobActivityStatus.Successful:
+      return (
+        <Chip
+          fillLevel={2}
+          iconColor="icon-success"
+          icon={<StatusOkIcon />}
+        >
+          Succeeded
+        </Chip>
+      )
+    case WorkbenchJobActivityStatus.Cancelled:
+      return <Chip fillLevel={2}>Denied</Chip>
+    default:
+      return null
+  }
 }
 
 const DetailSC = styled.div(({ theme }) => ({
