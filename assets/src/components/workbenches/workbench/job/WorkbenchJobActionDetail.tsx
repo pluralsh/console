@@ -1,5 +1,4 @@
 import {
-  ArrowLeftIcon,
   Button,
   Chip,
   Code,
@@ -10,6 +9,7 @@ import {
   Input,
   KubernetesIcon,
   Modal,
+  ReturnIcon,
   StatusOkIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -89,7 +89,7 @@ export function WorkbenchJobActionDetail({
         type="button"
         onClick={onBack}
       >
-        <ArrowLeftIcon size={12} />
+        <ReturnIcon size={12} />
         Back to all actions
       </BackBtnSC>
 
