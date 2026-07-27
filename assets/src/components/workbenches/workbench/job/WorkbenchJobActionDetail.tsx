@@ -60,103 +60,98 @@ export function WorkbenchJobActionDetail({
 
   return (
     <DetailSC>
-      <Flex
-        direction="column"
-        gap="large"
-        css={{ flex: 1, minHeight: 0, overflow: 'auto' }}
+      <BackBtnSC
+        type="button"
+        onClick={onBack}
       >
-        <BackBtnSC
-          type="button"
-          onClick={onBack}
-        >
-          <ArrowLeftIcon size={12} />
-          Back to all actions
-        </BackBtnSC>
+        <ArrowLeftIcon size={12} />
+        Back to all actions
+      </BackBtnSC>
 
+      <Flex
+        align="center"
+        justify="space-between"
+        gap="medium"
+      >
         <Flex
           align="center"
-          justify="space-between"
-          gap="medium"
+          gap="small"
+          css={{ minWidth: 0 }}
         >
-          <Flex
-            align="center"
-            gap="small"
+          <IconFrame
+            circle
+            size="medium"
+            type="secondary"
+            icon={icon ?? <KubernetesIcon size={16} />}
+            css={{
+              flexShrink: 0,
+              border: theme.borders['fill-two'],
+              backgroundColor: 'transparent',
+            }}
+          />
+          <StackedText
+            first={getActionTitle(activity)}
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second={getActionSubtitle(activity)}
+            secondColor="text-xlight"
+            truncate
             css={{ minWidth: 0 }}
-          >
-            <IconFrame
-              circle
-              size="medium"
-              type="secondary"
-              icon={icon ?? <KubernetesIcon size={16} />}
-              css={{
-                flexShrink: 0,
-                border: theme.borders['fill-two'],
-                backgroundColor: 'transparent',
-              }}
-            />
-            <StackedText
-              first={getActionTitle(activity)}
-              firstPartialType="body2Bold"
-              firstColor="text"
-              second={getActionSubtitle(activity)}
-              secondColor="text-xlight"
-              truncate
-              css={{ minWidth: 0 }}
-            />
-          </Flex>
-          {needsApproval && (
-            <Chip
-              size="small"
-              severity="warning"
-              icon={<WarningIcon />}
-            >
-              Pending approval
-            </Chip>
-          )}
+          />
         </Flex>
-
-        {error && <GqlError error={error} />}
-
-        {!!inputJson && (
-          <Flex
-            direction="column"
-            gap="xsmall"
+        {needsApproval && (
+          <Chip
+            size="small"
+            severity="warning"
+            icon={<WarningIcon />}
           >
-            <CaptionP $color="text-xlight">INPUT</CaptionP>
-            <Code
-              language="json"
-              showHeader={false}
-            >
-              {inputJson}
-            </Code>
-          </Flex>
-        )}
-
-        {!!resultJson && (
-          <Flex
-            direction="column"
-            gap="xsmall"
-          >
-            <CaptionP $color="text-xlight">
-              {activity.status === WorkbenchJobActivityStatus.Failed
-                ? 'ERROR'
-                : activity.status === WorkbenchJobActivityStatus.Cancelled
-                  ? 'REASON'
-                  : 'RESULT'}
-            </CaptionP>
-            <Code
-              language="json"
-              showHeader={false}
-            >
-              {resultJson}
-            </Code>
-          </Flex>
+            Pending approval
+          </Chip>
         )}
       </Flex>
 
+      {error && <GqlError error={error} />}
+
+      {!!inputJson && (
+        <Flex
+          direction="column"
+          gap="xsmall"
+        >
+          <CaptionP $color="text-xlight">INPUT</CaptionP>
+          <Code
+            language="json"
+            showHeader={false}
+          >
+            {inputJson}
+          </Code>
+        </Flex>
+      )}
+
+      {!!resultJson && (
+        <Flex
+          direction="column"
+          gap="xsmall"
+        >
+          <CaptionP $color="text-xlight">
+            {activity.status === WorkbenchJobActivityStatus.Failed
+              ? 'ERROR'
+              : activity.status === WorkbenchJobActivityStatus.Cancelled
+                ? 'REASON'
+                : 'RESULT'}
+          </CaptionP>
+          <Code
+            language="json"
+            showHeader={false}
+          >
+            {resultJson}
+          </Code>
+        </Flex>
+      )}
+
       {needsApproval && (
-        <FooterSC>
+        <ActionsRowSC>
           <Button
+            small
             secondary
             loading={rejecting}
             disabled={approving || rejecting}
@@ -165,11 +160,10 @@ export function WorkbenchJobActionDetail({
               reject()
             }}
             css={{
-              flex: 1,
-              color: theme.colors['text-danger'],
-              borderColor: theme.colors.border,
+              color: theme.colors['text-danger-light'],
+              borderColor: theme.colors['border-danger'],
               '&:hover': {
-                color: theme.colors['text-danger'],
+                color: theme.colors['text-danger-light'],
                 borderColor: theme.colors['border-danger'],
               },
             }}
@@ -177,17 +171,17 @@ export function WorkbenchJobActionDetail({
             Deny
           </Button>
           <Button
+            small
             loading={approving}
             disabled={approving || rejecting}
             onClick={() => {
               setError(null)
               approve()
             }}
-            css={{ flex: 1 }}
           >
             Approve
           </Button>
-        </FooterSC>
+        </ActionsRowSC>
       )}
     </DetailSC>
   )
@@ -197,8 +191,6 @@ const DetailSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  minHeight: '100%',
-  flex: 1,
 }))
 
 const BackBtnSC = styled.button(({ theme }) => ({
@@ -207,15 +199,14 @@ const BackBtnSC = styled.button(({ theme }) => ({
   display: 'inline-flex',
   alignItems: 'center',
   gap: theme.spacing.xsmall,
-  color: theme.colors['text-light'],
+  color: theme.colors['text-xlight'],
   width: 'fit-content',
   '&:hover': { color: theme.colors.text },
 }))
 
-const FooterSC = styled.div(({ theme }) => ({
+const ActionsRowSC = styled.div({
   display: 'flex',
-  gap: theme.spacing.small,
-  marginTop: 'auto',
-  paddingTop: theme.spacing.medium,
-  borderTop: theme.borders.default,
-}))
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+})
