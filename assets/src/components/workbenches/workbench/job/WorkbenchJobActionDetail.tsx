@@ -2,11 +2,8 @@ import {
   Button,
   Code,
   Flex,
-  FormField,
   IconFrame,
-  Input,
   KubernetesIcon,
-  Modal,
   ReturnIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -18,7 +15,7 @@ import {
   WorkbenchJobActionFragment,
   WorkbenchJobActivityStatus,
 } from 'generated/graphql'
-import { FormEvent, useState } from 'react'
+import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
   getActionIcon,
@@ -28,6 +25,7 @@ import {
   getActionTitle,
 } from './workbenchJobActionsUtils'
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
+import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
 
 export function WorkbenchJobActionDetail({
@@ -39,8 +37,6 @@ export function WorkbenchJobActionDetail({
 }) {
   const theme = useTheme()
   const [error, setError] = useState<string | null>(null)
-  const [denyOpen, setDenyOpen] = useState(false)
-  const [denyReason, setDenyReason] = useState('')
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const icon = getActionIcon(activity)
@@ -58,29 +54,9 @@ export function WorkbenchJobActionDetail({
 
   const [reject, { loading: rejecting, error: rejectError }] =
     useRejectWorkbenchJobActivityMutation({
-      onCompleted: () => {
-        setDenyOpen(false)
-        setDenyReason('')
-        onBack()
-      },
+      onCompleted: onBack,
       refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobActionSummary'],
     })
-
-  const closeDenyModal = () => {
-    if (rejecting) return
-    setDenyOpen(false)
-    setDenyReason('')
-  }
-
-  const onDeny = (e?: FormEvent) => {
-    e?.preventDefault()
-    reject({
-      variables: {
-        id: activity.id,
-        reason: denyReason.trim() || undefined,
-      },
-    })
-  }
 
   return (
     <DetailSC>
@@ -167,25 +143,19 @@ export function WorkbenchJobActionDetail({
 
       {needsApproval && (
         <ActionsRowSC>
-          <Button
-            small
-            secondary
+          <WorkbenchJobActionDenyButton
             disabled={approving}
-            onClick={() => {
-              setError(null)
-              setDenyOpen(true)
-            }}
-            css={{
-              color: theme.colors['text-danger-light'],
-              borderColor: theme.colors['border-danger'],
-              '&:hover': {
-                color: theme.colors['text-danger-light'],
-                borderColor: theme.colors['border-danger'],
-              },
-            }}
-          >
-            Deny
-          </Button>
+            rejecting={rejecting}
+            rejectError={rejectError}
+            onDeny={(reason) =>
+              reject({
+                variables: {
+                  id: activity.id,
+                  reason: reason || undefined,
+                },
+              })
+            }
+          />
           <Button
             small
             loading={approving}
@@ -199,50 +169,6 @@ export function WorkbenchJobActionDetail({
           </Button>
         </ActionsRowSC>
       )}
-
-      <Modal
-        header="Deny action"
-        open={denyOpen}
-        onClose={closeDenyModal}
-        asForm
-        onSubmit={onDeny}
-        actions={
-          <Flex gap="small">
-            <Button
-              secondary
-              type="button"
-              disabled={rejecting}
-              onClick={closeDenyModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              destructive
-              loading={rejecting}
-            >
-              Deny
-            </Button>
-          </Flex>
-        }
-      >
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          {rejectError && <GqlError error={rejectError} />}
-          <FormField label="Reason">
-            <Input
-              multiline
-              minRows={3}
-              maxRows={6}
-              value={denyReason}
-              onChange={(e) => setDenyReason(e.target.value)}
-              placeholder="Explain why this action was denied"
-            />
-          </FormField>
-        </Flex>
-      </Modal>
     </DetailSC>
   )
 }
