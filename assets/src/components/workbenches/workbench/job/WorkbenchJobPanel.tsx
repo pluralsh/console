@@ -5,6 +5,7 @@ import {
   GaugeIcon,
   GraphIcon,
   IconFrame,
+  LightningIcon,
   PaperCheckIcon,
   PrIcon,
   SubTab,
@@ -44,6 +45,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isJobRunning } from './WorkbenchJobActivity'
+import { WorkbenchJobActions } from './WorkbenchJobActions'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import {
   PATCH_PR_URL,
@@ -58,7 +60,13 @@ import { WorkbenchJobUsage } from './WorkbenchJobUsage'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
-  'Result' | 'Dashboard' | 'Topology' | 'Pull requests' | 'Eval' | 'Usage'
+  | 'Result'
+  | 'Dashboard'
+  | 'Topology'
+  | 'Pull requests'
+  | 'Eval'
+  | 'Usage'
+  | 'Actions'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -235,6 +243,7 @@ export function WorkbenchJobPanelContent() {
           {selectedTab === 'Usage' && job?.usage && (
             <WorkbenchJobUsage usage={job?.usage} />
           )}
+          {selectedTab === 'Actions' && <WorkbenchJobActions />}
         </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
@@ -328,6 +337,10 @@ const getPanelTabs = (
     job?.usage && {
       label: 'Usage',
       icon: <CostManagementIcon size={12} />,
+    },
+    {
+      label: 'Actions',
+      icon: <LightningIcon size={12} />,
     },
   ].filter(
     (

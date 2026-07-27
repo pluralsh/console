@@ -196,7 +196,7 @@ export function WorkbenchJob() {
           workbenchName={workbenchName}
         />
       </WrapperSC>
-      {hasResultContent && !isOpen && (
+      {!!job?.id && !isOpen && (
         <PanelOpenBtnSC
           tertiary
           onClick={() => setOpen(true)}
