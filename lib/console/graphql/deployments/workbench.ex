@@ -532,6 +532,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
+      arg :status, :workbench_job_activity_status, description: "filter activities by status"
+      arg :type, :workbench_job_activity_type, description: "filter activities by type"
+
       resolve &Deployments.list_workbench_job_activities/3
     end
 

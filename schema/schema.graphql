@@ -3650,7 +3650,18 @@ type WorkbenchJob {
   "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
   referencedJob: WorkbenchJob
 
-  activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
+  activities(
+    after: String
+    first: Int
+    before: String
+    last: Int
+
+    "filter activities by status"
+    status: WorkbenchJobActivityStatus
+
+    "filter activities by type"
+    type: WorkbenchJobActivityType
+  ): WorkbenchJobActivityConnection
 
   metricsTool(
     "the name of the metrics tool"

@@ -784,6 +784,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal(activities)
     end
 
+    test "it can filter activities by status" do
+      job = insert(:workbench_job)
+      pending = insert(:workbench_job_activity,
+        workbench_job: job,
+        type: :function,
+        status: :needs_approval
+      )
+      insert(:workbench_job_activity, workbench_job: job, type: :coding, status: :successful)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $status: WorkbenchJobActivityStatus) {
+          workbenchJob(id: $id) {
+            id
+            activities(first: 10, status: $status) {
+              edges { node { id status } }
+            }
+          }
+        }
+      """, %{"id" => job.id, "status" => "NEEDS_APPROVAL"}, %{current_user: admin_user()})
+
+      [node] = from_connection(found["activities"])
+      assert node["id"] == pending.id
+      assert node["status"] == "NEEDS_APPROVAL"
+    end
+
     test "it can paginate activities" do
       job = insert(:workbench_job)
       insert_list(5, :workbench_job_activity, workbench_job: job, type: :coding)

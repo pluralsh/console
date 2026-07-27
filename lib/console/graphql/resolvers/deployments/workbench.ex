@@ -138,6 +138,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_job_activities(job, args, _) do
     WorkbenchJobActivity.for_workbench_job(job.id)
     |> WorkbenchJobActivity.ordered()
+    |> activity_filters(args)
     |> paginate(args)
   end
 
