@@ -50,10 +50,6 @@ export function WorkbenchJobInlineActionCard({
   const isRunning =
     activity.status === WorkbenchJobActivityStatus.Pending ||
     activity.status === WorkbenchJobActivityStatus.Running
-  const isTerminal =
-    activity.status === WorkbenchJobActivityStatus.Successful ||
-    activity.status === WorkbenchJobActivityStatus.Failed ||
-    activity.status === WorkbenchJobActivityStatus.Cancelled
   const inputJson = getActionInputJson(activity)
   const resultJson = getActionResultJson(activity)
   const icon = getActionIcon(activity)
@@ -125,29 +121,14 @@ export function WorkbenchJobInlineActionCard({
         </Flex>
         <HeaderActionsSC>
           <InlineActionStatus activity={activity} />
-          {!expanded && (
-            <Button
-              small
-              secondary
-              onClick={() => setExpanded(true)}
-            >
-              {isRunning
-                ? 'See progress'
-                : isTerminal
-                  ? 'View job'
-                  : 'View details'}
-            </Button>
-          )}
-          {(!isTerminal || expanded) && (
-            <ExpandButtonSC
-              type="button"
-              aria-label={expanded ? 'Collapse action' : 'Expand action'}
-              onClick={() => setExpanded((value) => !value)}
-              $expanded={expanded}
-            >
-              <CaretDownIcon size={12} />
-            </ExpandButtonSC>
-          )}
+          <ExpandButtonSC
+            type="button"
+            aria-label={expanded ? 'Collapse action' : 'Expand action'}
+            onClick={() => setExpanded((value) => !value)}
+            $expanded={expanded}
+          >
+            <CaretDownIcon size={12} />
+          </ExpandButtonSC>
         </HeaderActionsSC>
       </HeaderSC>
 
