@@ -1,0 +1,33 @@
+name: PR Label Agent Defaults
+on:
+  pull_request_target:
+    branches: [ master ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  add-default-label:
+    name: Add default enhancement label to agent PRs
+    if: github.event.pull_request.head.ref == 'agent/sideload-workbench-followup-1753735967000'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const issue_number = context.payload.pull_request.number
+            const labels = context.payload.pull_request.labels.map((l) => l.name)
+            if (labels.includes('enhancement')) {
+              core.info('enhancement label already present')
+              return
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              labels: ['enhancement'],
+            })
+
+            core.info(`Added enhancement label to PR #${issue_number}`)
