@@ -10,6 +10,14 @@
   publisher: AccuKnox
 - name: adot
   versions:
+  - version: v0.156.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.151.0-eksbuild.2
     compatibilities:
     - '1.36'
@@ -1120,6 +1128,14 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.0.10-eksbuild.3
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.10-eksbuild.2
     compatibilities:
     - '1.35'
@@ -4588,6 +4604,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.59.10000020260422-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
@@ -4600,6 +4624,14 @@
     - '1.31'
     - '1.30'
   - version: v4.0.20001020260428-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.0.20001020260421-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -4637,6 +4669,15 @@
     - '1.30'
     - '1.29'
   - version: v1.21.10001020260618-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.21.10001020260422-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -9138,6 +9179,14 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v0.8.1-eksbuild.13
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.8.1-eksbuild.12
     compatibilities:
     - '1.36'
@@ -9574,6 +9623,24 @@
   publisher: Nirmata
 - name: prometheus-node-exporter
   versions:
+  - version: v1.12.1-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v1.12.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.11.1-eksbuild.7
     compatibilities:
     - '1.36'
