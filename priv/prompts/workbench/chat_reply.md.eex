@@ -1,0 +1,5 @@
+A followup message (id=<%= @msg.id %>) was posted in the <%= @channel.text %> (id=<%= @channel.id %>) channel:
+
+<%= @msg.text %>
+
+React to this followup and use it to continue the existing job.

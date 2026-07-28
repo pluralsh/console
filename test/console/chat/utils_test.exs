@@ -79,6 +79,9 @@ defmodule Console.Chat.UtilsTest do
       assert prompt.workbench_job_id == job.id
       assert prompt.user_id == user.id
       assert prompt.prompt =~ msg.text
+      assert prompt.prompt =~ "A followup message (id=#{msg.id})"
+      assert prompt.prompt =~ "React to this followup and use it to continue the existing job"
+      refute prompt.prompt =~ "You should reply to the original message"
       assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
       assert refetch(job).status == :successful
       assert Repo.all(WorkbenchJobActivity) == []
@@ -122,6 +125,9 @@ defmodule Console.Chat.UtilsTest do
 
       assert prompt.workbench_job_id == job.id
       assert prompt.prompt =~ msg.text
+      assert prompt.prompt =~ "A followup message (id=#{msg.id})"
+      assert prompt.prompt =~ "React to this followup and use it to continue the existing job"
+      refute prompt.prompt =~ "You should reply to the original message"
       assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
       assert refetch(job).status == :running
     end
