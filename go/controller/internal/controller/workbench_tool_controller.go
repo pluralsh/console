@@ -10,6 +10,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -101,14 +102,6 @@ func (in *WorkbenchToolReconciler) Reconcile(ctx context.Context, req reconcile.
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(workbenchTool.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Get WorkbenchTool SHA that can be saved back in the status to check for changes
-	changed, sha, err := workbenchTool.Diff(utils.HashObject)
-	if err != nil {
-		logger.Error(err, "unable to calculate workbench tool SHA")
-		utils.MarkCondition(workbenchTool.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-
 	// Get the project for the workbench tool.
 	project, res, err := common.Project(ctx, in.Client, in.Scheme, workbenchTool)
 	if res != nil || err != nil {
@@ -139,8 +132,27 @@ func (in *WorkbenchToolReconciler) Reconcile(ctx context.Context, req reconcile.
 		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
 	}
 
+	// Add controller refs to Docker auth secrets so credential rotation triggers reconcile.
+	if err := in.tryAddDockerOwnerRef(ctx, workbenchTool); err != nil {
+		utils.MarkCondition(workbenchTool.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	attrs, err := in.attributes(ctx, workbenchTool, project.Status.ID, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings)
+	if err != nil {
+		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
+	}
+
+	// Hash resolved attributes (includes secret values) so credential rotation is detected.
+	changed, sha, err := workbenchTool.Diff(attrs, utils.HashObject)
+	if err != nil {
+		logger.Error(err, "unable to calculate workbench tool SHA")
+		utils.MarkCondition(workbenchTool.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	// Sync WorkbenchTool CRD with the Console API
-	apiWorkbenchTool, err := in.sync(ctx, workbenchTool, project, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings, changed)
+	apiWorkbenchTool, err := in.sync(ctx, workbenchTool, attrs, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbenchTool.SetCondition)
 	}
@@ -321,7 +333,7 @@ func (in *WorkbenchToolReconciler) resolveBindings(workbenchTool *v1alpha1.Workb
 	return readBindings, writeBindings, nil
 }
 
-func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, project *v1alpha1.Project, mcpServerID, cloudConnectionID, scmConnectionID *string, readBindings, writeBindings []*console.PolicyBindingAttributes, changed bool) (*console.WorkbenchToolFragment, error) {
+func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool, attrs console.WorkbenchToolAttributes, changed bool) (*console.WorkbenchToolFragment, error) {
 	logger := log.FromContext(ctx)
 
 	existingWorkbenchTool, err := in.ConsoleClient.GetWorkbenchTool(ctx, nil, new(workbenchTool.ConsoleName()))
@@ -330,19 +342,11 @@ func (in *WorkbenchToolReconciler) sync(ctx context.Context, workbenchTool *v1al
 			return nil, err
 		}
 
-		attrs, err := in.attributes(ctx, workbenchTool, project.Status.ID, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings)
-		if err != nil {
-			return nil, err
-		}
 		logger.Info(fmt.Sprintf("%s workbench tool does not exist, creating it", workbenchTool.ConsoleName()))
 		return in.ConsoleClient.CreateWorkbenchTool(ctx, attrs)
 	}
 
-	if changed || in.cloudConnectionChanged(existingWorkbenchTool, cloudConnectionID) || in.scmConnectionChanged(existingWorkbenchTool, scmConnectionID) {
-		attrs, err := in.attributes(ctx, workbenchTool, project.Status.ID, mcpServerID, cloudConnectionID, scmConnectionID, readBindings, writeBindings)
-		if err != nil {
-			return nil, err
-		}
+	if changed {
 		logger.Info(fmt.Sprintf("updating workbench tool %s", workbenchTool.ConsoleName()))
 		return in.ConsoleClient.UpdateWorkbenchTool(ctx, existingWorkbenchTool.ID, attrs)
 	}
@@ -391,22 +395,29 @@ func (in *WorkbenchToolReconciler) attachDockerAuth(ctx context.Context, workben
 	return nil
 }
 
-func (in *WorkbenchToolReconciler) cloudConnectionChanged(workbenchTool *console.WorkbenchToolFragment, cloudConnectionID *string) bool {
-	existingCloudConnectionID := ""
-	if workbenchTool.CloudConnection != nil {
-		existingCloudConnectionID = workbenchTool.CloudConnection.ID
+func (in *WorkbenchToolReconciler) tryAddDockerOwnerRef(ctx context.Context, workbenchTool *v1alpha1.WorkbenchTool) error {
+	if workbenchTool.Spec.Configuration == nil || workbenchTool.Spec.Configuration.Docker == nil {
+		return nil
 	}
 
-	return existingCloudConnectionID != lo.FromPtr(cloudConnectionID)
-}
-
-func (in *WorkbenchToolReconciler) scmConnectionChanged(workbenchTool *console.WorkbenchToolFragment, scmConnectionID *string) bool {
-	existingScmConnectionID := ""
-	if workbenchTool.ScmConnection != nil {
-		existingScmConnectionID = workbenchTool.ScmConnection.ID
+	authHelper := &HelmRepositoryAuth{Client: in.Client, Scheme: in.Scheme}
+	secretRef := authHelper.getAuthSecretRef(&v1alpha1.HelmRepository{
+		ObjectMeta: v1.ObjectMeta{Namespace: workbenchTool.Namespace},
+		Spec: v1alpha1.HelmRepositorySpec{
+			Provider: workbenchTool.Spec.Configuration.Docker.Provider,
+			Auth:     workbenchTool.Spec.Configuration.Docker.Auth,
+		},
+	})
+	if secretRef == nil {
+		return nil
 	}
 
-	return existingScmConnectionID != lo.FromPtr(scmConnectionID)
+	secret, err := utils.GetSecret(ctx, in.Client, secretRef)
+	if err != nil {
+		return err
+	}
+
+	return utils.TryAddControllerRef(ctx, in.Client, workbenchTool, secret, in.Scheme)
 }
 
 // SetupWithManager is responsible for initializing a new reconciler within the provided ctrl.Manager.
@@ -416,5 +427,6 @@ func (in *WorkbenchToolReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.WorkbenchToolList))).
 		For(&v1alpha1.WorkbenchTool{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(in)
 }
