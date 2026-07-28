@@ -1,11 +1,15 @@
 import {
   Button,
+  Chip,
   Flex,
   IconFrame,
   KubernetesIcon,
 } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText'
-import { WorkbenchJobActionFragment } from 'generated/graphql'
+import {
+  WorkbenchJobActionFragment,
+  WorkbenchJobActivityType,
+} from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import {
   getActionDetailButtonLabel,
@@ -14,6 +18,7 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
+import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
 
 export function WorkbenchJobActionCard({
   activity,
@@ -24,6 +29,10 @@ export function WorkbenchJobActionCard({
 }) {
   const theme = useTheme()
   const icon = getActionIcon(activity)
+  const kubeVariant =
+    activity.type === WorkbenchJobActivityType.Kubernetes
+      ? getKubeActionVariant(activity.result?.kubeRequest?.method)
+      : null
 
   return (
     <CardSC $status={activity.status}>
@@ -46,20 +55,38 @@ export function WorkbenchJobActionCard({
         <StackedText
           first={getActionTitle(activity)}
           firstPartialType="body2Bold"
-          firstColor="text"
+          firstColor="text-light"
           second={getActionSubtitle(activity)}
           secondColor="text-xlight"
           truncate
           css={{ flex: 1, minWidth: 0 }}
         />
       </Flex>
+      {kubeVariant === 'update' && (
+        <Chip
+          size="small"
+          severity="info"
+          css={{ flexShrink: 0 }}
+        >
+          Update
+        </Chip>
+      )}
+      {kubeVariant === 'delete' && (
+        <Chip
+          size="small"
+          severity="danger"
+          css={{ flexShrink: 0 }}
+        >
+          Delete
+        </Chip>
+      )}
       <Button
         small
         secondary
         onClick={onView}
         css={{ flexShrink: 0 }}
       >
-        {getActionDetailButtonLabel(activity.status)}
+        {getActionDetailButtonLabel(activity)}
       </Button>
     </CardSC>
   )
@@ -71,7 +98,7 @@ const CardSC = styled.div<{
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.medium,
-  padding: theme.spacing.medium,
+  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
   borderRadius: theme.borderRadiuses.large,
   background: theme.colors['fill-one'],
   borderLeft: `2px solid ${getActionStatusBorderColor(theme, $status)}`,

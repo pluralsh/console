@@ -176,15 +176,17 @@ export function groupWorkbenchJobActions(
 }
 
 export function getActionDetailButtonLabel(
-  status: Nullable<WorkbenchJobActivityStatus>
+  activity: Pick<WorkbenchJobActionFragment, 'status' | 'type'>
 ): string {
-  switch (status) {
+  const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+
+  switch (activity.status) {
     case WorkbenchJobActivityStatus.NeedsApproval:
       return 'View diff'
     case WorkbenchJobActivityStatus.Failed:
       return 'View error'
     case WorkbenchJobActivityStatus.Successful:
-      return 'View JSON'
+      return isKubernetes ? 'View results' : 'View JSON'
     case WorkbenchJobActivityStatus.Cancelled:
     case WorkbenchJobActivityStatus.Rejected:
       return 'View reason'
