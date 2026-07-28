@@ -155,6 +155,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: {:ok, Workbenches.get_workbench_tool(id)}
   def function_call_tool(_, _, _), do: {:ok, nil}
 
+  def kube_request_body(%{path: path, body: body}, _, _) do
+    cond do
+      secret_path?(path) -> {:ok, nil}
+      secret_body?(body) -> {:ok, nil}
+      true -> {:ok, body}
+    end
+  end
+  def kube_request_body(_, _, _), do: {:ok, nil}
+
   def kube_request_current(%{handle: handle, path: path}, _, %{context: %{current_user: user}})
       when is_binary(handle) and is_binary(path) do
     cond do
@@ -174,6 +183,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   defp secret_path?(path) when is_binary(path),
     do: String.contains?(path, "/secrets/") or String.ends_with?(path, "/secrets")
   defp secret_path?(_), do: false
+
+  defp secret_body?(body) when is_binary(body) do
+    case Jason.decode(body) do
+      {:ok, %{"kind" => kind}} when kind in ["Secret", "SecretList"] -> true
+      {:ok, %{"items" => [%{"kind" => "Secret"} | _]}} -> true
+      _ -> false
+    end
+  end
+  defp secret_body?(_), do: false
 
   defp sanitize_kube_resource(res) when is_map(res) do
     res

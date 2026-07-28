@@ -3957,7 +3957,7 @@ type WorkbenchJobActivityKubeRequest {
   "the Kubernetes API request path"
   path: String
 
-  "the Kubernetes API request body"
+  "the Kubernetes API request body (Secret payloads are redacted)"
   body: String
 
   "query parameters sent with the Kubernetes API request"

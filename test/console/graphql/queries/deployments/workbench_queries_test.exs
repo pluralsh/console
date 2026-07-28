@@ -1224,6 +1224,91 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["result"]["jobUpdate"]["conclusion"] == "ok"
     end
 
+    test "it redacts Secret kube request bodies from workbench readers" do
+      job = insert(:workbench_job)
+      secret_body =
+        Jason.encode!(%{
+          "apiVersion" => "v1",
+          "kind" => "Secret",
+          "metadata" => %{"name" => "db", "namespace" => "default"},
+          "data" => %{"password" => "c2VjcmV0"}
+        })
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          result: %{
+            output: "pending approval",
+            kube_request: %{
+              handle: "prod-cluster",
+              method: "PUT",
+              path: "/api/v1/namespaces/default/secrets/db",
+              body: secret_body,
+              content_type: "application/json"
+            }
+          }
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            id
+            result {
+              kubeRequest {
+                path
+                body
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["result"]["kubeRequest"]["path"] == "/api/v1/namespaces/default/secrets/db"
+      assert found["result"]["kubeRequest"]["body"] == nil
+    end
+
+    test "it redacts Secret bodies based on kind even when the path is not a secrets endpoint" do
+      job = insert(:workbench_job)
+      secret_body =
+        Jason.encode!(%{
+          "apiVersion" => "v1",
+          "kind" => "Secret",
+          "metadata" => %{"name" => "db"},
+          "stringData" => %{"token" => "super-secret"}
+        })
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          result: %{
+            output: "pending approval",
+            kube_request: %{
+              handle: "prod-cluster",
+              method: "POST",
+              path: "/api/v1/namespaces/default/configmaps",
+              body: secret_body,
+              content_type: "application/json"
+            }
+          }
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            result {
+              kubeRequest {
+                body
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["result"]["kubeRequest"]["body"] == nil
+    end
+
   end
 
   describe "workbench_tools" do

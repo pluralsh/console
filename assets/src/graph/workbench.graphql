@@ -442,7 +442,6 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     handle
     method
     path
-    body
     queryParams
     contentType
   }
@@ -1337,7 +1336,6 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
       handle
       method
       path
-      body
       queryParams
       contentType
     }

@@ -832,13 +832,16 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Approves and calls a workbench function call encapsulated in the current activity
+  Approves and calls a workbench function call encapsulated in the current activity.
+
+  Locks the activity row for update so concurrent approvals cannot both invoke the
+  underlying external action before the status transitions away from needs_approval.
   """
   @spec approve_job_activity(binary, User.t()) :: activity_resp
   def approve_job_activity(activity_id, %User{} = user) when is_binary(activity_id) do
     start_transaction()
     |> add_operation(:activity, fn _ ->
-      get_workbench_job_activity!(activity_id)
+      lock_job_activity!(activity_id)
       |> allow(user, :approve)
     end)
     |> add_operation(:exec, fn
@@ -849,7 +852,7 @@ defmodule Console.Deployments.Workbenches do
           {:ok, output} -> output
           {:error, err} -> "Internal function calling error: #{inspect(err)}"
         end
-        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, user_id: user.id, result: %{output: &1}}))
         |> Repo.update()
       %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity} ->
         KubeRequest.invoke(request, user)
@@ -859,7 +862,7 @@ defmodule Console.Deployments.Workbenches do
           {:error, {:http_error, _, err}} -> "K8s request failed: #{inspect(err)}"
           {:error, err} -> "Internal kubernetes request error: #{inspect(err)}"
         end
-        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, user_id: user.id, result: %{output: &1}}))
         |> Repo.update()
       _ -> {:error, "activity does not support function calling"}
     end)
@@ -872,18 +875,25 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
   def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
-    get_workbench_job_activity!(activity_id)
-    |> allow(user, :approve)
-    |> when_ok(fn activity ->
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      lock_job_activity!(activity_id)
+      |> allow(user, :approve)
+    end)
+    |> add_operation(:reject, fn %{activity: activity} ->
       WorkbenchJobActivity.changeset(activity, %{
         status: :rejected,
         user_id: user.id,
         result: %{output: reason || "Execution rejected by user"}
       })
+      |> Repo.update()
     end)
-    |> when_ok(:update)
+    |> execute(extract: :reject)
     |> notify(:update)
   end
+
+  defp lock_job_activity!(id),
+    do: Repo.get!(WorkbenchJobActivity.with_lock(), id)
 
   @doc """
   Associates an agent run with a workbench activity: inserts the join row (idempotent) and sets

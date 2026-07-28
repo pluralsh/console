@@ -189,3 +189,28 @@ export function getKubeDeleteWarning(
 ): string {
   return `This permanently deletes ${getKubeDeleteResourceLabel(kube)} below. This can't be undone from the workbench.`
 }
+
+export function isKubeSecretPath(path: string | null | undefined): boolean {
+  if (!path) return false
+  return path.includes('/secrets/') || path.endsWith('/secrets')
+}
+
+export function isKubeSecretBody(body: string | null | undefined): boolean {
+  if (!body?.trim()) return false
+  try {
+    const parsed = JSON.parse(body) as {
+      kind?: string
+      items?: Array<{ kind?: string }>
+    }
+    if (parsed.kind === 'Secret' || parsed.kind === 'SecretList') return true
+    return parsed.items?.[0]?.kind === 'Secret'
+  } catch {
+    return false
+  }
+}
+
+export function isKubeSecretRequest(
+  kube: KubeRequestLike | null | undefined
+): boolean {
+  return isKubeSecretPath(kube?.path) || isKubeSecretBody(kube?.body)
+}

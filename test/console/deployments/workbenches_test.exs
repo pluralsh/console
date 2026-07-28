@@ -5,7 +5,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.AI.Tools.Workbench.KubeRequest
   alias Console.PubSub
   alias Console.Deployments.Workbenches
-  alias Console.Schema.WorkbenchJob
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
   alias CloudQuery.Client
   alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput, ToolQuery.Stub}
 
@@ -1338,6 +1338,51 @@ defmodule Console.Deployments.WorkbenchesTest do
       reloaded = refetch(activity)
       assert reloaded.status == :successful
       assert reloaded.result.output == "already complete"
+    end
+
+    test "concurrent approvals only invoke the external action once" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "concurrent-approval-cluster")
+      parent = self()
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          status: :needs_approval,
+          prompt: "approve the kubernetes request",
+          result: %{
+            output: "request pending user approval",
+            kube_request: %{
+              handle: cluster.handle,
+              method: "delete",
+              path: "/apis/apps/v1/namespaces/default/deployments/api",
+              content_type: "application/json"
+            }
+          }
+        )
+
+      expect(Kazan, :run, fn %Kazan.Request{}, _opts ->
+        send(parent, :kube_invoked)
+        Process.sleep(150)
+        {:ok, %{"kind" => "Status", "status" => "Success"}}
+      end)
+
+      task1 = Task.async(fn -> Workbenches.approve_job_activity(activity.id, user) end)
+      task2 = Task.async(fn -> Workbenches.approve_job_activity(activity.id, user) end)
+      results = [Task.await(task1), Task.await(task2)]
+
+      assert Enum.count(results, &match?({:ok, %WorkbenchJobActivity{}}, &1)) == 1
+      assert Enum.count(results, &match?({:error, _}, &1)) == 1
+      assert_receive :kube_invoked
+      refute_receive :kube_invoked, 50
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert Jason.decode!(reloaded.result.output) == %{"kind" => "Status", "status" => "Success"}
     end
 
     test "does not invoke grpc for a non-function activity even with function call metadata" do

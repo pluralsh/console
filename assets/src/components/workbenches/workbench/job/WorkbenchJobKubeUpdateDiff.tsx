@@ -20,6 +20,7 @@ import {
   getKubeDeleteResourceLabel,
   getKubeDeleteWarning,
   getKubeUpdateDiffValues,
+  isKubeSecretRequest,
   KubeRequestLike,
   toKubeYaml,
 } from './workbenchJobKubeActionUtils'
@@ -46,6 +47,7 @@ export function WorkbenchJobKubeUpdateDiff({
 
   const liveKube = data?.workbenchJobActivity?.result?.kubeRequest
   const kube = liveKube ?? kubeRequest
+  const secretProtected = isKubeSecretRequest(kube)
   const { oldValue, newValue } =
     variant === 'delete'
       ? getKubeDeleteDiffValues(kube)
@@ -69,8 +71,23 @@ export function WorkbenchJobKubeUpdateDiff({
     )
   }
 
-  if (error && !oldValue && !newValue) {
+  if (error && !oldValue && !newValue && !secretProtected) {
     return <GqlError error={error} />
+  }
+
+  if (secretProtected && !oldValue && !newValue) {
+    return (
+      <DiffSectionSC>
+        {isDelete && <DeleteWarningBanner kubeRequest={kube} />}
+        <CaptionP $color="text-xlight">
+          {isDelete ? getKubeDeleteResourceLabel(kube).toUpperCase() : 'DIFF'}
+        </CaptionP>
+        <CaptionP $color="text-light">
+          Secret payloads are hidden from workbench readers. Approve or deny
+          based on the request path and method.
+        </CaptionP>
+      </DiffSectionSC>
+    )
   }
 
   if (!newValue && !oldValue) return null
