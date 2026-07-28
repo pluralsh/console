@@ -3659,6 +3659,9 @@ type WorkbenchJob {
   "the workbench this run belongs to"
   workbench: Workbench
 
+  "the console URL for this workbench job"
+  url: String!
+
   "the flow this job is associated with"
   flow: Flow
 

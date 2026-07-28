@@ -408,6 +408,7 @@ mutation EnqueueWorkbenchPrFollowup($url: String!, $attributes: QueuedPromptAttr
         ...QueuedPromptFragment
         workbenchJob {
             id
+            url
         }
     }
 }

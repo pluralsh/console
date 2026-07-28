@@ -43544,7 +43544,8 @@ func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragm
 }
 
 type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob struct {
-	ID string "json:\"id\" graphql:\"id\""
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
 }
 
 func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) GetID() string {
@@ -43552,6 +43553,12 @@ func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) Get
 		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob{}
 	}
 	return t.ID
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) GetURL() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob{}
+	}
+	return t.URL
 }
 
 type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup struct {
@@ -72657,6 +72664,7 @@ const EnqueueWorkbenchPrFollowupDocument = `mutation EnqueueWorkbenchPrFollowup 
 		... QueuedPromptFragment
 		workbenchJob {
 			id
+			url
 		}
 	}
 }

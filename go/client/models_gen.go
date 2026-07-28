@@ -10328,6 +10328,8 @@ type WorkbenchJob struct {
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
+	// the console URL for this workbench job
+	URL string `json:"url"`
 	// the flow this job is associated with
 	Flow *Flow `json:"flow,omitempty"`
 	// the user who created this run
