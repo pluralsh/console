@@ -300,7 +300,6 @@ export function getActionInputJson(
       handle: kube.handle,
       method: kube.method,
       path: kube.path,
-      body: kube.body,
       queryParams: kube.queryParams,
       contentType: kube.contentType,
     })
