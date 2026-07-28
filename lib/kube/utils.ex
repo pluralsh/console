@@ -21,6 +21,29 @@ defmodule Kube.Utils do
   end
   def raw_meta(_), do: nil
 
+  def sanitize_kube_resource(res) when is_map(res) do
+    res
+    |> Console.string_map()
+    |> Map.drop(["status"])
+    |> then(fn
+      %{"metadata" => meta} = map when is_map(meta) ->
+        Map.put(
+          map,
+          "metadata",
+          Map.drop(meta, [
+            "managedFields",
+            "resourceVersion",
+            "uid",
+            "generation",
+            "creationTimestamp"
+          ])
+        )
+
+      map -> map
+    end)
+  end
+  def sanitize_kube_resource(res), do: res
+
   def ns(%{"metadata" => meta}), do: meta["namespace"]
   def ns(%{metadata: %MetaV1.ObjectMeta{namespace: ns}}), do: ns
   def ns(%{namespace: ns}), do: ns

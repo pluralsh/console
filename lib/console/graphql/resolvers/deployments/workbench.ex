@@ -155,70 +155,16 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: {:ok, Workbenches.get_workbench_tool(id)}
   def function_call_tool(_, _, _), do: {:ok, nil}
 
-  def kube_request_body(%{path: path, body: body}, _, _) do
-    cond do
-      secret_path?(path) -> {:ok, nil}
-      secret_body?(body) -> {:ok, nil}
-      true -> {:ok, body}
-    end
-  end
-  def kube_request_body(_, _, _), do: {:ok, nil}
-
   def kube_request_current(%{handle: handle, path: path}, _, %{context: %{current_user: user}})
       when is_binary(handle) and is_binary(path) do
-    cond do
-      secret_path?(path) ->
-        {:ok, nil}
-      true ->
-        with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
-             {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
-          {:ok, sanitize_kube_resource(res)}
-        else
-          _ -> {:ok, nil}
-        end
+    with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
+          {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
+      {:ok, Kube.Utils.sanitize_kube_resource(res)}
+    else
+      _ -> {:ok, nil}
     end
   end
   def kube_request_current(_, _, _), do: {:ok, nil}
-
-  defp secret_path?(path) when is_binary(path),
-    do: String.contains?(path, "/secrets/") or String.ends_with?(path, "/secrets")
-  defp secret_path?(_), do: false
-
-  defp secret_body?(body) when is_binary(body) do
-    case Jason.decode(body) do
-      {:ok, %{"kind" => kind}} when kind in ["Secret", "SecretList"] -> true
-      {:ok, %{"items" => [%{"kind" => "Secret"} | _]}} -> true
-      _ -> false
-    end
-  end
-  defp secret_body?(_), do: false
-
-  defp sanitize_kube_resource(res) when is_map(res) do
-    res
-    |> stringify_keys()
-    |> Map.drop(["status"])
-    |> then(fn
-      %{"metadata" => meta} = map when is_map(meta) ->
-        Map.put(map, "metadata", Map.drop(meta, [
-          "managedFields",
-          "resourceVersion",
-          "uid",
-          "generation",
-          "creationTimestamp"
-        ]))
-      map -> map
-    end)
-  end
-  defp sanitize_kube_resource(res), do: res
-
-  defp stringify_keys(map) when is_map(map) do
-    Map.new(map, fn
-      {k, v} when is_atom(k) -> {Atom.to_string(k), stringify_keys(v)}
-      {k, v} -> {k, stringify_keys(v)}
-    end)
-  end
-  defp stringify_keys(list) when is_list(list), do: Enum.map(list, &stringify_keys/1)
-  defp stringify_keys(other), do: other
 
   def all_workbench_alerts(args, %{context: %{current_user: user}}) do
     Alert.for_user(user)
