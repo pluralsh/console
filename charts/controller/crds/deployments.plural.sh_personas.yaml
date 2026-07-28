@@ -160,11 +160,6 @@ spec:
                           Permissions enables the permissions action in the flow header when set to true.
                           This allows personas to manage flow permissions from the flow detail page.
                         type: boolean
-                      startWorkbenchJob:
-                        description: |-
-                          StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.
-                          This allows personas to launch workbench jobs directly from the flow detail page.
-                        type: boolean
                       pipelines:
                         description: |-
                           Pipelines enables access to flow pipeline features when set to true.
@@ -174,6 +169,11 @@ spec:
                         description: |-
                           Previews enables access to flow preview environment features when set to true.
                           This includes viewing and managing preview environments associated with flows.
+                        type: boolean
+                      startWorkbenchJob:
+                        description: |-
+                          StartWorkbenchJob enables the "Start workbench job" action in the flow header when set to true.
+                          This allows personas to launch workbench jobs directly from the flow detail page.
                         type: boolean
                       workbenches:
                         description: |-
