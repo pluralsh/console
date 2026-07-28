@@ -2743,6 +2743,9 @@ input WorkbenchJobModesAttributes {
 
   "budget limits for this job"
   budget: WorkbenchJobBudgetAttributes
+
+  "kubernetes action options for this job"
+  kubernetes: WorkbenchJobKubernetesModesAttributes
 }
 
 input WorkbenchJobModelAttributes {
@@ -2767,6 +2770,20 @@ input WorkbenchJobBudgetAttributes {
 
   "maximum token budget for this job"
   tokens: Int
+}
+
+input WorkbenchJobKubernetesModesAttributes {
+  "whether kubernetes update actions are enabled"
+  update: Boolean
+
+  "whether kubernetes delete actions are enabled"
+  delete: Boolean
+
+  "namespaces the agent can never act in"
+  excludeNamespaces: [String]
+
+  "if set, actions are only allowed in these namespaces"
+  requireNamespaces: [String]
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -3707,6 +3724,9 @@ type WorkbenchJobModes {
 
   "budget limits for this job"
   budget: WorkbenchJobBudget
+
+  "kubernetes action options for this job"
+  kubernetes: WorkbenchJobKubernetesModes
 }
 
 type WorkbenchJobModel {
@@ -3731,6 +3751,20 @@ type WorkbenchJobBudget {
 
   "maximum token budget for this job"
   tokens: Int
+}
+
+type WorkbenchJobKubernetesModes {
+  "whether kubernetes update actions are enabled"
+  update: Boolean
+
+  "whether kubernetes delete actions are enabled"
+  delete: Boolean
+
+  "namespaces the agent can never act in"
+  excludeNamespaces: [String]
+
+  "if set, actions are only allowed in these namespaces"
+  requireNamespaces: [String]
 }
 
 type WorkbenchJobUsage {

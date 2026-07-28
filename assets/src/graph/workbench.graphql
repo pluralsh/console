@@ -94,6 +94,12 @@ fragment Workbench on Workbench {
       cost
       tokens
     }
+    kubernetes {
+      update
+      delete
+      excludeNamespaces
+      requireNamespaces
+    }
   }
   skills {
     ref {
@@ -520,6 +526,12 @@ fragment WorkbenchCron on WorkbenchCron {
       cost
       tokens
     }
+    kubernetes {
+      update
+      delete
+      excludeNamespaces
+      requireNamespaces
+    }
   }
   lastRunAt
   nextRunAt
@@ -555,6 +567,12 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
     budget {
       cost
       tokens
+    }
+    kubernetes {
+      update
+      delete
+      excludeNamespaces
+      requireNamespaces
     }
   }
   matches {
@@ -615,6 +633,12 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
     budget {
       cost
       tokens
+    }
+    kubernetes {
+      update
+      delete
+      excludeNamespaces
+      requireNamespaces
     }
   }
   insertedAt
