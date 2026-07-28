@@ -46,9 +46,9 @@ export function WorkbenchJobActionDetail({
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
-  const isKubeUpdate =
-    isKubernetes &&
-    getKubeActionVariant(activity.result?.kubeRequest?.method) === 'update'
+  const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
+  const isKubeDiff =
+    isKubernetes && (kubeVariant === 'update' || kubeVariant === 'delete')
   const icon = getActionIcon(activity)
   const inputJson = getActionInputJson(activity)
   const isDenied =
@@ -120,7 +120,7 @@ export function WorkbenchJobActionDetail({
 
       {error && <GqlError error={error} />}
 
-      {isKubeUpdate ? (
+      {isKubeDiff ? (
         <WorkbenchJobKubeUpdateDiff
           activityId={activity.id}
           kubeRequest={activity.result?.kubeRequest}

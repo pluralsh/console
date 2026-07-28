@@ -164,3 +164,28 @@ export function getKubeUpdateDiffValues(
   const oldValue = toKubeYaml(kube?.current)
   return { oldValue, newValue }
 }
+
+/** Full-file delete treatment: entire current object as removals. */
+export function getKubeDeleteDiffValues(
+  kube: KubeRequestLike | null | undefined
+): { oldValue: string; newValue: string } {
+  return {
+    oldValue: toKubeYaml(kube?.current),
+    newValue: '',
+  }
+}
+
+export function getKubeDeleteResourceLabel(
+  kube: KubeRequestLike | null | undefined
+): string {
+  const parsed = parseKubePath(kube?.path)
+  const nsLabel = parsed?.namespace ? `ns/${parsed.namespace}` : null
+  const name = parsed?.name
+  return [nsLabel, name].filter(Boolean).join(' · ') || kube?.path || 'resource'
+}
+
+export function getKubeDeleteWarning(
+  kube: KubeRequestLike | null | undefined
+): string {
+  return `This permanently deletes ${getKubeDeleteResourceLabel(kube)} below. This can't be undone from the workbench.`
+}

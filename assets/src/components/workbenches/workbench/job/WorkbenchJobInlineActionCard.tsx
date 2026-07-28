@@ -53,7 +53,8 @@ export function WorkbenchJobInlineActionCard({
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
-  const isKubeUpdate = isKubernetes && kubeVariant === 'update'
+  const isKubeDiff =
+    isKubernetes && (kubeVariant === 'update' || kubeVariant === 'delete')
   const inputJson = getActionInputJson(activity)
   const isDenied =
     activity.status === WorkbenchJobActivityStatus.Cancelled ||
@@ -126,12 +127,12 @@ export function WorkbenchJobInlineActionCard({
       {expanded && (
         <>
           {error && <GqlError error={error} />}
-          {!isKubeUpdate && (
+          {!isKubeDiff && (
             <CaptionP $color="text-xlight">
               {getActionDescription(activity)}
             </CaptionP>
           )}
-          {isKubeUpdate ? (
+          {isKubeDiff ? (
             <WorkbenchJobKubeUpdateDiff
               activityId={activity.id}
               kubeRequest={activity.result?.kubeRequest}
@@ -169,7 +170,7 @@ export function WorkbenchJobInlineActionCard({
             </>
           )}
           <WorkbenchJobActionDenialResult activity={activity} />
-          {!isKubeUpdate && !!activity.insertedAt && (
+          {!isKubeDiff && !!activity.insertedAt && (
             <TimeSC>
               <span>Start time</span>
               <strong>
