@@ -3688,8 +3688,11 @@ type WorkbenchJob {
 
   activities(
     after: String
+
     first: Int
+
     before: String
+
     last: Int
 
     "filter activities by status"
@@ -3843,7 +3846,7 @@ type WorkbenchJobActivity {
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
 
-  "the user who created this activity"
+  "the user who created or denied this activity"
   user: User
 
   insertedAt: DateTime
