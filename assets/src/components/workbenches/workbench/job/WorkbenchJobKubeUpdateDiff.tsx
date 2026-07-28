@@ -1,5 +1,10 @@
-import { Chip, Flex, TrashCanIcon } from '@pluralsh/design-system'
-import DiffViewer from 'components/utils/DiffViewer'
+import {
+  Chip,
+  DiffMethod,
+  DiffViewer,
+  Flex,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -8,7 +13,6 @@ import {
   WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { ReactNode } from 'react'
-import { DiffMethod } from 'react-diff-viewer-continued'
 import styled, { useTheme } from 'styled-components'
 import {
   getKubeActionVariant,

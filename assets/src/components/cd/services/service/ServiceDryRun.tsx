@@ -9,13 +9,12 @@ import { useMemo, useState } from 'react'
 import {
   DiffColumnIcon,
   DiffUnifiedIcon,
+  DiffViewer,
   IconFrame,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
-
-import DiffViewer from '../../../utils/DiffViewer'
 
 import { useServiceContext } from './ServiceDetailsContext'
 
