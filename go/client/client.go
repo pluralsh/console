@@ -324,6 +324,8 @@ type ConsoleClient interface {
 	CreateWorkbenchPrompt(ctx context.Context, workbenchID string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchPrompt, error)
 	UpdateWorkbenchPrompt(ctx context.Context, id string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchPrompt, error)
 	DeleteWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchPrompt, error)
+	CreateQueuedPrompt(ctx context.Context, jobID string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateQueuedPrompt, error)
+	EnqueueWorkbenchPrFollowup(ctx context.Context, url string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*EnqueueWorkbenchPrFollowup, error)
 	GetWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchPrompt, error)
 	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error)
 	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error)
@@ -7188,6 +7190,45 @@ func (t *WorkbenchPromptFragment) GetPrompt() *string {
 		t = &WorkbenchPromptFragment{}
 	}
 	return t.Prompt
+}
+
+type QueuedPromptFragment struct {
+	ID           string                             "json:\"id\" graphql:\"id\""
+	Prompt       *string                            "json:\"prompt,omitempty\" graphql:\"prompt\""
+	DequeableAt  *string                            "json:\"dequeableAt,omitempty\" graphql:\"dequeableAt\""
+	WorkbenchJob *QueuedPromptFragment_WorkbenchJob "json:\"workbenchJob,omitempty\" graphql:\"workbenchJob\""
+	User         *QueuedPromptFragment_User         "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *QueuedPromptFragment) GetID() string {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.ID
+}
+func (t *QueuedPromptFragment) GetPrompt() *string {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.Prompt
+}
+func (t *QueuedPromptFragment) GetDequeableAt() *string {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.DequeableAt
+}
+func (t *QueuedPromptFragment) GetWorkbenchJob() *QueuedPromptFragment_WorkbenchJob {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.WorkbenchJob
+}
+func (t *QueuedPromptFragment) GetUser() *QueuedPromptFragment_User {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.User
 }
 
 type TinyAgentRuntimeFragment_Cluster struct {
@@ -16180,6 +16221,28 @@ func (t *WorkbenchWebhookFragment_Workbench) GetName() string {
 		t = &WorkbenchWebhookFragment_Workbench{}
 	}
 	return t.Name
+}
+
+type QueuedPromptFragment_WorkbenchJob struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *QueuedPromptFragment_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &QueuedPromptFragment_WorkbenchJob{}
+	}
+	return t.ID
+}
+
+type QueuedPromptFragment_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *QueuedPromptFragment_User) GetID() string {
+	if t == nil {
+		t = &QueuedPromptFragment_User{}
+	}
+	return t.ID
 }
 
 type DeleteAgentRuntime_DeleteAgentRuntime struct {
@@ -43447,6 +43510,50 @@ func (t *DeleteWorkbenchPrompt_DeleteWorkbenchPrompt) GetID() string {
 	return t.ID
 }
 
+type CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_WorkbenchJob struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_WorkbenchJob{}
+	}
+	return t.ID
+}
+
+type CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User{}
+	}
+	return t.ID
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_WorkbenchJob struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_WorkbenchJob{}
+	}
+	return t.ID
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User{}
+	}
+	return t.ID
+}
+
 type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -47215,6 +47322,28 @@ func (t *DeleteWorkbenchPrompt) GetDeleteWorkbenchPrompt() *DeleteWorkbenchPromp
 		t = &DeleteWorkbenchPrompt{}
 	}
 	return t.DeleteWorkbenchPrompt
+}
+
+type CreateQueuedPrompt struct {
+	CreateQueuedPrompt *QueuedPromptFragment "json:\"createQueuedPrompt,omitempty\" graphql:\"createQueuedPrompt\""
+}
+
+func (t *CreateQueuedPrompt) GetCreateQueuedPrompt() *QueuedPromptFragment {
+	if t == nil {
+		t = &CreateQueuedPrompt{}
+	}
+	return t.CreateQueuedPrompt
+}
+
+type EnqueueWorkbenchPrFollowup struct {
+	EnqueueWorkbenchPrFollowup *QueuedPromptFragment "json:\"enqueueWorkbenchPrFollowup,omitempty\" graphql:\"enqueueWorkbenchPrFollowup\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup) GetEnqueueWorkbenchPrFollowup() *QueuedPromptFragment {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup{}
+	}
+	return t.EnqueueWorkbenchPrFollowup
 }
 
 type GetWorkbenchPrompt struct {
@@ -72448,6 +72577,78 @@ func (c *Client) DeleteWorkbenchPrompt(ctx context.Context, id string, intercept
 	return &res, nil
 }
 
+const CreateQueuedPromptDocument = `mutation CreateQueuedPrompt ($jobId: ID!, $attributes: QueuedPromptAttributes!) {
+	createQueuedPrompt(jobId: $jobId, attributes: $attributes) {
+		... QueuedPromptFragment
+	}
+}
+fragment QueuedPromptFragment on QueuedPrompt {
+	id
+	prompt
+	dequeableAt
+	workbenchJob {
+		id
+	}
+	user {
+		id
+	}
+}
+`
+
+func (c *Client) CreateQueuedPrompt(ctx context.Context, jobID string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateQueuedPrompt, error) {
+	vars := map[string]any{
+		"jobId":      jobID,
+		"attributes": attributes,
+	}
+
+	var res CreateQueuedPrompt
+	if err := c.Client.Post(ctx, "CreateQueuedPrompt", CreateQueuedPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const EnqueueWorkbenchPrFollowupDocument = `mutation EnqueueWorkbenchPrFollowup ($url: String!, $attributes: QueuedPromptAttributes!) {
+	enqueueWorkbenchPrFollowup(url: $url, attributes: $attributes) {
+		... QueuedPromptFragment
+	}
+}
+fragment QueuedPromptFragment on QueuedPrompt {
+	id
+	prompt
+	dequeableAt
+	workbenchJob {
+		id
+	}
+	user {
+		id
+	}
+}
+`
+
+func (c *Client) EnqueueWorkbenchPrFollowup(ctx context.Context, url string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*EnqueueWorkbenchPrFollowup, error) {
+	vars := map[string]any{
+		"url":        url,
+		"attributes": attributes,
+	}
+
+	var res EnqueueWorkbenchPrFollowup
+	if err := c.Client.Post(ctx, "EnqueueWorkbenchPrFollowup", EnqueueWorkbenchPrFollowupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetWorkbenchPromptDocument = `query GetWorkbenchPrompt ($id: ID!) {
 	workbenchPrompt(id: $id) {
 		... WorkbenchPromptFragment
@@ -72983,6 +73184,8 @@ var DocumentOperationNames = map[string]string{
 	CreateWorkbenchPromptDocument:                     "CreateWorkbenchPrompt",
 	UpdateWorkbenchPromptDocument:                     "UpdateWorkbenchPrompt",
 	DeleteWorkbenchPromptDocument:                     "DeleteWorkbenchPrompt",
+	CreateQueuedPromptDocument:                        "CreateQueuedPrompt",
+	EnqueueWorkbenchPrFollowupDocument:                "EnqueueWorkbenchPrFollowup",
 	GetWorkbenchPromptDocument:                        "GetWorkbenchPrompt",
 	CreateWorkbenchWebhookDocument:                    "CreateWorkbenchWebhook",
 	UpdateWorkbenchWebhookDocument:                    "UpdateWorkbenchWebhook",
