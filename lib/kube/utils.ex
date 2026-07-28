@@ -24,7 +24,6 @@ defmodule Kube.Utils do
   def sanitize_kube_resource(res) when is_map(res) do
     res
     |> Console.string_map()
-    |> Map.drop(["status"])
     |> then(fn
       %{"metadata" => meta} = map when is_map(meta) ->
         Map.put(
@@ -43,6 +42,21 @@ defmodule Kube.Utils do
     end)
   end
   def sanitize_kube_resource(res), do: res
+
+  def redact_secret(%{"kind" => "Secret"} = res) do
+    Enum.reduce(["data", "stringData"], res, fn field, acc ->
+      case Map.fetch(acc, field) do
+        {:ok, data} -> Map.put(acc, field, redact_secret_data(data))
+        :error -> acc
+      end
+    end)
+  end
+  def redact_secret(res), do: res
+
+  defp redact_secret_data(data) when is_map(data),
+    do: Map.new(data, fn {k, _} -> {k, "*****"} end)
+
+  defp redact_secret_data(data), do: data
 
   def ns(%{"metadata" => meta}), do: meta["namespace"]
   def ns(%{metadata: %MetaV1.ObjectMeta{namespace: ns}}), do: ns

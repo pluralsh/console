@@ -679,7 +679,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :handle,       :string, description: "the target cluster handle"
     field :method,       :string, description: "the Kubernetes API HTTP method"
     field :path,         :string, description: "the Kubernetes API request path"
-    field :body,         :string, description: "the Kubernetes API request body"
+    field :body,         :string,
+      description: "the Kubernetes API request body",
+      resolve: &Deployments.kube_request_body/3
     field :query_params, :map,    description: "query parameters sent with the Kubernetes API request"
     field :content_type, :string, description: "the Kubernetes API request content type"
 

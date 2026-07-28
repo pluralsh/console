@@ -83,9 +83,8 @@ defmodule Console.Deployments.Agents do
   def upsert_agent_runtime(attrs, %Cluster{} = cluster),
     do: upsert_agent_runtime(attrs, cluster, cluster)
 
-
   @spec upsert_agent_runtime(map, Cluster.t | nil, User.t | Cluster.t | nil) :: agent_runtime_resp
-  def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cid} = cluster, actor) do
+  def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cid}, actor) do
     runtime = get_agent_runtime(cid, name) |> Repo.preload([:create_bindings])
 
     with {:ok, _} <- allow(runtime || %AgentRuntime{cluster_id: cid}, actor, :write),

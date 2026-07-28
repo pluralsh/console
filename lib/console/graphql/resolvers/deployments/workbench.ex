@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Repo
+  alias Kube.Utils, as: KUtils
   alias Console.Deployments.{Clusters, Workbenches}
   alias Console.AI.Workbench.{Toolchain, Skills}
   alias Console.AI.Tools.Workbench.Infrastructure.KubeGet
@@ -155,11 +156,28 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: {:ok, Workbenches.get_workbench_tool(id)}
   def function_call_tool(_, _, _), do: {:ok, nil}
 
+  def kube_request_body(%{body: body}, _, _) when is_binary(body) do
+    case Jason.decode(body) do
+      {:ok, %{} = body} -> kube_request_body(body)
+      _ -> {:ok, body}
+    end
+  end
+  def kube_request_body(%{body: %{} = b}, _, _), do: kube_request_body(b)
+  def kube_request_body(_, _, _), do: {:ok, nil}
+
+  defp kube_request_body(body) do
+    KUtils.redact_secret(body)
+    |> KUtils.sanitize_kube_resource()
+    |> Jason.encode()
+  end
+
   def kube_request_current(%{handle: handle, path: path}, _, %{context: %{current_user: user}})
       when is_binary(handle) and is_binary(path) do
     with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
           {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
-      {:ok, Kube.Utils.sanitize_kube_resource(res)}
+      KUtils.sanitize_kube_resource(res)
+      |> KUtils.redact_secret()
+      |> ok()
     else
       _ -> {:ok, nil}
     end
