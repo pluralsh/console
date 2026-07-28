@@ -390,6 +390,27 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "PullRequestUpdated" do
+    test "it records the stack run created for a merged stack pr" do
+      repo = insert(:git_repository, pulled_at: Timex.shift(Timex.now(), seconds: -30))
+      stack = insert(:stack, git: %{folder: "terraform", ref: "main"}, repository: repo)
+      pr = insert(:pull_request, status: :merged, stack: stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+
+      event = %PubSub.PullRequestUpdated{item: pr}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      %{stack_run: run} = Repo.preload(updated, [:stack_run])
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert refetch(pr).stack_run_id == run.id
+    end
+  end
+
   describe "StackDeleted" do
     test "it will create a delete run" do
       stack = insert(:stack, deleted_at: Timex.now(), sha: "last-sha")
@@ -441,6 +462,35 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       assert dequeued.id == run.id
       assert dequeued.status == :pending
+    end
+
+    test "it kicks the associated workbench for a successful stack run" do
+      bot("console")
+      stack = insert(:stack)
+      completed = insert(:stack_run, stack: stack, status: :successful)
+      job = insert(:workbench_job)
+      pr =
+        insert(:pull_request,
+          url: "https://github.com/pluralsh/console/pull/10",
+          stack_run: completed,
+          workbench_job: job
+        )
+
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued)
+
+      event = %PubSub.StackRunCompleted{item: completed}
+      {:ok, dequeued} = Recurse.handle_event(event)
+
+      activity =
+        Console.Schema.WorkbenchJobActivity.for_workbench_job(job.id)
+        |> Repo.one!()
+
+      assert dequeued.id == run.id
+      assert activity.type == :user
+      assert activity.status == :successful
+      assert activity.prompt =~ "pull request #{pr.url} has been completed"
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
     end
 
     test "it can delete a stack if it is in deleting stack" do

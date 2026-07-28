@@ -22,10 +22,12 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
     PullRequest,
-    FlowWorkbench
+    FlowWorkbench,
+    StackRun
   }
   alias Console.AI.{Provider, VectorStore}
   alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
+  alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -785,6 +787,31 @@ defmodule Console.Deployments.Workbenches do
     get_workbench_job!(id)
     |> then(&create_message(attrs, &1, user))
   end
+
+  def kick_workbench(%StackRun{status: :successful, id: id}) do
+    WorkbenchJob.for_stack_run(id)
+    |> WorkbenchJob.with_limit(1)
+    |> Repo.one()
+    |> case do
+      %WorkbenchJob{} = job ->
+        %PullRequest{} = pr = PullRequest.for_stack_run(id) |> Repo.one!()
+        create_message(%{
+          type: :user,
+          prompt: String.trim(stack_run_verification_prompt(pr: pr))
+        },  job, Users.get_bot!("console"))
+      nil ->
+        {:error, "no workbench job found for stack run #{id}"}
+    end
+  end
+
+  def kick_workbench(_), do: :ok
+
+  EEx.function_from_file(
+    :defp,
+    :stack_run_verification_prompt,
+    "priv/prompts/workbench/stack_run_verification.md.eex",
+    [:assigns]
+  )
 
   @doc """
   Creates a new message for the job associated with a pull request.

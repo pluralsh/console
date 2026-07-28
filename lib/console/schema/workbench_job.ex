@@ -198,6 +198,14 @@ defmodule Console.Schema.WorkbenchJob do
     end)
   end
 
+  def for_stack_run(query \\ __MODULE__, stack_run_id) do
+    from(j in query,
+      join: pr in assoc(j, :pull_requests),
+      join: sr in assoc(pr, :stack_run),
+      where: sr.id == ^stack_run_id
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(j in query, order_by: ^order)
   end

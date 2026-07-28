@@ -11,7 +11,8 @@ defmodule Console.Schema.PullRequest do
     AgentRun,
     User,
     WorkbenchJob,
-    Workbench
+    Workbench,
+    StackRun
   }
 
   defmodule Aggregate do
@@ -59,6 +60,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :agent_run,      AgentRun
     belongs_to :author,         User
     belongs_to :workbench_job,  WorkbenchJob
+    belongs_to :stack_run,      StackRun
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -111,6 +113,10 @@ defmodule Console.Schema.PullRequest do
 
   def for_stack(query \\ __MODULE__, stack_id) do
     from(pr in query, where: pr.stack_id == ^stack_id)
+  end
+
+  def for_stack_run(query \\ __MODULE__, stack_run_id) do
+    from(pr in query, where: pr.stack_run_id == ^stack_run_id, limit: 1)
   end
 
   def for_flow(query \\ __MODULE__, flow_id) do
@@ -248,6 +254,7 @@ defmodule Console.Schema.PullRequest do
     merge_cron
     merge_attempt_at
     workbench_job_id
+    stack_run_id
   )a
 
   def changeset(model, attrs \\ %{}) do
