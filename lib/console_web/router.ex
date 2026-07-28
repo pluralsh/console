@@ -228,6 +228,8 @@ defmodule ConsoleWeb.Router do
           get "/workbenches",            WorkbenchController, :index
           get "/workbenches/name",       WorkbenchController, :show_by_name
           get "/workbenches/jobs/:id",   WorkbenchJobController, :show
+          post "/workbenches/jobs/:id/prompts",        QueuedPromptController, :create
+          delete "/workbenches/prompts/:id",           QueuedPromptController, :delete
           get "/workbenches/:id",        WorkbenchController, :show
           get "/workbenches/:id/jobs",    WorkbenchJobController, :index
           post "/workbenches/:id/jobs",  WorkbenchJobController, :create

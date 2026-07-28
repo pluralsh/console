@@ -13,7 +13,8 @@ defmodule Console.Schema.WorkbenchJob do
     Issue,
     PullRequest,
     Flow,
-    ChatbotMessage
+    ChatbotMessage,
+    QueuedPrompt
   }
   alias Console.Deployments.Policies.Rbac
 
@@ -27,7 +28,8 @@ defmodule Console.Schema.WorkbenchJob do
         field :model,    :string
       end
 
-      field :plan, :boolean
+      field :plan,         :boolean
+      field :verification, :boolean
 
       embeds_one :kubernetes, Kubernetes, on_replace: :update do
         field :update, :boolean, default: false
@@ -50,7 +52,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, [:plan])
+      |> cast(attrs, [:plan, :verification])
       |> cast_embed(:model, with: &model_changeset/2)
       |> cast_embed(:coding, with: &coding_changeset/2)
       |> cast_embed(:budget, with: &budget_changeset/2)
@@ -109,6 +111,7 @@ defmodule Console.Schema.WorkbenchJob do
     has_one  :chatbot_message, ChatbotMessage, on_replace: :update
     has_many :activities,      WorkbenchJobActivity, on_replace: :delete
     has_many :pull_requests,   PullRequest, on_replace: :delete
+    has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
 
     timestamps()
   end
@@ -196,6 +199,14 @@ defmodule Console.Schema.WorkbenchJob do
         distinct: true
       )
     end)
+  end
+
+  def for_stack_run(query \\ __MODULE__, stack_run_id) do
+    from(j in query,
+      join: pr in assoc(j, :pull_requests),
+      join: sr in assoc(pr, :stack_run),
+      where: sr.id == ^stack_run_id
+    )
   end
 
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do

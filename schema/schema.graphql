@@ -1398,6 +1398,17 @@ type RootMutationType {
     attributes: WorkbenchJobAttributes!
   ): WorkbenchJob
 
+  "Queues a prompt to be sent to a workbench job later. Requires prompt access to the job."
+  createQueuedPrompt(
+    "the workbench job to queue a prompt for"
+    jobId: ID!
+
+    attributes: QueuedPromptAttributes!
+  ): QueuedPrompt
+
+  "Deletes a queued prompt. Requires prompt access to the queued prompt's job."
+  deleteQueuedPrompt(id: ID!): QueuedPrompt
+
   createWorkbenchMessage(
     "the job to create a message for"
     jobId: ID!
@@ -1413,6 +1424,14 @@ type RootMutationType {
     "message attributes (e.g. prompt)"
     attributes: WorkbenchMessageAttributes!
   ): WorkbenchJobActivity
+
+  enqueueWorkbenchPrFollowup(
+    "the pull request url to queue a follow-up prompt for"
+    url: String!
+
+    "queued prompt attributes"
+    attributes: QueuedPromptAttributes!
+  ): QueuedPrompt
 
   "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
   approveWorkbenchJobActivity(
@@ -2735,6 +2754,9 @@ input WorkbenchJobModesAttributes {
   "whether planning mode is enabled for this job"
   plan: Boolean
 
+  "whether verification mode is enabled for this job"
+  verification: Boolean
+
   "model override for this job"
   model: WorkbenchJobModelAttributes
 
@@ -3486,6 +3508,14 @@ input WorkbenchMessageAttributes {
   prompt: String!
 }
 
+input QueuedPromptAttributes {
+  "the prompt to send when dequeued"
+  prompt: String!
+
+  "when this prompt becomes eligible to dequeue"
+  dequeableAt: DateTime!
+}
+
 type Workbench {
   "the id of the workbench"
   id: String!
@@ -3655,6 +3685,8 @@ type WorkbenchJob {
 
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
+  queuedPrompts(after: String, first: Int, before: String, last: Int): QueuedPromptConnection
+
   metricsTool(
     "the name of the metrics tool"
     name: String
@@ -3690,6 +3722,9 @@ type WorkbenchJob {
 type WorkbenchJobModes {
   "whether planning mode is enabled for this job"
   plan: Boolean
+
+  "whether verification mode is enabled for this job"
+  verification: Boolean
 
   "model override for this job"
   model: WorkbenchJobModel
@@ -4127,6 +4162,33 @@ type WorkbenchCron {
 
   "the workbench this cron belongs to"
   workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type QueuedPrompt {
+  "the id of the queued prompt"
+  id: String!
+
+  "the prompt text"
+  prompt: String
+
+  "when this prompt becomes eligible to dequeue"
+  dequeableAt: DateTime
+
+  "when this prompt was consumed"
+  consumedAt: DateTime
+
+  "user this prompt will run as"
+  userId: ID
+
+  "the job this prompt will be sent to"
+  workbenchJob: WorkbenchJob
+
+  "the user who queued this prompt"
+  user: User
 
   insertedAt: DateTime
 
@@ -4825,6 +4887,11 @@ type WorkbenchJobConnection {
 type WorkbenchJobActivityConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchJobActivityEdge]
+}
+
+type QueuedPromptConnection {
+  pageInfo: PageInfo!
+  edges: [QueuedPromptEdge]
 }
 
 type WorkbenchCronConnection {
@@ -16885,6 +16952,11 @@ type WorkbenchPromptEdge {
 
 type WorkbenchCronEdge {
   node: WorkbenchCron
+  cursor: String
+}
+
+type QueuedPromptEdge {
+  node: QueuedPrompt
   cursor: String
 }
 

@@ -2,6 +2,7 @@ defmodule Console.Deployments.Workbenches do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
+  import Console.AI.Workbench.Mentions
   alias Console.Schema.{
     User,
     Workbench,
@@ -22,10 +23,14 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
     PullRequest,
-    FlowWorkbench
+    FlowWorkbench,
+    StackRun,
+    Service,
+    QueuedPrompt
   }
   alias Console.AI.{Provider, VectorStore}
   alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
+  alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
 
@@ -38,6 +43,7 @@ defmodule Console.Deployments.Workbenches do
   @type activity_resp :: {:ok, WorkbenchJobActivity.t()} | error
   @type cron_resp :: {:ok, WorkbenchCron.t()} | error
   @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
+  @type queued_prompt_resp :: {:ok, QueuedPrompt.t()} | error
   @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
   @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
@@ -67,6 +73,8 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench_cron(id), do: Repo.get(WorkbenchCron, id)
   def get_workbench_prompt!(id), do: Repo.get!(WorkbenchPrompt, id)
   def get_workbench_prompt(id), do: Repo.get(WorkbenchPrompt, id)
+  def get_queued_prompt!(id), do: Repo.get!(QueuedPrompt, id)
+  def get_queued_prompt(id), do: Repo.get(QueuedPrompt, id)
   def get_workbench_skill!(id), do: Repo.get!(WorkbenchSkill, id)
   def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
@@ -787,6 +795,99 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Queues a prompt to be sent to a workbench job after `dequeable_at`.
+  Requires read/prompt access to the target job.
+  """
+  @spec create_queued_prompt(map, binary | WorkbenchJob.t(), User.t()) :: queued_prompt_resp
+  def create_queued_prompt(attrs, %WorkbenchJob{id: job_id}, %User{id: user_id} = user) do
+    %QueuedPrompt{workbench_job_id: job_id, user_id: user_id}
+    |> QueuedPrompt.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:insert)
+  end
+
+  def create_queued_prompt(attrs, job_id, %User{} = user) when is_binary(job_id) do
+    get_workbench_job!(job_id)
+    |> then(&create_queued_prompt(attrs, &1, user))
+  end
+
+  @doc """
+  Deletes a queued prompt before or after it has been consumed.
+  Requires read/prompt access to the target job.
+  """
+  @spec delete_queued_prompt(binary, User.t()) :: queued_prompt_resp
+  def delete_queued_prompt(id, %User{} = user) do
+    get_queued_prompt!(id)
+    |> allow(user, :read)
+    |> when_ok(:delete)
+  end
+
+  @spec dequeue_prompt(QueuedPrompt.t()) :: activity_resp
+  def dequeue_prompt(%QueuedPrompt{} = prompt) do
+    %{user: user, workbench_job: job} = Repo.preload(prompt, [:workbench_job, user: [:groups]])
+
+    start_transaction()
+    |> add_operation(:consume, fn _ ->
+      prompt
+      |> QueuedPrompt.changeset(%{consumed_at: DateTime.utc_now()})
+      |> Repo.update()
+    end)
+    |> add_operation(:job, fn %{consume: prompt} ->
+      create_message(%{
+        prompt: prompt.prompt
+      }, job, user)
+    end)
+    |> execute(extract: :job)
+  end
+
+  def kick_workbench(%StackRun{status: :successful, id: id} = run) do
+    run = Repo.preload(run, :stack)
+    WorkbenchJob.for_stack_run(id)
+    |> WorkbenchJob.with_limit(1)
+    |> Repo.one()
+    |> case do
+      %WorkbenchJob{modes: %{verification: true}} = job ->
+        %PullRequest{} = pr = PullRequest.for_stack_run(id)
+                              |> Repo.one!()
+        create_queued_prompt(%{
+          prompt: String.trim(stack_run_verification_prompt(pr: pr, run: run)),
+          dequeable_at: DateTime.utc_now()
+        },  job, Users.get_bot!("console"))
+
+      %{} -> {:error, "verification mode is not enabled for this job"}
+      nil -> {:error, "no workbench job found for stack run #{id}"}
+    end
+  end
+
+  def kick_workbench(%PullRequest{status: :merged, service: %Service{} = svc, workbench_job_id: id} = pr)
+      when is_binary(id) do
+    case Repo.preload(pr, [workbench_job: [user: :groups]]) do
+      %PullRequest{workbench_job: %WorkbenchJob{modes: %{verification: true}} = job} ->
+        create_queued_prompt(%{
+          prompt: String.trim(service_verification_prompt(pr: pr, svc: svc)),
+          dequeable_at: DateTime.add(DateTime.utc_now(), 15, :minute)
+        }, job, job.user)
+      _ -> {:error, "verification mode is not enabled for this job"}
+    end
+  end
+
+  def kick_workbench(_), do: :ok
+
+  EEx.function_from_file(
+    :defp,
+    :stack_run_verification_prompt,
+    "priv/prompts/workbench/stack_run_verification.md.eex",
+    [:assigns]
+  )
+
+  EEx.function_from_file(
+    :defp,
+    :service_verification_prompt,
+    "priv/prompts/workbench/service_verification.md.eex",
+    [:assigns]
+  )
+
+  @doc """
   Creates a new message for the job associated with a pull request.
   """
   @spec pr_followup(map, binary, User.t()) :: activity_resp
@@ -796,6 +897,21 @@ defmodule Console.Deployments.Workbenches do
     |> case do
       %PullRequest{workbench_job: %WorkbenchJob{} = job} ->
         create_message(attrs, job, user)
+      _ ->
+        {:error, "pull request not found"}
+    end
+  end
+
+  @doc """
+  Queues a prompt for the job associated with a pull request.
+  """
+  @spec pr_queued_prompt(map, binary, User.t()) :: queued_prompt_resp
+  def pr_queued_prompt(attrs, url, %User{} = user) do
+    Repo.get_by(PullRequest, url: url)
+    |> Repo.preload([:workbench_job])
+    |> case do
+      %PullRequest{workbench_job: %WorkbenchJob{} = job} ->
+        create_queued_prompt(attrs, job, user)
       _ ->
         {:error, "pull request not found"}
     end

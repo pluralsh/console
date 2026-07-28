@@ -206,6 +206,38 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert content =~ "\"critical_count\":1"
       assert content =~ report.id
     end
+
+    test "when components is true, includes service components in the response" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      service = insert(:service, cluster: cluster)
+
+      component =
+        insert(:service_component,
+          service: service,
+          group: "apps",
+          version: "v1",
+          kind: "Deployment",
+          namespace: "prod",
+          name: "api",
+          synced: true,
+          state: :running
+        )
+
+      assert {:ok, parsed} =
+               Tool.validate(%ServiceInspect{user: user}, %{
+                 "service_id" => service.id,
+                 "components" => true
+               })
+
+      assert {:ok, content} = ServiceInspect.implement(parsed)
+      assert content =~ "# Components"
+      assert content =~ "\"api_version\": \"apps/v1\""
+      assert content =~ "\"kind\": \"Deployment\""
+      assert content =~ "\"namespace\": \"prod\""
+      assert content =~ "\"name\": \"api\""
+      assert content =~ component.id
+    end
   end
 
   describe "StackList (plrl_stacks)" do
