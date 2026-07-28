@@ -80,9 +80,10 @@ func (in *WorkbenchTool) ConsoleName() string {
 	return in.Name
 }
 
-// Diff compares the current WorkbenchTool spec with its last known state.
-func (in *WorkbenchTool) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(in.Spec)
+// Diff compares the resolved WorkbenchTool attributes with their last known state.
+// Attributes include secret values, so credential rotation is detected.
+func (in *WorkbenchTool) Diff(attrs console.WorkbenchToolAttributes, hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(attrs)
 	if err != nil {
 		return false, "", err
 	}
