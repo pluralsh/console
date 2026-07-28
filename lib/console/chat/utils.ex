@@ -34,7 +34,12 @@ defmodule Console.Chat.Utils do
     with %WorkbenchChatbot{user: %User{} = user, prompt: prompt, message_behavior: behavior} = chatbot <- bot do
       prompt = prompt(chat: conn, msg: msg, channel: chan_ref, custom: prompt, behavior: behavior)
       case parent_job(msg) do
-        %WorkbenchJob{} = job -> Workbenches.create_message(%{prompt: prompt}, job, user)
+        %WorkbenchJob{} = job ->
+          Workbenches.create_queued_prompt(%{
+            prompt: prompt,
+            dequeable_at: DateTime.utc_now()
+          }, job, user)
+
         _ ->
           chatbot_message =
             Map.merge(%{
@@ -61,7 +66,7 @@ defmodule Console.Chat.Utils do
     chatbot_msg(id)
     |> Repo.preload(:workbench_job, force: true)
     |> case do
-      %ChatbotMessage{workbench_job: %WorkbenchJob{status: s} = job} when s not in ~w(running pending)a -> job
+      %ChatbotMessage{workbench_job: %WorkbenchJob{} = job} -> job
       _ -> nil
     end
   end
