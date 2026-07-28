@@ -406,6 +406,10 @@ mutation CreateQueuedPrompt($jobId: ID!, $attributes: QueuedPromptAttributes!) {
 mutation EnqueueWorkbenchPrFollowup($url: String!, $attributes: QueuedPromptAttributes!) {
     enqueueWorkbenchPrFollowup(url: $url, attributes: $attributes) {
         ...QueuedPromptFragment
+        workbenchJob {
+            id
+            url
+        }
     }
 }
 

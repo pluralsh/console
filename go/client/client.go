@@ -43532,17 +43532,6 @@ func (t *CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User) GetID(
 	return t.ID
 }
 
-type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_WorkbenchJob struct {
-	ID string "json:\"id\" graphql:\"id\""
-}
-
-func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_WorkbenchJob) GetID() string {
-	if t == nil {
-		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_WorkbenchJob{}
-	}
-	return t.ID
-}
-
 type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -43552,6 +43541,63 @@ func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragm
 		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User{}
 	}
 	return t.ID
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob{}
+	}
+	return t.ID
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) GetURL() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob{}
+	}
+	return t.URL
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup struct {
+	DequeableAt  *string                                                                          "json:\"dequeableAt,omitempty\" graphql:\"dequeableAt\""
+	ID           string                                                                           "json:\"id\" graphql:\"id\""
+	Prompt       *string                                                                          "json:\"prompt,omitempty\" graphql:\"prompt\""
+	User         *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User "json:\"user,omitempty\" graphql:\"user\""
+	WorkbenchJob *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob              "json:\"workbenchJob,omitempty\" graphql:\"workbenchJob\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetDequeableAt() *string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.DequeableAt
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.ID
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetPrompt() *string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.Prompt
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetUser() *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.User
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetWorkbenchJob() *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.WorkbenchJob
 }
 
 type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
@@ -47336,10 +47382,10 @@ func (t *CreateQueuedPrompt) GetCreateQueuedPrompt() *QueuedPromptFragment {
 }
 
 type EnqueueWorkbenchPrFollowup struct {
-	EnqueueWorkbenchPrFollowup *QueuedPromptFragment "json:\"enqueueWorkbenchPrFollowup,omitempty\" graphql:\"enqueueWorkbenchPrFollowup\""
+	EnqueueWorkbenchPrFollowup *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup "json:\"enqueueWorkbenchPrFollowup,omitempty\" graphql:\"enqueueWorkbenchPrFollowup\""
 }
 
-func (t *EnqueueWorkbenchPrFollowup) GetEnqueueWorkbenchPrFollowup() *QueuedPromptFragment {
+func (t *EnqueueWorkbenchPrFollowup) GetEnqueueWorkbenchPrFollowup() *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup {
 	if t == nil {
 		t = &EnqueueWorkbenchPrFollowup{}
 	}
@@ -72616,6 +72662,10 @@ func (c *Client) CreateQueuedPrompt(ctx context.Context, jobID string, attribute
 const EnqueueWorkbenchPrFollowupDocument = `mutation EnqueueWorkbenchPrFollowup ($url: String!, $attributes: QueuedPromptAttributes!) {
 	enqueueWorkbenchPrFollowup(url: $url, attributes: $attributes) {
 		... QueuedPromptFragment
+		workbenchJob {
+			id
+			url
+		}
 	}
 }
 fragment QueuedPromptFragment on QueuedPrompt {
