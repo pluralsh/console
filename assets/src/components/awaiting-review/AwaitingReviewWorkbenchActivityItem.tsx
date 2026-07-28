@@ -12,6 +12,12 @@ import {
   getWorkbenchToolLabel,
   WorkbenchToolIcon,
 } from 'components/workbenches/tools/workbenchToolsUtils'
+import {
+  getKubeActionSubtitle,
+  getKubeActionTitle,
+  getKubeActionVariant,
+  parseKubePath,
+} from 'components/workbenches/workbench/job/workbenchJobKubeActionUtils'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
@@ -31,18 +37,6 @@ type ActivityTool = NonNullable<
     >['functionCall']
   >['tool']
 >
-
-type KubeRequest = NonNullable<
-  NonNullable<AwaitingReviewWorkbenchActivityFragment['result']>['kubeRequest']
->
-
-type KubeActionVariant = 'update' | 'delete' | 'other'
-
-type ParsedKubePath = {
-  namespace?: string
-  resource?: string
-  name?: string
-}
 
 export function AwaitingReviewWorkbenchActivityItem({
   activity,
@@ -65,11 +59,11 @@ export function AwaitingReviewWorkbenchActivityItem({
   const parsedPath = isKubernetes ? parseKubePath(kubeRequest?.path) : null
 
   const title = isKubernetes
-    ? kubernetesTitle(kubeRequest, kubeVariant, parsedPath)
+    ? getKubeActionTitle(kubeRequest)
     : 'Approval required'
 
   const subtitle = isKubernetes
-    ? kubeRequestSubtitle(kubeRequest, kubeVariant, parsedPath)
+    ? getKubeActionSubtitle(kubeRequest)
     : toolType
       ? getWorkbenchToolLabel(toolType)
       : (functionCall?.name ?? 'Action')
@@ -217,7 +211,11 @@ export function AwaitingReviewWorkbenchActivityItem({
   )
 }
 
-function KubeActionIcon({ variant }: { variant: KubeActionVariant | null }) {
+function KubeActionIcon({
+  variant,
+}: {
+  variant: ReturnType<typeof getKubeActionVariant> | null
+}) {
   if (variant === 'delete') {
     return (
       <TrashCanIcon
@@ -244,96 +242,10 @@ function toolDescription(tool: ActivityTool | null | undefined): string | null {
   }
 }
 
-function getKubeActionVariant(
-  method: string | null | undefined
-): KubeActionVariant {
-  switch (method?.toLowerCase()) {
-    case 'delete':
-      return 'delete'
-    case 'put':
-    case 'patch':
-    case 'post':
-      return 'update'
-    default:
-      return 'other'
-  }
-}
-
-function parseKubePath(path: string | null | undefined): ParsedKubePath | null {
-  if (!path?.trim()) return null
-  const segments = path.split('/').filter(Boolean)
-  const nsIdx = segments.indexOf('namespaces')
-  if (nsIdx >= 0) {
-    return {
-      namespace: segments[nsIdx + 1],
-      resource: segments[nsIdx + 2],
-      name: segments[nsIdx + 3],
-    }
-  }
-  if (segments.length >= 2) {
-    return {
-      resource: segments.at(-2),
-      name: segments.at(-1),
-    }
-  }
-  return null
-}
-
-function kubernetesTitle(
-  kubeRequest: KubeRequest | null | undefined,
-  variant: KubeActionVariant | null,
-  parsed: ParsedKubePath | null
-): string {
-  const kind = formatKindLabel(parsed?.resource)
-  if (variant === 'delete' && kind && parsed?.name) {
-    return `${kind}/${parsed.name}`
-  }
-  if (kind) return kind
-  return kubeRequest?.method?.toUpperCase() || 'Kubernetes action'
-}
-
-function kubeRequestSubtitle(
-  kubeRequest: KubeRequest | null | undefined,
-  variant: KubeActionVariant | null,
-  parsed: ParsedKubePath | null
-): string {
-  const nsLabel = parsed?.namespace ? `ns/${parsed.namespace}` : null
-
-  if (variant === 'delete') {
-    return (
-      [nsLabel, kubeRequest?.handle].filter(Boolean).join(' · ') ||
-      kubeRequest?.handle ||
-      'Kubernetes'
-    )
-  }
-
-  if (variant === 'update') {
-    const resourcePath =
-      parsed?.resource && parsed?.name
-        ? `${parsed.resource}/${parsed.name}`
-        : parsed?.resource
-    return (
-      [nsLabel, resourcePath].filter(Boolean).join(' · ') ||
-      kubeRequest?.handle ||
-      'Kubernetes'
-    )
-  }
-
-  const path = kubeRequest?.path?.trim()
-  if (!path) return kubeRequest?.handle || 'Kubernetes'
-  return [kubeRequest?.handle, path].filter(Boolean).join(' · ')
-}
-
-function kubeDeleteDetail(parsed: ParsedKubePath | null): string | null {
+function kubeDeleteDetail(
+  parsed: ReturnType<typeof parseKubePath>
+): string | null {
   if (parsed?.namespace) return `Deleting ns/${parsed.namespace}`
   if (parsed?.name) return `Deleting ${parsed.name}`
   return 'Deleting resource'
-}
-
-function formatKindLabel(resource: string | undefined): string | undefined {
-  if (!resource) return undefined
-  return resource
-    .split(/[-_]/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
 }

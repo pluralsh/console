@@ -2,6 +2,8 @@ import {
   CancelledFilledIcon,
   StatusIpIcon,
   StatusOkIcon,
+  TrashCanIcon,
+  UpdatesIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
 import {
@@ -16,6 +18,11 @@ import {
 import { ComponentType, ReactElement } from 'react'
 import { DefaultTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import {
+  getKubeActionSubtitle,
+  getKubeActionTitle,
+  getKubeActionVariant,
+} from './workbenchJobKubeActionUtils'
 
 export type WorkbenchJobActionSectionKey =
   'awaiting' | 'pending' | 'running' | 'failed' | 'succeeded' | 'denied'
@@ -194,18 +201,7 @@ export function getActionTitle(activity: WorkbenchJobActionFragment): string {
   if (toolName) return toolName
 
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
-    const path = activity.result?.kubeRequest?.path?.trim()
-    if (path) {
-      const segments = path.split('/').filter(Boolean)
-      const resource = segments.at(-2)
-      if (resource) {
-        return resource
-          .split(/[-_]/)
-          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join('')
-      }
-    }
-    return 'Kubernetes action'
+    return getKubeActionTitle(activity.result?.kubeRequest)
   }
 
   return (
@@ -219,10 +215,7 @@ export function getActionSubtitle(
   activity: WorkbenchJobActionFragment
 ): string {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
-    const kube = activity.result?.kubeRequest
-    return (
-      [kube?.handle, kube?.path].filter(Boolean).join(' · ') || 'Kubernetes'
-    )
+    return getKubeActionSubtitle(activity.result?.kubeRequest)
   }
 
   const toolType = activity.result?.functionCall?.tool?.tool
@@ -253,7 +246,16 @@ export function getActionDescription(
 
 export function getActionIcon(activity: WorkbenchJobActionFragment) {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
-    return null
+    const variant = getKubeActionVariant(activity.result?.kubeRequest?.method)
+    if (variant === 'delete') {
+      return (
+        <TrashCanIcon
+          size={16}
+          color="icon-danger"
+        />
+      )
+    }
+    return <UpdatesIcon size={16} />
   }
 
   const toolType = activity.result?.functionCall?.tool?.tool

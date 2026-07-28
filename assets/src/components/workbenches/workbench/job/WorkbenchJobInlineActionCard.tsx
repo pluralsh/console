@@ -16,6 +16,7 @@ import {
   useRejectWorkbenchJobActivityMutation,
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
+  WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -29,6 +30,11 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
+import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
+import {
+  WorkbenchJobKubeActionChips,
+  WorkbenchJobKubeUpdateDiff,
+} from './WorkbenchJobKubeUpdateDiff'
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
@@ -45,6 +51,9 @@ export function WorkbenchJobInlineActionCard({
   const [error, setError] = useState<string | null>(null)
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
+  const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+  const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
+  const isKubeUpdate = isKubernetes && kubeVariant === 'update'
   const inputJson = getActionInputJson(activity)
   const isDenied =
     activity.status === WorkbenchJobActivityStatus.Cancelled ||
@@ -98,7 +107,11 @@ export function WorkbenchJobInlineActionCard({
           />
         </Flex>
         <HeaderActionsSC>
-          <InlineActionStatus activity={activity} />
+          <WorkbenchJobKubeActionChips
+            type={activity.type}
+            method={activity.result?.kubeRequest?.method}
+            statusChip={<InlineActionStatus activity={activity} />}
+          />
           <ExpandButtonSC
             type="button"
             aria-label={expanded ? 'Collapse action' : 'Expand action'}
@@ -113,38 +126,50 @@ export function WorkbenchJobInlineActionCard({
       {expanded && (
         <>
           {error && <GqlError error={error} />}
-          <CaptionP $color="text-xlight">
-            {getActionDescription(activity)}
-          </CaptionP>
-          {!!inputJson && (
-            <ActionData>
-              <CaptionP $color="text-xlight">INPUT</CaptionP>
-              <Code
-                language="json"
-                showHeader={false}
-              >
-                {inputJson}
-              </Code>
-            </ActionData>
+          {!isKubeUpdate && (
+            <CaptionP $color="text-xlight">
+              {getActionDescription(activity)}
+            </CaptionP>
           )}
-          {!!resultJson && (
-            <ActionData>
-              <CaptionP $color="text-xlight">RESULT</CaptionP>
-              <Code
-                language="json"
-                showHeader={false}
-                css={
-                  activity.status === WorkbenchJobActivityStatus.Failed
-                    ? { borderColor: theme.colors['border-danger'] }
-                    : undefined
-                }
-              >
-                {resultJson}
-              </Code>
-            </ActionData>
+          {isKubeUpdate ? (
+            <WorkbenchJobKubeUpdateDiff
+              activityId={activity.id}
+              kubeRequest={activity.result?.kubeRequest}
+              enabled={expanded}
+            />
+          ) : (
+            <>
+              {!!inputJson && (
+                <ActionData>
+                  <CaptionP $color="text-xlight">INPUT</CaptionP>
+                  <Code
+                    language="json"
+                    showHeader={false}
+                  >
+                    {inputJson}
+                  </Code>
+                </ActionData>
+              )}
+              {!!resultJson && (
+                <ActionData>
+                  <CaptionP $color="text-xlight">RESULT</CaptionP>
+                  <Code
+                    language="json"
+                    showHeader={false}
+                    css={
+                      activity.status === WorkbenchJobActivityStatus.Failed
+                        ? { borderColor: theme.colors['border-danger'] }
+                        : undefined
+                    }
+                  >
+                    {resultJson}
+                  </Code>
+                </ActionData>
+              )}
+            </>
           )}
           <WorkbenchJobActionDenialResult activity={activity} />
-          {!!activity.insertedAt && (
+          {!isKubeUpdate && !!activity.insertedAt && (
             <TimeSC>
               <span>Start time</span>
               <strong>

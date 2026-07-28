@@ -682,6 +682,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :body,         :string, description: "the Kubernetes API request body"
     field :query_params, :map, description: "query parameters sent with the Kubernetes API request"
     field :content_type, :string, description: "the Kubernetes API request content type"
+
+    @desc "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
+    field :current, :map, resolve: &Deployments.kube_request_current/3
   end
 
   object :workbench_job_activity_job_update do

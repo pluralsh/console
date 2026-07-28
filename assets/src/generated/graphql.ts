@@ -16106,6 +16106,8 @@ export type WorkbenchJobActivityKubeRequest = {
   body?: Maybe<Scalars['String']['output']>;
   /** the Kubernetes API request content type */
   contentType?: Maybe<Scalars['String']['output']>;
+  /** the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action */
+  current?: Maybe<Scalars['Map']['output']>;
   /** the target cluster handle */
   handle?: Maybe<Scalars['String']['output']>;
   /** the Kubernetes API HTTP method */
@@ -21539,6 +21541,13 @@ export type WorkbenchJobActivityQueryVariables = Exact<{
 
 
 export type WorkbenchJobActivityQuery = { __typename?: 'RootQueryType', workbenchJobActivity?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, activity?: { __typename?: 'WorkbenchJobActivity', id: string } | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null } | null } | null> | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, body?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null };
+
+export type WorkbenchJobKubeRequestDiffQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobKubeRequestDiffQuery = { __typename?: 'RootQueryType', workbenchJobActivity?: { __typename?: 'WorkbenchJobActivity', id: string, result?: { __typename?: 'WorkbenchJobActivityResult', kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, body?: string | null, contentType?: string | null, current?: Record<string, unknown> | null } | null } | null } | null };
 
 export type WorkbenchToolsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -45791,6 +45800,59 @@ export type WorkbenchJobActivityQueryHookResult = ReturnType<typeof useWorkbench
 export type WorkbenchJobActivityLazyQueryHookResult = ReturnType<typeof useWorkbenchJobActivityLazyQuery>;
 export type WorkbenchJobActivitySuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobActivitySuspenseQuery>;
 export type WorkbenchJobActivityQueryResult = Apollo.QueryResult<WorkbenchJobActivityQuery, WorkbenchJobActivityQueryVariables>;
+export const WorkbenchJobKubeRequestDiffDocument = gql`
+    query WorkbenchJobKubeRequestDiff($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    id
+    result {
+      kubeRequest {
+        handle
+        method
+        path
+        body
+        contentType
+        current
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchJobKubeRequestDiffQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchJobKubeRequestDiffQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobKubeRequestDiffQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobKubeRequestDiffQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchJobKubeRequestDiffQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables> & ({ variables: WorkbenchJobKubeRequestDiffQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>(WorkbenchJobKubeRequestDiffDocument, options);
+      }
+export function useWorkbenchJobKubeRequestDiffLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>(WorkbenchJobKubeRequestDiffDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchJobKubeRequestDiffSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>;
+export function useWorkbenchJobKubeRequestDiffSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobKubeRequestDiffQuery | undefined, WorkbenchJobKubeRequestDiffQueryVariables>;
+export function useWorkbenchJobKubeRequestDiffSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>(WorkbenchJobKubeRequestDiffDocument, options);
+        }
+export type WorkbenchJobKubeRequestDiffQueryHookResult = ReturnType<typeof useWorkbenchJobKubeRequestDiffQuery>;
+export type WorkbenchJobKubeRequestDiffLazyQueryHookResult = ReturnType<typeof useWorkbenchJobKubeRequestDiffLazyQuery>;
+export type WorkbenchJobKubeRequestDiffSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobKubeRequestDiffSuspenseQuery>;
+export type WorkbenchJobKubeRequestDiffQueryResult = Apollo.QueryResult<WorkbenchJobKubeRequestDiffQuery, WorkbenchJobKubeRequestDiffQueryVariables>;
 export const WorkbenchToolsDocument = gql`
     query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
   workbenchTools(first: $first, after: $after, q: $q) {
@@ -47447,6 +47509,7 @@ export const namedOperations = {
     WorkbenchJobWhimseyText: 'WorkbenchJobWhimseyText',
     WorkbenchJobActivityWhimseyText: 'WorkbenchJobActivityWhimseyText',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
+    WorkbenchJobKubeRequestDiff: 'WorkbenchJobKubeRequestDiff',
     WorkbenchTools: 'WorkbenchTools',
     WorkbenchTool: 'WorkbenchTool',
     WorkbenchLinkCard: 'WorkbenchLinkCard',

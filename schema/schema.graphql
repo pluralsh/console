@@ -3965,6 +3965,9 @@ type WorkbenchJobActivityKubeRequest {
 
   "the Kubernetes API request content type"
   contentType: String
+
+  "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
+  current: Map
 }
 
 type WorkbenchJobActivityJobUpdate {

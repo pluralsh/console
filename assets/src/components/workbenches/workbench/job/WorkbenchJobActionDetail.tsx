@@ -14,6 +14,7 @@ import {
   useRejectWorkbenchJobActivityMutation,
   WorkbenchJobActionFragment,
   WorkbenchJobActivityStatus,
+  WorkbenchJobActivityType,
 } from 'generated/graphql'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -24,6 +25,11 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
+import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
+import {
+  WorkbenchJobKubeActionChips,
+  WorkbenchJobKubeUpdateDiff,
+} from './WorkbenchJobKubeUpdateDiff'
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
@@ -39,6 +45,10 @@ export function WorkbenchJobActionDetail({
   const [error, setError] = useState<string | null>(null)
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
+  const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+  const isKubeUpdate =
+    isKubernetes &&
+    getKubeActionVariant(activity.result?.kubeRequest?.method) === 'update'
   const icon = getActionIcon(activity)
   const inputJson = getActionInputJson(activity)
   const isDenied =
@@ -101,44 +111,58 @@ export function WorkbenchJobActionDetail({
             css={{ minWidth: 0 }}
           />
         </Flex>
-        <WorkbenchJobActionStatusChip status={activity.status} />
+        <WorkbenchJobKubeActionChips
+          type={activity.type}
+          method={activity.result?.kubeRequest?.method}
+          statusChip={<WorkbenchJobActionStatusChip status={activity.status} />}
+        />
       </Flex>
 
       {error && <GqlError error={error} />}
 
-      {!!inputJson && (
-        <Flex
-          direction="column"
-          gap="xsmall"
-        >
-          <CaptionP $color="text-xlight">INPUT</CaptionP>
-          <Code
-            language="json"
-            showHeader={false}
-          >
-            {inputJson}
-          </Code>
-        </Flex>
-      )}
+      {isKubeUpdate ? (
+        <WorkbenchJobKubeUpdateDiff
+          activityId={activity.id}
+          kubeRequest={activity.result?.kubeRequest}
+          enabled
+        />
+      ) : (
+        <>
+          {!!inputJson && (
+            <Flex
+              direction="column"
+              gap="xsmall"
+            >
+              <CaptionP $color="text-xlight">INPUT</CaptionP>
+              <Code
+                language="json"
+                showHeader={false}
+              >
+                {inputJson}
+              </Code>
+            </Flex>
+          )}
 
-      {!!resultJson && (
-        <Flex
-          direction="column"
-          gap="xsmall"
-        >
-          <CaptionP $color="text-xlight">RESULT</CaptionP>
-          <Code
-            language="json"
-            showHeader={false}
-            css={
-              activity.status === WorkbenchJobActivityStatus.Failed
-                ? { borderColor: theme.colors['border-danger'] }
-                : undefined
-            }
-          >
-            {resultJson}
-          </Code>
-        </Flex>
+          {!!resultJson && (
+            <Flex
+              direction="column"
+              gap="xsmall"
+            >
+              <CaptionP $color="text-xlight">RESULT</CaptionP>
+              <Code
+                language="json"
+                showHeader={false}
+                css={
+                  activity.status === WorkbenchJobActivityStatus.Failed
+                    ? { borderColor: theme.colors['border-danger'] }
+                    : undefined
+                }
+              >
+                {resultJson}
+              </Code>
+            </Flex>
+          )}
+        </>
       )}
 
       <WorkbenchJobActionDenialResult activity={activity} />
