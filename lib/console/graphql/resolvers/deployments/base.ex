@@ -27,6 +27,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Base do
     Services.get_service_by_name!(cluster.id, name)
   end
 
+  def fetch_cluster(_, %{context: %{cluster: %Cluster{} = cluster}}), do: cluster
+  def fetch_cluster(%{cluster_id: id}, _) when is_binary(id), do: Clusters.get_cluster!(id)
+  def fetch_cluster(_, _), do: nil
+
   def maybe_search(query, module, %{q: q}) when is_binary(q), do: module.search(query, q)
   def maybe_search(query, _, _), do: query
 

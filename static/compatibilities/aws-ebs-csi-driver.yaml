@@ -8,7 +8,14 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Release notes provided do not enumerate changes; both versions only
+        link to the upstream CHANGELOG.]
+    breaking_changes: ['Unknown from provided notes; need to review upstream CHANGELOG
+        between v1.62.0 and v1.63.0 (and Helm chart changelog, if using the Helm chart)
+        to confirm any breaking changes.']
   chart_version: 2.63.0
   images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.3',
     'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.2', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.1',

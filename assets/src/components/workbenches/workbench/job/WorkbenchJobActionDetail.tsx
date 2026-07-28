@@ -41,7 +41,9 @@ export function WorkbenchJobActionDetail({
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const icon = getActionIcon(activity)
   const inputJson = getActionInputJson(activity)
-  const isDenied = activity.status === WorkbenchJobActivityStatus.Cancelled
+  const isDenied =
+    activity.status === WorkbenchJobActivityStatus.Cancelled ||
+    activity.status === WorkbenchJobActivityStatus.Rejected
   const resultJson = isDenied ? '' : getActionResultJson(activity)
 
   const [approve, { loading: approving }] =

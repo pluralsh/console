@@ -46,7 +46,9 @@ export function WorkbenchJobInlineActionCard({
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const inputJson = getActionInputJson(activity)
-  const isDenied = activity.status === WorkbenchJobActivityStatus.Cancelled
+  const isDenied =
+    activity.status === WorkbenchJobActivityStatus.Cancelled ||
+    activity.status === WorkbenchJobActivityStatus.Rejected
   const resultJson = isDenied ? '' : getActionResultJson(activity)
   const icon = getActionIcon(activity)
 

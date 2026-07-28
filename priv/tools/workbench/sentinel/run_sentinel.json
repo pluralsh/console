@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "properties": {
+        "sentinel_id": {
+            "type": "string",
+            "description": "UUID of the sentinel to run. Specify either sentinel_id or name."
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the sentinel to run. Specify either sentinel_id or name."
+        },
+        "overrides": {
+            "type": "object",
+            "description": "Optional sentinel run overrides. Currently supports tags for integration test checks.",
+            "properties": {
+                "tags": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Tags to merge into integration test checks for this run"
+                }
+            }
+        }
+    },
+    "required": []
+}

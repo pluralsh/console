@@ -223,6 +223,15 @@ mutation DeleteWorkbench($id: ID!) {
     }
 }
 
+mutation WorkbenchPrFollowup($url: String!, $attributes: WorkbenchMessageAttributes!) {
+    workbenchPrFollowup(url: $url, attributes: $attributes) {
+        id
+        prompt
+        type
+        status
+    }
+}
+
 mutation CreateWorkbenchTool($attributes: WorkbenchToolAttributes!) {
     createWorkbenchTool(attributes: $attributes) {
         ...WorkbenchToolFragment

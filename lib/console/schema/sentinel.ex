@@ -159,6 +159,10 @@ defmodule Console.Schema.Sentinel do
     from(s in query, order_by: ^order)
   end
 
+  def limit(query \\ __MODULE__, limit) do
+    from(s in query, limit: ^limit)
+  end
+
   @valid ~w(name description status last_run_at repository_id project_id crontab)a
 
   def changeset(model, attrs \\ %{}) do

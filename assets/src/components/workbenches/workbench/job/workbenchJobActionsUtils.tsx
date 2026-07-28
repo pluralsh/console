@@ -56,6 +56,7 @@ export function getActionStatusBorderColor(
     case WorkbenchJobActivityStatus.Failed:
       return theme.colors['border-danger']
     case WorkbenchJobActivityStatus.Cancelled:
+    case WorkbenchJobActivityStatus.Rejected:
       return theme.colors['border-input']
     default:
       return theme.colors.border
@@ -77,6 +78,7 @@ export function getActionSectionKey(
     case WorkbenchJobActivityStatus.Successful:
       return 'succeeded'
     case WorkbenchJobActivityStatus.Cancelled:
+    case WorkbenchJobActivityStatus.Rejected:
       return 'denied'
     default:
       return null
@@ -177,6 +179,7 @@ export function getActionDetailButtonLabel(
     case WorkbenchJobActivityStatus.Successful:
       return 'View JSON'
     case WorkbenchJobActivityStatus.Cancelled:
+    case WorkbenchJobActivityStatus.Rejected:
       return 'View reason'
     case WorkbenchJobActivityStatus.Pending:
     case WorkbenchJobActivityStatus.Running:

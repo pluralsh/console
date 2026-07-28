@@ -36,6 +36,7 @@ defmodule Console.Schema.Workbench do
         field :kubernetes,      :boolean
         field :pod_logs,        :boolean
         field :vulnerabilities, :boolean
+        field :sentinels,       :boolean
       end
 
       embeds_one :observability, Observability, on_replace: :update do
@@ -169,7 +170,7 @@ defmodule Console.Schema.Workbench do
 
   def infrastructure_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(services stacks kubernetes pod_logs vulnerabilities)a)
+    |> cast(attrs, ~w(services stacks kubernetes pod_logs vulnerabilities sentinels)a)
   end
 
   def coding_changeset(model, attrs \\ %{}) do

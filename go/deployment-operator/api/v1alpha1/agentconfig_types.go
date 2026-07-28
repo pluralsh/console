@@ -24,6 +24,10 @@ type AgentConfigurationSpec struct {
 	// Set to "0s" to disable stack polling.
 	StackPollInterval *string `json:"stackPollInterval,omitempty"`
 
+	// SentinelPollInterval sets how often the agent polls for sentinel run jobs.
+	// Set to "0s" to disable sentinel run job polling.
+	SentinelPollInterval *string `json:"sentinelPollInterval,omitempty"`
+
 	// PipelineGateInterval specifies how frequently the agent checks pipeline gates.
 	// Set to "0s" to disable pipeline gate checks.
 	PipelineGateInterval *string `json:"pipelineGateInterval,omitempty"`

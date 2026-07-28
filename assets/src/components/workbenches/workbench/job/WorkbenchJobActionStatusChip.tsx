@@ -64,6 +64,7 @@ export function WorkbenchJobActionStatusChip({
         </Chip>
       )
     case WorkbenchJobActivityStatus.Cancelled:
+    case WorkbenchJobActivityStatus.Rejected:
       return <Chip fillLevel={2}>Denied</Chip>
     default:
       return null

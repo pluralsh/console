@@ -1,6 +1,11 @@
 defmodule Console.AI.Workbench.Subagents.Coding do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun, AIUsage}
+  alias Console.Schema.{
+    WorkbenchJob,
+    WorkbenchJobActivity,
+    AgentRun,
+    AIUsage
+  }
   alias Console.AI.Tools.Workbench.{
     Skills,
     History,

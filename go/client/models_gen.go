@@ -573,6 +573,8 @@ type AgentRuntimeAttributes struct {
 	Name string `json:"name"`
 	// the type of this runtime
 	Type AgentRuntimeType `json:"type"`
+	// the cluster this runtime is running on (required for user-authenticated upserts)
+	ClusterID *string `json:"clusterId,omitempty"`
 	// the policy for creating runs on this runtime
 	CreateBindings []*AgentBindingAttributes `json:"createBindings,omitempty"`
 	// whether this runtime uses the built-in Plural AI proxy
@@ -2868,17 +2870,18 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed     *bool                        `json:"installed,omitempty"`
-	Cloud         *bool                        `json:"cloud,omitempty"`
-	Byok          *bool                        `json:"byok,omitempty"`
-	ExternalOidc  *bool                        `json:"externalOidc,omitempty"`
-	OidcName      *string                      `json:"oidcName,omitempty"`
-	QoveKey       *string                      `json:"qoveKey,omitempty"`
-	Features      *AvailableFeatures           `json:"features,omitempty"`
-	Details       *ConsoleConfigurationDetails `json:"details,omitempty"`
-	LicenseExpiry *string                      `json:"licenseExpiry,omitempty"`
-	Manifest      *PluralManifest              `json:"manifest,omitempty"`
-	GitStatus     *GitStatus                   `json:"gitStatus,omitempty"`
+	Installed             *bool                        `json:"installed,omitempty"`
+	Cloud                 *bool                        `json:"cloud,omitempty"`
+	Byok                  *bool                        `json:"byok,omitempty"`
+	ExternalOidc          *bool                        `json:"externalOidc,omitempty"`
+	OidcName              *string                      `json:"oidcName,omitempty"`
+	HealthmapClusterCount *int64                       `json:"healthmapClusterCount,omitempty"`
+	QoveKey               *string                      `json:"qoveKey,omitempty"`
+	Features              *AvailableFeatures           `json:"features,omitempty"`
+	Details               *ConsoleConfigurationDetails `json:"details,omitempty"`
+	LicenseExpiry         *string                      `json:"licenseExpiry,omitempty"`
+	Manifest              *PluralManifest              `json:"manifest,omitempty"`
+	GitStatus             *GitStatus                   `json:"gitStatus,omitempty"`
 }
 
 type ConsoleConfigurationDetails struct {
@@ -10247,6 +10250,8 @@ type WorkbenchInfrastructure struct {
 	PodLogs *bool `json:"podLogs,omitempty"`
 	// vulnerabilities capability enabled
 	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
+	// sentinels capability enabled
+	Sentinels *bool `json:"sentinels,omitempty"`
 }
 
 type WorkbenchInfrastructureAttributes struct {
@@ -10260,6 +10265,8 @@ type WorkbenchInfrastructureAttributes struct {
 	PodLogs *bool `json:"podLogs,omitempty"`
 	// enable vulnerabilities capability
 	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
+	// enable sentinels capability
+	Sentinels *bool `json:"sentinels,omitempty"`
 }
 
 type WorkbenchJob struct {
@@ -17611,6 +17618,7 @@ const (
 	WorkbenchJobActivityStatusFailed        WorkbenchJobActivityStatus = "FAILED"
 	WorkbenchJobActivityStatusCancelled     WorkbenchJobActivityStatus = "CANCELLED"
 	WorkbenchJobActivityStatusNeedsApproval WorkbenchJobActivityStatus = "NEEDS_APPROVAL"
+	WorkbenchJobActivityStatusRejected      WorkbenchJobActivityStatus = "REJECTED"
 )
 
 var AllWorkbenchJobActivityStatus = []WorkbenchJobActivityStatus{
@@ -17620,11 +17628,12 @@ var AllWorkbenchJobActivityStatus = []WorkbenchJobActivityStatus{
 	WorkbenchJobActivityStatusFailed,
 	WorkbenchJobActivityStatusCancelled,
 	WorkbenchJobActivityStatusNeedsApproval,
+	WorkbenchJobActivityStatusRejected,
 }
 
 func (e WorkbenchJobActivityStatus) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityStatusPending, WorkbenchJobActivityStatusRunning, WorkbenchJobActivityStatusSuccessful, WorkbenchJobActivityStatusFailed, WorkbenchJobActivityStatusCancelled, WorkbenchJobActivityStatusNeedsApproval:
+	case WorkbenchJobActivityStatusPending, WorkbenchJobActivityStatusRunning, WorkbenchJobActivityStatusSuccessful, WorkbenchJobActivityStatusFailed, WorkbenchJobActivityStatusCancelled, WorkbenchJobActivityStatusNeedsApproval, WorkbenchJobActivityStatusRejected:
 		return true
 	}
 	return false
@@ -17684,6 +17693,7 @@ const (
 	WorkbenchJobActivityTypeSearch         WorkbenchJobActivityType = "SEARCH"
 	WorkbenchJobActivityTypeFunction       WorkbenchJobActivityType = "FUNCTION"
 	WorkbenchJobActivityTypeKubernetes     WorkbenchJobActivityType = "KUBERNETES"
+	WorkbenchJobActivityTypeVerify         WorkbenchJobActivityType = "VERIFY"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -17703,11 +17713,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeSearch,
 	WorkbenchJobActivityTypeFunction,
 	WorkbenchJobActivityTypeKubernetes,
+	WorkbenchJobActivityTypeVerify,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify:
 		return true
 	}
 	return false
@@ -17894,6 +17905,9 @@ const (
 	WorkbenchToolCategoryScm            WorkbenchToolCategory = "SCM"
 	WorkbenchToolCategoryChat           WorkbenchToolCategory = "CHAT"
 	WorkbenchToolCategoryFunction       WorkbenchToolCategory = "FUNCTION"
+	WorkbenchToolCategoryCoding         WorkbenchToolCategory = "CODING"
+	WorkbenchToolCategoryVerification   WorkbenchToolCategory = "VERIFICATION"
+	WorkbenchToolCategoryObservability  WorkbenchToolCategory = "OBSERVABILITY"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -17908,11 +17922,14 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryScm,
 	WorkbenchToolCategoryChat,
 	WorkbenchToolCategoryFunction,
+	WorkbenchToolCategoryCoding,
+	WorkbenchToolCategoryVerification,
+	WorkbenchToolCategoryObservability,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking, WorkbenchToolCategoryInfrastructure, WorkbenchToolCategorySearch, WorkbenchToolCategoryScm, WorkbenchToolCategoryChat, WorkbenchToolCategoryFunction, WorkbenchToolCategoryCoding, WorkbenchToolCategoryVerification, WorkbenchToolCategoryObservability:
 		return true
 	}
 	return false

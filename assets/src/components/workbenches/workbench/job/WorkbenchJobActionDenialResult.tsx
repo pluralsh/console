@@ -10,7 +10,11 @@ import { useTheme } from 'styled-components'
 type ActionActivity = WorkbenchJobActionFragment | WorkbenchJobActivityFragment
 
 export function getActionDenialReason(activity: ActionActivity): string | null {
-  if (activity.status !== WorkbenchJobActivityStatus.Cancelled) return null
+  if (
+    activity.status !== WorkbenchJobActivityStatus.Cancelled &&
+    activity.status !== WorkbenchJobActivityStatus.Rejected
+  )
+    return null
   return activity.result?.output?.trim() || null
 }
 

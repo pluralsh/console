@@ -93,6 +93,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :kubernetes,      :boolean, description: "enable kubernetes capability"
     field :pod_logs,        :boolean, description: "enable pod logs capability"
     field :vulnerabilities, :boolean, description: "enable vulnerabilities capability"
+    field :sentinels,       :boolean, description: "enable sentinels capability"
   end
 
   input_object :workbench_coding_attributes do
@@ -803,6 +804,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :kubernetes,      :boolean, description: "kubernetes capability enabled"
     field :pod_logs,        :boolean, description: "pod logs capability enabled"
     field :vulnerabilities, :boolean, description: "vulnerabilities capability enabled"
+    field :sentinels,       :boolean, description: "sentinels capability enabled"
   end
 
   object :workbench_coding do
@@ -1787,6 +1789,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
 
       resolve &Deployments.create_workbench_message/2
+    end
+
+    field :workbench_pr_followup, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :url,        non_null(:string), description: "the pull request url to create a follow-up message for"
+      arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
+
+      resolve &Deployments.workbench_pr_followup/2
     end
 
     @desc "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."

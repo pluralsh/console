@@ -12,7 +12,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Teams.Tools do
     Console.AI.Tools.Workbench.Integration.Teams.SearchGroups,
     Console.AI.Tools.Workbench.Integration.Teams.PostChannelMessage,
     Console.AI.Tools.Workbench.Integration.Teams.UpdateChannelMessage,
-    Console.AI.Tools.Workbench.Integration.Teams.ReactToChannelMessage
+    Console.AI.Tools.Workbench.Integration.Teams.ReactToChannelMessage,
+    Console.AI.Tools.Workbench.Integration.Teams.Reply
   ]
 
   @spec expand(WorkbenchTool.t()) :: [struct()]

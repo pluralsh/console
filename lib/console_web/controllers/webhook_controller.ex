@@ -1,7 +1,10 @@
 defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
-  alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook, IssueWebhook}
+  alias Console.Repo
+  alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook, IssueWebhook, ChatConnection}
   alias Console.Deployments.{Git, Clusters, Observability, Integrations, Issues}
+  alias Console.Chat.Impl.Teams, as: TeamsBot
+  alias Console.Chat.Teams.Auth, as: TeamsAuth
 
   def cluster(conn, _) do
     with {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
@@ -37,6 +40,21 @@ defmodule ConsoleWeb.WebhookController do
       :reject -> send_resp(conn, 403, "Forbidden")
       _err ->
         json(conn, %{ignored: true})
+    end
+  end
+
+  def teams(conn, %{"id" => id}) do
+    activity = conn.body_params
+
+    with %ChatConnection{type: :teams, configuration: %{teams: %{client_id: cid}}} = chat <- Repo.get(ChatConnection, id),
+         true <- is_binary(cid),
+         {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
+         {:ok, _} <- TeamsAuth.verify(token, cid, service_url: activity["serviceUrl"]),
+         :ok <- TeamsBot.handle_activity(chat, activity) do
+      json(conn, %{ignored: false})
+    else
+      {:error, _} -> send_resp(conn, 401, "Unauthorized")
+      _ -> json(conn, %{ignored: true})
     end
   end
 

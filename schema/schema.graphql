@@ -1422,6 +1422,14 @@ type RootMutationType {
     attributes: WorkbenchMessageAttributes!
   ): WorkbenchJobActivity
 
+  workbenchPrFollowup(
+    "the pull request url to create a follow-up message for"
+    url: String!
+
+    "message attributes (e.g. prompt)"
+    attributes: WorkbenchMessageAttributes!
+  ): WorkbenchJobActivity
+
   "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
   approveWorkbenchJobActivity(
     "the workbench job activity to approve"
@@ -1932,6 +1940,9 @@ input AgentRuntimeAttributes {
 
   "the type of this runtime"
   type: AgentRuntimeType!
+
+  "the cluster this runtime is running on (required for user-authenticated upserts)"
+  clusterId: ID
 
   "the policy for creating runs on this runtime"
   createBindings: [AgentBindingAttributes]
@@ -2641,6 +2652,9 @@ enum WorkbenchToolCategory {
   SCM
   CHAT
   FUNCTION
+  CODING
+  VERIFICATION
+  OBSERVABILITY
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2667,6 +2681,7 @@ enum WorkbenchJobActivityStatus {
   FAILED
   CANCELLED
   NEEDS_APPROVAL
+  REJECTED
 }
 
 enum WorkbenchJobActivityType {
@@ -2686,6 +2701,7 @@ enum WorkbenchJobActivityType {
   SEARCH
   FUNCTION
   KUBERNETES
+  VERIFY
 }
 
 enum WorkbenchCanvasBlockType {
@@ -2866,6 +2882,9 @@ input WorkbenchInfrastructureAttributes {
 
   "enable vulnerabilities capability"
   vulnerabilities: Boolean
+
+  "enable sentinels capability"
+  sentinels: Boolean
 }
 
 input WorkbenchCodingAttributes {
@@ -4116,6 +4135,9 @@ type WorkbenchInfrastructure {
 
   "vulnerabilities capability enabled"
   vulnerabilities: Boolean
+
+  "sentinels capability enabled"
+  sentinels: Boolean
 }
 
 type WorkbenchCoding {
@@ -16462,6 +16484,8 @@ type ConsoleConfiguration {
   externalOidc: Boolean
 
   oidcName: String
+
+  healthmapClusterCount: Int
 
   qoveKey: String
 

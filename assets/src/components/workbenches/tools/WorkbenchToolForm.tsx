@@ -1,10 +1,14 @@
 import {
   Button,
   Checkbox,
+  Chip,
   Divider,
   Flex,
   FormField,
   Input2,
+  ListBoxItem,
+  Select,
+  SelectButton,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
@@ -13,6 +17,7 @@ import { FormBindings } from 'components/utils/bindings'
 import {
   PolicyBindingFragment,
   Provider,
+  WorkbenchToolCategory,
   WorkbenchToolAttributes,
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolFragment,
@@ -184,9 +189,13 @@ export function WorkbenchToolForm({
         : BASE_TOOL_FORM_STEPS,
     [supportsApproval]
   )
+  const defaultCategories =
+    type === WorkbenchToolType.Mcp
+      ? [WorkbenchToolCategory.Integration]
+      : TOOL_TYPE_TO_CATEGORIES[type]
   const { state, update, hasUpdates } = useUpdateState<WorkbenchToolFormState>({
     name: tool?.name ?? '',
-    categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
+    categories: tool?.categories ?? defaultCategories,
     configuration: sanitizeInitialConfiguration(tool),
     cloudConnectionId: tool?.cloudConnection?.id,
     mcpServerId: tool?.mcpServer?.id,
@@ -196,6 +205,7 @@ export function WorkbenchToolForm({
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
   const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
+  const selectedCategories = (state.categories ?? []).filter(isNonNullable)
   const hasRegisteredScm = Boolean(state.scmConnectionId)
   const scmType = scmTypeForWorkbenchTool(type)
   const cloudConnectionProvider =
@@ -307,10 +317,48 @@ export function WorkbenchToolForm({
               />
             )}
             {type === WorkbenchToolType.Mcp ? (
-              <McpServerSelectField
-                selectedId={state.mcpServerId ?? null}
-                onChange={(id) => update({ mcpServerId: id })}
-              />
+              <>
+                <McpServerSelectField
+                  selectedId={state.mcpServerId ?? null}
+                  onChange={(id) => update({ mcpServerId: id })}
+                />
+                <FormField label="Subagent Selection">
+                  <Select
+                    label="Subagent Selection"
+                    selectionMode="multiple"
+                    selectedKeys={new Set(selectedCategories)}
+                    onSelectionChange={(keys) => {
+                      const next = Array.from(keys).map(
+                        (key) => key as WorkbenchToolCategory
+                      )
+                      if (next.length > 0) update({ categories: next })
+                    }}
+                    triggerButton={
+                      <SelectButton>
+                        <Flex
+                          align="center"
+                          gap="xsmall"
+                        >
+                          <Chip
+                            fillLevel={3}
+                            size="small"
+                          >
+                            {selectedCategories.length}
+                          </Chip>
+                          <span>Subagents selected</span>
+                        </Flex>
+                      </SelectButton>
+                    }
+                  >
+                    {categories.map((category) => (
+                      <ListBoxItem
+                        key={category}
+                        label={categoryToLabel[category]}
+                      />
+                    ))}
+                  </Select>
+                </FormField>
+              </>
             ) : type !== WorkbenchToolType.Cloud ? (
               <>
                 {scmType ? (
@@ -328,14 +376,14 @@ export function WorkbenchToolForm({
                 />
               </>
             ) : null}
-            {categories.length > 1 && (
+            {type !== WorkbenchToolType.Mcp && categories.length > 1 && (
               <FormField label="Allowed capabilities (must select at least one)">
                 <Flex
                   direction="column"
                   gap="xsmall"
                 >
                   {categories.map((category) => {
-                    const selected = (state.categories ?? []).filter(Boolean)
+                    const selected = selectedCategories
                     const isChecked = selected.includes(category)
                     const canUncheck = selected.length > 1
                     return (

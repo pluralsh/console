@@ -89,6 +89,11 @@ spec:
                   PipelineGateInterval specifies how frequently the agent checks pipeline gates.
                   Set to "0s" to disable pipeline gate checks.
                 type: string
+              sentinelPollInterval:
+                description: |-
+                  SentinelPollInterval sets how often the agent polls for sentinel run jobs.
+                  Set to "0s" to disable sentinel run job polling.
+                type: string
               servicePollInterval:
                 description: |-
                   ServicePollInterval defines how often the agent polls for services.

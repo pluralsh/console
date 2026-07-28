@@ -104,7 +104,7 @@ const columns = [
     header: '',
     meta: { gridTemplate: `fit-content(100px)` },
     cell: function Cell({ getValue }) {
-      const { name, type, createBindings } = getValue()
+      const { name, type, cluster, createBindings } = getValue()
       const bindings = createBindings?.filter(isNonNullable) ?? []
       const [open, setOpen] = useState(false)
       return (
@@ -120,6 +120,7 @@ const columns = [
             onClose={() => setOpen(false)}
             name={name}
             type={type}
+            clusterId={cluster?.id}
             initialBindings={bindings}
           />
         </>

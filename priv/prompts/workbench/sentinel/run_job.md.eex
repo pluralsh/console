@@ -1,0 +1,21 @@
+# Sentinel Run Job
+
+- ID: `<%= @job.id %>`
+- Status: `<%= @job.status %>`
+- Check: `<%= @job.check %>`
+- Format: `<%= @job.format %>`
+- Sentinel run ID: `<%= @job.sentinel_run_id %>`
+- Cluster: <%= cluster(@job) %>
+- Repository ID: <%= nullable(@job.repository_id) %>
+- Completed at: <%= nullable(@job.completed_at) %>
+
+## Kubernetes Job
+
+- Namespace: <%= nullable(@job.reference && @job.reference.namespace) %>
+- Name: <%= nullable(@job.reference && @job.reference.name) %>
+
+## Output
+
+````<%= fence_language(@job.format) %>
+<%= @job.output || "" %>
+````

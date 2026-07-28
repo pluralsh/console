@@ -352,8 +352,8 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetGlobalService", mock.Anything, mock.Anything).Return(test.returnCreateService, nil)
-			fakeConsoleClient.On("DeleteGlobalService", mock.Anything, mock.Anything).Return(nil)
+			fakeConsoleClient.On("GetGlobalServiceByName", mock.Anything).Return(test.returnCreateService, nil)
+			fakeConsoleClient.On("DeleteGlobalService", mock.Anything).Return(nil)
 			serviceReconciler := &controller.GlobalServiceReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),

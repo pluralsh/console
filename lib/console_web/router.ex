@@ -57,6 +57,7 @@ defmodule ConsoleWeb.Router do
         get "/agent/chart", GitController, :agent_chart
         post "/webhooks/observability/:type/:id", WebhookController, :observability
         post "/webhooks/issues/:type/:id", WebhookController, :issue
+        post "/webhooks/teams/:id", WebhookController, :teams
         post "/webhooks/:type/:id", WebhookController, :scm
 
         scope "/states" do

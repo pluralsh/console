@@ -12,6 +12,11 @@ import { ChartLegendItem, HomeFilterOptionCard } from '../HomeFilterOptionCard'
 import { EmptyHeatmapSvg } from './ClusterHealthScoresHeatmapEmpty'
 
 export type HealthScoreFilterLabel = keyof typeof healthScoreLabelToRange
+export const DEFAULT_HEALTHMAP_CLUSTER_COUNT = 1000
+
+export const normalizeHealthmapClusterCount = (
+  count: Nullable<number>
+): number => (count && count > 0 ? count : DEFAULT_HEALTHMAP_CLUSTER_COUNT)
 
 export function ClusterHealthScoresHeatmap({
   clusters,

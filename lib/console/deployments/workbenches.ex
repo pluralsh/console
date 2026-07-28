@@ -21,6 +21,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchChatbot,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
+    PullRequest,
     FlowWorkbench
   }
   alias Console.AI.{Provider, VectorStore}
@@ -786,6 +787,21 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Creates a new message for the job associated with a pull request.
+  """
+  @spec pr_followup(map, binary, User.t()) :: activity_resp
+  def pr_followup(attrs, url, %User{} = user) do
+    Repo.get_by(PullRequest, url: url)
+    |> Repo.preload([:workbench_job])
+    |> case do
+      %PullRequest{workbench_job: %WorkbenchJob{} = job} ->
+        create_message(attrs, job, user)
+      _ ->
+        {:error, "pull request not found"}
+    end
+  end
+
+  @doc """
   Creates a new activity for a job, and bookkeeps job status and timestamp.
   """
   @spec create_job_activity(map, WorkbenchJob.t()) :: activity_resp
@@ -852,7 +868,7 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Rejects a job activity by setting status to cancelled and storing the reason as output.
+  Rejects a job activity by marking it rejected and setting the output to the reason.
   """
   @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
   def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
@@ -860,7 +876,7 @@ defmodule Console.Deployments.Workbenches do
     |> allow(user, :approve)
     |> when_ok(fn activity ->
       WorkbenchJobActivity.changeset(activity, %{
-        status: :cancelled,
+        status: :rejected,
         user_id: user.id,
         result: %{output: reason || "Execution rejected by user"}
       })

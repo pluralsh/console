@@ -230,7 +230,13 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.BitbucketDatacenter]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.AzureDevops]: [WorkbenchToolCategory.Scm],
   [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
-  [WorkbenchToolType.Mcp]: [WorkbenchToolCategory.Integration],
+  [WorkbenchToolType.Mcp]: [
+    WorkbenchToolCategory.Integration,
+    WorkbenchToolCategory.Observability,
+    WorkbenchToolCategory.Infrastructure,
+    WorkbenchToolCategory.Coding,
+    WorkbenchToolCategory.Verification,
+  ],
   [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
   [WorkbenchToolType.Splunk]: [WorkbenchToolCategory.Logs],
   [WorkbenchToolType.Dynatrace]: [
@@ -324,6 +330,9 @@ export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
   [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
   [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
   [WorkbenchToolCategory.Function]: 'Cloud Function',
+  [WorkbenchToolCategory.Coding]: 'Coding',
+  [WorkbenchToolCategory.Verification]: 'Verification',
+  [WorkbenchToolCategory.Observability]: 'Observability',
 }
 
 export type WorkbenchToolCard = {

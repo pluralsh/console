@@ -82,6 +82,10 @@ if get_env("CONSOLE_CACHE_AGENT_QUEUE_LIMIT") do
   config :console, :cache_agent_queue_limit, String.to_integer(get_env("CONSOLE_CACHE_AGENT_QUEUE_LIMIT"))
 end
 
+if get_env("CONSOLE_HEALTHMAP_CLUSTER_COUNT") do
+  config :console, :healthmap_cluster_count, String.to_integer(get_env("CONSOLE_HEALTHMAP_CLUSTER_COUNT"))
+end
+
 if get_env("CONSOLE_VERSION") do
   config :console, :version, get_env("CONSOLE_VERSION")
 end

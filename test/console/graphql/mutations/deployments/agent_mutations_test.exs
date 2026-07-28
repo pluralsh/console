@@ -50,6 +50,54 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert refetch(%AgentRuntime{id: runtime["id"]}).connection_id == conn.id
     end
 
+    test "an admin can upsert an agent runtime" do
+      cluster = insert(:cluster)
+      admin = insert(:user, roles: %{admin: true})
+      user = insert(:user)
+
+      {:ok, %{data: %{"upsertAgentRuntime" => runtime}}} = run_query("""
+        mutation Upsert($attrs: AgentRuntimeAttributes!) {
+          upsertAgentRuntime(attributes: $attrs) {
+            id
+            name
+            type
+            cluster { id }
+            createBindings { user { id } }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "test",
+        "type" => "CLAUDE",
+        "clusterId" => cluster.id,
+        "createBindings" => [%{"userEmail" => user.email}]
+      }}, %{current_user: admin})
+
+      assert runtime["id"]
+      assert runtime["name"] == "test"
+      assert runtime["type"] == "CLAUDE"
+      assert runtime["cluster"]["id"] == cluster.id
+      assert hd(runtime["createBindings"])["user"]["id"] == user.id
+    end
+
+    test "a non-admin user cannot upsert an agent runtime" do
+      cluster = insert(:cluster)
+      user = insert(:user)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation Upsert($attrs: AgentRuntimeAttributes!) {
+          upsertAgentRuntime(attributes: $attrs) {
+            id
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "test",
+        "type" => "CLAUDE",
+        "clusterId" => cluster.id
+      }}, %{current_user: user})
+
+      assert error.message =~ "forbidden"
+    end
+
     test "upserting an agent runtime rejects unknown scm connections" do
       cluster = insert(:cluster)
 

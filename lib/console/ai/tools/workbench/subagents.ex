@@ -34,6 +34,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(_, :skill, _), do: "Invoke a skill subagent to update the skills for the current workbench.  This subagent will use the skills API to update the skills for the current workbench."
   defp subagent_description(_, :history, _), do: "Invoke a history subagent to search past workbench activities.  Useful to remember what has been done so far, with regex support for finding past work."
   defp subagent_description(_, :search, _), do: "Invoke a web search subagent to search the public web for information.  Useful to find documentation, public pricing information, and anything else that's not specific to deployed infrastructure."
+  defp subagent_description(_, :verify, _), do: "Invoke a verification subagent to verify the job was successfully completed based on infrastructure and observability state."
   defp subagent_description(_, _, _), do: "Unknown subagent"
 
   defp infra_description(%{vulnerabilities: vulns, pod_logs: logs}) when vulns or logs do

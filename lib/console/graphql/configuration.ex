@@ -38,20 +38,22 @@ defmodule Console.GraphQl.Configuration do
   end
 
   object :console_configuration do
-    field :git_commit,      :string
-    field :console_version, :string, resolve: fn _, _, _ -> {:ok, Console.version()} end
-    field :is_demo_project, :boolean
-    field :is_sandbox,      :boolean
-    field :plural_login,    :boolean
-    field :vpn_enabled,     :boolean
-    field :sentry_enabled,  :boolean
-    field :installed,       :boolean,
+    field :git_commit,              :string
+    field :console_version,         :string, resolve: fn _, _, _ -> {:ok, Console.version()} end
+    field :is_demo_project,         :boolean
+    field :is_sandbox,              :boolean
+    field :plural_login,            :boolean
+    field :vpn_enabled,             :boolean
+    field :sentry_enabled,          :boolean
+    field :installed,               :boolean,
       resolve: fn _, _, _ -> {:ok, Console.Deployments.Clusters.installed?()} end,
       description: "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
-    field :cloud,           :boolean, resolve: fn _, _, _ -> {:ok, Console.cloud?()} end
-    field :byok,            :boolean, resolve: fn _, _, _ -> {:ok, Console.byok?()} end
-    field :external_oidc,   :boolean, resolve: fn _, _, _ -> {:ok, !!Console.conf(:oidc_login)} end
-    field :oidc_name,       :string,  resolve: fn _, _, _ -> {:ok, Console.conf(:oidc_name)} end
+    field :cloud,                   :boolean, resolve: fn _, _, _ -> {:ok, Console.cloud?()} end
+    field :byok,                    :boolean, resolve: fn _, _, _ -> {:ok, Console.byok?()} end
+    field :external_oidc,           :boolean, resolve: fn _, _, _ -> {:ok, !!Console.conf(:oidc_login)} end
+    field :oidc_name,               :string,  resolve: fn _, _, _ -> {:ok, Console.conf(:oidc_name)} end
+    field :healthmap_cluster_count, :integer
+
     field :qove_key, :string,
       resolve: fn _, _, _ ->
         case Console.conf(:qove_key) do
@@ -68,6 +70,7 @@ defmodule Console.GraphQl.Configuration do
     field :features,        :available_features
     field :details,         :console_configuration_details
     field :license_expiry,  :datetime, resolve: fn _, _, _ -> {:ok, Console.Features.expiry()} end
+
 
     field :manifest,        :plural_manifest, resolve: fn
       _, _, _ ->

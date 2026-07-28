@@ -359,6 +359,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def create_workbench_message(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_message(attrs, job_id, user)
 
+  def workbench_pr_followup(%{url: url, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.pr_followup(attrs, url, user)
+
   def approve_workbench_job_activity(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.approve_job_activity(id, user)
 
