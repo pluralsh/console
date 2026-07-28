@@ -3,14 +3,11 @@ import {
   Button,
   Card,
   Code,
-  DiffMethod,
-  DiffViewer,
   Flex,
   FlexProps,
   IconFrame,
   IconProps,
   Modal,
-  NotebookIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import {
@@ -33,7 +30,6 @@ import {
   useWorkbenchJobMetricsToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
-  WorkbenchJobActivityResultFragment,
   WorkbenchToolQueryData,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil, truncate } from 'lodash'
@@ -48,33 +44,6 @@ import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
-import { getOldContentFromTextDiff } from 'utils/textDiff'
-
-export function MemoActivityIcon({
-  jobUpdate,
-}: {
-  jobUpdate: Nullable<WorkbenchJobActivityResultFragment['jobUpdate']>
-}) {
-  const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''
-  const oldValue = useMemo(
-    () => getOldContentFromTextDiff(newValue, jobUpdate?.diff),
-    [newValue, jobUpdate?.diff]
-  )
-  return (
-    <ActivityModalIcon
-      icon={NotebookIcon}
-      tooltip="View diff"
-      modalHeader={`Updated ${jobUpdate?.workingTheory ? 'working theory' : 'conclusion'}`}
-      modalContent={
-        <DiffViewer
-          compareMethod={DiffMethod.WORDS}
-          oldValue={oldValue}
-          newValue={newValue}
-        />
-      }
-    />
-  )
-}
 
 const EXPANDABLE_PROMPT_LENGTH = 400
 export function ExpandableUserPrompt({

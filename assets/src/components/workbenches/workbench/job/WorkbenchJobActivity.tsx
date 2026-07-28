@@ -52,7 +52,6 @@ import {
   JobActivityMetrics,
   JobActivityMetricsChart,
   JobActivityPrompt,
-  MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
@@ -122,9 +121,6 @@ export function WorkbenchJobActivity({
           >
             {type?.toLowerCase() ?? 'activity'}
           </Body2P>
-          {result?.jobUpdate && (
-            <MemoActivityIcon jobUpdate={result.jobUpdate} />
-          )}
           {!isEmpty(result?.logs) && (
             <ActivityModalIcon
               icon={VisualInspectionIcon}
@@ -307,9 +303,16 @@ function WorkbenchJobMemo({
   const isRunning = isJobRunning(status)
   const isFailed = status === WorkbenchJobActivityStatus.Failed
   const isRejected = status === WorkbenchJobActivityStatus.Rejected
-  const content = textStream || result?.output || prompt || ''
+  const summary = textStream || result?.output || prompt || ''
+  const workingTheory =
+    result?.jobUpdate?.workingTheory?.trim() ||
+    result?.jobUpdate?.conclusion?.trim() ||
+    ''
+  // Prefer the longer working-theory/conclusion body over the short memo summary.
+  const fullText = workingTheory || summary
   const label =
-    content ||
+    summary ||
+    workingTheory ||
     result?.error ||
     (isRejected ? 'Rejected workbench notes update' : null) ||
     (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
@@ -327,7 +330,6 @@ function WorkbenchJobMemo({
           )}
         </MemoLabelSC>
       </ClickableLabelSC>
-      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
       {(isFailed || isRejected) && (
         <FailedFilledIcon
           size={12}
@@ -341,7 +343,7 @@ function WorkbenchJobMemo({
           setFinishedAnimating(false)
         }}
         onAnimationEnd={() => setFinishedAnimating(true)}
-        header="Memo"
+        header={workingTheory ? 'Working theory' : 'Memo'}
         size="large"
       >
         {finishedAnimating ? (
@@ -355,7 +357,7 @@ function WorkbenchJobMemo({
                 css={{ wordBreak: 'break-word' }}
               />
             )}
-            {content && <SimplifiedMarkdown text={content} />}
+            {fullText && <SimplifiedMarkdown text={fullText} />}
           </Flex>
         ) : (
           <RectangleSkeleton
