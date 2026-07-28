@@ -882,18 +882,34 @@ function NamespaceListField({
   const [isOpen, setIsOpen] = useState(false)
   const trimmed = draft.trim()
 
+  const allOptions = useMemo(() => {
+    const merged = new Set([...namespaces, ...values])
+    return [...merged].sort((a, b) => a.localeCompare(b))
+  }, [namespaces, values])
+
   const suggestions = useMemo(() => {
-    const available = namespaces.filter((ns) => !values.includes(ns))
-    if (!trimmed) return available
-    return new Fuse(available, { threshold: 0.25 })
+    if (!trimmed) return allOptions
+    return new Fuse(allOptions, { threshold: 0.25 })
       .search(trimmed)
       .map(({ item }) => item)
-  }, [namespaces, values, trimmed])
+  }, [allOptions, trimmed])
 
   const canAddCustom =
-    !!trimmed && !values.includes(trimmed) && !namespaces.includes(trimmed)
+    !!trimmed && !values.includes(trimmed) && !allOptions.includes(trimmed)
 
-  const addNamespace = (raw: string) => {
+  const toggleNamespace = (raw: string) => {
+    const value = raw.trim()
+    if (!value) return
+    onChange(
+      values.includes(value)
+        ? values.filter((ns) => ns !== value)
+        : [...values, value]
+    )
+    setDraft('')
+    setIsOpen(true)
+  }
+
+  const addCustomNamespace = (raw: string) => {
     const value = raw.trim()
     if (!value || values.includes(value)) {
       setDraft('')
@@ -901,7 +917,7 @@ function NamespaceListField({
     }
     onChange([...values, value])
     setDraft('')
-    setIsOpen(false)
+    setIsOpen(true)
   }
 
   return (
@@ -920,7 +936,7 @@ function NamespaceListField({
           onInputChange={setDraft}
           selectedKey={null}
           onSelectionChange={(key) => {
-            if (key) addNamespace(String(key))
+            if (key) toggleNamespace(String(key))
           }}
           isOpen={isOpen}
           onOpenChange={setIsOpen}
@@ -931,10 +947,12 @@ function NamespaceListField({
             onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
               if (e.key !== 'Enter' || !canAddCustom) return
               e.preventDefault()
-              addNamespace(trimmed)
+              addCustomNamespace(trimmed)
             },
           }}
-          onFooterClick={canAddCustom ? () => addNamespace(trimmed) : undefined}
+          onFooterClick={
+            canAddCustom ? () => addCustomNamespace(trimmed) : undefined
+          }
           dropdownFooter={
             canAddCustom ? (
               <ListBoxFooterPlus
@@ -955,6 +973,14 @@ function NamespaceListField({
               key={ns}
               label={ns}
               textValue={ns}
+              leftContent={
+                <Checkbox
+                  small
+                  checked={values.includes(ns)}
+                  tabIndex={-1}
+                  css={{ paddingLeft: 0, pointerEvents: 'none' }}
+                />
+              }
             />
           ))}
         </ComboBox>
