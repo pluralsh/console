@@ -307,6 +307,7 @@ type ConsoleClient interface {
 	CreateWorkbench(ctx context.Context, attributes WorkbenchAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbench, error)
 	UpdateWorkbench(ctx context.Context, id string, attributes WorkbenchAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbench, error)
 	DeleteWorkbench(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbench, error)
+	WorkbenchPrFollowup(ctx context.Context, url string, attributes WorkbenchMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*WorkbenchPrFollowup, error)
 	CreateWorkbenchTool(ctx context.Context, attributes WorkbenchToolAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchTool, error)
 	UpdateWorkbenchTool(ctx context.Context, id string, attributes WorkbenchToolAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchTool, error)
@@ -36614,6 +36615,38 @@ func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.Tempo
 }
 
+type WorkbenchPrFollowup_WorkbenchPrFollowup struct {
+	ID     string                     "json:\"id\" graphql:\"id\""
+	Prompt *string                    "json:\"prompt,omitempty\" graphql:\"prompt\""
+	Status WorkbenchJobActivityStatus "json:\"status\" graphql:\"status\""
+	Type   *WorkbenchJobActivityType  "json:\"type,omitempty\" graphql:\"type\""
+}
+
+func (t *WorkbenchPrFollowup_WorkbenchPrFollowup) GetID() string {
+	if t == nil {
+		t = &WorkbenchPrFollowup_WorkbenchPrFollowup{}
+	}
+	return t.ID
+}
+func (t *WorkbenchPrFollowup_WorkbenchPrFollowup) GetPrompt() *string {
+	if t == nil {
+		t = &WorkbenchPrFollowup_WorkbenchPrFollowup{}
+	}
+	return t.Prompt
+}
+func (t *WorkbenchPrFollowup_WorkbenchPrFollowup) GetStatus() *WorkbenchJobActivityStatus {
+	if t == nil {
+		t = &WorkbenchPrFollowup_WorkbenchPrFollowup{}
+	}
+	return &t.Status
+}
+func (t *WorkbenchPrFollowup_WorkbenchPrFollowup) GetType() *WorkbenchJobActivityType {
+	if t == nil {
+		t = &WorkbenchPrFollowup_WorkbenchPrFollowup{}
+	}
+	return t.Type
+}
+
 type CreateWorkbenchTool_CreateWorkbenchTool_WorkbenchToolFragment_McpServer_MCPServerFragment_Authentication_Headers struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -46995,6 +47028,17 @@ func (t *DeleteWorkbench) GetDeleteWorkbench() *WorkbenchFragment {
 		t = &DeleteWorkbench{}
 	}
 	return t.DeleteWorkbench
+}
+
+type WorkbenchPrFollowup struct {
+	WorkbenchPrFollowup *WorkbenchPrFollowup_WorkbenchPrFollowup "json:\"workbenchPrFollowup,omitempty\" graphql:\"workbenchPrFollowup\""
+}
+
+func (t *WorkbenchPrFollowup) GetWorkbenchPrFollowup() *WorkbenchPrFollowup_WorkbenchPrFollowup {
+	if t == nil {
+		t = &WorkbenchPrFollowup{}
+	}
+	return t.WorkbenchPrFollowup
 }
 
 type CreateWorkbenchTool struct {
@@ -70365,6 +70409,34 @@ func (c *Client) DeleteWorkbench(ctx context.Context, id string, interceptors ..
 	return &res, nil
 }
 
+const WorkbenchPrFollowupDocument = `mutation WorkbenchPrFollowup ($url: String!, $attributes: WorkbenchMessageAttributes!) {
+	workbenchPrFollowup(url: $url, attributes: $attributes) {
+		id
+		prompt
+		type
+		status
+	}
+}
+`
+
+func (c *Client) WorkbenchPrFollowup(ctx context.Context, url string, attributes WorkbenchMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*WorkbenchPrFollowup, error) {
+	vars := map[string]any{
+		"url":        url,
+		"attributes": attributes,
+	}
+
+	var res WorkbenchPrFollowup
+	if err := c.Client.Post(ctx, "WorkbenchPrFollowup", WorkbenchPrFollowupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateWorkbenchToolDocument = `mutation CreateWorkbenchTool ($attributes: WorkbenchToolAttributes!) {
 	createWorkbenchTool(attributes: $attributes) {
 		... WorkbenchToolFragment
@@ -72894,6 +72966,7 @@ var DocumentOperationNames = map[string]string{
 	CreateWorkbenchDocument:                           "CreateWorkbench",
 	UpdateWorkbenchDocument:                           "UpdateWorkbench",
 	DeleteWorkbenchDocument:                           "DeleteWorkbench",
+	WorkbenchPrFollowupDocument:                       "WorkbenchPrFollowup",
 	CreateWorkbenchToolDocument:                       "CreateWorkbenchTool",
 	UpdateWorkbenchToolDocument:                       "UpdateWorkbenchTool",
 	DeleteWorkbenchToolDocument:                       "DeleteWorkbenchTool",

@@ -573,6 +573,8 @@ type AgentRuntimeAttributes struct {
 	Name string `json:"name"`
 	// the type of this runtime
 	Type AgentRuntimeType `json:"type"`
+	// the cluster this runtime is running on (required for user-authenticated upserts)
+	ClusterID *string `json:"clusterId,omitempty"`
 	// the policy for creating runs on this runtime
 	CreateBindings []*AgentBindingAttributes `json:"createBindings,omitempty"`
 	// whether this runtime uses the built-in Plural AI proxy
@@ -10248,6 +10250,8 @@ type WorkbenchInfrastructure struct {
 	PodLogs *bool `json:"podLogs,omitempty"`
 	// vulnerabilities capability enabled
 	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
+	// sentinels capability enabled
+	Sentinels *bool `json:"sentinels,omitempty"`
 }
 
 type WorkbenchInfrastructureAttributes struct {
@@ -10261,6 +10265,8 @@ type WorkbenchInfrastructureAttributes struct {
 	PodLogs *bool `json:"podLogs,omitempty"`
 	// enable vulnerabilities capability
 	Vulnerabilities *bool `json:"vulnerabilities,omitempty"`
+	// enable sentinels capability
+	Sentinels *bool `json:"sentinels,omitempty"`
 }
 
 type WorkbenchJob struct {
