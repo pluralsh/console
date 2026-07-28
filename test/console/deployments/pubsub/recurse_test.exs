@@ -409,6 +409,48 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       assert run.git.ref == "new-sha"
       assert refetch(pr).stack_run_id == run.id
     end
+
+    test "it queues a workbench verification prompt for a merged service pr" do
+      bot("console")
+      repo = insert(:git_repository, pulled_at: Timex.shift(Timex.now(), seconds: -30))
+      service = insert(:service, repository: repo)
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          user: user,
+          modes: %Console.Schema.WorkbenchJob.Modes{verification: true}
+        )
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          url: "https://github.com/pluralsh/console/pull/10",
+          service: service,
+          workbench_job: job
+        )
+
+      expect(Discovery, :kick, fn %{id: repo_id} ->
+        assert repo_id == repo.id
+        :ok
+      end)
+
+      event = %PubSub.PullRequestUpdated{item: refetch(pr)}
+      {:ok, kicked} = Recurse.handle_event(event)
+
+      prompt =
+        Console.Schema.QueuedPrompt.for_workbench_job(job.id)
+        |> Repo.one!()
+
+      assert kicked.id == service.id
+      assert kicked.kick
+      assert prompt.user_id == user.id
+      assert prompt.prompt =~ "pull request #{pr.url} has been merged"
+      assert prompt.prompt =~ "<plrl-service"
+      assert prompt.prompt =~ ~s(item-id="#{service.id}")
+      assert prompt.prompt =~ ~s(item-name="#{service.name}")
+    end
   end
 
   describe "StackDeleted" do
@@ -468,7 +510,8 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       bot("console")
       stack = insert(:stack)
       completed = insert(:stack_run, stack: stack, status: :successful)
-      job = insert(:workbench_job)
+      job = insert(:workbench_job, modes: %Console.Schema.WorkbenchJob.Modes{verification: true})
+
       pr =
         insert(:pull_request,
           url: "https://github.com/pluralsh/console/pull/10",
@@ -482,15 +525,13 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       event = %PubSub.StackRunCompleted{item: completed}
       {:ok, dequeued} = Recurse.handle_event(event)
 
-      activity =
-        Console.Schema.WorkbenchJobActivity.for_workbench_job(job.id)
+      prompt =
+        Console.Schema.QueuedPrompt.for_workbench_job(job.id)
         |> Repo.one!()
 
       assert dequeued.id == run.id
-      assert activity.type == :user
-      assert activity.status == :successful
-      assert activity.prompt =~ "pull request #{pr.url} has been completed"
-      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+      assert prompt.prompt =~ "pull request #{pr.url} has been completed"
+      assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
     end
 
     test "it can delete a stack if it is in deleting stack" do

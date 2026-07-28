@@ -1268,6 +1268,15 @@ defmodule Console.Factory do
     }
   end
 
+  def queued_prompt_factory do
+    %Schema.QueuedPrompt{
+      prompt: "queued prompt text",
+      dequeable_at: DateTime.utc_now() |> DateTime.truncate(:second),
+      workbench_job: build(:workbench_job),
+      user: build(:user)
+    }
+  end
+
   def workbench_skill_factory do
     %Schema.WorkbenchSkill{
       name: sequence(:workbench_skill_name, &"workbench-skill-#{&1}"),

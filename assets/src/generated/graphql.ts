@@ -8726,6 +8726,45 @@ export type PulumiConfigurationAttributes = {
   stack?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type QueuedPrompt = {
+  __typename?: 'QueuedPrompt';
+  /** when this prompt was consumed */
+  consumedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when this prompt becomes eligible to dequeue */
+  dequeableAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the id of the queued prompt */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt text */
+  prompt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who queued this prompt */
+  user?: Maybe<User>;
+  /** user this prompt will run as */
+  userId?: Maybe<Scalars['ID']['output']>;
+  /** the job this prompt will be sent to */
+  workbenchJob?: Maybe<WorkbenchJob>;
+};
+
+export type QueuedPromptAttributes = {
+  /** when this prompt becomes eligible to dequeue */
+  dequeableAt: Scalars['DateTime']['input'];
+  /** the prompt to send when dequeued */
+  prompt: Scalars['String']['input'];
+};
+
+export type QueuedPromptConnection = {
+  __typename?: 'QueuedPromptConnection';
+  edges?: Maybe<Array<Maybe<QueuedPromptEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type QueuedPromptEdge = {
+  __typename?: 'QueuedPromptEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<QueuedPrompt>;
+};
+
 export type RbacAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -9037,6 +9076,8 @@ export type RootMutationType = {
   createPullRequest?: Maybe<PullRequest>;
   /** just registers a pointer record to a PR after it was created externally be some other automation */
   createPullRequestPointer?: Maybe<PullRequest>;
+  /** Queues a prompt to be sent to a workbench job later. Requires prompt access to the job. */
+  createQueuedPrompt?: Maybe<QueuedPrompt>;
   createRole?: Maybe<Role>;
   createScmConnection?: Maybe<ScmConnection>;
   createScmWebhook?: Maybe<ScmWebhook>;
@@ -9111,6 +9152,8 @@ export type RootMutationType = {
   deleteProject?: Maybe<Project>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deletePullRequest?: Maybe<PullRequest>;
+  /** Deletes a queued prompt. Requires prompt access to the queued prompt's job. */
+  deleteQueuedPrompt?: Maybe<QueuedPrompt>;
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
   deleteScmWebhook?: Maybe<ScmWebhook>;
@@ -9142,6 +9185,7 @@ export type RootMutationType = {
   detachStack?: Maybe<InfrastructureStack>;
   dismissOnboarding?: Maybe<DeploymentSettings>;
   enableDeployments?: Maybe<DeploymentSettings>;
+  enqueueWorkbenchPrFollowup?: Maybe<QueuedPrompt>;
   /** Fixes a broken mermaid diagram in an existing research */
   fixResearchDiagram?: Maybe<InfraResearch>;
   /** forces a pipeline gate to be in open state */
@@ -9641,6 +9685,12 @@ export type RootMutationTypeCreatePullRequestPointerArgs = {
 };
 
 
+export type RootMutationTypeCreateQueuedPromptArgs = {
+  attributes: QueuedPromptAttributes;
+  jobId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateRoleArgs = {
   attributes: RoleAttributes;
 };
@@ -9991,6 +10041,11 @@ export type RootMutationTypeDeletePullRequestArgs = {
 };
 
 
+export type RootMutationTypeDeleteQueuedPromptArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteRoleArgs = {
   id: Scalars['ID']['input'];
 };
@@ -10108,6 +10163,12 @@ export type RootMutationTypeDetachServiceDeploymentArgs = {
 
 export type RootMutationTypeDetachStackArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeEnqueueWorkbenchPrFollowupArgs = {
+  attributes: QueuedPromptAttributes;
+  url: Scalars['String']['input'];
 };
 
 
@@ -15973,6 +16034,7 @@ export type WorkbenchJob = {
   prompt?: Maybe<Scalars['String']['output']>;
   /** pull requests associated with this workbench job */
   pullRequests?: Maybe<Array<Maybe<PullRequest>>>;
+  queuedPrompts?: Maybe<QueuedPromptConnection>;
   /** the original job this job was spawned from (e.g. eval skill jobs) (sideloadable) */
   referencedJob?: Maybe<WorkbenchJob>;
   /** the result for this job (sideloadable) */
@@ -16011,6 +16073,14 @@ export type WorkbenchJobLogsToolArgs = {
 export type WorkbenchJobMetricsToolArgs = {
   arguments?: InputMaybe<Scalars['Json']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type WorkbenchJobQueuedPromptsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -16274,6 +16344,8 @@ export type WorkbenchJobModes = {
   model?: Maybe<WorkbenchJobModel>;
   /** whether planning mode is enabled for this job */
   plan?: Maybe<Scalars['Boolean']['output']>;
+  /** whether verification mode is enabled for this job */
+  verification?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type WorkbenchJobModesAttributes = {
@@ -16285,6 +16357,8 @@ export type WorkbenchJobModesAttributes = {
   model?: InputMaybe<WorkbenchJobModelAttributes>;
   /** whether planning mode is enabled for this job */
   plan?: InputMaybe<Scalars['Boolean']['input']>;
+  /** whether verification mode is enabled for this job */
+  verification?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type WorkbenchJobProgress = {

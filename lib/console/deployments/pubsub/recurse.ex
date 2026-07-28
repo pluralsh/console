@@ -118,7 +118,7 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Repo
   alias Console.Schema.{PullRequest, Stack, Service, GitRepository}
-  alias Console.Deployments.{Stacks, Git.Discovery, Services, Agents}
+  alias Console.Deployments.{Stacks, Git.Discovery, Services, Agents, Workbenches}
 
   def process(%@for{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
     with %PullRequest{stack: %Stack{} = stack} <- Repo.preload(pr, [stack: :repository]),
@@ -131,9 +131,11 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
   end
 
   def process(%@for{item: %PullRequest{status: :merged, service_id: id} = pr}) when is_binary(id) do
-    with %PullRequest{service: %Service{} = service} <- Repo.preload(pr, [service: :repository]),
+    with %PullRequest{service: %Service{} = service} = pr <- Repo.preload(pr, [service: :repository]),
          _ <- sleep(service.repository),
-      do: Services.kick(service)
+         kick <- Services.kick(service),
+         _ <- Workbenches.kick_workbench(pr),
+      do: kick
   end
 
   def process(%@for{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do

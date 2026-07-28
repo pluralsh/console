@@ -139,6 +139,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJobModes do
     description: "Mode-specific options for a workbench job",
     properties: %{
       plan: boolean(description: "Whether planning mode is enabled for this job"),
+      verification: boolean(description: "Whether verification mode is enabled for this job"),
       model: Console.OpenAPI.AI.WorkbenchJobModel,
       coding: Console.OpenAPI.AI.WorkbenchJobCodingModes
     }
@@ -196,5 +197,40 @@ defmodule Console.OpenAPI.AI.WorkbenchJobInput do
       modes: Console.OpenAPI.AI.WorkbenchJobModes
     },
     required: [:prompt]
+  }
+end
+
+defmodule Console.OpenAPI.AI.QueuedPrompt do
+  @moduledoc "OpenAPI schema for queued prompts."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "QueuedPrompt",
+    description: "A deferred prompt queued for a workbench job.  The prompt will wait for the job to settle and for its dequeuable time to elapse before being sent to the job.",
+    properties: timestamps(%{
+      id: string(description: "Unique identifier for the queued prompt"),
+      prompt: string(description: "The prompt text"),
+      dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue"),
+      consumed_at: datetime(description: "When the prompt was consumed"),
+      workbench_job_id: string(description: "ID of the workbench job this prompt targets"),
+      user_id: string(description: "ID of the user this prompt runs as")
+    })
+  }
+end
+
+defmodule Console.OpenAPI.AI.QueuedPromptInput do
+  @moduledoc "OpenAPI schema for creating queued prompts."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "QueuedPromptInput",
+    description: "Input for creating a deferred workbench prompt",
+    properties: %{
+      prompt: string(description: "The prompt to send when dequeued"),
+      dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue")
+    },
+    required: [:prompt, :dequeable_at]
   }
 end
