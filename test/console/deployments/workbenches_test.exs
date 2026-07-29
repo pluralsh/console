@@ -1814,7 +1814,7 @@ defmodule Console.Deployments.WorkbenchesTest do
           }
         )
 
-      expect(Kazan, :run, fn %Kazan.Request{}, _opts ->
+      stub(Kazan, :run, fn %Kazan.Request{}, _opts ->
         send(parent, :kube_invoked)
         Process.sleep(150)
         {:ok, %{"kind" => "Status", "status" => "Success"}}
