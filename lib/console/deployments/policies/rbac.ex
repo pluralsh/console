@@ -53,6 +53,7 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchPrompt,
+    QueuedPrompt,
     WorkbenchSkill,
     WorkbenchEval,
     WorkbenchEvalResult,
@@ -160,6 +161,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(cron, user, action, & &1.workbench)
   def evaluate(%WorkbenchPrompt{} = prompt, user, action),
     do: recurse(prompt, user, action, & &1.workbench)
+  def evaluate(%QueuedPrompt{} = prompt, user, action),
+    do: recurse(prompt, user, action, & &1.workbench_job)
   def evaluate(%WorkbenchSkill{} = skill, user, action),
     do: recurse(skill, user, action, & &1.workbench)
   def evaluate(%WorkbenchEval{} = eval, user, action),
@@ -309,6 +312,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(cron, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchPrompt{} = prompt),
     do: Repo.preload(prompt, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%QueuedPrompt{} = prompt),
+    do: Repo.preload(prompt, [workbench_job: [workbench: [:read_bindings, :write_bindings, project: @bindings]]])
   def preload(%WorkbenchSkill{} = skill),
     do: Repo.preload(skill, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchEval{} = eval),

@@ -7276,6 +7276,42 @@ type PulumiConfigurationAttributes struct {
 	BackendURL *string `json:"backendUrl,omitempty"`
 }
 
+type QueuedPrompt struct {
+	// the id of the queued prompt
+	ID string `json:"id"`
+	// the prompt text
+	Prompt *string `json:"prompt,omitempty"`
+	// when this prompt becomes eligible to dequeue
+	DequeableAt *string `json:"dequeableAt,omitempty"`
+	// when this prompt was consumed
+	ConsumedAt *string `json:"consumedAt,omitempty"`
+	// user this prompt will run as
+	UserID *string `json:"userId,omitempty"`
+	// the job this prompt will be sent to
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	// the user who queued this prompt
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type QueuedPromptAttributes struct {
+	// the prompt to send when dequeued
+	Prompt string `json:"prompt"`
+	// when this prompt becomes eligible to dequeue
+	DequeableAt string `json:"dequeableAt"`
+}
+
+type QueuedPromptConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*QueuedPromptEdge `json:"edges,omitempty"`
+}
+
+type QueuedPromptEdge struct {
+	Node   *QueuedPrompt `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
+}
+
 type RbacAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
@@ -10292,6 +10328,8 @@ type WorkbenchJob struct {
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
+	// the console URL for this workbench job
+	URL string `json:"url"`
 	// the flow this job is associated with
 	Flow *Flow `json:"flow,omitempty"`
 	// the user who created this run
@@ -10309,6 +10347,7 @@ type WorkbenchJob struct {
 	// the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)
 	ReferencedJob *WorkbenchJob                   `json:"referencedJob,omitempty"`
 	Activities    *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	QueuedPrompts *QueuedPromptConnection         `json:"queuedPrompts,omitempty"`
 	MetricsTool   []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
 	LogsTool      []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
 	TracesTool    []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
@@ -10521,6 +10560,8 @@ type WorkbenchJobModelAttributes struct {
 type WorkbenchJobModes struct {
 	// whether planning mode is enabled for this job
 	Plan *bool `json:"plan,omitempty"`
+	// whether verification mode is enabled for this job
+	Verification *bool `json:"verification,omitempty"`
 	// model override for this job
 	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// coding mode options for this job
@@ -10532,6 +10573,8 @@ type WorkbenchJobModes struct {
 type WorkbenchJobModesAttributes struct {
 	// whether planning mode is enabled for this job
 	Plan *bool `json:"plan,omitempty"`
+	// whether verification mode is enabled for this job
+	Verification *bool `json:"verification,omitempty"`
 	// model override for this job
 	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 	// coding mode options for this job

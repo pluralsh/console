@@ -26,11 +26,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_job_modes_attributes do
-    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
-    field :model,  :workbench_job_model_attributes, description: "model override for this job"
-    field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
-    field :budget, :workbench_job_budget_attributes, description: "budget limits for this job"
-    field :kubernetes, :workbench_job_kubernetes_modes_attributes, description: "kubernetes action options for this job"
+    field :plan,         :boolean, description: "whether planning mode is enabled for this job"
+    field :verification, :boolean, description: "whether verification mode is enabled for this job"
+    field :model,        :workbench_job_model_attributes, description: "model override for this job"
+    field :coding,       :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+    field :budget,       :workbench_job_budget_attributes, description: "budget limits for this job"
+    field :kubernetes,   :workbench_job_kubernetes_modes_attributes, description: "kubernetes action options for this job"
   end
 
   input_object :workbench_job_model_attributes do
@@ -426,6 +427,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, non_null(:string), description: "the prompt for the message"
   end
 
+  input_object :queued_prompt_attributes do
+    field :prompt,       non_null(:string), description: "the prompt to send when dequeued"
+    field :dequeable_at, non_null(:datetime), description: "when this prompt becomes eligible to dequeue"
+  end
+
   object :workbench do
     field :id,            non_null(:string), description: "the id of the workbench"
     field :name,          non_null(:string), description: "the name of the workbench"
@@ -530,6 +536,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
+    field :url,          non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/ai/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
     field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
@@ -545,6 +552,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :type, :workbench_job_activity_type, description: "filter activities by type"
 
       resolve &Deployments.list_workbench_job_activities/3
+    end
+
+    connection field :queued_prompts, node_type: :queued_prompt do
+      resolve &Deployments.list_queued_prompts/3
     end
 
     field :metrics_tool, list_of(:workbench_job_activity_metric) do
@@ -574,11 +585,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_modes do
-    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
-    field :model,  :workbench_job_model, description: "model override for this job"
-    field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
-    field :budget, :workbench_job_budget, description: "budget limits for this job"
-    field :kubernetes, :workbench_job_kubernetes_modes, description: "kubernetes action options for this job"
+    field :plan,         :boolean, description: "whether planning mode is enabled for this job"
+    field :verification, :boolean, description: "whether verification mode is enabled for this job"
+    field :model,        :workbench_job_model, description: "model override for this job"
+    field :coding,       :workbench_job_coding_modes, description: "coding mode options for this job"
+    field :budget,       :workbench_job_budget, description: "budget limits for this job"
+    field :kubernetes,   :workbench_job_kubernetes_modes, description: "kubernetes action options for this job"
   end
 
   object :workbench_job_model do
@@ -838,6 +850,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :user_id,     :id, description: "user this cron runs as"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this cron belongs to"
+
+    timestamps()
+  end
+
+  object :queued_prompt do
+    field :id,           non_null(:string), description: "the id of the queued prompt"
+    field :prompt,       :string, description: "the prompt text"
+    field :dequeable_at, :datetime, description: "when this prompt becomes eligible to dequeue"
+    field :consumed_at,  :datetime, description: "when this prompt was consumed"
+    field :user_id,      :id, description: "user this prompt will run as"
+
+    field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this prompt will be sent to"
+    field :user,          :user, resolve: dataloader(User), description: "the user who queued this prompt"
 
     timestamps()
   end
@@ -1254,6 +1279,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
+  connection node_type: :queued_prompt
   connection node_type: :workbench_cron
   connection node_type: :workbench_prompt
   connection node_type: :workbench_skill
@@ -1785,6 +1811,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.create_workbench_job/2
     end
 
+    @desc "Queues a prompt to be sent to a workbench job later. Requires prompt access to the job."
+    field :create_queued_prompt, :queued_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :job_id,     non_null(:id), description: "the workbench job to queue a prompt for"
+      arg :attributes, non_null(:queued_prompt_attributes)
+
+      resolve &Deployments.create_queued_prompt/2
+    end
+
+    @desc "Deletes a queued prompt. Requires prompt access to the queued prompt's job."
+    field :delete_queued_prompt, :queued_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_queued_prompt/2
+    end
+
     field :create_workbench_message, :workbench_job_activity do
       middleware Authenticated
       middleware Scope,
@@ -1805,6 +1854,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
 
       resolve &Deployments.workbench_pr_followup/2
+    end
+
+    field :enqueue_workbench_pr_followup, :queued_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :url,        non_null(:string), description: "the pull request url to queue a follow-up prompt for"
+      arg :attributes, non_null(:queued_prompt_attributes), description: "queued prompt attributes"
+
+      resolve &Deployments.enqueue_workbench_pr_followup/2
     end
 
     @desc "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."

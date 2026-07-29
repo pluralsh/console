@@ -96,6 +96,16 @@ This service is owned by a GlobalService resource, which itself has this basic s
 If it has a parent, you can inspect that service itself to see how its GitOps configuration is managed.
 <% end %>
 
+<%= if is_list(@components) && !Enum.empty?(@components) do %>
+# Components
+
+This service also has the following Kubernetes components. Use the api_version, kind, namespace, and name fields to query the component from Kubernetes tools:
+
+```json
+<%= Jason.encode!(@components, pretty: true) %>
+```
+<% end %>
+
 <%= if is_list(@vulns) && !Enum.empty?(@vulns) do %>
 # Vulnerability Reports
 

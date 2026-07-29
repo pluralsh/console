@@ -380,6 +380,7 @@ _Appears in:_
 - [ProjectSpec](#projectspec)
 - [ServiceSpec](#servicespec)
 - [WorkbenchSpec](#workbenchspec)
+- [WorkbenchToolSpec](#workbenchtoolspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1976,6 +1977,7 @@ _Appears in:_
 - [HelmRepositorySpec](#helmrepositoryspec)
 - [ObserverHelm](#observerhelm)
 - [ObserverOci](#observeroci)
+- [WorkbenchToolDockerConfig](#workbenchtooldockerconfig)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -5761,6 +5763,94 @@ _Appears in:_
 | `tenantId` _string_ | Azure tenant id. |  | Required: \{\} <br /> |
 | `clientId` _string_ | Azure client id. |  | Required: \{\} <br /> |
 | `clientSecretSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the azure client secret. |  | Required: \{\} <br /> |
+| `prometheusUrl` _string_ | Optional azure managed prometheus url if you wish to use it for metrics. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolAzureDevopsConfig
+
+
+
+WorkbenchToolAzureDevopsConfig defines an azure devops connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Optional REST API root (defaults to https://dev.azure.com). |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the Azure DevOps personal access token. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolAzureFunctionConfig
+
+
+
+WorkbenchToolAzureFunctionConfig defines an Azure Function / Cloud Function configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `identifier` _string_ | Cloud Function identifier. |  | Required: \{\} <br /> |
+| `description` _string_ | Description of the function exposed to the agent. |  | Required: \{\} <br /> |
+| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | JSON schema for the tool input. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolBitbucketConfig
+
+
+
+WorkbenchToolBitbucketConfig defines a bitbucket cloud connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Optional Bitbucket Cloud API base URL. |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the Bitbucket app password or access token. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolBitbucketDatacenterConfig
+
+
+
+WorkbenchToolBitbucketDatacenterConfig defines a bitbucket data center connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Bitbucket Data Center REST API base URL. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the HTTP access token or personal access token. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolCloudRunConfig
+
+
+
+WorkbenchToolCloudRunConfig defines a Google Cloud Run service configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `identifier` _string_ | Cloud Run service identifier. |  | Required: \{\} <br /> |
+| `description` _string_ | Description of the function exposed to the agent. |  | Required: \{\} <br /> |
+| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | JSON schema for the tool input. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchToolCloudwatchConfig
@@ -5800,6 +5890,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `http` _[WorkbenchToolHTTPConfig](#workbenchtoolhttpconfig)_ | Http tool configuration. |  | Optional: \{\} <br /> |
 | `elastic` _[WorkbenchToolElasticConfig](#workbenchtoolelasticconfig)_ | Elasticsearch connection (logs). |  | Optional: \{\} <br /> |
+| `opensearch` _[WorkbenchToolOpensearchConfig](#workbenchtoolopensearchconfig)_ | AWS OpenSearch connection (logs). |  | Optional: \{\} <br /> |
 | `prometheus` _[WorkbenchToolPrometheusConfig](#workbenchtoolprometheusconfig)_ | Prometheus connection (metrics). |  | Optional: \{\} <br /> |
 | `loki` _[WorkbenchToolLokiConfig](#workbenchtoollokiconfig)_ | Loki connection (logs). |  | Optional: \{\} <br /> |
 | `tempo` _[WorkbenchToolTempoConfig](#workbenchtooltempoconfig)_ | Tempo connection (traces). |  | Optional: \{\} <br /> |
@@ -5809,8 +5900,22 @@ _Appears in:_
 | `dynatrace` _[WorkbenchToolDynatraceConfig](#workbenchtooldynatraceconfig)_ | Dynatrace connection (metrics, logs, traces). |  | Optional: \{\} <br /> |
 | `cloudwatch` _[WorkbenchToolCloudwatchConfig](#workbenchtoolcloudwatchconfig)_ | Cloudwatch connection (metrics, logs). |  | Optional: \{\} <br /> |
 | `azure` _[WorkbenchToolAzureConfig](#workbenchtoolazureconfig)_ | Azure monitor connection (metrics). |  | Optional: \{\} <br /> |
+| `sentry` _[WorkbenchToolSentryConfig](#workbenchtoolsentryconfig)_ | Sentry connection (error tracking). |  | Optional: \{\} <br /> |
 | `linear` _[WorkbenchToolLinearConfig](#workbenchtoollinearconfig)_ | Linear connection (ticketing). |  | Optional: \{\} <br /> |
+| `slack` _[WorkbenchToolSlackConfig](#workbenchtoolslackconfig)_ | Slack connection (integration). |  | Optional: \{\} <br /> |
+| `pagerduty` _[WorkbenchToolPagerdutyConfig](#workbenchtoolpagerdutyconfig)_ | PagerDuty connection (integration). |  | Optional: \{\} <br /> |
+| `teams` _[WorkbenchToolTeamsConfig](#workbenchtoolteamsconfig)_ | Microsoft Teams / Graph connection (integration). |  | Optional: \{\} <br /> |
 | `atlassian` _[WorkbenchToolAtlassianConfig](#workbenchtoolatlassianconfig)_ | Atlassian/jira connection (ticketing). |  | Optional: \{\} <br /> |
+| `exa` _[WorkbenchToolExaConfig](#workbenchtoolexaconfig)_ | Exa connection (search). |  | Optional: \{\} <br /> |
+| `github` _[WorkbenchToolGithubConfig](#workbenchtoolgithubconfig)_ | GitHub connection (integration). |  | Optional: \{\} <br /> |
+| `gitlab` _[WorkbenchToolGitlabConfig](#workbenchtoolgitlabconfig)_ | GitLab connection (scm). |  | Optional: \{\} <br /> |
+| `bitbucket` _[WorkbenchToolBitbucketConfig](#workbenchtoolbitbucketconfig)_ | Bitbucket Cloud connection (scm). |  | Optional: \{\} <br /> |
+| `bitbucketDatacenter` _[WorkbenchToolBitbucketDatacenterConfig](#workbenchtoolbitbucketdatacenterconfig)_ | Bitbucket Data Center connection (scm). |  | Optional: \{\} <br /> |
+| `azureDevops` _[WorkbenchToolAzureDevopsConfig](#workbenchtoolazuredevopsconfig)_ | Azure DevOps connection (scm). |  | Optional: \{\} <br /> |
+| `lambda` _[WorkbenchToolLambdaConfig](#workbenchtoollambdaconfig)_ | AWS Lambda function configuration. |  | Optional: \{\} <br /> |
+| `cloudRun` _[WorkbenchToolCloudRunConfig](#workbenchtoolcloudrunconfig)_ | Google Cloud Run service configuration. |  | Optional: \{\} <br /> |
+| `azureFunction` _[WorkbenchToolAzureFunctionConfig](#workbenchtoolazurefunctionconfig)_ | Azure Function / Cloud Function configuration. |  | Optional: \{\} <br /> |
+| `docker` _[WorkbenchToolDockerConfig](#workbenchtooldockerconfig)_ | Docker/OCI registry connection. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchToolDatadogConfig
@@ -5829,6 +5934,25 @@ _Appears in:_
 | `site` _string_ | Datadog site (e.g. datadoghq.com). |  | Optional: \{\} <br /> |
 | `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the datadog API key. |  | Optional: \{\} <br /> |
 | `appKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the datadog application key. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolDockerConfig
+
+
+
+WorkbenchToolDockerConfig defines a docker/OCI registry connection.
+Auth secrets are resolved by the reconciler via HelmRepositoryAuth helpers.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Registry host or base URL (defaults to registry-1.docker.io). |  | Optional: \{\} <br /> |
+| `provider` _[HelmAuthProvider](#helmauthprovider)_ | Registry authentication provider: BASIC, BEARER, AWS, AZURE, or GCP. |  | Enum: [BASIC BEARER GCP AZURE AWS] <br />Optional: \{\} <br /> |
+| `auth` _[HelmRepositoryAuth](#helmrepositoryauth)_ | Registry authentication credentials and optional proxy. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchToolDynatraceConfig
@@ -5867,6 +5991,60 @@ _Appears in:_
 | `index` _string_ | Elasticsearch index. |  | Required: \{\} <br /> |
 
 
+#### WorkbenchToolExaConfig
+
+
+
+WorkbenchToolExaConfig defines an exa connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the exa API key. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolGithubConfig
+
+
+
+WorkbenchToolGithubConfig defines a github connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Optional GitHub REST API base URL (defaults to https://api.github.com/; set for GitHub Enterprise Server). |  | Optional: \{\} <br /> |
+| `accessTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing an optional GitHub personal access token or fine-grained token. |  | Optional: \{\} <br /> |
+| `toolset` _string_ | Optional native tool subset: issues, pull_requests, repos, security, default/all, or omit for all tools. |  | Optional: \{\} <br /> |
+| `appId` _string_ | GitHub App ID (use with installationId and privateKey instead of accessToken). |  | Optional: \{\} <br /> |
+| `installationId` _string_ | GitHub App installation ID for this organization or account. |  | Optional: \{\} <br /> |
+| `privateKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the PEM private key for the GitHub App. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolGitlabConfig
+
+
+
+WorkbenchToolGitlabConfig defines a gitlab connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Optional GitLab API base URL (defaults to https://gitlab.com when omitted). |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the GitLab personal access token or project/group token. |  | Optional: \{\} <br /> |
+
+
 #### WorkbenchToolHTTPConfig
 
 
@@ -5882,6 +6060,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `url` _string_ | The request URL. |  | Format: uri <br />Required: \{\} <br />Type: string <br /> |
 | `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | The HTTP method. |  | Enum: [GET POST PUT DELETE PATCH] <br />Required: \{\} <br /> |
+| `function` _boolean_ | When true, exposes this HTTP tool as a workbench action; execution may require approval when tool approval is enabled. |  | Optional: \{\} <br /> |
 | `headers` _[WorkbenchToolHTTPHeader](#workbenchtoolhttpheader) array_ | Request headers. |  | Optional: \{\} <br /> |
 | `body` _string_ | Request body. |  | Optional: \{\} <br />Type: string <br /> |
 | `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | JSON schema for the tool input. |  | Required: \{\} <br /> |
@@ -5923,6 +6102,24 @@ _Appears in:_
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
 
 
+#### WorkbenchToolLambdaConfig
+
+
+
+WorkbenchToolLambdaConfig defines an AWS Lambda function configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `lambdaArn` _string_ | AWS Lambda function ARN. |  | Required: \{\} <br /> |
+| `description` _string_ | Description of the function exposed to the agent. |  | Required: \{\} <br /> |
+| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | JSON schema for the tool input. |  | Optional: \{\} <br /> |
+
+
 #### WorkbenchToolLinearConfig
 
 
@@ -5959,6 +6156,44 @@ _Appears in:_
 | `tenantId` _string_ | Optional tenant id. |  | Optional: \{\} <br /> |
 
 
+#### WorkbenchToolOpensearchConfig
+
+
+
+WorkbenchToolOpensearchConfig defines an AWS OpenSearch connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `host` _string_ | AWS OpenSearch endpoint. |  | Required: \{\} <br /> |
+| `index` _string_ | OpenSearch index. |  | Required: \{\} <br /> |
+| `awsAccessKeyIdSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the AWS access key id for SigV4 authentication. |  | Optional: \{\} <br /> |
+| `awsSecretAccessKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the AWS secret access key for SigV4 authentication. |  | Optional: \{\} <br /> |
+| `awsRegion` _string_ | AWS region for SigV4 authentication. |  | Optional: \{\} <br /> |
+| `assumeRoleArn` _string_ | Optional IAM role ARN to assume before signing OpenSearch requests. |  | Optional: \{\} <br /> |
+| `usePodIdentity` _boolean_ | Whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolPagerdutyConfig
+
+
+
+WorkbenchToolPagerdutyConfig defines a pagerduty connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the pagerduty REST API key. |  | Optional: \{\} <br /> |
+
+
 #### WorkbenchToolPrometheusConfig
 
 
@@ -5977,6 +6212,43 @@ _Appears in:_
 | `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
 | `tenantId` _string_ | Optional tenant id (e.g. for Mimir). |  | Optional: \{\} <br /> |
+| `awsSigv4` _boolean_ | Whether to sign requests with AWS SigV4. |  | Optional: \{\} <br /> |
+| `awsAccessKeyIdSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the AWS access key id for SigV4 authentication. |  | Optional: \{\} <br /> |
+| `awsSecretAccessKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the AWS secret access key for SigV4 authentication. |  | Optional: \{\} <br /> |
+| `awsRegion` _string_ | AWS region for SigV4 authentication. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolSentryConfig
+
+
+
+WorkbenchToolSentryConfig defines a sentry connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Optional Sentry API host (defaults to https://sentry.io; set for self-hosted). |  | Optional: \{\} <br /> |
+| `accessTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the Sentry user auth token or internal integration token. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolSlackConfig
+
+
+
+WorkbenchToolSlackConfig defines a slack connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `botTokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the slack bot user OAuth token (xoxb-...). |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchToolSpec
@@ -5993,11 +6265,14 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | The name of the tool (a-z, 0-9, underscores). If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
-| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER] <br />Required: \{\} <br /> |
+| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | The type of tool. |  | Enum: [HTTP ELASTIC DATADOG PROMETHEUS LOKI TEMPO SENTRY MCP LINEAR ATLASSIAN SPLUNK DYNATRACE CLOUDWATCH AZURE CLOUD JAEGER EXA GITHUB SLACK TEAMS GITLAB BITBUCKET BITBUCKET_DATACENTER AZURE_DEVOPS PAGERDUTY OPENSEARCH LAMBDA CLOUD_RUN AZURE_FUNCTION DOCKER] <br />Required: \{\} <br /> |
 | `categories` _WorkbenchToolCategory array_ | Categories for the tool. |  | Optional: \{\} <br /> |
+| `approval` _boolean_ | Whether this tool requires approval before execution. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The project for this tool. |  | Optional: \{\} <br /> |
 | `mcpServerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The mcp server for this tool. |  | Optional: \{\} <br /> |
 | `cloudConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The cloud connection for this tool (e.g. infrastructure cloud tools). |  | Optional: \{\} <br /> |
+| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | The SCM connection for this tool (e.g. shared Git provider credentials). |  | Optional: \{\} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings define the read and write access policies for this tool. |  | Optional: \{\} <br /> |
 | `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Tool configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ |  |  | Optional: \{\} <br /> |
 
@@ -6019,6 +6294,24 @@ _Appears in:_
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the bearer token. |  | Optional: \{\} <br /> |
 | `username` _string_ | Basic auth username. |  | Optional: \{\} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the basic auth password. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolTeamsConfig
+
+
+
+WorkbenchToolTeamsConfig defines a microsoft teams / graph connection.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `clientId` _string_ | Microsoft Entra application (client) id. |  | Required: \{\} <br /> |
+| `clientSecretSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | Reference to a secret key containing the microsoft entra client secret. |  | Required: \{\} <br /> |
+| `tenantId` _string_ | Microsoft Entra tenant (directory) id. |  | Required: \{\} <br /> |
 
 
 #### WorkbenchToolTempoConfig

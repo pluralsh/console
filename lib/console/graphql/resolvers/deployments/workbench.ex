@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchPrompt,
+    QueuedPrompt,
     WorkbenchSkill,
     WorkbenchEvalResult,
     WorkbenchWebhook,
@@ -184,6 +185,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
   def kube_request_current(_, _, _), do: {:ok, nil}
 
+  def list_queued_prompts(job, args, _) do
+    QueuedPrompt.for_workbench_job(job.id)
+    |> paginate(args)
+  end
+
   def all_workbench_alerts(args, %{context: %{current_user: user}}) do
     Alert.for_user(user)
     |> Alert.ordered()
@@ -319,6 +325,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def create_workbench_job(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_job(attrs, workbench_id, user)
 
+  def create_queued_prompt(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_queued_prompt(attrs, job_id, user)
+
+  def delete_queued_prompt(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_queued_prompt(id, user)
+
   def create_workbench_cron(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_cron(attrs, workbench_id, user)
 
@@ -392,6 +404,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def workbench_pr_followup(%{url: url, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.pr_followup(attrs, url, user)
+
+  def enqueue_workbench_pr_followup(%{url: url, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.pr_queued_prompt(attrs, url, user)
 
   def approve_workbench_job_activity(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.approve_job_activity(id, user)

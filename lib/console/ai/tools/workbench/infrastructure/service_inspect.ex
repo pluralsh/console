@@ -13,9 +13,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
     field :user,         :map, virtual: true
     field :service_id,   :string
     field :vuln_reports, :boolean
+    field :components,   :boolean
   end
 
-  @valid ~w(service_id vuln_reports)a
+  @valid ~w(service_id vuln_reports components)a
 
   def changeset(model, attrs) do
     model
@@ -36,7 +37,14 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
     with %Service{} = svc <- Services.get_service(id) |> Repo.preload(@preloads),
          {:ok, svc} <- Policies.allow(svc, user, :read),
          {:ok, svc} <- check_flow(svc, model.job) do
-      {:ok, String.trim(service_prompt(service: svc, vulns: sideload_vulns(svc, model.vuln_reports)))}
+      {:ok,
+       String.trim(
+         service_prompt(
+           service: svc,
+           vulns: sideload_vulns(svc, model.vuln_reports),
+           components: sideload_components(svc, model.components)
+         )
+       )}
     else
       nil -> {:error, "could not find service with id #{id}"}
       {:error, err} -> {:error, "failed to inspect service, reason: #{inspect(err)}"}
@@ -50,6 +58,28 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ServiceInspect do
     |> Enum.map(&VulnReports.simplify/1)
   end
   defp sideload_vulns(_, _), do: []
+
+  defp sideload_components(%Service{} = svc, true) do
+    svc
+    |> Repo.preload(:components)
+    |> Map.get(:components, [])
+    |> Enum.map(&simplify_component/1)
+  end
+  defp sideload_components(_, _), do: []
+
+  defp simplify_component(comp) do
+    %{
+      id: comp.id,
+      api_version: Kube.Utils.api_version(comp.group, comp.version),
+      group: comp.group,
+      version: comp.version,
+      kind: comp.kind,
+      namespace: comp.namespace,
+      name: comp.name,
+      state: comp.state,
+      synced: comp.synced
+    }
+  end
 
   EEx.function_from_file(
     :defp,

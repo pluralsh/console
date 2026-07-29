@@ -5,7 +5,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.AI.Tools.Workbench.KubeRequest
   alias Console.PubSub
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
+  alias Console.Schema.{QueuedPrompt, WorkbenchJob, WorkbenchJobActivity}
   alias CloudQuery.Client
   alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput, ToolQuery.Stub}
 
@@ -945,6 +945,199 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "create_queued_prompt/3" do
+    test "users with read access can queue a prompt for a job" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:ok, prompt} =
+        Workbenches.create_queued_prompt(
+          %{prompt: "deferred follow-up", dequeable_at: dequeable_at},
+          job.id,
+          user
+        )
+
+      assert prompt.prompt == "deferred follow-up"
+      assert DateTime.compare(prompt.dequeable_at, dequeable_at) == :eq
+      assert prompt.workbench_job_id == job.id
+      assert prompt.user_id == user.id
+      refute prompt.consumed_at
+    end
+
+    test "users without read access cannot queue a prompt for a job" do
+      user = insert(:user)
+      job = insert(:workbench_job)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:error, "forbidden"} =
+        Workbenches.create_queued_prompt(
+          %{prompt: "unauthorized", dequeable_at: dequeable_at},
+          job.id,
+          user
+        )
+    end
+  end
+
+  describe "delete_queued_prompt/2" do
+    test "users with read access can delete queued prompts" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      prompt = insert(:queued_prompt, workbench_job: job, user: user)
+
+      {:ok, deleted} = Workbenches.delete_queued_prompt(prompt.id, user)
+
+      assert deleted.id == prompt.id
+      refute refetch(prompt)
+    end
+
+    test "users without read access cannot delete queued prompts" do
+      user = insert(:user)
+      prompt = insert(:queued_prompt)
+
+      {:error, "forbidden"} = Workbenches.delete_queued_prompt(prompt.id, user)
+
+      assert refetch(prompt)
+    end
+  end
+
+  describe "dequeue_prompt/1" do
+    test "consumes the queued prompt and creates a user message" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench, status: :successful)
+      prompt = insert(:queued_prompt, prompt: "run this later", workbench_job: job, user: user)
+
+      {:ok, activity} = Workbenches.dequeue_prompt(prompt)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "run this later"
+      assert activity.type == :user
+      assert activity.user_id == user.id
+      assert Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
+      assert refetch(job).status == :pending
+    end
+
+    test "does not consume the prompt when the job is active" do
+      user = insert(:user)
+      job = insert(:workbench_job, status: :running)
+      prompt = insert(:queued_prompt, workbench_job: job, user: user)
+
+      assert {:error, "job is currently active, please wait for it to complete before prompting"} =
+               Workbenches.dequeue_prompt(prompt)
+
+      refute Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
+    end
+  end
+
+  describe "kick_workbench/1" do
+    test "queues a verification prompt for successful stack runs when verification mode is enabled" do
+      bot = bot("console")
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          status: :successful,
+          modes: %WorkbenchJob.Modes{verification: true}
+        )
+
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :successful)
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          url: "https://github.com/pluralsh/console/pull/20",
+          stack: stack,
+          stack_run: run,
+          workbench_job: job
+        )
+
+      {:ok, prompt} = Workbenches.kick_workbench(run)
+
+      assert prompt.workbench_job_id == job.id
+      assert prompt.user_id == bot.id
+      assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
+      assert prompt.prompt =~ "pull request #{pr.url} has been completed"
+      assert prompt.prompt =~ "<plrl-stack"
+      assert prompt.prompt =~ ~s(item-id="#{stack.id}")
+    end
+
+    test "does not queue a stack run verification prompt when verification mode is disabled" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :successful)
+
+      insert(:pull_request,
+        status: :merged,
+        stack: stack,
+        stack_run: run,
+        workbench_job: job
+      )
+
+      assert {:error, "verification mode is not enabled for this job"} =
+               Workbenches.kick_workbench(run)
+
+      assert Console.Repo.preload(job, :queued_prompts).queued_prompts == []
+    end
+
+    test "queues a verification prompt for merged service prs when verification mode is enabled" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      service = insert(:service)
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          modes: %WorkbenchJob.Modes{verification: true}
+        )
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          url: "https://github.com/pluralsh/console/pull/21",
+          service: service,
+          workbench_job: job
+        )
+
+      {:ok, prompt} = Workbenches.kick_workbench(pr)
+
+      assert prompt.workbench_job_id == job.id
+      assert prompt.user_id == user.id
+      assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) == :gt
+      assert prompt.prompt =~ "pull request #{pr.url} has been merged"
+      assert prompt.prompt =~ "<plrl-service"
+      assert prompt.prompt =~ ~s(item-id="#{service.id}")
+    end
+
+    test "does not queue a service pr verification prompt when verification mode is disabled" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      service = insert(:service)
+      job = insert(:workbench_job, user: user, workbench: workbench)
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          service: service,
+          workbench_job: job
+        )
+
+      assert {:error, "verification mode is not enabled for this job"} =
+               Workbenches.kick_workbench(pr)
+
+      assert Console.Repo.preload(job, :queued_prompts).queued_prompts == []
+    end
+  end
+
   describe "pr_followup/3" do
     test "creates a message for the pull request job when it is idle" do
       user = insert(:user)
@@ -975,6 +1168,39 @@ defmodule Console.Deployments.WorkbenchesTest do
                Workbenches.pr_followup(%{prompt: "while running"}, pr.url, user)
 
       refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
+    end
+  end
+
+  describe "pr_queued_prompt/3" do
+    test "queues a prompt for the pull request job" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench)
+      pr = insert(:pull_request, workbench_job: job)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:ok, prompt} =
+        Workbenches.pr_queued_prompt(
+          %{prompt: "queued pr follow-up", dequeable_at: dequeable_at},
+          pr.url,
+          user
+        )
+
+      assert prompt.workbench_job_id == job.id
+      assert prompt.prompt == "queued pr follow-up"
+      assert DateTime.compare(prompt.dequeable_at, dequeable_at) == :eq
+      assert prompt.user_id == user.id
+    end
+
+    test "returns an error when the pull request does not exist" do
+      user = insert(:user)
+
+      assert {:error, "pull request not found"} =
+               Workbenches.pr_queued_prompt(
+                 %{prompt: "missing pr", dequeable_at: DateTime.utc_now()},
+                 "https://github.com/pluralsh/console/pull/404",
+                 user
+               )
     end
   end
 

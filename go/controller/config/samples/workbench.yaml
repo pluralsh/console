@@ -14,6 +14,24 @@ stringData:
   clientSecret: "placeholder"
   accessToken: "placeholder"
   apiToken: "placeholder"
+  botToken: "xoxb-placeholder"
+  privateKey: |
+    -----BEGIN RSA PRIVATE KEY-----
+    placeholder
+    -----END RSA PRIVATE KEY-----
+---
+# Dedicated Docker registry secret so credential rotation can be tested independently:
+#   kubectl patch secret workbench-docker-creds -n default --type merge -p '{"stringData":{"token":"rotated-token"}}'
+# Then confirm the WorkbenchTool reconciles and Console receives the new token.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: workbench-docker-creds
+  namespace: default
+stringData:
+  token: "initial-registry-token"
+  password: "initial-registry-password"
+  username: "registry-user"
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
@@ -31,10 +49,12 @@ spec:
   tool: HTTP
   categories:
     - INTEGRATION
+  approval: true
   configuration:
     http:
       url: https://api.example.com/health
       method: GET
+      function: true
       inputSchema:
         type: object
         properties:
@@ -102,6 +122,14 @@ spec:
         name: workbench-tool-creds
         key: password
       tenantId: my-tenant
+      awsSigv4: true
+      awsRegion: us-east-1
+      awsAccessKeyIdSecretRef:
+        name: workbench-tool-creds
+        key: accessKeyId
+      awsSecretAccessKeySecretRef:
+        name: workbench-tool-creds
+        key: secretAccessKey
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
@@ -151,6 +179,36 @@ spec:
         name: workbench-tool-creds
         key: password
       index: logs-*
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-opensearch-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-opensearch-sample
+  namespace: default
+spec:
+  name: workbenchtool_opensearch_sample
+  tool: OPENSEARCH
+  categories:
+    - LOGS
+  configuration:
+    opensearch:
+      host: https://search-my-domain.us-east-1.es.amazonaws.com
+      index: logs-*
+      awsRegion: us-east-1
+      assumeRoleArn: arn:aws:iam::123456789012:role/opensearch-reader
+      usePodIdentity: false
+      awsAccessKeyIdSecretRef:
+        name: workbench-tool-creds
+        key: accessKeyId
+      awsSecretAccessKeySecretRef:
+        name: workbench-tool-creds
+        key: secretAccessKey
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
@@ -282,6 +340,30 @@ spec:
       clientSecretSecretRef:
         name: workbench-tool-creds
         key: clientSecret
+      prometheusUrl: https://my-workspace.eastus.prometheus.monitor.azure.com
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-sentry-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-sentry-sample
+  namespace: default
+spec:
+  name: workbenchtool_sentry_sample
+  tool: SENTRY
+  categories:
+    - ERROR_TRACKING
+  configuration:
+    sentry:
+      url: https://sentry.io
+      accessTokenSecretRef:
+        name: workbench-tool-creds
+        key: accessToken
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
@@ -327,6 +409,356 @@ spec:
         name: workbench-tool-creds
         key: apiToken
       email: user@example.com
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-slack-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-slack-sample
+  namespace: default
+spec:
+  name: workbenchtool_slack_sample
+  tool: SLACK
+  categories:
+    - CHAT
+  configuration:
+    slack:
+      botTokenSecretRef:
+        name: workbench-tool-creds
+        key: botToken
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-pagerduty-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-pagerduty-sample
+  namespace: default
+spec:
+  name: workbenchtool_pagerduty_sample
+  tool: PAGERDUTY
+  categories:
+    - INTEGRATION
+  configuration:
+    pagerduty:
+      apiTokenSecretRef:
+        name: workbench-tool-creds
+        key: apiToken
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-teams-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-teams-sample
+  namespace: default
+spec:
+  name: workbenchtool_teams_sample
+  tool: TEAMS
+  categories:
+    - CHAT
+  configuration:
+    teams:
+      clientId: 00000000-0000-0000-0000-000000000010
+      tenantId: 00000000-0000-0000-0000-000000000011
+      clientSecretSecretRef:
+        name: workbench-tool-creds
+        key: clientSecret
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-exa-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-exa-sample
+  namespace: default
+spec:
+  name: workbenchtool_exa_sample
+  tool: EXA
+  categories:
+    - SEARCH
+  configuration:
+    exa:
+      apiKeySecretRef:
+        name: workbench-tool-creds
+        key: apiKey
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-github-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-github-sample
+  namespace: default
+spec:
+  name: workbenchtool_github_sample
+  tool: GITHUB
+  categories:
+    - SCM
+  scmConnectionRef:
+    name: github
+  configuration:
+    github:
+      url: https://api.github.com/
+      toolset: default
+      appId: "123456"
+      installationId: "987654"
+      privateKeySecretRef:
+        name: workbench-tool-creds
+        key: privateKey
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-gitlab-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-gitlab-sample
+  namespace: default
+spec:
+  name: workbenchtool_gitlab_sample
+  tool: GITLAB
+  categories:
+    - SCM
+  configuration:
+    gitlab:
+      url: https://gitlab.com
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-bitbucket-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-bitbucket-sample
+  namespace: default
+spec:
+  name: workbenchtool_bitbucket_sample
+  tool: BITBUCKET
+  categories:
+    - SCM
+  configuration:
+    bitbucket:
+      url: https://api.bitbucket.org
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-bitbucket-dc-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-bitbucket-dc-sample
+  namespace: default
+spec:
+  name: workbenchtool_bitbucket_dc_sample
+  tool: BITBUCKET_DATACENTER
+  categories:
+    - SCM
+  configuration:
+    bitbucketDatacenter:
+      url: https://bitbucket.example.com
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-azure-devops-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-azure-devops-sample
+  namespace: default
+spec:
+  name: workbenchtool_azure_devops_sample
+  tool: AZURE_DEVOPS
+  categories:
+    - SCM
+  configuration:
+    azureDevops:
+      url: https://dev.azure.com/my-org
+      tokenSecretRef:
+        name: workbench-tool-creds
+        key: token
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-lambda-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-lambda-sample
+  namespace: default
+spec:
+  name: workbenchtool_lambda_sample
+  tool: LAMBDA
+  categories:
+    - FUNCTION
+  approval: true
+  configuration:
+    lambda:
+      lambdaArn: arn:aws:lambda:us-east-1:123456789012:function:my-function
+      description: Invoke a custom Lambda function from the workbench
+      inputSchema:
+        type: object
+        properties:
+          payload:
+            type: string
+        required:
+          - payload
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-cloud-run-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-cloud-run-sample
+  namespace: default
+spec:
+  name: workbenchtool_cloud_run_sample
+  tool: CLOUD_RUN
+  categories:
+    - FUNCTION
+  configuration:
+    cloudRun:
+      identifier: projects/my-project/locations/us-central1/services/my-service
+      description: Invoke a Cloud Run service from the workbench
+      inputSchema:
+        type: object
+        properties:
+          path:
+            type: string
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-azure-function-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-azure-function-sample
+  namespace: default
+spec:
+  name: workbenchtool_azure_function_sample
+  tool: AZURE_FUNCTION
+  categories:
+    - FUNCTION
+  configuration:
+    azureFunction:
+      identifier: https://my-function-app.azurewebsites.net/api/HttpTrigger
+      description: Invoke an Azure Function from the workbench
+      inputSchema:
+        type: object
+        properties:
+          name:
+            type: string
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-docker-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-docker-sample
+  namespace: default
+spec:
+  name: workbenchtool_docker_sample
+  tool: DOCKER
+  categories:
+    - INTEGRATION
+  reconciliation:
+    driftDetection: true
+    interval: 1m
+  configuration:
+    docker:
+      url: registry-1.docker.io
+      provider: BEARER
+      auth:
+        proxy:
+          url: http://proxy.example.com:8080
+          noproxy: localhost,127.0.0.1
+        bearer:
+          tokenSecretKeyRef:
+            name: workbench-docker-creds
+            key: token
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-docker-basic-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-docker-basic-sample
+  namespace: default
+spec:
+  name: workbenchtool_docker_basic_sample
+  tool: DOCKER
+  categories:
+    - INTEGRATION
+  configuration:
+    docker:
+      url: ghcr.io
+      provider: BASIC
+      auth:
+        basic:
+          username: registry-user
+          passwordSecretKeyRef:
+            name: workbench-docker-creds
+            key: password
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
@@ -402,6 +834,26 @@ spec:
         namespace: default
         key: secretAccessKey
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-token
+  namespace: default
+stringData:
+  token: "test-token"
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: ScmConnection
+metadata:
+  name: github
+spec:
+  name: scm-test-github
+  type: GITHUB
+  tokenSecretRef:
+    name: github-token
+    namespace: default
+  username: "johndoe"
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Workbench
 metadata:
@@ -428,6 +880,8 @@ spec:
       namespace: default
     - name: workbenchtool-elastic-sample
       namespace: default
+    - name: workbenchtool-opensearch-sample
+      namespace: default
     - name: workbenchtool-tempo-sample
       namespace: default
     - name: workbenchtool-datadog-sample
@@ -438,9 +892,39 @@ spec:
       namespace: default
     - name: workbenchtool-azure-sample
       namespace: default
+    - name: workbenchtool-sentry-sample
+      namespace: default
     - name: workbenchtool-linear-sample
       namespace: default
     - name: workbenchtool-atlassian-sample
+      namespace: default
+    - name: workbenchtool-slack-sample
+      namespace: default
+    - name: workbenchtool-pagerduty-sample
+      namespace: default
+    - name: workbenchtool-teams-sample
+      namespace: default
+    - name: workbenchtool-exa-sample
+      namespace: default
+    - name: workbenchtool-github-sample
+      namespace: default
+    - name: workbenchtool-gitlab-sample
+      namespace: default
+    - name: workbenchtool-bitbucket-sample
+      namespace: default
+    - name: workbenchtool-bitbucket-dc-sample
+      namespace: default
+    - name: workbenchtool-azure-devops-sample
+      namespace: default
+    - name: workbenchtool-lambda-sample
+      namespace: default
+    - name: workbenchtool-cloud-run-sample
+      namespace: default
+    - name: workbenchtool-azure-function-sample
+      namespace: default
+    - name: workbenchtool-docker-sample
+      namespace: default
+    - name: workbenchtool-docker-basic-sample
       namespace: default
     - name: workbenchtool-mcp-sample
       namespace: default
