@@ -53,24 +53,54 @@ export function parseKubePath(
   return null
 }
 
+/** Readable singular labels for Kubernetes API resource plurals. */
+const KUBE_RESOURCE_LABELS: Record<string, string> = {
+  pods: 'Pod',
+  services: 'Service',
+  secrets: 'Secret',
+  namespaces: 'Namespace',
+  nodes: 'Node',
+  events: 'Event',
+  endpoints: 'Endpoint',
+  ingresses: 'Ingress',
+  jobs: 'Job',
+  deployments: 'Deployment',
+  configmaps: 'Config map',
+  serviceaccounts: 'Service account',
+  persistentvolumes: 'Persistent volume',
+  persistentvolumeclaims: 'Persistent volume claim',
+  networkpolicies: 'Network policy',
+  poddisruptionbudgets: 'Pod disruption budget',
+  roles: 'Role',
+  rolebindings: 'Role binding',
+  clusterroles: 'Cluster role',
+  clusterrolebindings: 'Cluster role binding',
+  storageclasses: 'Storage class',
+  ingressclasses: 'Ingress class',
+  priorityclasses: 'Priority class',
+  replicasets: 'Replica set',
+  statefulsets: 'Stateful set',
+  daemonsets: 'Daemon set',
+  cronjobs: 'Cron job',
+  horizontalpodautoscalers: 'Horizontal pod autoscaler',
+  customresourcedefinitions: 'Custom resource definition',
+}
+
 export function formatKubeKindLabel(
   resource: string | undefined
 ): string | undefined {
   if (!resource) return undefined
-  return resource
+  const key = resource.toLowerCase()
+  if (KUBE_RESOURCE_LABELS[key]) return KUBE_RESOURCE_LABELS[key]
+  const label = resource
     .split(/[-_]/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')
+    .join(' ')
+  return label.endsWith('s') ? label.slice(0, -1) : label
 }
 
 export function getKubeActionTitle(kube: KubeRequestLike | null | undefined) {
-  const variant = getKubeActionVariant(kube?.method)
-  const parsed = parseKubePath(kube?.path)
-  const kind = formatKubeKindLabel(parsed?.resource)
-
-  if (variant === 'delete' && kind && parsed?.name) {
-    return `${kind}/${parsed.name}`
-  }
+  const kind = formatKubeKindLabel(parseKubePath(kube?.path)?.resource)
   if (kind) return kind
   return kube?.method?.toUpperCase() || 'Kubernetes action'
 }
