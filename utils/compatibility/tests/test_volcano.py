@@ -4,6 +4,7 @@ from pathlib import Path
 
 COMPATIBILITY_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(COMPATIBILITY_DIR))
+sys.modules.pop("utils", None)
 
 from scrapers.volcano import (  # noqa: E402
     extract_table_data,
