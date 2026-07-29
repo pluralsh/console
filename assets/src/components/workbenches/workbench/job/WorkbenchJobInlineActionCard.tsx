@@ -128,7 +128,7 @@ export function WorkbenchJobInlineActionCard({
       {expanded && (
         <>
           {error && <GqlError error={error} />}
-          {!isKubeDiff && (
+          {!isKubernetes && (
             <CaptionP $color="text-xlight">
               {getActionDescription(activity)}
             </CaptionP>
