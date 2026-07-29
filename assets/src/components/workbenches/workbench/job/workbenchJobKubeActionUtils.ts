@@ -108,33 +108,14 @@ export function getKubeActionTitle(kube: KubeRequestLike | null | undefined) {
 export function getKubeActionSubtitle(
   kube: KubeRequestLike | null | undefined
 ) {
-  const variant = getKubeActionVariant(kube?.method)
   const parsed = parseKubePath(kube?.path)
-  const nsLabel = parsed?.namespace ? `ns/${parsed.namespace}` : null
-
-  if (variant === 'delete') {
-    return (
-      [nsLabel, kube?.handle].filter(Boolean).join(' · ') ||
-      kube?.handle ||
-      'Kubernetes'
-    )
-  }
-
-  if (variant === 'update') {
-    const resourcePath =
-      parsed?.resource && parsed?.name
-        ? `${parsed.resource}/${parsed.name}`
-        : parsed?.resource
-    return (
-      [nsLabel, resourcePath].filter(Boolean).join(' · ') ||
-      kube?.handle ||
-      'Kubernetes'
-    )
-  }
-
-  const path = kube?.path?.trim()
-  if (!path) return kube?.handle || 'Kubernetes'
-  return [kube?.handle, path].filter(Boolean).join(' · ')
+  return (
+    [parsed?.namespace && `ns/${parsed.namespace}`, parsed?.name]
+      .filter(Boolean)
+      .join(' · ') ||
+    kube?.path?.trim() ||
+    'Kubernetes'
+  )
 }
 
 function sanitizeForDiff(value: unknown): unknown {
