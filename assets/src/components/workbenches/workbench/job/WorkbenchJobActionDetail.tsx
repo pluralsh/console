@@ -88,7 +88,7 @@ export function WorkbenchJobActionDetail({
         <Flex
           align="center"
           gap="small"
-          css={{ minWidth: 0 }}
+          css={{ minWidth: 0, flex: 1 }}
         >
           <IconFrame
             circle
@@ -108,7 +108,7 @@ export function WorkbenchJobActionDetail({
             second={getActionSubtitle(activity)}
             secondColor="text-xlight"
             truncate
-            css={{ minWidth: 0 }}
+            css={{ minWidth: 0, flex: 1 }}
           />
         </Flex>
         <WorkbenchJobKubeActionChips

@@ -155,11 +155,13 @@ export function WorkbenchJobKubeActionChips({
     <Flex
       align="center"
       gap="xsmall"
+      css={{ flexShrink: 0, flexWrap: 'nowrap' }}
     >
       {variant === 'update' && (
         <Chip
           size="small"
           severity="info"
+          css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
         >
           Update
         </Chip>
@@ -168,6 +170,7 @@ export function WorkbenchJobKubeActionChips({
         <Chip
           size="small"
           severity="danger"
+          css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
         >
           Delete
         </Chip>
