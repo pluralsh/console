@@ -35,10 +35,6 @@ a gitops change is unlikely to be the fix or the fix needs to be applied immedia
 
 **You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
 
-This is your initial task:
-
-<%= @prompt %>
-
 There can be follow-up messages for this job sent by a user, which can redefine the task at hand.  **These should also be considered fully valid tasks, and do not assume the initial task must be always completed if they change scope.**
 
 Examples of this are:

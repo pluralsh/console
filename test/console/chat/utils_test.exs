@@ -79,8 +79,11 @@ defmodule Console.Chat.UtilsTest do
       assert prompt.workbench_job_id == job.id
       assert prompt.user_id == user.id
       assert prompt.prompt =~ msg.text
-      assert prompt.prompt =~ "A followup message (id=#{msg.id})"
-      assert prompt.prompt =~ "React to this followup and use it to continue the existing job"
+      assert prompt.prompt =~ "React to this in #{conn.type}"
+      assert prompt.prompt =~ "treat it as a followup for this job"
+      assert prompt.prompt =~ "Message details are id=#{msg.id}"
+      assert prompt.prompt =~ "channel=#{channel}"
+      assert prompt.prompt =~ "channel_id=id=C123"
       refute prompt.prompt =~ "You should reply to the original message"
       assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
       assert refetch(job).status == :successful
@@ -125,8 +128,11 @@ defmodule Console.Chat.UtilsTest do
 
       assert prompt.workbench_job_id == job.id
       assert prompt.prompt =~ msg.text
-      assert prompt.prompt =~ "A followup message (id=#{msg.id})"
-      assert prompt.prompt =~ "React to this followup and use it to continue the existing job"
+      assert prompt.prompt =~ "React to this in #{conn.type}"
+      assert prompt.prompt =~ "treat it as a followup for this job"
+      assert prompt.prompt =~ "Message details are id=#{msg.id}"
+      assert prompt.prompt =~ "channel=#{channel}"
+      assert prompt.prompt =~ "channel_id=id=C123"
       refute prompt.prompt =~ "You should reply to the original message"
       assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
       assert refetch(job).status == :running
