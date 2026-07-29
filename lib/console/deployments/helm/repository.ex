@@ -29,7 +29,7 @@ defmodule Console.Deployments.Helm.Repository do
   def charts(%HelmRepository{status: %HelmRepository.Status{
     artifact: %HelmRepository.Status.Artifact{url: url}
   }}) when is_binary(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
+    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, decode_body: false, retry: false),
          {:ok, yaml} <- YamlElixir.read_from_string(body) do
       helm = %Schema{entries: yaml["entries"]}
       helm = Schema.transform(helm)

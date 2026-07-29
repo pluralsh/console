@@ -177,19 +177,19 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp post(conn, path, body) do
     url(conn, path)
-    |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
+    |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp put(conn, path, body) do
     url(conn, path)
-    |> HTTPoison.put(Jason.encode!(body), Connection.headers(conn))
+    |> Req.put(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
+  defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
   defp handle_response(_), do: {:error, "unknown bitbucket error"}
 
   defp state(%{"state" => "MERGED"}), do: :merged

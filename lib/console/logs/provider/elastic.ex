@@ -9,7 +9,7 @@ defmodule Console.Logs.Provider.Elastic do
   @type t :: %__MODULE__{}
   @headers [{"Content-Type", "application/json"}]
 
-  @opts [recv_timeout: :timer.seconds(30)]
+  @opts [receive_timeout: :timer.seconds(30), decode_body: false, retry: false]
 
   defstruct [:connection, :client]
 
@@ -49,15 +49,15 @@ defmodule Console.Logs.Provider.Elastic do
 
   def search(%Elastic{index: index} = conn, query) do
     Elastic.url(conn, "#{index}/_search")
-    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(conn, @headers), @opts)
+    |> Req.post([headers: Elastic.headers(conn, @headers), body: Jason.encode!(query)] ++ @opts)
     |> search_response()
   end
 
-  defp search_response({:ok, %HTTPoison.Response{status_code: 200, body: body}}) do
+  defp search_response({:ok, %Req.Response{status: 200, body: body}}) do
     with {:ok, resp} <- Jason.decode(body),
       do: {:ok, Snap.SearchResponse.new(resp)}
   end
-  defp search_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "es failure: #{body}"}
+  defp search_response({:ok, %Req.Response{body: body}}), do: {:error, "es failure: #{body}"}
   defp search_response(_), do: {:error, "network failure"}
 
   defp format_hits(%Snap.SearchResponse{hits: %Snap.Hits{hits: hits}}) do

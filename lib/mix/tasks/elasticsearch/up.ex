@@ -6,7 +6,7 @@ defmodule Mix.Tasks.Elasticsearch.Up do
   @index Application.compile_env(:elasticsearch, :index)
 
   def run(_) do
-    HTTPoison.start()
+    {:ok, _} = Application.ensure_all_started(:req)
     with true <- index_exists?() do
       IO.puts("Elasticsearch index #{@index} already exists at #{@host}. Will delete")
       delete_index()
@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Elasticsearch.Up do
 
   def create_index(index \\ @index) do
     url("/#{index}")
-    |> HTTPoison.put!("", [])
+    |> Req.put!(body: "", decode_body: false, retry: false)
   end
 
   defp url(path), do: "#{@host}#{path}"

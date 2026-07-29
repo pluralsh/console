@@ -42,7 +42,7 @@ defmodule Console.AI.Graph.Provider.Elastic do
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     Elastic.url(es, curr_index(index))
-    |> HTTPoison.put(Jason.encode!(@index_mappings), Elastic.headers(es, @headers))
+    |> Req.put(headers: Elastic.headers(es, @headers), body: Jason.encode!(@index_mappings), decode_body: false, retry: false)
     |> handle_response("could not initialize elasticsearch:")
   end
 
@@ -56,7 +56,7 @@ defmodule Console.AI.Graph.Provider.Elastic do
       |> Enum.join("\n")
 
     Elastic.url(es, "/_bulk")
-    |> HTTPoison.post("#{bulk}\n", Elastic.headers(es, [{"Content-Type", "application/x-ndjson"}]))
+    |> Req.post(headers: Elastic.headers(es, [{"Content-Type", "application/x-ndjson"}]), body: "#{bulk}\n", decode_body: false, retry: false)
     |> handle_response("could not bulk index into elasticsearch:")
   end
 
@@ -133,8 +133,8 @@ defmodule Console.AI.Graph.Provider.Elastic do
   defp groups(%User{group_members: [_ | _] = members}), do: [%{terms: %{group_ids: Enum.map(members, & &1.group_id)}}]
   defp groups(_), do: []
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code}}, _) when code >= 200 and code < 300, do: :ok
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
+  defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok
+  defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: elasticsearch error"}
 
   def curr_index(index) when is_binary(index) do

@@ -50,11 +50,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   def get(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
     url = base <> path <> Query.query_string(query)
 
-    case HTTPoison.get(url, auth_headers(token), http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+    case Req.get(url, [headers: auth_headers(token)] ++ http_opts()) do
+      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
         decode_json(body)
 
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+      {:ok, %Req.Response{status: code, body: body}} ->
         {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
@@ -68,11 +68,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
     url = base <> path
     headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
 
-    case HTTPoison.post(url, Jason.encode!(body_map), headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+    case Req.post(url, [headers: headers, body: Jason.encode!(body_map)] ++ http_opts()) do
+      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
         decode_json(body)
 
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+      {:ok, %Req.Response{status: code, body: body}} ->
         {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
@@ -103,5 +103,5 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   defp enc(s) when is_binary(s), do: URI.encode(String.trim(s), &URI.char_unreserved?/1)
 
   defp http_opts,
-    do: Application.get_env(:console, :httpoison_bitbucket_options, []) ++ [recv_timeout: 60_000]
+    do: Application.get_env(:console, :req_bitbucket_options, []) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
 end

@@ -7,7 +7,7 @@ defmodule Console.Logs.Provider.Victoria do
   alias Console.Logs.{Query, Time, Line, Stream.Exec}
   alias Console.Schema.{Cluster, Service, DeploymentSettings.Connection}
 
-  @options [recv_timeout: :timer.seconds(30), timeout: :timer.seconds(30)]
+  @options [receive_timeout: :timer.seconds(30), connect_options: [timeout: :timer.seconds(30)], retry: false]
   @headers [{"Content-Type", "application/x-www-form-urlencoded"}]
 
   defstruct [:connection]
@@ -17,10 +17,14 @@ defmodule Console.Logs.Provider.Victoria do
   def query(%__MODULE__{connection: %Connection{host: host} = conn}, %Query{} = query) when is_binary(host) do
     Exec.exec(fn ->
       Connection.url(conn, "/select/logsql/query")
-      |> HTTPoison.post({:form, [
-        {"query", build_query(query)},
-        {"limit", "#{Query.limit(query)}"}
-      ]}, Connection.headers(conn, @headers), [stream_to: self(), async: :once] ++ @options)
+      |> Req.post([
+        form: [
+          {"query", build_query(query)},
+          {"limit", "#{Query.limit(query)}"}
+        ],
+        headers: Connection.headers(conn, @headers),
+        into: :self
+      ] ++ @options)
     end, mapper: &line/1)
   end
   def query(_, _), do: {:error, "no victoria metrics host specified"}

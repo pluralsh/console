@@ -22,40 +22,44 @@ defmodule Console.Logs.Stream.Exec do
     Stream.resource(
       start,
       fn
-        {:error, %HTTPoison.Error{} = error} -> {[{:error, error}], :error}
-        {{:error, err}, _} -> {[{:error, err}], :error}
+        {:error, error} -> {[{:error, error}], :error}
 
-        {:ok, %HTTPoison.AsyncResponse{}} = resp  -> {[], {resp, ""}}
+        {:ok, %Req.Response{status: code}} = resp when code >= 200 and code < 400 ->
+          {[], {resp, ""}}
 
-        {{:ok, %HTTPoison.AsyncResponse{id: id} = res}, acc}  ->
+        {:ok, %Req.Response{status: code}} ->
+          {[{:error, "error code: #{code}"}], :error}
+
+        {{:ok, %Req.Response{body: %Req.Response.Async{ref: ref}} = res}, acc} ->
           receive do
-            %HTTPoison.AsyncStatus{id: ^id, code: code} when code >= 200 and code < 400 ->
-              {[], stream_next(res, acc)}
+            {^ref, _} = message ->
+              case Req.parse_message(res, message) do
+                {:ok, [data: chunk]} ->
+                  {items, remaining} = parser.parse(acc <> chunk)
+                  {items, {{:ok, res}, remaining}}
 
-            %HTTPoison.AsyncStatus{id: ^id, code: code} ->
-              {[{:error, "error code: #{code}"}], :error}
+                {:ok, [trailers: _]} ->
+                  {[], {{:ok, res}, acc}}
 
-            %HTTPoison.AsyncHeaders{id: ^id, headers: _headers} ->
-              {[], stream_next(res, acc)}
+                {:ok, [:done]} ->
+                  {:halt, res}
 
-            %HTTPoison.AsyncChunk{chunk: chunk} ->
-              {items, remaining} = parser.parse(acc <> chunk)
-              {items, stream_next(res, remaining)}
+                {:error, err} ->
+                  {[{:error, err}], :error}
 
-            %HTTPoison.AsyncEnd{id: ^id} ->
-              {:halt, res}
+                :unknown ->
+                  {[], {{:ok, res}, acc}}
+              end
           after
             @timeout -> {:halt, res}
           end
-        {:error, _} -> {:halt, :error}
+
         :error -> {:halt, :error}
       end,
       fn
-        %{id: id} -> :hackney.stop_async(id)
-        :error -> :ok
+        %Req.Response{body: %Req.Response.Async{}} = res -> Req.cancel_async_response(res)
+        _ -> :ok
       end
     )
   end
-
-  defp stream_next(resp, acc), do: {HTTPoison.stream_next(resp), acc}
 end

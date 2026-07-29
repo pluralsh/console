@@ -17,9 +17,9 @@ defmodule Loki.Client do
 
     host(client)
     |> Path.join("/loki/api/v1/query_range?#{query}")
-    |> HTTPoison.get(Enum.uniq_by(headers() ++ auth(client), &elem(&1, 0)))
+    |> Req.get(headers: Enum.uniq_by(headers() ++ auth(client), &elem(&1, 0)), decode_body: false, retry: false)
     |> case do
-      {:ok, %{body: body, status_code: 200}} ->
+      {:ok, %{body: body, status: 200}} ->
         {:ok, body
               |> Poison.decode(as: %Response{data: %Data{result: [%Result{}]}})
               |> convert()}

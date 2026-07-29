@@ -39,16 +39,25 @@ defmodule Console.AI.Tools.Workbench.Http do
 
   def invoke(%WorkbenchTool{configuration: %Configuration{http: http}}, %{} = input) do
     with {:body, {:ok, body}} <- {:body, body(http, input)},
-         {:request, {:ok, %HTTPoison.Response{body: body, status_code: code}}} <- {:request, do_request(http, body)} do
+         {:request, {:ok, %Req.Response{body: body, status: code}}} <- {:request, do_request(http, body)} do
       {:ok, "http response: #{body} (status #{code})"}
     else
       {:body, {:error, error}} -> {:error, "could not render request body: #{inspect(error)}"}
-      {:request, {:error, %HTTPoison.Error{reason: reason}}} -> {:error, "HTTP error: #{inspect(reason)}"}
+      {:request, {:error, reason}} -> {:error, "HTTP error: #{inspect(reason)}"}
     end
   end
 
   defp do_request(%HttpConfiguration{method: method, url: url} = config, body) do
-    HTTPoison.request(method, url, body, headers(config), [timeout: 10_000, recv_timeout: 10_000])
+    Req.request(
+      method: method,
+      url: url,
+      body: body,
+      headers: headers(config),
+      connect_options: [timeout: 10_000],
+      receive_timeout: 10_000,
+      decode_body: false,
+      retry: false
+    )
   end
 
   defp headers(%HttpConfiguration{headers: [_ | _] = headers}), do: Enum.map(headers, &{&1.name, &1.value})

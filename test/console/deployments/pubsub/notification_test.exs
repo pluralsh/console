@@ -14,7 +14,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["service.update"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, service: svc)
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      expect(Req, :post, fn _, _ -> {:ok, %Req.Response{}} end)
 
       event = %PubSub.ServiceUpdated{item: svc}
       :ok = Notifications.handle_event(event)
@@ -24,7 +24,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       svc = insert(:service)
       router = insert(:notification_router, events: ["service.update"])
       insert(:router_sink, router: router)
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      expect(Req, :post, fn _, _ -> {:ok, %Req.Response{}} end)
 
       event = %PubSub.ServiceUpdated{item: svc}
       :ok = Notifications.handle_event(event)
@@ -78,7 +78,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["pr.create"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, regex: ".*/pluralsh/console/.*")
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      expect(Req, :post, fn _, _ -> {:ok, %Req.Response{}} end)
 
       event = %PubSub.PullRequestCreated{item: pr}
       :ok = Notifications.handle_event(event)
@@ -94,7 +94,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["pr.close"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, regex: ".*/pluralsh/console/.*")
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      expect(Req, :post, fn _, _ -> {:ok, %Req.Response{}} end)
 
       event = %PubSub.PullRequestUpdated{item: pr}
       :ok = Notifications.handle_event(event)
@@ -108,7 +108,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["pr.close"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, regex: ".*/pluralsh/console/.*")
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      expect(Req, :post, fn _, _ -> {:ok, %Req.Response{}} end)
 
       event = %PubSub.PullRequestUpdated{item: pr}
       :ok = Notifications.handle_event(event)
@@ -125,7 +125,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["pipeline.update"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, pipeline: pipe)
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      expect(Req, :post, fn _, _ -> {:ok, %Req.Response{}} end)
 
       event = %PubSub.PipelineGateUpdated{item: gate}
       :ok = Notifications.handle_event(event)
@@ -139,9 +139,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, stack: run.stack)
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.StackRunCreated{item: run}
@@ -157,7 +157,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["stack.run"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, stack: run.stack)
-      reject(HTTPoison, :post, 3)
+      reject(Req, :post, 2)
 
       event = %PubSub.StackRunCreated{item: run}
       :ok = Notifications.handle_event(event)
@@ -171,9 +171,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, stack: run.stack)
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.StackRunUpdated{item: run}
@@ -189,7 +189,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["stack.pending"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, stack: run.stack)
-      reject(HTTPoison, :post, 3)
+      reject(Req, :post, 2)
 
       event = %PubSub.StackRunUpdated{item: run}
       :ok = Notifications.handle_event(event)
@@ -205,9 +205,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_filter, router: router, service: svc)
 
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.ServiceInsight{item: {svc, insight}}
@@ -253,9 +253,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_filter, router: router, stack: stack)
 
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.StackInsight{item: {stack, insight}}
@@ -276,9 +276,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_filter, router: router, cluster: cluster)
 
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.ClusterInsight{item: {cluster, insight}}
@@ -298,9 +298,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_filter, router: router)
 
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.SentinelRunUpdated{item: run}
@@ -315,7 +315,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       run = insert(:sentinel_run, status: :pending)
       router = insert(:notification_router, events: ["sentinel.run.failed"])
       insert(:router_sink, router: router)
-      reject(&HTTPoison.post/3)
+      reject(&Req.post/2)
 
       event = %PubSub.SentinelRunUpdated{item: run}
       :ok = Notifications.handle_event(event)
@@ -331,9 +331,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_filter, router: router, cluster: cluster)
 
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
@@ -352,9 +352,9 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_filter, router: router, cluster: cluster)
 
       me = self()
-      expect(HTTPoison, :post, fn _, body, _ ->
-        send me, {:body, body}
-        {:ok, %HTTPoison.Response{}}
+      expect(Req, :post, fn _, opts ->
+        send me, {:body, opts[:body]}
+        {:ok, %Req.Response{}}
       end)
 
       event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
@@ -373,7 +373,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, cluster: cluster)
 
-      reject(&HTTPoison.post/3)
+      reject(&Req.post/2)
 
       event = %PubSub.AlertCreated{item: alert}
       :ok = Notifications.handle_event(event)

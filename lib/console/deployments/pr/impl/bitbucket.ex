@@ -144,38 +144,38 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   def merge(_, _), do: :ok
 
   defp post(conn, url, body) do
-    HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
+    Req.post("#{conn.host}#{url}", headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp put(conn, url, body) do
-    HTTPoison.put("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
+    Req.put("#{conn.host}#{url}", headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp get(%Connection{} = conn, url) do
-    HTTPoison.get("#{conn.host}#{url}", Connection.headers(conn))
+    Req.get("#{conn.host}#{url}", headers: Connection.headers(conn), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp get(url, headers) when is_binary(url) and is_list(headers) do
-    HTTPoison.get(url, headers)
+    Req.get(url, headers: headers, decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp get_raw(url, headers) when is_binary(url) and is_list(headers) do
-    HTTPoison.get(url, headers)
+    Req.get(url, headers: headers, decode_body: false, retry: false)
     |> handle_response_raw()
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
+  defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
   defp handle_response(_), do: {:error, "unknown bitbucket error"}
 
-  defp handle_response_raw({:ok, %HTTPoison.Response{status_code: code, body: body}})
+  defp handle_response_raw({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: {:ok, body}
-  defp handle_response_raw({:ok, %HTTPoison.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
+  defp handle_response_raw({:ok, %Req.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}
   defp handle_response_raw(_), do: {:error, "unknown bitbucket error"}
 
   defp state(%{"state" => "MERGED"}), do: :merged
@@ -210,7 +210,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
          } = pr_body} <- get(conn, "/repositories/#{workspace}/#{repo}/pullrequests/#{pr_id}") do
       {:ok, pr_body, diff_url, diffstat_url}
     else
-      {:error, %HTTPoison.Error{reason: reason}} ->
+      {:error, %Req.TransportError{reason: reason}} ->
         {:error, "HTTP request failed: #{inspect(reason)}"}
       {:error, %Jason.DecodeError{}} ->
         {:error, "Invalid JSON response"}

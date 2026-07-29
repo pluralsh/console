@@ -2,7 +2,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Http do
   @moduledoc false
 
   @spec error(String.t(), term()) :: {:error, String.t()}
-  def error(service, %HTTPoison.Error{reason: reason}),
+  def error(service, %Req.TransportError{reason: reason}),
     do: {:error, "#{service} request failed: #{format_reason(reason)}"}
 
   def error(service, reason),

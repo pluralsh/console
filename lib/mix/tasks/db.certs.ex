@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Db.Certs do
   require Logger
-  @deps ~w(logger httpoison hackney)a
+  @deps ~w(logger req)a
 
   @urls [
     aws: ~w(https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem),
@@ -25,10 +25,10 @@ defmodule Mix.Tasks.Db.Certs do
 
   defp build_pem(path, scope, urls) do
     Enum.reduce(urls, [], fn url, acc ->
-      case HTTPoison.get(url) do
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+      case Req.get(url, raw: true, retry: false) do
+        {:ok, %Req.Response{status: 200, body: body}} ->
           [parse(body, url) | acc]
-        {:ok, %HTTPoison.Response{body: body}} ->
+        {:ok, %Req.Response{body: body}} ->
           Logger.info("Error fetching RDS CA: #{inspect(body)}")
           acc
         {:error, error} ->

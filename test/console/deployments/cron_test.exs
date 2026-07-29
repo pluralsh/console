@@ -291,9 +291,9 @@ defmodule Console.Deployments.CronTest do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", governance: governance)
 
-      expect(HTTPoison, :post, fn "https://webhook.url/v1/confirm", _, _ ->
+      expect(Req, :post, fn "https://webhook.url/v1/confirm", _ ->
         body = Jason.encode!(%{state: %{service_now_id: "1234567890"}})
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}}
+        {:ok, %Req.Response{status: 200, body: body}}
       end)
 
       expect(Tentacat.Pulls.Reviews, :create, fn _, "pluralsh", "console", "1", _ ->

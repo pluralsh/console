@@ -143,19 +143,19 @@ defmodule Console.Deployments.Pr.Impl.Azure do
 
   defp get(conn, url) do
     url(conn, url)
-    |> HTTPoison.get(Connection.headers(conn))
+    |> Req.get(headers: Connection.headers(conn), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp post(conn, url, body) do
     url(conn, url)
-    |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
+    |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp patch(conn, url, body) do
     url(conn, url)
-    |> HTTPoison.patch(Jason.encode!(body), Connection.headers(conn))
+    |> Req.patch(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
@@ -230,9 +230,9 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     end
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "azure devops request failed: #{body}"}
+  defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, "azure devops request failed: #{body}"}
   defp handle_response(_), do: {:error, "unknown azure devops error"}
 
   defp connection(%PrAutomation{connection: %ScmConnection{} = conn}), do: connection(conn)

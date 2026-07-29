@@ -57,7 +57,7 @@ defmodule Console.Deployments.Deprecations.Table do
   end
 
   defp fetch_and_parse(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url, [], proxy_config()),
+    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, [decode_body: false, retry: false] ++ Console.Utils.HTTP.req_options(proxy_config())),
          {:ok, %{"deprecated-versions" => deprecated}} <- YamlElixir.read_from_string(body) do
       Enum.map(deprecated, &to_entry/1)
     end

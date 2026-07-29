@@ -39,11 +39,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     url = base <> path <> Query.query_string(query)
     headers = [{"PRIVATE-TOKEN", token}]
 
-    case HTTPoison.get(url, headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+    case Req.get(url, [headers: headers] ++ http_opts()) do
+      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
         decode_json(body)
 
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+      {:ok, %Req.Response{status: code, body: body}} ->
         {:error, "GitLab API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
@@ -57,11 +57,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     url = base <> path <> Query.query_string(query)
     headers = [{"PRIVATE-TOKEN", token}]
 
-    case HTTPoison.post(url, "", headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+    case Req.post(url, [headers: headers, body: ""] ++ http_opts()) do
+      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
         decode_json(body)
 
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+      {:ok, %Req.Response{status: code, body: body}} ->
         {:error, "GitLab API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
@@ -76,11 +76,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     headers = [{"PRIVATE-TOKEN", token}, {"Content-Type", "application/json"}]
     encoded = Jason.encode!(body_map)
 
-    case HTTPoison.post(url, encoded, headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+    case Req.post(url, [headers: headers, body: encoded] ++ http_opts()) do
+      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
         decode_json(body)
 
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+      {:ok, %Req.Response{status: code, body: body}} ->
         {:error, "GitLab API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
@@ -98,7 +98,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
   end
 
   defp http_opts,
-    do: Application.get_env(:console, :httpoison_gitlab_options, []) ++ [recv_timeout: 60_000]
+    do: Application.get_env(:console, :req_gitlab_options, []) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
 
   @doc false
   def encode_project_id(project) when is_integer(project), do: Integer.to_string(project)

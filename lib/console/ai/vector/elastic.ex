@@ -53,7 +53,7 @@ defmodule Console.AI.Vector.Elastic do
 
   def init(%__MODULE__{conn: %Elastic{index: index} = es}) do
     Elastic.url(es, index)
-    |> HTTPoison.put(Jason.encode!(@index_mappings), Elastic.headers(es, @headers))
+    |> Req.put(headers: Elastic.headers(es, @headers), body: Jason.encode!(@index_mappings), decode_body: false, retry: false)
     |> handle_response("could not initialize elasticsearch:")
     |> case do
       :ok -> initialized()
@@ -63,7 +63,7 @@ defmodule Console.AI.Vector.Elastic do
 
   def recreate(%__MODULE__{conn: %Elastic{index: index} = es} = store) do
     Elastic.url(es, index)
-    |> HTTPoison.delete(Elastic.headers(es, @headers))
+    |> Req.delete(headers: Elastic.headers(es, @headers), decode_body: false, retry: false)
     |> handle_response("could not delete elasticsearch:")
     |> case do
       :ok -> init(store)
@@ -76,12 +76,12 @@ defmodule Console.AI.Vector.Elastic do
     with {id, datatype, text} <- Content.content(data),
          {:ok, embeddings} <- Provider.embeddings(text) do
       Elastic.url(es, doc_url(es.index, id))
-      |> HTTPoison.post(Jason.encode!(doc_filters(%{
+      |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(doc_filters(%{
         passages: Enum.map(embeddings, fn {passage, vector} -> %{vector: vector, text: passage} end),
         datatype: datatype,
         "@timestamp": DateTime.utc_now(),
         "#{datatype}": Console.mapify(data)
-      }, filters, conn)), Elastic.headers(es, @headers))
+      }, filters, conn)), decode_body: false, retry: false)
       |> handle_response("could not insert vector into elasticsearch:")
     end
   end
@@ -124,7 +124,7 @@ defmodule Console.AI.Vector.Elastic do
     not_filters = Keyword.get(opts, :not, [])
     query = %{query: %{bool: add_not(%{must: filters(filters)}, not_filters)}}
     Elastic.url(es, "#{es.index}/_delete_by_query")
-    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(es, @headers))
+    |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(query), decode_body: false, retry: false)
     |> handle_response("could not delete vectors from elasticsearch:")
   end
 
@@ -140,7 +140,7 @@ defmodule Console.AI.Vector.Elastic do
     }
 
     Elastic.url(es, "#{es.index}/_delete_by_query")
-    |> HTTPoison.post(Jason.encode!(query), Elastic.headers(es, @headers))
+    |> Req.post(headers: Elastic.headers(es, @headers), body: Jason.encode!(query), decode_body: false, retry: false)
     |> handle_response("could not delete vectors from elasticsearch:")
   end
 
@@ -190,7 +190,7 @@ defmodule Console.AI.Vector.Elastic do
   end
   defp add_not(filters, _), do: filters
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code}}, _) when code >= 200 and code < 300, do: :ok
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
+  defp handle_response({:ok, %Req.Response{status: code}}, _) when code >= 200 and code < 300, do: :ok
+  defp handle_response({:ok, %Req.Response{body: body}}, modifier), do: {:error, "#{modifier}: #{body}"}
   defp handle_response(_, modifier), do: {:error, "#{modifier}: elasticsearch error"}
 end

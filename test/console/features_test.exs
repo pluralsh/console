@@ -14,7 +14,8 @@ defmodule Console.FeaturesTest do
       })
 
       account = %{id: "id", availableFeatures: %{vpn: true}}
-      expect(HTTPoison, :post, fn _, ^body, _ ->
+      expect(Req, :post, fn _, opts ->
+        assert opts[:body] == body
         {:ok, %{body: Jason.encode!(%{data: %{account: account}})}}
       end)
 

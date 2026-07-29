@@ -165,26 +165,26 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   defp post(conn, url, body) do
     api_url(conn, url)
-    |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
+    |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp put(conn, url, body) do
     api_url(conn, url)
-    |> HTTPoison.put(Jason.encode!(body), Connection.headers(conn))
+    |> Req.put(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp get(conn, url) do
     api_url(conn, url)
-    |> HTTPoison.get(Connection.headers(conn))
+    |> Req.get(headers: Connection.headers(conn), decode_body: false, retry: false)
     |> handle_response()
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "gitlab request failed: #{body}"}
-  defp handle_response({:error, %HTTPoison.Error{reason: reason}}), do: {:error, "gitlab request failed: #{reason}"}
+  defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, "gitlab request failed: #{body}"}
+  defp handle_response({:error, %Req.TransportError{reason: reason}}), do: {:error, "gitlab request failed: #{inspect(reason)}"}
   defp handle_response(_), do: {:error, "unknown gitlab error"}
 
   defp state(%{"state" => "merged"}), do: :merged

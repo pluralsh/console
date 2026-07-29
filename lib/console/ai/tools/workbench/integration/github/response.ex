@@ -80,11 +80,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Response do
 
   defp query_param(_, _), do: nil
 
-  defp header(%HTTPoison.Response{headers: headers}, key) do
-    Enum.find_value(headers, fn
-      {^key, value} -> value
+  defp header(%Req.Response{} = resp, key) do
+    case Req.Response.get_header(resp, String.downcase(key)) do
+      [value | _] -> value
       _ -> nil
-    end)
+    end
   end
 
   defp header(_, _), do: nil

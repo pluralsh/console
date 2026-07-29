@@ -6,9 +6,9 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.ClientTest do
 
   describe "get/3" do
     test "bubbles HTTP transport failures as string errors" do
-      expect(HTTPoison, :get, fn _url, _headers, _opts ->
+      expect(Req, :get, fn _url, _opts ->
         {:error,
-         %HTTPoison.Error{
+         %Req.TransportError{
            reason: {:tls_alert, {:unknown_ca, ~c"TLS client: certificate verify failed"}}
          }}
       end)
