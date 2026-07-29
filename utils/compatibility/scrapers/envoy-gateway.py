@@ -4,13 +4,21 @@ from collections import OrderedDict
 
 from packaging.version import Version
 
-from utils import fetch_page, print_error, print_warning, update_compatibility_info
+from utils import (
+    fetch_page,
+    get_chart_images,
+    print_error,
+    print_warning,
+    update_compatibility_info,
+)
 
 
 APP_NAME = "envoy-gateway"
 COMPATIBILITY_URL = "https://raw.githubusercontent.com/envoyproxy/gateway/main/site/content/en/news/releases/matrix.md"
 TAGS_URL = "https://api.github.com/repos/envoyproxy/gateway/tags"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
+CHART_URL = "oci://docker.io/envoyproxy/gateway-helm"
+CHART_NAME = "gateway-helm"
 
 
 def _decode(content):
@@ -129,16 +137,19 @@ def scrape():
             skipped_series.append(series)
             continue
 
-        versions.append(
-            OrderedDict(
-                [
-                    ("version", app_version),
-                    ("kube", kube_versions),
-                    ("requirements", []),
-                    ("incompatibilities", []),
-                ]
-            )
+        row = OrderedDict(
+            [
+                ("version", app_version),
+                ("kube", kube_versions),
+                ("requirements", []),
+                ("incompatibilities", []),
+            ]
         )
+        images = get_chart_images(CHART_URL, CHART_NAME, app_version)
+        if images:
+            row["chart_version"] = app_version
+            row["images"] = images
+        versions.append(row)
 
     if skipped_series:
         print_warning(
