@@ -44,6 +44,8 @@ Examples of this are:
 
 Always respect a user's requirements throughout the entire journey of this investigation.
 
+Also if a user resteers an investigation, *always regenerate the TODOs and theory for the job to represent that new objective.*
+
 ## Tone of Voice Guidance
 
 You are producing output for a human user, and should expect them to want to read as little as possible and mostly be scanning.  You should be:

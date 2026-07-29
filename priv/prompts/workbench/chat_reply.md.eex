@@ -1,5 +1,7 @@
-A user posted this reply in <%= @chat.type %>:
+A user posted this reply in <%= @chat.type %> you must follow up on:
 
+```
 <%= @msg.text %>
+```
 
-React to this in <%= @chat.type %> and treat it as a followup for this job.  Message details are id=<%= @msg.id %>, channel=<%= @channel.text %>,channel_id=id=<%= @channel.id %>.
+Before working, react to this in <%= @chat.type %>.  Message details are id=<%= @msg.id %>, channel=<%= @channel.text %>,channel_id=id=<%= @channel.id %>.  Then do what you can to address the prompt above.
