@@ -2,7 +2,7 @@ import { dump } from 'js-yaml'
 import { startCase } from 'lodash'
 import pluralize from 'pluralize'
 
-export type KubeActionVariant = 'update' | 'delete' | 'other'
+export type KubeActionVariant = 'create' | 'update' | 'delete' | 'other'
 
 const YAML_DUMP_OPTS = { lineWidth: -1, noRefs: true } as const
 
@@ -28,8 +28,9 @@ export function getKubeActionVariant(
       return 'delete'
     case 'put':
     case 'patch':
-    case 'post':
       return 'update'
+    case 'post':
+      return 'create'
     default:
       return 'other'
   }
@@ -40,18 +41,25 @@ export function parseKubePath(
 ): ParsedKubePath | null {
   if (!path?.trim()) return null
   const segments = path.split('/').filter(Boolean)
-  const nsIdx = segments.indexOf('namespaces')
-  if (nsIdx >= 0) {
+  const resourceSegments =
+    segments[0] === 'api'
+      ? segments.slice(2)
+      : segments[0] === 'apis'
+        ? segments.slice(3)
+        : segments
+
+  if (resourceSegments[0] === 'namespaces' && resourceSegments.length >= 3) {
     return {
-      namespace: segments[nsIdx + 1],
-      resource: segments[nsIdx + 2],
-      name: segments[nsIdx + 3],
+      namespace: resourceSegments[1],
+      resource: resourceSegments[2],
+      name: resourceSegments[3],
     }
   }
-  if (segments.length >= 2) {
+
+  if (resourceSegments.length >= 1) {
     return {
-      resource: segments.at(-2),
-      name: segments.at(-1),
+      resource: resourceSegments[0],
+      name: resourceSegments[1],
     }
   }
   return null
@@ -106,11 +114,16 @@ export function getKubeActionTitle(kube: KubeRequestLike | null | undefined) {
 
 function getKubeResourceLocationLabel(
   kube: KubeRequestLike | null | undefined,
-  fallback: string
+  fallback: string,
+  includeHandle = false
 ): string {
   const parsed = parseKubePath(kube?.path)
   return (
-    [parsed?.namespace && `ns/${parsed.namespace}`, parsed?.name]
+    [
+      includeHandle && kube?.handle?.trim(),
+      parsed?.namespace && `ns/${parsed.namespace}`,
+      parsed?.name,
+    ]
       .filter(Boolean)
       .join(' · ') ||
     kube?.path?.trim() ||
@@ -121,7 +134,7 @@ function getKubeResourceLocationLabel(
 export function getKubeActionSubtitle(
   kube: KubeRequestLike | null | undefined
 ) {
-  return getKubeResourceLocationLabel(kube, 'Kubernetes')
+  return getKubeResourceLocationLabel(kube, 'Kubernetes', true)
 }
 
 function sanitizeForDiff(value: unknown): unknown {

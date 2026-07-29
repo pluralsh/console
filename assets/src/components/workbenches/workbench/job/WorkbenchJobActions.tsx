@@ -29,7 +29,11 @@ export function WorkbenchJobActions({ jobId }: { jobId: string }) {
   })
 
   const actions = useMemo(
-    () => mapActionNodes(data?.workbenchJob?.activities?.edges),
+    () =>
+      [
+        ...mapActionNodes(data?.workbenchJob?.functionActions?.edges),
+        ...mapActionNodes(data?.workbenchJob?.kubernetesActions?.edges),
+      ].sort((a, b) => (a.insertedAt ?? '').localeCompare(b.insertedAt ?? '')),
     [data]
   )
   const sections = useMemo(

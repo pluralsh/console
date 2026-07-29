@@ -51,7 +51,7 @@ export function AwaitingReviewWorkbenchActivityItem({
 
   const title = isKubernetes
     ? getKubeActionTitle(kubeRequest)
-    : 'Approval required'
+    : tool?.name?.trim() || functionCall?.name?.trim() || 'Approval required'
 
   const subtitle = isKubernetes
     ? getKubeActionSubtitle(kubeRequest)
@@ -172,6 +172,14 @@ export function AwaitingReviewWorkbenchActivityItem({
           >
             Pending approval
           </Chip>
+          {kubeVariant === 'create' && (
+            <Chip
+              size="small"
+              severity="success"
+            >
+              Create
+            </Chip>
+          )}
           {kubeVariant === 'update' && (
             <Chip
               size="small"

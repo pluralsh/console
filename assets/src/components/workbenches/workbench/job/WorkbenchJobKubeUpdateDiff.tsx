@@ -36,7 +36,8 @@ export function WorkbenchJobKubeUpdateDiff({
 }) {
   const theme = useTheme()
   const variant = getKubeActionVariant(kubeRequest?.method)
-  const shouldFetch = variant === 'update' || variant === 'delete'
+  const shouldFetch =
+    variant === 'create' || variant === 'update' || variant === 'delete'
   const { data, loading, error } = useWorkbenchJobKubeRequestDiffQuery({
     variables: { id: activityId },
     skip: !enabled || !activityId || !shouldFetch,
@@ -126,7 +127,7 @@ function DeleteWarningBanner({
   kubeRequest: KubeRequestLike | null | undefined
 }) {
   return (
-    <DeleteWarningSC>
+    <DeleteWarningSC role="alert">
       <TrashCanIcon
         size={16}
         color="icon-danger"
@@ -157,6 +158,15 @@ export function WorkbenchJobKubeActionChips({
       gap="xsmall"
       css={{ flexShrink: 0, flexWrap: 'nowrap' }}
     >
+      {variant === 'create' && (
+        <Chip
+          size="small"
+          severity="success"
+          css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+        >
+          Create
+        </Chip>
+      )}
       {variant === 'update' && (
         <Chip
           size="small"

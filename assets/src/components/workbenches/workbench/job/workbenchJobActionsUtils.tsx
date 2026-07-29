@@ -28,6 +28,13 @@ import {
 export type WorkbenchJobActionSectionKey =
   'awaiting' | 'pending' | 'running' | 'failed' | 'succeeded' | 'denied'
 
+export const WORKBENCH_JOB_ACTION_REFETCH_QUERIES = [
+  'WorkbenchJobActivities',
+  'WorkbenchJobActions',
+  'WorkbenchJobActionSummary',
+  'PendingApprovalWorkbenchActivities',
+]
+
 export type WorkbenchJobActionSection = {
   key: WorkbenchJobActionSectionKey
   label: string
@@ -183,7 +190,7 @@ export function getActionDetailButtonLabel(
 
   switch (activity.status) {
     case WorkbenchJobActivityStatus.NeedsApproval:
-      return 'View diff'
+      return isKubernetes ? 'View diff' : 'View JSON'
     case WorkbenchJobActivityStatus.Failed:
       return 'View error'
     case WorkbenchJobActivityStatus.Successful:
@@ -257,7 +264,7 @@ export function getActionIcon(activity: WorkbenchJobActionFragment) {
   }
 
   const toolType = activity.result?.functionCall?.tool?.tool
-  if (!toolType) return null
+  if (!toolType) return <UpdatesIcon size={16} />
 
   return (
     <WorkbenchToolIcon

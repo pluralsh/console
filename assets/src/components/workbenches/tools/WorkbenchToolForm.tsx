@@ -26,6 +26,7 @@ import {
   HelmAuthProvider,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
+import { isValidJson } from 'utils/isValidJson'
 import { useMemo, useState } from 'react'
 import {
   FormCardSC,
@@ -99,6 +100,11 @@ function pagerdutyConfigurationIsComplete(
 
 function scmTokenIsSet(token: string | null | undefined): boolean {
   return (token ?? '').trim().length > 0
+}
+
+function inputSchemaIsValid(value: unknown, required = false): boolean {
+  if (value == null || value === '') return !required
+  return typeof value !== 'string' || isValidJson(value)
 }
 
 function sentryConfigurationIsComplete(
@@ -208,11 +214,13 @@ export function WorkbenchToolForm({
   const selectedCategories = (state.categories ?? []).filter(isNonNullable)
   const hasRegisteredScm = Boolean(state.scmConnectionId)
   const scmType = scmTypeForWorkbenchTool(type)
-  const cloudConnectionProvider =
-    provider ?? cloudFunctionProviderForWorkbenchTool(type)
+  const cloudFunctionProvider = cloudFunctionProviderForWorkbenchTool(type)
+  const cloudConnectionProvider = cloudFunctionProvider ?? provider
+  const requiresCloudConnection =
+    type === WorkbenchToolType.Cloud || !!cloudFunctionProvider
   const configurationStepComplete =
     !!state.name.trim() &&
-    (!cloudConnectionProvider || !!state.cloudConnectionId) &&
+    (!requiresCloudConnection || !!state.cloudConnectionId) &&
     (type !== WorkbenchToolType.Mcp || !!state.mcpServerId) &&
     (type !== WorkbenchToolType.Github ||
       hasRegisteredScm ||
@@ -244,18 +252,23 @@ export function WorkbenchToolForm({
     (type !== WorkbenchToolType.Sentry ||
       !!tool?.id ||
       sentryConfigurationIsComplete(state.configuration?.sentry)) &&
+    (type !== WorkbenchToolType.Http ||
+      inputSchemaIsValid(state.configuration?.http?.inputSchema, true)) &&
     (type !== WorkbenchToolType.Lambda ||
       (!!state.configuration?.lambda?.lambdaArn.trim() &&
         !!state.configuration.lambda.description.trim() &&
-        !!state.configuration.lambda.inputSchema)) &&
+        inputSchemaIsValid(state.configuration.lambda.inputSchema, true))) &&
     (type !== WorkbenchToolType.CloudRun ||
       (!!state.configuration?.cloudRun?.identifier.trim() &&
         !!state.configuration.cloudRun.description.trim() &&
-        !!state.configuration.cloudRun.inputSchema)) &&
+        inputSchemaIsValid(state.configuration.cloudRun.inputSchema, true))) &&
     (type !== WorkbenchToolType.AzureFunction ||
       (!!state.configuration?.azureFunction?.identifier.trim() &&
         !!state.configuration.azureFunction.description.trim() &&
-        !!state.configuration.azureFunction.inputSchema))
+        inputSchemaIsValid(
+          state.configuration.azureFunction.inputSchema,
+          true
+        )))
   const allowSave = hasUpdates && configurationStepComplete
   const isLastStep =
     currentStep === toolFormSteps[toolFormSteps.length - 1]?.key

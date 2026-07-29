@@ -24,6 +24,7 @@ import {
   getActionResultJson,
   getActionSubtitle,
   getActionTitle,
+  WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
 } from './workbenchJobActionsUtils'
 import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
 import {
@@ -48,7 +49,11 @@ export function WorkbenchJobActionDetail({
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
   const isKubeDiff =
-    isKubernetes && (kubeVariant === 'update' || kubeVariant === 'delete')
+    isKubernetes &&
+    needsApproval &&
+    (kubeVariant === 'create' ||
+      kubeVariant === 'update' ||
+      kubeVariant === 'delete')
   const icon = getActionIcon(activity)
   const inputJson = getActionInputJson(activity)
   const isDenied =
@@ -61,13 +66,13 @@ export function WorkbenchJobActionDetail({
       variables: { id: activity.id },
       onCompleted: onBack,
       onError: (err) => setError(err.message),
-      refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobActionSummary'],
+      refetchQueries: WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
     })
 
   const [reject, { loading: rejecting, error: rejectError }] =
     useRejectWorkbenchJobActivityMutation({
       onCompleted: onBack,
-      refetchQueries: ['WorkbenchJobActions', 'WorkbenchJobActionSummary'],
+      refetchQueries: WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
     })
 
   return (
@@ -185,7 +190,7 @@ export function WorkbenchJobActionDetail({
           <Button
             small
             loading={approving}
-            disabled={approving}
+            disabled={approving || rejecting}
             onClick={() => {
               setError(null)
               approve()

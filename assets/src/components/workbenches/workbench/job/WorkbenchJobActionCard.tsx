@@ -62,6 +62,15 @@ export function WorkbenchJobActionCard({
           css={{ flex: 1, minWidth: 0 }}
         />
       </Flex>
+      {kubeVariant === 'create' && (
+        <Chip
+          size="small"
+          severity="success"
+          css={{ flexShrink: 0 }}
+        >
+          Create
+        </Chip>
+      )}
       {kubeVariant === 'update' && (
         <Chip
           size="small"

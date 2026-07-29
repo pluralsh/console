@@ -38,7 +38,13 @@ export function WorkbenchJobActionDenyButton({
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState('')
 
-  const floating = useFloating({
+  const {
+    refs: { setReference, setFloating },
+    placement,
+    strategy,
+    x,
+    y,
+  } = useFloating({
     placement: 'top-start',
     strategy: 'fixed',
     middleware: [
@@ -69,9 +75,11 @@ export function WorkbenchJobActionDenyButton({
   return (
     <>
       <Button
-        ref={floating.refs.setReference}
+        ref={setReference}
         small
         secondary
+        aria-haspopup="dialog"
+        aria-expanded={open}
         disabled={disabled || rejecting}
         onClick={() => setOpen((value) => !value)}
         css={{
@@ -89,12 +97,12 @@ export function WorkbenchJobActionDenyButton({
         <FloatingPortal id={theme.portals.default.id}>
           <PopoverWrapper
             $isOpen={open}
-            $placement={floating.placement}
-            ref={floating.refs.setFloating}
+            $placement={placement}
+            ref={setFloating}
             style={{
-              position: floating.strategy,
-              left: floating.x ?? 0,
-              top: floating.y ?? 0,
+              position: strategy,
+              left: x ?? 0,
+              top: y ?? 0,
               width: POPOVER_WIDTH,
               height: 'auto',
               maxHeight: 'none',

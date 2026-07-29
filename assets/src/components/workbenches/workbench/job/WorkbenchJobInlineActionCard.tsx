@@ -29,6 +29,7 @@ import {
   getActionStatusBorderColor,
   getActionSubtitle,
   getActionTitle,
+  WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
 } from './workbenchJobActionsUtils'
 import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
 import {
@@ -54,7 +55,11 @@ export function WorkbenchJobInlineActionCard({
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
   const isKubeDiff =
-    isKubernetes && (kubeVariant === 'update' || kubeVariant === 'delete')
+    isKubernetes &&
+    needsApproval &&
+    (kubeVariant === 'create' ||
+      kubeVariant === 'update' ||
+      kubeVariant === 'delete')
   const inputJson = getActionInputJson(activity)
   const isDenied =
     activity.status === WorkbenchJobActivityStatus.Cancelled ||
@@ -62,20 +67,15 @@ export function WorkbenchJobInlineActionCard({
   const resultJson = isDenied ? '' : getActionResultJson(activity)
   const icon = getActionIcon(activity)
 
-  const refetchQueries = [
-    'WorkbenchJobActivities',
-    'WorkbenchJobActions',
-    'WorkbenchJobActionSummary',
-  ]
   const [approve, { loading: approving }] =
     useApproveWorkbenchJobActivityMutation({
       variables: { id: activity.id },
       onError: (err) => setError(err.message),
-      refetchQueries,
+      refetchQueries: WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
     })
   const [reject, { loading: rejecting, error: rejectError }] =
     useRejectWorkbenchJobActivityMutation({
-      refetchQueries,
+      refetchQueries: WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
     })
 
   return (
@@ -116,6 +116,7 @@ export function WorkbenchJobInlineActionCard({
           <ExpandButtonSC
             type="button"
             aria-label={expanded ? 'Collapse action' : 'Expand action'}
+            aria-expanded={expanded}
             onClick={() => setExpanded((value) => !value)}
             $expanded={expanded}
           >
@@ -201,7 +202,7 @@ export function WorkbenchJobInlineActionCard({
               <Button
                 small
                 loading={approving}
-                disabled={approving}
+                disabled={approving || rejecting}
                 onClick={() => {
                   setError(null)
                   approve()

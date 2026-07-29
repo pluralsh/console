@@ -397,6 +397,7 @@ function HttpFormFields({
       <JsonEditorField
         label="Input schema (JSON)"
         hint="JSON schema for the tool input"
+        required
         value={c.inputSchema as Record<string, unknown> | string | undefined}
         onChange={(jsonStr) => set({ ...c, inputSchema: jsonStr })}
       />
@@ -1409,11 +1410,10 @@ function JsonEditorField({
       <CodeEditor
         value={rawValue}
         onChange={(raw) => {
-          setRawValue(raw ?? '')
-          if (isValidJson(raw)) {
-            onChange(raw)
-            setIsJsonInvalid(false)
-          } else setIsJsonInvalid(true)
+          const next = raw ?? ''
+          setRawValue(next)
+          onChange(next || undefined)
+          setIsJsonInvalid(!!next && !isValidJson(next))
         }}
         language="json"
         height={160}

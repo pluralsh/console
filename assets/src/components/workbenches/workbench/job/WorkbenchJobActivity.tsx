@@ -52,6 +52,7 @@ import {
   JobActivityMetrics,
   JobActivityMetricsChart,
   JobActivityPrompt,
+  MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
@@ -121,6 +122,9 @@ export function WorkbenchJobActivity({
           >
             {type?.toLowerCase() ?? 'activity'}
           </Body2P>
+          {result?.jobUpdate && (
+            <MemoActivityIcon jobUpdate={result.jobUpdate} />
+          )}
           {!isEmpty(result?.logs) && (
             <ActivityModalIcon
               icon={VisualInspectionIcon}
@@ -330,6 +334,7 @@ function WorkbenchJobMemo({
           )}
         </MemoLabelSC>
       </ClickableLabelSC>
+      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
       {(isFailed || isRejected) && (
         <FailedFilledIcon
           size={12}
