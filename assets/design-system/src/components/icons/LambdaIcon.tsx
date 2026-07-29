@@ -1,42 +1,16 @@
 import createIcon from './createIcon'
 
-const icon =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAYCAYAAAARfGZ1AAAD5UlEQVR4AYxVXWhcVRD+5tx79yfZ/DSbRJv0oSi1SvWhUAoRlEqeJKKVmqIgIhRa9MmiIKKWa4sW9EUQrQiCPvkHPolCRXwUIS+C0FJ8qKBttbtpm2x2s/fnjN/Zzf6km11zdubOOTNzvpk7d85Zg9vG6mt3TkWnijeiN4sJZdrhydX49fGH9TiC27b0XfaANz3FQMjoZmTV89/BzEyggGAbw2zDp+XicbI/RnQvvsa29vU4FcaTdab1s0DPE+wnQJeh/KEBmBOLR/DLrgxt/0s94KiV1vzZ0qJ/o/xEYOQwwT8nSkJ2ZBjneUyv5lQhTjGIe8AlhJUTiOUD1BFeX7M2/ZABVtogKnuiqlnACfhtXZ9JD3i3nxA1Su1N5nipS58x4j2O8clcl27L6UBwt2MkHlqnXGLVlRIMxJh4sBboKBVujn5jILjbXAlkiPU9gC4Y1n0q8PACwsE9PxD8ajiTz3jRiyKyH+iCV3G9/hzi4hQGjL7gGsLssPU5Y8xJ7s+SOyQukExExj7k/DqGzbMtwRsbKnfkPZU3WJICtwjZkbrHBjOgOXIZyNCnZd8wNcWW4DT5ST5+mXKOOXqUjiwfrmuc5BSeiMzvTsZmcbRxwJxuE/eAa4hMrToxrZCXCNy6pHiI9EKQ6rwC/xLBBRB26nBqglexD60EaOrQJnBlnSv1wliQM19CZIxuZqMFK8bSulIuEfBXMoPRCvEtdA7ZsWFd7A2wCRysc+BnF9lqB7m1ZXN3zaeeP/qdO7Ue9Auo1Gl3RB/ZG9eDu7Fvd+stnb7BNDYkmJdfL9R2eoK3AWk6KlIVlH1j35fwsjtM8IbN98z8LwCWDCh8tfgKuVtZBVgqtEcbHBgveGlwViGjbavoLVF9Cli+0tYtlapE+IzrZvZckHbGa+YehPA0hHElcrIBvsR/lyiWRyGyADS+vFImfJz72yv/JuFGllTKN0gjCK9iVLh0xNsZOVE5hGi6mNiJ+fi+4nEkxb2NKA/MTOwR432sAHvX+SPl+17KGH2X923U0HQ9hmreRdr/pCohAwJRg1OJl15QmG+5fC8xeszgwOSQWHmFDnkArjtSprKSpHqM5aiGYSdr2pt08J91EXOSi8Z3oHRUUJEdnBR4qHgfmUMmraQshTwDhbufLY1Vq/gkHywvSYhmZlR2kxxF6kv8O7Mnd1uIonxrQY1aa1S8Z6m6qoIrClxj1j9mvJG3+gFzU5PKNx2A6/mYQVzpqjSsCPCDGPtkPfEXTHC69FjmTOmu7OnSLvJscKZ8RMJm29G5PxUR21g+YmJ/0OkcO+PpwNj7/Yulw0G4fH7k7LXr/wEAAP//oYg0lgAAAAZJREFUAwB8uWLGeMjfdQAAAABJRU5ErkJggg=='
-
 export default createIcon(({ size, color, fullColor }) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 23 24"
+    viewBox="12 12 56 56"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    {fullColor ? (
-      <image
-        href={icon}
-        width="23"
-        height="24"
-      />
-    ) : (
-      <>
-        <mask
-          id="lambda-icon-mask"
-          maskUnits="userSpaceOnUse"
-          style={{ maskType: 'alpha' }}
-        >
-          <image
-            href={icon}
-            width="23"
-            height="24"
-          />
-        </mask>
-        <rect
-          width="23"
-          height="24"
-          fill={color}
-          mask="url(#lambda-icon-mask)"
-        />
-      </>
-    )}
+    <path
+      d="M30.2196674,34.553 C30.0512768,34.208 29.7004629,33.989 29.3175745,33.989 L29.3145676,33.989 C28.9286723,33.99 28.5778583,34.211 28.4124746,34.558 L13.097944,66.569 C12.9495999,66.879 12.9706487,67.243 13.1550766,67.534 C13.3374998,67.824 13.6582439,68 14.0020416,68 L28.6420072,68 C29.0299071,68 29.3817234,67.777 29.5481094,67.428 L37.563706,50.528 C37.693006,50.254 37.6920037,49.937 37.5586944,49.665 L30.2196674,34.553 Z M65.9976745,54 L60.9599868,54 L41.25928,12.571 C41.0938963,12.223 40.7410777,12 40.3531778,12 L22.89768,12 C22.3453987,12 21.8963569,12.447 21.8953545,12.999 L21.884329,24.999 C21.884329,25.265 21.9885708,25.519 22.1780103,25.707 C22.3654452,25.895 22.6200358,26 22.8866544,26 L31.3292417,26 L51.1221625,67.43 C51.2885485,67.778 51.6393624,68 52.02626,68 L65.9976745,68 C66.5519605,68 67,67.552 67,67 L67,55 C67,54.448 66.5519605,54 65.9976745,54 Z"
+      fill={fullColor ? '#ED7100' : color}
+    />
   </svg>
 ))
