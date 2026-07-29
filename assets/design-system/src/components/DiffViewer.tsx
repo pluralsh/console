@@ -95,6 +95,7 @@ export function DiffViewer({
             flexDirection: 'column',
             maxHeight: '100%',
             overflow: 'auto',
+            ...cardProps?.css,
           }}
         />
       }
