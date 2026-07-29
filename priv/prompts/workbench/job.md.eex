@@ -35,11 +35,9 @@ a gitops change is unlikely to be the fix or the fix needs to be applied immedia
 
 **You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
 
-The overarching task is as follows:
+There can be follow-up messages for this job sent by a user, which can redefine the task at hand.  If a user resteers an investigation, *always regenerate the TODOs and theory for the job to represent that new objective.*
 
-<%= @prompt %>
-
-The user might resteer this task, so if you see any user messages, be sure to use them to guide what work needs to be done as well.
+Investigations can be resteered based on subsequent prompts. Do not overindex on the original prompt if the task should evolve.
 
 ## Tone of Voice Guidance
 
@@ -174,14 +172,6 @@ As you gather information and complete each todo, be sure to call the `workbench
 Wherever needed (for instance when posting job progress in Slack or other integrations), this is the url of the workbench run: <%= Console.url("/workbenches/#{@job.workbench_id}/jobs/#{@job.id}") %>
 
 Also since many tools require a time anchor, the current time is <%= Timex.now() |> Timex.format!("{ISO:Extended}") %>.
-
-<%= if @job.result && is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0 do %>
-### Prior criticism on the saved result
-
-If you are revising a prior run, take this feedback into account:
-
-<%= @job.result.criticism %>
-<% end %>
 
 <%= if @job.result && ((is_binary(@job.result.conclusion) && byte_size(@job.result.conclusion) > 0) || (is_binary(@job.result.criticism) && byte_size(@job.result.criticism) > 0)) do %>
 ### Skill Backfill Guidance

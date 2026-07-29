@@ -70,7 +70,7 @@ defmodule Console.AI.Workbench.Heartbeat do
     do: {:stop, {:shutdown, {:budget, :cost, tc}}, %{s | usage: usage}}
   defp enforce_budget(usage, %State{} = state), do: {:noreply, %{state | usage: usage}}
 
-  defp preserve_usage(%WorkbenchJob{usage: %{} = usage}), do: AIUsage.sanitize(usage)
+  defp preserve_usage(%{} = usage), do: AIUsage.sanitize(usage)
   defp preserve_usage(_), do: %{}
 
   defp reprompt(%WorkbenchJob{usage: %{}}), do: true

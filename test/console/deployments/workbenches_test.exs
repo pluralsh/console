@@ -885,6 +885,43 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "via struct"
     end
 
+    test "clears existing todos while preserving other result fields" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          result:
+            build(:workbench_job_result,
+              working_theory: "keep the theory",
+              conclusion: "keep the conclusion",
+              topology: "graph TD; A-->B"
+            )
+        )
+
+      job.result
+      |> Console.Schema.WorkbenchJobResult.changeset(%{
+        todos: [
+          %{name: "investigate", description: "check the failing path", done: false},
+          %{name: "verify", description: "confirm the fix", done: true}
+        ]
+      })
+      |> Console.Repo.update!()
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "new user prompt"}, job, user)
+
+      assert activity.prompt == "new user prompt"
+
+      result = Console.Repo.preload(refetch(job), :result).result
+      assert result.todos == []
+      assert result.working_theory == "keep the theory"
+      assert result.conclusion == "keep the conclusion"
+      assert result.topology == "graph TD; A-->B"
+    end
+
     test "user with workbench read access can create messages for someone else's job" do
       owner = insert(:user)
       reader = insert(:user)

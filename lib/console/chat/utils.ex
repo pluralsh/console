@@ -31,11 +31,19 @@ defmodule Console.Chat.Utils do
   """
   def handle_mention(%Reference{id: external_id} = msg, %Reference{text: channel} = chan_ref, %ChatConnection{id: id} = conn, %{} = extra) do
     bot = Workbenches.workbench_chatbot(id, channel) |> Repo.preload([user: [:groups]])
-    with %WorkbenchChatbot{user: %User{} = user, prompt: prompt, message_behavior: behavior} = chatbot <- bot do
-      prompt = prompt(chat: conn, msg: msg, channel: chan_ref, custom: prompt, behavior: behavior)
+    with %WorkbenchChatbot{user: %User{} = user, prompt: custom, message_behavior: behavior} = chatbot <- bot do
       case parent_job(msg) do
-        %WorkbenchJob{} = job -> Workbenches.create_message(%{prompt: prompt}, job, user)
+        %WorkbenchJob{} = job ->
+          prompt = reply_prompt(chat: conn, msg: msg, channel: chan_ref, custom: custom, job: job)
+
+          Workbenches.create_queued_prompt(%{
+            prompt: prompt,
+            dequeable_at: DateTime.utc_now()
+          }, job, user)
+
         _ ->
+          prompt = prompt(chat: conn, msg: msg, channel: chan_ref, custom: custom, behavior: behavior)
+
           chatbot_message =
             Map.merge(%{
               message: msg.text,
@@ -61,7 +69,7 @@ defmodule Console.Chat.Utils do
     chatbot_msg(id)
     |> Repo.preload(:workbench_job, force: true)
     |> case do
-      %ChatbotMessage{workbench_job: %WorkbenchJob{status: s} = job} when s not in ~w(running pending)a -> job
+      %ChatbotMessage{workbench_job: %WorkbenchJob{} = job} -> job
       _ -> nil
     end
   end
@@ -71,4 +79,5 @@ defmodule Console.Chat.Utils do
   defp cache_id(%ChatbotMessage{id: id}), do: id
 
   EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "workbench", "chat.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :reply_prompt, Console.priv_filename(["prompts", "workbench", "chat_reply.md.eex"]), [:assigns])
 end

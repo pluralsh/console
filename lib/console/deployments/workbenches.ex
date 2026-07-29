@@ -775,8 +775,14 @@ defmodule Console.Deployments.Workbenches do
       end
     end)
     |> add_operation(:job, fn %{idle: job} ->
+      job = Repo.preload(job, :result, force: true)
       with {:ok, job} <- allow(job, user, :prompt) do
-        WorkbenchJob.changeset(job, %{status: :pending, error: nil, user_id: user.id})
+        WorkbenchJob.changeset(job, %{
+          status: :pending,
+          error: nil,
+          user_id: user.id,
+          result: %{todos: []}
+        })
         |> Repo.update()
       end
     end)
@@ -804,6 +810,7 @@ defmodule Console.Deployments.Workbenches do
     |> QueuedPrompt.changeset(attrs)
     |> allow(user, :read)
     |> when_ok(:insert)
+    |> notify(:create, user)
   end
 
   def create_queued_prompt(attrs, job_id, %User{} = user) when is_binary(job_id) do
@@ -1176,6 +1183,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchPromptUpdated, prompt, actor: user)
   defp notify({:ok, %WorkbenchPrompt{} = prompt}, :delete, user),
     do: handle_notify(PubSub.WorkbenchPromptDeleted, prompt, actor: user)
+  defp notify({:ok, %QueuedPrompt{} = prompt}, :create, user),
+    do: handle_notify(PubSub.WorkbenchQueuedPromptCreated, prompt, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :create, user),
     do: handle_notify(PubSub.WorkbenchSkillCreated, skill, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :update, user),
