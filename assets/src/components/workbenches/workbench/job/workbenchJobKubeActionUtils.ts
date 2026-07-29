@@ -1,6 +1,10 @@
 import { dump } from 'js-yaml'
+import { startCase } from 'lodash'
+import pluralize from 'pluralize'
 
 export type KubeActionVariant = 'update' | 'delete' | 'other'
+
+const YAML_DUMP_OPTS = { lineWidth: -1, noRefs: true } as const
 
 export type ParsedKubePath = {
   namespace?: string
@@ -91,12 +95,7 @@ export function formatKubeKindLabel(
 ): string | undefined {
   if (!resource) return undefined
   const key = resource.toLowerCase()
-  if (KUBE_RESOURCE_LABELS[key]) return KUBE_RESOURCE_LABELS[key]
-  const label = resource
-    .split(/[-_]/)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-  return label.endsWith('s') ? label.slice(0, -1) : label
+  return KUBE_RESOURCE_LABELS[key] ?? startCase(pluralize.singular(key))
 }
 
 export function getKubeActionTitle(kube: KubeRequestLike | null | undefined) {
@@ -105,17 +104,24 @@ export function getKubeActionTitle(kube: KubeRequestLike | null | undefined) {
   return kube?.method?.toUpperCase() || 'Kubernetes action'
 }
 
-export function getKubeActionSubtitle(
-  kube: KubeRequestLike | null | undefined
-) {
+function getKubeResourceLocationLabel(
+  kube: KubeRequestLike | null | undefined,
+  fallback: string
+): string {
   const parsed = parseKubePath(kube?.path)
   return (
     [parsed?.namespace && `ns/${parsed.namespace}`, parsed?.name]
       .filter(Boolean)
       .join(' · ') ||
     kube?.path?.trim() ||
-    'Kubernetes'
+    fallback
   )
+}
+
+export function getKubeActionSubtitle(
+  kube: KubeRequestLike | null | undefined
+) {
+  return getKubeResourceLocationLabel(kube, 'Kubernetes')
 }
 
 function sanitizeForDiff(value: unknown): unknown {
@@ -149,19 +155,16 @@ export function toKubeYaml(value: unknown): string {
     const trimmed = value.trim()
     if (!trimmed) return ''
     try {
-      return dump(sanitizeForDiff(JSON.parse(trimmed)), {
-        lineWidth: -1,
-        noRefs: true,
-      }).trimEnd()
+      return dump(
+        sanitizeForDiff(JSON.parse(trimmed)),
+        YAML_DUMP_OPTS
+      ).trimEnd()
     } catch {
       return trimmed
     }
   }
   try {
-    return dump(sanitizeForDiff(value), {
-      lineWidth: -1,
-      noRefs: true,
-    }).trimEnd()
+    return dump(sanitizeForDiff(value), YAML_DUMP_OPTS).trimEnd()
   } catch {
     return String(value)
   }
@@ -189,10 +192,7 @@ export function getKubeDeleteDiffValues(
 export function getKubeDeleteResourceLabel(
   kube: KubeRequestLike | null | undefined
 ): string {
-  const parsed = parseKubePath(kube?.path)
-  const nsLabel = parsed?.namespace ? `ns/${parsed.namespace}` : null
-  const name = parsed?.name
-  return [nsLabel, name].filter(Boolean).join(' · ') || kube?.path || 'resource'
+  return getKubeResourceLocationLabel(kube, 'resource')
 }
 
 export function getKubeDeleteWarning(

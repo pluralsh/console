@@ -204,6 +204,26 @@ export const getWorkbenchToolLabel = (
     ? WORKBENCH_TOOL_LABELS[`${type}:${provider}`]
     : WORKBENCH_TOOL_LABELS[type]
 
+/** Description from Lambda / Cloud Run / Azure Function tool configuration. */
+export function getWorkbenchToolDescription(
+  tool:
+    | {
+        configuration?: Nullable<{
+          lambda?: Nullable<{ description?: Nullable<string> }>
+          cloudRun?: Nullable<{ description?: Nullable<string> }>
+          azureFunction?: Nullable<{ description?: Nullable<string> }>
+        }>
+      }
+    | null
+    | undefined
+): string | undefined {
+  const description =
+    tool?.configuration?.lambda?.description?.trim() ||
+    tool?.configuration?.cloudRun?.description?.trim() ||
+    tool?.configuration?.azureFunction?.description?.trim()
+  return description || undefined
+}
+
 export const TOOL_TYPE_TO_CATEGORIES: Record<
   WorkbenchToolType,
   WorkbenchToolCategory[]

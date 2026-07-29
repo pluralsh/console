@@ -7,6 +7,7 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import {
+  getWorkbenchToolDescription,
   getWorkbenchToolLabel,
   WorkbenchToolIcon,
 } from 'components/workbenches/tools/workbenchToolsUtils'
@@ -190,9 +191,6 @@ export function getActionDetailButtonLabel(
     case WorkbenchJobActivityStatus.Cancelled:
     case WorkbenchJobActivityStatus.Rejected:
       return 'View reason'
-    case WorkbenchJobActivityStatus.Pending:
-    case WorkbenchJobActivityStatus.Running:
-      return 'View details'
     default:
       return 'View details'
   }
@@ -229,11 +227,9 @@ export function getActionSubtitle(
 export function getActionDescription(
   activity: WorkbenchJobActionFragment
 ): string {
-  const tool = activity.result?.functionCall?.tool
-  const description =
-    tool?.configuration?.lambda?.description?.trim() ||
-    tool?.configuration?.cloudRun?.description?.trim() ||
-    tool?.configuration?.azureFunction?.description?.trim()
+  const description = getWorkbenchToolDescription(
+    activity.result?.functionCall?.tool
+  )
   if (description) return description
 
   const output = activity.result?.output?.trim()

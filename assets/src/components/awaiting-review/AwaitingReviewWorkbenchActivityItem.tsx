@@ -9,6 +9,7 @@ import {
 } from '@pluralsh/design-system'
 import { WorkbenchLinkChip } from 'components/workbenches/common/WorkbenchLinkChip'
 import {
+  getWorkbenchToolDescription,
   getWorkbenchToolLabel,
   WorkbenchToolIcon,
 } from 'components/workbenches/tools/workbenchToolsUtils'
@@ -16,7 +17,7 @@ import {
   getKubeActionSubtitle,
   getKubeActionTitle,
   getKubeActionVariant,
-  parseKubePath,
+  getKubeDeleteResourceLabel,
 } from 'components/workbenches/workbench/job/workbenchJobKubeActionUtils'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -24,19 +25,10 @@ import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   AwaitingReviewWorkbenchActivityFragment,
   WorkbenchJobActivityType,
-  WorkbenchToolType,
 } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
-
-type ActivityTool = NonNullable<
-  NonNullable<
-    NonNullable<
-      AwaitingReviewWorkbenchActivityFragment['result']
-    >['functionCall']
-  >['tool']
->
 
 export function AwaitingReviewWorkbenchActivityItem({
   activity,
@@ -56,7 +48,6 @@ export function AwaitingReviewWorkbenchActivityItem({
   const kubeVariant = isKubernetes
     ? getKubeActionVariant(kubeRequest?.method)
     : null
-  const parsedPath = isKubernetes ? parseKubePath(kubeRequest?.path) : null
 
   const title = isKubernetes
     ? getKubeActionTitle(kubeRequest)
@@ -70,12 +61,14 @@ export function AwaitingReviewWorkbenchActivityItem({
 
   const description =
     workbenchJob?.result?.workingTheory?.trim() ||
-    toolDescription(tool) ||
+    getWorkbenchToolDescription(tool) ||
     activity.prompt?.trim() ||
     null
 
   const detailLine =
-    kubeVariant === 'delete' ? kubeDeleteDetail(parsedPath) : null
+    kubeVariant === 'delete'
+      ? `Deleting ${getKubeDeleteResourceLabel(kubeRequest)}`
+      : null
 
   const viewPath =
     workbenchJob?.id && workbench?.id
@@ -225,27 +218,4 @@ function KubeActionIcon({
     )
   }
   return <UpdatesIcon size={16} />
-}
-
-function toolDescription(tool: ActivityTool | null | undefined): string | null {
-  if (!tool?.configuration) return null
-  const { configuration, tool: toolType } = tool
-  switch (toolType) {
-    case WorkbenchToolType.Lambda:
-      return configuration.lambda?.description?.trim() || null
-    case WorkbenchToolType.CloudRun:
-      return configuration.cloudRun?.description?.trim() || null
-    case WorkbenchToolType.AzureFunction:
-      return configuration.azureFunction?.description?.trim() || null
-    default:
-      return null
-  }
-}
-
-function kubeDeleteDetail(
-  parsed: ReturnType<typeof parseKubePath>
-): string | null {
-  if (parsed?.namespace) return `Deleting ns/${parsed.namespace}`
-  if (parsed?.name) return `Deleting ${parsed.name}`
-  return 'Deleting resource'
 }
