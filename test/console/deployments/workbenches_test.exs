@@ -1788,6 +1788,60 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert reloaded.status == :successful
       assert reloaded.result.output == "already complete"
     end
+
+    test "concurrent approve and reject cannot both succeed" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "concurrent-approve-reject-cluster")
+      parent = self()
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          status: :needs_approval,
+          prompt: "review the kube request",
+          result: %{
+            output: "request pending user approval",
+            kube_request: %{
+              handle: cluster.handle,
+              method: "delete",
+              path: "/apis/apps/v1/namespaces/default/deployments/api",
+              content_type: "application/json"
+            }
+          }
+        )
+
+      expect(Kazan, :run, fn %Kazan.Request{}, _opts ->
+        send(parent, :kube_invoked)
+        Process.sleep(150)
+        {:ok, %{"kind" => "Status", "status" => "Success"}}
+      end)
+
+      task1 = Task.async(fn -> Workbenches.approve_job_activity(activity.id, user) end)
+      task2 = Task.async(fn -> Workbenches.reject_job_activity("too risky", activity.id, user) end)
+      results = [Task.await(task1), Task.await(task2)]
+
+      assert Enum.count(results, &match?({:ok, %WorkbenchJobActivity{}}, &1)) == 1
+      assert Enum.count(results, &match?({:error, _}, &1)) == 1
+
+      reloaded = refetch(activity)
+      assert reloaded.status in [:successful, :rejected]
+
+      case reloaded.status do
+        :successful ->
+          assert_receive :kube_invoked
+          refute_receive :kube_invoked, 50
+          assert Jason.decode!(reloaded.result.output) == %{"kind" => "Status", "status" => "Success"}
+
+        :rejected ->
+          refute_receive :kube_invoked, 50
+          assert reloaded.result.output == "too risky"
+          assert reloaded.user_id == user.id
+      end
+    end
   end
 
   describe "save_canvas/2" do

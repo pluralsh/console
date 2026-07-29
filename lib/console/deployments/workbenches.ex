@@ -988,6 +988,9 @@ defmodule Console.Deployments.Workbenches do
 
   @doc """
   Rejects a job activity by marking it rejected and setting the output to the reason.
+
+  Locks the activity row for update and re-checks needs_approval before writing so a
+  concurrent approve cannot be overwritten by a stale reject (or vice versa).
   """
   @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
   def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
@@ -996,13 +999,16 @@ defmodule Console.Deployments.Workbenches do
       lock_job_activity!(activity_id)
       |> allow(user, :approve)
     end)
-    |> add_operation(:reject, fn %{activity: activity} ->
-      WorkbenchJobActivity.changeset(activity, %{
-        status: :rejected,
-        user_id: user.id,
-        result: %{output: reason || "Execution rejected by user"}
-      })
-      |> Repo.update()
+    |> add_operation(:reject, fn
+      %{activity: %WorkbenchJobActivity{status: :needs_approval} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :rejected,
+          user_id: user.id,
+          result: %{output: reason || "Execution rejected by user"}
+        })
+        |> Repo.update()
+      _ ->
+        {:error, "activity must be in needs approval status to be approved"}
     end)
     |> execute(extract: :reject)
     |> notify(:update)
