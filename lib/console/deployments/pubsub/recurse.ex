@@ -336,3 +336,7 @@ end
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobCreated do
   def process(%{item: job}), do: Console.Pipelines.AI.Workbench.Producer.kick(job)
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchQueuedPromptCreated do
+  def process(%{item: prompt}), do: Console.Pipelines.AI.QueuedPrompt.Producer.kick(prompt)
+end

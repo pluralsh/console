@@ -35,15 +35,18 @@ a gitops change is unlikely to be the fix or the fix needs to be applied immedia
 
 **You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
 
-The overarching task is as follows:
+This is your initial task:
 
 <%= @prompt %>
 
-There can be follow-up messages to this job, which can redefine the task at hand.  You should use them to guide what work needs to be done as well.  Examples of this are:
+There can be follow-up messages for this job sent by a user, which can redefine the task at hand.  **These should also be considered fully valid tasks, and do not assume the initial task must be always completed if they change scope.**
 
+Examples of this are:
 * a user starting a job as an analysis task and then realizing they want to create a pr or make some change in response to findings.
 * a user doing additional work in the course of a long running job.
 * etc
+
+Always respect a user's requirements throughout the entire journey of this investigation.
 
 ## Tone of Voice Guidance
 

@@ -131,6 +131,7 @@ defmodule Console.PubSub.WorkbenchCronDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchPromptCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchPromptUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchPromptDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchQueuedPromptCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillDeleted, do: use Piazza.PubSub.Event
