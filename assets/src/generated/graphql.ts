@@ -16056,6 +16056,8 @@ export type WorkbenchJob = {
   status: WorkbenchJobStatus;
   tracesTool?: Maybe<Array<Maybe<WorkbenchJobActivityTrace>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the console URL for this workbench job */
+  url: Scalars['String']['output'];
   /** token and cost usage for this job */
   usage?: Maybe<WorkbenchJobUsage>;
   /** the user who created this run */
@@ -16805,7 +16807,7 @@ export type WorkbenchToolAzureFunctionConnection = {
   __typename?: 'WorkbenchToolAzureFunctionConnection';
   /** description of the function exposed to the agent */
   description?: Maybe<Scalars['String']['output']>;
-  /** Cloud Function identifier */
+  /** Azure Function identifier */
   identifier?: Maybe<Scalars['String']['output']>;
   /** JSON schema for the tool input */
   inputSchema?: Maybe<Scalars['Map']['output']>;
@@ -16814,7 +16816,7 @@ export type WorkbenchToolAzureFunctionConnection = {
 export type WorkbenchToolAzureFunctionConnectionAttributes = {
   /** description of the function exposed to the agent */
   description: Scalars['String']['input'];
-  /** Cloud Function identifier */
+  /** Azure Function identifier */
   identifier: Scalars['String']['input'];
   /** JSON schema for the tool input */
   inputSchema?: InputMaybe<Scalars['Json']['input']>;
@@ -16919,7 +16921,7 @@ export type WorkbenchToolConfiguration = {
   azure?: Maybe<WorkbenchToolAzureConnection>;
   /** azure devops connection (no secrets) */
   azureDevops?: Maybe<WorkbenchToolAzureDevopsConnection>;
-  /** google cloud function configuration */
+  /** azure function configuration */
   azureFunction?: Maybe<WorkbenchToolAzureFunctionConnection>;
   /** bitbucket cloud connection (no secrets) */
   bitbucket?: Maybe<WorkbenchToolBitbucketConnection>;
@@ -16978,7 +16980,7 @@ export type WorkbenchToolConfigurationAttributes = {
   azure?: InputMaybe<WorkbenchToolAzureConnectionAttributes>;
   /** azure devops connection (scm) */
   azureDevops?: InputMaybe<WorkbenchToolAzureDevopsConnectionAttributes>;
-  /** google cloud function configuration */
+  /** azure function configuration */
   azureFunction?: InputMaybe<WorkbenchToolAzureFunctionConnectionAttributes>;
   /** bitbucket cloud connection (scm) */
   bitbucket?: InputMaybe<WorkbenchToolBitbucketConnectionAttributes>;
@@ -21578,7 +21580,7 @@ export type WorkbenchJobActionsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobActionsQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null } | null } | null } | null> | null } | null } | null };
+export type WorkbenchJobActionsQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, functionActions?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null } | null } | null } | null> | null } | null, kubernetesActions?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type ApproveWorkbenchJobActivityMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -45628,7 +45630,14 @@ export const WorkbenchJobActionsDocument = gql`
     query WorkbenchJobActions($id: ID!) {
   workbenchJob(id: $id) {
     id
-    activities(first: 100) {
+    functionActions: activities(first: 100, type: FUNCTION) {
+      edges {
+        node {
+          ...WorkbenchJobAction
+        }
+      }
+    }
+    kubernetesActions: activities(first: 100, type: KUBERNETES) {
       edges {
         node {
           ...WorkbenchJobAction

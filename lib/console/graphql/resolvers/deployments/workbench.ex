@@ -157,33 +157,42 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: {:ok, Workbenches.get_workbench_tool(id)}
   def function_call_tool(_, _, _), do: {:ok, nil}
 
-  def kube_request_body(%{body: body}, _, _) when is_binary(body) do
+  def kube_request_body(%{body: body} = request, _, _) when is_binary(body) do
     case Jason.decode(body) do
-      {:ok, %{} = body} -> kube_request_body(body)
+      {:ok, %{} = body} -> sanitize_kube_request_body(body, request[:path])
       _ -> {:ok, body}
     end
   end
-  def kube_request_body(%{body: %{} = b}, _, _), do: kube_request_body(b)
+  def kube_request_body(%{body: %{} = body} = request, _, _),
+    do: sanitize_kube_request_body(body, request[:path])
   def kube_request_body(_, _, _), do: {:ok, nil}
 
-  defp kube_request_body(body) do
-    KUtils.redact_secret(body)
-    |> KUtils.sanitize_kube_resource()
+  defp sanitize_kube_request_body(body, path) do
+    KUtils.sanitize_kube_resource(body)
+    |> KUtils.redact_secret(path)
     |> Jason.encode()
   end
 
-  def kube_request_current(%{handle: handle, path: path}, _, %{context: %{current_user: user}})
+  def kube_request_current(%{handle: handle, path: path} = request, _, %{context: %{current_user: user}})
       when is_binary(handle) and is_binary(path) do
-    with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
-          {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
-      KUtils.sanitize_kube_resource(res)
-      |> KUtils.redact_secret()
-      |> ok()
-    else
-      _ -> {:ok, nil}
+    case normalize_kube_method(request[:method]) do
+      "post" ->
+        {:ok, nil}
+      _ ->
+        with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
+             {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
+          KUtils.sanitize_kube_resource(res)
+          |> KUtils.redact_secret()
+          |> ok()
+        else
+          _ -> {:ok, nil}
+        end
     end
   end
   def kube_request_current(_, _, _), do: {:ok, nil}
+
+  defp normalize_kube_method(method) when is_binary(method), do: String.downcase(method)
+  defp normalize_kube_method(_), do: nil
 
   def list_queued_prompts(job, args, _) do
     QueuedPrompt.for_workbench_job(job.id)

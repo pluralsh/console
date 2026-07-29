@@ -3165,7 +3165,7 @@ input WorkbenchToolConfigurationAttributes {
   "google cloud run service configuration"
   cloudRun: WorkbenchToolCloudRunConnectionAttributes
 
-  "google cloud function configuration"
+  "azure function configuration"
   azureFunction: WorkbenchToolAzureFunctionConnectionAttributes
 
   "bitbucket data center connection (scm)"
@@ -3521,7 +3521,7 @@ input WorkbenchToolCloudRunConnectionAttributes {
 }
 
 input WorkbenchToolAzureFunctionConnectionAttributes {
-  "Cloud Function identifier"
+  "Azure Function identifier"
   identifier: String!
 
   "description of the function exposed to the agent"
@@ -3884,7 +3884,7 @@ type WorkbenchJobActivity {
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
 
-  "the user who created or denied this activity"
+  "the user who created, approved, or denied this activity"
   user: User
 
   insertedAt: DateTime
@@ -4652,7 +4652,7 @@ type WorkbenchToolConfiguration {
   "google cloud run service configuration"
   cloudRun: WorkbenchToolCloudRunConnection
 
-  "google cloud function configuration"
+  "azure function configuration"
   azureFunction: WorkbenchToolAzureFunctionConnection
 
   "docker\/OCI registry connection (no secrets)"
@@ -4915,7 +4915,7 @@ type WorkbenchToolCloudRunConnection {
 }
 
 type WorkbenchToolAzureFunctionConnection {
-  "Cloud Function identifier"
+  "Azure Function identifier"
   identifier: String
 
   "description of the function exposed to the agent"

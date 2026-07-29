@@ -211,7 +211,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :bitbucket,            :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
     field :lambda,               :workbench_tool_lambda_connection_attributes, description: "aws lambda function configuration"
     field :cloud_run,            :workbench_tool_cloud_run_connection_attributes, description: "google cloud run service configuration"
-    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "google cloud function configuration"
+    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "azure function configuration"
     field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes, description: "bitbucket data center connection (scm)"
     field :azure_devops,         :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
     field :docker,               :workbench_tool_docker_connection_attributes, description: "docker/OCI registry connection"
@@ -413,7 +413,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_azure_function_connection_attributes do
-    field :identifier,   non_null(:string), description: "Cloud Function identifier"
+    field :identifier,   non_null(:string), description: "Azure Function identifier"
     field :description,  non_null(:string), description: "description of the function exposed to the agent"
     field :input_schema, :json, description: "JSON schema for the tool input"
   end
@@ -639,7 +639,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
-    field :user,         :user, resolve: dataloader(User), description: "the user who created or denied this activity"
+    field :user,         :user, resolve: dataloader(User), description: "the user who created, approved, or denied this activity"
 
     timestamps()
   end
@@ -1065,7 +1065,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :lambda, :workbench_tool_lambda_connection, description: "aws lambda function configuration"
     field :cloud_run, :workbench_tool_cloud_run_connection, description: "google cloud run service configuration"
     field :azure_function, :workbench_tool_azure_function_connection,
-      description: "google cloud function configuration"
+      description: "azure function configuration"
     field :docker, :workbench_tool_docker_connection, description: "docker/OCI registry connection (no secrets)"
   end
 
@@ -1252,7 +1252,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_azure_function_connection do
-    field :identifier,   :string, description: "Cloud Function identifier"
+    field :identifier,   :string, description: "Azure Function identifier"
     field :description,  :string, description: "description of the function exposed to the agent"
     field :input_schema, :map, description: "JSON schema for the tool input"
   end

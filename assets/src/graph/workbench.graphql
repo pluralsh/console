@@ -1345,7 +1345,14 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
 query WorkbenchJobActions($id: ID!) {
   workbenchJob(id: $id) {
     id
-    activities(first: 100) {
+    functionActions: activities(first: 100, type: FUNCTION) {
+      edges {
+        node {
+          ...WorkbenchJobAction
+        }
+      }
+    }
+    kubernetesActions: activities(first: 100, type: KUBERNETES) {
       edges {
         node {
           ...WorkbenchJobAction

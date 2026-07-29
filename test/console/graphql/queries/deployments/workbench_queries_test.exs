@@ -1224,6 +1224,43 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["result"]["jobUpdate"]["conclusion"] == "ok"
     end
 
+    test "it redacts secret values in kube request bodies" do
+      body = Jason.encode!(%{
+        "kind" => "Secret",
+        "stringData" => %{"token" => "super-secret"}
+      })
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: insert(:workbench_job),
+          type: :kubernetes,
+          result: %{
+            kube_request: %{
+              handle: "prod-cluster",
+              method: "PATCH",
+              path: "/api/v1/namespaces/default/secrets/database",
+              body: body,
+              content_type: "application/merge-patch+json"
+            }
+          }
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            result {
+              kubeRequest {
+                body
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["result"]["kubeRequest"]["body"] =~ "*****"
+      refute found["result"]["kubeRequest"]["body"] =~ "super-secret"
+    end
+
   end
 
   describe "workbench_tools" do
