@@ -43,6 +43,19 @@ defmodule Console.Utils.HTTP do
 
   def req_options(_), do: []
 
+  @doc """
+  Resolves per-provider request options from application config while preserving
+  backwards compatibility with the legacy HTTPoison-style `legacy_key`. Any
+  values still configured under `legacy_key` (eg. `proxy`, `ssl`, `recv_timeout`)
+  are translated into their `Req` equivalents, while values under `req_key` are
+  treated as native `Req` options and take precedence when both are set.
+  """
+  @spec provider_options(atom, atom) :: keyword
+  def provider_options(legacy_key, req_key) do
+    legacy = req_options(Application.get_env(:console, legacy_key, []))
+    Keyword.merge(legacy, Application.get_env(:console, req_key, []))
+  end
+
   defp merge_connect(opts, connect) do
     Keyword.update(opts, :connect_options, connect, &Keyword.merge(&1, connect))
   end

@@ -98,7 +98,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
   end
 
   defp http_opts,
-    do: Application.get_env(:console, :req_gitlab_options, []) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
+    do: Console.Utils.HTTP.provider_options(:httpoison_gitlab_options, :req_gitlab_options) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
 
   @doc false
   def encode_project_id(project) when is_integer(project), do: Integer.to_string(project)

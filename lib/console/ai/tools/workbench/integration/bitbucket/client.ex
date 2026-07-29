@@ -103,5 +103,5 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   defp enc(s) when is_binary(s), do: URI.encode(String.trim(s), &URI.char_unreserved?/1)
 
   defp http_opts,
-    do: Application.get_env(:console, :req_bitbucket_options, []) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
+    do: Console.Utils.HTTP.provider_options(:httpoison_bitbucket_options, :req_bitbucket_options) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
 end

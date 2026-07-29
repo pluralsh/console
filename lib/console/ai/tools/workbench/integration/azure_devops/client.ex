@@ -190,5 +190,5 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
 
   defp http_opts,
     do:
-      Application.get_env(:console, :req_azure_devops_options, []) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
+      Console.Utils.HTTP.provider_options(:httpoison_azure_devops_options, :req_azure_devops_options) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
 end

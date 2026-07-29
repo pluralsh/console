@@ -154,6 +154,6 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
 
   defp http_opts,
     do:
-      Application.get_env(:console, :req_bitbucket_datacenter_options, []) ++
+      Console.Utils.HTTP.provider_options(:httpoison_bitbucket_datacenter_options, :req_bitbucket_datacenter_options) ++
         [receive_timeout: 60_000, decode_body: false, retry: false]
 end
