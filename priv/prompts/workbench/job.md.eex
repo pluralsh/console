@@ -39,7 +39,11 @@ The overarching task is as follows:
 
 <%= @prompt %>
 
-The user might resteer this task, so if you see any user messages, be sure to use them to guide what work needs to be done as well.
+There can be follow-up messages to this job, which can redefine the task at hand.  You should use them to guide what work needs to be done as well.  Examples of this are:
+
+* a user starting a job as an analysis task and then realizing they want to create a pr or make some change in response to findings.
+* a user doing additional work in the course of a long running job.
+* etc
 
 ## Tone of Voice Guidance
 
