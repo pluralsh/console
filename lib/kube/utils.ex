@@ -43,6 +43,10 @@ defmodule Kube.Utils do
   end
   def sanitize_kube_resource(res), do: res
 
+  def secret_path?(path) when is_binary(path),
+    do: Regex.match?(~r{/secrets(?:/|$)}, path)
+  def secret_path?(_), do: false
+
   def redact_secret(%{"kind" => "Secret"} = res) do
     Enum.reduce(["data", "stringData"], res, fn field, acc ->
       case Map.fetch(acc, field) do
@@ -52,6 +56,15 @@ defmodule Kube.Utils do
     end)
   end
   def redact_secret(res), do: res
+
+  # Merge-patch bodies often omit kind; still redact secret fields on /secrets paths.
+  def redact_secret(res, path) when is_map(res) and is_binary(path) do
+    case secret_path?(path) do
+      true -> redact_secret(Map.put_new(res, "kind", "Secret"))
+      false -> redact_secret(res)
+    end
+  end
+  def redact_secret(res, _), do: redact_secret(res)
 
   defp redact_secret_data(data) when is_map(data),
     do: Map.new(data, fn {k, _} -> {k, "*****"} end)

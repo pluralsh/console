@@ -29,5 +29,17 @@ defmodule Kube.UtilsTest do
 
       assert Kube.Utils.redact_secret(config_map) == config_map
     end
+
+    test "redacts secret-path merge patches that omit kind" do
+      patch = %{"stringData" => %{"token" => "super-secret"}}
+      path = "/api/v1/namespaces/default/secrets/database"
+
+      assert Kube.Utils.redact_secret(patch, path) == %{
+               "kind" => "Secret",
+               "stringData" => %{"token" => "*****"}
+             }
+      assert Kube.Utils.redact_secret(patch, "/api/v1/namespaces/default/configmaps/db") ==
+               patch
+    end
   end
 end
