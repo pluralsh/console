@@ -775,8 +775,14 @@ defmodule Console.Deployments.Workbenches do
       end
     end)
     |> add_operation(:job, fn %{idle: job} ->
+      job = Repo.preload(job, :result, force: true)
       with {:ok, job} <- allow(job, user, :prompt) do
-        WorkbenchJob.changeset(job, %{status: :pending, error: nil, user_id: user.id})
+        WorkbenchJob.changeset(job, %{
+          status: :pending,
+          error: nil,
+          user_id: user.id,
+          result: %{todos: []}
+        })
         |> Repo.update()
       end
     end)

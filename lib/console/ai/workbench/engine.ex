@@ -87,7 +87,7 @@ defmodule Console.AI.Workbench.Engine do
 
     tools(job, environment, activities)
     |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
-    |> MemoryEngine.reduce(Enum.reverse(maybe_continue(messages, engine) ++ [{:user, job.prompt}]), &reducer/2)
+    |> MemoryEngine.reduce(Enum.reverse(messages ++ [{:user, job.prompt}]), &reducer/2)
     |> case do
       {:ok, %Complete{
         conclusion: conclusion,
@@ -370,9 +370,6 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp verifiable(engine), do: engine
 
-  defp maybe_continue(messages, %__MODULE__{activities: [_ | _]} = engine), do: [{:user, String.trim(continue_prompt(engine: engine))} | messages]
-  defp maybe_continue(messages, _), do: messages
-
   defp preload_job(%WorkbenchJob{type: :skill} = job),
     do: Repo.preload(job, @preloads ++ [referenced_job: [:result, workbench: [:workbench_skills, :repository], activities: :thoughts]])
   defp preload_job(job), do: Repo.preload(job, @preloads)
@@ -390,7 +387,6 @@ defmodule Console.AI.Workbench.Engine do
   def callback(_, _), do: :ok
 
   EEx.function_from_file(:defp, :skill_system_prompt, Console.priv_filename(["prompts", "workbench", "eval_skill.md.eex"]), [:assigns])
-  EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns])
 end

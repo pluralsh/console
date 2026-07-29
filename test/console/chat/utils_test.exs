@@ -79,8 +79,8 @@ defmodule Console.Chat.UtilsTest do
       assert prompt.workbench_job_id == job.id
       assert prompt.user_id == user.id
       assert prompt.prompt =~ msg.text
-      assert prompt.prompt =~ "A user posted this reply in #{conn.type} you must follow up on"
-      assert prompt.prompt =~ "Before working, react to this in #{conn.type}"
+      assert prompt.prompt =~ "This was a message in #{conn.type}"
+      assert prompt.prompt =~ "Be sure to react to this in #{conn.type}"
       assert prompt.prompt =~ "Message details are id=#{msg.id}"
       assert prompt.prompt =~ "channel=#{channel}"
       assert prompt.prompt =~ "channel_id=id=C123"
@@ -128,8 +128,8 @@ defmodule Console.Chat.UtilsTest do
 
       assert prompt.workbench_job_id == job.id
       assert prompt.prompt =~ msg.text
-      assert prompt.prompt =~ "A user posted this reply in #{conn.type} you must follow up on"
-      assert prompt.prompt =~ "Before working, react to this in #{conn.type}"
+      assert prompt.prompt =~ "This was a message in #{conn.type}"
+      assert prompt.prompt =~ "Be sure to react to this in #{conn.type}"
       assert prompt.prompt =~ "Message details are id=#{msg.id}"
       assert prompt.prompt =~ "channel=#{channel}"
       assert prompt.prompt =~ "channel_id=id=C123"
