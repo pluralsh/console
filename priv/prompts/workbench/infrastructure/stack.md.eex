@@ -42,6 +42,16 @@ The stack is managed as an InfrastructureStack kubernetes custom resource in the
 You can always query details about the parent service to investigate further.
 <% end %>
 
+<%= if is_list(@resources) && !Enum.empty?(@resources) do %>
+# Resources
+
+This stack has the following state resources:
+
+```json
+<%= Jason.encode!(@resources, pretty: true) %>
+```
+<% end %>
+
 <%= if @failed_run do %>
 # Latest failed run
 
