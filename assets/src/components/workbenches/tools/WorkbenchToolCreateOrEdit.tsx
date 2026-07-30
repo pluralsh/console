@@ -332,11 +332,11 @@ function coerceConfigurationJsonFields<T extends Record<string, unknown>>(
   if (!('inputSchema' in config)) return config
 
   const inputSchema = config.inputSchema
-  if (typeof inputSchema !== 'string') return config
+  if (inputSchema == null || typeof inputSchema === 'string') return config
 
   return {
     ...config,
-    inputSchema: JSON.parse(inputSchema),
+    inputSchema: JSON.stringify(inputSchema),
   }
 }
 
