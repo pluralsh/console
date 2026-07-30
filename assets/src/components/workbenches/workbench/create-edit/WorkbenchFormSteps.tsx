@@ -17,6 +17,7 @@ import {
   Flex,
   FormField,
   IconFrame,
+  InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
   KubernetesIcon,
@@ -975,6 +976,12 @@ export function WorkbenchModesAndTokenLimitStep({
           <Body2P $color="text-xlight">
             Auto-trigger a verification loop after PRs.
           </Body2P>
+          <Tooltip label="Confirms if PR is merged and followup if it didn’t.">
+            <InfoOutlineIcon
+              size={12}
+              color="icon-xlight"
+            />
+          </Tooltip>
         </Flex>
         <WorkbenchBudgetLimitControl
           value={modes?.budget}

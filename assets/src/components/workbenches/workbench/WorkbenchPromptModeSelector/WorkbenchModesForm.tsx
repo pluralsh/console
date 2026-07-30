@@ -1,4 +1,11 @@
-import { Flex, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
+import {
+  Flex,
+  InfoOutlineIcon,
+  ListBoxItem,
+  Select,
+  Switch,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import type {
   WorkbenchJobCodingModesAttributes,
@@ -111,6 +118,12 @@ export function WorkbenchModesForm({
         <Body2P $color="text-xlight">
           Auto-trigger a verification loop after PRs.
         </Body2P>
+        <Tooltip label="Confirms if PR is merged and followup if it didn’t.">
+          <InfoOutlineIcon
+            size={12}
+            color="icon-xlight"
+          />
+        </Tooltip>
       </Flex>
       <WorkbenchBudgetLimitControl
         workbenchId={workbenchId}
