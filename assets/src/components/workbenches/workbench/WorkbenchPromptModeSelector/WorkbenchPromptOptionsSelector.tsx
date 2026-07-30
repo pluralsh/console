@@ -10,6 +10,8 @@ import {
   KubernetesIcon,
   ListIcon,
   Switch,
+  TrashCanIcon,
+  UpdatesIcon,
   useFloatingDropdown,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
@@ -328,6 +330,12 @@ export function WorkbenchPromptOptionPills({
         <SelectedOptionPill
           label="Kubernetes"
           icon={<KubernetesIcon size={12} />}
+          optionIcons={
+            <>
+              {value?.kubernetes?.update && <UpdatesIcon size={12} />}
+              {value?.kubernetes?.delete && <TrashCanIcon size={12} />}
+            </>
+          }
           onClear={() =>
             onChange({
               ...value,
