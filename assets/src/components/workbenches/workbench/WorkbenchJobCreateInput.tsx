@@ -43,12 +43,13 @@ import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { WorkbenchModelSelector } from './WorkbenchModelSelector'
-import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
-import { WorkbenchTokenLimitSelector } from './WorkbenchPromptModeSelector/WorkbenchTokenLimitSelector'
+import {
+  WorkbenchPromptOptionPills,
+  WorkbenchPromptOptionsSelector,
+} from './WorkbenchPromptModeSelector/WorkbenchPromptOptionsSelector'
 import {
   defaultPromptModesFromWorkbench,
   modesAttributes,
-  updateBudgetModes,
 } from './WorkbenchPromptModeSelector/workbenchPromptModes'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import { CaptionP } from 'components/utils/typography/Text'
@@ -211,17 +212,9 @@ export function WorkbenchJobCreateInput({
               gap="xsmall"
               height={32}
             >
-              <WorkbenchPromptModeSelector
+              <WorkbenchPromptOptionsSelector
                 value={promptModes}
                 onChange={setPromptModes}
-                disabled={disabled || loading}
-              />
-              <WorkbenchTokenLimitSelector
-                workbenchId={workbenchId}
-                value={promptModes?.budget}
-                onChange={(budget) =>
-                  setPromptModes((modes) => updateBudgetModes(modes, budget))
-                }
                 disabled={disabled || loading}
               />
               <WorkbenchModelSelector
@@ -230,6 +223,10 @@ export function WorkbenchJobCreateInput({
                   setSelectedModelState({ workbenchId, model })
                 }
                 disabled={disabled || loading}
+              />
+              <WorkbenchPromptOptionPills
+                value={promptModes}
+                onChange={setPromptModes}
               />
               {setWorkbenchId && (
                 <WorkbenchPillSelector

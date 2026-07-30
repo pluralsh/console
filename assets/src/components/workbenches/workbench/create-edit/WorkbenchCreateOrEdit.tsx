@@ -451,16 +451,22 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
   // Keep explicit empty list so "delete all skills" is persisted.
   rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
 
-  // Keep explicit namespace lists so clearing required/blacklisted namespaces persists.
-  if (state.modes?.kubernetes) {
+  // Keep explicit mode values so disabling an existing default persists.
+  if (state.modes) {
     rest.modes ??= {}
-    rest.modes.kubernetes = {
-      ...rest.modes.kubernetes,
-      update: state.modes.kubernetes.update ?? false,
-      delete: state.modes.kubernetes.delete ?? false,
-      requireNamespaces: state.modes.kubernetes.requireNamespaces ?? [],
-      excludeNamespaces: state.modes.kubernetes.excludeNamespaces ?? [],
-    }
+    rest.modes.plan = state.modes.plan ?? false
+    rest.modes.verification = state.modes.verification ?? false
+    rest.modes.coding = state.modes.coding ?? null
+    rest.modes.budget = state.modes.budget ?? null
+    rest.modes.kubernetes = state.modes.kubernetes
+      ? {
+          ...rest.modes.kubernetes,
+          update: state.modes.kubernetes.update ?? false,
+          delete: state.modes.kubernetes.delete ?? false,
+          requireNamespaces: state.modes.kubernetes.requireNamespaces ?? [],
+          excludeNamespaces: state.modes.kubernetes.excludeNamespaces ?? [],
+        }
+      : null
   }
 
   return {
@@ -555,6 +561,7 @@ function workbenchModesToAttributes(
 
   return {
     plan: modes.plan,
+    verification: modes.verification,
     ...(modes.model?.provider && modes.model.model
       ? {
           model: {

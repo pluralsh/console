@@ -15,7 +15,13 @@ import {
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
-import { cloneElement, type ReactNode, useRef, useState } from 'react'
+import {
+  cloneElement,
+  type CSSProperties,
+  type ReactNode,
+  useRef,
+  useState,
+} from 'react'
 import { useButton } from 'react-aria'
 import { to, useTransition } from '@react-spring/web'
 import { FloatingPortal, type UseFloatingReturn } from '@floating-ui/react'
@@ -288,11 +294,13 @@ export function WorkbenchPromptPopover({
   onClose,
   floating,
   children,
+  style,
 }: {
   isOpen: boolean
   onClose: () => void
   floating: UseFloatingReturn
   children: ReactNode
+  style?: CSSProperties
 }) {
   const theme = useTheme()
   const direction = floating.placement.startsWith('bottom') ? -1 : 1
@@ -316,6 +324,7 @@ export function WorkbenchPromptPopover({
           position: floating.strategy,
           left: floating.x ?? 0,
           top: floating.y ?? 0,
+          ...style,
         }}
       >
         <AnimatedDiv

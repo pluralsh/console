@@ -1,5 +1,5 @@
-import { Flex, ListBoxItem, Select } from '@pluralsh/design-system'
-import { Body2BoldP } from 'components/utils/typography/Text'
+import { Flex, ListBoxItem, Select, Switch } from '@pluralsh/design-system'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import type {
   WorkbenchJobCodingModesAttributes,
   WorkbenchJobModesAttributes,
@@ -96,6 +96,21 @@ export function WorkbenchModesForm({
           onBabysitChange={(babysit) => setCoding({ babysit })}
           showHeader={false}
         />
+      </Flex>
+      <Flex
+        align="center"
+        gap="small"
+      >
+        <Switch
+          aria-label="Verification loop"
+          checked={value?.verification ?? false}
+          disabled={disabled}
+          onChange={(verification) => onChange({ ...value, verification })}
+        />
+        <Body2BoldP>Verification loop</Body2BoldP>
+        <Body2P $color="text-xlight">
+          Auto-trigger a verification loop after PRs.
+        </Body2P>
       </Flex>
       <WorkbenchBudgetLimitControl
         workbenchId={workbenchId}

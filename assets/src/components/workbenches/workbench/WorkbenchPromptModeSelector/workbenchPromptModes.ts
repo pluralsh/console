@@ -11,13 +11,20 @@ export function attributesForPromptMode(
   mode: WorkbenchPromptMode,
   current: WorkbenchJobModesAttributes | null
 ): WorkbenchJobModesAttributes {
+  const shared = {
+    budget: current?.budget,
+    model: current?.model,
+    verification: current?.verification,
+    kubernetes: current?.kubernetes,
+  }
+
   switch (mode) {
     case 'plan':
-      return { budget: current?.budget, model: current?.model, plan: true }
+      return { ...shared, plan: true }
     case 'agent':
       return {
-        budget: current?.budget,
-        model: current?.model,
+        ...shared,
+        plan: false,
         coding: current?.coding ?? {},
       }
   }
@@ -29,11 +36,24 @@ export function modesAttributes(
   if (!modes) return
 
   const budget = budgetAttributes(modes.budget)
-  const shared = { budget, model: modes.model }
+  const attributes = {
+    budget,
+    model: modes.model,
+    plan: modes.plan,
+    verification: modes.verification,
+    coding: modes.coding,
+    kubernetes: modes.kubernetes,
+  }
 
-  if (modes.plan) return { ...shared, plan: true }
-  if (modes.coding != null) return { ...shared, coding: modes.coding }
-  if (budget != null || modes.model != null) return shared
+  if (
+    budget != null ||
+    modes.model != null ||
+    modes.plan != null ||
+    modes.verification != null ||
+    modes.coding != null ||
+    modes.kubernetes != null
+  )
+    return attributes
 }
 
 export function modesFormValue(
@@ -43,6 +63,7 @@ export function modesFormValue(
 
   return {
     plan: modes.plan,
+    verification: modes.verification,
     model:
       modes.model?.provider && modes.model.model
         ? {
@@ -60,6 +81,20 @@ export function modesFormValue(
       ? {
           cost: modes.budget.cost,
           tokens: modes.budget.tokens,
+        }
+      : undefined,
+    kubernetes: modes.kubernetes
+      ? {
+          update: modes.kubernetes.update,
+          delete: modes.kubernetes.delete,
+          requireNamespaces:
+            modes.kubernetes.requireNamespaces?.filter(
+              (namespace): namespace is string => !!namespace
+            ) ?? [],
+          excludeNamespaces:
+            modes.kubernetes.excludeNamespaces?.filter(
+              (namespace): namespace is string => !!namespace
+            ) ?? [],
         }
       : undefined,
   }
@@ -85,7 +120,11 @@ export function updateCodingModes(
   modes: WorkbenchJobModesAttributes | null,
   coding: WorkbenchJobCodingModesAttributes
 ): WorkbenchJobModesAttributes {
-  return { ...modes, coding: { ...modes?.coding, ...coding } }
+  return {
+    ...modes,
+    plan: false,
+    coding: { ...modes?.coding, ...coding },
+  }
 }
 
 export function updateBudgetModes(
@@ -106,6 +145,7 @@ export function defaultPromptModesFromWorkbench(
         configuration?: {
           coding?: { enableBabysitting?: boolean | null } | null
         } | null
+        modes?: WorkbenchJobModes | null
       }
     | null
     | undefined,
@@ -114,7 +154,10 @@ export function defaultPromptModesFromWorkbench(
   if (!workbenchId || !workbench || workbench.id !== workbenchId)
     return undefined
 
-  return workbench.configuration?.coding?.enableBabysitting
-    ? { coding: { babysit: true } }
-    : null
+  return (
+    modesFormValue(workbench.modes) ??
+    (workbench.configuration?.coding?.enableBabysitting
+      ? { coding: { babysit: true } }
+      : null)
+  )
 }
