@@ -240,7 +240,7 @@ export function getActionDescription(
   if (description) return description
 
   const output = activity.result?.output?.trim()
-  if (output && output !== 'waiting for user approval') return output
+  if (output && !isPendingApprovalOutput(output)) return output
 
   const prompt = activity.prompt?.trim()
   if (prompt && !prompt.toLowerCase().startsWith('function call:'))
@@ -311,16 +311,24 @@ export function getActionInputJson(
   return ''
 }
 
+const PENDING_APPROVAL_OUTPUTS = new Set([
+  'waiting for user approval',
+  'request pending user approval',
+])
+
+function isPendingApprovalOutput(output: string): boolean {
+  return PENDING_APPROVAL_OUTPUTS.has(output.trim())
+}
+
 export function getActionResultJson(
   activity: WorkbenchJobActionFragment
 ): string {
   if (activity.result?.error?.trim()) {
     return activity.result.error.trim()
   }
-  if (activity.result?.output != null) {
-    return formatActionJson(activity.result.output)
-  }
-  return ''
+  const output = activity.result?.output
+  if (output == null || isPendingApprovalOutput(String(output))) return ''
+  return formatActionJson(output)
 }
 
 export function mapActionNodes(
