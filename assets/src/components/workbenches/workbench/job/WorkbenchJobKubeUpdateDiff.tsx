@@ -151,6 +151,7 @@ export function WorkbenchJobKubeActionChips({
   }
 
   const variant = getKubeActionVariant(method)
+  const chip = KUBE_VARIANT_CHIPS[variant]
 
   return (
     <Flex
@@ -158,37 +159,26 @@ export function WorkbenchJobKubeActionChips({
       gap="xsmall"
       css={{ flexShrink: 0, flexWrap: 'nowrap' }}
     >
-      {variant === 'create' && (
+      {chip && (
         <Chip
           size="small"
-          severity="success"
+          severity={chip.severity}
           css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
         >
-          Create
-        </Chip>
-      )}
-      {variant === 'update' && (
-        <Chip
-          size="small"
-          severity="info"
-          css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-        >
-          Update
-        </Chip>
-      )}
-      {variant === 'delete' && (
-        <Chip
-          size="small"
-          severity="danger"
-          css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
-        >
-          Delete
+          {chip.label}
         </Chip>
       )}
       {statusChip}
     </Flex>
   )
 }
+
+const KUBE_VARIANT_CHIPS = {
+  create: { severity: 'success', label: 'Create' },
+  update: { severity: 'info', label: 'Update' },
+  delete: { severity: 'danger', label: 'Delete' },
+  other: null,
+} as const
 
 const DiffSectionSC = styled.div(({ theme }) => ({
   display: 'flex',

@@ -13,6 +13,7 @@ import {
   getWorkbenchToolLabel,
   WorkbenchToolIcon,
 } from 'components/workbenches/tools/workbenchToolsUtils'
+import { WorkbenchJobKubeActionChips } from 'components/workbenches/workbench/job/WorkbenchJobKubeUpdateDiff'
 import {
   getKubeActionSubtitle,
   getKubeActionTitle,
@@ -160,43 +161,19 @@ export function AwaitingReviewWorkbenchActivityItem({
         align="center"
         gap="small"
       >
-        <Flex
-          align="center"
-          gap="xsmall"
-          wrap="wrap"
-        >
-          <Chip
-            size="small"
-            iconColor="icon-warning"
-            icon={<WarningOutlineIcon />}
-          >
-            Pending approval
-          </Chip>
-          {kubeVariant === 'create' && (
+        <WorkbenchJobKubeActionChips
+          type={activity.type}
+          method={kubeRequest?.method}
+          statusChip={
             <Chip
               size="small"
-              severity="success"
+              iconColor="icon-warning"
+              icon={<WarningOutlineIcon />}
             >
-              Create
+              Pending approval
             </Chip>
-          )}
-          {kubeVariant === 'update' && (
-            <Chip
-              size="small"
-              severity="info"
-            >
-              Update
-            </Chip>
-          )}
-          {kubeVariant === 'delete' && (
-            <Chip
-              size="small"
-              severity="danger"
-            >
-              Delete
-            </Chip>
-          )}
-        </Flex>
+          }
+        />
         {viewPath && (
           <Button
             small
