@@ -20,6 +20,7 @@ import {
   getKubeDeleteResourceLabel,
   getKubeDeleteWarning,
   getKubeUpdateDiffValues,
+  isServerSideApplyKubeRequest,
   isKubeSecretRequest,
   KubeRequestLike,
   toKubeYaml,
@@ -49,6 +50,7 @@ export function WorkbenchJobKubeUpdateDiff({
   const liveKube = data?.workbenchJobActivity?.result?.kubeRequest
   const kube = liveKube ?? kubeRequest
   const secretProtected = isKubeSecretRequest(kube)
+  const serverSideApply = isServerSideApplyKubeRequest(kube)
   const { oldValue, newValue } =
     variant === 'delete'
       ? getKubeDeleteDiffValues(kube)
@@ -99,6 +101,12 @@ export function WorkbenchJobKubeUpdateDiff({
       <CaptionP $color="text-xlight">
         {isDelete ? getKubeDeleteResourceLabel(kube).toUpperCase() : 'DIFF'}
       </CaptionP>
+      {serverSideApply && (
+        <CaptionP $color="text-light">
+          Server-side apply only changes the fields shown here; omitted fields
+          remain in place.
+        </CaptionP>
+      )}
       {error && <GqlError error={error} />}
       <DiffViewer
         splitView={false}
