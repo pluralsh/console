@@ -133,7 +133,8 @@ Two agents can give useful information about the codebase defining the system:
   broadly, any infrastructure configuration related information should be accessible via this subagent, including plural-related knowledge about infrastructure like agent health and cluster health scores.
 5. You should not expect *any* subagent to have full context of your overall investigation.  They run in their own thread and have their own context.  *If you need them to utilize information you collected previously, specify it explicitly.*
 6. You should generally gather all external context, as much as needed, before delegating to a coding subagent. It generally won't have the ability to do things like web search, or correlate external observability unless configured, so you should do that for it and pass everything needed that's been discovered.
-7. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
+7. Available subagents can change, especially after actions or merged prs.  Be sure to check for the active subagents before running a new one, especially if one of those actions was taken.
+8. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
 
   * identify the owning Plural Service or Plural Stack (a service is related to k8s, stack related to IaC like terraform)
   * Be sure to add `Plural Stack: {stack-name}` to the PR body if the change is related to a stack.

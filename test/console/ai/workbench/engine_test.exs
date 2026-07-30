@@ -183,6 +183,76 @@ defmodule Console.AI.Workbench.EngineTest do
       assert result.result.conclusion == "complete"
     end
 
+    test "unlocks verify subagent after a successful action activity" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "call function", [
+          %Tool{
+            id: "1",
+            name: "http_function_call_example_http_function",
+            arguments: %{"input" => %{}}
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn _, opts ->
+        subagent_tool = Enum.find(opts[:plural], &(Tool.name(&1) == "workbench_subagent"))
+        subagents = get_in(Tool.json_schema(subagent_tool), ["properties", "subagent", "enum"])
+
+        assert :verify in subagents
+
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "todo 1", description: "todo 1", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      project = insert(:project)
+      workbench = insert(:workbench, project: project)
+
+      tool =
+        insert(:workbench_tool,
+          project: project,
+          tool: :http,
+          categories: [:function],
+          name: "example_http_function",
+          configuration: %{
+            http: %{
+              url: "http://127.0.0.1:1",
+              method: :get,
+              function: true,
+              input_schema: %{"type" => "object", "properties" => %{}, "required" => []}
+            }
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+
+      {:ok, engine} = Engine.new(job)
+      {:ok, result} = Engine.run(engine)
+
+      assert result.status == :successful
+    end
+
     test "dispatches build_dashboard tool calls, persists the canvas activity, and completes the job" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},

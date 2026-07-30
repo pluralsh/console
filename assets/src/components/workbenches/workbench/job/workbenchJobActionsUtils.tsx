@@ -1,8 +1,8 @@
 import {
   CancelledFilledIcon,
+  KubernetesIcon,
   StatusIpIcon,
   StatusOkIcon,
-  TrashCanIcon,
   UpdatesIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
@@ -252,16 +252,17 @@ export function getActionDescription(
 
 export function getActionIcon(activity: WorkbenchJobActionFragment) {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
-    const variant = getKubeActionVariant(activity.result?.kubeRequest?.method)
-    if (variant === 'delete') {
-      return (
-        <TrashCanIcon
-          size={16}
-          color="icon-danger"
-        />
-      )
-    }
-    return <UpdatesIcon size={16} />
+    return (
+      <KubernetesIcon
+        size={16}
+        color={
+          getKubeActionVariant(activity.result?.kubeRequest?.method) ===
+          'delete'
+            ? 'icon-danger'
+            : undefined
+        }
+      />
+    )
   }
 
   const toolType = activity.result?.functionCall?.tool?.tool

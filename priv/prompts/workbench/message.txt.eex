@@ -12,8 +12,16 @@ Activity status: <%= @activity.status %>
 Conclusion:
 
 ```
-<%= @activity.result.output || @activity.result.error %>
+<%= @activity.result.output %>
 ```
+
+<%= if @activity.result.error do %>
+Error:
+
+```
+<%= @activity.result.error %>
+```
+<% end %>
 
 <%= if is_list(@activity.result.logs) and !Enum.empty?(@activity.result.logs) do %>
 There were also some important log lines emitted by the activity, in json format:

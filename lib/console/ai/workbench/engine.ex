@@ -154,7 +154,16 @@ defmodule Console.AI.Workbench.Engine do
         []
       _ -> []
     end)
-    |> then(& %{engine | activities: &1 ++ engine.activities, messages: &1 ++ msgs, iterations: engine.iterations + 1, job: refresh_job(engine.job)})
+    |> then(
+      &%{
+        engine
+        | activities: &1 ++ engine.activities,
+          messages: &1 ++ msgs,
+          iterations: engine.iterations + 1,
+          job: refresh_job(engine.job)
+      }
+    )
+    |> verifiable()
     |> loop()
   end
 
