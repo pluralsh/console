@@ -157,14 +157,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: {:ok, Workbenches.get_workbench_tool(id)}
   def function_call_tool(_, _, _), do: {:ok, nil}
 
-  def kube_request_body(%{body: body} = request, _, _) when is_binary(body) do
+  def kube_request_body(%{body: body, path: path}, _, _) when is_binary(body) do
     case Jason.decode(body) do
-      {:ok, %{} = body} -> sanitize_kube_request_body(body, request[:path])
+      {:ok, %{} = body} -> sanitize_kube_request_body(body, path)
       _ -> {:ok, body}
     end
   end
-  def kube_request_body(%{body: %{} = body} = request, _, _),
-    do: sanitize_kube_request_body(body, request[:path])
+  def kube_request_body(%{body: %{} = body, path: path}, _, _),
+    do: sanitize_kube_request_body(body, path)
   def kube_request_body(_, _, _), do: {:ok, nil}
 
   defp sanitize_kube_request_body(body, path) do
@@ -173,9 +173,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     |> Jason.encode()
   end
 
-  def kube_request_current(%{handle: handle, path: path} = request, _, %{context: %{current_user: user}})
+  def kube_request_current(%{handle: handle, path: path, method: method}, _, %{context: %{current_user: user}})
       when is_binary(handle) and is_binary(path) do
-    case normalize_kube_method(request[:method]) do
+    case normalize_kube_method(method) do
       "post" ->
         {:ok, nil}
       _ ->
@@ -187,6 +187,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
         else
           _ -> {:ok, nil}
         end
+    end
+  end
+  def kube_request_current(%{handle: handle, path: path}, _, %{context: %{current_user: user}})
+      when is_binary(handle) and is_binary(path) do
+    with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
+         {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
+      KUtils.sanitize_kube_resource(res)
+      |> KUtils.redact_secret()
+      |> ok()
+    else
+      _ -> {:ok, nil}
     end
   end
   def kube_request_current(_, _, _), do: {:ok, nil}
