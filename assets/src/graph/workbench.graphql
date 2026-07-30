@@ -83,6 +83,7 @@ fragment Workbench on Workbench {
   }
   modes {
     plan
+    verification
     model {
       provider
       model
@@ -514,6 +515,7 @@ fragment WorkbenchCron on WorkbenchCron {
   userId
   modes {
     plan
+    verification
     model {
       provider
       model
@@ -556,6 +558,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   userId
   modes {
     plan
+    verification
     model {
       provider
       model
@@ -622,6 +625,7 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   userId
   modes {
     plan
+    verification
     model {
       provider
       model
