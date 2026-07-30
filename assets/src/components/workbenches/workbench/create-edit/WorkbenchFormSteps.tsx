@@ -815,7 +815,7 @@ export function WorkbenchConfigureActionsStep({
       gap="large"
     >
       <FormField
-        label="Enable kubernetes actions"
+        label="Enable Kubernetes actions"
         hint="Reads are always permitted. Every mutation you enable below still requires your approval before it runs."
       >
         <Flex
