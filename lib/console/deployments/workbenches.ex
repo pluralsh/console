@@ -984,10 +984,14 @@ defmodule Console.Deployments.Workbenches do
     get_workbench_tool!(call.tool_id)
     |> FunctionCall.call_function(call.input)
     |> case do
-      {:ok, output} -> output
-      {:error, err} -> "Internal function calling error: #{inspect(err)}"
+      {:ok, output} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: output}})
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Internal function calling error: #{inspect(err)}"}
+        })
     end
-    |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
     |> Repo.update()
   end
 
@@ -1002,11 +1006,23 @@ defmodule Console.Deployments.Workbenches do
         |> KUtils.sanitize_kube_resource()
         |> KUtils.redact_secret()
         |> JSON.encode!()
-      {:error, {:http_error, _, %{"message" => msg}}} -> "K8s request failed: #{msg}"
-      {:error, {:http_error, _, err}} -> "K8s request failed: #{inspect(err)}"
-      {:error, err} -> "Internal kubernetes request error: #{inspect(err)}"
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+      {:error, {:http_error, _, %{"message" => msg}}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "K8s request failed: #{msg}"}
+        })
+      {:error, {:http_error, _, err}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "K8s request failed: #{inspect(err)}"}
+        })
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Internal kubernetes request error: #{inspect(err)}"}
+        })
     end
-    |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
     |> Repo.update()
   end
 

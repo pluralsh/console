@@ -1457,12 +1457,13 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
 
-      assert updated.status == :successful
-      assert updated.result.output == "Internal function calling error: :timeout"
+      assert updated.status == :failed
+      assert updated.result.error == "Internal function calling error: :timeout"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       reloaded = refetch(activity)
-      assert reloaded.status == :successful
+      assert reloaded.status == :failed
+      assert reloaded.result.error == "Internal function calling error: :timeout"
     end
 
     test "users without read access cannot approve or invoke a function activity" do
