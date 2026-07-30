@@ -4,19 +4,50 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
-- version: 1.19.6
+- version: 1.20.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Gateway API: support configuring Gateway access logs via `spec.telemetry.accessLogs`
-        in `CiliumGatewayClassConfig`.', 'Datapath L2 responder: uses L3 sockets for
-        solicited-node multicast signaling, improving IPv6 neighbor discovery behavior
-        in some environments.']
-    breaking_changes: []
-  chart_version: 1.19.6
+    features: ['Gateway API updates: moves to Gateway API v1.6.1 with new/expanded
+        capabilities including ListenerSets (delegated listeners), BackendTLSPolicy,
+        TCPRoute/UDPRoute, ExternalAuth filter, CORS and additional redirect codes,
+        and configurable gRPC-web translation.', Extensible datapath via datapath
+        plugins for cloud providers to extend/instrument eBPF datapath without forking
+        Cilium., '`bpf.datapathMode=auto` can automatically select netkit on supported
+        kernels and fall back to veth (default remains veth).', 'Egress Gateway improvements:
+        explicit IPv6 egress IP support and IPv4 traffic honors policy-selected interface
+        like IPv6.', 'BGP improvements: new Hive shell commands and clearer peer output;
+        control plane updates to GoBGP v4.6.1 with route-policy reconciliation optimizations.',
+      'IPAM enhancements: AWS ENI IPAM supports IPv6 prefixes (beta); migration path
+        from cluster-pool IPAM to multi-pool IPAM without rebuild.', NodePort can
+        dynamically select preferred source address using kernel FIB on supported
+        kernels., New `preferIpv6` option applies consistently to health probes and
+        Hubble peer communication., 'Service/ClusterMesh features: topology-aware
+        traffic distribution hints (PreferSameZone/PreferSameNode), weighted Maglev
+        backends via EndpointSlice annotation, more VXLAN per-Service LB mode options,
+        and stable MCS API support.', 'Security/encryption: improved ztunnel identity
+        management (internal CA or SPIRE) with new metrics; support for Kubernetes
+        ClusterNetworkPolicy (KCNP); ICMPv6 unreachable responses on IPv6 policy denies;
+        new `cluster-mesh` policy entity; AWS VPC group policies transformed into
+        CiliumCIDRGroup; per-pod source IP verification control via annotation guarded
+        by namespace opt-in.', 'Day-2/observability: configuration drift metric (unapplied
+        ConfigMap settings), startup time/resource-sync metrics, Hubble correlates
+        policy responsible for audit verdicts, standalone DNS proxy metrics exported
+        through Cilium.', 'Performance/scale: aggregated load-balancer state for shared
+        backends, more efficient Envoy updates via ADS/Delta xDS, optimized BPF policy
+        map encoding, and significantly smaller cilium-cni binary.', 'Updated foundations:
+        Kubernetes v1.36, Envoy v1.37.x, Gateway API v1.6.1, MCS API v0.5.2, Ubuntu
+        26.04 base images, and default CNI config version from 0.3.1 to 1.0.0.']
+    breaking_changes: ['Upgrade may require manual action if you use legacy Mutual
+        Authentication, Envoy Go extensions, Kafka-aware policies, `cilium.io/v2alpha1`
+        CiliumNodeConfig API, the libnetwork integration, or a custom CNI configuration
+        (see Cilium 1.20 upgrade guide).', 'Default CNI configuration version changes
+        from 0.3.1 to 1.0.0, which can affect clusters using custom CNI config management
+        or validating CNI config schema/format.']
+  chart_version: 1.20.0
   images: []
 - version: 1.19.4
   kube: ['1.36', '1.35', '1.34']

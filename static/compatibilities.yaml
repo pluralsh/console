@@ -183,7 +183,15 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific changes were included in the provided v1.63.1 and v1.63.0
+          release note excerpts; both entries only point to the upstream CHANGELOG
+          for details.]
+      breaking_changes: [No breaking changes were stated in the provided release notes;
+          review the linked upstream CHANGELOG for any behavior or configuration changes
+          before upgrading.]
     chart_version: 2.63.1
     images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.4', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.4',
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.3', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.2',
@@ -1146,35 +1154,34 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
-  - version: 3.4.2
+  - version: 3.4.3
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ['Application image should be updated from `public.ecr.aws/eks/aws-load-balancer-controller:v3.4.0`
-          to `:v3.4.2` (via Helm chart values such as `image.tag`, depending on your
-          chart).', No CRD updates required for v3.4.2 per release notes (still verify
-          your installed CRDs match chart-managed CRDs if you manage them separately).,
-        No IAM policy changes required for v3.4.2 per release notes., No Gateway API
-          CRD updates required for v3.4.2 per release notes.]
-      features: ['Ingress to Gateway Migration Tool introduced in v3.4.0: `lbc-migrate`
-          CLI to translate Ingress manifests to Gateway API YAML and an in-cluster
-          Migration Console to compare resulting AWS resources.', 'Improved readiness
-          gate handling: TargetGroupBinding controller watches Pod events instead
-          of fixed-timer requeues, speeding readiness reconciliation and reducing
-          churn.', NLB weighted target groups now allow weight 0 (with validation
-          that at least one target group has non-zero weight).]
-      breaking_changes: ['Gateway API behavior change in v3.4.0: for an NLB Gateway,
-          only one L4 (TCP/UDP/TLS) route per listener will receive traffic; when
-          multiple routes target the same listener, the oldest route wins. Consolidate
-          to a single L4 route per listener to avoid unexpected traffic loss.', 'Security-related
-          behavior change in v3.4.2: unified cross-kind route precedence for HTTPRoute/GRPCRoute;
-          rule ordering now based on specificity rather than route kind, which can
-          change which route matches first if you relied on the old (buggy) ordering.']
-    chart_version: 3.4.2
-    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.2']
+      chart_updates: []
+      features: ['Ingress-to-Gateway migration tooling introduced in v3.4.0: `lbc-migrate`
+          CLI to translate Ingress manifests to Gateway API YAML, plus an in-cluster
+          migration console to compare resulting AWS resources side-by-side.', Webhooks
+          upgraded to `admissionregistration.k8s.io/v1` (automatic on upgrade)., 'Readiness
+          gate handling improved: TargetGroupBinding controller watches pod events
+          instead of fixed requeues, improving responsiveness and reducing churn.',
+        'Various reconciliation/validation fixes: regex path rule drift prevention,
+          capacity reservation annotation parsing now validated, clearer retry timeout
+          errors, and listener rule tag reconciliation.', 'v3.4.3 Gateway/ALB behavior
+          change: for HTTP/GRPC Routes with multiple hostnames, controller generates
+          a distinct ALB rule per hostname with adjusted precedence behavior.']
+      breaking_changes: ["Gateway API behavior change in v3.4.0 for NLB Gateway: if\
+          \ multiple L4 (TCP/UDP/TLS) routes target the same listener, only the oldest\
+          \ route receives traffic after upgrade\u2014consolidate to one L4 route\
+          \ per listener.", 'Action required in v3.4.3 for ALB Gateway users: HTTP/GRPC
+          Routes with multiple hostnames now create one ALB rule per hostname, which
+          can increase rule consumption and potentially hit ALB rule limits; review
+          your rule counts/limits.']
+    chart_version: 3.4.3
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.3']
   - version: 3.4.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -10803,6 +10810,7 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
+    chart_version: 1.22.4
   - version: 1.22.1
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -12479,19 +12487,51 @@ addons:
   helm_values: debug.verbose=flow
   eolApiSlug: cilium
   versions:
-  - version: 1.19.6
+  - version: 1.20.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Gateway API: support configuring Gateway access logs via `spec.telemetry.accessLogs`
-          in `CiliumGatewayClassConfig`.', 'Datapath L2 responder: uses L3 sockets
-          for solicited-node multicast signaling, improving IPv6 neighbor discovery
-          behavior in some environments.']
-      breaking_changes: []
-    chart_version: 1.19.6
+      features: ['Gateway API updates: moves to Gateway API v1.6.1 with new/expanded
+          capabilities including ListenerSets (delegated listeners), BackendTLSPolicy,
+          TCPRoute/UDPRoute, ExternalAuth filter, CORS and additional redirect codes,
+          and configurable gRPC-web translation.', Extensible datapath via datapath
+          plugins for cloud providers to extend/instrument eBPF datapath without forking
+          Cilium., '`bpf.datapathMode=auto` can automatically select netkit on supported
+          kernels and fall back to veth (default remains veth).', 'Egress Gateway
+          improvements: explicit IPv6 egress IP support and IPv4 traffic honors policy-selected
+          interface like IPv6.', 'BGP improvements: new Hive shell commands and clearer
+          peer output; control plane updates to GoBGP v4.6.1 with route-policy reconciliation
+          optimizations.', 'IPAM enhancements: AWS ENI IPAM supports IPv6 prefixes
+          (beta); migration path from cluster-pool IPAM to multi-pool IPAM without
+          rebuild.', NodePort can dynamically select preferred source address using
+          kernel FIB on supported kernels., New `preferIpv6` option applies consistently
+          to health probes and Hubble peer communication., 'Service/ClusterMesh features:
+          topology-aware traffic distribution hints (PreferSameZone/PreferSameNode),
+          weighted Maglev backends via EndpointSlice annotation, more VXLAN per-Service
+          LB mode options, and stable MCS API support.', 'Security/encryption: improved
+          ztunnel identity management (internal CA or SPIRE) with new metrics; support
+          for Kubernetes ClusterNetworkPolicy (KCNP); ICMPv6 unreachable responses
+          on IPv6 policy denies; new `cluster-mesh` policy entity; AWS VPC group policies
+          transformed into CiliumCIDRGroup; per-pod source IP verification control
+          via annotation guarded by namespace opt-in.', 'Day-2/observability: configuration
+          drift metric (unapplied ConfigMap settings), startup time/resource-sync
+          metrics, Hubble correlates policy responsible for audit verdicts, standalone
+          DNS proxy metrics exported through Cilium.', 'Performance/scale: aggregated
+          load-balancer state for shared backends, more efficient Envoy updates via
+          ADS/Delta xDS, optimized BPF policy map encoding, and significantly smaller
+          cilium-cni binary.', 'Updated foundations: Kubernetes v1.36, Envoy v1.37.x,
+          Gateway API v1.6.1, MCS API v0.5.2, Ubuntu 26.04 base images, and default
+          CNI config version from 0.3.1 to 1.0.0.']
+      breaking_changes: ['Upgrade may require manual action if you use legacy Mutual
+          Authentication, Envoy Go extensions, Kafka-aware policies, `cilium.io/v2alpha1`
+          CiliumNodeConfig API, the libnetwork integration, or a custom CNI configuration
+          (see Cilium 1.20 upgrade guide).', 'Default CNI configuration version changes
+          from 0.3.1 to 1.0.0, which can affect clusters using custom CNI config management
+          or validating CNI config schema/format.']
+    chart_version: 1.20.0
     images: []
   - version: 1.19.4
     kube: ['1.36', '1.35', '1.34']
@@ -28766,35 +28806,44 @@ addons:
   helm_repository_url: oci://ghcr.io/kserve/charts/kserve
   chart_name: kserve
   versions:
-  - version: 0.18.1
+  - version: 0.19.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
-      chart_updates: ["Release notes provided are for **v0.18.0**, not v0.18.1; you\
-          \ still need the v0.18.1 changelog (and helm chart changelog) to accurately\
-          \ summarize the 0.18.0 \u2192 0.18.1 upgrade.", 'v0.18.0 includes helm packaging/chart
-          restructuring: chart renamed to **kserve-resources** and multiple charts
-          are published (CRDs, resources, runtime-configs, llmisvc/localmodel variants).
-          Ensure your upgrade plan accounts for the chart split/rename and installs
-          the correct artifacts in the right order (CRDs before controllers/resources).']
-      features: [Namespace-scoped ModelCache support (download jobs can run in a jobNamespace).,
-        Added CSV and Parquet marshallers., CloudEvents logging enhancements (log
-          occurrence and record time)., OpenAI Responses API support via a new /v1/responses
-          HTTPRoute., Added output offset_mapping for HuggingFace token classification.,
-        'LLMInferenceService: autoscaling improvements (KEDA/HPA integration, LWS
-          target for multi-node workloads), config updates including TLS flag and
-          extra_headers support, and multiple dependency upgrades (LLM-D, vLLM, WVA).',
-        'Ingress/Gateway: added DisableHTTPRouteTimeout flag for GKE Gateway and enhanced
-          Gateway refs (SectionName support).']
-      breaking_changes: ['Potentially breaking packaging change: helm chart rename
-          to **kserve-resources** and publication of multiple chart artifacts may
-          require changing the chart name/reference in your helm commands and CI pipelines.',
-        'LLMInferenceService scaling fields changed: default for MinReplicas and MaxReplicas
-          made a required int32; manifests/values depending on previous behavior may
-          fail validation.']
-    chart_version: v0.18.1
+      helm_changes: "- **Image pull policy default**: the chart now aligns `imagePullPolicy`\
+        \ defaults with the kustomize base (PR #5459). If you previously relied on\
+        \ the old default, explicitly set `*.imagePullPolicy` in your values.\n- **CRD\
+        \ safety on upgrade**: Helm upgrade behavior was adjusted to **prevent deletion\
+        \ of the `ClusterStorageContainer` CRD** (PR #5539). Ensure you\u2019re using\
+        \ the updated CRD chart/templates from v0.19.0.\n- **Minimal install behavior**:\
+        \ **conversion webhooks are enabled in minimal installs** (PR #5416). Minimal/CRD-only\
+        \ installs may now require webhook-related prerequisites (cert-manager/webhook\
+        \ serving) depending on your cluster setup.\n- **LLMISvc GIE CRDs optional**:\
+        \ chart adds a knob to **make LLMISvc GIE CRD creation optional** (PR #5544).\
+        \ If you manage these CRDs separately, disable creation in the chart.\n- **LLMISvc\
+        \ CRD packaging fix**: v0.19.0 removes **incorrect CRDs included in `llmisvc-crd`**\
+        \ (PR #5428). Review your CRD installation path to avoid drift between previously-installed\
+        \ CRDs and the corrected set.\n"
+      chart_updates: [LLMISvc CRD chart content corrected (removed incorrect CRDs).,
+        Helm upgrade guard added to avoid deleting ClusterStorageContainer CRD., Defaults
+          updated to match kustomize for imagePullPolicy., Minimal (CRD-minimal) installs
+          now enable conversion webhooks., LLMISvc chart gains option to skip creating
+          GIE CRDs.]
+      features: [Standard mode InferenceService can now support dual-protocol routing
+          (REST and gRPC) for the same service., LocalModelCache support was added
+          for LLMInferenceService to improve reuse/efficiency of locally cached models.,
+        LLMISvc now propagates spec labels/annotations to the Service and can emit
+          Kubernetes Events for readiness transitions., 'LLMISvc routing/status observability
+          improved (model-name based routing, topology/workload refs reporting, applied-configs
+          visibility).', 'Autoscaling support and testing for LLMISvc improved, including
+          better surfacing of HPA/KEDA scaling status in conditions.']
+      breaking_changes: ['Minimal installs now enable conversion webhooks, which can
+          change requirements/behavior in clusters that previously ran minimal CRDs
+          without webhooks.', 'LLMISvc CRD packaging was corrected; if you previously
+          depended on the erroneous CRDs bundled in `llmisvc-crd`, your upgrade may
+          remove/stop managing them and you must install any needed CRDs explicitly.']
+    chart_version: v0.19.0
     images: []
   - version: 0.18.0
     kube: ['1.35', '1.34', '1.33', '1.32']
