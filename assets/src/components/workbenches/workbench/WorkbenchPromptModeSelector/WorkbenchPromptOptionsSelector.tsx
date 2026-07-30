@@ -277,36 +277,60 @@ export function WorkbenchPromptOptionPills({
   onChange: (value: WorkbenchJobModesAttributes | null) => void
 }) {
   const budgetLabel = formatBudgetLimitLabel(value?.budget)
-  const modeLabel = value?.plan
-    ? 'Read'
-    : value?.coding != null &&
-        (!!value.kubernetes?.update || !!value.kubernetes?.delete)
-      ? 'Coding + Kubernetes'
-      : value?.coding != null
-        ? 'Coding'
-        : !!value?.kubernetes?.update || !!value?.kubernetes?.delete
-          ? 'Kubernetes'
-          : null
+  const showRead = !!value?.plan
+  const showCoding = !showRead && value?.coding != null
+  const showKubernetes =
+    !showRead && (!!value?.kubernetes?.update || !!value?.kubernetes?.delete)
 
   return (
     <>
-      {modeLabel && (
+      {showRead && (
         <SelectedOptionPill
-          label={modeLabel}
-          icon={
-            value?.plan ? (
-              <ListIcon size={12} />
-            ) : value?.coding != null ? (
-              <DiscoverIcon size={12} />
-            ) : (
-              <KubernetesIcon size={12} />
-            )
-          }
+          label="Read"
+          icon={<ListIcon size={12} />}
           onClear={() =>
             onChange({
               ...value,
               plan: undefined,
+            })
+          }
+        />
+      )}
+      {showCoding && (
+        <SelectedOptionPill
+          label="Coding"
+          icon={<DiscoverIcon size={12} />}
+          optionIcons={
+            <>
+              {value?.coding?.approval && (
+                <WarningShieldIcon
+                  size={12}
+                  color="icon-light"
+                />
+              )}
+              {value?.coding?.babysit && (
+                <ContainerRuntimeIcon
+                  size={12}
+                  color="icon-light"
+                />
+              )}
+            </>
+          }
+          onClear={() =>
+            onChange({
+              ...value,
               coding: null,
+            })
+          }
+        />
+      )}
+      {showKubernetes && (
+        <SelectedOptionPill
+          label="Kubernetes"
+          icon={<KubernetesIcon size={12} />}
+          onClear={() =>
+            onChange({
+              ...value,
               kubernetes: { update: false, delete: false },
             })
           }
@@ -560,10 +584,12 @@ function SidePanelContainer({ children }: { children: ReactNode }) {
 function SelectedOptionPill({
   label,
   icon,
+  optionIcons,
   onClear,
 }: {
   label: string
   icon?: ReactNode
+  optionIcons?: ReactNode
   onClear: () => void
 }) {
   return (
@@ -573,6 +599,7 @@ function SelectedOptionPill({
     >
       {icon}
       <span>{label}</span>
+      {optionIcons}
       <span
         role="button"
         tabIndex={0}
