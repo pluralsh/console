@@ -66,20 +66,29 @@ function CollapsedLinesDecoration({ count }: { count: number }) {
 
 export function AgentRunPatchView({ patch }: { patch: string }) {
   const theme = useTheme()
-  const { file, tokens } = useMemo(() => {
-    const parsedFile = parseDiff(patch)[0]
+  const { file, tokens, parseFailed } = useMemo(() => {
+    try {
+      const parsedFile = parseDiff(patch)[0]
 
-    if (!parsedFile?.hunks?.length) {
-      return { file: parsedFile, tokens: null }
-    }
+      if (!parsedFile?.hunks?.length) {
+        return { file: parsedFile, tokens: null, parseFailed: false }
+      }
 
-    return {
-      file: parsedFile,
-      tokens: tokenize(parsedFile.hunks, {
-        enhancers: [markEdits(parsedFile.hunks, { type: 'line' })],
-      }),
+      return {
+        file: parsedFile,
+        tokens: tokenize(parsedFile.hunks, {
+          enhancers: [markEdits(parsedFile.hunks, { type: 'line' })],
+        }),
+        parseFailed: false,
+      }
+    } catch {
+      return { file: undefined, tokens: null, parseFailed: true }
     }
   }, [patch])
+
+  if (parseFailed) {
+    return <PatchRawSC>{patch}</PatchRawSC>
+  }
 
   if (!file?.hunks?.length || !tokens) {
     return (
@@ -117,6 +126,17 @@ export function AgentRunPatchView({ patch }: { patch: string }) {
 
 const PatchEmptySC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
+}))
+
+const PatchRawSC = styled.pre(({ theme }) => ({
+  margin: 0,
+  padding: theme.spacing.medium,
+  fontFamily: '"Roboto Mono", monospace',
+  fontSize: 14,
+  lineHeight: '22px',
+  color: theme.colors['text-light'],
+  whiteSpace: 'pre-wrap',
+  wordBreak: 'break-word',
 }))
 
 const PatchViewSC = styled.div<{

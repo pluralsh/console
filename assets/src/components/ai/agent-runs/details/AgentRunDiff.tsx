@@ -102,13 +102,18 @@ function splitPatchFiles(content: string): DiffFile[] {
       }
     }
 
-    const parsed = parsePatch(patch)
-    const file = parsed[0]
+    let resolvedPath = path
+    try {
+      const file = parsePatch(patch)[0]
+      if (file) {
+        resolvedPath = patchFilePath(file.oldFileName, file.newFileName, index)
+      }
+    } catch {
+      // Malformed hunks still show via header path + raw patch content.
+    }
 
     return {
-      path: file
-        ? patchFilePath(file.oldFileName, file.newFileName, index)
-        : path,
+      path: resolvedPath,
       patch,
       ...countChangedLines(patch),
     }
