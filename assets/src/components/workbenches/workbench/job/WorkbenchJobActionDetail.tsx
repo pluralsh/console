@@ -22,6 +22,7 @@ import {
   getActionIcon,
   getActionInputJson,
   getActionResultJson,
+  getActionResultLanguage,
   getActionSubtitle,
   getActionTitle,
   WORKBENCH_JOB_ACTION_REFETCH_QUERIES,
@@ -60,6 +61,7 @@ export function WorkbenchJobActionDetail({
     activity.status === WorkbenchJobActivityStatus.Cancelled ||
     activity.status === WorkbenchJobActivityStatus.Rejected
   const resultJson = isDenied ? '' : getActionResultJson(activity)
+  const resultLanguage = getActionResultLanguage(activity)
 
   const [approve, { loading: approving }] =
     useApproveWorkbenchJobActivityMutation({
@@ -155,7 +157,7 @@ export function WorkbenchJobActionDetail({
             >
               <CaptionP $color="text-xlight">RESULT</CaptionP>
               <Code
-                language="json"
+                language={resultLanguage}
                 showHeader={false}
                 css={
                   activity.status === WorkbenchJobActivityStatus.Failed

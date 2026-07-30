@@ -23,6 +23,7 @@ import {
   getKubeActionSubtitle,
   getKubeActionTitle,
   getKubeActionVariant,
+  toKubeYaml,
 } from './workbenchJobKubeActionUtils'
 
 export type WorkbenchJobActionSectionKey =
@@ -328,7 +329,22 @@ export function getActionResultJson(
   }
   const output = activity.result?.output
   if (output == null || isPendingApprovalOutput(String(output))) return ''
+  if (activity.type === WorkbenchJobActivityType.Kubernetes) {
+    return toKubeYaml(output)
+  }
   return formatActionJson(output)
+}
+
+export function getActionResultLanguage(
+  activity: WorkbenchJobActionFragment
+): 'json' | 'yaml' {
+  if (
+    activity.type === WorkbenchJobActivityType.Kubernetes &&
+    !activity.result?.error?.trim()
+  ) {
+    return 'yaml'
+  }
+  return 'json'
 }
 
 export function mapActionNodes(

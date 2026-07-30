@@ -26,6 +26,7 @@ import {
   getActionIcon,
   getActionInputJson,
   getActionResultJson,
+  getActionResultLanguage,
   getActionStatusBorderColor,
   getActionSubtitle,
   getActionTitle,
@@ -65,6 +66,7 @@ export function WorkbenchJobInlineActionCard({
     activity.status === WorkbenchJobActivityStatus.Cancelled ||
     activity.status === WorkbenchJobActivityStatus.Rejected
   const resultJson = isDenied ? '' : getActionResultJson(activity)
+  const resultLanguage = getActionResultLanguage(activity)
   const icon = getActionIcon(activity)
 
   const [approve, { loading: approving }] =
@@ -156,7 +158,7 @@ export function WorkbenchJobInlineActionCard({
                 <ActionData>
                   <CaptionP $color="text-xlight">RESULT</CaptionP>
                   <Code
-                    language="json"
+                    language={resultLanguage}
                     showHeader={false}
                     css={
                       activity.status === WorkbenchJobActivityStatus.Failed
