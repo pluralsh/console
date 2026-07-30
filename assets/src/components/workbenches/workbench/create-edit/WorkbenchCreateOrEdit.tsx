@@ -23,7 +23,6 @@ import {
   WorkbenchSkillAttributes,
   WorkbenchSkillSubagent,
 } from 'generated/graphql'
-import { cloneDeep } from 'lodash'
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -445,35 +444,42 @@ const validateForm = (formState: WorkbenchFormState) =>
   )
 
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
-  const sanitizedState = cloneDeep(deepOmitFalsy(state))
-  const { name, readBindings: r, writeBindings: w, ...rest } = sanitizedState
-
-  // Keep explicit empty list so "delete all skills" is persisted.
-  rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
-
-  // Keep explicit mode values so disabling an existing default persists.
-  if (state.modes) {
-    rest.modes ??= {}
-    rest.modes.plan = state.modes.plan ?? false
-    rest.modes.verification = state.modes.verification ?? false
-    rest.modes.coding = state.modes.coding ?? null
-    rest.modes.budget = state.modes.budget ?? null
-    rest.modes.kubernetes = state.modes.kubernetes
-      ? {
-          ...rest.modes.kubernetes,
-          update: state.modes.kubernetes.update ?? false,
-          delete: state.modes.kubernetes.delete ?? false,
-          requireNamespaces: state.modes.kubernetes.requireNamespaces ?? [],
-          excludeNamespaces: state.modes.kubernetes.excludeNamespaces ?? [],
-        }
-      : null
-  }
+  const { name, readBindings, writeBindings, modes, workbenchSkills, ...rest } =
+    state
 
   return {
+    ...deepOmitFalsy(rest),
     name: name ?? '',
-    ...(r && { readBindings: r.map(bindingToBindingAttributes) }),
-    ...(w && { writeBindings: w.map(bindingToBindingAttributes) }),
-    ...rest,
+    // Keep explicit empty list so "delete all skills" is persisted.
+    workbenchSkills: (workbenchSkills ?? []).filter(isNonNullable),
+    // Keep explicit mode values so disabling an existing default persists.
+    ...(modes ? { modes: modesToAttributes(modes) } : {}),
+    ...(readBindings?.length && {
+      readBindings: readBindings.map(bindingToBindingAttributes),
+    }),
+    ...(writeBindings?.length && {
+      writeBindings: writeBindings.map(bindingToBindingAttributes),
+    }),
+  }
+}
+
+function modesToAttributes(
+  modes: NonNullable<WorkbenchFormState['modes']>
+): NonNullable<WorkbenchAttributes['modes']> {
+  return {
+    plan: modes.plan ?? false,
+    verification: modes.verification ?? false,
+    coding: modes.coding ?? null,
+    budget: modes.budget ?? null,
+    ...(modes.model && { model: modes.model }),
+    kubernetes: modes.kubernetes
+      ? {
+          update: modes.kubernetes.update ?? false,
+          delete: modes.kubernetes.delete ?? false,
+          requireNamespaces: modes.kubernetes.requireNamespaces ?? [],
+          excludeNamespaces: modes.kubernetes.excludeNamespaces ?? [],
+        }
+      : null,
   }
 }
 
