@@ -1,15 +1,11 @@
 import {
   Button,
-  Chip,
   Flex,
   IconFrame,
   KubernetesIcon,
 } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText'
-import {
-  WorkbenchJobActionFragment,
-  WorkbenchJobActivityType,
-} from 'generated/graphql'
+import { WorkbenchJobActionFragment } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import {
   getActionDetailButtonLabel,
@@ -18,7 +14,7 @@ import {
   getActionSubtitle,
   getActionTitle,
 } from './workbenchJobActionsUtils'
-import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
+import { WorkbenchJobKubeActionChips } from './WorkbenchJobKubeUpdateDiff'
 
 export function WorkbenchJobActionCard({
   activity,
@@ -29,10 +25,6 @@ export function WorkbenchJobActionCard({
 }) {
   const theme = useTheme()
   const icon = getActionIcon(activity)
-  const kubeVariant =
-    activity.type === WorkbenchJobActivityType.Kubernetes
-      ? getKubeActionVariant(activity.result?.kubeRequest?.method)
-      : null
 
   return (
     <CardSC $status={activity.status}>
@@ -62,33 +54,10 @@ export function WorkbenchJobActionCard({
           css={{ flex: 1, minWidth: 0 }}
         />
       </Flex>
-      {kubeVariant === 'create' && (
-        <Chip
-          size="small"
-          severity="success"
-          css={{ flexShrink: 0 }}
-        >
-          Create
-        </Chip>
-      )}
-      {kubeVariant === 'update' && (
-        <Chip
-          size="small"
-          severity="info"
-          css={{ flexShrink: 0 }}
-        >
-          Update
-        </Chip>
-      )}
-      {kubeVariant === 'delete' && (
-        <Chip
-          size="small"
-          severity="danger"
-          css={{ flexShrink: 0 }}
-        >
-          Delete
-        </Chip>
-      )}
+      <WorkbenchJobKubeActionChips
+        type={activity.type}
+        method={activity.result?.kubeRequest?.method}
+      />
       <Button
         small
         secondary

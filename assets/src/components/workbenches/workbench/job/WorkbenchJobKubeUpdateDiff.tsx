@@ -144,14 +144,13 @@ export function WorkbenchJobKubeActionChips({
 }: {
   type: Nullable<WorkbenchJobActivityType>
   method: string | null | undefined
-  statusChip: ReactNode
+  statusChip?: ReactNode
 }) {
   if (type !== WorkbenchJobActivityType.Kubernetes) {
     return <>{statusChip}</>
   }
 
-  const variant = getKubeActionVariant(method)
-  const chip = KUBE_VARIANT_CHIPS[variant]
+  const chip = KUBE_VARIANT_CHIPS[getKubeActionVariant(method)]
 
   return (
     <Flex
