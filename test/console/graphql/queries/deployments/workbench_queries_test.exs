@@ -707,6 +707,25 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == to_string(job.status) |> String.upcase()
     end
 
+    test "it returns the UI URL for a workbench job" do
+      job = insert(:workbench_job)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} =
+        run_query(
+          """
+            query WorkbenchJob($id: ID!) {
+              workbenchJob(id: $id) {
+                url
+              }
+            }
+          """,
+          %{"id" => job.id},
+          %{current_user: admin_user()}
+        )
+
+      assert URI.parse(found["url"]).path == "/workbenches/#{job.workbench_id}/jobs/#{job.id}"
+    end
+
     test "it can sideload chatbotMessage on a workbench job" do
       job = insert(:workbench_job)
       msg = insert(:chatbot_message, workbench_job: job)

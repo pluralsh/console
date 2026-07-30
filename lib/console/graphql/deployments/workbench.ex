@@ -528,7 +528,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
-    field :url,          non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/ai/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
+    field :url,          non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
     field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
