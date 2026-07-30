@@ -7,7 +7,7 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { WorkbenchJobActivityStatus } from 'generated/graphql'
-import { ComponentProps } from 'react'
+import { ComponentProps, ReactNode } from 'react'
 
 const chipCss = {
   flexShrink: 0,
@@ -15,77 +15,57 @@ const chipCss = {
   '& .children': { whiteSpace: 'nowrap' },
 } as const satisfies ComponentProps<typeof Chip>['css']
 
+const STATUS_CHIPS: Partial<
+  Record<
+    WorkbenchJobActivityStatus,
+    { label: string; icon?: ReactNode; iconColor?: string }
+  >
+> = {
+  [WorkbenchJobActivityStatus.NeedsApproval]: {
+    label: 'Pending approval',
+    icon: <WarningIcon />,
+    iconColor: 'icon-warning',
+  },
+  [WorkbenchJobActivityStatus.Pending]: {
+    label: 'Pending',
+    icon: <StatusIpIcon />,
+    iconColor: 'icon-light',
+  },
+  [WorkbenchJobActivityStatus.Running]: {
+    label: 'Running',
+    icon: <SpinnerAlt />,
+  },
+  [WorkbenchJobActivityStatus.Failed]: {
+    label: 'Failed',
+    icon: <FailedFilledIcon />,
+    iconColor: 'icon-danger',
+  },
+  [WorkbenchJobActivityStatus.Successful]: {
+    label: 'Succeeded',
+    icon: <StatusOkIcon />,
+    iconColor: 'icon-success',
+  },
+  [WorkbenchJobActivityStatus.Cancelled]: { label: 'Denied' },
+  [WorkbenchJobActivityStatus.Rejected]: { label: 'Denied' },
+}
+
 export function WorkbenchJobActionStatusChip({
   status,
 }: {
   status: Nullable<WorkbenchJobActivityStatus>
 }) {
-  switch (status) {
-    case WorkbenchJobActivityStatus.NeedsApproval:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-warning"
-          icon={<WarningIcon />}
-          css={chipCss}
-        >
-          Pending approval
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Pending:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-light"
-          icon={<StatusIpIcon />}
-          css={chipCss}
-        >
-          Pending
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Running:
-      return (
-        <Chip
-          fillLevel={2}
-          icon={<SpinnerAlt />}
-          css={chipCss}
-        >
-          Running
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Failed:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-danger"
-          icon={<FailedFilledIcon />}
-          css={chipCss}
-        >
-          Failed
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Successful:
-      return (
-        <Chip
-          fillLevel={2}
-          iconColor="icon-success"
-          icon={<StatusOkIcon />}
-          css={chipCss}
-        >
-          Succeeded
-        </Chip>
-      )
-    case WorkbenchJobActivityStatus.Cancelled:
-    case WorkbenchJobActivityStatus.Rejected:
-      return (
-        <Chip
-          fillLevel={2}
-          css={chipCss}
-        >
-          Denied
-        </Chip>
-      )
-    default:
-      return null
-  }
+  if (!status) return null
+  const chip = STATUS_CHIPS[status]
+  if (!chip) return null
+
+  return (
+    <Chip
+      fillLevel={2}
+      icon={chip.icon}
+      iconColor={chip.iconColor}
+      css={chipCss}
+    >
+      {chip.label}
+    </Chip>
+  )
 }
