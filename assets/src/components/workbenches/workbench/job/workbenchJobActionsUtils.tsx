@@ -338,13 +338,10 @@ export function getActionResultJson(
 export function getActionResultLanguage(
   activity: WorkbenchJobActionFragment
 ): 'json' | 'yaml' {
-  if (
-    activity.type === WorkbenchJobActivityType.Kubernetes &&
+  return activity.type === WorkbenchJobActivityType.Kubernetes &&
     !activity.result?.error?.trim()
-  ) {
-    return 'yaml'
-  }
-  return 'json'
+    ? 'yaml'
+    : 'json'
 }
 
 export function mapActionNodes(
