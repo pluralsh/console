@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :model,        :workbench_job_model_attributes, description: "model override for this job"
     field :coding,       :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
     field :budget,       :workbench_job_budget_attributes, description: "budget limits for this job"
+    field :kubernetes,   :workbench_job_kubernetes_modes_attributes, description: "kubernetes action options for this job"
   end
 
   input_object :workbench_job_model_attributes do
@@ -46,6 +47,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_budget_attributes do
     field :cost,   :float, description: "maximum cost budget for this job"
     field :tokens, :integer, description: "maximum token budget for this job"
+  end
+
+  input_object :workbench_job_kubernetes_modes_attributes do
+    field :update, :boolean, description: "whether kubernetes update actions are enabled"
+    field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
+    field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
 
   input_object :workbench_job_update_attributes do
@@ -203,7 +211,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :bitbucket,            :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
     field :lambda,               :workbench_tool_lambda_connection_attributes, description: "aws lambda function configuration"
     field :cloud_run,            :workbench_tool_cloud_run_connection_attributes, description: "google cloud run service configuration"
-    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "google cloud function configuration"
+    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "azure function configuration"
     field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes, description: "bitbucket data center connection (scm)"
     field :azure_devops,         :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
     field :docker,               :workbench_tool_docker_connection_attributes, description: "docker/OCI registry connection"
@@ -405,7 +413,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_azure_function_connection_attributes do
-    field :identifier,   non_null(:string), description: "Cloud Function identifier"
+    field :identifier,   non_null(:string), description: "Azure Function identifier"
     field :description,  non_null(:string), description: "description of the function exposed to the agent"
     field :input_schema, :json, description: "JSON schema for the tool input"
   end
@@ -540,6 +548,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
+      arg :status, :workbench_job_activity_status, description: "filter activities by status"
+      arg :type, :workbench_job_activity_type, description: "filter activities by type"
+
       resolve &Deployments.list_workbench_job_activities/3
     end
 
@@ -579,6 +590,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :model,        :workbench_job_model, description: "model override for this job"
     field :coding,       :workbench_job_coding_modes, description: "coding mode options for this job"
     field :budget,       :workbench_job_budget, description: "budget limits for this job"
+    field :kubernetes,   :workbench_job_kubernetes_modes, description: "kubernetes action options for this job"
   end
 
   object :workbench_job_model do
@@ -594,6 +606,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_budget do
     field :cost,   :float, description: "maximum cost budget for this job"
     field :tokens, :integer, description: "maximum token budget for this job"
+  end
+
+  object :workbench_job_kubernetes_modes do
+    field :update, :boolean, description: "whether kubernetes update actions are enabled"
+    field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
+    field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
 
   object :workbench_job_usage do
@@ -620,7 +639,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
-    field :user,         :user, resolve: dataloader(User), description: "the user who created this activity"
+    field :user,         :user, resolve: dataloader(User), description: "the user who created, approved, or denied this activity"
 
     timestamps()
   end
@@ -665,15 +684,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,    :string, description: "the function name to invoke"
     field :input,   :map, description: "input passed to the function"
     field :tool_id, :id, description: "the workbench tool id backing this function"
+    field :tool,    :workbench_tool, resolve: &Deployments.function_call_tool/3, description: "the workbench tool backing this function call"
   end
 
   object :workbench_job_activity_kube_request do
     field :handle,       :string, description: "the target cluster handle"
     field :method,       :string, description: "the Kubernetes API HTTP method"
     field :path,         :string, description: "the Kubernetes API request path"
-    field :body,         :string, description: "the Kubernetes API request body"
-    field :query_params, :map, description: "query parameters sent with the Kubernetes API request"
+    field :body,         :string,
+      description: "the Kubernetes API request body",
+      resolve: &Deployments.kube_request_body/3
+    field :query_params, :map,    description: "query parameters sent with the Kubernetes API request"
     field :content_type, :string, description: "the Kubernetes API request content type"
+
+    @desc "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
+    field :current, :map, resolve: &Deployments.kube_request_current/3
   end
 
   object :workbench_job_activity_job_update do
@@ -1040,7 +1065,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :lambda, :workbench_tool_lambda_connection, description: "aws lambda function configuration"
     field :cloud_run, :workbench_tool_cloud_run_connection, description: "google cloud run service configuration"
     field :azure_function, :workbench_tool_azure_function_connection,
-      description: "google cloud function configuration"
+      description: "azure function configuration"
     field :docker, :workbench_tool_docker_connection, description: "docker/OCI registry connection (no secrets)"
   end
 
@@ -1227,7 +1252,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_azure_function_connection do
-    field :identifier,   :string, description: "Cloud Function identifier"
+    field :identifier,   :string, description: "Azure Function identifier"
     field :description,  :string, description: "description of the function exposed to the agent"
     field :input_schema, :map, description: "JSON schema for the tool input"
   end
@@ -1374,6 +1399,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.workbench_job_activity/2
+    end
+
+    connection field :workbench_job_activities, node_type: :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :status, :workbench_job_activity_status, description: "filter activities by status"
+      arg :type, :workbench_job_activity_type, description: "filter activities by type"
+
+      resolve &Deployments.workbench_job_activities/2
     end
 
     connection field :workbench_alerts, node_type: :alert do

@@ -56,6 +56,7 @@ import {
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
+import { WorkbenchJobInlineActionCard } from './WorkbenchJobInlineActionCard'
 
 export function WorkbenchJobActivity({
   isOpen,
@@ -76,6 +77,12 @@ export function WorkbenchJobActivity({
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
   const isRejected = status === WorkbenchJobActivityStatus.Rejected
+
+  if (
+    type === WorkbenchJobActivityType.Function ||
+    type === WorkbenchJobActivityType.Kubernetes
+  )
+    return <WorkbenchJobInlineActionCard activity={activity} />
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
@@ -300,9 +307,16 @@ function WorkbenchJobMemo({
   const isRunning = isJobRunning(status)
   const isFailed = status === WorkbenchJobActivityStatus.Failed
   const isRejected = status === WorkbenchJobActivityStatus.Rejected
-  const content = textStream || result?.output || prompt || ''
+  const summary = textStream || result?.output || prompt || ''
+  const workingTheory =
+    result?.jobUpdate?.workingTheory?.trim() ||
+    result?.jobUpdate?.conclusion?.trim() ||
+    ''
+  // Prefer the longer working-theory/conclusion body over the short memo summary.
+  const fullText = workingTheory || summary
   const label =
-    content ||
+    summary ||
+    workingTheory ||
     result?.error ||
     (isRejected ? 'Rejected workbench notes update' : null) ||
     (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
@@ -334,7 +348,7 @@ function WorkbenchJobMemo({
           setFinishedAnimating(false)
         }}
         onAnimationEnd={() => setFinishedAnimating(true)}
-        header="Memo"
+        header={workingTheory ? 'Working theory' : 'Memo'}
         size="large"
       >
         {finishedAnimating ? (
@@ -348,7 +362,7 @@ function WorkbenchJobMemo({
                 css={{ wordBreak: 'break-word' }}
               />
             )}
-            {content && <SimplifiedMarkdown text={content} />}
+            {fullText && <SimplifiedMarkdown text={fullText} />}
           </Flex>
         ) : (
           <RectangleSkeleton

@@ -5,6 +5,7 @@ import {
   GaugeIcon,
   GraphIcon,
   IconFrame,
+  LightningIcon,
   PaperCheckIcon,
   PrIcon,
   SubTab,
@@ -44,6 +45,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { isJobRunning } from './WorkbenchJobActivity'
+import { WorkbenchJobActions } from './WorkbenchJobActions'
 import { WorkbenchJobCanvas } from './WorkbenchJobCanvas'
 import {
   PATCH_PR_URL,
@@ -55,10 +57,17 @@ import {
 } from './WorkbenchJobResult'
 import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
 import { WorkbenchJobUsage } from './WorkbenchJobUsage'
+import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
 
 const SIDE_PANEL_TYPE: SidePanel = 'workbench-job'
 type JobPanelTab =
-  'Result' | 'Dashboard' | 'Topology' | 'Pull requests' | 'Eval' | 'Usage'
+  | 'Result'
+  | 'Dashboard'
+  | 'Topology'
+  | 'Pull requests'
+  | 'Eval'
+  | 'Usage'
+  | 'Actions'
 
 export function WorkbenchJobPanelContent() {
   const { spacing } = useTheme()
@@ -82,6 +91,11 @@ export function WorkbenchJobPanelContent() {
     variables: { id: jobId },
     fetchPolicy: 'cache-first',
   })
+  const {
+    hasActions,
+    hasActionsAwaitingApproval,
+    isLoading: areActionsLoading,
+  } = useWorkbenchJobActionSummary(jobId)
   const job = data?.workbenchJob
   const isLoading = loading && !job
   const activities = useMemo(
@@ -142,8 +156,21 @@ export function WorkbenchJobPanelContent() {
   const hasDraftPrsAwaitingApproval = draftPrs.length > 0
 
   const tabs = useMemo(
-    () => getPanelTabs(job, hasDraftPrsAwaitingApproval, isLoading),
-    [hasDraftPrsAwaitingApproval, isLoading, job]
+    () =>
+      getPanelTabs(
+        job,
+        hasDraftPrsAwaitingApproval,
+        hasActions,
+        hasActionsAwaitingApproval,
+        isLoading
+      ),
+    [
+      hasActions,
+      hasActionsAwaitingApproval,
+      hasDraftPrsAwaitingApproval,
+      isLoading,
+      job,
+    ]
   )
 
   useEffect(() => {
@@ -153,8 +180,9 @@ export function WorkbenchJobPanelContent() {
   }, [selectedTab, tabs])
 
   useEffect(() => {
-    if (!isLoading && job && isEmpty(tabs)) setOpen(false)
-  }, [isLoading, job, setOpen, tabs])
+    if (isLoading || areActionsLoading) return
+    if (job && isEmpty(tabs)) setOpen(false)
+  }, [areActionsLoading, isLoading, job, setOpen, tabs])
 
   return (
     <SidePanelContent>
@@ -235,6 +263,9 @@ export function WorkbenchJobPanelContent() {
           {selectedTab === 'Usage' && job?.usage && (
             <WorkbenchJobUsage usage={job?.usage} />
           )}
+          {selectedTab === 'Actions' && job?.id && (
+            <WorkbenchJobActions jobId={job.id} />
+          )}
         </ContentInnerSC>
       </ContentWrapperSC>
     </SidePanelContent>
@@ -301,6 +332,8 @@ const PanelSubTabSC = styled(SubTab)(({ theme, active }) => ({
 const getPanelTabs = (
   job: Nullable<WorkbenchJobFragment>,
   hasDraftPrsAwaitingApproval: boolean,
+  hasActions: boolean,
+  hasActionsAwaitingApproval: boolean,
   isLoading: boolean
 ) =>
   [
@@ -328,6 +361,11 @@ const getPanelTabs = (
     job?.usage && {
       label: 'Usage',
       icon: <CostManagementIcon size={12} />,
+    },
+    hasActions && {
+      label: 'Actions',
+      icon: <LightningIcon size={12} />,
+      showDot: hasActionsAwaitingApproval,
     },
   ].filter(
     (

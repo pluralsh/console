@@ -2,6 +2,7 @@ import {
   WorkbenchJobFragment,
   WorkbenchJobResultFragment,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { isJobRunning } from './WorkbenchJobActivity'
 
 export function getWorkbenchJobTodos(
@@ -32,5 +33,20 @@ export function hasWorkbenchJobResultContent(
   return (
     !!getWorkbenchJobResultText(job) ||
     getWorkbenchJobTodos(job?.result).length > 0
+  )
+}
+
+export function hasWorkbenchJobPanelContent(
+  job: Nullable<WorkbenchJobFragment>,
+  hasActions = false
+) {
+  return (
+    hasWorkbenchJobResultContent(job) ||
+    !isEmpty(job?.result?.canvas) ||
+    !!job?.result?.topology ||
+    !isEmpty(job?.pullRequests) ||
+    !!job?.evalResult ||
+    !!job?.usage ||
+    hasActions
   )
 }

@@ -1,26 +1,36 @@
-import ReactDiffViewer, {
-  ReactDiffViewerProps,
-} from 'react-diff-viewer-continued'
-import { useTheme } from 'styled-components'
-import { Card, CardProps, WrapWithIf } from '@pluralsh/design-system'
-import chroma from 'chroma-js'
-import { merge } from 'lodash'
 import { useMemo } from 'react'
+import ReactDiffViewer, {
+  DiffMethod,
+  type ReactDiffViewerProps,
+} from 'react-diff-viewer-continued'
+import { merge } from 'lodash-es'
+import chroma from 'chroma-js'
+import { useTheme } from 'styled-components'
 
-const opacity = (color: string, opacity: number) => {
-  return chroma(color).alpha(opacity).hex()
+import Card, { type CardProps } from './Card'
+import WrapWithIf from './WrapWithIf'
+
+export { DiffMethod }
+export type { ReactDiffViewerProps }
+
+const opacity = (color: string, amount: number) =>
+  chroma(color).alpha(amount).hex()
+
+export type DiffViewerProps = Omit<
+  ReactDiffViewerProps,
+  'leftTitle' | 'rightTitle'
+> & {
+  asCard?: boolean
+  cardProps?: CardProps
 }
 
-export default function DiffViewer({
+export function DiffViewer({
   styles,
   asCard = true,
   cardProps,
   hideSummary = true,
   ...props
-}: Omit<ReactDiffViewerProps, 'leftTitle' | 'rightTitle'> & {
-  asCard?: boolean
-  cardProps?: CardProps
-}) {
+}: DiffViewerProps) {
   const theme = useTheme()
 
   const mergedStyles = useMemo(() => {
@@ -29,6 +39,7 @@ export default function DiffViewer({
       gutterBackground: 'transparent',
       codeFoldGutterBackground: 'transparent',
     }
+
     return merge(
       {
         content: {
@@ -84,6 +95,7 @@ export default function DiffViewer({
             flexDirection: 'column',
             maxHeight: '100%',
             overflow: 'auto',
+            ...cardProps?.css,
           }}
         />
       }
@@ -97,3 +109,5 @@ export default function DiffViewer({
     </WrapWithIf>
   )
 }
+
+export default DiffViewer

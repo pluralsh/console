@@ -123,11 +123,18 @@ defmodule Console.Schema.WorkbenchJobActivity do
     from(a in query, where: a.type == ^type)
   end
 
+  def for_user(query \\ __MODULE__, %User{} = user) do
+    from(a in query,
+      join: j in subquery(WorkbenchJob.for_user(user)),
+      on: j.id == a.workbench_job_id
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :inserted_at]) do
     from(a in query, order_by: ^order)
   end
 
-  @valid ~w(status type prompt workbench_job_id agent_run_id)a
+  @valid ~w(status type prompt workbench_job_id agent_run_id user_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

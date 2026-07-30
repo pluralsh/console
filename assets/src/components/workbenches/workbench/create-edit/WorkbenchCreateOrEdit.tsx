@@ -451,6 +451,18 @@ function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
   // Keep explicit empty list so "delete all skills" is persisted.
   rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
 
+  // Keep explicit namespace lists so clearing required/blacklisted namespaces persists.
+  if (state.modes?.kubernetes) {
+    rest.modes ??= {}
+    rest.modes.kubernetes = {
+      ...rest.modes.kubernetes,
+      update: state.modes.kubernetes.update ?? false,
+      delete: state.modes.kubernetes.delete ?? false,
+      requireNamespaces: state.modes.kubernetes.requireNamespaces ?? [],
+      excludeNamespaces: state.modes.kubernetes.excludeNamespaces ?? [],
+    }
+  }
+
   return {
     name: name ?? '',
     ...(r && { readBindings: r.map(bindingToBindingAttributes) }),
@@ -564,6 +576,18 @@ function workbenchModesToAttributes(
           budget: {
             cost: modes.budget.cost,
             tokens: modes.budget.tokens,
+          },
+        }
+      : {}),
+    ...(modes.kubernetes
+      ? {
+          kubernetes: {
+            update: modes.kubernetes.update,
+            delete: modes.kubernetes.delete,
+            requireNamespaces:
+              modes.kubernetes.requireNamespaces?.filter(isNonNullable) ?? [],
+            excludeNamespaces:
+              modes.kubernetes.excludeNamespaces?.filter(isNonNullable) ?? [],
           },
         }
       : {}),

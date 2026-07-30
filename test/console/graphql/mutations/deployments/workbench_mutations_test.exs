@@ -834,6 +834,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             id
             status
             result { output }
+            user { name }
           }
         }
       """, %{"id" => activity.id, "reason" => "not approved"}, %{current_user: user})
@@ -841,9 +842,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert updated["id"] == activity.id
       assert updated["status"] == "REJECTED"
       assert updated["result"]["output"] == "not approved"
+      assert updated["user"]["name"] == user.name
 
       reloaded = refetch(activity)
       assert reloaded.status == :rejected
+      assert reloaded.user_id == user.id
       assert reloaded.result.output == "not approved"
     end
   end

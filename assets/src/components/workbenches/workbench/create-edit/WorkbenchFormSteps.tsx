@@ -1,4 +1,5 @@
 import {
+  AddIcon,
   ArrowTopRightIcon,
   Button,
   Card,
@@ -6,7 +7,9 @@ import {
   CardTabs,
   Checkbox,
   Chip,
+  ChipList,
   CloseIcon,
+  ComboBox,
   Divider,
   Flex,
   FormField,
@@ -14,6 +17,7 @@ import {
   InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
+  ListBoxFooterPlus,
   ListBoxItem,
   Radio,
   RadioGroup,
@@ -25,14 +29,18 @@ import {
 import {
   AgentRunMode,
   PolicyBindingFragment,
+  useAgentRuntimeQuery,
   useAgentRuntimeReposQuery,
+  useClusterNamespacesQuery,
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
   useWorkbenchToolsQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
+import Fuse from 'fuse.js'
 import {
   Dispatch,
+  KeyboardEvent,
   ReactNode,
   SetStateAction,
   useCallback,
@@ -747,6 +755,252 @@ export function WorkbenchCodingAgentStep({
   )
 }
 
+export function WorkbenchConfigureActionsStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const update = createFormUpdater(setFormState)
+  const kubernetes = formState.modes?.kubernetes
+  const allowUpdates = kubernetes?.update ?? false
+  const allowDeletes = kubernetes?.delete ?? false
+  const requireNamespaces = (kubernetes?.requireNamespaces ?? []).filter(
+    (ns): ns is string => !!ns
+  )
+  const excludeNamespaces = (kubernetes?.excludeNamespaces ?? []).filter(
+    (ns): ns is string => !!ns
+  )
+
+  const { data: runtimeData } = useAgentRuntimeQuery({
+    variables: { id: formState.agentRuntimeId ?? '' },
+    skip: !formState.agentRuntimeId,
+  })
+  const clusterId = runtimeData?.agentRuntime?.cluster?.id
+  const { data: namespacesData, loading: namespacesLoading } =
+    useClusterNamespacesQuery({
+      variables: { clusterId },
+      skip: !clusterId,
+    })
+  const namespaceOptions = useMemo(
+    () =>
+      (namespacesData?.namespaces ?? [])
+        .map((ns) => ns?.metadata?.name)
+        .filter(isNonNullable)
+        .sort((a, b) => a.localeCompare(b)),
+    [namespacesData?.namespaces]
+  )
+
+  const setKubernetes = (
+    patch: Partial<{
+      update: boolean
+      delete: boolean
+      requireNamespaces: string[]
+      excludeNamespaces: string[]
+    }>
+  ) =>
+    update((d) => {
+      d.modes ??= {}
+      d.modes.kubernetes = {
+        update: allowUpdates,
+        delete: allowDeletes,
+        requireNamespaces,
+        excludeNamespaces,
+        ...d.modes.kubernetes,
+        ...patch,
+      }
+    })
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      <FormField
+        label="Enable Kubernetes actions"
+        hint="Reads are always permitted. Every mutation you enable below still requires your approval before it runs."
+      >
+        <Flex
+          gap="xxxxlarge"
+          wrap="wrap"
+        >
+          <Checkbox
+            small
+            checked={allowUpdates}
+            onChange={(e) => setKubernetes({ update: e.target.checked })}
+          >
+            Allow updates
+          </Checkbox>
+          <Checkbox
+            small
+            checked={allowDeletes}
+            onChange={(e) => setKubernetes({ delete: e.target.checked })}
+          >
+            Allow deletes
+          </Checkbox>
+        </Flex>
+      </FormField>
+
+      <NamespaceListField
+        label="Required namespaces"
+        hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist)."
+        values={requireNamespaces}
+        namespaces={namespaceOptions}
+        loading={namespacesLoading}
+        onChange={(next) => setKubernetes({ requireNamespaces: next })}
+      />
+
+      <NamespaceListField
+        label="Blacklisted namespaces"
+        hint="The agent can never act in these namespaces, even if they're in the required set."
+        values={excludeNamespaces}
+        namespaces={namespaceOptions}
+        loading={namespacesLoading}
+        severity="danger"
+        onChange={(next) => setKubernetes({ excludeNamespaces: next })}
+      />
+    </Flex>
+  )
+}
+
+function NamespaceListField({
+  label,
+  hint,
+  values,
+  namespaces,
+  loading,
+  severity,
+  onChange,
+}: {
+  label: string
+  hint: string
+  values: string[]
+  namespaces: string[]
+  loading?: boolean
+  severity?: 'danger'
+  onChange: (next: string[]) => void
+}) {
+  const [draft, setDraft] = useState('')
+  const [isOpen, setIsOpen] = useState(false)
+  const trimmed = draft.trim()
+
+  const allOptions = useMemo(() => {
+    const merged = new Set([...namespaces, ...values])
+    return [...merged].sort((a, b) => a.localeCompare(b))
+  }, [namespaces, values])
+
+  const suggestions = useMemo(() => {
+    if (!trimmed) return allOptions
+    return new Fuse(allOptions, { threshold: 0.25 })
+      .search(trimmed)
+      .map(({ item }) => item)
+  }, [allOptions, trimmed])
+
+  const canAddCustom =
+    !!trimmed && !values.includes(trimmed) && !allOptions.includes(trimmed)
+
+  const toggleNamespace = (raw: string) => {
+    const value = raw.trim()
+    if (!value) return
+    onChange(
+      values.includes(value)
+        ? values.filter((ns) => ns !== value)
+        : [...values, value]
+    )
+    setDraft('')
+    setIsOpen(true)
+  }
+
+  const addCustomNamespace = (raw: string) => {
+    const value = raw.trim()
+    if (!value || values.includes(value)) {
+      setDraft('')
+      return
+    }
+    onChange([...values, value])
+    setDraft('')
+    setIsOpen(true)
+  }
+
+  return (
+    <FormField
+      label={label}
+      hint={hint}
+    >
+      <Flex
+        direction="column"
+        gap="xsmall"
+        width="100%"
+      >
+        <ComboBox
+          aria-label={label}
+          inputValue={draft}
+          onInputChange={setDraft}
+          selectedKey={null}
+          onSelectionChange={(key) => {
+            if (key) toggleNamespace(String(key))
+          }}
+          isOpen={isOpen}
+          onOpenChange={setIsOpen}
+          loading={loading}
+          allowsEmptyCollection={canAddCustom}
+          inputProps={{
+            placeholder: 'Search namespace name',
+            onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
+              if (e.key !== 'Enter' || !canAddCustom) return
+              e.preventDefault()
+              addCustomNamespace(trimmed)
+            },
+          }}
+          onFooterClick={
+            canAddCustom ? () => addCustomNamespace(trimmed) : undefined
+          }
+          dropdownFooter={
+            canAddCustom ? (
+              <ListBoxFooterPlus
+                leftContent={
+                  <AddIcon
+                    size={16}
+                    color="text-primary-accent"
+                  />
+                }
+              >
+                Use &quot;{trimmed}&quot;
+              </ListBoxFooterPlus>
+            ) : undefined
+          }
+        >
+          {suggestions.map((ns) => (
+            <ListBoxItem
+              key={ns}
+              label={ns}
+              textValue={ns}
+              leftContent={
+                <Checkbox
+                  small
+                  checked={values.includes(ns)}
+                  tabIndex={-1}
+                  css={{ paddingLeft: 0, pointerEvents: 'none' }}
+                />
+              }
+            />
+          ))}
+        </ComboBox>
+        {values.length > 0 && (
+          <ChipList
+            values={values}
+            limit={3}
+            size="small"
+            closeButton
+            severity={severity}
+            emptyState={null}
+            onClickCondition={() => true}
+            onClick={(value) => onChange(values.filter((ns) => ns !== value))}
+          />
+        )}
+      </Flex>
+    </FormField>
+  )
+}
+
 export function WorkbenchAccessPolicyStep({
   formState,
   setFormState,
@@ -1044,6 +1298,7 @@ export const WORKBENCH_STEP_LABELS = [
   'Workbench setup',
   'Skills configuration',
   'Coding agent',
+  'Configure actions',
   'Access policy',
   'Attach tools',
 ] as const
@@ -1056,6 +1311,7 @@ export const workbenchFormSteps: WorkbenchFormStep[] = [
   { label: 'Workbench setup', component: WorkbenchSetupStep },
   { label: 'Skills configuration', component: WorkbenchSkillsConfigStep },
   { label: 'Coding agent', component: WorkbenchCodingAgentStep },
+  { label: 'Configure actions', component: WorkbenchConfigureActionsStep },
   { label: 'Access policy', component: WorkbenchAccessPolicyStep },
   { label: 'Attach tools', component: WorkbenchAttachToolsStep },
 ]

@@ -21,6 +21,56 @@ defmodule Kube.Utils do
   end
   def raw_meta(_), do: nil
 
+  def sanitize_kube_resource(res) when is_map(res) do
+    res
+    |> Console.string_map()
+    |> then(fn
+      %{"metadata" => meta} = map when is_map(meta) ->
+        Map.put(
+          map,
+          "metadata",
+          Map.drop(meta, [
+            "managedFields",
+            "resourceVersion",
+            "uid",
+            "generation",
+            "creationTimestamp"
+          ])
+        )
+
+      map -> map
+    end)
+  end
+  def sanitize_kube_resource(res), do: res
+
+  def secret_path?(path) when is_binary(path),
+    do: Regex.match?(~r{/secrets(?:/|$)}, path)
+  def secret_path?(_), do: false
+
+  def redact_secret(%{"kind" => "Secret"} = res) do
+    Enum.reduce(["data", "stringData"], res, fn field, acc ->
+      case Map.fetch(acc, field) do
+        {:ok, data} -> Map.put(acc, field, redact_secret_data(data))
+        :error -> acc
+      end
+    end)
+  end
+  def redact_secret(res), do: res
+
+  # Merge-patch bodies often omit kind; still redact secret fields on /secrets paths.
+  def redact_secret(res, path) when is_map(res) and is_binary(path) do
+    case secret_path?(path) do
+      true -> redact_secret(Map.put_new(res, "kind", "Secret"))
+      false -> redact_secret(res)
+    end
+  end
+  def redact_secret(res, _), do: redact_secret(res)
+
+  defp redact_secret_data(data) when is_map(data),
+    do: Map.new(data, fn {k, _} -> {k, "*****"} end)
+
+  defp redact_secret_data(data), do: data
+
   def ns(%{"metadata" => meta}), do: meta["namespace"]
   def ns(%{metadata: %MetaV1.ObjectMeta{namespace: ns}}), do: ns
   def ns(%{namespace: ns}), do: ns

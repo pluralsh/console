@@ -45,9 +45,9 @@ const metadataExtractors: Record<WorkbenchToolType, MetadataExtractor> = {
   [WorkbenchToolType.AzureDevops]: extractAzureDevopsMetadata,
   [WorkbenchToolType.Docker]: extractDockerMetadata,
   [WorkbenchToolType.Cloud]: () => [],
-  [WorkbenchToolType.Lambda]: () => [],
-  [WorkbenchToolType.CloudRun]: () => [],
-  [WorkbenchToolType.AzureFunction]: () => [],
+  [WorkbenchToolType.Lambda]: extractLambdaMetadata,
+  [WorkbenchToolType.CloudRun]: extractCloudRunMetadata,
+  [WorkbenchToolType.AzureFunction]: extractAzureFunctionMetadata,
 }
 
 export function WorkbenchesConfiguredToolMetadata({
@@ -322,6 +322,26 @@ function extractDockerMetadata(
     { label: 'Registry', value: docker?.url },
     { label: 'Auth', value: docker?.provider },
     { label: 'Proxy', value: docker?.proxy?.url },
+  ]
+}
+
+function extractLambdaMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'ARN', value: configuration?.lambda?.lambdaArn }]
+}
+
+function extractCloudRunMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [{ label: 'Service', value: configuration?.cloudRun?.identifier }]
+}
+
+function extractAzureFunctionMetadata(
+  configuration: WorkbenchToolConfiguration | null
+): MetadataRow[] {
+  return [
+    { label: 'Function', value: configuration?.azureFunction?.identifier },
   ]
 }
 

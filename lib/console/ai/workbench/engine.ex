@@ -249,11 +249,13 @@ defmodule Console.AI.Workbench.Engine do
 
   @max_poll_iterations 60
   @poll_interval :timer.seconds(10)
+  @approval_pending_statuses [:needs_approval, :running]
 
   defp poll_activity(activity, iter \\ 0)
-  defp poll_activity(%WorkbenchJobActivity{status: :needs_approval} = activity, iter) when iter < @max_poll_iterations do
+  defp poll_activity(%WorkbenchJobActivity{status: status} = activity, iter)
+       when status in @approval_pending_statuses and iter < @max_poll_iterations do
     case Repo.get(WorkbenchJobActivity, activity.id) do
-      %WorkbenchJobActivity{status: :needs_approval} = activity ->
+      %WorkbenchJobActivity{status: status} = activity when status in @approval_pending_statuses ->
         :timer.sleep(@poll_interval)
         poll_activity(activity, iter + 1)
       %WorkbenchJobActivity{} = activity -> {:ok, activity}

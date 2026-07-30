@@ -10378,7 +10378,7 @@ type WorkbenchJobActivity struct {
 	AgentRun *AgentRun `json:"agentRun,omitempty"`
 	// all agent runs associated with this activity (sideloadable)
 	AgentRuns []*AgentRun `json:"agentRuns,omitempty"`
-	// the user who created this activity
+	// the user who created, approved, or denied this activity
 	User       *User   `json:"user,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
@@ -10406,6 +10406,8 @@ type WorkbenchJobActivityFunctionCall struct {
 	Input map[string]any `json:"input,omitempty"`
 	// the workbench tool id backing this function
 	ToolID *string `json:"toolId,omitempty"`
+	// the workbench tool backing this function call
+	Tool *WorkbenchTool `json:"tool,omitempty"`
 }
 
 type WorkbenchJobActivityJobUpdate struct {
@@ -10430,6 +10432,8 @@ type WorkbenchJobActivityKubeRequest struct {
 	QueryParams map[string]any `json:"queryParams,omitempty"`
 	// the Kubernetes API request content type
 	ContentType *string `json:"contentType,omitempty"`
+	// the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action
+	Current map[string]any `json:"current,omitempty"`
 }
 
 type WorkbenchJobActivityLog struct {
@@ -10541,6 +10545,28 @@ type WorkbenchJobEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobKubernetesModes struct {
+	// whether kubernetes update actions are enabled
+	Update *bool `json:"update,omitempty"`
+	// whether kubernetes delete actions are enabled
+	Delete *bool `json:"delete,omitempty"`
+	// namespaces the agent can never act in
+	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
+	// if set, actions are only allowed in these namespaces
+	RequireNamespaces []*string `json:"requireNamespaces,omitempty"`
+}
+
+type WorkbenchJobKubernetesModesAttributes struct {
+	// whether kubernetes update actions are enabled
+	Update *bool `json:"update,omitempty"`
+	// whether kubernetes delete actions are enabled
+	Delete *bool `json:"delete,omitempty"`
+	// namespaces the agent can never act in
+	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
+	// if set, actions are only allowed in these namespaces
+	RequireNamespaces []*string `json:"requireNamespaces,omitempty"`
+}
+
 type WorkbenchJobModel struct {
 	// the ai provider for this job
 	Provider *AiProvider `json:"provider,omitempty"`
@@ -10566,6 +10592,8 @@ type WorkbenchJobModes struct {
 	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
 	// budget limits for this job
 	Budget *WorkbenchJobBudget `json:"budget,omitempty"`
+	// kubernetes action options for this job
+	Kubernetes *WorkbenchJobKubernetesModes `json:"kubernetes,omitempty"`
 }
 
 type WorkbenchJobModesAttributes struct {
@@ -10579,6 +10607,8 @@ type WorkbenchJobModesAttributes struct {
 	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
 	// budget limits for this job
 	Budget *WorkbenchJobBudgetAttributes `json:"budget,omitempty"`
+	// kubernetes action options for this job
+	Kubernetes *WorkbenchJobKubernetesModesAttributes `json:"kubernetes,omitempty"`
 }
 
 type WorkbenchJobProgress struct {
@@ -10934,7 +10964,7 @@ type WorkbenchToolAzureDevopsConnectionAttributes struct {
 }
 
 type WorkbenchToolAzureFunctionConnection struct {
-	// Cloud Function identifier
+	// Azure Function identifier
 	Identifier *string `json:"identifier,omitempty"`
 	// description of the function exposed to the agent
 	Description *string `json:"description,omitempty"`
@@ -10943,7 +10973,7 @@ type WorkbenchToolAzureFunctionConnection struct {
 }
 
 type WorkbenchToolAzureFunctionConnectionAttributes struct {
-	// Cloud Function identifier
+	// Azure Function identifier
 	Identifier string `json:"identifier"`
 	// description of the function exposed to the agent
 	Description string `json:"description"`
@@ -11074,7 +11104,7 @@ type WorkbenchToolConfiguration struct {
 	Lambda *WorkbenchToolLambdaConnection `json:"lambda,omitempty"`
 	// google cloud run service configuration
 	CloudRun *WorkbenchToolCloudRunConnection `json:"cloudRun,omitempty"`
-	// google cloud function configuration
+	// azure function configuration
 	AzureFunction *WorkbenchToolAzureFunctionConnection `json:"azureFunction,omitempty"`
 	// docker/OCI registry connection (no secrets)
 	Docker *WorkbenchToolDockerConnection `json:"docker,omitempty"`
@@ -11129,7 +11159,7 @@ type WorkbenchToolConfigurationAttributes struct {
 	Lambda *WorkbenchToolLambdaConnectionAttributes `json:"lambda,omitempty"`
 	// google cloud run service configuration
 	CloudRun *WorkbenchToolCloudRunConnectionAttributes `json:"cloudRun,omitempty"`
-	// google cloud function configuration
+	// azure function configuration
 	AzureFunction *WorkbenchToolAzureFunctionConnectionAttributes `json:"azureFunction,omitempty"`
 	// bitbucket data center connection (scm)
 	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnectionAttributes `json:"bitbucketDatacenter,omitempty"`

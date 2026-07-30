@@ -51,6 +51,11 @@ export { default as CodeEditor } from './components/CodeEditor'
 export { default as Codeline } from './components/Codeline'
 export { ComboBox } from './components/ComboBox'
 export { default as Date } from './components/Date'
+export {
+  default as DiffViewer,
+  DiffMethod,
+  type DiffViewerProps,
+} from './components/DiffViewer'
 export { default as Divider } from './components/Divider'
 export { default as EmptyState } from './components/EmptyState'
 export { default as Flex } from './components/Flex'

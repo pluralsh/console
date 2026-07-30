@@ -33,6 +33,7 @@ defmodule Console.Deployments.Workbenches do
   alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
+  alias Kube.Utils, as: KUtils
 
   require EEx
 
@@ -955,57 +956,116 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Approves and calls a workbench function call encapsulated in the current activity
+  Approves and calls a workbench function call encapsulated in the current activity.
+
+  Atomically claims the activity as running before invoking the external action so
+  concurrent approvals cannot execute it twice and no database lock is held during
+  network I/O.
   """
   @spec approve_job_activity(binary, User.t()) :: activity_resp
   def approve_job_activity(activity_id, %User{} = user) when is_binary(activity_id) do
     start_transaction()
     |> add_operation(:activity, fn _ ->
-      get_workbench_job_activity!(activity_id)
+      lock_job_activity!(activity_id)
       |> allow(user, :approve)
     end)
-    |> add_operation(:exec, fn
-      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = call}} = activity} ->
-        get_workbench_tool!(call.tool_id)
-        |> FunctionCall.call_function(call.input)
-        |> case do
-          {:ok, output} -> output
-          {:error, err} -> "Internal function calling error: #{inspect(err)}"
-        end
-        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+    |> add_operation(:claim, fn
+      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = _}} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
         |> Repo.update()
-      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity} ->
-        KubeRequest.invoke(request, user)
-        |> case do
-          {:ok, %{} = output} -> JSON.encode!(output)
-          {:error, {:http_error, _, %{"message" => msg}}} -> "K8s request failed: #{msg}"
-          {:error, {:http_error, _, err}} -> "K8s request failed: #{inspect(err)}"
-          {:error, err} -> "Internal kubernetes request error: #{inspect(err)}"
-        end
-        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{}}} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
         |> Repo.update()
-      _ -> {:error, "activity does not support function calling"}
+      _ ->
+        {:error, "activity does not support function calling"}
     end)
-    |> execute(extract: :exec)
+    |> execute(extract: :claim)
+    |> when_ok(&execute_approved_activity(&1, user))
     |> notify(:update)
   end
 
+  defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = call}} = activity,
+    _user
+  ) do
+    get_workbench_tool!(call.tool_id)
+    |> FunctionCall.call_function(call.input)
+    |> case do
+      {:ok, output} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: output}})
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Internal function calling error: #{inspect(err)}"}
+        })
+    end
+    |> Repo.update()
+  end
+
+  defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity,
+    user
+  ) do
+    KubeRequest.invoke(request, user)
+    |> case do
+      {:ok, %{} = output} ->
+        output
+        |> KUtils.sanitize_kube_resource()
+        |> KUtils.redact_secret()
+        |> JSON.encode!()
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+      {:error, {:http_error, _, %{"message" => msg}}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "K8s request failed: #{msg}"}
+        })
+      {:error, {:http_error, _, err}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "K8s request failed: #{inspect(err)}"}
+        })
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Internal kubernetes request error: #{inspect(err)}"}
+        })
+    end
+    |> Repo.update()
+  end
+
+  defp execute_approved_activity(_, _),
+    do: {:error, "activity does not support function calling"}
+
   @doc """
   Rejects a job activity by marking it rejected and setting the output to the reason.
+
+  Locks the activity row for update and re-checks needs_approval before writing so a
+  concurrent approve cannot be overwritten by a stale reject (or vice versa).
   """
   @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
   def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
-    get_workbench_job_activity!(activity_id)
-    |> allow(user, :approve)
-    |> when_ok(fn activity ->
-      WorkbenchJobActivity.changeset(activity, %{
-        status: :rejected,
-        result: %{output: reason || "Execution rejected by user"}
-      })
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      lock_job_activity!(activity_id)
+      |> allow(user, :approve)
     end)
-    |> when_ok(:update)
+    |> add_operation(:reject, fn
+      %{activity: %WorkbenchJobActivity{status: :needs_approval} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :rejected,
+          user_id: user.id,
+          result: %{output: reason || "Execution rejected by user"}
+        })
+        |> Repo.update()
+      _ ->
+        {:error, "activity must be in needs approval status to be approved"}
+    end)
+    |> execute(extract: :reject)
     |> notify(:update)
   end
+
+  defp lock_job_activity!(id),
+    do: Repo.get!(WorkbenchJobActivity.with_lock(), id)
 
   @doc """
   Associates an agent run with a workbench activity: inserts the join row (idempotent) and sets
