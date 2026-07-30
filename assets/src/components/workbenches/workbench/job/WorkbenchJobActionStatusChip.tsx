@@ -7,7 +7,7 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { WorkbenchJobActivityStatus } from 'generated/graphql'
-import { ComponentProps, ReactNode } from 'react'
+import { ComponentProps, ReactElement } from 'react'
 
 const chipCss = {
   flexShrink: 0,
@@ -15,11 +15,14 @@ const chipCss = {
   '& .children': { whiteSpace: 'nowrap' },
 } as const satisfies ComponentProps<typeof Chip>['css']
 
+type StatusChipConfig = {
+  label: string
+  icon?: ReactElement
+  iconColor?: ComponentProps<typeof Chip>['iconColor']
+}
+
 const STATUS_CHIPS: Partial<
-  Record<
-    WorkbenchJobActivityStatus,
-    { label: string; icon?: ReactNode; iconColor?: string }
-  >
+  Record<WorkbenchJobActivityStatus, StatusChipConfig>
 > = {
   [WorkbenchJobActivityStatus.NeedsApproval]: {
     label: 'Pending approval',
