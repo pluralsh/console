@@ -16124,7 +16124,7 @@ export type WorkbenchJobActivity = {
   /** the type of the activity */
   type?: Maybe<WorkbenchJobActivityType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** the user who created or denied this activity */
+  /** the user who created, approved, or denied this activity */
   user?: Maybe<User>;
   /** whimsically describes current progress for you */
   whimsey?: Maybe<Scalars['String']['output']>;
@@ -16174,7 +16174,7 @@ export type WorkbenchJobActivityJobUpdate = {
 
 export type WorkbenchJobActivityKubeRequest = {
   __typename?: 'WorkbenchJobActivityKubeRequest';
-  /** the Kubernetes API request body (Secret payloads are redacted) */
+  /** the Kubernetes API request body */
   body?: Maybe<Scalars['String']['output']>;
   /** the Kubernetes API request content type */
   contentType?: Maybe<Scalars['String']['output']>;

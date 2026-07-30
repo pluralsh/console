@@ -10426,7 +10426,7 @@ type WorkbenchJobActivityKubeRequest struct {
 	Method *string `json:"method,omitempty"`
 	// the Kubernetes API request path
 	Path *string `json:"path,omitempty"`
-	// the Kubernetes API request body (Secret payloads are redacted)
+	// the Kubernetes API request body
 	Body *string `json:"body,omitempty"`
 	// query parameters sent with the Kubernetes API request
 	QueryParams map[string]any `json:"queryParams,omitempty"`
