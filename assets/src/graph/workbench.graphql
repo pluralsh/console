@@ -19,6 +19,29 @@ fragment WorkbenchTiny on Workbench {
   }
 }
 
+fragment WorkbenchJobModesFields on WorkbenchJobModes {
+  plan
+  verification
+  model {
+    provider
+    model
+  }
+  coding {
+    approval
+    babysit
+  }
+  budget {
+    cost
+    tokens
+  }
+  kubernetes {
+    update
+    delete
+    excludeNamespaces
+    requireNamespaces
+  }
+}
+
 fragment IssueWebhook on IssueWebhook {
   id
   name
@@ -82,25 +105,7 @@ fragment Workbench on Workbench {
     }
   }
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   skills {
     ref {
@@ -513,25 +518,7 @@ fragment WorkbenchCron on WorkbenchCron {
   prompt
   userId
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   lastRunAt
   nextRunAt
@@ -555,25 +542,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   priority
   userId
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   matches {
     regex
@@ -621,25 +590,7 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   messageBehavior
   userId
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   insertedAt
   updatedAt

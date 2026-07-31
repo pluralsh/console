@@ -10,6 +10,7 @@ import {
   WorkbenchPromptModeDetails,
   workbenchPromptModeIconColor,
 } from './WorkbenchPromptModeDetails'
+import { WorkbenchVerificationLoopControl } from './WorkbenchModeOptionFields'
 import { WORKBENCH_PROMPT_MODES } from './WorkbenchPromptModeSelector'
 import {
   attributesForPromptMode,
@@ -36,12 +37,7 @@ export function WorkbenchModesForm({
   )!
 
   const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
-    onChange(
-      updateCodingModes(
-        value?.plan ? attributesForPromptMode('agent', value) : value,
-        coding
-      )
-    )
+    onChange(updateCodingModes(value, coding))
 
   return (
     <Flex
@@ -94,9 +90,13 @@ export function WorkbenchModesForm({
           babysit={!!value?.coding?.babysit}
           onApprovalChange={(approval) => setCoding({ approval })}
           onBabysitChange={(babysit) => setCoding({ babysit })}
-          showHeader={false}
         />
       </Flex>
+      <WorkbenchVerificationLoopControl
+        checked={value?.verification ?? false}
+        disabled={disabled}
+        onChange={(verification) => onChange({ ...value, verification })}
+      />
       <WorkbenchBudgetLimitControl
         workbenchId={workbenchId}
         value={value?.budget}

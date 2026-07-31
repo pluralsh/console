@@ -21,9 +21,12 @@ export function useFloatingDropdown({
   minWidth,
   minHeight = 140,
   maxHeight,
+  sizeToContent = false,
 }: Pick<SelectProps, 'placement' | 'width' | 'maxHeight'> & {
   minHeight?: string | number
   minWidth?: string | number
+  /** Grow with content up to maxHeight instead of filling available height. */
+  sizeToContent?: boolean
   triggerRef: RefObject<any>
 }): {
   floating: UseFloatingReturn
@@ -75,8 +78,12 @@ export function useFloatingDropdown({
           Object.assign(elements.floating.style, {
             maxWidth: maxW,
             ...(minW ? { minWidth: minW } : {}),
-            ...(maxH ? { height: maxH } : {}),
             ...(minH ? { minHeight: minH } : {}),
+            ...(sizeToContent
+              ? { height: 'auto', maxHeight: maxH }
+              : maxH
+                ? { height: maxH }
+                : {}),
           })
         },
       }),

@@ -1,54 +1,51 @@
 import {
-  AddIcon,
   ArrowTopRightIcon,
   Button,
   Card,
   CardTab,
   CardTabs,
+  CaretDownIcon,
   Checkbox,
   Chip,
   ChipList,
   CloseIcon,
-  ComboBox,
+  DiscoverIcon,
   Divider,
   Flex,
   FormField,
   IconFrame,
-  InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
-  ListBoxFooterPlus,
+  KubernetesIcon,
+  ListIcon,
   ListBoxItem,
-  Radio,
-  RadioGroup,
   Select,
   SelectButton,
   Switch,
   Tooltip,
+  useFloatingDropdown,
 } from '@pluralsh/design-system'
+import type { Key } from '@react-types/shared'
 import {
-  AgentRunMode,
   PolicyBindingFragment,
-  useAgentRuntimeQuery,
   useAgentRuntimeReposQuery,
-  useClusterNamespacesQuery,
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
   useWorkbenchToolsQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import Fuse from 'fuse.js'
 import {
   Dispatch,
-  KeyboardEvent,
   ReactNode,
   SetStateAction,
   useCallback,
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from 'react'
+import { useButton } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
 
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector'
@@ -65,6 +62,8 @@ import { FormBindings } from 'components/utils/bindings'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import {
   Body1BoldP,
+  Body2BoldP,
+  Body2P,
   CaptionP,
   InlineA,
   OverlineH3,
@@ -72,7 +71,6 @@ import {
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { BABYSITTING_TOOLTIP } from 'components/ai/babysittingTooltip'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
@@ -95,6 +93,25 @@ import {
   WorkbenchToolIcon,
 } from '../../tools/workbenchToolsUtils'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
+import { WorkbenchBudgetLimitControl } from '../WorkbenchPromptModeSelector/WorkbenchBudgetLimit'
+import {
+  WorkbenchCodingSupervisionFields,
+  WorkbenchKubernetesMutationFields,
+  WorkbenchVerificationLoopControl,
+} from '../WorkbenchPromptModeSelector/WorkbenchModeOptionFields'
+import { WorkbenchPromptPopover } from '../WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
+import {
+  attributesForPromptMode,
+  CODING_AGENT_LABEL,
+  disableKubernetesModes,
+  enableKubernetesModes,
+  KUBERNETES_ACTIONS_HINT,
+  KUBERNETES_ACTIONS_LABEL,
+  READ_MODE_LABEL,
+  updateBudgetModes,
+  WRITE_MODE_HINT,
+  WRITE_MODE_LABEL,
+} from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
   useWorkbenchFormCardTabs,
@@ -580,8 +597,6 @@ export function WorkbenchCodingAgentStep({
     () => coding?.repositories?.filter(isNonNullable) ?? [],
     [coding?.repositories]
   )
-  const mode = coding?.mode ?? AgentRunMode.Analyze
-  const enableBabysitting = coding?.enableBabysitting ?? false
 
   const setCodingRepos = (next: string[]) => {
     update((d) => {
@@ -625,22 +640,6 @@ export function WorkbenchCodingAgentStep({
             outerStyles={{ width: '100%' }}
           />
         </FillLevelDiv>
-      </FormField>
-      <FormField label="Mode">
-        <RadioGroup
-          value={mode}
-          onChange={(v) =>
-            update((d) => {
-              d.configuration ??= {}
-              d.configuration.coding ??= {}
-              d.configuration.coding.mode = v as AgentRunMode
-            })
-          }
-          css={{ display: 'flex', gap: 16 }}
-        >
-          <Radio value={AgentRunMode.Analyze}>Analyze</Radio>
-          <Radio value={AgentRunMode.Write}>Write</Radio>
-        </RadioGroup>
       </FormField>
       <FormField
         label="Allowed repositories"
@@ -722,47 +721,462 @@ export function WorkbenchCodingAgentStep({
           </Flex>
         )}
       </FormField>
-      {mode === AgentRunMode.Write && (
-        <Flex
-          align="center"
-          gap="xsmall"
-        >
-          <Switch
-            checked={enableBabysitting}
-            onChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.coding ??= {}
-                d.configuration.coding.enableBabysitting = checked
-              })
-            }
-          >
-            Enable babysitting
-          </Switch>
-          <Tooltip
-            label={BABYSITTING_TOOLTIP}
-            css={{ maxWidth: 320 }}
-          >
-            <InfoOutlineIcon
-              color="icon-xlight"
-              size={14}
-              css={{ cursor: 'help', flexShrink: 0 }}
-            />
-          </Tooltip>
-        </Flex>
-      )}
     </>
   )
 }
 
-export function WorkbenchConfigureActionsStep({
+export function WorkbenchModesAndTokenLimitStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  const theme = useTheme()
+  const update = createFormUpdater(setFormState)
+  const modes = formState.modes
+  const selectedMode = modes?.plan ? 'plan' : 'agent'
+  const coding = modes?.coding
+  const kubernetes = modes?.kubernetes
+  const [openPanel, setOpenPanel] = useState<'coding' | 'kubernetes' | null>(
+    null
+  )
+
+  const setMode = (mode: 'agent' | 'plan') =>
+    update((d) => {
+      d.modes = attributesForPromptMode(mode, d.modes)
+    })
+
+  const codingSummary = [
+    coding?.approval ? 'Require approval' : null,
+    coding?.babysit ? 'Babysit' : null,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
+  const kubernetesSummary = [
+    kubernetes?.update ? 'Allow updates' : null,
+    kubernetes?.delete ? 'Allow deletes' : null,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
+  const codingEnabled = coding != null
+  const kubernetesEnabled = !!kubernetes?.update || !!kubernetes?.delete
+  const selectedActionKeys = useMemo(() => {
+    const keys = new Set<Key>()
+    if (codingEnabled) keys.add('coding')
+    if (kubernetesEnabled) keys.add('kubernetes')
+    return keys
+  }, [codingEnabled, kubernetesEnabled])
+  const actionsSummary = [
+    codingEnabled ? CODING_AGENT_LABEL : null,
+    kubernetesEnabled ? KUBERNETES_ACTIONS_LABEL : null,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
+  const setSelectedActions = (keys: Set<Key>) => {
+    const nextCoding = keys.has('coding')
+    const nextKubernetes = keys.has('kubernetes')
+    update((d) => {
+      d.modes ??= {}
+      d.modes.plan = false
+      d.modes.coding = nextCoding ? (d.modes.coding ?? {}) : null
+      if (nextKubernetes) {
+        d.modes.kubernetes = enableKubernetesModes(d.modes.kubernetes)
+      } else {
+        d.modes.kubernetes = disableKubernetesModes(d.modes.kubernetes)
+      }
+    })
+    setOpenPanel((panel) => {
+      if (panel === 'coding' && !nextCoding) return null
+      if (panel === 'kubernetes' && !nextKubernetes) return null
+      return panel
+    })
+  }
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+    >
+      <FormField label="Modes">
+        <div
+          css={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+            gap: theme.spacing.xsmall,
+          }}
+        >
+          <ModeCard
+            active={selectedMode === 'agent'}
+            label={WRITE_MODE_LABEL}
+            description={WRITE_MODE_HINT}
+            icon={<DiscoverIcon size={16} />}
+            onClick={() => setMode('agent')}
+          />
+          <ModeCard
+            active={selectedMode === 'plan'}
+            label={READ_MODE_LABEL}
+            description="Run entirely in read-only mode. No PRs will be created, use for exploring infrastructure or root cause analysis."
+            icon={<ListIcon size={16} />}
+            onClick={() => setMode('plan')}
+          />
+        </div>
+      </FormField>
+
+      {selectedMode === 'agent' && (
+        <Card
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+            padding: theme.spacing.large,
+            background: theme.colors['fill-two'],
+            border: theme.borders['fill-two'],
+          }}
+        >
+          <Select
+            label="Select actions"
+            selectionMode="multiple"
+            selectedKeys={selectedActionKeys}
+            onSelectionChange={setSelectedActions}
+            placement="left"
+            triggerButton={
+              <SelectButton css={{ width: '100%' }}>
+                {actionsSummary || 'Select actions'}
+              </SelectButton>
+            }
+          >
+            <ListBoxItem
+              key="coding"
+              label={CODING_AGENT_LABEL}
+              description={WRITE_MODE_HINT}
+              leftContent={<DiscoverIcon size={16} />}
+              rightContent={
+                <Chip
+                  size="small"
+                  severity="neutral"
+                >
+                  Default
+                </Chip>
+              }
+            />
+            <ListBoxItem
+              key="kubernetes"
+              label="Kubernetes actions"
+              description={KUBERNETES_ACTIONS_HINT}
+              leftContent={<KubernetesIcon size={16} />}
+            />
+          </Select>
+
+          <Flex
+            direction="column"
+            gap="medium"
+          >
+            <ModeActionRow
+              icon={<DiscoverIcon size={16} />}
+              label={CODING_AGENT_LABEL}
+              description={WRITE_MODE_HINT}
+              disabled={!codingEnabled}
+              summary={codingSummary || 'Configure supervision'}
+              isOpen={openPanel === 'coding'}
+              onOpenChange={(open) => setOpenPanel(open ? 'coding' : null)}
+            >
+              <WorkbenchCodingSupervisionFields
+                approval={!!coding?.approval}
+                babysit={!!coding?.babysit}
+                onApprovalChange={(approval) =>
+                  update((d) => {
+                    d.modes ??= {}
+                    d.modes.plan = false
+                    d.modes.coding = { ...d.modes.coding, approval }
+                  })
+                }
+                onBabysitChange={(babysit) =>
+                  update((d) => {
+                    d.modes ??= {}
+                    d.modes.plan = false
+                    d.modes.coding = { ...d.modes.coding, babysit }
+                  })
+                }
+              />
+            </ModeActionRow>
+
+            <ModeActionRow
+              icon={<KubernetesIcon size={16} />}
+              label={KUBERNETES_ACTIONS_LABEL}
+              description={KUBERNETES_ACTIONS_HINT}
+              disabled={!kubernetesEnabled}
+              summary={kubernetesSummary || 'Configure actions'}
+              isOpen={openPanel === 'kubernetes'}
+              onOpenChange={(open) => setOpenPanel(open ? 'kubernetes' : null)}
+            >
+              <WorkbenchKubernetesMutationFields
+                allowUpdates={!!kubernetes?.update}
+                allowDeletes={!!kubernetes?.delete}
+                onAllowUpdatesChange={(checked) => {
+                  update((d) => {
+                    d.modes ??= {}
+                    d.modes.kubernetes = {
+                      ...d.modes.kubernetes,
+                      update: checked,
+                      delete: d.modes.kubernetes?.delete ?? false,
+                    }
+                  })
+                  if (!checked && !kubernetes?.delete) setOpenPanel(null)
+                }}
+                onAllowDeletesChange={(checked) => {
+                  update((d) => {
+                    d.modes ??= {}
+                    d.modes.kubernetes = {
+                      ...d.modes.kubernetes,
+                      update: d.modes.kubernetes?.update ?? false,
+                      delete: checked,
+                    }
+                  })
+                  if (!checked && !kubernetes?.update) setOpenPanel(null)
+                }}
+              />
+            </ModeActionRow>
+
+            <div
+              css={{
+                opacity: kubernetesEnabled ? 1 : 0.7,
+                pointerEvents: kubernetesEnabled ? undefined : 'none',
+              }}
+            >
+              <WorkbenchKubernetesNamespaceFields
+                formState={formState}
+                setFormState={setFormState}
+              />
+            </div>
+          </Flex>
+        </Card>
+      )}
+
+      <Flex
+        direction="column"
+        gap="medium"
+      >
+        <OverlineH3 $color="text-xlight">Global settings</OverlineH3>
+        <WorkbenchVerificationLoopControl
+          checked={modes?.verification ?? false}
+          onChange={(verification) =>
+            update((d) => {
+              d.modes ??= {}
+              d.modes.verification = verification
+            })
+          }
+        />
+        <WorkbenchBudgetLimitControl
+          value={modes?.budget}
+          onChange={(budget) =>
+            update((d) => {
+              d.modes = updateBudgetModes(d.modes, budget)
+            })
+          }
+        />
+      </Flex>
+    </Flex>
+  )
+}
+
+function ModeActionRow({
+  icon,
+  label,
+  description,
+  disabled = false,
+  summary,
+  isOpen,
+  onOpenChange,
+  children,
+}: {
+  icon: ReactNode
+  label: string
+  description: string
+  disabled?: boolean
+  summary: string
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+  children: ReactNode
+}) {
+  const theme = useTheme()
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const { floating, triggerRef: mergedTriggerRef } = useFloatingDropdown({
+    triggerRef,
+    width: 360,
+    maxHeight: 480,
+    minHeight: 0,
+    placement: 'right',
+  })
+  const { buttonProps } = useButton(
+    {
+      onPress: () => !disabled && onOpenChange(!isOpen),
+      isDisabled: disabled,
+    },
+    triggerRef
+  )
+
+  return (
+    <Flex
+      align="center"
+      gap="large"
+      css={{
+        opacity: disabled ? 0.7 : 1,
+        pointerEvents: disabled ? 'none' : undefined,
+      }}
+    >
+      <Flex
+        direction="column"
+        gap="xxsmall"
+        flex={1}
+        minWidth={0}
+      >
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          {icon}
+          <Body2P>{label}</Body2P>
+        </Flex>
+        <Body2P $color="text-xlight">{description}</Body2P>
+      </Flex>
+      <div css={{ flex: 1, minWidth: 0 }}>
+        <button
+          type="button"
+          ref={mergedTriggerRef}
+          {...buttonProps}
+          disabled={disabled}
+          css={{
+            ...theme.partials.reset.button,
+            display: 'flex',
+            alignItems: 'center',
+            gap: theme.spacing.small,
+            width: '100%',
+            padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+            color: theme.colors['text-xlight'],
+            background: theme.colors['fill-one'],
+            border: theme.borders.input,
+            borderRadius: theme.borderRadiuses.medium,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            textAlign: 'left',
+          }}
+        >
+          <Body2P
+            $color="text-xlight"
+            css={{
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {summary}
+          </Body2P>
+          <CaretDownIcon
+            size={16}
+            css={{
+              transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
+              transition: 'transform 0.1s ease',
+              flexShrink: 0,
+            }}
+          />
+        </button>
+        <WorkbenchPromptPopover
+          isOpen={!disabled && isOpen}
+          onClose={() => onOpenChange(false)}
+          floating={floating}
+        >
+          <Card
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.small,
+              width: 360,
+              padding: theme.spacing.medium,
+              background: theme.colors['fill-two-selected'],
+              border: theme.borders['fill-two'],
+              boxShadow: theme.boxShadows.moderate,
+            }}
+          >
+            {children}
+          </Card>
+        </WorkbenchPromptPopover>
+      </div>
+    </Flex>
+  )
+}
+
+function ModeCard({
+  active,
+  label,
+  description,
+  icon,
+  onClick,
+}: {
+  active: boolean
+  label: string
+  description: string
+  icon: ReactNode
+  onClick: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      css={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: theme.spacing.small,
+        minHeight: 108,
+        padding: theme.spacing.medium,
+        color: theme.colors.text,
+        textAlign: 'left',
+        background: 'transparent',
+        border: active ? theme.borders.input : theme.borders.default,
+        borderRadius: theme.borderRadiuses.medium,
+        cursor: 'pointer',
+      }}
+    >
+      <span
+        css={{
+          width: 16,
+          height: 16,
+          marginTop: 2,
+          borderRadius: '50%',
+          border: `1px solid ${active ? theme.colors['border-selected'] : theme.colors['border-input']}`,
+          boxShadow: active
+            ? `inset 0 0 0 3px ${theme.colors['fill-two']}`
+            : undefined,
+          background: active ? theme.colors['action-primary'] : 'transparent',
+          flexShrink: 0,
+        }}
+      />
+      <Flex
+        direction="column"
+        gap="xxsmall"
+      >
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          {icon}
+          <Body2BoldP>{label}</Body2BoldP>
+        </Flex>
+        <Body2P $color="text-xlight">{description}</Body2P>
+      </Flex>
+    </button>
+  )
+}
+
+function WorkbenchKubernetesNamespaceFields({
   formState,
   setFormState,
 }: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const kubernetes = formState.modes?.kubernetes
-  const allowUpdates = kubernetes?.update ?? false
-  const allowDeletes = kubernetes?.delete ?? false
   const requireNamespaces = (kubernetes?.requireNamespaces ?? []).filter(
     (ns): ns is string => !!ns
   )
@@ -770,29 +1184,8 @@ export function WorkbenchConfigureActionsStep({
     (ns): ns is string => !!ns
   )
 
-  const { data: runtimeData } = useAgentRuntimeQuery({
-    variables: { id: formState.agentRuntimeId ?? '' },
-    skip: !formState.agentRuntimeId,
-  })
-  const clusterId = runtimeData?.agentRuntime?.cluster?.id
-  const { data: namespacesData, loading: namespacesLoading } =
-    useClusterNamespacesQuery({
-      variables: { clusterId },
-      skip: !clusterId,
-    })
-  const namespaceOptions = useMemo(
-    () =>
-      (namespacesData?.namespaces ?? [])
-        .map((ns) => ns?.metadata?.name)
-        .filter(isNonNullable)
-        .sort((a, b) => a.localeCompare(b)),
-    [namespacesData?.namespaces]
-  )
-
-  const setKubernetes = (
+  const setNamespaces = (
     patch: Partial<{
-      update: boolean
-      delete: boolean
       requireNamespaces: string[]
       excludeNamespaces: string[]
     }>
@@ -800,8 +1193,8 @@ export function WorkbenchConfigureActionsStep({
     update((d) => {
       d.modes ??= {}
       d.modes.kubernetes = {
-        update: allowUpdates,
-        delete: allowDeletes,
+        update: kubernetes?.update ?? false,
+        delete: kubernetes?.delete ?? false,
         requireNamespaces,
         excludeNamespaces,
         ...d.modes.kubernetes,
@@ -814,48 +1207,18 @@ export function WorkbenchConfigureActionsStep({
       direction="column"
       gap="large"
     >
-      <FormField
-        label="Enable Kubernetes actions"
-        hint="Reads are always permitted. Every mutation you enable below still requires your approval before it runs."
-      >
-        <Flex
-          gap="xxxxlarge"
-          wrap="wrap"
-        >
-          <Checkbox
-            small
-            checked={allowUpdates}
-            onChange={(e) => setKubernetes({ update: e.target.checked })}
-          >
-            Allow updates
-          </Checkbox>
-          <Checkbox
-            small
-            checked={allowDeletes}
-            onChange={(e) => setKubernetes({ delete: e.target.checked })}
-          >
-            Allow deletes
-          </Checkbox>
-        </Flex>
-      </FormField>
-
       <NamespaceListField
         label="Required namespaces"
-        hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist)."
+        hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist). Press Enter to add."
         values={requireNamespaces}
-        namespaces={namespaceOptions}
-        loading={namespacesLoading}
-        onChange={(next) => setKubernetes({ requireNamespaces: next })}
+        onChange={(next) => setNamespaces({ requireNamespaces: next })}
       />
-
       <NamespaceListField
         label="Blacklisted namespaces"
-        hint="The agent can never act in these namespaces, even if they're in the required set."
+        hint="The agent can never act in these namespaces, even if they're in the required set. Press Enter to add."
         values={excludeNamespaces}
-        namespaces={namespaceOptions}
-        loading={namespacesLoading}
         severity="danger"
-        onChange={(next) => setKubernetes({ excludeNamespaces: next })}
+        onChange={(next) => setNamespaces({ excludeNamespaces: next })}
       />
     </Flex>
   )
@@ -865,59 +1228,26 @@ function NamespaceListField({
   label,
   hint,
   values,
-  namespaces,
-  loading,
   severity,
   onChange,
 }: {
   label: string
   hint: string
   values: string[]
-  namespaces: string[]
-  loading?: boolean
   severity?: 'danger'
   onChange: (next: string[]) => void
 }) {
   const [draft, setDraft] = useState('')
-  const [isOpen, setIsOpen] = useState(false)
   const trimmed = draft.trim()
+  const canAdd = !!trimmed && !values.includes(trimmed)
 
-  const allOptions = useMemo(() => {
-    const merged = new Set([...namespaces, ...values])
-    return [...merged].sort((a, b) => a.localeCompare(b))
-  }, [namespaces, values])
-
-  const suggestions = useMemo(() => {
-    if (!trimmed) return allOptions
-    return new Fuse(allOptions, { threshold: 0.25 })
-      .search(trimmed)
-      .map(({ item }) => item)
-  }, [allOptions, trimmed])
-
-  const canAddCustom =
-    !!trimmed && !values.includes(trimmed) && !allOptions.includes(trimmed)
-
-  const toggleNamespace = (raw: string) => {
-    const value = raw.trim()
-    if (!value) return
-    onChange(
-      values.includes(value)
-        ? values.filter((ns) => ns !== value)
-        : [...values, value]
-    )
-    setDraft('')
-    setIsOpen(true)
-  }
-
-  const addCustomNamespace = (raw: string) => {
-    const value = raw.trim()
-    if (!value || values.includes(value)) {
+  const addNamespace = () => {
+    if (!canAdd) {
       setDraft('')
       return
     }
-    onChange([...values, value])
+    onChange([...values, trimmed])
     setDraft('')
-    setIsOpen(true)
   }
 
   return (
@@ -930,64 +1260,20 @@ function NamespaceListField({
         gap="xsmall"
         width="100%"
       >
-        <ComboBox
-          aria-label={label}
-          inputValue={draft}
-          onInputChange={setDraft}
-          selectedKey={null}
-          onSelectionChange={(key) => {
-            if (key) toggleNamespace(String(key))
+        <Input2
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return
+            e.preventDefault()
+            addNamespace()
           }}
-          isOpen={isOpen}
-          onOpenChange={setIsOpen}
-          loading={loading}
-          allowsEmptyCollection={canAddCustom}
-          inputProps={{
-            placeholder: 'Search namespace name',
-            onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
-              if (e.key !== 'Enter' || !canAddCustom) return
-              e.preventDefault()
-              addCustomNamespace(trimmed)
-            },
-          }}
-          onFooterClick={
-            canAddCustom ? () => addCustomNamespace(trimmed) : undefined
-          }
-          dropdownFooter={
-            canAddCustom ? (
-              <ListBoxFooterPlus
-                leftContent={
-                  <AddIcon
-                    size={16}
-                    color="text-primary-accent"
-                  />
-                }
-              >
-                Use &quot;{trimmed}&quot;
-              </ListBoxFooterPlus>
-            ) : undefined
-          }
-        >
-          {suggestions.map((ns) => (
-            <ListBoxItem
-              key={ns}
-              label={ns}
-              textValue={ns}
-              leftContent={
-                <Checkbox
-                  small
-                  checked={values.includes(ns)}
-                  tabIndex={-1}
-                  css={{ paddingLeft: 0, pointerEvents: 'none' }}
-                />
-              }
-            />
-          ))}
-        </ComboBox>
+          placeholder="Enter namespace name"
+        />
         {values.length > 0 && (
           <ChipList
             values={values}
-            limit={3}
+            limit={Infinity}
             size="small"
             closeButton
             severity={severity}
@@ -1298,7 +1584,7 @@ export const WORKBENCH_STEP_LABELS = [
   'Workbench setup',
   'Skills configuration',
   'Coding agent',
-  'Configure actions',
+  'Modes & token limit',
   'Access policy',
   'Attach tools',
 ] as const
@@ -1311,7 +1597,10 @@ export const workbenchFormSteps: WorkbenchFormStep[] = [
   { label: 'Workbench setup', component: WorkbenchSetupStep },
   { label: 'Skills configuration', component: WorkbenchSkillsConfigStep },
   { label: 'Coding agent', component: WorkbenchCodingAgentStep },
-  { label: 'Configure actions', component: WorkbenchConfigureActionsStep },
+  {
+    label: 'Modes & token limit',
+    component: WorkbenchModesAndTokenLimitStep,
+  },
   { label: 'Access policy', component: WorkbenchAccessPolicyStep },
   { label: 'Attach tools', component: WorkbenchAttachToolsStep },
 ]
