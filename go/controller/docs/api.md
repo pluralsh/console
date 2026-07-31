@@ -353,6 +353,7 @@ _Appears in:_
 - [NotificationSinkSpec](#notificationsinkspec)
 - [PersonaSpec](#personaspec)
 - [PrAutomationBindings](#prautomationbindings)
+- [ServiceAccountSpec](#serviceaccountspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -4714,6 +4715,7 @@ _Appears in:_
 | `scopes` _[ServiceAccountScope](#serviceaccountscope) array_ | Scopes define the access boundaries for this service account, controlling<br />which Console APIs and resources it can interact with. Each scope can restrict<br />access to specific API endpoints and resource identifiers, enabling fine-grained<br />permission control for automated processes. |  | Optional: \{\} <br /> |
 | `tokenExpiry` _string_ | TokenExpiry is the TTL of the access token, e.g. 1h, 1d, 1w |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef references a Kubernetes secret that should contain the<br />authentication token for this service account. This enables secure storage<br />and management of credentials within the cluster. |  | Optional: \{\} <br /> |
+| `assumeBindings` _[Binding](#binding) array_ | AssumeBindings define which users and groups can assume this service account. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 

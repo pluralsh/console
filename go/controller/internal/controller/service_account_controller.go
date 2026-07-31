@@ -163,17 +163,22 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 }
 
 func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.ServiceAccount, changed bool) (*console.UserFragment, error) {
+	assumeBindings, err := common.BindingsAttributes(sa.Spec.AssumeBindings)
+	if err != nil {
+		return nil, err
+	}
+
 	existingSA, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			return nil, err
 		}
-		return r.ConsoleClient.CreateServiceAccount(ctx, sa.Attributes())
+		return r.ConsoleClient.CreateServiceAccount(ctx, sa.Attributes(assumeBindings))
 	}
 
 	// Update only if ServiceAccount has changed.
 	if changed {
-		attr := sa.Attributes()
+		attr := sa.Attributes(assumeBindings)
 		return r.ConsoleClient.UpdateServiceAccount(ctx, existingSA.ID, attr)
 	}
 

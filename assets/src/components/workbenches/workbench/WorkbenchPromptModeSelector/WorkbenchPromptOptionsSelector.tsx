@@ -144,7 +144,7 @@ export function WorkbenchPromptOptionsSelector({
             css={{
               display: 'flex',
               flexDirection: 'column',
-              gap: theme.spacing.medium,
+              gap: theme.spacing.small,
               width: PANEL_WIDTH,
               maxHeight: '100%',
               minHeight: 0,
@@ -186,7 +186,7 @@ export function WorkbenchPromptOptionsSelector({
             {!readMode && (
               <Flex
                 direction="column"
-                gap="small"
+                gap="xsmall"
               >
                 <PromptOptionRow
                   label={CODING_AGENT_LABEL}
