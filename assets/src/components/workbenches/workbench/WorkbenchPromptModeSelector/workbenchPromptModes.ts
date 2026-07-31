@@ -15,7 +15,6 @@ export function attributesForPromptMode(
     budget: current?.budget,
     model: current?.model,
     verification: current?.verification,
-    kubernetes: current?.kubernetes,
   }
 
   switch (mode) {
@@ -26,6 +25,7 @@ export function attributesForPromptMode(
         ...shared,
         plan: false,
         coding: current?.coding ?? {},
+        kubernetes: current?.kubernetes,
       }
   }
 }
@@ -133,9 +133,17 @@ export function updateBudgetModes(
 ): WorkbenchJobModesAttributes | null {
   const next = { ...modes, budget }
 
-  return !budget && !next.plan && next.coding == null && next.model == null
-    ? null
-    : next
+  if (
+    !budget &&
+    !next.plan &&
+    !next.verification &&
+    next.coding == null &&
+    next.model == null &&
+    next.kubernetes == null
+  )
+    return null
+
+  return next
 }
 
 export function defaultPromptModesFromWorkbench(

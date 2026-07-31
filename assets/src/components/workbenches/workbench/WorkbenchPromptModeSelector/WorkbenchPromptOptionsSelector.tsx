@@ -15,7 +15,6 @@ import {
   useFloatingDropdown,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
-import { Overline } from 'components/cd/utils/PermissionsModal'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
@@ -32,8 +31,11 @@ import {
   WorkbenchBudgetAmountControl,
   formatBudgetLimitLabel,
 } from './WorkbenchBudgetLimit'
+import {
+  WorkbenchCodingSupervisionFields,
+  WorkbenchKubernetesMutationFields,
+} from './WorkbenchModeOptionFields'
 import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
-import { WorkbenchPromptSupervisionOption } from './WorkbenchPromptSupervisionOption'
 import { updateBudgetModes } from './workbenchPromptModes'
 
 const PANEL_WIDTH = 373
@@ -149,7 +151,7 @@ export function WorkbenchPromptOptionsSelector({
                         ...value,
                         plan: true,
                         coding: undefined,
-                        kubernetes: { update: false, delete: false },
+                        kubernetes: undefined,
                       }
                     : { ...value, plan: false }
                 )
@@ -212,7 +214,7 @@ export function WorkbenchPromptOptionsSelector({
                         ? kubernetesEnabled
                           ? value?.kubernetes
                           : { update: true, delete: true }
-                        : { update: false, delete: false },
+                        : undefined,
                     })
                     setSidePanel(checked ? 'kubernetes' : null)
                   }}
@@ -339,7 +341,7 @@ export function WorkbenchPromptOptionPills({
           onClear={() =>
             onChange({
               ...value,
-              kubernetes: { update: false, delete: false },
+              kubernetes: undefined,
             })
           }
         />
@@ -467,36 +469,17 @@ function CodingSidePanel({
 }) {
   return (
     <SidePanelContainer>
-      <Overline>Supervision</Overline>
-      <WorkbenchPromptSupervisionOption
-        icon={
-          <WarningShieldIcon
-            size={16}
-            color="icon-light"
-          />
-        }
-        label="Requires approval"
-        hint="Pause for your sign-off before it edits anything or opens a PR."
-        checked={!!value?.coding?.approval}
-        onChange={(approval) =>
+      <WorkbenchCodingSupervisionFields
+        approval={!!value?.coding?.approval}
+        babysit={!!value?.coding?.babysit}
+        onApprovalChange={(approval) =>
           onChange({
             ...value,
             plan: false,
             coding: { ...value?.coding, approval },
           })
         }
-      />
-      <WorkbenchPromptSupervisionOption
-        icon={
-          <ContainerRuntimeIcon
-            size={16}
-            color="icon-light"
-          />
-        }
-        label="Babysit"
-        hint="Stays active after opening the PR to monitor review feedback and requested changes, then follows up until it’s ready to merge."
-        checked={!!value?.coding?.babysit}
-        onChange={(babysit) =>
+        onBabysitChange={(babysit) =>
           onChange({
             ...value,
             plan: false,
@@ -519,50 +502,32 @@ function KubernetesSidePanel({
 }) {
   return (
     <SidePanelContainer>
-      <Overline>Kubernetes actions</Overline>
-      <Body2P $color="text-xlight">
-        Reads are always permitted. Every mutation you enable below still
-        requires your approval before it runs.
-      </Body2P>
-      <Flex
-        direction="column"
-        gap="xxsmall"
-      >
-        <Checkbox
-          small
-          checked={!!value?.kubernetes?.update}
-          onChange={(event) => {
-            onChange({
-              ...value,
-              plan: false,
-              kubernetes: {
-                ...value?.kubernetes,
-                update: event.target.checked,
-              },
-            })
-            if (!event.target.checked && !value?.kubernetes?.delete) onEmpty()
-          }}
-        >
-          Allow updates
-        </Checkbox>
-        <Checkbox
-          small
-          checked={!!value?.kubernetes?.delete}
-          onChange={(event) => {
-            onChange({
-              ...value,
-              plan: false,
-              kubernetes: {
-                ...value?.kubernetes,
-                delete: event.target.checked,
-              },
-            })
-            if (!event.target.checked && !value?.kubernetes?.update) onEmpty()
-          }}
-        >
-          Allow deletes
-        </Checkbox>
-      </Flex>
+      <WorkbenchKubernetesMutationFields
+        allowUpdates={!!value?.kubernetes?.update}
+        allowDeletes={!!value?.kubernetes?.delete}
+        onAllowUpdatesChange={(checked) => {
+          onChange({
+            ...value,
+            plan: false,
+            kubernetes: {
+              ...value?.kubernetes,
+              update: checked,
+            },
+          })
+          if (!checked && !value?.kubernetes?.delete) onEmpty()
+        }}
+        onAllowDeletesChange={(checked) => {
+          onChange({
+            ...value,
+            plan: false,
+            kubernetes: {
+              ...value?.kubernetes,
+              delete: checked,
+            },
+          })
+          if (!checked && !value?.kubernetes?.update) onEmpty()
+        }}
+      />
     </SidePanelContainer>
   )
 }

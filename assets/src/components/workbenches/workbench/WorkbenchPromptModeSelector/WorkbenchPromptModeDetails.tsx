@@ -93,7 +93,7 @@ export function WorkbenchPromptModeDetails({
                 />
               }
               label="Requires approval"
-              hint="Require manual approval to create prs, and allow follow up prompting to get things right if needed"
+              hint="Pause for your sign-off before it edits anything or opens a PR."
               checked={approval}
               onChange={onApprovalChange}
             />
@@ -105,7 +105,7 @@ export function WorkbenchPromptModeDetails({
                 />
               }
               label="Babysit"
-              hint="Stays active after opening the PR to respond to review feedback or CI failures."
+              hint="Stays active after opening the PR to monitor review feedback and requested changes, then follows up until it’s ready to merge."
               checked={babysit}
               onChange={onBabysitChange}
             />

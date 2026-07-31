@@ -34,6 +34,7 @@ import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
+import { modesFormValue } from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
   WORKBENCH_STEP_LABELS,
   workbenchFormSteps,
@@ -536,7 +537,7 @@ function sanitizeInitialForm({
       observability: { logs, metrics },
       coding: { mode, repositories, enableBabysitting },
     },
-    modes: workbenchModesToAttributes(modes),
+    modes: modesFormValue(modes),
     skills: { ref, files },
     toolAssociations:
       tools?.flatMap((t) => (t ? [{ toolId: t.id }] : [])) ?? [],
@@ -557,52 +558,5 @@ function sanitizeInitialForm({
         },
       ]) ?? [],
     workbenchSkills: resolvedWorkbenchSkills,
-  }
-}
-
-function workbenchModesToAttributes(
-  modes: WorkbenchFragment['modes']
-): WorkbenchFormState['modes'] {
-  if (!modes) return null
-
-  return {
-    plan: modes.plan,
-    verification: modes.verification,
-    ...(modes.model?.provider && modes.model.model
-      ? {
-          model: {
-            provider: modes.model.provider,
-            model: modes.model.model,
-          },
-        }
-      : {}),
-    ...(modes.coding
-      ? {
-          coding: {
-            approval: modes.coding.approval,
-            babysit: modes.coding.babysit,
-          },
-        }
-      : {}),
-    ...(modes.budget
-      ? {
-          budget: {
-            cost: modes.budget.cost,
-            tokens: modes.budget.tokens,
-          },
-        }
-      : {}),
-    ...(modes.kubernetes
-      ? {
-          kubernetes: {
-            update: modes.kubernetes.update,
-            delete: modes.kubernetes.delete,
-            requireNamespaces:
-              modes.kubernetes.requireNamespaces?.filter(isNonNullable) ?? [],
-            excludeNamespaces:
-              modes.kubernetes.excludeNamespaces?.filter(isNonNullable) ?? [],
-          },
-        }
-      : {}),
   }
 }

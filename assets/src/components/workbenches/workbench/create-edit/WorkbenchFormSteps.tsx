@@ -9,7 +9,6 @@ import {
   Chip,
   ChipList,
   CloseIcon,
-  ContainerRuntimeIcon,
   DiscoverIcon,
   Divider,
   Flex,
@@ -25,7 +24,6 @@ import {
   SelectButton,
   Switch,
   Tooltip,
-  WarningShieldIcon,
   useFloatingDropdown,
 } from '@pluralsh/design-system'
 import {
@@ -95,10 +93,12 @@ import {
   WorkbenchToolIcon,
 } from '../../tools/workbenchToolsUtils'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
-import { Overline } from 'components/cd/utils/PermissionsModal'
 import { WorkbenchBudgetLimitControl } from '../WorkbenchPromptModeSelector/WorkbenchBudgetLimit'
+import {
+  WorkbenchCodingSupervisionFields,
+  WorkbenchKubernetesMutationFields,
+} from '../WorkbenchPromptModeSelector/WorkbenchModeOptionFields'
 import { WorkbenchPromptPopover } from '../WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
-import { WorkbenchPromptSupervisionOption } from '../WorkbenchPromptModeSelector/WorkbenchPromptSupervisionOption'
 import {
   attributesForPromptMode,
   updateBudgetModes,
@@ -734,10 +734,6 @@ export function WorkbenchModesAndTokenLimitStep({
   const setMode = (mode: 'agent' | 'plan') =>
     update((d) => {
       d.modes = attributesForPromptMode(mode, d.modes)
-      if (mode === 'plan') {
-        d.modes.coding = undefined
-        d.modes.kubernetes = undefined
-      }
     })
 
   const codingSummary = [
@@ -841,36 +837,17 @@ export function WorkbenchModesAndTokenLimitStep({
                 isOpen={openPanel === 'coding'}
                 onOpenChange={(open) => setOpenPanel(open ? 'coding' : null)}
               >
-                <Overline>Supervision</Overline>
-                <WorkbenchPromptSupervisionOption
-                  icon={
-                    <WarningShieldIcon
-                      size={16}
-                      color="icon-light"
-                    />
-                  }
-                  label="Requires approval"
-                  hint="Pause for your sign-off before it edits anything or opens a PR."
-                  checked={!!coding?.approval}
-                  onChange={(approval) =>
+                <WorkbenchCodingSupervisionFields
+                  approval={!!coding?.approval}
+                  babysit={!!coding?.babysit}
+                  onApprovalChange={(approval) =>
                     update((d) => {
                       d.modes ??= {}
                       d.modes.plan = false
                       d.modes.coding = { ...d.modes.coding, approval }
                     })
                   }
-                />
-                <WorkbenchPromptSupervisionOption
-                  icon={
-                    <ContainerRuntimeIcon
-                      size={16}
-                      color="icon-light"
-                    />
-                  }
-                  label="Babysit"
-                  hint="Stays active after opening the PR to monitor review feedback and requested changes, then follows up until it’s ready to merge."
-                  checked={!!coding?.babysit}
-                  onChange={(babysit) =>
+                  onBabysitChange={(babysit) =>
                     update((d) => {
                       d.modes ??= {}
                       d.modes.plan = false
@@ -890,55 +867,36 @@ export function WorkbenchModesAndTokenLimitStep({
                   setOpenPanel(open ? 'kubernetes' : null)
                 }
               >
-                <Overline>Kubernetes actions</Overline>
-                <Body2P $color="text-xlight">
-                  Reads are always permitted. Every mutation you enable below
-                  still requires your approval before it runs.
-                </Body2P>
-                <Flex
-                  direction="column"
-                  gap="xxsmall"
-                >
-                  <Checkbox
-                    small
-                    checked={!!kubernetes?.update}
-                    onChange={(e) =>
-                      update((d) => {
-                        d.modes ??= {}
-                        d.modes.kubernetes = {
-                          ...d.modes.kubernetes,
-                          update: e.target.checked,
-                          delete: d.modes.kubernetes?.delete ?? false,
-                        }
-                      })
-                    }
-                  >
-                    Allow updates
-                  </Checkbox>
-                  <Checkbox
-                    small
-                    checked={!!kubernetes?.delete}
-                    onChange={(e) =>
-                      update((d) => {
-                        d.modes ??= {}
-                        d.modes.kubernetes = {
-                          ...d.modes.kubernetes,
-                          update: d.modes.kubernetes?.update ?? false,
-                          delete: e.target.checked,
-                        }
-                      })
-                    }
-                  >
-                    Allow deletes
-                  </Checkbox>
-                </Flex>
+                <WorkbenchKubernetesMutationFields
+                  allowUpdates={!!kubernetes?.update}
+                  allowDeletes={!!kubernetes?.delete}
+                  onAllowUpdatesChange={(checked) =>
+                    update((d) => {
+                      d.modes ??= {}
+                      d.modes.kubernetes = {
+                        ...d.modes.kubernetes,
+                        update: checked,
+                        delete: d.modes.kubernetes?.delete ?? false,
+                      }
+                    })
+                  }
+                  onAllowDeletesChange={(checked) =>
+                    update((d) => {
+                      d.modes ??= {}
+                      d.modes.kubernetes = {
+                        ...d.modes.kubernetes,
+                        update: d.modes.kubernetes?.update ?? false,
+                        delete: checked,
+                      }
+                    })
+                  }
+                />
               </ModeActionRow>
 
               {(!!kubernetes?.update || !!kubernetes?.delete) && (
-                <WorkbenchConfigureActionsStep
+                <WorkbenchKubernetesNamespaceFields
                   formState={formState}
                   setFormState={setFormState}
-                  namespacesOnly
                 />
               )}
             </Flex>
@@ -1177,15 +1135,12 @@ function ModeCard({
   )
 }
 
-export function WorkbenchConfigureActionsStep({
+function WorkbenchKubernetesNamespaceFields({
   formState,
   setFormState,
-  namespacesOnly = false,
-}: WorkbenchFormStepProps & { namespacesOnly?: boolean }) {
+}: WorkbenchFormStepProps) {
   const update = createFormUpdater(setFormState)
   const kubernetes = formState.modes?.kubernetes
-  const allowUpdates = kubernetes?.update ?? false
-  const allowDeletes = kubernetes?.delete ?? false
   const requireNamespaces = (kubernetes?.requireNamespaces ?? []).filter(
     (ns): ns is string => !!ns
   )
@@ -1193,10 +1148,8 @@ export function WorkbenchConfigureActionsStep({
     (ns): ns is string => !!ns
   )
 
-  const setKubernetes = (
+  const setNamespaces = (
     patch: Partial<{
-      update: boolean
-      delete: boolean
       requireNamespaces: string[]
       excludeNamespaces: string[]
     }>
@@ -1204,8 +1157,8 @@ export function WorkbenchConfigureActionsStep({
     update((d) => {
       d.modes ??= {}
       d.modes.kubernetes = {
-        update: allowUpdates,
-        delete: allowDeletes,
+        update: kubernetes?.update ?? false,
+        delete: kubernetes?.delete ?? false,
         requireNamespaces,
         excludeNamespaces,
         ...d.modes.kubernetes,
@@ -1218,46 +1171,18 @@ export function WorkbenchConfigureActionsStep({
       direction="column"
       gap="large"
     >
-      {!namespacesOnly && (
-        <FormField
-          label="Enable Kubernetes actions"
-          hint="Reads are always permitted. Every mutation you enable below still requires your approval before it runs."
-        >
-          <Flex
-            gap="xxxxlarge"
-            wrap="wrap"
-          >
-            <Checkbox
-              small
-              checked={allowUpdates}
-              onChange={(e) => setKubernetes({ update: e.target.checked })}
-            >
-              Allow updates
-            </Checkbox>
-            <Checkbox
-              small
-              checked={allowDeletes}
-              onChange={(e) => setKubernetes({ delete: e.target.checked })}
-            >
-              Allow deletes
-            </Checkbox>
-          </Flex>
-        </FormField>
-      )}
-
       <NamespaceListField
         label="Required namespaces"
         hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist)."
         values={requireNamespaces}
-        onChange={(next) => setKubernetes({ requireNamespaces: next })}
+        onChange={(next) => setNamespaces({ requireNamespaces: next })}
       />
-
       <NamespaceListField
         label="Blacklisted namespaces"
         hint="The agent can never act in these namespaces, even if they're in the required set."
         values={excludeNamespaces}
         severity="danger"
-        onChange={(next) => setKubernetes({ excludeNamespaces: next })}
+        onChange={(next) => setNamespaces({ excludeNamespaces: next })}
       />
     </Flex>
   )
