@@ -131,6 +131,7 @@ function getMenuItems({
       expandedLabel: 'Stacks',
       icon: <StacksNavIcon />,
       path: getStacksAbsPath(''),
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.stacks),
       hotkeys: ['shift S'],
     },
     {
@@ -187,13 +188,14 @@ function getMenuItems({
       expandedLabel: 'Security',
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.security),
     },
     {
       text: 'Cost management',
       expandedLabel: 'Cost management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.cost),
       hotkeys: ['shift C+M'],
     },
     {
