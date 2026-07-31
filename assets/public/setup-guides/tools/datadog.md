@@ -45,6 +45,6 @@ The form currently labels the application key optional, but the Datadog query AP
 
 ## Set the access policy
 
-Use **Read permissions** to control who can access and attach this tool to a workbench. Use **Write permissions** to control who can edit its configuration and access policy.
+Use **Read permissions** to control who can access this tool. Attaching it requires write permission on the workbench. Use **Write permissions** to control who can edit the tool's configuration and access policy.
 
 After saving, attach the configured tool to a workbench and run a query for one of its enabled capabilities.
