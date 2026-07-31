@@ -1,7 +1,6 @@
 defmodule Console.Deployments.PubSub.RecurseTest do
   use Console.DataCase, async: true
   use Mimic
-  alias Console.AI.Provider
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services, Global, Stacks}
   alias Console.Deployments.Git.Discovery
@@ -677,7 +676,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   describe "StackRunUpdated" do
     test "it will delegate stack run approval to ai if configured" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      model = Provider.defaults(:openai)[:tool_model]
+      model = Console.AI.Provider.defaults(:openai)[:model]
       bot = insert(:user, bot_name: "console", roles: %{admin: true})
 
       git = insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")

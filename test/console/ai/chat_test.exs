@@ -288,7 +288,7 @@ defmodule Console.AI.ChatTest do
     test "it can spawn a pr from a thread" do
       insert(:scm_connection, token: "some-pat", default: true)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      model = Provider.defaults(:openai)[:tool_model]
+      model = Provider.defaults(:openai)[:model]
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "plrl/ai/pr-test" <> _} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
@@ -519,7 +519,7 @@ defmodule Console.AI.ChatSyncTest do
       thread = insert(:chat_thread, user: user)
       insert(:agent_session, thread: thread)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      model = Provider.defaults(:openai)[:tool_model]
+      model = Console.AI.Provider.defaults(:openai)[:tool_model]
 
       expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{

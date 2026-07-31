@@ -42,7 +42,7 @@ defmodule Console.Cost.PrTest do
       expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
       expect(File, :write, fn _, "first" -> :ok end)
       expect(File, :write, fn _, "second" -> :ok end)
-      model = Provider.defaults(:openai)[:tool_model]
+      model = Provider.defaults(:openai)[:model]
       expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",

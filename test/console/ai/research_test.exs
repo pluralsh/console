@@ -37,7 +37,7 @@ defmodule Console.AI.ResearchTest do
       user = insert(:user)
       research = insert(:infra_research, user: user, diagram: "diagram")
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
-      model = Provider.defaults(:openai)[:tool_model]
+      model = Provider.defaults(:openai)[:model]
 
       expect(ReqLLM, :generate_text, fn %{provider: :openai, model: ^model}, _, _ ->
         Jason.encode!(%{
