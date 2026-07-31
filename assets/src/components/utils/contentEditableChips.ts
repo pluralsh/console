@@ -36,6 +36,17 @@ export function decodeChipAttrValue(value: string): string {
   return unescape(value.replace(/&#10;/g, '\n').replace(/&#9;/g, '\t'))
 }
 
+export function serializeChipAttrs(
+  tag: MentionKind,
+  attrs: Record<string, Nullable<string | undefined>>
+): string {
+  const serialized = Object.entries(attrs)
+    .filter(([, value]) => value != null && value !== '')
+    .map(([name, value]) => `${name}="${encodeChipAttrValue(value ?? '')}"`)
+
+  return `<${tag}${serialized.length ? ` ${serialized.join(' ')}` : ''}></${tag}>`
+}
+
 export const stripZwsp = (text: string): string => text.replace(/​/g, '')
 export const isChipNode = (node: Nullable<Node>): boolean =>
   !!node &&
@@ -53,14 +64,14 @@ function leadingChipFillerLen(text: string): number {
  * self-closing on unknown elements.
  */
 export function serializeChip(el: HTMLElement): string {
-  const tag = el.getAttribute(CHIP_TAG_ATTR) ?? 'plrl-unknown'
-  const attrs: string[] = []
+  const tag = (el.getAttribute(CHIP_TAG_ATTR) ?? 'plrl-unknown') as MentionKind
+  const attrs: Record<string, string> = {}
   for (const attr of Array.from(el.attributes)) {
     if (!attr.name.startsWith(CHIP_ATTR_PREFIX)) continue
     const xmlName = attr.name.slice(CHIP_ATTR_PREFIX.length)
-    attrs.push(`${xmlName}="${encodeChipAttrValue(attr.value)}"`)
+    attrs[xmlName] = attr.value
   }
-  return `<${tag}${attrs.length ? ' ' + attrs.join(' ') : ''}></${tag}>`
+  return serializeChipAttrs(tag, attrs)
 }
 
 /** Serialize the contents of a Range to canonical text (chips → XML). */
