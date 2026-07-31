@@ -70,9 +70,9 @@ export function buildInsightWorkbenchPrompt(
       ? `Investigate ${componentName} end to end.`
       : `Investigate with full context and determine the root cause.`
 
-  return `The one-shot insight on ${subject} may be wrong or incomplete. ${investigateTarget}
+  return `Use the insight on ${subject} as a starting point. ${investigateTarget}
 
-Gather the full context needed to validate or correct the insight, then take the appropriate fix if you can confirm the issue.
+Gather the full context needed, then take the appropriate fix if you can confirm the issue.
 
 Post the conclusion back on the insight.`
 }
