@@ -1,5 +1,5 @@
 import { Flex, MinusIcon, PlusIcon, Switch } from '@pluralsh/design-system'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import type { WorkbenchJobBudgetAttributes } from 'generated/graphql'
 import {
   type ComponentPropsWithoutRef,
@@ -74,7 +74,7 @@ export function WorkbenchBudgetLimitControl({
           }
         />
         <Body2BoldP>{TOKEN_LIMIT_LABEL}</Body2BoldP>
-        <Body2P $color="text-xlight">{TOKEN_LIMIT_HINT}</Body2P>
+        <CaptionP $color="text-xlight">{TOKEN_LIMIT_HINT}</CaptionP>
       </Flex>
       {enabled && (
         <>

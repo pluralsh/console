@@ -1,5 +1,5 @@
 import { Flex, type SemanticColorKey } from '@pluralsh/design-system'
-import { Body2P } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import { type DefaultTheme } from 'styled-components'
 import type { WorkbenchPromptMode } from './workbenchPromptModes'
 import { WorkbenchCodingSupervisionFields } from './WorkbenchModeOptionFields'
@@ -43,7 +43,7 @@ export function WorkbenchPromptModeDetails({
       gap="small"
       height="100%"
     >
-      <Body2P $color="text-xlight">{config.description}</Body2P>
+      <CaptionP $color="text-xlight">{config.description}</CaptionP>
       {config.supervisionOptions && mode === 'agent' && (
         <WorkbenchCodingSupervisionFields
           approval={approval}

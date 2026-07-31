@@ -15,7 +15,7 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import {
   cloneElement,
@@ -379,7 +379,7 @@ function PromptOptionSwitch({
         flex={1}
       >
         <Body2BoldP>{label}</Body2BoldP>
-        <Body2P $color="text-xlight">{hint}</Body2P>
+        <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
       <Switch
         aria-label={label}
@@ -436,7 +436,7 @@ function PromptOptionRow({
           {icon}
           <Body2BoldP>{label}</Body2BoldP>
         </Flex>
-        <Body2P $color="text-xlight">{hint}</Body2P>
+        <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
       <CaretRightIcon
         size={12}

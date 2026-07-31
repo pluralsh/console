@@ -18,6 +18,7 @@ import type { Key } from '@react-types/shared'
 import {
   Body2BoldP,
   Body2P,
+  CaptionP,
   OverlineH3,
 } from 'components/utils/typography/Text'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
@@ -379,10 +380,7 @@ function NamespaceListField({
   }
 
   return (
-    <FormField
-      label={label}
-      hint={hint}
-    >
+    <FormField label={label}>
       <Flex
         direction="column"
         gap="xsmall"
@@ -398,6 +396,7 @@ function NamespaceListField({
           }}
           placeholder="Enter namespace name"
         />
+        <CaptionP $color="text-xlight">{hint}</CaptionP>
         {values.length > 0 && (
           <ChipList
             values={values}
@@ -473,7 +472,7 @@ function ModeActionRow({
           {icon}
           <Body2P>{label}</Body2P>
         </Flex>
-        <Body2P $color="text-xlight">{description}</Body2P>
+        <CaptionP $color="text-xlight">{description}</CaptionP>
       </Flex>
       <div css={{ flex: 1, minWidth: 0 }}>
         <button
@@ -604,7 +603,7 @@ function ModeCard({
           {icon}
           <Body2BoldP>{label}</Body2BoldP>
         </Flex>
-        <Body2P $color="text-xlight">{description}</Body2P>
+        <CaptionP $color="text-xlight">{description}</CaptionP>
       </Flex>
     </button>
   )
