@@ -13,7 +13,6 @@ import {
   KUBERNETES_ACTIONS_HINT,
   VERIFICATION_LOOP_HINT,
   VERIFICATION_LOOP_LABEL,
-  VERIFICATION_LOOP_TOOLTIP,
 } from './workbenchPromptModes'
 import { WorkbenchPromptSupervisionOption } from './WorkbenchPromptSupervisionOption'
 
@@ -39,7 +38,7 @@ export function WorkbenchVerificationLoopControl({
       />
       <Body2BoldP>{VERIFICATION_LOOP_LABEL}</Body2BoldP>
       <Body2P $color="text-xlight">{VERIFICATION_LOOP_HINT}</Body2P>
-      <Tooltip label={VERIFICATION_LOOP_TOOLTIP}>
+      <Tooltip label="Confirms if PR is merged and followup if it didn’t.">
         <InfoOutlineIcon
           size={12}
           color="icon-xlight"

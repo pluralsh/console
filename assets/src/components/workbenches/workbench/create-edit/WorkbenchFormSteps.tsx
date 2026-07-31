@@ -105,7 +105,6 @@ import {
   CODING_AGENT_LABEL,
   KUBERNETES_ACTIONS_HINT,
   KUBERNETES_ACTIONS_LABEL,
-  READ_MODE_DESCRIPTION,
   READ_MODE_LABEL,
   updateBudgetModes,
   WRITE_MODE_HINT,
@@ -815,7 +814,7 @@ export function WorkbenchModesAndTokenLimitStep({
           <ModeCard
             active={selectedMode === 'plan'}
             label={READ_MODE_LABEL}
-            description={READ_MODE_DESCRIPTION}
+            description="Run entirely in read-only mode. No PRs will be created, use for exploring infrastructure or root cause analysis."
             icon={<ListIcon size={16} />}
             onClick={() => setMode('plan')}
           />

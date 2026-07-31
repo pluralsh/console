@@ -39,7 +39,6 @@ import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
 import {
   CODING_AGENT_LABEL,
   KUBERNETES_ACTIONS_LABEL,
-  READ_MODE_HINT,
   READ_MODE_LABEL,
   TOKEN_LIMIT_HINT,
   TOKEN_LIMIT_LABEL,
@@ -155,7 +154,11 @@ export function WorkbenchPromptOptionsSelector({
           >
             <PromptOptionSwitch
               label={readMode ? READ_MODE_LABEL : WRITE_MODE_LABEL}
-              hint={readMode ? READ_MODE_HINT : WRITE_MODE_HINT}
+              hint={
+                readMode
+                  ? 'Agents explore and report, no PRs are created.'
+                  : WRITE_MODE_HINT
+              }
               checked={!readMode}
               onChange={(checked) => {
                 const nextReadMode = !checked
