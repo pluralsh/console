@@ -1539,6 +1539,14 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.63.1-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.63.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4589,6 +4597,14 @@
   publisher: eks
 - name: chainguard_aws-ebs-csi-driver-fips
   versions:
+  - version: v2.63.10001020260729-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.62.10000020260721-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4695,6 +4711,15 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.0.10000020260728-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
@@ -4727,6 +4752,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.10009020260423-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10000020260729-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -7378,6 +7408,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.36.0-eksbuild.14
+    compatibilities:
+    - '1.36'
   - version: v1.36.0-eksbuild.13
     compatibilities:
     - '1.36'
@@ -9931,6 +9964,14 @@
   publisher: rafay-systems
 - name: snapshot-controller
   versions:
+  - version: v8.6.0-eksbuild.4
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v8.6.0-eksbuild.3
     compatibilities:
     - '1.36'
