@@ -1084,12 +1084,8 @@ function ModeCard({
         padding: theme.spacing.medium,
         color: theme.colors.text,
         textAlign: 'left',
-        background: active
-          ? theme.colors['fill-two-selected']
-          : theme.colors['fill-two'],
-        border: active
-          ? theme.borders['outline-focused']
-          : theme.borders['fill-two'],
+        background: 'transparent',
+        border: active ? theme.borders.input : theme.borders.default,
         borderRadius: theme.borderRadiuses.medium,
         cursor: 'pointer',
       }}
@@ -1100,7 +1096,7 @@ function ModeCard({
           height: 16,
           marginTop: 2,
           borderRadius: '50%',
-          border: `1px solid ${active ? theme.colors['border-primary'] : theme.colors['border-input']}`,
+          border: `1px solid ${active ? theme.colors['border-selected'] : theme.colors['border-input']}`,
           boxShadow: active
             ? `inset 0 0 0 3px ${theme.colors['fill-two']}`
             : undefined,
