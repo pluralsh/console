@@ -31,6 +31,7 @@ import {
   WorkbenchBudgetAmountControl,
   formatBudgetLimitLabel,
 } from './WorkbenchBudgetLimit'
+import { WorkbenchBudgetSpendCapWarning } from './WorkbenchBudgetSpendCapWarning'
 import {
   WorkbenchCodingSupervisionFields,
   WorkbenchKubernetesMutationFields,
@@ -55,10 +56,12 @@ const SIDE_PANEL_WIDTH = 394
 type SidePanel = 'coding' | 'kubernetes'
 
 export function WorkbenchPromptOptionsSelector({
+  workbenchId,
   value,
   onChange,
   disabled = false,
 }: {
+  workbenchId?: Nullable<string>
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   disabled?: boolean
@@ -80,6 +83,7 @@ export function WorkbenchPromptOptionsSelector({
     minWidth: contentWidth,
     maxHeight: 600,
     minHeight: 0,
+    sizeToContent: true,
     placement: 'left',
   })
   const { buttonProps } = useButton(
@@ -93,7 +97,7 @@ export function WorkbenchPromptOptionsSelector({
   useLayoutEffect(() => {
     if (!isOpen) return
     void floating.update()
-  }, [contentWidth, isOpen, floating])
+  }, [contentWidth, isOpen, floating, tokenLimitEnabled, sidePanel])
 
   const trigger = (
     <ChatOptionPill
@@ -262,14 +266,20 @@ export function WorkbenchPromptOptionsSelector({
               }
             />
             {tokenLimitEnabled && (
-              <WorkbenchBudgetAmountControl
-                value={value?.budget}
-                onChange={(budget) =>
-                  onChange(updateBudgetModes(value, budget))
-                }
-                disabled={disabled}
-                stacked
-              />
+              <>
+                <WorkbenchBudgetAmountControl
+                  value={value?.budget}
+                  onChange={(budget) =>
+                    onChange(updateBudgetModes(value, budget))
+                  }
+                  disabled={disabled}
+                  stacked
+                />
+                <WorkbenchBudgetSpendCapWarning
+                  workbenchId={workbenchId}
+                  budget={value?.budget}
+                />
+              </>
             )}
           </Card>
           {sidePanel === 'coding' && (

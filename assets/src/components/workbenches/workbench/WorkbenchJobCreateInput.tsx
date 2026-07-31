@@ -212,6 +212,7 @@ export function WorkbenchJobCreateInput({
               height={32}
             >
               <WorkbenchPromptOptionsSelector
+                workbenchId={workbenchId}
                 value={promptModes}
                 onChange={setPromptModes}
                 disabled={disabled || loading}
