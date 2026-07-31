@@ -867,99 +867,96 @@ export function WorkbenchModesAndTokenLimitStep({
             />
           </Select>
 
-          {(codingEnabled || kubernetesEnabled) && (
-            <Flex
-              direction="column"
-              gap="medium"
+          <Flex
+            direction="column"
+            gap="medium"
+          >
+            <ModeActionRow
+              icon={<DiscoverIcon size={16} />}
+              label={CODING_AGENT_LABEL}
+              description={WRITE_MODE_HINT}
+              disabled={!codingEnabled}
+              summary={codingSummary || 'Configure supervision'}
+              isOpen={openPanel === 'coding'}
+              onOpenChange={(open) => setOpenPanel(open ? 'coding' : null)}
             >
-              {codingEnabled && (
-                <ModeActionRow
-                  icon={<DiscoverIcon size={16} />}
-                  label={CODING_AGENT_LABEL}
-                  description={WRITE_MODE_HINT}
-                  summary={codingSummary || 'Configure supervision'}
-                  isOpen={openPanel === 'coding'}
-                  onOpenChange={(open) => setOpenPanel(open ? 'coding' : null)}
-                >
-                  <WorkbenchCodingSupervisionFields
-                    approval={!!coding?.approval}
-                    babysit={!!coding?.babysit}
-                    onApprovalChange={(approval) =>
-                      update((d) => {
-                        d.modes ??= {}
-                        d.modes.plan = false
-                        d.modes.coding = { ...d.modes.coding, approval }
-                      })
-                    }
-                    onBabysitChange={(babysit) =>
-                      update((d) => {
-                        d.modes ??= {}
-                        d.modes.plan = false
-                        d.modes.coding = { ...d.modes.coding, babysit }
-                      })
-                    }
-                  />
-                </ModeActionRow>
-              )}
+              <WorkbenchCodingSupervisionFields
+                approval={!!coding?.approval}
+                babysit={!!coding?.babysit}
+                onApprovalChange={(approval) =>
+                  update((d) => {
+                    d.modes ??= {}
+                    d.modes.plan = false
+                    d.modes.coding = { ...d.modes.coding, approval }
+                  })
+                }
+                onBabysitChange={(babysit) =>
+                  update((d) => {
+                    d.modes ??= {}
+                    d.modes.plan = false
+                    d.modes.coding = { ...d.modes.coding, babysit }
+                  })
+                }
+              />
+            </ModeActionRow>
 
-              {kubernetesEnabled && (
-                <ModeActionRow
-                  icon={<KubernetesIcon size={16} />}
-                  label={KUBERNETES_ACTIONS_LABEL}
-                  description={KUBERNETES_ACTIONS_HINT}
-                  summary={kubernetesSummary || 'Configure actions'}
-                  isOpen={openPanel === 'kubernetes'}
-                  onOpenChange={(open) =>
-                    setOpenPanel(open ? 'kubernetes' : null)
-                  }
-                >
-                  <WorkbenchKubernetesMutationFields
-                    allowUpdates={!!kubernetes?.update}
-                    allowDeletes={!!kubernetes?.delete}
-                    onAllowUpdatesChange={(checked) => {
-                      update((d) => {
-                        d.modes ??= {}
-                        const deleteEnabled =
-                          d.modes.kubernetes?.delete ?? false
-                        d.modes.kubernetes =
-                          checked || deleteEnabled
-                            ? {
-                                ...d.modes.kubernetes,
-                                update: checked,
-                                delete: deleteEnabled,
-                              }
-                            : undefined
-                      })
-                      if (!checked && !kubernetes?.delete) setOpenPanel(null)
-                    }}
-                    onAllowDeletesChange={(checked) => {
-                      update((d) => {
-                        d.modes ??= {}
-                        const updateEnabled =
-                          d.modes.kubernetes?.update ?? false
-                        d.modes.kubernetes =
-                          checked || updateEnabled
-                            ? {
-                                ...d.modes.kubernetes,
-                                update: updateEnabled,
-                                delete: checked,
-                              }
-                            : undefined
-                      })
-                      if (!checked && !kubernetes?.update) setOpenPanel(null)
-                    }}
-                  />
-                </ModeActionRow>
-              )}
+            <ModeActionRow
+              icon={<KubernetesIcon size={16} />}
+              label={KUBERNETES_ACTIONS_LABEL}
+              description={KUBERNETES_ACTIONS_HINT}
+              disabled={!kubernetesEnabled}
+              summary={kubernetesSummary || 'Configure actions'}
+              isOpen={openPanel === 'kubernetes'}
+              onOpenChange={(open) => setOpenPanel(open ? 'kubernetes' : null)}
+            >
+              <WorkbenchKubernetesMutationFields
+                allowUpdates={!!kubernetes?.update}
+                allowDeletes={!!kubernetes?.delete}
+                onAllowUpdatesChange={(checked) => {
+                  update((d) => {
+                    d.modes ??= {}
+                    const deleteEnabled = d.modes.kubernetes?.delete ?? false
+                    d.modes.kubernetes =
+                      checked || deleteEnabled
+                        ? {
+                            ...d.modes.kubernetes,
+                            update: checked,
+                            delete: deleteEnabled,
+                          }
+                        : undefined
+                  })
+                  if (!checked && !kubernetes?.delete) setOpenPanel(null)
+                }}
+                onAllowDeletesChange={(checked) => {
+                  update((d) => {
+                    d.modes ??= {}
+                    const updateEnabled = d.modes.kubernetes?.update ?? false
+                    d.modes.kubernetes =
+                      checked || updateEnabled
+                        ? {
+                            ...d.modes.kubernetes,
+                            update: updateEnabled,
+                            delete: checked,
+                          }
+                        : undefined
+                  })
+                  if (!checked && !kubernetes?.update) setOpenPanel(null)
+                }}
+              />
+            </ModeActionRow>
 
-              {kubernetesEnabled && (
-                <WorkbenchKubernetesNamespaceFields
-                  formState={formState}
-                  setFormState={setFormState}
-                />
-              )}
-            </Flex>
-          )}
+            <div
+              css={{
+                opacity: kubernetesEnabled ? 1 : 0.7,
+                pointerEvents: kubernetesEnabled ? undefined : 'none',
+              }}
+            >
+              <WorkbenchKubernetesNamespaceFields
+                formState={formState}
+                setFormState={setFormState}
+              />
+            </div>
+          </Flex>
         </Card>
       )}
 
@@ -994,6 +991,7 @@ function ModeActionRow({
   icon,
   label,
   description,
+  disabled = false,
   summary,
   isOpen,
   onOpenChange,
@@ -1002,6 +1000,7 @@ function ModeActionRow({
   icon: ReactNode
   label: string
   description: string
+  disabled?: boolean
   summary: string
   isOpen: boolean
   onOpenChange: (open: boolean) => void
@@ -1018,7 +1017,8 @@ function ModeActionRow({
   })
   const { buttonProps } = useButton(
     {
-      onPress: () => onOpenChange(!isOpen),
+      onPress: () => !disabled && onOpenChange(!isOpen),
+      isDisabled: disabled,
     },
     triggerRef
   )
@@ -1027,6 +1027,10 @@ function ModeActionRow({
     <Flex
       align="center"
       gap="large"
+      css={{
+        opacity: disabled ? 0.7 : 1,
+        pointerEvents: disabled ? 'none' : undefined,
+      }}
     >
       <Flex
         direction="column"
@@ -1048,6 +1052,7 @@ function ModeActionRow({
           type="button"
           ref={mergedTriggerRef}
           {...buttonProps}
+          disabled={disabled}
           css={{
             ...theme.partials.reset.button,
             display: 'flex',
@@ -1059,7 +1064,7 @@ function ModeActionRow({
             background: theme.colors['fill-one'],
             border: theme.borders.input,
             borderRadius: theme.borderRadiuses.medium,
-            cursor: 'pointer',
+            cursor: disabled ? 'not-allowed' : 'pointer',
             textAlign: 'left',
           }}
         >
@@ -1084,7 +1089,7 @@ function ModeActionRow({
           />
         </button>
         <WorkbenchPromptPopover
-          isOpen={isOpen}
+          isOpen={!disabled && isOpen}
           onClose={() => onOpenChange(false)}
           floating={floating}
         >
