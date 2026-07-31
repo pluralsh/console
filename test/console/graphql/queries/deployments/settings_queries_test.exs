@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
   use Console.DataCase, async: true
+  alias Console.AI.Provider
   alias Console.Deployments.Settings
 
   describe "project" do
@@ -42,6 +43,8 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
 
   describe "defaultModels" do
     test "it lists the configured provider defaults" do
+      openai_defaults = Provider.defaults(:openai)
+
       {:ok, %{data: %{"defaultModels" => found}}} =
         run_query(
           """
@@ -55,9 +58,9 @@ defmodule Console.GraphQl.Deployments.SettingsQueriesTest do
 
       assert Enum.find(found, &(&1["provider"] == "OPENAI")) == %{
                "provider" => "OPENAI",
-               "model" => "gpt-5.4-mini",
-               "toolModel" => "gpt-5.4",
-               "embeddingModel" => "text-embedding-3-large"
+               "model" => openai_defaults[:model],
+               "toolModel" => openai_defaults[:tool_model],
+               "embeddingModel" => openai_defaults[:embedding_model]
              }
 
       assert Enum.find(found, &(&1["provider"] == "ANTHROPIC")) == %{

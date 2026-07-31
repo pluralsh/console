@@ -83,9 +83,10 @@ config :console,
 
 config :console, :ai_defaults,
   openai: %{
-    model: "gpt-5.4-mini",
-    tool_model: "gpt-5.4",
-    embedding_model: "text-embedding-3-large"
+    model: "gpt-5.6-luna",
+    tool_model: "gpt-5.6-terra",
+    embedding_model: "text-embedding-3-large",
+    proxy_models: ["gpt-5.4", "gpt-5.4-mini"]
   },
   xai: %{
     model: "grok-4.5",
