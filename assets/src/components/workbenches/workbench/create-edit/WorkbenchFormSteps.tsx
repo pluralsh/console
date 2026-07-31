@@ -14,7 +14,6 @@ import {
   Flex,
   FormField,
   IconFrame,
-  InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
   KubernetesIcon,
@@ -97,10 +96,15 @@ import { WorkbenchBudgetLimitControl } from '../WorkbenchPromptModeSelector/Work
 import {
   WorkbenchCodingSupervisionFields,
   WorkbenchKubernetesMutationFields,
+  WorkbenchVerificationLoopControl,
 } from '../WorkbenchPromptModeSelector/WorkbenchModeOptionFields'
 import { WorkbenchPromptPopover } from '../WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
 import {
   attributesForPromptMode,
+  CODING_AGENT_LABEL,
+  KUBERNETES_ACTIONS_HINT,
+  KUBERNETES_ACTIONS_LABEL,
+  READ_MODE_DESCRIPTION,
   updateBudgetModes,
 } from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
@@ -773,7 +777,7 @@ export function WorkbenchModesAndTokenLimitStep({
           <ModeCard
             active={selectedMode === 'plan'}
             label="Read mode"
-            description="Run entirely in read-only mode. No PRs will be created, use for exploring infrastructure or root cause analysis."
+            description={READ_MODE_DESCRIPTION}
             icon={<ListIcon size={16} />}
             onClick={() => setMode('plan')}
           />
@@ -831,7 +835,7 @@ export function WorkbenchModesAndTokenLimitStep({
             >
               <ModeActionRow
                 icon={<DiscoverIcon size={16} />}
-                label="Coding agent"
+                label={CODING_AGENT_LABEL}
                 description="Full access. Agents edit code, apply changes and open pull requests to fix what they find."
                 summary={codingSummary || 'Configure supervision'}
                 isOpen={openPanel === 'coding'}
@@ -859,8 +863,8 @@ export function WorkbenchModesAndTokenLimitStep({
 
               <ModeActionRow
                 icon={<KubernetesIcon size={16} />}
-                label="Enable Kubernetes actions"
-                description="Reads are always permitted. Every mutation you enable below still requires your approval before it runs."
+                label={KUBERNETES_ACTIONS_LABEL}
+                description={KUBERNETES_ACTIONS_HINT}
                 summary={kubernetesSummary || 'Configure actions'}
                 isOpen={openPanel === 'kubernetes'}
                 onOpenChange={(open) =>
@@ -909,31 +913,15 @@ export function WorkbenchModesAndTokenLimitStep({
         gap="medium"
       >
         <OverlineH3 $color="text-xlight">Global settings</OverlineH3>
-        <Flex
-          align="center"
-          gap="small"
-        >
-          <Switch
-            aria-label="Verification loop"
-            checked={modes?.verification ?? false}
-            onChange={(verification) =>
-              update((d) => {
-                d.modes ??= {}
-                d.modes.verification = verification
-              })
-            }
-          />
-          <Body2BoldP>Verification loop</Body2BoldP>
-          <Body2P $color="text-xlight">
-            Auto-trigger a verification loop after PRs.
-          </Body2P>
-          <Tooltip label="Confirms if PR is merged and followup if it didn’t.">
-            <InfoOutlineIcon
-              size={12}
-              color="icon-xlight"
-            />
-          </Tooltip>
-        </Flex>
+        <WorkbenchVerificationLoopControl
+          checked={modes?.verification ?? false}
+          onChange={(verification) =>
+            update((d) => {
+              d.modes ??= {}
+              d.modes.verification = verification
+            })
+          }
+        />
         <WorkbenchBudgetLimitControl
           value={modes?.budget}
           onChange={(budget) =>
@@ -941,7 +929,6 @@ export function WorkbenchModesAndTokenLimitStep({
               d.modes = updateBudgetModes(d.modes, budget)
             })
           }
-          disabled={false}
         />
       </Flex>
     </Flex>

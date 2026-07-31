@@ -1,12 +1,5 @@
-import {
-  Flex,
-  InfoOutlineIcon,
-  ListBoxItem,
-  Select,
-  Switch,
-  Tooltip,
-} from '@pluralsh/design-system'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Flex, ListBoxItem, Select } from '@pluralsh/design-system'
+import { Body2BoldP } from 'components/utils/typography/Text'
 import type {
   WorkbenchJobCodingModesAttributes,
   WorkbenchJobModesAttributes,
@@ -17,6 +10,7 @@ import {
   WorkbenchPromptModeDetails,
   workbenchPromptModeIconColor,
 } from './WorkbenchPromptModeDetails'
+import { WorkbenchVerificationLoopControl } from './WorkbenchModeOptionFields'
 import { WORKBENCH_PROMPT_MODES } from './WorkbenchPromptModeSelector'
 import {
   attributesForPromptMode,
@@ -43,12 +37,7 @@ export function WorkbenchModesForm({
   )!
 
   const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
-    onChange(
-      updateCodingModes(
-        value?.plan ? attributesForPromptMode('agent', value) : value,
-        coding
-      )
-    )
+    onChange(updateCodingModes(value, coding))
 
   return (
     <Flex
@@ -101,30 +90,13 @@ export function WorkbenchModesForm({
           babysit={!!value?.coding?.babysit}
           onApprovalChange={(approval) => setCoding({ approval })}
           onBabysitChange={(babysit) => setCoding({ babysit })}
-          showHeader={false}
         />
       </Flex>
-      <Flex
-        align="center"
-        gap="small"
-      >
-        <Switch
-          aria-label="Verification loop"
-          checked={value?.verification ?? false}
-          disabled={disabled}
-          onChange={(verification) => onChange({ ...value, verification })}
-        />
-        <Body2BoldP>Verification loop</Body2BoldP>
-        <Body2P $color="text-xlight">
-          Auto-trigger a verification loop after PRs.
-        </Body2P>
-        <Tooltip label="Confirms if PR is merged and followup if it didn’t.">
-          <InfoOutlineIcon
-            size={12}
-            color="icon-xlight"
-          />
-        </Tooltip>
-      </Flex>
+      <WorkbenchVerificationLoopControl
+        checked={value?.verification ?? false}
+        disabled={disabled}
+        onChange={(verification) => onChange({ ...value, verification })}
+      />
       <WorkbenchBudgetLimitControl
         workbenchId={workbenchId}
         value={value?.budget}

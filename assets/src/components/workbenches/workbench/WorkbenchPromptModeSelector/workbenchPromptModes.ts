@@ -7,6 +7,23 @@ import type {
 
 export type WorkbenchPromptMode = 'agent' | 'plan'
 
+export const VERIFICATION_LOOP_LABEL = 'Verification loop'
+export const VERIFICATION_LOOP_HINT =
+  'Auto-trigger a verification loop after PRs.'
+export const VERIFICATION_LOOP_TOOLTIP =
+  'Confirms if PR is merged and followup if it didn’t.'
+export const TOKEN_LIMIT_LABEL = 'Set token limit'
+export const TOKEN_LIMIT_HINT =
+  'Set a dollar or token limit. Default is unlimited.'
+export const READ_MODE_LABEL = 'Read mode'
+export const READ_MODE_HINT = 'Agents explore and report, no PRs are created.'
+export const READ_MODE_DESCRIPTION =
+  'Run entirely in read-only mode. No PRs will be created, use for exploring infrastructure or root cause analysis.'
+export const CODING_AGENT_LABEL = 'Coding agent'
+export const KUBERNETES_ACTIONS_LABEL = 'Enable Kubernetes actions'
+export const KUBERNETES_ACTIONS_HINT =
+  'Reads are always permitted. Every mutation you enable below still requires your approval before it runs.'
+
 export function attributesForPromptMode(
   mode: WorkbenchPromptMode,
   current: WorkbenchJobModesAttributes | null

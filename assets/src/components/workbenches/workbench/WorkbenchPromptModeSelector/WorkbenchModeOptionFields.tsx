@@ -2,11 +2,52 @@ import {
   Checkbox,
   ContainerRuntimeIcon,
   Flex,
+  InfoOutlineIcon,
+  Switch,
+  Tooltip,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import {
+  KUBERNETES_ACTIONS_HINT,
+  VERIFICATION_LOOP_HINT,
+  VERIFICATION_LOOP_LABEL,
+  VERIFICATION_LOOP_TOOLTIP,
+} from './workbenchPromptModes'
 import { WorkbenchPromptSupervisionOption } from './WorkbenchPromptSupervisionOption'
+
+export function WorkbenchVerificationLoopControl({
+  checked,
+  onChange,
+  disabled = false,
+}: {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+}) {
+  return (
+    <Flex
+      align="center"
+      gap="small"
+    >
+      <Switch
+        aria-label={VERIFICATION_LOOP_LABEL}
+        checked={checked}
+        disabled={disabled}
+        onChange={onChange}
+      />
+      <Body2BoldP>{VERIFICATION_LOOP_LABEL}</Body2BoldP>
+      <Body2P $color="text-xlight">{VERIFICATION_LOOP_HINT}</Body2P>
+      <Tooltip label={VERIFICATION_LOOP_TOOLTIP}>
+        <InfoOutlineIcon
+          size={12}
+          color="icon-xlight"
+        />
+      </Tooltip>
+    </Flex>
+  )
+}
 
 export function WorkbenchCodingSupervisionFields({
   approval,
@@ -55,23 +96,16 @@ export function WorkbenchKubernetesMutationFields({
   allowDeletes,
   onAllowUpdatesChange,
   onAllowDeletesChange,
-  showDescription = true,
 }: {
   allowUpdates: boolean
   allowDeletes: boolean
   onAllowUpdatesChange: (checked: boolean) => void
   onAllowDeletesChange: (checked: boolean) => void
-  showDescription?: boolean
 }) {
   return (
     <>
       <Overline>Kubernetes actions</Overline>
-      {showDescription && (
-        <Body2P $color="text-xlight">
-          Reads are always permitted. Every mutation you enable below still
-          requires your approval before it runs.
-        </Body2P>
-      )}
+      <Body2P $color="text-xlight">{KUBERNETES_ACTIONS_HINT}</Body2P>
       <Flex
         direction="column"
         gap="xxsmall"

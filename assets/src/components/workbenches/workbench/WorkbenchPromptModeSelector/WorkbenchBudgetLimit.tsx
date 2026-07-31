@@ -11,6 +11,7 @@ import {
 import styled from 'styled-components'
 import { formatTokenCount } from '../../common/workbenchUsage'
 import { WorkbenchBudgetSpendCapWarning } from './WorkbenchBudgetSpendCapWarning'
+import { TOKEN_LIMIT_HINT, TOKEN_LIMIT_LABEL } from './workbenchPromptModes'
 
 type BudgetUnit = 'dollars' | 'tokens'
 
@@ -72,10 +73,8 @@ export function WorkbenchBudgetLimitControl({
             onChange(checked ? defaultBudget(preferredUnit) : undefined)
           }
         />
-        <Body2BoldP>Set token limit</Body2BoldP>
-        <Body2P $color="text-xlight">
-          Set a dollar or token limit. Default is unlimited.
-        </Body2P>
+        <Body2BoldP>{TOKEN_LIMIT_LABEL}</Body2BoldP>
+        <Body2P $color="text-xlight">{TOKEN_LIMIT_HINT}</Body2P>
       </Flex>
       {enabled && (
         <>

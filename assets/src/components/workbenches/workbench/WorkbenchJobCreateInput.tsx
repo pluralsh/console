@@ -24,6 +24,7 @@ import {
   useWorkbenchQuery,
   WorkbenchJobFragment,
   WorkbenchJobModelAttributes,
+  type WorkbenchJobModesAttributes,
   WorkbenchPromptFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
@@ -51,7 +52,6 @@ import {
   defaultPromptModesFromWorkbench,
   modesAttributes,
 } from './WorkbenchPromptModeSelector/workbenchPromptModes'
-import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import { CaptionP } from 'components/utils/typography/Text'
 
 const MAX_WIDTH = 924

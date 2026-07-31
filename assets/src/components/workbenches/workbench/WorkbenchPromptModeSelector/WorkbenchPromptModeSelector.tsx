@@ -19,7 +19,6 @@ export const WORKBENCH_PROMPT_MODES: (WorkbenchPromptModeConfig & {
   {
     mode: 'agent',
     label: 'Coding agent',
-    triggerLabel: 'Coding',
     Icon: DiscoverIcon,
     description: 'Tune coding agent functionality for this job.',
     supervisionOptions: true,

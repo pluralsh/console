@@ -36,7 +36,18 @@ import {
   WorkbenchKubernetesMutationFields,
 } from './WorkbenchModeOptionFields'
 import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
-import { updateBudgetModes } from './workbenchPromptModes'
+import {
+  CODING_AGENT_LABEL,
+  KUBERNETES_ACTIONS_LABEL,
+  READ_MODE_HINT,
+  READ_MODE_LABEL,
+  TOKEN_LIMIT_HINT,
+  TOKEN_LIMIT_LABEL,
+  updateBudgetModes,
+  updateCodingModes,
+  VERIFICATION_LOOP_HINT,
+  VERIFICATION_LOOP_LABEL,
+} from './workbenchPromptModes'
 
 const PANEL_WIDTH = 373
 const SIDE_PANEL_WIDTH = 394
@@ -140,8 +151,8 @@ export function WorkbenchPromptOptionsSelector({
             }}
           >
             <PromptOptionSwitch
-              label="Read mode"
-              hint="Agents explore and report, no PRs are created."
+              label={READ_MODE_LABEL}
+              hint={READ_MODE_HINT}
               checked={readMode}
               onChange={(checked) => {
                 if (checked) setSidePanel(null)
@@ -164,7 +175,7 @@ export function WorkbenchPromptOptionsSelector({
                 gap="small"
               >
                 <PromptOptionCheckbox
-                  label="Coding agent"
+                  label={CODING_AGENT_LABEL}
                   hint="Edits code and opens PRs"
                   icon={<DiscoverIcon size={12} />}
                   checked={codingEnabled}
@@ -188,7 +199,7 @@ export function WorkbenchPromptOptionsSelector({
                   }}
                 />
                 <PromptOptionCheckbox
-                  label="Enable Kubernetes actions"
+                  label={KUBERNETES_ACTIONS_LABEL}
                   hint="Applies changes to live clusters"
                   icon={<KubernetesIcon size={12} />}
                   checked={kubernetesEnabled}
@@ -224,15 +235,15 @@ export function WorkbenchPromptOptionsSelector({
 
             <Divider />
             <PromptOptionSwitch
-              label="Verification loop"
-              hint="Auto-trigger a verification loop after PRs."
+              label={VERIFICATION_LOOP_LABEL}
+              hint={VERIFICATION_LOOP_HINT}
               checked={value?.verification ?? false}
               onChange={(verification) => onChange({ ...value, verification })}
             />
             <Divider />
             <PromptOptionSwitch
-              label="Set token limit"
-              hint="Set a dollar or token limit. Default is unlimited."
+              label={TOKEN_LIMIT_LABEL}
+              hint={TOKEN_LIMIT_HINT}
               checked={tokenLimitEnabled}
               onChange={(checked) =>
                 onChange(
@@ -473,18 +484,10 @@ function CodingSidePanel({
         approval={!!value?.coding?.approval}
         babysit={!!value?.coding?.babysit}
         onApprovalChange={(approval) =>
-          onChange({
-            ...value,
-            plan: false,
-            coding: { ...value?.coding, approval },
-          })
+          onChange(updateCodingModes(value, { approval }))
         }
         onBabysitChange={(babysit) =>
-          onChange({
-            ...value,
-            plan: false,
-            coding: { ...value?.coding, babysit },
-          })
+          onChange(updateCodingModes(value, { babysit }))
         }
       />
     </SidePanelContainer>

@@ -21209,6 +21209,8 @@ export type ClusterVulnerabilityAggregateQuery = { __typename?: 'RootQueryType',
 
 export type WorkbenchTinyFragment = { __typename?: 'Workbench', id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, approval?: boolean | null, cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, mcpServer?: { __typename?: 'McpServer', id: string, name: string, url: string } | null } | null> | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, priority?: number | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null };
 
+export type WorkbenchJobModesFieldsFragment = { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null };
+
 export type IssueWebhookFragment = { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string, insertedAt?: string | null, updatedAt?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type IssueWebhookTinyFragment = { __typename?: 'IssueWebhook', id: string, provider: IssueWebhookProvider };
@@ -26941,6 +26943,30 @@ export const WorkbenchTinyFragmentDoc = gql`
 }
     ${WorkbenchToolTinyFragmentDoc}
 ${WorkbenchWebhookTinyFragmentDoc}`;
+export const WorkbenchJobModesFieldsFragmentDoc = gql`
+    fragment WorkbenchJobModesFields on WorkbenchJobModes {
+  plan
+  verification
+  model {
+    provider
+    model
+  }
+  coding {
+    approval
+    babysit
+  }
+  budget {
+    cost
+    tokens
+  }
+  kubernetes {
+    update
+    delete
+    excludeNamespaces
+    requireNamespaces
+  }
+}
+    `;
 export const WorkbenchToolFragmentDoc = gql`
     fragment WorkbenchTool on WorkbenchTool {
   ...WorkbenchToolTiny
@@ -27119,26 +27145,7 @@ export const WorkbenchFragmentDoc = gql`
     }
   }
   modes {
-    plan
-    verification
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   skills {
     ref {
@@ -27175,6 +27182,7 @@ export const WorkbenchFragmentDoc = gql`
   }
 }
     ${WorkbenchTinyFragmentDoc}
+${WorkbenchJobModesFieldsFragmentDoc}
 ${WorkbenchToolFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
 export const WorkbenchToolQueryDataFragmentDoc = gql`
@@ -27395,33 +27403,14 @@ export const WorkbenchCronFragmentDoc = gql`
   prompt
   userId
   modes {
-    plan
-    verification
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   lastRunAt
   nextRunAt
   insertedAt
   updatedAt
 }
-    `;
+    ${WorkbenchJobModesFieldsFragmentDoc}`;
 export const WorkbenchPromptFragmentDoc = gql`
     fragment WorkbenchPrompt on WorkbenchPrompt {
   id
@@ -27456,26 +27445,7 @@ export const WorkbenchWebhookFragmentDoc = gql`
   priority
   userId
   modes {
-    plan
-    verification
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   matches {
     regex
@@ -27494,7 +27464,8 @@ export const WorkbenchWebhookFragmentDoc = gql`
     ...IssueWebhook
   }
 }
-    ${IssueWebhookFragmentDoc}`;
+    ${WorkbenchJobModesFieldsFragmentDoc}
+${IssueWebhookFragmentDoc}`;
 export const ChatProviderConnectionFragmentDoc = gql`
     fragment ChatProviderConnection on ChatProviderConnection {
   id
@@ -27525,26 +27496,7 @@ export const WorkbenchChatbotFragmentDoc = gql`
   messageBehavior
   userId
   modes {
-    plan
-    verification
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
-    kubernetes {
-      update
-      delete
-      excludeNamespaces
-      requireNamespaces
-    }
+    ...WorkbenchJobModesFields
   }
   insertedAt
   updatedAt
@@ -27558,7 +27510,8 @@ export const WorkbenchChatbotFragmentDoc = gql`
     profile
   }
 }
-    ${ChatProviderConnectionFragmentDoc}`;
+    ${WorkbenchJobModesFieldsFragmentDoc}
+${ChatProviderConnectionFragmentDoc}`;
 export const WorkbenchIssueFragmentDoc = gql`
     fragment WorkbenchIssue on Issue {
   id
@@ -48088,6 +48041,7 @@ export const namedOperations = {
     CvssBundle: 'CvssBundle',
     VulnerabilityReportConnection: 'VulnerabilityReportConnection',
     WorkbenchTiny: 'WorkbenchTiny',
+    WorkbenchJobModesFields: 'WorkbenchJobModesFields',
     IssueWebhook: 'IssueWebhook',
     IssueWebhookTiny: 'IssueWebhookTiny',
     WorkbenchWebhookTiny: 'WorkbenchWebhookTiny',
