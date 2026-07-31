@@ -1,7 +1,7 @@
 defmodule Console.Cost.PrTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.Cost.Pr
+  alias Console.{AI.Provider, Cost.Pr}
 
   describe "#suggestion/2" do
     test "it can generate a completion describing the pr we want to suggest" do
@@ -42,7 +42,8 @@ defmodule Console.Cost.PrTest do
       expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
       expect(File, :write, fn _, "first" -> :ok end)
       expect(File, :write, fn _, "second" -> :ok end)
-      expect(ReqLLM, :generate_text, fn %{model: "gpt-5.4-mini"}, _, _ ->
+      model = Provider.defaults(:openai)[:tool_model]
+      expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [
@@ -74,7 +75,7 @@ defmodule Console.Cost.PrTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        |> ReqLLM.Response.decode_response("openai:#{model}")
       end)
 
       user = insert(:user)

@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Close an open GitLab merge request without merging it.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project ID or path, such as group/subgroup/repository."
+    },
+    "merge_request_iid": {
+      "type": "integer",
+      "description": "Merge request IID (the project-local number)."
+    }
+  },
+  "required": ["project", "merge_request_iid"],
+  "additionalProperties": false
+}

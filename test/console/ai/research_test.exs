@@ -1,6 +1,6 @@
 defmodule Console.AI.ResearchTest do
   use Console.DataCase, async: true
-  alias Console.AI.Research
+  alias Console.AI.{Provider, Research}
   use Mimic
 
   describe "create_research/1" do
@@ -37,8 +37,9 @@ defmodule Console.AI.ResearchTest do
       user = insert(:user)
       research = insert(:infra_research, user: user, diagram: "diagram")
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
+      model = Provider.defaults(:openai)[:tool_model]
 
-      expect(ReqLLM, :generate_text, fn %{provider: :openai, model: "gpt-5.4-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{provider: :openai, model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [%{
@@ -52,7 +53,7 @@ defmodule Console.AI.ResearchTest do
             })
           }]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        |> ReqLLM.Response.decode_response("openai:#{model}")
       end)
 
       {:ok, research} = Research.fix_diagram("some error message", research.id, user)

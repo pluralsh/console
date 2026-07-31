@@ -50,7 +50,7 @@ defmodule Console.AI.Workbench.Heartbeat do
     end
   end
 
-  def terminate(:cancel, _), do: :ok
+  def terminate(:cancel, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:shutdown, %State{job: job, usage: usage}), do: Workbenches.pause_job(job, usage)
   def terminate({:shutdown, {:budget, dim, val}}, %State{job: job, usage: usage}),
     do: Workbenches.fail_job("Budget exceeded, #{dim} consumption of #{val} exceeded limit", job, usage)

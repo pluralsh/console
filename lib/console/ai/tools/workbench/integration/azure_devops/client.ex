@@ -165,6 +165,23 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
     end
   end
 
+  @spec patch_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
+  def patch_json(%{token: _} = client, url, body_map) when is_binary(url) and is_map(body_map) do
+    encoded = Jason.encode!(body_map)
+    headers = json_auth_headers(client)
+
+    case HTTPoison.patch(url, encoded, headers, http_opts()) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+        decode_json(body)
+
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
+
+      {:error, reason} ->
+        Http.error("Azure DevOps", reason)
+    end
+  end
+
   @spec post_empty(map(), String.t()) :: {:ok, term()} | {:error, String.t()}
   def post_empty(%{token: _} = client, url) when is_binary(url) do
     case HTTPoison.post(url, "", basic_auth_header(client), http_opts()) do

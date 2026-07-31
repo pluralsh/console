@@ -1,6 +1,7 @@
 defmodule Console.Deployments.PubSub.RecurseTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.AI.Provider
   alias Console.PubSub
   alias Console.Deployments.{Clusters, Services, Global, Stacks}
   alias Console.Deployments.Git.Discovery
@@ -676,6 +677,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   describe "StackRunUpdated" do
     test "it will delegate stack run approval to ai if configured" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      model = Provider.defaults(:openai)[:tool_model]
       bot = insert(:user, bot_name: "console", roles: %{admin: true})
 
       git = insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
@@ -687,7 +689,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
         configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
       )
       insert(:stack_state, plan: "terraform plan", run: stack_run)
-      expect(ReqLLM, :generate_text, fn %{model: "gpt-5.4-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [
@@ -704,7 +706,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        |> ReqLLM.Response.decode_response("openai:#{model}")
       end)
 
       event = %PubSub.StackRunUpdated{item: stack_run}

@@ -79,8 +79,8 @@ defmodule Console.Deployments.SettingsTest do
       assert model_fields() == [
                %{provider: :openai, model: openai_defaults[:model]},
                %{provider: :openai, model: openai_defaults[:tool_model]},
-               %{provider: :openai, model: "gpt-5.4"},
-               %{provider: :openai, model: "gpt-5.4-mini"},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 0)},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 1)},
                %{provider: :anthropic, model: "claude-4-5-haiku-latest"},
                %{provider: :anthropic, model: "claude-sonnet-5-latest"},
                %{provider: :vertex, model: "claude-haiku-4-5@20251001"},
@@ -108,8 +108,8 @@ defmodule Console.Deployments.SettingsTest do
       assert model_fields() == [
                %{provider: :openai, model: openai_defaults[:model]},
                %{provider: :openai, model: openai_defaults[:tool_model]},
-               %{provider: :openai, model: "gpt-5.4"},
-               %{provider: :openai, model: "gpt-5.4-mini"}
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 0)},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 1)}
              ]
     end
 

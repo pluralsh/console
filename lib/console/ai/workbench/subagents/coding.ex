@@ -16,6 +16,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     Coding.PullRequests
   }
   alias Console.AI.Workbench.{Environment, Heartbeat}
+  alias Console.AI.Workbench.Subagents.Integration
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -73,7 +74,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     do: {:tool, content, %{call_id: id, name: name, arguments: args}}
   defp tool_msg(content, _), do: {:user, content}
 
-  defp tools(activity, %Environment{skills: skills, job: job, activities: activities}) do
+  defp tools(activity, %Environment{skills: skills, tools: workbench_tools, job: job, activities: activities}) do
     skills = Environment.subagent_skills(skills, :coding)
     [
       %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},
@@ -84,6 +85,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       %History{job: job, activities: activities},
       Result
     ]
+    |> Enum.concat(Integration.scm_tools(workbench_tools))
   end
 
   EEx.function_from_file(:defp, :analysis_prompt, Console.priv_filename(["prompts", "workbench", "coding_output.md.eex"]), [:assigns])

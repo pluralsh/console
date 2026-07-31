@@ -4,6 +4,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Tools do
   alias Console.Schema.WorkbenchTool
 
   @all [
+    Console.AI.Tools.Workbench.Integration.Bitbucket.ClosePullRequest,
     Console.AI.Tools.Workbench.Integration.Bitbucket.PullRequestRead,
     Console.AI.Tools.Workbench.Integration.Bitbucket.IssueRead,
     Console.AI.Tools.Workbench.Integration.Bitbucket.CreateComment,

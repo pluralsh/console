@@ -4,6 +4,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Tools do
   alias Console.Schema.WorkbenchTool
 
   @all [
+    Console.AI.Tools.Workbench.Integration.AzureDevops.ClosePullRequest,
     Console.AI.Tools.Workbench.Integration.AzureDevops.PullRequestRead,
     Console.AI.Tools.Workbench.Integration.AzureDevops.WorkItemRead,
     Console.AI.Tools.Workbench.Integration.AzureDevops.CreateComment,

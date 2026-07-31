@@ -15,6 +15,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
     Console.AI.Tools.Workbench.Integration.Github.AddReactionToPullRequestComment,
     Console.AI.Tools.Workbench.Integration.Github.RemoveReactionFromPullRequestComment,
     Console.AI.Tools.Workbench.Integration.Github.AddReplyToPullRequestComment,
+    Console.AI.Tools.Workbench.Integration.Github.ClosePullRequest,
     Console.AI.Tools.Workbench.Integration.Github.ListPullRequests,
     Console.AI.Tools.Workbench.Integration.Github.PullRequestRead,
     Console.AI.Tools.Workbench.Integration.Github.PullRequestReviewWrite,
