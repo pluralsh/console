@@ -778,11 +778,22 @@ export function WorkbenchModesAndTokenLimitStep({
       d.modes ??= {}
       d.modes.plan = false
       d.modes.coding = nextCoding ? (d.modes.coding ?? {}) : null
-      d.modes.kubernetes = nextKubernetes
-        ? d.modes.kubernetes?.update || d.modes.kubernetes?.delete
-          ? d.modes.kubernetes
-          : { update: true, delete: true }
-        : undefined
+      if (nextKubernetes) {
+        const current = d.modes.kubernetes
+        const wasEnabled = !!current?.update || !!current?.delete
+        d.modes.kubernetes = {
+          ...current,
+          update: wasEnabled ? !!current?.update : true,
+          delete: wasEnabled ? !!current?.delete : true,
+        }
+      } else if (d.modes.kubernetes) {
+        // Keep namespace lists; only clear mutation permissions.
+        d.modes.kubernetes = {
+          ...d.modes.kubernetes,
+          update: false,
+          delete: false,
+        }
+      }
     })
     setOpenPanel((panel) => {
       if (panel === 'coding' && !nextCoding) return null
@@ -914,30 +925,22 @@ export function WorkbenchModesAndTokenLimitStep({
                 onAllowUpdatesChange={(checked) => {
                   update((d) => {
                     d.modes ??= {}
-                    const deleteEnabled = d.modes.kubernetes?.delete ?? false
-                    d.modes.kubernetes =
-                      checked || deleteEnabled
-                        ? {
-                            ...d.modes.kubernetes,
-                            update: checked,
-                            delete: deleteEnabled,
-                          }
-                        : undefined
+                    d.modes.kubernetes = {
+                      ...d.modes.kubernetes,
+                      update: checked,
+                      delete: d.modes.kubernetes?.delete ?? false,
+                    }
                   })
                   if (!checked && !kubernetes?.delete) setOpenPanel(null)
                 }}
                 onAllowDeletesChange={(checked) => {
                   update((d) => {
                     d.modes ??= {}
-                    const updateEnabled = d.modes.kubernetes?.update ?? false
-                    d.modes.kubernetes =
-                      checked || updateEnabled
-                        ? {
-                            ...d.modes.kubernetes,
-                            update: updateEnabled,
-                            delete: checked,
-                          }
-                        : undefined
+                    d.modes.kubernetes = {
+                      ...d.modes.kubernetes,
+                      update: d.modes.kubernetes?.update ?? false,
+                      delete: checked,
+                    }
                   })
                   if (!checked && !kubernetes?.update) setOpenPanel(null)
                 }}
