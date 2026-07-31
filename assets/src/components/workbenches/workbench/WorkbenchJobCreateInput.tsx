@@ -376,6 +376,7 @@ function WorkbenchSavedPrompts({
           isOpen={isOpen}
           showArrow={false}
           disabled={disabled}
+          fillLevel={1}
           aria-label="Saved prompts"
           css={{
             width: 32,

@@ -101,6 +101,7 @@ export function WorkbenchPromptOptionsSelector({
       isOpen={isOpen}
       showArrow={false}
       disabled={disabled}
+      fillLevel={1}
       aria-label="Configure modes and token limit"
       css={{
         width: 32,
