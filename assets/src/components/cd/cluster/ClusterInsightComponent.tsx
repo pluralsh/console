@@ -41,7 +41,6 @@ export function ClusterInsightComponent() {
         <ClusterInsightComponentLabel
           component={component}
           loading={!data && (loading || clusterLoading)}
-          icon={null}
         />
       ),
       [component, data, loading, clusterLoading]
