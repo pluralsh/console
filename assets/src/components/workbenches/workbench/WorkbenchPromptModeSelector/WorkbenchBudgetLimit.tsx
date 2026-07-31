@@ -43,12 +43,12 @@ export function WorkbenchBudgetLimitControl({
   workbenchId,
   value,
   onChange,
-  disabled,
+  disabled = false,
 }: {
   workbenchId?: Nullable<string>
   value: WorkbenchJobBudgetAttributes | null | undefined
   onChange: (value: WorkbenchJobBudgetAttributes | undefined) => void
-  disabled: boolean
+  disabled?: boolean
 }) {
   const enabled = value?.tokens != null || value?.cost != null
   const [preferredUnit, setPreferredUnit] = useState<BudgetUnit>(
