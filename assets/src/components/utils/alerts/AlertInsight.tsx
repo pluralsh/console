@@ -10,11 +10,8 @@ import { Link, useParams } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 
 import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from 'components/ai/chatbot/ChatbotButton'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay'
+import { SendInsightToWorkbenchButton } from 'components/ai/insights/SendInsightToWorkbench'
 import {
   PageHeaderContext,
   POLL_INTERVAL,
@@ -128,10 +125,9 @@ export function AlertInsight({
           loading={loading}
           refetch={refetch}
         />
-        <ChatWithAIButton
-          floating
-          insightId={insight?.id}
-          messages={[insightMessage(insight)]}
+        <SendInsightToWorkbenchButton
+          insight={insight}
+          flowId={type === 'flow' ? flowIdOrName : undefined}
         />
         <AISuggestFix insight={insight} />
       </Flex>

@@ -1,9 +1,6 @@
 import { Code, Divider, Flex, Switch } from '@pluralsh/design-system'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from 'components/ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay.tsx'
+import { SendInsightToWorkbenchButton } from 'components/ai/insights/SendInsightToWorkbench'
 import { GqlError } from 'components/utils/Alert.tsx'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame.tsx'
 import { useClusterInsightComponentQuery } from 'generated/graphql.ts'
@@ -41,7 +38,6 @@ export function ClusterInsightComponent() {
         <ClusterInsightComponentLabel
           component={component}
           loading={!data && (loading || clusterLoading)}
-          icon={null}
         />
       ),
       [component, data, loading, clusterLoading]
@@ -62,11 +58,7 @@ export function ClusterInsightComponent() {
             loading={clusterLoading}
             refetch={refetch}
           />
-          <ChatWithAIButton
-            floating
-            insightId={component?.insight?.id}
-            messages={[insightMessage(component?.insight)]}
-          />
+          <SendInsightToWorkbenchButton insight={component?.insight} />
         </Flex>
       ),
       [showRaw, clusterLoading, refetch, component?.insight]
