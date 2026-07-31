@@ -2,14 +2,11 @@ import { Flex } from '@pluralsh/design-system'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from '../ai/chatbot/ChatbotButton.tsx'
+import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
 import { InsightDisplay } from '../ai/insights/InsightDisplay.tsx'
+import { SendInsightToWorkbenchButton } from '../ai/insights/SendInsightToWorkbench'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
-import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
 
 export function ComponentInsights() {
   const { component, refetch, loading } =
@@ -39,11 +36,7 @@ export function ComponentInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <ChatWithAIButton
-          floating
-          insightId={component?.insight?.id}
-          messages={[insightMessage(component?.insight)]}
-        />
+        <SendInsightToWorkbenchButton insight={component?.insight} />
         <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay

@@ -4,11 +4,8 @@ import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from '../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
+import { SendInsightToWorkbenchButton } from '../../ai/insights/SendInsightToWorkbench'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
@@ -46,11 +43,7 @@ export function StackInsights() {
           gap="small"
         >
           {stack?.insight && <InsightRefresh insight={stack?.insight} />}
-          <ChatWithAIButton
-            floating
-            insightId={stack?.insight?.id}
-            messages={[insightMessage(stack?.insight)]}
-          />
+          <SendInsightToWorkbenchButton insight={stack?.insight} />
           <AISuggestFix insight={stack?.insight} />
         </Flex>
       </Flex>

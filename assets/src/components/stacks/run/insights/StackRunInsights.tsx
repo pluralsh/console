@@ -4,15 +4,12 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { formatDateTime, fromNow } from 'utils/datetime'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from '../../../ai/chatbot/ChatbotButton.tsx'
+import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
+import { SendInsightToWorkbenchButton } from '../../../ai/insights/SendInsightToWorkbench'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
-import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
 
 export function StackRunInsights() {
   const theme = useTheme()
@@ -55,11 +52,7 @@ export function StackRunInsights() {
             loading={loading}
             refetch={refetch}
           />
-          <ChatWithAIButton
-            floating
-            insightId={stackRun?.insight?.id}
-            messages={[insightMessage(stackRun?.insight)]}
-          />
+          <SendInsightToWorkbenchButton insight={stackRun?.insight} />
           <AISuggestFix insight={stackRun?.insight} />
         </Flex>
       </Flex>
