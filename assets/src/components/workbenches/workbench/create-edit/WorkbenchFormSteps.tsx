@@ -105,7 +105,10 @@ import {
   KUBERNETES_ACTIONS_HINT,
   KUBERNETES_ACTIONS_LABEL,
   READ_MODE_DESCRIPTION,
+  READ_MODE_LABEL,
   updateBudgetModes,
+  WRITE_MODE_HINT,
+  WRITE_MODE_LABEL,
 } from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
@@ -769,14 +772,14 @@ export function WorkbenchModesAndTokenLimitStep({
         >
           <ModeCard
             active={selectedMode === 'agent'}
-            label="Write mode"
-            description="Full access. Agents edit code, apply changes and open pull requests to fix what they find."
+            label={WRITE_MODE_LABEL}
+            description={WRITE_MODE_HINT}
             icon={<DiscoverIcon size={16} />}
             onClick={() => setMode('agent')}
           />
           <ModeCard
             active={selectedMode === 'plan'}
-            label="Read mode"
+            label={READ_MODE_LABEL}
             description={READ_MODE_DESCRIPTION}
             icon={<ListIcon size={16} />}
             onClick={() => setMode('plan')}
@@ -836,7 +839,7 @@ export function WorkbenchModesAndTokenLimitStep({
               <ModeActionRow
                 icon={<DiscoverIcon size={16} />}
                 label={CODING_AGENT_LABEL}
-                description="Full access. Agents edit code, apply changes and open pull requests to fix what they find."
+                description={WRITE_MODE_HINT}
                 summary={codingSummary || 'Configure supervision'}
                 isOpen={openPanel === 'coding'}
                 onOpenChange={(open) => setOpenPanel(open ? 'coding' : null)}

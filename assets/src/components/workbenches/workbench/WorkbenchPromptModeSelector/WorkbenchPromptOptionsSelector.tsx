@@ -47,6 +47,8 @@ import {
   updateCodingModes,
   VERIFICATION_LOOP_HINT,
   VERIFICATION_LOOP_LABEL,
+  WRITE_MODE_HINT,
+  WRITE_MODE_LABEL,
 } from './workbenchPromptModes'
 
 const PANEL_WIDTH = 373
@@ -151,13 +153,14 @@ export function WorkbenchPromptOptionsSelector({
             }}
           >
             <PromptOptionSwitch
-              label={READ_MODE_LABEL}
-              hint={READ_MODE_HINT}
-              checked={readMode}
+              label={readMode ? READ_MODE_LABEL : WRITE_MODE_LABEL}
+              hint={readMode ? READ_MODE_HINT : WRITE_MODE_HINT}
+              checked={!readMode}
               onChange={(checked) => {
-                if (checked) setSidePanel(null)
+                const nextReadMode = !checked
+                if (nextReadMode) setSidePanel(null)
                 onChange(
-                  checked
+                  nextReadMode
                     ? {
                         ...value,
                         plan: true,

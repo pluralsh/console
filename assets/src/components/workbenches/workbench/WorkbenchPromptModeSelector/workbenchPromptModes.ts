@@ -19,6 +19,9 @@ export const READ_MODE_LABEL = 'Read mode'
 export const READ_MODE_HINT = 'Agents explore and report, no PRs are created.'
 export const READ_MODE_DESCRIPTION =
   'Run entirely in read-only mode. No PRs will be created, use for exploring infrastructure or root cause analysis.'
+export const WRITE_MODE_LABEL = 'Write mode'
+export const WRITE_MODE_HINT =
+  'Full access. Agents edit code, apply changes and open pull requests to fix what they find.'
 export const CODING_AGENT_LABEL = 'Coding agent'
 export const KUBERNETES_ACTIONS_LABEL = 'Enable Kubernetes actions'
 export const KUBERNETES_ACTIONS_HINT =
