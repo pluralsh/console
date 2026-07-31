@@ -2,7 +2,6 @@ import {
   AddIcon,
   BookmarkAddIcon,
   Flex,
-  IconFrame,
   ListBoxFooterPlus,
   ListBoxItem,
   Select,
@@ -228,19 +227,19 @@ export function WorkbenchJobCreateInput({
                 value={promptModes}
                 onChange={setPromptModes}
               />
-              {setWorkbenchId && (
-                <WorkbenchPillSelector
-                  workbenchId={workbenchId}
-                  setWorkbenchId={setWorkbenchId}
-                  workbenchOptions={workbenchOptions}
-                />
-              )}
               {workbenchId && (
                 <WorkbenchSavedPrompts
                   workbenchId={workbenchId}
                   disabled={loading}
                   currentPrompt={prompt}
                   onSelectPrompt={handleSelectSavedPrompt}
+                />
+              )}
+              {setWorkbenchId && (
+                <WorkbenchPillSelector
+                  workbenchId={workbenchId}
+                  setWorkbenchId={setWorkbenchId}
+                  workbenchOptions={workbenchOptions}
                 />
               )}
             </Flex>
@@ -373,13 +372,22 @@ function WorkbenchSavedPrompts({
         setIsOpen(false)
       }}
       triggerButton={
-        <IconFrame
-          type="tertiary"
-          clickable={!disabled}
-          icon={<BookmarkAddIcon size={12} />}
+        <ChatOptionPill
+          isOpen={isOpen}
+          showArrow={false}
           disabled={disabled}
-          tooltip="Saved prompts"
-        />
+          aria-label="Saved prompts"
+          css={{
+            width: 32,
+            height: '100%',
+            justifyContent: 'center',
+            padding: 0,
+            borderRadius: '50%',
+            flexShrink: 0,
+          }}
+        >
+          <BookmarkAddIcon size={12} />
+        </ChatOptionPill>
       }
       dropdownFooterFixed={
         <ListBoxFooterPlus
