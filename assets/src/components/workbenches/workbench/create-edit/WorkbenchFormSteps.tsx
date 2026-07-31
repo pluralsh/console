@@ -757,6 +757,15 @@ export function WorkbenchModesAndTokenLimitStep({
     .filter(Boolean)
     .join(', ')
 
+  const codingEnabled = coding != null
+  const kubernetesEnabled = !!kubernetes?.update || !!kubernetes?.delete
+  const actionsSummary = [
+    codingEnabled ? CODING_AGENT_LABEL : null,
+    kubernetesEnabled ? KUBERNETES_ACTIONS_LABEL : null,
+  ]
+    .filter(Boolean)
+    .join(', ')
+
   return (
     <Flex
       direction="column"
@@ -818,9 +827,14 @@ export function WorkbenchModesAndTokenLimitStep({
           >
             <Body2P
               $color="text-xlight"
-              css={{ flex: 1 }}
+              css={{
+                flex: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
             >
-              Coding agent, enable kubernetes actions
+              {actionsSummary || 'Select actions'}
             </Body2P>
             <CaretDownIcon
               size={16}
@@ -877,30 +891,40 @@ export function WorkbenchModesAndTokenLimitStep({
                 <WorkbenchKubernetesMutationFields
                   allowUpdates={!!kubernetes?.update}
                   allowDeletes={!!kubernetes?.delete}
-                  onAllowUpdatesChange={(checked) =>
+                  onAllowUpdatesChange={(checked) => {
                     update((d) => {
                       d.modes ??= {}
-                      d.modes.kubernetes = {
-                        ...d.modes.kubernetes,
-                        update: checked,
-                        delete: d.modes.kubernetes?.delete ?? false,
-                      }
+                      const deleteEnabled = d.modes.kubernetes?.delete ?? false
+                      d.modes.kubernetes =
+                        checked || deleteEnabled
+                          ? {
+                              ...d.modes.kubernetes,
+                              update: checked,
+                              delete: deleteEnabled,
+                            }
+                          : undefined
                     })
-                  }
-                  onAllowDeletesChange={(checked) =>
+                    if (!checked && !kubernetes?.delete) setOpenPanel(null)
+                  }}
+                  onAllowDeletesChange={(checked) => {
                     update((d) => {
                       d.modes ??= {}
-                      d.modes.kubernetes = {
-                        ...d.modes.kubernetes,
-                        update: d.modes.kubernetes?.update ?? false,
-                        delete: checked,
-                      }
+                      const updateEnabled = d.modes.kubernetes?.update ?? false
+                      d.modes.kubernetes =
+                        checked || updateEnabled
+                          ? {
+                              ...d.modes.kubernetes,
+                              update: updateEnabled,
+                              delete: checked,
+                            }
+                          : undefined
                     })
-                  }
+                    if (!checked && !kubernetes?.update) setOpenPanel(null)
+                  }}
                 />
               </ModeActionRow>
 
-              {(!!kubernetes?.update || !!kubernetes?.delete) && (
+              {kubernetesEnabled && (
                 <WorkbenchKubernetesNamespaceFields
                   formState={formState}
                   setFormState={setFormState}
