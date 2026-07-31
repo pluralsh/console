@@ -1,6 +1,7 @@
 import type {
   WorkbenchJobBudgetAttributes,
   WorkbenchJobCodingModesAttributes,
+  WorkbenchJobKubernetesModesAttributes,
   WorkbenchJobModes,
   WorkbenchJobModesAttributes,
 } from 'generated/graphql'
@@ -139,6 +140,32 @@ export function updateCodingModes(
     ...modes,
     plan: false,
     coding: { ...modes?.coding, ...coding },
+  }
+}
+
+/** Clear mutation permissions but keep namespace restrictions. */
+export function disableKubernetesModes(
+  current: WorkbenchJobKubernetesModesAttributes | null | undefined
+): WorkbenchJobKubernetesModesAttributes | undefined {
+  if (!current) return undefined
+
+  return {
+    ...current,
+    update: false,
+    delete: false,
+  }
+}
+
+/** Enable Kubernetes actions, preserving namespace restrictions. */
+export function enableKubernetesModes(
+  current: WorkbenchJobKubernetesModesAttributes | null | undefined
+): WorkbenchJobKubernetesModesAttributes {
+  const wasEnabled = !!current?.update || !!current?.delete
+
+  return {
+    ...current,
+    update: wasEnabled ? !!current?.update : true,
+    delete: wasEnabled ? !!current?.delete : false,
   }
 }
 

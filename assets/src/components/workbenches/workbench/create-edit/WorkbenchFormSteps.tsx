@@ -103,6 +103,8 @@ import { WorkbenchPromptPopover } from '../WorkbenchPromptModeSelector/Workbench
 import {
   attributesForPromptMode,
   CODING_AGENT_LABEL,
+  disableKubernetesModes,
+  enableKubernetesModes,
   KUBERNETES_ACTIONS_HINT,
   KUBERNETES_ACTIONS_LABEL,
   READ_MODE_LABEL,
@@ -779,20 +781,9 @@ export function WorkbenchModesAndTokenLimitStep({
       d.modes.plan = false
       d.modes.coding = nextCoding ? (d.modes.coding ?? {}) : null
       if (nextKubernetes) {
-        const current = d.modes.kubernetes
-        const wasEnabled = !!current?.update || !!current?.delete
-        d.modes.kubernetes = {
-          ...current,
-          update: wasEnabled ? !!current?.update : true,
-          delete: wasEnabled ? !!current?.delete : true,
-        }
-      } else if (d.modes.kubernetes) {
-        // Keep namespace lists; only clear mutation permissions.
-        d.modes.kubernetes = {
-          ...d.modes.kubernetes,
-          update: false,
-          delete: false,
-        }
+        d.modes.kubernetes = enableKubernetesModes(d.modes.kubernetes)
+      } else {
+        d.modes.kubernetes = disableKubernetesModes(d.modes.kubernetes)
       }
     })
     setOpenPanel((panel) => {

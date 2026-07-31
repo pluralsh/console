@@ -39,6 +39,8 @@ import {
 import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
 import {
   CODING_AGENT_LABEL,
+  disableKubernetesModes,
+  enableKubernetesModes,
   KUBERNETES_ACTIONS_LABEL,
   READ_MODE_LABEL,
   TOKEN_LIMIT_HINT,
@@ -173,7 +175,7 @@ export function WorkbenchPromptOptionsSelector({
                         ...value,
                         plan: true,
                         coding: undefined,
-                        kubernetes: undefined,
+                        kubernetes: disableKubernetesModes(value?.kubernetes),
                       }
                     : { ...value, plan: false }
                 )
@@ -224,7 +226,7 @@ export function WorkbenchPromptOptionsSelector({
                       onChange({
                         ...value,
                         plan: false,
-                        kubernetes: { update: true, delete: true },
+                        kubernetes: enableKubernetesModes(value?.kubernetes),
                       })
                     setSidePanel('kubernetes')
                   }}
@@ -233,10 +235,8 @@ export function WorkbenchPromptOptionsSelector({
                       ...value,
                       plan: false,
                       kubernetes: checked
-                        ? kubernetesEnabled
-                          ? value?.kubernetes
-                          : { update: true, delete: true }
-                        : undefined,
+                        ? enableKubernetesModes(value?.kubernetes)
+                        : disableKubernetesModes(value?.kubernetes),
                     })
                     setSidePanel(checked ? 'kubernetes' : null)
                   }}
@@ -369,7 +369,7 @@ export function WorkbenchPromptOptionPills({
           onClear={() =>
             onChange({
               ...value,
-              kubernetes: undefined,
+              kubernetes: disableKubernetesModes(value?.kubernetes),
             })
           }
         />
