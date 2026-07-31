@@ -361,8 +361,8 @@ export function WorkbenchPromptOptionPills({
         />
       )}
       {budgetLabel && (
-        <SelectedOptionPill
-          label={budgetLabel}
+        <BudgetLimitOptionPill
+          amount={budgetLabel}
           onClear={() => onChange(updateBudgetModes(value, undefined))}
         />
       )}
@@ -560,13 +560,40 @@ function SidePanelContainer({ children }: { children: ReactNode }) {
   )
 }
 
+function BudgetLimitOptionPill({
+  amount,
+  onClear,
+}: {
+  amount: string
+  onClear: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <SelectedOptionPill
+      label={
+        <>
+          {amount}{' '}
+          <span css={{ color: theme.colors['text-input-disabled'] }}>
+            limit
+          </span>
+        </>
+      }
+      clearLabel={`Clear ${amount} limit`}
+      onClear={onClear}
+    />
+  )
+}
+
 function SelectedOptionPill({
   label,
+  clearLabel,
   icon,
   optionIcons,
   onClear,
 }: {
-  label: string
+  label: ReactNode
+  clearLabel?: string
   icon?: ReactNode
   optionIcons?: ReactNode
   onClear: () => void
@@ -582,7 +609,9 @@ function SelectedOptionPill({
       <span
         role="button"
         tabIndex={0}
-        aria-label={`Clear ${label}`}
+        aria-label={
+          clearLabel ?? `Clear ${typeof label === 'string' ? label : 'option'}`
+        }
         css={{ display: 'flex' }}
         onClick={(event) => {
           event.stopPropagation()

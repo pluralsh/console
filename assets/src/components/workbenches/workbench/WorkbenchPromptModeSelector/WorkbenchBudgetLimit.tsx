@@ -241,9 +241,9 @@ export function formatBudgetLimitLabel(
   value: WorkbenchJobBudgetAttributes | null | undefined
 ) {
   if (value?.cost != null && value.cost > 0)
-    return `${formatBudgetAmount('dollars', value.cost)} limit`
+    return formatBudgetAmount('dollars', value.cost)
   if (value?.tokens != null && value.tokens > 0)
-    return `${formatBudgetAmount('tokens', value.tokens)} limit`
+    return formatBudgetAmount('tokens', value.tokens)
   return null
 }
 
