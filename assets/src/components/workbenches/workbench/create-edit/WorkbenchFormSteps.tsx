@@ -1,5 +1,4 @@
 import {
-  AddIcon,
   ArrowTopRightIcon,
   Button,
   Card,
@@ -10,7 +9,6 @@ import {
   Chip,
   ChipList,
   CloseIcon,
-  ComboBox,
   ContainerRuntimeIcon,
   DiscoverIcon,
   Divider,
@@ -22,7 +20,6 @@ import {
   isValidRepoUrl,
   KubernetesIcon,
   ListIcon,
-  ListBoxFooterPlus,
   ListBoxItem,
   Select,
   SelectButton,
@@ -33,18 +30,14 @@ import {
 } from '@pluralsh/design-system'
 import {
   PolicyBindingFragment,
-  useAgentRuntimeQuery,
   useAgentRuntimeReposQuery,
-  useClusterNamespacesQuery,
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
   useWorkbenchToolsQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import Fuse from 'fuse.js'
 import {
   Dispatch,
-  KeyboardEvent,
   ReactNode,
   SetStateAction,
   useCallback,
@@ -1200,25 +1193,6 @@ export function WorkbenchConfigureActionsStep({
     (ns): ns is string => !!ns
   )
 
-  const { data: runtimeData } = useAgentRuntimeQuery({
-    variables: { id: formState.agentRuntimeId ?? '' },
-    skip: !formState.agentRuntimeId,
-  })
-  const clusterId = runtimeData?.agentRuntime?.cluster?.id
-  const { data: namespacesData, loading: namespacesLoading } =
-    useClusterNamespacesQuery({
-      variables: { clusterId },
-      skip: !clusterId,
-    })
-  const namespaceOptions = useMemo(
-    () =>
-      (namespacesData?.namespaces ?? [])
-        .map((ns) => ns?.metadata?.name)
-        .filter(isNonNullable)
-        .sort((a, b) => a.localeCompare(b)),
-    [namespacesData?.namespaces]
-  )
-
   const setKubernetes = (
     patch: Partial<{
       update: boolean
@@ -1275,8 +1249,6 @@ export function WorkbenchConfigureActionsStep({
         label="Required namespaces"
         hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist)."
         values={requireNamespaces}
-        namespaces={namespaceOptions}
-        loading={namespacesLoading}
         onChange={(next) => setKubernetes({ requireNamespaces: next })}
       />
 
@@ -1284,8 +1256,6 @@ export function WorkbenchConfigureActionsStep({
         label="Blacklisted namespaces"
         hint="The agent can never act in these namespaces, even if they're in the required set."
         values={excludeNamespaces}
-        namespaces={namespaceOptions}
-        loading={namespacesLoading}
         severity="danger"
         onChange={(next) => setKubernetes({ excludeNamespaces: next })}
       />
@@ -1297,59 +1267,26 @@ function NamespaceListField({
   label,
   hint,
   values,
-  namespaces,
-  loading,
   severity,
   onChange,
 }: {
   label: string
   hint: string
   values: string[]
-  namespaces: string[]
-  loading?: boolean
   severity?: 'danger'
   onChange: (next: string[]) => void
 }) {
   const [draft, setDraft] = useState('')
-  const [isOpen, setIsOpen] = useState(false)
   const trimmed = draft.trim()
+  const canAdd = !!trimmed && !values.includes(trimmed)
 
-  const allOptions = useMemo(() => {
-    const merged = new Set([...namespaces, ...values])
-    return [...merged].sort((a, b) => a.localeCompare(b))
-  }, [namespaces, values])
-
-  const suggestions = useMemo(() => {
-    if (!trimmed) return allOptions
-    return new Fuse(allOptions, { threshold: 0.25 })
-      .search(trimmed)
-      .map(({ item }) => item)
-  }, [allOptions, trimmed])
-
-  const canAddCustom =
-    !!trimmed && !values.includes(trimmed) && !allOptions.includes(trimmed)
-
-  const toggleNamespace = (raw: string) => {
-    const value = raw.trim()
-    if (!value) return
-    onChange(
-      values.includes(value)
-        ? values.filter((ns) => ns !== value)
-        : [...values, value]
-    )
-    setDraft('')
-    setIsOpen(true)
-  }
-
-  const addCustomNamespace = (raw: string) => {
-    const value = raw.trim()
-    if (!value || values.includes(value)) {
+  const addNamespace = () => {
+    if (!canAdd) {
       setDraft('')
       return
     }
-    onChange([...values, value])
+    onChange([...values, trimmed])
     setDraft('')
-    setIsOpen(true)
   }
 
   return (
@@ -1362,64 +1299,30 @@ function NamespaceListField({
         gap="xsmall"
         width="100%"
       >
-        <ComboBox
-          aria-label={label}
-          inputValue={draft}
-          onInputChange={setDraft}
-          selectedKey={null}
-          onSelectionChange={(key) => {
-            if (key) toggleNamespace(String(key))
-          }}
-          isOpen={isOpen}
-          onOpenChange={setIsOpen}
-          loading={loading}
-          allowsEmptyCollection={canAddCustom}
-          inputProps={{
-            placeholder: 'Search namespace name',
-            onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
-              if (e.key !== 'Enter' || !canAddCustom) return
+        <Flex gap="xsmall">
+          <Input2
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter') return
               e.preventDefault()
-              addCustomNamespace(trimmed)
-            },
-          }}
-          onFooterClick={
-            canAddCustom ? () => addCustomNamespace(trimmed) : undefined
-          }
-          dropdownFooter={
-            canAddCustom ? (
-              <ListBoxFooterPlus
-                leftContent={
-                  <AddIcon
-                    size={16}
-                    color="text-primary-accent"
-                  />
-                }
-              >
-                Use &quot;{trimmed}&quot;
-              </ListBoxFooterPlus>
-            ) : undefined
-          }
-        >
-          {suggestions.map((ns) => (
-            <ListBoxItem
-              key={ns}
-              label={ns}
-              textValue={ns}
-              leftContent={
-                <Checkbox
-                  small
-                  checked={values.includes(ns)}
-                  tabIndex={-1}
-                  css={{ paddingLeft: 0, pointerEvents: 'none' }}
-                />
-              }
-            />
-          ))}
-        </ComboBox>
+              addNamespace()
+            }}
+            placeholder="Enter namespace name and press Enter or Add"
+            css={{ flex: 1 }}
+          />
+          <Button
+            secondary
+            disabled={!canAdd}
+            onClick={addNamespace}
+          >
+            Add
+          </Button>
+        </Flex>
         {values.length > 0 && (
           <ChipList
             values={values}
-            limit={3}
+            limit={Infinity}
             size="small"
             closeButton
             severity={severity}
