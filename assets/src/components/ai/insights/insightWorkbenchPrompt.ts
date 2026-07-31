@@ -70,10 +70,10 @@ function kubernetesResourceContext(
       : resource.version
     : 'unknown'
   const scope = resource.namespace
-    ? `namespace "${resource.namespace}"`
+    ? `namespace ${resource.namespace}`
     : 'cluster-scoped'
 
-  return `Focus the investigation on the ${resourceLabel} with apiVersion "${apiVersion}", kind "${resource.kind ?? 'unknown'}", ${scope}, and name "${resource.name ?? 'unknown'}" (id: ${resource.id}) within this ${parentLabel}.`
+  return `Focus the investigation on the ${resourceLabel} with apiVersion ${apiVersion}, kind ${resource.kind ?? 'unknown'}, ${scope}, and name ${resource.name ?? 'unknown'} (id: ${resource.id}) within this ${parentLabel}.`
 }
 
 function serviceComponentContextFromInsight(
