@@ -1216,13 +1216,13 @@ function WorkbenchKubernetesNamespaceFields({
     >
       <NamespaceListField
         label="Required namespaces"
-        hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist)."
+        hint="If set, actions are only allowed inside these namespaces. Leave empty to allow all (except the blacklist). Press Enter to add."
         values={requireNamespaces}
         onChange={(next) => setNamespaces({ requireNamespaces: next })}
       />
       <NamespaceListField
         label="Blacklisted namespaces"
-        hint="The agent can never act in these namespaces, even if they're in the required set."
+        hint="The agent can never act in these namespaces, even if they're in the required set. Press Enter to add."
         values={excludeNamespaces}
         severity="danger"
         onChange={(next) => setNamespaces({ excludeNamespaces: next })}
@@ -1267,26 +1267,16 @@ function NamespaceListField({
         gap="xsmall"
         width="100%"
       >
-        <Flex gap="xsmall">
-          <Input2
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key !== 'Enter') return
-              e.preventDefault()
-              addNamespace()
-            }}
-            placeholder="Enter namespace name and press Enter or Add"
-            css={{ flex: 1 }}
-          />
-          <Button
-            secondary
-            disabled={!canAdd}
-            onClick={addNamespace}
-          >
-            Add
-          </Button>
-        </Flex>
+        <Input2
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return
+            e.preventDefault()
+            addNamespace()
+          }}
+          placeholder="Enter namespace name"
+        />
         {values.length > 0 && (
           <ChipList
             values={values}
