@@ -246,7 +246,6 @@ export function WorkbenchJobMemoGroup({
               key={activity.id}
               activity={activity}
               textStream={textStreamMap[activity.id] ?? ''}
-              showMemoPrefix={activities.length > 1}
             />
           ))}
         </Flex>
@@ -295,11 +294,9 @@ export function WorkbenchJobMemoGroup({
 function WorkbenchJobMemo({
   activity,
   textStream,
-  showMemoPrefix = true,
 }: {
   activity: WorkbenchJobActivityFragment
   textStream: string
-  showMemoPrefix?: boolean
 }) {
   const { prompt, result, status } = activity
   const [isOpen, setIsOpen] = useState(false)
@@ -324,15 +321,7 @@ function WorkbenchJobMemo({
   return (
     <MemoRowSC>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <MemoLabelSC $shimmer={isRunning}>
-          {showMemoPrefix ? (
-            <>
-              Memo <SpanSC $color="text-light">{label}</SpanSC>
-            </>
-          ) : (
-            label
-          )}
-        </MemoLabelSC>
+        <MemoLabelSC $shimmer={isRunning}>{label}</MemoLabelSC>
       </ClickableLabelSC>
       {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
       {(isFailed || isRejected) && (

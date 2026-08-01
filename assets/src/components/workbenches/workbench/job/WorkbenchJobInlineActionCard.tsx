@@ -252,7 +252,7 @@ const CardSC = styled.div<{ $status: WorkbenchJobActivityStatus }>(
     minWidth: 0,
     padding: theme.spacing.medium,
     border: theme.borders.default,
-    borderLeft: `2px solid ${getActionStatusBorderColor(theme, $status)}`,
+    borderLeft: `${theme.borderRadiuses.large / 2}px solid ${getActionStatusBorderColor(theme, $status)}`,
     borderRadius: theme.borderRadiuses.large,
     background: theme.colors['fill-zero'],
     overflow: 'hidden',

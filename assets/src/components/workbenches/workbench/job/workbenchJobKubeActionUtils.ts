@@ -1,4 +1,4 @@
-import { dump } from 'js-yaml'
+import { dump, load } from 'js-yaml'
 import { startCase } from 'lodash'
 import pluralize from 'pluralize'
 
@@ -17,6 +17,7 @@ export type KubeRequestLike = {
   method?: string | null
   path?: string | null
   body?: string | null
+  contentType?: string | null
   current?: unknown
 }
 
@@ -137,6 +138,10 @@ export function getKubeActionSubtitle(
   return getKubeResourceLocationLabel(kube, 'Kubernetes', true)
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
 function sanitizeForDiff(value: unknown): unknown {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return value
   const record = { ...(value as Record<string, unknown>) }
@@ -158,8 +163,34 @@ function parseKubeBody(body: string | null | undefined): unknown {
   try {
     return JSON.parse(body)
   } catch {
-    return body
+    try {
+      return load(body)
+    } catch {
+      return body
+    }
   }
+}
+
+export function isServerSideApplyKubeRequest(
+  kube: KubeRequestLike | null | undefined
+): boolean {
+  const contentType = kube?.contentType?.toLowerCase().split(';')[0]?.trim()
+  return (
+    kube?.method?.toLowerCase() === 'patch' &&
+    (contentType === 'application/apply-patch+yaml' ||
+      contentType === 'application/apply-patch+json')
+  )
+}
+
+function filterSourceToShape(source: unknown, shape: unknown): unknown {
+  if (!isPlainObject(shape)) return source
+  if (!isPlainObject(source)) return source == null ? {} : source
+
+  return Object.fromEntries(
+    Object.keys(shape)
+      .filter((key) => Object.prototype.hasOwnProperty.call(source, key))
+      .map((key) => [key, filterSourceToShape(source[key], shape[key])])
+  )
 }
 
 export function toKubeYaml(value: unknown): string {
@@ -187,8 +218,14 @@ export function getKubeUpdateDiffValues(
   kube: KubeRequestLike | null | undefined
 ): { oldValue: string; newValue: string } {
   const proposed = parseKubeBody(kube?.body)
-  const newValue = toKubeYaml(proposed ?? kube?.body)
-  const oldValue = toKubeYaml(kube?.current)
+  const proposedForDiff = sanitizeForDiff(proposed ?? kube?.body)
+  const currentForDiff = sanitizeForDiff(kube?.current)
+  const oldValue = toKubeYaml(
+    isServerSideApplyKubeRequest(kube)
+      ? filterSourceToShape(currentForDiff, proposedForDiff)
+      : currentForDiff
+  )
+  const newValue = toKubeYaml(proposedForDiff)
   return { oldValue, newValue }
 }
 

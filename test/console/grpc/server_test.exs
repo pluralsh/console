@@ -1,6 +1,7 @@
 defmodule Console.GRPC.ServerTest do
   use Console.DataCase, async: true
 
+  alias Console.AI.Provider
   alias Console.GRPC.Server
 
   describe "get_ai_config/2" do
@@ -21,6 +22,19 @@ defmodule Console.GRPC.ServerTest do
       assert config.openaiCompatible.apiKey == "ignore"
       assert config.openaiCompatible.baseUrl == "https://openai-compatible.example.com"
       assert config.openaiCompatible.model == "custom-model"
+    end
+
+    test "uses default OpenAI proxy models when none are configured" do
+      deployment_settings(
+        ai: %{
+          enabled: true,
+          openai: %{access_token: "openai-token"}
+        }
+      )
+
+      config = Server.get_ai_config(%Plrl.AiConfigRequest{}, nil)
+
+      assert config.openai.proxyModels == Provider.defaults(:openai)[:proxy_models]
     end
 
     test "preserves configured OpenAI-compatible api keys" do

@@ -8594,6 +8594,13 @@ func (in *ServiceAccountSpec) DeepCopyInto(out *ServiceAccountSpec) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
+	if in.AssumeBindings != nil {
+		in, out := &in.AssumeBindings, &out.AssumeBindings
+		*out = make([]Binding, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	if in.Reconciliation != nil {
 		in, out := &in.Reconciliation, &out.Reconciliation
 		*out = new(Reconciliation)

@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "description": "Decline an open Bitbucket Cloud pull request without merging it.",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository selector as workspace/repo_slug."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request ID."
+    }
+  },
+  "required": ["repository", "pull_request_id"],
+  "additionalProperties": false
+}

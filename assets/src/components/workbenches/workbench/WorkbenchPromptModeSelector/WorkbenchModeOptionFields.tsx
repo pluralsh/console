@@ -8,7 +8,7 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   KUBERNETES_ACTIONS_HINT,
   VERIFICATION_LOOP_HINT,
@@ -37,7 +37,7 @@ export function WorkbenchVerificationLoopControl({
         onChange={onChange}
       />
       <Body2BoldP>{VERIFICATION_LOOP_LABEL}</Body2BoldP>
-      <Body2P $color="text-xlight">{VERIFICATION_LOOP_HINT}</Body2P>
+      <CaptionP $color="text-xlight">{VERIFICATION_LOOP_HINT}</CaptionP>
       <Tooltip label="Confirms if PR is merged and followup if it didn’t.">
         <InfoOutlineIcon
           size={12}
@@ -104,7 +104,7 @@ export function WorkbenchKubernetesMutationFields({
   return (
     <>
       <Overline>Kubernetes actions</Overline>
-      <Body2P $color="text-xlight">{KUBERNETES_ACTIONS_HINT}</Body2P>
+      <CaptionP $color="text-xlight">{KUBERNETES_ACTIONS_HINT}</CaptionP>
       <Flex
         direction="column"
         gap="xxsmall"

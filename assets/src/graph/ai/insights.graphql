@@ -36,7 +36,14 @@ fragment AiInsightContext on AiInsight {
   }
   clusterInsightComponent {
     id
+    group
+    version
+    kind
     name
+    namespace
+    cluster {
+      ...ClusterMinimal
+    }
   }
   service {
     id
@@ -47,7 +54,11 @@ fragment AiInsightContext on AiInsight {
   }
   serviceComponent {
     id
+    group
+    version
+    kind
     name
+    namespace
     service {
       id
       name

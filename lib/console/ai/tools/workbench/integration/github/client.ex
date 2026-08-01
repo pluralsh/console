@@ -33,6 +33,10 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   def json_delete(%Tentacat.Client{} = client, path) when is_binary(path),
     do: json_request(:delete, client, path)
 
+  @spec json_patch(Tentacat.Client.t(), String.t(), map()) :: Tentacat.response() | {:error, String.t()}
+  def json_patch(%Tentacat.Client{} = client, path, body) when is_binary(path) and is_map(body),
+    do: json_request(:patch, client, path, body, [])
+
   @spec build(WorkbenchTool.t()) :: {:ok, Tentacat.Client.t()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{github: gh} = conn})
       when not is_nil(gh) and is_binary(gh.app_id) and is_binary(gh.installation_id) and
@@ -109,10 +113,15 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
     if String.ends_with?(url, "/"), do: url, else: url <> "/"
   end
 
-  defp json_request(method, %Tentacat.Client{} = client, path, opts \\ []) do
+  defp json_request(method, %Tentacat.Client{} = client, path, opts \\ []),
+    do: json_request(method, client, path, "", opts)
+
+  defp json_request(method, %Tentacat.Client{} = client, path, body, opts) do
     url = client.endpoint <> path
 
-    case HTTPoison.request(method, url, "", json_headers(client), request_options(client)) do
+    body = if is_map(body), do: Jason.encode!(body), else: body
+
+    case HTTPoison.request(method, url, body, json_headers(client), request_options(client)) do
       {:ok, %HTTPoison.Response{status_code: code, body: body} = resp} ->
         response(method, code, decode_json_body(body), resp, opts)
 

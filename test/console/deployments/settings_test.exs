@@ -1,6 +1,7 @@
 defmodule Console.Deployments.SettingsTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.AI.Provider
   alias Console.PubSub
   alias Console.Deployments.Settings
 
@@ -62,6 +63,8 @@ defmodule Console.Deployments.SettingsTest do
     end
 
     test "it falls back to defaults for partially configured providers" do
+      openai_defaults = Provider.defaults(:openai)
+
       deployment_settings(
         ai: %{
           enabled: true,
@@ -74,8 +77,10 @@ defmodule Console.Deployments.SettingsTest do
       )
 
       assert model_fields() == [
-               %{provider: :openai, model: "gpt-5.4-mini"},
-               %{provider: :openai, model: "gpt-5.4"},
+               %{provider: :openai, model: openai_defaults[:model]},
+               %{provider: :openai, model: openai_defaults[:tool_model]},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 0)},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 1)},
                %{provider: :anthropic, model: "claude-4-5-haiku-latest"},
                %{provider: :anthropic, model: "claude-sonnet-5-latest"},
                %{provider: :vertex, model: "claude-haiku-4-5@20251001"},
@@ -88,6 +93,8 @@ defmodule Console.Deployments.SettingsTest do
     end
 
     test "it ignores selected providers that are not configured" do
+      openai_defaults = Provider.defaults(:openai)
+
       deployment_settings(
         ai: %{
           enabled: true,
@@ -99,8 +106,10 @@ defmodule Console.Deployments.SettingsTest do
       )
 
       assert model_fields() == [
-               %{provider: :openai, model: "gpt-5.4-mini"},
-               %{provider: :openai, model: "gpt-5.4"}
+               %{provider: :openai, model: openai_defaults[:model]},
+               %{provider: :openai, model: openai_defaults[:tool_model]},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 0)},
+               %{provider: :openai, model: Enum.at(openai_defaults[:proxy_models], 1)}
              ]
     end
 
@@ -128,7 +137,7 @@ defmodule Console.Deployments.SettingsTest do
 
       assert model_fields() == [
                %{provider: :openai_compatible, model: "custom-default"},
-               %{provider: :openai_compatible, model: "gpt-5.4"},
+               %{provider: :openai_compatible, model: Provider.defaults(:openai)[:tool_model]},
                %{provider: :openai_compatible, model: "custom-proxy"},
                %{provider: :xai, model: "grok-custom"},
                %{provider: :xai, model: "grok-4.5"},

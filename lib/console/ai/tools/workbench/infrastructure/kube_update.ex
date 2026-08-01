@@ -9,16 +9,16 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
   defenum Operation, replace: 0, apply: 1
 
   embedded_schema do
-    field :user,       :map, virtual: true
-    field :job,        :map, virtual: true
-    field :operation,  Operation, default: :replace
-    field :cluster,    :string
-    field :group,      :string
-    field :version,    :string
-    field :kind,       :string
-    field :name,       :string
-    field :namespace,  :string
-    field :json,       :string
+    field :user,            :map, virtual: true
+    field :job,             :map, virtual: true
+    field :operation,       Operation, default: :replace
+    field :cluster,         :string
+    field :group,           :string
+    field :version,         :string
+    field :kind,            :string
+    field :name,            :string
+    field :namespace,       :string
+    field :json,            :string
   end
 
   @valid ~w(cluster operation group version kind name namespace json)a
@@ -67,6 +67,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
 
     You can toggle between server-side apply or full replace operations depending on the edit needed.  Full edits are usually
     only necessary when an apply would result in ambiguity (eg removing elements from a container array).
+    Server-side apply takes ownership of conflicting fields to mirror the deployment operator's apply behavior.
     """
   end
 
@@ -88,7 +89,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
       method: "patch",
       path: path,
       content_type: "application/apply-patch+yaml",
-      query_params: %{"fieldManager" => "plural"},
+      query_params: %{"fieldManager" => "plural", "force" => "true"},
       body: json
     )
   end

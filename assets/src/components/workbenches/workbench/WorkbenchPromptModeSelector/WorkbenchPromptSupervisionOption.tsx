@@ -1,5 +1,5 @@
 import { Checkbox, Flex } from '@pluralsh/design-system'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import type { ReactElement } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -58,7 +58,7 @@ export function WorkbenchPromptSupervisionOption({
           {icon}
           <Body2BoldP $color="text">{label}</Body2BoldP>
         </Flex>
-        <Body2P css={{ color: theme.colors['text-xlight'] }}>{hint}</Body2P>
+        <CaptionP css={{ color: theme.colors['text-xlight'] }}>{hint}</CaptionP>
       </Flex>
     </button>
   )

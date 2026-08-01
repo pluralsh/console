@@ -186,7 +186,7 @@ defmodule Console.MixProject do
       {:protobuf, "~> 0.16.1", override: true},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.17"},
+      {:req_llm, "~> 1.18"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},

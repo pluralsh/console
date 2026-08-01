@@ -1,6 +1,6 @@
 defmodule Console.AI.ChatTest do
   use Console.DataCase, async: true
-  alias Console.AI.Chat
+  alias Console.AI.{Chat, Provider}
   alias Console.Repo
   use Mimic
 
@@ -288,6 +288,7 @@ defmodule Console.AI.ChatTest do
     test "it can spawn a pr from a thread" do
       insert(:scm_connection, token: "some-pat", default: true)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      model = Provider.defaults(:openai)[:model]
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "plrl/ai/pr-test" <> _} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
@@ -298,7 +299,7 @@ defmodule Console.AI.ChatTest do
       expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
       expect(File, :write, fn _, "first" -> :ok end)
       expect(File, :write, fn _, "second" -> :ok end)
-      expect(ReqLLM, :generate_text, fn %{model: "gpt-5.4-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [
@@ -330,7 +331,7 @@ defmodule Console.AI.ChatTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        |> ReqLLM.Response.decode_response("openai:#{model}")
       end)
 
       user = insert(:user)
@@ -518,8 +519,9 @@ defmodule Console.AI.ChatSyncTest do
       thread = insert(:chat_thread, user: user)
       insert(:agent_session, thread: thread)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      model = Console.AI.Provider.defaults(:openai)[:tool_model]
 
-      expect(ReqLLM, :generate_text, fn _, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [
@@ -535,7 +537,7 @@ defmodule Console.AI.ChatSyncTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        |> ReqLLM.Response.decode_response("openai:#{model}")
       end)
 
       {:ok, [next]} = Chat.hybrid_chat([

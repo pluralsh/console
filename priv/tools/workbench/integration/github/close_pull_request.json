@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "description": "Close an open GitHub pull request without merging it.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "pull_number": {
+      "type": "integer",
+      "description": "Pull request number."
+    }
+  },
+  "required": ["owner", "repo", "pull_number"],
+  "additionalProperties": false
+}

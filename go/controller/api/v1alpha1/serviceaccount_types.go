@@ -62,10 +62,11 @@ func (in *ServiceAccount) ConsoleName() string {
 	return in.Name
 }
 
-func (in *ServiceAccount) Attributes() console.ServiceAccountAttributes {
+func (in *ServiceAccount) Attributes(assumeBindings []*console.PolicyBindingAttributes) console.ServiceAccountAttributes {
 	attrs := console.ServiceAccountAttributes{
-		Name:  lo.ToPtr(in.ConsoleName()),
-		Email: &in.Spec.Email,
+		Name:           lo.ToPtr(in.ConsoleName()),
+		Email:          &in.Spec.Email,
+		AssumeBindings: assumeBindings,
 	}
 
 	return attrs
@@ -122,6 +123,10 @@ type ServiceAccountSpec struct {
 	// and management of credentials within the cluster.
 	// +kubebuilder:validation:Optional
 	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
+
+	// AssumeBindings define which users and groups can assume this service account.
+	// +kubebuilder:validation:Optional
+	AssumeBindings []Binding `json:"assumeBindings,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.

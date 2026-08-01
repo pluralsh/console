@@ -63,6 +63,12 @@ You are producing output for a human user, and should expect them to want to rea
 * still provide as much critical information as needed to conveigh the result of your work
 * use supporting markdown formatting where needed to improve readability in a way that supports scanning.
 
+## Useful Tool Workflows
+
+* To gather information about k8s failures, usually log info is needed. You can list pods in a namespace + use `pod_logs` to get the logs for a set of given pods.  Often k8s operators have 1-2 pods so this is efficient.
+* Plural services associate with k8s components.  You can navigate from plrl_service, fetch components, then use those to fetch the specifics of each compoennt from k8s using describe tools.
+* Stacks oftentimes have direct cloud resources which can be fetched within the terraform/pulumi of the stack that manages them.
+* directly traversing from (service, stack) -> components -> resource is a good fallback in the event the *_search tools are not available (not always the case in case an instance doesn't have vector search implemented).
 
 ## Tool Guidance
 

@@ -4,6 +4,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Tools do
   alias Console.Schema.WorkbenchTool
 
   @all [
+    Console.AI.Tools.Workbench.Integration.Gitlab.CloseMergeRequest,
     Console.AI.Tools.Workbench.Integration.Gitlab.MergeRequestRead,
     Console.AI.Tools.Workbench.Integration.Gitlab.IssueRead,
     Console.AI.Tools.Workbench.Integration.Gitlab.CreateNote,

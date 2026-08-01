@@ -86,6 +86,11 @@ export function SendInsightToWorkbenchButton({
     setWorkbenchJob(null)
   }
 
+  const popoverMaxHeight =
+    y == null
+      ? `calc(100vh - ${theme.spacing.medium * 2}px)`
+      : `calc(100vh - ${Math.max(y, 0) + theme.spacing.small}px)`
+
   const openPopover = () => {
     setOpen((value) => {
       if (!value) {
@@ -124,7 +129,7 @@ export function SendInsightToWorkbenchButton({
               top: y ?? 0,
               width: POPOVER_WIDTH,
               height: 'auto',
-              maxHeight: 'none',
+              maxHeight: popoverMaxHeight,
               zIndex: theme.zIndexes.modal,
             }}
           >
@@ -132,7 +137,7 @@ export function SendInsightToWorkbenchButton({
               isOpen={open}
               onClose={close}
             >
-              <PopoverSC>
+              <PopoverSC style={{ maxHeight: popoverMaxHeight }}>
                 <StretchedFlex>
                   <Flex
                     align="center"
@@ -382,6 +387,8 @@ const PopoverSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.large,
   width: '100%',
+  minHeight: 0,
+  overflow: 'hidden',
   padding: theme.spacing.medium,
   borderRadius: theme.borderRadiuses.large,
   border: theme.borders.default,
@@ -390,6 +397,9 @@ const PopoverSC = styled.div(({ theme }) => ({
 }))
 
 const PromptInputBoxSC = styled(Card)(({ theme }) => ({
+  flex: '1 1 auto',
+  minHeight: 0,
+  overflowY: 'auto',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   backgroundColor: theme.colors['fill-two'],
   border: theme.borders.input,

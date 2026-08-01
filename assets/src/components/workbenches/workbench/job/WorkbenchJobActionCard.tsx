@@ -79,5 +79,5 @@ const CardSC = styled.div<{
   padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
   borderRadius: theme.borderRadiuses.large,
   background: theme.colors['fill-one'],
-  borderLeft: `2px solid ${getActionStatusBorderColor(theme, $status)}`,
+  borderLeft: `${theme.borderRadiuses.large / 2}px solid ${getActionStatusBorderColor(theme, $status)}`,
 }))

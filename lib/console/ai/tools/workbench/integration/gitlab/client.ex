@@ -88,6 +88,23 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     end
   end
 
+  @spec put(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
+  def put(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
+    url = base <> path <> Query.query_string(query)
+    headers = [{"PRIVATE-TOKEN", token}]
+
+    case HTTPoison.put(url, "", headers, http_opts()) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+        decode_json(body)
+
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, "GitLab API #{code}: #{inspect(body)}"}
+
+      {:error, reason} ->
+        Http.error("GitLab", reason)
+    end
+  end
+
   defp decode_json(""), do: {:ok, %{}}
 
   defp decode_json(body) do

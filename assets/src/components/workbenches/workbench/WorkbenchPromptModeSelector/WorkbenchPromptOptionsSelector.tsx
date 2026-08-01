@@ -2,7 +2,6 @@ import {
   AddIcon,
   Card,
   CaretRightIcon,
-  Checkbox,
   CloseIcon,
   ContainerRuntimeIcon,
   DiscoverIcon,
@@ -16,7 +15,7 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import {
   cloneElement,
@@ -40,7 +39,6 @@ import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
 import {
   CODING_AGENT_LABEL,
   disableKubernetesModes,
-  enableKubernetesModes,
   KUBERNETES_ACTIONS_LABEL,
   READ_MODE_LABEL,
   TOKEN_LIMIT_HINT,
@@ -55,6 +53,7 @@ import {
 
 const PANEL_WIDTH = 373
 const SIDE_PANEL_WIDTH = 394
+const PANEL_MAX_HEIGHT = 600
 type SidePanel = 'coding' | 'kubernetes'
 
 export function WorkbenchPromptOptionsSelector({
@@ -73,9 +72,6 @@ export function WorkbenchPromptOptionsSelector({
   const [isOpen, setIsOpen] = useState(false)
   const [sidePanel, setSidePanel] = useState<SidePanel | null>(null)
   const readMode = !!value?.plan
-  const codingEnabled = value?.coding != null
-  const kubernetesEnabled =
-    !!value?.kubernetes?.update || !!value?.kubernetes?.delete
   const tokenLimitEnabled =
     value?.budget?.tokens != null || value?.budget?.cost != null
   const contentWidth = PANEL_WIDTH + (sidePanel ? SIDE_PANEL_WIDTH : 0)
@@ -83,9 +79,8 @@ export function WorkbenchPromptOptionsSelector({
     triggerRef,
     width: contentWidth,
     minWidth: contentWidth,
-    maxHeight: 600,
+    maxHeight: PANEL_MAX_HEIGHT,
     minHeight: 0,
-    sizeToContent: true,
     placement: 'left',
   })
   const { buttonProps } = useButton(
@@ -141,14 +136,20 @@ export function WorkbenchPromptOptionsSelector({
           clipPath: 'none',
         }}
       >
-        <Flex align="stretch">
+        <Flex
+          align="flex-start"
+          css={{ maxHeight: '100%', minHeight: 0 }}
+        >
           <Card
             css={{
               display: 'flex',
               flexDirection: 'column',
-              gap: theme.spacing.medium,
+              gap: theme.spacing.small,
               width: PANEL_WIDTH,
+              maxHeight: '100%',
+              minHeight: 0,
               flexShrink: 0,
+              overflowY: 'auto',
               padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
               backgroundColor: theme.colors['fill-two'],
               border: 'none',
@@ -185,60 +186,32 @@ export function WorkbenchPromptOptionsSelector({
             {!readMode && (
               <Flex
                 direction="column"
-                gap="small"
+                gap="xsmall"
               >
-                <PromptOptionCheckbox
+                <PromptOptionRow
                   label={CODING_AGENT_LABEL}
                   hint="Edits code and opens PRs"
                   icon={<DiscoverIcon size={12} />}
-                  checked={codingEnabled}
                   active={sidePanel === 'coding'}
                   onOpen={() => {
                     if (sidePanel === 'coding') {
                       setSidePanel(null)
                       return
                     }
-                    if (!codingEnabled)
-                      onChange({ ...value, plan: false, coding: {} })
                     setSidePanel('coding')
                   }}
-                  onChange={(checked) => {
-                    onChange({
-                      ...value,
-                      plan: false,
-                      coding: checked ? (value?.coding ?? {}) : null,
-                    })
-                    setSidePanel(checked ? 'coding' : null)
-                  }}
                 />
-                <PromptOptionCheckbox
+                <PromptOptionRow
                   label={KUBERNETES_ACTIONS_LABEL}
                   hint="Applies changes to live clusters"
                   icon={<KubernetesIcon size={12} />}
-                  checked={kubernetesEnabled}
                   active={sidePanel === 'kubernetes'}
                   onOpen={() => {
                     if (sidePanel === 'kubernetes') {
                       setSidePanel(null)
                       return
                     }
-                    if (!kubernetesEnabled)
-                      onChange({
-                        ...value,
-                        plan: false,
-                        kubernetes: enableKubernetesModes(value?.kubernetes),
-                      })
                     setSidePanel('kubernetes')
-                  }}
-                  onChange={(checked) => {
-                    onChange({
-                      ...value,
-                      plan: false,
-                      kubernetes: checked
-                        ? enableKubernetesModes(value?.kubernetes)
-                        : disableKubernetesModes(value?.kubernetes),
-                    })
-                    setSidePanel(checked ? 'kubernetes' : null)
                   }}
                 />
               </Flex>
@@ -406,7 +379,7 @@ function PromptOptionSwitch({
         flex={1}
       >
         <Body2BoldP>{label}</Body2BoldP>
-        <Body2P $color="text-xlight">{hint}</Body2P>
+        <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
       <Switch
         aria-label={label}
@@ -417,22 +390,18 @@ function PromptOptionSwitch({
   )
 }
 
-function PromptOptionCheckbox({
+function PromptOptionRow({
   label,
   hint,
   icon,
-  checked,
   active,
   onOpen,
-  onChange,
 }: {
   label: string
   hint: string
   icon: ReactNode
-  checked: boolean
   active: boolean
   onOpen: () => void
-  onChange: (checked: boolean) => void
 }) {
   const theme = useTheme()
 
@@ -455,14 +424,6 @@ function PromptOptionCheckbox({
         '&:hover': { background: theme.colors['fill-two-hover'] },
       }}
     >
-      <span onClick={(event) => event.stopPropagation()}>
-        <Checkbox
-          small
-          aria-label={label}
-          checked={checked}
-          onChange={(event) => onChange(event.target.checked)}
-        />
-      </span>
       <Flex
         direction="column"
         gap="xxsmall"
@@ -475,15 +436,13 @@ function PromptOptionCheckbox({
           {icon}
           <Body2BoldP>{label}</Body2BoldP>
         </Flex>
-        <Body2P $color="text-xlight">{hint}</Body2P>
+        <CaptionP $color="text-xlight">{hint}</CaptionP>
       </Flex>
-      {checked && (
-        <CaretRightIcon
-          size={12}
-          color={active ? 'icon-default' : 'icon-light'}
-          css={{ alignSelf: 'center', flexShrink: 0 }}
-        />
-      )}
+      <CaretRightIcon
+        size={12}
+        color={active ? 'icon-default' : 'icon-light'}
+        css={{ alignSelf: 'center', flexShrink: 0 }}
+      />
     </button>
   )
 }
@@ -563,6 +522,9 @@ function SidePanelContainer({ children }: { children: ReactNode }) {
       padding="medium"
       css={{
         flexShrink: 0,
+        maxHeight: '100%',
+        minHeight: 0,
+        overflowY: 'auto',
         background: theme.colors['fill-two-selected'],
         border: theme.borders['fill-two'],
         borderRadius: `0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px 0`,
