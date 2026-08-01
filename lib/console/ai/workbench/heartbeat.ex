@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Heartbeat do
   alias Console.Schema.{AIUsage, WorkbenchJob}
   alias Console.Schema.WorkbenchJob.{Modes, Modes.Budget}
   alias Console.Deployments.Workbenches
-  alias Console.AI.Agents
+  alias Console.AI.{Agents, ModelSelection}
 
   @poll :timer.seconds(15)
 
@@ -23,10 +23,24 @@ defmodule Console.AI.Workbench.Heartbeat do
     {:ok, %State{job: job, booted: true, usage: preserve_usage(job.usage), reprompt: reprompt(job)}}
   end
 
+  def handle_cast({:usage, %{} = new_usage, _provider, _model, price_sheet}, %State{usage: usage} = state) do
+    new_usage
+    |> ModelSelection.backfill_usage(price_sheet)
+    |> merge_usage(usage)
+    |> enforce_budget(state)
+  end
   def handle_cast({:usage, %{} = new_usage}, %State{usage: usage} = state) do
     new_usage
     |> AIUsage.sanitize()
-    |> Enum.reduce(usage, fn {k, v}, acc ->
+    |> merge_usage(usage)
+    |> enforce_budget(state)
+  end
+  def handle_cast(:cancel, %State{job: job, booted: booted} = state),
+    do: {:stop, :cancel, %{state | job: job, booted: booted}}
+  def handle_cast(_, state), do: {:noreply, state}
+
+  defp merge_usage(new_usage, usage) do
+    Enum.reduce(new_usage, usage, fn {k, v}, acc ->
       case Map.get(acc, k) do
         old when (is_integer(old) or is_float(old)) and (is_integer(v) or is_float(v)) ->
           Map.put(acc, k, old + v)
@@ -34,11 +48,7 @@ defmodule Console.AI.Workbench.Heartbeat do
         _ -> Map.put(acc, k, v)
       end
     end)
-    |> enforce_budget(state)
   end
-  def handle_cast(:cancel, %State{job: job, booted: booted} = state),
-    do: {:stop, :cancel, %{state | job: job, booted: booted}}
-  def handle_cast(_, state), do: {:noreply, state}
 
   def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
 
@@ -77,6 +87,8 @@ defmodule Console.AI.Workbench.Heartbeat do
   defp reprompt(_), do: false
 
   def usage_callback(%WorkbenchJob{} = job, usage), do: GenServer.cast(via(job), {:usage, usage})
+  def usage_callback(%WorkbenchJob{} = job, provider, model, price_sheet, usage),
+    do: GenServer.cast(via(job), {:usage, usage, provider, model, price_sheet})
 
   defp via(%WorkbenchJob{id: id}), do: {:via, Registry, {Agents, {:workbench_heartbeat, id}}}
 end

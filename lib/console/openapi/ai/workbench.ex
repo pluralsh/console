@@ -27,7 +27,27 @@ defmodule Console.OpenAPI.AI.Workbench do
       project_id: string(description: "ID of the project this workbench belongs to"),
       repository_id: string(description: "ID of the git repository for this workbench"),
       agent_runtime_id: string(description: "ID of the agent runtime for this workbench"),
+      budget: Console.OpenAPI.AI.WorkbenchBudget,
     })
+  }
+end
+
+defmodule Console.OpenAPI.AI.WorkbenchBudget do
+  @moduledoc "OpenAPI schema for workbench token bucket budget tracking."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchBudget",
+    description: "Token bucket budget configuration and current state for a workbench",
+    properties: %{
+      enabled: boolean(description: "Whether budget tracking is enabled"),
+      maximum: %{type: :number, description: "Maximum budget capacity"},
+      min_free: %{type: :number, description: "Minimum budget capacity to keep free"},
+      unit: ecto_enum(Console.Schema.Workbench.BudgetUnit, description: "The budget unit"),
+      last: %{type: :number, description: "Remaining budget capacity"},
+      last_updated: datetime(description: "When the budget was last updated")
+    }
   }
 end
 

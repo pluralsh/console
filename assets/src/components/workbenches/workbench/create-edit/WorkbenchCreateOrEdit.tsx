@@ -495,6 +495,7 @@ function sanitizeInitialForm({
   repository,
   skills,
   modes,
+  budget,
   workbenchSkills,
   tools,
   readBindings,
@@ -538,6 +539,7 @@ function sanitizeInitialForm({
       coding: { mode, repositories, enableBabysitting },
     },
     modes: modesFormValue(modes),
+    budget: budget ?? null,
     skills: { ref, files },
     toolAssociations:
       tools?.flatMap((t) => (t ? [{ toolId: t.id }] : [])) ?? [],

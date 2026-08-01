@@ -341,6 +341,13 @@ defmodule Console.Schema.DeploymentSettings do
         field :tool_model,      :string
         field :embedding_model, :string
       end
+
+      embeds_many :price_sheets, PriceSheet, on_replace: :delete do
+        field :provider,        AIProvider
+        field :model,           :string
+        field :input_price,     :float
+        field :output_price,    :float
+      end
     end
 
     belongs_to :artifact_repository, GitRepository
@@ -427,6 +434,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:bedrock, with: &bedrock_changeset/2)
     |> cast_embed(:vertex, with: &vertex_changeset/2)
     |> cast_embed(:nexus, with: &nexus_changeset/2)
+    |> cast_embed(:price_sheets, with: &price_sheet_changeset/2)
   end
 
   defp analysis_rates_changeset(model, attrs), do: model |> cast(attrs, ~w(fast slow)a)
@@ -548,6 +556,14 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:victoria)
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)
+  end
+
+  defp price_sheet_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(provider model input_price output_price)a)
+    |> validate_required([:provider, :model])
+    |> validate_number(:input_price, greater_than_or_equal_to: 0)
+    |> validate_number(:output_price, greater_than_or_equal_to: 0)
   end
 
   defp set_initialized(changeset) do

@@ -129,7 +129,7 @@ defmodule Console.MixProject do
       {:cowboy, "~> 2.12"},
       {:uniq, "~> 0.4"},
       {:oauth2, "~> 2.1"},
-      {:mermaid_validator, git: "https://github.com/pluralsh/mermaid-validator.git", tag: "v0.1.1"},
+      {:mermaid_validator, git: "https://github.com/pluralsh/mermaid-validator.git", tag: "v0.1.2"},
       {:rustler, "~> 0.37", optional: true, override: true},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test]},
@@ -194,7 +194,6 @@ defmodule Console.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:ex_aws_auth, "~> 1.4"},
       {:pgvector, "~> 0.3.0"},
-
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

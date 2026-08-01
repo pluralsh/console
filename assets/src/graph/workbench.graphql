@@ -107,6 +107,14 @@ fragment Workbench on Workbench {
   modes {
     ...WorkbenchJobModesFields
   }
+  budget {
+    enabled
+    maximum
+    minFree
+    unit
+    last
+    lastUpdated
+  }
   skills {
     ref {
       ref

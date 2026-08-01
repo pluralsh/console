@@ -332,8 +332,8 @@ defmodule Console.Deployments.Global do
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.chunk_every(100)
+    |> Console.throttle(count: 100, pause: 100)
     |> Stream.flat_map(&add_gs_instances(global, &1))
-    |> Console.throttle(count: 100, pause: 30)
     |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 4)
     |> Stream.map(fn
       {:ok, res} -> res

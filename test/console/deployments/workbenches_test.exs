@@ -6,6 +6,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.PubSub
   alias Console.Deployments.Workbenches
   alias Console.Schema.{QueuedPrompt, WorkbenchJob, WorkbenchJobActivity}
+  alias Console.Schema.Workbench.Budget
   alias CloudQuery.Client
   alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput, ToolQuery.Stub}
 
@@ -19,6 +20,53 @@ defmodule Console.Deployments.WorkbenchesTest do
     output_cost: 0.02,
     total_cost: 0.03
   }
+
+  describe "workbench budget" do
+    test "refills lazily and defaults min_free to an hour of usage" do
+      now = ~U[2026-08-02 17:00:00Z]
+
+      budget =
+        Budget.changeset(%Budget{}, %{enabled: true, maximum: 43_200, unit: :token})
+        |> Ecto.Changeset.apply_changes()
+
+      assert budget.min_free == 60
+
+      budget = %{budget | last: 0, last_updated: DateTime.add(now, -3_600)}
+
+      assert Budget.total_available(budget, now) == 60
+      refute Budget.available?(budget, now)
+
+      updated = Budget.consume(budget, 10, now)
+      assert updated.last == 50
+      assert updated.last_updated == now
+    end
+
+    test "does not enforce disabled budgets" do
+      budget = %Budget{enabled: false, maximum: 100, min_free: 100, last: 0}
+
+      assert Budget.available?(budget)
+      assert Budget.consume(budget, 10) == budget
+    end
+
+    test "locks and consumes a workbench budget" do
+      workbench =
+        insert(:workbench,
+          budget: %Budget{
+            enabled: true,
+            maximum: 1_000,
+            min_free: 1,
+            unit: :token,
+            last: 1_000,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      {:ok, updated} = Workbenches.update_budget(workbench, %{total_tokens: 125})
+
+      assert updated.budget.last == 875
+      assert refetch(workbench).budget.last == 875
+    end
+  end
 
   describe "create_workbench/2" do
     test "project writers can create a workbench" do
@@ -524,6 +572,26 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_workbench_job/3" do
+    test "rejects jobs when the workbench budget is exhausted" do
+      user = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: user.id}],
+          budget: %Budget{
+            enabled: true,
+            maximum: 100,
+            min_free: 10,
+            unit: :token,
+            last: 10,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      assert {:error, "workbench budget is exhausted"} =
+               Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+    end
+
     test "users with read access can create a job" do
       user = insert(:user)
       project = insert(:project)
@@ -817,6 +885,26 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "save_usage/2" do
+    test "updates the workbench budget atomically with job usage" do
+      workbench =
+        insert(:workbench,
+          budget: %Budget{
+            enabled: true,
+            maximum: 1_000,
+            min_free: 1,
+            unit: :token,
+            last: 1_000,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      job = insert(:workbench_job, status: :running, workbench: workbench)
+
+      {:ok, _} = Workbenches.save_usage(job, @usage)
+
+      assert refetch(workbench).budget.last == 875
+    end
+
     test "persists token and cost usage for a job" do
       job = insert(:workbench_job, status: :running)
 

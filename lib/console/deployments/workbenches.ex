@@ -6,6 +6,8 @@ defmodule Console.Deployments.Workbenches do
   alias Console.Schema.{
     User,
     Workbench,
+    Workbench.Budget,
+    AIUsage,
     WorkbenchJob,
     WorkbenchTool,
     WorkbenchJobActivity,
@@ -54,6 +56,7 @@ defmodule Console.Deployments.Workbenches do
   @ttl :timer.hours(6)
 
   def get_workbench!(id), do: Repo.get!(Workbench, id)
+  def get_workbench_with_lock!(id), do: Repo.get!(Workbench.with_lock(), id)
   def get_workbench(id), do: Repo.get(Workbench, id)
   def get_workbench_job!(id), do: Repo.get!(WorkbenchJob, id)
   def get_workbench_job(id), do: Repo.get(WorkbenchJob, id)
@@ -620,20 +623,29 @@ defmodule Console.Deployments.Workbenches do
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
   @spec create_workbench_job(map, binary | Workbench.t(), User.t()) :: job_resp
-  def create_workbench_job(attrs, %Workbench{id: wb_id} = wb, %User{} = user) do
-    %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
-    |> WorkbenchJob.changeset(
-      attrs
-      |> merge_modes(wb)
-      |> Map.put(:result, %{working_theory: "", conclusion: ""})
-    )
-    |> allow(user, :read)
-    |> when_ok(:insert)
-    |> notify(:create, user)
-  end
+  def create_workbench_job(attrs, %Workbench{id: id}, %User{} = user),
+    do: create_workbench_job(attrs, id, user)
   def create_workbench_job(attrs, workbench_id, %User{} = user) when is_binary(workbench_id) do
-    get_workbench!(workbench_id)
-    |> then(&create_workbench_job(attrs, &1, user))
+    start_transaction()
+    |> add_operation(:budget, fn _ ->
+      bench = get_workbench_with_lock!(workbench_id)
+      case budget_available?(bench) do
+        true -> {:ok, bench}
+        false -> {:error, "workbench budget is exhausted"}
+      end
+    end)
+    |> add_operation(:job, fn %{budget: %Workbench{id: wb_id} = wb} ->
+      %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
+      |> WorkbenchJob.changeset(
+        attrs
+        |> merge_modes(wb)
+        |> Map.put(:result, %{working_theory: "", conclusion: ""})
+      )
+      |> allow(user, :read)
+      |> when_ok(:insert)
+    end)
+    |> execute(extract: :job)
+    |> notify(:create, user)
   end
 
   defp merge_modes(attrs, %Workbench{modes: modes}) do
@@ -641,6 +653,9 @@ defmodule Console.Deployments.Workbenches do
     |> DeepMerge.deep_merge(attrs[:modes] || %{})
     |> then(&Map.put(attrs, :modes, &1))
   end
+
+  defp budget_available?(%Workbench{budget: %Budget{} = budget}), do: Budget.available?(budget)
+  defp budget_available?(%Workbench{}), do: true
 
   def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
     hook = Repo.preload(hook, [:user])
@@ -1183,24 +1198,62 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec save_usage(WorkbenchJob.t(), map) :: job_resp
   def save_usage(%WorkbenchJob{} = job, usage) do
-    job
-    |> WorkbenchJob.changeset(%{usage: usage})
-    |> Repo.update()
+    usage = AIUsage.sanitize(usage)
+
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      job
+      |> WorkbenchJob.changeset(%{usage: usage})
+      |> Repo.update()
+    end)
+    |> add_operation(:budget, fn _ ->
+      update_budget(job.workbench_id, usage)
+    end)
+    |> execute(extract: :job)
     |> notify(:update)
   end
+
+  @doc """
+  Atomically consumes a quantity from a workbench's budget.
+  """
+  @spec update_budget(Workbench.t() | binary, map) :: workbench_resp
+  def update_budget(%Workbench{id: id}, usage), do: update_budget(id, usage)
+  def update_budget(id, %{} = usage) when is_binary(id) do
+    start_transaction()
+    |> add_operation(:fetch, fn _ -> {:ok, get_workbench_with_lock!(id)} end)
+    |> add_operation(:workbench, fn
+      %{fetch: %Workbench{budget: %Budget{enabled: true} = budget} = workbench} ->
+        new_budget = Budget.consume(budget, budget_quantity(budget, usage))
+        workbench
+        |> Workbench.changeset(%{budget: Console.mapify(new_budget)})
+        |> Repo.update()
+      %{fetch: %Workbench{} = bench} -> {:ok, bench}
+    end)
+    |> execute(extract: :workbench)
+  end
+
+  defp budget_quantity(%Budget{unit: :dollar}, usage), do: Map.get(usage, :total_cost)
+  defp budget_quantity(%Budget{unit: :token}, usage), do: Map.get(usage, :total_tokens)
 
   @doc """
   Fails a job with an error message.
   """
   @spec fail_job(binary, WorkbenchJob.t()) :: job_resp
   def fail_job(error, %WorkbenchJob{} = job, usage \\ %{}) when is_binary(error) do
-    WorkbenchJob.changeset(job, %{
-      status: :failed,
-      completed_at: DateTime.utc_now(),
-      error: error,
-      usage: usage
-    })
-    |> Repo.update()
+    usage = AIUsage.sanitize(usage)
+
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      WorkbenchJob.changeset(job, %{
+        status: :failed,
+        completed_at: DateTime.utc_now(),
+        error: error,
+        usage: usage
+      })
+      |> Repo.update()
+    end)
+    |> add_operation(:budget, fn _ -> update_budget(job.workbench_id, usage) end)
+    |> execute(extract: :job)
     |> notify(:update)
   end
 

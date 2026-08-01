@@ -23,6 +23,81 @@ defmodule Console.Schema.Workbench do
   alias Console.Deployments.Policies.Rbac
   alias Console.Uploads.Type
 
+  defenum BudgetUnit, dollar: 0, token: 1
+
+  defmodule Budget do
+    @moduledoc """
+    Token bucket based budget tracking for workbenches.  Should always be updated atomically via the Workbenches service module.
+    """
+    use Console.Schema.Base
+
+    @minutes_per_month 30 * 24 * 60
+    @minutes_per_hour 60
+
+    embedded_schema do
+      field :enabled,      :boolean
+      field :maximum,      :float
+      field :min_free,     :float
+      field :unit,         Console.Schema.Workbench.BudgetUnit
+      field :last,         :float
+      field :last_updated, :utc_datetime_usec
+    end
+
+    @valid ~w(enabled maximum unit last last_updated min_free)a
+
+    def changeset(model, attrs \\ %{}) do
+      model
+      |> cast(attrs, @valid)
+      |> validate_required([:maximum, :unit])
+      |> put_new_change(:min_free, fn -> min_free(attrs) end)
+    end
+
+    @doc """
+    Returns the amount currently in the bucket, including elapsed refill time.
+    """
+    def total_available(%__MODULE__{maximum: maximum} = budget, now \\ DateTime.utc_now())
+        when is_number(maximum) do
+      available =
+        (budget.last || maximum) +
+          refill_rate(maximum) * elapsed_minutes(budget.last_updated, now)
+
+      min(available, maximum)
+    end
+
+    @doc """
+    Consumes an amount from the bucket after lazily applying its refill.
+    """
+    def consume(budget, quantity, now \\ DateTime.utc_now())
+    def consume(%__MODULE__{enabled: true} = budget, quantity, now)
+        when is_number(quantity) and quantity >= 0 do
+      %{budget | last: total_available(budget, now) - quantity, last_updated: now}
+    end
+    def consume(%__MODULE__{} = budget, _quantity, _now), do: budget
+
+    @doc """
+    Returns whether the budget can accept new work.
+    """
+    def available?(budget, now \\ DateTime.utc_now())
+    def available?(%__MODULE__{enabled: true} = budget, now) do
+      total_available(budget, now) > (budget.min_free || 0)
+    end
+    def available?(%__MODULE__{}, _now), do: true
+
+    defp min_free(attrs) do
+      with {:free, nil} <- {:free, Map.get(attrs, :min_free)},
+           max when is_number(max) <- Map.get(attrs, :maximum) do
+        max * @minutes_per_hour / @minutes_per_month
+      else
+        {:free, free} when is_number(free) -> free
+        _ -> nil
+      end
+    end
+
+    defp refill_rate(maximum), do: maximum / @minutes_per_month
+    defp elapsed_minutes(nil, _now), do: 0
+    defp elapsed_minutes(last_updated, now), do: max(DateTime.diff(now, last_updated, :second) / 60, 0)
+  end
+
   schema "workbenches" do
     field :name,           :string
     field :description,    :string
@@ -52,6 +127,7 @@ defmodule Console.Schema.Workbench do
     end
 
     embeds_one :modes, WorkbenchJob.Modes, on_replace: :update
+    embeds_one :budget, Budget, on_replace: :update
 
     embeds_one :skills, Skills, on_replace: :update do
       embeds_one :ref, Service.Git, on_replace: :update
@@ -136,6 +212,7 @@ defmodule Console.Schema.Workbench do
     |> cast_embed(:modes)
     |> cast_embed(:skills, with: &skills_changeset/2)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
+    |> cast_embed(:budget)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:repository_id)

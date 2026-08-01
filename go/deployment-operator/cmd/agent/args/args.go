@@ -62,14 +62,14 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
-	defaultComponentShaCacheTTL         = "2h"
-	defaultComponentShaCacheTTLDuration = 2 * time.Hour
+	defaultComponentShaCacheTTL         = "3h"
+	defaultComponentShaCacheTTLDuration = 3 * time.Hour
 
 	defaultManifestCacheJitter         = "30m"
 	defaultManifestCacheJitterDuration = 30 * time.Minute
 
-	defaultComponentShaCacheJitter         = "1h"
-	defaultComponentShaCacheJitterDuration = time.Hour
+	defaultComponentShaCacheJitter         = "2h"
+	defaultComponentShaCacheJitterDuration = 2 * time.Hour
 
 	defaultControllerCacheTTL         = "2m"
 	defaultControllerCacheTTLDuration = 2 * time.Minute

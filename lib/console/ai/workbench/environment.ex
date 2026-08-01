@@ -6,6 +6,7 @@ defmodule Console.AI.Workbench.Environment do
     WorkbenchJobActivity,
     User
   }
+  alias Console.{AI.ModelSelection, Deployments.Settings}
   alias Console.AI.Workbench.{Skill, Skills.Builtins, Heartbeat}
 
   @type t :: %__MODULE__{
@@ -40,9 +41,23 @@ defmodule Console.AI.Workbench.Environment do
     |> save()
   end
 
-  def engine_opts(%WorkbenchJob{modes: %{model: %{model: m, provider: p}}} = job) when is_binary(m),
-    do: [model: m, provider: p, usage_callback: &Heartbeat.usage_callback(job, &1)]
-  def engine_opts(%WorkbenchJob{} = job), do: [usage_callback: &Heartbeat.usage_callback(job, &1)]
+  def engine_opts(%WorkbenchJob{} = job) do
+    settings = Settings.cached()
+
+    case ModelSelection.tool_model(job, settings) do
+      %{model: model, provider: provider} ->
+        price_sheet = ModelSelection.price_sheet(settings, provider, model)
+
+        [
+          model: model,
+          provider: provider,
+          usage_callback: &Heartbeat.usage_callback(job, provider, model, price_sheet, &1)
+        ]
+
+      _ ->
+        [usage_callback: &Heartbeat.usage_callback(job, &1)]
+    end
+  end
 
   def actions(%__MODULE__{functions: funcs, job: job}) do
     %Actions{

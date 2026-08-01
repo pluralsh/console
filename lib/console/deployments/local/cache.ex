@@ -4,7 +4,7 @@ defmodule Console.Deployments.Local.Cache do
 
   @type t :: %__MODULE__{}
 
-  defstruct [:dir, :table]
+  defstruct [:dir, :table, :last_updated]
 
   defmodule Line do
     @type t :: %__MODULE__{}
@@ -32,9 +32,8 @@ defmodule Console.Deployments.Local.Cache do
     end
   end
 
-  @spec new(:ets.tab()) :: t
-  def new(table) do
-    {:ok, dir} = Briefly.create(directory: true)
+  @spec new(:ets.tab(), binary) :: t
+  def new(table, dir) when is_binary(dir) do
     %__MODULE__{dir: dir, table: table}
   end
 
@@ -106,8 +105,14 @@ defmodule Console.Deployments.Local.Cache do
     end
   end
 
+  def fresh?(%__MODULE__{last_updated: last_updated}, shift \\ [second: -10]) do
+    Timex.now()
+    |> Timex.shift(shift)
+    |> Timex.before?(last_updated)
+  end
+
   defp store(%__MODULE__{table: table} = cache, %Line{digest: digest} = line) do
     :ets.insert(table, {{:line, digest}, line})
-    cache
+    %{cache | last_updated: Timex.now()}
   end
 end
