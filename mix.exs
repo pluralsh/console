@@ -184,6 +184,7 @@ defmodule Console.MixProject do
       {:oidcc, "~> 3.3"},
       {:hackney, "~> 1.21"},
       {:protobuf, "~> 0.16.1", override: true},
+      {:scribe, "~> 0.11"},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
       {:req_llm, "~> 1.18"},

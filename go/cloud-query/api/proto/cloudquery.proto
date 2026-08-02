@@ -53,6 +53,11 @@ message SchemaInput {
   optional string table = 2;
 }
 
+message SchemasInput {
+  Connection connection = 1;
+  repeated string tables = 2;
+}
+
 message ExtractInput {
   Connection connection = 1;
 }
@@ -94,6 +99,7 @@ message ExtractOutput {
 service CloudQuery {
   rpc Query(QueryInput) returns (QueryResult) {}
   rpc Schema(SchemaInput) returns (SchemaOutput) {}
+  rpc Schemas(SchemasInput) returns (SchemaOutput) {}
   rpc Tables(TablesInput) returns (TablesOutput) {}
   rpc Extract(ExtractInput) returns (stream ExtractOutput) {}
 }

@@ -106,6 +106,10 @@ defmodule Console.Deployments.Local.Server do
     # assists in cleanup for local envs, in prod, emptyDir handles this
     defp server_dir(), do: Briefly.create!(directory: true)
   else
-    defp server_dir(), do: File.mkdir_p!(Path.join([System.tmp_dir!, "local_server"]))
+    defp server_dir() do
+      dir = Path.join([System.tmp_dir!(), "local_server"])
+      File.mkdir_p!(dir)
+      dir
+    end
   end
 end

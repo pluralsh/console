@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "tables": {
+      "type": "array",
+      "description": "Exact table names to inspect.",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    }
+  },
+  "required": ["tables"]
+}
