@@ -8,7 +8,9 @@ defmodule Console.AI.Memoizer do
     model   = Evidence.preload(model)
     insight = Evidence.insight(model)
     case AiInsight.memoized?(insight, nil) do
-      true -> {:ok, insight}
+      true ->
+        bump_poll(model)
+        {:ok, insight}
       false -> try_generate(model, insight)
     end
   end
@@ -86,7 +88,7 @@ defmodule Console.AI.Memoizer do
     |> String.downcase()
   end
 
-  @poll_duration 30 * 60 # 30 minutes
+  @poll_duration 60 * 60 # 1 hour
 
   def next_poll_at() do
     duration = Duration.new!(second: @poll_duration + Console.jitter(floor(@poll_duration / 2)))

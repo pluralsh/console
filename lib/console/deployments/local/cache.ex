@@ -1,8 +1,11 @@
 defmodule Console.Deployments.Local.Cache do
   alias Console.SmartFile
+  use Nebulex.Caching
   require Logger
 
   @type t :: %__MODULE__{}
+
+  @local_adapter Console.conf(:local_cache)
 
   defstruct [:dir, :table, :last_updated]
 
@@ -75,6 +78,7 @@ defmodule Console.Deployments.Local.Cache do
         _ -> acc
       end
     end, 0, t)
+    send self(), {:persistent_ets, :flush}
     Logger.info("pruned #{deleted} expired files from local file server")
     cache
   end
@@ -99,8 +103,10 @@ defmodule Console.Deployments.Local.Cache do
 
   def find(%__MODULE__{table: table}, digest), do: find(table, digest)
   def find(table, digest) do
-    case :ets.lookup(table, {:line, digest}) do
-      [{{:line, ^digest}, line}] -> line
+    with [{{:line, ^digest}, %Line{file: f} = line}] <- :ets.lookup(table, {:line, digest}),
+         true <- exists?(f) do
+      line
+    else
       _ -> nil
     end
   end
@@ -110,6 +116,9 @@ defmodule Console.Deployments.Local.Cache do
     |> Timex.shift(shift)
     |> Timex.before?(last_updated)
   end
+
+  @decorate cacheable(cache: @local_adapter, key: {:file_exists, fname}, opts: [ttl: :timer.hours(3)])
+  defp exists?(fname), do: File.exists?(fname)
 
   defp store(%__MODULE__{table: table} = cache, %Line{digest: digest} = line) do
     :ets.insert(table, {{:line, digest}, line})

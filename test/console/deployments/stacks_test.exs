@@ -643,6 +643,21 @@ defmodule Console.Deployments.StacksTest do
       assert pr.next_poll_at
     end
 
+    test "defers polling a pr when sha discovery fails" do
+      stack = insert(:stack,
+        git: %{ref: "main", folder: "terraform"},
+        sha: "old-sha"
+      )
+      pr = insert(:pull_request, stack: stack)
+
+      expect(Discovery, :sha, fn _, _ -> {:error, "git unavailable"} end)
+
+      assert {:error, "git unavailable"} = Stacks.poll(pr)
+
+      pr = refetch(pr)
+      assert DateTime.after?(pr.next_poll_at, DateTime.utc_now())
+    end
+
     test "it can create a new run an ansible stack" do
       stack = insert(:stack,
         type: :ansible,
@@ -1061,6 +1076,24 @@ defmodule Console.Deployments.StacksTest do
         state: %{plan: "some plan"},
         output: [%{name: "some-output", value: "val"}]
       }, run.id, user)
+    end
+
+    test "makes a stack immediately ai pollable when its run fails" do
+      user = insert(:user)
+
+      stack = insert(:stack,
+        status: :successful,
+        ai_poll_at: DateTime.add(DateTime.utc_now(), 1, :hour),
+        write_bindings: [%{user_id: user.id}]
+      )
+
+      run = insert(:stack_run, stack: stack)
+
+      {:ok, _} = Stacks.complete_stack_run(%{status: :failed}, run.id, user)
+
+      stack = refetch(stack)
+      assert stack.status == :failed
+      assert DateTime.before?(stack.ai_poll_at, DateTime.utc_now())
     end
 
     test "clusters can complete runs" do

@@ -447,6 +447,7 @@ defmodule Console.Schema.Service do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> make_ai_pollable_on_failure()
     |> kubernetes_names([:name, :namespace])
     |> semver(:version)
     |> validate_length(:name, max: 510)
@@ -480,6 +481,12 @@ defmodule Console.Schema.Service do
     |> immutable([:agent_id])
   end
 
+  def status_changeset(model, attrs) do
+    model
+    |> Ecto.Changeset.change(attrs)
+    |> make_ai_pollable_on_failure()
+  end
+
   def update_changeset(changeset) do
     Enum.reduce(@immutable, changeset, fn field, cs ->
       case get_change(cs, field) do
@@ -496,6 +503,16 @@ defmodule Console.Schema.Service do
     |> cast_embed(:helm)
     |> cast_embed(:kustomize)
     |> validate_required(~w(revision_id)a)
+  end
+
+  defp make_ai_pollable_on_failure(changeset) do
+    case get_change(changeset, :status) do
+      :failed ->
+        put_change(changeset, :ai_poll_at, DateTime.utc_now())
+
+      _ ->
+        changeset
+    end
   end
 
   def rbac_changeset(model, attrs \\ %{}) do

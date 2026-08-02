@@ -1,6 +1,7 @@
 defmodule ConsoleWeb.ExternalSocket do
   use Phoenix.Socket, log: false
   alias Console.Schema.Cluster
+  alias Console.Deployments.Clusters
 
   channel "cluster:*", ConsoleWeb.ClusterChannel
 
@@ -16,7 +17,7 @@ defmodule ConsoleWeb.ExternalSocket do
 
   def build_context(params) do
     with {:ok, token} <- fetch_token(params),
-          %Cluster{} = cluster <- Console.Deployments.Clusters.get_by_deploy_token(token) do
+          %Cluster{} = cluster <- Clusters.get_by_deploy_token(token) do
       {:ok, %{cluster: cluster}}
     end
   end

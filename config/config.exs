@@ -168,7 +168,7 @@ config :console, Console.MultilevelCache,
       gc_interval: :timer.hours(12),
       backend: :shards,
       partitions: 2,
-      allocated_memory: 1000 * 1000 * 10
+      allocated_memory: 1000 * 1000 * 100
     },
     {
       Console.MultilevelCache.L2,
