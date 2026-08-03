@@ -650,6 +650,7 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   status
   error
   insertedAt
+  queuedPromptCount
   usage {
     ...WorkbenchJobUsageTiny
   }

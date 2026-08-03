@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
+  import Absinthe.Resolution.Helpers, only: [batch: 3]
   alias Console.Repo
   alias Kube.Utils, as: KUtils
   alias Console.Deployments.{Clusters, Workbenches}
@@ -207,7 +208,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def list_queued_prompts(job, args, _) do
     QueuedPrompt.for_workbench_job(job.id)
+    |> QueuedPrompt.unconsumed()
     |> paginate(args)
+  end
+
+  def queued_prompt_count(%WorkbenchJob{id: id}, _, _) do
+    batch({__MODULE__, :queued_prompt_counts}, id, fn counts ->
+      {:ok, Map.get(counts, id, 0)}
+    end)
+  end
+
+  def queued_prompt_counts(_, job_ids) do
+    QueuedPrompt.for_workbench_jobs(job_ids)
+    |> QueuedPrompt.unconsumed()
+    |> QueuedPrompt.counts_by_workbench_job()
+    |> Console.Repo.all()
+    |> Map.new()
   end
 
   def all_workbench_alerts(args, %{context: %{current_user: user}}) do

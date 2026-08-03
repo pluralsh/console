@@ -17,6 +17,21 @@ defmodule Console.Schema.QueuedPrompt do
     from(q in query, where: q.workbench_job_id == ^job_id)
   end
 
+  def for_workbench_jobs(query \\ __MODULE__, job_ids) do
+    from(q in query, where: q.workbench_job_id in ^job_ids)
+  end
+
+  def unconsumed(query \\ __MODULE__) do
+    from(q in query, where: is_nil(q.consumed_at))
+  end
+
+  def counts_by_workbench_job(query \\ __MODULE__) do
+    from(q in query,
+      group_by: q.workbench_job_id,
+      select: {q.workbench_job_id, count(q.id)}
+    )
+  end
+
   @valid ~w(prompt user_id workbench_job_id dequeable_at consumed_at)a
 
   def changeset(model, attrs \\ %{}) do

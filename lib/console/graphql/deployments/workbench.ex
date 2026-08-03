@@ -558,6 +558,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_queued_prompts/3
     end
 
+    field :queued_prompt_count, non_null(:integer),
+      resolve: &Deployments.queued_prompt_count/3,
+      description: "number of unconsumed queued prompts for this job"
+
     field :metrics_tool, list_of(:workbench_job_activity_metric) do
       arg :name,      :string, description: "the name of the metrics tool"
       arg :arguments, :json,   description: "the arguments for the metrics tool"

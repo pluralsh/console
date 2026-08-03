@@ -3737,6 +3737,9 @@ type WorkbenchJob {
 
   queuedPrompts(after: String, first: Int, before: String, last: Int): QueuedPromptConnection
 
+  "number of unconsumed queued prompts for this job"
+  queuedPromptCount: Int!
+
   metricsTool(
     "the name of the metrics tool"
     name: String
