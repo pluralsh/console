@@ -10,13 +10,15 @@ import {
   SearchIcon,
 } from '@pluralsh/design-system'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
+import { CaptionP } from 'components/utils/typography/Text'
 import { AiInsightFragment } from 'generated/graphql'
-import { useState } from 'react'
+import { isEmpty } from 'lodash'
+import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
+import { fromNow } from 'utils/datetime'
+import { isNonNullable } from 'utils/isNonNullable'
 import { InsightEvidence } from './InsightEvidence'
 import { InsightMainContent } from './InsightMainContent'
-import { isEmpty } from 'lodash'
-import { isNonNullable } from 'utils/isNonNullable'
 
 const HEADER_HEIGHT = 40
 
@@ -24,34 +26,59 @@ export function InsightDisplay({
   insight,
   kind = 'resource',
   loading = false,
+  headerActions,
 }: {
   insight: Nullable<AiInsightFragment>
   kind: Nullable<string>
   loading: boolean
+  /** When set, merges title, last-updated, and actions into one panel header. */
+  headerActions?: ReactNode
 }) {
   const evidence = insight?.evidence?.filter(isNonNullable)
   const hasEvidence = !isEmpty(evidence)
   const [openItem, setOpenItem] = useState(ARBITRARY_VALUE_NAME)
   const isExpanded = openItem === ARBITRARY_VALUE_NAME
+  const compactHeader = headerActions != null
 
   return (
     <WrapperSC>
       <LeftSideSC>
-        <ContentHeaderSC>
-          <Flex gap="small">
-            <AiSparkleOutlineIcon />
-            <span>insight</span>
-          </Flex>
-          {hasEvidence && !isExpanded && (
-            <Button
-              secondary
-              small
-              startIcon={<SearchDocsIcon />}
-              onClick={() => setOpenItem(ARBITRARY_VALUE_NAME)}
+        <ContentHeaderSC $compact={compactHeader}>
+          {compactHeader ? (
+            <Flex
+              direction="column"
+              gap="xxsmall"
+              justify="center"
             >
-              View evidence
-            </Button>
+              <span>insight</span>
+              {insight?.updatedAt && (
+                <CaptionP $color="text-xlight">
+                  Last updated {fromNow(insight.updatedAt)}
+                </CaptionP>
+              )}
+            </Flex>
+          ) : (
+            <Flex gap="small">
+              <AiSparkleOutlineIcon />
+              <span>insight</span>
+            </Flex>
           )}
+          <Flex
+            align="center"
+            gap="small"
+          >
+            {hasEvidence && !isExpanded && (
+              <Button
+                secondary
+                small
+                startIcon={<SearchDocsIcon />}
+                onClick={() => setOpenItem(ARBITRARY_VALUE_NAME)}
+              >
+                View evidence
+              </Button>
+            )}
+            {headerActions}
+          </Flex>
         </ContentHeaderSC>
         <InsightMainContent
           text={insight?.text}
@@ -112,21 +139,25 @@ const WrapperSC = styled.div(({ theme }) => ({
       : theme.colors['fill-one'],
 }))
 
-const ContentHeaderSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.overline,
-  color: theme.colors['text-xlight'],
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  height: HEADER_HEIGHT,
-  minWidth: 'max-content',
-  background:
-    theme.mode === 'light'
-      ? theme.colors['fill-one']
-      : theme.colors['fill-two'],
-  borderBottom: theme.borders['fill-two'],
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-}))
+const ContentHeaderSC = styled.div<{ $compact?: boolean }>(
+  ({ theme, $compact }) => ({
+    ...theme.partials.text.overline,
+    color: theme.colors['text-xlight'],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing.small,
+    height: $compact ? 'auto' : HEADER_HEIGHT,
+    minHeight: HEADER_HEIGHT,
+    minWidth: 0,
+    background:
+      theme.mode === 'light'
+        ? theme.colors['fill-one']
+        : theme.colors['fill-two'],
+    borderBottom: theme.borders['fill-two'],
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  })
+)
 
 const LeftSideSC = styled.div({
   display: 'flex',

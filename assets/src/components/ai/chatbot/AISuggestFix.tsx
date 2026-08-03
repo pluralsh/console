@@ -1,6 +1,7 @@
 import {
   AiSparkleFilledIcon,
   Button,
+  ButtonProps,
   LinkoutIcon,
   Markdown,
   PrOpenIcon,
@@ -134,7 +135,10 @@ function FixPr({
   )
 }
 
-function AISuggestFix({ insight }: { insight: Nullable<AiInsightFragment> }) {
+function AISuggestFix({
+  insight,
+  ...props
+}: { insight: Nullable<AiInsightFragment> } & ButtonProps) {
   const settings = useDeploymentSettings()
   const ref = useRef<HTMLDivElement>(null)
   const [streaming, setStreaming] = useState<boolean>(false)
@@ -177,6 +181,7 @@ function AISuggestFix({ insight }: { insight: Nullable<AiInsightFragment> }) {
     <div css={{ position: 'relative' }}>
       <Button
         startIcon={<AiSparkleFilledIcon />}
+        {...props}
         onClick={showPanel}
       >
         Suggest a fix
