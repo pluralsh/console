@@ -209,6 +209,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_queued_prompts(job, args, _) do
     QueuedPrompt.for_workbench_job(job.id)
     |> QueuedPrompt.unconsumed()
+    |> QueuedPrompt.ordered()
     |> paginate(args)
   end
 

@@ -25,6 +25,10 @@ defmodule Console.Schema.QueuedPrompt do
     from(q in query, where: is_nil(q.consumed_at))
   end
 
+  def ordered(query \\ __MODULE__, order \\ [asc: :dequeable_at, asc: :inserted_at]) do
+    from(q in query, order_by: ^order)
+  end
+
   def counts_by_workbench_job(query \\ __MODULE__) do
     from(q in query,
       group_by: q.workbench_job_id,
