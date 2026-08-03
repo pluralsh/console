@@ -707,6 +707,24 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == to_string(job.status) |> String.upcase()
     end
 
+    test "it returns queuedPromptCount for unconsumed prompts" do
+      job = insert(:workbench_job)
+      insert_list(2, :queued_prompt, workbench_job: job)
+      insert(:queued_prompt, workbench_job: job, consumed_at: DateTime.utc_now())
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            queuedPromptCount
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["queuedPromptCount"] == 2
+    end
+
     test "it returns the UI URL for a workbench job" do
       job = insert(:workbench_job)
 
