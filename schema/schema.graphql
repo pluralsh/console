@@ -2101,6 +2101,9 @@ input AgentPullRequestAttributes {
 
   "the commit shas of the pull request"
   commitShas: [CommitShaAttributes]
+
+  "the classified type and changed line count of the pull request"
+  difficulty: PullRequestDifficultyAttributes
 }
 
 input CommitShaAttributes {

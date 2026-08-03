@@ -349,6 +349,8 @@ type AgentPullRequestAttributes struct {
 	Head string `json:"head"`
 	// the commit shas of the pull request
 	CommitShas []*CommitShaAttributes `json:"commitShas,omitempty"`
+	// the classified type and changed line count of the pull request
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 type AgentRun struct {

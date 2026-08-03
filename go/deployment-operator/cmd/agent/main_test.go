@@ -27,7 +27,7 @@ func TestLoadAgentConfigurationUsesDefaultsWhenMissing(t *testing.T) {
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetRuntimeServicesPingInterval())
 	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetStackPollInterval())
-	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetSentinelPollInterval())
+	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
@@ -68,7 +68,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetRuntimeServicesPingInterval())
 	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetStackPollInterval())
-	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetSentinelPollInterval())
+	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
@@ -98,7 +98,7 @@ func agentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 		ClusterPingInterval:         ptr("2m"),
 		CompatibilityUploadInterval: ptr("3m"),
 		StackPollInterval:           ptr("30s"),
-		SentinelPollInterval:        ptr("30s"),
+		SentinelPollInterval:        ptr("3m"),
 		PipelineGateInterval:        ptr("0s"),
 		DisableWebsocket:            &disableWebsocket,
 	}

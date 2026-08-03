@@ -417,6 +417,8 @@ export type AgentPullRequestAttributes = {
   body: Scalars['String']['input'];
   /** the commit shas of the pull request */
   commitShas?: InputMaybe<Array<InputMaybe<CommitShaAttributes>>>;
+  /** the classified type and changed line count of the pull request */
+  difficulty?: InputMaybe<PullRequestDifficultyAttributes>;
   /** the head branch of the pull request */
   head: Scalars['String']['input'];
   /** the title of the pull request */

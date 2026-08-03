@@ -377,6 +377,7 @@ defmodule Console.Deployments.Agents do
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
         |> Map.put(:workbench_job_id, workbench_job_id_for_agent_pr(run))
+        |> Map.put(:difficulty, attrs[:difficulty])
       )
       |> Repo.insert()
       |> notify(:create)

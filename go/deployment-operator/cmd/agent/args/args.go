@@ -92,8 +92,8 @@ const (
 	defaultStackPollInterval         = "30s"
 	defaultStackPollIntervalDuration = 30 * time.Second
 
-	defaultSentinelPollInterval         = "30s"
-	defaultSentinelPollIntervalDuration = 30 * time.Second
+	defaultSentinelPollInterval         = "3m"
+	defaultSentinelPollIntervalDuration = 3 * time.Minute
 
 	defaultPipelineGatesPollInterval         = "0s"
 	defaultPipelineGatesPollIntervalDuration = 0 * time.Second
