@@ -47,7 +47,7 @@ defmodule Console.Schema.QueuedPrompt do
     |> validate_required(@valid -- [:consumed_at])
   end
 
-  @idle_statuses ~w(successful cancelled)a
+  @idle_statuses ~w(successful failed cancelled)a
 
   def dequeueable(query \\ __MODULE__) do
     from(q in query,
