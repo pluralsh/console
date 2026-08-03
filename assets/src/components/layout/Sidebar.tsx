@@ -124,6 +124,7 @@ function getMenuItems({
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.cd),
       hotkeys: ['shift C'],
     },
     {
@@ -155,6 +156,7 @@ function getMenuItems({
       expandedLabel: 'Self service',
       icon: <CatalogIcon />,
       path: SELF_SERVICE_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
       hotkeys: ['shift S+C'],
     },
     {
@@ -170,6 +172,7 @@ function getMenuItems({
       expandedLabel: 'Plural AI',
       icon: <AINavIcon />,
       path: AI_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.ai),
       hotkeys: ['shift A'],
     },
     ...(featureFlags.Edge

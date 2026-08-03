@@ -6075,6 +6075,7 @@ type PersonaServicesAttributes struct {
 }
 
 type PersonaSidebar struct {
+	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
 	PullRequests *bool `json:"pullRequests,omitempty"`
@@ -6085,9 +6086,11 @@ type PersonaSidebar struct {
 	Stacks       *bool `json:"stacks,omitempty"`
 	Security     *bool `json:"security,omitempty"`
 	Cost         *bool `json:"cost,omitempty"`
+	Ai           *bool `json:"ai,omitempty"`
 }
 
 type PersonaSidebarAttributes struct {
+	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
 	PullRequests *bool `json:"pullRequests,omitempty"`
@@ -6098,6 +6101,7 @@ type PersonaSidebarAttributes struct {
 	Stacks       *bool `json:"stacks,omitempty"`
 	Security     *bool `json:"security,omitempty"`
 	Cost         *bool `json:"cost,omitempty"`
+	Ai           *bool `json:"ai,omitempty"`
 }
 
 // A reference to a custom resource you want to be displayed in the k8s dashboard

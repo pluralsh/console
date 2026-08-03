@@ -9602,8 +9602,10 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWo
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -9612,6 +9614,12 @@ type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -9623,6 +9631,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -9765,8 +9779,10 @@ func (t *PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 }
 
 type PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -9775,6 +9791,12 @@ type PersonaConfigurationFragment_Sidebar struct {
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &PersonaConfigurationFragment_Sidebar{}
@@ -9786,6 +9808,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25300,8 +25328,10 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 }
 
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25310,6 +25340,12 @@ type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragme
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25321,6 +25357,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25481,8 +25523,10 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25491,6 +25535,12 @@ type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25502,6 +25552,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25644,8 +25700,10 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25654,6 +25712,12 @@ type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25665,6 +25729,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25807,8 +25877,10 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25817,6 +25889,12 @@ type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25828,6 +25906,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -61861,6 +61945,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -61973,6 +62059,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -62060,6 +62148,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -62148,6 +62238,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {

@@ -16165,6 +16165,7 @@ input PersonaFlowsAttributes {
 }
 
 input PersonaSidebarAttributes {
+  cd: Boolean
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
@@ -16175,6 +16176,7 @@ input PersonaSidebarAttributes {
   stacks: Boolean
   security: Boolean
   cost: Boolean
+  ai: Boolean
 }
 
 input PersonaHomeAttributes {
@@ -16413,6 +16415,7 @@ type PersonaFlows {
 }
 
 type PersonaSidebar {
+  cd: Boolean
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
@@ -16423,6 +16426,7 @@ type PersonaSidebar {
   stacks: Boolean
   security: Boolean
   cost: Boolean
+  ai: Boolean
 }
 
 type PersonaHome {
