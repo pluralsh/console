@@ -68,6 +68,8 @@ const DEFAULT_CONFIGURATION = {
     backups: true,
     cost: true,
     security: true,
+    cd: true,
+    ai: true,
   },
   services: {
     secrets: true,

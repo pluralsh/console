@@ -68,6 +68,8 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
     backups: true,
     cost: true,
     security: true,
+    cd: true,
+    ai: true,
   },
   services: {
     secrets: true,
