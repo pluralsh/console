@@ -393,7 +393,7 @@ func (in *PersonaFlows) Attributes() *console.PersonaFlowsAttributes {
 // These settings allow personas to have customized navigation focused on their primary workflows
 // while hiding irrelevant or restricted functionality from the user interface.
 type PersonaSidebar struct {
-	// CD enables access to the continuous deployment navigation item when set to true.
+	// CD enables access to the Plural Continuous Deployment tab when set to true.
 	// This is the entry point for clusters, services, pipelines, and other deployment
 	// management views. Use the Deployments configuration to control the individual
 	// views within it.
@@ -456,7 +456,7 @@ type PersonaSidebar struct {
 	// +kubebuilder:validation:Optional
 	Cost *bool `json:"cost,omitempty"`
 
-	// AI enables access to the Plural AI navigation item when set to true.
+	// AI enables access to the Plural AI tab when set to true.
 	// This includes AI insights, chat threads, and other AI-driven investigation tools.
 	// Use the AI configuration to control individual AI capabilities within it.
 	// +kubebuilder:validation:Optional
