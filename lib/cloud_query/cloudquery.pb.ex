@@ -96,6 +96,7 @@ defmodule Cloudquery.SchemaInput do
 
   field :connection, 1, type: Cloudquery.Connection
   field :table, 2, proto3_optional: true, type: :string
+  field :tables, 3, repeated: true, type: :string
 end
 
 defmodule Cloudquery.ExtractInput do

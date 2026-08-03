@@ -51,6 +51,9 @@ message QueryInput {
 message SchemaInput {
   Connection connection = 1;
   optional string table = 2;
+  // Exact table names to return schemas for. When non-empty, takes
+  // precedence over `table` and matches with table_name = ANY(tables).
+  repeated string tables = 3;
 }
 
 message ExtractInput {

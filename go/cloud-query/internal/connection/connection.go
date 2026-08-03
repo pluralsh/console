@@ -20,7 +20,7 @@ var defaultDataSource = common.DataSource(args.DatabaseHost(), args.DatabasePort
 
 type Connection interface {
 	Configure() error
-	Schema(table string) ([]cloudquery.SchemaResult, error)
+	Schema(table string, tables []string) ([]cloudquery.SchemaResult, error)
 	Tables(table string) ([]string, error)
 	Query(q string, args ...any) (columns []string, rows [][]any, err error)
 	Exec(q string, args ...any) (sql.Result, error)

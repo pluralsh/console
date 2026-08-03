@@ -186,8 +186,14 @@ The Schema method retrieves the schema information for cloud resources.
 message SchemaInput {
   Connection connection = 1;
   optional string table = 2;
+  // Exact table names to return schemas for. When non-empty, takes
+  // precedence over `table` and matches with table_name = ANY(tables).
+  repeated string tables = 3;
 }
 ```
+
+- `table`: optional substring / LIKE filter (`%table%`). When omitted and `tables` is empty, returns schemas for all provider tables.
+- `tables`: optional list of exact table names. When non-empty, takes precedence over `table`.
 
 #### Response: SchemaOutput
 
@@ -212,7 +218,7 @@ message SchemaResult {
 Using curl (with grpcurl):
 
 ```bash
-# Using grpcurl to make a Schema request
+# Using grpcurl to make a Schema request (LIKE filter)
 grpcurl -d '{
   "connection": {
     "provider": "aws",
@@ -222,6 +228,18 @@ grpcurl -d '{
     }
   },
   "table": "aws_ec2_%"
+}' -plaintext localhost:9192 cloudquery.CloudQuery/Schema
+
+# Exact schemas for multiple tables
+grpcurl -d '{
+  "connection": {
+    "provider": "aws",
+    "aws": {
+      "access_key_id": "YOUR_ACCESS_KEY",
+      "secret_access_key": "YOUR_SECRET_KEY"
+    }
+  },
+  "tables": ["aws_vpc", "aws_ec2_instance", "aws_eks_cluster"]
 }' -plaintext localhost:9192 cloudquery.CloudQuery/Schema
 ```
 
@@ -242,7 +260,7 @@ Using Postman:
       "secret_access_key": "YOUR_SECRET_KEY"
     }
   },
-  "table": "aws_ec2_%"
+  "tables": ["aws_vpc", "aws_ec2_instance"]
 }
 ```
 

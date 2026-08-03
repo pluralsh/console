@@ -1,8 +1,10 @@
 package connection
 
 import (
+	"database/sql"
 	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
@@ -10,15 +12,10 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/cloudquery"
 )
 
-func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
-	klog.V(log.LogLevelDebug).InfoS("running schema query", "table", table)
+func (in *connection) Schema(table string, tables []string) ([]cloudquery.SchemaResult, error) {
+	klog.V(log.LogLevelDebug).InfoS("running schema query", "table", table, "tables", tables)
 
-	prefix := fmt.Sprintf("%s_", in.provider())
-
-	qResponse, err := in.db.Query(`
-		SELECT table_name, column_name, data_type
-		FROM information_schema.columns
-		WHERE table_name LIKE $1;`, lo.Ternary(lo.IsEmpty(table), prefix+"%", "%"+table+"%"))
+	qResponse, err := in.querySchema(table, tables)
 	if err != nil {
 		return nil, err
 	}
@@ -53,6 +50,21 @@ func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 		})
 	}
 	return result, nil
+}
+
+func (in *connection) querySchema(table string, tables []string) (*sql.Rows, error) {
+	if len(tables) > 0 {
+		return in.db.Query(`
+			SELECT table_name, column_name, data_type
+			FROM information_schema.columns
+			WHERE table_name = ANY($1);`, pq.Array(tables))
+	}
+
+	prefix := fmt.Sprintf("%s_", in.provider())
+	return in.db.Query(`
+		SELECT table_name, column_name, data_type
+		FROM information_schema.columns
+		WHERE table_name LIKE $1;`, lo.Ternary(lo.IsEmpty(table), prefix+"%", "%"+table+"%"))
 }
 
 func (in *connection) Tables(table string) ([]string, error) {

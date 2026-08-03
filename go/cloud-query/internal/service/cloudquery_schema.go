@@ -18,11 +18,11 @@ func (in *CloudQueryService) Schema(_ context.Context, input *cloudquery.SchemaI
 		return nil, err
 	}
 
-	return in.handleSchema(c, input.GetTable())
+	return in.handleSchema(c, input.GetTable(), input.GetTables())
 }
 
-func (in *CloudQueryService) handleSchema(c connection.Connection, table string) (*cloudquery.SchemaOutput, error) {
-	result, err := c.Schema(table)
+func (in *CloudQueryService) handleSchema(c connection.Connection, table string, tables []string) (*cloudquery.SchemaOutput, error) {
+	result, err := c.Schema(table, tables)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to execute schema query '%s': %v", table, err)
 	}
