@@ -725,6 +725,40 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["queuedPromptCount"] == 2
     end
 
+    test "it returns queuedPromptSummary ready/pending breakdown" do
+      job = insert(:workbench_job)
+      next_at = DateTime.utc_now() |> DateTime.add(30, :minute) |> DateTime.truncate(:second)
+      insert(:queued_prompt, workbench_job: job)
+      insert(:queued_prompt,
+        workbench_job: job,
+        dequeable_at: next_at
+      )
+      insert(:queued_prompt,
+        workbench_job: job,
+        dequeable_at: DateTime.add(next_at, 60, :minute)
+      )
+      insert(:queued_prompt, workbench_job: job, consumed_at: DateTime.utc_now())
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            queuedPromptCount
+            queuedPromptSummary {
+              readyCount
+              pendingCount
+              nextAt
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["queuedPromptCount"] == 3
+      assert found["queuedPromptSummary"]["readyCount"] == 1
+      assert found["queuedPromptSummary"]["pendingCount"] == 2
+      assert found["queuedPromptSummary"]["nextAt"]
+    end
+
     test "it lists unconsumed queued prompts ordered by dequeableAt" do
       job = insert(:workbench_job)
       later = insert(:queued_prompt,

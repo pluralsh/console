@@ -214,15 +214,22 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   end
 
   def queued_prompt_count(%WorkbenchJob{id: id}, _, _) do
-    batch({__MODULE__, :queued_prompt_counts}, id, fn counts ->
-      {:ok, Map.get(counts, id, 0)}
+    batch({__MODULE__, :queued_prompt_summaries}, id, fn summaries ->
+      summary = Map.get(summaries, id, %{ready_count: 0, pending_count: 0})
+      {:ok, summary.ready_count + summary.pending_count}
     end)
   end
 
-  def queued_prompt_counts(_, job_ids) do
+  def queued_prompt_summary(%WorkbenchJob{id: id}, _, _) do
+    batch({__MODULE__, :queued_prompt_summaries}, id, fn summaries ->
+      {:ok, Map.get(summaries, id, %{ready_count: 0, pending_count: 0, next_at: nil})}
+    end)
+  end
+
+  def queued_prompt_summaries(_, job_ids) do
     QueuedPrompt.for_workbench_jobs(job_ids)
     |> QueuedPrompt.unconsumed()
-    |> QueuedPrompt.counts_by_workbench_job()
+    |> QueuedPrompt.summaries_by_workbench_job()
     |> Console.Repo.all()
     |> Map.new()
   end

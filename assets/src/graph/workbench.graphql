@@ -670,6 +670,11 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   error
   insertedAt
   queuedPromptCount
+  queuedPromptSummary {
+    readyCount
+    pendingCount
+    nextAt
+  }
   usage {
     ...WorkbenchJobUsageTiny
   }

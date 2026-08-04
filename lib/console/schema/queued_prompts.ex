@@ -36,6 +36,22 @@ defmodule Console.Schema.QueuedPrompt do
     )
   end
 
+  def summaries_by_workbench_job(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+
+    from(q in query,
+      group_by: q.workbench_job_id,
+      select: {
+        q.workbench_job_id,
+        %{
+          ready_count: fragment("count(*) filter (where ? <= ?)", q.dequeable_at, ^now),
+          pending_count: fragment("count(*) filter (where ? > ?)", q.dequeable_at, ^now),
+          next_at: fragment("min(?) filter (where ? > ?)", q.dequeable_at, q.dequeable_at, ^now)
+        }
+      }
+    )
+  end
+
   @valid ~w(prompt user_id workbench_job_id dequeable_at consumed_at)a
 
   def changeset(model, attrs \\ %{}) do

@@ -328,6 +328,7 @@ export function WorkbenchJobActionsRow({
       <JobConclusionIcon result={job.result} />
       <WorkbenchQueuedPromptChip
         count={job.queuedPromptCount}
+        summary={job.queuedPromptSummary}
         fillLevel={chipFillLevel}
       />
     </div>
