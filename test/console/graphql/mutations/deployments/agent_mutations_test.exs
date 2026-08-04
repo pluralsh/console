@@ -368,6 +368,10 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
           agentPullRequest(runId: $runId, attributes: $attrs) {
             id
             title
+            difficulty {
+              type
+              lines
+            }
           }
         }
       """, %{
@@ -376,12 +380,14 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
           "title" => "a pr",
           "body" => "a body",
           "base" => "main",
-          "head" => "plrl/ai/pr-test"
+          "head" => "plrl/ai/pr-test",
+          "difficulty" => %{"type" => "GITOPS", "lines" => 42}
         }
       }, %{current_user: user})
 
       assert pr["id"]
       assert pr["title"] == "a pr"
+      assert pr["difficulty"] == %{"type" => "GITOPS", "lines" => 42}
     end
   end
 

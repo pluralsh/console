@@ -349,6 +349,8 @@ type AgentPullRequestAttributes struct {
 	Head string `json:"head"`
 	// the commit shas of the pull request
 	CommitShas []*CommitShaAttributes `json:"commitShas,omitempty"`
+	// the classified type and changed line count of the pull request
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 type AgentRun struct {
@@ -800,6 +802,20 @@ type AiPinEdge struct {
 	Cursor *string `json:"cursor,omitempty"`
 }
 
+type AiPriceSheet struct {
+	Provider    *AiProvider `json:"provider,omitempty"`
+	Model       *string     `json:"model,omitempty"`
+	InputPrice  *float64    `json:"inputPrice,omitempty"`
+	OutputPrice *float64    `json:"outputPrice,omitempty"`
+}
+
+type AiPriceSheetAttributes struct {
+	Provider    *AiProvider `json:"provider,omitempty"`
+	Model       *string     `json:"model,omitempty"`
+	InputPrice  *float64    `json:"inputPrice,omitempty"`
+	OutputPrice *float64    `json:"outputPrice,omitempty"`
+}
+
 // configuration for AI based service promotion
 type AiPromotionCriteria struct {
 	// whether AI based service promotion is enabled for this promotion
@@ -836,6 +852,8 @@ type AiSettings struct {
 	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
 	Bedrock          *BedrockAiSettings   `json:"bedrock,omitempty"`
 	Vertex           *VertexAiSettings    `json:"vertex,omitempty"`
+	// per-model token prices used to calculate AI usage costs
+	PriceSheets []*AiPriceSheet `json:"priceSheets,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -861,6 +879,8 @@ type AiSettingsAttributes struct {
 	Vertex           *VertexAiAttributes          `json:"vertex,omitempty"`
 	VectorStore      *VectorStoreAttributes       `json:"vectorStore,omitempty"`
 	Graph            *GraphStoreAttributes        `json:"graph,omitempty"`
+	// per-model token prices used to calculate AI usage costs
+	PriceSheets []*AiPriceSheetAttributes `json:"priceSheets,omitempty"`
 }
 
 type AiUsageAttributes struct {
@@ -7193,6 +7213,8 @@ type PullRequest struct {
 	Labels  []*string `json:"labels,omitempty"`
 	// the patch for this pr, if it is a patch.  This is in place of generating a full pr
 	Patch *string `json:"patch,omitempty"`
+	// the estimated complexity of the pull request
+	Difficulty *PullRequestDifficulty `json:"difficulty,omitempty"`
 	// the user that spawned this pr, will also be associated with notifications w/in Plural
 	Author *User `json:"author,omitempty"`
 	// the flow this pr is meant to modify
@@ -7207,19 +7229,32 @@ type PullRequest struct {
 
 // attributes for a pull request pointer record
 type PullRequestAttributes struct {
-	URL       string          `json:"url"`
-	Title     string          `json:"title"`
-	Creator   *string         `json:"creator,omitempty"`
-	Labels    []*string       `json:"labels,omitempty"`
-	ServiceID *string         `json:"serviceId,omitempty"`
-	ClusterID *string         `json:"clusterId,omitempty"`
-	Service   *NamespacedName `json:"service,omitempty"`
-	Cluster   *NamespacedName `json:"cluster,omitempty"`
+	URL        string                           `json:"url"`
+	Title      string                           `json:"title"`
+	Creator    *string                          `json:"creator,omitempty"`
+	Labels     []*string                        `json:"labels,omitempty"`
+	ServiceID  *string                          `json:"serviceId,omitempty"`
+	ClusterID  *string                          `json:"clusterId,omitempty"`
+	Service    *NamespacedName                  `json:"service,omitempty"`
+	Cluster    *NamespacedName                  `json:"cluster,omitempty"`
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 type PullRequestConnection struct {
 	PageInfo PageInfo           `json:"pageInfo"`
 	Edges    []*PullRequestEdge `json:"edges,omitempty"`
+}
+
+type PullRequestDifficulty struct {
+	// the type of change in the pull request
+	Type *PrChangeType `json:"type,omitempty"`
+	// the number of changed lines
+	Lines *int64 `json:"lines,omitempty"`
+}
+
+type PullRequestDifficultyAttributes struct {
+	Type  *PrChangeType `json:"type,omitempty"`
+	Lines *int64        `json:"lines,omitempty"`
 }
 
 type PullRequestEdge struct {
@@ -7239,13 +7274,14 @@ type PullRequestEvidence struct {
 
 // attributes for a pull request pointer record
 type PullRequestUpdateAttributes struct {
-	Title     string          `json:"title"`
-	Labels    []*string       `json:"labels,omitempty"`
-	Status    PrStatus        `json:"status"`
-	ServiceID *string         `json:"serviceId,omitempty"`
-	ClusterID *string         `json:"clusterId,omitempty"`
-	Service   *NamespacedName `json:"service,omitempty"`
-	Cluster   *NamespacedName `json:"cluster,omitempty"`
+	Title      string                           `json:"title"`
+	Labels     []*string                        `json:"labels,omitempty"`
+	Status     PrStatus                         `json:"status"`
+	ServiceID  *string                          `json:"serviceId,omitempty"`
+	ClusterID  *string                          `json:"clusterId,omitempty"`
+	Service    *NamespacedName                  `json:"service,omitempty"`
+	Cluster    *NamespacedName                  `json:"cluster,omitempty"`
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 // a rollup count of repository pullability
@@ -9957,6 +9993,8 @@ type Workbench struct {
 	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
 	// default mode-specific options for jobs created by this workbench
 	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+	// token bucket budget for this workbench
+	Budget *WorkbenchBudget `json:"budget,omitempty"`
 	// skills configuration
 	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// the project of this workbench
@@ -10019,6 +10057,8 @@ type WorkbenchAttributes struct {
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
 	// default mode-specific options for jobs created by this workbench
 	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
+	// token bucket budget for this workbench
+	Budget *WorkbenchBudgetAttributes `json:"budget,omitempty"`
 	// skills configuration (ref and files)
 	Skills *WorkbenchSkillsAttributes `json:"skills,omitempty"`
 	// users who can read and execute this workbench
@@ -10029,6 +10069,36 @@ type WorkbenchAttributes struct {
 	ToolAssociations []*WorkbenchToolAssociationAttributes `json:"toolAssociations,omitempty"`
 	// skills to include with this workbench
 	WorkbenchSkills []*WorkbenchSkillAttributes `json:"workbenchSkills,omitempty"`
+}
+
+type WorkbenchBudget struct {
+	// whether budget tracking is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// maximum budget capacity
+	Maximum *float64 `json:"maximum,omitempty"`
+	// minimum budget capacity to keep free
+	MinFree *float64 `json:"minFree,omitempty"`
+	// the budget unit
+	Unit *WorkbenchBudgetUnit `json:"unit,omitempty"`
+	// remaining budget capacity
+	Last *float64 `json:"last,omitempty"`
+	// when the budget was last updated
+	LastUpdated *string `json:"lastUpdated,omitempty"`
+}
+
+type WorkbenchBudgetAttributes struct {
+	// whether budget tracking is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// maximum budget capacity
+	Maximum *float64 `json:"maximum,omitempty"`
+	// minimum budget capacity to keep free
+	MinFree *float64 `json:"minFree,omitempty"`
+	// the budget unit
+	Unit *WorkbenchBudgetUnit `json:"unit,omitempty"`
+	// remaining budget capacity
+	Last *float64 `json:"last,omitempty"`
+	// when the budget was last updated
+	LastUpdated *string `json:"lastUpdated,omitempty"`
 }
 
 type WorkbenchCanvasBlock struct {
@@ -15635,6 +15705,63 @@ func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type PrChangeType string
+
+const (
+	PrChangeTypeGitops        PrChangeType = "GITOPS"
+	PrChangeTypeApplication   PrChangeType = "APPLICATION"
+	PrChangeTypeConfiguration PrChangeType = "CONFIGURATION"
+)
+
+var AllPrChangeType = []PrChangeType{
+	PrChangeTypeGitops,
+	PrChangeTypeApplication,
+	PrChangeTypeConfiguration,
+}
+
+func (e PrChangeType) IsValid() bool {
+	switch e {
+	case PrChangeTypeGitops, PrChangeTypeApplication, PrChangeTypeConfiguration:
+		return true
+	}
+	return false
+}
+
+func (e PrChangeType) String() string {
+	return string(e)
+}
+
+func (e *PrChangeType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PrChangeType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PrChangeType", str)
+	}
+	return nil
+}
+
+func (e PrChangeType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PrChangeType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PrChangeType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type PrGovernanceType string
 
 const (
@@ -17561,6 +17688,61 @@ func (e *VulnUserInteraction) UnmarshalJSON(b []byte) error {
 }
 
 func (e VulnUserInteraction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchBudgetUnit string
+
+const (
+	WorkbenchBudgetUnitDollar WorkbenchBudgetUnit = "DOLLAR"
+	WorkbenchBudgetUnitToken  WorkbenchBudgetUnit = "TOKEN"
+)
+
+var AllWorkbenchBudgetUnit = []WorkbenchBudgetUnit{
+	WorkbenchBudgetUnitDollar,
+	WorkbenchBudgetUnitToken,
+}
+
+func (e WorkbenchBudgetUnit) IsValid() bool {
+	switch e {
+	case WorkbenchBudgetUnitDollar, WorkbenchBudgetUnitToken:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchBudgetUnit) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchBudgetUnit) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchBudgetUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchBudgetUnit", str)
+	}
+	return nil
+}
+
+func (e WorkbenchBudgetUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchBudgetUnit) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchBudgetUnit) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

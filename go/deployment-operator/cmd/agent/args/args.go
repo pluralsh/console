@@ -45,6 +45,8 @@ const (
 	defaultPollInterval         = "2m"
 	defaultPollIntervalDuration = 2 * time.Minute
 
+	defaultManagedNamespacePollInterval = "0s"
+
 	defaultApplierWaveDelay         = "200ms"
 	defaultApplierWaveDelayDuration = 200 * time.Millisecond
 
@@ -62,14 +64,14 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
-	defaultComponentShaCacheTTL         = "2h"
-	defaultComponentShaCacheTTLDuration = 2 * time.Hour
+	defaultComponentShaCacheTTL         = "3h"
+	defaultComponentShaCacheTTLDuration = 3 * time.Hour
 
 	defaultManifestCacheJitter         = "30m"
 	defaultManifestCacheJitterDuration = 30 * time.Minute
 
-	defaultComponentShaCacheJitter         = "1h"
-	defaultComponentShaCacheJitterDuration = time.Hour
+	defaultComponentShaCacheJitter         = "2h"
+	defaultComponentShaCacheJitterDuration = 2 * time.Hour
 
 	defaultControllerCacheTTL         = "2m"
 	defaultControllerCacheTTLDuration = 2 * time.Minute
@@ -92,8 +94,8 @@ const (
 	defaultStackPollInterval         = "30s"
 	defaultStackPollIntervalDuration = 30 * time.Second
 
-	defaultSentinelPollInterval         = "30s"
-	defaultSentinelPollIntervalDuration = 30 * time.Second
+	defaultSentinelPollInterval         = "3m"
+	defaultSentinelPollIntervalDuration = 3 * time.Minute
 
 	defaultPipelineGatesPollInterval         = "0s"
 	defaultPipelineGatesPollIntervalDuration = 0 * time.Second
@@ -548,6 +550,7 @@ func DisableWebsocket() bool {
 
 func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	servicePollInterval := PollInterval().String()
+	managedNamespacePollInterval := defaultManagedNamespacePollInterval
 	clusterPingInterval := ClusterPingInterval().String()
 	compatibilityUploadInterval := RuntimeServicesPingInterval().String()
 	stackPollInterval := StackPollInterval().String()
@@ -556,13 +559,14 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	disableWebsocket := DisableWebsocket()
 
 	return v1alpha1.AgentConfigurationSpec{
-		ServicePollInterval:         &servicePollInterval,
-		ClusterPingInterval:         &clusterPingInterval,
-		CompatibilityUploadInterval: &compatibilityUploadInterval,
-		StackPollInterval:           &stackPollInterval,
-		SentinelPollInterval:        &sentinelPollInterval,
-		PipelineGateInterval:        &pipelineGateInterval,
-		DisableWebsocket:            &disableWebsocket,
+		ServicePollInterval:          &servicePollInterval,
+		ManagedNamespacePollInterval: &managedNamespacePollInterval,
+		ClusterPingInterval:          &clusterPingInterval,
+		CompatibilityUploadInterval:  &compatibilityUploadInterval,
+		StackPollInterval:            &stackPollInterval,
+		SentinelPollInterval:         &sentinelPollInterval,
+		PipelineGateInterval:         &pipelineGateInterval,
+		DisableWebsocket:             &disableWebsocket,
 	}
 }
 

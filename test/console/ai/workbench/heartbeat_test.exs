@@ -1,6 +1,8 @@
 defmodule Console.AI.Workbench.HeartbeatTest do
   use Console.DataCase, async: false
-  alias Console.AI.Workbench.Heartbeat
+  alias Console.AI.{ModelSelection, Workbench.Heartbeat}
+  alias Console.Schema.{Workbench, WorkbenchJob}
+  alias Console.Schema.Workbench.Budget
 
   @usage %{
     input_tokens: 100,
@@ -14,6 +16,79 @@ defmodule Console.AI.Workbench.HeartbeatTest do
   }
 
   describe "usage_callback/2" do
+    test "backfills missing costs using the configured tool model price sheet" do
+      settings = deployment_settings(ai: %{
+        enabled: true,
+        provider: :openai,
+        tool_provider: :anthropic,
+        openai: %{tool_model: "openai-tool-model"},
+        anthropic: %{tool_model: "anthropic-tool-model"},
+        price_sheets: [
+          %{provider: :anthropic, model: "anthropic-tool-model", input_price: 3.0, output_price: 15.0}
+        ]
+      })
+
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :cancel)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :anthropic,
+        "anthropic-tool-model",
+        ModelSelection.price_sheet(settings, :anthropic, "anthropic-tool-model"),
+        %{input_tokens: 1_000_000, output_tokens: 250_000}
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_cost == 3.0
+      assert usage.output_cost == 3.75
+      assert usage.total_cost == 6.75
+    end
+
+    test "backfills missing costs using the job model override price sheet" do
+      settings = deployment_settings(ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{tool_model: "default-tool-model"},
+        price_sheets: [
+          %{provider: :openai, model: "default-tool-model", input_price: 1.0, output_price: 2.0},
+          %{provider: :anthropic, model: "job-tool-model", input_price: 3.0, output_price: 15.0}
+        ]
+      })
+
+      job = insert(:workbench_job,
+        status: :running,
+        modes: %{model: %{provider: :anthropic, model: "job-tool-model"}}
+      )
+
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :cancel)
+      end)
+
+      Heartbeat.usage_callback(
+        job,
+        :anthropic,
+        "job-tool-model",
+        ModelSelection.price_sheet(settings, :anthropic, "job-tool-model"),
+        %{input_tokens: 1_000_000, output_tokens: 250_000}
+      )
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_cost == 3.0
+      assert usage.output_cost == 3.75
+      assert usage.total_cost == 6.75
+    end
+
     test "adds new usage to usage already persisted on the job" do
       job = insert(:workbench_job, status: :running, usage: @usage)
       {:ok, pid} = Heartbeat.start_link(job)
@@ -51,7 +126,19 @@ defmodule Console.AI.Workbench.HeartbeatTest do
     end
 
     test "persists accumulated usage when the job is cancelled" do
-      job = insert(:workbench_job, status: :running)
+      workbench =
+        insert(:workbench,
+          budget: %Budget{
+            enabled: true,
+            maximum: 1_000,
+            min_free: 1,
+            unit: :token,
+            last: 1_000,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      job = insert(:workbench_job, status: :running, workbench: workbench)
       {:ok, pid} = Heartbeat.start_link(job)
       Process.unlink(pid)
       ref = Process.monitor(pid)
@@ -64,7 +151,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
 
       assert_receive {:DOWN, ^ref, :process, ^pid, :cancel}
 
-      persisted_job = Console.Repo.get!(Console.Schema.WorkbenchJob, job.id)
+      persisted_job = Console.Repo.get!(WorkbenchJob, job.id)
 
       assert persisted_job.status == :cancelled
       assert persisted_job.usage.input_tokens == @usage.input_tokens
@@ -75,6 +162,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert_in_delta persisted_job.usage.input_cost, @usage.input_cost, 0.000_001
       assert_in_delta persisted_job.usage.output_cost, @usage.output_cost, 0.000_001
       assert_in_delta persisted_job.usage.total_cost, @usage.total_cost, 0.000_001
+      assert Console.Repo.get!(Workbench, workbench.id).budget.last == 875
     end
   end
 end

@@ -284,6 +284,10 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunUpdated do
   def process(%@for{item: run}), do: Pipelines.broadcast_gate(run)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunCreated do
+  def process(%@for{item: run}), do: Console.Pipelines.SentinelRun.Producer.kick(run)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
   alias Console.Deployments.Agents
 

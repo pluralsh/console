@@ -658,9 +658,16 @@ defmodule Console.Deployments.Stacks do
           err
       end
     end)
+    |> case do
+      {:error, _} = err ->
+        PullRequest.next_poll_changeset(pr, stack.interval)
+        |> Repo.update()
+        err
+      pass -> pass
+    end
   end
-
   def poll(_), do: {:error, "invalid parent"}
+
 
   defp on_new_sha(repo, ref, sha, ps, fun) do
     case Discovery.sha(repo, ref) do

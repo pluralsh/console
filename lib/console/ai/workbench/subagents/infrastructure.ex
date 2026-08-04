@@ -19,7 +19,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
     Infrastructure.StackInspect,
-    Infrastructure.CloudSchema,
+    Infrastructure.CloudSchemas,
     Infrastructure.CloudQuery,
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
@@ -90,7 +90,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp cloud_tools(%Environment{tools: tools}) do
     Enum.flat_map(tools, fn
       {_, %WorkbenchTool{tool: :cloud} = tool} -> [
-        %CloudSchema{tool: tool},
+        %CloudSchemas{tool: tool},
         %CloudQuery{tool: tool},
         %CloudTables{tool: tool}
       ]

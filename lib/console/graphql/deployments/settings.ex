@@ -148,6 +148,15 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :vertex, :vertex_ai_attributes
     field :vector_store, :vector_store_attributes
     field :graph, :graph_store_attributes
+    field :price_sheets, list_of(:ai_price_sheet_attributes),
+      description: "per-model token prices used to calculate AI usage costs"
+  end
+
+  input_object :ai_price_sheet_attributes do
+    field :provider,     :ai_provider
+    field :model,        :string
+    field :input_price,  :float
+    field :output_price, :float
   end
 
   input_object :analysis_rates_attributes do
@@ -544,6 +553,15 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :azure, :azure_openai_settings
     field :bedrock, :bedrock_ai_settings
     field :vertex, :vertex_ai_settings
+    field :price_sheets, list_of(:ai_price_sheet),
+      description: "per-model token prices used to calculate AI usage costs"
+  end
+
+  object :ai_price_sheet do
+    field :provider,     :ai_provider
+    field :model,        :string
+    field :input_price,  :float
+    field :output_price, :float
   end
 
   object :vector_store_settings do

@@ -19,7 +19,7 @@ defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComp
   alias Console.Deployments.Pipelines
   use Nebulex.Caching
 
-  @local_adapter Console.conf(:local_cache)
+  @multilevel_adapter Console.conf(:multilevel_cache)
 
   def pipe(%{item: %{status: s} = svc}) when s in ~w(healthy failed)a do
     Logger.info "Kicking any pipelines associated with #{svc.id}"
@@ -32,7 +32,7 @@ defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComp
   end
   def pipe(_), do: :ok
 
-  @decorate cacheable(cache: @local_adapter, key: :eligible_sids, opts: [ttl: :timer.minutes(2)])
+  @decorate cacheable(cache: @multilevel_adapter, key: :eligible_sids, opts: [ttl: :timer.minutes(5)])
   def eligible_sids(), do: Pipelines.pipelined_services()
 
   defp handle_status([], _), do: :ok

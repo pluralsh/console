@@ -3295,6 +3295,9 @@
             "description": "ID of the agent runtime for this workbench",
             "type": "string"
           },
+          "budget": {
+            "$ref": "#/components/schemas/WorkbenchBudget"
+          },
           "description": {
             "description": "Description of the workbench",
             "type": "string"
@@ -3325,6 +3328,42 @@
           },
           "updated_at": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchBudget": {
+        "title": "WorkbenchBudget",
+        "description": "Token bucket budget configuration and current state for a workbench",
+        "properties": {
+          "enabled": {
+            "description": "Whether budget tracking is enabled",
+            "type": "boolean"
+          },
+          "last": {
+            "description": "Remaining budget capacity",
+            "type": "number"
+          },
+          "last_updated": {
+            "description": "When the budget was last updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "maximum": {
+            "description": "Maximum budget capacity",
+            "type": "number"
+          },
+          "min_free": {
+            "description": "Minimum budget capacity to keep free",
+            "type": "number"
+          },
+          "unit": {
+            "description": "The budget unit",
+            "enum": [
+              "dollar",
+              "token"
+            ],
             "type": "string"
           }
         },

@@ -21,6 +21,19 @@ defmodule Console.Buffers.ClusterAuditTest do
       audits = Repo.all(ClusterAuditLog)
       assert length(audits) == 4
     end
+
+    test "flushes when the buffer reaches its size limit" do
+      cluster = insert(:cluster)
+      user = insert(:user)
+      {:ok, pid} = ClusterAudit.start()
+
+      Enum.each(1..500, fn _ ->
+        ClusterAudit.audit(pid, audit(cluster, user))
+      end)
+
+      assert %{records: [], count: 0} = :sys.get_state(pid)
+      assert Repo.aggregate(ClusterAuditLog, :count) == 500
+    end
   end
 
   def audit(cluster, user) do
