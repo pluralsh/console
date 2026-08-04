@@ -22,6 +22,18 @@ import (
 	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
+// InitialPollDelay returns the delay before the first poll when PollImmediately is false.
+// Tests may override this to make timing assertions deterministic.
+var InitialPollDelay = DefaultInitialPollDelay
+
+// DefaultInitialPollDelay returns a random delay in [0, interval).
+func DefaultInitialPollDelay(interval time.Duration) time.Duration {
+	if interval <= 0 {
+		return 0
+	}
+	return time.Duration(rand.Int63n(int64(interval)))
+}
+
 type Controller struct {
 	// Name is used to uniquely identify a Controller in tracing, logging and monitoring. Name is required.
 	Name string
@@ -142,7 +154,7 @@ func (c *Controller) startPoller(ctx context.Context) {
 
 	if !common.GetConfigurationManager().IsPollImmediately() {
 		if interval := c.Do.GetPollInterval()(); interval > 0 {
-			initialDelay := time.Duration(rand.Int63n(int64(interval)))
+			initialDelay := InitialPollDelay(interval)
 			klog.V(internallog.LogLevelExtended).InfoS("Delaying initial poll", "ctrl", c.Name, "delay", initialDelay)
 			select {
 			case <-ctx.Done():

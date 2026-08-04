@@ -191,14 +191,15 @@ func setAgentConfigurationDefaultsOrDie() {
 }
 
 func waitForAgentConfigurationOrDie(ctx context.Context, mgr ctrl.Manager) {
-	setupLog.Info("waiting for kubernetes cache sync before applying AgentConfiguration")
-	if ok := mgr.GetCache().WaitForCacheSync(ctx); !ok {
-		setupLog.Error(ctx.Err(), "timed out waiting for kubernetes cache sync")
-		os.Exit(1)
-	}
-
 	waitCtx, cancel := context.WithTimeout(ctx, agentConfigurationReadyTimeout)
 	defer cancel()
+
+	setupLog.Info("waiting for kubernetes cache sync before applying AgentConfiguration", "timeout", agentConfigurationReadyTimeout)
+	if ok := mgr.GetCache().WaitForCacheSync(waitCtx); !ok {
+		setupLog.Info("kubernetes cache sync not ready in time, loading AgentConfiguration directly", "timeout", agentConfigurationReadyTimeout)
+		loadAgentConfigurationOrDie(ctx, mgr.GetAPIReader())
+		return
+	}
 
 	if err := common.GetConfigurationManager().WaitReady(waitCtx); err == nil {
 		setupLog.Info("AgentConfiguration ready")

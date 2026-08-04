@@ -16,7 +16,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-// slowStartReconciler uses a large poll interval so jitter-based initial delay is observable.
 type slowStartReconciler struct {
 	pollCount atomic.Int32
 	queue     workqueue.TypedRateLimitingInterface[string]
@@ -37,10 +36,8 @@ func (r *slowStartReconciler) Reconcile(_ context.Context, _ string) (reconcile.
 	return reconcile.Result{}, nil
 }
 
-// GetPollInterval returns 10s so the jittered initial delay is drawn from [0, 10s).
-// A 100ms observation window has only ~1% chance of catching a near-zero jitter.
 func (r *slowStartReconciler) GetPollInterval() func() time.Duration {
-	return func() time.Duration { return 10 * time.Second }
+	return func() time.Duration { return time.Second }
 }
 
 func (r *slowStartReconciler) GetPublisher() (string, websocket.Publisher) {
@@ -48,18 +45,22 @@ func (r *slowStartReconciler) GetPublisher() (string, websocket.Publisher) {
 }
 
 func (r *slowStartReconciler) Queue() workqueue.TypedRateLimitingInterface[string] { return r.queue }
-func (r *slowStartReconciler) Restart()                                             {}
-func (r *slowStartReconciler) Shutdown()                                            { r.queue.ShutDown() }
+func (r *slowStartReconciler) Restart()                                            {}
+func (r *slowStartReconciler) Shutdown()                                           { r.queue.ShutDown() }
 
 func resetPollImmediatelyConfig() {
 	_ = common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{})
 }
 
 // TestManagerDoesNotPollImmediatelyWhenDisabled verifies that when pollImmediately=false
-// the controller does not execute its first poll before the jittered initial delay elapses.
+// the controller waits for the configured initial delay before the first poll.
 func TestManagerDoesNotPollImmediatelyWhenDisabled(t *testing.T) {
 	t.Cleanup(resetPollImmediatelyConfig)
 	resetPollImmediatelyConfig()
+
+	originalDelay := controller.InitialPollDelay
+	t.Cleanup(func() { controller.InitialPollDelay = originalDelay })
+	controller.InitialPollDelay = func(time.Duration) time.Duration { return time.Hour }
 
 	pollImmediately := false
 	require.NoError(t, common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{
@@ -84,5 +85,44 @@ func TestManagerDoesNotPollImmediatelyWhenDisabled(t *testing.T) {
 	require.NoError(t, mgr.Start(ctx))
 	<-ctx.Done()
 
-	assert.Equal(t, int32(0), reconciler.pollCount.Load(), "expected no polls during initial jitter delay")
+	assert.Equal(t, int32(0), reconciler.pollCount.Load(), "expected no polls during fixed initial delay")
+}
+
+// TestManagerPollsImmediatelyWhenEnabled verifies that when pollImmediately=true
+// the controller polls without waiting for the initial delay.
+func TestManagerPollsImmediatelyWhenEnabled(t *testing.T) {
+	t.Cleanup(resetPollImmediatelyConfig)
+	resetPollImmediatelyConfig()
+
+	originalDelay := controller.InitialPollDelay
+	t.Cleanup(func() { controller.InitialPollDelay = originalDelay })
+	controller.InitialPollDelay = func(time.Duration) time.Duration { return time.Hour }
+
+	pollImmediately := true
+	require.NoError(t, common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{
+		PollImmediately: &pollImmediately,
+	}))
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	reconciler := newSlowStartReconciler()
+	mgr, err := controller.NewControllerManager(
+		controller.WithSocket(&FakeSocket{}),
+		controller.WithMaxConcurrentReconciles(1),
+	)
+	require.NoError(t, err)
+
+	mgr.AddController(&controller.Controller{
+		Name: name,
+		Do:   reconciler,
+	})
+
+	require.NoError(t, mgr.Start(ctx))
+
+	require.Eventually(t, func() bool {
+		return reconciler.pollCount.Load() > 0
+	}, time.Second, 10*time.Millisecond, "expected an immediate poll when pollImmediately=true")
+
+	cancel()
 }
