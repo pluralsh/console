@@ -15,7 +15,7 @@ import (
 const (
 	defaultListenGracePeriod = 5 * time.Second
 
-	defaultAgentInfoCacheTTL         = 5 * time.Minute
+	defaultAgentInfoCacheTTL         = 12 * time.Hour
 	defaultAgentInfoCacheErrorTTL    = 1 * time.Minute
 	defaultAgentRedisConnInfoTTL     = 5 * time.Minute
 	defaultAgentRedisConnInfoRefresh = 4 * time.Minute

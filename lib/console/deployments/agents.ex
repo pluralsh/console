@@ -272,6 +272,19 @@ defmodule Console.Deployments.Agents do
     |> notify(:create)
   end
 
+  @spec update_agent_message(map, binary, Cluster.t) :: agent_msg_resp
+  def update_agent_message(attrs, message_id, %Cluster{} = cluster) do
+    start_transaction()
+    |> add_operation(:message, fn _ -> {:ok, Repo.get!(AgentMessage, message_id)} end)
+    |> add_operation(:validate, fn %{message: message} -> validate_run(message.agent_run_id, cluster) end)
+    |> add_operation(:update, fn %{message: message} ->
+      AgentMessage.changeset(message, attrs)
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
+    |> notify(:update)
+  end
+
   defp validate_run(run_id, %Cluster{id: cluster_id}, preloads \\ [:runtime]) do
     get_agent_run!(run_id)
     |> Repo.preload(preloads)
@@ -569,5 +582,7 @@ defmodule Console.Deployments.Agents do
     do: handle_notify(PubSub.AgentRunUpdated, run)
   defp notify({:ok, %AgentMessage{} = msg}, :create),
     do: handle_notify(PubSub.AgentMessageCreated, msg)
+  defp notify({:ok, %AgentMessage{} = msg}, :update),
+    do: handle_notify(PubSub.AgentMessageUpdated, msg)
   defp notify(pass, _), do: pass
 end

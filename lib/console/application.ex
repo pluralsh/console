@@ -29,6 +29,7 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.Deployments.Helm.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.AI.MCP.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.AI.Agents]},
+      {Finch, name: Anubis.Finch},
       :hackney_pool.child_spec(:ai_pool, [max_connections: 100, max_per_host: 100]),
       :hackney_pool.child_spec(:kazan_pool, [max_connections: 100, max_per_host: 100]),
       Console.Bootstrapper,

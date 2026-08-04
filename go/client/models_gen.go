@@ -222,6 +222,8 @@ type AgentMessageFileAttributes struct {
 }
 
 type AgentMessageMetadata struct {
+	// when the message completed
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
 	Reasoning *AgentMessageReasoning `json:"reasoning,omitempty"`
 	// the file of the message
@@ -231,6 +233,8 @@ type AgentMessageMetadata struct {
 }
 
 type AgentMessageMetadataAttributes struct {
+	// when the message completed, eg for command based tool calls that take a while
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
 	Reasoning *AgentMessageReasoningAttributes `json:"reasoning,omitempty"`
 	// the file of the message

@@ -280,6 +280,8 @@ export type AgentMessageFileAttributes = {
 
 export type AgentMessageMetadata = {
   __typename?: 'AgentMessageMetadata';
+  /** when the message completed */
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the file of the message */
   file?: Maybe<AgentMessageFile>;
   /** the reasoning of the message */
@@ -289,6 +291,8 @@ export type AgentMessageMetadata = {
 };
 
 export type AgentMessageMetadataAttributes = {
+  /** when the message completed, eg for command based tool calls that take a while */
+  completedAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** the file of the message */
   file?: InputMaybe<AgentMessageFileAttributes>;
   /** the reasoning of the message */
@@ -9306,6 +9310,7 @@ export type RootMutationType = {
   threadPr?: Maybe<Chat>;
   /** start a new run from the newest sha in the stack's run history */
   triggerRun?: Maybe<StackRun>;
+  updateAgentMessage?: Maybe<AgentMessage>;
   updateAgentRun?: Maybe<AgentRun>;
   updateAgentRunAnalysis?: Maybe<AgentRun>;
   updateAgentRunTodos?: Maybe<AgentRun>;
@@ -10484,6 +10489,12 @@ export type RootMutationTypeThreadPrArgs = {
 
 
 export type RootMutationTypeTriggerRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateAgentMessageArgs = {
+  attributes: AgentMessageAttributes;
   id: Scalars['ID']['input'];
 };
 

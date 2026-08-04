@@ -28,7 +28,7 @@ agent:
     audit_log_flush_interval: "30s"
     audit_log_flush_events: 128
     audit_log_drain_timeout: "45s"
-  info_cache_ttl: "300s"
+  info_cache_ttl: "43200s"
   info_cache_error_ttl: "60s"
   redis_conn_info_ttl: "300s"
   redis_conn_info_refresh: "240s"

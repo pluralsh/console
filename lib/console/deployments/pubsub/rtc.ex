@@ -27,7 +27,11 @@ defimpl Console.PubSub.Rtc, for: [
   def deliver(%{item: item}), do: {item, :update}
 end
 
-defimpl Console.PubSub.Rtc, for: [Console.PubSub.AgentMessageCreated] do
+defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageUpdated do
+  def deliver(%{item: message}), do: {message, :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageCreated do
   def deliver(%{item: message}), do: {message, :create}
 end
 

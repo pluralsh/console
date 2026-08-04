@@ -1503,6 +1503,8 @@ type RootMutationType {
 
   createAgentMessage(runId: ID!, attributes: AgentMessageAttributes!): AgentMessage
 
+  updateAgentMessage(id: ID!, attributes: AgentMessageAttributes!): AgentMessage
+
   createAgentRunUpload(runId: ID!, attributes: AgentRunUploadAttributes!): AgentRunUpload
 
   updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
@@ -2190,6 +2192,9 @@ input AgentMessageTokensAttributes {
 }
 
 input AgentMessageMetadataAttributes {
+  "when the message completed, eg for command based tool calls that take a while"
+  completedAt: DateTime
+
   "the reasoning of the message"
   reasoning: AgentMessageReasoningAttributes
 
@@ -2520,6 +2525,9 @@ type AgentMessageTokens {
 }
 
 type AgentMessageMetadata {
+  "when the message completed"
+  completedAt: DateTime
+
   "the reasoning of the message"
   reasoning: AgentMessageReasoning
 
