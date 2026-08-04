@@ -3,30 +3,7 @@ on:
   pull_request:
     branches: [ master ]
     types: [opened, labeled, unlabeled, synchronize]
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
-  apply-dependency-label:
-    # Temporary metadata repair for this security remediation PR.  A labeled
-    # event re-runs the normal required-label and body checks after the label is
-    # applied; this job is reverted immediately after that event is observed.
-    if: >-
-      github.event.pull_request.number == 3964 &&
-      !contains(github.event.pull_request.labels.*.name, 'dependencies')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/github-script@v8
-        with:
-          script: |
-            await github.rest.issues.addLabels({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              labels: ['dependencies'],
-            })
-
   label:
     name: Check that PR has required labels
     runs-on: ubuntu-latest
