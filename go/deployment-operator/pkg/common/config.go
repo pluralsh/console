@@ -40,6 +40,7 @@ type ConfigurationManager struct {
 	maxAgentRunPods              *int
 	baseRegistryURL              *string
 	disableWebsocket             *bool
+	pollImmediately              *bool
 }
 
 func GetConfigurationManager() *ConfigurationManager {
@@ -118,6 +119,10 @@ func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfiguration
 	s.maxStackRunJobs = config.MaxStackRunJobs
 	s.maxAgentRunPods = config.MaxAgentRunPods
 	s.disableWebsocket = config.DisableWebsocket
+	if config.PollImmediately == nil {
+		config.PollImmediately = lo.ToPtr(true)
+	}
+	s.pollImmediately = config.PollImmediately
 
 	return nil
 }
@@ -166,6 +171,9 @@ func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfiguration
 	}
 	if overrides.DisableWebsocket != nil {
 		merged.DisableWebsocket = overrides.DisableWebsocket
+	}
+	if overrides.PollImmediately != nil {
+		merged.PollImmediately = overrides.PollImmediately
 	}
 
 	return merged
@@ -277,6 +285,15 @@ func (s *ConfigurationManager) IsWebsocketDisabled() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.disableWebsocket != nil && *s.disableWebsocket
+}
+
+func (s *ConfigurationManager) IsPollImmediately() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.pollImmediately == nil {
+		return true
+	}
+	return *s.pollImmediately
 }
 
 func (s *ConfigurationManager) SwapBaseRegistry(image string) string {

@@ -139,6 +139,19 @@ func (c *Controller) startPoller(ctx context.Context) {
 	defer c.Do.Shutdown()
 
 	klog.V(internallog.LogLevelExtended).InfoS("Starting controller poller", "ctrl", c.Name)
+
+	if !common.GetConfigurationManager().IsPollImmediately() {
+		if interval := c.Do.GetPollInterval()(); interval > 0 {
+			initialDelay := time.Duration(rand.Int63n(int64(interval)))
+			klog.V(internallog.LogLevelExtended).InfoS("Delaying initial poll", "ctrl", c.Name, "delay", initialDelay)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(initialDelay):
+			}
+		}
+	}
+
 	_ = helpers.DynamicPollUntilContextCancel(ctx, c.Do.GetPollInterval(), func(_ context.Context) (bool, error) {
 		defer func() {
 			c.setLastPollTime(time.Now())
