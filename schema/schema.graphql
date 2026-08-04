@@ -3580,6 +3580,17 @@ input QueuedPromptAttributes {
   dequeableAt: DateTime!
 }
 
+type QueuedPromptSummary {
+  "unconsumed prompts that are eligible to dequeue"
+  readyCount: Int!
+
+  "unconsumed prompts waiting for dequeable_at"
+  pendingCount: Int!
+
+  "earliest future dequeable_at among pending prompts"
+  nextAt: DateTime
+}
+
 type Workbench {
   "the id of the workbench"
   id: String!
@@ -3774,7 +3785,7 @@ type WorkbenchJob {
   "number of unconsumed queued prompts for this job"
   queuedPromptCount: Int!
 
-  "ready/pending breakdown for unconsumed queued prompts"
+  "ready\/pending breakdown for unconsumed queued prompts"
   queuedPromptSummary: QueuedPromptSummary!
 
   metricsTool(
@@ -4299,17 +4310,6 @@ type WorkbenchCron {
   insertedAt: DateTime
 
   updatedAt: DateTime
-}
-
-type QueuedPromptSummary {
-  "unconsumed prompts that are eligible to dequeue"
-  readyCount: Int!
-
-  "unconsumed prompts waiting for dequeable_at"
-  pendingCount: Int!
-
-  "earliest future dequeable_at among pending prompts"
-  nextAt: DateTime
 }
 
 type QueuedPrompt {
