@@ -1159,34 +1159,55 @@ addons:
   helm_values: clusterName=example
   chart_name: aws-load-balancer-controller
   versions:
-  - version: 3.4.3
+  - version: 3.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ['Ingress-to-Gateway migration tooling introduced in v3.4.0: `lbc-migrate`
-          CLI to translate Ingress manifests to Gateway API YAML, plus an in-cluster
-          migration console to compare resulting AWS resources side-by-side.', Webhooks
-          upgraded to `admissionregistration.k8s.io/v1` (automatic on upgrade)., 'Readiness
-          gate handling improved: TargetGroupBinding controller watches pod events
-          instead of fixed requeues, improving responsiveness and reducing churn.',
-        'Various reconciliation/validation fixes: regex path rule drift prevention,
-          capacity reservation annotation parsing now validated, clearer retry timeout
-          errors, and listener rule tag reconciliation.', 'v3.4.3 Gateway/ALB behavior
-          change: for HTTP/GRPC Routes with multiple hostnames, controller generates
-          a distinct ALB rule per hostname with adjusted precedence behavior.']
-      breaking_changes: ["Gateway API behavior change in v3.4.0 for NLB Gateway: if\
-          \ multiple L4 (TCP/UDP/TLS) routes target the same listener, only the oldest\
-          \ route receives traffic after upgrade\u2014consolidate to one L4 route\
-          \ per listener.", 'Action required in v3.4.3 for ALB Gateway users: HTTP/GRPC
-          Routes with multiple hostnames now create one ALB rule per hostname, which
-          can increase rule consumption and potentially hit ALB rule limits; review
-          your rule counts/limits.']
-    chart_version: 3.4.3
-    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.3']
+      helm_changes: "## Helm values / install changes\n- **Gateway API users:** **Update\
+        \ Gateway API CRDs to v1.6.0 before upgrading the controller**:\n  ```bash\n\
+        \  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.6.0/standard-install.yaml\n\
+        \  ```\n  If you upgrade the controller first, **NLB Gateway L4 routing (TCPRoute/UDPRoute/TLSRoute)\
+        \ will be auto-disabled** until CRDs are updated.\n- **Gateway API users:**\
+        \ Apply updated **AWS LBC Gateway CRDs** (adds `gateway.k8s.aws/v1` as storage\
+        \ version; deprecates `v1beta1`):\n  ```bash\n  kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/refs/heads/main/config/crd/gateway/gateway-crds.yaml\n\
+        \  ```\n- **Manifests:** Gateway API standard install no longer serves `v1alpha2`;\
+        \ update any existing route manifests from `gateway.networking.k8s.io/v1alpha2`\
+        \ to `gateway.networking.k8s.io/v1`.\n- **New chart flag:** Helm chart adds\
+        \ a **certificate management controller flag** (review new value/flag and\
+        \ set explicitly if you rely on certificate automation behavior).\n- Comment-only:\
+        \ Helm values comment corrected for `enableEndpointSlices` default (no functional\
+        \ change implied)."
+      chart_updates: [Gateway API support and conformance aligned to **Gateway API
+          v1.6.0**; L4 routes (TCPRoute/UDPRoute) now use stable `gateway.networking.k8s.io/v1`.,
+        LBC-specific Gateway CRDs now use `gateway.k8s.aws/v1` as **storage version**;
+          `v1beta1` is deprecated but transparently converted by the apiserver for
+          now., 'Networking improvements: EndpointSlice registration filtered by IP
+          family; hosted zone lookup matches longest suffix; dualstack subnet autodiscovery
+          fix; ICMP constants fix; feature gates rendered as parseable key=value pairs.',
+        'Route precedence refactor: unified precedence across HTTPRoute/GRPCRoute;
+          fixes non-transitive precedence issues.', Certificate management fix for
+          wildcard-host ACM cert creation; adds certificate list support for ECDSA/RSA
+          (per notes)., Go module path changed to `sigs.k8s.io/aws-load-balancer-controller/v3`
+          (relevant only if you import the controller as a library).]
+      features: [Gateway API L4 routes graduate to stable `gateway.networking.k8s.io/v1`
+          with conformance against Gateway API v1.6.0., 'Certificate management enhancements:
+          wildcard-host ingress ACM issuance fix and support for ECDSA/RSA certificate
+          list handling.', Ingress-to-Gateway migration tooling introduced in 3.4.0
+          (lbc-migrate CLI + in-cluster migration console) to enable non-disruptive
+          parallel ALB stacks during migration.]
+      breaking_changes: ['**Gateway API CRD requirement:** controller v3.5.0 requires
+          **Gateway API CRDs v1.6.0**; upgrading controller first will disable NLB
+          Gateway L4 routing until CRDs are updated, and any `v1alpha2` route manifests
+          must move to `v1`.', '**LBC Gateway CRDs:** storage version is now `gateway.k8s.aws/v1`;
+          `v1beta1` is deprecated and will stop being served in a future release (plan
+          to update manifests).', "(From 3.4.0) **NLB Gateway behavior change:** only\
+          \ one L4 route per listener serves traffic; when multiple attach to the\
+          \ same listener, only the oldest continues after upgrade\u2014consolidate\
+          \ routes to avoid traffic loss."]
+    chart_version: 3.5.0
+    images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.5.0']
   - version: 3.4.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -22892,7 +22913,7 @@ addons:
           (proxies, some enterprise setups), test carefully and follow the migration
           note.', 3.7.9 includes a security advisory fix (GHSA-3ccp-42pg-hgv6); treat
           the upgrade as security-relevant and prioritize rollout.]
-    chart_version: 41.1.0
+    chart_version: 41.1.1
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
