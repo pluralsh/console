@@ -35,16 +35,16 @@ function formatPendingReadyAt(date?: Nullable<string>) {
   const now = dayjs()
 
   if (d.isSame(now.add(1, 'day'), 'day'))
-    return `Tomorrow ${d.format('h:mm A')} ·`
+    return `Tomorrow ${d.format('h:mm A')}`
 
   const days = d.startOf('day').diff(now.startOf('day'), 'day')
   if (days >= 2 && days <= 6) {
     const label = d.fromNow()
-    return `${label.charAt(0).toUpperCase()}${label.slice(1)} ·`
+    return `${label.charAt(0).toUpperCase()}${label.slice(1)}`
   }
 
-  if (d.isSame(now, 'year')) return `${d.format('MMM D, h:mm A')} ·`
-  return `${d.format('MMM D, YYYY h:mm A')} ·`
+  if (d.isSame(now, 'year')) return d.format('MMM D, h:mm A')
+  return d.format('MMM D, YYYY h:mm A')
 }
 
 function formatNextDeferredLabel(date?: Nullable<string>) {
@@ -97,6 +97,7 @@ export function WorkbenchJobPromptQueue({
         caret="right"
         triggerWrapperStyles={{
           width: '100%',
+          paddingRight: theme.spacing.medium,
           '.icon': { width: 10, color: theme.colors['icon-xlight'] },
         }}
         trigger={
@@ -115,12 +116,9 @@ export function WorkbenchJobPromptQueue({
         <QueueBodySC>
           {!isEmpty(ready) && (
             <QueueSectionSC>
-              <Body2P
-                $color="text-success-light"
-                css={{ letterSpacing: '0.5px' }}
-              >
+              <QueueSectionLabelSC $color="text-success-light">
                 {ready.length} Ready
-              </Body2P>
+              </QueueSectionLabelSC>
               {ready.map((prompt) => (
                 <QueueItem
                   key={prompt.id}
@@ -136,12 +134,9 @@ export function WorkbenchJobPromptQueue({
           )}
           {!isEmpty(pending) && (
             <QueueSectionSC>
-              <Body2P
-                $color="text-light"
-                css={{ letterSpacing: '0.5px' }}
-              >
+              <QueueSectionLabelSC $color="text-light">
                 {pending.length} Pending
-              </Body2P>
+              </QueueSectionLabelSC>
               {pending.map((prompt) => (
                 <QueueItem
                   key={prompt.id}
@@ -183,6 +178,9 @@ function QueueItem({
         </Body2P>
         <MetaRowSC>
           {meta && <CaptionP $color="text-input-disabled">{meta}</CaptionP>}
+          {meta && prompt.user?.name && (
+            <CaptionP $color="text-input-disabled">·</CaptionP>
+          )}
           {prompt.user?.name && (
             <CaptionP $color="text-input-disabled">{prompt.user.name}</CaptionP>
           )}
@@ -221,11 +219,6 @@ export function queuedPromptsFromJob(
 }
 
 const QueueCardSC = styled(Card)(({ theme }) => ({
-  position: 'absolute',
-  bottom: '100%',
-  left: theme.spacing.medium,
-  right: theme.spacing.medium,
-  zIndex: 1,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
@@ -233,7 +226,9 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   borderBottomLeftRadius: 0,
   borderBottomRightRadius: 0,
   borderBottom: 'none',
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px ${theme.spacing.small}px`,
+  // Pull down 1px so this border meets the chat input border without a double line.
+  marginBottom: -1,
+  padding: `${theme.spacing.xsmall}px 0 ${theme.spacing.small}px`,
 }))
 
 const QueueHeaderSC = styled.div(({ theme }) => ({
@@ -243,6 +238,7 @@ const QueueHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   width: '100%',
   minWidth: 0,
+  padding: `0 ${theme.spacing.medium}px`,
 }))
 
 const QueueBodySC = styled.div(({ theme }) => ({
@@ -255,7 +251,13 @@ const QueueBodySC = styled.div(({ theme }) => ({
 const QueueSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.xxsmall,
+  padding: `0 ${theme.spacing.xsmall}px`,
+}))
+
+const QueueSectionLabelSC = styled(Body2P)(({ theme }) => ({
+  letterSpacing: '0.5px',
+  padding: `0 ${theme.spacing.xsmall}px`,
 }))
 
 const DeleteButtonSC = styled(IconFrame)({
@@ -269,7 +271,6 @@ const QueueItemSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.medium,
   borderRadius: theme.borderRadiuses.medium,
-  margin: `0 -${theme.spacing.xsmall}px`,
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
   '&:hover': {
     backgroundColor: theme.colors['fill-two-hover'],

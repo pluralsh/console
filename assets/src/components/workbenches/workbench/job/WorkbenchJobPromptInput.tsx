@@ -91,10 +91,12 @@ export function WorkbenchJobPromptInput({
     })
   }
 
+  const hasQueue = queuedPrompts.length > 0
+
   return (
     <>
       {submitError && <GqlError error={submitError} />}
-      <div css={{ position: 'relative' }}>
+      <PromptComposerSC $hasQueue={hasQueue}>
         <WorkbenchJobPromptQueue prompts={queuedPrompts} />
         <ChatInputSimple
           ref={chatInputRef}
@@ -104,7 +106,15 @@ export function WorkbenchJobPromptInput({
           setValue={setNewMessage}
           onSubmit={submitJob}
           allowSubmit={!!newMessage}
-          wrapperStyles={{ minHeight: 90 }}
+          wrapperStyles={{
+            minHeight: 90,
+            ...(hasQueue
+              ? {
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                }
+              : {}),
+          }}
           enableAutoComplete
           workbenchId={job?.workbench?.id}
           submitButton={
@@ -120,7 +130,7 @@ export function WorkbenchJobPromptInput({
             ) : undefined
           }
         />
-      </div>
+      </PromptComposerSC>
       <Confirm
         open={cancelModalOpen}
         close={() => setCancelModalOpen(false)}
@@ -137,6 +147,20 @@ export function WorkbenchJobPromptInput({
     </>
   )
 }
+
+const PromptComposerSC = styled.div<{ $hasQueue: boolean }>(
+  ({ theme, $hasQueue }) => ({
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    ...($hasQueue
+      ? {
+          // Keep the stacked queue + input reading as one control.
+          marginTop: theme.spacing.xsmall,
+        }
+      : {}),
+  })
+)
 
 const CancelSquareButtonSC = styled.button(({ theme }) => ({
   position: 'absolute',
