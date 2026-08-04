@@ -46,7 +46,10 @@ defmodule Console.Schema.QueuedPrompt do
         %{
           ready_count: fragment("count(*) filter (where ? <= ?)", q.dequeable_at, ^now),
           pending_count: fragment("count(*) filter (where ? > ?)", q.dequeable_at, ^now),
-          next_at: fragment("min(?) filter (where ? > ?)", q.dequeable_at, q.dequeable_at, ^now)
+          next_at: type(
+            fragment("min(?) filter (where ? > ?)", q.dequeable_at, q.dequeable_at, ^now),
+            :utc_datetime_usec
+          )
         }
       }
     )
