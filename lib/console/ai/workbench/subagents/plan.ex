@@ -8,12 +8,12 @@ defmodule Console.AI.Workbench.Subagents.Plan do
   @system Console.priv_file!("prompts/workbench/plan.md")
 
   def run(%WorkbenchJob{status: s} = job, _) when s != :pending, do: {:ok, job}
-  def run(%WorkbenchJob{prompt: prompt} = job, %Environment{} = environment) do
+  def run(%WorkbenchJob{} = job, %Environment{} = environment) do
     job = Repo.preload(job, [:result])
 
     tools(job, environment)
     |> MemoryEngine.new(20, engine_opts(job) ++ [system_prompt: @system, acc: %{}])
-    |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
+    |> MemoryEngine.reduce([{:user, WorkbenchJob.objective(job)}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
       {:error, error} -> %{status: :failed, result: %{error: "error planning job: #{inspect(error)}"}}

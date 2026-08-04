@@ -4055,6 +4055,7 @@ type WorkbenchJobActivityKubeRequest {
 
 type WorkbenchJobActivityJobUpdate {
   diff: String
+  objective: String
   workingTheory: String
   criticism: String
   conclusion: String
@@ -4089,6 +4090,9 @@ type WorkbenchJobActivityTrace {
 type WorkbenchJobResult {
   "the id of the result"
   id: String!
+
+  "the sole active objective for this investigation"
+  objective: String
 
   "the working theory for this result"
   workingTheory: String

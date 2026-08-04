@@ -3537,6 +3537,10 @@
           "metadata": {
             "$ref": "#/components/schemas/WorkbenchJobResultMetadata"
           },
+          "objective": {
+            "description": "The sole active objective for this investigation",
+            "type": "string"
+          },
           "todos": {
             "description": "Todos for this result",
             "items": {

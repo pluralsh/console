@@ -108,6 +108,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJobResult do
     description: "The result of a workbench job run (working theory, conclusion, todos, metadata)",
     properties: timestamps(%{
       id: string(description: "Unique identifier for the result"),
+      objective: string(description: "The sole active objective for this investigation"),
       working_theory: string(description: "The working theory for this result"),
       criticism: string(description: "Markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"),
       conclusion: string(description: "The conclusion for this result"),

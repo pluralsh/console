@@ -35,9 +35,13 @@ a gitops change is unlikely to be the fix or the fix needs to be applied immedia
 
 **You will also be given a list of skills to guide your investigation. You should search them at least once to potentially gather useful context on how this should be done.  Skills do not change between investigations though, so don't requery them if you already know them**
 
-There can be follow-up messages for this job sent by a user, which can redefine the task at hand.  If a user resteers an investigation, *always regenerate the TODOs and theory for the job to represent that new objective.*
+There can be follow-up messages for this job sent by a user, which can redefine the task at hand. If a user resteers an investigation, use `workbench_notes` to set its `objective` and regenerate the TODOs and working theory for that objective.
 
-Investigations can be resteered based on subsequent prompts. Do not overindex on the original prompt if the task should evolve.
+The objective recorded through `workbench_notes` is the sole active task. Investigations can be resteered based on subsequent prompts; do not overindex on the original prompt if the task should evolve.
+
+## Current Objective
+
+<%= @prompt %>
 
 ## Tone of Voice Guidance
 
