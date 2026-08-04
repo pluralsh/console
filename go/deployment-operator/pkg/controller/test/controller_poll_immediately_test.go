@@ -58,10 +58,6 @@ func TestManagerDoesNotPollImmediatelyWhenDisabled(t *testing.T) {
 	t.Cleanup(resetPollImmediatelyConfig)
 	resetPollImmediatelyConfig()
 
-	originalDelay := controller.InitialPollDelay
-	t.Cleanup(func() { controller.InitialPollDelay = originalDelay })
-	controller.InitialPollDelay = func(time.Duration) time.Duration { return time.Hour }
-
 	pollImmediately := false
 	require.NoError(t, common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{
 		PollImmediately: &pollImmediately,
@@ -80,6 +76,8 @@ func TestManagerDoesNotPollImmediatelyWhenDisabled(t *testing.T) {
 	mgr.AddController(&controller.Controller{
 		Name: name,
 		Do:   reconciler,
+		// Fixed long delay keeps the assertion deterministic without shared mutable state.
+		InitialPollDelay: func(time.Duration) time.Duration { return time.Hour },
 	})
 
 	require.NoError(t, mgr.Start(ctx))
@@ -93,10 +91,6 @@ func TestManagerDoesNotPollImmediatelyWhenDisabled(t *testing.T) {
 func TestManagerPollsImmediatelyWhenEnabled(t *testing.T) {
 	t.Cleanup(resetPollImmediatelyConfig)
 	resetPollImmediatelyConfig()
-
-	originalDelay := controller.InitialPollDelay
-	t.Cleanup(func() { controller.InitialPollDelay = originalDelay })
-	controller.InitialPollDelay = func(time.Duration) time.Duration { return time.Hour }
 
 	pollImmediately := true
 	require.NoError(t, common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{
@@ -116,6 +110,8 @@ func TestManagerPollsImmediatelyWhenEnabled(t *testing.T) {
 	mgr.AddController(&controller.Controller{
 		Name: name,
 		Do:   reconciler,
+		// Would block forever if the delay path were incorrectly taken.
+		InitialPollDelay: func(time.Duration) time.Duration { return time.Hour },
 	})
 
 	require.NoError(t, mgr.Start(ctx))

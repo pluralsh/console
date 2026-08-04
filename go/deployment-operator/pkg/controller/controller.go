@@ -22,10 +22,6 @@ import (
 	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
-// InitialPollDelay returns the delay before the first poll when PollImmediately is false.
-// Tests may override this to make timing assertions deterministic.
-var InitialPollDelay = DefaultInitialPollDelay
-
 // DefaultInitialPollDelay returns a random delay in [0, interval).
 func DefaultInitialPollDelay(interval time.Duration) time.Duration {
 	if interval <= 0 {
@@ -60,6 +56,10 @@ type Controller struct {
 
 	// RecoverPanic indicates whether the panic caused by reconcile should be recovered.
 	RecoverPanic *bool
+
+	// InitialPollDelay optionally overrides the default jittered delay used when
+	// PollImmediately is false. If nil, DefaultInitialPollDelay is used.
+	InitialPollDelay func(interval time.Duration) time.Duration
 
 	// lastPollTime is the last time Reconciler.Poll was called.
 	lastPollTime time.Time
@@ -154,7 +154,11 @@ func (c *Controller) startPoller(ctx context.Context) {
 
 	if !common.GetConfigurationManager().IsPollImmediately() {
 		if interval := c.Do.GetPollInterval()(); interval > 0 {
-			initialDelay := InitialPollDelay(interval)
+			delayFn := c.InitialPollDelay
+			if delayFn == nil {
+				delayFn = DefaultInitialPollDelay
+			}
+			initialDelay := delayFn(interval)
 			klog.V(internallog.LogLevelExtended).InfoS("Delaying initial poll", "ctrl", c.Name, "delay", initialDelay)
 			select {
 			case <-ctx.Done():
