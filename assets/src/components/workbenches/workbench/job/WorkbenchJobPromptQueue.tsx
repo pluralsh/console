@@ -91,7 +91,11 @@ export function WorkbenchJobPromptQueue({
 
   return (
     <QueueCardSC>
-      {deleteError && <GqlError error={deleteError} />}
+      {deleteError && (
+        <QueueErrorSC>
+          <GqlError error={deleteError} />
+        </QueueErrorSC>
+      )}
       <SimpleAccordion
         defaultOpen
         caret="right"
@@ -229,6 +233,10 @@ const QueueCardSC = styled(Card)(({ theme }) => ({
   // Pull down 1px so this border meets the chat input border without a double line.
   marginBottom: -1,
   padding: `${theme.spacing.xsmall}px 0 ${theme.spacing.small}px`,
+}))
+
+const QueueErrorSC = styled.div(({ theme }) => ({
+  padding: `0 ${theme.spacing.medium}px`,
 }))
 
 const QueueHeaderSC = styled.div(({ theme }) => ({
