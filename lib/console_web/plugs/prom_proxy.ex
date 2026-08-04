@@ -1,7 +1,15 @@
 defmodule ConsoleWeb.Plugs.PromProxy do
+  alias Console.ReverseProxy.Client
   alias ConsoleWeb.Plugs.Ingest
+  alias ReverseProxyPlug.HTTPClient.Adapters.Tesla
 
-  def init(_opts), do: ReverseProxyPlug.init(upstream: &Ingest.prom_select_url/0)
+  def init(_opts) do
+    ReverseProxyPlug.init(
+      upstream: &Ingest.prom_select_url/0,
+      client: Tesla,
+      client_options: [tesla_client: Client.client()]
+    )
+  end
 
   def call(conn, opts) do
     prefix_path(conn)

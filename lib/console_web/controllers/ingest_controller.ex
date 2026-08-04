@@ -1,7 +1,8 @@
 defmodule ConsoleWeb.IngestController do
   use ConsoleWeb, :controller
+  alias Console.ReverseProxy.Client
   alias ConsoleWeb.Plugs.Ingest
-  alias ReverseProxyPlug.HTTPClient.Adapters.Req
+  alias ReverseProxyPlug.HTTPClient.Adapters.Tesla
 
   def prometheus(conn, _) do
     prom = Ingest.prom_url()
@@ -40,9 +41,12 @@ defmodule ConsoleWeb.IngestController do
       url: upstream,
       headers: convert_headers(conn, upstream),
       body: body,
-      options: [receive_timeout: :timer.seconds(30)]
+      options: [
+        receive_timeout: :timer.seconds(30),
+        tesla_client: Client.client()
+      ]
     }
-    |> Req.request_stream()
+    |> Tesla.request_stream()
     |> ReverseProxyPlug.response(conn, opts)
     |> halt()
   end
