@@ -31,7 +31,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const sentryCreateBrowserRouter =
-  Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
+  Sentry.wrapCreateBrowserRouterV7(createBrowserRouter)
 
 const router = sentryCreateBrowserRouter(rootRoutes)
 const queryClient = new QueryClient()

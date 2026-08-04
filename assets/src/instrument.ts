@@ -29,7 +29,7 @@ export function initializeSentry(enabled: boolean = false) {
     sendDefaultPii: true,
 
     integrations: [
-      Sentry.reactRouterV6BrowserTracingIntegration({
+      Sentry.reactRouterV7BrowserTracingIntegration({
         useEffect: useEffect,
         useLocation,
         useNavigationType,
