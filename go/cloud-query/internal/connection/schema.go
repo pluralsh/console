@@ -3,6 +3,7 @@ package connection
 import (
 	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
@@ -53,6 +54,45 @@ func (in *connection) Schema(table string) ([]cloudquery.SchemaResult, error) {
 		})
 	}
 	return result, nil
+}
+
+func (in *connection) Schemas(tables []string) ([]cloudquery.SchemaResult, error) {
+	klog.V(log.LogLevelDebug).InfoS("running schemas query", "tables", tables)
+
+	qResponse, err := in.db.Query(`
+		SELECT table_name, column_name, data_type
+		FROM information_schema.columns
+		WHERE table_name = ANY($1)
+		ORDER BY table_name, ordinal_position;`, pq.Array(tables))
+	if err != nil {
+		return nil, err
+	}
+	defer qResponse.Close()
+
+	schema := make(map[string][]cloudquery.SchemaColumn, len(tables))
+	for qResponse.Next() {
+		var tableName, columnName, dataType string
+		if err = qResponse.Scan(&tableName, &columnName, &dataType); err != nil {
+			return nil, err
+		}
+
+		schema[tableName] = append(schema[tableName], cloudquery.SchemaColumn{
+			Column: columnName,
+			Type:   dataType,
+		})
+	}
+
+	result := make([]cloudquery.SchemaResult, 0, len(schema))
+	for _, tableName := range tables {
+		if columns, ok := schema[tableName]; ok {
+			result = append(result, cloudquery.SchemaResult{
+				Table:   tableName,
+				Columns: lo.ToSlicePtr(columns),
+			})
+		}
+	}
+
+	return result, qResponse.Err()
 }
 
 func (in *connection) Tables(table string) ([]string, error) {

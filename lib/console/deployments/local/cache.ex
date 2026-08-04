@@ -1,10 +1,13 @@
 defmodule Console.Deployments.Local.Cache do
   alias Console.SmartFile
+  use Nebulex.Caching
   require Logger
 
   @type t :: %__MODULE__{}
 
-  defstruct [:dir, :table]
+  @local_adapter Console.conf(:local_cache)
+
+  defstruct [:dir, :table, :last_updated]
 
   defmodule Line do
     @type t :: %__MODULE__{}
@@ -32,9 +35,8 @@ defmodule Console.Deployments.Local.Cache do
     end
   end
 
-  @spec new(:ets.tab()) :: t
-  def new(table) do
-    {:ok, dir} = Briefly.create(directory: true)
+  @spec new(:ets.tab(), binary) :: t
+  def new(table, dir) when is_binary(dir) do
     %__MODULE__{dir: dir, table: table}
   end
 
@@ -76,6 +78,7 @@ defmodule Console.Deployments.Local.Cache do
         _ -> acc
       end
     end, 0, t)
+    send self(), {:persistent_ets, :flush}
     Logger.info("pruned #{deleted} expired files from local file server")
     cache
   end
@@ -100,14 +103,25 @@ defmodule Console.Deployments.Local.Cache do
 
   def find(%__MODULE__{table: table}, digest), do: find(table, digest)
   def find(table, digest) do
-    case :ets.lookup(table, {:line, digest}) do
-      [{{:line, ^digest}, line}] -> line
+    with [{{:line, ^digest}, %Line{file: f} = line}] <- :ets.lookup(table, {:line, digest}),
+         true <- exists?(f) do
+      line
+    else
       _ -> nil
     end
   end
 
+  def fresh?(%__MODULE__{last_updated: last_updated}, shift \\ [second: -10]) do
+    Timex.now()
+    |> Timex.shift(shift)
+    |> Timex.before?(last_updated)
+  end
+
+  @decorate cacheable(cache: @local_adapter, key: {:file_exists, fname}, opts: [ttl: :timer.hours(3)])
+  defp exists?(fname), do: File.exists?(fname)
+
   defp store(%__MODULE__{table: table} = cache, %Line{digest: digest} = line) do
     :ets.insert(table, {{:line, digest}, line})
-    cache
+    %{cache | last_updated: Timex.now()}
   end
 end

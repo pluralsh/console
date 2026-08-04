@@ -16,6 +16,7 @@ import {
   PageHeaderContext,
   POLL_INTERVAL,
 } from 'components/cd/ContinuousDeployment'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -35,6 +36,8 @@ export function AlertInsight({
   type: 'cluster' | 'service' | 'flow'
 }) {
   const { clusterId, serviceId, flowIdOrName, insightId } = useParams()
+  const { flowData } = useCurrentFlow({ skip: type !== 'flow' })
+  const flowId = type === 'flow' ? flowData?.flow?.id : undefined
 
   const { data, loading, error, refetch } = useAiInsightQuery({
     variables: { id: insightId ?? '' },
@@ -125,10 +128,12 @@ export function AlertInsight({
           loading={loading}
           refetch={refetch}
         />
-        <SendInsightToWorkbenchButton
-          insight={insight}
-          flowId={type === 'flow' ? flowIdOrName : undefined}
-        />
+        {(type !== 'flow' || flowId) && (
+          <SendInsightToWorkbenchButton
+            insight={insight}
+            flowId={flowId}
+          />
+        )}
         <AISuggestFix insight={insight} />
       </Flex>
       <InsightDisplay

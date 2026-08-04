@@ -20,6 +20,7 @@ defmodule Console.Schema.PullRequest do
   end
 
   defenum Status, open: 0, merged: 1, closed: 2
+  defenum ChangeType, gitops: 0, application: 1, configuration: 2
 
   schema "pull_requests" do
     field :url,                :string
@@ -50,6 +51,11 @@ defmodule Console.Schema.PullRequest do
     field :comment_id,         :string,  virtual: true
     field :fresh,              :boolean, virtual: true, default: false
     field :governance_changed, :boolean, virtual: true, default: false
+
+    embeds_one :difficulty, Difficulty, on_replace: :update do
+      field :type,  Console.Schema.PullRequest.ChangeType
+      field :lines, :integer
+    end
 
     belongs_to :cluster,        Cluster
     belongs_to :service,        Service
@@ -264,6 +270,7 @@ defmodule Console.Schema.PullRequest do
     |> validate_length(:title, max: 255)
     |> validate_length(:url, max: 255)
     |> cast_assoc(:notifications_bindings)
+    |> cast_embed(:difficulty, with: &difficulty_changeset/2)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:stack_id)
@@ -273,6 +280,12 @@ defmodule Console.Schema.PullRequest do
     |> change_markers(governance_id: :governance_changed)
     |> next_merge_attempt()
     |> validate_required(~w(url title)a)
+  end
+
+  defp difficulty_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:type, :lines])
+    |> validate_required([:type, :lines])
   end
 
   def next_poll_changeset(model, interval) do

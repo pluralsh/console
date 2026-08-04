@@ -75,6 +75,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :base,        non_null(:string), description: "the base branch of the pull request"
     field :head,        non_null(:string), description: "the head branch of the pull request"
     field :commit_shas, list_of(:commit_sha_attributes), description: "the commit shas of the pull request"
+    field :difficulty,  :pull_request_difficulty_attributes, description: "the classified type and changed line count of the pull request"
   end
 
   input_object :commit_sha_attributes do

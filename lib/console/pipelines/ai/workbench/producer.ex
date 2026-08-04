@@ -1,5 +1,5 @@
 defmodule Console.Pipelines.AI.Workbench.Producer do
-  use Console.Pipelines.PollProducer
+  use Console.Pipelines.PollProducer, interval: :timer.seconds(15)
   import Console.Pipelines.AI.Base
   alias Console.Schema.WorkbenchJob
 

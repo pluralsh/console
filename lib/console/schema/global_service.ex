@@ -135,5 +135,5 @@ defmodule Console.Schema.GlobalService do
       {:error, _} -> poll_duration(nil)
     end
   end
-  def poll_duration(_), do: Duration.new!(minute: 10)
+  def poll_duration(_), do: Duration.new!(minute: 15)
 end

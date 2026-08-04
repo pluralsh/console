@@ -24,21 +24,22 @@ var configurationManager *ConfigurationManager
 
 // Configuration is a thread-safe structure for agent configuration
 type ConfigurationManager struct {
-	mu                          sync.RWMutex
-	defaults                    v1alpha1.AgentConfigurationSpec
-	servicePollInterval         *time.Duration
-	clusterPingInterval         *time.Duration
-	runtimeServicesPingInterval *time.Duration
-	stackPollInterval           *time.Duration
-	sentinelPollInterval        *time.Duration
-	compatibilityUploadInterval *time.Duration
-	pipelineGateInterval        *time.Duration
-	maxConcurrentReconciles     *int
-	maxSentinelRunJobs          *int
-	maxStackRunJobs             *int
-	maxAgentRunPods             *int
-	baseRegistryURL             *string
-	disableWebsocket            *bool
+	mu                           sync.RWMutex
+	defaults                     v1alpha1.AgentConfigurationSpec
+	servicePollInterval          *time.Duration
+	managedNamespacePollInterval *time.Duration
+	clusterPingInterval          *time.Duration
+	runtimeServicesPingInterval  *time.Duration
+	stackPollInterval            *time.Duration
+	sentinelPollInterval         *time.Duration
+	compatibilityUploadInterval  *time.Duration
+	pipelineGateInterval         *time.Duration
+	maxConcurrentReconciles      *int
+	maxSentinelRunJobs           *int
+	maxStackRunJobs              *int
+	maxAgentRunPods              *int
+	baseRegistryURL              *string
+	disableWebsocket             *bool
 }
 
 func GetConfigurationManager() *ConfigurationManager {
@@ -105,6 +106,12 @@ func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfiguration
 	}
 	s.servicePollInterval = interval
 
+	interval, err = setDuration(config.ManagedNamespacePollInterval)
+	if err != nil {
+		return err
+	}
+	s.managedNamespacePollInterval = interval
+
 	s.maxConcurrentReconciles = config.MaxConcurrentReconciles
 	s.baseRegistryURL = config.BaseRegistryURL
 	s.maxSentinelRunJobs = config.MaxSentinelRunJobs
@@ -120,6 +127,9 @@ func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfiguration
 
 	if overrides.ServicePollInterval != nil {
 		merged.ServicePollInterval = overrides.ServicePollInterval
+	}
+	if overrides.ManagedNamespacePollInterval != nil {
+		merged.ManagedNamespacePollInterval = overrides.ManagedNamespacePollInterval
 	}
 	if overrides.ClusterPingInterval != nil {
 		merged.ClusterPingInterval = overrides.ClusterPingInterval
@@ -249,6 +259,12 @@ func (s *ConfigurationManager) GetServicePollInterval() *time.Duration {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.servicePollInterval
+}
+
+func (s *ConfigurationManager) GetManagedNamespacePollInterval() *time.Duration {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.managedNamespacePollInterval
 }
 
 func (s *ConfigurationManager) GetBaseRegistryURL() *string {

@@ -12,6 +12,10 @@ type AgentConfigurationSpec struct {
 	// Set to "0s" to disable service polling.
 	ServicePollInterval *string `json:"servicePollInterval,omitempty"`
 
+	// ManagedNamespacePollInterval defines how often the agent polls for managed namespaces.
+	// Set to "0s" to disable managed namespace polling.
+	ManagedNamespacePollInterval *string `json:"managedNamespacePollInterval,omitempty"`
+
 	// ClusterPingInterval specifies the interval at which the agent pings the cluster.
 	// Set to "0s" to disable cluster pings.
 	ClusterPingInterval *string `json:"clusterPingInterval,omitempty"`

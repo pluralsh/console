@@ -358,11 +358,14 @@ defmodule Console.Deployments.AgentsTest do
         body: "a body",
         repository: "https://github.com/pluralsh/console.git",
         base: "main",
-        head: "plrl/ai/pr-test"
+        head: "plrl/ai/pr-test",
+        difficulty: %{type: :gitops, lines: 42}
       }, run.id, user)
 
       assert pr.status == :open
       assert pr.title == "a pr"
+      assert pr.difficulty.type == :gitops
+      assert pr.difficulty.lines == 42
       assert pr.flow_id == run.flow_id
       assert pr.agent_run_id == run.id
       updated = refetch(run)

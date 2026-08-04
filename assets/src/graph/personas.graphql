@@ -30,6 +30,8 @@ fragment PersonaConfiguration on PersonaConfiguration {
     workbenches
     security
     cost
+    cd
+    ai
   }
   services {
     configuration

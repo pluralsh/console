@@ -223,7 +223,8 @@ When you reach the final todo:
    - `title` (descriptive),
    - `body` (brief summary and rationale),
    - `base` (the branch this run started from; if omitted the tool defaults to the cloned branch),
-   - `head` (branch from `createBranch`).
+   - `head` (branch from `createBranch`),
+   - `changeType` (`GITOPS`, `APPLICATION`, or `CONFIGURATION`) based on the primary kind of change.
 2. Only after Plural MCP server `agentPullRequest` tool succeeds:
    - Use One‑Todo Protocol to set the PR todo `done: true`
    - Optionally add PR URL/number to `description`.

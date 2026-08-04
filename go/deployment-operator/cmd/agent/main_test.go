@@ -24,10 +24,11 @@ func TestLoadAgentConfigurationUsesDefaultsWhenMissing(t *testing.T) {
 	require.NoError(t, loadAgentConfiguration(context.Background(), reader, defaults))
 
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetServicePollInterval())
+	assertDuration(t, 0, common.GetConfigurationManager().GetManagedNamespacePollInterval())
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetRuntimeServicesPingInterval())
 	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetStackPollInterval())
-	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetSentinelPollInterval())
+	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
@@ -42,13 +43,14 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 		WithObjects(&v1alpha1.AgentConfiguration{
 			ObjectMeta: metav1.ObjectMeta{Name: "default"},
 			Spec: v1alpha1.AgentConfigurationSpec{
-				ClusterPingInterval:         ptr("15m"),
-				CompatibilityUploadInterval: ptr("30m"),
-				DisableWebsocket:            &disableWebsocket,
-				PipelineGateInterval:        ptr("0s"),
-				ServicePollInterval:         ptr("10m"),
-				SentinelPollInterval:        ptr("5m"),
-				StackPollInterval:           ptr("0s"),
+				ClusterPingInterval:          ptr("15m"),
+				CompatibilityUploadInterval:  ptr("30m"),
+				DisableWebsocket:             &disableWebsocket,
+				PipelineGateInterval:         ptr("0s"),
+				ServicePollInterval:          ptr("10m"),
+				ManagedNamespacePollInterval: ptr("15m"),
+				SentinelPollInterval:         ptr("5m"),
+				StackPollInterval:            ptr("0s"),
 			},
 		}).
 		Build()
@@ -56,6 +58,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 	require.NoError(t, loadAgentConfiguration(context.Background(), reader, agentConfigurationDefaults()))
 
 	assertDuration(t, 10*time.Minute, common.GetConfigurationManager().GetServicePollInterval())
+	assertDuration(t, 15*time.Minute, common.GetConfigurationManager().GetManagedNamespacePollInterval())
 	assertDuration(t, 15*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
 	assertDuration(t, 30*time.Minute, common.GetConfigurationManager().GetRuntimeServicesPingInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetStackPollInterval())
@@ -65,10 +68,11 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 
 	require.NoError(t, common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{}))
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetServicePollInterval())
+	assertDuration(t, 0, common.GetConfigurationManager().GetManagedNamespacePollInterval())
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetRuntimeServicesPingInterval())
 	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetStackPollInterval())
-	assertDuration(t, 30*time.Second, common.GetConfigurationManager().GetSentinelPollInterval())
+	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
@@ -94,13 +98,14 @@ func agentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	disableWebsocket := false
 
 	return v1alpha1.AgentConfigurationSpec{
-		ServicePollInterval:         ptr("2m"),
-		ClusterPingInterval:         ptr("2m"),
-		CompatibilityUploadInterval: ptr("3m"),
-		StackPollInterval:           ptr("30s"),
-		SentinelPollInterval:        ptr("30s"),
-		PipelineGateInterval:        ptr("0s"),
-		DisableWebsocket:            &disableWebsocket,
+		ServicePollInterval:          ptr("2m"),
+		ManagedNamespacePollInterval: ptr("0s"),
+		ClusterPingInterval:          ptr("2m"),
+		CompatibilityUploadInterval:  ptr("3m"),
+		StackPollInterval:            ptr("30s"),
+		SentinelPollInterval:         ptr("3m"),
+		PipelineGateInterval:         ptr("0s"),
+		DisableWebsocket:             &disableWebsocket,
 	}
 }
 

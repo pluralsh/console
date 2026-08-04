@@ -98,6 +98,18 @@ defmodule Cloudquery.SchemaInput do
   field :table, 2, proto3_optional: true, type: :string
 end
 
+defmodule Cloudquery.SchemasInput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "cloudquery.SchemasInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :connection, 1, type: Cloudquery.Connection
+  field :tables, 2, repeated: true, type: :string
+end
+
 defmodule Cloudquery.ExtractInput do
   @moduledoc false
 
@@ -200,6 +212,8 @@ defmodule Cloudquery.CloudQuery.Service do
   rpc :Query, Cloudquery.QueryInput, Cloudquery.QueryResult
 
   rpc :Schema, Cloudquery.SchemaInput, Cloudquery.SchemaOutput
+
+  rpc :Schemas, Cloudquery.SchemasInput, Cloudquery.SchemaOutput
 
   rpc :Tables, Cloudquery.TablesInput, Cloudquery.TablesOutput
 

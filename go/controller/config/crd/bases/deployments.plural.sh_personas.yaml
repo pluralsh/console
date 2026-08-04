@@ -225,6 +225,12 @@ spec:
                       This allows personas to have streamlined navigation focused on their primary workflows
                       while hiding irrelevant or restricted functionality.
                     properties:
+                      ai:
+                        description: |-
+                          AI enables access to the Plural AI tab when set to true.
+                          This includes AI insights, chat threads, and other AI-driven investigation tools.
+                          Use the AI configuration to control individual AI capabilities within it.
+                        type: boolean
                       audits:
                         description: |-
                           Audits enables access to audit logs and compliance reporting features when set to true.
@@ -236,6 +242,13 @@ spec:
                           Backups enables access to backup and restore management features when set to true.
                           This includes configuring backup policies, managing backup storage,
                           and performing restore operations for disaster recovery.
+                        type: boolean
+                      cd:
+                        description: |-
+                          CD enables access to the Plural Continuous Deployment tab when set to true.
+                          This is the entry point for clusters, services, pipelines, and other deployment
+                          management views. Use the Deployments configuration to control the individual
+                          views within it.
                         type: boolean
                       cost:
                         description: |-

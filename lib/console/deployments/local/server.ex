@@ -2,20 +2,34 @@ defmodule Console.Deployments.Local.Server do
   use GenServer
   alias Console.SmartFile
   alias Console.Deployments.Local.Cache
+  alias Console.Deployments.Local.PersistentEts
 
   @type error :: Console.error
 
   @table_name :plrl_file_server
   @timeout :timer.seconds(60)
+  @flush_interval :timer.seconds(10)
+
+  defmodule State do
+    defstruct [:cache, :table]
+  end
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
   def init(_) do
+    dir = server_dir()
     :timer.send_interval(:timer.minutes(5), :sweep)
-    table = :ets.new(@table_name, [:set, :protected, :named_table, read_concurrency: true])
-    {:ok, Cache.new(table)}
+
+    table = PersistentEts.new(
+      @table_name,
+      Path.join(dir, "local.tab"),
+      [:set, :protected, :named_table, read_concurrency: true],
+      flush_interval: @flush_interval
+    )
+
+    {:ok, %State{cache: Cache.new(table.table, dir), table: table}}
   end
 
   @doc """
@@ -60,26 +74,42 @@ defmodule Console.Deployments.Local.Server do
     end
   end
 
-  def handle_call({:proxy, digest, f}, _, %Cache{} = cache) do
+  def handle_call({:proxy, digest, f}, _, %State{cache: cache} = state) do
     case Cache.proxy(cache, digest, f) do
-      {:ok, line, cache} -> {:reply, {:ok, SmartFile.new(line.file)}, cache}
-      err -> {:reply, err, cache}
+      {:ok, line, cache} -> {:reply, {:ok, SmartFile.new(line.file)}, %{state | cache: cache}}
+      err -> {:reply, err, state}
     end
   end
 
-  def handle_call({:fetch, digest, reader}, _, cache) when is_function(reader, 0) do
+  def handle_call({:fetch, digest, reader}, _, %State{cache: cache} = state)
+      when is_function(reader, 0) do
     case Cache.fetch(cache, digest, reader) do
-      {:ok, line, cache} -> {:reply, {:ok, line.file}, cache}
-      err -> {:reply, err, cache}
+      {:ok, line, cache} -> {:reply, {:ok, line.file}, %{state | cache: cache}}
+      err -> {:reply, err, state}
     end
   end
 
-  def handle_call(:sweep, _, cache), do: {:reply, :ok, Cache.sweep(cache)}
+  def handle_call(:sweep, _, %State{cache: cache} = state),
+    do: {:reply, :ok, %{state | cache: Cache.sweep(cache)}}
+  def handle_call({:open, f}, _, state), do: {:reply, File.open(f), state}
+  def handle_call(_, _, state), do: {:reply, :ok, state}
 
-  def handle_call({:open, f}, _, cache), do: {:reply, File.open(f), cache}
+  def handle_info(:sweep, %State{cache: cache} = state),
+    do: {:noreply, %{state | cache: Cache.sweep(cache)}}
+  def handle_info({:persistent_ets, :flush}, %State{table: table} = state) do
+    PersistentEts.flush(table)
+    {:noreply, state}
+  end
+  def handle_info(_, state), do: {:noreply, state}
 
-  def handle_call(_, _, cache), do: {:reply, :ok, cache}
-
-  def handle_info(:sweep, cache), do: {:noreply, Cache.sweep(cache)}
-  def handle_info(_, cache), do: {:noreply, cache}
+  if Mix.env() == :test do
+    # assists in cleanup for local envs, in prod, emptyDir handles this
+    defp server_dir(), do: Briefly.create!(directory: true)
+  else
+    defp server_dir() do
+      dir = Path.join([System.tmp_dir!(), "local_server"])
+      File.mkdir_p!(dir)
+      dir
+    end
+  end
 end

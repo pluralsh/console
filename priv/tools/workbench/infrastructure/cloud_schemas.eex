@@ -1,0 +1,22 @@
+<%= if Enum.empty?(@results) do %>
+No schemas found.
+<% else %>
+<%= for result <- @results do %>
+Table <%= result.table %>
+<%= Scribe.format(
+  Enum.map(result.columns, fn column ->
+    %{
+      column: %Console.AI.Tools.Workbench.Infrastructure.CloudSchemas.Cell{value: column.column},
+      type: %Console.AI.Tools.Workbench.Infrastructure.CloudSchemas.Cell{value: column.type}
+    }
+  end),
+  colorize: false,
+  data: [
+    {%Console.AI.Tools.Workbench.Infrastructure.CloudSchemas.Cell{value: "Column"}, :column},
+    {%Console.AI.Tools.Workbench.Infrastructure.CloudSchemas.Cell{value: "Data Type"}, :type}
+  ],
+  style: Scribe.Style.Psql
+) %>
+
+<% end %>
+<% end %>

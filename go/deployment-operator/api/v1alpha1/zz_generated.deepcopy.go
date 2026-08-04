@@ -121,6 +121,11 @@ func (in *AgentConfigurationSpec) DeepCopyInto(out *AgentConfigurationSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ManagedNamespacePollInterval != nil {
+		in, out := &in.ManagedNamespacePollInterval, &out.ManagedNamespacePollInterval
+		*out = new(string)
+		**out = **in
+	}
 	if in.ClusterPingInterval != nil {
 		in, out := &in.ClusterPingInterval, &out.ClusterPingInterval
 		*out = new(string)

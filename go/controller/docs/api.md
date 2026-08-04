@@ -3286,6 +3286,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `cd` _boolean_ | CD enables access to the Plural Continuous Deployment tab when set to true.<br />This is the entry point for clusters, services, pipelines, and other deployment<br />management views. Use the Deployments configuration to control the individual<br />views within it. |  | Optional: \{\} <br /> |
 | `audits` _boolean_ | Audits enables access to audit logs and compliance reporting features when set to true.<br />This includes viewing system audit trails, user activity logs, and compliance reports.<br />Typically enabled for security teams and compliance officers. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables access to direct Kubernetes management features when set to true.<br />This includes raw Kubernetes resource management, kubectl-like operations,<br />and low-level cluster administration tasks. |  | Optional: \{\} <br /> |
 | `pullRequests` _boolean_ | PullRequests enables access to pull request management features when set to true.<br />This includes viewing and managing pull requests and Git-based deployment automation features. |  | Optional: \{\} <br /> |
@@ -3296,6 +3297,7 @@ _Appears in:_
 | `stacks` _boolean_ | Stacks enables access to Infrastructure as Code (IaC) stack management when set to true.<br />This includes managing Terraform stacks and other IaC<br />automation tools for infrastructure provisioning and management. |  | Optional: \{\} <br /> |
 | `security` _boolean_ | Security enables access to security management features when set to true.<br />This includes security scanning results, vulnerability management,<br />policy enforcement, and other security-related tools and dashboards. |  | Optional: \{\} <br /> |
 | `cost` _boolean_ | Cost enables access to cost management and optimization features when set to true.<br />This includes cost tracking or resource optimization recommendations. |  | Optional: \{\} <br /> |
+| `ai` _boolean_ | AI enables access to the Plural AI tab when set to true.<br />This includes AI insights, chat threads, and other AI-driven investigation tools.<br />Use the AI configuration to control individual AI capabilities within it. |  | Optional: \{\} <br /> |
 
 
 #### PersonaSpec

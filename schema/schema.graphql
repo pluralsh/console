@@ -2101,6 +2101,9 @@ input AgentPullRequestAttributes {
 
   "the commit shas of the pull request"
   commitShas: [CommitShaAttributes]
+
+  "the classified type and changed line count of the pull request"
+  difficulty: PullRequestDifficultyAttributes
 }
 
 input CommitShaAttributes {
@@ -2749,6 +2752,11 @@ enum WorkbenchChatbotMessageBehavior {
   MESSAGE
 }
 
+enum WorkbenchBudgetUnit {
+  DOLLAR
+  TOKEN
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -2862,6 +2870,9 @@ input WorkbenchAttributes {
   "default mode-specific options for jobs created by this workbench"
   modes: WorkbenchJobModesAttributes
 
+  "token bucket budget for this workbench"
+  budget: WorkbenchBudgetAttributes
+
   "skills configuration (ref and files)"
   skills: WorkbenchSkillsAttributes
 
@@ -2926,6 +2937,26 @@ input WorkbenchObservabilityAttributes {
 
   "enable metrics capability"
   metrics: Boolean
+}
+
+input WorkbenchBudgetAttributes {
+  "whether budget tracking is enabled"
+  enabled: Boolean
+
+  "maximum budget capacity"
+  maximum: Float
+
+  "minimum budget capacity to keep free"
+  minFree: Float
+
+  "the budget unit"
+  unit: WorkbenchBudgetUnit
+
+  "remaining budget capacity"
+  last: Float
+
+  "when the budget was last updated"
+  lastUpdated: DateTime
 }
 
 input WorkbenchSkillsAttributes {
@@ -3568,6 +3599,9 @@ type Workbench {
   "default mode-specific options for jobs created by this workbench"
   modes: WorkbenchJobModes
 
+  "token bucket budget for this workbench"
+  budget: WorkbenchBudget
+
   "skills configuration"
   skills: WorkbenchSkills
 
@@ -4204,6 +4238,26 @@ type WorkbenchObservability {
 
   "metrics capability enabled"
   metrics: Boolean
+}
+
+type WorkbenchBudget {
+  "whether budget tracking is enabled"
+  enabled: Boolean
+
+  "maximum budget capacity"
+  maximum: Float
+
+  "minimum budget capacity to keep free"
+  minFree: Float
+
+  "the budget unit"
+  unit: WorkbenchBudgetUnit
+
+  "remaining budget capacity"
+  last: Float
+
+  "when the budget was last updated"
+  lastUpdated: DateTime
 }
 
 type WorkbenchSkills {
@@ -6210,6 +6264,16 @@ input AiSettingsAttributes {
   vectorStore: VectorStoreAttributes
 
   graph: GraphStoreAttributes
+
+  "per-model token prices used to calculate AI usage costs"
+  priceSheets: [AiPriceSheetAttributes]
+}
+
+input AiPriceSheetAttributes {
+  provider: AiProvider
+  model: String
+  inputPrice: Float
+  outputPrice: Float
 }
 
 input AnalysisRatesAttributes {
@@ -6657,6 +6721,16 @@ type AiSettings {
   bedrock: BedrockAiSettings
 
   vertex: VertexAiSettings
+
+  "per-model token prices used to calculate AI usage costs"
+  priceSheets: [AiPriceSheet]
+}
+
+type AiPriceSheet {
+  provider: AiProvider
+  model: String
+  inputPrice: Float
+  outputPrice: Float
 }
 
 type VectorStoreSettings {
@@ -13073,6 +13147,12 @@ enum PrStatus {
   CLOSED
 }
 
+enum PrChangeType {
+  GITOPS
+  APPLICATION
+  CONFIGURATION
+}
+
 enum ConfigurationType {
   STRING
   INT
@@ -13613,6 +13693,7 @@ input PullRequestAttributes {
   clusterId: ID
   service: NamespacedName
   cluster: NamespacedName
+  difficulty: PullRequestDifficultyAttributes
 }
 
 "attributes for a pull request pointer record"
@@ -13624,6 +13705,12 @@ input PullRequestUpdateAttributes {
   clusterId: ID
   service: NamespacedName
   cluster: NamespacedName
+  difficulty: PullRequestDifficultyAttributes
+}
+
+input PullRequestDifficultyAttributes {
+  type: PrChangeType
+  lines: Int
 }
 
 "The attributes to configure a new webhook for a SCM provider"
@@ -14272,6 +14359,9 @@ type PullRequest {
   "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
   patch: String
 
+  "the estimated complexity of the pull request"
+  difficulty: PullRequestDifficulty
+
   "the user that spawned this pr, will also be associated with notifications w\/in Plural"
   author: User
 
@@ -14287,6 +14377,14 @@ type PullRequest {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type PullRequestDifficulty {
+  "the type of change in the pull request"
+  type: PrChangeType
+
+  "the number of changed lines"
+  lines: Int
 }
 
 type ScmWebhook {
@@ -16168,6 +16266,7 @@ input PersonaFlowsAttributes {
 }
 
 input PersonaSidebarAttributes {
+  cd: Boolean
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
@@ -16178,6 +16277,7 @@ input PersonaSidebarAttributes {
   stacks: Boolean
   security: Boolean
   cost: Boolean
+  ai: Boolean
 }
 
 input PersonaHomeAttributes {
@@ -16416,6 +16516,7 @@ type PersonaFlows {
 }
 
 type PersonaSidebar {
+  cd: Boolean
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
@@ -16426,6 +16527,7 @@ type PersonaSidebar {
   stacks: Boolean
   security: Boolean
   cost: Boolean
+  ai: Boolean
 }
 
 type PersonaHome {

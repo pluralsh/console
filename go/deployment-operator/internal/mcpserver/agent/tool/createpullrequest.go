@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -34,6 +35,15 @@ func (in *CreatePullRequest) Install(server *server.MCPServer) {
 			mcp.WithString("head",
 				mcp.Required(),
 				mcp.Description("The head branch (source branch with changes)"),
+			),
+			mcp.WithString("changeType",
+				mcp.Required(),
+				mcp.Enum(
+					string(client.PrChangeTypeGitops),
+					string(client.PrChangeTypeApplication),
+					string(client.PrChangeTypeConfiguration),
+				),
+				mcp.Description("The PR change category"),
 			),
 		),
 		in.handler,
@@ -145,6 +155,15 @@ func (in *CreatePullRequest) fromRequest(request mcp.CallToolRequest) (result cl
 		return
 	}
 
+	changeType, err := request.RequireString("changeType")
+	if err != nil {
+		return result, err
+	}
+	prChangeType := client.PrChangeType(changeType)
+	if !prChangeType.IsValid() {
+		return result, fmt.Errorf("invalid changeType %q", changeType)
+	}
+
 	if err = in.persistHeadBranch(result.Head); err != nil {
 		return
 	}
@@ -176,6 +195,11 @@ func (in *CreatePullRequest) fromRequest(request mcp.CallToolRequest) (result cl
 		Branch: result.Base,
 		Sha:    baseSHA,
 	})
+	lines := in.changedLines(config.Dir, baseSHA, headSHA)
+	result.Difficulty = &client.PullRequestDifficultyAttributes{
+		Type:  &prChangeType,
+		Lines: &lines,
+	}
 
 	return
 }
@@ -195,6 +219,32 @@ func (in *CreatePullRequest) getCommitSHA(repoDir, branch string) (string, error
 	}
 
 	return string(bytes.TrimSpace(shaBytes)), nil
+}
+
+func (in *CreatePullRequest) changedLines(repoDir, baseSHA, headSHA string) int64 {
+	output, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"diff", "--numstat", baseSHA + "..." + headSHA, "--"}),
+		exec.WithDir(repoDir)).RunWithOutput(context.Background())
+	if err != nil {
+		return 0
+	}
+
+	var lines int64
+	for _, row := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+		fields := strings.Fields(row)
+		if len(fields) < 2 {
+			continue
+		}
+
+		additions, addErr := strconv.ParseInt(fields[0], 10, 64)
+		deletions, deleteErr := strconv.ParseInt(fields[1], 10, 64)
+		if addErr != nil || deleteErr != nil {
+			continue
+		}
+		lines += additions + deletions
+	}
+
+	return lines
 }
 
 func NewCreatePullRequest(client, runtimeClient console.Client, agentRunID string) Tool {

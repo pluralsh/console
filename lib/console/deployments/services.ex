@@ -1129,7 +1129,7 @@ defmodule Console.Deployments.Services do
   end
 
   defp update_status(%Service{} = svc, status, component_status) do
-    Ecto.Changeset.change(svc, revert_proceed(%{status: status, component_status: component_status}, status))
+    Service.status_changeset(svc, revert_proceed(%{status: status, component_status: component_status}, status))
     |> Repo.update()
   end
 

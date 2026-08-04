@@ -927,6 +927,7 @@ defmodule Console.Deployments.ServicesTest do
       svc = refetch(service)
       assert svc.status == :failed
       assert svc.component_status == "0 / 1"
+      assert DateTime.before?(svc.ai_poll_at, DateTime.utc_now())
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end

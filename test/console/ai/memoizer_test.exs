@@ -3,6 +3,8 @@ defmodule Console.AI.MemoizerTest do
   use Mimic
 
   alias Console.AI.Memoizer
+  alias Console.Repo
+  alias Console.Schema.Service
   alias Console.AI.Tools.Insight
 
   @base_model "gpt-5.4"
@@ -11,6 +13,15 @@ defmodule Console.AI.MemoizerTest do
   setup :set_mimic_global
 
   describe "generate/1" do
+    test "defers polling when the insight is fresh" do
+      svc = insert(:service, insight: insert(:ai_insight))
+
+      assert {:ok, _} = Memoizer.generate(svc)
+
+      assert %Service{ai_poll_at: ai_poll_at} = Repo.get(Service, svc.id)
+      assert DateTime.after?(ai_poll_at, DateTime.utc_now())
+    end
+
     test "uses the provider base model, not the tool model, when generating an insight" do
       deployment_settings(
         ai: %{

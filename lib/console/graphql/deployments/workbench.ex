@@ -12,6 +12,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
   ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
   ecto_enum :workbench_chatbot_message_behavior, Console.Schema.WorkbenchChatbot.MessageBehavior
+  ecto_enum :workbench_budget_unit, Console.Schema.Workbench.BudgetUnit
 
   enum :eval_results_period do
     value :day
@@ -75,6 +76,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :override_bot_user, :boolean, description: "when true on update, sets botUserId to the authenticated user"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
     field :modes,             :workbench_job_modes_attributes, description: "default mode-specific options for jobs created by this workbench"
+    field :budget,            :workbench_budget_attributes, description: "token bucket budget for this workbench"
     field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
     field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
@@ -106,6 +108,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_observability_attributes do
     field :logs,    :boolean, description: "enable logs capability"
     field :metrics, :boolean, description: "enable metrics capability"
+  end
+
+  input_object :workbench_budget_attributes do
+    field :enabled,      :boolean, description: "whether budget tracking is enabled"
+    field :maximum,      :float, description: "maximum budget capacity"
+    field :min_free,     :float, description: "minimum budget capacity to keep free"
+    field :unit,         :workbench_budget_unit, description: "the budget unit"
+    field :last,         :float, description: "remaining budget capacity"
+    field :last_updated, :datetime, description: "when the budget was last updated"
   end
 
   input_object :workbench_skills_attributes do
@@ -439,6 +450,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :system_prompt, :string, description: "the system prompt for the workbench"
     field :configuration, :workbench_configuration, description: "workbench configuration"
     field :modes,         :workbench_job_modes, description: "default mode-specific options for jobs created by this workbench"
+    field :budget,        :workbench_budget, description: "token bucket budget for this workbench"
     field :skills,        :workbench_skills, description: "skills configuration"
 
     field :project,       :project,                  resolve: dataloader(Deployments), description: "the project of this workbench"
@@ -837,6 +849,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_observability do
     field :logs,    :boolean, description: "logs capability enabled"
     field :metrics, :boolean, description: "metrics capability enabled"
+  end
+
+  object :workbench_budget do
+    field :enabled,      :boolean, description: "whether budget tracking is enabled"
+    field :maximum,      :float, description: "maximum budget capacity"
+    field :min_free,     :float, description: "minimum budget capacity to keep free"
+    field :unit,         :workbench_budget_unit, description: "the budget unit"
+    field :last,         :float, description: "remaining budget capacity"
+    field :last_updated, :datetime, description: "when the budget was last updated"
   end
 
   object :workbench_skills do

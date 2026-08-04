@@ -2,11 +2,9 @@ import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { fromNow } from 'utils/datetime'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
 import { SendInsightToWorkbenchButton } from '../../ai/insights/SendInsightToWorkbench'
-import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
 export function StackInsights() {
@@ -18,39 +16,35 @@ export function StackInsights() {
       [stack]
     )
   )
+
   return (
     <Flex
       direction="column"
-      gap="medium"
       overflow="hidden"
       height="100%"
     >
-      <Flex
-        justify="space-between"
-        alignItems="center"
-      >
-        <StackedText
-          first="Insight"
-          firstPartialType="body1Bold"
-          second={
-            stack.insight?.updatedAt &&
-            `Last updated ${fromNow(stack.insight?.updatedAt)}`
-          }
-        />
-        <Flex
-          align="center"
-          justify="flex-end"
-          gap="small"
-        >
-          {stack?.insight && <InsightRefresh insight={stack?.insight} />}
-          <SendInsightToWorkbenchButton insight={stack?.insight} />
-          <AISuggestFix insight={stack?.insight} />
-        </Flex>
-      </Flex>
       <InsightDisplay
         insight={stack.insight}
         kind="stack"
         loading={loading}
+        headerActions={
+          <>
+            {stack.insight && (
+              <InsightRefresh
+                size="medium"
+                insight={stack.insight}
+              />
+            )}
+            <SendInsightToWorkbenchButton
+              small
+              insight={stack.insight}
+            />
+            <AISuggestFix
+              small
+              insight={stack.insight}
+            />
+          </>
+        }
       />
     </Flex>
   )
