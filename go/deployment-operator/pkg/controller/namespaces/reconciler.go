@@ -21,6 +21,7 @@ import (
 	clienterrors "github.com/pluralsh/console/go/deployment-operator/internal/errors"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	agentcommon "github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/websocket"
 )
@@ -68,7 +69,14 @@ func (n *NamespaceReconciler) Shutdown() {
 }
 
 func (n *NamespaceReconciler) GetPollInterval() func() time.Duration {
-	return func() time.Duration { return n.pollInterval } // use default poll interval
+	return func() time.Duration { return EffectivePollInterval(n.pollInterval) }
+}
+
+func EffectivePollInterval(defaultInterval time.Duration) time.Duration {
+	if interval := agentcommon.GetConfigurationManager().GetManagedNamespacePollInterval(); interval != nil {
+		return *interval
+	}
+	return defaultInterval
 }
 
 func (n *NamespaceReconciler) GetPublisher() (string, websocket.Publisher) {

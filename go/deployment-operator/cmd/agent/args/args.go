@@ -45,6 +45,8 @@ const (
 	defaultPollInterval         = "2m"
 	defaultPollIntervalDuration = 2 * time.Minute
 
+	defaultManagedNamespacePollInterval = "0s"
+
 	defaultApplierWaveDelay         = "200ms"
 	defaultApplierWaveDelayDuration = 200 * time.Millisecond
 
@@ -548,6 +550,7 @@ func DisableWebsocket() bool {
 
 func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	servicePollInterval := PollInterval().String()
+	managedNamespacePollInterval := defaultManagedNamespacePollInterval
 	clusterPingInterval := ClusterPingInterval().String()
 	compatibilityUploadInterval := RuntimeServicesPingInterval().String()
 	stackPollInterval := StackPollInterval().String()
@@ -556,13 +559,14 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	disableWebsocket := DisableWebsocket()
 
 	return v1alpha1.AgentConfigurationSpec{
-		ServicePollInterval:         &servicePollInterval,
-		ClusterPingInterval:         &clusterPingInterval,
-		CompatibilityUploadInterval: &compatibilityUploadInterval,
-		StackPollInterval:           &stackPollInterval,
-		SentinelPollInterval:        &sentinelPollInterval,
-		PipelineGateInterval:        &pipelineGateInterval,
-		DisableWebsocket:            &disableWebsocket,
+		ServicePollInterval:          &servicePollInterval,
+		ManagedNamespacePollInterval: &managedNamespacePollInterval,
+		ClusterPingInterval:          &clusterPingInterval,
+		CompatibilityUploadInterval:  &compatibilityUploadInterval,
+		StackPollInterval:            &stackPollInterval,
+		SentinelPollInterval:         &sentinelPollInterval,
+		PipelineGateInterval:         &pipelineGateInterval,
+		DisableWebsocket:             &disableWebsocket,
 	}
 }
 
