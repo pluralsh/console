@@ -97,6 +97,17 @@ message ProxyAuthenticationResponse {
   bool authenticated = 1;
 }
 
+// Fetches the cluster associated with a cluster deploy token.
+message VerifyClusterRequest {
+  string token = 1;
+}
+
+// The cluster identity required by KAS.
+message VerifyClusterResponse {
+  string id = 1;
+  string name = 2;
+}
+
 message ObservabilityConfig {
   optional string prometheusUsername = 1;
   optional string prometheusPassword = 2;
@@ -123,4 +134,5 @@ service PluralServer {
   rpc GetAiConfig (AiConfigRequest) returns (AiConfig);
   rpc GetObservabilityConfig (ObservabilityConfigRequest) returns (ObservabilityConfig);
   rpc ProxyAuthentication (ProxyAuthenticationRequest) returns (ProxyAuthenticationResponse);
+  rpc VerifyCluster (VerifyClusterRequest) returns (VerifyClusterResponse);
 }

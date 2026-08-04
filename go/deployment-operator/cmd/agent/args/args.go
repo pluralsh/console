@@ -91,8 +91,8 @@ const (
 	defaultRuntimeServicePingInterval         = "3m"
 	defaultRuntimeServicePingIntervalDuration = 3 * time.Minute
 
-	defaultStackPollInterval         = "30s"
-	defaultStackPollIntervalDuration = 30 * time.Second
+	defaultStackPollInterval         = "2m"
+	defaultStackPollIntervalDuration = 2 * time.Minute
 
 	defaultSentinelPollInterval         = "3m"
 	defaultSentinelPollIntervalDuration = 3 * time.Minute

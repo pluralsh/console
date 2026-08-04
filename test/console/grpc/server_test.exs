@@ -74,4 +74,24 @@ defmodule Console.GRPC.ServerTest do
       assert config.xai.toolModel == "grok-4.5"
     end
   end
+
+  describe "verify_cluster/2" do
+    test "returns the KAS cluster identity for a cluster access token" do
+      cluster = insert(:cluster)
+
+      result = Server.verify_cluster(%Plrl.VerifyClusterRequest{token: cluster.deploy_token}, nil)
+
+      assert result.id == cluster.id
+      assert result.name == cluster.name
+    end
+
+    test "requires a valid cluster access token" do
+      error =
+        assert_raise GRPC.RPCError, fn ->
+          Server.verify_cluster(%Plrl.VerifyClusterRequest{token: "console-not-a-cluster-token"}, nil)
+        end
+
+      assert error.status == GRPC.Status.unauthenticated()
+    end
+  end
 end
