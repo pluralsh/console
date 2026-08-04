@@ -13167,6 +13167,28 @@ entries:
   plural:
   - apiVersion: v2
     appVersion: 0.11.8
+    created: "2026-08-04T01:21:50.009073675Z"
+    dependencies:
+    - name: hydra
+      repository: https://k8s.ory.sh/helm/charts
+      version: 0.26.5
+    - condition: test-base.enabled
+      name: test-base
+      repository: https://pluralsh.github.io/module-library
+      version: 0.1.10
+    description: A helm chart for installing plural
+    digest: 88e0cd84d7ef877054679c2faf094d7145d4eb979313464936bb570bc596a88b
+    maintainers:
+    - email: mjg@plural.sh
+      name: michaeljguarino
+    name: plural
+    sources:
+    - https://github.com/pluralsh/plural
+    urls:
+    - https://github.com/pluralsh/console/releases/download/plural-chart-v0.10.109/plural-0.10.109.tgz
+    version: 0.10.109
+  - apiVersion: v2
+    appVersion: 0.11.8
     created: "2026-04-09T03:24:16.630799391Z"
     dependencies:
     - name: hydra
@@ -13280,4 +13302,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-08-02T02:20:24.15525989Z"
+generated: "2026-08-04T01:21:50.00983603Z"
