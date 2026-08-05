@@ -4,28 +4,42 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
-- version: 3.4.6
+- version: 3.5.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['(3.4.1 baseline) New ApplicationSet status includes a Health field,
-        improving visibility into generated app health at the AppSet level.', (3.4.1
-        baseline) Controller supports an annotation to pause reconciliation for a
-        specific cluster., '(3.4.1 baseline) Helm source supports wildcard/glob patterns
-        for valueFiles, simplifying multi-environment values layouts.', '(3.4.6) OIDC
-        sessions can renew using refresh tokens, reducing user logins when sessions
-        expire.', '(3.4.6) Helm OCI registry authentication now passes registry passwords
-        via stdin, improving compatibility/security with some registries.']
-    breaking_changes: ['Cluster generator Kubernetes version label format changed
-        in 3.4.x to align with Helm 3.19 behavior: ApplicationSets using Cluster Generator
-        with auto-labeling must use `argocd.argoproj.io/kubernetes-version` in `vMajor.Minor.Patch`
-        format instead of `Major.Minor` (3.4.1 note).']
-  chart_version: 10.2.2
+    features: ['Helm rendering now uses Helm 4, which may change manifest output and
+        requires validating chart compatibility and any custom tooling/plugins tied
+        to Helm 3.', 'ApplicationSet controller can manage applications concurrently,
+        improving performance for large numbers of generated Applications but increasing
+        burstiness against the Kubernetes API.', Webhook-triggered application refreshes
+        now support configurable jitter to reduce thundering-herd refresh spikes.,
+      'Repo-server gains mTLS support, enabling mutual TLS between Argo CD components
+        and the repo-server for hardened transport security.', 'Source Integrity checking
+        is introduced (CLI support and hydrator opt-in for dry sources, alpha), enabling
+        signature/integrity verification of sources with policy-driven enforcement.',
+      'UI gains deeper ApplicationSet visibility: AppSet appears in the Application
+        resource tree, has preview apps and an Apps tab, and additional filtering
+        options (repo URL, target revision).', 'Helm valueFiles now support wildcard
+        glob patterns, allowing simpler configuration for multi-environment values
+        overlays.', 'Server cache behavior is tightened: objects from non-allowed
+        namespaces are dropped before entering cache, improving isolation in multi-namespace
+        setups.', Authentication improvements include optional relaxed strict impersonation
+        enforcement and better OIDC session handling (refresh tokens to renew expired
+        sessions).]
+    breaking_changes: ['Migration from Helm 3 to Helm 4 is a major tooling change
+        that can affect manifest rendering/output; test all Helm-based applications
+        and custom plugins, and verify repo-server image/tooling expectations.', 'If
+        you rely on ApplicationSet cluster generator Kubernetes version labels from
+        earlier behavior (3.4 series note), ensure secrets use the vMajor.Minor.Patch
+        format under argocd.argoproj.io/kubernetes-version; mismatches can break cluster
+        selection logic.']
+  chart_version: 10.2.3
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
-    'quay.io/argoproj/argocd:v3.4.6']
+    'quay.io/argoproj/argocd:v3.5.0']
 - version: 3.4.1
   kube: ['1.36', '1.35', '1.34']
   requirements: []
@@ -136,6 +150,7 @@ versions:
   chart_version: 9.1.8
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.1']
+  eolAt: '2026-08-04'
 - version: 3.2.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -167,6 +182,7 @@ versions:
   chart_version: 9.1.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.0']
+  eolAt: '2026-08-04'
 - version: 3.1.1
   kube: ['1.34', '1.33', '1.32']
   requirements: []

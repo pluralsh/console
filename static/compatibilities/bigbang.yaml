@@ -4,7 +4,7 @@ git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
 - version: 3.29.0
-  kube: ['1.34']
+  kube: ['1.35']
   requirements:
   - name: Alloy
     version: 4.2.2-bb.0
