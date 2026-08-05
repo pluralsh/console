@@ -68,6 +68,11 @@ type AgentConfigurationSpec struct {
 	// push updates. This is useful in large-scale edge deployments where maintaining
 	// persistent websocket connections has an infeasible network cost.
 	DisableWebsocket *bool `json:"disableWebsocket,omitempty"`
+
+	// PollImmediately determines whether the agent should poll immediately upon startup.
+	// When set to true, the agent will perform an initial poll as soon as it starts.
+	// By default, it's set to true.
+	PollImmediately *bool `json:"pollImmediately,omitempty"`
 }
 
 //+kubebuilder:object:root=true

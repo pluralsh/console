@@ -21,6 +21,14 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
                Tool.validate(%Logs{}, %{"cluster_id" => "cluster-1"})
     end
 
+    test "changeset casts time range" do
+      assert {:ok, %Logs{time_range: %{start: %DateTime{}, end: %DateTime{}}}} =
+               Tool.validate(%Logs{}, %{
+                 "cluster_id" => "cluster-1",
+                 "time_range" => %{"start" => "2025-01-01T00:00:00Z", "end" => "2025-01-01T01:00:00Z"}
+               })
+    end
+
     test "changeset requires service_id or cluster_id" do
       assert {:error, cs} = Tool.validate(%Logs{}, %{"query" => "error"})
       assert Enum.any?(errors_on(cs).service_id, &String.contains?(&1, "One of these fields must be present"))
@@ -43,6 +51,14 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
                Tool.validate(%LogsAggregate{}, %{"service_id" => "svc-1"})
     end
 
+    test "changeset casts time range" do
+      assert {:ok, %LogsAggregate{time_range: %{start: %DateTime{}, end: %DateTime{}}}} =
+               Tool.validate(%LogsAggregate{}, %{
+                 "service_id" => "svc-1",
+                 "time_range" => %{"start" => "2025-01-01T00:00:00Z", "end" => "2025-01-01T01:00:00Z"}
+               })
+    end
+
     test "changeset requires service_id or cluster_id" do
       assert {:error, _} = Tool.validate(%LogsAggregate{}, %{})
     end
@@ -54,6 +70,14 @@ defmodule Console.AI.Tools.Workbench.Observability.PlrlToolsTest do
                Tool.validate(%LogLabels{}, %{
                  "cluster_id" => "cluster-1",
                  "field" => "namespace"
+               })
+    end
+
+    test "changeset casts time range" do
+      assert {:ok, %LogLabels{time_range: %{start: %DateTime{}, end: %DateTime{}}}} =
+               Tool.validate(%LogLabels{}, %{
+                 "cluster_id" => "cluster-1",
+                 "time_range" => %{"start" => "2025-01-01T00:00:00Z", "end" => "2025-01-01T01:00:00Z"}
                })
     end
 

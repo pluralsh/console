@@ -7,6 +7,7 @@ metadata:
   name: default
 spec:
   clusterPingInterval: "10s"
+  servicePollInterval: "20s"
   stackPollInterval: "20s"
   sentinelPollInterval: "20s"
   pipelineGateInterval: "0s"
@@ -14,4 +15,5 @@ spec:
   maxConcurrentReconciles: 5
   maxSentinelRunJobs: 2
   disableWebsocket: false
+  pollImmediately: false
 

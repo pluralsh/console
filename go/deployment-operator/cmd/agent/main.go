@@ -7,6 +7,7 @@ import (
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
@@ -75,7 +76,8 @@ func init() {
 }
 
 const (
-	httpClientTimout = time.Second * 5
+	httpClientTimout                      = time.Second * 5
+	existingOperatorInitialPollDeferAfter = time.Hour
 )
 
 func main() {
@@ -122,7 +124,6 @@ func main() {
 
 	kubeManager := initKubeManagerOrDie(config)
 	consoleManager := initConsoleManagerOrDie()
-	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
 
 	// Start the discovery cache manager in background.
 	runDiscoveryManagerOrDie(ctx, discoveryCache)
@@ -162,6 +163,15 @@ func main() {
 	// Start the metrics scarper in background.
 	scraper.RunMetricsScraperInBackgroundOrDie(ctx, kubeManager.GetClient(), discoveryCache, config)
 
+	// Apply AgentConfiguration before poll controllers start. Direct apiserver load is
+	// sufficient for startup; the kube reconciler continues to own live updates afterward.
+	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
+	if err := deferPollOnInstall(ctx, kubeManager.GetAPIReader(), args.DeferPollOnInstall(), time.Now()); err != nil {
+		setupLog.Error(err, "unable to determine deployment operator age for initial poll")
+	}
+
+	go runKubeManagerOrDie(ctx, kubeManager)
+
 	// Start the console manager in background.
 	runConsoleManagerInBackgroundOrDie(ctx, consoleManager)
 
@@ -173,8 +183,9 @@ func main() {
 	// Start runtime services pinger
 	ping.RunRuntimeServicePingerInBackgroundOrDie(ctx, pinger, args.RuntimeServicesPingInterval())
 
-	// Start the standard kubernetes manager and block the main thread until context cancel.
-	runKubeManagerOrDie(ctx, kubeManager)
+	// Block the main thread until context cancel.
+	<-ctx.Done()
+	setupLog.Info("shutting down")
 }
 
 func loadAgentConfigurationOrDie(ctx context.Context, reader ctrlclient.Reader) {
@@ -201,6 +212,29 @@ func loadAgentConfiguration(ctx context.Context, reader ctrlclient.Reader, defau
 
 	if err := common.GetConfigurationManager().SetValue(config.Spec); err != nil {
 		return fmt.Errorf("set AgentConfiguration/default: %w", err)
+	}
+
+	return nil
+}
+
+func deferPollOnInstall(ctx context.Context, reader ctrlclient.Reader, enabled bool, now time.Time) error {
+	if !enabled {
+		return nil
+	}
+
+	namespace, err := utils.GetOperatorNamespace()
+	if err != nil {
+		return fmt.Errorf("get operator namespace: %w", err)
+	}
+
+	deployment := &appsv1.Deployment{}
+	if err := reader.Get(ctx, ctrlclient.ObjectKey{Name: "deployment-operator", Namespace: namespace}, deployment); err != nil {
+		return fmt.Errorf("get deployment-operator deployment: %w", err)
+	}
+
+	if !deployment.CreationTimestamp.IsZero() && now.Sub(deployment.CreationTimestamp.Time) > existingOperatorInitialPollDeferAfter {
+		common.GetConfigurationManager().SetPollImmediately(false)
+		setupLog.Info("deferring initial poll for existing deployment operator", "age", now.Sub(deployment.CreationTimestamp.Time))
 	}
 
 	return nil
