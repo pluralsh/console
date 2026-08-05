@@ -12,6 +12,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   ecto_enum :workbench_canvas_block_type, Console.Schema.WorkbenchJobResult.CanvasBlock.Type
   ecto_enum :workbench_skill_subagent, Console.Schema.WorkbenchSkill.Subagent
   ecto_enum :workbench_chatbot_message_behavior, Console.Schema.WorkbenchChatbot.MessageBehavior
+  ecto_enum :workbench_budget_unit, Console.Schema.Workbench.BudgetUnit
 
   enum :eval_results_period do
     value :day
@@ -26,10 +27,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_job_modes_attributes do
-    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
-    field :model,  :workbench_job_model_attributes, description: "model override for this job"
-    field :coding, :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
-    field :budget, :workbench_job_budget_attributes, description: "budget limits for this job"
+    field :plan,         :boolean, description: "whether planning mode is enabled for this job"
+    field :verification, :boolean, description: "whether verification mode is enabled for this job"
+    field :model,        :workbench_job_model_attributes, description: "model override for this job"
+    field :coding,       :workbench_job_coding_modes_attributes, description: "coding mode options for this job"
+    field :budget,       :workbench_job_budget_attributes, description: "budget limits for this job"
+    field :kubernetes,   :workbench_job_kubernetes_modes_attributes, description: "kubernetes action options for this job"
   end
 
   input_object :workbench_job_model_attributes do
@@ -45,6 +48,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_budget_attributes do
     field :cost,   :float, description: "maximum cost budget for this job"
     field :tokens, :integer, description: "maximum token budget for this job"
+  end
+
+  input_object :workbench_job_kubernetes_modes_attributes do
+    field :update, :boolean, description: "whether kubernetes update actions are enabled"
+    field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
+    field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
 
   input_object :workbench_job_update_attributes do
@@ -66,6 +76,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :override_bot_user, :boolean, description: "when true on update, sets botUserId to the authenticated user"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
     field :modes,             :workbench_job_modes_attributes, description: "default mode-specific options for jobs created by this workbench"
+    field :budget,            :workbench_budget_attributes, description: "token bucket budget for this workbench"
     field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
     field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
     field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
@@ -97,6 +108,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_observability_attributes do
     field :logs,    :boolean, description: "enable logs capability"
     field :metrics, :boolean, description: "enable metrics capability"
+  end
+
+  input_object :workbench_budget_attributes do
+    field :enabled,      :boolean, description: "whether budget tracking is enabled"
+    field :maximum,      :float, description: "maximum budget capacity"
+    field :min_free,     :float, description: "minimum budget capacity to keep free"
+    field :unit,         :workbench_budget_unit, description: "the budget unit"
+    field :last,         :float, description: "remaining budget capacity"
+    field :last_updated, :datetime, description: "when the budget was last updated"
   end
 
   input_object :workbench_skills_attributes do
@@ -202,7 +222,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :bitbucket,            :workbench_tool_bitbucket_connection_attributes, description: "bitbucket cloud connection (scm)"
     field :lambda,               :workbench_tool_lambda_connection_attributes, description: "aws lambda function configuration"
     field :cloud_run,            :workbench_tool_cloud_run_connection_attributes, description: "google cloud run service configuration"
-    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "google cloud function configuration"
+    field :azure_function,       :workbench_tool_azure_function_connection_attributes, description: "azure function configuration"
     field :bitbucket_datacenter, :workbench_tool_bitbucket_datacenter_connection_attributes, description: "bitbucket data center connection (scm)"
     field :azure_devops,         :workbench_tool_azure_devops_connection_attributes, description: "azure devops connection (scm)"
     field :docker,               :workbench_tool_docker_connection_attributes, description: "docker/OCI registry connection"
@@ -404,7 +424,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_azure_function_connection_attributes do
-    field :identifier,   non_null(:string), description: "Cloud Function identifier"
+    field :identifier,   non_null(:string), description: "Azure Function identifier"
     field :description,  non_null(:string), description: "description of the function exposed to the agent"
     field :input_schema, :json, description: "JSON schema for the tool input"
   end
@@ -418,6 +438,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, non_null(:string), description: "the prompt for the message"
   end
 
+  input_object :queued_prompt_attributes do
+    field :prompt,       non_null(:string), description: "the prompt to send when dequeued"
+    field :dequeable_at, non_null(:datetime), description: "when this prompt becomes eligible to dequeue"
+  end
+
+  object :queued_prompt_summary do
+    field :ready_count,   non_null(:integer), description: "unconsumed prompts that are eligible to dequeue"
+    field :pending_count, non_null(:integer), description: "unconsumed prompts waiting for dequeable_at"
+    field :next_at,       :datetime, description: "earliest future dequeable_at among pending prompts"
+  end
+
   object :workbench do
     field :id,            non_null(:string), description: "the id of the workbench"
     field :name,          non_null(:string), description: "the name of the workbench"
@@ -425,6 +456,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :system_prompt, :string, description: "the system prompt for the workbench"
     field :configuration, :workbench_configuration, description: "workbench configuration"
     field :modes,         :workbench_job_modes, description: "default mode-specific options for jobs created by this workbench"
+    field :budget,        :workbench_budget, description: "token bucket budget for this workbench"
     field :skills,        :workbench_skills, description: "skills configuration"
 
     field :project,       :project,                  resolve: dataloader(Deployments), description: "the project of this workbench"
@@ -522,6 +554,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       description: "chatbot integration metadata for this job, when present"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
+    field :url,          non_null(:string), resolve: fn job, _, _ -> {:ok, Console.url("/workbenches/#{job.workbench_id}/jobs/#{job.id}")} end, description: "the console URL for this workbench job"
     field :flow,         :flow, resolve: dataloader(Deployments), description: "the flow this job is associated with"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
@@ -533,8 +566,23 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :referenced_job,  :workbench_job, resolve: dataloader(Deployments), description: "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
 
     connection field :activities, node_type: :workbench_job_activity do
+      arg :status, :workbench_job_activity_status, description: "filter activities by status"
+      arg :type, :workbench_job_activity_type, description: "filter activities by type"
+
       resolve &Deployments.list_workbench_job_activities/3
     end
+
+    connection field :queued_prompts, node_type: :queued_prompt do
+      resolve &Deployments.list_queued_prompts/3
+    end
+
+    field :queued_prompt_count, non_null(:integer),
+      resolve: &Deployments.queued_prompt_count/3,
+      description: "number of unconsumed queued prompts for this job"
+
+    field :queued_prompt_summary, non_null(:queued_prompt_summary),
+      resolve: &Deployments.queued_prompt_summary/3,
+      description: "ready/pending breakdown for unconsumed queued prompts"
 
     field :metrics_tool, list_of(:workbench_job_activity_metric) do
       arg :name,      :string, description: "the name of the metrics tool"
@@ -563,10 +611,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_job_modes do
-    field :plan,   :boolean, description: "whether planning mode is enabled for this job"
-    field :model,  :workbench_job_model, description: "model override for this job"
-    field :coding, :workbench_job_coding_modes, description: "coding mode options for this job"
-    field :budget, :workbench_job_budget, description: "budget limits for this job"
+    field :plan,         :boolean, description: "whether planning mode is enabled for this job"
+    field :verification, :boolean, description: "whether verification mode is enabled for this job"
+    field :model,        :workbench_job_model, description: "model override for this job"
+    field :coding,       :workbench_job_coding_modes, description: "coding mode options for this job"
+    field :budget,       :workbench_job_budget, description: "budget limits for this job"
+    field :kubernetes,   :workbench_job_kubernetes_modes, description: "kubernetes action options for this job"
   end
 
   object :workbench_job_model do
@@ -582,6 +632,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_budget do
     field :cost,   :float, description: "maximum cost budget for this job"
     field :tokens, :integer, description: "maximum token budget for this job"
+  end
+
+  object :workbench_job_kubernetes_modes do
+    field :update, :boolean, description: "whether kubernetes update actions are enabled"
+    field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
+    field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
 
   object :workbench_job_usage do
@@ -608,7 +665,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
     field :agent_runs,   list_of(:agent_run), resolve: dataloader(Deployments), description: "all agent runs associated with this activity (sideloadable)"
-    field :user,         :user, resolve: dataloader(User), description: "the user who created this activity"
+    field :user,         :user, resolve: dataloader(User), description: "the user who created, approved, or denied this activity"
 
     timestamps()
   end
@@ -653,19 +710,26 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,    :string, description: "the function name to invoke"
     field :input,   :map, description: "input passed to the function"
     field :tool_id, :id, description: "the workbench tool id backing this function"
+    field :tool,    :workbench_tool, resolve: &Deployments.function_call_tool/3, description: "the workbench tool backing this function call"
   end
 
   object :workbench_job_activity_kube_request do
     field :handle,       :string, description: "the target cluster handle"
     field :method,       :string, description: "the Kubernetes API HTTP method"
     field :path,         :string, description: "the Kubernetes API request path"
-    field :body,         :string, description: "the Kubernetes API request body"
-    field :query_params, :map, description: "query parameters sent with the Kubernetes API request"
+    field :body,         :string,
+      description: "the Kubernetes API request body",
+      resolve: &Deployments.kube_request_body/3
+    field :query_params, :map,    description: "query parameters sent with the Kubernetes API request"
     field :content_type, :string, description: "the Kubernetes API request content type"
+
+    @desc "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
+    field :current, :map, resolve: &Deployments.kube_request_current/3
   end
 
   object :workbench_job_activity_job_update do
     field :diff,            :string
+    field :objective,       :string
     field :working_theory,  :string
     field :criticism,       :string
     field :conclusion,      :string
@@ -699,6 +763,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_result do
     field :id,              non_null(:string), description: "the id of the result"
+    field :objective,       :string, description: "the sole active objective for this investigation"
     field :working_theory,  :string, description: "the working theory for this result"
     field :criticism,       :string, description: "a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"
     field :conclusion,      :string, description: "the conclusion for this result"
@@ -798,6 +863,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :metrics, :boolean, description: "metrics capability enabled"
   end
 
+  object :workbench_budget do
+    field :enabled,      :boolean, description: "whether budget tracking is enabled"
+    field :maximum,      :float, description: "maximum budget capacity"
+    field :min_free,     :float, description: "minimum budget capacity to keep free"
+    field :unit,         :workbench_budget_unit, description: "the budget unit"
+    field :last,         :float, description: "remaining budget capacity"
+    field :last_updated, :datetime, description: "when the budget was last updated"
+  end
+
   object :workbench_skills do
     field :ref,   :git_ref, description: "git reference for skills"
     field :files, list_of(:string), description: "files to include"
@@ -813,6 +887,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :user_id,     :id, description: "user this cron runs as"
 
     field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this cron belongs to"
+
+    timestamps()
+  end
+
+  object :queued_prompt do
+    field :id,           non_null(:string), description: "the id of the queued prompt"
+    field :prompt,       :string, description: "the prompt text"
+    field :dequeable_at, :datetime, description: "when this prompt becomes eligible to dequeue"
+    field :consumed_at,  :datetime, description: "when this prompt was consumed"
+    field :user_id,      :id, description: "user this prompt will run as"
+
+    field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this prompt will be sent to"
+    field :user,          :user, resolve: dataloader(User), description: "the user who queued this prompt"
 
     timestamps()
   end
@@ -1015,7 +1102,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :lambda, :workbench_tool_lambda_connection, description: "aws lambda function configuration"
     field :cloud_run, :workbench_tool_cloud_run_connection, description: "google cloud run service configuration"
     field :azure_function, :workbench_tool_azure_function_connection,
-      description: "google cloud function configuration"
+      description: "azure function configuration"
     field :docker, :workbench_tool_docker_connection, description: "docker/OCI registry connection (no secrets)"
   end
 
@@ -1202,7 +1289,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_azure_function_connection do
-    field :identifier,   :string, description: "Cloud Function identifier"
+    field :identifier,   :string, description: "Azure Function identifier"
     field :description,  :string, description: "description of the function exposed to the agent"
     field :input_schema, :map, description: "JSON schema for the tool input"
   end
@@ -1229,6 +1316,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
+  connection node_type: :queued_prompt
   connection node_type: :workbench_cron
   connection node_type: :workbench_prompt
   connection node_type: :workbench_skill
@@ -1348,6 +1436,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.workbench_job_activity/2
+    end
+
+    connection field :workbench_job_activities, node_type: :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :status, :workbench_job_activity_status, description: "filter activities by status"
+      arg :type, :workbench_job_activity_type, description: "filter activities by type"
+
+      resolve &Deployments.workbench_job_activities/2
     end
 
     connection field :workbench_alerts, node_type: :alert do
@@ -1749,6 +1848,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.create_workbench_job/2
     end
 
+    @desc "Queues a prompt to be sent to a workbench job later. Requires prompt access to the job."
+    field :create_queued_prompt, :queued_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :job_id,     non_null(:id), description: "the workbench job to queue a prompt for"
+      arg :attributes, non_null(:queued_prompt_attributes)
+
+      resolve &Deployments.create_queued_prompt/2
+    end
+
+    @desc "Deletes a queued prompt. Requires prompt access to the queued prompt's job."
+    field :delete_queued_prompt, :queued_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_queued_prompt/2
+    end
+
     field :create_workbench_message, :workbench_job_activity do
       middleware Authenticated
       middleware Scope,
@@ -1769,6 +1891,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
 
       resolve &Deployments.workbench_pr_followup/2
+    end
+
+    field :enqueue_workbench_pr_followup, :queued_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :url,        non_null(:string), description: "the pull request url to queue a follow-up prompt for"
+      arg :attributes, non_null(:queued_prompt_attributes), description: "queued prompt attributes"
+
+      resolve &Deployments.enqueue_workbench_pr_followup/2
     end
 
     @desc "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."

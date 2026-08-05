@@ -36,7 +36,8 @@ defmodule Console.Buffers.ClusterAudit do
 
   defp maybe_flush(attrs, %State{records: records, count: count}) when count >= @flush_size - 1,
     do: do_flush([attrs | records])
-  defp maybe_flush(attrs, %State{records: records} = state), do: put_in(state.records, [attrs | records])
+  defp maybe_flush(attrs, %State{records: records, count: count} = state),
+    do: %{state | records: [attrs | records], count: count + 1}
 
   def terminate(_, %State{records: [_ | _] = records}), do: Repo.insert_all(ClusterAuditLog, records)
   def terminate(_, _), do: :ok

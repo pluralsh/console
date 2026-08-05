@@ -47,7 +47,8 @@ export default function AwaitingReviewLauncher() {
     setOpen(false)
   })
 
-  const { stacks, agentRuns, count, loading, error } = useAwaitingReview()
+  const { stacks, agentRuns, activities, count, loading, error } =
+    useAwaitingReview()
 
   useLayoutEffect(() => {
     if (!open) return
@@ -95,6 +96,7 @@ export default function AwaitingReviewLauncher() {
                 <AwaitingReviewPanel
                   stacks={stacks}
                   agentRuns={agentRuns}
+                  activities={activities}
                   loading={loading}
                   error={error}
                   onClose={() => setOpen(false)}

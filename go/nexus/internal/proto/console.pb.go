@@ -866,6 +866,104 @@ func (x *ProxyAuthenticationResponse) GetAuthenticated() bool {
 	return false
 }
 
+// Fetches the cluster associated with a cluster deploy token.
+type VerifyClusterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyClusterRequest) Reset() {
+	*x = VerifyClusterRequest{}
+	mi := &file_console_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyClusterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyClusterRequest) ProtoMessage() {}
+
+func (x *VerifyClusterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_console_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyClusterRequest.ProtoReflect.Descriptor instead.
+func (*VerifyClusterRequest) Descriptor() ([]byte, []int) {
+	return file_console_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *VerifyClusterRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+// The cluster identity required by KAS.
+type VerifyClusterResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyClusterResponse) Reset() {
+	*x = VerifyClusterResponse{}
+	mi := &file_console_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyClusterResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyClusterResponse) ProtoMessage() {}
+
+func (x *VerifyClusterResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_console_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyClusterResponse.ProtoReflect.Descriptor instead.
+func (*VerifyClusterResponse) Descriptor() ([]byte, []int) {
+	return file_console_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *VerifyClusterResponse) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *VerifyClusterResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
 type ObservabilityConfig struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	PrometheusUsername *string                `protobuf:"bytes,1,opt,name=prometheusUsername,proto3,oneof" json:"prometheusUsername,omitempty"`
@@ -881,7 +979,7 @@ type ObservabilityConfig struct {
 
 func (x *ObservabilityConfig) Reset() {
 	*x = ObservabilityConfig{}
-	mi := &file_console_proto_msgTypes[10]
+	mi := &file_console_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -893,7 +991,7 @@ func (x *ObservabilityConfig) String() string {
 func (*ObservabilityConfig) ProtoMessage() {}
 
 func (x *ObservabilityConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[10]
+	mi := &file_console_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -906,7 +1004,7 @@ func (x *ObservabilityConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObservabilityConfig.ProtoReflect.Descriptor instead.
 func (*ObservabilityConfig) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{10}
+	return file_console_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ObservabilityConfig) GetPrometheusUsername() string {
@@ -967,7 +1065,7 @@ type MeterMetricsRequest struct {
 
 func (x *MeterMetricsRequest) Reset() {
 	*x = MeterMetricsRequest{}
-	mi := &file_console_proto_msgTypes[11]
+	mi := &file_console_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -979,7 +1077,7 @@ func (x *MeterMetricsRequest) String() string {
 func (*MeterMetricsRequest) ProtoMessage() {}
 
 func (x *MeterMetricsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[11]
+	mi := &file_console_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -992,7 +1090,7 @@ func (x *MeterMetricsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MeterMetricsRequest.ProtoReflect.Descriptor instead.
 func (*MeterMetricsRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{11}
+	return file_console_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *MeterMetricsRequest) GetBytes() int64 {
@@ -1011,7 +1109,7 @@ type MeterMetricsResponse struct {
 
 func (x *MeterMetricsResponse) Reset() {
 	*x = MeterMetricsResponse{}
-	mi := &file_console_proto_msgTypes[12]
+	mi := &file_console_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1023,7 +1121,7 @@ func (x *MeterMetricsResponse) String() string {
 func (*MeterMetricsResponse) ProtoMessage() {}
 
 func (x *MeterMetricsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[12]
+	mi := &file_console_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1036,7 +1134,7 @@ func (x *MeterMetricsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MeterMetricsResponse.ProtoReflect.Descriptor instead.
 func (*MeterMetricsResponse) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{12}
+	return file_console_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *MeterMetricsResponse) GetSuccess() bool {
@@ -1054,7 +1152,7 @@ type ObservabilityConfigRequest struct {
 
 func (x *ObservabilityConfigRequest) Reset() {
 	*x = ObservabilityConfigRequest{}
-	mi := &file_console_proto_msgTypes[13]
+	mi := &file_console_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1066,7 +1164,7 @@ func (x *ObservabilityConfigRequest) String() string {
 func (*ObservabilityConfigRequest) ProtoMessage() {}
 
 func (x *ObservabilityConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[13]
+	mi := &file_console_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1079,7 +1177,7 @@ func (x *ObservabilityConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObservabilityConfigRequest.ProtoReflect.Descriptor instead.
 func (*ObservabilityConfigRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{13}
+	return file_console_proto_rawDescGZIP(), []int{15}
 }
 
 var File_console_proto protoreflect.FileDescriptor
@@ -1204,7 +1302,12 @@ const file_console_proto_rawDesc = "" +
 	"\x1aProxyAuthenticationRequest\x12\x14\n" +
 	"\x05token\x18\x01 \x01(\tR\x05token\"C\n" +
 	"\x1bProxyAuthenticationResponse\x12$\n" +
-	"\rauthenticated\x18\x01 \x01(\bR\rauthenticated\"\xe4\x03\n" +
+	"\rauthenticated\x18\x01 \x01(\bR\rauthenticated\",\n" +
+	"\x14VerifyClusterRequest\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\";\n" +
+	"\x15VerifyClusterResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xe4\x03\n" +
 	"\x13ObservabilityConfig\x123\n" +
 	"\x12prometheusUsername\x18\x01 \x01(\tH\x00R\x12prometheusUsername\x88\x01\x01\x123\n" +
 	"\x12prometheusPassword\x18\x02 \x01(\tH\x01R\x12prometheusPassword\x88\x01\x01\x12-\n" +
@@ -1229,12 +1332,13 @@ const file_console_proto_rawDesc = "" +
 	"\x1aOPEN_AI_METHOD_UNSPECIFIED\x10\x00\x12\b\n" +
 	"\x04CHAT\x10\x01\x12\r\n" +
 	"\tRESPONSES\x10\x02\x12\b\n" +
-	"\x04AUTO\x10\x032\xbe\x02\n" +
+	"\x04AUTO\x10\x032\x88\x03\n" +
 	"\fPluralServer\x12E\n" +
 	"\fMeterMetrics\x12\x19.plrl.MeterMetricsRequest\x1a\x1a.plrl.MeterMetricsResponse\x124\n" +
 	"\vGetAiConfig\x12\x15.plrl.AiConfigRequest\x1a\x0e.plrl.AiConfig\x12U\n" +
 	"\x16GetObservabilityConfig\x12 .plrl.ObservabilityConfigRequest\x1a\x19.plrl.ObservabilityConfig\x12Z\n" +
-	"\x13ProxyAuthentication\x12 .plrl.ProxyAuthenticationRequest\x1a!.plrl.ProxyAuthenticationResponseB\x10Z\x0einternal/protob\x06proto3"
+	"\x13ProxyAuthentication\x12 .plrl.ProxyAuthenticationRequest\x1a!.plrl.ProxyAuthenticationResponse\x12H\n" +
+	"\rVerifyCluster\x12\x1a.plrl.VerifyClusterRequest\x1a\x1b.plrl.VerifyClusterResponseB\x10Z\x0einternal/protob\x06proto3"
 
 var (
 	file_console_proto_rawDescOnce sync.Once
@@ -1249,7 +1353,7 @@ func file_console_proto_rawDescGZIP() []byte {
 }
 
 var file_console_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_console_proto_goTypes = []any{
 	(OpenAiMethod)(0),                   // 0: plrl.OpenAiMethod
 	(*AiConfigRequest)(nil),             // 1: plrl.AiConfigRequest
@@ -1262,12 +1366,14 @@ var file_console_proto_goTypes = []any{
 	(*AzureOpenAiConfig)(nil),           // 8: plrl.AzureOpenAiConfig
 	(*ProxyAuthenticationRequest)(nil),  // 9: plrl.ProxyAuthenticationRequest
 	(*ProxyAuthenticationResponse)(nil), // 10: plrl.ProxyAuthenticationResponse
-	(*ObservabilityConfig)(nil),         // 11: plrl.ObservabilityConfig
-	(*MeterMetricsRequest)(nil),         // 12: plrl.MeterMetricsRequest
-	(*MeterMetricsResponse)(nil),        // 13: plrl.MeterMetricsResponse
-	(*ObservabilityConfigRequest)(nil),  // 14: plrl.ObservabilityConfigRequest
-	nil,                                 // 15: plrl.BedrockConfig.DeploymentsEntry
-	nil,                                 // 16: plrl.AzureOpenAiConfig.DeploymentsEntry
+	(*VerifyClusterRequest)(nil),        // 11: plrl.VerifyClusterRequest
+	(*VerifyClusterResponse)(nil),       // 12: plrl.VerifyClusterResponse
+	(*ObservabilityConfig)(nil),         // 13: plrl.ObservabilityConfig
+	(*MeterMetricsRequest)(nil),         // 14: plrl.MeterMetricsRequest
+	(*MeterMetricsResponse)(nil),        // 15: plrl.MeterMetricsResponse
+	(*ObservabilityConfigRequest)(nil),  // 16: plrl.ObservabilityConfigRequest
+	nil,                                 // 17: plrl.BedrockConfig.DeploymentsEntry
+	nil,                                 // 18: plrl.AzureOpenAiConfig.DeploymentsEntry
 }
 var file_console_proto_depIdxs = []int32{
 	4,  // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
@@ -1279,18 +1385,20 @@ var file_console_proto_depIdxs = []int32{
 	4,  // 6: plrl.AiConfig.xai:type_name -> plrl.OpenAiConfig
 	3,  // 7: plrl.OpenAiConfig.tokenExchange:type_name -> plrl.OpenAiTokenExchange
 	0,  // 8: plrl.OpenAiConfig.method:type_name -> plrl.OpenAiMethod
-	15, // 9: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
-	16, // 10: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
-	12, // 11: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
+	17, // 9: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
+	18, // 10: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	14, // 11: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
 	1,  // 12: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	14, // 13: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
+	16, // 13: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
 	9,  // 14: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	13, // 15: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
-	2,  // 16: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	11, // 17: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
-	10, // 18: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	15, // [15:19] is the sub-list for method output_type
-	11, // [11:15] is the sub-list for method input_type
+	11, // 15: plrl.PluralServer.VerifyCluster:input_type -> plrl.VerifyClusterRequest
+	15, // 16: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
+	2,  // 17: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	13, // 18: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
+	10, // 19: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	12, // 20: plrl.PluralServer.VerifyCluster:output_type -> plrl.VerifyClusterResponse
+	16, // [16:21] is the sub-list for method output_type
+	11, // [11:16] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
 	11, // [11:11] is the sub-list for extension extendee
 	0,  // [0:11] is the sub-list for field type_name
@@ -1307,14 +1415,14 @@ func file_console_proto_init() {
 	file_console_proto_msgTypes[5].OneofWrappers = []any{}
 	file_console_proto_msgTypes[6].OneofWrappers = []any{}
 	file_console_proto_msgTypes[7].OneofWrappers = []any{}
-	file_console_proto_msgTypes[10].OneofWrappers = []any{}
+	file_console_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_console_proto_rawDesc), len(file_console_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   16,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

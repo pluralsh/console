@@ -13,7 +13,8 @@ defmodule Console.Schema.WorkbenchJob do
     Issue,
     PullRequest,
     Flow,
-    ChatbotMessage
+    ChatbotMessage,
+    QueuedPrompt
   }
   alias Console.Deployments.Policies.Rbac
 
@@ -27,7 +28,8 @@ defmodule Console.Schema.WorkbenchJob do
         field :model,    :string
       end
 
-      field :plan, :boolean
+      field :plan,         :boolean
+      field :verification, :boolean
 
       embeds_one :kubernetes, Kubernetes, on_replace: :update do
         field :update, :boolean, default: false
@@ -50,7 +52,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     def changeset(model, attrs) do
       model
-      |> cast(attrs, [:plan])
+      |> cast(attrs, [:plan, :verification])
       |> cast_embed(:model, with: &model_changeset/2)
       |> cast_embed(:coding, with: &coding_changeset/2)
       |> cast_embed(:budget, with: &budget_changeset/2)
@@ -109,6 +111,7 @@ defmodule Console.Schema.WorkbenchJob do
     has_one  :chatbot_message, ChatbotMessage, on_replace: :update
     has_many :activities,      WorkbenchJobActivity, on_replace: :delete
     has_many :pull_requests,   PullRequest, on_replace: :delete
+    has_many :queued_prompts,  QueuedPrompt, on_replace: :delete
 
     timestamps()
   end
@@ -198,6 +201,14 @@ defmodule Console.Schema.WorkbenchJob do
     end)
   end
 
+  def for_stack_run(query \\ __MODULE__, stack_run_id) do
+    from(j in query,
+      join: pr in assoc(j, :pull_requests),
+      join: sr in assoc(pr, :stack_run),
+      where: sr.id == ^stack_run_id
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(j in query, order_by: ^order)
   end
@@ -261,6 +272,10 @@ defmodule Console.Schema.WorkbenchJob do
     |> validate_required([:status, :workbench_id, :user_id])
   end
 
+  def objective(%__MODULE__{result: %{objective: objective}}) when is_binary(objective) and byte_size(objective) > 0,
+    do: objective
+  def objective(%__MODULE__{prompt: prompt}), do: prompt
+
   def update_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [])
@@ -276,6 +291,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
     id: binary,
     status: binary,
     prompt: binary,
+    objective: binary,
     conclusion: binary,
     criticism: binary,
     topology: binary,
@@ -285,7 +301,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
 
   @derive Jason.Encoder
 
-  defstruct [:id, :status, :prompt, :conclusion, :criticism, :topology, :activities, :pull_requests]
+  defstruct [:id, :status, :prompt, :objective, :conclusion, :criticism, :topology, :activities, :pull_requests]
 
   def new(%WorkbenchJob{} = job) do
     job = Console.Repo.preload(job, [:result, :activities, :pull_requests])
@@ -293,6 +309,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
       id: job.id,
       status: job.status,
       prompt: job.prompt,
+      objective: WorkbenchJob.objective(job),
       conclusion: job.result && job.result.conclusion,
       criticism: job.result && job.result.criticism,
       topology: job.result && job.result.topology,
@@ -306,6 +323,7 @@ defmodule Console.Schema.WorkbenchJob.Mini do
       id: attrs["id"],
       status: attrs["status"],
       prompt: attrs["prompt"],
+      objective: attrs["objective"],
       conclusion: attrs["conclusion"],
       criticism: attrs["criticism"],
       topology: attrs["topology"],
@@ -317,7 +335,9 @@ defmodule Console.Schema.WorkbenchJob.Mini do
   def prompt_job(%__MODULE__{} = mini) do
     %{
       prompt: mini.prompt,
+      objective: mini.objective,
       result: %{
+        objective: mini.objective,
         conclusion: mini.conclusion,
         criticism: mini.criticism,
         topology: mini.topology

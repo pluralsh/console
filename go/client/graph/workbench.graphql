@@ -343,6 +343,18 @@ fragment WorkbenchPromptFragment on WorkbenchPrompt {
     prompt
 }
 
+fragment QueuedPromptFragment on QueuedPrompt {
+    id
+    prompt
+    dequeableAt
+    workbenchJob {
+        id
+    }
+    user {
+        id
+    }
+}
+
 mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
     createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
         ...WorkbenchCronFragment
@@ -382,6 +394,22 @@ mutation UpdateWorkbenchPrompt($id: ID!, $attributes: WorkbenchPromptAttributes!
 mutation DeleteWorkbenchPrompt($id: ID!) {
     deleteWorkbenchPrompt(id: $id) {
         id
+    }
+}
+
+mutation CreateQueuedPrompt($jobId: ID!, $attributes: QueuedPromptAttributes!) {
+    createQueuedPrompt(jobId: $jobId, attributes: $attributes) {
+        ...QueuedPromptFragment
+    }
+}
+
+mutation EnqueueWorkbenchPrFollowup($url: String!, $attributes: QueuedPromptAttributes!) {
+    enqueueWorkbenchPrFollowup(url: $url, attributes: $attributes) {
+        ...QueuedPromptFragment
+        workbenchJob {
+            id
+            url
+        }
     }
 }
 

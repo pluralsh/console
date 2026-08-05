@@ -2,9 +2,12 @@ defmodule Console.Deployments.Workbenches do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
+  import Console.AI.Workbench.Mentions
   alias Console.Schema.{
     User,
     Workbench,
+    Workbench.Budget,
+    AIUsage,
     WorkbenchJob,
     WorkbenchTool,
     WorkbenchJobActivity,
@@ -22,12 +25,17 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
     PullRequest,
-    FlowWorkbench
+    FlowWorkbench,
+    StackRun,
+    Service,
+    QueuedPrompt
   }
   alias Console.AI.{Provider, VectorStore}
   alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
+  alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
+  alias Kube.Utils, as: KUtils
 
   require EEx
 
@@ -38,6 +46,7 @@ defmodule Console.Deployments.Workbenches do
   @type activity_resp :: {:ok, WorkbenchJobActivity.t()} | error
   @type cron_resp :: {:ok, WorkbenchCron.t()} | error
   @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
+  @type queued_prompt_resp :: {:ok, QueuedPrompt.t()} | error
   @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
   @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
@@ -47,6 +56,7 @@ defmodule Console.Deployments.Workbenches do
   @ttl :timer.hours(6)
 
   def get_workbench!(id), do: Repo.get!(Workbench, id)
+  def get_workbench_with_lock!(id), do: Repo.get!(Workbench.with_lock(), id)
   def get_workbench(id), do: Repo.get(Workbench, id)
   def get_workbench_job!(id), do: Repo.get!(WorkbenchJob, id)
   def get_workbench_job(id), do: Repo.get(WorkbenchJob, id)
@@ -67,6 +77,8 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench_cron(id), do: Repo.get(WorkbenchCron, id)
   def get_workbench_prompt!(id), do: Repo.get!(WorkbenchPrompt, id)
   def get_workbench_prompt(id), do: Repo.get(WorkbenchPrompt, id)
+  def get_queued_prompt!(id), do: Repo.get!(QueuedPrompt, id)
+  def get_queued_prompt(id), do: Repo.get(QueuedPrompt, id)
   def get_workbench_skill!(id), do: Repo.get!(WorkbenchSkill, id)
   def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
@@ -611,20 +623,29 @@ defmodule Console.Deployments.Workbenches do
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
   @spec create_workbench_job(map, binary | Workbench.t(), User.t()) :: job_resp
-  def create_workbench_job(attrs, %Workbench{id: wb_id} = wb, %User{} = user) do
-    %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
-    |> WorkbenchJob.changeset(
-      attrs
-      |> merge_modes(wb)
-      |> Map.put(:result, %{working_theory: "", conclusion: ""})
-    )
-    |> allow(user, :read)
-    |> when_ok(:insert)
-    |> notify(:create, user)
-  end
+  def create_workbench_job(attrs, %Workbench{id: id}, %User{} = user),
+    do: create_workbench_job(attrs, id, user)
   def create_workbench_job(attrs, workbench_id, %User{} = user) when is_binary(workbench_id) do
-    get_workbench!(workbench_id)
-    |> then(&create_workbench_job(attrs, &1, user))
+    start_transaction()
+    |> add_operation(:budget, fn _ ->
+      bench = get_workbench_with_lock!(workbench_id)
+      case budget_available?(bench) do
+        true -> {:ok, bench}
+        false -> {:error, "workbench budget is exhausted"}
+      end
+    end)
+    |> add_operation(:job, fn %{budget: %Workbench{id: wb_id} = wb} ->
+      %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
+      |> WorkbenchJob.changeset(
+        attrs
+        |> merge_modes(wb)
+        |> Map.put(:result, %{working_theory: "", conclusion: ""})
+      )
+      |> allow(user, :read)
+      |> when_ok(:insert)
+    end)
+    |> execute(extract: :job)
+    |> notify(:create, user)
   end
 
   defp merge_modes(attrs, %Workbench{modes: modes}) do
@@ -632,6 +653,9 @@ defmodule Console.Deployments.Workbenches do
     |> DeepMerge.deep_merge(attrs[:modes] || %{})
     |> then(&Map.put(attrs, :modes, &1))
   end
+
+  defp budget_available?(%Workbench{budget: %Budget{} = budget}), do: Budget.available?(budget)
+  defp budget_available?(%Workbench{}), do: true
 
   def create_workbench_bot_job(attrs, workbench_id, %WorkbenchWebhook{modes: modes} = hook) do
     hook = Repo.preload(hook, [:user])
@@ -767,13 +791,24 @@ defmodule Console.Deployments.Workbenches do
       end
     end)
     |> add_operation(:job, fn %{idle: job} ->
+      job = Repo.preload(job, :result, force: true)
       with {:ok, job} <- allow(job, user, :prompt) do
-        WorkbenchJob.changeset(job, %{status: :pending, error: nil, user_id: user.id})
+        WorkbenchJob.changeset(job, %{
+          status: :pending,
+          error: nil,
+          user_id: user.id,
+          result: %{todos: []}
+        })
         |> Repo.update()
       end
     end)
     |> add_operation(:activity, fn %{job: job} ->
-      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, user_id: user.id, status: :successful}
+      %WorkbenchJobActivity{
+        workbench_job_id: job.id,
+        type: :user,
+        user_id: user.id,
+        status: :successful
+      }
       |> WorkbenchJobActivity.changeset(attrs)
       |> Repo.insert()
     end)
@@ -787,6 +822,100 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Queues a prompt to be sent to a workbench job after `dequeable_at`.
+  Requires read/prompt access to the target job.
+  """
+  @spec create_queued_prompt(map, binary | WorkbenchJob.t(), User.t()) :: queued_prompt_resp
+  def create_queued_prompt(attrs, %WorkbenchJob{id: job_id}, %User{id: user_id} = user) do
+    %QueuedPrompt{workbench_job_id: job_id, user_id: user_id}
+    |> QueuedPrompt.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  def create_queued_prompt(attrs, job_id, %User{} = user) when is_binary(job_id) do
+    get_workbench_job!(job_id)
+    |> then(&create_queued_prompt(attrs, &1, user))
+  end
+
+  @doc """
+  Deletes a queued prompt before or after it has been consumed.
+  Requires read/prompt access to the target job.
+  """
+  @spec delete_queued_prompt(binary, User.t()) :: queued_prompt_resp
+  def delete_queued_prompt(id, %User{} = user) do
+    get_queued_prompt!(id)
+    |> allow(user, :read)
+    |> when_ok(:delete)
+  end
+
+  @spec dequeue_prompt(QueuedPrompt.t()) :: activity_resp
+  def dequeue_prompt(%QueuedPrompt{} = prompt) do
+    %{user: user, workbench_job: job} = Repo.preload(prompt, [:workbench_job, user: [:groups]])
+
+    start_transaction()
+    |> add_operation(:consume, fn _ ->
+      prompt
+      |> QueuedPrompt.changeset(%{consumed_at: DateTime.utc_now()})
+      |> Repo.update()
+    end)
+    |> add_operation(:job, fn %{consume: prompt} ->
+      create_message(%{
+        prompt: prompt.prompt
+      }, job, user)
+    end)
+    |> execute(extract: :job)
+  end
+
+  def kick_workbench(%StackRun{status: :successful, id: id} = run) do
+    run = Repo.preload(run, :stack)
+    WorkbenchJob.for_stack_run(id)
+    |> WorkbenchJob.with_limit(1)
+    |> Repo.one()
+    |> case do
+      %WorkbenchJob{modes: %{verification: true}} = job ->
+        %PullRequest{} = pr = PullRequest.for_stack_run(id)
+                              |> Repo.one!()
+        create_queued_prompt(%{
+          prompt: String.trim(stack_run_verification_prompt(pr: pr, run: run)),
+          dequeable_at: DateTime.utc_now()
+        },  job, Users.get_bot!("console"))
+
+      %{} -> {:error, "verification mode is not enabled for this job"}
+      nil -> {:error, "no workbench job found for stack run #{id}"}
+    end
+  end
+
+  def kick_workbench(%PullRequest{status: :merged, service: %Service{} = svc, workbench_job_id: id} = pr)
+      when is_binary(id) do
+    case Repo.preload(pr, [workbench_job: [user: :groups]]) do
+      %PullRequest{workbench_job: %WorkbenchJob{modes: %{verification: true}} = job} ->
+        create_queued_prompt(%{
+          prompt: String.trim(service_verification_prompt(pr: pr, svc: svc)),
+          dequeable_at: DateTime.add(DateTime.utc_now(), 15, :minute)
+        }, job, job.user)
+      _ -> {:error, "verification mode is not enabled for this job"}
+    end
+  end
+
+  def kick_workbench(_), do: :ok
+
+  EEx.function_from_file(
+    :defp,
+    :stack_run_verification_prompt,
+    "priv/prompts/workbench/stack_run_verification.md.eex",
+    [:assigns]
+  )
+
+  EEx.function_from_file(
+    :defp,
+    :service_verification_prompt,
+    "priv/prompts/workbench/service_verification.md.eex",
+    [:assigns]
+  )
+
+  @doc """
   Creates a new message for the job associated with a pull request.
   """
   @spec pr_followup(map, binary, User.t()) :: activity_resp
@@ -796,6 +925,21 @@ defmodule Console.Deployments.Workbenches do
     |> case do
       %PullRequest{workbench_job: %WorkbenchJob{} = job} ->
         create_message(attrs, job, user)
+      _ ->
+        {:error, "pull request not found"}
+    end
+  end
+
+  @doc """
+  Queues a prompt for the job associated with a pull request.
+  """
+  @spec pr_queued_prompt(map, binary, User.t()) :: queued_prompt_resp
+  def pr_queued_prompt(attrs, url, %User{} = user) do
+    Repo.get_by(PullRequest, url: url)
+    |> Repo.preload([:workbench_job])
+    |> case do
+      %PullRequest{workbench_job: %WorkbenchJob{} = job} ->
+        create_queued_prompt(attrs, job, user)
       _ ->
         {:error, "pull request not found"}
     end
@@ -832,57 +976,116 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Approves and calls a workbench function call encapsulated in the current activity
+  Approves and calls a workbench function call encapsulated in the current activity.
+
+  Atomically claims the activity as running before invoking the external action so
+  concurrent approvals cannot execute it twice and no database lock is held during
+  network I/O.
   """
   @spec approve_job_activity(binary, User.t()) :: activity_resp
   def approve_job_activity(activity_id, %User{} = user) when is_binary(activity_id) do
     start_transaction()
     |> add_operation(:activity, fn _ ->
-      get_workbench_job_activity!(activity_id)
+      lock_job_activity!(activity_id)
       |> allow(user, :approve)
     end)
-    |> add_operation(:exec, fn
-      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = call}} = activity} ->
-        get_workbench_tool!(call.tool_id)
-        |> FunctionCall.call_function(call.input)
-        |> case do
-          {:ok, output} -> output
-          {:error, err} -> "Internal function calling error: #{inspect(err)}"
-        end
-        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+    |> add_operation(:claim, fn
+      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = _}} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
         |> Repo.update()
-      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity} ->
-        KubeRequest.invoke(request, user)
-        |> case do
-          {:ok, %{} = output} -> JSON.encode!(output)
-          {:error, {:http_error, _, %{"message" => msg}}} -> "K8s request failed: #{msg}"
-          {:error, {:http_error, _, err}} -> "K8s request failed: #{inspect(err)}"
-          {:error, err} -> "Internal kubernetes request error: #{inspect(err)}"
-        end
-        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{}}} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
         |> Repo.update()
-      _ -> {:error, "activity does not support function calling"}
+      _ ->
+        {:error, "activity does not support function calling"}
     end)
-    |> execute(extract: :exec)
+    |> execute(extract: :claim)
+    |> when_ok(&execute_approved_activity(&1, user))
     |> notify(:update)
   end
 
+  defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = call}} = activity,
+    _user
+  ) do
+    get_workbench_tool!(call.tool_id)
+    |> FunctionCall.call_function(call.input)
+    |> case do
+      {:ok, output} ->
+        WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: output}})
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Internal function calling error: #{inspect(err)}"}
+        })
+    end
+    |> Repo.update()
+  end
+
+  defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity,
+    user
+  ) do
+    KubeRequest.invoke(request, user)
+    |> case do
+      {:ok, %{} = output} ->
+        output
+        |> KUtils.sanitize_kube_resource()
+        |> KUtils.redact_secret()
+        |> JSON.encode!()
+        |> then(&WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: &1}}))
+      {:error, {:http_error, _, %{"message" => msg}}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "K8s request failed: #{msg}"}
+        })
+      {:error, {:http_error, _, err}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "K8s request failed: #{inspect(err)}"}
+        })
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Internal kubernetes request error: #{inspect(err)}"}
+        })
+    end
+    |> Repo.update()
+  end
+
+  defp execute_approved_activity(_, _),
+    do: {:error, "activity does not support function calling"}
+
   @doc """
   Rejects a job activity by marking it rejected and setting the output to the reason.
+
+  Locks the activity row for update and re-checks needs_approval before writing so a
+  concurrent approve cannot be overwritten by a stale reject (or vice versa).
   """
   @spec reject_job_activity(binary | nil, binary, User.t()) :: activity_resp
   def reject_job_activity(reason \\ nil, activity_id, %User{} = user) when is_binary(activity_id) do
-    get_workbench_job_activity!(activity_id)
-    |> allow(user, :approve)
-    |> when_ok(fn activity ->
-      WorkbenchJobActivity.changeset(activity, %{
-        status: :rejected,
-        result: %{output: reason || "Execution rejected by user"}
-      })
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      lock_job_activity!(activity_id)
+      |> allow(user, :approve)
     end)
-    |> when_ok(:update)
+    |> add_operation(:reject, fn
+      %{activity: %WorkbenchJobActivity{status: :needs_approval} = activity} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :rejected,
+          user_id: user.id,
+          result: %{output: reason || "Execution rejected by user"}
+        })
+        |> Repo.update()
+      _ ->
+        {:error, "activity must be in needs approval status to be approved"}
+    end)
+    |> execute(extract: :reject)
     |> notify(:update)
   end
+
+  defp lock_job_activity!(id),
+    do: Repo.get!(WorkbenchJobActivity.with_lock(), id)
 
   @doc """
   Associates an agent run with a workbench activity: inserts the join row (idempotent) and sets
@@ -1000,24 +1203,62 @@ defmodule Console.Deployments.Workbenches do
   """
   @spec save_usage(WorkbenchJob.t(), map) :: job_resp
   def save_usage(%WorkbenchJob{} = job, usage) do
-    job
-    |> WorkbenchJob.changeset(%{usage: usage})
-    |> Repo.update()
+    usage = AIUsage.sanitize(usage)
+
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      job
+      |> WorkbenchJob.changeset(%{usage: usage})
+      |> Repo.update()
+    end)
+    |> add_operation(:budget, fn _ ->
+      update_budget(job.workbench_id, usage)
+    end)
+    |> execute(extract: :job)
     |> notify(:update)
   end
+
+  @doc """
+  Atomically consumes a quantity from a workbench's budget.
+  """
+  @spec update_budget(Workbench.t() | binary, map) :: workbench_resp
+  def update_budget(%Workbench{id: id}, usage), do: update_budget(id, usage)
+  def update_budget(id, %{} = usage) when is_binary(id) do
+    start_transaction()
+    |> add_operation(:fetch, fn _ -> {:ok, get_workbench_with_lock!(id)} end)
+    |> add_operation(:workbench, fn
+      %{fetch: %Workbench{budget: %Budget{enabled: true} = budget} = workbench} ->
+        new_budget = Budget.consume(budget, budget_quantity(budget, usage))
+        workbench
+        |> Workbench.changeset(%{budget: Console.mapify(new_budget)})
+        |> Repo.update()
+      %{fetch: %Workbench{} = bench} -> {:ok, bench}
+    end)
+    |> execute(extract: :workbench)
+  end
+
+  defp budget_quantity(%Budget{unit: :dollar}, usage), do: Map.get(usage, :total_cost)
+  defp budget_quantity(%Budget{unit: :token}, usage), do: Map.get(usage, :total_tokens)
 
   @doc """
   Fails a job with an error message.
   """
   @spec fail_job(binary, WorkbenchJob.t()) :: job_resp
   def fail_job(error, %WorkbenchJob{} = job, usage \\ %{}) when is_binary(error) do
-    WorkbenchJob.changeset(job, %{
-      status: :failed,
-      completed_at: DateTime.utc_now(),
-      error: error,
-      usage: usage
-    })
-    |> Repo.update()
+    usage = AIUsage.sanitize(usage)
+
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      WorkbenchJob.changeset(job, %{
+        status: :failed,
+        completed_at: DateTime.utc_now(),
+        error: error,
+        usage: usage
+      })
+      |> Repo.update()
+    end)
+    |> add_operation(:budget, fn _ -> update_budget(job.workbench_id, usage) end)
+    |> execute(extract: :job)
     |> notify(:update)
   end
 
@@ -1060,6 +1301,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchPromptUpdated, prompt, actor: user)
   defp notify({:ok, %WorkbenchPrompt{} = prompt}, :delete, user),
     do: handle_notify(PubSub.WorkbenchPromptDeleted, prompt, actor: user)
+  defp notify({:ok, %QueuedPrompt{} = prompt}, :create, user),
+    do: handle_notify(PubSub.WorkbenchQueuedPromptCreated, prompt, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :create, user),
     do: handle_notify(PubSub.WorkbenchSkillCreated, skill, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :update, user),

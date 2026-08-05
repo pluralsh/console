@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Heartbeat do
   alias Console.Schema.{AIUsage, WorkbenchJob}
   alias Console.Schema.WorkbenchJob.{Modes, Modes.Budget}
   alias Console.Deployments.Workbenches
-  alias Console.AI.Agents
+  alias Console.AI.{Agents, ModelSelection}
 
   @poll :timer.seconds(15)
 
@@ -23,10 +23,24 @@ defmodule Console.AI.Workbench.Heartbeat do
     {:ok, %State{job: job, booted: true, usage: preserve_usage(job.usage), reprompt: reprompt(job)}}
   end
 
+  def handle_cast({:usage, %{} = new_usage, _provider, _model, price_sheet}, %State{usage: usage} = state) do
+    new_usage
+    |> ModelSelection.backfill_usage(price_sheet)
+    |> merge_usage(usage)
+    |> enforce_budget(state)
+  end
   def handle_cast({:usage, %{} = new_usage}, %State{usage: usage} = state) do
     new_usage
     |> AIUsage.sanitize()
-    |> Enum.reduce(usage, fn {k, v}, acc ->
+    |> merge_usage(usage)
+    |> enforce_budget(state)
+  end
+  def handle_cast(:cancel, %State{job: job, booted: booted} = state),
+    do: {:stop, :cancel, %{state | job: job, booted: booted}}
+  def handle_cast(_, state), do: {:noreply, state}
+
+  defp merge_usage(new_usage, usage) do
+    Enum.reduce(new_usage, usage, fn {k, v}, acc ->
       case Map.get(acc, k) do
         old when (is_integer(old) or is_float(old)) and (is_integer(v) or is_float(v)) ->
           Map.put(acc, k, old + v)
@@ -34,11 +48,7 @@ defmodule Console.AI.Workbench.Heartbeat do
         _ -> Map.put(acc, k, v)
       end
     end)
-    |> enforce_budget(state)
   end
-  def handle_cast(:cancel, %State{job: job, booted: booted} = state),
-    do: {:stop, :cancel, %{state | job: job, booted: booted}}
-  def handle_cast(_, state), do: {:noreply, state}
 
   def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
 
@@ -50,7 +60,7 @@ defmodule Console.AI.Workbench.Heartbeat do
     end
   end
 
-  def terminate(:cancel, _), do: :ok
+  def terminate(:cancel, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:shutdown, %State{job: job, usage: usage}), do: Workbenches.pause_job(job, usage)
   def terminate({:shutdown, {:budget, dim, val}}, %State{job: job, usage: usage}),
     do: Workbenches.fail_job("Budget exceeded, #{dim} consumption of #{val} exceeded limit", job, usage)
@@ -70,13 +80,15 @@ defmodule Console.AI.Workbench.Heartbeat do
     do: {:stop, {:shutdown, {:budget, :cost, tc}}, %{s | usage: usage}}
   defp enforce_budget(usage, %State{} = state), do: {:noreply, %{state | usage: usage}}
 
-  defp preserve_usage(%WorkbenchJob{usage: %{} = usage}), do: AIUsage.sanitize(usage)
+  defp preserve_usage(%{} = usage), do: AIUsage.sanitize(usage)
   defp preserve_usage(_), do: %{}
 
   defp reprompt(%WorkbenchJob{usage: %{}}), do: true
   defp reprompt(_), do: false
 
   def usage_callback(%WorkbenchJob{} = job, usage), do: GenServer.cast(via(job), {:usage, usage})
+  def usage_callback(%WorkbenchJob{} = job, provider, model, price_sheet, usage),
+    do: GenServer.cast(via(job), {:usage, usage, provider, model, price_sheet})
 
   defp via(%WorkbenchJob{id: id}), do: {:via, Registry, {Agents, {:workbench_heartbeat, id}}}
 end

@@ -8,6 +8,21 @@
         "vuln_reports": {
             "type": "boolean",
             "description": "If true, include simplified vulnerability reports for the service in the response"
+        },
+        "components": {
+            "type": "object",
+            "description": "Optionally include the service's Kubernetes components in the response. Use search to filter by component api version, kind, namespace, name, or regex patterns like apps/.*/prod/api.*.",
+            "properties": {
+                "fetch": {
+                    "type": "boolean",
+                    "description": "If true, include the service's Kubernetes components in the response"
+                },
+                "search": {
+                    "type": ["string", "null"],
+                    "description": "Optional case-insensitive regex search string."
+                }
+            },
+            "required": ["fetch"]
         }
     },
     "required": ["service_id"]

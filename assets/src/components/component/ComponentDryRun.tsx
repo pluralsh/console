@@ -1,8 +1,8 @@
 import { useOutletContext } from 'react-router-dom'
 import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
+import { DiffViewer } from '@pluralsh/design-system'
 
-import DiffViewer from '../utils/DiffViewer'
 import { ComponentDetailsContext } from './ComponentDetails'
 
 export default function ComponentDryRun() {

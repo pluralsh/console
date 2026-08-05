@@ -124,6 +124,7 @@ function getMenuItems({
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.cd),
       hotkeys: ['shift C'],
     },
     {
@@ -131,6 +132,7 @@ function getMenuItems({
       expandedLabel: 'Stacks',
       icon: <StacksNavIcon />,
       path: getStacksAbsPath(''),
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.stacks),
       hotkeys: ['shift S'],
     },
     {
@@ -154,6 +156,7 @@ function getMenuItems({
       expandedLabel: 'Self service',
       icon: <CatalogIcon />,
       path: SELF_SERVICE_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
       hotkeys: ['shift S+C'],
     },
     {
@@ -169,6 +172,7 @@ function getMenuItems({
       expandedLabel: 'Plural AI',
       icon: <AINavIcon />,
       path: AI_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.ai),
       hotkeys: ['shift A'],
     },
     ...(featureFlags.Edge
@@ -187,13 +191,14 @@ function getMenuItems({
       expandedLabel: 'Security',
       icon: <WarningShieldIcon />,
       path: SECURITY_ABS_PATH,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.security),
     },
     {
       text: 'Cost management',
       expandedLabel: 'Cost management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.cost),
       hotkeys: ['shift C+M'],
     },
     {

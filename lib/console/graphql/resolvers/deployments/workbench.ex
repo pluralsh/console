@@ -1,10 +1,14 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
+  import Absinthe.Resolution.Helpers, only: [batch: 3]
   alias Console.Repo
-  alias Console.Deployments.Workbenches
+  alias Kube.Utils, as: KUtils
+  alias Console.Deployments.{Clusters, Workbenches}
   alias Console.AI.Workbench.{Toolchain, Skills}
+  alias Console.AI.Tools.Workbench.Infrastructure.KubeGet
   alias Console.Schema.{
     Alert,
+    Cluster,
     Issue,
     Workbench,
     WorkbenchJob,
@@ -12,6 +16,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchPrompt,
+    QueuedPrompt,
     WorkbenchSkill,
     WorkbenchEvalResult,
     WorkbenchWebhook,
@@ -138,7 +143,95 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_job_activities(job, args, _) do
     WorkbenchJobActivity.for_workbench_job(job.id)
     |> WorkbenchJobActivity.ordered()
+    |> activity_filters(args)
     |> paginate(args)
+  end
+
+  def workbench_job_activities(args, %{context: %{current_user: user}}) do
+    WorkbenchJobActivity.ordered(WorkbenchJobActivity, [desc: :inserted_at])
+    |> WorkbenchJobActivity.for_user(user)
+    |> activity_filters(args)
+    |> paginate(args)
+  end
+
+  def function_call_tool(%{tool_id: id}, _, _) when is_binary(id),
+    do: {:ok, Workbenches.get_workbench_tool(id)}
+  def function_call_tool(_, _, _), do: {:ok, nil}
+
+  def kube_request_body(%{body: body, path: path}, _, _) when is_binary(body) do
+    case Jason.decode(body) do
+      {:ok, %{} = body} -> sanitize_kube_request_body(body, path)
+      _ -> {:ok, body}
+    end
+  end
+  def kube_request_body(%{body: %{} = body, path: path}, _, _),
+    do: sanitize_kube_request_body(body, path)
+  def kube_request_body(_, _, _), do: {:ok, nil}
+
+  defp sanitize_kube_request_body(body, path) do
+    KUtils.sanitize_kube_resource(body)
+    |> KUtils.redact_secret(path)
+    |> Jason.encode()
+  end
+
+  def kube_request_current(%{handle: handle, path: path, method: method}, _, %{context: %{current_user: user}})
+      when is_binary(handle) and is_binary(path) do
+    case normalize_kube_method(method) do
+      "post" ->
+        {:ok, nil}
+      _ ->
+        with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
+             {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
+          KUtils.sanitize_kube_resource(res)
+          |> KUtils.redact_secret()
+          |> ok()
+        else
+          _ -> {:ok, nil}
+        end
+    end
+  end
+  def kube_request_current(%{handle: handle, path: path}, _, %{context: %{current_user: user}})
+      when is_binary(handle) and is_binary(path) do
+    with %Cluster{} = cluster <- Clusters.get_cluster_by_handle(handle),
+         {:ok, res} <- KubeGet.kube_request(cluster, user, path) do
+      KUtils.sanitize_kube_resource(res)
+      |> KUtils.redact_secret()
+      |> ok()
+    else
+      _ -> {:ok, nil}
+    end
+  end
+  def kube_request_current(_, _, _), do: {:ok, nil}
+
+  defp normalize_kube_method(method) when is_binary(method), do: String.downcase(method)
+  defp normalize_kube_method(_), do: nil
+
+  def list_queued_prompts(job, args, _) do
+    QueuedPrompt.for_workbench_job(job.id)
+    |> QueuedPrompt.unconsumed()
+    |> QueuedPrompt.ordered()
+    |> paginate(args)
+  end
+
+  def queued_prompt_count(%WorkbenchJob{id: id}, _, _) do
+    batch({__MODULE__, :queued_prompt_summaries}, id, fn summaries ->
+      summary = Map.get(summaries, id, %{ready_count: 0, pending_count: 0})
+      {:ok, summary.ready_count + summary.pending_count}
+    end)
+  end
+
+  def queued_prompt_summary(%WorkbenchJob{id: id}, _, _) do
+    batch({__MODULE__, :queued_prompt_summaries}, id, fn summaries ->
+      {:ok, Map.get(summaries, id, %{ready_count: 0, pending_count: 0, next_at: nil})}
+    end)
+  end
+
+  def queued_prompt_summaries(_, job_ids) do
+    QueuedPrompt.for_workbench_jobs(job_ids)
+    |> QueuedPrompt.unconsumed()
+    |> QueuedPrompt.summaries_by_workbench_job()
+    |> Console.Repo.all()
+    |> Map.new()
   end
 
   def all_workbench_alerts(args, %{context: %{current_user: user}}) do
@@ -276,6 +369,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def create_workbench_job(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_job(attrs, workbench_id, user)
 
+  def create_queued_prompt(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_queued_prompt(attrs, job_id, user)
+
+  def delete_queued_prompt(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_queued_prompt(id, user)
+
   def create_workbench_cron(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_cron(attrs, workbench_id, user)
 
@@ -350,6 +449,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def workbench_pr_followup(%{url: url, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.pr_followup(attrs, url, user)
 
+  def enqueue_workbench_pr_followup(%{url: url, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.pr_queued_prompt(attrs, url, user)
+
   def approve_workbench_job_activity(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.approve_job_activity(id, user)
 
@@ -380,6 +482,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     Enum.reduce(args, query, fn
       {:alert, true}, q -> WorkbenchJob.with_alert(q)
       {:issue, true}, q -> WorkbenchJob.with_issue(q)
+      _, q -> q
+    end)
+  end
+
+  defp activity_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:status, status}, q when not is_nil(status) -> WorkbenchJobActivity.for_status(q, status)
+      {:type, type}, q when not is_nil(type) -> WorkbenchJobActivity.for_type(q, type)
       _, q -> q
     end)
   end

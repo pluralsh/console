@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "description": "Abandon an open Azure DevOps pull request without merging it.",
+  "properties": {
+    "organization": {
+      "type": "string",
+      "description": "Azure DevOps organization, required when the configured API URL has no organization."
+    },
+    "project": {
+      "type": "string",
+      "description": "Team project name or GUID."
+    },
+    "repository": {
+      "type": "string",
+      "description": "Git repository name or ID."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request ID."
+    }
+  },
+  "required": ["project", "repository", "pull_request_id"],
+  "additionalProperties": false
+}

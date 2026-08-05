@@ -10,6 +10,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import {
   AwaitingReviewAgentRunFragment,
   AwaitingReviewStackFragment,
+  AwaitingReviewWorkbenchActivityFragment,
 } from 'generated/graphql'
 import { ApolloError } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
@@ -17,11 +18,13 @@ import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
 import { AwaitingReviewAgentRunItem } from './AwaitingReviewAgentRunItem'
 import { AwaitingReviewItem } from './AwaitingReviewItem'
+import { AwaitingReviewWorkbenchActivityItem } from './AwaitingReviewWorkbenchActivityItem'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 
 export function AwaitingReviewPanel({
   stacks,
   agentRuns,
+  activities,
   loading,
   error,
   onClose,
@@ -29,12 +32,14 @@ export function AwaitingReviewPanel({
 }: ComponentProps<typeof Card> & {
   stacks: AwaitingReviewStackFragment[]
   agentRuns: AwaitingReviewAgentRunFragment[]
+  activities: AwaitingReviewWorkbenchActivityFragment[]
   loading: boolean
   error?: ApolloError
   onClose: () => void
 }) {
   const theme = useTheme()
-  const hasItems = !isEmpty(stacks) || !isEmpty(agentRuns)
+  const hasItems =
+    !isEmpty(stacks) || !isEmpty(agentRuns) || !isEmpty(activities)
 
   return (
     <Card
@@ -97,6 +102,13 @@ export function AwaitingReviewPanel({
           </div>
         ) : (
           <>
+            {activities.map((activity) => (
+              <AwaitingReviewWorkbenchActivityItem
+                key={activity.id}
+                activity={activity}
+                onNavigate={onClose}
+              />
+            ))}
             {agentRuns.map((agentRun) => (
               <AwaitingReviewAgentRunItem
                 key={agentRun.id}

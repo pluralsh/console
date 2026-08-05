@@ -1,0 +1,1 @@
+The pull request <%= @pr.url %> has been merged. Do a verification pass in <%= plrl_service_mention(@svc) %> to ensure the expected changes were made (be aware that some changes could have been placed in other PRs or actions).

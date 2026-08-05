@@ -1,5 +1,5 @@
 import { Flex, MinusIcon, PlusIcon, Switch } from '@pluralsh/design-system'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import type { WorkbenchJobBudgetAttributes } from 'generated/graphql'
 import {
   type ComponentPropsWithoutRef,
@@ -11,6 +11,7 @@ import {
 import styled from 'styled-components'
 import { formatTokenCount } from '../../common/workbenchUsage'
 import { WorkbenchBudgetSpendCapWarning } from './WorkbenchBudgetSpendCapWarning'
+import { TOKEN_LIMIT_HINT, TOKEN_LIMIT_LABEL } from './workbenchPromptModes'
 
 type BudgetUnit = 'dollars' | 'tokens'
 
@@ -42,12 +43,12 @@ export function WorkbenchBudgetLimitControl({
   workbenchId,
   value,
   onChange,
-  disabled,
+  disabled = false,
 }: {
   workbenchId?: Nullable<string>
   value: WorkbenchJobBudgetAttributes | null | undefined
   onChange: (value: WorkbenchJobBudgetAttributes | undefined) => void
-  disabled: boolean
+  disabled?: boolean
 }) {
   const enabled = value?.tokens != null || value?.cost != null
   const [preferredUnit, setPreferredUnit] = useState<BudgetUnit>(
@@ -72,10 +73,8 @@ export function WorkbenchBudgetLimitControl({
             onChange(checked ? defaultBudget(preferredUnit) : undefined)
           }
         />
-        <Body2BoldP>Set token limit</Body2BoldP>
-        <Body2P $color="text-xlight">
-          Set a dollar or token limit. Default is unlimited.
-        </Body2P>
+        <Body2BoldP>{TOKEN_LIMIT_LABEL}</Body2BoldP>
+        <CaptionP $color="text-xlight">{TOKEN_LIMIT_HINT}</CaptionP>
       </Flex>
       {enabled && (
         <>
@@ -242,9 +241,9 @@ export function formatBudgetLimitLabel(
   value: WorkbenchJobBudgetAttributes | null | undefined
 ) {
   if (value?.cost != null && value.cost > 0)
-    return `${formatBudgetAmount('dollars', value.cost)} limit`
+    return formatBudgetAmount('dollars', value.cost)
   if (value?.tokens != null && value.tokens > 0)
-    return `${formatBudgetAmount('tokens', value.tokens)} limit`
+    return formatBudgetAmount('tokens', value.tokens)
   return null
 }
 

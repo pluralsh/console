@@ -4,19 +4,50 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
-- version: 1.19.6
+- version: 1.20.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Gateway API: support configuring Gateway access logs via `spec.telemetry.accessLogs`
-        in `CiliumGatewayClassConfig`.', 'Datapath L2 responder: uses L3 sockets for
-        solicited-node multicast signaling, improving IPv6 neighbor discovery behavior
-        in some environments.']
-    breaking_changes: []
-  chart_version: 1.19.6
+    features: ['Gateway API updates: moves to Gateway API v1.6.1 with new/expanded
+        capabilities including ListenerSets (delegated listeners), BackendTLSPolicy,
+        TCPRoute/UDPRoute, ExternalAuth filter, CORS and additional redirect codes,
+        and configurable gRPC-web translation.', Extensible datapath via datapath
+        plugins for cloud providers to extend/instrument eBPF datapath without forking
+        Cilium., '`bpf.datapathMode=auto` can automatically select netkit on supported
+        kernels and fall back to veth (default remains veth).', 'Egress Gateway improvements:
+        explicit IPv6 egress IP support and IPv4 traffic honors policy-selected interface
+        like IPv6.', 'BGP improvements: new Hive shell commands and clearer peer output;
+        control plane updates to GoBGP v4.6.1 with route-policy reconciliation optimizations.',
+      'IPAM enhancements: AWS ENI IPAM supports IPv6 prefixes (beta); migration path
+        from cluster-pool IPAM to multi-pool IPAM without rebuild.', NodePort can
+        dynamically select preferred source address using kernel FIB on supported
+        kernels., New `preferIpv6` option applies consistently to health probes and
+        Hubble peer communication., 'Service/ClusterMesh features: topology-aware
+        traffic distribution hints (PreferSameZone/PreferSameNode), weighted Maglev
+        backends via EndpointSlice annotation, more VXLAN per-Service LB mode options,
+        and stable MCS API support.', 'Security/encryption: improved ztunnel identity
+        management (internal CA or SPIRE) with new metrics; support for Kubernetes
+        ClusterNetworkPolicy (KCNP); ICMPv6 unreachable responses on IPv6 policy denies;
+        new `cluster-mesh` policy entity; AWS VPC group policies transformed into
+        CiliumCIDRGroup; per-pod source IP verification control via annotation guarded
+        by namespace opt-in.', 'Day-2/observability: configuration drift metric (unapplied
+        ConfigMap settings), startup time/resource-sync metrics, Hubble correlates
+        policy responsible for audit verdicts, standalone DNS proxy metrics exported
+        through Cilium.', 'Performance/scale: aggregated load-balancer state for shared
+        backends, more efficient Envoy updates via ADS/Delta xDS, optimized BPF policy
+        map encoding, and significantly smaller cilium-cni binary.', 'Updated foundations:
+        Kubernetes v1.36, Envoy v1.37.x, Gateway API v1.6.1, MCS API v0.5.2, Ubuntu
+        26.04 base images, and default CNI config version from 0.3.1 to 1.0.0.']
+    breaking_changes: ['Upgrade may require manual action if you use legacy Mutual
+        Authentication, Envoy Go extensions, Kafka-aware policies, `cilium.io/v2alpha1`
+        CiliumNodeConfig API, the libnetwork integration, or a custom CNI configuration
+        (see Cilium 1.20 upgrade guide).', 'Default CNI configuration version changes
+        from 0.3.1 to 1.0.0, which can affect clusters using custom CNI config management
+        or validating CNI config schema/format.']
+  chart_version: 1.20.0
   images: []
 - version: 1.19.4
   kube: ['1.36', '1.35', '1.34']
@@ -275,6 +306,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.36.6-1778235340-b87d1e32f522b33bd51701c6476d199326f01496@sha256:71d4fa0ec45e8d546dbd5604e169dc77fe92be63b799313bff031d00d89762e3',
     'quay.io/cilium/cilium:v1.17.16@sha256:4efb37b791561bc5a2c6d746bdd6f52a9c393623d2426e8c0877cc389610477c',
     'quay.io/cilium/operator-generic:v1.17.16@sha256:42955931dd62c9c2ea906d78eed0b651b22e70d59cd4877381f57bb98e4a09ae']
+  eolAt: '2026-07-29'
 - version: 1.17.12
   kube: ['1.35', '1.34', '1.33']
   requirements: []
@@ -297,6 +329,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
     'quay.io/cilium/cilium:v1.17.12@sha256:f525e12698149b3958024599493d9cc56fadbc46c9250cbced8016e9b9b679e5',
     'quay.io/cilium/operator-generic:v1.17.12@sha256:0b675406b1e43b198962d4f9c3a5ba6bb68fc98836cba05b224860109112f6d9']
+  eolAt: '2026-07-29'
 - version: 1.17.8
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -338,6 +371,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
     'quay.io/cilium/cilium:v1.17.8@sha256:6d7ea72ed311eeca4c75a1f17617a3d596fb6038d30d00799090679f82a01636',
     'quay.io/cilium/operator-generic:v1.17.8@sha256:5468807b9c31997f3a1a14558ec7c20c5b962a2df6db633b7afbe2f45a15da1c']
+  eolAt: '2026-07-29'
 - version: 1.17.4
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -368,6 +402,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.32.6-1746661844-0f602c28cb2aa57b29078195049fb257d5b5246c@sha256:a04218c6879007d60d96339a441c448565b6f86650358652da27582e0efbf182',
     'quay.io/cilium/cilium:v1.17.4@sha256:24a73fe795351cf3279ac8e84918633000b52a9654ff73a6b0d7223bcff4a67a',
     'quay.io/cilium/operator-generic:v1.17.4@sha256:a3906412f477b09904f46aac1bed28eb522bef7899ed7dd81c15f78b7aa1b9b5']
+  eolAt: '2026-07-29'
 - version: 1.17.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -410,6 +445,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e@sha256:57a3aa6355a3223da360395e3a109802867ff635cb852aa0afe03ec7bf04e545',
     'quay.io/cilium/cilium:v1.17.0@sha256:51f21bdd003c3975b5aaaf41bd21aee23cc08f44efaa27effc91c621bc9d8b1d',
     'quay.io/cilium/operator-generic:v1.17.0@sha256:1ce5a5a287166fc70b6a5ced3990aaa442496242d1d4930b5a3125e44cccdca8']
+  eolAt: '2026-07-29'
 - version: 1.16.19
   kube: ['1.35', '1.34', '1.33']
   requirements: []

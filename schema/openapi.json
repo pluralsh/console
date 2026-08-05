@@ -2122,6 +2122,67 @@
         },
         "type": "object"
       },
+      "QueuedPrompt": {
+        "title": "QueuedPrompt",
+        "description": "A deferred prompt queued for a workbench job.  The prompt will wait for the job to settle and for its dequeuable time to elapse before being sent to the job.",
+        "properties": {
+          "consumed_at": {
+            "description": "When the prompt was consumed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dequeable_at": {
+            "description": "When the prompt becomes eligible to dequeue",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the queued prompt",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt text",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "ID of the user this prompt runs as",
+            "type": "string"
+          },
+          "workbench_job_id": {
+            "description": "ID of the workbench job this prompt targets",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "QueuedPromptInput": {
+        "title": "QueuedPromptInput",
+        "description": "Input for creating a deferred workbench prompt",
+        "properties": {
+          "dequeable_at": {
+            "description": "When the prompt becomes eligible to dequeue",
+            "format": "date-time",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt to send when dequeued",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt",
+          "dequeable_at"
+        ],
+        "type": "object"
+      },
       "RendererHelm": {
         "title": "RendererHelm",
         "description": "Helm-specific configuration for a renderer",
@@ -3234,6 +3295,9 @@
             "description": "ID of the agent runtime for this workbench",
             "type": "string"
           },
+          "budget": {
+            "$ref": "#/components/schemas/WorkbenchBudget"
+          },
           "description": {
             "description": "Description of the workbench",
             "type": "string"
@@ -3264,6 +3328,42 @@
           },
           "updated_at": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchBudget": {
+        "title": "WorkbenchBudget",
+        "description": "Token bucket budget configuration and current state for a workbench",
+        "properties": {
+          "enabled": {
+            "description": "Whether budget tracking is enabled",
+            "type": "boolean"
+          },
+          "last": {
+            "description": "Remaining budget capacity",
+            "type": "number"
+          },
+          "last_updated": {
+            "description": "When the budget was last updated",
+            "format": "date-time",
+            "type": "string"
+          },
+          "maximum": {
+            "description": "Maximum budget capacity",
+            "type": "number"
+          },
+          "min_free": {
+            "description": "Minimum budget capacity to keep free",
+            "type": "number"
+          },
+          "unit": {
+            "description": "The budget unit",
+            "enum": [
+              "dollar",
+              "token"
+            ],
             "type": "string"
           }
         },
@@ -3406,6 +3506,10 @@
           "plan": {
             "description": "Whether planning mode is enabled for this job",
             "type": "boolean"
+          },
+          "verification": {
+            "description": "Whether verification mode is enabled for this job",
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -3432,6 +3536,10 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/WorkbenchJobResultMetadata"
+          },
+          "objective": {
+            "description": "The sole active objective for this investigation",
+            "type": "string"
           },
           "todos": {
             "description": "Todos for this result",
@@ -4133,6 +4241,49 @@
         ]
       }
     },
+    "/v1/api/ai/workbenches/jobs/{id}/prompts": {
+      "post": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuedPrompt"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateQueuedPrompt",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueuedPromptInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "workbench.read"
+        ]
+      }
+    },
     "/v1/api/ai/workbenches/name": {
       "get": {
         "tags": [
@@ -4155,6 +4306,39 @@
           {
             "in": "query",
             "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "workbench.read"
+        ]
+      }
+    },
+    "/v1/api/ai/workbenches/prompts/{id}": {
+      "delete": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuedPrompt"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteQueuedPrompt",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
               "type": "string"

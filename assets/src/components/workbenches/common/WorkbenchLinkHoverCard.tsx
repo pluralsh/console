@@ -1,7 +1,6 @@
 import {
   ArrowTopRightIcon,
   Button,
-  Card,
   Flex,
   prettifyRepoUrl,
   WorkbenchIcon,
@@ -14,13 +13,15 @@ import {
   getWorkbenchJobAbsPath,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 
-export const WORKBENCH_LINK_HOVER_CARD_WIDTH = 220
+export const WORKBENCH_LINK_HOVER_CARD_WIDTH = 260
 
 type WorkbenchLinkHoverCardProps = {
   workbenchName: string
   workbenchId?: string
   workbenchJobId?: string
+  jobInsertedAt?: string | null
   workbench?: WorkbenchLinkCardFragment | null
   pendingAgentRuns?: number
   onNavigate?: () => void
@@ -35,7 +36,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     >
       <CaptionP $color="text-xlight">{label}</CaptionP>
       <CaptionP
-        $color="text-light"
+        $color="text-xlight"
         css={{ textAlign: 'right' }}
       >
         {value}
@@ -48,6 +49,7 @@ export function WorkbenchLinkHoverCard({
   workbenchName,
   workbenchId,
   workbenchJobId,
+  jobInsertedAt,
   workbench,
   pendingAgentRuns = 0,
   onNavigate,
@@ -61,6 +63,9 @@ export function WorkbenchLinkHoverCard({
     workbench?.repository?.httpsPath ?? workbench?.repository?.url ?? ''
   )
   const pendingCount = pendingAgentRuns
+  const startTime = jobInsertedAt
+    ? formatDateTime(jobInsertedAt, 'HH:mm:ss [UTC]', false, true)
+    : null
   const workbenchPath =
     workbenchId && workbenchJobId
       ? getWorkbenchJobAbsPath({ workbenchId, jobId: workbenchJobId })
@@ -68,93 +73,117 @@ export function WorkbenchLinkHoverCard({
         ? getWorkbenchAbsPath(workbenchId)
         : undefined
 
+  const detailRows = workbenchJobId
+    ? [
+        owner ? { label: 'Owner', value: owner } : null,
+        startTime ? { label: 'Start time', value: startTime } : null,
+      ].filter(isDetailRow)
+    : [
+        cluster ? { label: 'Cluster', value: cluster } : null,
+        owner ? { label: 'Owner', value: owner } : null,
+        repo ? { label: 'Repo', value: repo } : null,
+      ].filter(isDetailRow)
+
   return (
-    <CardSC fillLevel={2}>
-      <Flex
-        align="center"
-        gap="xsmall"
-      >
-        <WorkbenchIcon size={16} />
+    <CardSC>
+      <HeaderSC>
+        <IconWrapSC>
+          <WorkbenchIcon size={16} />
+        </IconWrapSC>
         <CaptionP
           $color="text"
           css={{ ...theme.partials.text.body2Bold }}
         >
           {workbenchName}
         </CaptionP>
-      </Flex>
-      <DividerSC />
-      <Flex
-        direction="column"
-        gap="xsmall"
-      >
-        {cluster && (
-          <DetailRow
-            label="Cluster"
-            value={cluster}
-          />
-        )}
-        {owner && (
-          <DetailRow
-            label="Owner"
-            value={owner}
-          />
-        )}
-        {repo && (
-          <DetailRow
-            label="Repo"
-            value={repo}
-          />
-        )}
-        {pendingCount > 0 && (
+      </HeaderSC>
+      <ContentSC>
+        {(detailRows.length > 0 || (!workbenchJobId && pendingCount > 0)) && (
           <Flex
-            align="center"
-            justify="space-between"
-            gap="medium"
+            direction="column"
+            gap="xsmall"
           >
-            <CaptionP $color="text-xlight">Agent runs</CaptionP>
-            <CaptionP css={{ color: theme.colors.yellow[300] }}>
-              {pendingCount} pending
-            </CaptionP>
+            {detailRows.map(({ label, value }) => (
+              <DetailRow
+                key={label}
+                label={label}
+                value={value}
+              />
+            ))}
+            {!workbenchJobId && pendingCount > 0 && (
+              <Flex
+                align="center"
+                justify="space-between"
+                gap="medium"
+              >
+                <CaptionP $color="text-xlight">Agent runs</CaptionP>
+                <CaptionP css={{ color: theme.colors.yellow[300] }}>
+                  {pendingCount} pending
+                </CaptionP>
+              </Flex>
+            )}
           </Flex>
         )}
-      </Flex>
-      {workbenchPath && (
-        <Button
-          small
-          secondary
-          width="100%"
-          as={Link}
-          to={workbenchPath}
-          onClick={(event) => {
-            event.stopPropagation()
-            onNavigate?.()
-          }}
-          endIcon={<ArrowTopRightIcon />}
-        >
-          {workbenchJobId ? 'Open job' : 'Open workbench'}
-        </Button>
-      )}
+        {workbenchPath && (
+          <Button
+            small
+            secondary
+            width="100%"
+            as={Link}
+            to={workbenchPath}
+            onClick={(event) => {
+              event.stopPropagation()
+              onNavigate?.()
+            }}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            {workbenchJobId ? 'Open workbench job' : 'Open workbench'}
+          </Button>
+        )}
+      </ContentSC>
     </CardSC>
   )
 }
 
-const CardSC = styled(Card)(({ theme }) => ({
-  '&&': {
-    width: WORKBENCH_LINK_HOVER_CARD_WIDTH,
-    maxWidth: WORKBENCH_LINK_HOVER_CARD_WIDTH,
-    flexGrow: 0,
-  },
+function isDetailRow(
+  row: { label: string; value: string } | null
+): row is { label: string; value: string } {
+  return row != null
+}
+
+const CardSC = styled.div(({ theme }) => ({
+  width: WORKBENCH_LINK_HOVER_CARD_WIDTH,
+  maxWidth: WORKBENCH_LINK_HOVER_CARD_WIDTH,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.medium,
+  backgroundColor: theme.colors['fill-one'],
   border: theme.borders['fill-two'],
+  borderRadius: 6,
+  boxShadow: theme.boxShadows.moderate,
+  overflow: 'hidden',
   pointerEvents: 'auto',
 }))
 
-const DividerSC = styled.div(({ theme }) => ({
-  borderTop: `1px solid ${theme.colors['border-fill-two']}`,
-  marginLeft: -theme.spacing.medium,
-  marginRight: -theme.spacing.medium,
+const HeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+  padding: 10,
+  borderBottom: theme.borders['fill-two'],
+}))
+
+const IconWrapSC = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 32,
+  height: 32,
   flexShrink: 0,
+})
+
+const ContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  padding: theme.spacing.small,
 }))

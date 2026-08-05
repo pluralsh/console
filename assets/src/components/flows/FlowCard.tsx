@@ -18,6 +18,7 @@ import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import pluralize from 'pluralize'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
 export function FlowCard({
@@ -31,12 +32,13 @@ export function FlowCard({
   const [hovered, setHovered] = useState(false)
   const [showPermissions, setShowPermissions] = useState(false)
   const numAlerts = flow.alerts?.edges?.length ?? 0
+  const flowPath = getFlowDetailsPath({ flowIdOrName: flow.name })
   return (
     <>
       <CardSC
         fillLevel={1}
         forwardedAs={Link}
-        to={flow.name}
+        to={flowPath}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -69,6 +71,7 @@ export function FlowCard({
               clickable
               tooltip="Permissions"
               onClick={(e) => {
+                e.preventDefault()
                 e.stopPropagation()
                 setShowPermissions(!showPermissions)
               }}
@@ -78,8 +81,9 @@ export function FlowCard({
               clickable
               tooltip="View pipelines for this flow"
               onClick={(e) => {
+                e.preventDefault()
                 e.stopPropagation()
-                navigate(`${flow.id}/pipelines`)
+                navigate(`${flowPath}/pipelines`)
               }}
               icon={<GitPullIcon color="icon-light" />}
             />

@@ -40,6 +40,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
         backups
         stacks
         workbenches
+        cd
+        ai
     }
 }
 

@@ -28,7 +28,7 @@ A good skill has a few qualities:
 
 The specific investigation was prompted with:
 
-<%= @job.prompt %>
+<%= Console.Schema.WorkbenchJob.objective(@job) %>
 
 <%= if @job.result do %>
 And the ultimate conclusion was:

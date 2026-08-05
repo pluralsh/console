@@ -1,20 +1,11 @@
-import {
-  ContainerRuntimeIcon,
-  Flex,
-  WarningShieldIcon,
-  type SemanticColorKey,
-} from '@pluralsh/design-system'
-import { Overline } from 'components/cd/utils/PermissionsModal'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
-import { type DefaultTheme, useTheme } from 'styled-components'
+import { Flex, type SemanticColorKey } from '@pluralsh/design-system'
+import { CaptionP } from 'components/utils/typography/Text'
+import { type DefaultTheme } from 'styled-components'
 import type { WorkbenchPromptMode } from './workbenchPromptModes'
-import { WorkbenchPromptSupervisionOption } from './WorkbenchPromptSupervisionOption'
-
-export const WORKBENCH_PROMPT_MODE_ICON_SIZE_HEADER = 16
+import { WorkbenchCodingSupervisionFields } from './WorkbenchModeOptionFields'
 
 export type WorkbenchPromptModeConfig = {
   label: string
-  triggerLabel?: string
   Icon: React.ComponentType<{ size: number; color: string }>
   iconColor?: SemanticColorKey
   iconFill?: string
@@ -38,7 +29,6 @@ export function WorkbenchPromptModeDetails({
   babysit,
   onApprovalChange,
   onBabysitChange,
-  showHeader = true,
 }: {
   config: WorkbenchPromptModeConfig
   mode: WorkbenchPromptMode
@@ -46,71 +36,21 @@ export function WorkbenchPromptModeDetails({
   babysit: boolean
   onApprovalChange: (approval: boolean) => void
   onBabysitChange: (babysit: boolean) => void
-  showHeader?: boolean
 }) {
-  const theme = useTheme()
-
   return (
     <Flex
       direction="column"
       gap="small"
       height="100%"
     >
-      {showHeader && (
-        <Flex
-          align="center"
-          gap="small"
-        >
-          <config.Icon
-            size={WORKBENCH_PROMPT_MODE_ICON_SIZE_HEADER}
-            color={workbenchPromptModeIconColor(config, theme)}
-          />
-          <Body2BoldP
-            $color="text"
-            css={{ flex: 1 }}
-          >
-            {config.label}
-          </Body2BoldP>
-        </Flex>
-      )}
-      <Body2P $color="text-xlight">{config.description}</Body2P>
+      <CaptionP $color="text-xlight">{config.description}</CaptionP>
       {config.supervisionOptions && mode === 'agent' && (
-        <Flex
-          direction="column"
-          gap="xxsmall"
-          css={{ marginTop: theme.spacing.xsmall }}
-        >
-          <Overline>SUPERVISION</Overline>
-          <Flex
-            direction="column"
-            gap="xxsmall"
-          >
-            <WorkbenchPromptSupervisionOption
-              icon={
-                <WarningShieldIcon
-                  size={12}
-                  color="icon-light"
-                />
-              }
-              label="Requires approval"
-              hint="Require manual approval to create prs, and allow follow up prompting to get things right if needed"
-              checked={approval}
-              onChange={onApprovalChange}
-            />
-            <WorkbenchPromptSupervisionOption
-              icon={
-                <ContainerRuntimeIcon
-                  size={12}
-                  color="icon-light"
-                />
-              }
-              label="Babysit"
-              hint="Stays active after opening the PR to respond to review feedback or CI failures."
-              checked={babysit}
-              onChange={onBabysitChange}
-            />
-          </Flex>
-        </Flex>
+        <WorkbenchCodingSupervisionFields
+          approval={approval}
+          babysit={babysit}
+          onApprovalChange={onApprovalChange}
+          onBabysitChange={onBabysitChange}
+        />
       )}
     </Flex>
   )

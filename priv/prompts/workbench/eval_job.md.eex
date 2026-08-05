@@ -3,7 +3,7 @@ Here's the result of the workbench job we're evaluating.
 ## Initial Prompt
 
 ```
-<%= @job.prompt %>
+<%= Console.Schema.WorkbenchJob.objective(@job) %>
 ```
 
 ## Job Activities

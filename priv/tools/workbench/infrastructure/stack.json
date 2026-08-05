@@ -4,6 +4,21 @@
         "stack_id": {
             "type": "string",
             "description": "UUID of the stack (from plrl_stacks)"
+        },
+        "resources": {
+            "type": "object",
+            "description": "Optionally include the stack's state resources in the response. Use search to filter by identifier, resource type, name, configuration, link, or regex patterns like aws_.*\\..*.",
+            "properties": {
+                "fetch": {
+                    "type": "boolean",
+                    "description": "If true, include the stack's state resources in the response"
+                },
+                "search": {
+                    "type": ["string", "null"],
+                    "description": "Optional case-insensitive regex search string."
+                }
+            },
+            "required": ["fetch"]
         }
     },
     "required": ["stack_id"]

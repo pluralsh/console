@@ -1,12 +1,19 @@
-import { IconFrame, ReloadIcon, Spinner } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  IconFrameProps,
+  ReloadIcon,
+  Spinner,
+} from '@pluralsh/design-system'
 import { useCallback, useRef, useState } from 'react'
 
 export default function IconFrameRefreshButton({
   refetch,
   loading,
+  size = 'large',
 }: {
   refetch: () => void
   loading?: boolean
+  size?: IconFrameProps['size']
 }) {
   const [clickedRecently, setClickedRecently] = useState(false)
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -22,7 +29,7 @@ export default function IconFrameRefreshButton({
     <IconFrame
       clickable
       type="secondary"
-      size="large"
+      size={size}
       tooltip="Refetch data"
       onClick={handleClick}
       disabled={loading}

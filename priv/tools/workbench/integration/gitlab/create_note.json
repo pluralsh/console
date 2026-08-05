@@ -18,6 +18,11 @@
     "body": {
       "type": "string",
       "description": "Note body (GitLab Flavored Markdown supported)."
+    },
+    "internal": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, create an internal note visible only to project members. Defaults to false for a public note."
     }
   },
   "required": ["project", "resource", "iid", "body"],

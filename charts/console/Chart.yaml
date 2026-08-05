@@ -2,11 +2,11 @@ apiVersion: v2
 name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
-appVersion: 0.12.33
-version: 0.4.32
+appVersion: 0.12.35
+version: 0.4.34
 dependencies:
   - name: controller
-    version: 0.0.201
+    version: 0.0.203
     repository: file://../controller
     condition: controller.enabled
   - name: flux2

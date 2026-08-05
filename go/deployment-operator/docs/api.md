@@ -76,6 +76,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `servicePollInterval` _string_ | ServicePollInterval defines how often the agent polls for services.<br />Expected format is a duration string (e.g., "30s", "5m").<br />Set to "0s" to disable service polling. |  |  |
+| `managedNamespacePollInterval` _string_ | ManagedNamespacePollInterval defines how often the agent polls for managed namespaces.<br />Set to "0s" to disable managed namespace polling. |  |  |
 | `clusterPingInterval` _string_ | ClusterPingInterval specifies the interval at which the agent pings the cluster.<br />Set to "0s" to disable cluster pings. |  |  |
 | `compatibilityUploadInterval` _string_ | CompatibilityUploadInterval determines how frequently the agent uploads compatibility data.<br />Set to "0s" to disable compatibility uploads. |  |  |
 | `stackPollInterval` _string_ | StackPollInterval sets how often the agent polls for stack updates or changes.<br />Set to "0s" to disable stack polling. |  |  |

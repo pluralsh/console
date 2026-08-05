@@ -19,7 +19,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
     Infrastructure.StackInspect,
-    Infrastructure.CloudSchema,
+    Infrastructure.CloudSchemas,
     Infrastructure.CloudQuery,
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
@@ -33,12 +33,13 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools = tools(job, environment, FileCache.new())
+    objective = WorkbenchJob.objective(job)
 
     MemoryEngine.new(tools, 50,
       engine_opts(job) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: jprompt, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
+        system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
         acc: %{},
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
@@ -90,7 +91,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp cloud_tools(%Environment{tools: tools}) do
     Enum.flat_map(tools, fn
       {_, %WorkbenchTool{tool: :cloud} = tool} -> [
-        %CloudSchema{tool: tool},
+        %CloudSchemas{tool: tool},
         %CloudQuery{tool: tool},
         %CloudTables{tool: tool}
       ]

@@ -593,6 +593,58 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "createQueuedPrompt" do
+    test "it can queue a prompt for a workbench job" do
+      user = admin_user()
+      job = insert(:workbench_job, user: user)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:ok, %{data: %{"createQueuedPrompt" => prompt}}} = run_query("""
+        mutation CreateQueuedPrompt($jobId: ID!, $attributes: QueuedPromptAttributes!) {
+          createQueuedPrompt(jobId: $jobId, attributes: $attributes) {
+            id
+            prompt
+            dequeableAt
+            consumedAt
+            user { id }
+            workbenchJob { id }
+          }
+        }
+      """, %{
+        "jobId" => job.id,
+        "attributes" => %{
+          "prompt" => "from graphql later",
+          "dequeableAt" => DateTime.to_iso8601(dequeable_at)
+        }
+      }, %{current_user: user})
+
+      assert prompt["prompt"] == "from graphql later"
+      {:ok, returned_dequeable_at, 0} = DateTime.from_iso8601(prompt["dequeableAt"])
+      assert DateTime.compare(returned_dequeable_at, dequeable_at) == :eq
+      refute prompt["consumedAt"]
+      assert prompt["user"]["id"] == user.id
+      assert prompt["workbenchJob"]["id"] == job.id
+    end
+  end
+
+  describe "deleteQueuedPrompt" do
+    test "it can delete a queued prompt" do
+      user = admin_user()
+      prompt = insert(:queued_prompt, user: user)
+
+      {:ok, %{data: %{"deleteQueuedPrompt" => deleted}}} = run_query("""
+        mutation DeleteQueuedPrompt($id: ID!) {
+          deleteQueuedPrompt(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => prompt.id}, %{current_user: user})
+
+      assert deleted["id"] == prompt.id
+      refute refetch(prompt)
+    end
+  end
+
   describe "createWorkbenchMessage" do
     test "it can create a user message on an idle job owned by the current user" do
       user = admin_user()
@@ -654,6 +706,40 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"url" => pr.url, "attributes" => %{"prompt" => "while running"}}, %{current_user: user})
 
       assert error.message == "job is currently active, please wait for it to complete before prompting"
+    end
+  end
+
+  describe "enqueueWorkbenchPrFollowup" do
+    test "it can queue a prompt on a pull request job" do
+      user = admin_user()
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, user: user, workbench: workbench)
+      pr = insert(:pull_request, workbench_job: job)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:ok, %{data: %{"enqueueWorkbenchPrFollowup" => prompt}}} = run_query("""
+        mutation EnqueueWorkbenchPrFollowup($url: String!, $attributes: QueuedPromptAttributes!) {
+          enqueueWorkbenchPrFollowup(url: $url, attributes: $attributes) {
+            id
+            prompt
+            dequeableAt
+            workbenchJob { id }
+            user { id }
+          }
+        }
+      """, %{
+        "url" => pr.url,
+        "attributes" => %{
+          "prompt" => "queued from pr graphql",
+          "dequeableAt" => DateTime.to_iso8601(dequeable_at)
+        }
+      }, %{current_user: user})
+
+      assert prompt["prompt"] == "queued from pr graphql"
+      {:ok, returned_dequeable_at, 0} = DateTime.from_iso8601(prompt["dequeableAt"])
+      assert DateTime.compare(returned_dequeable_at, dequeable_at) == :eq
+      assert prompt["workbenchJob"]["id"] == job.id
+      assert prompt["user"]["id"] == user.id
     end
   end
 
@@ -748,6 +834,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
             id
             status
             result { output }
+            user { name }
           }
         }
       """, %{"id" => activity.id, "reason" => "not approved"}, %{current_user: user})
@@ -755,9 +842,11 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert updated["id"] == activity.id
       assert updated["status"] == "REJECTED"
       assert updated["result"]["output"] == "not approved"
+      assert updated["user"]["name"] == user.name
 
       reloaded = refetch(activity)
       assert reloaded.status == :rejected
+      assert reloaded.user_id == user.id
       assert reloaded.result.output == "not approved"
     end
   end

@@ -4,6 +4,7 @@ import {
   decodeChipAttrValue,
   encodeChipAttrValue,
   insertPlrlText,
+  serializeChipAttrs,
   serializeEditableDiv,
 } from './contentEditableChips'
 import { MentionKind } from 'components/ai/chatbot/input/autocomplete/mentionTypes'
@@ -29,6 +30,21 @@ describe('chip attr encoding', () => {
         .querySelector('[data-attr-description]')
         ?.getAttribute('data-attr-description')
     ).toBe(description)
+  })
+
+  it('serializes chip attrs while filtering empty values', () => {
+    const description = 'Line "quoted"\nwith &'
+
+    expect(
+      serializeChipAttrs(MentionKind.Vulnerability, {
+        'item-id': 'v1',
+        'item-name': 'CVE-2024-1',
+        severity: '',
+        description,
+      })
+    ).toBe(
+      `<${MentionKind.Vulnerability} item-id="v1" item-name="CVE-2024-1" description="${encodeChipAttrValue(description)}"></${MentionKind.Vulnerability}>`
+    )
   })
 })
 

@@ -258,7 +258,7 @@ defmodule Console.Services.Users do
   Determines if a user can refresh their jwt and returns the user back if so
   """
   @spec authorize_refresh(binary) :: user_resp
-  def authorize_refresh(token) do
+  def authorize_refresh(token) when is_binary(token) do
     get_refresh_token(token)
     |> Repo.preload([:user])
     |> case do
@@ -266,6 +266,7 @@ defmodule Console.Services.Users do
       _ -> {:error, "could not fetch refresh token"}
     end
   end
+  def authorize_refresh(_), do: {:error, "no refresh token provided"}
 
   def create_service_account(attrs) do
     %User{service_account: true}

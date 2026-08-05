@@ -222,6 +222,8 @@ type AgentMessageFileAttributes struct {
 }
 
 type AgentMessageMetadata struct {
+	// when the message completed
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
 	Reasoning *AgentMessageReasoning `json:"reasoning,omitempty"`
 	// the file of the message
@@ -231,6 +233,8 @@ type AgentMessageMetadata struct {
 }
 
 type AgentMessageMetadataAttributes struct {
+	// when the message completed, eg for command based tool calls that take a while
+	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
 	Reasoning *AgentMessageReasoningAttributes `json:"reasoning,omitempty"`
 	// the file of the message
@@ -349,6 +353,8 @@ type AgentPullRequestAttributes struct {
 	Head string `json:"head"`
 	// the commit shas of the pull request
 	CommitShas []*CommitShaAttributes `json:"commitShas,omitempty"`
+	// the classified type and changed line count of the pull request
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 type AgentRun struct {
@@ -800,6 +806,20 @@ type AiPinEdge struct {
 	Cursor *string `json:"cursor,omitempty"`
 }
 
+type AiPriceSheet struct {
+	Provider    *AiProvider `json:"provider,omitempty"`
+	Model       *string     `json:"model,omitempty"`
+	InputPrice  *float64    `json:"inputPrice,omitempty"`
+	OutputPrice *float64    `json:"outputPrice,omitempty"`
+}
+
+type AiPriceSheetAttributes struct {
+	Provider    *AiProvider `json:"provider,omitempty"`
+	Model       *string     `json:"model,omitempty"`
+	InputPrice  *float64    `json:"inputPrice,omitempty"`
+	OutputPrice *float64    `json:"outputPrice,omitempty"`
+}
+
 // configuration for AI based service promotion
 type AiPromotionCriteria struct {
 	// whether AI based service promotion is enabled for this promotion
@@ -836,6 +856,8 @@ type AiSettings struct {
 	Azure            *AzureOpenaiSettings `json:"azure,omitempty"`
 	Bedrock          *BedrockAiSettings   `json:"bedrock,omitempty"`
 	Vertex           *VertexAiSettings    `json:"vertex,omitempty"`
+	// per-model token prices used to calculate AI usage costs
+	PriceSheets []*AiPriceSheet `json:"priceSheets,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -861,6 +883,8 @@ type AiSettingsAttributes struct {
 	Vertex           *VertexAiAttributes          `json:"vertex,omitempty"`
 	VectorStore      *VectorStoreAttributes       `json:"vectorStore,omitempty"`
 	Graph            *GraphStoreAttributes        `json:"graph,omitempty"`
+	// per-model token prices used to calculate AI usage costs
+	PriceSheets []*AiPriceSheetAttributes `json:"priceSheets,omitempty"`
 }
 
 type AiUsageAttributes struct {
@@ -6075,6 +6099,7 @@ type PersonaServicesAttributes struct {
 }
 
 type PersonaSidebar struct {
+	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
 	PullRequests *bool `json:"pullRequests,omitempty"`
@@ -6085,9 +6110,11 @@ type PersonaSidebar struct {
 	Stacks       *bool `json:"stacks,omitempty"`
 	Security     *bool `json:"security,omitempty"`
 	Cost         *bool `json:"cost,omitempty"`
+	Ai           *bool `json:"ai,omitempty"`
 }
 
 type PersonaSidebarAttributes struct {
+	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
 	PullRequests *bool `json:"pullRequests,omitempty"`
@@ -6098,6 +6125,7 @@ type PersonaSidebarAttributes struct {
 	Stacks       *bool `json:"stacks,omitempty"`
 	Security     *bool `json:"security,omitempty"`
 	Cost         *bool `json:"cost,omitempty"`
+	Ai           *bool `json:"ai,omitempty"`
 }
 
 // A reference to a custom resource you want to be displayed in the k8s dashboard
@@ -7189,6 +7217,8 @@ type PullRequest struct {
 	Labels  []*string `json:"labels,omitempty"`
 	// the patch for this pr, if it is a patch.  This is in place of generating a full pr
 	Patch *string `json:"patch,omitempty"`
+	// the estimated complexity of the pull request
+	Difficulty *PullRequestDifficulty `json:"difficulty,omitempty"`
 	// the user that spawned this pr, will also be associated with notifications w/in Plural
 	Author *User `json:"author,omitempty"`
 	// the flow this pr is meant to modify
@@ -7203,19 +7233,32 @@ type PullRequest struct {
 
 // attributes for a pull request pointer record
 type PullRequestAttributes struct {
-	URL       string          `json:"url"`
-	Title     string          `json:"title"`
-	Creator   *string         `json:"creator,omitempty"`
-	Labels    []*string       `json:"labels,omitempty"`
-	ServiceID *string         `json:"serviceId,omitempty"`
-	ClusterID *string         `json:"clusterId,omitempty"`
-	Service   *NamespacedName `json:"service,omitempty"`
-	Cluster   *NamespacedName `json:"cluster,omitempty"`
+	URL        string                           `json:"url"`
+	Title      string                           `json:"title"`
+	Creator    *string                          `json:"creator,omitempty"`
+	Labels     []*string                        `json:"labels,omitempty"`
+	ServiceID  *string                          `json:"serviceId,omitempty"`
+	ClusterID  *string                          `json:"clusterId,omitempty"`
+	Service    *NamespacedName                  `json:"service,omitempty"`
+	Cluster    *NamespacedName                  `json:"cluster,omitempty"`
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 type PullRequestConnection struct {
 	PageInfo PageInfo           `json:"pageInfo"`
 	Edges    []*PullRequestEdge `json:"edges,omitempty"`
+}
+
+type PullRequestDifficulty struct {
+	// the type of change in the pull request
+	Type *PrChangeType `json:"type,omitempty"`
+	// the number of changed lines
+	Lines *int64 `json:"lines,omitempty"`
+}
+
+type PullRequestDifficultyAttributes struct {
+	Type  *PrChangeType `json:"type,omitempty"`
+	Lines *int64        `json:"lines,omitempty"`
 }
 
 type PullRequestEdge struct {
@@ -7235,13 +7278,14 @@ type PullRequestEvidence struct {
 
 // attributes for a pull request pointer record
 type PullRequestUpdateAttributes struct {
-	Title     string          `json:"title"`
-	Labels    []*string       `json:"labels,omitempty"`
-	Status    PrStatus        `json:"status"`
-	ServiceID *string         `json:"serviceId,omitempty"`
-	ClusterID *string         `json:"clusterId,omitempty"`
-	Service   *NamespacedName `json:"service,omitempty"`
-	Cluster   *NamespacedName `json:"cluster,omitempty"`
+	Title      string                           `json:"title"`
+	Labels     []*string                        `json:"labels,omitempty"`
+	Status     PrStatus                         `json:"status"`
+	ServiceID  *string                          `json:"serviceId,omitempty"`
+	ClusterID  *string                          `json:"clusterId,omitempty"`
+	Service    *NamespacedName                  `json:"service,omitempty"`
+	Cluster    *NamespacedName                  `json:"cluster,omitempty"`
+	Difficulty *PullRequestDifficultyAttributes `json:"difficulty,omitempty"`
 }
 
 // a rollup count of repository pullability
@@ -7274,6 +7318,42 @@ type PulumiConfigurationAttributes struct {
 	Stack *string `json:"stack,omitempty"`
 	// optional opaque URL passed to pulumi login for the state backend; when omitted, Pulumi Cloud is used. Supports self-hosted Pulumi Cloud, S3, GCS, Azure Blob, and other Pulumi-supported login URLs
 	BackendURL *string `json:"backendUrl,omitempty"`
+}
+
+type QueuedPrompt struct {
+	// the id of the queued prompt
+	ID string `json:"id"`
+	// the prompt text
+	Prompt *string `json:"prompt,omitempty"`
+	// when this prompt becomes eligible to dequeue
+	DequeableAt *string `json:"dequeableAt,omitempty"`
+	// when this prompt was consumed
+	ConsumedAt *string `json:"consumedAt,omitempty"`
+	// user this prompt will run as
+	UserID *string `json:"userId,omitempty"`
+	// the job this prompt will be sent to
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	// the user who queued this prompt
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type QueuedPromptAttributes struct {
+	// the prompt to send when dequeued
+	Prompt string `json:"prompt"`
+	// when this prompt becomes eligible to dequeue
+	DequeableAt string `json:"dequeableAt"`
+}
+
+type QueuedPromptConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*QueuedPromptEdge `json:"edges,omitempty"`
+}
+
+type QueuedPromptEdge struct {
+	Node   *QueuedPrompt `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
 }
 
 type RbacAttributes struct {
@@ -9917,6 +9997,8 @@ type Workbench struct {
 	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
 	// default mode-specific options for jobs created by this workbench
 	Modes *WorkbenchJobModes `json:"modes,omitempty"`
+	// token bucket budget for this workbench
+	Budget *WorkbenchBudget `json:"budget,omitempty"`
 	// skills configuration
 	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// the project of this workbench
@@ -9979,6 +10061,8 @@ type WorkbenchAttributes struct {
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
 	// default mode-specific options for jobs created by this workbench
 	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
+	// token bucket budget for this workbench
+	Budget *WorkbenchBudgetAttributes `json:"budget,omitempty"`
 	// skills configuration (ref and files)
 	Skills *WorkbenchSkillsAttributes `json:"skills,omitempty"`
 	// users who can read and execute this workbench
@@ -9989,6 +10073,36 @@ type WorkbenchAttributes struct {
 	ToolAssociations []*WorkbenchToolAssociationAttributes `json:"toolAssociations,omitempty"`
 	// skills to include with this workbench
 	WorkbenchSkills []*WorkbenchSkillAttributes `json:"workbenchSkills,omitempty"`
+}
+
+type WorkbenchBudget struct {
+	// whether budget tracking is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// maximum budget capacity
+	Maximum *float64 `json:"maximum,omitempty"`
+	// minimum budget capacity to keep free
+	MinFree *float64 `json:"minFree,omitempty"`
+	// the budget unit
+	Unit *WorkbenchBudgetUnit `json:"unit,omitempty"`
+	// remaining budget capacity
+	Last *float64 `json:"last,omitempty"`
+	// when the budget was last updated
+	LastUpdated *string `json:"lastUpdated,omitempty"`
+}
+
+type WorkbenchBudgetAttributes struct {
+	// whether budget tracking is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// maximum budget capacity
+	Maximum *float64 `json:"maximum,omitempty"`
+	// minimum budget capacity to keep free
+	MinFree *float64 `json:"minFree,omitempty"`
+	// the budget unit
+	Unit *WorkbenchBudgetUnit `json:"unit,omitempty"`
+	// remaining budget capacity
+	Last *float64 `json:"last,omitempty"`
+	// when the budget was last updated
+	LastUpdated *string `json:"lastUpdated,omitempty"`
 }
 
 type WorkbenchCanvasBlock struct {
@@ -10292,6 +10406,8 @@ type WorkbenchJob struct {
 	ChatbotMessage *ChatbotMessage `json:"chatbotMessage,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
+	// the console URL for this workbench job
+	URL string `json:"url"`
 	// the flow this job is associated with
 	Flow *Flow `json:"flow,omitempty"`
 	// the user who created this run
@@ -10309,6 +10425,7 @@ type WorkbenchJob struct {
 	// the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)
 	ReferencedJob *WorkbenchJob                   `json:"referencedJob,omitempty"`
 	Activities    *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	QueuedPrompts *QueuedPromptConnection         `json:"queuedPrompts,omitempty"`
 	MetricsTool   []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
 	LogsTool      []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
 	TracesTool    []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
@@ -10339,7 +10456,7 @@ type WorkbenchJobActivity struct {
 	AgentRun *AgentRun `json:"agentRun,omitempty"`
 	// all agent runs associated with this activity (sideloadable)
 	AgentRuns []*AgentRun `json:"agentRuns,omitempty"`
-	// the user who created this activity
+	// the user who created, approved, or denied this activity
 	User       *User   `json:"user,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
@@ -10367,6 +10484,8 @@ type WorkbenchJobActivityFunctionCall struct {
 	Input map[string]any `json:"input,omitempty"`
 	// the workbench tool id backing this function
 	ToolID *string `json:"toolId,omitempty"`
+	// the workbench tool backing this function call
+	Tool *WorkbenchTool `json:"tool,omitempty"`
 }
 
 type WorkbenchJobActivityJobUpdate struct {
@@ -10391,6 +10510,8 @@ type WorkbenchJobActivityKubeRequest struct {
 	QueryParams map[string]any `json:"queryParams,omitempty"`
 	// the Kubernetes API request content type
 	ContentType *string `json:"contentType,omitempty"`
+	// the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action
+	Current map[string]any `json:"current,omitempty"`
 }
 
 type WorkbenchJobActivityLog struct {
@@ -10502,6 +10623,28 @@ type WorkbenchJobEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobKubernetesModes struct {
+	// whether kubernetes update actions are enabled
+	Update *bool `json:"update,omitempty"`
+	// whether kubernetes delete actions are enabled
+	Delete *bool `json:"delete,omitempty"`
+	// namespaces the agent can never act in
+	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
+	// if set, actions are only allowed in these namespaces
+	RequireNamespaces []*string `json:"requireNamespaces,omitempty"`
+}
+
+type WorkbenchJobKubernetesModesAttributes struct {
+	// whether kubernetes update actions are enabled
+	Update *bool `json:"update,omitempty"`
+	// whether kubernetes delete actions are enabled
+	Delete *bool `json:"delete,omitempty"`
+	// namespaces the agent can never act in
+	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
+	// if set, actions are only allowed in these namespaces
+	RequireNamespaces []*string `json:"requireNamespaces,omitempty"`
+}
+
 type WorkbenchJobModel struct {
 	// the ai provider for this job
 	Provider *AiProvider `json:"provider,omitempty"`
@@ -10519,23 +10662,31 @@ type WorkbenchJobModelAttributes struct {
 type WorkbenchJobModes struct {
 	// whether planning mode is enabled for this job
 	Plan *bool `json:"plan,omitempty"`
+	// whether verification mode is enabled for this job
+	Verification *bool `json:"verification,omitempty"`
 	// model override for this job
 	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModes `json:"coding,omitempty"`
 	// budget limits for this job
 	Budget *WorkbenchJobBudget `json:"budget,omitempty"`
+	// kubernetes action options for this job
+	Kubernetes *WorkbenchJobKubernetesModes `json:"kubernetes,omitempty"`
 }
 
 type WorkbenchJobModesAttributes struct {
 	// whether planning mode is enabled for this job
 	Plan *bool `json:"plan,omitempty"`
+	// whether verification mode is enabled for this job
+	Verification *bool `json:"verification,omitempty"`
 	// model override for this job
 	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 	// coding mode options for this job
 	Coding *WorkbenchJobCodingModesAttributes `json:"coding,omitempty"`
 	// budget limits for this job
 	Budget *WorkbenchJobBudgetAttributes `json:"budget,omitempty"`
+	// kubernetes action options for this job
+	Kubernetes *WorkbenchJobKubernetesModesAttributes `json:"kubernetes,omitempty"`
 }
 
 type WorkbenchJobProgress struct {
@@ -10891,7 +11042,7 @@ type WorkbenchToolAzureDevopsConnectionAttributes struct {
 }
 
 type WorkbenchToolAzureFunctionConnection struct {
-	// Cloud Function identifier
+	// Azure Function identifier
 	Identifier *string `json:"identifier,omitempty"`
 	// description of the function exposed to the agent
 	Description *string `json:"description,omitempty"`
@@ -10900,7 +11051,7 @@ type WorkbenchToolAzureFunctionConnection struct {
 }
 
 type WorkbenchToolAzureFunctionConnectionAttributes struct {
-	// Cloud Function identifier
+	// Azure Function identifier
 	Identifier string `json:"identifier"`
 	// description of the function exposed to the agent
 	Description string `json:"description"`
@@ -11031,7 +11182,7 @@ type WorkbenchToolConfiguration struct {
 	Lambda *WorkbenchToolLambdaConnection `json:"lambda,omitempty"`
 	// google cloud run service configuration
 	CloudRun *WorkbenchToolCloudRunConnection `json:"cloudRun,omitempty"`
-	// google cloud function configuration
+	// azure function configuration
 	AzureFunction *WorkbenchToolAzureFunctionConnection `json:"azureFunction,omitempty"`
 	// docker/OCI registry connection (no secrets)
 	Docker *WorkbenchToolDockerConnection `json:"docker,omitempty"`
@@ -11086,7 +11237,7 @@ type WorkbenchToolConfigurationAttributes struct {
 	Lambda *WorkbenchToolLambdaConnectionAttributes `json:"lambda,omitempty"`
 	// google cloud run service configuration
 	CloudRun *WorkbenchToolCloudRunConnectionAttributes `json:"cloudRun,omitempty"`
-	// google cloud function configuration
+	// azure function configuration
 	AzureFunction *WorkbenchToolAzureFunctionConnectionAttributes `json:"azureFunction,omitempty"`
 	// bitbucket data center connection (scm)
 	BitbucketDatacenter *WorkbenchToolBitbucketDatacenterConnectionAttributes `json:"bitbucketDatacenter,omitempty"`
@@ -15558,6 +15709,63 @@ func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type PrChangeType string
+
+const (
+	PrChangeTypeGitops        PrChangeType = "GITOPS"
+	PrChangeTypeApplication   PrChangeType = "APPLICATION"
+	PrChangeTypeConfiguration PrChangeType = "CONFIGURATION"
+)
+
+var AllPrChangeType = []PrChangeType{
+	PrChangeTypeGitops,
+	PrChangeTypeApplication,
+	PrChangeTypeConfiguration,
+}
+
+func (e PrChangeType) IsValid() bool {
+	switch e {
+	case PrChangeTypeGitops, PrChangeTypeApplication, PrChangeTypeConfiguration:
+		return true
+	}
+	return false
+}
+
+func (e PrChangeType) String() string {
+	return string(e)
+}
+
+func (e *PrChangeType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PrChangeType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PrChangeType", str)
+	}
+	return nil
+}
+
+func (e PrChangeType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PrChangeType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PrChangeType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type PrGovernanceType string
 
 const (
@@ -17484,6 +17692,61 @@ func (e *VulnUserInteraction) UnmarshalJSON(b []byte) error {
 }
 
 func (e VulnUserInteraction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchBudgetUnit string
+
+const (
+	WorkbenchBudgetUnitDollar WorkbenchBudgetUnit = "DOLLAR"
+	WorkbenchBudgetUnitToken  WorkbenchBudgetUnit = "TOKEN"
+)
+
+var AllWorkbenchBudgetUnit = []WorkbenchBudgetUnit{
+	WorkbenchBudgetUnitDollar,
+	WorkbenchBudgetUnitToken,
+}
+
+func (e WorkbenchBudgetUnit) IsValid() bool {
+	switch e {
+	case WorkbenchBudgetUnitDollar, WorkbenchBudgetUnitToken:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchBudgetUnit) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchBudgetUnit) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchBudgetUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchBudgetUnit", str)
+	}
+	return nil
+}
+
+func (e WorkbenchBudgetUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchBudgetUnit) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchBudgetUnit) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

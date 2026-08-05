@@ -83,9 +83,8 @@ defmodule Console.Deployments.Agents do
   def upsert_agent_runtime(attrs, %Cluster{} = cluster),
     do: upsert_agent_runtime(attrs, cluster, cluster)
 
-
   @spec upsert_agent_runtime(map, Cluster.t | nil, User.t | Cluster.t | nil) :: agent_runtime_resp
-  def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cid} = cluster, actor) do
+  def upsert_agent_runtime(%{name: name} = attrs, %Cluster{id: cid}, actor) do
     runtime = get_agent_runtime(cid, name) |> Repo.preload([:create_bindings])
 
     with {:ok, _} <- allow(runtime || %AgentRuntime{cluster_id: cid}, actor, :write),
@@ -273,6 +272,19 @@ defmodule Console.Deployments.Agents do
     |> notify(:create)
   end
 
+  @spec update_agent_message(map, binary, Cluster.t) :: agent_msg_resp
+  def update_agent_message(attrs, message_id, %Cluster{} = cluster) do
+    start_transaction()
+    |> add_operation(:message, fn _ -> {:ok, Repo.get!(AgentMessage, message_id)} end)
+    |> add_operation(:validate, fn %{message: message} -> validate_run(message.agent_run_id, cluster) end)
+    |> add_operation(:update, fn %{message: message} ->
+      AgentMessage.changeset(message, attrs)
+      |> Repo.update()
+    end)
+    |> execute(extract: :update)
+    |> notify(:update)
+  end
+
   defp validate_run(run_id, %Cluster{id: cluster_id}, preloads \\ [:runtime]) do
     get_agent_run!(run_id)
     |> Repo.preload(preloads)
@@ -378,6 +390,7 @@ defmodule Console.Deployments.Agents do
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
         |> Map.put(:workbench_job_id, workbench_job_id_for_agent_pr(run))
+        |> Map.put(:difficulty, attrs[:difficulty])
       )
       |> Repo.insert()
       |> notify(:create)
@@ -569,5 +582,7 @@ defmodule Console.Deployments.Agents do
     do: handle_notify(PubSub.AgentRunUpdated, run)
   defp notify({:ok, %AgentMessage{} = msg}, :create),
     do: handle_notify(PubSub.AgentMessageCreated, msg)
+  defp notify({:ok, %AgentMessage{} = msg}, :update),
+    do: handle_notify(PubSub.AgentMessageUpdated, msg)
   defp notify(pass, _), do: pass
 end

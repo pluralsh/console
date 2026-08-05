@@ -1,43 +1,17 @@
 import {
   AnimatedDiv,
-  Card,
-  CheckRoundedIcon,
-  ContainerRuntimeIcon,
   DiscoverIcon,
-  Flex,
   ListIcon,
-  LogsIcon,
   orange,
   Popover,
   PopoverWrapper,
-  useFloatingDropdown,
-  WarningShieldIcon,
 } from '@pluralsh/design-system'
-import { Overline } from 'components/cd/utils/PermissionsModal'
-import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
-import { cloneElement, type ReactNode, useRef, useState } from 'react'
-import { useButton } from 'react-aria'
+import { type CSSProperties, type ReactNode } from 'react'
 import { to, useTransition } from '@react-spring/web'
 import { FloatingPortal, type UseFloatingReturn } from '@floating-ui/react'
 import { useTheme } from 'styled-components'
-import type {
-  WorkbenchJobCodingModesAttributes,
-  WorkbenchJobModesAttributes,
-} from 'generated/graphql'
-import {
-  WorkbenchPromptModeDetails,
-  workbenchPromptModeIconColor,
-  type WorkbenchPromptModeConfig,
-} from './WorkbenchPromptModeDetails'
-import {
-  attributesForPromptMode,
-  type WorkbenchPromptMode,
-  updateCodingModes,
-} from './workbenchPromptModes'
-
-const PANEL_WIDTH = 640
-const LEFT_PANE_WIDTH = 240
-const RIGHT_PANE_WIDTH = 400
+import { type WorkbenchPromptModeConfig } from './WorkbenchPromptModeDetails'
+import { type WorkbenchPromptMode } from './workbenchPromptModes'
 
 export const WORKBENCH_PROMPT_MODES: (WorkbenchPromptModeConfig & {
   mode: WorkbenchPromptMode
@@ -45,7 +19,6 @@ export const WORKBENCH_PROMPT_MODES: (WorkbenchPromptModeConfig & {
   {
     mode: 'agent',
     label: 'Coding agent',
-    triggerLabel: 'Coding',
     Icon: DiscoverIcon,
     description: 'Tune coding agent functionality for this job.',
     supervisionOptions: true,
@@ -60,239 +33,18 @@ export const WORKBENCH_PROMPT_MODES: (WorkbenchPromptModeConfig & {
   },
 ]
 
-export function WorkbenchPromptModeSelector({
-  value,
-  onChange,
-  disabled = false,
-}: {
-  value: WorkbenchJobModesAttributes | null
-  onChange: (value: WorkbenchJobModesAttributes | null) => void
-  disabled?: boolean
-}) {
-  const theme = useTheme()
-  const triggerRef = useRef<HTMLButtonElement>(null)
-  const [isOpen, setIsOpen] = useState(false)
-  const [hoveredMode, setHoveredMode] = useState<WorkbenchPromptMode | null>(
-    null
-  )
-
-  const selectedMode: WorkbenchPromptMode | null = value?.plan
-    ? 'plan'
-    : value?.coding != null
-      ? 'agent'
-      : null
-
-  const { floating, triggerRef: mergedTriggerRef } = useFloatingDropdown({
-    triggerRef,
-    width: PANEL_WIDTH,
-    maxHeight: 360,
-    minHeight: 280,
-    placement: 'left',
-  })
-
-  const { buttonProps } = useButton(
-    {
-      onPress: () => !disabled && setIsOpen((open) => !open),
-      isDisabled: disabled,
-    },
-    triggerRef
-  )
-
-  const previewMode = hoveredMode ?? selectedMode ?? 'agent'
-  const previewConfig = WORKBENCH_PROMPT_MODES.find(
-    (m) => m.mode === previewMode
-  )!
-  const selectedModeConfig = selectedMode
-    ? WORKBENCH_PROMPT_MODES.find((m) => m.mode === selectedMode)
-    : null
-
-  const setCoding = (coding: WorkbenchJobCodingModesAttributes) =>
-    onChange(
-      updateCodingModes(
-        selectedMode === 'agent'
-          ? value
-          : attributesForPromptMode('agent', value),
-        coding
-      )
-    )
-
-  const selectedIconColor = selectedModeConfig
-    ? workbenchPromptModeIconColor(selectedModeConfig, theme)
-    : undefined
-
-  const trigger = (
-    <ChatOptionPill
-      isOpen={isOpen}
-      css={{ height: '100%' }}
-    >
-      {selectedModeConfig ? (
-        <>
-          <selectedModeConfig.Icon
-            size={12}
-            color={selectedIconColor!}
-          />
-          <span
-            css={
-              selectedMode === 'plan' ? { color: selectedIconColor } : undefined
-            }
-          >
-            {selectedModeConfig.triggerLabel ?? selectedModeConfig.label}
-          </span>
-          {selectedMode === 'agent' && value?.coding?.approval && (
-            <WarningShieldIcon
-              size={12}
-              color="icon-light"
-            />
-          )}
-          {selectedMode === 'agent' && value?.coding?.babysit && (
-            <ContainerRuntimeIcon
-              size={12}
-              color="icon-light"
-            />
-          )}
-        </>
-      ) : (
-        <>
-          <LogsIcon size={12} />
-          <span>Modes</span>
-        </>
-      )}
-    </ChatOptionPill>
-  )
-
-  return (
-    <>
-      {cloneElement(trigger, {
-        ref: mergedTriggerRef,
-        ...buttonProps,
-        ...(isOpen ? { style: { zIndex: theme.zIndexes.tooltip + 1 } } : {}),
-      })}
-      <WorkbenchPromptPopover
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-          setHoveredMode(null)
-        }}
-        floating={floating}
-      >
-        <Card
-          css={{
-            display: 'flex',
-            width: '100%',
-            overflow: 'hidden',
-            backgroundColor: theme.colors['fill-two'],
-            borderRadius: theme.borderRadiuses.large,
-            border: theme.borders['fill-two'],
-            boxShadow: theme.boxShadows.moderate,
-          }}
-        >
-          <Flex
-            direction="column"
-            gap="small"
-            css={{
-              borderRight: theme.borders['fill-two'],
-              width: LEFT_PANE_WIDTH,
-              flexShrink: 0,
-              padding: theme.spacing.medium,
-            }}
-          >
-            <Overline>Mode</Overline>
-            <Flex
-              direction="column"
-              gap="xxsmall"
-            >
-              {WORKBENCH_PROMPT_MODES.map(({ mode, ...config }) => {
-                const selected = selectedMode === mode
-                const hovered = hoveredMode === mode
-
-                return (
-                  <button
-                    key={mode}
-                    type="button"
-                    css={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: theme.spacing.xsmall,
-                      width: '100%',
-                      padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-                      border: 'none',
-                      borderRadius: theme.borderRadiuses.medium,
-                      backgroundColor:
-                        selected || hovered
-                          ? theme.colors['fill-three']
-                          : 'transparent',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                    onMouseEnter={() => setHoveredMode(mode)}
-                    onMouseLeave={() => setHoveredMode(null)}
-                    onClick={() =>
-                      onChange(attributesForPromptMode(mode, value))
-                    }
-                  >
-                    <Flex
-                      align="center"
-                      gap="xsmall"
-                      flex={1}
-                      minWidth={0}
-                    >
-                      <config.Icon
-                        size={12}
-                        color={workbenchPromptModeIconColor(config, theme)}
-                      />
-                      <span
-                        css={{
-                          ...theme.partials.text.body2,
-                          color: theme.colors.text,
-                        }}
-                      >
-                        {config.label}
-                      </span>
-                    </Flex>
-                    {selected && (
-                      <CheckRoundedIcon
-                        size={16}
-                        color="icon-default"
-                      />
-                    )}
-                  </button>
-                )
-              })}
-            </Flex>
-          </Flex>
-          <Flex
-            css={{
-              backgroundColor: theme.colors['fill-two-selected'],
-              width: RIGHT_PANE_WIDTH,
-              flexShrink: 0,
-              padding: theme.spacing.medium,
-            }}
-          >
-            <WorkbenchPromptModeDetails
-              config={previewConfig}
-              mode={previewMode}
-              approval={!!value?.coding?.approval}
-              babysit={!!value?.coding?.babysit}
-              onApprovalChange={(approval) => setCoding({ approval })}
-              onBabysitChange={(babysit) => setCoding({ babysit })}
-            />
-          </Flex>
-        </Card>
-      </WorkbenchPromptPopover>
-    </>
-  )
-}
-
 export function WorkbenchPromptPopover({
   isOpen,
   onClose,
   floating,
   children,
+  style,
 }: {
   isOpen: boolean
   onClose: () => void
   floating: UseFloatingReturn
   children: ReactNode
+  style?: CSSProperties
 }) {
   const theme = useTheme()
   const direction = floating.placement.startsWith('bottom') ? -1 : 1
@@ -316,6 +68,7 @@ export function WorkbenchPromptPopover({
           position: floating.strategy,
           left: floating.x ?? 0,
           top: floating.y ?? 0,
+          ...style,
         }}
       >
         <AnimatedDiv

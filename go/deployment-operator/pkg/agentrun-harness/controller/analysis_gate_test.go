@@ -405,6 +405,88 @@ func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
 	require.Contains(t, bCtx.Prompt, "review:2")
 }
 
+func TestBuildBabysitContextSkipsStateChangesWithoutCommentsOrFailingCI(t *testing.T) {
+	t.Parallel()
+
+	prURL := "https://github.com/pluralsh/console/pull/1"
+	in := &agentRunController{dir: t.TempDir()}
+	agentRun := &gqlclient.AgentRunFragment{
+		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
+	}
+	client := &fakeBabysitGRPCClient{
+		details: map[string]*scm.PRDetails{
+			prURL: {
+				Title:   "Fix babysit",
+				HeadRef: "fix/babysit",
+				State:   scm.PRStateOpen,
+				CIChecks: []scm.CICheck{{
+					Name:       "test",
+					Status:     scm.CICheckStatusCompleted,
+					Conclusion: scm.CICheckConclusionSuccess,
+				}},
+			},
+		},
+	}
+
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	baselineSHA := in.lastPRSHA
+
+	client.details[prURL] = &scm.PRDetails{
+		Title:   "Fix babysit docs",
+		HeadRef: "fix/babysit",
+		State:   scm.PRStateOpen,
+		CIChecks: []scm.CICheck{{
+			Name:   "test",
+			Status: scm.CICheckStatusInProgress,
+		}},
+	}
+
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.NotEqual(t, baselineSHA, in.lastPRSHA)
+}
+
+func TestBuildBabysitContextIncludesFailingCIWithoutComments(t *testing.T) {
+	t.Parallel()
+
+	prURL := "https://github.com/pluralsh/console/pull/1"
+	in := &agentRunController{dir: t.TempDir()}
+	agentRun := &gqlclient.AgentRunFragment{
+		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
+	}
+	client := &fakeBabysitGRPCClient{
+		details: map[string]*scm.PRDetails{
+			prURL: {
+				Title:   "Fix babysit",
+				HeadRef: "fix/babysit",
+				State:   scm.PRStateOpen,
+				CIChecks: []scm.CICheck{{
+					Name:       "test",
+					Status:     scm.CICheckStatusCompleted,
+					Conclusion: scm.CICheckConclusionSuccess,
+				}},
+			},
+		},
+	}
+
+	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+
+	client.details[prURL] = &scm.PRDetails{
+		Title:   "Fix babysit",
+		HeadRef: "fix/babysit",
+		State:   scm.PRStateOpen,
+		CIChecks: []scm.CICheck{{
+			Name:       "test",
+			Status:     scm.CICheckStatusCompleted,
+			Conclusion: scm.CICheckConclusionFailure,
+		}},
+	}
+
+	bCtx := in.buildBabysitContext(context.Background(), agentRun, client)
+	require.NotNil(t, bCtx)
+	require.Contains(t, bCtx.Prompt, "Failing CI checks")
+	require.Contains(t, bCtx.Prompt, "test")
+}
+
 func TestBuildBabysitContextIncludesReviewSummariesAsNonReactable(t *testing.T) {
 	t.Parallel()
 

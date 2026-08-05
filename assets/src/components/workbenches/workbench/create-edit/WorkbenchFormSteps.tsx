@@ -11,19 +11,15 @@ import {
   Flex,
   FormField,
   IconFrame,
-  InfoOutlineIcon,
   Input2,
   isValidRepoUrl,
   ListBoxItem,
-  Radio,
-  RadioGroup,
   Select,
   SelectButton,
   Switch,
   Tooltip,
 } from '@pluralsh/design-system'
 import {
-  AgentRunMode,
   PolicyBindingFragment,
   useAgentRuntimeReposQuery,
   useGitRepositoriesQuery,
@@ -64,7 +60,6 @@ import {
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { BABYSITTING_TOOLTIP } from 'components/ai/babysittingTooltip'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
@@ -87,6 +82,7 @@ import {
   WorkbenchToolIcon,
 } from '../../tools/workbenchToolsUtils'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
+import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
   useWorkbenchFormCardTabs,
@@ -572,8 +568,6 @@ export function WorkbenchCodingAgentStep({
     () => coding?.repositories?.filter(isNonNullable) ?? [],
     [coding?.repositories]
   )
-  const mode = coding?.mode ?? AgentRunMode.Analyze
-  const enableBabysitting = coding?.enableBabysitting ?? false
 
   const setCodingRepos = (next: string[]) => {
     update((d) => {
@@ -617,22 +611,6 @@ export function WorkbenchCodingAgentStep({
             outerStyles={{ width: '100%' }}
           />
         </FillLevelDiv>
-      </FormField>
-      <FormField label="Mode">
-        <RadioGroup
-          value={mode}
-          onChange={(v) =>
-            update((d) => {
-              d.configuration ??= {}
-              d.configuration.coding ??= {}
-              d.configuration.coding.mode = v as AgentRunMode
-            })
-          }
-          css={{ display: 'flex', gap: 16 }}
-        >
-          <Radio value={AgentRunMode.Analyze}>Analyze</Radio>
-          <Radio value={AgentRunMode.Write}>Write</Radio>
-        </RadioGroup>
       </FormField>
       <FormField
         label="Allowed repositories"
@@ -714,36 +692,24 @@ export function WorkbenchCodingAgentStep({
           </Flex>
         )}
       </FormField>
-      {mode === AgentRunMode.Write && (
-        <Flex
-          align="center"
-          gap="xsmall"
-        >
-          <Switch
-            checked={enableBabysitting}
-            onChange={(checked) =>
-              update((d) => {
-                d.configuration ??= {}
-                d.configuration.coding ??= {}
-                d.configuration.coding.enableBabysitting = checked
-              })
-            }
-          >
-            Enable babysitting
-          </Switch>
-          <Tooltip
-            label={BABYSITTING_TOOLTIP}
-            css={{ maxWidth: 320 }}
-          >
-            <InfoOutlineIcon
-              color="icon-xlight"
-              size={14}
-              css={{ cursor: 'help', flexShrink: 0 }}
-            />
-          </Tooltip>
-        </Flex>
-      )}
     </>
+  )
+}
+
+export function WorkbenchModesAndTokenLimitStep({
+  formState,
+  setFormState,
+}: WorkbenchFormStepProps) {
+  return (
+    <WorkbenchModesForm
+      value={formState.modes}
+      onChange={(modes) =>
+        setFormState((prev) => ({
+          ...prev,
+          modes,
+        }))
+      }
+    />
   )
 }
 
@@ -1044,6 +1010,7 @@ export const WORKBENCH_STEP_LABELS = [
   'Workbench setup',
   'Skills configuration',
   'Coding agent',
+  'Modes & token limit',
   'Access policy',
   'Attach tools',
 ] as const
@@ -1056,6 +1023,10 @@ export const workbenchFormSteps: WorkbenchFormStep[] = [
   { label: 'Workbench setup', component: WorkbenchSetupStep },
   { label: 'Skills configuration', component: WorkbenchSkillsConfigStep },
   { label: 'Coding agent', component: WorkbenchCodingAgentStep },
+  {
+    label: 'Modes & token limit',
+    component: WorkbenchModesAndTokenLimitStep,
+  },
   { label: 'Access policy', component: WorkbenchAccessPolicyStep },
   { label: 'Attach tools', component: WorkbenchAttachToolsStep },
 ]

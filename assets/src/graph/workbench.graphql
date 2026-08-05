@@ -19,6 +19,29 @@ fragment WorkbenchTiny on Workbench {
   }
 }
 
+fragment WorkbenchJobModesFields on WorkbenchJobModes {
+  plan
+  verification
+  model {
+    provider
+    model
+  }
+  coding {
+    approval
+    babysit
+  }
+  budget {
+    cost
+    tokens
+  }
+  kubernetes {
+    update
+    delete
+    excludeNamespaces
+    requireNamespaces
+  }
+}
+
 fragment IssueWebhook on IssueWebhook {
   id
   name
@@ -82,19 +105,15 @@ fragment Workbench on Workbench {
     }
   }
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
+    ...WorkbenchJobModesFields
+  }
+  budget {
+    enabled
+    maximum
+    minFree
+    unit
+    last
+    lastUpdated
   }
   skills {
     ref {
@@ -136,6 +155,7 @@ fragment WorkbenchToolTiny on WorkbenchTool {
   name
   tool
   categories
+  approval
   cloudConnection {
     ...CloudConnectionTiny
   }
@@ -264,6 +284,21 @@ fragment WorkbenchTool on WorkbenchTool {
     }
     azureDevops {
       url
+    }
+    lambda {
+      lambdaArn
+      description
+      inputSchema
+    }
+    cloudRun {
+      identifier
+      description
+      inputSchema
+    }
+    azureFunction {
+      identifier
+      description
+      inputSchema
     }
     docker {
       url
@@ -399,12 +434,27 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     name
     input
     toolId
+    tool {
+      id
+      name
+      tool
+      configuration {
+        lambda {
+          description
+        }
+        cloudRun {
+          description
+        }
+        azureFunction {
+          description
+        }
+      }
+    }
   }
   kubeRequest {
     handle
     method
     path
-    body
     queryParams
     contentType
   }
@@ -437,6 +487,9 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  user {
+    ...UserTiny
+  }
   result {
     ...WorkbenchJobActivityResult
   }
@@ -473,19 +526,7 @@ fragment WorkbenchCron on WorkbenchCron {
   prompt
   userId
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
+    ...WorkbenchJobModesFields
   }
   lastRunAt
   nextRunAt
@@ -509,19 +550,7 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   priority
   userId
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
+    ...WorkbenchJobModesFields
   }
   matches {
     regex
@@ -569,19 +598,7 @@ fragment WorkbenchChatbot on WorkbenchChatbot {
   messageBehavior
   userId
   modes {
-    plan
-    model {
-      provider
-      model
-    }
-    coding {
-      approval
-      babysit
-    }
-    budget {
-      cost
-      tokens
-    }
+    ...WorkbenchJobModesFields
   }
   insertedAt
   updatedAt
@@ -614,6 +631,17 @@ fragment WorkbenchIssue on Issue {
   }
 }
 
+fragment QueuedPromptTiny on QueuedPrompt {
+  id
+  prompt
+  dequeableAt
+  insertedAt
+  user {
+    id
+    name
+  }
+}
+
 fragment WorkbenchJobPullRequest on PullRequest {
   ...PullRequestBasic
   patch
@@ -641,6 +669,12 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   status
   error
   insertedAt
+  queuedPromptCount
+  queuedPromptSummary {
+    readyCount
+    pendingCount
+    nextAt
+  }
   usage {
     ...WorkbenchJobUsageTiny
   }
@@ -1211,6 +1245,115 @@ query WorkbenchJobActivities($id: ID!) {
         }
       }
     }
+    queuedPrompts(first: 100) {
+      edges {
+        node {
+          ...QueuedPromptTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchJobActionSummary($id: ID!, $first: Int = 1) {
+  workbenchJob(id: $id) {
+    id
+    pendingActions: activities(first: $first, status: NEEDS_APPROVAL) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    functionActions: activities(first: $first, type: FUNCTION) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    kubernetesActions: activities(first: $first, type: KUBERNETES) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+
+fragment WorkbenchJobAction on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  insertedAt
+  user {
+    ...UserTiny
+  }
+  result {
+    output
+    error
+    functionCall {
+      name
+      input
+      toolId
+      tool {
+        id
+        name
+        tool
+        configuration {
+          lambda {
+            description
+          }
+          cloudRun {
+            description
+          }
+          azureFunction {
+            description
+          }
+        }
+      }
+    }
+    kubeRequest {
+      handle
+      method
+      path
+      queryParams
+      contentType
+    }
+  }
+}
+
+query WorkbenchJobActions($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    functionActions: activities(first: 100, type: FUNCTION) {
+      edges {
+        node {
+          ...WorkbenchJobAction
+        }
+      }
+    }
+    kubernetesActions: activities(first: 100, type: KUBERNETES) {
+      edges {
+        node {
+          ...WorkbenchJobAction
+        }
+      }
+    }
+  }
+}
+
+mutation ApproveWorkbenchJobActivity($id: ID!) {
+  approveWorkbenchJobActivity(id: $id) {
+    ...WorkbenchJobAction
+  }
+}
+
+mutation RejectWorkbenchJobActivity($id: ID!, $reason: String) {
+  rejectWorkbenchJobActivity(id: $id, reason: $reason) {
+    ...WorkbenchJobAction
   }
 }
 
@@ -1231,6 +1374,22 @@ query WorkbenchJobActivityWhimseyText($id: ID!) {
 query WorkbenchJobActivity($id: ID!) {
   workbenchJobActivity(id: $id) {
     ...WorkbenchJobActivityWithThoughts
+  }
+}
+
+query WorkbenchJobKubeRequestDiff($id: ID!) {
+  workbenchJobActivity(id: $id) {
+    id
+    result {
+      kubeRequest {
+        handle
+        method
+        path
+        body
+        contentType
+        current
+      }
+    }
   }
 }
 
@@ -1344,6 +1503,18 @@ mutation CreateWorkbenchMessage(
 ) {
   createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
     ...WorkbenchJobActivity
+  }
+}
+
+mutation CreateQueuedPrompt($jobId: ID!, $attributes: QueuedPromptAttributes!) {
+  createQueuedPrompt(jobId: $jobId, attributes: $attributes) {
+    ...QueuedPromptTiny
+  }
+}
+
+mutation DeleteQueuedPrompt($id: ID!) {
+  deleteQueuedPrompt(id: $id) {
+    id
   }
 }
 

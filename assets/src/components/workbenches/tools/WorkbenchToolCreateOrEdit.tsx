@@ -34,11 +34,13 @@ import { deepOmitBlank } from 'utils/graphql'
 import { getWorkbenchesBreadcrumbs } from '../Workbenches'
 import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
+  cloudFunctionProviderForWorkbenchTool,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   getWorkbenchToolLabel,
   isConfigurableWorkbenchToolType,
   isProvider,
   scmTypeForWorkbenchTool,
+  workbenchToolSupportsApproval,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
 import {
@@ -270,6 +272,7 @@ function formStateToAttributes(
     cloudConnectionId,
     mcpServerId,
     scmConnectionId,
+    approval,
     readBindings,
     writeBindings,
   } = state
@@ -277,17 +280,23 @@ function formStateToAttributes(
     tool: type,
     name,
     categories,
+    ...(workbenchToolSupportsApproval(type) ? { approval: !!approval } : {}),
     readBindings: readBindings.map(bindingToBindingAttributes),
     writeBindings: writeBindings.map(bindingToBindingAttributes),
   }
 
   const scmType = scmTypeForWorkbenchTool(type)
   const scmPatch = scmType ? { scmConnectionId: scmConnectionId ?? null } : {}
+  const cloudConnectionPatch =
+    type === WorkbenchToolType.Cloud ||
+    !!cloudFunctionProviderForWorkbenchTool(type)
+      ? { cloudConnectionId: cloudConnectionId ?? null }
+      : {}
 
   if (type === WorkbenchToolType.Cloud)
     return {
       ...base,
-      cloudConnectionId: cloudConnectionId ?? null,
+      ...cloudConnectionPatch,
       ...scmPatch,
     }
 
@@ -299,14 +308,36 @@ function formStateToAttributes(
     }
 
   if (!isConfigurableWorkbenchToolType(type) || !configuration)
-    return { ...base, ...scmPatch }
+    return { ...base, ...cloudConnectionPatch, ...scmPatch }
 
   const configKey = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
   const sanitized = deepOmitBlank(configuration[configKey])
 
-  if (isEmpty(sanitized)) return { ...base, ...scmPatch }
+  if (isEmpty(sanitized))
+    return { ...base, ...cloudConnectionPatch, ...scmPatch }
 
-  return { ...base, ...scmPatch, configuration: { [configKey]: sanitized } }
+  return {
+    ...base,
+    ...cloudConnectionPatch,
+    ...scmPatch,
+    configuration: {
+      [configKey]: coerceConfigurationJsonFields(sanitized),
+    },
+  }
+}
+
+function coerceConfigurationJsonFields<T extends Record<string, unknown>>(
+  config: T
+): T {
+  if (!('inputSchema' in config)) return config
+
+  const inputSchema = config.inputSchema
+  if (inputSchema == null || typeof inputSchema === 'string') return config
+
+  return {
+    ...config,
+    inputSchema: JSON.stringify(inputSchema),
+  }
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

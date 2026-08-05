@@ -117,7 +117,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpd
           ]
         _ -> :ok
       end
-    end, ttl: :timer.hours(1))
+    end, ttl: :timer.hours(2))
   end
   def resource(_), do: :ok
 end
@@ -126,6 +126,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ClusterPinged do
   alias Console.Schema.Cluster
   alias Console.AI.PubSub.Vector.Indexable
   alias Console.Deployments.Clusters
+  require Logger
 
   def resource(%@for{item: %Cluster{} = cluster}) do
     # Preload cloud_addons and fetch runtime services with addon info hydrated
@@ -137,11 +138,12 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ClusterPinged do
 
     Console.debounce({:vectorizer, :cluster, cluster.id}, fn ->
       {users, groups} = Console.AI.Authorizable.authorize(cluster)
+      Logger.info("vectorizing cluster #{cluster.id}")
       [
         %Indexable{delete: true, force: true, filters: [cluster_id: cluster.id, datatype: {:raw, :cluster}]},
         %Indexable{data: Cluster.Mini.new(cluster_with_data), filters: [cluster_id: cluster.id, user_ids: users, group_ids: groups], force: true}
       ]
-    end)
+    end, ttl: :timer.hours(2))
   end
   def resource(_), do: :ok
 end

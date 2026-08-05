@@ -324,6 +324,8 @@ type ConsoleClient interface {
 	CreateWorkbenchPrompt(ctx context.Context, workbenchID string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchPrompt, error)
 	UpdateWorkbenchPrompt(ctx context.Context, id string, attributes WorkbenchPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchPrompt, error)
 	DeleteWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchPrompt, error)
+	CreateQueuedPrompt(ctx context.Context, jobID string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateQueuedPrompt, error)
+	EnqueueWorkbenchPrFollowup(ctx context.Context, url string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*EnqueueWorkbenchPrFollowup, error)
 	GetWorkbenchPrompt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchPrompt, error)
 	CreateWorkbenchWebhook(ctx context.Context, workbenchID string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateWorkbenchWebhook, error)
 	UpdateWorkbenchWebhook(ctx context.Context, id string, attributes WorkbenchWebhookAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchWebhook, error)
@@ -7190,6 +7192,45 @@ func (t *WorkbenchPromptFragment) GetPrompt() *string {
 	return t.Prompt
 }
 
+type QueuedPromptFragment struct {
+	ID           string                             "json:\"id\" graphql:\"id\""
+	Prompt       *string                            "json:\"prompt,omitempty\" graphql:\"prompt\""
+	DequeableAt  *string                            "json:\"dequeableAt,omitempty\" graphql:\"dequeableAt\""
+	WorkbenchJob *QueuedPromptFragment_WorkbenchJob "json:\"workbenchJob,omitempty\" graphql:\"workbenchJob\""
+	User         *QueuedPromptFragment_User         "json:\"user,omitempty\" graphql:\"user\""
+}
+
+func (t *QueuedPromptFragment) GetID() string {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.ID
+}
+func (t *QueuedPromptFragment) GetPrompt() *string {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.Prompt
+}
+func (t *QueuedPromptFragment) GetDequeableAt() *string {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.DequeableAt
+}
+func (t *QueuedPromptFragment) GetWorkbenchJob() *QueuedPromptFragment_WorkbenchJob {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.WorkbenchJob
+}
+func (t *QueuedPromptFragment) GetUser() *QueuedPromptFragment_User {
+	if t == nil {
+		t = &QueuedPromptFragment{}
+	}
+	return t.User
+}
+
 type TinyAgentRuntimeFragment_Cluster struct {
 	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
 	ID     string  "json:\"id\" graphql:\"id\""
@@ -9561,8 +9602,10 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Flows) GetWo
 }
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -9571,6 +9614,12 @@ type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -9582,6 +9631,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -9724,8 +9779,10 @@ func (t *PersonaConfigurationFragment_Flows) GetWorkbenches() *bool {
 }
 
 type PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -9734,6 +9791,12 @@ type PersonaConfigurationFragment_Sidebar struct {
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &PersonaConfigurationFragment_Sidebar{}
@@ -9745,6 +9808,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -16180,6 +16249,28 @@ func (t *WorkbenchWebhookFragment_Workbench) GetName() string {
 		t = &WorkbenchWebhookFragment_Workbench{}
 	}
 	return t.Name
+}
+
+type QueuedPromptFragment_WorkbenchJob struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *QueuedPromptFragment_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &QueuedPromptFragment_WorkbenchJob{}
+	}
+	return t.ID
+}
+
+type QueuedPromptFragment_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *QueuedPromptFragment_User) GetID() string {
+	if t == nil {
+		t = &QueuedPromptFragment_User{}
+	}
+	return t.ID
 }
 
 type DeleteAgentRuntime_DeleteAgentRuntime struct {
@@ -25237,8 +25328,10 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 }
 
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25247,6 +25340,12 @@ type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragme
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25258,6 +25357,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25418,8 +25523,10 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25428,6 +25535,12 @@ type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25439,6 +25552,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25581,8 +25700,10 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25591,6 +25712,12 @@ type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25602,6 +25729,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -25744,8 +25877,10 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
+	Ai           *bool "json:\"ai,omitempty\" graphql:\"ai\""
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
 	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
+	Cd           *bool "json:\"cd,omitempty\" graphql:\"cd\""
 	Flows        *bool "json:\"flows,omitempty\" graphql:\"flows\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
@@ -25754,6 +25889,12 @@ type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurat
 	Workbenches  *bool "json:\"workbenches,omitempty\" graphql:\"workbenches\""
 }
 
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAi() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Ai
+}
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 	if t == nil {
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -25765,6 +25906,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Backups
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetCd() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Cd
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetFlows() *bool {
 	if t == nil {
@@ -43447,6 +43594,96 @@ func (t *DeleteWorkbenchPrompt_DeleteWorkbenchPrompt) GetID() string {
 	return t.ID
 }
 
+type CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_WorkbenchJob struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_WorkbenchJob{}
+	}
+	return t.ID
+}
+
+type CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User) GetID() string {
+	if t == nil {
+		t = &CreateQueuedPrompt_CreateQueuedPrompt_QueuedPromptFragment_User{}
+	}
+	return t.ID
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User{}
+	}
+	return t.ID
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	URL string "json:\"url\" graphql:\"url\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob{}
+	}
+	return t.ID
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob) GetURL() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob{}
+	}
+	return t.URL
+}
+
+type EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup struct {
+	DequeableAt  *string                                                                          "json:\"dequeableAt,omitempty\" graphql:\"dequeableAt\""
+	ID           string                                                                           "json:\"id\" graphql:\"id\""
+	Prompt       *string                                                                          "json:\"prompt,omitempty\" graphql:\"prompt\""
+	User         *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User "json:\"user,omitempty\" graphql:\"user\""
+	WorkbenchJob *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob              "json:\"workbenchJob,omitempty\" graphql:\"workbenchJob\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetDequeableAt() *string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.DequeableAt
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetID() string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.ID
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetPrompt() *string {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.Prompt
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetUser() *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_QueuedPromptFragment_User {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.User
+}
+func (t *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup) GetWorkbenchJob() *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup_WorkbenchJob {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup{}
+	}
+	return t.WorkbenchJob
+}
+
 type CreateWorkbenchWebhook_CreateWorkbenchWebhook_WorkbenchWebhookFragment_Matches struct {
 	CaseInsensitive *bool   "json:\"caseInsensitive,omitempty\" graphql:\"caseInsensitive\""
 	Regex           *string "json:\"regex,omitempty\" graphql:\"regex\""
@@ -47215,6 +47452,28 @@ func (t *DeleteWorkbenchPrompt) GetDeleteWorkbenchPrompt() *DeleteWorkbenchPromp
 		t = &DeleteWorkbenchPrompt{}
 	}
 	return t.DeleteWorkbenchPrompt
+}
+
+type CreateQueuedPrompt struct {
+	CreateQueuedPrompt *QueuedPromptFragment "json:\"createQueuedPrompt,omitempty\" graphql:\"createQueuedPrompt\""
+}
+
+func (t *CreateQueuedPrompt) GetCreateQueuedPrompt() *QueuedPromptFragment {
+	if t == nil {
+		t = &CreateQueuedPrompt{}
+	}
+	return t.CreateQueuedPrompt
+}
+
+type EnqueueWorkbenchPrFollowup struct {
+	EnqueueWorkbenchPrFollowup *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup "json:\"enqueueWorkbenchPrFollowup,omitempty\" graphql:\"enqueueWorkbenchPrFollowup\""
+}
+
+func (t *EnqueueWorkbenchPrFollowup) GetEnqueueWorkbenchPrFollowup() *EnqueueWorkbenchPrFollowup_EnqueueWorkbenchPrFollowup {
+	if t == nil {
+		t = &EnqueueWorkbenchPrFollowup{}
+	}
+	return t.EnqueueWorkbenchPrFollowup
 }
 
 type GetWorkbenchPrompt struct {
@@ -61686,6 +61945,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -61798,6 +62059,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -61885,6 +62148,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -61973,6 +62238,8 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
 		backups
 		stacks
 		workbenches
+		cd
+		ai
 	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
@@ -72448,6 +72715,82 @@ func (c *Client) DeleteWorkbenchPrompt(ctx context.Context, id string, intercept
 	return &res, nil
 }
 
+const CreateQueuedPromptDocument = `mutation CreateQueuedPrompt ($jobId: ID!, $attributes: QueuedPromptAttributes!) {
+	createQueuedPrompt(jobId: $jobId, attributes: $attributes) {
+		... QueuedPromptFragment
+	}
+}
+fragment QueuedPromptFragment on QueuedPrompt {
+	id
+	prompt
+	dequeableAt
+	workbenchJob {
+		id
+	}
+	user {
+		id
+	}
+}
+`
+
+func (c *Client) CreateQueuedPrompt(ctx context.Context, jobID string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateQueuedPrompt, error) {
+	vars := map[string]any{
+		"jobId":      jobID,
+		"attributes": attributes,
+	}
+
+	var res CreateQueuedPrompt
+	if err := c.Client.Post(ctx, "CreateQueuedPrompt", CreateQueuedPromptDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const EnqueueWorkbenchPrFollowupDocument = `mutation EnqueueWorkbenchPrFollowup ($url: String!, $attributes: QueuedPromptAttributes!) {
+	enqueueWorkbenchPrFollowup(url: $url, attributes: $attributes) {
+		... QueuedPromptFragment
+		workbenchJob {
+			id
+			url
+		}
+	}
+}
+fragment QueuedPromptFragment on QueuedPrompt {
+	id
+	prompt
+	dequeableAt
+	workbenchJob {
+		id
+	}
+	user {
+		id
+	}
+}
+`
+
+func (c *Client) EnqueueWorkbenchPrFollowup(ctx context.Context, url string, attributes QueuedPromptAttributes, interceptors ...clientv2.RequestInterceptor) (*EnqueueWorkbenchPrFollowup, error) {
+	vars := map[string]any{
+		"url":        url,
+		"attributes": attributes,
+	}
+
+	var res EnqueueWorkbenchPrFollowup
+	if err := c.Client.Post(ctx, "EnqueueWorkbenchPrFollowup", EnqueueWorkbenchPrFollowupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetWorkbenchPromptDocument = `query GetWorkbenchPrompt ($id: ID!) {
 	workbenchPrompt(id: $id) {
 		... WorkbenchPromptFragment
@@ -72983,6 +73326,8 @@ var DocumentOperationNames = map[string]string{
 	CreateWorkbenchPromptDocument:                     "CreateWorkbenchPrompt",
 	UpdateWorkbenchPromptDocument:                     "UpdateWorkbenchPrompt",
 	DeleteWorkbenchPromptDocument:                     "DeleteWorkbenchPrompt",
+	CreateQueuedPromptDocument:                        "CreateQueuedPrompt",
+	EnqueueWorkbenchPrFollowupDocument:                "EnqueueWorkbenchPrFollowup",
 	GetWorkbenchPromptDocument:                        "GetWorkbenchPrompt",
 	CreateWorkbenchWebhookDocument:                    "CreateWorkbenchWebhook",
 	UpdateWorkbenchWebhookDocument:                    "UpdateWorkbenchWebhook",

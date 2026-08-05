@@ -16,12 +16,12 @@ defmodule Console.AI.Workbench.Subagents.Integration do
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools = tools(environment)
 
     MemoryEngine.new(tools, 20,
       engine_opts(job) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: jprompt, engine: &1)),
+        system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
         tool_search: length(tools) > 10,
         pre_enable: [Result, %Skills{} ,%Skill{}],
@@ -61,8 +61,27 @@ defmodule Console.AI.Workbench.Subagents.Integration do
 
   @allowed_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker)a
 
+  def scm_tools(tools) do
+    tools
+    |> tool_values()
+    |> Enum.filter(fn
+      %WorkbenchTool{categories: categories} when is_list(categories) -> :scm in categories
+      _ -> false
+    end)
+    |> expand_workbench_tools()
+  end
+
   defp workbench_tools(tools) do
-    Enum.map(tools, &elem(&1, 1))
+    tools
+    |> tool_values()
+    |> expand_workbench_tools()
+  end
+
+  defp tool_values(tools) when is_map(tools), do: Map.values(tools)
+  defp tool_values(tools) when is_list(tools), do: tools
+
+  defp expand_workbench_tools(tools) do
+    tools
     |> Enum.filter(fn
       %WorkbenchTool{tool: t} when t in @allowed_tools -> true
       _ -> false

@@ -27,7 +27,27 @@ defmodule Console.OpenAPI.AI.Workbench do
       project_id: string(description: "ID of the project this workbench belongs to"),
       repository_id: string(description: "ID of the git repository for this workbench"),
       agent_runtime_id: string(description: "ID of the agent runtime for this workbench"),
+      budget: Console.OpenAPI.AI.WorkbenchBudget,
     })
+  }
+end
+
+defmodule Console.OpenAPI.AI.WorkbenchBudget do
+  @moduledoc "OpenAPI schema for workbench token bucket budget tracking."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchBudget",
+    description: "Token bucket budget configuration and current state for a workbench",
+    properties: %{
+      enabled: boolean(description: "Whether budget tracking is enabled"),
+      maximum: %{type: :number, description: "Maximum budget capacity"},
+      min_free: %{type: :number, description: "Minimum budget capacity to keep free"},
+      unit: ecto_enum(Console.Schema.Workbench.BudgetUnit, description: "The budget unit"),
+      last: %{type: :number, description: "Remaining budget capacity"},
+      last_updated: datetime(description: "When the budget was last updated")
+    }
   }
 end
 
@@ -88,6 +108,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJobResult do
     description: "The result of a workbench job run (working theory, conclusion, todos, metadata)",
     properties: timestamps(%{
       id: string(description: "Unique identifier for the result"),
+      objective: string(description: "The sole active objective for this investigation"),
       working_theory: string(description: "The working theory for this result"),
       criticism: string(description: "Markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"),
       conclusion: string(description: "The conclusion for this result"),
@@ -139,6 +160,7 @@ defmodule Console.OpenAPI.AI.WorkbenchJobModes do
     description: "Mode-specific options for a workbench job",
     properties: %{
       plan: boolean(description: "Whether planning mode is enabled for this job"),
+      verification: boolean(description: "Whether verification mode is enabled for this job"),
       model: Console.OpenAPI.AI.WorkbenchJobModel,
       coding: Console.OpenAPI.AI.WorkbenchJobCodingModes
     }
@@ -196,5 +218,40 @@ defmodule Console.OpenAPI.AI.WorkbenchJobInput do
       modes: Console.OpenAPI.AI.WorkbenchJobModes
     },
     required: [:prompt]
+  }
+end
+
+defmodule Console.OpenAPI.AI.QueuedPrompt do
+  @moduledoc "OpenAPI schema for queued prompts."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "QueuedPrompt",
+    description: "A deferred prompt queued for a workbench job.  The prompt will wait for the job to settle and for its dequeuable time to elapse before being sent to the job.",
+    properties: timestamps(%{
+      id: string(description: "Unique identifier for the queued prompt"),
+      prompt: string(description: "The prompt text"),
+      dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue"),
+      consumed_at: datetime(description: "When the prompt was consumed"),
+      workbench_job_id: string(description: "ID of the workbench job this prompt targets"),
+      user_id: string(description: "ID of the user this prompt runs as")
+    })
+  }
+end
+
+defmodule Console.OpenAPI.AI.QueuedPromptInput do
+  @moduledoc "OpenAPI schema for creating queued prompts."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "QueuedPromptInput",
+    description: "Input for creating a deferred workbench prompt",
+    properties: %{
+      prompt: string(description: "The prompt to send when dequeued"),
+      dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue")
+    },
+    required: [:prompt, :dequeable_at]
   }
 end

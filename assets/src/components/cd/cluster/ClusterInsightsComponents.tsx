@@ -11,7 +11,6 @@ import {
 import { ComponentPropsWithRef, useMemo, useState } from 'react'
 
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
-import { Body2BoldP } from 'components/utils/typography/Text.tsx'
 import {
   ClusterInsightComponentFragment,
   InsightComponentPriority,
@@ -53,11 +52,11 @@ export function ClusterInsightsComponents() {
         <StackedText
           first={
             <Flex
-              gap="xsmall"
+              gap="small"
               align="center"
               height={40}
             >
-              <ComponentsIcon />
+              <ComponentsIcon size={16} />
               <span>Component insights</span>
             </Flex>
           }
@@ -133,9 +132,21 @@ export function ClusterInsightsComponents() {
                 icon={
                   <IconFrame
                     size="medium"
-                    icon={<ComponentsIcon />}
+                    icon={<ComponentsIcon size={16} />}
                   />
                 }
+                first={
+                  <span>
+                    {component.namespace && (
+                      <span css={{ color: theme.colors['text-light'] }}>
+                        {component.namespace} &gt;{' '}
+                      </span>
+                    )}
+                    {component.name}
+                  </span>
+                }
+                firstPartialType="body2"
+                secondPartialType="caption"
               />
               <Flex
                 gap="xsmall"
@@ -159,33 +170,25 @@ export function ClusterInsightsComponents() {
 
 export function ClusterInsightComponentLabel({
   component,
-  icon = (
-    <IconFrame
-      size="large"
-      icon={<ComponentsIcon />}
-    />
-  ),
+  icon = <ComponentsIcon size={16} />,
   ...props
 }: {
   component: Nullable<ClusterInsightComponentFragment>
 } & Partial<ComponentPropsWithRef<typeof StackedText>>) {
+  const title = component?.namespace
+    ? `${component.namespace} > ${component.name}`
+    : component?.name
+
   return (
     <StackedText
-      firstColor="text-light"
-      first={
-        <div>
-          {component?.namespace}
-          <span>&nbsp;&#62;&nbsp;</span>
-          <Body2BoldP
-            as="span"
-            $color="text"
-          >
-            {component?.name}
-          </Body2BoldP>
-        </div>
-      }
+      first={title}
+      firstPartialType="body2Bold"
+      firstColor="text"
       second={`${component?.group ?? component?.version ?? 'v1'}/${component?.kind}`}
+      secondPartialType="body2"
+      secondColor="text-light"
       icon={icon}
+      iconGap="small"
       iconFlexProps={{ minWidth: 0 }}
       {...props}
     />

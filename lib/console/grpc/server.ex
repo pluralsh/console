@@ -1,7 +1,7 @@
 defmodule Console.GRPC.Server do
   use GRPC.Server, service: Plrl.PluralServer.Service
   alias Console.AI.Provider
-  alias Console.Deployments.{Settings, Agents}
+  alias Console.Deployments.{Settings, Agents, Clusters}
   alias Console.Schema.{DeploymentSettings, User, Cluster}
 
   @dummy_key "ignore"
@@ -35,6 +35,19 @@ defmodule Console.GRPC.Server do
         %Plrl.ProxyAuthenticationResponse{authenticated: false}
     end
   end
+
+  def verify_cluster(%Plrl.VerifyClusterRequest{token: "deploy-" <> _ = token}, _) do
+    case Clusters.get_by_deploy_token(token) do
+      %Cluster{} = cluster ->
+        my_cluster_pb(cluster)
+
+      _ ->
+        raise GRPC.RPCError, status: :unauthenticated, message: "invalid cluster access token"
+    end
+  end
+
+  def verify_cluster(_, _),
+    do: raise(GRPC.RPCError, status: :unauthenticated, message: "invalid cluster access token")
 
   defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
     with {:ok, _, pass} <- Console.es_creds(),
@@ -80,7 +93,7 @@ defmodule Console.GRPC.Server do
       embeddingModel: Map.get(openai, :embedding_model) || defaults[:embedding_model],
       toolModel: Map.get(openai, :tool_model) || defaults[:tool_model],
       baseUrl: Map.get(openai, :base_url),
-      proxyModels: proxy_models(openai),
+      proxyModels: proxy_models(openai, defaults),
       tokenExchange: to_openai_token_exchange_pb(Map.get(openai, :token_exchange)),
       method: openai_method_to_pb(Map.get(openai, :method))
     }
@@ -114,7 +127,7 @@ defmodule Console.GRPC.Server do
       model: Map.get(anthropic, :model) || defaults[:model],
       toolModel: Map.get(anthropic, :tool_model) || defaults[:tool_model],
       baseUrl: Map.get(anthropic, :base_url),
-      proxyModels: proxy_models(anthropic)
+      proxyModels: proxy_models(anthropic, defaults)
     }
   end
   defp to_anthropic_pb(_), do: nil
@@ -130,7 +143,7 @@ defmodule Console.GRPC.Server do
       embeddingModel: Map.get(vertex_ai, :embedding_model) || defaults[:embedding_model],
       project: Map.get(vertex_ai, :project),
       location: Map.get(vertex_ai, :location),
-      proxyModels: proxy_models(vertex_ai)
+      proxyModels: proxy_models(vertex_ai, defaults)
     }
   end
   defp to_vertex_pb(_), do: nil
@@ -145,7 +158,7 @@ defmodule Console.GRPC.Server do
       region: Map.get(bedrock, :region),
       awsAccessKeyId: Map.get(bedrock, :aws_access_key_id),
       awsSecretAccessKey: Map.get(bedrock, :aws_secret_access_key),
-      proxyModels: proxy_models(bedrock),
+      proxyModels: proxy_models(bedrock, defaults),
       deployments: to_string_map(Map.get(bedrock, :deployments))
     }
   end
@@ -161,7 +174,7 @@ defmodule Console.GRPC.Server do
       toolModel: Map.get(azure, :tool_model) || defaults[:tool_model],
       accessToken: Map.get(azure, :access_token),
       deployments: to_string_map(Map.get(azure, :deployments)),
-      proxyModels: proxy_models(azure)
+      proxyModels: proxy_models(azure, defaults)
     }
   end
   defp to_azure_pb(_), do: nil
@@ -172,12 +185,21 @@ defmodule Console.GRPC.Server do
   defp openai_method_to_pb(nil), do: :AUTO
   defp openai_method_to_pb(_), do: :AUTO
 
-  defp proxy_models(%{proxy_models: [_ | _] = models}), do: models
-  defp proxy_models(_), do: []
+  defp proxy_models(config, defaults)
+  defp proxy_models(%{proxy_models: [_ | _] = models}, _), do: models
+  defp proxy_models(_, %{proxy_models: models}) when is_list(models), do: models
+  defp proxy_models(_, _), do: []
 
   defp to_string_map(%{} = map) do
     Enum.filter(map, fn {k, v} -> is_binary(k) and is_binary(v) end)
     |> Map.new()
   end
   defp to_string_map(_), do: %{}
+
+  defp my_cluster_pb(%Cluster{} = cluster) do
+    %Plrl.VerifyClusterResponse{
+      id: cluster.id,
+      name: cluster.name
+    }
+  end
 end

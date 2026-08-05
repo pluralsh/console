@@ -100,6 +100,7 @@ defmodule Console.PubSub.AgentRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentMessageCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.AgentMessageUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.PrAutomationCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PrAutomationUpdated, do: use Piazza.PubSub.Event
@@ -131,6 +132,7 @@ defmodule Console.PubSub.WorkbenchCronDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchPromptCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchPromptUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchPromptDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchQueuedPromptCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillDeleted, do: use Piazza.PubSub.Event

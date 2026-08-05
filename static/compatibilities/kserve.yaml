@@ -4,35 +4,44 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
-- version: 0.18.1
+- version: 0.19.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: ["Release notes provided are for **v0.18.0**, not v0.18.1; you\
-        \ still need the v0.18.1 changelog (and helm chart changelog) to accurately\
-        \ summarize the 0.18.0 \u2192 0.18.1 upgrade.", 'v0.18.0 includes helm packaging/chart
-        restructuring: chart renamed to **kserve-resources** and multiple charts are
-        published (CRDs, resources, runtime-configs, llmisvc/localmodel variants).
-        Ensure your upgrade plan accounts for the chart split/rename and installs
-        the correct artifacts in the right order (CRDs before controllers/resources).']
-    features: [Namespace-scoped ModelCache support (download jobs can run in a jobNamespace).,
-      Added CSV and Parquet marshallers., CloudEvents logging enhancements (log occurrence
-        and record time)., OpenAI Responses API support via a new /v1/responses HTTPRoute.,
-      Added output offset_mapping for HuggingFace token classification., 'LLMInferenceService:
-        autoscaling improvements (KEDA/HPA integration, LWS target for multi-node
-        workloads), config updates including TLS flag and extra_headers support, and
-        multiple dependency upgrades (LLM-D, vLLM, WVA).', 'Ingress/Gateway: added
-        DisableHTTPRouteTimeout flag for GKE Gateway and enhanced Gateway refs (SectionName
-        support).']
-    breaking_changes: ['Potentially breaking packaging change: helm chart rename to
-        **kserve-resources** and publication of multiple chart artifacts may require
-        changing the chart name/reference in your helm commands and CI pipelines.',
-      'LLMInferenceService scaling fields changed: default for MinReplicas and MaxReplicas
-        made a required int32; manifests/values depending on previous behavior may
-        fail validation.']
-  chart_version: v0.18.1
+    helm_changes: "- **Image pull policy default**: the chart now aligns `imagePullPolicy`\
+      \ defaults with the kustomize base (PR #5459). If you previously relied on the\
+      \ old default, explicitly set `*.imagePullPolicy` in your values.\n- **CRD safety\
+      \ on upgrade**: Helm upgrade behavior was adjusted to **prevent deletion of\
+      \ the `ClusterStorageContainer` CRD** (PR #5539). Ensure you\u2019re using the\
+      \ updated CRD chart/templates from v0.19.0.\n- **Minimal install behavior**:\
+      \ **conversion webhooks are enabled in minimal installs** (PR #5416). Minimal/CRD-only\
+      \ installs may now require webhook-related prerequisites (cert-manager/webhook\
+      \ serving) depending on your cluster setup.\n- **LLMISvc GIE CRDs optional**:\
+      \ chart adds a knob to **make LLMISvc GIE CRD creation optional** (PR #5544).\
+      \ If you manage these CRDs separately, disable creation in the chart.\n- **LLMISvc\
+      \ CRD packaging fix**: v0.19.0 removes **incorrect CRDs included in `llmisvc-crd`**\
+      \ (PR #5428). Review your CRD installation path to avoid drift between previously-installed\
+      \ CRDs and the corrected set.\n"
+    chart_updates: [LLMISvc CRD chart content corrected (removed incorrect CRDs).,
+      Helm upgrade guard added to avoid deleting ClusterStorageContainer CRD., Defaults
+        updated to match kustomize for imagePullPolicy., Minimal (CRD-minimal) installs
+        now enable conversion webhooks., LLMISvc chart gains option to skip creating
+        GIE CRDs.]
+    features: [Standard mode InferenceService can now support dual-protocol routing
+        (REST and gRPC) for the same service., LocalModelCache support was added for
+        LLMInferenceService to improve reuse/efficiency of locally cached models.,
+      LLMISvc now propagates spec labels/annotations to the Service and can emit Kubernetes
+        Events for readiness transitions., 'LLMISvc routing/status observability improved
+        (model-name based routing, topology/workload refs reporting, applied-configs
+        visibility).', 'Autoscaling support and testing for LLMISvc improved, including
+        better surfacing of HPA/KEDA scaling status in conditions.']
+    breaking_changes: ['Minimal installs now enable conversion webhooks, which can
+        change requirements/behavior in clusters that previously ran minimal CRDs
+        without webhooks.', 'LLMISvc CRD packaging was corrected; if you previously
+        depended on the erroneous CRDs bundled in `llmisvc-crd`, your upgrade may
+        remove/stop managing them and you must install any needed CRDs explicitly.']
+  chart_version: v0.19.0
   images: []
 - version: 0.18.0
   kube: ['1.35', '1.34', '1.33', '1.32']

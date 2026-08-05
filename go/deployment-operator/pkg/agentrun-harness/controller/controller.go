@@ -384,6 +384,13 @@ func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun 
 		return nil
 	}
 
+	if !hasBabysitActivity(enriched) {
+		in.lastPRSHA = sha
+		in.lastPRCheckAt = time.Now()
+		klog.V(log.LogLevelExtended).InfoS("PR state changed without new comments or failing CI, skipping reprompt")
+		return nil
+	}
+
 	// Determine working branch from the live PR head ref.
 	// Fall back to a generic placeholder if none of the PRs carry a head ref.
 	branch := "your working branch"
@@ -477,6 +484,30 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 		}
 	}
 	return sb.String()
+}
+
+func hasBabysitActivity(prs []toolv1.EnrichedPR) bool {
+	for _, pr := range prs {
+		if len(pr.NewComments) > 0 {
+			return true
+		}
+		if pr.Details != nil && hasFailingCICheck(pr.Details.CIChecks) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasFailingCICheck(checks []scm.CICheck) bool {
+	for _, ci := range checks {
+		switch ci.Conclusion {
+		case scm.CICheckConclusionFailure, "timed_out", scm.CICheckConclusionCancelled:
+			return true
+		}
+	}
+
+	return false
 }
 
 func (in *agentRunController) newOrUpdatedPRComments(prURL string, comments []scm.PRComment) []scm.PRComment {

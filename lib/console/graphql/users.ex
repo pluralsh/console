@@ -108,6 +108,7 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :persona_sidebar_attributes do
+    field :cd,            :boolean
     field :audits,        :boolean
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
@@ -118,6 +119,7 @@ defmodule Console.GraphQl.Users do
     field :stacks,        :boolean
     field :security,      :boolean
     field :cost,          :boolean
+    field :ai,            :boolean
   end
 
   input_object :persona_home_attributes do
@@ -338,6 +340,7 @@ defmodule Console.GraphQl.Users do
   end
 
   object :persona_sidebar do
+    field :cd,            :boolean
     field :audits,        :boolean
     field :kubernetes,    :boolean
     field :pull_requests, :boolean
@@ -348,6 +351,7 @@ defmodule Console.GraphQl.Users do
     field :stacks,        :boolean
     field :security,      :boolean
     field :cost,          :boolean
+    field :ai,            :boolean
   end
 
   object :persona_home do

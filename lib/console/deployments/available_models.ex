@@ -39,7 +39,7 @@ defmodule Console.Deployments.AvailableModels do
     [
       Map.get(config, :model) || defaults[:model],
       Map.get(config, :tool_model) || defaults[:tool_model]
-      | proxy_models(config)
+      | proxy_models(config, defaults)
     ]
   end
 
@@ -49,7 +49,7 @@ defmodule Console.Deployments.AvailableModels do
     [
       Map.get(config, :model) || defaults[:model],
       Map.get(config, :tool_model) || defaults[:tool_model]
-      | proxy_models(config)
+      | proxy_models(config, defaults)
     ]
   end
 
@@ -59,7 +59,7 @@ defmodule Console.Deployments.AvailableModels do
     [
       Map.get(config, :model_id) || defaults[:model],
       Map.get(config, :tool_model_id) || defaults[:tool_model]
-      | proxy_models(config)
+      | proxy_models(config, defaults)
     ]
   end
 
@@ -69,7 +69,7 @@ defmodule Console.Deployments.AvailableModels do
     [
       Map.get(config, :model) || defaults[:model],
       Map.get(config, :tool_model) || defaults[:tool_model]
-      | proxy_models(config)
+      | proxy_models(config, defaults)
     ]
   end
 
@@ -79,12 +79,20 @@ defmodule Console.Deployments.AvailableModels do
     [
       Map.get(config, :model) || defaults[:model],
       Map.get(config, :tool_model) || defaults[:tool_model]
-      | proxy_models(config)
+      | proxy_models(config, defaults)
     ]
   end
 
-  defp proxy_models(%{proxy_models: models}) when is_list(models), do: models
-  defp proxy_models(_), do: []
+  defp proxy_models(config, defaults)
+  defp proxy_models(%{proxy_models: models}, defaults) when is_list(models) do
+    if has_model?(models), do: models, else: proxy_models(%{}, defaults)
+  end
+  defp proxy_models(_, %{proxy_models: models}) when is_list(models), do: models
+  defp proxy_models(_, _), do: []
+
+  defp has_model?(models) do
+    Enum.any?(models, &(is_binary(&1) && String.trim(&1) != ""))
+  end
 
   defp normalize(models) do
     models

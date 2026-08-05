@@ -87,7 +87,7 @@ defmodule Console.AI.Workbench.Engine do
 
     tools(job, environment, activities)
     |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
-    |> MemoryEngine.reduce(Enum.reverse([{:user, String.trim(continue_prompt(engine: engine))} | messages]), &reducer/2)
+    |> MemoryEngine.reduce([{:user, job.prompt} | Enum.reverse(messages)], &reducer/2)
     |> case do
       {:ok, %Complete{
         conclusion: conclusion,
@@ -154,7 +154,16 @@ defmodule Console.AI.Workbench.Engine do
         []
       _ -> []
     end)
-    |> then(& %{engine | activities: &1 ++ engine.activities, messages: &1 ++ msgs, iterations: engine.iterations + 1, job: refresh_job(engine.job)})
+    |> then(
+      &%{
+        engine
+        | activities: &1 ++ engine.activities,
+          messages: &1 ++ msgs,
+          iterations: engine.iterations + 1,
+          job: refresh_job(engine.job)
+      }
+    )
+    |> verifiable()
     |> loop()
   end
 
@@ -249,11 +258,13 @@ defmodule Console.AI.Workbench.Engine do
 
   @max_poll_iterations 60
   @poll_interval :timer.seconds(10)
+  @approval_pending_statuses [:needs_approval, :running]
 
   defp poll_activity(activity, iter \\ 0)
-  defp poll_activity(%WorkbenchJobActivity{status: :needs_approval} = activity, iter) when iter < @max_poll_iterations do
+  defp poll_activity(%WorkbenchJobActivity{status: status} = activity, iter)
+       when status in @approval_pending_statuses and iter < @max_poll_iterations do
     case Repo.get(WorkbenchJobActivity, activity.id) do
-      %WorkbenchJobActivity{status: :needs_approval} = activity ->
+      %WorkbenchJobActivity{status: status} = activity when status in @approval_pending_statuses ->
         :timer.sleep(@poll_interval)
         poll_activity(activity, iter + 1)
       %WorkbenchJobActivity{} = activity -> {:ok, activity}
@@ -335,12 +346,13 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp kube_tools(_), do: []
 
-  defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _, _),
-    do: String.trim(skill_system_prompt(job: job, prompt: prompt))
-  defp sysprompt(%WorkbenchJob{prompt: prompt} = job, environment, engine) do
+  defp sysprompt(%WorkbenchJob{type: :skill, referenced_job: job} = workbench_job, _, _),
+    do: String.trim(skill_system_prompt(job: job, prompt: WorkbenchJob.objective(workbench_job)))
+  defp sysprompt(%WorkbenchJob{} = job, environment, engine) do
+    objective = WorkbenchJob.objective(job)
     String.trim(system_prompt(
       job: job,
-      prompt: prompt,
+      prompt: objective,
       engine: engine,
       actions: Environment.actions(environment)
     ))
@@ -387,7 +399,6 @@ defmodule Console.AI.Workbench.Engine do
   def callback(_, _), do: :ok
 
   EEx.function_from_file(:defp, :skill_system_prompt, Console.priv_filename(["prompts", "workbench", "eval_skill.md.eex"]), [:assigns])
-  EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns])
 end

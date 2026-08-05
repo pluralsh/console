@@ -113,7 +113,7 @@ defmodule Console.MixProject do
       {:telemetry_registry, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
-      {:anubis_mcp, "~> 1.1.1"},
+      {:anubis_mcp, "~> 1.14"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", commit: "2a91145d0d567f1aab40d52843d77dfb491c424a", override: true},
       {:flow, "~> 1.2"},
       {:gen_stage, "~> 1.0", override: true},
@@ -129,7 +129,7 @@ defmodule Console.MixProject do
       {:cowboy, "~> 2.12"},
       {:uniq, "~> 0.4"},
       {:oauth2, "~> 2.1"},
-      {:mermaid_validator, git: "https://github.com/pluralsh/mermaid-validator.git", tag: "v0.1.1"},
+      {:mermaid_validator, git: "https://github.com/pluralsh/mermaid-validator.git", tag: "v0.1.2"},
       {:rustler, "~> 0.37", optional: true, override: true},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test]},
@@ -184,9 +184,10 @@ defmodule Console.MixProject do
       {:oidcc, "~> 3.3"},
       {:hackney, "~> 1.21"},
       {:protobuf, "~> 0.16.1", override: true},
+      {:scribe, "~> 0.11"},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.17"},
+      {:req_llm, "~> 1.18"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},
@@ -194,7 +195,6 @@ defmodule Console.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:ex_aws_auth, "~> 1.4"},
       {:pgvector, "~> 0.3.0"},
-
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

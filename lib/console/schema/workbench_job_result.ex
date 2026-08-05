@@ -159,6 +159,7 @@ defmodule Console.Schema.WorkbenchJobResult do
   end
 
   schema "workbench_job_results" do
+    field :objective,       :binary
     field :working_theory, :binary
     field :conclusion,     :binary
     field :criticism,      :binary
@@ -187,7 +188,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(working_theory conclusion criticism topology workbench_job_id)a
+  @valid ~w(objective working_theory conclusion criticism topology workbench_job_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

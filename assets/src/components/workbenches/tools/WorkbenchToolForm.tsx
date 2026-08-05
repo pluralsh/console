@@ -9,7 +9,9 @@ import {
   ListBoxItem,
   Select,
   SelectButton,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
+import { Overline } from 'components/cd/utils/PermissionsModal'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { FormBindings } from 'components/utils/bindings'
 import {
@@ -24,13 +26,15 @@ import {
   HelmAuthProvider,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useState } from 'react'
+import { isValidJson } from 'utils/isValidJson'
+import { useMemo, useState } from 'react'
 import {
   FormCardSC,
   SidebarBtnSC,
   StickyActionsFooterSC,
   WorkbenchSplitLayoutSC,
 } from '../workbench/create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchPromptSupervisionOption } from '../workbench/WorkbenchPromptModeSelector/WorkbenchPromptSupervisionOption'
 import { CloudConnectionSelectField } from './cloud-connection/CloudConnectionSelectField'
 import { McpServerSelectField } from './mcp-server/McpServerSelectField'
 import { ScmConnectionWorkbenchSelect } from './scm-connection/ScmConnectionWorkbenchSelect'
@@ -38,6 +42,7 @@ import { WorkbenchToolDeleteModal } from './WorkbenchToolDeleteModal'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
   categoryToLabel,
+  cloudFunctionProviderForWorkbenchTool,
   ConfigForToolType,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
@@ -45,6 +50,7 @@ import {
   isConfigurableWorkbenchToolType,
   scmTypeForWorkbenchTool,
   TOOL_TYPE_TO_CATEGORIES,
+  workbenchToolSupportsApproval,
 } from './workbenchToolsUtils'
 import { Link } from 'react-router-dom'
 
@@ -96,6 +102,11 @@ function scmTokenIsSet(token: string | null | undefined): boolean {
   return (token ?? '').trim().length > 0
 }
 
+function inputSchemaIsValid(value: unknown, required = false): boolean {
+  if (value == null || value === '') return !required
+  return typeof value !== 'string' || isValidJson(value)
+}
+
 function sentryConfigurationIsComplete(
   c: WorkbenchToolConfigurationAttributes['sentry'] | null | undefined
 ): boolean {
@@ -134,6 +145,7 @@ export type WorkbenchToolFormState = Omit<
     | 'cloudConnectionId'
     | 'mcpServerId'
     | 'scmConnectionId'
+    | 'approval'
     | 'readBindings'
     | 'writeBindings'
   >,
@@ -143,12 +155,17 @@ export type WorkbenchToolFormState = Omit<
   writeBindings: PolicyBindingFragment[]
 }
 
-type WorkbenchToolFormStep = 'configuration' | 'access-policy'
+type WorkbenchToolFormStep = 'configuration' | 'access-policy' | 'approvals'
 
-const TOOL_FORM_STEPS = [
-  { key: 'configuration', label: 'Configuration' },
-  { key: 'access-policy', label: 'Access policy' },
-] as const
+const BASE_TOOL_FORM_STEPS = [
+  { key: 'configuration' as const, label: 'Configuration' },
+  { key: 'access-policy' as const, label: 'Access policy' },
+]
+
+const APPROVALS_TOOL_FORM_STEP = {
+  key: 'approvals' as const,
+  label: 'Approvals',
+}
 
 export function WorkbenchToolForm({
   type,
@@ -170,6 +187,14 @@ export function WorkbenchToolForm({
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [currentStep, setCurrentStep] =
     useState<WorkbenchToolFormStep>('configuration')
+  const supportsApproval = workbenchToolSupportsApproval(type)
+  const toolFormSteps = useMemo(
+    () =>
+      supportsApproval
+        ? [...BASE_TOOL_FORM_STEPS, APPROVALS_TOOL_FORM_STEP]
+        : BASE_TOOL_FORM_STEPS,
+    [supportsApproval]
+  )
   const defaultCategories =
     type === WorkbenchToolType.Mcp
       ? [WorkbenchToolCategory.Integration]
@@ -181,6 +206,7 @@ export function WorkbenchToolForm({
     cloudConnectionId: tool?.cloudConnection?.id,
     mcpServerId: tool?.mcpServer?.id,
     scmConnectionId: tool?.scmConnection?.id,
+    approval: tool?.approval ?? false,
     readBindings: tool?.readBindings?.filter(isNonNullable) ?? [],
     writeBindings: tool?.writeBindings?.filter(isNonNullable) ?? [],
   })
@@ -188,9 +214,13 @@ export function WorkbenchToolForm({
   const selectedCategories = (state.categories ?? []).filter(isNonNullable)
   const hasRegisteredScm = Boolean(state.scmConnectionId)
   const scmType = scmTypeForWorkbenchTool(type)
+  const cloudFunctionProvider = cloudFunctionProviderForWorkbenchTool(type)
+  const cloudConnectionProvider = cloudFunctionProvider ?? provider
+  const requiresCloudConnection =
+    type === WorkbenchToolType.Cloud || !!cloudFunctionProvider
   const configurationStepComplete =
     !!state.name.trim() &&
-    (type !== WorkbenchToolType.Cloud || !!state.cloudConnectionId) &&
+    (!requiresCloudConnection || !!state.cloudConnectionId) &&
     (type !== WorkbenchToolType.Mcp || !!state.mcpServerId) &&
     (type !== WorkbenchToolType.Github ||
       hasRegisteredScm ||
@@ -221,8 +251,27 @@ export function WorkbenchToolForm({
       pagerdutyConfigurationIsComplete(state.configuration?.pagerduty)) &&
     (type !== WorkbenchToolType.Sentry ||
       !!tool?.id ||
-      sentryConfigurationIsComplete(state.configuration?.sentry))
+      sentryConfigurationIsComplete(state.configuration?.sentry)) &&
+    (type !== WorkbenchToolType.Http ||
+      inputSchemaIsValid(state.configuration?.http?.inputSchema, true)) &&
+    (type !== WorkbenchToolType.Lambda ||
+      (!!state.configuration?.lambda?.lambdaArn.trim() &&
+        !!state.configuration.lambda.description.trim() &&
+        inputSchemaIsValid(state.configuration.lambda.inputSchema, true))) &&
+    (type !== WorkbenchToolType.CloudRun ||
+      (!!state.configuration?.cloudRun?.identifier.trim() &&
+        !!state.configuration.cloudRun.description.trim() &&
+        inputSchemaIsValid(state.configuration.cloudRun.inputSchema, true))) &&
+    (type !== WorkbenchToolType.AzureFunction ||
+      (!!state.configuration?.azureFunction?.identifier.trim() &&
+        !!state.configuration.azureFunction.description.trim() &&
+        inputSchemaIsValid(
+          state.configuration.azureFunction.inputSchema,
+          true
+        )))
   const allowSave = hasUpdates && configurationStepComplete
+  const isLastStep =
+    currentStep === toolFormSteps[toolFormSteps.length - 1]?.key
   return (
     <WorkbenchSplitLayoutSC
       css={{
@@ -240,7 +289,7 @@ export function WorkbenchToolForm({
         flexShrink={0}
         gap="xxxsmall"
       >
-        {TOOL_FORM_STEPS.map(({ key, label }) => (
+        {toolFormSteps.map(({ key, label }) => (
           <SidebarBtnSC
             key={key}
             $active={currentStep === key}
@@ -273,13 +322,14 @@ export function WorkbenchToolForm({
                 onChange={(e) => update({ name: e.target.value })}
               />
             </FormField>
-            {type === WorkbenchToolType.Cloud && provider ? (
+            {cloudConnectionProvider && (
               <CloudConnectionSelectField
-                provider={provider}
+                provider={cloudConnectionProvider}
                 selectedId={state.cloudConnectionId ?? null}
                 onChange={(id) => update({ cloudConnectionId: id })}
               />
-            ) : type === WorkbenchToolType.Mcp ? (
+            )}
+            {type === WorkbenchToolType.Mcp ? (
               <>
                 <McpServerSelectField
                   selectedId={state.mcpServerId ?? null}
@@ -322,7 +372,7 @@ export function WorkbenchToolForm({
                   </Select>
                 </FormField>
               </>
-            ) : (
+            ) : type !== WorkbenchToolType.Cloud ? (
               <>
                 {scmType ? (
                   <ScmConnectionWorkbenchSelect
@@ -338,7 +388,7 @@ export function WorkbenchToolForm({
                   update={update}
                 />
               </>
-            )}
+            ) : null}
             {type !== WorkbenchToolType.Mcp && categories.length > 1 && (
               <FormField label="Allowed capabilities (must select at least one)">
                 <Flex
@@ -379,10 +429,15 @@ export function WorkbenchToolForm({
               </FormField>
             )}
           </>
-        ) : (
+        ) : currentStep === 'access-policy' ? (
           <ToolAccessPolicyStep
             readBindings={state.readBindings?.filter(isNonNullable) ?? []}
             writeBindings={state.writeBindings?.filter(isNonNullable) ?? []}
+            update={update}
+          />
+        ) : (
+          <ToolApprovalsStep
+            approval={!!state.approval}
             update={update}
           />
         )}
@@ -411,18 +466,24 @@ export function WorkbenchToolForm({
               disabled={
                 currentStep === 'configuration'
                   ? !configurationStepComplete
-                  : !allowSave
+                  : isLastStep
+                    ? !allowSave
+                    : false
               }
-              loading={currentStep === 'access-policy' && mutationLoading}
+              loading={isLastStep && mutationLoading}
               onClick={() => {
                 if (currentStep === 'configuration') {
                   setCurrentStep('access-policy')
                   return
                 }
+                if (currentStep === 'access-policy' && supportsApproval) {
+                  setCurrentStep('approvals')
+                  return
+                }
                 onSave(state)
               }}
             >
-              {currentStep === 'configuration' ? 'Next' : 'Save'}
+              {isLastStep ? 'Save' : 'Next'}
             </Button>
           </Flex>
         </StickyActionsFooterSC>
@@ -434,6 +495,35 @@ export function WorkbenchToolForm({
         />
       </FormCardSC>
     </WorkbenchSplitLayoutSC>
+  )
+}
+
+function ToolApprovalsStep({
+  approval,
+  update,
+}: {
+  approval: boolean
+  update: (next: Partial<WorkbenchToolFormState>) => void
+}) {
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+    >
+      <Overline>Supervision</Overline>
+      <WorkbenchPromptSupervisionOption
+        icon={
+          <WarningShieldIcon
+            size={12}
+            color="icon-light"
+          />
+        }
+        label="Requires approval"
+        hint="Pause for your sign-off before this action executes."
+        checked={approval}
+        onChange={(checked) => update({ approval: checked })}
+      />
+    </Flex>
   )
 }
 
@@ -488,6 +578,14 @@ function ToolAccessPolicyStep({
       </Flex>
     </Flex>
   )
+}
+
+function normalizeJsonField(
+  value: Nullable<Record<string, unknown> | string>
+): string | undefined {
+  if (value == null || value === '') return undefined
+  if (typeof value === 'string') return value
+  return JSON.stringify(value, null, 2)
 }
 
 // done this way so TS will catch new tool types that aren't fully implemented yet
@@ -546,7 +644,7 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
           WorkbenchToolHttpMethod.Get,
         body: body ?? undefined,
         headers: headers?.filter(isNonNullable),
-        inputSchema: inputSchema ?? undefined,
+        inputSchema: normalizeJsonField(inputSchema),
       },
     }
   },
@@ -670,6 +768,36 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         auth: proxy
           ? { proxy: { url: proxy.url, noproxy: proxy.noproxy } }
           : {},
+      },
+    }
+  },
+  [WorkbenchToolType.Lambda]: (config) => {
+    const { lambdaArn, description, inputSchema } = config?.lambda ?? {}
+    return {
+      lambda: {
+        lambdaArn: lambdaArn ?? '',
+        description: description ?? '',
+        inputSchema: normalizeJsonField(inputSchema),
+      },
+    }
+  },
+  [WorkbenchToolType.CloudRun]: (config) => {
+    const { identifier, description, inputSchema } = config?.cloudRun ?? {}
+    return {
+      cloudRun: {
+        identifier: identifier ?? '',
+        description: description ?? '',
+        inputSchema: normalizeJsonField(inputSchema),
+      },
+    }
+  },
+  [WorkbenchToolType.AzureFunction]: (config) => {
+    const { identifier, description, inputSchema } = config?.azureFunction ?? {}
+    return {
+      azureFunction: {
+        identifier: identifier ?? '',
+        description: description ?? '',
+        inputSchema: normalizeJsonField(inputSchema),
       },
     }
   },

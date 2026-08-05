@@ -5,7 +5,7 @@ First here's what's happened so far:
 Initial prompt:
 
 ```
-<%= @job.prompt %>
+<%= Console.Schema.WorkbenchJob.objective(@job) %>
 ```
 
 Current List of activities performed:

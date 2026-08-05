@@ -15,16 +15,17 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     Result,
     Coding.PullRequests
   }
-  alias Console.AI.Workbench.{Environment, Heartbeat}
+  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.Subagents.Integration
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools(activity, environment)
     |> MemoryEngine.new(20,
       engine_opts(job) ++ [
-        system_prompt: String.trim(system_prompt(prompt: jprompt)),
+        system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
         acc: %{},
         callback: &callback(activity, &1),
         continue_msg: cont_msg()
@@ -38,16 +39,35 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   end
 
   defp reducer(messages, _, job) do
-    case Enum.find(messages, &stop_msg/1) do
-      %AgentRun{} = run -> {:message, persist_and_poll_run(run, job)}
-      %Result{output: output} -> {:halt, %{status: :successful, result: %{output: output}}}
-      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
+    {runs, messages} = Enum.split_with(messages, &match?(%AgentRun{}, &1))
+    case {runs, Enum.find(messages, &stop_msg/1)} do
+      {[_ | _] = runs, _} ->
+        case parallel_runs(runs, job) do
+          {:messages, results} -> {:messages, results}
+          {:error, error} -> last_message(messages, fn _ ->
+            {:cont, %{status: :failed, result: %{error: "error running parallel agent runs: #{inspect(error)}"}}}
+          end)
+        end
+      {_, %Result{output: output}} -> {:halt, %{status: :successful, result: %{output: output}}}
+      {_, _} -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 
   defp stop_msg(%AgentRun{}), do: true
   defp stop_msg(%Result{}), do: true
   defp stop_msg(_), do: false
+
+  defp parallel_runs(runs, job) do
+    Task.async_stream(runs, &persist_and_poll_run(&1, job), timeout: :infinity, max_concurrency: 10)
+    |> Enum.reduce_while([], fn
+      {:ok, result}, acc -> {:cont, [result | acc]}
+      {:exit, error}, _ -> {:halt, {:error, error}}
+    end)
+    |> case do
+      results when is_list(results) -> {:messages, results}
+      {:error, error} -> {:error, error}
+    end
+  end
 
   defp persist_and_poll_run(%AgentRun{id: id, tool: tool} = run, job) do
     poll_run(run)
@@ -64,7 +84,8 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   end
 
   defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage}} = pass, job) when result in [:failed, :success] do
-    Heartbeat.usage_callback(job, AIUsage.to_map(usage))
+    callback  = Environment.engine_opts(job) |> Keyword.fetch!(:usage_callback)
+    callback.(AIUsage.to_map(usage))
     pass
   end
   defp record_usage(result, _), do: result
@@ -73,7 +94,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     do: {:tool, content, %{call_id: id, name: name, arguments: args}}
   defp tool_msg(content, _), do: {:user, content}
 
-  defp tools(activity, %Environment{skills: skills, job: job, activities: activities}) do
+  defp tools(activity, %Environment{skills: skills, tools: workbench_tools, job: job, activities: activities}) do
     skills = Environment.subagent_skills(skills, :coding)
     [
       %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},
@@ -84,6 +105,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       %History{job: job, activities: activities},
       Result
     ]
+    |> Enum.concat(Integration.scm_tools(workbench_tools))
   end
 
   EEx.function_from_file(:defp, :analysis_prompt, Console.priv_filename(["prompts", "workbench", "coding_output.md.eex"]), [:assigns])

@@ -390,6 +390,69 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "PullRequestUpdated" do
+    test "it records the stack run created for a merged stack pr" do
+      repo = insert(:git_repository, pulled_at: Timex.shift(Timex.now(), seconds: -30))
+      stack = insert(:stack, git: %{folder: "terraform", ref: "main"}, repository: repo)
+      pr = insert(:pull_request, status: :merged, stack: stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+
+      event = %PubSub.PullRequestUpdated{item: pr}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      %{stack_run: run} = Repo.preload(updated, [:stack_run])
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert refetch(pr).stack_run_id == run.id
+    end
+
+    test "it queues a workbench verification prompt for a merged service pr" do
+      bot("console")
+      repo = insert(:git_repository, pulled_at: Timex.shift(Timex.now(), seconds: -30))
+      service = insert(:service, repository: repo)
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          user: user,
+          modes: %Console.Schema.WorkbenchJob.Modes{verification: true}
+        )
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          url: "https://github.com/pluralsh/console/pull/10",
+          service: service,
+          workbench_job: job
+        )
+
+      expect(Discovery, :kick, fn %{id: repo_id} ->
+        assert repo_id == repo.id
+        :ok
+      end)
+
+      event = %PubSub.PullRequestUpdated{item: refetch(pr)}
+      {:ok, kicked} = Recurse.handle_event(event)
+
+      prompt =
+        Console.Schema.QueuedPrompt.for_workbench_job(job.id)
+        |> Repo.one!()
+
+      assert kicked.id == service.id
+      assert kicked.kick
+      assert prompt.user_id == user.id
+      assert prompt.prompt =~ "pull request #{pr.url} has been merged"
+      assert prompt.prompt =~ "<plrl-service"
+      assert prompt.prompt =~ ~s(item-id="#{service.id}")
+      assert prompt.prompt =~ ~s(item-name="#{service.name}")
+    end
+  end
+
   describe "StackDeleted" do
     test "it will create a delete run" do
       stack = insert(:stack, deleted_at: Timex.now(), sha: "last-sha")
@@ -441,6 +504,34 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       assert dequeued.id == run.id
       assert dequeued.status == :pending
+    end
+
+    test "it kicks the associated workbench for a successful stack run" do
+      bot("console")
+      stack = insert(:stack)
+      completed = insert(:stack_run, stack: stack, status: :successful)
+      job = insert(:workbench_job, modes: %Console.Schema.WorkbenchJob.Modes{verification: true})
+
+      pr =
+        insert(:pull_request,
+          url: "https://github.com/pluralsh/console/pull/10",
+          stack_run: completed,
+          workbench_job: job
+        )
+
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued)
+
+      event = %PubSub.StackRunCompleted{item: completed}
+      {:ok, dequeued} = Recurse.handle_event(event)
+
+      prompt =
+        Console.Schema.QueuedPrompt.for_workbench_job(job.id)
+        |> Repo.one!()
+
+      assert dequeued.id == run.id
+      assert prompt.prompt =~ "pull request #{pr.url} has been completed"
+      assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
     end
 
     test "it can delete a stack if it is in deleting stack" do
@@ -585,6 +676,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
   describe "StackRunUpdated" do
     test "it will delegate stack run approval to ai if configured" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      model = Console.AI.Provider.defaults(:openai)[:model]
       bot = insert(:user, bot_name: "console", roles: %{admin: true})
 
       git = insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")
@@ -596,7 +688,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
         configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
       )
       insert(:stack_state, plan: "terraform plan", run: stack_run)
-      expect(ReqLLM, :generate_text, fn %{model: "gpt-5.4-mini"}, _, _ ->
+      expect(ReqLLM, :generate_text, fn %{model: ^model}, _, _ ->
         Jason.encode!(%{
           object: "response",
           output: [
@@ -613,7 +705,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
             }
           ]
         })
-        |> ReqLLM.Response.decode_response("openai:gpt-5.4-mini")
+        |> ReqLLM.Response.decode_response("openai:#{model}")
       end)
 
       event = %PubSub.StackRunUpdated{item: stack_run}

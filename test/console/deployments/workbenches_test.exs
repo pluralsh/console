@@ -5,7 +5,8 @@ defmodule Console.Deployments.WorkbenchesTest do
   alias Console.AI.Tools.Workbench.KubeRequest
   alias Console.PubSub
   alias Console.Deployments.Workbenches
-  alias Console.Schema.WorkbenchJob
+  alias Console.Schema.{QueuedPrompt, WorkbenchJob, WorkbenchJobActivity}
+  alias Console.Schema.Workbench.Budget
   alias CloudQuery.Client
   alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput, ToolQuery.Stub}
 
@@ -19,6 +20,53 @@ defmodule Console.Deployments.WorkbenchesTest do
     output_cost: 0.02,
     total_cost: 0.03
   }
+
+  describe "workbench budget" do
+    test "refills lazily and defaults min_free to an hour of usage" do
+      now = ~U[2026-08-02 17:00:00Z]
+
+      budget =
+        Budget.changeset(%Budget{}, %{enabled: true, maximum: 43_200, unit: :token})
+        |> Ecto.Changeset.apply_changes()
+
+      assert budget.min_free == 60
+
+      budget = %{budget | last: 0, last_updated: DateTime.add(now, -3_600)}
+
+      assert Budget.total_available(budget, now) == 60
+      refute Budget.available?(budget, now)
+
+      updated = Budget.consume(budget, 10, now)
+      assert updated.last == 50
+      assert updated.last_updated == now
+    end
+
+    test "does not enforce disabled budgets" do
+      budget = %Budget{enabled: false, maximum: 100, min_free: 100, last: 0}
+
+      assert Budget.available?(budget)
+      assert Budget.consume(budget, 10) == budget
+    end
+
+    test "locks and consumes a workbench budget" do
+      workbench =
+        insert(:workbench,
+          budget: %Budget{
+            enabled: true,
+            maximum: 1_000,
+            min_free: 1,
+            unit: :token,
+            last: 1_000,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      {:ok, updated} = Workbenches.update_budget(workbench, %{total_tokens: 125})
+
+      assert updated.budget.last == 875
+      assert refetch(workbench).budget.last == 875
+    end
+  end
 
   describe "create_workbench/2" do
     test "project writers can create a workbench" do
@@ -524,6 +572,26 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_workbench_job/3" do
+    test "rejects jobs when the workbench budget is exhausted" do
+      user = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: user.id}],
+          budget: %Budget{
+            enabled: true,
+            maximum: 100,
+            min_free: 10,
+            unit: :token,
+            last: 10,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      assert {:error, "workbench budget is exhausted"} =
+               Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+    end
+
     test "users with read access can create a job" do
       user = insert(:user)
       project = insert(:project)
@@ -817,6 +885,26 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "save_usage/2" do
+    test "updates the workbench budget atomically with job usage" do
+      workbench =
+        insert(:workbench,
+          budget: %Budget{
+            enabled: true,
+            maximum: 1_000,
+            min_free: 1,
+            unit: :token,
+            last: 1_000,
+            last_updated: DateTime.utc_now()
+          }
+        )
+
+      job = insert(:workbench_job, status: :running, workbench: workbench)
+
+      {:ok, _} = Workbenches.save_usage(job, @usage)
+
+      assert refetch(workbench).budget.last == 875
+    end
+
     test "persists token and cost usage for a job" do
       job = insert(:workbench_job, status: :running)
 
@@ -885,6 +973,43 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.prompt == "via struct"
     end
 
+    test "clears existing todos while preserving other result fields" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          result:
+            build(:workbench_job_result,
+              working_theory: "keep the theory",
+              conclusion: "keep the conclusion",
+              topology: "graph TD; A-->B"
+            )
+        )
+
+      job.result
+      |> Console.Schema.WorkbenchJobResult.changeset(%{
+        todos: [
+          %{name: "investigate", description: "check the failing path", done: false},
+          %{name: "verify", description: "confirm the fix", done: true}
+        ]
+      })
+      |> Console.Repo.update!()
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "new user prompt"}, job, user)
+
+      assert activity.prompt == "new user prompt"
+
+      result = Console.Repo.preload(refetch(job), :result).result
+      assert result.todos == []
+      assert result.working_theory == "keep the theory"
+      assert result.conclusion == "keep the conclusion"
+      assert result.topology == "graph TD; A-->B"
+    end
+
     test "user with workbench read access can create messages for someone else's job" do
       owner = insert(:user)
       reader = insert(:user)
@@ -945,6 +1070,199 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "create_queued_prompt/3" do
+    test "users with read access can queue a prompt for a job" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:ok, prompt} =
+        Workbenches.create_queued_prompt(
+          %{prompt: "deferred follow-up", dequeable_at: dequeable_at},
+          job.id,
+          user
+        )
+
+      assert prompt.prompt == "deferred follow-up"
+      assert DateTime.compare(prompt.dequeable_at, dequeable_at) == :eq
+      assert prompt.workbench_job_id == job.id
+      assert prompt.user_id == user.id
+      refute prompt.consumed_at
+    end
+
+    test "users without read access cannot queue a prompt for a job" do
+      user = insert(:user)
+      job = insert(:workbench_job)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:error, "forbidden"} =
+        Workbenches.create_queued_prompt(
+          %{prompt: "unauthorized", dequeable_at: dequeable_at},
+          job.id,
+          user
+        )
+    end
+  end
+
+  describe "delete_queued_prompt/2" do
+    test "users with read access can delete queued prompts" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      prompt = insert(:queued_prompt, workbench_job: job, user: user)
+
+      {:ok, deleted} = Workbenches.delete_queued_prompt(prompt.id, user)
+
+      assert deleted.id == prompt.id
+      refute refetch(prompt)
+    end
+
+    test "users without read access cannot delete queued prompts" do
+      user = insert(:user)
+      prompt = insert(:queued_prompt)
+
+      {:error, "forbidden"} = Workbenches.delete_queued_prompt(prompt.id, user)
+
+      assert refetch(prompt)
+    end
+  end
+
+  describe "dequeue_prompt/1" do
+    test "consumes the queued prompt and creates a user message" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench, status: :successful)
+      prompt = insert(:queued_prompt, prompt: "run this later", workbench_job: job, user: user)
+
+      {:ok, activity} = Workbenches.dequeue_prompt(prompt)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "run this later"
+      assert activity.type == :user
+      assert activity.user_id == user.id
+      assert Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
+      assert refetch(job).status == :pending
+    end
+
+    test "does not consume the prompt when the job is active" do
+      user = insert(:user)
+      job = insert(:workbench_job, status: :running)
+      prompt = insert(:queued_prompt, workbench_job: job, user: user)
+
+      assert {:error, "job is currently active, please wait for it to complete before prompting"} =
+               Workbenches.dequeue_prompt(prompt)
+
+      refute Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
+    end
+  end
+
+  describe "kick_workbench/1" do
+    test "queues a verification prompt for successful stack runs when verification mode is enabled" do
+      bot = bot("console")
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          status: :successful,
+          modes: %WorkbenchJob.Modes{verification: true}
+        )
+
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :successful)
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          url: "https://github.com/pluralsh/console/pull/20",
+          stack: stack,
+          stack_run: run,
+          workbench_job: job
+        )
+
+      {:ok, prompt} = Workbenches.kick_workbench(run)
+
+      assert prompt.workbench_job_id == job.id
+      assert prompt.user_id == bot.id
+      assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) in [:lt, :eq]
+      assert prompt.prompt =~ "pull request #{pr.url} has been completed"
+      assert prompt.prompt =~ "<plrl-stack"
+      assert prompt.prompt =~ ~s(item-id="#{stack.id}")
+    end
+
+    test "does not queue a stack run verification prompt when verification mode is disabled" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
+      stack = insert(:stack)
+      run = insert(:stack_run, stack: stack, status: :successful)
+
+      insert(:pull_request,
+        status: :merged,
+        stack: stack,
+        stack_run: run,
+        workbench_job: job
+      )
+
+      assert {:error, "verification mode is not enabled for this job"} =
+               Workbenches.kick_workbench(run)
+
+      assert Console.Repo.preload(job, :queued_prompts).queued_prompts == []
+    end
+
+    test "queues a verification prompt for merged service prs when verification mode is enabled" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      service = insert(:service)
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          modes: %WorkbenchJob.Modes{verification: true}
+        )
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          url: "https://github.com/pluralsh/console/pull/21",
+          service: service,
+          workbench_job: job
+        )
+
+      {:ok, prompt} = Workbenches.kick_workbench(pr)
+
+      assert prompt.workbench_job_id == job.id
+      assert prompt.user_id == user.id
+      assert DateTime.compare(prompt.dequeable_at, DateTime.utc_now()) == :gt
+      assert prompt.prompt =~ "pull request #{pr.url} has been merged"
+      assert prompt.prompt =~ "<plrl-service"
+      assert prompt.prompt =~ ~s(item-id="#{service.id}")
+    end
+
+    test "does not queue a service pr verification prompt when verification mode is disabled" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      service = insert(:service)
+      job = insert(:workbench_job, user: user, workbench: workbench)
+
+      pr =
+        insert(:pull_request,
+          status: :merged,
+          service: service,
+          workbench_job: job
+        )
+
+      assert {:error, "verification mode is not enabled for this job"} =
+               Workbenches.kick_workbench(pr)
+
+      assert Console.Repo.preload(job, :queued_prompts).queued_prompts == []
+    end
+  end
+
   describe "pr_followup/3" do
     test "creates a message for the pull request job when it is idle" do
       user = insert(:user)
@@ -975,6 +1293,39 @@ defmodule Console.Deployments.WorkbenchesTest do
                Workbenches.pr_followup(%{prompt: "while running"}, pr.url, user)
 
       refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
+    end
+  end
+
+  describe "pr_queued_prompt/3" do
+    test "queues a prompt for the pull request job" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench)
+      pr = insert(:pull_request, workbench_job: job)
+      dequeable_at = DateTime.utc_now() |> DateTime.add(60, :second) |> DateTime.truncate(:second)
+
+      {:ok, prompt} =
+        Workbenches.pr_queued_prompt(
+          %{prompt: "queued pr follow-up", dequeable_at: dequeable_at},
+          pr.url,
+          user
+        )
+
+      assert prompt.workbench_job_id == job.id
+      assert prompt.prompt == "queued pr follow-up"
+      assert DateTime.compare(prompt.dequeable_at, dequeable_at) == :eq
+      assert prompt.user_id == user.id
+    end
+
+    test "returns an error when the pull request does not exist" do
+      user = insert(:user)
+
+      assert {:error, "pull request not found"} =
+               Workbenches.pr_queued_prompt(
+                 %{prompt: "missing pr", dequeable_at: DateTime.utc_now()},
+                 "https://github.com/pluralsh/console/pull/404",
+                 user
+               )
     end
   end
 
@@ -1231,12 +1582,13 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
 
-      assert updated.status == :successful
-      assert updated.result.output == "Internal function calling error: :timeout"
+      assert updated.status == :failed
+      assert updated.result.error == "Internal function calling error: :timeout"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       reloaded = refetch(activity)
-      assert reloaded.status == :successful
+      assert reloaded.status == :failed
+      assert reloaded.result.error == "Internal function calling error: :timeout"
     end
 
     test "users without read access cannot approve or invoke a function activity" do
@@ -1340,6 +1692,51 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert reloaded.result.output == "already complete"
     end
 
+    test "concurrent approvals only invoke the external action once" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "concurrent-approval-cluster")
+      parent = self()
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          status: :needs_approval,
+          prompt: "approve the kubernetes request",
+          result: %{
+            output: "request pending user approval",
+            kube_request: %{
+              handle: cluster.handle,
+              method: "delete",
+              path: "/apis/apps/v1/namespaces/default/deployments/api",
+              content_type: "application/json"
+            }
+          }
+        )
+
+      expect(Kazan, :run, fn %Kazan.Request{}, _opts ->
+        send(parent, :kube_invoked)
+        Process.sleep(150)
+        {:ok, %{"kind" => "Status", "status" => "Success"}}
+      end)
+
+      task1 = Task.async(fn -> Workbenches.approve_job_activity(activity.id, user) end)
+      task2 = Task.async(fn -> Workbenches.approve_job_activity(activity.id, user) end)
+      results = [Task.await(task1), Task.await(task2)]
+
+      assert Enum.count(results, &match?({:ok, %WorkbenchJobActivity{}}, &1)) == 1
+      assert Enum.count(results, &match?({:error, _}, &1)) == 1
+      assert_receive :kube_invoked
+      refute_receive :kube_invoked, 50
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert Jason.decode!(reloaded.result.output) == %{"kind" => "Status", "status" => "Success"}
+    end
+
     test "does not invoke grpc for a non-function activity even with function call metadata" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -1439,11 +1836,13 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert updated.id == activity.id
       assert updated.status == :rejected
+      assert updated.user_id == user.id
       assert updated.result.output == "too risky"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       reloaded = refetch(activity)
       assert reloaded.status == :rejected
+      assert reloaded.user_id == user.id
       assert reloaded.result.output == "too risky"
     end
 
@@ -1465,6 +1864,7 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert updated.id == activity.id
       assert updated.status == :rejected
+      assert updated.user_id == user.id
       assert updated.result.output == "Execution rejected by user"
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
     end
@@ -1513,6 +1913,60 @@ defmodule Console.Deployments.WorkbenchesTest do
       reloaded = refetch(activity)
       assert reloaded.status == :successful
       assert reloaded.result.output == "already complete"
+    end
+
+    test "concurrent approve and reject cannot both succeed" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "concurrent-approve-reject-cluster")
+      parent = self()
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :kubernetes,
+          status: :needs_approval,
+          prompt: "review the kube request",
+          result: %{
+            output: "request pending user approval",
+            kube_request: %{
+              handle: cluster.handle,
+              method: "delete",
+              path: "/apis/apps/v1/namespaces/default/deployments/api",
+              content_type: "application/json"
+            }
+          }
+        )
+
+      stub(Kazan, :run, fn %Kazan.Request{}, _opts ->
+        send(parent, :kube_invoked)
+        Process.sleep(150)
+        {:ok, %{"kind" => "Status", "status" => "Success"}}
+      end)
+
+      task1 = Task.async(fn -> Workbenches.approve_job_activity(activity.id, user) end)
+      task2 = Task.async(fn -> Workbenches.reject_job_activity("too risky", activity.id, user) end)
+      results = [Task.await(task1), Task.await(task2)]
+
+      assert Enum.count(results, &match?({:ok, %WorkbenchJobActivity{}}, &1)) == 1
+      assert Enum.count(results, &match?({:error, _}, &1)) == 1
+
+      reloaded = refetch(activity)
+      assert reloaded.status in [:successful, :rejected]
+
+      case reloaded.status do
+        :successful ->
+          assert_receive :kube_invoked
+          refute_receive :kube_invoked, 50
+          assert Jason.decode!(reloaded.result.output) == %{"kind" => "Status", "status" => "Success"}
+
+        :rejected ->
+          refute_receive :kube_invoked, 50
+          assert reloaded.result.output == "too risky"
+          assert reloaded.user_id == user.id
+      end
     end
   end
 

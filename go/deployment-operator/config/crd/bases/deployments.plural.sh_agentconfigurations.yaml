@@ -84,6 +84,11 @@ spec:
                   Must be greater than 0. Set this field to nil (omit) to disable the limit.
                 minimum: 1
                 type: integer
+              managedNamespacePollInterval:
+                description: |-
+                  ManagedNamespacePollInterval defines how often the agent polls for managed namespaces.
+                  Set to "0s" to disable managed namespace polling.
+                type: string
               pipelineGateInterval:
                 description: |-
                   PipelineGateInterval specifies how frequently the agent checks pipeline gates.

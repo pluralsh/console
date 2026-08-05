@@ -10,10 +10,13 @@ import {
   GitHubLogoIcon,
   GitLabLogoIcon,
   GoogleCloudLogoIcon,
+  GoogleCloudRunIcon,
   IconProps,
+  LambdaIcon,
   LinearLogoIcon,
   LokiLogoIcon,
   McpLogoIcon,
+  MicrosoftActionsIcon,
   MsTeamsLogoIcon,
   OpenSearchLogoIcon,
   PrometheusLogoIcon,
@@ -63,6 +66,9 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Azure,
   WorkbenchToolType.Sentry,
   WorkbenchToolType.Docker,
+  WorkbenchToolType.Lambda,
+  WorkbenchToolType.CloudRun,
+  WorkbenchToolType.AzureFunction,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -98,6 +104,9 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Azure]: 'azure',
   [WorkbenchToolType.Sentry]: 'sentry',
   [WorkbenchToolType.Docker]: 'docker',
+  [WorkbenchToolType.Lambda]: 'lambda',
+  [WorkbenchToolType.CloudRun]: 'cloudRun',
+  [WorkbenchToolType.AzureFunction]: 'azureFunction',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -131,6 +140,22 @@ export function scmTypeForWorkbenchTool(
   return WORKBENCH_TOOL_TO_SCM_TYPE[type]
 }
 
+const CLOUD_FUNCTION_TOOL_TO_PROVIDER: Partial<
+  Record<WorkbenchToolType, Provider>
+> = {
+  [WorkbenchToolType.Lambda]: Provider.Aws,
+  [WorkbenchToolType.CloudRun]: Provider.Gcp,
+  [WorkbenchToolType.AzureFunction]: Provider.Azure,
+}
+
+export const cloudFunctionProviderForWorkbenchTool = (
+  type: WorkbenchToolType
+): Provider | undefined => CLOUD_FUNCTION_TOOL_TO_PROVIDER[type]
+
+export const workbenchToolSupportsApproval = (
+  type: WorkbenchToolType
+): boolean => !!cloudFunctionProviderForWorkbenchTool(type)
+
 const WORKBENCH_TOOL_LABELS: Record<
   WorkbenchToolType | `${WorkbenchToolType.Cloud}:${Provider}`,
   string
@@ -163,7 +188,7 @@ const WORKBENCH_TOOL_LABELS: Record<
   [WorkbenchToolType.Cloud]: 'Cloud',
   [WorkbenchToolType.Lambda]: 'AWS Lambda',
   [WorkbenchToolType.CloudRun]: 'GCP Cloud Run',
-  [WorkbenchToolType.AzureFunction]: 'Azure Function',
+  [WorkbenchToolType.AzureFunction]: 'Azure Cloud Function',
   [WorkbenchToolType.Docker]: 'Docker / OCI registry',
   [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
   [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
@@ -178,6 +203,26 @@ export const getWorkbenchToolLabel = (
   type === WorkbenchToolType.Cloud && provider
     ? WORKBENCH_TOOL_LABELS[`${type}:${provider}`]
     : WORKBENCH_TOOL_LABELS[type]
+
+/** Description from Lambda / Cloud Run / Azure Function tool configuration. */
+export function getWorkbenchToolDescription(
+  tool:
+    | {
+        configuration?: Nullable<{
+          lambda?: Nullable<{ description?: Nullable<string> }>
+          cloudRun?: Nullable<{ description?: Nullable<string> }>
+          azureFunction?: Nullable<{ description?: Nullable<string> }>
+        }>
+      }
+    | null
+    | undefined
+): string | undefined {
+  const description =
+    tool?.configuration?.lambda?.description?.trim() ||
+    tool?.configuration?.cloudRun?.description?.trim() ||
+    tool?.configuration?.azureFunction?.description?.trim()
+  return description || undefined
+}
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
   WorkbenchToolType,
@@ -285,6 +330,12 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Connect to Sentry to list issues, inspect error details, and read stack traces.',
   [WorkbenchToolType.Docker]:
     'Inspect Docker and OCI registries by listing tags and fetching manifests.',
+  [WorkbenchToolType.Lambda]:
+    'Run custom code with AWS Lambda without provisioning or managing servers.',
+  [WorkbenchToolType.CloudRun]:
+    'Run custom containerized applications on GCP Cloud Run.',
+  [WorkbenchToolType.AzureFunction]:
+    'Run custom code with Azure Functions without managing infrastructure.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -448,4 +499,7 @@ const toolToIcon: Record<
   [WorkbenchToolType.Jaeger]: ToolsIcon,
   [WorkbenchToolType.Sentry]: SentryLogoIcon,
   [WorkbenchToolType.Docker]: DockerLogoIcon,
+  [WorkbenchToolType.Lambda]: LambdaIcon,
+  [WorkbenchToolType.CloudRun]: GoogleCloudRunIcon,
+  [WorkbenchToolType.AzureFunction]: MicrosoftActionsIcon,
 }

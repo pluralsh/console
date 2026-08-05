@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :helm_auth_provider,       HelmRepository.Provider
   ecto_enum :pr_role,                  PrAutomation.Role
   ecto_enum :pr_status,                PullRequest.Status
+  ecto_enum :pr_change_type,           PullRequest.ChangeType
   ecto_enum :configuration_type,       Configuration.Type
   ecto_enum :operation,                Configuration.Condition.Operation
   ecto_enum :validation_uniq_scope,    Configuration.UniqScope
@@ -332,6 +333,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :cluster_id, :id
     field :service,    :namespaced_name
     field :cluster,    :namespaced_name
+    field :difficulty, :pull_request_difficulty_attributes
   end
 
   @desc "attributes for a pull request pointer record"
@@ -343,6 +345,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :cluster_id, :id
     field :service,    :namespaced_name
     field :cluster,    :namespaced_name
+    field :difficulty, :pull_request_difficulty_attributes
+  end
+
+  input_object :pull_request_difficulty_attributes do
+    field :type,  :pr_change_type
+    field :lines, :integer
   end
 
   @desc "The attributes to configure a new webhook for a SCM provider"
@@ -787,6 +795,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :ref,     :string
     field :labels,  list_of(:string)
     field :patch,   :string, description: "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
+    field :difficulty, :pull_request_difficulty,
+      description: "the estimated complexity of the pull request"
 
     field :author,  :user, description: "the user that spawned this pr, will also be associated with notifications w/in Plural",
       resolve: dataloader(Deployments)
@@ -798,6 +808,11 @@ defmodule Console.GraphQl.Deployments.Git do
       resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  object :pull_request_difficulty do
+    field :type,  :pr_change_type, description: "the type of change in the pull request"
+    field :lines, :integer, description: "the number of changed lines"
   end
 
   object :scm_webhook do

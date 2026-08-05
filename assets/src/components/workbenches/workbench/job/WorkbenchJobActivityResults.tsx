@@ -3,6 +3,8 @@ import {
   Button,
   Card,
   Code,
+  DiffMethod,
+  DiffViewer,
   Flex,
   FlexProps,
   IconFrame,
@@ -22,7 +24,6 @@ import {
   prettifyPrompt,
   truncateKeepingChips,
 } from 'components/utils/contentEditableChips'
-import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
@@ -43,7 +44,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { DiffMethod } from 'react-diff-viewer-continued'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
@@ -60,6 +60,7 @@ export function MemoActivityIcon({
     () => getOldContentFromTextDiff(newValue, jobUpdate?.diff),
     [newValue, jobUpdate?.diff]
   )
+
   return (
     <ActivityModalIcon
       icon={NotebookIcon}

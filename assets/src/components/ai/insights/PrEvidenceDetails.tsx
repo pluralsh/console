@@ -3,15 +3,15 @@ import {
   AccordionItem,
   CloseIcon,
   CaretDownIcon,
+  DiffMethod,
+  DiffViewer,
   FileIcon,
   Flex,
   IconFrame,
   PrOpenIcon,
 } from '@pluralsh/design-system'
-import DiffViewer from 'components/utils/DiffViewer'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useMemo } from 'react'
-import { DiffMethod } from 'react-diff-viewer-continued'
 import styled from 'styled-components'
 import pluralize from 'pluralize'
 import { getURLPath } from 'utils/url'

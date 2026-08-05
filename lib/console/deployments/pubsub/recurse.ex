@@ -118,19 +118,24 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Repo
   alias Console.Schema.{PullRequest, Stack, Service, GitRepository}
-  alias Console.Deployments.{Stacks, Git.Discovery, Services, Agents}
+  alias Console.Deployments.{Stacks, Git.Discovery, Services, Agents, Workbenches}
 
   def process(%@for{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
     with %PullRequest{stack: %Stack{} = stack} <- Repo.preload(pr, [stack: :repository]),
          _ <- sleep(stack.repository),
          _ <- Discovery.kick(stack.repository),
-      do: Stacks.poll(stack)
+         {:ok, run} <- Stacks.poll(stack) do
+      PullRequest.changeset(pr, %{stack_run_id: run.id})
+      |> Repo.update()
+    end
   end
 
   def process(%@for{item: %PullRequest{status: :merged, service_id: id} = pr}) when is_binary(id) do
-    with %PullRequest{service: %Service{} = service} <- Repo.preload(pr, [service: :repository]),
+    with %PullRequest{service: %Service{} = service} = pr <- Repo.preload(pr, [service: :repository]),
          _ <- sleep(service.repository),
-      do: Services.kick(service)
+         kick <- Services.kick(service),
+         _ <- Workbenches.kick_workbench(pr),
+      do: kick
   end
 
   def process(%@for{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
@@ -237,7 +242,7 @@ end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
   alias Console.Schema.{Stack, StackRun, PullRequest}
-  alias Console.Deployments.Stacks
+  alias Console.Deployments.{Stacks, Workbenches}
 
   def process(%{item: %StackRun{id: id} = run}) do
     run = Console.Repo.preload(run, [:pull_request, :stack])
@@ -250,6 +255,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
         Stacks.post_comment(run)
         Stacks.dequeue(pr)
       %StackRun{stack: %Stack{} = stack} ->
+        Workbenches.kick_workbench(run)
         Stacks.dequeue(stack)
     end
   end
@@ -276,6 +282,10 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunUpdated do
   alias Console.Deployments.Pipelines
 
   def process(%@for{item: run}), do: Pipelines.broadcast_gate(run)
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunCreated do
+  def process(%@for{item: run}), do: Console.Pipelines.SentinelRun.Producer.kick(run)
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
@@ -329,4 +339,8 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobCreated do
   def process(%{item: job}), do: Console.Pipelines.AI.Workbench.Producer.kick(job)
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchQueuedPromptCreated do
+  def process(%{item: prompt}), do: Console.Pipelines.AI.QueuedPrompt.Producer.kick(prompt)
 end

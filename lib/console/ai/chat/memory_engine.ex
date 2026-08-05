@@ -121,6 +121,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> fun.(acc)
     |> case do
       {:halt, res} -> {:ok, res}
+      {:messages, [_ | _] = msgs} -> loop(%{engine | acc: acc, messages: messages ++ msgs}, iter + 1)
       {:message, msg} -> loop(%{engine | acc: acc, messages: messages ++ [msg]}, iter + 1)
       {:cont, acc} -> loop(%{engine | acc: acc, messages: messages ++ msgs}, iter + 1)
     end

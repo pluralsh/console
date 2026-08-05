@@ -23,7 +23,6 @@ import {
   WorkbenchSkillAttributes,
   WorkbenchSkillSubagent,
 } from 'generated/graphql'
-import { cloneDeep } from 'lodash'
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -35,6 +34,7 @@ import styled, { useTheme } from 'styled-components'
 import { deepOmitFalsy } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
+import { modesFormValue } from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 import {
   WORKBENCH_STEP_LABELS,
   workbenchFormSteps,
@@ -445,17 +445,42 @@ const validateForm = (formState: WorkbenchFormState) =>
   )
 
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
-  const sanitizedState = cloneDeep(deepOmitFalsy(state))
-  const { name, readBindings: r, writeBindings: w, ...rest } = sanitizedState
-
-  // Keep explicit empty list so "delete all skills" is persisted.
-  rest.workbenchSkills = (state.workbenchSkills ?? []).filter(isNonNullable)
+  const { name, readBindings, writeBindings, modes, workbenchSkills, ...rest } =
+    state
 
   return {
+    ...deepOmitFalsy(rest),
     name: name ?? '',
-    ...(r && { readBindings: r.map(bindingToBindingAttributes) }),
-    ...(w && { writeBindings: w.map(bindingToBindingAttributes) }),
-    ...rest,
+    // Keep explicit empty list so "delete all skills" is persisted.
+    workbenchSkills: (workbenchSkills ?? []).filter(isNonNullable),
+    // Keep explicit mode values so disabling an existing default persists.
+    ...(modes ? { modes: modesToAttributes(modes) } : {}),
+    ...(readBindings?.length && {
+      readBindings: readBindings.map(bindingToBindingAttributes),
+    }),
+    ...(writeBindings?.length && {
+      writeBindings: writeBindings.map(bindingToBindingAttributes),
+    }),
+  }
+}
+
+function modesToAttributes(
+  modes: NonNullable<WorkbenchFormState['modes']>
+): NonNullable<WorkbenchAttributes['modes']> {
+  return {
+    plan: modes.plan ?? false,
+    verification: modes.verification ?? false,
+    coding: modes.coding ?? null,
+    budget: modes.budget ?? null,
+    ...(modes.model && { model: modes.model }),
+    kubernetes: modes.kubernetes
+      ? {
+          update: modes.kubernetes.update ?? false,
+          delete: modes.kubernetes.delete ?? false,
+          requireNamespaces: modes.kubernetes.requireNamespaces ?? [],
+          excludeNamespaces: modes.kubernetes.excludeNamespaces ?? [],
+        }
+      : null,
   }
 }
 
@@ -470,6 +495,7 @@ function sanitizeInitialForm({
   repository,
   skills,
   modes,
+  budget,
   workbenchSkills,
   tools,
   readBindings,
@@ -512,7 +538,8 @@ function sanitizeInitialForm({
       observability: { logs, metrics },
       coding: { mode, repositories, enableBabysitting },
     },
-    modes: workbenchModesToAttributes(modes),
+    modes: modesFormValue(modes),
+    budget: budget ?? null,
     skills: { ref, files },
     toolAssociations:
       tools?.flatMap((t) => (t ? [{ toolId: t.id }] : [])) ?? [],
@@ -533,39 +560,5 @@ function sanitizeInitialForm({
         },
       ]) ?? [],
     workbenchSkills: resolvedWorkbenchSkills,
-  }
-}
-
-function workbenchModesToAttributes(
-  modes: WorkbenchFragment['modes']
-): WorkbenchFormState['modes'] {
-  if (!modes) return null
-
-  return {
-    plan: modes.plan,
-    ...(modes.model?.provider && modes.model.model
-      ? {
-          model: {
-            provider: modes.model.provider,
-            model: modes.model.model,
-          },
-        }
-      : {}),
-    ...(modes.coding
-      ? {
-          coding: {
-            approval: modes.coding.approval,
-            babysit: modes.coding.babysit,
-          },
-        }
-      : {}),
-    ...(modes.budget
-      ? {
-          budget: {
-            cost: modes.budget.cost,
-            tokens: modes.budget.tokens,
-          },
-        }
-      : {}),
   }
 }

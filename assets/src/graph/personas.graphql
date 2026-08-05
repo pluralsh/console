@@ -28,6 +28,10 @@ fragment PersonaConfiguration on PersonaConfiguration {
     backups
     stacks
     workbenches
+    security
+    cost
+    cd
+    ai
   }
   services {
     configuration

@@ -31,13 +31,13 @@
                     "type": "string",
                     "description": "A mermaid diagram of the topology of the system in question in this investigation. We will validate mermaid syntax and reply with an error if invalid."
                 },
+                "objective": {
+                    "type": "string",
+                    "description": "The sole current objective for this investigation. Update it when a user redefines the task; otherwise pass the existing objective unchanged."
+                },
                 "working_theory": {
                     "type": "string",
                     "description": "The current working theory you might want to update.  Pass the old theory if no changes are needed."
-                },
-                "criticism": {
-                    "type": "string",
-                    "description": "A markdown-formatted critique of the work done so far.  Use this to highlight any gaps, inconsistencies, missing evidence, unverified assumptions, or weaknesses in the current investigation that should be addressed in subsequent steps."
                 }
             },
             "required": []

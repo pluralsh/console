@@ -1,72 +1,42 @@
 import { Flex } from '@pluralsh/design-system'
-
-import { CaptionP } from 'components/utils/typography/Text'
-import { useOutletContext } from 'react-router-dom'
-import { useTheme } from 'styled-components'
-import { formatDateTime, fromNow } from 'utils/datetime'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from '../../../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
-import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
-import { StackedText } from '../../../utils/table/StackedText.tsx'
-import { StackRunOutletContextT } from '../Route.tsx'
 import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
+import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
+import { SendInsightToWorkbenchButton } from '../../../ai/insights/SendInsightToWorkbench'
+import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
+import { useOutletContext } from 'react-router-dom'
+import { StackRunOutletContextT } from '../Route.tsx'
 
 export function StackRunInsights() {
-  const theme = useTheme()
   const { stackRun, refetch, loading } =
     useOutletContext<StackRunOutletContextT>()
 
   return (
     <Flex
       direction="column"
-      gap="medium"
       overflow="hidden"
       height="100%"
     >
-      <Flex
-        justify="space-between"
-        alignItems="center"
-      >
-        <StackedText
-          first="Insight"
-          firstPartialType="body1Bold"
-          second={
-            stackRun.insight?.updatedAt &&
-            `Last updated ${fromNow(stackRun.insight?.updatedAt)}`
-          }
-        />
-        <Flex
-          align="center"
-          justify="flex-end"
-          gap="small"
-          paddingLeft={theme.spacing.medium}
-        >
-          <CaptionP
-            css={{ width: 'max-content' }}
-            $color="text-xlight"
-          >
-            {stackRun.insight?.updatedAt &&
-              `Last updated ${formatDateTime(stackRun?.insight?.updatedAt)}`}
-          </CaptionP>
-          <IconFrameRefreshButton
-            loading={loading}
-            refetch={refetch}
-          />
-          <ChatWithAIButton
-            floating
-            insightId={stackRun?.insight?.id}
-            messages={[insightMessage(stackRun?.insight)]}
-          />
-          <AISuggestFix insight={stackRun?.insight} />
-        </Flex>
-      </Flex>
       <InsightDisplay
         insight={stackRun?.insight}
         kind="stack run"
         loading={loading}
+        headerActions={
+          <>
+            <IconFrameRefreshButton
+              size="medium"
+              loading={loading}
+              refetch={refetch}
+            />
+            <SendInsightToWorkbenchButton
+              small
+              insight={stackRun?.insight}
+            />
+            <AISuggestFix
+              small
+              insight={stackRun?.insight}
+            />
+          </>
+        }
       />
     </Flex>
   )

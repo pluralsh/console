@@ -51,6 +51,20 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert Enum.any?(list, &(&1["id"] == allowed_cluster.id))
       refute Enum.any?(list, &(&1["project"]["name"] == other_project.name))
     end
+
+    test "filters results by max health score and includes health score" do
+      user = insert(:user)
+      unhealthy_cluster = insert(:cluster, health_score: 35, read_bindings: [%{user_id: user.id}])
+      _healthy_cluster = insert(:cluster, health_score: 90, read_bindings: [%{user_id: user.id}])
+
+      assert {:ok, parsed} =
+               Tool.validate(%ClusterList{user: user}, %{"max_health_score" => 50})
+
+      assert {:ok, json} = ClusterList.implement(parsed)
+      assert {:ok, [row]} = Jason.decode(json)
+      assert row["id"] == unhealthy_cluster.id
+      assert row["health_score"] == 35
+    end
   end
 
   describe "ClusterTags (plrl_cluster_tags)" do
@@ -206,6 +220,52 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert content =~ "\"critical_count\":1"
       assert content =~ report.id
     end
+
+    test "when components fetch is true, includes matching service components in the response" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      service = insert(:service, cluster: cluster)
+
+      component =
+        insert(:service_component,
+          service: service,
+          group: "apps",
+          version: "v1",
+          kind: "Deployment",
+          namespace: "prod",
+          name: "api",
+          synced: true,
+          state: :running
+        )
+
+      other =
+        insert(:service_component,
+          service: service,
+          group: "apps",
+          version: "v1",
+          kind: "Deployment",
+          namespace: "staging",
+          name: "worker",
+          synced: true,
+          state: :running
+        )
+
+      assert {:ok, parsed} =
+               Tool.validate(%ServiceInspect{user: user}, %{
+                 "service_id" => service.id,
+                 "components" => %{"fetch" => true, "search" => "prod/api.*"}
+               })
+
+      assert {:ok, content} = ServiceInspect.implement(parsed)
+      assert content =~ "# Components"
+      assert content =~ "\"api_version\": \"apps/v1\""
+      assert content =~ "\"kind\": \"Deployment\""
+      assert content =~ "\"namespace\": \"prod\""
+      assert content =~ "\"name\": \"api\""
+      assert content =~ component.id
+      refute content =~ other.id
+      refute content =~ "\"name\": \"worker\""
+    end
   end
 
   describe "StackList (plrl_stacks)" do
@@ -281,6 +341,45 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert content =~ run.id
       assert content =~ "terraform"
       assert content =~ "Error: something broke"
+    end
+
+    test "when resources fetch is true, includes matching stack state resources in the response" do
+      user = insert(:user)
+      stack = insert(:stack, read_bindings: [%{user_id: user.id}])
+
+      insert(:stack_state,
+        stack: stack,
+        state: [
+          %{
+            identifier: "aws_s3_bucket.app_logs",
+            resource: "aws_s3_bucket",
+            name: "app_logs",
+            configuration: %{"bucket" => "app-logs"},
+            links: []
+          },
+          %{
+            identifier: "aws_iam_role.worker",
+            resource: "aws_iam_role",
+            name: "worker",
+            configuration: %{"name" => "worker"},
+            links: []
+          }
+        ]
+      )
+
+      assert {:ok, parsed} =
+               Tool.validate(%StackInspect{user: user}, %{
+                 "stack_id" => stack.id,
+                 "resources" => %{"fetch" => true, "search" => "aws_s3_bucket.*logs"}
+               })
+
+      assert {:ok, content} = StackInspect.implement(parsed)
+
+      assert content =~ "# Resources"
+      assert content =~ "\"identifier\": \"aws_s3_bucket.app_logs\""
+      assert content =~ "\"resource\": \"aws_s3_bucket\""
+      assert content =~ "\"name\": \"app_logs\""
+      refute content =~ "aws_iam_role.worker"
     end
   end
 

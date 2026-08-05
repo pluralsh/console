@@ -358,11 +358,14 @@ defmodule Console.Deployments.AgentsTest do
         body: "a body",
         repository: "https://github.com/pluralsh/console.git",
         base: "main",
-        head: "plrl/ai/pr-test"
+        head: "plrl/ai/pr-test",
+        difficulty: %{type: :gitops, lines: 42}
       }, run.id, user)
 
       assert pr.status == :open
       assert pr.title == "a pr"
+      assert pr.difficulty.type == :gitops
+      assert pr.difficulty.lines == 42
       assert pr.flow_id == run.flow_id
       assert pr.agent_run_id == run.id
       updated = refetch(run)
@@ -775,6 +778,32 @@ defmodule Console.Deployments.AgentsTest do
         message: "a message",
         role: :user
       }, run.id, insert(:cluster))
+    end
+  end
+
+  describe "update_agent_message/3" do
+    test "it can update a long-running tool message" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+
+      message = insert(:agent_message,
+        agent_run: run,
+        metadata: %{tool: %{name: "shell", state: :running, input: "mix test"}}
+      )
+
+      {:ok, updated} = Agents.update_agent_message(%{
+        message: message.message,
+        role: message.role,
+        metadata: %{
+          completed_at: ~U[2026-08-04 20:00:00.000000Z],
+          tool: %{name: "shell", state: :completed, input: "mix test", output: "0 failures"}
+        }
+      }, message.id, runtime.cluster)
+
+      assert updated.metadata.completed_at == ~U[2026-08-04 20:00:00.000000Z]
+      assert updated.metadata.tool.state == :completed
+      assert updated.metadata.tool.output == "0 failures"
+      assert_receive {:event, %PubSub.AgentMessageUpdated{item: ^updated}}
     end
   end
 end

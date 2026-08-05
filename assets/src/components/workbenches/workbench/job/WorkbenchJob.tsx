@@ -9,6 +9,7 @@ import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { useSidePanelWidth } from 'components/layout/TopLevelSidePanel'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -30,8 +31,8 @@ import { SaveWorkbenchPromptButton } from '../SaveWorkbenchPromptButton'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { isJobRunning } from './WorkbenchJobActivity'
 import { useWorkbenchJobPanel } from './WorkbenchJobPanel'
-import { prettifyPrompt } from 'components/utils/contentEditableChips'
-import { hasWorkbenchJobResultContent } from './workbenchJobResultUtils'
+import { hasWorkbenchJobPanelContent } from './workbenchJobResultUtils'
+import { useWorkbenchJobActionSummary } from './useWorkbenchJobActionSummary'
 
 export function WorkbenchJob() {
   const theme = useTheme()
@@ -49,11 +50,10 @@ export function WorkbenchJob() {
 
   const job = data?.workbenchJob
   const isLoading = loading && !job
-  const hasResultContent = hasWorkbenchJobResultContent(job)
+  const { hasActions } = useWorkbenchJobActionSummary(jobId)
+  const hasPanelContent = hasWorkbenchJobPanelContent(job, hasActions)
 
-  const { isOpen, setOpen } = useWorkbenchJobPanel(
-    !!job?.id && hasResultContent
-  )
+  const { isOpen, setOpen } = useWorkbenchJobPanel(!!job?.id && hasPanelContent)
   useSidePanelWidth({
     maxWidthVw: 60,
     initialWidthVw:
@@ -196,7 +196,7 @@ export function WorkbenchJob() {
           workbenchName={workbenchName}
         />
       </WrapperSC>
-      {hasResultContent && !isOpen && (
+      {!!job?.id && hasPanelContent && !isOpen && (
         <PanelOpenBtnSC
           tertiary
           onClick={() => setOpen(true)}

@@ -4,11 +4,8 @@ import { fromNow } from 'utils/datetime'
 import { InsightRefresh } from 'components/ai/insights/InsightRefresh.tsx'
 import { useTheme } from 'styled-components'
 import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
-import {
-  ChatWithAIButton,
-  insightMessage,
-} from '../../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
+import { SendInsightToWorkbenchButton } from '../../../ai/insights/SendInsightToWorkbench'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { useServiceContext } from './ServiceDetailsContext'
 
@@ -41,11 +38,7 @@ export function ServiceInsights() {
           gap="small"
         >
           {service?.insight && <InsightRefresh insight={service?.insight} />}
-          <ChatWithAIButton
-            floating
-            insightId={service?.insight?.id}
-            messages={[insightMessage(service?.insight)]}
-          />
+          <SendInsightToWorkbenchButton insight={service?.insight} />
           <AISuggestFix insight={service?.insight} />
         </Flex>
       </Flex>

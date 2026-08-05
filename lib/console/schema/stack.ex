@@ -317,6 +317,7 @@ defmodule Console.Schema.Stack do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> make_ai_pollable_on_failure()
     |> cast_embed(:git)
     |> cast_embed(:job_spec)
     |> cast_embed(:configuration)
@@ -384,9 +385,20 @@ defmodule Console.Schema.Stack do
   def complete_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(status last_successful)a)
+    |> make_ai_pollable_on_failure()
     |> cast_assoc(:output)
     |> cast_assoc(:state)
     |> validate_required(~w(status)a)
+  end
+
+  defp make_ai_pollable_on_failure(changeset) do
+    case get_change(changeset, :status) do
+      :failed ->
+        put_change(changeset, :ai_poll_at, DateTime.utc_now())
+
+      _ ->
+        changeset
+    end
   end
 
   def rbac_changeset(model, attrs \\ %{}) do

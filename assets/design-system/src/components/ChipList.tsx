@@ -63,6 +63,8 @@ function ChipList<TValue = string>({
       {values.length > limit && (
         <Chip
           {...props}
+          closeButton={false}
+          clickable={false}
           tooltip={
             <Flex
               gap="xsmall"

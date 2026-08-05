@@ -9,6 +9,7 @@ import {
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
+import { WorkbenchQueuedPromptChip } from 'components/workbenches/common/WorkbenchQueuedPromptChip'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
@@ -302,7 +303,8 @@ export function WorkbenchJobActionsRow({
     !!job.chatbotMessage ||
     prs.length > 0 ||
     job.evalResult?.grade != null ||
-    !!job.result?.conclusion
+    !!job.result?.conclusion ||
+    (job.queuedPromptCount ?? 0) > 0
 
   if (!hasActions) return null
 
@@ -324,6 +326,11 @@ export function WorkbenchJobActionsRow({
       <PRsModalIcon prs={prs} />
       <JobEvalBadge job={job} />
       <JobConclusionIcon result={job.result} />
+      <WorkbenchQueuedPromptChip
+        count={job.queuedPromptCount}
+        summary={job.queuedPromptSummary}
+        fillLevel={chipFillLevel}
+      />
     </div>
   )
 }

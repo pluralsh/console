@@ -707,6 +707,114 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == to_string(job.status) |> String.upcase()
     end
 
+    test "it returns queuedPromptCount for unconsumed prompts" do
+      job = insert(:workbench_job)
+      insert_list(2, :queued_prompt, workbench_job: job)
+      insert(:queued_prompt, workbench_job: job, consumed_at: DateTime.utc_now())
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            queuedPromptCount
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["queuedPromptCount"] == 2
+    end
+
+    test "it returns queuedPromptSummary ready/pending breakdown" do
+      job = insert(:workbench_job)
+      next_at = DateTime.utc_now() |> DateTime.add(30, :minute) |> DateTime.truncate(:second)
+      insert(:queued_prompt, workbench_job: job)
+      insert(:queued_prompt,
+        workbench_job: job,
+        dequeable_at: next_at
+      )
+      insert(:queued_prompt,
+        workbench_job: job,
+        dequeable_at: DateTime.add(next_at, 60, :minute)
+      )
+      insert(:queued_prompt, workbench_job: job, consumed_at: DateTime.utc_now())
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            queuedPromptCount
+            queuedPromptSummary {
+              readyCount
+              pendingCount
+              nextAt
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["queuedPromptCount"] == 3
+      assert found["queuedPromptSummary"]["readyCount"] == 1
+      assert found["queuedPromptSummary"]["pendingCount"] == 2
+      assert found["queuedPromptSummary"]["nextAt"]
+    end
+
+    test "it lists unconsumed queued prompts ordered by dequeableAt" do
+      job = insert(:workbench_job)
+      later = insert(:queued_prompt,
+        workbench_job: job,
+        prompt: "later",
+        dequeable_at: DateTime.utc_now() |> DateTime.add(60, :minute)
+      )
+      sooner = insert(:queued_prompt,
+        workbench_job: job,
+        prompt: "sooner",
+        dequeable_at: DateTime.utc_now() |> DateTime.add(5, :minute)
+      )
+      insert(:queued_prompt,
+        workbench_job: job,
+        prompt: "consumed",
+        consumed_at: DateTime.utc_now()
+      )
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            queuedPrompts(first: 10) {
+              edges {
+                node {
+                  id
+                  prompt
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      ids = Enum.map(found["queuedPrompts"]["edges"], & &1["node"]["id"])
+      assert ids == [sooner.id, later.id]
+    end
+
+    test "it returns the UI URL for a workbench job" do
+      job = insert(:workbench_job)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} =
+        run_query(
+          """
+            query WorkbenchJob($id: ID!) {
+              workbenchJob(id: $id) {
+                url
+              }
+            }
+          """,
+          %{"id" => job.id},
+          %{current_user: admin_user()}
+        )
+
+      assert URI.parse(found["url"]).path == "/workbenches/#{job.workbench_id}/jobs/#{job.id}"
+    end
+
     test "it can sideload chatbotMessage on a workbench job" do
       job = insert(:workbench_job)
       msg = insert(:chatbot_message, workbench_job: job)
@@ -782,6 +890,31 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == job.id
       assert from_connection(found["activities"])
              |> ids_equal(activities)
+    end
+
+    test "it can filter activities by status" do
+      job = insert(:workbench_job)
+      pending = insert(:workbench_job_activity,
+        workbench_job: job,
+        type: :function,
+        status: :needs_approval
+      )
+      insert(:workbench_job_activity, workbench_job: job, type: :coding, status: :successful)
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!, $status: WorkbenchJobActivityStatus) {
+          workbenchJob(id: $id) {
+            id
+            activities(first: 10, status: $status) {
+              edges { node { id status } }
+            }
+          }
+        }
+      """, %{"id" => job.id, "status" => "NEEDS_APPROVAL"}, %{current_user: admin_user()})
+
+      [node] = from_connection(found["activities"])
+      assert node["id"] == pending.id
+      assert node["status"] == "NEEDS_APPROVAL"
     end
 
     test "it can paginate activities" do
@@ -1027,6 +1160,40 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
   end
 
+  describe "workbenchJobActivities" do
+    test "it can list activities needing approval for readable workbenches" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench)
+      pending =
+        insert_list(2, :workbench_job_activity,
+          workbench_job: job,
+          type: :function,
+          status: :needs_approval
+        )
+      insert(:workbench_job_activity,
+        workbench_job: job,
+        type: :function,
+        status: :successful
+      )
+      insert(:workbench_job_activity, type: :function, status: :needs_approval)
+
+      {:ok, %{data: %{"workbenchJobActivities" => found}}} = run_query("""
+        query WorkbenchJobActivities($status: WorkbenchJobActivityStatus!) {
+          workbenchJobActivities(first: 10, status: $status) {
+            edges { node { id status type } }
+          }
+        }
+      """, %{"status" => "NEEDS_APPROVAL"}, %{current_user: user})
+
+      nodes = from_connection(found)
+      assert length(nodes) == 2
+      assert Enum.all?(nodes, &(&1["status"] == "NEEDS_APPROVAL"))
+      assert ids_equal(nodes, pending)
+    end
+  end
+
   describe "workbenchJobActivity" do
     test "it can fetch a workbench job activity by id" do
       user = insert(:user)
@@ -1163,6 +1330,43 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["result"]["jobUpdate"]["diff"] == "a -> b"
       assert found["result"]["jobUpdate"]["workingTheory"] == "theory"
       assert found["result"]["jobUpdate"]["conclusion"] == "ok"
+    end
+
+    test "it redacts secret values in kube request bodies" do
+      body = Jason.encode!(%{
+        "kind" => "Secret",
+        "stringData" => %{"token" => "super-secret"}
+      })
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: insert(:workbench_job),
+          type: :kubernetes,
+          result: %{
+            kube_request: %{
+              handle: "prod-cluster",
+              method: "PATCH",
+              path: "/api/v1/namespaces/default/secrets/database",
+              body: body,
+              content_type: "application/merge-patch+json"
+            }
+          }
+        )
+
+      {:ok, %{data: %{"workbenchJobActivity" => found}}} = run_query("""
+        query WorkbenchJobActivity($id: ID!) {
+          workbenchJobActivity(id: $id) {
+            result {
+              kubeRequest {
+                body
+              }
+            }
+          }
+        }
+      """, %{"id" => activity.id}, %{current_user: admin_user()})
+
+      assert found["result"]["kubeRequest"]["body"] =~ "*****"
+      refute found["result"]["kubeRequest"]["body"] =~ "super-secret"
     end
 
   end

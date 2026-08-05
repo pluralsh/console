@@ -16,7 +16,7 @@ agent:
     url_path_prefix: /
     allowed_agent_cache_ttl: "60s"
     allowed_agent_cache_error_ttl: "10s"
-  info_cache_ttl: "300s"
+  info_cache_ttl: "43200s"
   info_cache_error_ttl: "60s"
   redis_conn_info_ttl: "300s"
   redis_conn_info_refresh: "240s"

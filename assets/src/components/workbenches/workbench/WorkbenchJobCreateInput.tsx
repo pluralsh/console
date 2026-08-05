@@ -2,7 +2,6 @@ import {
   AddIcon,
   BookmarkAddIcon,
   Flex,
-  IconFrame,
   ListBoxFooterPlus,
   ListBoxItem,
   Select,
@@ -24,6 +23,7 @@ import {
   useWorkbenchQuery,
   WorkbenchJobFragment,
   WorkbenchJobModelAttributes,
+  type WorkbenchJobModesAttributes,
   WorkbenchPromptFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
@@ -43,14 +43,14 @@ import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { WorkbenchModelSelector } from './WorkbenchModelSelector'
-import { WorkbenchPromptModeSelector } from './WorkbenchPromptModeSelector/WorkbenchPromptModeSelector'
-import { WorkbenchTokenLimitSelector } from './WorkbenchPromptModeSelector/WorkbenchTokenLimitSelector'
+import {
+  WorkbenchPromptOptionPills,
+  WorkbenchPromptOptionsSelector,
+} from './WorkbenchPromptModeSelector/WorkbenchPromptOptionsSelector'
 import {
   defaultPromptModesFromWorkbench,
   modesAttributes,
-  updateBudgetModes,
 } from './WorkbenchPromptModeSelector/workbenchPromptModes'
-import type { WorkbenchJobModesAttributes } from 'generated/graphql'
 import { CaptionP } from 'components/utils/typography/Text'
 
 const MAX_WIDTH = 924
@@ -211,17 +211,10 @@ export function WorkbenchJobCreateInput({
               gap="xsmall"
               height={32}
             >
-              <WorkbenchPromptModeSelector
+              <WorkbenchPromptOptionsSelector
+                workbenchId={workbenchId}
                 value={promptModes}
                 onChange={setPromptModes}
-                disabled={disabled || loading}
-              />
-              <WorkbenchTokenLimitSelector
-                workbenchId={workbenchId}
-                value={promptModes?.budget}
-                onChange={(budget) =>
-                  setPromptModes((modes) => updateBudgetModes(modes, budget))
-                }
                 disabled={disabled || loading}
               />
               <WorkbenchModelSelector
@@ -231,19 +224,23 @@ export function WorkbenchJobCreateInput({
                 }
                 disabled={disabled || loading}
               />
-              {setWorkbenchId && (
-                <WorkbenchPillSelector
-                  workbenchId={workbenchId}
-                  setWorkbenchId={setWorkbenchId}
-                  workbenchOptions={workbenchOptions}
-                />
-              )}
+              <WorkbenchPromptOptionPills
+                value={promptModes}
+                onChange={setPromptModes}
+              />
               {workbenchId && (
                 <WorkbenchSavedPrompts
                   workbenchId={workbenchId}
                   disabled={loading}
                   currentPrompt={prompt}
                   onSelectPrompt={handleSelectSavedPrompt}
+                />
+              )}
+              {setWorkbenchId && (
+                <WorkbenchPillSelector
+                  workbenchId={workbenchId}
+                  setWorkbenchId={setWorkbenchId}
+                  workbenchOptions={workbenchOptions}
                 />
               )}
             </Flex>
@@ -376,13 +373,23 @@ function WorkbenchSavedPrompts({
         setIsOpen(false)
       }}
       triggerButton={
-        <IconFrame
-          type="tertiary"
-          clickable={!disabled}
-          icon={<BookmarkAddIcon size={12} />}
+        <ChatOptionPill
+          isOpen={isOpen}
+          showArrow={false}
           disabled={disabled}
-          tooltip="Saved prompts"
-        />
+          fillLevel={1}
+          aria-label="Saved prompts"
+          css={{
+            width: 32,
+            height: '100%',
+            justifyContent: 'center',
+            padding: 0,
+            borderRadius: '50%',
+            flexShrink: 0,
+          }}
+        >
+          <BookmarkAddIcon size={12} />
+        </ChatOptionPill>
       }
       dropdownFooterFixed={
         <ListBoxFooterPlus

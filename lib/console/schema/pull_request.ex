@@ -11,7 +11,8 @@ defmodule Console.Schema.PullRequest do
     AgentRun,
     User,
     WorkbenchJob,
-    Workbench
+    Workbench,
+    StackRun
   }
 
   defmodule Aggregate do
@@ -19,6 +20,7 @@ defmodule Console.Schema.PullRequest do
   end
 
   defenum Status, open: 0, merged: 1, closed: 2
+  defenum ChangeType, gitops: 0, application: 1, configuration: 2
 
   schema "pull_requests" do
     field :url,                :string
@@ -50,6 +52,11 @@ defmodule Console.Schema.PullRequest do
     field :fresh,              :boolean, virtual: true, default: false
     field :governance_changed, :boolean, virtual: true, default: false
 
+    embeds_one :difficulty, Difficulty, on_replace: :update do
+      field :type,  Console.Schema.PullRequest.ChangeType
+      field :lines, :integer
+    end
+
     belongs_to :cluster,        Cluster
     belongs_to :service,        Service
     belongs_to :stack,          Stack
@@ -59,6 +66,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :agent_run,      AgentRun
     belongs_to :author,         User
     belongs_to :workbench_job,  WorkbenchJob
+    belongs_to :stack_run,      StackRun
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -111,6 +119,10 @@ defmodule Console.Schema.PullRequest do
 
   def for_stack(query \\ __MODULE__, stack_id) do
     from(pr in query, where: pr.stack_id == ^stack_id)
+  end
+
+  def for_stack_run(query \\ __MODULE__, stack_run_id) do
+    from(pr in query, where: pr.stack_run_id == ^stack_run_id, limit: 1)
   end
 
   def for_flow(query \\ __MODULE__, flow_id) do
@@ -248,6 +260,7 @@ defmodule Console.Schema.PullRequest do
     merge_cron
     merge_attempt_at
     workbench_job_id
+    stack_run_id
   )a
 
   def changeset(model, attrs \\ %{}) do
@@ -257,6 +270,7 @@ defmodule Console.Schema.PullRequest do
     |> validate_length(:title, max: 255)
     |> validate_length(:url, max: 255)
     |> cast_assoc(:notifications_bindings)
+    |> cast_embed(:difficulty, with: &difficulty_changeset/2)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:stack_id)
@@ -266,6 +280,12 @@ defmodule Console.Schema.PullRequest do
     |> change_markers(governance_id: :governance_changed)
     |> next_merge_attempt()
     |> validate_required(~w(url title)a)
+  end
+
+  defp difficulty_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:type, :lines])
+    |> validate_required([:type, :lines])
   end
 
   def next_poll_changeset(model, interval) do

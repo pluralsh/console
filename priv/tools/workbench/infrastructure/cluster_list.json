@@ -22,6 +22,12 @@
             ],
             "description": "The distribution of kubernetes this cluster is running (generic, eks, aks, gke, rke, k3s, openshift).  If null, will search across all distros."
         },
+        "max_health_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Optional filter to return only clusters with a health_score less than or equal to this value."
+        },
         "tags": {
             "type": "array",
             "description": "Key/value tags to filter and organize clusters.  Multiple tag pairs combined with AND semantics. If ignored, will search across all tags.",

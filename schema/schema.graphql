@@ -571,6 +571,22 @@ type RootQueryType {
 
   workbenchJobActivity(id: ID!): WorkbenchJobActivity
 
+  workbenchJobActivities(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter activities by status"
+    status: WorkbenchJobActivityStatus
+
+    "filter activities by type"
+    type: WorkbenchJobActivityType
+  ): WorkbenchJobActivityConnection
+
   workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   workbenchIssues(after: String, first: Int, before: String, last: Int): IssueConnection
@@ -1398,6 +1414,17 @@ type RootMutationType {
     attributes: WorkbenchJobAttributes!
   ): WorkbenchJob
 
+  "Queues a prompt to be sent to a workbench job later. Requires prompt access to the job."
+  createQueuedPrompt(
+    "the workbench job to queue a prompt for"
+    jobId: ID!
+
+    attributes: QueuedPromptAttributes!
+  ): QueuedPrompt
+
+  "Deletes a queued prompt. Requires prompt access to the queued prompt's job."
+  deleteQueuedPrompt(id: ID!): QueuedPrompt
+
   createWorkbenchMessage(
     "the job to create a message for"
     jobId: ID!
@@ -1413,6 +1440,14 @@ type RootMutationType {
     "message attributes (e.g. prompt)"
     attributes: WorkbenchMessageAttributes!
   ): WorkbenchJobActivity
+
+  enqueueWorkbenchPrFollowup(
+    "the pull request url to queue a follow-up prompt for"
+    url: String!
+
+    "queued prompt attributes"
+    attributes: QueuedPromptAttributes!
+  ): QueuedPrompt
 
   "Approves and invokes a pending workbench function activity. Requires read access to the job's workbench."
   approveWorkbenchJobActivity(
@@ -1467,6 +1502,8 @@ type RootMutationType {
   updateAgentRunTodos(id: ID!, todos: [AgentTodoAttributes]): AgentRun
 
   createAgentMessage(runId: ID!, attributes: AgentMessageAttributes!): AgentMessage
+
+  updateAgentMessage(id: ID!, attributes: AgentMessageAttributes!): AgentMessage
 
   createAgentRunUpload(runId: ID!, attributes: AgentRunUploadAttributes!): AgentRunUpload
 
@@ -2066,6 +2103,9 @@ input AgentPullRequestAttributes {
 
   "the commit shas of the pull request"
   commitShas: [CommitShaAttributes]
+
+  "the classified type and changed line count of the pull request"
+  difficulty: PullRequestDifficultyAttributes
 }
 
 input CommitShaAttributes {
@@ -2152,6 +2192,9 @@ input AgentMessageTokensAttributes {
 }
 
 input AgentMessageMetadataAttributes {
+  "when the message completed, eg for command based tool calls that take a while"
+  completedAt: DateTime
+
   "the reasoning of the message"
   reasoning: AgentMessageReasoningAttributes
 
@@ -2482,6 +2525,9 @@ type AgentMessageTokens {
 }
 
 type AgentMessageMetadata {
+  "when the message completed"
+  completedAt: DateTime
+
   "the reasoning of the message"
   reasoning: AgentMessageReasoning
 
@@ -2714,6 +2760,11 @@ enum WorkbenchChatbotMessageBehavior {
   MESSAGE
 }
 
+enum WorkbenchBudgetUnit {
+  DOLLAR
+  TOKEN
+}
+
 enum EvalResultsPeriod {
   DAY
   WEEK
@@ -2735,6 +2786,9 @@ input WorkbenchJobModesAttributes {
   "whether planning mode is enabled for this job"
   plan: Boolean
 
+  "whether verification mode is enabled for this job"
+  verification: Boolean
+
   "model override for this job"
   model: WorkbenchJobModelAttributes
 
@@ -2743,6 +2797,9 @@ input WorkbenchJobModesAttributes {
 
   "budget limits for this job"
   budget: WorkbenchJobBudgetAttributes
+
+  "kubernetes action options for this job"
+  kubernetes: WorkbenchJobKubernetesModesAttributes
 }
 
 input WorkbenchJobModelAttributes {
@@ -2767,6 +2824,20 @@ input WorkbenchJobBudgetAttributes {
 
   "maximum token budget for this job"
   tokens: Int
+}
+
+input WorkbenchJobKubernetesModesAttributes {
+  "whether kubernetes update actions are enabled"
+  update: Boolean
+
+  "whether kubernetes delete actions are enabled"
+  delete: Boolean
+
+  "namespaces the agent can never act in"
+  excludeNamespaces: [String]
+
+  "if set, actions are only allowed in these namespaces"
+  requireNamespaces: [String]
 }
 
 input WorkbenchJobUpdateAttributes {
@@ -2806,6 +2877,9 @@ input WorkbenchAttributes {
 
   "default mode-specific options for jobs created by this workbench"
   modes: WorkbenchJobModesAttributes
+
+  "token bucket budget for this workbench"
+  budget: WorkbenchBudgetAttributes
 
   "skills configuration (ref and files)"
   skills: WorkbenchSkillsAttributes
@@ -2871,6 +2945,26 @@ input WorkbenchObservabilityAttributes {
 
   "enable metrics capability"
   metrics: Boolean
+}
+
+input WorkbenchBudgetAttributes {
+  "whether budget tracking is enabled"
+  enabled: Boolean
+
+  "maximum budget capacity"
+  maximum: Float
+
+  "minimum budget capacity to keep free"
+  minFree: Float
+
+  "the budget unit"
+  unit: WorkbenchBudgetUnit
+
+  "remaining budget capacity"
+  last: Float
+
+  "when the budget was last updated"
+  lastUpdated: DateTime
 }
 
 input WorkbenchSkillsAttributes {
@@ -3110,7 +3204,7 @@ input WorkbenchToolConfigurationAttributes {
   "google cloud run service configuration"
   cloudRun: WorkbenchToolCloudRunConnectionAttributes
 
-  "google cloud function configuration"
+  "azure function configuration"
   azureFunction: WorkbenchToolAzureFunctionConnectionAttributes
 
   "bitbucket data center connection (scm)"
@@ -3466,7 +3560,7 @@ input WorkbenchToolCloudRunConnectionAttributes {
 }
 
 input WorkbenchToolAzureFunctionConnectionAttributes {
-  "Cloud Function identifier"
+  "Azure Function identifier"
   identifier: String!
 
   "description of the function exposed to the agent"
@@ -3484,6 +3578,25 @@ input WorkbenchToolHttpHeaderAttributes {
 input WorkbenchMessageAttributes {
   "the prompt for the message"
   prompt: String!
+}
+
+input QueuedPromptAttributes {
+  "the prompt to send when dequeued"
+  prompt: String!
+
+  "when this prompt becomes eligible to dequeue"
+  dequeableAt: DateTime!
+}
+
+type QueuedPromptSummary {
+  "unconsumed prompts that are eligible to dequeue"
+  readyCount: Int!
+
+  "unconsumed prompts waiting for dequeable_at"
+  pendingCount: Int!
+
+  "earliest future dequeable_at among pending prompts"
+  nextAt: DateTime
 }
 
 type Workbench {
@@ -3504,6 +3617,9 @@ type Workbench {
 
   "default mode-specific options for jobs created by this workbench"
   modes: WorkbenchJobModes
+
+  "token bucket budget for this workbench"
+  budget: WorkbenchBudget
 
   "skills configuration"
   skills: WorkbenchSkills
@@ -3629,6 +3745,9 @@ type WorkbenchJob {
   "the workbench this run belongs to"
   workbench: Workbench
 
+  "the console URL for this workbench job"
+  url: String!
+
   "the flow this job is associated with"
   flow: Flow
 
@@ -3653,7 +3772,29 @@ type WorkbenchJob {
   "the original job this job was spawned from (e.g. eval skill jobs) (sideloadable)"
   referencedJob: WorkbenchJob
 
-  activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
+  activities(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter activities by status"
+    status: WorkbenchJobActivityStatus
+
+    "filter activities by type"
+    type: WorkbenchJobActivityType
+  ): WorkbenchJobActivityConnection
+
+  queuedPrompts(after: String, first: Int, before: String, last: Int): QueuedPromptConnection
+
+  "number of unconsumed queued prompts for this job"
+  queuedPromptCount: Int!
+
+  "ready\/pending breakdown for unconsumed queued prompts"
+  queuedPromptSummary: QueuedPromptSummary!
 
   metricsTool(
     "the name of the metrics tool"
@@ -3691,6 +3832,9 @@ type WorkbenchJobModes {
   "whether planning mode is enabled for this job"
   plan: Boolean
 
+  "whether verification mode is enabled for this job"
+  verification: Boolean
+
   "model override for this job"
   model: WorkbenchJobModel
 
@@ -3699,6 +3843,9 @@ type WorkbenchJobModes {
 
   "budget limits for this job"
   budget: WorkbenchJobBudget
+
+  "kubernetes action options for this job"
+  kubernetes: WorkbenchJobKubernetesModes
 }
 
 type WorkbenchJobModel {
@@ -3723,6 +3870,20 @@ type WorkbenchJobBudget {
 
   "maximum token budget for this job"
   tokens: Int
+}
+
+type WorkbenchJobKubernetesModes {
+  "whether kubernetes update actions are enabled"
+  update: Boolean
+
+  "whether kubernetes delete actions are enabled"
+  delete: Boolean
+
+  "namespaces the agent can never act in"
+  excludeNamespaces: [String]
+
+  "if set, actions are only allowed in these namespaces"
+  requireNamespaces: [String]
 }
 
 type WorkbenchJobUsage {
@@ -3782,7 +3943,7 @@ type WorkbenchJobActivity {
   "all agent runs associated with this activity (sideloadable)"
   agentRuns: [AgentRun]
 
-  "the user who created this activity"
+  "the user who created, approved, or denied this activity"
   user: User
 
   insertedAt: DateTime
@@ -3881,6 +4042,9 @@ type WorkbenchJobActivityFunctionCall {
 
   "the workbench tool id backing this function"
   toolId: ID
+
+  "the workbench tool backing this function call"
+  tool: WorkbenchTool
 }
 
 type WorkbenchJobActivityKubeRequest {
@@ -3901,10 +4065,14 @@ type WorkbenchJobActivityKubeRequest {
 
   "the Kubernetes API request content type"
   contentType: String
+
+  "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
+  current: Map
 }
 
 type WorkbenchJobActivityJobUpdate {
   diff: String
+  objective: String
   workingTheory: String
   criticism: String
   conclusion: String
@@ -3939,6 +4107,9 @@ type WorkbenchJobActivityTrace {
 type WorkbenchJobResult {
   "the id of the result"
   id: String!
+
+  "the sole active objective for this investigation"
+  objective: String
 
   "the working theory for this result"
   workingTheory: String
@@ -4095,6 +4266,26 @@ type WorkbenchObservability {
   metrics: Boolean
 }
 
+type WorkbenchBudget {
+  "whether budget tracking is enabled"
+  enabled: Boolean
+
+  "maximum budget capacity"
+  maximum: Float
+
+  "minimum budget capacity to keep free"
+  minFree: Float
+
+  "the budget unit"
+  unit: WorkbenchBudgetUnit
+
+  "remaining budget capacity"
+  last: Float
+
+  "when the budget was last updated"
+  lastUpdated: DateTime
+}
+
 type WorkbenchSkills {
   "git reference for skills"
   ref: GitRef
@@ -4127,6 +4318,33 @@ type WorkbenchCron {
 
   "the workbench this cron belongs to"
   workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type QueuedPrompt {
+  "the id of the queued prompt"
+  id: String!
+
+  "the prompt text"
+  prompt: String
+
+  "when this prompt becomes eligible to dequeue"
+  dequeableAt: DateTime
+
+  "when this prompt was consumed"
+  consumedAt: DateTime
+
+  "user this prompt will run as"
+  userId: ID
+
+  "the job this prompt will be sent to"
+  workbenchJob: WorkbenchJob
+
+  "the user who queued this prompt"
+  user: User
 
   insertedAt: DateTime
 
@@ -4517,7 +4735,7 @@ type WorkbenchToolConfiguration {
   "google cloud run service configuration"
   cloudRun: WorkbenchToolCloudRunConnection
 
-  "google cloud function configuration"
+  "azure function configuration"
   azureFunction: WorkbenchToolAzureFunctionConnection
 
   "docker\/OCI registry connection (no secrets)"
@@ -4780,7 +4998,7 @@ type WorkbenchToolCloudRunConnection {
 }
 
 type WorkbenchToolAzureFunctionConnection {
-  "Cloud Function identifier"
+  "Azure Function identifier"
   identifier: String
 
   "description of the function exposed to the agent"
@@ -4825,6 +5043,11 @@ type WorkbenchJobConnection {
 type WorkbenchJobActivityConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchJobActivityEdge]
+}
+
+type QueuedPromptConnection {
+  pageInfo: PageInfo!
+  edges: [QueuedPromptEdge]
 }
 
 type WorkbenchCronConnection {
@@ -6067,6 +6290,16 @@ input AiSettingsAttributes {
   vectorStore: VectorStoreAttributes
 
   graph: GraphStoreAttributes
+
+  "per-model token prices used to calculate AI usage costs"
+  priceSheets: [AiPriceSheetAttributes]
+}
+
+input AiPriceSheetAttributes {
+  provider: AiProvider
+  model: String
+  inputPrice: Float
+  outputPrice: Float
 }
 
 input AnalysisRatesAttributes {
@@ -6514,6 +6747,16 @@ type AiSettings {
   bedrock: BedrockAiSettings
 
   vertex: VertexAiSettings
+
+  "per-model token prices used to calculate AI usage costs"
+  priceSheets: [AiPriceSheet]
+}
+
+type AiPriceSheet {
+  provider: AiProvider
+  model: String
+  inputPrice: Float
+  outputPrice: Float
 }
 
 type VectorStoreSettings {
@@ -12930,6 +13173,12 @@ enum PrStatus {
   CLOSED
 }
 
+enum PrChangeType {
+  GITOPS
+  APPLICATION
+  CONFIGURATION
+}
+
 enum ConfigurationType {
   STRING
   INT
@@ -13470,6 +13719,7 @@ input PullRequestAttributes {
   clusterId: ID
   service: NamespacedName
   cluster: NamespacedName
+  difficulty: PullRequestDifficultyAttributes
 }
 
 "attributes for a pull request pointer record"
@@ -13481,6 +13731,12 @@ input PullRequestUpdateAttributes {
   clusterId: ID
   service: NamespacedName
   cluster: NamespacedName
+  difficulty: PullRequestDifficultyAttributes
+}
+
+input PullRequestDifficultyAttributes {
+  type: PrChangeType
+  lines: Int
 }
 
 "The attributes to configure a new webhook for a SCM provider"
@@ -14129,6 +14385,9 @@ type PullRequest {
   "the patch for this pr, if it is a patch.  This is in place of generating a full pr"
   patch: String
 
+  "the estimated complexity of the pull request"
+  difficulty: PullRequestDifficulty
+
   "the user that spawned this pr, will also be associated with notifications w\/in Plural"
   author: User
 
@@ -14144,6 +14403,14 @@ type PullRequest {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type PullRequestDifficulty {
+  "the type of change in the pull request"
+  type: PrChangeType
+
+  "the number of changed lines"
+  lines: Int
 }
 
 type ScmWebhook {
@@ -16025,6 +16292,7 @@ input PersonaFlowsAttributes {
 }
 
 input PersonaSidebarAttributes {
+  cd: Boolean
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
@@ -16035,6 +16303,7 @@ input PersonaSidebarAttributes {
   stacks: Boolean
   security: Boolean
   cost: Boolean
+  ai: Boolean
 }
 
 input PersonaHomeAttributes {
@@ -16273,6 +16542,7 @@ type PersonaFlows {
 }
 
 type PersonaSidebar {
+  cd: Boolean
   audits: Boolean
   kubernetes: Boolean
   pullRequests: Boolean
@@ -16283,6 +16553,7 @@ type PersonaSidebar {
   stacks: Boolean
   security: Boolean
   cost: Boolean
+  ai: Boolean
 }
 
 type PersonaHome {
@@ -16885,6 +17156,11 @@ type WorkbenchPromptEdge {
 
 type WorkbenchCronEdge {
   node: WorkbenchCron
+  cursor: String
+}
+
+type QueuedPromptEdge {
+  node: QueuedPrompt
   cursor: String
 }
 

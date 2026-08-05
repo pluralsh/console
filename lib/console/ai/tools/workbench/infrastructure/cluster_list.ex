@@ -9,6 +9,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
     field :q,       :string
     field :project, :string
     field :distro,  Console.Schema.Cluster.Distro
+    field :max_health_score, :integer
 
     embeds_many :tags, Tag, on_replace: :delete do
       field :name, :string
@@ -16,11 +17,12 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
     end
   end
 
-  @valid ~w(q project distro)a
+  @valid ~w(q project distro max_health_score)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> validate_number(:max_health_score, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
     |> cast_embed(:tags, with: &tag_changeset/2)
   end
 
@@ -30,12 +32,13 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   def name(_), do: "plrl_clusters"
   def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle or cluster_id for full details."
 
-  def implement(%__MODULE__{user: %User{} = user, q: q, project: project, distro: distro, tags: tags}) do
+  def implement(%__MODULE__{user: %User{} = user, q: q, project: project, distro: distro, tags: tags, max_health_score: max_health_score}) do
     Cluster.ordered()
     |> Cluster.for_user(user)
     |> maybe_distro(distro)
     |> maybe_tags(tags)
     |> maybe_project(project)
+    |> maybe_max_health_score(max_health_score)
     |> Cluster.preloaded([:tags, :project])
     |> maybe_search(q)
     |> Repo.all()
@@ -56,6 +59,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
     do: Cluster.for_project_name(query, name)
   defp maybe_project(query, _), do: query
 
+  defp maybe_max_health_score(query, max) when is_integer(max), do: Cluster.for_health_range(query, 0, max)
+  defp maybe_max_health_score(query, _), do: query
+
   defp cluster_brief(%Cluster{} = c) do
     %{
       id: c.id,
@@ -65,6 +71,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
       self: c.self,
       virtual: c.virtual,
       installed: c.installed,
+      health_score: c.health_score,
       current_version: c.current_version,
       version: c.version,
       upgrade_plan: upgrade_plan_brief(c.upgrade_plan),

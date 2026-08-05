@@ -13,7 +13,7 @@ defmodule Console.Pipelines.PollProducer do
   @callback poll(integer) :: [%{id: binary}]
 
   defmacro __using__(opts) do
-    interval = Keyword.get(opts, :interval, :timer.seconds(15))
+    interval = Keyword.get(opts, :interval, :timer.minutes(1))
 
     quote do
       use GenStage
@@ -33,7 +33,7 @@ defmodule Console.Pipelines.PollProducer do
       end
 
       def init(_) do
-        :timer.send_interval(@poll_interval, :poll)
+        send_poll()
         send_gc()
         {:producer, %State{}}
       end
@@ -49,6 +49,7 @@ defmodule Console.Pipelines.PollProducer do
       def handle_cast(:kick, state), do: handle_info(:poll, state)
 
       def handle_info(:poll, %State{demand: demand} = state) do
+        send_poll()
         events = poll(min(demand, 30))
         Logger.info "poll success for #{__MODULE__}: #{length(events)} events"
         ingest(events, state)
@@ -70,6 +71,10 @@ defmodule Console.Pipelines.PollProducer do
 
       defp send_gc() do
         Process.send_after(self(), :gc, @gc_interval + Console.jitter(@gc_interval))
+      end
+
+      defp send_poll() do
+        Process.send_after(self(), :poll, @poll_interval + Console.jitter(@poll_interval))
       end
     end
   end
