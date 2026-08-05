@@ -68,7 +68,15 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
 
   const closeDropdown = () => setDropdownOpen(false)
 
-  useClickOutside(ref, closeDropdown)
+  useClickOutside(ref, (event) => {
+    if (
+      event.target instanceof Node &&
+      floating.refs.floating.current?.contains(event.target)
+    )
+      return
+
+    closeDropdown()
+  })
 
   useKeyDown(['Escape'], clearSearch)
 
@@ -193,6 +201,7 @@ const SearchWrapperSC = styled.div({
 const DropdownSC = styled(Card)(({ theme }) => ({
   width: INPUT_WIDTH,
   zIndex: theme.zIndexes.selectPopover,
+  pointerEvents: 'auto',
   overflow: 'hidden',
 }))
 

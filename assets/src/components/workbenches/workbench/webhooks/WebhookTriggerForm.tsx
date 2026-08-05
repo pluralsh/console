@@ -665,6 +665,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
                       <WorkbenchPromptRichInput
                         syncKey={`webhook-prompt-${location.key}-${promptInputSyncKeySuffix}`}
                         workbenchId={workbenchId}
+                        workbenchRepositorySource={workbench}
                         prompt={formState.prompt}
                         disabled={isSaving}
                         onPromptChange={(next) =>

@@ -1,7 +1,6 @@
 import { ChatInputSimple } from 'components/ai/chatbot/input/ChatInput'
+import type { WorkbenchRepositorySource } from 'components/ai/chatbot/input/autocomplete/useMentionDataSources'
 import type { ComponentProps } from 'react'
-import { useOutletContext } from 'react-router-dom'
-import type { WorkbenchOutletContext } from './Workbench'
 
 /**
  * Workbench prompt field with @ cluster/service/stack/repository and / skill mention autocomplete,
@@ -10,6 +9,7 @@ import type { WorkbenchOutletContext } from './Workbench'
  */
 export function WorkbenchPromptRichInput({
   workbenchId,
+  workbenchRepositorySource,
   prompt,
   onPromptChange,
   placeholder,
@@ -19,6 +19,7 @@ export function WorkbenchPromptRichInput({
   wrapperStyles,
 }: {
   workbenchId: Nullable<string>
+  workbenchRepositorySource?: Nullable<WorkbenchRepositorySource>
   prompt: string
   onPromptChange: (next: string) => void
   placeholder?: string
@@ -27,14 +28,12 @@ export function WorkbenchPromptRichInput({
   syncKey?: string
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
-  const { workbench } = useOutletContext<WorkbenchOutletContext>()
-
   return (
     <ChatInputSimple
       key={syncKey}
       enableAutoComplete
       workbenchId={workbenchId}
-      workbenchRepositorySource={workbench}
+      workbenchRepositorySource={workbenchRepositorySource}
       deserializePlrlInitialValue
       placeholder={placeholder}
       disabled={disabled}
