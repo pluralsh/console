@@ -129,7 +129,7 @@ export function SimpleToolCall({
       case 'bash':
       case 'command_execution': {
         const command = getCommand(toolName, args)
-        const result = content && content !== 'running…' ? content : undefined
+        const result = content || undefined
         return (
           <SimpleAccordion label={label}>
             <Flex

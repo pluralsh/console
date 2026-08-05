@@ -46,6 +46,11 @@ func (e *ToolResultEvent) Process(onMessage v1.MessageCallback) {
 }
 
 func (e *ToolResultEvent) Attributes() *console.AgentMessageAttributes {
+	// Always set output so empty/missing results clear the "running..." placeholder on update.
+	output := lo.FromPtr(e.Output)
+	if output == "" && e.Error != nil {
+		output = e.Error.Message
+	}
 	attrs := &console.AgentMessageAttributes{
 		Message: "Called tool",
 		Role:    console.AiRoleAssistant,
@@ -53,7 +58,7 @@ func (e *ToolResultEvent) Attributes() *console.AgentMessageAttributes {
 			Tool: &console.AgentMessageToolAttributes{
 				Name:   lo.ToPtr(e.ToolID),
 				State:  e.Status.Attributes(),
-				Output: e.Output,
+				Output: lo.ToPtr(output),
 			},
 		},
 	}

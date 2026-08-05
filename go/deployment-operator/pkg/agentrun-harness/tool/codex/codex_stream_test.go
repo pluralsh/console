@@ -123,6 +123,26 @@ func TestMapCommandExecutionTwoTurn(t *testing.T) {
 	require.Equal(t, "docs\n", *msg.Metadata.Tool.Output)
 }
 
+func TestMapCommandExecutionEmptyOutputClearsRunningPlaceholder(t *testing.T) {
+	c := &Codex{toolItems: make(map[string]*StreamItem)}
+
+	started := &StreamEvent{}
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.started","item":{"id":"item_1","type":"command_execution","command":"bash -lc 'sleep 100'","status":"in_progress"}}`), started))
+	msg, callID := c.mapStreamEvent(started)
+	require.NotNil(t, msg)
+	require.Equal(t, "item_1", callID)
+	require.Equal(t, v1.RunningToolOutput, *msg.Metadata.Tool.Output)
+
+	completed := &StreamEvent{}
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"bash -lc 'sleep 100'","aggregated_output":"","exit_code":0,"status":"completed"}}`), completed))
+	msg, callID = c.mapStreamEvent(completed)
+	require.NotNil(t, msg)
+	require.Equal(t, "item_1", callID)
+	require.Equal(t, console.AgentMessageToolStateCompleted, *msg.Metadata.Tool.State)
+	require.NotNil(t, msg.Metadata.Tool.Output)
+	require.Equal(t, "", *msg.Metadata.Tool.Output)
+}
+
 func TestMapTurnCompletedPersistsCostWithoutChatContent(t *testing.T) {
 	line := `{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":20,"output_tokens":50,"reasoning_output_tokens":12}}`
 

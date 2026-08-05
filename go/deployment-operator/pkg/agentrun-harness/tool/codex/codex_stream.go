@@ -327,14 +327,12 @@ func mapWebSearchItem(item *StreamItem, threadID string) (*console.AgentMessageA
 
 func toolCallMessage(name string, state console.AgentMessageToolState, input, output string) *console.AgentMessageAttributes {
 	tool := &console.AgentMessageToolAttributes{
-		Name:  lo.ToPtr(name),
-		State: lo.ToPtr(state),
+		Name:   lo.ToPtr(name),
+		State:  lo.ToPtr(state),
+		Output: lo.ToPtr(output), // Always set output so empty stdout clears the "running..." placeholder on update.
 	}
 	if input != "" {
 		tool.Input = lo.ToPtr(input)
-	}
-	if output != "" {
-		tool.Output = lo.ToPtr(output)
 	}
 	return &console.AgentMessageAttributes{
 		Role:    console.AiRoleAssistant,
