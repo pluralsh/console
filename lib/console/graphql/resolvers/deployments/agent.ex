@@ -115,6 +115,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def create_agent_message(%{run_id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Agents.create_agent_message(attrs, id, cluster)
 
+  def agent_message_output(%{attributes: attrs}, %{context: %{cluster: cluster}}),
+    do: Agents.message_output(attrs, cluster)
+
   def update_agent_message(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Agents.update_agent_message(attrs, id, cluster)
 

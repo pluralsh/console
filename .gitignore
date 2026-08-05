@@ -36,6 +36,7 @@ gha-creds-*.json
 
 # The directory Mix downloads your dependencies sources to.
 /deps/
+/.hex/
 
 # Where third-party dependencies like ExDoc output generated docs.
 /doc/

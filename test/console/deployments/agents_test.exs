@@ -781,6 +781,39 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
+  describe "message_output/2" do
+    test "clusters can publish output for messages belonging to their agent runs" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      assert {:ok, %AgentMessage.Stdout{} = output} =
+               Agents.message_output(%{
+                 message_id: message.id,
+                 stdout: "command output",
+                 stderr: "command error"
+               }, cluster)
+
+      assert output.message_id == message.id
+      assert output.agent_run_id == run.id
+      assert output.stdout == "command output"
+      assert output.stderr == "command error"
+      assert output.cluster.id == cluster.id
+
+      assert_receive {:event, %PubSub.AgentMessageStdoutCreated{item: ^output}}
+    end
+
+    test "clusters cannot publish output for another cluster's agent run" do
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      assert {:error, "clusters can only update their own agent runs"} =
+               Agents.message_output(%{message_id: message.id, stdout: "command output"}, insert(:cluster))
+    end
+  end
+
   describe "update_agent_message/3" do
     test "it can update a long-running tool message" do
       runtime = insert(:agent_runtime)

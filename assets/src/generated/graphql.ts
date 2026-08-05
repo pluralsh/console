@@ -305,6 +305,33 @@ export type AgentMessageMetadataAttributes = {
   tool?: InputMaybe<AgentMessageToolAttributes>;
 };
 
+export type AgentMessageOutput = {
+  __typename?: 'AgentMessageOutput';
+  /** the agent run this output belongs to */
+  agentRunId: Scalars['ID']['output'];
+  /** the command message this output belongs to */
+  messageId: Scalars['ID']['output'];
+  /** the command standard error */
+  stderr?: Maybe<Scalars['String']['output']>;
+  /** the command standard output */
+  stdout?: Maybe<Scalars['String']['output']>;
+};
+
+export type AgentMessageOutputAttributes = {
+  /** the command message this output belongs to */
+  messageId: Scalars['ID']['input'];
+  /** the command standard error */
+  stderr?: InputMaybe<Scalars['String']['input']>;
+  /** the command standard output */
+  stdout?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AgentMessageOutputDelta = {
+  __typename?: 'AgentMessageOutputDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<AgentMessageOutput>;
+};
+
 export type AgentMessageReasoning = {
   __typename?: 'AgentMessageReasoning';
   /** the end of the reasoning */
@@ -9070,6 +9097,7 @@ export type RootMutationType = {
   addChatContext?: Maybe<Array<Maybe<Chat>>>;
   addClusterAuditLog?: Maybe<Scalars['Boolean']['output']>;
   addRunLogs?: Maybe<RunLogs>;
+  agentMessageOutput?: Maybe<AgentMessageOutput>;
   agentPullRequest?: Maybe<PullRequest>;
   aiFixPr?: Maybe<PullRequest>;
   applyScalingRecommendation?: Maybe<PullRequest>;
@@ -9431,6 +9459,11 @@ export type RootMutationTypeAddClusterAuditLogArgs = {
 export type RootMutationTypeAddRunLogsArgs = {
   attributes: RunLogAttributes;
   stepId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeAgentMessageOutputArgs = {
+  attributes: AgentMessageOutputAttributes;
 };
 
 
@@ -12679,6 +12712,7 @@ export type RootQueryTypeWorkbenchesArgs = {
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
   agentMessageDelta?: Maybe<AgentMessageDelta>;
+  agentMessageOutputDelta?: Maybe<AgentMessageOutputDelta>;
   agentRunDelta?: Maybe<AgentRunDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
@@ -12697,6 +12731,11 @@ export type RootSubscriptionType = {
 
 
 export type RootSubscriptionTypeAgentMessageDeltaArgs = {
+  runId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeAgentMessageOutputDeltaArgs = {
   runId: Scalars['ID']['input'];
 };
 

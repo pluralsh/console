@@ -1503,6 +1503,8 @@ type RootMutationType {
 
   createAgentMessage(runId: ID!, attributes: AgentMessageAttributes!): AgentMessage
 
+  agentMessageOutput(attributes: AgentMessageOutputAttributes!): AgentMessageOutput
+
   updateAgentMessage(id: ID!, attributes: AgentMessageAttributes!): AgentMessage
 
   createAgentRunUpload(runId: ID!, attributes: AgentRunUploadAttributes!): AgentRunUpload
@@ -1639,6 +1641,8 @@ type RootSubscriptionType {
   agentMessageDelta(runId: ID!): AgentMessageDelta
 
   agentRunDelta(id: ID!): AgentRunDelta
+
+  agentMessageOutputDelta(runId: ID!): AgentMessageOutputDelta
 
   workbenchJobDelta(id: ID, workbenchId: ID): WorkbenchJobDelta
 
@@ -2172,6 +2176,17 @@ input AgentMessageAttributes {
   metadata: AgentMessageMetadataAttributes
 }
 
+input AgentMessageOutputAttributes {
+  "the command message this output belongs to"
+  messageId: ID!
+
+  "the command standard output"
+  stdout: String
+
+  "the command standard error"
+  stderr: String
+}
+
 input AgentMessageCostAttributes {
   "the total cost of the message"
   total: Float!
@@ -2494,6 +2509,20 @@ type AgentMessage {
   updatedAt: DateTime
 }
 
+type AgentMessageOutput {
+  "the command message this output belongs to"
+  messageId: ID!
+
+  "the agent run this output belongs to"
+  agentRunId: ID!
+
+  "the command standard output"
+  stdout: String
+
+  "the command standard error"
+  stderr: String
+}
+
 type AgentPrompt {
   id: ID!
 
@@ -2636,6 +2665,11 @@ type AgentRunRepositoryConnection {
 type AgentMessageDelta {
   delta: Delta
   payload: AgentMessage
+}
+
+type AgentMessageOutputDelta {
+  delta: Delta
+  payload: AgentMessageOutput
 }
 
 type AgentRunDelta {
