@@ -115,16 +115,8 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
   def get_json(%{token: _} = client, url, query \\ %{}) when is_binary(url) do
     req_url = url <> Query.query_string(query)
 
-    case Req.get(req_url, [headers: basic_auth_header(client)] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Azure DevOps", reason)
-    end
+    Req.get(req_url, [headers: basic_auth_header(client)] ++ http_opts())
+    |> Http.handle("Azure DevOps")
   end
 
   @spec post_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
@@ -132,16 +124,8 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
     encoded = Jason.encode!(body_map)
     headers = json_auth_headers(client)
 
-    case Req.post(url, [headers: headers, body: encoded] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Azure DevOps", reason)
-    end
+    Req.post(url, [headers: headers, body: encoded] ++ http_opts())
+    |> Http.handle("Azure DevOps")
   end
 
   @spec put_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
@@ -153,42 +137,20 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
         {Jason.encode!(body_map), json_auth_headers(client)}
       end
 
-    case Req.put(url, [headers: headers, body: encoded] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Azure DevOps", reason)
-    end
+    Req.put(url, [headers: headers, body: encoded] ++ http_opts())
+    |> Http.handle("Azure DevOps")
   end
 
   @spec post_empty(map(), String.t()) :: {:ok, term()} | {:error, String.t()}
   def post_empty(%{token: _} = client, url) when is_binary(url) do
-    case Req.post(url, [headers: basic_auth_header(client), body: ""] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Azure DevOps", reason)
-    end
-  end
-
-  defp decode_json(""), do: {:ok, %{}}
-
-  defp decode_json(body) do
-    case Jason.decode(body) do
-      {:ok, data} -> {:ok, data}
-      {:error, _} -> {:error, "Azure DevOps returned non-JSON body: #{inspect(body)}"}
-    end
+    Req.post(url, [headers: basic_auth_header(client), body: ""] ++ http_opts())
+    |> Http.handle("Azure DevOps")
   end
 
   defp http_opts,
     do:
-      Console.Utils.HTTP.provider_options(:httpoison_azure_devops_options, :req_azure_devops_options) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
+      Console.Utils.HTTP.client_options(
+        :httpoison_azure_devops_options,
+        :req_azure_devops_options
+      )
 end

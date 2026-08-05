@@ -56,6 +56,18 @@ defmodule Console.Utils.HTTP do
     Keyword.merge(legacy, Application.get_env(:console, req_key, []))
   end
 
+  @client_defaults [receive_timeout: 60_000, decode_body: false, retry: false]
+
+  @doc """
+  Resolves per-provider `Req` options via `provider_options/2` layered on top of
+  the shared client defaults (60s receive timeout, no automatic body decoding,
+  no retries). Configured provider options win over the defaults.
+  """
+  @spec client_options(atom, atom) :: keyword
+  def client_options(legacy_key, req_key) do
+    Keyword.merge(@client_defaults, provider_options(legacy_key, req_key))
+  end
+
   defp merge_connect(opts, connect) do
     Keyword.update(opts, :connect_options, connect, &Keyword.merge(&1, connect))
   end

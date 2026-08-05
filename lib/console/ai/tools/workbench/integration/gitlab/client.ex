@@ -39,16 +39,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     url = base <> path <> Query.query_string(query)
     headers = [{"PRIVATE-TOKEN", token}]
 
-    case Req.get(url, [headers: headers] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "GitLab API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("GitLab", reason)
-    end
+    Req.get(url, [headers: headers] ++ http_opts())
+    |> Http.handle("GitLab")
   end
 
   @spec post(map(), String.t(), keyword()) :: {:ok, term()} | {:error, String.t()}
@@ -57,16 +49,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     url = base <> path <> Query.query_string(query)
     headers = [{"PRIVATE-TOKEN", token}]
 
-    case Req.post(url, [headers: headers, body: ""] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "GitLab API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("GitLab", reason)
-    end
+    Req.post(url, [headers: headers, body: ""] ++ http_opts())
+    |> Http.handle("GitLab")
   end
 
   @spec post_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
@@ -76,29 +60,12 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     headers = [{"PRIVATE-TOKEN", token}, {"Content-Type", "application/json"}]
     encoded = Jason.encode!(body_map)
 
-    case Req.post(url, [headers: headers, body: encoded] ++ http_opts()) do
-      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %Req.Response{status: code, body: body}} ->
-        {:error, "GitLab API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("GitLab", reason)
-    end
-  end
-
-  defp decode_json(""), do: {:ok, %{}}
-
-  defp decode_json(body) do
-    case Jason.decode(body) do
-      {:ok, data} -> {:ok, data}
-      {:error, _} -> {:error, "GitLab returned non-JSON body: #{inspect(body)}"}
-    end
+    Req.post(url, [headers: headers, body: encoded] ++ http_opts())
+    |> Http.handle("GitLab")
   end
 
   defp http_opts,
-    do: Console.Utils.HTTP.provider_options(:httpoison_gitlab_options, :req_gitlab_options) ++ [receive_timeout: 60_000, decode_body: false, retry: false]
+    do: Console.Utils.HTTP.client_options(:httpoison_gitlab_options, :req_gitlab_options)
 
   @doc false
   def encode_project_id(project) when is_integer(project), do: Integer.to_string(project)
