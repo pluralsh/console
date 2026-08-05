@@ -132,6 +132,7 @@ var (
 	argDatadog                         = flag.Bool("datadog", helpers.GetPluralEnvBool(EnvDatadogEnabled, false), "Enable datadog integration for detailed application profiling. By default it will push to http://datadog.monitoring.svc.cluster.local:8125")
 	argLocalDatabaseProfiler           = flag.Bool("local-db-profiler", false, "Enable local database profiler for profiling local database operations.")
 	argEnableKubecostProxy             = flag.Bool("enable-kubecost-proxy", false, "If set, will proxy a Kubecost API request through the K8s API server.")
+	argDeferPollOnInstall              = flag.Bool("defer-poll-on-install", true, "Defer the initial poll when this deployment operator has been running for more than one hour.")
 
 	argMaxConcurrentReconciles = flag.Int("max-concurrent-reconciles", 100, "Maximum number of concurrent reconciles which can be run.")
 	argResyncSeconds           = flag.Int("resync-seconds", 300, "Resync duration in seconds.")
@@ -218,6 +219,10 @@ func DisableHelmTemplateDryRunServer() bool {
 
 func EnableKubecostProxy() bool {
 	return *argEnableKubecostProxy
+}
+
+func DeferPollOnInstall() bool {
+	return *argDeferPollOnInstall
 }
 
 func EnableHelmDependencyUpdate() bool {

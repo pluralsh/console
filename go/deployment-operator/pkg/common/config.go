@@ -296,6 +296,14 @@ func (s *ConfigurationManager) IsPollImmediately() bool {
 	return *s.pollImmediately
 }
 
+// SetPollImmediately overrides the initial polling behavior without changing
+// the remaining AgentConfiguration values.
+func (s *ConfigurationManager) SetPollImmediately(value bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.pollImmediately = &value
+}
+
 func (s *ConfigurationManager) SwapBaseRegistry(image string) string {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
