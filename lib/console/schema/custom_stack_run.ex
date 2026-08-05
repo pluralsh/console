@@ -28,8 +28,8 @@ defmodule Console.Schema.CustomStackRun do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(name documentation stack_id)a)
-    |> truncate_fields([:name], 2048)
     |> validate_length(:name, max: 2048, message: "name must be 2,048 characters or fewer")
+    |> truncate_fields([:name], 2048)
     |> cast_embed(:configuration)
     |> cast_embed(:commands, with: &command_changeset/2)
     |> unique_constraint([:stack_id, :name])
