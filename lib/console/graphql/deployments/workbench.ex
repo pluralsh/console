@@ -715,6 +715,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_activity_job_update do
     field :diff,            :string
+    field :objective,       :string
     field :working_theory,  :string
     field :criticism,       :string
     field :conclusion,      :string
@@ -748,6 +749,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_result do
     field :id,              non_null(:string), description: "the id of the result"
+    field :objective,       :string, description: "the sole active objective for this investigation"
     field :working_theory,  :string, description: "the working theory for this result"
     field :criticism,       :string, description: "a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation"
     field :conclusion,      :string, description: "the conclusion for this result"

@@ -15,11 +15,11 @@ defmodule Console.AI.Workbench.Subagents.Verify do
 
   require EEx
 
-  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt} = job, %Environment{} = environment) do
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools(job, environment)
     |> MemoryEngine.new(20,
       engine_opts(job) ++ [
-        system_prompt: String.trim(system_prompt(prompt: jprompt)),
+        system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
         acc: %{},
         callback: &callback(activity, &1),
         pre_enable: [Result, %Skills{} ,%Skill{}],

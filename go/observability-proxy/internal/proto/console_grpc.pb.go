@@ -23,6 +23,7 @@ const (
 	PluralServer_GetAiConfig_FullMethodName            = "/plrl.PluralServer/GetAiConfig"
 	PluralServer_GetObservabilityConfig_FullMethodName = "/plrl.PluralServer/GetObservabilityConfig"
 	PluralServer_ProxyAuthentication_FullMethodName    = "/plrl.PluralServer/ProxyAuthentication"
+	PluralServer_VerifyCluster_FullMethodName          = "/plrl.PluralServer/VerifyCluster"
 )
 
 // PluralServerClient is the client API for PluralServer service.
@@ -35,6 +36,7 @@ type PluralServerClient interface {
 	GetAiConfig(ctx context.Context, in *AiConfigRequest, opts ...grpc.CallOption) (*AiConfig, error)
 	GetObservabilityConfig(ctx context.Context, in *ObservabilityConfigRequest, opts ...grpc.CallOption) (*ObservabilityConfig, error)
 	ProxyAuthentication(ctx context.Context, in *ProxyAuthenticationRequest, opts ...grpc.CallOption) (*ProxyAuthenticationResponse, error)
+	VerifyCluster(ctx context.Context, in *VerifyClusterRequest, opts ...grpc.CallOption) (*VerifyClusterResponse, error)
 }
 
 type pluralServerClient struct {
@@ -85,6 +87,16 @@ func (c *pluralServerClient) ProxyAuthentication(ctx context.Context, in *ProxyA
 	return out, nil
 }
 
+func (c *pluralServerClient) VerifyCluster(ctx context.Context, in *VerifyClusterRequest, opts ...grpc.CallOption) (*VerifyClusterResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifyClusterResponse)
+	err := c.cc.Invoke(ctx, PluralServer_VerifyCluster_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PluralServerServer is the server API for PluralServer service.
 // All implementations must embed UnimplementedPluralServerServer
 // for forward compatibility.
@@ -95,6 +107,7 @@ type PluralServerServer interface {
 	GetAiConfig(context.Context, *AiConfigRequest) (*AiConfig, error)
 	GetObservabilityConfig(context.Context, *ObservabilityConfigRequest) (*ObservabilityConfig, error)
 	ProxyAuthentication(context.Context, *ProxyAuthenticationRequest) (*ProxyAuthenticationResponse, error)
+	VerifyCluster(context.Context, *VerifyClusterRequest) (*VerifyClusterResponse, error)
 	mustEmbedUnimplementedPluralServerServer()
 }
 
@@ -116,6 +129,9 @@ func (UnimplementedPluralServerServer) GetObservabilityConfig(context.Context, *
 }
 func (UnimplementedPluralServerServer) ProxyAuthentication(context.Context, *ProxyAuthenticationRequest) (*ProxyAuthenticationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ProxyAuthentication not implemented")
+}
+func (UnimplementedPluralServerServer) VerifyCluster(context.Context, *VerifyClusterRequest) (*VerifyClusterResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method VerifyCluster not implemented")
 }
 func (UnimplementedPluralServerServer) mustEmbedUnimplementedPluralServerServer() {}
 func (UnimplementedPluralServerServer) testEmbeddedByValue()                      {}
@@ -210,6 +226,24 @@ func _PluralServer_ProxyAuthentication_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PluralServer_VerifyCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluralServerServer).VerifyCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluralServer_VerifyCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluralServerServer).VerifyCluster(ctx, req.(*VerifyClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PluralServer_ServiceDesc is the grpc.ServiceDesc for PluralServer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -232,6 +266,10 @@ var PluralServer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ProxyAuthentication",
 			Handler:    _PluralServer_ProxyAuthentication_Handler,
+		},
+		{
+			MethodName: "VerifyCluster",
+			Handler:    _PluralServer_VerifyCluster_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

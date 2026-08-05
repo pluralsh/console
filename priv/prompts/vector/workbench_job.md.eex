@@ -6,6 +6,14 @@ Here's a prior resolution of a Workbench job.
 <%= @job.prompt %>
 ```
 
+<%= if is_binary(@job.result.objective) && byte_size(@job.result.objective) > 0 do %>
+## Final Objective
+
+```
+<%= @job.result.objective %>
+```
+<% end %>
+
 ## Conclusion
 
 The ultimate accepted conclusion of the workbenches analysis.

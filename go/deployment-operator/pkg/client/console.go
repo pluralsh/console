@@ -2,13 +2,22 @@ package client
 
 import (
 	"context"
+	"math/rand"
 	"net/http"
+	"time"
 
 	console "github.com/pluralsh/console/go/client"
+	pollycache "github.com/pluralsh/console/go/polly/cache"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
+)
+
+const (
+	myClusterCacheKey    = "my-cluster"
+	myClusterCacheTTL    = time.Hour
+	myClusterCacheJitter = 20 * time.Minute
 )
 
 type NamespaceVersion struct {
@@ -18,10 +27,11 @@ type NamespaceVersion struct {
 }
 
 type client struct {
-	ctx           context.Context
-	consoleClient console.ConsoleClient
-	url           string
-	token         string
+	ctx            context.Context
+	consoleClient  console.ConsoleClient
+	url            string
+	token          string
+	myClusterCache pollycache.Store[console.MyCluster]
 }
 
 func (c *client) GetCredentials() (url, token string) {
@@ -29,7 +39,7 @@ func (c *client) GetCredentials() (url, token string) {
 }
 
 func New(url, token string) Client {
-	return &client{
+	client := &client{
 		consoleClient: console.NewClient(&http.Client{
 			Transport: helpers.NewAuthorizationTokenTransport(token),
 		}, url, nil, console.PersistedQueryInterceptor),
@@ -37,6 +47,15 @@ func New(url, token string) Client {
 		url:   url,
 		token: token,
 	}
+
+	client.myClusterCache = pollycache.NewCache[console.MyCluster](
+		myClusterCacheTTL+time.Duration(rand.Int63n(int64(myClusterCacheJitter))),
+		func(string) (*console.MyCluster, error) {
+			return client.consoleClient.MyCluster(client.ctx)
+		},
+	)
+
+	return client
 }
 
 type Client interface {

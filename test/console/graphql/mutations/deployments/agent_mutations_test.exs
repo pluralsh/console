@@ -535,4 +535,35 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       assert message["role"] == "USER"
     end
   end
+
+  describe "updateAgentMessage" do
+    test "a cluster can update an agent message" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      {:ok, %{data: %{"updateAgentMessage" => updated}}} = run_query("""
+        mutation Update($id: ID!, $attrs: AgentMessageAttributes!) {
+          updateAgentMessage(id: $id, attributes: $attrs) {
+            id
+            metadata { completedAt tool { name state output } }
+          }
+        }
+      """, %{
+        "id" => message.id,
+        "attrs" => %{
+          "message" => message.message,
+          "role" => "USER",
+          "metadata" => %{
+            "completedAt" => "2026-08-04T20:00:00.000000Z",
+            "tool" => %{"name" => "shell", "state" => "COMPLETED", "output" => "0 failures"}
+          }
+        }
+      }, %{cluster: runtime.cluster})
+
+      assert updated["id"] == message.id
+      assert updated["metadata"]["completedAt"] == "2026-08-04T20:00:00.000000Z"
+      assert updated["metadata"]["tool"] == %{"name" => "shell", "state" => "COMPLETED", "output" => "0 failures"}
+    end
+  end
 end

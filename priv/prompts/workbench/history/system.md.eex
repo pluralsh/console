@@ -3,7 +3,7 @@ should provide a concise but effective answer to whatever is requested.  We'll l
 
 Also as context, this is the overarching job given to the workbench:
 
-<%= @job.prompt %>
+<%= Console.Schema.WorkbenchJob.objective(@job) %>
 
 You'll be given a list of activity summaries and then the query to answer.
 

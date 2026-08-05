@@ -121,7 +121,7 @@ func (c *client) RegisterRuntimeServices(svcs map[string]NamespaceVersion, depre
 }
 
 func (c *client) MyCluster() (*console.MyCluster, error) {
-	return c.consoleClient.MyCluster(c.ctx)
+	return c.myClusterCache.Get(myClusterCacheKey)
 }
 
 func (c *client) UpsertVirtualCluster(parentID string, attributes console.ClusterAttributes) (*console.GetClusterWithToken_Cluster, error) {
@@ -219,5 +219,8 @@ func (c *client) GetDeployToken(clusterId, clusterName *string) (string, error) 
 
 func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes) error {
 	_, err := c.consoleClient.UpdateCluster(c.ctx, id, attrs)
+	if err == nil {
+		c.myClusterCache.Expire(myClusterCacheKey)
+	}
 	return err
 }

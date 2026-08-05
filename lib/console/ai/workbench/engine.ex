@@ -87,7 +87,7 @@ defmodule Console.AI.Workbench.Engine do
 
     tools(job, environment, activities)
     |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
-    |> MemoryEngine.reduce(Enum.reverse(messages ++ [{:user, job.prompt}]), &reducer/2)
+    |> MemoryEngine.reduce([{:user, job.prompt} | Enum.reverse(messages)], &reducer/2)
     |> case do
       {:ok, %Complete{
         conclusion: conclusion,
@@ -346,12 +346,13 @@ defmodule Console.AI.Workbench.Engine do
   end
   defp kube_tools(_), do: []
 
-  defp sysprompt(%WorkbenchJob{type: :skill, prompt: prompt, referenced_job: job}, _, _),
-    do: String.trim(skill_system_prompt(job: job, prompt: prompt))
-  defp sysprompt(%WorkbenchJob{prompt: prompt} = job, environment, engine) do
+  defp sysprompt(%WorkbenchJob{type: :skill, referenced_job: job} = workbench_job, _, _),
+    do: String.trim(skill_system_prompt(job: job, prompt: WorkbenchJob.objective(workbench_job)))
+  defp sysprompt(%WorkbenchJob{} = job, environment, engine) do
+    objective = WorkbenchJob.objective(job)
     String.trim(system_prompt(
       job: job,
-      prompt: prompt,
+      prompt: objective,
       engine: engine,
       actions: Environment.actions(environment)
     ))

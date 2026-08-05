@@ -100,6 +100,7 @@ defmodule Console.PubSub.AgentRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentMessageCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.AgentMessageUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.PrAutomationCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PrAutomationUpdated, do: use Piazza.PubSub.Event

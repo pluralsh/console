@@ -1,7 +1,7 @@
 defmodule Console.GRPC.Server do
   use GRPC.Server, service: Plrl.PluralServer.Service
   alias Console.AI.Provider
-  alias Console.Deployments.{Settings, Agents}
+  alias Console.Deployments.{Settings, Agents, Clusters}
   alias Console.Schema.{DeploymentSettings, User, Cluster}
 
   @dummy_key "ignore"
@@ -35,6 +35,19 @@ defmodule Console.GRPC.Server do
         %Plrl.ProxyAuthenticationResponse{authenticated: false}
     end
   end
+
+  def verify_cluster(%Plrl.VerifyClusterRequest{token: "deploy-" <> _ = token}, _) do
+    case Clusters.get_by_deploy_token(token) do
+      %Cluster{} = cluster ->
+        my_cluster_pb(cluster)
+
+      _ ->
+        raise GRPC.RPCError, status: :unauthenticated, message: "invalid cluster access token"
+    end
+  end
+
+  def verify_cluster(_, _),
+    do: raise(GRPC.RPCError, status: :unauthenticated, message: "invalid cluster access token")
 
   defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
     with {:ok, _, pass} <- Console.es_creds(),
@@ -182,4 +195,11 @@ defmodule Console.GRPC.Server do
     |> Map.new()
   end
   defp to_string_map(_), do: %{}
+
+  defp my_cluster_pb(%Cluster{} = cluster) do
+    %Plrl.VerifyClusterResponse{
+      id: cluster.id,
+      name: cluster.name
+    }
+  end
 end

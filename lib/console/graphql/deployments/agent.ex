@@ -126,9 +126,10 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   input_object :agent_message_metadata_attributes do
-    field :reasoning, :agent_message_reasoning_attributes, description: "the reasoning of the message"
-    field :file,      :agent_message_file_attributes, description: "the file of the message"
-    field :tool,      :agent_message_tool_attributes, description: "the tool of the message"
+    field :completed_at, :datetime, description: "when the message completed, eg for command based tool calls that take a while"
+    field :reasoning,    :agent_message_reasoning_attributes, description: "the reasoning of the message"
+    field :file,         :agent_message_file_attributes, description: "the file of the message"
+    field :tool,         :agent_message_tool_attributes, description: "the tool of the message"
   end
 
   input_object :agent_message_reasoning_attributes do
@@ -308,6 +309,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   object :agent_message_metadata do
+    field :completed_at, :datetime, description: "when the message completed"
     field :reasoning, :agent_message_reasoning, description: "the reasoning of the message"
     field :file,      :agent_message_file, description: "the file of the message"
     field :tool,      :agent_message_tool, description: "the tool of the message"
@@ -428,6 +430,14 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_message_attributes)
 
       resolve &Deployments.create_agent_message/2
+    end
+
+    field :update_agent_message, :agent_message do
+      middleware ClusterAuthenticated
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:agent_message_attributes)
+
+      resolve &Deployments.update_agent_message/2
     end
 
     field :create_agent_run_upload, :agent_run_upload do

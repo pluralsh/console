@@ -14,11 +14,12 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.CreateNote do
     issue: 1
 
   embedded_schema do
-    field :tool, :map, virtual: true
-    field :project, :string
+    field :tool,     :map, virtual: true
+    field :project,  :string
     field :resource, Resource
-    field :iid, :integer
-    field :body, :string
+    field :iid,      :integer
+    field :body,     :string
+    field :internal, :boolean, default: false
   end
 
   @json_schema Console.priv_file!("tools/workbench/integration/gitlab/create_note.json") |> Jason.decode!()
@@ -26,13 +27,13 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.CreateNote do
   def name(%__MODULE__{tool: %WorkbenchTool{name: n}}), do: "gitlab_#{n}_create_note"
 
   def description(%__MODULE__{tool: %WorkbenchTool{name: n}}),
-    do: "Post a new note (comment) on a GitLab merge request or issue (#{n}) via REST."
+    do: "Post a new public or internal note (comment) on a GitLab merge request or issue (#{n}) via REST."
 
   def json_schema(%__MODULE__{}), do: @json_schema
 
   def changeset(m, attrs) do
     m
-    |> cast(attrs, [:project, :resource, :iid, :body])
+    |> cast(attrs, [:project, :resource, :iid, :body, :internal])
     |> validate_required([:project, :resource, :iid, :body])
   end
 
@@ -40,7 +41,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.CreateNote do
     with {:ok, client} <- Client.build(m.tool),
          pid <- Client.encode_project_id(m.project),
          path <- note_path(pid, m.resource, m.iid),
-         {:ok, created} <- Client.post_json(client, path, %{"body" => m.body}) do
+         {:ok, created} <- Client.post_json(client, path, %{"body" => m.body, "internal" => m.internal}) do
       Jason.encode(created)
     end
   end

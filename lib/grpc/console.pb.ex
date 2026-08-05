@@ -189,6 +189,29 @@ defmodule Plrl.ProxyAuthenticationResponse do
   field :authenticated, 1, type: :bool
 end
 
+defmodule Plrl.VerifyClusterRequest do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "plrl.VerifyClusterRequest",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :token, 1, type: :string
+end
+
+defmodule Plrl.VerifyClusterResponse do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "plrl.VerifyClusterResponse",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :id, 1, type: :string
+  field :name, 2, type: :string
+end
+
 defmodule Plrl.ObservabilityConfig do
   @moduledoc false
 
@@ -249,6 +272,8 @@ defmodule Plrl.PluralServer.Service do
   rpc :GetObservabilityConfig, Plrl.ObservabilityConfigRequest, Plrl.ObservabilityConfig
 
   rpc :ProxyAuthentication, Plrl.ProxyAuthenticationRequest, Plrl.ProxyAuthenticationResponse
+
+  rpc :VerifyCluster, Plrl.VerifyClusterRequest, Plrl.VerifyClusterResponse
 end
 
 defmodule Plrl.PluralServer.Stub do
