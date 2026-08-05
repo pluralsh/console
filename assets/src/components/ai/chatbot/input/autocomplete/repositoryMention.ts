@@ -1,4 +1,3 @@
-import { extractRepoProjectPath } from '@pluralsh/design-system'
 import { ScmType } from 'generated/graphql'
 
 export type RepositoryMentionMetadata = {
@@ -29,14 +28,36 @@ function providerForHost(host: string | null): ScmType | undefined {
   return undefined
 }
 
+function repositorySlug(repoUrl: string): string | undefined {
+  let path: string
+
+  if (/^git@[^:]+:/.test(repoUrl)) {
+    path = repoUrl.replace(/^git@[^:]+:/, '')
+  } else if (/^ssh:\/\//.test(repoUrl)) {
+    path = repoUrl.replace(/^ssh:\/\/(?:[^@]+@)?[^/]+\/?/, '')
+  } else if (/^https?:\/\//.test(repoUrl)) {
+    path = repoUrl.replace(/^https?:\/\/[^/]+\/?/, '')
+  } else {
+    return undefined
+  }
+
+  return (
+    path
+      .replace(/^\/+/, '')
+      .replace(/\/-\/.*$/, '')
+      .replace(/\.git$/, '')
+      .split('/')
+      .filter(Boolean)
+      .join('/') || undefined
+  )
+}
+
 export function repositoryMentionMetadata(
   url: string
 ): RepositoryMentionMetadata {
   const normalizedUrl = url.trim()
   const provider = providerForHost(repositoryHost(normalizedUrl))
-  const slug = provider
-    ? (extractRepoProjectPath(normalizedUrl) ?? undefined)
-    : undefined
+  const slug = provider ? repositorySlug(normalizedUrl) : undefined
 
   return {
     url: normalizedUrl,
