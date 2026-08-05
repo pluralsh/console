@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
   use Console.AI.Tools.Workbench.Base
   import Piazza.Ecto.Schema
+  alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias Console.AI.Tools.Workbench.Observability.Plrl.Logs
   alias Console.Logs.{Query, Provider}
 
