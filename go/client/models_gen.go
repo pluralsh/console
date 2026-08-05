@@ -10490,6 +10490,7 @@ type WorkbenchJobActivityFunctionCall struct {
 
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
+	Objective     *string                   `json:"objective,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
 	Criticism     *string                   `json:"criticism,omitempty"`
 	Conclusion    *string                   `json:"conclusion,omitempty"`
@@ -10699,6 +10700,8 @@ type WorkbenchJobProgress struct {
 type WorkbenchJobResult struct {
 	// the id of the result
 	ID string `json:"id"`
+	// the sole active objective for this investigation
+	Objective *string `json:"objective,omitempty"`
 	// the working theory for this result
 	WorkingTheory *string `json:"workingTheory,omitempty"`
 	// a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation
