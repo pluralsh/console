@@ -86,7 +86,7 @@ export function SimpleToolCall({
   customResultBody?: ReactNode
   customLabel?: ReactNode
 }) {
-  const { colors } = useTheme()
+  const { colors, spacing } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
@@ -135,6 +135,7 @@ export function SimpleToolCall({
               gap="xsmall"
               minWidth={0}
               width="100%"
+              marginTop={spacing.xsmall}
             >
               <Code
                 language="bash"
