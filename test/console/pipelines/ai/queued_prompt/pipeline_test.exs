@@ -11,6 +11,7 @@ defmodule Console.Pipelines.AI.QueuedPrompt.PipelineTest do
       user = insert(:user)
       successful = insert(:workbench_job, status: :successful)
       cancelled = insert(:workbench_job, status: :cancelled)
+      failed = insert(:workbench_job, status: :failed)
       running = insert(:workbench_job, status: :running)
       first = insert(:queued_prompt,
         id: "00000000-0000-0000-0000-000000000100",
@@ -29,6 +30,12 @@ defmodule Console.Pipelines.AI.QueuedPrompt.PipelineTest do
       cancelled_prompt = insert(:queued_prompt,
         id: "00000000-0000-0000-0000-000000000200",
         workbench_job: cancelled,
+        user: user,
+        dequeable_at: due
+      )
+      failed_prompt = insert(:queued_prompt,
+        id: "00000000-0000-0000-0000-000000000250",
+        workbench_job: failed,
         user: user,
         dequeable_at: due
       )
@@ -57,7 +64,7 @@ defmodule Console.Pipelines.AI.QueuedPrompt.PipelineTest do
         |> Console.Repo.all()
 
       assert length(found) == length(Enum.uniq_by(found, & &1.workbench_job_id))
-      assert ids_equal(found, [first, cancelled_prompt])
+      assert ids_equal(found, [first, cancelled_prompt, failed_prompt])
     end
 
     test "prioritizes the lowest prompt id for each workbench job" do

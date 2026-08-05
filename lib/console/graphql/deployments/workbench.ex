@@ -443,6 +443,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :dequeable_at, non_null(:datetime), description: "when this prompt becomes eligible to dequeue"
   end
 
+  object :queued_prompt_summary do
+    field :ready_count,   non_null(:integer), description: "unconsumed prompts that are eligible to dequeue"
+    field :pending_count, non_null(:integer), description: "unconsumed prompts waiting for dequeable_at"
+    field :next_at,       :datetime, description: "earliest future dequeable_at among pending prompts"
+  end
+
   object :workbench do
     field :id,            non_null(:string), description: "the id of the workbench"
     field :name,          non_null(:string), description: "the name of the workbench"
@@ -569,6 +575,14 @@ defmodule Console.GraphQl.Deployments.Workbench do
     connection field :queued_prompts, node_type: :queued_prompt do
       resolve &Deployments.list_queued_prompts/3
     end
+
+    field :queued_prompt_count, non_null(:integer),
+      resolve: &Deployments.queued_prompt_count/3,
+      description: "number of unconsumed queued prompts for this job"
+
+    field :queued_prompt_summary, non_null(:queued_prompt_summary),
+      resolve: &Deployments.queued_prompt_summary/3,
+      description: "ready/pending breakdown for unconsumed queued prompts"
 
     field :metrics_tool, list_of(:workbench_job_activity_metric) do
       arg :name,      :string, description: "the name of the metrics tool"

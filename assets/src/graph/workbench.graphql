@@ -631,6 +631,17 @@ fragment WorkbenchIssue on Issue {
   }
 }
 
+fragment QueuedPromptTiny on QueuedPrompt {
+  id
+  prompt
+  dequeableAt
+  insertedAt
+  user {
+    id
+    name
+  }
+}
+
 fragment WorkbenchJobPullRequest on PullRequest {
   ...PullRequestBasic
   patch
@@ -658,6 +669,12 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   status
   error
   insertedAt
+  queuedPromptCount
+  queuedPromptSummary {
+    readyCount
+    pendingCount
+    nextAt
+  }
   usage {
     ...WorkbenchJobUsageTiny
   }
@@ -1228,6 +1245,13 @@ query WorkbenchJobActivities($id: ID!) {
         }
       }
     }
+    queuedPrompts(first: 100) {
+      edges {
+        node {
+          ...QueuedPromptTiny
+        }
+      }
+    }
   }
 }
 
@@ -1479,6 +1503,18 @@ mutation CreateWorkbenchMessage(
 ) {
   createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
     ...WorkbenchJobActivity
+  }
+}
+
+mutation CreateQueuedPrompt($jobId: ID!, $attributes: QueuedPromptAttributes!) {
+  createQueuedPrompt(jobId: $jobId, attributes: $attributes) {
+    ...QueuedPromptTiny
+  }
+}
+
+mutation DeleteQueuedPrompt($id: ID!) {
+  deleteQueuedPrompt(id: $id) {
+    id
   }
 }
 

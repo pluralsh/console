@@ -707,6 +707,95 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["status"] == to_string(job.status) |> String.upcase()
     end
 
+    test "it returns queuedPromptCount for unconsumed prompts" do
+      job = insert(:workbench_job)
+      insert_list(2, :queued_prompt, workbench_job: job)
+      insert(:queued_prompt, workbench_job: job, consumed_at: DateTime.utc_now())
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            queuedPromptCount
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["id"] == job.id
+      assert found["queuedPromptCount"] == 2
+    end
+
+    test "it returns queuedPromptSummary ready/pending breakdown" do
+      job = insert(:workbench_job)
+      next_at = DateTime.utc_now() |> DateTime.add(30, :minute) |> DateTime.truncate(:second)
+      insert(:queued_prompt, workbench_job: job)
+      insert(:queued_prompt,
+        workbench_job: job,
+        dequeable_at: next_at
+      )
+      insert(:queued_prompt,
+        workbench_job: job,
+        dequeable_at: DateTime.add(next_at, 60, :minute)
+      )
+      insert(:queued_prompt, workbench_job: job, consumed_at: DateTime.utc_now())
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            id
+            queuedPromptCount
+            queuedPromptSummary {
+              readyCount
+              pendingCount
+              nextAt
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      assert found["queuedPromptCount"] == 3
+      assert found["queuedPromptSummary"]["readyCount"] == 1
+      assert found["queuedPromptSummary"]["pendingCount"] == 2
+      assert found["queuedPromptSummary"]["nextAt"]
+    end
+
+    test "it lists unconsumed queued prompts ordered by dequeableAt" do
+      job = insert(:workbench_job)
+      later = insert(:queued_prompt,
+        workbench_job: job,
+        prompt: "later",
+        dequeable_at: DateTime.utc_now() |> DateTime.add(60, :minute)
+      )
+      sooner = insert(:queued_prompt,
+        workbench_job: job,
+        prompt: "sooner",
+        dequeable_at: DateTime.utc_now() |> DateTime.add(5, :minute)
+      )
+      insert(:queued_prompt,
+        workbench_job: job,
+        prompt: "consumed",
+        consumed_at: DateTime.utc_now()
+      )
+
+      {:ok, %{data: %{"workbenchJob" => found}}} = run_query("""
+        query WorkbenchJob($id: ID!) {
+          workbenchJob(id: $id) {
+            queuedPrompts(first: 10) {
+              edges {
+                node {
+                  id
+                  prompt
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => job.id}, %{current_user: admin_user()})
+
+      ids = Enum.map(found["queuedPrompts"]["edges"], & &1["node"]["id"])
+      assert ids == [sooner.id, later.id]
+    end
+
     test "it returns the UI URL for a workbench job" do
       job = insert(:workbench_job)
 

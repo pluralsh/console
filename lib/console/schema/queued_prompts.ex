@@ -17,6 +17,44 @@ defmodule Console.Schema.QueuedPrompt do
     from(q in query, where: q.workbench_job_id == ^job_id)
   end
 
+  def for_workbench_jobs(query \\ __MODULE__, job_ids) do
+    from(q in query, where: q.workbench_job_id in ^job_ids)
+  end
+
+  def unconsumed(query \\ __MODULE__) do
+    from(q in query, where: is_nil(q.consumed_at))
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :dequeable_at, asc: :inserted_at]) do
+    from(q in query, order_by: ^order)
+  end
+
+  def counts_by_workbench_job(query \\ __MODULE__) do
+    from(q in query,
+      group_by: q.workbench_job_id,
+      select: {q.workbench_job_id, count(q.id)}
+    )
+  end
+
+  def summaries_by_workbench_job(query \\ __MODULE__) do
+    now = DateTime.utc_now()
+
+    from(q in query,
+      group_by: q.workbench_job_id,
+      select: {
+        q.workbench_job_id,
+        %{
+          ready_count: fragment("count(*) filter (where ? <= ?)", q.dequeable_at, ^now),
+          pending_count: fragment("count(*) filter (where ? > ?)", q.dequeable_at, ^now),
+          next_at: type(
+            fragment("min(?) filter (where ? > ?)", q.dequeable_at, q.dequeable_at, ^now),
+            :utc_datetime_usec
+          )
+        }
+      }
+    )
+  end
+
   @valid ~w(prompt user_id workbench_job_id dequeable_at consumed_at)a
 
   def changeset(model, attrs \\ %{}) do
@@ -28,7 +66,7 @@ defmodule Console.Schema.QueuedPrompt do
     |> validate_required(@valid -- [:consumed_at])
   end
 
-  @idle_statuses ~w(successful cancelled)a
+  @idle_statuses ~w(successful failed cancelled)a
 
   def dequeueable(query \\ __MODULE__) do
     from(q in query,
