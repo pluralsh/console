@@ -10,7 +10,9 @@ import {
   Flex,
   SearchIcon,
   Spinner,
+  useFloatingDropdown,
 } from '@pluralsh/design-system'
+import { FloatingPortal } from '@floating-ui/react'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { PRsModalIcon } from 'components/ai/agent-runs/AIAgentRunsTableCols'
 import { GqlError } from 'components/utils/Alert'
@@ -33,11 +35,20 @@ const INPUT_WIDTH = 520
 
 export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
   const ref = useRef<HTMLDivElement>(null)
+  const theme = useTheme()
   const [query, setQuery] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const debouncedQuery = useDebounce(query, 200)
   const trimmedQuery = debouncedQuery.trim()
   const showDropdown = dropdownOpen && trimmedQuery.length > 0
+
+  const { floating, triggerRef } = useFloatingDropdown({
+    triggerRef: ref,
+    placement: 'left',
+    width: INPUT_WIDTH,
+    maxHeight: 360,
+    sizeToContent: true,
+  })
 
   const { data, loading, error } = useWorkbenchJobSearchQuery({
     variables: { workbenchId, q: trimmedQuery, limit: SEARCH_LIMIT },
@@ -62,7 +73,7 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
   useKeyDown(['Escape'], clearSearch)
 
   return (
-    <SearchWrapperSC ref={ref}>
+    <SearchWrapperSC ref={triggerRef}>
       <IconExpander
         tooltip="Search jobs"
         icon={<SearchIcon />}
@@ -81,41 +92,48 @@ export function WorkbenchJobsSearch({ workbenchId }: { workbenchId: string }) {
         />
       </IconExpander>
       {showDropdown && (
-        <DropdownSC
-          fillLevel={1}
-          css={{ overflow: 'hidden' }}
-        >
-          {error ? (
-            <DropdownBodySC>
-              <GqlError error={error} />
-            </DropdownBodySC>
-          ) : loading && !data ? (
-            <DropdownBodySC>
-              <Flex
-                align="center"
-                justify="center"
-                padding="large"
-              >
-                <Spinner />
-              </Flex>
-            </DropdownBodySC>
-          ) : isEmpty(results) ? (
-            <DropdownBodySC>
-              <EmptyState message="No matching jobs found." />
-            </DropdownBodySC>
-          ) : (
-            <ResultsListSC>
-              {results.map((job) => (
-                <WorkbenchJobSearchResultRow
-                  key={job.id}
-                  job={job}
-                  workbenchId={workbenchId}
-                  onNavigate={closeDropdown}
-                />
-              ))}
-            </ResultsListSC>
-          )}
-        </DropdownSC>
+        <FloatingPortal id={theme.portals.default.id}>
+          <DropdownSC
+            ref={floating.refs.setFloating}
+            fillLevel={1}
+            style={{
+              position: floating.strategy,
+              left: floating.x ?? 0,
+              top: floating.y ?? 0,
+            }}
+          >
+            {error ? (
+              <DropdownBodySC>
+                <GqlError error={error} />
+              </DropdownBodySC>
+            ) : loading && !data ? (
+              <DropdownBodySC>
+                <Flex
+                  align="center"
+                  justify="center"
+                  padding="large"
+                >
+                  <Spinner />
+                </Flex>
+              </DropdownBodySC>
+            ) : isEmpty(results) ? (
+              <DropdownBodySC>
+                <EmptyState message="No matching jobs found." />
+              </DropdownBodySC>
+            ) : (
+              <ResultsListSC>
+                {results.map((job) => (
+                  <WorkbenchJobSearchResultRow
+                    key={job.id}
+                    job={job}
+                    workbenchId={workbenchId}
+                    onNavigate={closeDropdown}
+                  />
+                ))}
+              </ResultsListSC>
+            )}
+          </DropdownSC>
+        </FloatingPortal>
       )}
     </SearchWrapperSC>
   )
@@ -173,12 +191,8 @@ const SearchWrapperSC = styled.div({
 })
 
 const DropdownSC = styled(Card)(({ theme }) => ({
-  position: 'absolute',
-  top: `calc(100% + ${theme.spacing.xsmall}px)`,
-  left: 0,
-  width: '100%',
-  zIndex: theme.zIndexes.modal,
-  maxHeight: 360,
+  width: INPUT_WIDTH,
+  zIndex: theme.zIndexes.selectPopover,
   overflow: 'hidden',
 }))
 

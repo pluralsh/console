@@ -6,6 +6,7 @@ export enum MentionKind {
   Stack = 'plrl-stack',
   Skill = 'plrl-skill',
   Vulnerability = 'plrl-vulnerability',
+  Repository = 'plrl-repository',
 }
 
 export const PLRL_CHIP_TAG_NAMES: readonly MentionKind[] =
@@ -17,6 +18,7 @@ export const KIND_LABELS: Record<MentionKind, string> = {
   [MentionKind.Stack]: 'stack',
   [MentionKind.Skill]: 'skill',
   [MentionKind.Vulnerability]: 'vulnerability',
+  [MentionKind.Repository]: 'repository',
 }
 
 // --- Triggers ---
@@ -75,12 +77,19 @@ export type VulnerabilityChipAttrs =
     description?: Nullable<string>
   }
 
+export type RepositoryChipAttrs = BaseChipAttrs<MentionKind.Repository> & {
+  'repo-url': string
+  'repo-slug'?: string
+  provider?: string
+}
+
 export type ChipAttrsByKind = {
   [MentionKind.Cluster]: ClusterChipAttrs
   [MentionKind.Service]: ServiceChipAttrs
   [MentionKind.Stack]: StackChipAttrs
   [MentionKind.Skill]: SkillChipAttrs
   [MentionKind.Vulnerability]: VulnerabilityChipAttrs
+  [MentionKind.Repository]: RepositoryChipAttrs
 }
 
 export type ChipAttrs = ChipAttrsByKind[MentionKind]
@@ -123,6 +132,13 @@ export const CHIP_ATTRIBUTE_SCHEMA: {
     'primary-link',
     'description',
   ],
+  [MentionKind.Repository]: [
+    'item-id',
+    'item-name',
+    'repo-url',
+    'repo-slug',
+    'provider',
+  ],
 }
 
 type ChipAttrRecord = Record<string, string | null | undefined>
@@ -151,6 +167,7 @@ export function chipDisplayText(
       if (severity && name) return `${name} (${severity})`
       return name
     }
+    case MentionKind.Repository:
     case MentionKind.Stack:
     default:
       return name

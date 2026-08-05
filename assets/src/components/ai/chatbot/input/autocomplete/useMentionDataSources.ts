@@ -1,6 +1,7 @@
 import Fuse from 'fuse.js'
 import { useThrottle } from 'components/hooks/useThrottle'
 import {
+  useAgentRunRepositoriesQuery,
   useClustersTinyQuery,
   useServiceDeploymentsQuery,
   useStacksQuery,
@@ -13,27 +14,45 @@ import {
   ClusterChipAttrs,
   MentionKind,
   MentionTrigger,
+  RepositoryChipAttrs,
   ServiceChipAttrs,
   SkillChipAttrs,
   StackChipAttrs,
 } from './mentionTypes'
 import { isEmpty } from 'lodash'
+import { isNonNullable } from 'utils/isNonNullable'
+import { sortDatesDesc } from 'utils/datetime'
+import { repositoryMentionMetadata } from './repositoryMention'
 
 const MAX_PER_KIND = 8
 const QUERY_THROTTLE_MS = 200
 
 const skillFuseOptions = { keys: ['item-name', 'description'], threshold: 0.5 }
+const repositoryFuseOptions = { threshold: 0.25, ignoreLocation: true }
+
+export type WorkbenchRepositorySource = {
+  agentRuntime?: {
+    allowedRepositories?: Nullable<Array<Nullable<string>>>
+  } | null
+  configuration?: {
+    coding?: {
+      repositories?: Nullable<Array<Nullable<string>>>
+    } | null
+  } | null
+}
 
 export function useMentionDataSources({
   trigger,
   query,
   workbenchId,
+  workbenchRepositorySource,
   flowId,
   enabled,
 }: {
   trigger: MentionTrigger | null
   query: string
   workbenchId?: Nullable<string>
+  workbenchRepositorySource?: Nullable<WorkbenchRepositorySource>
   flowId?: Nullable<string>
   enabled: boolean
 }): { items: ChipAttrs[]; loading: boolean } {
@@ -81,6 +100,29 @@ export function useMentionDataSources({
     fetchPolicy: 'cache-and-network',
   })
   const skillData = sklData || sklPreviousData
+
+  const workbenchRepositories =
+    workbenchRepositorySource?.configuration?.coding?.repositories?.filter(
+      isNonNullable
+    ) ?? null
+  const runtimeRepositories =
+    workbenchRepositorySource?.agentRuntime?.allowedRepositories?.filter(
+      isNonNullable
+    ) ?? null
+  // Workbench configuration further constrains a runtime, so it takes
+  // precedence when it explicitly supplies a repository list.
+  const allowedRepositories = workbenchRepositories ?? runtimeRepositories
+
+  const {
+    data: repoCur,
+    previousData: repoPrev,
+    loading: repositoriesLoading,
+  } = useAgentRunRepositoriesQuery({
+    variables: { q: throttled || undefined },
+    skip: !wantsAt || !workbenchId || allowedRepositories !== null,
+    fetchPolicy: 'cache-and-network',
+  })
+  const repositoryData = repoCur || repoPrev
 
   const clusters = useMemo<ClusterChipAttrs[]>(
     () =>
@@ -144,20 +186,62 @@ export function useMentionDataSources({
       .map(({ item }) => item)
   }, [skillData, throttled])
 
+  const repositories = useMemo<RepositoryChipAttrs[]>(() => {
+    const urls =
+      allowedRepositories ??
+      mapExistingNodes(repositoryData?.agentRunRepositories)
+        .toSorted((a, b) => sortDatesDesc(a.lastUsedAt, b.lastUsedAt))
+        .map(({ url }) => url)
+    const matches = throttled
+      ? new Fuse(urls, repositoryFuseOptions)
+          .search(throttled)
+          .map(({ item }) => item)
+      : urls
+
+    return matches.slice(0, MAX_PER_KIND).map((url) => {
+      const { displayName, provider, slug } = repositoryMentionMetadata(url)
+      return {
+        kind: MentionKind.Repository,
+        'item-id': url,
+        'item-name': displayName,
+        'repo-url': url,
+        ...(slug ? { 'repo-slug': slug } : {}),
+        ...(provider ? { provider } : {}),
+      }
+    })
+  }, [allowedRepositories, repositoryData, throttled])
+
   const items = useMemo<ChipAttrs[]>(() => {
     if (wantsAt)
-      return flowId ? services : [...clusters, ...services, ...stacks]
+      return flowId
+        ? [...services, ...repositories]
+        : [...clusters, ...services, ...stacks, ...repositories]
     if (wantsSlash) return skills
     return []
-  }, [wantsAt, wantsSlash, flowId, clusters, services, stacks, skills])
+  }, [
+    wantsAt,
+    wantsSlash,
+    flowId,
+    clusters,
+    services,
+    stacks,
+    repositories,
+    skills,
+  ])
 
   const loading = wantsAt
     ? flowId
-      ? isEmpty(services) && servicesLoading
+      ? isEmpty(services) &&
+        isEmpty(repositories) &&
+        (servicesLoading || repositoriesLoading)
       : isEmpty(clusters) &&
         isEmpty(services) &&
         isEmpty(stacks) &&
-        (clustersLoading || servicesLoading || stacksLoading)
+        isEmpty(repositories) &&
+        (clustersLoading ||
+          servicesLoading ||
+          stacksLoading ||
+          repositoriesLoading)
     : wantsSlash
       ? isEmpty(skills) && skillsLoading
       : false
