@@ -75,12 +75,14 @@ export function SimpleToolCall({
   content,
   attributes,
   isPending,
+  toolRuntime,
   customResultBody,
   customLabel,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
   isPending?: boolean
+  toolRuntime?: string
   customResultBody?: ReactNode
   customLabel?: ReactNode
 }) {
@@ -99,6 +101,7 @@ export function SimpleToolCall({
       <CaptionP
         as="span"
         $color="text"
+        $shimmer={isPending}
       >
         {title}{' '}
         {subtitle && (
@@ -107,6 +110,15 @@ export function SimpleToolCall({
             $color="text-xlight"
           >
             {subtitle}
+          </CaptionP>
+        )}
+        {toolRuntime && (
+          <CaptionP
+            as="span"
+            $color="text-xlight"
+          >
+            {' '}
+            · {toolRuntime}
           </CaptionP>
         )}
       </CaptionP>
@@ -212,6 +224,7 @@ export function SimpleToolCall({
           >
             {isPending ? 'Calling' : 'Called'} tool{' '}
             <span css={{ color: colors['text-light'] }}>{toolName}</span>
+            {toolRuntime ? ` · ${toolRuntime}` : ''}
           </CaptionP>
         )}
       </ClickableLabelSC>

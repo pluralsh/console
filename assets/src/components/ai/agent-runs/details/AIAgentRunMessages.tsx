@@ -7,6 +7,7 @@ import {
 import { VirtualList } from 'components/utils/VirtualList'
 import {
   AgentMessageFragment,
+  AgentMessageToolState,
   AgentRunFragment,
   AgentRunStatus,
   AiRole,
@@ -20,6 +21,7 @@ import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AILoadingText } from 'components/utils/AILoadingText'
+import { duration } from 'utils/datetime'
 
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   const { spacing, colors } = useTheme()
@@ -35,26 +37,34 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
     skip: !isRunning,
     variables: { runId: run.id },
     onData: ({ data: { data } }) => {
+      const payload = data?.agentMessageDelta?.payload
+      if (!payload) return
+
       setSubscribedMessages(
-        produce(subscribedMessages, (messages) => {
-          const payload = data?.agentMessageDelta?.payload
-          if (payload) messages.push(payload)
+        produce((messages) => {
+          const idx = messages.findIndex((m) => m.id === payload.id)
+          if (idx >= 0) messages[idx] = payload
+          else messages.push(payload)
         })
       )
     },
   })
 
-  const messages: ChatFragment[] = useMemo(
+  // Subscribed messages first so UPDATE deltas win over the initial run.messages snapshot.
+  const agentMessages = useMemo(
     () =>
       uniqWith(
-        (run.messages ?? [])
-          .concat(subscribedMessages)
-          .filter(isNonNullable)
-          .filter((msg) => !isHiddenAgentMessage(msg))
-          .map(agentMsgToChatMsg),
+        subscribedMessages
+          .concat((run.messages ?? []).filter(isNonNullable))
+          .filter((msg) => !isHiddenAgentMessage(msg)),
         (a, b) => a.id === b.id
       ),
     [subscribedMessages, run.messages]
+  )
+
+  const messages: ChatFragment[] = useMemo(
+    () => agentMessages.map(agentMsgToChatMsg),
+    [agentMessages]
   )
 
   const displayItems: ChatDisplayItem[] = useMemo(
@@ -64,6 +74,22 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
       ),
     [messages, run.prompt]
   )
+
+  const getToolMessageProps = (id?: string | null) => {
+    const agent = agentMessages.find((m) => m.id === id)
+    const state = agent?.metadata?.tool?.state
+    const isPending =
+      state === AgentMessageToolState.Running ||
+      state === AgentMessageToolState.Pending
+
+    return {
+      isPending,
+      toolRuntime:
+        agent?.insertedAt && agent.metadata?.completedAt
+          ? duration(agent.insertedAt, agent.metadata.completedAt)
+          : undefined,
+    }
+  }
 
   return (
     <MessagesStreamWrapperSC>
@@ -83,11 +109,13 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
               messages={rowData}
               isRunning={isRunning}
               chatMessageProps={chatMessagePropsShared}
+              getChatMessageProps={(message) => getToolMessageProps(message.id)}
             />
           ) : (
             <ChatMessage
               {...rowData}
               {...chatMessagePropsShared}
+              {...getToolMessageProps(rowData.id)}
               userMsgWrapperStyle={{
                 background: colors['fill-one'],
                 borderColor: colors['border-fill-one'],

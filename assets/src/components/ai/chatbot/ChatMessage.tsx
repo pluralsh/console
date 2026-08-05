@@ -54,6 +54,7 @@ export function ChatMessage({
   toolDisplayType = 'accordion',
   userMsgWrapperStyle,
   isPending,
+  toolRuntime,
   ...props
 }: {
   id?: string
@@ -77,6 +78,7 @@ export function ChatMessage({
   toolDisplayType?: 'accordion' | 'simple'
   userMsgWrapperStyle?: StyledObject
   isPending?: boolean
+  toolRuntime?: string
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   const actionsTimeoutRef = useRef<NodeJS.Timeout>(undefined)
@@ -123,6 +125,7 @@ export function ChatMessage({
         toolDisplayType={toolDisplayType}
         userMsgWrapperStyle={userMsgWrapperStyle}
         isPending={isPending}
+        toolRuntime={toolRuntime}
       />
       {type !== ChatType.File && disableActions !== 'no-spacing' && (
         <ChatMessageActions
