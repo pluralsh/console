@@ -1,15 +1,25 @@
 import { Card, Code, Flex, Markdown } from '@pluralsh/design-system'
-import { Body2P } from 'components/utils/typography/Text'
+import { CaptionP } from 'components/utils/typography/Text'
 import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 
-const scrollableCodeStyle = {
-  maxHeight: 324,
-  overflow: 'auto',
-  minHeight: 0,
-} as const
+export function useSlimToolCodeCss() {
+  const { colors } = useTheme()
+  return {
+    overflow: 'auto',
+    minHeight: 0,
+    '& > div > div:first-child': {
+      minHeight: 36,
+      padding: 8,
+      color: colors['text-light'],
+    },
+    '& > div > div:first-child svg': {
+      display: 'none',
+    },
+  } as const
+}
 
 export function ToolCallContent({
   content,
@@ -21,6 +31,7 @@ export function ToolCallContent({
   customResultBody?: ReactNode
 }) {
   const { spacing } = useTheme()
+  const slimCodeCss = useSlimToolCodeCss()
 
   return (
     <Flex
@@ -28,36 +39,42 @@ export function ToolCallContent({
       gap="small"
       width="100%"
       minHeight={0}
+      marginTop={spacing.xsmall}
     >
       {attributes?.tool?.arguments && (
-        <>
-          <Body2P $color="text-light">Arguments:</Body2P>
-          <Code
-            language="json"
-            showHeader={false}
-            css={scrollableCodeStyle}
-          >
-            {JSON.stringify(attributes.tool.arguments, null, 2)}
-          </Code>
-        </>
+        <Code
+          language="json"
+          title="Arguments"
+          css={slimCodeCss}
+        >
+          {JSON.stringify(attributes.tool.arguments, null, 2)}
+        </Code>
       )}
-      <Body2P $color="text-light">Response:</Body2P>
-      {customResultBody ||
-        (isJson(content) ? (
-          <Code
-            fillLevel={2}
-            language={content.length < 25_000 ? 'json' : undefined}
-            showHeader={false}
-            css={scrollableCodeStyle}
-          >
-            {prettifyJsonStr(content)}
-          </Code>
-        ) : (
+      {customResultBody ? (
+        <>
+          <CaptionP $color="text-light">Response</CaptionP>
+          {customResultBody}
+        </>
+      ) : isJson(content) ? (
+        <Code
+          fillLevel={2}
+          language={content.length < 25_000 ? 'json' : undefined}
+          title="Response"
+          showHeader
+          css={slimCodeCss}
+        >
+          {prettifyJsonStr(content)}
+        </Code>
+      ) : (
+        <>
+          <CaptionP $color="text-light">Response</CaptionP>
           <Card
             fillLevel={2}
             css={{
-              padding: spacing.medium,
-              ...scrollableCodeStyle,
+              padding: spacing.small,
+              maxHeight: 260,
+              overflow: 'auto',
+              minHeight: 0,
             }}
           >
             <Markdown
@@ -65,7 +82,8 @@ export function ToolCallContent({
               css={{ whiteSpace: 'pre-line' }}
             />
           </Card>
-        ))}
+        </>
+      )}
     </Flex>
   )
 }

@@ -17,7 +17,7 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
-import { ToolCallContent } from '../ToolCallContent'
+import { ToolCallContent, useSlimToolCodeCss } from '../ToolCallContent'
 import {
   formatFileChangeSummary,
   getCommand,
@@ -87,6 +87,7 @@ export function SimpleToolCall({
   customLabel?: ReactNode
 }) {
   const { colors, spacing } = useTheme()
+  const slimCodeCss = useSlimToolCodeCss()
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
@@ -133,18 +134,27 @@ export function SimpleToolCall({
           <SimpleAccordion label={label}>
             <Flex
               direction="column"
-              gap="xsmall"
+              gap="small"
               minWidth={0}
               width="100%"
               marginTop={spacing.xsmall}
             >
               <Code
                 language="bash"
-                showHeader={false}
+                title="Command"
+                css={slimCodeCss}
               >
                 {command}
               </Code>
-              {result ? <Code showHeader={false}>{result}</Code> : null}
+              {result ? (
+                <Code
+                  title="Response"
+                  showHeader
+                  css={slimCodeCss}
+                >
+                  {result}
+                </Code>
+              ) : null}
             </Flex>
           </SimpleAccordion>
         )
