@@ -35,7 +35,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
 
   @spec json_patch(Tentacat.Client.t(), String.t(), map()) :: Tentacat.response() | {:error, String.t()}
   def json_patch(%Tentacat.Client{} = client, path, body) when is_binary(path) and is_map(body),
-    do: json_request(:patch, client, path, body, [])
+    do: json_request(:patch, client, path, Jason.encode!(body), [])
 
   @spec build(WorkbenchTool.t()) :: {:ok, Tentacat.Client.t()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{github: gh} = conn})
@@ -119,7 +119,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   defp json_request(method, %Tentacat.Client{} = client, path, body, opts) do
     url = client.endpoint <> path
 
-    case Req.request(req_opts(method, url, "", json_headers(client), request_options(client))) do
+    case Req.request(req_opts(method, url, body, json_headers(client), request_options(client))) do
       {:ok, %Req.Response{status: code, body: body} = resp} ->
         response(method, code, decode_json_body(body), resp, opts)
 

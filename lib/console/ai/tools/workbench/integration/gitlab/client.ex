@@ -64,6 +64,15 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     |> Http.handle("GitLab")
   end
 
+  @spec put(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
+  def put(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
+    url = base <> path <> Query.query_string(query)
+    headers = [{"PRIVATE-TOKEN", token}]
+
+    Req.put(url, [headers: headers, body: ""] ++ http_opts())
+    |> Http.handle("GitLab")
+  end
+
   defp http_opts,
     do: Console.Utils.HTTP.client_options(:httpoison_gitlab_options, :req_gitlab_options)
 

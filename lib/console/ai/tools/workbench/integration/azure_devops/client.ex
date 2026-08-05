@@ -146,16 +146,8 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Client do
     encoded = Jason.encode!(body_map)
     headers = json_auth_headers(client)
 
-    case HTTPoison.patch(url, encoded, headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "Azure DevOps API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Azure DevOps", reason)
-    end
+    Req.patch(url, [headers: headers, body: encoded] ++ http_opts())
+    |> Http.handle("Azure DevOps")
   end
 
   @spec post_empty(map(), String.t()) :: {:ok, term()} | {:error, String.t()}
