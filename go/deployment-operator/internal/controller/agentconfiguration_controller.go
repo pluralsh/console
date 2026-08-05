@@ -8,7 +8,6 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
@@ -16,7 +15,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -45,7 +43,6 @@ func (r *AgentConfigurationReconciler) Reconcile(ctx context.Context, req ctrl.R
 				logger.Error(err, "Unable to reset configuration to defaults")
 				return ctrl.Result{}, err
 			}
-			common.GetConfigurationManager().MarkReady()
 			return ctrl.Result{}, nil
 		}
 
@@ -76,34 +73,15 @@ func (r *AgentConfigurationReconciler) Reconcile(ctx context.Context, req ctrl.R
 	LogOverriddenCRDValues(ctx, config.Spec)
 
 	utils.MarkCondition(config.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	common.GetConfigurationManager().MarkReady()
 	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *AgentConfigurationReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	if err := ctrl.NewControllerManagedBy(mgr).
+	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.AgentConfiguration{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Complete(r); err != nil {
-		return err
-	}
-
-	// Ensure AgentConfiguration/default is applied once after cache sync, even when the CR is missing.
-	return mgr.Add(manager.RunnableFunc(func(ctx context.Context) error {
-		return r.ensureDefault(ctx)
-	}))
-}
-
-func (r *AgentConfigurationReconciler) ensureDefault(ctx context.Context) error {
-	logger := log.FromContext(ctx)
-	if _, err := r.Reconcile(ctx, reconcile.Request{
-		NamespacedName: types.NamespacedName{Name: agentConfigurationDefaultName},
-	}); err != nil {
-		// Do not fail the manager; startup wait has a direct-load fallback.
-		logger.Error(err, "failed to ensure AgentConfiguration/default")
-	}
-	return nil
+		Complete(r)
 }
 
 func LogOverriddenCRDValues(ctx context.Context, spec v1alpha1.AgentConfigurationSpec) {

@@ -23,7 +23,6 @@ func TestLoadAgentConfigurationUsesDefaultsWhenMissing(t *testing.T) {
 
 	require.NoError(t, loadAgentConfiguration(context.Background(), reader, defaults))
 
-	assert.True(t, common.GetConfigurationManager().IsReady())
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetServicePollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetManagedNamespacePollInterval())
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
@@ -58,7 +57,6 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 
 	require.NoError(t, loadAgentConfiguration(context.Background(), reader, agentConfigurationDefaults()))
 
-	assert.True(t, common.GetConfigurationManager().IsReady())
 	assertDuration(t, 10*time.Minute, common.GetConfigurationManager().GetServicePollInterval())
 	assertDuration(t, 15*time.Minute, common.GetConfigurationManager().GetManagedNamespacePollInterval())
 	assertDuration(t, 15*time.Minute, common.GetConfigurationManager().GetClusterPingInterval())
@@ -128,7 +126,6 @@ func assertDuration(t *testing.T, expected time.Duration, actual *time.Duration)
 
 func resetAgentConfiguration() {
 	_ = common.GetConfigurationManager().SetDefaults(v1alpha1.AgentConfigurationSpec{})
-	common.GetConfigurationManager().ResetReadyForTest()
 }
 
 func ptr[T any](v T) *T {

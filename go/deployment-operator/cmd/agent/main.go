@@ -75,8 +75,7 @@ func init() {
 }
 
 const (
-	httpClientTimout               = time.Second * 5
-	agentConfigurationReadyTimeout = 30 * time.Second
+	httpClientTimout = time.Second * 5
 )
 
 func main() {
@@ -123,7 +122,6 @@ func main() {
 
 	kubeManager := initKubeManagerOrDie(config)
 	consoleManager := initConsoleManagerOrDie()
-	setAgentConfigurationDefaultsOrDie()
 
 	// Start the discovery cache manager in background.
 	runDiscoveryManagerOrDie(ctx, discoveryCache)
@@ -163,9 +161,11 @@ func main() {
 	// Start the metrics scarper in background.
 	scraper.RunMetricsScraperInBackgroundOrDie(ctx, kubeManager.GetClient(), discoveryCache, config)
 
-	// Start the kubernetes manager first so AgentConfiguration can apply before poll controllers.
+	// Apply AgentConfiguration before poll controllers start. Direct apiserver load is
+	// sufficient for startup; the kube reconciler continues to own live updates afterward.
+	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
+
 	go runKubeManagerOrDie(ctx, kubeManager)
-	waitForAgentConfigurationOrDie(ctx, kubeManager)
 
 	// Start the console manager in background.
 	runConsoleManagerInBackgroundOrDie(ctx, consoleManager)
@@ -181,33 +181,6 @@ func main() {
 	// Block the main thread until context cancel.
 	<-ctx.Done()
 	setupLog.Info("shutting down")
-}
-
-func setAgentConfigurationDefaultsOrDie() {
-	if err := common.GetConfigurationManager().SetDefaults(args.AgentConfigurationDefaults()); err != nil {
-		setupLog.Error(err, "unable to set agent configuration defaults")
-		os.Exit(1)
-	}
-}
-
-func waitForAgentConfigurationOrDie(ctx context.Context, mgr ctrl.Manager) {
-	waitCtx, cancel := context.WithTimeout(ctx, agentConfigurationReadyTimeout)
-	defer cancel()
-
-	setupLog.Info("waiting for kubernetes cache sync before applying AgentConfiguration", "timeout", agentConfigurationReadyTimeout)
-	if ok := mgr.GetCache().WaitForCacheSync(waitCtx); !ok {
-		setupLog.Info("kubernetes cache sync not ready in time, loading AgentConfiguration directly", "timeout", agentConfigurationReadyTimeout)
-		loadAgentConfigurationOrDie(ctx, mgr.GetAPIReader())
-		return
-	}
-
-	if err := common.GetConfigurationManager().WaitReady(waitCtx); err == nil {
-		setupLog.Info("AgentConfiguration ready")
-		return
-	}
-
-	setupLog.Info("AgentConfiguration not ready in time, loading directly", "timeout", agentConfigurationReadyTimeout)
-	loadAgentConfigurationOrDie(ctx, mgr.GetAPIReader())
 }
 
 func loadAgentConfigurationOrDie(ctx context.Context, reader ctrlclient.Reader) {
@@ -226,7 +199,6 @@ func loadAgentConfiguration(ctx context.Context, reader ctrlclient.Reader, defau
 	if err := reader.Get(ctx, ctrlclient.ObjectKey{Name: "default"}, config); err != nil {
 		if apierrors.IsNotFound(err) {
 			setupLog.Info("AgentConfiguration/default not found, using flag defaults")
-			common.GetConfigurationManager().MarkReady()
 			return nil
 		}
 
@@ -237,7 +209,6 @@ func loadAgentConfiguration(ctx context.Context, reader ctrlclient.Reader, defau
 		return fmt.Errorf("set AgentConfiguration/default: %w", err)
 	}
 
-	common.GetConfigurationManager().MarkReady()
 	return nil
 }
 

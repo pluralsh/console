@@ -1,7 +1,6 @@
 package common
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"sync"
@@ -18,16 +17,10 @@ const (
 )
 
 func init() {
-	configurationManager = newConfigurationManager()
+	configurationManager = &ConfigurationManager{}
 }
 
 var configurationManager *ConfigurationManager
-
-func newConfigurationManager() *ConfigurationManager {
-	return &ConfigurationManager{
-		readyCh: make(chan struct{}),
-	}
-}
 
 // Configuration is a thread-safe structure for agent configuration
 type ConfigurationManager struct {
@@ -48,9 +41,6 @@ type ConfigurationManager struct {
 	baseRegistryURL              *string
 	disableWebsocket             *bool
 	pollImmediately              *bool
-
-	readyOnce sync.Once
-	readyCh   chan struct{}
 }
 
 func GetConfigurationManager() *ConfigurationManager {
@@ -304,42 +294,6 @@ func (s *ConfigurationManager) IsPollImmediately() bool {
 		return true
 	}
 	return *s.pollImmediately
-}
-
-// MarkReady signals that AgentConfiguration has been applied at least once.
-// Safe to call multiple times; only the first call unblocks WaitReady.
-func (s *ConfigurationManager) MarkReady() {
-	s.readyOnce.Do(func() {
-		close(s.readyCh)
-	})
-}
-
-// IsReady reports whether AgentConfiguration has been applied at least once.
-func (s *ConfigurationManager) IsReady() bool {
-	select {
-	case <-s.readyCh:
-		return true
-	default:
-		return false
-	}
-}
-
-// WaitReady blocks until MarkReady has been called or ctx is cancelled.
-func (s *ConfigurationManager) WaitReady(ctx context.Context) error {
-	select {
-	case <-s.readyCh:
-		return nil
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-}
-
-// ResetReadyForTest resets the ready gate. Intended for tests only.
-func (s *ConfigurationManager) ResetReadyForTest() {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.readyOnce = sync.Once{}
-	s.readyCh = make(chan struct{})
 }
 
 func (s *ConfigurationManager) SwapBaseRegistry(image string) string {
