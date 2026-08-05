@@ -4691,6 +4691,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v4.0.10000020260803-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.0.10000020260801-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4728,6 +4736,15 @@
     - '1.30'
     - '1.29'
   - version: v1.21.20001020260426-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.21.10001020260803-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -4819,6 +4836,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.10009020260423-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10000020260803-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -6906,6 +6928,15 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.0.9-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v5.0.9-eksbuild.1
     compatibilities:
     - '1.36'
@@ -7493,6 +7524,10 @@
   - version: v1.36.0-eksbuild.2
     compatibilities:
     - '1.36'
+  - version: v1.35.3-eksbuild.18
+    compatibilities:
+    - '1.36'
+    - '1.35'
   - version: v1.35.3-eksbuild.17
     compatibilities:
     - '1.36'
@@ -7525,6 +7560,11 @@
     compatibilities:
     - '1.36'
     - '1.35'
+  - version: v1.34.6-eksbuild.18
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v1.34.6-eksbuild.17
     compatibilities:
     - '1.36'
@@ -7585,6 +7625,12 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v1.33.10-eksbuild.18
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.10-eksbuild.17
     compatibilities:
     - '1.36'
@@ -7669,6 +7715,12 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.13-eksbuild.21
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.13-eksbuild.20
     compatibilities:
     - '1.35'
@@ -7777,6 +7829,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.25
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.24
     compatibilities:
     - '1.34'
@@ -7909,6 +7967,12 @@
     - '1.33'
     - '1.32'
     - '1.31'
+  - version: v1.30.14-eksbuild.43
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.30.14-eksbuild.42
     compatibilities:
     - '1.33'
