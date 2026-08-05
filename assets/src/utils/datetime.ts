@@ -163,7 +163,10 @@ export const duration = (
     ...(!!dur.minutes() ? ['m[m]'] : []),
     ...(!!dur.seconds() ? ['s[s]'] : []),
   ]
-  return dur.format(format ?? formatParts.join(' '))
+  // Empty format is falsy in dayjs duration, which falls back to a datetime
+  // pattern and renders as 0000-00-00T00:00:00 for sub-second spans.
+  const resolvedFormat = format || formatParts.join(' ') || 's[s]'
+  return dur.format(resolvedFormat)
 }
 
 export const toDateOrUndef = (d: unknown) => {
