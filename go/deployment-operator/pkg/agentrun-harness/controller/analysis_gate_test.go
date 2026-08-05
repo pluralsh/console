@@ -117,7 +117,7 @@ func (t *recordingTool) ConfigureBabysitRun() error {
 
 func (t *recordingTool) Configure(_, _ string) error { return nil }
 
-func (t *recordingTool) OnMessage(func(*gqlclient.AgentMessageAttributes)) {}
+func (t *recordingTool) OnMessage(toolv1.MessageCallback) {}
 
 func (t *recordingTool) FollowUpRun(context.Context, string) error {
 	t.analysisFollowUps++

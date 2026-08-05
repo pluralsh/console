@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
@@ -68,7 +69,7 @@ func (in *Opencode) Configure(consoleURL, consoleToken string) error {
 	return nil
 }
 
-func (in *Opencode) OnMessage(f func(message *console.AgentMessageAttributes)) {
+func (in *Opencode) OnMessage(f v1.MessageCallback) {
 	in.onMessage = f
 }
 
@@ -97,7 +98,7 @@ func (in *Opencode) start(ctx context.Context, options ...exec.Option) {
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	state := &streamState{
@@ -173,7 +174,7 @@ func (in *Opencode) processEvent(state *streamState, event EventListResponse) {
 		return
 	}
 
-	if in.emitCompletedToolEvent(event) {
+	if in.emitToolEvent(event) {
 		return
 	}
 
@@ -202,18 +203,24 @@ func (in *Opencode) processEvent(state *streamState, event EventListResponse) {
 
 	aggregated.Sanitize()
 	if in.onMessage != nil {
-		in.onMessage(aggregated.Message)
+		in.onMessage(aggregated.Message, "")
 	}
 
 	delete(state.events, id)
 }
 
-func (in *Opencode) emitCompletedToolEvent(event EventListResponse) bool {
+func (in *Opencode) emitToolEvent(event EventListResponse) bool {
 	if event.Part == nil || event.Part.Type != StreamPartTypeTool {
 		return false
 	}
 
-	if event.Part.State == nil || (event.Part.State.Status != StreamToolStatusCompleted && event.Part.State.Status != StreamToolStatusError) {
+	if event.Part.State == nil {
+		return true
+	}
+
+	switch event.Part.State.Status {
+	case StreamToolStatusRunning, StreamToolStatusPending, StreamToolStatusCompleted, StreamToolStatusError:
+	default:
 		return true
 	}
 
@@ -232,10 +239,22 @@ func (in *Opencode) emitCompletedToolEvent(event EventListResponse) bool {
 
 	toolEvent := &Event{}
 	toolEvent.FromEventResponse(event, in.Config.Usage)
+	if event.Part.State.Status == StreamToolStatusRunning || event.Part.State.Status == StreamToolStatusPending {
+		if toolEvent.Message.Metadata != nil && toolEvent.Message.Metadata.Tool != nil {
+			if toolEvent.Message.Metadata.Tool.Output == nil || *toolEvent.Message.Metadata.Tool.Output == "" {
+				toolEvent.Message.Metadata.Tool.Output = lo.ToPtr(v1.RunningToolOutput)
+			}
+		}
+	}
 	toolEvent.Sanitize()
 
+	callID := event.Part.CallID
+	if callID == "" {
+		callID = event.Part.ID
+	}
+
 	if in.onMessage != nil {
-		in.onMessage(toolEvent.Message)
+		in.onMessage(toolEvent.Message, callID)
 	}
 
 	return true
@@ -346,7 +365,7 @@ func (in *Opencode) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) boo
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	state := &streamState{

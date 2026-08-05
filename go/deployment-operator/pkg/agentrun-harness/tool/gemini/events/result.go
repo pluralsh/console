@@ -2,6 +2,7 @@ package events
 
 import (
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/samber/lo"
 )
 
@@ -45,18 +46,18 @@ func (e *ResultEvent) Validate() bool {
 	return e.Type == EventTypeResult
 }
 
-func (e *ResultEvent) Process(onMessage func(message *console.AgentMessageAttributes)) {
+func (e *ResultEvent) Process(onMessage v1.MessageCallback) {
 	costSent := false
 
 	// If there is a message to send, send it first.
 	if messageBuilder.Len() > 0 {
-		onMessage(e.Attributes())
+		onMessage(e.Attributes(), "")
 		costSent = true
 	}
 
 	// If there was an error, send that as well.
 	if e.Status == StatusError {
-		onMessage(e.ErrorAttributes(costSent))
+		onMessage(e.ErrorAttributes(costSent), "")
 	}
 }
 

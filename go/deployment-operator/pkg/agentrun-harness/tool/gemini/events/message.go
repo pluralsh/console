@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 )
@@ -39,7 +40,7 @@ func (e *MessageEvent) Validate() bool {
 	return e.Type == EventTypeMessage && e.Content != "" && e.Delta != nil && *e.Delta
 }
 
-func (e *MessageEvent) Process(_ func(message *console.AgentMessageAttributes)) {
+func (e *MessageEvent) Process(_ v1.MessageCallback) {
 	messageBuilder.WriteString(e.Content)
 	klog.V(log.LogLevelDebug).Infof("appended message delta: %s", e.Content)
 }

@@ -24,7 +24,7 @@ type Gemini struct {
 	v1.DefaultTool
 
 	// onMessage is a callback called when a new message is received.
-	onMessage func(message *console.AgentMessageAttributes)
+	onMessage v1.MessageCallback
 
 	// executable is the Gemini executable used to call CLI.
 	executable exec.Executable
@@ -61,7 +61,7 @@ func (in *Gemini) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	err := in.executable.RunStream(ctx, func(line []byte) {
@@ -181,7 +181,7 @@ func (in *Gemini) start(ctx context.Context, options ...exec.Option) {
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	err := in.executable.RunStream(ctx, func(line []byte) {
@@ -293,7 +293,7 @@ func (in *Gemini) recordSessionID(line []byte, eventType events.EventType) {
 	in.sessionID = initEvent.SessionID
 }
 
-func (in *Gemini) OnMessage(f func(message *console.AgentMessageAttributes)) {
+func (in *Gemini) OnMessage(f v1.MessageCallback) {
 	in.onMessage = f
 }
 

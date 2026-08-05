@@ -9,6 +9,7 @@ import (
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
@@ -29,28 +30,29 @@ func (in *Codex) handleStreamLine(line []byte) {
 		klog.V(log.LogLevelDebug).InfoS("codex thread started", "thread_id", in.threadID)
 	}
 
-	msg := in.mapStreamEvent(event)
+	msg, callID := in.mapStreamEvent(event)
 	if in.onMessage != nil && msg != nil {
-		in.onMessage(msg)
+		in.onMessage(msg, callID)
 	}
 }
 
 // mapStreamEvent converts a Codex CLI JSON stream event (codex exec --json) into
 // AgentMessageAttributes. See https://takopi.dev/reference/runners/codex/exec-json-cheatsheet/
-func (in *Codex) mapStreamEvent(event *StreamEvent) *console.AgentMessageAttributes {
+// The second return value is a tool call ID used to correlate start/complete updates.
+func (in *Codex) mapStreamEvent(event *StreamEvent) (*console.AgentMessageAttributes, string) {
 	switch event.Type {
 	case streamEventTypeItemStarted:
 		in.cacheToolItem(event.Item)
-		return nil
+		return mapStartedStreamItem(event.Item, in.threadID)
 	case streamEventTypeItemCompleted:
 		if event.Item == nil {
-			return nil
+			return nil, ""
 		}
 		item := in.mergeToolItem(event.Item)
 		return mapCompletedStreamItem(item, in.threadID)
 	case streamEventTypeTurnCompleted:
 		if event.Usage == nil {
-			return nil
+			return nil, ""
 		}
 		in.Config.Usage.RecordUsage(usage.Record{
 			InputTokens:     event.Usage.InputTokens,
@@ -69,26 +71,26 @@ func (in *Codex) mapStreamEvent(event *StreamEvent) *console.AgentMessageAttribu
 					Output: lo.ToPtr(float64(event.Usage.OutputTokens)),
 				},
 			},
-		}
+		}, ""
 	case streamEventTypeTurnFailed:
 		msg := ""
 		if event.Error != nil {
 			msg = event.Error.Message
 		}
 		if msg == "" {
-			return nil
+			return nil, ""
 		}
 		return &console.AgentMessageAttributes{
 			Role:    console.AiRoleAssistant,
 			Message: msg,
-		}
+		}, ""
 	case "error":
 		return &console.AgentMessageAttributes{
 			Role:    console.AiRoleAssistant,
 			Message: event.Message,
-		}
+		}, ""
 	}
-	return nil
+	return nil, ""
 }
 
 func (in *Codex) cacheToolItem(item *StreamItem) {
@@ -130,32 +132,85 @@ func (in *Codex) mergeToolItem(item *StreamItem) *StreamItem {
 	return &merged
 }
 
-func mapCompletedStreamItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
+func mapStartedStreamItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
+	if item == nil || item.ID == "" {
+		return nil, ""
+	}
+	switch item.Type {
+	case "command_execution":
+		klog.V(log.LogLevelDebug).InfoS("codex command execution started", "command", item.Command, "thread_id", threadID)
+		return toolCallMessage(
+			"command_execution",
+			console.AgentMessageToolStateRunning,
+			formatCommandInput(item.Command),
+			v1.RunningToolOutput,
+		), item.ID
+	case streamItemTypeDynamicToolCall:
+		toolName := resolveDynamicToolName(item)
+		klog.V(log.LogLevelDebug).InfoS(
+			"codex dynamic tool call started",
+			"tool", toolName,
+			"namespace", item.Namespace,
+			"thread_id", threadID,
+		)
+		return toolCallMessage(
+			toolName,
+			console.AgentMessageToolStateRunning,
+			formatDynamicToolInput(item),
+			v1.RunningToolOutput,
+		), item.ID
+	case "mcp_tool_call":
+		klog.V(log.LogLevelDebug).InfoS(
+			"codex mcp tool call started",
+			"server", item.Server,
+			"tool", item.Tool,
+			"thread_id", threadID,
+		)
+		return toolCallMessage(
+			"mcp_tool_call",
+			console.AgentMessageToolStateRunning,
+			formatMCPInput(item.Server, item.Tool, item.Arguments),
+			v1.RunningToolOutput,
+		), item.ID
+	case "file_change":
+		input, _ := json.Marshal(item.Changes)
+		klog.V(log.LogLevelDebug).InfoS("codex file change started", "thread_id", threadID)
+		return toolCallMessage(
+			"file_change",
+			console.AgentMessageToolStateRunning,
+			string(input),
+			v1.RunningToolOutput,
+		), item.ID
+	}
+	return nil, ""
+}
+
+func mapCompletedStreamItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
 	switch item.Type {
 	case "error":
 		msg := lo.Ternary(len(item.Message) == 0, item.Text, item.Message)
 		if len(msg) == 0 {
-			return nil
+			return nil, ""
 		}
 
 		klog.V(log.LogLevelDebug).InfoS("codex item error", "message", msg, "thread_id", threadID)
 		return &console.AgentMessageAttributes{
 			Role:    console.AiRoleAssistant,
 			Message: msg,
-		}
+		}, ""
 	case "reasoning":
 		// Reasoning summaries are not forwarded to the console API.
-		return nil
+		return nil, ""
 
 	case "agent_message":
 		if item.Text == "" {
-			return nil
+			return nil, ""
 		}
 		klog.V(log.LogLevelDebug).InfoS("codex agent message", "text", item.Text, "thread_id", threadID)
 		return &console.AgentMessageAttributes{
 			Role:    console.AiRoleAssistant,
 			Message: item.Text,
-		}
+		}, ""
 
 	case "command_execution":
 		return mapCommandExecutionItem(item, threadID)
@@ -173,12 +228,12 @@ func mapCompletedStreamItem(item *StreamItem, threadID string) *console.AgentMes
 		return mapWebSearchItem(item, threadID)
 	}
 
-	return nil
+	return nil, ""
 }
 
-func mapCommandExecutionItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
+func mapCommandExecutionItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
 	if item.Status != statusCompleted && item.Status != statusFailed {
-		return nil
+		return nil, ""
 	}
 	exitCode := 0
 	if item.ExitCode != nil {
@@ -194,13 +249,13 @@ func mapCommandExecutionItem(item *StreamItem, threadID string) *console.AgentMe
 		state,
 		formatCommandInput(item.Command),
 		item.AggregatedOutput,
-	)
+	), item.ID
 }
 
-func mapDynamicToolCallItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
+func mapDynamicToolCallItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
 	state, ok := dynamicToolState(item)
 	if !ok {
-		return nil
+		return nil, ""
 	}
 	toolName := resolveDynamicToolName(item)
 	output := formatDynamicToolOutput(item)
@@ -216,12 +271,12 @@ func mapDynamicToolCallItem(item *StreamItem, threadID string) *console.AgentMes
 		state,
 		formatDynamicToolInput(item),
 		output,
-	)
+	), item.ID
 }
 
-func mapMCPToolCallItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
+func mapMCPToolCallItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
 	if item.Status != statusCompleted && item.Status != statusFailed {
-		return nil
+		return nil, ""
 	}
 	state := console.AgentMessageToolStateCompleted
 	if item.Status == statusFailed {
@@ -240,12 +295,12 @@ func mapMCPToolCallItem(item *StreamItem, threadID string) *console.AgentMessage
 		state,
 		formatMCPInput(item.Server, item.Tool, item.Arguments),
 		output,
-	)
+	), item.ID
 }
 
-func mapFileChangeItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
+func mapFileChangeItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
 	if item.Status != statusCompleted && item.Status != statusFailed {
-		return nil
+		return nil, ""
 	}
 	state := console.AgentMessageToolStateCompleted
 	if item.Status == statusFailed {
@@ -258,16 +313,16 @@ func mapFileChangeItem(item *StreamItem, threadID string) *console.AgentMessageA
 	output := strings.Join(paths, ", ")
 	input, _ := json.Marshal(item.Changes)
 	klog.V(log.LogLevelDebug).InfoS("codex file change", "changes", output, "thread_id", threadID)
-	return toolCallMessage("file_change", state, string(input), output)
+	return toolCallMessage("file_change", state, string(input), output), item.ID
 }
 
-func mapWebSearchItem(item *StreamItem, threadID string) *console.AgentMessageAttributes {
+func mapWebSearchItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
 	if item.Query == "" {
-		return nil
+		return nil, ""
 	}
 	klog.V(log.LogLevelDebug).InfoS("codex web search", "query", item.Query, "thread_id", threadID)
 	input, _ := json.Marshal(map[string]string{"query": item.Query})
-	return toolCallMessage("web_search", console.AgentMessageToolStateCompleted, string(input), "")
+	return toolCallMessage("web_search", console.AgentMessageToolStateCompleted, string(input), ""), item.ID
 }
 
 func toolCallMessage(name string, state console.AgentMessageToolState, input, output string) *console.AgentMessageAttributes {

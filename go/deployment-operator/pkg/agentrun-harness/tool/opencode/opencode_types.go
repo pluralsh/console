@@ -116,7 +116,7 @@ type Opencode struct {
 	executable exec.Executable
 
 	// onMessage is a callback called when a new message is received.
-	onMessage func(message *console.AgentMessageAttributes)
+	onMessage toolv1.MessageCallback
 
 	// sessionID is the latest native OpenCode session identifier observed in stream events.
 	sessionID string

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
@@ -53,7 +54,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 		in.onMessage(&console.AgentMessageAttributes{
 			Message: bCtx.Prompt,
 			Role:    console.AiRoleUser,
-		})
+		}, "")
 	}
 
 	// promptFile is the absolute path to the rendered system prompt file.
@@ -92,10 +93,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 		}
 		in.recordSessionID(event.SessionID)
 		if event.Message != nil {
-			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache, in.Config.Usage)
-			if in.onMessage != nil && msg != nil {
-				in.onMessage(msg)
-			}
+			emitClaudeContent(event, in.toolUseCache, in.Config.Usage, in.onMessage)
 		}
 	})
 	if err != nil {
@@ -158,10 +156,7 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 		}
 		in.recordSessionID(event.SessionID)
 		if event.Message != nil {
-			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache, in.Config.Usage)
-			if in.onMessage != nil && msg != nil {
-				in.onMessage(msg)
-			}
+			emitClaudeContent(event, in.toolUseCache, in.Config.Usage, in.onMessage)
 		}
 	})
 	if err != nil {
@@ -207,7 +202,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	err := in.executable.RunStream(ctx, func(line []byte) {
@@ -220,10 +215,7 @@ func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 		in.recordSessionID(event.SessionID)
 
 		if event.Message != nil {
-			msg := mapClaudeContentToAgentMessage(event, in.toolUseCache, in.Config.Usage)
-			if in.onMessage != nil && msg != nil {
-				in.onMessage(msg)
-			}
+			emitClaudeContent(event, in.toolUseCache, in.Config.Usage, in.onMessage)
 		}
 	})
 	if err != nil {
@@ -350,7 +342,7 @@ func (in *Claude) recordSessionID(sessionID string) {
 	in.sessionID = sessionID
 }
 
-func (in *Claude) OnMessage(f func(message *console.AgentMessageAttributes)) {
+func (in *Claude) OnMessage(f v1.MessageCallback) {
 	in.onMessage = f
 }
 
@@ -370,21 +362,36 @@ func (in *Claude) ensure() error {
 	return nil
 }
 
-func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]ContentMsg, recorder *usage.Usage) *console.AgentMessageAttributes {
-	msg := &console.AgentMessageAttributes{
-		Role: mapRole(event.Message.Role),
+func emitClaudeContent(event *StreamEvent, toolUseCache map[string]ContentMsg, recorder *usage.Usage, onMessage v1.MessageCallback) {
+	if onMessage == nil || event == nil || event.Message == nil {
+		return
 	}
 
-	var builder strings.Builder
+	var textBuilder strings.Builder
 	for _, c := range event.Message.Content {
 		klog.V(log.LogLevelExtended).InfoS("claude content", "type", c.Type, "text", c.Text)
 
 		switch c.Type {
 		case "tool_use":
-			// Cache tool name for later use in tool_result
 			if c.ID != "" {
 				toolUseCache[c.ID] = c
 			}
+			toolMsg := &console.AgentMessageAttributes{
+				Role:    console.AiRoleAssistant,
+				Message: "Called tool",
+				Metadata: &console.AgentMessageMetadataAttributes{
+					Tool: &console.AgentMessageToolAttributes{
+						Name:   new(c.Name),
+						State:  lo.ToPtr(console.AgentMessageToolStateRunning),
+						Output: lo.ToPtr(v1.RunningToolOutput),
+					},
+				},
+			}
+			if input, err := json.Marshal(c.Input); err == nil {
+				toolMsg.Metadata.Tool.Input = new(string(input))
+			}
+			klog.V(log.LogLevelDebug).InfoS("claude tool use started", "tool_use_id", c.ID, "name", c.Name)
+			onMessage(toolMsg, c.ID)
 		case "tool_result":
 			output := ""
 			if c.Content != nil {
@@ -407,33 +414,31 @@ func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]
 			if c.IsError {
 				state = console.AgentMessageToolStateError
 			}
-			msg.Role = console.AiRoleAssistant // Agent run tool calls should be marked as assistant messages.
-			msg.Metadata = &console.AgentMessageMetadataAttributes{
-				Tool: &console.AgentMessageToolAttributes{
-					Name:   new(toolUseContent.Name),
-					State:  new(state),
-					Output: new(output),
+			toolMsg := &console.AgentMessageAttributes{
+				Role:    console.AiRoleAssistant,
+				Message: "Called tool",
+				Metadata: &console.AgentMessageMetadataAttributes{
+					Tool: &console.AgentMessageToolAttributes{
+						Name:   new(toolUseContent.Name),
+						State:  new(state),
+						Output: new(output),
+					},
 				},
 			}
-
-			input, err := json.Marshal(toolUseContent.Input)
-			if err == nil {
-				msg.Metadata.Tool.Input = new(string(input))
+			if input, err := json.Marshal(toolUseContent.Input); err == nil {
+				toolMsg.Metadata.Tool.Input = new(string(input))
 			}
-
-			builder.WriteString("Called tool")
+			onMessage(toolMsg, c.ToolUseID)
 		case "text":
-			builder.WriteString(c.Text)
+			textBuilder.WriteString(c.Text)
 		}
 	}
-	msg.Message = builder.String()
 
-	// Empty messages are not valid
-	if len(msg.Message) == 0 {
-		return nil
+	msg := &console.AgentMessageAttributes{
+		Role:    mapRole(event.Message.Role),
+		Message: textBuilder.String(),
 	}
 
-	// Map usage → Cost
 	if event.Message.Usage != nil {
 		cached := event.Message.Usage.CacheCreationInputTokens + event.Message.Usage.CacheReadInputTokens
 		inputTokens := event.Message.Usage.InputTokens + cached
@@ -456,7 +461,15 @@ func mapClaudeContentToAgentMessage(event *StreamEvent, toolUseCache map[string]
 		}
 	}
 
-	return msg
+	// Empty text messages are not valid unless they carry cost metadata.
+	if len(msg.Message) == 0 {
+		if msg.Cost == nil {
+			return
+		}
+		msg.Message = "__plrl_ignore__"
+	}
+
+	onMessage(msg, "")
 }
 
 func mapRole(role string) console.AiRole {

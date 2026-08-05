@@ -214,7 +214,7 @@ func (in *Codex) writeCodexConfig() error {
 	return nil
 }
 
-func (in *Codex) OnMessage(f func(message *console.AgentMessageAttributes)) {
+func (in *Codex) OnMessage(f v1.MessageCallback) {
 	in.onMessage = f
 }
 
@@ -234,7 +234,7 @@ func (in *Codex) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool {
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: bCtx.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	in.resetToolItems()
@@ -320,7 +320,7 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 
 	// Send the initial prompt as a message too
 	if in.onMessage != nil {
-		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser})
+		in.onMessage(&console.AgentMessageAttributes{Message: in.Config.Run.Prompt, Role: console.AiRoleUser}, "")
 	}
 
 	in.resetToolItems()

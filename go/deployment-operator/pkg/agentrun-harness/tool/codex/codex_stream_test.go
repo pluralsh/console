@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	harnessusage "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/stretchr/testify/require"
 )
@@ -16,8 +17,9 @@ func TestMapDynamicToolCallReadFile(t *testing.T) {
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	msg := c.mapStreamEvent(event)
+	msg, callID := c.mapStreamEvent(event)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_8", callID)
 	require.Equal(t, "read_file", *msg.Metadata.Tool.Name)
 	require.JSONEq(t, `{"tool":"read_file","path":"README.md"}`, *msg.Metadata.Tool.Input)
 	require.Equal(t, "# Hello", *msg.Metadata.Tool.Output)
@@ -28,13 +30,19 @@ func TestMapDynamicToolCallMergesArgumentsFromStarted(t *testing.T) {
 
 	started := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.started","item":{"id":"item_8","type":"dynamic_tool_call","tool":"read_file","arguments":{"path":"README.md"},"status":"in_progress"}}`), started))
-	require.Nil(t, c.mapStreamEvent(started))
+	msg, callID := c.mapStreamEvent(started)
+	require.NotNil(t, msg)
+	require.Equal(t, "item_8", callID)
+	require.Equal(t, console.AgentMessageToolStateRunning, *msg.Metadata.Tool.State)
+	require.Equal(t, v1.RunningToolOutput, *msg.Metadata.Tool.Output)
+	require.JSONEq(t, `{"tool":"read_file","path":"README.md"}`, *msg.Metadata.Tool.Input)
 
 	completed := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.completed","item":{"id":"item_8","type":"dynamic_tool_call","tool":"read_file","content_items":[{"type":"input_text","text":"ok"}],"success":true,"status":"completed"}}`), completed))
 
-	msg := c.mapStreamEvent(completed)
+	msg, callID = c.mapStreamEvent(completed)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_8", callID)
 	require.Equal(t, "read_file", *msg.Metadata.Tool.Name)
 	require.JSONEq(t, `{"tool":"read_file","path":"README.md"}`, *msg.Metadata.Tool.Input)
 }
@@ -46,8 +54,9 @@ func TestMapMCPToolCallIncludesArgumentsAndResult(t *testing.T) {
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	msg := c.mapStreamEvent(event)
+	msg, callID := c.mapStreamEvent(event)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_5", callID)
 	require.NotNil(t, msg.Metadata)
 	require.NotNil(t, msg.Metadata.Tool)
 
@@ -62,13 +71,17 @@ func TestMapMCPToolCallMergesArgumentsFromStarted(t *testing.T) {
 
 	started := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.started","item":{"id":"item_5","type":"mcp_tool_call","server":"docs","tool":"search","arguments":{"q":"exec --json"},"status":"in_progress"}}`), started))
-	require.Nil(t, c.mapStreamEvent(started))
+	msg, callID := c.mapStreamEvent(started)
+	require.NotNil(t, msg)
+	require.Equal(t, "item_5", callID)
+	require.Equal(t, console.AgentMessageToolStateRunning, *msg.Metadata.Tool.State)
 
 	completed := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.completed","item":{"id":"item_5","type":"mcp_tool_call","server":"docs","tool":"search","result":{"content":[{"type":"text","text":"ok"}]},"status":"completed"}}`), completed))
 
-	msg := c.mapStreamEvent(completed)
+	msg, callID = c.mapStreamEvent(completed)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_5", callID)
 	require.JSONEq(t, `{"server":"docs","tool":"search","q":"exec --json"}`, *msg.Metadata.Tool.Input)
 	require.Equal(t, "ok", *msg.Metadata.Tool.Output)
 }
@@ -80,24 +93,33 @@ func TestMapMCPToolCallFailureUsesErrorMessage(t *testing.T) {
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	msg := c.mapStreamEvent(event)
+	msg, callID := c.mapStreamEvent(event)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_6", callID)
 	require.Equal(t, console.AgentMessageToolStateError, *msg.Metadata.Tool.State)
 	require.Equal(t, "tool timeout", *msg.Metadata.Tool.Output)
 	require.JSONEq(t, `{"server":"docs","tool":"search","q":"exec --json"}`, *msg.Metadata.Tool.Input)
 }
 
-func TestMapCommandExecutionIncludesInput(t *testing.T) {
-	line := `{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"bash -lc ls","aggregated_output":"docs\n","exit_code":0,"status":"completed"}}`
-
+func TestMapCommandExecutionTwoTurn(t *testing.T) {
 	c := &Codex{toolItems: make(map[string]*StreamItem)}
-	event := &StreamEvent{}
-	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	msg := c.mapStreamEvent(event)
+	started := &StreamEvent{}
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.started","item":{"id":"item_1","type":"command_execution","command":"bash -lc ls","status":"in_progress"}}`), started))
+	msg, callID := c.mapStreamEvent(started)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_1", callID)
 	require.Equal(t, "command_execution", *msg.Metadata.Tool.Name)
+	require.Equal(t, console.AgentMessageToolStateRunning, *msg.Metadata.Tool.State)
+	require.Equal(t, v1.RunningToolOutput, *msg.Metadata.Tool.Output)
 	require.JSONEq(t, `{"command":"bash -lc ls"}`, *msg.Metadata.Tool.Input)
+
+	completed := &StreamEvent{}
+	require.NoError(t, json.Unmarshal([]byte(`{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"bash -lc ls","aggregated_output":"docs\n","exit_code":0,"status":"completed"}}`), completed))
+	msg, callID = c.mapStreamEvent(completed)
+	require.NotNil(t, msg)
+	require.Equal(t, "item_1", callID)
+	require.Equal(t, console.AgentMessageToolStateCompleted, *msg.Metadata.Tool.State)
 	require.Equal(t, "docs\n", *msg.Metadata.Tool.Output)
 }
 
@@ -109,8 +131,9 @@ func TestMapTurnCompletedPersistsCostWithoutChatContent(t *testing.T) {
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	msg := c.mapStreamEvent(event)
+	msg, callID := c.mapStreamEvent(event)
 	require.NotNil(t, msg)
+	require.Empty(t, callID)
 	require.Equal(t, ignoredAgentMessage, msg.Message)
 	require.NotNil(t, msg.Cost)
 	require.Equal(t, float64(150), msg.Cost.Total)
@@ -133,8 +156,9 @@ func TestMapWebSearchIncludesQueryAsInput(t *testing.T) {
 	event := &StreamEvent{}
 	require.NoError(t, json.Unmarshal([]byte(line), event))
 
-	msg := c.mapStreamEvent(event)
+	msg, callID := c.mapStreamEvent(event)
 	require.NotNil(t, msg)
+	require.Equal(t, "item_7", callID)
 	require.Equal(t, "web_search", *msg.Metadata.Tool.Name)
 	require.JSONEq(t, `{"query":"codex exec --json schema"}`, *msg.Metadata.Tool.Input)
 }
