@@ -411,6 +411,7 @@ function ToolMessageContent({
               <ToolCallContent
                 content={content}
                 attributes={attributes}
+                isPending={isPending}
               />
             </Flex>
           </AccordionItem>

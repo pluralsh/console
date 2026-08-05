@@ -1,4 +1,5 @@
 import { Card, Code, Flex, Markdown } from '@pluralsh/design-system'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
 import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
@@ -25,10 +26,12 @@ export function ToolCallContent({
   content,
   attributes,
   customResultBody,
+  isPending,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
   customResultBody?: ReactNode
+  isPending?: boolean
 }) {
   const { spacing } = useTheme()
   const slimCodeCss = useSlimToolCodeCss()
@@ -50,7 +53,12 @@ export function ToolCallContent({
           {JSON.stringify(attributes.tool.arguments, null, 2)}
         </Code>
       )}
-      {customResultBody ? (
+      {isPending ? (
+        <RectangleSkeleton
+          $height={48}
+          $width="100%"
+        />
+      ) : customResultBody ? (
         <>
           <CaptionP $color="text-light">Response</CaptionP>
           {customResultBody}

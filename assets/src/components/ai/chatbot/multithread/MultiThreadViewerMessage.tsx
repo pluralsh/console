@@ -146,7 +146,12 @@ export function SimpleToolCall({
               >
                 {command}
               </Code>
-              {result ? (
+              {isPending ? (
+                <RectangleSkeleton
+                  $height={48}
+                  $width="100%"
+                />
+              ) : result ? (
                 <Code
                   title="Response"
                   showHeader
@@ -182,6 +187,7 @@ export function SimpleToolCall({
               content={content ?? ''}
               attributes={attributes}
               customResultBody={customResultBody}
+              isPending={isPending}
             />
           </SimpleAccordion>
         )
@@ -218,6 +224,7 @@ export function SimpleToolCall({
               content={content ?? ''}
               attributes={attributes}
               customResultBody={customResultBody}
+              isPending={isPending}
             />
           </SimpleAccordion>
         )
@@ -253,6 +260,7 @@ export function SimpleToolCall({
         <ToolCallContent
           content={content ?? ''}
           attributes={attributes}
+          isPending={isPending}
           customResultBody={
             finishedAnimating ? (
               customResultBody
