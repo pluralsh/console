@@ -98,7 +98,7 @@ func (in *Codex) cacheToolItem(item *StreamItem) {
 		return
 	}
 	switch item.Type {
-	case "mcp_tool_call", "command_execution", streamItemTypeDynamicToolCall:
+	case streamItemTypeMCPToolCall, streamItemTypeCommandExecution, streamItemTypeDynamicToolCall:
 		in.toolItems[item.ID] = item
 	}
 }
@@ -137,10 +137,10 @@ func mapStartedStreamItem(item *StreamItem, threadID string) (*console.AgentMess
 		return nil, ""
 	}
 	switch item.Type {
-	case "command_execution":
+	case streamItemTypeCommandExecution:
 		klog.V(log.LogLevelDebug).InfoS("codex command execution started", "command", item.Command, "thread_id", threadID)
 		return toolCallMessage(
-			"command_execution",
+			streamItemTypeCommandExecution,
 			console.AgentMessageToolStateRunning,
 			formatCommandInput(item.Command),
 			v1.RunningToolOutput,
@@ -159,7 +159,7 @@ func mapStartedStreamItem(item *StreamItem, threadID string) (*console.AgentMess
 			formatDynamicToolInput(item),
 			v1.RunningToolOutput,
 		), item.ID
-	case "mcp_tool_call":
+	case streamItemTypeMCPToolCall:
 		klog.V(log.LogLevelDebug).InfoS(
 			"codex mcp tool call started",
 			"server", item.Server,
@@ -167,16 +167,16 @@ func mapStartedStreamItem(item *StreamItem, threadID string) (*console.AgentMess
 			"thread_id", threadID,
 		)
 		return toolCallMessage(
-			"mcp_tool_call",
+			streamItemTypeMCPToolCall,
 			console.AgentMessageToolStateRunning,
 			formatMCPInput(item.Server, item.Tool, item.Arguments),
 			v1.RunningToolOutput,
 		), item.ID
-	case "file_change":
+	case streamItemTypeFileChange:
 		input, _ := json.Marshal(item.Changes)
 		klog.V(log.LogLevelDebug).InfoS("codex file change started", "thread_id", threadID)
 		return toolCallMessage(
-			"file_change",
+			streamItemTypeFileChange,
 			console.AgentMessageToolStateRunning,
 			string(input),
 			v1.RunningToolOutput,
@@ -212,19 +212,19 @@ func mapCompletedStreamItem(item *StreamItem, threadID string) (*console.AgentMe
 			Message: item.Text,
 		}, ""
 
-	case "command_execution":
+	case streamItemTypeCommandExecution:
 		return mapCommandExecutionItem(item, threadID)
 
 	case streamItemTypeDynamicToolCall:
 		return mapDynamicToolCallItem(item, threadID)
 
-	case "mcp_tool_call":
+	case streamItemTypeMCPToolCall:
 		return mapMCPToolCallItem(item, threadID)
 
-	case "file_change":
+	case streamItemTypeFileChange:
 		return mapFileChangeItem(item, threadID)
 
-	case "web_search":
+	case streamItemTypeWebSearch:
 		return mapWebSearchItem(item, threadID)
 	}
 
@@ -245,7 +245,7 @@ func mapCommandExecutionItem(item *StreamItem, threadID string) (*console.AgentM
 	}
 	klog.V(log.LogLevelDebug).InfoS("codex command execution", "command", item.Command, "exit_code", exitCode, "thread_id", threadID)
 	return toolCallMessage(
-		"command_execution",
+		streamItemTypeCommandExecution,
 		state,
 		formatCommandInput(item.Command),
 		item.AggregatedOutput,
@@ -291,7 +291,7 @@ func mapMCPToolCallItem(item *StreamItem, threadID string) (*console.AgentMessag
 		"thread_id", threadID,
 	)
 	return toolCallMessage(
-		"mcp_tool_call",
+		streamItemTypeMCPToolCall,
 		state,
 		formatMCPInput(item.Server, item.Tool, item.Arguments),
 		output,
@@ -313,7 +313,7 @@ func mapFileChangeItem(item *StreamItem, threadID string) (*console.AgentMessage
 	output := strings.Join(paths, ", ")
 	input, _ := json.Marshal(item.Changes)
 	klog.V(log.LogLevelDebug).InfoS("codex file change", "changes", output, "thread_id", threadID)
-	return toolCallMessage("file_change", state, string(input), output), item.ID
+	return toolCallMessage(streamItemTypeFileChange, state, string(input), output), item.ID
 }
 
 func mapWebSearchItem(item *StreamItem, threadID string) (*console.AgentMessageAttributes, string) {
@@ -322,7 +322,7 @@ func mapWebSearchItem(item *StreamItem, threadID string) (*console.AgentMessageA
 	}
 	klog.V(log.LogLevelDebug).InfoS("codex web search", "query", item.Query, "thread_id", threadID)
 	input, _ := json.Marshal(map[string]string{"query": item.Query})
-	return toolCallMessage("web_search", console.AgentMessageToolStateCompleted, string(input), ""), item.ID
+	return toolCallMessage(streamItemTypeWebSearch, console.AgentMessageToolStateCompleted, string(input), ""), item.ID
 }
 
 func toolCallMessage(name string, state console.AgentMessageToolState, input, output string) *console.AgentMessageAttributes {

@@ -20,7 +20,11 @@ const (
 	streamEventTypeTurnCompleted = "turn.completed"
 	streamEventTypeTurnFailed    = "turn.failed"
 
-	streamItemTypeDynamicToolCall = "dynamic_tool_call"
+	streamItemTypeCommandExecution = "command_execution"
+	streamItemTypeDynamicToolCall  = "dynamic_tool_call"
+	streamItemTypeMCPToolCall      = "mcp_tool_call"
+	streamItemTypeFileChange       = "file_change"
+	streamItemTypeWebSearch        = "web_search"
 
 	// ignoredAgentMessage marks messages persisted for metadata (e.g. cost) but hidden in chat.
 	ignoredAgentMessage = "__plrl_ignore__"
