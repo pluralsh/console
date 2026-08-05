@@ -317,6 +317,8 @@ defmodule Console.Schema.Stack do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
+    |> truncate_fields([:name], 255)
     |> make_ai_pollable_on_failure()
     |> cast_embed(:git)
     |> cast_embed(:job_spec)
@@ -337,7 +339,6 @@ defmodule Console.Schema.Stack do
     |> foreign_key_constraint(:actor_id)
     |> unique_constraint(:name)
     |> duration(:interval)
-    |> validate_length(:name, max: 255, message: "name must be less than 255 characters")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> change_markers(actor_id: :actor_changed)
