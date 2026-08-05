@@ -229,12 +229,17 @@ func (in *executable) RunStream(ctx context.Context, cb func([]byte)) error {
 	var scErrMu sync.Mutex
 	var scannerErrs []error
 
-	// Callback worker to prevent callback backpressure from stalling stream readers.
+	// Callback worker decouples pipe reads from callback work (e.g. GraphQL create/update),
+	// but must never drop lines: agent tool_use/tool_result pairs are correlated by call ID.
+	// Prefer blocking readers (and eventually the child process) over silent event loss.
 	var cbCh chan []byte
+	var cbWg sync.WaitGroup
 	if cb != nil {
 		const callbackBufferSize = 256
 		cbCh = make(chan []byte, callbackBufferSize)
+		cbWg.Add(1)
 		go func() {
+			defer cbWg.Done()
 			for line := range cbCh {
 				// Protect callback with recover to avoid goroutine crash leaking.
 				func() {
@@ -283,13 +288,9 @@ func (in *executable) RunStream(ctx context.Context, cb func([]byte)) error {
 				klog.V(log.LogLevelDebug).InfoS("stream line", "reader", name, "line", string(line))
 			}()
 
-			// Queue callback (non-blocking best-effort).
+			// Block when the callback is slow so tool lifecycle events are not dropped.
 			if cbCh != nil {
-				select {
-				case cbCh <- line:
-				default:
-					klog.V(log.LogLevelDebug).InfoS("dropping stream line because callback backlog", "reader", name)
-				}
+				cbCh <- line
 			}
 
 			// Write to sinks (append newline because Scanner strips it)
@@ -320,6 +321,9 @@ func (in *executable) RunStream(ctx context.Context, cb func([]byte)) error {
 	wg.Wait()
 	if cbCh != nil {
 		close(cbCh)
+		// Ensure every queued line is processed before RunStream returns; otherwise
+		// terminal tool updates / completedAt may be lost when the harness tears down.
+		cbWg.Wait()
 	}
 
 	// Close sinks now that readers finished writing to them
