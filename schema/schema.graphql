@@ -2192,6 +2192,9 @@ input AgentMessageTokensAttributes {
 }
 
 input AgentMessageMetadataAttributes {
+  "when the tool/message started, eg when create time differs from tool start"
+  startedAt: DateTime
+
   "when the message completed, eg for command based tool calls that take a while"
   completedAt: DateTime
 
@@ -2525,6 +2528,9 @@ type AgentMessageTokens {
 }
 
 type AgentMessageMetadata {
+  "when the tool/message started"
+  startedAt: DateTime
+
   "when the message completed"
   completedAt: DateTime
 

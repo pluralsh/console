@@ -795,11 +795,13 @@ defmodule Console.Deployments.AgentsTest do
         message: message.message,
         role: message.role,
         metadata: %{
+          started_at: ~U[2026-08-04 19:58:20.000000Z],
           completed_at: ~U[2026-08-04 20:00:00.000000Z],
           tool: %{name: "shell", state: :completed, input: "mix test", output: "0 failures"}
         }
       }, message.id, runtime.cluster)
 
+      assert updated.metadata.started_at == ~U[2026-08-04 19:58:20.000000Z]
       assert updated.metadata.completed_at == ~U[2026-08-04 20:00:00.000000Z]
       assert updated.metadata.tool.state == :completed
       assert updated.metadata.tool.output == "0 failures"

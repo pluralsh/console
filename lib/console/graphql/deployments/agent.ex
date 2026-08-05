@@ -126,6 +126,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   input_object :agent_message_metadata_attributes do
+    field :started_at,   :datetime, description: "when the tool/message started, eg when create time differs from tool start"
     field :completed_at, :datetime, description: "when the message completed, eg for command based tool calls that take a while"
     field :reasoning,    :agent_message_reasoning_attributes, description: "the reasoning of the message"
     field :file,         :agent_message_file_attributes, description: "the file of the message"
@@ -309,6 +310,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   object :agent_message_metadata do
+    field :started_at,   :datetime, description: "when the tool/message started"
     field :completed_at, :datetime, description: "when the message completed"
     field :reasoning, :agent_message_reasoning, description: "the reasoning of the message"
     field :file,      :agent_message_file, description: "the file of the message"

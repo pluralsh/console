@@ -108,6 +108,7 @@ fragment AgentMessage on AgentMessage {
 }
 
 fragment AgentMessageMetadata on AgentMessageMetadata {
+  startedAt
   completedAt
   reasoning {
     text

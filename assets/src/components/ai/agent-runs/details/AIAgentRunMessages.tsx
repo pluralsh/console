@@ -100,7 +100,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
     return {
       isPending,
       toolRuntime: toolRuntimeLabel(
-        agent?.insertedAt,
+        agent?.metadata?.startedAt ?? agent?.insertedAt,
         agent?.metadata?.completedAt,
         isPending,
         now
@@ -211,13 +211,13 @@ const safeJsonParse = (str: Nullable<string>) => {
 }
 
 function toolRuntimeLabel(
-  insertedAt?: string | null,
+  startedAt?: string | null,
   completedAt?: string | null,
   isPending?: boolean,
   now?: number
 ) {
-  if (!insertedAt) return undefined
-  if (completedAt) return duration(insertedAt, completedAt)
-  if (isPending && now != null) return duration(insertedAt, now)
+  if (!startedAt) return undefined
+  if (completedAt) return duration(startedAt, completedAt)
+  if (isPending && now != null) return duration(startedAt, now)
   return undefined
 }

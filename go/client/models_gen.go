@@ -222,6 +222,8 @@ type AgentMessageFileAttributes struct {
 }
 
 type AgentMessageMetadata struct {
+	// when the tool/message started
+	StartedAt *string `json:"startedAt,omitempty"`
 	// when the message completed
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
@@ -233,6 +235,8 @@ type AgentMessageMetadata struct {
 }
 
 type AgentMessageMetadataAttributes struct {
+	// when the tool/message started, eg when create time differs from tool start
+	StartedAt *string `json:"startedAt,omitempty"`
 	// when the message completed, eg for command based tool calls that take a while
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
