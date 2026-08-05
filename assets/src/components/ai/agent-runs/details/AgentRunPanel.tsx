@@ -374,6 +374,12 @@ export function AgentRunPanelContent() {
                 runId={run.id}
                 isFullscreen={diffFullscreen}
                 onFullscreenChange={setDiffFullscreen}
+                isApprovable={
+                  run.status === AgentRunStatus.PendingApproval &&
+                  !run.approvedAt
+                }
+                onApprove={() => approval?.onApprove()}
+                approving={approval?.approving ?? false}
               />
             </ContentInnerFlushSC>
           </ContentWrapperFlushSC>
