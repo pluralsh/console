@@ -17,7 +17,7 @@ import {
 } from 'generated/graphql'
 import { produce } from 'immer'
 import { isEmpty } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { duration } from 'utils/datetime'
@@ -71,6 +71,25 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
     [messages, run.prompt]
   )
 
+  const hasPendingTool = useMemo(
+    () =>
+      agentMessages.some((msg) => {
+        const state = msg.metadata?.tool?.state
+        return (
+          state === AgentMessageToolState.Running ||
+          state === AgentMessageToolState.Pending
+        )
+      }),
+    [agentMessages]
+  )
+
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (!hasPendingTool) return
+    const id = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(id)
+  }, [hasPendingTool])
+
   const getToolMessageProps = (id?: string | null) => {
     const agent = agentMessages.find((m) => m.id === id)
     const state = agent?.metadata?.tool?.state
@@ -80,10 +99,12 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
 
     return {
       isPending,
-      toolRuntime:
-        agent?.insertedAt && agent.metadata?.completedAt
-          ? duration(agent.insertedAt, agent.metadata.completedAt)
-          : undefined,
+      toolRuntime: toolRuntimeLabel(
+        agent?.insertedAt,
+        agent?.metadata?.completedAt,
+        isPending,
+        now
+      ),
     }
   }
 
@@ -187,4 +208,16 @@ const safeJsonParse = (str: Nullable<string>) => {
   } catch {
     return undefined
   }
+}
+
+function toolRuntimeLabel(
+  insertedAt?: string | null,
+  completedAt?: string | null,
+  isPending?: boolean,
+  now?: number
+) {
+  if (!insertedAt) return undefined
+  if (completedAt) return duration(insertedAt, completedAt)
+  if (isPending && now != null) return duration(insertedAt, now)
+  return undefined
 }
