@@ -16,10 +16,9 @@ import {
   useAgentRunChatSubscription,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import { isEmpty, uniqWith } from 'lodash'
+import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { duration } from 'utils/datetime'
 
@@ -50,17 +49,14 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
     },
   })
 
-  // Subscribed messages first so UPDATE deltas win over the initial run.messages snapshot.
-  const agentMessages = useMemo(
-    () =>
-      uniqWith(
-        subscribedMessages
-          .concat((run.messages ?? []).filter(isNonNullable))
-          .filter((msg) => !isHiddenAgentMessage(msg)),
-        (a, b) => a.id === b.id
-      ),
-    [subscribedMessages, run.messages]
-  )
+  // Merge by id (subscribed wins for updates), then restore conversation order by seq.
+  const agentMessages = useMemo(() => {
+    const byId = new Map<string, AgentMessageFragment>()
+    for (const msg of [...(run.messages ?? []), ...subscribedMessages]) {
+      if (msg && !isHiddenAgentMessage(msg)) byId.set(msg.id, msg)
+    }
+    return Array.from(byId.values()).sort((a, b) => a.seq - b.seq)
+  }, [subscribedMessages, run.messages])
 
   const messages: ChatFragment[] = useMemo(
     () => agentMessages.map(agentMsgToChatMsg),
