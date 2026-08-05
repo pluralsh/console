@@ -31,17 +31,15 @@ type AgentConfigurationReconciler struct {
 // Reconcile AgentConfiguration custom resources to ensure that Console stays in sync with Kubernetes cluster.
 func (r *AgentConfigurationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	if req.Name != agentConfigurationDefaultName {
-		logger.Error(fmt.Errorf("expected %q name, got %s", agentConfigurationDefaultName, req.Name), "")
-		return reconcile.Result{}, nil
-	}
 	config := &v1alpha1.AgentConfiguration{}
 	if err := r.Get(ctx, req.NamespacedName, config); err != nil {
 		if apierrors.IsNotFound(err) {
-			logger.Info("AgentConfiguration/default not found, using defaults")
-			if err := common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{}); err != nil {
-				logger.Error(err, "Unable to reset configuration to defaults")
-				return ctrl.Result{}, err
+			if req.Name == agentConfigurationDefaultName {
+				logger.Info("AgentConfiguration/default not found, using defaults")
+				if err := common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{}); err != nil {
+					logger.Error(err, "Unable to reset configuration to defaults")
+					return ctrl.Result{}, err
+				}
 			}
 			return ctrl.Result{}, nil
 		}
@@ -49,13 +47,11 @@ func (r *AgentConfigurationReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Error(err, "Unable to fetch AgentConfiguration")
 		return ctrl.Result{}, err
 	}
-	utils.MarkCondition(config.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewDefaultScope(ctx, r.Client, config)
 	if err != nil {
 		logger.Error(err, "Failed to create cluster scope")
-		utils.MarkCondition(config.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
 	defer func() {
@@ -63,6 +59,15 @@ func (r *AgentConfigurationReconciler) Reconcile(ctx context.Context, req ctrl.R
 			reterr = err
 		}
 	}()
+
+	if req.Name != agentConfigurationDefaultName {
+		msg := fmt.Sprintf("expected %q name, got %s", agentConfigurationDefaultName, req.Name)
+		logger.Error(fmt.Errorf("%s", msg), "")
+		utils.MarkCondition(config.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReasonError, msg)
+		return reconcile.Result{}, nil
+	}
+
+	utils.MarkCondition(config.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	if err := common.GetConfigurationManager().SetValue(config.Spec); err != nil {
 		logger.Error(err, "Unable to set configuration")
