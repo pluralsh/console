@@ -163,7 +163,12 @@ export const duration = (
     ...(!!dur.minutes() ? ['m[m]'] : []),
     ...(!!dur.seconds() ? ['s[s]'] : []),
   ]
-  return dur.format(format ?? formatParts.join(' '))
+  if (format) return dur.format(format)
+  if (formatParts.length === 0) {
+    const ms = Math.max(0, Math.round(dur.asMilliseconds()))
+    return ms > 0 ? `${ms}ms` : '0s'
+  }
+  return dur.format(formatParts.join(' '))
 }
 
 export const toDateOrUndef = (d: unknown) => {

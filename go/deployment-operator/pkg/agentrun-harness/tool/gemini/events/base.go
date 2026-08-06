@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 )
@@ -23,7 +23,7 @@ const (
 
 type Event interface {
 	Validate() bool
-	Process(onMessage func(message *console.AgentMessageAttributes))
+	Process(onMessage v1.MessageCallback)
 }
 
 type EventBase struct {
@@ -31,7 +31,7 @@ type EventBase struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-func (e EventBase) OnMessage(line []byte, onMessage func(message *console.AgentMessageAttributes)) error {
+func (e EventBase) OnMessage(line []byte, onMessage v1.MessageCallback) error {
 	if onMessage == nil {
 		klog.V(log.LogLevelDebug).InfoS("ignoring event as message handler is not defined",
 			"type", e.Type, "line", string(line))
@@ -62,7 +62,7 @@ func (e EventBase) OnMessage(line []byte, onMessage func(message *console.AgentM
 func handleEvent[T any, PT interface {
 	*T
 	Event
-}](line []byte, onMessage func(message *console.AgentMessageAttributes)) error {
+}](line []byte, onMessage v1.MessageCallback) error {
 	var t T
 	pt := PT(&t)
 	if err := json.Unmarshal(line, pt); err != nil {

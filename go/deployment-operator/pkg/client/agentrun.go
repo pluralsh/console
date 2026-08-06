@@ -119,6 +119,19 @@ func (c *client) CreateAgentMessage(ctx context.Context, runID string, attrs con
 	return response.CreateAgentMessage, nil
 }
 
+func (c *client) UpdateAgentMessage(ctx context.Context, id string, attrs console.AgentMessageAttributes) (*console.UpdateAgentMessage_UpdateAgentMessage, error) {
+	response, err := c.consoleClient.UpdateAgentMessage(ctx, id, attrs)
+	if err != nil {
+		return nil, err
+	}
+
+	if response == nil || response.UpdateAgentMessage == nil {
+		return nil, nil
+	}
+
+	return response.UpdateAgentMessage, nil
+}
+
 func (c *client) GetAgentRunTodos(ctx context.Context, id string) ([]*console.AgentTodoFragment, error) {
 	response, err := c.consoleClient.GetAgentRunTodos(ctx, id)
 	if err != nil {

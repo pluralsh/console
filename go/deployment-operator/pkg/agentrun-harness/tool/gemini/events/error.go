@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
 
 type Severity string
@@ -34,8 +35,8 @@ func (e *ErrorEvent) Validate() bool {
 	return e.Type == EventTypeError && e.Message != ""
 }
 
-func (e *ErrorEvent) Process(onMessage func(message *console.AgentMessageAttributes)) {
-	onMessage(e.Attributes())
+func (e *ErrorEvent) Process(onMessage v1.MessageCallback) {
+	onMessage(e.Attributes(), "")
 }
 
 func (e *ErrorEvent) Attributes() *console.AgentMessageAttributes {

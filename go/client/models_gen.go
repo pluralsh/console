@@ -222,6 +222,8 @@ type AgentMessageFileAttributes struct {
 }
 
 type AgentMessageMetadata struct {
+	// when the tool/message started
+	StartedAt *string `json:"startedAt,omitempty"`
 	// when the message completed
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
@@ -233,6 +235,8 @@ type AgentMessageMetadata struct {
 }
 
 type AgentMessageMetadataAttributes struct {
+	// when the tool/message started, eg when create time differs from tool start
+	StartedAt *string `json:"startedAt,omitempty"`
 	// when the message completed, eg for command based tool calls that take a while
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
@@ -10490,6 +10494,7 @@ type WorkbenchJobActivityFunctionCall struct {
 
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
+	Objective     *string                   `json:"objective,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
 	Criticism     *string                   `json:"criticism,omitempty"`
 	Conclusion    *string                   `json:"conclusion,omitempty"`
@@ -10699,6 +10704,8 @@ type WorkbenchJobProgress struct {
 type WorkbenchJobResult struct {
 	// the id of the result
 	ID string `json:"id"`
+	// the sole active objective for this investigation
+	Objective *string `json:"objective,omitempty"`
 	// the working theory for this result
 	WorkingTheory *string `json:"workingTheory,omitempty"`
 	// a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation

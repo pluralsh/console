@@ -19,6 +19,7 @@ defmodule Console.Schema.AgentMessage do
     end
 
     embeds_one :metadata, Metadata, on_replace: :update do
+      field :started_at,   :utc_datetime_usec
       field :completed_at, :utc_datetime_usec
       embeds_one :reasoning, Reasoning, on_replace: :update do
         field :text,  :string
@@ -77,7 +78,7 @@ defmodule Console.Schema.AgentMessage do
 
   defp metadata_changeset(model, attrs) do
     model
-    |> cast(attrs, [:completed_at])
+    |> cast(attrs, [:started_at, :completed_at])
     |> cast_embed(:reasoning, with: &reasoning_changeset/2)
     |> cast_embed(:file, with: &file_changeset/2)
     |> cast_embed(:tool, with: &tool_changeset/2)

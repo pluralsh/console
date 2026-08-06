@@ -211,6 +211,7 @@ export function styledToolCallKinds(): ToolCallKind[] {
     'file_change',
     'web_search',
     'mcp_tool_call',
+    'generic',
   ]
 }
 

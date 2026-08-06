@@ -230,6 +230,66 @@ func (_c *ClientMock_CreateAgentMessage_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// UpdateAgentMessage provides a mock function with given fields: ctx, id, attrs
+func (_m *ClientMock) UpdateAgentMessage(ctx context.Context, id string, attrs goclient.AgentMessageAttributes) (*goclient.UpdateAgentMessage_UpdateAgentMessage, error) {
+	ret := _m.Called(ctx, id, attrs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateAgentMessage")
+	}
+
+	var r0 *goclient.UpdateAgentMessage_UpdateAgentMessage
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentMessageAttributes) (*goclient.UpdateAgentMessage_UpdateAgentMessage, error)); ok {
+		return rf(ctx, id, attrs)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, goclient.AgentMessageAttributes) *goclient.UpdateAgentMessage_UpdateAgentMessage); ok {
+		r0 = rf(ctx, id, attrs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*goclient.UpdateAgentMessage_UpdateAgentMessage)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, goclient.AgentMessageAttributes) error); ok {
+		r1 = rf(ctx, id, attrs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ClientMock_UpdateAgentMessage_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateAgentMessage'
+type ClientMock_UpdateAgentMessage_Call struct {
+	*mock.Call
+}
+
+// UpdateAgentMessage is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attrs goclient.AgentMessageAttributes
+func (_e *ClientMock_Expecter) UpdateAgentMessage(ctx interface{}, id interface{}, attrs interface{}) *ClientMock_UpdateAgentMessage_Call {
+	return &ClientMock_UpdateAgentMessage_Call{Call: _e.mock.On("UpdateAgentMessage", ctx, id, attrs)}
+}
+
+func (_c *ClientMock_UpdateAgentMessage_Call) Run(run func(ctx context.Context, id string, attrs goclient.AgentMessageAttributes)) *ClientMock_UpdateAgentMessage_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(goclient.AgentMessageAttributes))
+	})
+	return _c
+}
+
+func (_c *ClientMock_UpdateAgentMessage_Call) Return(_a0 *goclient.UpdateAgentMessage_UpdateAgentMessage, _a1 error) *ClientMock_UpdateAgentMessage_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ClientMock_UpdateAgentMessage_Call) RunAndReturn(run func(context.Context, string, goclient.AgentMessageAttributes) (*goclient.UpdateAgentMessage_UpdateAgentMessage, error)) *ClientMock_UpdateAgentMessage_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateAgentPullRequest provides a mock function with given fields: ctx, runID, attrs
 func (_m *ClientMock) CreateAgentPullRequest(ctx context.Context, runID string, attrs goclient.AgentPullRequestAttributes) (*goclient.PullRequestFragment, error) {
 	ret := _m.Called(ctx, runID, attrs)

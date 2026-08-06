@@ -1,7 +1,7 @@
 package events
 
 import (
-	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"k8s.io/klog/v2"
 )
@@ -16,6 +16,6 @@ func (e *InitEvent) Validate() bool {
 	return e.Type == EventTypeInit
 }
 
-func (e *InitEvent) Process(_ func(message *console.AgentMessageAttributes)) {
+func (e *InitEvent) Process(_ v1.MessageCallback) {
 	klog.V(log.LogLevelDebug).Infof("initialized %s model", e.Model)
 }

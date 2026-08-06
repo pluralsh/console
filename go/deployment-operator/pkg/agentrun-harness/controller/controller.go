@@ -53,15 +53,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 		return retErr
 	}
 
-	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes) {
-		if message == nil {
-			return
-		}
-
-		_, err := in.consoleClient.CreateAgentMessage(ctx, in.agentRunID, *message)
-		if err != nil {
-			klog.ErrorS(err, "failed to create agent message", "message", message)
-		}
+	in.ensureToolCallMessageIDs()
+	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes, callID string) {
+		in.handleAgentMessage(ctx, message, callID)
 	})
 
 	in.tool.Run(
