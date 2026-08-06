@@ -3286,7 +3286,6 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `home` _boolean_ | Home enables access to the Home tab when set to true.<br />This is the default landing entry in the sidebar and typically opens the configured homepage. |  | Optional: \{\} <br /> |
 | `cd` _boolean_ | CD enables access to the Plural Continuous Deployment tab when set to true.<br />This is the entry point for clusters, services, pipelines, and other deployment<br />management views. Use the Deployments configuration to control the individual<br />views within it. |  | Optional: \{\} <br /> |
 | `audits` _boolean_ | Audits enables access to audit logs and compliance reporting features when set to true.<br />This includes viewing system audit trails, user activity logs, and compliance reports.<br />Typically enabled for security teams and compliance officers. |  | Optional: \{\} <br /> |
 | `kubernetes` _boolean_ | Kubernetes enables access to direct Kubernetes management features when set to true.<br />This includes raw Kubernetes resource management, kubectl-like operations,<br />and low-level cluster administration tasks. |  | Optional: \{\} <br /> |

@@ -34,7 +34,6 @@ fragment PersonaConfigurationFragment on PersonaConfiguration {
     sidebar {
         audits
         flows
-        home
         kubernetes
         pullRequests
         settings

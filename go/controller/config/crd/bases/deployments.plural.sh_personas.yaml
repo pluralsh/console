@@ -260,11 +260,6 @@ spec:
                           Flows enables access to the flows navigation item when set to true.
                           This includes viewing and managing flow resources from the main sidebar.
                         type: boolean
-                      home:
-                        description: |-
-                          Home enables access to the Home navigation item when set to true.
-                          This is the default landing entry in the sidebar and typically opens the configured homepage.
-                        type: boolean
                       kubernetes:
                         description: |-
                           Kubernetes enables access to direct Kubernetes management features when set to true.

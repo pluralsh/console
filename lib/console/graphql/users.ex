@@ -108,7 +108,6 @@ defmodule Console.GraphQl.Users do
   end
 
   input_object :persona_sidebar_attributes do
-    field :home,          :boolean
     field :cd,            :boolean
     field :audits,        :boolean
     field :kubernetes,    :boolean
@@ -341,7 +340,6 @@ defmodule Console.GraphQl.Users do
   end
 
   object :persona_sidebar do
-    field :home,          :boolean
     field :cd,            :boolean
     field :audits,        :boolean
     field :kubernetes,    :boolean

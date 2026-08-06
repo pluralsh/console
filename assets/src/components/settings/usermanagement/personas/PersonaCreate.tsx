@@ -60,7 +60,6 @@ const DEFAULT_CONFIGURATION = {
   sidebar: {
     audits: true,
     flows: true,
-    home: true,
     kubernetes: true,
     pullRequests: true,
     settings: true,

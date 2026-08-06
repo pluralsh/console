@@ -6099,7 +6099,6 @@ type PersonaServicesAttributes struct {
 }
 
 type PersonaSidebar struct {
-	Home         *bool `json:"home,omitempty"`
 	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
@@ -6115,7 +6114,6 @@ type PersonaSidebar struct {
 }
 
 type PersonaSidebarAttributes struct {
-	Home         *bool `json:"home,omitempty"`
 	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
