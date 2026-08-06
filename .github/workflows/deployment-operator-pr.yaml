@@ -27,7 +27,7 @@ jobs:
   #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   body:
     name: Body check
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     if: ${{ !contains(github.event.*.labels.*.name, 'dependencies') && !contains(github.event.*.labels.*.name, 'release')}}
     steps:
       - name: Check pull request body
