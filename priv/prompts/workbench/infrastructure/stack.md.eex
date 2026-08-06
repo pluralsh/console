@@ -8,6 +8,7 @@ Here's the GitOps structure of the following stack
 
 # Repository
 
+<%= if @stack.repository && @stack.git do %>
 This is where the <%= @stack.type %> code lives.
 
 ```json
@@ -17,11 +18,14 @@ This is where the <%= @stack.type %> code lives.
     folder: @stack.git.folder
 }, pretty: true) %>
 ```
+<% else %>
+Repository details are unavailable for this stack.
+<% end %>
 <%= if @stack.workdir do %>
 Working directory: <%= @stack.workdir %>
 <% end %>
 
-<%= if @stack.parent do %>
+<%= if @stack.parent && @stack.parent.cluster do %>
 # Parent
 
 The stack is managed as an InfrastructureStack kubernetes custom resource in the following Plural Service:
@@ -52,7 +56,7 @@ This stack has the following state resources:
 ```
 <% end %>
 
-<%= if @failed_run do %>
+<%= if @failed_run && @failed_run.failing_step do %>
 # Latest failed run
 
 The stack status is **failed**. This section summarizes the most recent **failed** stack run including log output
