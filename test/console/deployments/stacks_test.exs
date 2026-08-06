@@ -1251,6 +1251,22 @@ defmodule Console.Deployments.StacksTest do
 
       {:error, _} = Stacks.create_custom_run(stack.id, [%{cmd: "echo", args: ["hello world!"]}], user)
     end
+
+    test "can create custom runs with extremely large args" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], sha: "test-sha")
+      long_arg = String.duplicate("a", 2048)
+
+      {:ok, run} = Stacks.create_custom_run(stack.id, [
+        %{cmd: "terraform", args: ["init"]},
+        %{cmd: "terraform", args: ["import", "some.resource", long_arg]}
+      ], user)
+
+      assert [
+        %{cmd: "terraform", args: ["init"]},
+        %{cmd: "terraform", args: ["import", "some.resource", ^long_arg]}
+      ] = run.steps
+    end
   end
 
   describe "#create_custom_stack_run/2" do
