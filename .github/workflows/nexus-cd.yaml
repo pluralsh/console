@@ -25,7 +25,7 @@ env:
 jobs:
   test:
     name: Unit test
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     defaults:
       run:
         shell: bash
@@ -141,7 +141,7 @@ jobs:
         - ghcr.io/pluralsh/nexus
         - gcr.io/pluralsh/nexus
         - docker.io/pluralsh/nexus
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
     - name: Download digests
       uses: actions/download-artifact@v7

@@ -3,7 +3,8 @@ Here's the GitOps structure of the following stack
 # Attributes
 
 ```json
-<%= Map.take(@stack, [:id, :name, :type, :approval, :workdir]) |> Jason.encode!(pretty: true) %>
+<%= Map.take(@stack, [:id, :name, :type, :approval, :workdir])
+    |> Jason.encode!(pretty: true) %>
 ```
 
 # Repository
