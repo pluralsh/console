@@ -10,10 +10,12 @@ defmodule Console.Plural.Client do
 
   def run(query, variables, type_spec) do
     token = Config.fetch()
-    HTTPoison.post(url(), Jason.encode!(%{
-      query: query,
-      variables: variables
-    }), [{"authorization", "Bearer #{token}"} | @headers])
+    Req.post(url(),
+      headers: [{"authorization", "Bearer #{token}"} | @headers],
+      body: Jason.encode!(%{query: query, variables: variables}),
+      decode_body: false,
+      retry: false
+    )
     |> decode(type_spec)
   end
 

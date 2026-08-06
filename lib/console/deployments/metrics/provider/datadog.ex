@@ -31,15 +31,15 @@ defmodule Console.Deployments.Metrics.Provider.Datadog do
   end
 
   defp get(conn, url) do
-    HTTPoison.get("#{conn.host}#{url}", Connection.headers(conn))
+    Req.get("#{conn.host}#{url}", headers: Connection.headers(conn), decode_body: false, retry: false)
     |> handle_response()
   end
 
   defp listify(l) when is_list(l), do: l
   defp listify(v), do: [v]
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, {:client, "datadog api call failed: #{body}"}}
+  defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, {:client, "datadog api call failed: #{body}"}}
   defp handle_response(_), do: {:error, {:client, "unknown datadog error"}}
 end

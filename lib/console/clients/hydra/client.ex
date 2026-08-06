@@ -46,33 +46,33 @@ defmodule Console.Hydra.Client do
 
   def get_configuration() do
     public_url("/.well-known/openid-configuration")
-    |> HTTPoison.get(headers())
+    |> Req.get(req_opts())
     |> handle_response(%Configuration{})
   end
 
   def get_client(id) do
     admin_url("/clients/#{id}")
-    |> HTTPoison.get(headers())
+    |> Req.get(req_opts())
     |> handle_response(%Client{})
   end
 
   def create_client(attrs) do
     admin_url("/clients")
-    |> HTTPoison.post(Jason.encode!(attrs), headers())
+    |> Req.post(req_opts(body: Jason.encode!(attrs)))
     |> handle_response(%Client{})
   end
 
   def update_client(client_id, attrs) do
     admin_url("/clients/#{client_id}")
-    |> HTTPoison.put(Jason.encode!(attrs), headers())
+    |> Req.put(req_opts(body: Jason.encode!(attrs)))
     |> handle_response(%Client{})
   end
 
   def delete_client(client_id) do
     admin_url("/clients/#{client_id}")
-    |> HTTPoison.delete(headers())
+    |> Req.delete(req_opts())
     |> case do
-      {:ok, %{status_code: 204}} -> :ok
+      {:ok, %{status: 204}} -> :ok
       error ->
         Logger.error "Failed to delete hydra client: #{inspect(error)}"
         {:error, :unauthorized}
@@ -81,26 +81,26 @@ defmodule Console.Hydra.Client do
 
   def get_login(challenge) do
     admin_url("/oauth2/auth/requests/login?login_challenge=#{challenge}")
-    |> HTTPoison.get(headers())
+    |> Req.get(req_opts())
     |> handle_response(%LoginRequest{client: %Client{}})
   end
 
   def accept_login(challenge, user) do
     body = Jason.encode!(%{subject: user.id, remember: false})
     admin_url("/oauth2/auth/requests/login/accept?login_challenge=#{challenge}")
-    |> HTTPoison.put(body, headers())
+    |> Req.put(req_opts(body: body))
     |> handle_response(%Response{})
   end
 
   def reject_login(challenge) do
     admin_url("/oauth2/auth/requests/login/reject?login_challenge=#{challenge}")
-    |> HTTPoison.put("{}", headers())
+    |> Req.put(req_opts(body: "{}"))
     |> handle_response(%Response{})
   end
 
   def get_consent(challenge) do
     admin_url("/oauth2/auth/requests/consent?consent_challenge=#{challenge}")
-    |> HTTPoison.get(headers())
+    |> Req.get(req_opts())
     |> handle_response(%ConsentRequest{client: %Client{}})
   end
 
@@ -114,17 +114,19 @@ defmodule Console.Hydra.Client do
       }
     })
     admin_url("/oauth2/auth/requests/consent/accept?consent_challenge=#{challenge}")
-    |> HTTPoison.put(body, headers())
+    |> Req.put(req_opts(body: body))
     |> handle_response(%Response{})
   end
 
   def reject_consent(challenge) do
     admin_url("/oauth2/auth/requests/consent/accept?consent_challenge=#{challenge}")
-    |> HTTPoison.put("{}", headers())
+    |> Req.put(req_opts(body: "{}"))
     |> handle_response(%Response{})
   end
 
-  defp handle_response({:ok, %{status_code: code, body: body}}, type) when code in 200..299,
+  defp req_opts(extra \\ []), do: [headers: headers(), decode_body: false, retry: false] ++ extra
+
+  defp handle_response({:ok, %{status: code, body: body}}, type) when code in 200..299,
     do: {:ok, Poison.decode!(body, as: type)}
   defp handle_response(error, _) do
     Logger.error "Failed to call hydra: #{inspect(error)}"
@@ -155,7 +157,7 @@ defmodule Console.Hydra.Client do
   defp conf(key), do: Console.conf(__MODULE__)[key]
 
   defp hydra_error({:error, _}), do: "internal network error"
-  defp hydra_error({:ok, %HTTPoison.Response{status_code: code, body: body}}),
+  defp hydra_error({:ok, %Req.Response{status: code, body: body}}),
     do: "hydra error: code=#{code}, body=#{body}"
 
   defp headers(), do: [{"accept", "application/json"}, {"content-type", "application/json"}]

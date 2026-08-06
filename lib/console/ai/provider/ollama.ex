@@ -14,7 +14,7 @@ defmodule Console.AI.Ollama do
 
   @base_headers [{"content-type", "application/json"}]
 
-  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
+  @options [receive_timeout: :timer.minutes(5), connect_options: [timeout: :timer.minutes(5)], decode_body: false, retry: false]
 
   defmodule Message do
     @type t :: %__MODULE__{}
@@ -77,13 +77,13 @@ defmodule Console.AI.Ollama do
     })
 
     "#{url}/api/chat"
-    |> HTTPoison.post(body, auth(ollama, @base_headers), @options)
+    |> Req.post([headers: auth(ollama, @base_headers), body: body] ++ @options)
     |> handle_response(ChatResponse.spec())
   end
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}}, type) when code in 200..299,
+  defp handle_response({:ok, %Req.Response{status: code, body: body}}, type) when code in 200..299,
     do: Poison.decode(body, as: type)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}, _) do
+  defp handle_response({:ok, %Req.Response{body: body}}, _) do
     Logger.error "ollama error: #{body}"
     {:error, "ollama error: #{body}"}
   end

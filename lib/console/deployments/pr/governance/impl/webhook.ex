@@ -30,12 +30,13 @@ defmodule Console.Deployments.Pr.Governance.Impl.Webhook do
 
   defp make_request(%PrGovernance{configuration: %{webhook: %{url: url}}}, path, body) do
     Path.join(url, path)
-    |> HTTPoison.post(body, @headers)
+    |> Req.post(headers: @headers, body: body, decode_body: false, retry: false)
     |> case do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code in 200..299 ->
+      {:ok, %Req.Response{status: code, body: body}} when code in 200..299 ->
         Jason.decode(body)
-      {:ok, %HTTPoison.Response{body: body}} -> {:error, body}
-      {:error, %HTTPoison.Error{reason: reason}} -> {:error, reason}
+      {:ok, %Req.Response{body: body}} -> {:error, body}
+      {:error, %Req.TransportError{reason: reason}} -> {:error, reason}
+      {:error, error} -> {:error, error}
     end
   end
 end

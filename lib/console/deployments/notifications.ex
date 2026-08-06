@@ -171,10 +171,15 @@ defmodule Console.Deployments.Notifications do
   end
 
   defp url_deliver(url, body) do
-    HTTPoison.post(url, body, [
-      {"content-type", "application/json"},
-      {"accept", "application/json"}
-    ])
+    Req.post(url,
+      headers: [
+        {"content-type", "application/json"},
+        {"accept", "application/json"}
+      ],
+      body: body,
+      decode_body: false,
+      retry: false
+    )
     |> log_errors()
   end
 
@@ -183,7 +188,7 @@ defmodule Console.Deployments.Notifications do
     |> EEx.eval_file(assigns: Map.to_list(map))
   end
 
-  defp log_errors({:ok, %HTTPoison.Response{status_code: c, body: b}}) when is_integer(c) and (c < 200 or c >= 300) do
+  defp log_errors({:ok, %Req.Response{status: c, body: b}}) when is_integer(c) and (c < 200 or c >= 300) do
     Logger.error "Failed to deliver incoming webhook: #{b}"
   end
   defp log_errors(pass), do: pass

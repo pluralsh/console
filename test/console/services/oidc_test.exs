@@ -6,8 +6,8 @@ defmodule Console.Services.OIDCTest do
   describe "#create_oidc_provider/2" do
     test "admins can create an oidc provider" do
       group = insert(:group)
-      expect(HTTPoison, :post, fn _, _, _ ->
-        {:ok, %{status_code: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
+      expect(Req, :post, fn _, _ ->
+        {:ok, %{status: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
       end)
       user = insert(:user)
 
@@ -33,8 +33,8 @@ defmodule Console.Services.OIDCTest do
     test "admins can update your own providers" do
       user = admin_user()
       oidc = insert(:oidc_provider)
-      expect(HTTPoison, :put, fn _, _, _ ->
-        {:ok, %{status_code: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
+      expect(Req, :put, fn _, _ ->
+        {:ok, %{status: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
       end)
 
       {:ok, updated} = OIDC.update_oidc_provider(%{
@@ -49,8 +49,8 @@ defmodule Console.Services.OIDCTest do
     test "writers can update providers" do
       user = insert(:user)
       oidc = insert(:oidc_provider, write_bindings: [%{user_id: user.id}])
-      expect(HTTPoison, :put, fn _, _, _ ->
-        {:ok, %{status_code: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
+      expect(Req, :put, fn _, _ ->
+        {:ok, %{status: 200, body: Jason.encode!(%{client_id: "123", client_secret: "secret"})}}
       end)
 
       {:ok, updated} = OIDC.update_oidc_provider(%{
@@ -76,7 +76,7 @@ defmodule Console.Services.OIDCTest do
     test "admins can delete providers" do
       user = admin_user()
       oidc = insert(:oidc_provider)
-      expect(HTTPoison, :delete, fn _, _ -> {:ok, %{status_code: 204, body: ""}} end)
+      expect(Req, :delete, fn _, _ -> {:ok, %{status: 204, body: ""}} end)
 
       {:ok, deleted} = OIDC.delete_oidc_provider(oidc.id, user)
 
@@ -94,9 +94,9 @@ defmodule Console.Services.OIDCTest do
   describe "#get_login/1" do
     test "It can get information related to an OIDC login" do
       provider = insert(:oidc_provider)
-      expect(HTTPoison, :get, fn _, _ ->
+      expect(Req, :get, fn _, _ ->
         body = Jason.encode!(%{client: %{client_id: provider.client_id}})
-        {:ok, %{status_code: 200, body: body}}
+        {:ok, %{status: 200, body: body}}
       end)
 
       {:ok, result} = OIDC.get_login("challenge")
@@ -110,15 +110,15 @@ defmodule Console.Services.OIDCTest do
       %{id: id} = user = insert(:user)
       provider = insert(:oidc_provider, bindings: [%{user_id: id}])
 
-      expect(HTTPoison, :get, fn _, _ ->
+      expect(Req, :get, fn _, _ ->
         body = Jason.encode!(%{client: %{client_id: provider.client_id}})
-        {:ok, %{status_code: 200, body: body}}
+        {:ok, %{status: 200, body: body}}
       end)
 
-      expect(HTTPoison, :put, fn _, body, _ ->
+      expect(Req, :put, fn _, opts ->
         resp = Jason.encode!(%{redirect_to: "example.com"})
-        case Jason.decode!(body) do
-          %{"subject" => ^id} -> {:ok, %{status_code: 200, body: resp}}
+        case Jason.decode!(opts[:body]) do
+          %{"subject" => ^id} -> {:ok, %{status: 200, body: resp}}
           _ -> {:error, :invalid}
         end
       end)
@@ -132,16 +132,16 @@ defmodule Console.Services.OIDCTest do
       %{id: id} = user = insert(:user)
       provider = insert(:oidc_provider)
 
-      expect(HTTPoison, :get, fn _, _ ->
+      expect(Req, :get, fn _, _ ->
         body = Jason.encode!(%{client: %{client_id: provider.client_id}})
-        {:ok, %{status_code: 200, body: body}}
+        {:ok, %{status: 200, body: body}}
       end)
 
-      expect(HTTPoison, :put, fn _, body, _ ->
+      expect(Req, :put, fn _, opts ->
         resp = Jason.encode!(%{redirect_url: "example.com"})
-        case Jason.decode!(body) do
+        case Jason.decode!(opts[:body]) do
           %{"subject" => ^id} -> {:error, :invalid}
-          _ -> {:ok, %{status_code: 200, body: resp}}
+          _ -> {:ok, %{status: 200, body: resp}}
         end
       end)
 
@@ -154,13 +154,13 @@ defmodule Console.Services.OIDCTest do
       me = self()
       user = insert(:user, roles: %{admin: true})
       provider = insert(:oidc_provider)
-      expect(HTTPoison, :put, fn _, body, _ ->
-        send(me, {:body, Jason.decode!(body)})
-        {:ok, %{status_code: 200, body: Jason.encode!(%{redirect_to: "example.com"})}}
+      expect(Req, :put, fn _, opts ->
+        send(me, {:body, Jason.decode!(opts[:body])})
+        {:ok, %{status: 200, body: Jason.encode!(%{redirect_to: "example.com"})}}
       end)
 
-      expect(HTTPoison, :get, fn _, _ ->
-        {:ok, %{status_code: 200, body: Jason.encode!(%{client: %{client_id: provider.client_id}})}}
+      expect(Req, :get, fn _, _ ->
+        {:ok, %{status: 200, body: Jason.encode!(%{client: %{client_id: provider.client_id}})}}
       end)
 
       {:ok, %{redirect_to: _}} = OIDC.consent("challenge", "profile", user)

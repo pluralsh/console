@@ -572,8 +572,8 @@ defmodule Console.Deployments.GitTest do
         ]
       )
       expect(Plural, :template, fn f, _, _, _ -> File.read(f) end)
-      expect(HTTPoison, :post, fn "https://bitbucket.example.com/rest/api/latest/projects/pluralsh/repos/console/pull-requests", _, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"id" => 1})}}
+      expect(Req, :post, fn "https://bitbucket.example.com/rest/api/latest/projects/pluralsh/repos/console/pull-requests", _ ->
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"id" => 1})}}
       end)
       expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
       expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
@@ -925,9 +925,9 @@ defmodule Console.Deployments.GitTest do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", governance: governance)
 
-      expect(HTTPoison, :post, fn "https://webhook.url/v1/confirm", _, _ ->
+      expect(Req, :post, fn "https://webhook.url/v1/confirm", _ ->
         body = Jason.encode!(%{state: %{service_now_id: "1234567890"}})
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}}
+        {:ok, %Req.Response{status: 200, body: body}}
       end)
 
       expect(Tentacat.Pulls.Reviews, :create, fn _, "pluralsh", "console", "1", _ ->

@@ -9,8 +9,8 @@ defmodule Console.GraphQl.Deployments.OAuthMutationsTest do
         "description" => "test provider",
         "redirectUris" => ["https://example.com"]
       }
-      expect(HTTPoison, :post, fn _, _, _ ->
-        {:ok, %HTTPoison.Response{body: Jason.encode!(%{data: %{"createOidcProvider" => Map.merge(
+      expect(Req, :post, fn _, _ ->
+        {:ok, %Req.Response{body: Jason.encode!(%{data: %{"createOidcProvider" => Map.merge(
           attrs,
           %{"id" => "id", "clientId" => "test-id", "clientSecret" => "test-secret"}
         )}})}}

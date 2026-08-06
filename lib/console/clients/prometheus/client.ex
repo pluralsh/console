@@ -4,7 +4,7 @@ defmodule Prometheus.Client do
   require Logger
 
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
-  @timeouts [timeout: :timer.seconds(30), recv_timeout: :timer.seconds(30)]
+  @timeouts [connect_options: [timeout: :timer.seconds(30)], receive_timeout: :timer.seconds(30), decode_body: false, retry: false]
 
   defstruct [:host, :user, :password]
 
@@ -22,9 +22,9 @@ defmodule Prometheus.Client do
     query = variable_subst(query, variables)
 
     Path.join(host(client), "/api/v1/query")
-    |> HTTPoison.post({:form, [{"query", query}]}, @headers ++ auth(client), @timeouts)
+    |> Req.post([form: [{"query", query}], headers: @headers ++ auth(client)] ++ @timeouts)
     |> case do
-      {:ok, %{body: body, status_code: 200}} -> Poison.decode(body, as: Response.spec())
+      {:ok, %{body: body, status: 200}} -> Poison.decode(body, as: Response.spec())
       _ -> {:error, "prometheus error"}
     end
   end
@@ -32,18 +32,18 @@ defmodule Prometheus.Client do
   def query(client \\ nil, query, start, end_t, step, variables) do
     query = variable_subst(query, variables)
     Logger.info "Issuing prometheus query: #{query}"
-    HTTPoison.post(
+    Req.post(
       Path.join(host(client), "/api/v1/query_range"),
-      {:form, [
+      [form: [
         {"query", query},
         {"end", DateTime.to_iso8601(end_t)},
         {"start", DateTime.to_iso8601(start)},
         {"step", step}
-      ]},
-      @headers ++ auth(client)
+      ],
+      headers: @headers ++ auth(client)] ++ @timeouts
     )
     |> case do
-      {:ok, %{body: body, status_code: 200}} -> Poison.decode(body, as: Response.spec())
+      {:ok, %{body: body, status: 200}} -> Poison.decode(body, as: Response.spec())
       _ -> {:error, "prometheus error"}
     end
   end

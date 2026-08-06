@@ -37,8 +37,8 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _, [] ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
+      expect(Req, :get, fn "https://test.url", _ ->
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 
       event = %PubSub.PullRequestCreated{item: pr}
@@ -74,9 +74,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
 
       # Mock the api to get MR changes
-      expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1/changes", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
+      expect(Req, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/merge_requests/1/changes", _ ->
+        {:ok, %Req.Response{
+          status: 200,
           body: Jason.encode!(%{
             "sha" => "sha",
             "title" => "Test MR",
@@ -92,9 +92,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       end)
 
       # Mock the api to get the file content
-      expect(HTTPoison, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/repository/files/terraform%2Fmain.tf?ref=sha", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
+      expect(Req, :get, fn "https://gitlab.com/api/v4/projects/owner%2Frepo/repository/files/terraform%2Fmain.tf?ref=sha", _ ->
+        {:ok, %Req.Response{
+          status: 200,
           body: Jason.encode!(%{
             "content" => Base.encode64("terraform content")
           })
@@ -132,9 +132,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
 
       # Mock the API to get the PR info
-      expect(HTTPoison, :get, fn "https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/1", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
+      expect(Req, :get, fn "https://api.bitbucket.org/2.0/repositories/workspace/repo/pullrequests/1", _ ->
+        {:ok, %Req.Response{
+          status: 200,
           body: Jason.encode!(%{
             "links" => %{
               # In bitbucket API, the diff and diffstat URLs are part of the PR info response
@@ -155,18 +155,18 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       end)
 
       # See above mock, the basic PR info api provides an URL to get the diff
-      expect(HTTPoison, :get, fn "https://api.bitbucket.org/2.0/diff_url", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
+      expect(Req, :get, fn "https://api.bitbucket.org/2.0/diff_url", _ ->
+        {:ok, %Req.Response{
+          status: 200,
           body: "diff --git a\nsamplediff"
         }}
       end)
 
       # See above mock, the basic PR info api provides an URL to get the diffstat
       # The diffstat API has a list of all modified files in the PR
-      expect(HTTPoison, :get, fn "https://api.bitbucket.org/2.0/diffstat_url", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
+      expect(Req, :get, fn "https://api.bitbucket.org/2.0/diffstat_url", _ ->
+        {:ok, %Req.Response{
+          status: 200,
           body: Jason.encode!(%{
             "values" => [%{
               "new" => %{
@@ -179,9 +179,9 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
       end)
 
       # Mock the call to get the full file contents
-      expect(HTTPoison, :get, fn "https://api.bitbucket.org/2.0/raw_url", _ ->
-        {:ok, %HTTPoison.Response{
-          status_code: 200,
+      expect(Req, :get, fn "https://api.bitbucket.org/2.0/raw_url", _ ->
+        {:ok, %Req.Response{
+          status: 200,
           body: "terraform content"
         }}
       end)
@@ -230,8 +230,8 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _, [] ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
+      expect(Req, :get, fn "https://test.url", _ ->
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 
       event = %PubSub.PullRequestCreated{item: pr}
@@ -280,8 +280,8 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
           "patch" => "example diff",
         }], %HTTPoison.Response{status_code: 200}}
       end)
-      expect(HTTPoison, :get, fn "https://test.url", _, [] ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
+      expect(Req, :get, fn "https://test.url", _ ->
+        {:ok, %Req.Response{status: 200, body: Jason.encode!(%{"content" => Base.encode64("terraform")})}}
       end)
 
       event = %PubSub.PullRequestCreated{item: pr}
