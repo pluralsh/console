@@ -1,8 +1,6 @@
 package claude
 
 import (
-	console "github.com/pluralsh/console/go/client"
-
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
@@ -28,7 +26,7 @@ type Claude struct {
 	toolv1.DefaultTool
 
 	// onMessage is a callback called when a new message is received.
-	onMessage func(message *console.AgentMessageAttributes)
+	onMessage toolv1.MessageCallback
 
 	// executable is the claude executable used to call CLI.
 	executable exec.Executable

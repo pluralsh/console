@@ -3,7 +3,6 @@ package codex
 import (
 	"encoding/json"
 
-	console "github.com/pluralsh/console/go/client"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
@@ -21,7 +20,11 @@ const (
 	streamEventTypeTurnCompleted = "turn.completed"
 	streamEventTypeTurnFailed    = "turn.failed"
 
-	streamItemTypeDynamicToolCall = "dynamic_tool_call"
+	streamItemTypeCommandExecution = "command_execution"
+	streamItemTypeDynamicToolCall  = "dynamic_tool_call"
+	streamItemTypeMCPToolCall      = "mcp_tool_call"
+	streamItemTypeFileChange       = "file_change"
+	streamItemTypeWebSearch        = "web_search"
 
 	// ignoredAgentMessage marks messages persisted for metadata (e.g. cost) but hidden in chat.
 	ignoredAgentMessage = "__plrl_ignore__"
@@ -31,7 +34,7 @@ type Codex struct {
 	v1.DefaultTool
 
 	// onMessage is a callback called when a new message is received.
-	onMessage func(message *console.AgentMessageAttributes)
+	onMessage v1.MessageCallback
 
 	// executable is the Codex executable used to call CLI.
 	executable exec.Executable

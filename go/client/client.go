@@ -28,6 +28,7 @@ type ConsoleClient interface {
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
+	UpdateAgentMessage(ctx context.Context, id string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentMessage, error)
 	CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
 	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
@@ -17237,6 +17238,24 @@ func (t *CreateAgentMessage_CreateAgentMessage) GetID() string {
 func (t *CreateAgentMessage_CreateAgentMessage) GetMessage() string {
 	if t == nil {
 		t = &CreateAgentMessage_CreateAgentMessage{}
+	}
+	return t.Message
+}
+
+type UpdateAgentMessage_UpdateAgentMessage struct {
+	ID      string "json:\"id\" graphql:\"id\""
+	Message string "json:\"message\" graphql:\"message\""
+}
+
+func (t *UpdateAgentMessage_UpdateAgentMessage) GetID() string {
+	if t == nil {
+		t = &UpdateAgentMessage_UpdateAgentMessage{}
+	}
+	return t.ID
+}
+func (t *UpdateAgentMessage_UpdateAgentMessage) GetMessage() string {
+	if t == nil {
+		t = &UpdateAgentMessage_UpdateAgentMessage{}
 	}
 	return t.Message
 }
@@ -44198,6 +44217,17 @@ func (t *CreateAgentMessage) GetCreateAgentMessage() *CreateAgentMessage_CreateA
 	return t.CreateAgentMessage
 }
 
+type UpdateAgentMessage struct {
+	UpdateAgentMessage *UpdateAgentMessage_UpdateAgentMessage "json:\"updateAgentMessage,omitempty\" graphql:\"updateAgentMessage\""
+}
+
+func (t *UpdateAgentMessage) GetUpdateAgentMessage() *UpdateAgentMessage_UpdateAgentMessage {
+	if t == nil {
+		t = &UpdateAgentMessage{}
+	}
+	return t.UpdateAgentMessage
+}
+
 type CreateAgentRunUpload struct {
 	CreateAgentRunUpload *AgentRunUploadFragment "json:\"createAgentRunUpload,omitempty\" graphql:\"createAgentRunUpload\""
 }
@@ -49081,6 +49111,32 @@ func (c *Client) CreateAgentMessage(ctx context.Context, runID string, attribute
 
 	var res CreateAgentMessage
 	if err := c.Client.Post(ctx, "CreateAgentMessage", CreateAgentMessageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateAgentMessageDocument = `mutation UpdateAgentMessage ($id: ID!, $attributes: AgentMessageAttributes!) {
+	updateAgentMessage(id: $id, attributes: $attributes) {
+		id
+		message
+	}
+}
+`
+
+func (c *Client) UpdateAgentMessage(ctx context.Context, id string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentMessage, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateAgentMessage
+	if err := c.Client.Post(ctx, "UpdateAgentMessage", UpdateAgentMessageDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -73030,6 +73086,7 @@ var DocumentOperationNames = map[string]string{
 	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
 	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
 	CreateAgentMessageDocument:                        "CreateAgentMessage",
+	UpdateAgentMessageDocument:                        "UpdateAgentMessage",
 	CreateAgentRunUploadDocument:                      "CreateAgentRunUpload",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",

@@ -62,6 +62,7 @@ type ChatMessageContentProps = {
   toolDisplayType?: 'accordion' | 'simple'
   userMsgWrapperStyle?: StyledObject
   isPending?: boolean
+  toolRuntime?: string
 }
 
 export function ChatMessageContent({
@@ -84,6 +85,7 @@ export function ChatMessageContent({
   toolDisplayType,
   userMsgWrapperStyle,
   isPending,
+  toolRuntime,
 }: ChatMessageContentProps) {
   const { colors } = useTheme()
   switch (type) {
@@ -119,6 +121,7 @@ export function ChatMessageContent({
           confirmedAt={confirmedAt}
           serverName={serverName}
           isPending={isPending}
+          toolRuntime={toolRuntime}
         />
       )
     case ChatType.PrCall:
@@ -408,6 +411,7 @@ function ToolMessageContent({
               <ToolCallContent
                 content={content}
                 attributes={attributes}
+                isPending={isPending}
               />
             </Flex>
           </AccordionItem>
@@ -449,6 +453,7 @@ function SimpleToolMessageContent({
   confirmedAt,
   serverName,
   isPending,
+  toolRuntime,
 }: ChatMessageContentProps) {
   const pendingConfirmation = confirm && !confirmedAt
   const customResultBody = getToolMessageDetailsBody(content, attributes)
@@ -476,6 +481,7 @@ function SimpleToolMessageContent({
         content={content ?? ''}
         attributes={attributes}
         isPending={isPending}
+        toolRuntime={toolRuntime}
         customLabel={
           serverName || pendingConfirmation ? (
             <ToolCallLabel
