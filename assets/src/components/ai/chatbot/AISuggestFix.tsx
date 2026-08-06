@@ -147,7 +147,7 @@ function AISuggestFix({
   workbenchEnabled?: boolean
 } & ButtonProps) {
   const settings = useDeploymentSettings()
-  const { hasWorkbenches } = useWorkbenchOptions(
+  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions(
     flowId,
     workbenchEnabled && !!insight?.id
   )
@@ -172,7 +172,7 @@ function AISuggestFix({
     getSuggestion()
   }, [getSuggestion])
 
-  if (!insight || !insight.text || hasWorkbenches) {
+  if (!insight || !insight.text || workbenchesLoading || hasWorkbenches) {
     return null
   }
 

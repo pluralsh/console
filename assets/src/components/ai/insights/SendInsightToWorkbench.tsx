@@ -106,7 +106,7 @@ export function SendInsightToWorkbenchButton({
     })
   }
 
-  if (!insight?.id || (!workbenchesLoading && !hasWorkbenches)) return null
+  if (!insight?.id || workbenchesLoading || !hasWorkbenches) return null
 
   return (
     <>
@@ -311,7 +311,9 @@ export function useWorkbenchOptions(flowId?: Nullable<string>, enabled = true) {
   return {
     workbenches,
     hasWorkbenches: workbenches.length > 0,
-    loading: flowId ? flowLoading && !flowData : allWorkbenchesLoading,
+    loading: flowId
+      ? flowLoading && !flowData
+      : allWorkbenchesLoading && !allWorkbenchesData,
   }
 }
 
