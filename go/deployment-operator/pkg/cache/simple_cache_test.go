@@ -8,7 +8,7 @@ import (
 )
 
 func TestSimpleCacheStoresJitteredExpiryPerEntry(t *testing.T) {
-	cache := NewSimpleCache[string](time.Hour, 30*time.Minute)
+	cache := NewSimpleCache[string](time.Hour)
 
 	before := time.Now()
 	cache.Add("id", "value")
@@ -16,19 +16,6 @@ func TestSimpleCacheStoresJitteredExpiryPerEntry(t *testing.T) {
 
 	line, ok := cache.cache.Get("id")
 	assert.True(t, ok)
-	assert.False(t, line.expiresAt.Before(before.Add(time.Hour)))
-	assert.True(t, line.expiresAt.Before(after.Add(time.Hour+30*time.Minute)))
-}
-
-func TestSimpleCacheWithoutJitterUsesBaseExpiry(t *testing.T) {
-	cache := NewSimpleCache[string](time.Hour, 0)
-
-	before := time.Now()
-	cache.Add("id", "value")
-	after := time.Now()
-
-	line, ok := cache.cache.Get("id")
-	assert.True(t, ok)
-	assert.False(t, line.expiresAt.Before(before.Add(time.Hour)))
-	assert.False(t, line.expiresAt.After(after.Add(time.Hour)))
+	assert.False(t, line.expiresAt.Before(before.Add(30*time.Minute)))
+	assert.True(t, line.expiresAt.Before(after.Add(90*time.Minute)))
 }

@@ -67,11 +67,11 @@ const (
 	defaultComponentShaCacheTTL         = "3h"
 	defaultComponentShaCacheTTLDuration = 3 * time.Hour
 
-	defaultManifestCacheJitter         = "30m"
-	defaultManifestCacheJitterDuration = 30 * time.Minute
+	// Deprecated: cache jitter is now fixed at 50% of the cache TTL.
+	defaultManifestCacheJitter = "30m"
 
-	defaultComponentShaCacheJitter         = "2h"
-	defaultComponentShaCacheJitterDuration = 2 * time.Hour
+	// Deprecated: cache jitter is now fixed at 50% of the cache TTL.
+	defaultComponentShaCacheJitter = "2h"
 
 	defaultControllerCacheTTL         = "2m"
 	defaultControllerCacheTTLDuration = 2 * time.Minute
@@ -152,9 +152,9 @@ var (
 	argPollJitter                           = flag.String("refresh-jitter", defaultPollJitter, "Randomly selected jitter time up to the provided duration will be added to the poll interval.")
 	argResourceCacheTTL                     = flag.String("resource-cache-ttl", defaultResourceCacheTTL, "The time to live of each resource cache entry.")
 	argManifestCacheTTL                     = flag.String("manifest-cache-ttl", defaultManifestCacheTTL, "The time to live of service manifests in cache entry.")
-	argManifestCacheJitter                  = flag.String("manifest-cache-jitter", defaultManifestCacheJitter, "Randomly selected jitter time up to the provided duration will be added to the manifest cache TTL.")
+	argManifestCacheJitter                  = flag.String("manifest-cache-jitter", defaultManifestCacheJitter, "Deprecated: ignored; manifest cache jitter is fixed at 50% of its TTL.")
 	argComponentShaCacheTTL                 = flag.String("component-sha-cache-ttl", defaultComponentShaCacheTTL, "The time to live of the component sha cache entries.")
-	argComponentShaCacheJitter              = flag.String("component-sha-cache-jitter", defaultComponentShaCacheJitter, "Randomly selected jitter time up to the provided duration will be added to the component sha cache TTL.")
+	argComponentShaCacheJitter              = flag.String("component-sha-cache-jitter", defaultComponentShaCacheJitter, "Deprecated: ignored; component SHA cache jitter is fixed at 50% of its TTL.")
 	argControllerCacheTTL                   = flag.String("controller-cache-ttl", defaultControllerCacheTTL, "The time to live of console controller cache entries.")
 	argRestoreNamespace                     = flag.String("restore-namespace", defaultRestoreNamespace, "The namespace where Velero restores are located.")
 	argServices                             = flag.String("services", "", "A comma separated list of service ids to reconcile. Leave empty to reconcile all.")
@@ -377,16 +377,6 @@ func ManifestCacheTTL() time.Duration {
 	return duration
 }
 
-func ManifestCacheJitter() time.Duration {
-	jitter, err := time.ParseDuration(*argManifestCacheJitter)
-	if err != nil {
-		klog.ErrorS(err, "Could not parse manifest-cache-jitter", "value", *argManifestCacheJitter, "default", defaultManifestCacheJitterDuration)
-		return defaultManifestCacheJitterDuration
-	}
-
-	return jitter
-}
-
 func ComponentShaCacheTTL() time.Duration {
 	duration, err := time.ParseDuration(*argComponentShaCacheTTL)
 	if err != nil {
@@ -395,16 +385,6 @@ func ComponentShaCacheTTL() time.Duration {
 	}
 
 	return duration
-}
-
-func ComponentShaCacheJitter() time.Duration {
-	jitter, err := time.ParseDuration(*argComponentShaCacheJitter)
-	if err != nil {
-		klog.ErrorS(err, "Could not parse component-sha-cache-jitter", "value", *argComponentShaCacheJitter, "default", defaultComponentShaCacheJitterDuration)
-		return defaultComponentShaCacheJitterDuration
-	}
-
-	return jitter
 }
 
 func ControllerCacheTTL() time.Duration {
