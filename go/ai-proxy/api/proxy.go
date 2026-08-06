@@ -14,3 +14,13 @@ type TranslationProxy interface {
 type OpenAIProxy interface {
 	Proxy() http.HandlerFunc
 }
+
+type MantleConfig struct {
+	APIKey        string
+	AWSRegion     string
+	ModelPrefixes []string
+}
+
+func (in MantleConfig) Enabled() bool {
+	return in.APIKey != ""
+}

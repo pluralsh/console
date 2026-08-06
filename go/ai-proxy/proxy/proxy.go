@@ -26,10 +26,10 @@ func NewOllamaTranslationProxy(p api.Provider, host, serviceAccount string, toke
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewOpenAIProxy(p api.Provider, host, region string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+func NewOpenAIProxy(p api.Provider, host, region string, tokenRotator *helpers.RoundRobinTokenRotator, mantleConfig api.MantleConfig) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
-		return openai.NewOpenAIProxy(host, tokenRotator)
+		return openai.NewOpenAIProxy(host, tokenRotator, mantleConfig)
 	case api.ProviderBedrock:
 		return bedrock.NewBedrockProxy(region)
 	case api.ProviderOllama:
@@ -38,7 +38,7 @@ func NewOpenAIProxy(p api.Provider, host, region string, tokenRotator *helpers.R
 	return nil, fmt.Errorf("invalid provider: %s", p)
 }
 
-func NewOpenAIEmbeddingsProxy(p api.Provider, host, region string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+func NewOpenAIEmbeddingsProxy(p api.Provider, host, region string, tokenRotator *helpers.RoundRobinTokenRotator, _ api.MantleConfig) (api.OpenAIProxy, error) {
 	switch p {
 	case api.ProviderOpenAI:
 		return openai.NewOpenAIEmbeddingsProxy(host, tokenRotator)

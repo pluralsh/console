@@ -1,10 +1,13 @@
 package openai
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
+	"strings"
 
 	"k8s.io/klog/v2"
 
@@ -25,7 +28,7 @@ func (o *OpenAIProxy) Proxy() http.HandlerFunc {
 	}
 }
 
-func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (api.OpenAIProxy, error) {
+func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator, mantleConfig api.MantleConfig) (api.OpenAIProxy, error) {
 	if len(tokenRotator.Tokens) == 0 {
 		return nil, fmt.Errorf("at least one token is required")
 	}
@@ -37,8 +40,6 @@ func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (
 
 	reverse := &httputil.ReverseProxy{
 		Rewrite: func(r *httputil.ProxyRequest) {
-			r.Out.Header.Set("Authorization", "Bearer "+tokenRotator.GetNextToken())
-
 			r.SetXForwarded()
 
 			targetPath := openai.EndpointChatCompletions
@@ -46,16 +47,22 @@ func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (
 				targetPath = "/v1/responses"
 			}
 
-			targetURL, err := url.Parse(targetPath)
-			if err != nil {
-				klog.ErrorS(err, "failed to parse target url")
-				return
+			target := parsedURL
+			token := tokenRotator.GetNextToken()
+			upstreamPath := targetPath
+			if mantleConfig.Enabled() && routeToMantle(r, mantleConfig.ModelPrefixes) {
+				target.Scheme = "https"
+				target.Host = fmt.Sprintf("bedrock-mantle.%s.api.aws", mantleConfig.AWSRegion)
+				target.Path = "/openai/v1"
+				token = mantleConfig.APIKey
+				upstreamPath = strings.TrimRight(target.Path, "/") + strings.TrimPrefix(targetPath, "/v1")
 			}
 
-			r.Out.URL.Scheme = parsedURL.Scheme
-			r.Out.URL.Host = parsedURL.Host
-			r.Out.Host = parsedURL.Host
-			r.Out.URL.Path = targetURL.Path
+			r.Out.Header.Set("Authorization", "Bearer "+token)
+			r.Out.URL.Scheme = target.Scheme
+			r.Out.URL.Host = target.Host
+			r.Out.Host = target.Host
+			r.Out.URL.Path = upstreamPath
 
 			klog.V(log.LogLevelDebug).InfoS(
 				"proxying request",
@@ -69,4 +76,57 @@ func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator) (
 		proxy:        reverse,
 		tokenRotator: tokenRotator,
 	}, nil
+}
+
+func routeToMantle(r *httputil.ProxyRequest, modelPrefixes []string) bool {
+	if r.Out.Body == nil {
+		return false
+	}
+
+	body, err := io.ReadAll(r.Out.Body)
+	if err != nil {
+		klog.ErrorS(err, "failed to read OpenAI request body")
+		return false
+	}
+	defer func() { _ = r.Out.Body.Close() }()
+
+	r.Out.Body = io.NopCloser(bytes.NewReader(body))
+	var payload map[string]any
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return false
+	}
+
+	model, ok := payload["model"].(string)
+	if !ok || !hasModelPrefix(model, modelPrefixes) {
+		return false
+	}
+
+	if !strings.HasPrefix(model, "openai.") {
+		payload["model"] = "openai." + model
+		rewrittenBody, err := json.Marshal(payload)
+		if err != nil {
+			klog.ErrorS(err, "failed to rewrite OpenAI model for Amazon Bedrock Mantle")
+			return false
+		}
+
+		r.Out.Body = io.NopCloser(bytes.NewReader(rewrittenBody))
+		r.Out.ContentLength = int64(len(rewrittenBody))
+		if r.Out.Header == nil {
+			r.Out.Header = make(http.Header)
+		}
+		r.Out.Header.Set("Content-Length", fmt.Sprint(len(rewrittenBody)))
+	}
+
+	return true
+}
+
+func hasModelPrefix(model string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		prefix = strings.TrimSpace(prefix)
+		if prefix != "" && strings.HasPrefix(strings.TrimPrefix(model, "openai."), strings.TrimPrefix(prefix, "openai.")) {
+			return true
+		}
+	}
+
+	return false
 }
