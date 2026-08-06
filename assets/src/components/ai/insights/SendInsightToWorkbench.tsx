@@ -56,6 +56,10 @@ export function SendInsightToWorkbenchButton({
   insight: Nullable<AiInsightFragment>
   flowId?: Nullable<string>
 } & ButtonProps) {
+  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions(
+    flowId,
+    !!insight?.id
+  )
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [promptKey, setPromptKey] = useState(0)
@@ -102,17 +106,17 @@ export function SendInsightToWorkbenchButton({
     })
   }
 
-  if (!insight?.id) return null
+  if (!insight?.id || (!workbenchesLoading && !hasWorkbenches)) return null
 
   return (
     <>
       <Button
         ref={setReference}
-        floating
         aria-haspopup="dialog"
         aria-expanded={open}
         startIcon={<WorkbenchIcon />}
         {...props}
+        floating={!hasWorkbenches}
         onClick={openPopover}
       >
         Send to workbench
@@ -286,14 +290,16 @@ function SendInsightForm({
   )
 }
 
-function useWorkbenchOptions(flowId?: Nullable<string>) {
+export function useWorkbenchOptions(flowId?: Nullable<string>, enabled = true) {
   const { data: flowData, loading: flowLoading } = useFlowWorkbenchesQuery({
     variables: { id: flowId ?? '' },
-    skip: !flowId,
+    skip: !enabled || !flowId,
+    fetchPolicy: 'cache-first',
   })
   const { data: allWorkbenchesData, loading: allWorkbenchesLoading } =
     useWorkbenchesQuery({
-      skip: !!flowId,
+      skip: !enabled || !!flowId,
+      fetchPolicy: 'cache-first',
     })
 
   const workbenches = useMemo(() => {
@@ -304,6 +310,7 @@ function useWorkbenchOptions(flowId?: Nullable<string>) {
 
   return {
     workbenches,
+    hasWorkbenches: workbenches.length > 0,
     loading: flowId ? flowLoading && !flowData : allWorkbenchesLoading,
   }
 }

@@ -30,6 +30,7 @@ import { useLogin } from '../../contexts.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import { hasAccess } from '../../utils/persona.tsx'
 import { AIPanel } from '../AIPanel.tsx'
+import { useWorkbenchOptions } from '../insights/SendInsightToWorkbench.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
 import { useStreamBuffer } from './useStreamBuffer.tsx'
 
@@ -137,9 +138,19 @@ function FixPr({
 
 function AISuggestFix({
   insight,
+  flowId,
+  workbenchEnabled = true,
   ...props
-}: { insight: Nullable<AiInsightFragment> } & ButtonProps) {
+}: {
+  insight: Nullable<AiInsightFragment>
+  flowId?: Nullable<string>
+  workbenchEnabled?: boolean
+} & ButtonProps) {
   const settings = useDeploymentSettings()
+  const { hasWorkbenches } = useWorkbenchOptions(
+    flowId,
+    workbenchEnabled && !!insight?.id
+  )
   const ref = useRef<HTMLDivElement>(null)
   const [streaming, setStreaming] = useState<boolean>(false)
   const scrollToBottom = useCallback(() => {
@@ -161,7 +172,7 @@ function AISuggestFix({
     getSuggestion()
   }, [getSuggestion])
 
-  if (!insight || !insight?.text) {
+  if (!insight || !insight.text || hasWorkbenches) {
     return null
   }
 

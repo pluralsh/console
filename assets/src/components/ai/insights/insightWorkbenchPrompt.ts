@@ -4,6 +4,8 @@ import ejs from 'ejs'
 import { AiInsightFragment } from 'generated/graphql'
 import insightWorkbenchPromptTemplate from './insight-workbench-prompt.ejs?raw'
 
+const insightHeadingPattern = /^(#{1,6})\s+(.+?)\s*$/gm
+const includedSections = new Set(['summary', 'root cause'])
 const renderInsightWorkbenchPrompt = ejs.compile(insightWorkbenchPromptTemplate)
 
 type KubernetesIdentityResource = {
@@ -13,6 +15,26 @@ type KubernetesIdentityResource = {
   kind?: Nullable<string>
   name?: Nullable<string>
   namespace?: Nullable<string>
+}
+
+export function extractSummaryAndRootCause(
+  insightText?: Nullable<string>
+): string {
+  if (!insightText) return ''
+
+  const headings = [...insightText.matchAll(insightHeadingPattern)]
+
+  return headings
+    .filter((heading) => includedSections.has(heading[2].toLowerCase()))
+    .map((heading) => {
+      const nextHeading = headings.find(
+        (next) => (next.index ?? 0) > (heading.index ?? 0)
+      )
+      const end = nextHeading?.index ?? insightText.length
+
+      return insightText.slice(heading.index, end).trim()
+    })
+    .join('\n\n')
 }
 
 export function parentMentionFromInsight(
@@ -110,6 +132,6 @@ export function buildInsightWorkbenchPrompt(
   return renderInsightWorkbenchPrompt({
     subject,
     componentContext,
-    insightText: insight?.text,
+    insightText: extractSummaryAndRootCause(insight?.text),
   }).trim()
 }
