@@ -1043,6 +1043,15 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-inference
   versions:
+  - version: v1.4.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.3.1-eksbuild.2
     compatibilities:
     - '1.36'
@@ -4624,6 +4633,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.63.10000020260803-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.63.10000020260801-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4792,6 +4809,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.47.10000020260804-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.47.10000020260802-eksbuild.1
     compatibilities:
     - '1.35'
@@ -9370,6 +9392,14 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v0.8.1-eksbuild.14
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.8.1-eksbuild.13
     compatibilities:
     - '1.36'
