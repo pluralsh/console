@@ -217,6 +217,7 @@ export function WorkbenchJobCreateInput({
                 value={promptModes}
                 onChange={setPromptModes}
                 disabled={disabled || loading}
+                workbenchModes={data?.workbench?.modes}
               />
               <WorkbenchModelSelector
                 value={selectedModel}
