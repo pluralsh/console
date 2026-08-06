@@ -115,7 +115,9 @@ function getMenuItems({
       expandedLabel: 'Home',
       icon: homeIcon,
       path: '/',
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.home),
+      enabled: !!(
+        personaConfig?.all || personaConfig?.sidebar?.home !== false
+      ),
       hotkeys: ['shift H'],
     },
     {
