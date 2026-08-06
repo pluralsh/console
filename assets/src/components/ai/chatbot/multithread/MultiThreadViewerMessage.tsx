@@ -219,6 +219,8 @@ export function SimpleToolCall({
       }
       case 'read':
       case 'grep':
+      case 'generic':
+      default:
         return (
           <SimpleAccordion label={label}>
             <ToolCallContent
@@ -229,8 +231,6 @@ export function SimpleToolCall({
             />
           </SimpleAccordion>
         )
-      default:
-        break
     }
   }
 
