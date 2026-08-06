@@ -60,6 +60,7 @@ const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
   sidebar: {
     audits: false,
     flows: false,
+    home: false,
     kubernetes: false,
     pullRequests: false,
     settings: false,

@@ -16172,6 +16172,7 @@ enum PersonaRole {
 enum Homepage {
   CLUSTERS
   WORKBENCHES
+  FLOWS
 }
 
 enum ReadType {
@@ -16292,6 +16293,7 @@ input PersonaFlowsAttributes {
 }
 
 input PersonaSidebarAttributes {
+  home: Boolean
   cd: Boolean
   audits: Boolean
   kubernetes: Boolean
@@ -16542,6 +16544,7 @@ type PersonaFlows {
 }
 
 type PersonaSidebar {
+  home: Boolean
   cd: Boolean
   audits: Boolean
   kubernetes: Boolean

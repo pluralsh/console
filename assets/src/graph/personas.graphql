@@ -22,6 +22,7 @@ fragment PersonaConfiguration on PersonaConfiguration {
   sidebar {
     audits
     flows
+    home
     kubernetes
     pullRequests
     settings
@@ -46,6 +47,7 @@ fragment Persona on Persona {
   id
   name
   description
+  role
   bindings {
     ...PolicyBinding
   }

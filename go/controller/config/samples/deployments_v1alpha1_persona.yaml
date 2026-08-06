@@ -29,6 +29,7 @@ spec:
       stacks: true
       security: false
       cost: true
+      home: true
     services:
       secrets: true
       configuration: true
@@ -64,6 +65,8 @@ spec:
       stacks: false
       security: false
       cost: false
+      home: false
+      flows: true
     services:
       secrets: false
       configuration: true
@@ -99,6 +102,7 @@ spec:
       stacks: false
       security: true
       cost: false
+      home: true
     services:
       secrets: true
       configuration: false

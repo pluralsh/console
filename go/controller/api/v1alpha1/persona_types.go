@@ -393,6 +393,11 @@ func (in *PersonaFlows) Attributes() *console.PersonaFlowsAttributes {
 // These settings allow personas to have customized navigation focused on their primary workflows
 // while hiding irrelevant or restricted functionality from the user interface.
 type PersonaSidebar struct {
+	// Home enables access to the Home tab when set to true.
+	// This is the default landing entry in the sidebar and typically opens the configured homepage.
+	// +kubebuilder:validation:Optional
+	Home *bool `json:"home,omitempty"`
+
 	// CD enables access to the Plural Continuous Deployment tab when set to true.
 	// This is the entry point for clusters, services, pipelines, and other deployment
 	// management views. Use the Deployments configuration to control the individual
@@ -470,6 +475,7 @@ func (in *PersonaSidebar) Attributes() *console.PersonaSidebarAttributes {
 	}
 
 	return &console.PersonaSidebarAttributes{
+		Home:         in.Home,
 		Cd:           in.CD,
 		Audits:       in.Audits,
 		Kubernetes:   in.Kubernetes,

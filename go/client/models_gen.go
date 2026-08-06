@@ -6099,6 +6099,7 @@ type PersonaServicesAttributes struct {
 }
 
 type PersonaSidebar struct {
+	Home         *bool `json:"home,omitempty"`
 	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
@@ -6114,6 +6115,7 @@ type PersonaSidebar struct {
 }
 
 type PersonaSidebarAttributes struct {
+	Home         *bool `json:"home,omitempty"`
 	Cd           *bool `json:"cd,omitempty"`
 	Audits       *bool `json:"audits,omitempty"`
 	Kubernetes   *bool `json:"kubernetes,omitempty"`
@@ -13875,16 +13877,18 @@ type Homepage string
 const (
 	HomepageClusters    Homepage = "CLUSTERS"
 	HomepageWorkbenches Homepage = "WORKBENCHES"
+	HomepageFlows       Homepage = "FLOWS"
 )
 
 var AllHomepage = []Homepage{
 	HomepageClusters,
 	HomepageWorkbenches,
+	HomepageFlows,
 }
 
 func (e Homepage) IsValid() bool {
 	switch e {
-	case HomepageClusters, HomepageWorkbenches:
+	case HomepageClusters, HomepageWorkbenches, HomepageFlows:
 		return true
 	}
 	return false

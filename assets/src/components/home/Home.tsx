@@ -13,12 +13,15 @@ import {
   ClustersQueryVariables,
   ClustersRowFragment,
   Homepage,
+  PersonaRole,
   useClusterHealthScoresQuery,
   useClustersQuery,
   useUpgradeStatisticsQuery,
   VersionCompliance,
 } from 'generated/graphql.ts'
 import { useMemo, useState } from 'react'
+import { Navigate } from 'react-router-dom'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
@@ -47,7 +50,22 @@ const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
   const { me } = useLogin()
-  if (me?.homepage === Homepage.Workbenches) return <HomeWorkbenches />
+  const isDeveloperPersona = me?.personas?.some(
+    (persona) => persona?.role === PersonaRole.Developer
+  )
+  const homepage =
+    isDeveloperPersona || me?.homepage === Homepage.Flows
+      ? Homepage.Flows
+      : me?.homepage
+
+  if (homepage === Homepage.Flows)
+    return (
+      <Navigate
+        replace
+        to={FLOWS_ABS_PATH}
+      />
+    )
+  if (homepage === Homepage.Workbenches) return <HomeWorkbenches />
   return <HomeClusters />
 }
 

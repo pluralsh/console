@@ -26,7 +26,7 @@ defmodule Console.Schema.Persona do
       end
 
       embeds_one :sidebar, Sidebar, on_replace: :update do
-        boolean_fields [:all, :cd, :kubernetes, :audits, :pull_requests, :flows, :workbenches, :settings, :backups, :stacks, :security, :cost, :ai]
+        boolean_fields [:all, :home, :cd, :kubernetes, :audits, :pull_requests, :flows, :workbenches, :settings, :backups, :stacks, :security, :cost, :ai]
       end
 
       embeds_one :ai, AI, on_replace: :update do
