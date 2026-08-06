@@ -17,7 +17,11 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
-import { ToolCallContent, useSlimToolCodeCss } from '../ToolCallContent'
+import {
+  RunningToolOutputCode,
+  ToolCallContent,
+  useSlimToolCodeCss,
+} from '../ToolCallContent'
 import {
   formatFileChangeSummary,
   getCommand,
@@ -147,10 +151,7 @@ export function SimpleToolCall({
                 {command}
               </Code>
               {isPending ? (
-                <RectangleSkeleton
-                  $height={48}
-                  $width="100%"
-                />
+                <RunningToolOutputCode />
               ) : result ? (
                 <Code
                   title="Response"

@@ -1,9 +1,8 @@
 import { Card, Code, Flex, Markdown } from '@pluralsh/design-system'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
 import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 export function useSlimToolCodeCss() {
@@ -20,6 +19,36 @@ export function useSlimToolCodeCss() {
       display: 'none',
     },
   } as const
+}
+
+const RUNNING_DOTS = ['', '.', '..', '...'] as const
+
+/** Response Code card with animated "running" / "running." / "running.." / "running...". */
+export function RunningToolOutputCode({
+  fillLevel,
+}: {
+  fillLevel?: 0 | 1 | 2 | 3
+}) {
+  const slimCodeCss = useSlimToolCodeCss()
+  const [dotIndex, setDotIndex] = useState(0)
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setDotIndex((index) => (index + 1) % RUNNING_DOTS.length)
+    }, 500)
+    return () => window.clearInterval(id)
+  }, [])
+
+  return (
+    <Code
+      fillLevel={fillLevel}
+      title="Response"
+      showHeader
+      css={slimCodeCss}
+    >
+      {`running${RUNNING_DOTS[dotIndex]}`}
+    </Code>
+  )
 }
 
 export function ToolCallContent({
@@ -54,10 +83,7 @@ export function ToolCallContent({
         </Code>
       )}
       {isPending ? (
-        <RectangleSkeleton
-          $height={48}
-          $width="100%"
-        />
+        <RunningToolOutputCode fillLevel={2} />
       ) : customResultBody ? (
         <>
           <CaptionP $color="text-light">Response</CaptionP>
