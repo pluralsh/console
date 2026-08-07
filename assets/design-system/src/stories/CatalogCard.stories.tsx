@@ -1,6 +1,7 @@
 import { Div } from 'honorable'
 
 import CatalogCard from '../components/CatalogCard'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'CatalogCard',
@@ -43,7 +44,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   name: 'Base catalog',

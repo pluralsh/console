@@ -3,6 +3,7 @@ import { createElement } from 'react'
 
 import * as icons from '../icons'
 import * as logos from '../plural-logos'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Icons',
@@ -167,7 +168,7 @@ function LogosTemplate({
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   color: 'icon-default',
   size: 16,
@@ -175,7 +176,7 @@ Default.args = {
   backgroundColor: 'transparent',
 }
 
-export const Xlarge = Template.bind({})
+export const Xlarge: StoryFn = Template.bind({})
 Xlarge.args = {
   color: 'icon-default',
   size: 32,
@@ -183,7 +184,7 @@ Xlarge.args = {
   backgroundColor: 'transparent',
 }
 
-export const Large = Template.bind({})
+export const Large: StoryFn = Template.bind({})
 Large.args = {
   color: 'icon-default',
   size: 24,
@@ -191,7 +192,7 @@ Large.args = {
   backgroundColor: 'transparent',
 }
 
-export const Small = Template.bind({})
+export const Small: StoryFn = Template.bind({})
 Small.args = {
   color: 'icon-default',
   size: 12,
@@ -199,7 +200,7 @@ Small.args = {
   backgroundColor: 'transparent',
 }
 
-export const Color = Template.bind({})
+export const Color: StoryFn = Template.bind({})
 Color.args = {
   color: 'icon-primary',
   fullColor: false,
@@ -207,7 +208,7 @@ Color.args = {
   backgroundColor: 'transparent',
 }
 
-export const FullColor = Template.bind({})
+export const FullColor: StoryFn = Template.bind({})
 FullColor.args = {
   color: 'icon-default',
   fullColor: true,
@@ -215,7 +216,7 @@ FullColor.args = {
   backgroundColor: 'transparent',
 }
 
-export const PluralLogos = LogosTemplate.bind({})
+export const PluralLogos: StoryFn = LogosTemplate.bind({})
 PluralLogos.args = {
   color: 'icon-default',
   fullColor: true,

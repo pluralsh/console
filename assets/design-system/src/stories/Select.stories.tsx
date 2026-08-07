@@ -2,6 +2,7 @@ import { type ComponentProps, useEffect, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
+import type { StoryFn } from '@storybook/react'
 
 import {
   AppIcon,
@@ -662,6 +663,6 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {}

@@ -1,4 +1,5 @@
 import { PropWide } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Prop Wide',
@@ -9,5 +10,5 @@ function Template() {
   return <PropWide title="Name">Test</PropWide>
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {}

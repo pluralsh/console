@@ -1,4 +1,5 @@
 import Slider from '../components/Slider'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Slider',
@@ -9,7 +10,7 @@ function Template(args: any) {
   return <Slider {...args} />
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   label: 'Applications',
   defaultValue: 30,

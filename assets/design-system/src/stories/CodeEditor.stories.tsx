@@ -3,6 +3,7 @@ import { Div, Flex } from 'honorable'
 import { Card, CodeEditor, WrapWithIf } from '..'
 
 import { goCode, jsCode, tfCode } from '../constants'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Code Editor',
@@ -111,10 +112,10 @@ function StretchedTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   options: { lineNumbers: true },
 }
 
-export const Stretched = StretchedTemplate.bind({})
+export const Stretched: StoryFn = StretchedTemplate.bind({})
 Stretched.args = {}

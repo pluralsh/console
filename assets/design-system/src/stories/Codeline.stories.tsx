@@ -1,6 +1,7 @@
 import { Flex } from 'honorable'
 
 import { Codeline } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Codeline',
@@ -46,13 +47,13 @@ function CustomCopyTemplate(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   children: 'npm i @pluralsh/design-system',
 }
 
-export const CustomCopy = CustomCopyTemplate.bind({})
+export const CustomCopy: StoryFn = CustomCopyTemplate.bind({})
 
 CustomCopy.args = {
   children: 'npm i @pluralsh/design-system',

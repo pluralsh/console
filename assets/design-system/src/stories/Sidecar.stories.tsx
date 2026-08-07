@@ -1,6 +1,7 @@
 import { A, Div } from 'honorable'
 
 import { Sidecar, SidecarItem, type SidecarProps } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Sidecar',
@@ -52,7 +53,7 @@ function Template({ heading, ...props }: SidecarProps) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   heading: 'Sidecar Title',

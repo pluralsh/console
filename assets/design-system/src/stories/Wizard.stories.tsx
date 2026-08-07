@@ -16,6 +16,7 @@ import { Picker, type StepConfig } from '../components/wizard/Picker'
 import { Step } from '../components/wizard/Step'
 import { Stepper } from '../components/wizard/Stepper'
 import { Wizard } from '../components/wizard/Wizard'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Wizard',
@@ -246,10 +247,10 @@ function StandaloneTemplate() {
   )
 }
 
-export const Default = ModalTemplate.bind({})
+export const Default: StoryFn = ModalTemplate.bind({})
 
 Default.args = {}
 
-export const Standalone = StandaloneTemplate.bind({})
+export const Standalone: StoryFn = StandaloneTemplate.bind({})
 
 Standalone.args = {}

@@ -11,6 +11,7 @@ import React, {
 import type { Row } from '@tanstack/react-table'
 
 import { useTheme } from 'styled-components'
+import type { StoryFn } from '@storybook/react'
 
 import {
   AppIcon,
@@ -357,7 +358,7 @@ const extremeLengthData = Array(200)
   .flat()
   .map((item, i) => ({ ...item, id: `id-${i}` }))
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -367,7 +368,7 @@ Default.args = {
   columns,
 }
 
-export const Empty = Template.bind({})
+export const Empty: StoryFn = Template.bind({})
 Empty.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -377,7 +378,7 @@ Empty.args = {
   columns,
 }
 
-export const Loading = Template.bind({})
+export const Loading: StoryFn = Template.bind({})
 Loading.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -388,7 +389,7 @@ Loading.args = {
   loading: true,
 }
 
-export const Highlighted = Template.bind({})
+export const Highlighted: StoryFn = Template.bind({})
 Highlighted.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -419,7 +420,7 @@ Highlighted.args = {
   highlightedRowId: 1,
 }
 
-export const VirtualizedRows = Template.bind({})
+export const VirtualizedRows: StoryFn = Template.bind({})
 VirtualizedRows.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -430,7 +431,7 @@ VirtualizedRows.args = {
   columns,
 }
 
-export const PagedData = PagedTemplate.bind({})
+export const PagedData: StoryFn = PagedTemplate.bind({})
 PagedData.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -441,7 +442,7 @@ PagedData.args = {
   columns,
 }
 
-export const Loose = Template.bind({})
+export const Loose: StoryFn = Template.bind({})
 
 Loose.args = {
   fillLevel: 0,
@@ -453,7 +454,7 @@ Loose.args = {
   loose: true,
 }
 
-export const Clickable = Template.bind({})
+export const Clickable: StoryFn = Template.bind({})
 
 Clickable.args = {
   fillLevel: 0,
@@ -465,7 +466,7 @@ Clickable.args = {
   onRowClick: (_e: MouseEvent, row: Row<any>) => console.info(row?.original),
 }
 
-export const StickyColumn = Template.bind({})
+export const StickyColumn: StoryFn = Template.bind({})
 
 StickyColumn.args = {
   fillLevel: 0,
@@ -477,7 +478,7 @@ StickyColumn.args = {
   stickyColumn: true,
 }
 
-export const Expandable = Template.bind({})
+export const Expandable: StoryFn = Template.bind({})
 
 Expandable.args = {
   fillLevel: 0,
@@ -492,7 +493,7 @@ Expandable.args = {
   ),
 }
 
-export const FilterableAndSortable = FilterableTemplate.bind({})
+export const FilterableAndSortable: StoryFn = FilterableTemplate.bind({})
 FilterableAndSortable.args = {
   fillLevel: 0,
   rowBg: 'base',
@@ -506,7 +507,7 @@ FilterableAndSortable.args = {
   columns,
 }
 
-export const Selectable = SelectableTemplate.bind({})
+export const Selectable: StoryFn = SelectableTemplate.bind({})
 
 Selectable.args = {
   fillLevel: 0,
@@ -517,7 +518,7 @@ Selectable.args = {
   columns: expandingColumns,
 }
 
-export const LinkableRows = Template.bind({})
+export const LinkableRows: StoryFn = Template.bind({})
 
 LinkableRows.args = {
   fillLevel: 0,

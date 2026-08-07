@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { StoryFn } from '@storybook/react'
 
 import ValidatedInput, {
   type ValidationResponse,
@@ -32,4 +33,4 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})

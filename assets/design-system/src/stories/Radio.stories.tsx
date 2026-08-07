@@ -4,6 +4,7 @@ import styled, { useTheme } from 'styled-components'
 import Button from '../components/Button'
 import Radio from '../components/Radio'
 import RadioGroup from '../components/RadioGroup'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Radio',
@@ -65,12 +66,12 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   small: false,
 }
 
-export const Small = Template.bind({})
+export const Small: StoryFn = Template.bind({})
 Small.args = {
   small: true,
 }

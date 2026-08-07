@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Divider from '../components/Divider'
 
 import { type styledTheme } from '..'
+import type { StoryFn } from '@storybook/react'
 
 const SemanticText = styled.div<{
   $typeStyle?: keyof typeof styledTheme.partials.text
@@ -139,7 +140,7 @@ function Template({ exampleText }: { exampleText?: string }) {
   )
 }
 
-const Exp = Template.bind({})
+const Exp: StoryFn = Template.bind({})
 
 export default Exp
 Exp.args = {

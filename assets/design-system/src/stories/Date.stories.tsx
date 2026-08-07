@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 
 import { Date } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Date',
@@ -39,7 +40,7 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   date: '2016-01-08T00:00:00-06:00',

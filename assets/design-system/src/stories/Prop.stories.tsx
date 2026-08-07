@@ -1,4 +1,5 @@
 import { Prop } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Prop',
@@ -9,5 +10,5 @@ function Template() {
   return <Prop title="Name">Test</Prop>
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {}

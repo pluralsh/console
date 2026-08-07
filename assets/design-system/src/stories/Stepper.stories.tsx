@@ -4,6 +4,7 @@ import BrowserIcon from '../components/icons/BrowserIcon'
 import CloudIcon from '../components/icons/CloudIcon'
 import GearTrainIcon from '../components/icons/GearTrainIcon'
 import GitHubIcon from '../components/icons/GitHubIcon'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Stepper',
@@ -50,35 +51,35 @@ const steps: StepperSteps = [
   },
 ]
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   stepIndex: 1,
   steps,
   compact: false,
 }
 
-export const List03 = Template.bind({})
+export const List03: StoryFn = Template.bind({})
 List03.args = {
   stepIndex: 1,
   steps: steps.slice(0, 3),
   compact: false,
 }
 
-export const List02 = Template.bind({})
+export const List02: StoryFn = Template.bind({})
 List02.args = {
   stepIndex: 1,
   steps: steps.slice(0, 2),
   compact: false,
 }
 
-export const List01 = Template.bind({})
+export const List01: StoryFn = Template.bind({})
 List01.args = {
   stepIndex: 0,
   steps: steps.slice(0, 1),
   compact: false,
 }
 
-export const Vertical = Template.bind({})
+export const Vertical: StoryFn = Template.bind({})
 Vertical.args = {
   stepIndex: 1,
   containerWidth: 170,
@@ -90,7 +91,7 @@ Vertical.args = {
   steps,
 }
 
-export const Compact = Template.bind({})
+export const Compact: StoryFn = Template.bind({})
 Compact.args = {
   stepIndex: 1,
   steps,

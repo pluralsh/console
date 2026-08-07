@@ -21,6 +21,7 @@ import {
 
 import { ClusterTagsTemplate } from './ClusterTagsTemplate'
 import TagMultiSelectTemplate from './TagMultiselectTemplate'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Combo Box',
@@ -473,20 +474,20 @@ function TagsTemplate({
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   loading: false,
   withTitleContent: false,
 }
 
-export const Tags = TagsTemplate.bind({})
+export const Tags: StoryFn = TagsTemplate.bind({})
 Tags.args = {
   loading: false,
   withTitleContent: false,
 }
 
-export const ClusterTags = ClusterTagsTemplate.bind({})
+export const ClusterTags: StoryFn = ClusterTagsTemplate.bind({})
 ClusterTags.args = {
   loading: false,
   withTitleContent: false,
@@ -510,7 +511,7 @@ const TAGS = [
 ]
 const tags = uniqWith(TAGS, isEqual)
 
-export const TagMultiSelect = TagMultiSelectTemplate.bind({})
+export const TagMultiSelect: StoryFn = TagMultiSelectTemplate.bind({})
 TagMultiSelect.args = {
   loading: false,
   options: tags.map((tag) => `${tag.name}:${tag.value}`),

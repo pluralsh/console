@@ -2,6 +2,7 @@ import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { type Key } from '@react-types/shared'
+import type { StoryFn } from '@storybook/react'
 
 import {
   AppIcon,
@@ -316,6 +317,6 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {}

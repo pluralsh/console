@@ -1,6 +1,7 @@
 import { Div } from 'honorable'
 
 import { Markdown } from '..'
+import type { StoryFn } from '@storybook/react'
 
 const markdown = `# Plural Console
 
@@ -250,4 +251,4 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})

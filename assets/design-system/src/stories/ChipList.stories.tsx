@@ -5,6 +5,7 @@ import Card from '../components/Card'
 import ChipList from '../components/ChipList'
 import WrapWithIf from '../components/WrapWithIf'
 import { SEVERITIES } from '../types'
+import type { StoryFn } from '@storybook/react'
 
 const sizes: ComponentProps<typeof Chip>['size'][] = [
   'small',
@@ -151,28 +152,28 @@ function EmptyTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
-export const Text = TextTemplate.bind({})
+export const Text: StoryFn = TextTemplate.bind({})
 Text.args = {
   severity: 'info',
   size: 'small',
   onFillLevel: 0,
 }
 
-export const Label = LabelTemplate.bind({})
+export const Label: StoryFn = LabelTemplate.bind({})
 Label.args = {
   severity: 'info',
   size: 'small',
   onFillLevel: 0,
 }
 
-export const Empty = EmptyTemplate.bind({})
+export const Empty: StoryFn = EmptyTemplate.bind({})
 Empty.args = {
   severity: 'info',
   size: 'small',
   onFillLevel: 0,
 }
 
-export const CustomClick = CustomClickTemplate.bind({})
+export const CustomClick: StoryFn = CustomClickTemplate.bind({})
 CustomClick.args = {
   severity: 'info',
   size: 'small',

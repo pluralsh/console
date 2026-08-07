@@ -1,6 +1,7 @@
 import { A, Flex, H1 } from 'honorable'
 
 import Banner, { BANNER_SEVERITIES } from '../components/Banner'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Banner (AKA Toast Content)',
@@ -133,7 +134,7 @@ function Template({ closeButton, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   closeButton: false,

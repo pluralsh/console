@@ -7,6 +7,7 @@ import DownloadIcon from '../components/icons/DownloadIcon'
 import GitHubLogoIcon from '../components/icons/GitHubLogoIcon'
 import MarketIcon from '../components/icons/MarketIcon'
 import TerminalIcon from '../components/icons/TerminalIcon'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Checklist',
@@ -213,6 +214,6 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {}

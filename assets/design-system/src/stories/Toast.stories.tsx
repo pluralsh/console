@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { type LayerPositionType } from '../components/Layer'
 import { GraphQLToast, Toast, type ToastSeverity } from '../components/Toast'
 import { ApolloError } from '@apollo/client'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Toast',
@@ -111,13 +112,13 @@ function GraphQLTemplate() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   severity: 'success',
   closeTimeout: undefined,
 }
 
-export const GraphQL = GraphQLTemplate.bind({})
+export const GraphQL: StoryFn = GraphQLTemplate.bind({})
 
 GraphQL.args = {}

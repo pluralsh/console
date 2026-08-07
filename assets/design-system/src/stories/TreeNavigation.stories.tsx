@@ -6,6 +6,7 @@ import { useNavigationContext } from '../components/contexts/NavigationContext'
 import { TreeNav, TreeNavEntry } from '../components/TreeNavigation'
 
 import { NavContextProviderStub } from './NavigationContextStub'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Tree Navigation',
@@ -223,5 +224,5 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {}

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { type Key } from '@react-types/shared'
 
 import { Button, Checkbox } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Checkbox',
@@ -86,7 +87,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   small: false,
   disabled: false,
@@ -94,7 +95,7 @@ Default.args = {
   tabIndex: 0,
 }
 
-export const Small = Template.bind({})
+export const Small: StoryFn = Template.bind({})
 Small.args = {
   small: true,
   disabled: false,

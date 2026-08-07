@@ -5,6 +5,7 @@ import styled from 'styled-components'
 
 import { Button, Card, Code, Flyover, FormField, Input2, SearchIcon } from '..'
 import { jsCode } from '../constants'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Flyover',
@@ -142,7 +143,7 @@ function NonScrollTemplate(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   header: 'Default',
@@ -150,7 +151,7 @@ Default.args = {
   scrollable: true,
 }
 
-export const Form = Template.bind({})
+export const Form: StoryFn = Template.bind({})
 
 Form.args = {
   header: 'Form',
@@ -158,7 +159,7 @@ Form.args = {
   scrollable: true,
 }
 
-export const NonScrollable = NonScrollTemplate.bind({})
+export const NonScrollable: StoryFn = NonScrollTemplate.bind({})
 
 NonScrollable.args = {
   header: 'Non-scrollable',

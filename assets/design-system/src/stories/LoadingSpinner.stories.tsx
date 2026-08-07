@@ -1,4 +1,5 @@
 import { Div } from 'honorable'
+import type { StoryFn } from '@storybook/react'
 
 import LoadingSpinner, {
   type LoadingSpinnerProps,
@@ -31,7 +32,7 @@ function Template(args: LoadingSpinnerProps) {
   )
 }
 
-export const Primary = Template.bind({})
+export const Primary: StoryFn = Template.bind({})
 
 Primary.args = {
   show: true,

@@ -6,6 +6,7 @@ import ErrorIcon from '../components/icons/ErrorIcon'
 import Tab from '../components/Tab'
 import SubTab from '../components/SubTab'
 import Card from '../components/Card'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Tab',
@@ -70,7 +71,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {}
 
@@ -139,7 +140,7 @@ function Template2(args: any) {
   )
 }
 
-export const Vertical = Template2.bind({})
+export const Vertical: StoryFn = Template2.bind({})
 
 Vertical.args = {
   vertical: true,
@@ -202,7 +203,7 @@ const contentCardStyle = {
   justifyContent: 'center',
 }
 
-export const Subtab = SubTabTemplate.bind({})
+export const Subtab: StoryFn = SubTabTemplate.bind({})
 
 Subtab.args = {
   disabled: false,

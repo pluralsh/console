@@ -1,4 +1,5 @@
 import FormTitle from '../components/FormTitle'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'FormTitle',
@@ -14,7 +15,7 @@ function Template(args: any) {
   )
 }
 
-export const Primary = Template.bind({})
+export const Primary: StoryFn = Template.bind({})
 
 Primary.args = {
   title: 'Automatic Upgrades',

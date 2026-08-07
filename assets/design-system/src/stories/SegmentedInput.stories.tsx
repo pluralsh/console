@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import styled from 'styled-components'
 import { Segment, SegmentedInput } from '..'
+import type { StoryFn } from '@storybook/react'
 
 type StoryProps = {
   format: string
@@ -100,14 +101,14 @@ function Template({ format, separator, segments }: StoryProps) {
   }
 }
 
-export const DateInput = Template.bind({})
+export const DateInput: StoryFn = Template.bind({})
 DateInput.args = {
   format: 'date',
   separator: '/',
   segments: DATE_SEGMENTS,
 }
 
-export const CustomFormatInput = Template.bind({})
+export const CustomFormatInput: StoryFn = Template.bind({})
 CustomFormatInput.args = {
   format: 'custom',
   separator: '.',

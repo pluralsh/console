@@ -4,6 +4,7 @@ import { type ComponentProps, useState } from 'react'
 import { IconFrame, InfoIcon, Modal } from '..'
 
 import Tooltip from '../components/Tooltip'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Tooltip',
@@ -163,6 +164,6 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {}

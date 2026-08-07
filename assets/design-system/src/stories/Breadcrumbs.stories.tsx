@@ -13,6 +13,7 @@ import { ListBoxItem } from '../components/ListBoxItem'
 import FormField from '../components/FormField'
 
 import { NavContextProviderStub } from './NavigationContextStub'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Breadcrumbs',
@@ -159,7 +160,7 @@ function ManualTemplate(args: any) {
   )
 }
 
-export const UsingContext = WithContextTemplate.bind({})
+export const UsingContext: StoryFn = WithContextTemplate.bind({})
 
 UsingContext.args = {
   minLength: undefined,
@@ -167,7 +168,7 @@ UsingContext.args = {
   collapsible: true,
 }
 
-export const Manual = ManualTemplate.bind({})
+export const Manual: StoryFn = ManualTemplate.bind({})
 
 Manual.args = {
   minLength: undefined,

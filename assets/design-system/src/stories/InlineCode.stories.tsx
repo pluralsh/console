@@ -2,6 +2,7 @@ import { A, P } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import { Banner, Callout, Card, InlineCode } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Inline Code',
@@ -111,5 +112,5 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {}

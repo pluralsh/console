@@ -9,6 +9,7 @@ import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
 import Input2 from '../components/Input2'
 import { Card } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Input',
@@ -167,44 +168,44 @@ function CustomInputV2Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {}
 
-export const Error = Template.bind({})
+export const Error: StoryFn = Template.bind({})
 
 Error.args = {
   error: true,
 }
 
-export const Placeholder = Template.bind({})
+export const Placeholder: StoryFn = Template.bind({})
 
 Placeholder.args = {
   placeholder: 'A neat placeholder!',
 }
 
-export const Disabled = Template.bind({})
+export const Disabled: StoryFn = Template.bind({})
 
 Disabled.args = {
   placeholder: 'Disabled placeholder',
   disabled: true,
 }
 
-export const PrefixSuffix = CustomInputTemplate.bind({})
+export const PrefixSuffix: StoryFn = CustomInputTemplate.bind({})
 
 PrefixSuffix.args = {
   prefix: 'app.',
   suffix: '.plural.sh',
 }
 
-export const Multiline = CustomInputTemplate.bind({})
+export const Multiline: StoryFn = CustomInputTemplate.bind({})
 
 Multiline.args = {
   multiline: true,
   minRows: 3,
 }
 
-export const TitleContent = CustomInputTemplate.bind({})
+export const TitleContent: StoryFn = CustomInputTemplate.bind({})
 
 TitleContent.args = {
   startIcon: <SearchIcon />,
@@ -219,7 +220,7 @@ TitleContent.args = {
   suffix: '',
 }
 
-export const Version2 = CustomInputV2Template.bind({})
+export const Version2: StoryFn = CustomInputV2Template.bind({})
 
 Version2.args = {
   startIcon: <SearchIcon />,

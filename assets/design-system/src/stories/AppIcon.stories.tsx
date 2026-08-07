@@ -3,6 +3,7 @@ import { Flex, H3 } from 'honorable'
 import { Card, PluralLogoMark, WrapWithIf } from '..'
 
 import AppIcon from '../components/AppIcon'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'AppIcon',
@@ -104,7 +105,7 @@ function Template({ onFillLevel, icon, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   name: 'Michael J Guarino',
   initials: '',

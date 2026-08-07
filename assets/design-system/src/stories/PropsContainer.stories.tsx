@@ -1,4 +1,5 @@
 import { Prop, PropsContainer, UserDetails } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Props Container',
@@ -23,5 +24,5 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {}

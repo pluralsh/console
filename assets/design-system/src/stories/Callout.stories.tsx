@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { type FillLevel } from '../components/contexts/FillLevelContext'
 import { Button, Callout, type CalloutProps, Card } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Callout',
@@ -186,7 +187,7 @@ function CloseableTemplate({ title }: CalloutProps) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   title: '',
   size: 'full',
@@ -194,7 +195,7 @@ Default.args = {
   onFillLevel: 0,
 }
 
-export const WithTitle = Template.bind({})
+export const WithTitle: StoryFn = Template.bind({})
 WithTitle.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',
@@ -202,7 +203,7 @@ WithTitle.args = {
   onFillLevel: 0,
 }
 
-export const OnlyTitle = Template.bind({})
+export const OnlyTitle: StoryFn = Template.bind({})
 OnlyTitle.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',
@@ -211,7 +212,7 @@ OnlyTitle.args = {
   onFillLevel: 0,
 }
 
-export const Compact = Template.bind({})
+export const Compact: StoryFn = Template.bind({})
 Compact.args = {
   title: '',
   size: 'compact',
@@ -219,7 +220,7 @@ Compact.args = {
   onFillLevel: 0,
 }
 
-export const WithButton = Template.bind({})
+export const WithButton: StoryFn = Template.bind({})
 WithButton.args = {
   title: '',
   size: 'full',
@@ -227,18 +228,18 @@ WithButton.args = {
   onFillLevel: 0,
 }
 
-export const Expandable = ExpandableTemplate.bind({})
+export const Expandable: StoryFn = ExpandableTemplate.bind({})
 Expandable.args = {
   title: 'Why do I need to authenticate with GitHub/GitLab?',
   controlled: 'false',
 }
 
-export const Closeable = CloseableTemplate.bind({})
+export const Closeable: StoryFn = CloseableTemplate.bind({})
 Expandable.args = {
   title: 'Why do I need to authenticate with GitHub/GitLab?',
 }
 
-export const KitchenSink = Template.bind({})
+export const KitchenSink: StoryFn = Template.bind({})
 KitchenSink.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',
@@ -246,7 +247,7 @@ KitchenSink.args = {
   onFillLevel: 0,
 }
 
-export const OnCard = Template.bind({})
+export const OnCard: StoryFn = Template.bind({})
 OnCard.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',

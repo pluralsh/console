@@ -7,6 +7,7 @@ import {
 import { Flex } from 'honorable'
 
 import TextSwitch, { type TextSwitchProps } from '../components/TextSwitch'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'TextSwitch',
@@ -91,7 +92,7 @@ function Template({ label, ...args }: ComponentProps<typeof TextSwitch>) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   size: 'small',
   label: '',

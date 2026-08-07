@@ -7,6 +7,7 @@ import { baseSpacing } from '../theme/spacing'
 import { ItemLabel } from './ItemLabel'
 import { FilledBox } from './FilledBox'
 import { FlexWrap } from './FlexWrap'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Semantic System',
@@ -235,7 +236,7 @@ function Spacing() {
   )
 }
 
-export const Miscellaneous = Template.bind({})
+export const Miscellaneous: StoryFn = Template.bind({})
 Miscellaneous.args = {}
 
 export { default as Colors } from './Colors'

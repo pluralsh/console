@@ -1,4 +1,5 @@
 import { A, Flex } from 'honorable'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'A',
@@ -29,7 +30,7 @@ function Template(args: any) {
   )
 }
 
-export const Primary = Template.bind({})
+export const Primary: StoryFn = Template.bind({})
 
 Primary.args = {
   children: 'Click me',

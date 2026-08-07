@@ -1,6 +1,7 @@
 import { Button, Div, Flex, P } from 'honorable'
 
 import PageTitle, { type PageTitleProps } from '../components/PageTitle'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Page Title',
@@ -24,13 +25,13 @@ function Template({ heading, ...props }: PageTitleProps) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   heading: 'Page Title',
 }
 
-export const WithContent = Template.bind({})
+export const WithContent: StoryFn = Template.bind({})
 WithContent.args = {
   heading: (
     <Div>

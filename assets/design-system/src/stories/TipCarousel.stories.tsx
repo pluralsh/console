@@ -1,6 +1,7 @@
 import { A } from 'honorable'
 
 import TipCarousel from '../components/TipCarousel'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'TipCarousel',
@@ -48,7 +49,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   autoAdvanceTime: 10000,

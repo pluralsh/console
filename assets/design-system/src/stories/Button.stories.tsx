@@ -2,6 +2,7 @@ import { useTheme } from 'styled-components'
 import Button from '../components/Button'
 import Flex from '../components/Flex'
 import DownloadIcon from '../components/icons/DownloadIcon'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Button',
@@ -87,7 +88,7 @@ function Template(args: any) {
   )
 }
 
-export const Primary = Template.bind({})
+export const Primary: StoryFn = Template.bind({})
 
 Primary.args = {
   disabled: false,
@@ -95,7 +96,7 @@ Primary.args = {
   children: 'Primary Button',
 }
 
-export const SecondaryFloating = Template.bind({})
+export const SecondaryFloating: StoryFn = Template.bind({})
 
 SecondaryFloating.args = {
   disabled: false,
@@ -104,7 +105,7 @@ SecondaryFloating.args = {
   floating: true,
 }
 
-export const SecondaryOutline = Template.bind({})
+export const SecondaryOutline: StoryFn = Template.bind({})
 
 SecondaryOutline.args = {
   disabled: false,
@@ -113,7 +114,7 @@ SecondaryOutline.args = {
   secondary: true,
 }
 
-export const Tertiary = Template.bind({})
+export const Tertiary: StoryFn = Template.bind({})
 
 Tertiary.args = {
   disabled: false,
@@ -123,7 +124,7 @@ Tertiary.args = {
   padding: '',
 }
 
-export const TertiaryNoPadding = Template.bind({})
+export const TertiaryNoPadding: StoryFn = Template.bind({})
 
 TertiaryNoPadding.args = {
   disabled: false,
@@ -133,7 +134,7 @@ TertiaryNoPadding.args = {
   padding: 'none',
 }
 
-export const Destructive = Template.bind({})
+export const Destructive: StoryFn = Template.bind({})
 
 Destructive.args = {
   disabled: false,

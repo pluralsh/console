@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { type Key } from '@react-types/shared'
 
 import { SubTab, TabList, type TabListStateProps, TabPanel } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'ButtonGroup',
@@ -101,7 +102,7 @@ function TemplateBasic(args: any) {
   )
 }
 
-export const Default = TemplateBasic.bind({})
+export const Default: StoryFn = TemplateBasic.bind({})
 Default.args = {
   size: 'small',
 }

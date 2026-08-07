@@ -1,4 +1,5 @@
 import { LightDarkSwitch, Switch } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Switch',
@@ -16,7 +17,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   children: 'Email notifications',
@@ -35,7 +36,7 @@ function LightDarkTemplate(args: any) {
   )
 }
 
-export const LightDarkMode = LightDarkTemplate.bind({})
+export const LightDarkMode: StoryFn = LightDarkTemplate.bind({})
 
 LightDarkMode.args = {
   disabled: false,

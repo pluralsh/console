@@ -2,6 +2,7 @@ import { Flex } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import { Card, Code, WrapWithIf } from '..'
+import type { StoryFn } from '@storybook/react'
 
 import {
   cCode,
@@ -232,14 +233,14 @@ function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   title: '',
   showLineNumbers: true,
   showHeader: undefined,
 }
 
-export const WithTabs = WithTabsTemplate.bind({})
+export const WithTabs: StoryFn = WithTabsTemplate.bind({})
 WithTabs.args = {
   title: 'This is an optional title',
   showLineNumbers: true,
@@ -350,7 +351,7 @@ function MermaidTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
-export const Mermaid = MermaidTemplate.bind({})
+export const Mermaid: StoryFn = MermaidTemplate.bind({})
 Mermaid.args = {
   title: '',
   showLineNumbers: false,
@@ -414,7 +415,7 @@ function MermaidWithTabsTemplate({ onFillLevel, title, ...args }: any) {
   )
 }
 
-export const MermaidWithTabs = MermaidWithTabsTemplate.bind({})
+export const MermaidWithTabs: StoryFn = MermaidWithTabsTemplate.bind({})
 MermaidWithTabs.args = {
   title: 'Mermaid Diagrams',
   showLineNumbers: false,

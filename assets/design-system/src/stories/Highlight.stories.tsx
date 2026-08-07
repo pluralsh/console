@@ -3,6 +3,7 @@ import { Flex } from 'honorable'
 import { goCode, jsCode, tfCode } from '../constants'
 
 import { Divider, Highlight } from '..'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Highlight',
@@ -26,4 +27,4 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})

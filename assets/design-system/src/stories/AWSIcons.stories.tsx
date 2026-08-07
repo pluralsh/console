@@ -1,5 +1,6 @@
 import { useTheme } from 'styled-components'
 import AWSIcon, { AWSIconName } from '../components/icons/AWSIcon'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'AWSIcon',
@@ -45,7 +46,7 @@ function Template({ size, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   size: 32,
 }

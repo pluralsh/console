@@ -5,6 +5,7 @@ import Input from '../components/Input'
 import FormField from '../components/FormField'
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'FormField',
@@ -84,7 +85,7 @@ function AllSizesTemplate(args: any) {
   )
 }
 
-export const Full = AllSizesTemplate.bind({})
+export const Full: StoryFn = AllSizesTemplate.bind({})
 
 Full.args = {
   label: 'Label',
@@ -101,7 +102,7 @@ Full.args = {
   ),
 }
 
-export const FullError = AllSizesTemplate.bind({})
+export const FullError: StoryFn = AllSizesTemplate.bind({})
 
 FullError.args = {
   ...Full.args,
@@ -112,7 +113,7 @@ FullError.args = {
   },
 }
 
-export const FullDisabled = AllSizesTemplate.bind({})
+export const FullDisabled: StoryFn = AllSizesTemplate.bind({})
 
 FullDisabled.args = {
   ...Full.args,
@@ -121,38 +122,38 @@ FullDisabled.args = {
   },
 }
 
-export const Horizontal = Template.bind({})
+export const Horizontal: StoryFn = Template.bind({})
 
 Horizontal.args = {
   ...Full.args,
   layout: 'horizontal',
 }
 
-export const Default = AllSizesTemplate.bind({})
+export const Default: StoryFn = AllSizesTemplate.bind({})
 
 Default.args = {}
 
-export const Label = AllSizesTemplate.bind({})
+export const Label: StoryFn = AllSizesTemplate.bind({})
 
 Label.args = {
   label: 'Email',
 }
 
-export const Required = AllSizesTemplate.bind({})
+export const Required: StoryFn = AllSizesTemplate.bind({})
 
 Required.args = {
   label: 'Email',
   required: true,
 }
 
-export const Caption = AllSizesTemplate.bind({})
+export const Caption: StoryFn = AllSizesTemplate.bind({})
 
 Caption.args = {
   label: 'Password',
   caption: 'A short caption',
 }
 
-export const LongCaption = AllSizesTemplate.bind({})
+export const LongCaption: StoryFn = AllSizesTemplate.bind({})
 
 LongCaption.args = {
   label: 'Label',
@@ -160,21 +161,21 @@ LongCaption.args = {
     'This will probably truncate, because it is ever so so longer than usual.',
 }
 
-export const HintText = AllSizesTemplate.bind({})
+export const HintText: StoryFn = AllSizesTemplate.bind({})
 
 HintText.args = {
   label: 'Label',
   hint: 'Some hint text',
 }
 
-export const MaxLength = AllSizesTemplate.bind({})
+export const MaxLength: StoryFn = AllSizesTemplate.bind({})
 
 MaxLength.args = {
   label: 'Label',
   maxLength: 30,
 }
 
-export const ArbitraryHintContent = AllSizesTemplate.bind({})
+export const ArbitraryHintContent: StoryFn = AllSizesTemplate.bind({})
 
 ArbitraryHintContent.args = {
   label: 'Label',
@@ -192,7 +193,7 @@ ArbitraryHintContent.args = {
   ),
 }
 
-export const Multiline = AllSizesTemplate.bind({})
+export const Multiline: StoryFn = AllSizesTemplate.bind({})
 
 Multiline.args = {
   label: 'Label',

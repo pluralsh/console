@@ -6,6 +6,7 @@ import { type FillLevel } from '../components/contexts/FillLevelContext'
 
 import type { CardProps } from '../components/Card'
 import { Card, Flex, InfoOutlineIcon, Tooltip } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Card',
@@ -137,7 +138,7 @@ function FillLevelTemplate({
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   selected: false,
   clickable: false,
@@ -159,7 +160,7 @@ Default.args = {
   ),
 }
 
-export const Clickable = Template.bind({})
+export const Clickable: StoryFn = Template.bind({})
 Clickable.args = {
   ...Default.args,
   ...{
@@ -167,7 +168,7 @@ Clickable.args = {
   },
 }
 
-export const WithFillLevelContext = FillLevelTemplate.bind({})
+export const WithFillLevelContext: StoryFn = FillLevelTemplate.bind({})
 WithFillLevelContext.args = {
   selected: false,
   clickable: false,

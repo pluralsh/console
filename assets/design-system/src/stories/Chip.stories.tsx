@@ -8,6 +8,7 @@ import Card from '../components/Card'
 import { SEVERITIES } from '../types'
 
 import { Link } from './NavigationContextStub'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Chip',
@@ -232,7 +233,7 @@ function Template({ onFillLevel, asLink, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   closeButton: true,
   clickable: true,

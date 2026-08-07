@@ -1,6 +1,7 @@
 import { Div, Flex, H4 } from 'honorable'
 
 import RepositoryCard from '../components/RepositoryCard'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'RepositoryCard',
@@ -108,7 +109,7 @@ function ListTemplate(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   installed: true,
@@ -133,5 +134,5 @@ Default.args = {
   ],
 }
 
-export const List = ListTemplate.bind({})
+export const List: StoryFn = ListTemplate.bind({})
 List.args = { width: '500px', ...Default.args }

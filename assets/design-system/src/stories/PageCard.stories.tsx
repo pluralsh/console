@@ -3,6 +3,7 @@ import { A, Flex } from 'honorable'
 import CheckedShieldIcon from '../components/icons/CheckedShieldIcon'
 
 import { PageCard } from '../index'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Page Card',
@@ -69,5 +70,5 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {}

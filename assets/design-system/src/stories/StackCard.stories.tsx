@@ -1,6 +1,7 @@
 import { Flex } from 'honorable'
 
 import StackCard from '../components/StackCard'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'StackCard',
@@ -53,7 +54,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 
 Default.args = {
   apps: [

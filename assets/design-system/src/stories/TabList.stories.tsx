@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
+import type { StoryFn } from '@storybook/react'
 
 import {
   Tab,
@@ -319,19 +320,19 @@ function TemplateComplex() {
   )
 }
 
-export const Default = TemplateBasic.bind({})
+export const Default: StoryFn = TemplateBasic.bind({})
 Default.args = {}
 
-export const Vertical = TemplateBasic.bind({})
+export const Vertical: StoryFn = TemplateBasic.bind({})
 Vertical.args = {
   orientation: 'vertical',
 }
 
-export const Scrollable = TemplateBasic.bind({})
+export const Scrollable: StoryFn = TemplateBasic.bind({})
 Scrollable.args = {
   scrollable: true,
   tabs: moreTabs,
 }
 
-export const AdvancedContent = TemplateComplex.bind({})
+export const AdvancedContent: StoryFn = TemplateComplex.bind({})
 AdvancedContent.args = {}

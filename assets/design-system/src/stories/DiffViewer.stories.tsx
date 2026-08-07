@@ -1,4 +1,5 @@
 import { DiffMethod, DiffViewer } from '..'
+import type { StoryFn } from '@storybook/react'
 
 const OLD_VALUE = `apiVersion: v1
 kind: ConfigMap
@@ -43,7 +44,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
+export const Default: StoryFn = Template.bind({})
 Default.args = {
   oldValue: OLD_VALUE,
   newValue: NEW_VALUE,
@@ -52,7 +53,7 @@ Default.args = {
   asCard: true,
 }
 
-export const DeletedFile = Template.bind({})
+export const DeletedFile: StoryFn = Template.bind({})
 DeletedFile.args = {
   oldValue: OLD_VALUE,
   newValue: '',

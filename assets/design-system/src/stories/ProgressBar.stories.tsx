@@ -1,4 +1,5 @@
 import ProgressBar from '../components/ProgressBar'
+import type { StoryFn } from '@storybook/react'
 
 export default {
   title: 'Progress Bar',
@@ -15,13 +16,13 @@ export default {
   },
 }
 
-export const Indeterminate = ProgressBar.bind({})
+export const Indeterminate: StoryFn = ProgressBar.bind({})
 Indeterminate.args = {
   paused: false,
   complete: false,
 }
 
-export const Determinate = ProgressBar.bind({})
+export const Determinate: StoryFn = ProgressBar.bind({})
 Determinate.args = {
   paused: false,
   complete: false,
