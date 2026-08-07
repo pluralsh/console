@@ -77,9 +77,10 @@ defmodule Console do
     end
   end
 
-  def truncate(str, len) when byte_size(str) > len,
-    do: "#{String.slice(str, 0, len - 3)}..."
-  def truncate(str, _), do: str
+  def truncate(str, len, suffix \\ "...")
+  def truncate(str, len, suffix) when byte_size(str) > len,
+    do: "#{String.slice(str, 0, len - byte_size(suffix))}#{suffix}"
+  def truncate(str, _, _), do: str
 
   def byok?() do
     case {provider(), Console.conf(:byok)} do
