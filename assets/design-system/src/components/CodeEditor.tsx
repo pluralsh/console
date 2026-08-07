@@ -51,7 +51,7 @@ export default function CodeEditor({
   const monaco = useMonaco()
   const [current, setCurrent] = useState<string>(value ?? '')
   const [copied, setCopied] = useState<boolean>(false)
-  const changed = current !== value
+  const changed = current !== (value ?? '')
 
   const onEditorMount = useCallback(
     (editor: any) => {
