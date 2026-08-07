@@ -58,7 +58,7 @@ function useBimodalSelectState<T extends object>({
   onSelectionChange: onSelectChangeProp,
   ...props
 }: BimodalSelectProps<T> & {
-  onSelectionChange: (arg: any) => any
+  onSelectionChange?: (arg: any) => any
 }): BimodalSelectState<T> {
   const [selectedKey, setSelectedKey] = useControlledState<Key>(
     selectionMode === 'single' ? props.selectedKey : undefined,
@@ -115,7 +115,8 @@ function useBimodalSelectState<T extends object>({
 
   const validationState = useFormValidationState({
     ...props,
-    value: selectionMode === 'single' ? selectedKey : selectedKeys,
+    value:
+      selectionMode === 'single' ? selectedKey : Array.from(selectedKeys ?? []),
   })
 
   const selectedItem =

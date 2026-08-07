@@ -83,7 +83,10 @@ type TriggerProps = {
 
 function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   const ref = props.buttonRef
-  const { buttonProps } = useButton(props, ref)
+  const { buttonProps } = useButton(
+    props as unknown as Parameters<typeof useButton>[0],
+    ref
+  )
   const theme = useTheme()
 
   return cloneElement(buttonElt, {

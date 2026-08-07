@@ -8,7 +8,6 @@
 
     // TODO: get rid of all these once errors are fixed
     "strictNullChecks": false,
-    "strictFunctionTypes": false,
     "strictPropertyInitialization": false
   },
   "include": ["src/**/*"]

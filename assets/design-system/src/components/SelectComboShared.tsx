@@ -1,12 +1,6 @@
 import { type Key, type Selection } from '@react-types/shared'
 import { isNil } from 'lodash-es'
-import {
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
-  useCallback,
-  useRef,
-} from 'react'
+import { type RefObject, useCallback, useRef } from 'react'
 import { type ListState } from 'react-stately'
 
 import { type ComboBoxProps } from './ComboBox'
@@ -25,7 +19,7 @@ type UseSelectComboStatePropsArgs<T extends TType> = Pick<
   | 'onHeaderClick'
   | 'children'
 > & {
-  setIsOpen: Dispatch<SetStateAction<boolean>>
+  setIsOpen: (open: boolean) => void
   stateRef: RefObject<ListState<object> | null>
   nextFocusedKeyRef: RefObject<Key>
 }

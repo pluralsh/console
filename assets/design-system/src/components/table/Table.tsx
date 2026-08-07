@@ -135,7 +135,7 @@ function Table({
   const getItemKey = useCallback<
     Parameters<typeof useVirtualizer>[0]['getItemKey']
   >((i) => tableRows[i]?.id || i, [tableRows])
-  const rowVirtualizer = useVirtualizer({
+  const rowVirtualizer = useVirtualizer<HTMLDivElement, Element>({
     count: hasNextPage ? tableRows.length + 1 : tableRows.length,
     overscan: 10,
     getItemKey,
