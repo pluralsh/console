@@ -2,7 +2,6 @@ package pulumi
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/samber/lo"
 )
@@ -43,18 +42,6 @@ func appendNonInteractive(args []string) []string {
 	return append(args, "--non-interactive")
 }
 
-// appendColor forces ANSI highlighting. Pulumi defaults to --color=auto, which
-// disables color when stdout is not a TTY (as in harness step execution).
-func appendColor(args []string) []string {
-	for _, arg := range args {
-		if arg == "--color" || strings.HasPrefix(arg, "--color=") {
-			return args
-		}
-	}
-
-	return append(args, "--color=always")
-}
-
 // Args implements [v1.ArgsModifier] type.
 func (in *PreviewArgsModifier) Args(args []string) []string {
 	if !lo.Contains(args, "preview") {
@@ -69,7 +56,7 @@ func (in *PreviewArgsModifier) Args(args []string) []string {
 		args = append(args, "--save-plan", in.planFile)
 	}
 
-	return appendColor(appendNonInteractive(args))
+	return appendNonInteractive(args)
 }
 
 // Args implements [v1.ArgsModifier] type.
@@ -90,7 +77,7 @@ func (in *UpArgsModifier) Args(args []string) []string {
 		args = append(args, "--yes")
 	}
 
-	return appendColor(appendNonInteractive(args))
+	return appendNonInteractive(args)
 }
 
 // Args implements [v1.ArgsModifier] type.
@@ -107,7 +94,7 @@ func (in *DestroyPreviewArgsModifier) Args(args []string) []string {
 		args = append(args, "--preview-only")
 	}
 
-	return appendColor(appendNonInteractive(args))
+	return appendNonInteractive(args)
 }
 
 // Args implements [v1.ArgsModifier] type.
@@ -124,5 +111,5 @@ func (in *DestroyArgsModifier) Args(args []string) []string {
 		args = append(args, "--yes")
 	}
 
-	return appendColor(appendNonInteractive(args))
+	return appendNonInteractive(args)
 }
