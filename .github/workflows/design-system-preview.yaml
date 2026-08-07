@@ -1,0 +1,37 @@
+name: Design system / Storybook preview
+
+on:
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "assets/design-system/**"
+      - ".github/workflows/design-system-preview.yaml"
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    name: Create preview
+    if: ${{ github.actor != 'renovate[bot]' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: assets
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+      - run: yarn --immutable
+      - run: yarn workspace @pluralsh/design-system build:storybook
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PLURALSH_DESIGN }}
+          projectId: pluralsh-design
+          entryPoint: assets/design-system
