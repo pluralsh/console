@@ -156,10 +156,9 @@ export function ClusterTagsTemplate({
             }}
             maxHeight={232}
             allowsEmptyCollection
-            startIcon={<TagIcon />}
+            startIcon={withTitleContent ? null : <TagIcon />}
             {...(withTitleContent
               ? {
-                  startIcon: null,
                   titleContent: (
                     <>
                       <TagIcon marginRight="small" />

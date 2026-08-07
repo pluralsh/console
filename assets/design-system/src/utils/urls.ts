@@ -15,7 +15,7 @@ export function isRelativeUrl(str: string) {
 }
 
 export function isExternalUrl(str?: string | null) {
-  return !!str.match(/^(\/\/|[a-z\d+-.]+?:)/i)
+  return !!str?.match(/^(\/\/|[a-z\d+-.]+?:)/i)
 }
 
 export function getBarePathFromPath(url: string) {

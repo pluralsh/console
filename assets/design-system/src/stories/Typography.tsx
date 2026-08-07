@@ -6,7 +6,7 @@ import { type styledTheme } from '..'
 import type { StoryObj } from '@storybook/react'
 
 const SemanticText = styled.div<{
-  $typeStyle?: keyof typeof styledTheme.partials.text
+  $typeStyle: keyof typeof styledTheme.partials.text
 }>(({ theme, $typeStyle: typeStyle }) => ({
   ...theme.partials.text[typeStyle],
   marginBottom: theme.spacing.large,
@@ -44,7 +44,7 @@ export function Typography({
   )
 }
 const MktgText = styled.div<{
-  $typeStyle?: keyof typeof styledTheme.partials.marketingText
+  $typeStyle: keyof typeof styledTheme.partials.marketingText
 }>(({ theme, $typeStyle: typeStyle }) => ({
   ...theme.partials.marketingText[typeStyle],
   display: 'block',
@@ -123,7 +123,11 @@ export function MarketingTypography({
   )
 }
 
-function Template({ exampleText }: { exampleText?: string }) {
+function Template({
+  exampleText = 'Lorem ipsum dolor sit amet',
+}: {
+  exampleText?: string
+}) {
   return (
     <>
       <Divider

@@ -86,7 +86,7 @@ function Table({
   ...props
 }: TableProps) {
   const theme = useTheme()
-  const tableContainerRef = useRef<HTMLDivElement>(undefined)
+  const tableContainerRef = useRef<HTMLDivElement>(null)
 
   const [expanded, setExpanded] = useState({})
 
@@ -132,9 +132,10 @@ function Table({
   useEffect(() => setFixedGridTemplateColumns(null), [columns.length])
 
   const { rows: tableRows } = table.getRowModel()
-  const getItemKey = useCallback<
-    Parameters<typeof useVirtualizer>[0]['getItemKey']
-  >((i) => tableRows[i]?.id || i, [tableRows])
+  const getItemKey = useCallback(
+    (i: number) => tableRows[i]?.id || i,
+    [tableRows]
+  )
   const rowVirtualizer = useVirtualizer<HTMLDivElement, Element>({
     count: hasNextPage ? tableRows.length + 1 : tableRows.length,
     overscan: 10,
@@ -161,7 +162,7 @@ function Table({
   useEffect(() => {
     if ((lockColumnsOnScroll ?? virtualizeRows) && rowVirtualizer.isScrolling) {
       const thCells = tableContainerRef.current?.querySelectorAll('th')
-      const columns = Array.from(thCells)
+      const columns = Array.from(thCells ?? [])
         .map((th) => {
           const { width } = th.getBoundingClientRect()
           return `${width}px`
@@ -217,7 +218,7 @@ function Table({
       hasNextPage &&
       !isFetchingNextPage
     ) {
-      fetchNextPage()
+      fetchNextPage?.()
     }
   }, [
     hasNextPage,
@@ -241,7 +242,7 @@ function Table({
           onScrollCapture={onScrollCapture}
           $fillLevel={fillLevel}
           $flush={flush}
-          css={props}
+          css={props as any}
         >
           <T $gridTemplateColumns={gridTemplateColumns}>
             <Thead>
@@ -373,6 +374,7 @@ function Table({
                               : undefined
                           }
                           onClick={(e) => {
+                            if (!tableRow) return
                             if (
                               !getRowIsClickable ||
                               !!getRowIsClickable(tableRow)
@@ -385,9 +387,10 @@ function Table({
                           $selectable={tableRow?.getCanSelect() ?? false}
                           $selected={tableRow?.getIsSelected() ?? false}
                           $clickable={
-                            !!getRowIsClickable
+                            !!tableRow &&
+                            (!!getRowIsClickable
                               ? getRowIsClickable(tableRow)
-                              : !!onRowClick || !!getRowLink
+                              : !!onRowClick || !!getRowLink)
                           }
                         >
                           {isNil(tableRow) && isLoaderRow ? (
@@ -424,7 +427,7 @@ function Table({
                                     cell.column?.columnDef?.meta?.highlight
                                   }
                                   $truncateColumn={
-                                    cell.column?.columnDef?.meta?.truncate
+                                    !!cell.column?.columnDef?.meta?.truncate
                                   }
                                   $center={cell.column?.columnDef?.meta?.center}
                                   $right={cell.column?.columnDef?.meta?.right}
@@ -515,7 +518,7 @@ const TableWrapSC = styled.div<{
 const TableSC = styled.div<{
   $flush?: TableProps['flush']
   $fillLevel?: TableProps['fillLevel']
-}>(({ theme, $flush, $fillLevel }) => ({
+}>(({ theme, $flush, $fillLevel = 0 }) => ({
   backgroundColor: theme.colors[tableFillLevelToBg[$fillLevel]],
   border: $flush ? 'none' : theme.borders[tableFillLevelToBorder[$fillLevel]],
   borderRadius: $flush

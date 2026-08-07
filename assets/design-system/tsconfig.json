@@ -4,11 +4,7 @@
     "composite": true,
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "dist",
-
-    // TODO: get rid of all these once errors are fixed
-    "strictNullChecks": false,
-    "strictPropertyInitialization": false
+    "outDir": "dist"
   },
   "include": ["src/**/*"]
 }

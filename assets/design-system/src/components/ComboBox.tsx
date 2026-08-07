@@ -105,20 +105,22 @@ const OpenButtonSC = styled.div(({ theme }) => ({
 
 function OpenButton({
   buttonRef,
-  buttonProps,
+  buttonProps = {},
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
-  buttonRef: RefObject<any>
-  buttonProps: AriaButtonProps
+  buttonRef?: RefObject<HTMLDivElement | null>
+  buttonProps?: AriaButtonProps
 }) {
+  const fallbackRef = useRef<HTMLDivElement | null>(null)
+  const resolvedButtonRef = buttonRef ?? fallbackRef
   const { buttonProps: useButtonProps } = useButton(
     { ...buttonProps, elementType: 'div' },
-    buttonRef
+    resolvedButtonRef
   )
 
   return (
     <OpenButtonSC
-      ref={buttonRef}
+      ref={resolvedButtonRef}
       {...props}
       {...useButtonProps}
     >
@@ -237,7 +239,7 @@ function ComboBox({
   containerProps,
   ...props
 }: ComboBoxProps) {
-  const nextFocusedKeyRef = useRef<Key>(null)
+  const nextFocusedKeyRef = useRef<Key | null>(null)
   const stateRef = useRef<ComboBoxState<object> | null>(null)
   const [isOpenUncontrolled, setIsOpenUncontrolled] = useState(false)
   const previousInputValue = useRef(inputValue)
@@ -264,9 +266,9 @@ function ComboBox({
   )
 
   const wrappedOnSelectionChange: typeof onSelectionChange = useCallback(
-    (newKey, ...args) => {
+    (newKey) => {
       if (onSelectionChange) {
-        onSelectionChange(typeof newKey === 'string' ? newKey : '', ...args)
+        onSelectionChange(typeof newKey === 'string' ? newKey : '')
         setIsOpen(false)
       }
     },
@@ -274,26 +276,26 @@ function ComboBox({
   )
 
   const wrappedOnFocusChange: typeof onFocusChange = useCallback(
-    (isFocused, ...args) => {
+    (isFocused) => {
       // Enforce open on focus
       if (isFocused && !isOpen) {
         setIsOpen(true)
       }
       if (onFocusChange) {
-        onFocusChange(isFocused, ...args)
+        onFocusChange(isFocused)
       }
     },
     [isOpen, onFocusChange, setIsOpen]
   )
 
   const wrappedOnInputChange: typeof onInputChange = useCallback(
-    (input, ...args) => {
+    (input) => {
       if (input !== previousInputValue.current) {
         previousInputValue.current = input
         setIsOpen(true)
       }
       if (onInputChange) {
-        onInputChange(input, ...args)
+        onInputChange(input)
       }
     },
     [onInputChange, setIsOpen]
@@ -338,16 +340,16 @@ function ComboBox({
     }
   }, [state, isOpen])
 
-  const buttonRef = useRef(null)
-  const inputRef = useRef(null)
-  const inputInnerRef = useRef(null)
-  const listBoxRef = useRef(null)
-  const popoverRef = useRef(null)
+  const buttonRef = useRef<HTMLDivElement | null>(null)
+  const triggerElRef = useRef<HTMLDivElement | null>(null)
+  const inputInnerRef = useRef<HTMLInputElement | null>(null)
+  const listBoxRef = useRef<HTMLDivElement | null>(null)
+  const popoverRef = useRef<HTMLDivElement | null>(null)
 
   const { buttonProps, inputProps, listBoxProps } = useComboBox(
     {
       ...comboStateProps,
-      inputRef,
+      inputRef: inputInnerRef,
       buttonRef,
       listBoxRef,
       popoverRef,
@@ -360,7 +362,7 @@ function ComboBox({
   }
 
   const { floating, triggerRef } = useFloatingDropdown({
-    triggerRef: inputRef,
+    triggerRef: triggerElRef,
     width,
     maxHeight,
     placement,
@@ -387,7 +389,7 @@ function ComboBox({
         if (nextChipClose instanceof HTMLElement) {
           nextChipClose.focus?.()
         } else {
-          inputRef.current?.querySelector('input')?.focus?.()
+          inputInnerRef.current?.focus?.()
         }
       }
 
@@ -421,20 +423,24 @@ function ComboBox({
     ) {
       const chip = document.activeElement?.closest(`[${CHIP_ATTR_KEY}]`)
 
+      if (!chip) return
+
       if (dir === 1) {
         if (!chip.nextElementSibling) {
           inputInnerRef.current?.focus()
         } else {
-          chip?.nextElementSibling
-            ?.querySelector(`[${CHIP_CLOSE_ATTR_KEY}]`)
-            // @ts-ignore
-            ?.focus?.()
+          ;(
+            chip.nextElementSibling.querySelector(
+              `[${CHIP_CLOSE_ATTR_KEY}]`
+            ) as HTMLElement | null
+          )?.focus?.()
         }
       } else if (dir === -1) {
-        chip.previousElementSibling
-          ?.querySelector(`[${CHIP_CLOSE_ATTR_KEY}]`)
-          // @ts-ignore
-          ?.focus?.()
+        ;(
+          chip.previousElementSibling?.querySelector(
+            `[${CHIP_CLOSE_ATTR_KEY}]`
+          ) as HTMLElement | null
+        )?.focus?.()
       }
     }
   }, [])
@@ -449,7 +455,7 @@ function ComboBox({
               ref={chipListRef}
               onKeyDown={handleKeyDown}
             >
-              {chips.map((chipProps) => (
+              {chips?.map((chipProps) => (
                 <Chip
                   fillLevel={2}
                   size="small"

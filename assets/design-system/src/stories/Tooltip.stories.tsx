@@ -55,7 +55,7 @@ function ModalExample({
           >
             <Button
               secondary
-              onClick={() => onClose()}
+              onClick={() => onClose?.()}
             >
               Cancel
             </Button>
@@ -67,7 +67,7 @@ function ModalExample({
             <Button
               primary
               marginLeft="medium"
-              onClick={() => onClose()}
+              onClick={() => onClose?.()}
             >
               Done
             </Button>

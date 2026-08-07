@@ -37,7 +37,9 @@ const H1 = styled.h1(({ theme }) => ({
 }))
 
 function Template(args: any) {
-  const [selectedValueRG, setSelectedValueRG] = useState(undefined)
+  const [selectedValueRG, setSelectedValueRG] = useState<string | undefined>(
+    undefined
+  )
   const theme = useTheme()
 
   return (
@@ -60,7 +62,7 @@ function Template(args: any) {
       <Button
         marginTop={theme.spacing.medium}
         onClick={() => {
-          setSelectedValueRG(null)
+          setSelectedValueRG(undefined)
         }}
       >
         Reset

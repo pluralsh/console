@@ -225,10 +225,13 @@ function PagedTemplate({ data, pageSize, ...args }: any) {
     [data, endIndex]
   )
   const hasNextPage = pagedData.length < data.length
-  const [virtualSlice, setVirtualSlice] = useState(null)
+  const [virtualSlice, setVirtualSlice] = useState<{
+    start: { index: number } | undefined
+    end: { index: number } | undefined
+  } | null>(null)
 
   const onVirtualSliceChange = useCallback<
-    ComponentProps<typeof Table>['onVirtualSliceChange']
+    NonNullable<ComponentProps<typeof Table>['onVirtualSliceChange']>
   >((vSlice) => {
     setVirtualSlice(vSlice)
   }, [])
@@ -271,9 +274,9 @@ function PagedTemplate({ data, pageSize, ...args }: any) {
       />
       {virtualSlice && (
         <p style={{ ...theme.partials.text.body2 }}>
-          Virtual slice start index: {virtualSlice.start.index}
+          Virtual slice start index: {virtualSlice.start?.index}
           <br />
-          Virtual slice end index: {virtualSlice.end.index}
+          Virtual slice end index: {virtualSlice.end?.index}
         </p>
       )}
     </>

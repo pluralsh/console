@@ -154,7 +154,7 @@ function NavEntryDoc({
   useEffect(() => {
     if (!subPaths) {
       if (currentHash) {
-        setCurrentHash(null)
+        setCurrentHash(undefined)
       }
     } else if (subPaths.length > 0 && !currentHash) {
       setCurrentHash(subPaths[0].id)

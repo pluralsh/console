@@ -32,11 +32,9 @@ const meta = {
 export default meta
 type Story = StoryObj<any>
 
-const sizes: ComponentProps<typeof Chip>['size'][] = [
-  'small',
-  'medium',
-  'large',
-]
+const sizes = ['small', 'medium', 'large'] as const satisfies readonly NonNullable<
+  ComponentProps<typeof Chip>['size']
+>[]
 
 const severities = SEVERITIES
 

@@ -94,7 +94,7 @@ function TagMultiSelectUnstyled({
           defaultOpen={false}
           triggerButton={
             <MultiSelectMatchButtonContainer>
-              {matchOptions.find((el) => el.value === searchLogic).label}
+              {matchOptions.find((el) => el.value === searchLogic)?.label}
             </MultiSelectMatchButtonContainer>
           }
           {...selectProps}

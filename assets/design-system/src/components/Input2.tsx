@@ -211,11 +211,13 @@ const InputAreaSC = styled.div((_) => ({
   flex: '1 1',
   overflowX: 'auto',
 }))
-const InputContentSC = styled.div<{ $padStart: keyof DefaultTheme['spacing'] }>(
+const InputContentSC = styled.div<{
+  $padStart?: keyof DefaultTheme['spacing'] | null
+}>(
   ({ theme, $padStart }) => ({
     display: 'flex',
     alignSelf: 'stretch',
-    paddingLeft: theme.spacing[$padStart],
+    ...($padStart ? { paddingLeft: theme.spacing[$padStart] } : {}),
   })
 )
 
@@ -266,7 +268,7 @@ function Input2({
       (inputAreaRef.current?.getBoundingClientRect().width ?? 0)
 
     if (scrollDiff > 0) {
-      inputAreaRef.current.scrollTo({
+      inputAreaRef.current?.scrollTo({
         left: scrollDiff + 1,
         behavior: 'smooth',
       })

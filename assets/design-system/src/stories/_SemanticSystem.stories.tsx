@@ -11,7 +11,6 @@ import type { Meta, StoryObj } from '@storybook/react'
 
 const meta = {
   title: 'Semantic System',
-  component: null,
 } satisfies Meta<any>
 
 export default meta
@@ -95,7 +94,7 @@ function Shadows() {
 }
 
 const RadiusedBox = styled(FilledBox)<{ $radius?: 'medium' | 'large' }>(
-  ({ theme, $radius: radius }) => ({
+  ({ theme, $radius: radius = 'medium' }) => ({
     borderRadius: theme.borderRadiuses[radius],
   })
 )
@@ -123,7 +122,9 @@ const BorderedBox = styled(RadiusedBox).attrs(
   () => ({ radius: 'medium' }) as any
 )<{
   border?: string
-}>(({ theme, border }) => ({ border: (theme.borders as any)[border] }))
+}>(({ theme, border }) => ({
+  border: border ? (theme.borders as any)[border] : undefined,
+}))
 
 function BoxBorders() {
   const { borders } = useTheme()
@@ -142,7 +143,7 @@ function BoxBorders() {
 
 const ScrollbarBox = styled(FilledBox)<{
   $fillLevel?: FillLevel
-}>(({ theme, $fillLevel: fillLevel }) => ({
+}>(({ theme, $fillLevel: fillLevel = 0 }) => ({
   ...theme.partials.scrollBar({ fillLevel }),
   ...theme.partials.text.caption,
   backgroundColor: (theme.colors as any)[fillLevelToBGColor[fillLevel]],

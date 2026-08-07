@@ -15,7 +15,7 @@ import Tooltip, { type TooltipProps } from './Tooltip'
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type Type = 'secondary' | 'tertiary' | 'floating'
 
-function typeToBG(theme: DefaultTheme): Record<Type, string> {
+function typeToBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: 'transparent',
     tertiary: 'transparent',
@@ -26,7 +26,7 @@ function typeToBG(theme: DefaultTheme): Record<Type, string> {
   }
 }
 
-function typeToHoverBG(theme: DefaultTheme): Record<Type, string> {
+function typeToHoverBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: theme.colors['action-input-hover'],
     tertiary: theme.colors['action-input-hover'],
@@ -37,7 +37,7 @@ function typeToHoverBG(theme: DefaultTheme): Record<Type, string> {
   }
 }
 
-function typeToSelectedBG(theme: DefaultTheme): Record<Type, string> {
+function typeToSelectedBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: undefined,
     tertiary: undefined,
@@ -48,7 +48,7 @@ function typeToSelectedBG(theme: DefaultTheme): Record<Type, string> {
   }
 }
 
-function typeToFocusBG(theme: DefaultTheme): Record<Type, string> {
+function typeToFocusBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: undefined,
     tertiary: undefined,

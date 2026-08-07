@@ -21,7 +21,7 @@ type UseSelectComboStatePropsArgs<T extends TType> = Pick<
 > & {
   setIsOpen: (open: boolean) => void
   stateRef: RefObject<ListState<object> | null>
-  nextFocusedKeyRef: RefObject<Key>
+  nextFocusedKeyRef: RefObject<Key | null>
 }
 
 type UseSelectComboStatePropsReturn<T extends TType> = Pick<
@@ -87,7 +87,7 @@ function useSelectComboStateProps<T extends TType>({
           onFooterClick?.()
           if (stateRef.current) {
             nextFocusedKeyRef.current =
-              stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
+              stateRef.current.collection.getKeyBefore(FOOTER_KEY) ?? null
           }
           break
         default:
@@ -106,9 +106,9 @@ const setNextFocusedKey = ({
   state,
   stateRef,
 }: {
-  nextFocusedKeyRef: RefObject<Key>
+  nextFocusedKeyRef: RefObject<Key | null>
   state: ListState<object>
-  stateRef: RefObject<ListState<object>>
+  stateRef: RefObject<ListState<object> | null>
 }) => {
   stateRef.current = state
 

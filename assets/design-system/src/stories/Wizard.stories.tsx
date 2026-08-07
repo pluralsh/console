@@ -32,7 +32,7 @@ interface FormData {
 
 function Application({ ...props }: any): ReactElement<any> {
   const { active, setData } = useActive<FormData>()
-  const [domain, setDomain] = useState<string>(active?.data?.domain)
+  const [domain, setDomain] = useState<string>(active?.data?.domain ?? '')
 
   // Build our form data
   const data = useMemo<FormData>(() => ({ domain }), [domain])

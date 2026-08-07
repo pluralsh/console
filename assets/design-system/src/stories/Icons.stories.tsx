@@ -65,10 +65,10 @@ const AppIcon = styled.div<{ $backgroundColor: string }>(
     width: theme.spacing.xxxlarge,
     hyphens: 'none',
     wordBreak: 'break-all',
-    fontSize: '0.75rem',
     minWidth: '8em',
     textAlign: 'center',
     ...theme.partials.text.caption,
+    fontSize: '0.75rem',
     backgroundColor: $backgroundColor,
   })
 )

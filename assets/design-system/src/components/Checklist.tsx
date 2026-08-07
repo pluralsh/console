@@ -123,13 +123,17 @@ function ChecklistUnstyled({
     useState<number>(-1)
 
   const onSelectionChangeWrapper = useCallback(
-    (idx: number) =>
-      idx < children.length && idx > -1 ? onSelectionChange(idx) : undefined,
+    (idx: number | null) => {
+      if (idx === null || idx >= children.length || idx < 0) return
+      onSelectionChange?.(idx)
+    },
     [children, onSelectionChange]
   )
   const onFocusChangeWrapper = useCallback(
-    (idx: number) =>
-      idx < children.length && idx > -1 ? onFocusChange(idx) : undefined,
+    (idx: number) => {
+      if (idx >= children.length || idx < -1) return
+      onFocusChange?.(idx)
+    },
     [children, onFocusChange]
   )
 
@@ -142,7 +146,7 @@ function ChecklistUnstyled({
           index={index}
           selected={selectedKey === index}
           focused={focusedKey === index}
-          completed={completedKey >= index}
+          completed={(completedKey ?? -1) >= index}
           onSelectionChange={onSelectionChangeWrapper}
           onFocusChange={onFocusChangeWrapper}
         >
@@ -170,6 +174,8 @@ function ChecklistUnstyled({
   })
 
   useEffect(() => {
+    if (!itemsContainerRef.current || !finishedContainerRef.current) return
+
     const maxItemContainerHeight = Math.max(
       itemContainerHeight,
       itemsContainerRef.current.getBoundingClientRect().height
@@ -202,7 +208,7 @@ function ChecklistUnstyled({
       >
         <div
           className="header"
-          onClick={() => onOpenChange(!isOpen)}
+          onClick={() => onOpenChange?.(!isOpen)}
         >
           <div>{label}</div>
           <DropdownArrowIcon className={isOpen ? 'arrowUp' : 'arrowDown'} />

@@ -123,7 +123,7 @@ const items = [
     key: 'sushi',
     label: 'Sushi',
     description: 'With ham and cheese',
-    chips: null,
+    chips: [],
     version: '0.2.26',
   },
   {
@@ -226,7 +226,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
 
   useTestKeyCapture()
 
-  const [selectedKey, setSelectedKey] = useState<Key>()
+  const [selectedKey, setSelectedKey] = useState<Key | null>(null)
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
 
@@ -331,7 +331,9 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           }}
           defaultOpen={false}
           leftContent={<SearchIcon />}
-          rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
+          rightContent={
+            <ListBoxItemChipList chips={curItem?.chips ?? []} />
+          }
           dropdownFooterFixed={
             <ListBoxFooterPlus onClick={createNewHandler}>
               Create new
@@ -397,18 +399,18 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             rightContent={
-              curItem && (
+              curItem ? (
                 <ListBoxItemChipList
                   maxVisible={0}
                   showExtra
                   chips={curItem.chips}
                 />
-              )
+              ) : undefined
             }
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -444,18 +446,18 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             rightContent={
-              curItem && (
+              curItem ? (
                 <ListBoxItemChipList
                   maxVisible={0}
                   showExtra
                   chips={curItem.chips}
                 />
-              )
+              ) : undefined
             }
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -523,7 +525,9 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           }}
           defaultOpen={false}
           leftContent={<SearchIcon />}
-          rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
+          rightContent={
+            <ListBoxItemChipList chips={curItem?.chips ?? []} />
+          }
           dropdownFooterFixed={
             <ListBoxFooterPlus onClick={createNewHandler}>
               Create new
@@ -590,9 +594,9 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -629,18 +633,18 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             rightContent={
-              curItem && (
+              curItem ? (
                 <ListBoxItemChipList
                   maxVisible={0}
                   showExtra
                   chips={curItem.chips}
                 />
-              )
+              ) : undefined
             }
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (

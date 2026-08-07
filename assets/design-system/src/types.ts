@@ -41,14 +41,16 @@ export function sanitizeSeverity<T extends SeverityExt>(
 
     severity = 'danger'
   }
-  if (opts.allowList.includes(severity as any)) {
+  const allowList = opts.allowList ?? []
+
+  if (allowList.includes(severity as any)) {
     return severity as T
   }
   console.warn(
     `Warning: Severity of "${severity}" is not allowed. Using default of "${opts.default}"`
   )
 
-  return opts.allowList.includes('neutral' as T)
+  return allowList.includes('neutral' as T)
     ? ('neutral' as T)
     : opts.default
 }

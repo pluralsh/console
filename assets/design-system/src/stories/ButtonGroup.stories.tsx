@@ -1,5 +1,5 @@
 import { Div, Flex, H1 } from 'honorable'
-import { useRef, useState } from 'react'
+import { type ComponentProps, useRef, useState } from 'react'
 
 import { type Key } from '@react-types/shared'
 
@@ -46,7 +46,9 @@ const tabs = {
 }
 
 function TemplateBasic(args: any) {
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef(null) as unknown as ComponentProps<
+    typeof TabList
+  >['stateRef']
   const [selectedKey, setSelectedKey] = useState<Key>('1')
   const orientation = 'horizontal'
   const tabListStateProps: TabListStateProps = {

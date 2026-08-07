@@ -59,21 +59,21 @@ function Template({ label, ...args }: ComponentProps<typeof TextSwitch>) {
       flexDirection="column"
     >
       <TextSwitch
+        {...args}
         name="radio-group-controlled1"
         label={label || 'Match'}
         value={selectedValue1}
         onChange={(value) => setSelectedValue1(value as string)}
         options={options1}
-        {...args}
       />
       <TextSwitch
+        {...args}
         name="radio-group-controlled2"
         label={label || 'Options'}
         labelPosition="end"
         value={selectedValue2}
         onChange={(value) => setSelectedValue2(value as string)}
         options={options2}
-        {...args}
       />
     </Flex>
   )

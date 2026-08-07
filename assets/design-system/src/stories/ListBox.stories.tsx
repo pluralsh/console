@@ -102,7 +102,7 @@ const items = [
     key: 'sushi',
     label: 'Sushi',
     description: 'With ham and cheese',
-    chips: null,
+    chips: [],
     version: '0.2.26',
   },
   {
@@ -261,9 +261,9 @@ function Template() {
             setSelectedKey(key)
           }}
           footer={
-            shownLimit < items.length && (
+            shownLimit < items.length ? (
               <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-            )
+            ) : undefined
           }
           onFooterClick={() => {
             setShownLimit(shownLimit + shownStep)

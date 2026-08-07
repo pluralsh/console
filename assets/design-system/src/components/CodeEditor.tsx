@@ -49,7 +49,7 @@ export default function CodeEditor({
   const parentFillLevel = useFillLevel()
   const theme = useTheme()
   const monaco = useMonaco()
-  const [current, setCurrent] = useState<string>(value)
+  const [current, setCurrent] = useState<string>(value ?? '')
   const [copied, setCopied] = useState<boolean>(false)
   const changed = current !== value
 
@@ -115,8 +115,8 @@ export default function CodeEditor({
           language={language}
           value={value}
           onChange={(v) => {
-            setCurrent(v)
-            if (onChange) onChange(v)
+            setCurrent(v ?? '')
+            if (onChange) onChange(v ?? '')
           }}
           options={mergedOptions}
           theme={theme.mode === 'light' ? 'plural-light' : 'plural-dark'}

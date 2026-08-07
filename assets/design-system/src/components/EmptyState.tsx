@@ -32,7 +32,7 @@ const IconSC = styled.div(({ theme }) => ({
 function EmptyState({
   message,
   description,
-  icon = null,
+  icon,
   children,
   ...props
 }: EmptyStateProps) {

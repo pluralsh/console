@@ -121,7 +121,7 @@ const items: Item[] = [
     key: 'sushi',
     label: 'Sushi',
     description: 'With ham and cheese',
-    chips: null,
+    chips: undefined,
     version: '0.2.26',
   },
   {
@@ -391,7 +391,7 @@ function TagsTemplate({
     setInputValue(value)
   }
 
-  let newKey = inputValue
+  let newKey: string | null = inputValue
     .toLowerCase()
     .replaceAll(/\s+/g, '-')
     .replaceAll(/[^a-z-]/g, '')
@@ -424,7 +424,9 @@ function TagsTemplate({
             inputValue={inputValue}
             onSelectionChange={onSelectionChange}
             onFooterClick={() => {
-              setSelectedKeys(new Set([...selectedKeys, newKey]))
+              if (newKey) {
+                setSelectedKeys(new Set([...selectedKeys, newKey]))
+              }
               setInputValue('')
               setIsOpen(false)
             }}

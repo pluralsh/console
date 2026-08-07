@@ -4,13 +4,14 @@ import { isEmpty, isEqual } from 'lodash-es'
 import { type ContextProps, type StepConfig, WizardContext } from './context'
 
 const useActive = <T = unknown>() => {
+  const ctx = useContext(WizardContext) as ContextProps<T>
   const {
     steps,
     setSteps,
     active: activeIdx,
-  } = useContext<ContextProps<T>>(WizardContext)
+  } = ctx
   const active: StepConfig<T> = useMemo<StepConfig<T>>(
-    () => steps.at(activeIdx),
+    () => steps.at(activeIdx)!,
     [activeIdx, steps]
   )
   const valid = useMemo(() => active.isDefault || active.isValid, [active])
@@ -24,7 +25,7 @@ const useActive = <T = unknown>() => {
       setSteps((steps) => {
         const active = steps.at(activeIdx)
 
-        if (valid === active.isValid) {
+        if (!active || valid === active.isValid) {
           return steps
         }
 
@@ -44,7 +45,7 @@ const useActive = <T = unknown>() => {
       setSteps((steps) => {
         const active = steps.at(activeIdx)
 
-        if (completed === active.isCompleted) {
+        if (!active || completed === active.isCompleted) {
           return steps
         }
 
@@ -64,7 +65,7 @@ const useActive = <T = unknown>() => {
       setSteps((steps) => {
         const active = steps.at(activeIdx)
 
-        if (isEmpty(data) || isEqual(data, active.data)) {
+        if (!active || isEmpty(data) || isEqual(data, active.data)) {
           return steps
         }
 
@@ -90,31 +91,34 @@ const useActive = <T = unknown>() => {
 }
 
 const useNavigation = () => {
-  const { steps, setSteps, active, setActive, setCompleted } =
-    useContext(WizardContext)
+  const { steps, setSteps, active, setActive, setCompleted } = useContext(
+    WizardContext
+  ) as ContextProps
 
   const onNext = useCallback(() => {
     const currentStep = steps.at(active)
+    if (!currentStep) return -1
     const idx = steps.findIndex((s) => s.key === currentStep.key)
     let nextIdx = idx + 1
 
     if (idx < 0) return -1
     if (idx === steps.length - 1) return idx
 
-    while (steps.at(nextIdx).isPlaceholder) nextIdx++
+    while (steps.at(nextIdx)?.isPlaceholder) nextIdx++
 
     setActive(nextIdx)
   }, [steps, active, setActive])
 
   const onBack = useCallback(() => {
     const currentStep = steps.at(active)
+    if (!currentStep) return -1
     const idx = steps.findIndex((s) => s.key === currentStep.key)
     let prevIdx = idx - 1
 
     if (idx < 0) return -1
     if (idx === 0) return idx
 
-    while (steps.at(prevIdx).isPlaceholder) prevIdx--
+    while (steps.at(prevIdx)?.isPlaceholder) prevIdx--
 
     setActive(prevIdx)
   }, [steps, active, setActive])
@@ -159,7 +163,7 @@ const useNavigation = () => {
 }
 
 const usePicker = () => {
-  const { steps, setSteps } = useContext(WizardContext)
+  const { steps, setSteps } = useContext(WizardContext) as ContextProps
 
   const onSelect = useCallback(
     (elem: StepConfig) => {
@@ -203,7 +207,7 @@ const usePicker = () => {
 }
 
 const useStepper = <T = unknown>() => {
-  const { steps } = useContext<ContextProps<T>>(WizardContext)
+  const { steps } = useContext(WizardContext) as ContextProps<T>
   const selected = useMemo(
     () => steps.filter((step) => !step.isDefault && !step.isPlaceholder),
     [steps]

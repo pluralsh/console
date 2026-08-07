@@ -1,5 +1,5 @@
 import { Button, Div, Flex, H1 } from 'honorable'
-import { useRef, useState } from 'react'
+import { type ComponentProps, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
@@ -108,7 +108,9 @@ const moreTabs = {
 }
 
 function TemplateBasic(args: any) {
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef(null) as unknown as ComponentProps<
+    typeof TabList
+  >['stateRef']
   const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const orientation = args.orientation || 'horizontal'
   const tabListStateProps: TabListStateProps = {
@@ -229,7 +231,9 @@ function MyCustomTab2({ selectedKey, ...props }: any) {
 }
 
 function TemplateComplex() {
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef(null) as unknown as ComponentProps<
+    typeof TabList
+  >['stateRef']
   const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const orientation = 'vertical'
   const tabListStateProps: TabListStateProps = {

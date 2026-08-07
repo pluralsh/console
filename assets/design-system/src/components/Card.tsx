@@ -209,7 +209,7 @@ function Card({
           <HeaderSC
             $fillLevel={headerFillLevel}
             $selected={selected}
-            $size={size}
+            $size={size ?? 'medium'}
             $cornerSize={cornerSize}
             {...headerProps}
           >

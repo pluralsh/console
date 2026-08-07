@@ -54,7 +54,7 @@ function Highlight({
   const lines = useMemo(() => children.split(/\r?\n/), [children])
 
   useLayoutEffect(() => {
-    if (hljs.getLanguage(language) && codeRef.current) {
+    if (language && hljs.getLanguage(language) && codeRef.current) {
       delete codeRef.current.dataset.highlighted
       hljs.highlightElement(codeRef.current)
     }

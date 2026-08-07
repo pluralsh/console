@@ -76,7 +76,7 @@ function Tooltip({
   label,
   placement = 'right',
   displayOn = 'hover',
-  manualOpen = null,
+  manualOpen,
   arrowProps = {},
   strategy = 'fixed',
   arrow: showArrow = true,
@@ -141,7 +141,7 @@ function Tooltip({
 
   // Preserve the consumer's ref
   const childrenRef = useMemo(
-    () => mergeRefs([refs.setReference, children.props?.ref]),
+    () => mergeRefs([refs.setReference, children?.props?.ref]),
     [refs.setReference, children]
   )
 
@@ -160,23 +160,26 @@ function Tooltip({
     left: 'right',
   }[finalPlacementSide]
 
-  const transformOrigin = {
-    top: 'top center',
-    right: 'center right',
-    bottom: 'bottom center',
-    left: 'center left',
-  }[staticSide]
+  const transformOrigin = staticSide
+    ? {
+        top: 'top center',
+        right: 'center right',
+        bottom: 'bottom center',
+        left: 'center left',
+      }[staticSide]
+    : undefined
   return (
     <>
-      {cloneElement(
-        children,
-        getReferenceProps(
-          mergeProps(passThroughProps, children.props, {
-            [TOOLTIP_TRIGGER_ATTRIBUTE]: 'true',
-            ref: childrenRef,
-          })
-        )
-      )}
+      {children &&
+        cloneElement(
+          children,
+          getReferenceProps(
+            mergeProps(passThroughProps, children.props, {
+              [TOOLTIP_TRIGGER_ATTRIBUTE]: 'true',
+              ref: childrenRef,
+            })
+          )
+        )}
       <WrapWithIf
         condition={portal}
         wrapper={
@@ -208,7 +211,7 @@ function Tooltip({
             {...getFloatingProps()}
           >
             {label}
-            {showArrow && (
+            {showArrow && staticSide && (
               <div
                 ref={arrowRef}
                 style={{
