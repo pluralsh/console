@@ -2341,6 +2341,9 @@ type AgentRun {
   "the agent run this run consumed"
   consumed: ID
 
+  "whether this run is a follow-up to a pull request"
+  followup: Boolean
+
   "the programming language used in the agent run"
   language: AgentRunLanguage
 

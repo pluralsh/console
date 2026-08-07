@@ -8,6 +8,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Tools do
     Console.AI.Tools.Workbench.Integration.Gitlab.MergeRequestRead,
     Console.AI.Tools.Workbench.Integration.Gitlab.IssueRead,
     Console.AI.Tools.Workbench.Integration.Gitlab.CreateNote,
+    Console.AI.Tools.Workbench.Integration.Gitlab.UpdateNote,
     Console.AI.Tools.Workbench.Integration.Gitlab.AwardEmojiOnNote
   ]
 

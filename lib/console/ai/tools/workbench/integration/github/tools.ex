@@ -5,6 +5,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
 
   @issues [
     Console.AI.Tools.Workbench.Integration.Github.AddIssueComment,
+    Console.AI.Tools.Workbench.Integration.Github.UpdateComment,
     Console.AI.Tools.Workbench.Integration.Github.IssueRead,
     Console.AI.Tools.Workbench.Integration.Github.ListIssues,
     Console.AI.Tools.Workbench.Integration.Github.SearchIssues
@@ -15,6 +16,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
     Console.AI.Tools.Workbench.Integration.Github.AddReactionToPullRequestComment,
     Console.AI.Tools.Workbench.Integration.Github.RemoveReactionFromPullRequestComment,
     Console.AI.Tools.Workbench.Integration.Github.AddReplyToPullRequestComment,
+    Console.AI.Tools.Workbench.Integration.Github.UpdateComment,
     Console.AI.Tools.Workbench.Integration.Github.ClosePullRequest,
     Console.AI.Tools.Workbench.Integration.Github.ListPullRequests,
     Console.AI.Tools.Workbench.Integration.Github.PullRequestRead,
@@ -41,7 +43,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Tools do
     Console.AI.Tools.Workbench.Integration.Github.ListSecretScanningAlerts
   ]
 
-  @default @issues ++ @pull_requests ++ @repos ++ @security
+  @default Enum.uniq(@issues ++ @pull_requests ++ @repos ++ @security)
 
   def expand(%WorkbenchTool{} = tool) do
     Enum.map(modules_for(tool), &struct(&1, tool: tool))

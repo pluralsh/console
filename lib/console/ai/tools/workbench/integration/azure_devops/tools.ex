@@ -8,6 +8,7 @@ defmodule Console.AI.Tools.Workbench.Integration.AzureDevops.Tools do
     Console.AI.Tools.Workbench.Integration.AzureDevops.PullRequestRead,
     Console.AI.Tools.Workbench.Integration.AzureDevops.WorkItemRead,
     Console.AI.Tools.Workbench.Integration.AzureDevops.CreateComment,
+    Console.AI.Tools.Workbench.Integration.AzureDevops.UpdateComment,
     Console.AI.Tools.Workbench.Integration.AzureDevops.ReactToComment
   ]
 

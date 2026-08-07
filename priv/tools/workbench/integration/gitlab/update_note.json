@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "description": "Edit an existing GitLab merge request or issue note. Supplying discussion_id edits a note in that discussion thread.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Project ID or path."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["merge_request", "issue"],
+      "description": "Resource containing the note."
+    },
+    "iid": {
+      "type": "integer",
+      "description": "Merge request or issue IID."
+    },
+    "note_id": {
+      "type": "integer",
+      "description": "ID of the note to update."
+    },
+    "discussion_id": {
+      "type": "string",
+      "description": "Optional discussion ID. Set this for a threaded or inline discussion note; omit it for a regular note."
+    },
+    "body": {
+      "type": "string",
+      "description": "Replacement GitLab Flavored Markdown body."
+    }
+  },
+  "required": ["project", "resource", "iid", "note_id", "body"],
+  "additionalProperties": false
+}

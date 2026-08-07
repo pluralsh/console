@@ -416,6 +416,8 @@ type AgentRun struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// whether this run is a follow-up to a pull request
+	Followup *bool `json:"followup,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify

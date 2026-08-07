@@ -401,7 +401,7 @@ defmodule Console.Deployments.Agents do
     run = get_agent_run!(run_id)
           |> Repo.preload([runtime: :connection, workbench_job_activity_agent_run: :workbench_job_activity])
     shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
-    with {:ok, run} <- allow(run, user, :creds),
+    with {:ok, run} <- allow(run, user, :pr),
          %ScmConnection{} = conn <- scm_connection(run),
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},

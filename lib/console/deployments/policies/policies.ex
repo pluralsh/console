@@ -76,6 +76,8 @@ defmodule Console.Deployments.Policies do
   def can?(%User{}, %WorkbenchJobActivity{}, :approve),
     do: {:error, "activity must be in needs approval status to be approved"}
 
+  def can?(%User{}, %AgentRun{followup: true}, :pr),
+    do: {:error, "follow up agent runs cannot create additional pull requests"}
   def can?(%Cluster{id: id}, %AgentRun{} = run, _) do
     case Repo.preload(run, [:runtime]) do
       %AgentRun{runtime: %AgentRuntime{cluster_id: ^id}} -> :pass

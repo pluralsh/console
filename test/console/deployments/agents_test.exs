@@ -375,6 +375,20 @@ defmodule Console.Deployments.AgentsTest do
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
+    test "it blocks pull requests for follow-up runs" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, followup: true)
+
+      assert {:error, "follow up agent runs cannot create additional pull requests"} =
+               Agents.agent_pull_request(%{
+                 title: "a pr",
+                 body: "a body",
+                 repository: "https://github.com/pluralsh/console.git",
+                 base: "main",
+                 head: "plrl/ai/pr-test"
+               }, run.id, user)
+    end
+
     test "it blocks pull requests until runs requiring approval are approved" do
       user    = insert(:user)
       runtime = insert(:agent_runtime, cluster: insert(:cluster))

@@ -480,6 +480,8 @@ export type AgentRun = {
   error?: Maybe<Scalars['String']['output']>;
   /** the flow this agent is associated with */
   flow?: Maybe<Flow>;
+  /** whether this run is a follow-up to a pull request */
+  followup?: Maybe<Scalars['Boolean']['output']>;
   /** the head branch this agent run has created for its pull request */
   headBranch?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
