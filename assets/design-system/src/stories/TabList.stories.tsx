@@ -1,8 +1,9 @@
 import { Button, Div, Flex, H1 } from 'honorable'
-import { useRef, useState } from 'react'
+import { type ComponentProps, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   Tab,
@@ -12,10 +13,13 @@ import {
   TabPanel,
 } from '../index'
 
-export default {
+const meta = {
   title: 'Tab List',
   component: TabList,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const tabs = {
   lions: {
@@ -104,7 +108,9 @@ const moreTabs = {
 }
 
 function TemplateBasic(args: any) {
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef(null) as unknown as ComponentProps<
+    typeof TabList
+  >['stateRef']
   const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const orientation = args.orientation || 'horizontal'
   const tabListStateProps: TabListStateProps = {
@@ -225,7 +231,9 @@ function MyCustomTab2({ selectedKey, ...props }: any) {
 }
 
 function TemplateComplex() {
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef(null) as unknown as ComponentProps<
+    typeof TabList
+  >['stateRef']
   const [selectedKey, setSelectedKey] = useState<Key>('lions')
   const orientation = 'vertical'
   const tabListStateProps: TabListStateProps = {
@@ -319,19 +327,27 @@ function TemplateComplex() {
   )
 }
 
-export const Default = TemplateBasic.bind({})
-Default.args = {}
-
-export const Vertical = TemplateBasic.bind({})
-Vertical.args = {
-  orientation: 'vertical',
+export const Default: Story = {
+  render: TemplateBasic,
+  args: {},
 }
 
-export const Scrollable = TemplateBasic.bind({})
-Scrollable.args = {
-  scrollable: true,
-  tabs: moreTabs,
+export const Vertical: Story = {
+  render: TemplateBasic,
+  args: {
+    orientation: 'vertical',
+  },
 }
 
-export const AdvancedContent = TemplateComplex.bind({})
-AdvancedContent.args = {}
+export const Scrollable: Story = {
+  render: TemplateBasic,
+  args: {
+    scrollable: true,
+    tabs: moreTabs,
+  },
+}
+
+export const AdvancedContent: Story = {
+  render: TemplateComplex,
+  args: {},
+}

@@ -51,6 +51,7 @@ export function ClusterTagsTemplate({
 }: {
   onFillLevel: any
   withTitleContent: boolean
+  loading?: boolean
 }) {
   const theme = useTheme()
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
@@ -155,10 +156,9 @@ export function ClusterTagsTemplate({
             }}
             maxHeight={232}
             allowsEmptyCollection
-            startIcon={<TagIcon />}
+            startIcon={withTitleContent ? null : <TagIcon />}
             {...(withTitleContent
               ? {
-                  startIcon: null,
                   titleContent: (
                     <>
                       <TagIcon marginRight="small" />

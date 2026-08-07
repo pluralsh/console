@@ -142,10 +142,12 @@ function CenteringWrapper({ children }: { children: ReactNode }) {
   const [windowHeight, setWindowHeight] = useState<number | null>(
     window.innerHeight
   )
-  const ref = useRef<HTMLDivElement>(undefined)
+  const ref = useRef<HTMLDivElement>(null)
 
   const onSizeChange = useCallback(() => {
-    const nextTop = ref.current.getBoundingClientRect().top
+    const nextTop = ref.current?.getBoundingClientRect().top
+
+    if (nextTop == null) return
 
     if (nextTop !== top) {
       setTop(nextTop)

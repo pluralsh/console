@@ -16,11 +16,15 @@ import { Picker, type StepConfig } from '../components/wizard/Picker'
 import { Step } from '../components/wizard/Step'
 import { Stepper } from '../components/wizard/Stepper'
 import { Wizard } from '../components/wizard/Wizard'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Wizard',
   component: Wizard,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 interface FormData {
   domain: string
@@ -28,7 +32,7 @@ interface FormData {
 
 function Application({ ...props }: any): ReactElement<any> {
   const { active, setData } = useActive<FormData>()
-  const [domain, setDomain] = useState<string>(active?.data?.domain)
+  const [domain, setDomain] = useState<string>(active?.data?.domain ?? '')
 
   // Build our form data
   const data = useMemo<FormData>(() => ({ domain }), [domain])
@@ -246,10 +250,12 @@ function StandaloneTemplate() {
   )
 }
 
-export const Default = ModalTemplate.bind({})
+export const Default: Story = {
+  render: ModalTemplate,
+  args: {},
+}
 
-Default.args = {}
-
-export const Standalone = StandaloneTemplate.bind({})
-
-Standalone.args = {}
+export const Standalone: Story = {
+  render: StandaloneTemplate,
+  args: {},
+}

@@ -30,7 +30,7 @@ const toStepperSteps = (items: Array<StepConfig>): StepperSteps =>
   })
 
 function ContextAwareStepper(): JSX.Element {
-  const { steps: wizardSteps, limit } = useContext(WizardContext)
+  const { steps: wizardSteps, limit } = useContext(WizardContext)!
   const { isFirst } = useNavigation()
   const { active } = useActive()
   const { selectedCount } = usePicker()

@@ -1,12 +1,6 @@
 import { type Key, type Selection } from '@react-types/shared'
 import { isNil } from 'lodash-es'
-import {
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
-  useCallback,
-  useRef,
-} from 'react'
+import { type RefObject, useCallback, useRef } from 'react'
 import { type ListState } from 'react-stately'
 
 import { type ComboBoxProps } from './ComboBox'
@@ -25,9 +19,9 @@ type UseSelectComboStatePropsArgs<T extends TType> = Pick<
   | 'onHeaderClick'
   | 'children'
 > & {
-  setIsOpen: Dispatch<SetStateAction<boolean>>
+  setIsOpen: (open: boolean) => void
   stateRef: RefObject<ListState<object> | null>
-  nextFocusedKeyRef: RefObject<Key>
+  nextFocusedKeyRef: RefObject<Key | null>
 }
 
 type UseSelectComboStatePropsReturn<T extends TType> = Pick<
@@ -66,10 +60,10 @@ function useSelectComboStateProps<T extends TType>({
       }
       setIsOpen(open)
       if (onOpenChange) {
-        onOpenChange.apply(this, [open, ...args])
+        onOpenChange(open, ...args)
       }
     },
-    onSelectionChange: (newKeyOrKeys: Key | Selection, ...args: any) => {
+    onSelectionChange: (newKeyOrKeys: Key | Selection) => {
       let newKey: Key = ''
 
       if (
@@ -93,11 +87,13 @@ function useSelectComboStateProps<T extends TType>({
           onFooterClick?.()
           if (stateRef.current) {
             nextFocusedKeyRef.current =
-              stateRef?.current?.collection?.getKeyBefore(FOOTER_KEY)
+              stateRef.current.collection.getKeyBefore(FOOTER_KEY) ?? null
           }
           break
         default:
-          onSelectionChange?.apply(this, [newKeyOrKeys, ...args])
+          ;(
+            onSelectionChange as ((key: Key | Selection) => void) | undefined
+          )?.(newKeyOrKeys)
           break
       }
     },
@@ -110,9 +106,9 @@ const setNextFocusedKey = ({
   state,
   stateRef,
 }: {
-  nextFocusedKeyRef: RefObject<Key>
+  nextFocusedKeyRef: RefObject<Key | null>
   state: ListState<object>
-  stateRef: RefObject<ListState<object>>
+  stateRef: RefObject<ListState<object> | null>
 }) => {
   stateRef.current = state
 

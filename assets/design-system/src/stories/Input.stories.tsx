@@ -9,11 +9,15 @@ import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
 import Input2 from '../components/Input2'
 import { Card } from '../index'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Input',
   component: Input,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function InputSet(props: any) {
   return (
@@ -167,73 +171,81 @@ function CustomInputV2Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {}
-
-export const Error = Template.bind({})
-
-Error.args = {
-  error: true,
+export const Default: Story = {
+  render: Template,
+  args: {},
 }
 
-export const Placeholder = Template.bind({})
-
-Placeholder.args = {
-  placeholder: 'A neat placeholder!',
+export const Error: Story = {
+  render: Template,
+  args: {
+    error: true,
+  },
 }
 
-export const Disabled = Template.bind({})
-
-Disabled.args = {
-  placeholder: 'Disabled placeholder',
-  disabled: true,
+export const Placeholder: Story = {
+  render: Template,
+  args: {
+    placeholder: 'A neat placeholder!',
+  },
 }
 
-export const PrefixSuffix = CustomInputTemplate.bind({})
-
-PrefixSuffix.args = {
-  prefix: 'app.',
-  suffix: '.plural.sh',
+export const Disabled: Story = {
+  render: Template,
+  args: {
+    placeholder: 'Disabled placeholder',
+    disabled: true,
+  },
 }
 
-export const Multiline = CustomInputTemplate.bind({})
-
-Multiline.args = {
-  multiline: true,
-  minRows: 3,
+export const PrefixSuffix: Story = {
+  render: CustomInputTemplate,
+  args: {
+    prefix: 'app.',
+    suffix: '.plural.sh',
+  },
 }
 
-export const TitleContent = CustomInputTemplate.bind({})
-
-TitleContent.args = {
-  startIcon: <SearchIcon />,
-  titleContent: (
-    <>
-      <BrowseAppsIcon marginRight="small" />
-      Marketplace
-    </>
-  ),
-  placeholder: 'Search the marketplace',
-  showClearButton: true,
-  suffix: '',
+export const Multiline: Story = {
+  render: CustomInputTemplate,
+  args: {
+    multiline: true,
+    minRows: 3,
+  },
 }
 
-export const Version2 = CustomInputV2Template.bind({})
+export const TitleContent: Story = {
+  render: CustomInputTemplate,
+  args: {
+    startIcon: <SearchIcon />,
+    titleContent: (
+      <>
+        <BrowseAppsIcon marginRight="small" />
+        Marketplace
+      </>
+    ),
+    placeholder: 'Search the marketplace',
+    showClearButton: true,
+    suffix: '',
+  },
+}
 
-Version2.args = {
-  startIcon: <SearchIcon />,
-  // endIcon: <TagIcon />,
-  titleContent: (
-    <>
-      <BrowseAppsIcon marginRight="small" />
-      Marketplace
-    </>
-  ),
-  placeholder: 'Search the marketplace',
-  showClearButton: true,
-  suffix: '',
-  prefix: '',
-  disabled: false,
-  error: false,
+export const Version2: Story = {
+  render: CustomInputV2Template,
+  args: {
+    startIcon: <SearchIcon />,
+    // endIcon: <TagIcon />,
+    titleContent: (
+      <>
+        <BrowseAppsIcon marginRight="small" />
+        Marketplace
+      </>
+    ),
+    placeholder: 'Search the marketplace',
+    showClearButton: true,
+    suffix: '',
+    prefix: '',
+    disabled: false,
+    error: false,
+  },
 }

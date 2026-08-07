@@ -85,14 +85,16 @@ function TagMultiSelectUnstyled({
         <Select
           label="Pick search logic"
           selectedKey={searchLogic}
-          onSelectionChange={(value: 'AND' | 'OR') => {
-            setSearchLogic(value)
-            onChangeMatchType?.(value)
+          onSelectionChange={(value) => {
+            const matchType = value as 'AND' | 'OR'
+
+            setSearchLogic(matchType)
+            onChangeMatchType?.(matchType)
           }}
           defaultOpen={false}
           triggerButton={
             <MultiSelectMatchButtonContainer>
-              {matchOptions.find((el) => el.value === searchLogic).label}
+              {matchOptions.find((el) => el.value === searchLogic)?.label}
             </MultiSelectMatchButtonContainer>
           }
           {...selectProps}

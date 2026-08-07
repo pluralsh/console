@@ -17,8 +17,8 @@ export default function TagMultiSelectTemplate({
   onFilterChange?: (value: string) => void
   onChangeMatchType?: (value: 'AND' | 'OR') => void
 }) {
-  const [selected, setSelected] = useState<Set<Key>>()
-  const [input, setInput] = useState<string>()
+  const [selected, setSelected] = useState<Set<Key>>(new Set())
+  const [input, setInput] = useState<string>('')
 
   return (
     <div style={{ width: `${width}%` }}>

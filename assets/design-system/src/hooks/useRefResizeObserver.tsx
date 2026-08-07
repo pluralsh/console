@@ -1,7 +1,7 @@
 import { type RefCallback, type RefObject, useCallback, useRef } from 'react'
 
 export function useRefResizeObserver<T extends HTMLElement>(
-  ref: RefObject<T>,
+  ref: RefObject<T | null>,
   callback: (entry: ResizeObserverEntry, observer: ResizeObserver) => void,
   options: ResizeObserverOptions = {}
 ) {

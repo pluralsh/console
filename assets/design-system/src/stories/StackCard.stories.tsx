@@ -1,11 +1,15 @@
 import { Flex } from 'honorable'
 
 import StackCard from '../components/StackCard'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'StackCard',
   component: StackCard,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -53,14 +57,15 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  apps: [
-    { name: 'Airflow', imageUrl: '/logos/airflow-logo.svg' },
-    { name: 'Airbyte', imageUrl: '/logos/airbyte-logo.svg' },
-    { name: 'Console', imageUrl: '/logos/console-logo.png' },
-    { name: 'Crossplane', imageUrl: '/logos/crossplane-logo.png' },
-  ],
-  width: '420px',
+export const Default: Story = {
+  render: Template,
+  args: {
+    apps: [
+      { name: 'Airflow', imageUrl: '/logos/airflow-logo.svg' },
+      { name: 'Airbyte', imageUrl: '/logos/airbyte-logo.svg' },
+      { name: 'Console', imageUrl: '/logos/console-logo.png' },
+      { name: 'Crossplane', imageUrl: '/logos/crossplane-logo.png' },
+    ],
+    width: '420px',
+  },
 }

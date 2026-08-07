@@ -25,7 +25,7 @@ export function useIsScrolling(
 
       const scrollHandler = () => {
         setIsScrolling(true)
-        window.clearTimeout(timeout.current)
+        window.clearTimeout(timeout.current ?? undefined)
         timeout.current = window.setTimeout(() => {
           setIsScrolling(false)
         }, restDelay)
@@ -47,7 +47,7 @@ export function useOnVirtualSliceChange({
 }: {
   virtualRows: VirtualItem[]
   virtualizeRows: boolean
-  onVirtualSliceChange: (slice: VirtualSlice) => void
+  onVirtualSliceChange?: (slice: VirtualSlice) => void
 }) {
   const sliceStartRow = virtualRows[0]
   const sliceEndRow: VirtualItem = virtualRows[virtualRows.length - 1]

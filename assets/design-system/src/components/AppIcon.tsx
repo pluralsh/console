@@ -85,7 +85,7 @@ export function toInitials(name: string) {
     .map((n) => n.charAt(0).toUpperCase())
 
   if (initials.length > 2) {
-    initials = [initials[0], last(initials)]
+    initials = [initials[0], last(initials) ?? '']
   }
 
   return initials.join('')
@@ -101,17 +101,17 @@ const AppIconSC = styled.div<{
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: theme.colors[$color],
+  backgroundColor: $color ? theme.colors[$color] : undefined,
   borderRadius: theme.borderRadiuses.medium,
   border: $hasBorder ? theme.borders.default : 'none',
-  borderColor: theme.colors[$borderColor],
+  borderColor: $borderColor ? theme.colors[$borderColor] : undefined,
   width: $boxSize,
   height: $boxSize,
   minWidth: $boxSize,
   minHeight: $boxSize,
   cursor: $clickable ? 'pointer' : 'auto',
   overflow: 'hidden',
-  _hover: $clickable ? { backgroundColor: $borderColor } : null,
+  _hover: $clickable ? { backgroundColor: $borderColor } : undefined,
 }))
 
 const InitialsSC = styled.div<{
@@ -141,7 +141,7 @@ function AppIcon({
   hue,
   clickable = false,
   url,
-  icon = null,
+  icon,
   alt,
   name,
   initials,
@@ -175,13 +175,13 @@ function AppIcon({
       $hasBorder={hasBorder}
       $boxSize={boxSize}
       $clickable={clickable}
-      onClick={clickable ? onClose : null}
+      onClick={clickable ? onClose : undefined}
       {...props}
     >
       {url ? (
         <ImgSC
           src={url}
-          alt={alt}
+          alt={alt ?? undefined}
           $iconWidth={iconWidth}
         />
       ) : (
