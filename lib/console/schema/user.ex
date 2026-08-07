@@ -10,7 +10,7 @@ defmodule Console.Schema.User do
     Chat
   }
 
-  defenum Homepage, clusters: 0, workbenches: 1
+  defenum Homepage, clusters: 0, workbenches: 1, flows: 2
 
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 

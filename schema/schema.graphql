@@ -16215,6 +16215,7 @@ enum PersonaRole {
 enum Homepage {
   CLUSTERS
   WORKBENCHES
+  FLOWS
 }
 
 enum ReadType {

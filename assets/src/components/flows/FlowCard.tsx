@@ -13,7 +13,9 @@ import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
+import { useLogin } from 'components/contexts'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
+import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import pluralize from 'pluralize'
 import { useState } from 'react'
@@ -29,6 +31,12 @@ export function FlowCard({
   refetch: () => void
 }) {
   const navigate = useNavigate()
+  const { personaConfiguration } = useLogin()
+  const showPermissionsBtn = hasAccess(
+    personaConfiguration,
+    'flows.permissions'
+  )
+  const showPipelines = hasAccess(personaConfiguration, 'flows.pipelines')
   const [hovered, setHovered] = useState(false)
   const [showPermissions, setShowPermissions] = useState(false)
   const numAlerts = flow.alerts?.edges?.length ?? 0
@@ -67,40 +75,46 @@ export function FlowCard({
         </ContentSC>
         <FooterSC $parentHover={hovered}>
           <Flex gap="xsmall">
-            <IconFrame
-              clickable
-              tooltip="Permissions"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setShowPermissions(!showPermissions)
-              }}
-              icon={<PeopleIcon color="icon-light" />}
-            />
-            <IconFrame
-              clickable
-              tooltip="View pipelines for this flow"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                navigate(`${flowPath}/pipelines`)
-              }}
-              icon={<GitPullIcon color="icon-light" />}
-            />
+            {showPermissionsBtn && (
+              <IconFrame
+                clickable
+                tooltip="Permissions"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setShowPermissions(!showPermissions)
+                }}
+                icon={<PeopleIcon color="icon-light" />}
+              />
+            )}
+            {showPipelines && (
+              <IconFrame
+                clickable
+                tooltip="View pipelines for this flow"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  navigate(`${flowPath}/pipelines`)
+                }}
+                icon={<GitPullIcon color="icon-light" />}
+              />
+            )}
           </Flex>
 
           <ArrowRightIcon color="icon-light" />
         </FooterSC>
       </CardSC>
-      <PermissionsModal
-        id={flow.id}
-        type={PermissionsIdType.Flow}
-        bindings={flow}
-        header="Flow permissions"
-        refetch={refetch}
-        open={showPermissions}
-        onClose={() => setShowPermissions(false)}
-      />
+      {showPermissionsBtn && (
+        <PermissionsModal
+          id={flow.id}
+          type={PermissionsIdType.Flow}
+          bindings={flow}
+          header="Flow permissions"
+          refetch={refetch}
+          open={showPermissions}
+          onClose={() => setShowPermissions(false)}
+        />
+      )}
     </>
   )
 }

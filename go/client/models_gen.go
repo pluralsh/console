@@ -13922,16 +13922,18 @@ type Homepage string
 const (
 	HomepageClusters    Homepage = "CLUSTERS"
 	HomepageWorkbenches Homepage = "WORKBENCHES"
+	HomepageFlows       Homepage = "FLOWS"
 )
 
 var AllHomepage = []Homepage{
 	HomepageClusters,
 	HomepageWorkbenches,
+	HomepageFlows,
 }
 
 func (e Homepage) IsValid() bool {
 	switch e {
-	case HomepageClusters, HomepageWorkbenches:
+	case HomepageClusters, HomepageWorkbenches, HomepageFlows:
 		return true
 	}
 	return false

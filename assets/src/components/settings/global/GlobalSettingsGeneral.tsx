@@ -4,6 +4,7 @@ import {
   ClusterIcon,
   Divider,
   Flex,
+  FlowIcon,
   IconFrame,
   ListBoxItem,
   MoonIcon,
@@ -127,6 +128,10 @@ const homepageOptions: Record<Homepage, { label: string; icon: ReactElement }> =
     [Homepage.Clusters]: {
       label: 'Clusters overview',
       icon: <ClusterIcon size={16} />,
+    },
+    [Homepage.Flows]: {
+      label: 'Flows',
+      icon: <FlowIcon size={16} />,
     },
   }
 

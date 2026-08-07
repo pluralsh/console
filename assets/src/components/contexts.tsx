@@ -22,6 +22,7 @@ import {
 import {
   MeQuery,
   PersonaConfigurationFragment,
+  PersonaRole,
   useLogoutMutation,
   useRefreshLazyQuery,
 } from '../generated/graphql'
@@ -53,6 +54,15 @@ export const useIsManager = () => {
     me?.personas?.find(
       (persona) => persona?.configuration?.home?.manager === true
     ) !== undefined
+  )
+}
+
+export const useIsDeveloperPersona = () => {
+  const { me } = useLogin()
+
+  return (
+    me?.personas?.some((persona) => persona?.role === PersonaRole.Developer) ??
+    false
   )
 }
 

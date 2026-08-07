@@ -1,5 +1,9 @@
 import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useCloudSetupUnfinished, useLogin } from 'components/contexts'
+import {
+  useCloudSetupUnfinished,
+  useIsDeveloperPersona,
+  useLogin,
+} from 'components/contexts'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 import { HomeWorkbenches } from './HomeWorkbenches.tsx'
 
@@ -19,6 +23,8 @@ import {
   VersionCompliance,
 } from 'generated/graphql.ts'
 import { useMemo, useState } from 'react'
+import { Navigate } from 'react-router-dom'
+import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { isNonNullable } from 'utils/isNonNullable.ts'
@@ -47,7 +53,20 @@ const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
   const { me } = useLogin()
-  if (me?.homepage === Homepage.Workbenches) return <HomeWorkbenches />
+  const isDeveloperPersona = useIsDeveloperPersona()
+  const homepage =
+    isDeveloperPersona || me?.homepage === Homepage.Flows
+      ? Homepage.Flows
+      : me?.homepage
+
+  if (homepage === Homepage.Flows)
+    return (
+      <Navigate
+        replace
+        to={FLOWS_ABS_PATH}
+      />
+    )
+  if (homepage === Homepage.Workbenches) return <HomeWorkbenches />
   return <HomeClusters />
 }
 
