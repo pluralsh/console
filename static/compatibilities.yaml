@@ -1746,6 +1746,113 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.30.0
+    kube: ['1.35']
+    requirements:
+    - name: Alloy
+      version: 4.3.1-bb.1
+    - name: Anchore Enterprise
+      version: 3.25.1-bb.1
+    - name: Argocd
+      version: 10.1.4-bb.1
+    - name: Authservice
+      version: 1.1.5-bb.5
+    - name: Bbctl
+      version: 3.0.1-bb.3
+    - name: Eck Operator
+      version: 3.4.1-bb.1
+    - name: Elasticsearch Kibana
+      version: 1.40.0-bb.2
+    - name: External Secrets Operator
+      version: 2.7.0-bb.2
+    - name: Fluentbit
+      version: 0.57.9-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.1
+    - name: Gatekeeper
+      version: 3.22.2-bb.2
+    - name: Gateway Api
+      version: 1.5.1-bb.1
+    - name: Gitlab
+      version: 9.11.8-bb.0
+    - name: Gitlab Runner
+      version: 0.88.3-bb.2
+    - name: Grafana
+      version: 10.5.15-bb.6
+    - name: Harbor
+      version: 1.19.1-bb.2
+    - name: Headlamp
+      version: 0.40.0-bb.2
+    - name: Istio Cni
+      version: 1.30.3-bb.0
+    - name: Istio Crds
+      version: 1.30.3-bb.0
+    - name: Istio Gateway
+      version: 1.30.3-bb.0
+    - name: Istiod
+      version: 1.30.3-bb.0
+    - name: Keycloak
+      version: 7.2.2-bb.1
+    - name: Kiali
+      version: 2.28.0-bb.1
+    - name: Kyverno
+      version: 3.8.2-bb.0
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.9.0-bb.0
+    - name: Loki
+      version: 6.55.0-bb.2
+    - name: Mattermost
+      version: 11.9.0-bb.5
+    - name: Mattermost Operator
+      version: 1.25.7-bb.2
+    - name: Metrics Server
+      version: 3.13.1-bb.1
+    - name: Mimir
+      version: 6.1.0-bb.1
+    - name: Minio
+      version: 7.1.1-bb.21
+    - name: Minio Operator
+      version: 7.1.1-bb.8
+    - name: Monitoring
+      version: 87.10.1-bb.3
+    - name: Neuvector
+      version: 2.11.0-bb.2
+    - name: Prometheus Operator Crds
+      version: 30.0.1-bb.0
+    - name: Renovate
+      version: 46.31.6-bb.5
+    - name: Sonarqube
+      version: 2026.3.1-bb.2
+    - name: Tempo
+      version: 2.1.0-bb.2
+    - name: Thanos
+      version: 17.4.0-bb.3
+    - name: Twistlock
+      version: 0.28.0-bb.2
+    - name: Vault
+      version: 0.33.0-bb.4
+    - name: Velero
+      version: 12.1.0-bb.2
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.3-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [BigBang 3.30.0 primarily updates bundled component chart versions
+          (patch/minor bumps across most packages)., "Notable minor bumps include:\
+          \ Mimir 6.0.6\u21926.1.0, Kyverno 3.8.1\u21923.8.2, Kyverno Reporter 3.7.4\u2192\
+          3.9.0, NeuVector 2.10.3\u21922.11.0, Elastic/Kibana 1.39\u21921.40, Alloy\
+          \ 4.2.2\u21924.3.1, and Istio 1.30.2\u21921.30.3."]
+      features: ['General dependency refresh: newer upstream component versions with
+          bugfixes and security patches.', Observability stack refresh via Alloy and
+          Mimir bumps; policy/reporting refresh via Kyverno and Kyverno Reporter bumps.]
+      breaking_changes: []
+    chart_version: 3.30.0
+    images: []
   - version: 3.29.0
     kube: ['1.35']
     requirements:
