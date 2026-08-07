@@ -31,6 +31,12 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - name: Setup Blacksmith Builder
         uses: useblacksmith/setup-docker-builder@v1
+      - name: Login to Docker Hardened Images
+        uses: docker/login-action@v3
+        with:
+          registry: dhi.io
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build softserve image for local test
         uses: useblacksmith/build-push-action@v2
         with:
@@ -100,6 +106,12 @@ jobs:
       - name: Login to Docker
         uses: docker/login-action@v3
         with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - name: Login to Docker Hardened Images
+        uses: docker/login-action@v3
+        with:
+          registry: dhi.io
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - uses: docker/login-action@v3
