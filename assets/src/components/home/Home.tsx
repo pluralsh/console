@@ -1,5 +1,9 @@
 import { Breadcrumb, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useCloudSetupUnfinished, useLogin } from 'components/contexts'
+import {
+  useCloudSetupUnfinished,
+  useIsDeveloperPersona,
+  useLogin,
+} from 'components/contexts'
 import { useOnboarded } from '../contexts/DeploymentSettingsContext.tsx'
 import { HomeWorkbenches } from './HomeWorkbenches.tsx'
 
@@ -13,7 +17,6 @@ import {
   ClustersQueryVariables,
   ClustersRowFragment,
   Homepage,
-  PersonaRole,
   useClusterHealthScoresQuery,
   useClustersQuery,
   useUpgradeStatisticsQuery,
@@ -50,9 +53,7 @@ const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export function Home() {
   const { me } = useLogin()
-  const isDeveloperPersona = me?.personas?.some(
-    (persona) => persona?.role === PersonaRole.Developer
-  )
+  const isDeveloperPersona = useIsDeveloperPersona()
   const homepage =
     isDeveloperPersona || me?.homepage === Homepage.Flows
       ? Homepage.Flows
