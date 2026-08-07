@@ -266,10 +266,7 @@ function ComboBox({
   const wrappedOnSelectionChange: typeof onSelectionChange = useCallback(
     (newKey, ...args) => {
       if (onSelectionChange) {
-        onSelectionChange.apply(this, [
-          typeof newKey === 'string' ? newKey : '',
-          ...args,
-        ])
+        onSelectionChange(typeof newKey === 'string' ? newKey : '', ...args)
         setIsOpen(false)
       }
     },

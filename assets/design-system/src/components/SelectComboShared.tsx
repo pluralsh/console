@@ -66,10 +66,10 @@ function useSelectComboStateProps<T extends TType>({
       }
       setIsOpen(open)
       if (onOpenChange) {
-        onOpenChange.apply(this, [open, ...args])
+        onOpenChange(open, ...args)
       }
     },
-    onSelectionChange: (newKeyOrKeys: Key | Selection, ...args: any) => {
+    onSelectionChange: (newKeyOrKeys: Key | Selection) => {
       let newKey: Key = ''
 
       if (
@@ -97,7 +97,9 @@ function useSelectComboStateProps<T extends TType>({
           }
           break
         default:
-          onSelectionChange?.apply(this, [newKeyOrKeys, ...args])
+          ;(onSelectionChange as ((key: Key | Selection) => void) | undefined)?.(
+            newKeyOrKeys
+          )
           break
       }
     },
