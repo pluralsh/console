@@ -4,12 +4,15 @@ import { type ComponentProps, useState } from 'react'
 import { IconFrame, InfoIcon, Modal } from '..'
 
 import Tooltip from '../components/Tooltip'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Tooltip',
   component: Tooltip,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function CornerBox({ ref, ...props }: FlexProps) {
   return (
@@ -164,6 +167,8 @@ function Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: Story = {
+  render: Template,
+  args: {},
+}
 
-Default.args = {}

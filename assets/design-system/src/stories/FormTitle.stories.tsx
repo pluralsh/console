@@ -1,10 +1,13 @@
 import FormTitle from '../components/FormTitle'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'FormTitle',
   component: FormTitle,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -15,9 +18,11 @@ function Template(args: any) {
   )
 }
 
-export const Primary: StoryFn = Template.bind({})
-
-Primary.args = {
-  title: 'Automatic Upgrades',
-  message: 'Determine how this application is updated on a regular basis.',
+export const Primary: Story = {
+  render: Template,
+  args: {
+    title: 'Automatic Upgrades',
+    message: 'Determine how this application is updated on a regular basis.',
+  },
 }
+

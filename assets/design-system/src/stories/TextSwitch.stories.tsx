@@ -1,15 +1,10 @@
-import {
-  type ComponentProps,
-  type ComponentType,
-  type RefAttributes,
-  useState,
-} from 'react'
+import { type ComponentProps, useState } from 'react'
 import { Flex } from 'honorable'
 
-import TextSwitch, { type TextSwitchProps } from '../components/TextSwitch'
-import type { StoryFn } from '@storybook/react'
+import TextSwitch from '../components/TextSwitch'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'TextSwitch',
   component: TextSwitch,
   argTypes: {
@@ -18,17 +13,9 @@ export default {
       control: { type: 'select' },
     },
   },
-} as {
-  title: string
-  component: ComponentType<TextSwitchProps & RefAttributes<any>>
-  argTypes: {
-    size: {
-      options: string[]
-      control: { type: string }
-    }
-  }
-}
+} satisfies Meta<any>
 
+export default meta
 const options1 = [
   {
     value: 'AND',
@@ -92,9 +79,11 @@ function Template({ label, ...args }: ComponentProps<typeof TextSwitch>) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  size: 'small',
-  label: '',
-  isDisabled: false,
-} as const satisfies Partial<ComponentProps<typeof TextSwitch>>
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    size: 'small',
+    label: '',
+    isDisabled: false,
+  } as const satisfies Partial<ComponentProps<typeof TextSwitch>>,
+}

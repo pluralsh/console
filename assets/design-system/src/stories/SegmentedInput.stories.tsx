@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import styled from 'styled-components'
 import { Segment, SegmentedInput } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 type StoryProps = {
   format: string
@@ -27,7 +27,7 @@ const EMPTY_SEGMENTS = [
   { length: 4, max: 9999, name: 'YYYY' },
 ]
 
-export default {
+const meta = {
   title: 'SegmentedInput',
   component: SegmentedInput,
   argTypes: {
@@ -41,8 +41,9 @@ export default {
       defaultValue: '/',
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const WrapperSC = styled.div(({ theme }) => ({
   maxWidth: '300px',
   marginBottom: theme.spacing.large,
@@ -101,16 +102,21 @@ function Template({ format, separator, segments }: StoryProps) {
   }
 }
 
-export const DateInput: StoryFn = Template.bind({})
-DateInput.args = {
-  format: 'date',
-  separator: '/',
-  segments: DATE_SEGMENTS,
+export const DateInput: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    format: 'date',
+    separator: '/',
+    segments: DATE_SEGMENTS,
+  },
 }
 
-export const CustomFormatInput: StoryFn = Template.bind({})
-CustomFormatInput.args = {
-  format: 'custom',
-  separator: '.',
-  segments: CUSTOM_SEGMENTS,
+export const CustomFormatInput: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    format: 'custom',
+    separator: '.',
+    segments: CUSTOM_SEGMENTS,
+  },
 }
+

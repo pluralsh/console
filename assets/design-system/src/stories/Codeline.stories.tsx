@@ -1,12 +1,15 @@
 import { Flex } from 'honorable'
 
 import { Codeline } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Codeline',
   component: Codeline,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -47,14 +50,17 @@ function CustomCopyTemplate(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  children: 'npm i @pluralsh/design-system',
+export const Default: Story = {
+  render: Template,
+  args: {
+    children: 'npm i @pluralsh/design-system',
+  },
 }
 
-export const CustomCopy: StoryFn = CustomCopyTemplate.bind({})
-
-CustomCopy.args = {
-  children: 'npm i @pluralsh/design-system',
+export const CustomCopy: Story = {
+  render: CustomCopyTemplate,
+  args: {
+    children: 'npm i @pluralsh/design-system',
+  },
 }
+

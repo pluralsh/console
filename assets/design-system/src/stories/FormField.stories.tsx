@@ -5,12 +5,15 @@ import Input from '../components/Input'
 import FormField from '../components/FormField'
 import MagnifyingGlassIcon from '../components/icons/MagnifyingGlassIcon'
 import CaretDownIcon from '../components/icons/CaretDownIcon'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'FormField',
   component: FormField,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   const [value, setValue] = useState('')
@@ -85,9 +88,9 @@ function AllSizesTemplate(args: any) {
   )
 }
 
-export const Full: StoryFn = AllSizesTemplate.bind({})
-
-Full.args = {
+export const Full: Story = {
+  render: AllSizesTemplate,
+  args: {
   label: 'Label',
   caption: 'Action',
   maxLength: 120,
@@ -100,84 +103,95 @@ Full.args = {
       mx="3px"
     />
   ),
+},
 }
 
-export const FullError: StoryFn = AllSizesTemplate.bind({})
-
-FullError.args = {
+export const FullError: Story = {
+  render: AllSizesTemplate,
+  args: {
   ...Full.args,
   ...{
     label: 'Password',
     hint: 'Something is wrong',
     error: true,
   },
+},
 }
 
-export const FullDisabled: StoryFn = AllSizesTemplate.bind({})
-
-FullDisabled.args = {
+export const FullDisabled: Story = {
+  render: AllSizesTemplate,
+  args: {
   ...Full.args,
   ...{
     disabled: true,
   },
+},
 }
 
-export const Horizontal: StoryFn = Template.bind({})
-
-Horizontal.args = {
-  ...Full.args,
-  layout: 'horizontal',
+export const Horizontal: Story = {
+  render: Template,
+  args: {
+    ...Full.args,
+    layout: 'horizontal',
+  },
 }
 
-export const Default: StoryFn = AllSizesTemplate.bind({})
-
-Default.args = {}
-
-export const Label: StoryFn = AllSizesTemplate.bind({})
-
-Label.args = {
-  label: 'Email',
+export const Default: Story = {
+  render: AllSizesTemplate,
+  args: {},
 }
 
-export const Required: StoryFn = AllSizesTemplate.bind({})
-
-Required.args = {
-  label: 'Email',
-  required: true,
+export const Label: Story = {
+  render: AllSizesTemplate,
+  args: {
+    label: 'Email',
+  },
 }
 
-export const Caption: StoryFn = AllSizesTemplate.bind({})
-
-Caption.args = {
-  label: 'Password',
-  caption: 'A short caption',
+export const Required: Story = {
+  render: AllSizesTemplate,
+  args: {
+    label: 'Email',
+    required: true,
+  },
 }
 
-export const LongCaption: StoryFn = AllSizesTemplate.bind({})
+export const Caption: Story = {
+  render: AllSizesTemplate,
+  args: {
+    label: 'Password',
+    caption: 'A short caption',
+  },
+}
 
-LongCaption.args = {
+export const LongCaption: Story = {
+  render: AllSizesTemplate,
+  args: {
   label: 'Label',
   caption:
     'This will probably truncate, because it is ever so so longer than usual.',
+},
 }
 
-export const HintText: StoryFn = AllSizesTemplate.bind({})
-
-HintText.args = {
-  label: 'Label',
-  hint: 'Some hint text',
+export const HintText: Story = {
+  render: AllSizesTemplate,
+  args: {
+    label: 'Label',
+    hint: 'Some hint text',
+  },
 }
 
-export const MaxLength: StoryFn = AllSizesTemplate.bind({})
-
-MaxLength.args = {
-  label: 'Label',
-  maxLength: 30,
+export const MaxLength: Story = {
+  render: AllSizesTemplate,
+  args: {
+    label: 'Label',
+    maxLength: 30,
+  },
 }
 
-export const ArbitraryHintContent: StoryFn = AllSizesTemplate.bind({})
-
-ArbitraryHintContent.args = {
+export const ArbitraryHintContent: Story = {
+  render: AllSizesTemplate,
+  args: {
   label: 'Label',
   hint: (
     <Div
@@ -191,13 +205,16 @@ ArbitraryHintContent.args = {
       Put whatever you want in the hint!
     </Div>
   ),
+},
 }
 
-export const Multiline: StoryFn = AllSizesTemplate.bind({})
-
-Multiline.args = {
-  label: 'Label',
-  multiline: true,
-  minRows: 3,
-  maxLength: 200,
+export const Multiline: Story = {
+  render: AllSizesTemplate,
+  args: {
+    label: 'Label',
+    multiline: true,
+    minRows: 3,
+    maxLength: 200,
+  },
 }
+

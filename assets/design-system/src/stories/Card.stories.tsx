@@ -6,9 +6,9 @@ import { type FillLevel } from '../components/contexts/FillLevelContext'
 
 import type { CardProps } from '../components/Card'
 import { Card, Flex, InfoOutlineIcon, Tooltip } from '../index'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Card',
   component: null,
   argTypes: {
@@ -20,8 +20,9 @@ export default {
       control: { type: 'text' },
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const fillLevels: (FillLevel | undefined)[] = [undefined, 1, 2, 3]
 const cornerSizes: ComponentProps<typeof Card>['cornerSize'][] = [
   'medium',
@@ -138,8 +139,9 @@ function FillLevelTemplate({
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
   selected: false,
   clickable: false,
   disabled: false,
@@ -158,18 +160,22 @@ Default.args = {
       </Tooltip>
     </Flex>
   ),
+},
 }
 
-export const Clickable: StoryFn = Template.bind({})
-Clickable.args = {
+export const Clickable: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
   ...Default.args,
   ...{
     clickable: true,
   },
+},
 }
 
-export const WithFillLevelContext: StoryFn = FillLevelTemplate.bind({})
-WithFillLevelContext.args = {
+export const WithFillLevelContext: StoryObj<Parameters<typeof FillLevelTemplate>[0]> = {
+  render: FillLevelTemplate,
+  args: {
   selected: false,
   clickable: false,
   disabled: false,
@@ -187,4 +193,6 @@ WithFillLevelContext.args = {
       </Tooltip>
     </Flex>
   ),
+},
 }
+

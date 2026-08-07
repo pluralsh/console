@@ -6,12 +6,15 @@ import ErrorIcon from '../components/icons/ErrorIcon'
 import Tab from '../components/Tab'
 import SubTab from '../components/SubTab'
 import Card from '../components/Card'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Tab',
   component: Tab,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   const [active, setActive] = useState(0)
@@ -71,9 +74,10 @@ function Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}
 
 function Template2(args: any) {
   const [active, setActive] = useState(0)
@@ -140,10 +144,11 @@ function Template2(args: any) {
   )
 }
 
-export const Vertical: StoryFn = Template2.bind({})
-
-Vertical.args = {
-  vertical: true,
+export const Vertical: Story = {
+  render: Template2,
+  args: {
+    vertical: true,
+  },
 }
 
 function SubTabs(args: any) {
@@ -203,8 +208,10 @@ const contentCardStyle = {
   justifyContent: 'center',
 }
 
-export const Subtab: StoryFn = SubTabTemplate.bind({})
-
-Subtab.args = {
-  disabled: false,
+export const Subtab: Story = {
+  render: SubTabTemplate,
+  args: {
+    disabled: false,
+  },
 }
+

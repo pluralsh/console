@@ -2,12 +2,15 @@ import { A, P } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import { Banner, Callout, Card, InlineCode } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Inline Code',
   component: InlineCode,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const FlexWrap = styled.div(({ theme }) => ({
   display: 'flex',
@@ -112,5 +115,8 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}
+

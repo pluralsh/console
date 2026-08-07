@@ -3,9 +3,9 @@ import { createElement } from 'react'
 
 import * as icons from '../icons'
 import * as logos from '../plural-logos'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Icons',
   component: icons.MarketPlusIcon,
   argTypes: {
@@ -43,7 +43,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const AppIcon = styled.div<{ $backgroundColor: string }>(
   ({ theme, $backgroundColor = 'transparent' }) => ({
@@ -168,58 +171,73 @@ function LogosTemplate({
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  color: 'icon-default',
-  size: 16,
-  fullColor: false,
-  backgroundColor: 'transparent',
+export const Default: Story = {
+  render: Template,
+  args: {
+    color: 'icon-default',
+    size: 16,
+    fullColor: false,
+    backgroundColor: 'transparent',
+  },
 }
 
-export const Xlarge: StoryFn = Template.bind({})
-Xlarge.args = {
-  color: 'icon-default',
-  size: 32,
-  fullColor: false,
-  backgroundColor: 'transparent',
+export const Xlarge: Story = {
+  render: Template,
+  args: {
+    color: 'icon-default',
+    size: 32,
+    fullColor: false,
+    backgroundColor: 'transparent',
+  },
 }
 
-export const Large: StoryFn = Template.bind({})
-Large.args = {
-  color: 'icon-default',
-  size: 24,
-  fullColor: false,
-  backgroundColor: 'transparent',
+export const Large: Story = {
+  render: Template,
+  args: {
+    color: 'icon-default',
+    size: 24,
+    fullColor: false,
+    backgroundColor: 'transparent',
+  },
 }
 
-export const Small: StoryFn = Template.bind({})
-Small.args = {
-  color: 'icon-default',
-  size: 12,
-  fullColor: false,
-  backgroundColor: 'transparent',
+export const Small: Story = {
+  render: Template,
+  args: {
+    color: 'icon-default',
+    size: 12,
+    fullColor: false,
+    backgroundColor: 'transparent',
+  },
 }
 
-export const Color: StoryFn = Template.bind({})
-Color.args = {
-  color: 'icon-primary',
-  fullColor: false,
-  size: 16,
-  backgroundColor: 'transparent',
+export const Color: Story = {
+  render: Template,
+  args: {
+    color: 'icon-primary',
+    fullColor: false,
+    size: 16,
+    backgroundColor: 'transparent',
+  },
 }
 
-export const FullColor: StoryFn = Template.bind({})
-FullColor.args = {
-  color: 'icon-default',
-  fullColor: true,
-  size: 32,
-  backgroundColor: 'transparent',
+export const FullColor: Story = {
+  render: Template,
+  args: {
+    color: 'icon-default',
+    fullColor: true,
+    size: 32,
+    backgroundColor: 'transparent',
+  },
 }
 
-export const PluralLogos: StoryFn = LogosTemplate.bind({})
-PluralLogos.args = {
-  color: 'icon-default',
-  fullColor: true,
-  size: 32,
-  backgroundColor: 'transparent',
+export const PluralLogos: Story = {
+  render: LogosTemplate,
+  args: {
+    color: 'icon-default',
+    fullColor: true,
+    size: 32,
+    backgroundColor: 'transparent',
+  },
 }
+

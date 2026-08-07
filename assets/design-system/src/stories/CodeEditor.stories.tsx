@@ -3,9 +3,9 @@ import { Div, Flex } from 'honorable'
 import { Card, CodeEditor, WrapWithIf } from '..'
 
 import { goCode, jsCode, tfCode } from '../constants'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Code Editor',
   component: CodeEditor,
   argTypes: {
@@ -27,7 +27,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template({ onFillLevel, ...args }: any) {
   return (
@@ -112,10 +115,15 @@ function StretchedTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  options: { lineNumbers: true },
+export const Default: Story = {
+  render: Template,
+  args: {
+    options: { lineNumbers: true },
+  },
 }
 
-export const Stretched: StoryFn = StretchedTemplate.bind({})
-Stretched.args = {}
+export const Stretched: Story = {
+  render: StretchedTemplate,
+  args: {},
+}
+

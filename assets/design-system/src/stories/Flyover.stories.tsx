@@ -5,13 +5,16 @@ import styled from 'styled-components'
 
 import { Button, Card, Code, Flyover, FormField, Input2, SearchIcon } from '..'
 import { jsCode } from '../constants'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Flyover',
   component: Flyover,
   argTypes: {},
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function ExtraContent() {
   return (
@@ -143,25 +146,29 @@ function NonScrollTemplate(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  header: 'Default',
-  asForm: false,
-  scrollable: true,
+export const Default: Story = {
+  render: Template,
+  args: {
+    header: 'Default',
+    asForm: false,
+    scrollable: true,
+  },
 }
 
-export const Form: StoryFn = Template.bind({})
-
-Form.args = {
-  header: 'Form',
-  asForm: true,
-  scrollable: true,
+export const Form: Story = {
+  render: Template,
+  args: {
+    header: 'Form',
+    asForm: true,
+    scrollable: true,
+  },
 }
 
-export const NonScrollable: StoryFn = NonScrollTemplate.bind({})
-
-NonScrollable.args = {
-  header: 'Non-scrollable',
-  scrollable: false,
+export const NonScrollable: Story = {
+  render: NonScrollTemplate,
+  args: {
+    header: 'Non-scrollable',
+    scrollable: false,
+  },
 }
+

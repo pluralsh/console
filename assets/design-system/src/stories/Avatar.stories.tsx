@@ -1,36 +1,44 @@
 import { Avatar } from 'honorable'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Avatar',
   component: Avatar,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return <Avatar {...args} />
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  name: 'Jane Smith',
+export const Default: Story = {
+  render: Template,
+  args: {
+    name: 'Jane Smith',
+  },
 }
 
-export const ComplexName: StoryFn = Template.bind({})
-
-ComplexName.args = {
-  name: 'Edgard Alan Poe',
+export const ComplexName: Story = {
+  render: Template,
+  args: {
+    name: 'Edgard Alan Poe',
+  },
 }
 
-export const Image: StoryFn = Template.bind({})
-
-Image.args = {
-  src: 'https://avatars.githubusercontent.com/u/4154003?v=4',
+export const Image: Story = {
+  render: Template,
+  args: {
+    src: 'https://avatars.githubusercontent.com/u/4154003?v=4',
+  },
 }
 
-export const Small: StoryFn = Template.bind({})
-
-Small.args = {
-  name: 'Jane Smith',
-  size: 32,
+export const Small: Story = {
+  render: Template,
+  args: {
+    name: 'Jane Smith',
+    size: 32,
+  },
 }
+

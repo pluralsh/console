@@ -3,9 +3,9 @@ import { Flex, H3 } from 'honorable'
 import { Card, PluralLogoMark, WrapWithIf } from '..'
 
 import AppIcon from '../components/AppIcon'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'AppIcon',
   component: AppIcon,
   argTypes: {
@@ -34,7 +34,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const sizes = [
   { label: 'Extra Large', size: 'xlarge' },
@@ -105,11 +108,14 @@ function Template({ onFillLevel, icon, ...args }: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  name: 'Michael J Guarino',
-  initials: '',
-  onFillLevel: 0,
-  hue: undefined,
-  clickable: false,
+export const Default: Story = {
+  render: Template,
+  args: {
+    name: 'Michael J Guarino',
+    initials: '',
+    onFillLevel: 0,
+    hue: undefined,
+    clickable: false,
+  },
 }
+

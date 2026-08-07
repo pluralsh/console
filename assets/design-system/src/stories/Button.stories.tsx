@@ -2,9 +2,9 @@ import { useTheme } from 'styled-components'
 import Button from '../components/Button'
 import Flex from '../components/Flex'
 import DownloadIcon from '../components/icons/DownloadIcon'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Button',
   component: Button,
   argTypes: {
@@ -21,7 +21,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function TemplateBase(args: any) {
   return (
@@ -88,57 +91,63 @@ function Template(args: any) {
   )
 }
 
-export const Primary: StoryFn = Template.bind({})
-
-Primary.args = {
-  disabled: false,
-  loading: false,
-  children: 'Primary Button',
+export const Primary: Story = {
+  render: Template,
+  args: {
+    disabled: false,
+    loading: false,
+    children: 'Primary Button',
+  },
 }
 
-export const SecondaryFloating: StoryFn = Template.bind({})
-
-SecondaryFloating.args = {
-  disabled: false,
-  loading: false,
-  children: 'Floating Button',
-  floating: true,
+export const SecondaryFloating: Story = {
+  render: Template,
+  args: {
+    disabled: false,
+    loading: false,
+    children: 'Floating Button',
+    floating: true,
+  },
 }
 
-export const SecondaryOutline: StoryFn = Template.bind({})
-
-SecondaryOutline.args = {
-  disabled: false,
-  loading: false,
-  children: 'Secondary Button',
-  secondary: true,
+export const SecondaryOutline: Story = {
+  render: Template,
+  args: {
+    disabled: false,
+    loading: false,
+    children: 'Secondary Button',
+    secondary: true,
+  },
 }
 
-export const Tertiary: StoryFn = Template.bind({})
-
-Tertiary.args = {
-  disabled: false,
-  loading: false,
-  children: 'Tertiary Button',
-  tertiary: true,
-  padding: '',
+export const Tertiary: Story = {
+  render: Template,
+  args: {
+    disabled: false,
+    loading: false,
+    children: 'Tertiary Button',
+    tertiary: true,
+    padding: '',
+  },
 }
 
-export const TertiaryNoPadding: StoryFn = Template.bind({})
-
-TertiaryNoPadding.args = {
-  disabled: false,
-  loading: false,
-  children: 'Tertiary Button',
-  tertiary: true,
-  padding: 'none',
+export const TertiaryNoPadding: Story = {
+  render: Template,
+  args: {
+    disabled: false,
+    loading: false,
+    children: 'Tertiary Button',
+    tertiary: true,
+    padding: 'none',
+  },
 }
 
-export const Destructive: StoryFn = Template.bind({})
-
-Destructive.args = {
-  disabled: false,
-  loading: false,
-  children: 'Destructive Button',
-  destructive: true,
+export const Destructive: Story = {
+  render: Template,
+  args: {
+    disabled: false,
+    loading: false,
+    children: 'Destructive Button',
+    destructive: true,
+  },
 }

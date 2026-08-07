@@ -9,12 +9,15 @@ import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
 import Input2 from '../components/Input2'
 import { Card } from '../index'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Input',
   component: Input,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function InputSet(props: any) {
   return (
@@ -168,46 +171,52 @@ function CustomInputV2Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {}
-
-export const Error: StoryFn = Template.bind({})
-
-Error.args = {
-  error: true,
+export const Default: Story = {
+  render: Template,
+  args: {},
 }
 
-export const Placeholder: StoryFn = Template.bind({})
-
-Placeholder.args = {
-  placeholder: 'A neat placeholder!',
+export const Error: Story = {
+  render: Template,
+  args: {
+    error: true,
+  },
 }
 
-export const Disabled: StoryFn = Template.bind({})
-
-Disabled.args = {
-  placeholder: 'Disabled placeholder',
-  disabled: true,
+export const Placeholder: Story = {
+  render: Template,
+  args: {
+    placeholder: 'A neat placeholder!',
+  },
 }
 
-export const PrefixSuffix: StoryFn = CustomInputTemplate.bind({})
-
-PrefixSuffix.args = {
-  prefix: 'app.',
-  suffix: '.plural.sh',
+export const Disabled: Story = {
+  render: Template,
+  args: {
+    placeholder: 'Disabled placeholder',
+    disabled: true,
+  },
 }
 
-export const Multiline: StoryFn = CustomInputTemplate.bind({})
-
-Multiline.args = {
-  multiline: true,
-  minRows: 3,
+export const PrefixSuffix: Story = {
+  render: CustomInputTemplate,
+  args: {
+    prefix: 'app.',
+    suffix: '.plural.sh',
+  },
 }
 
-export const TitleContent: StoryFn = CustomInputTemplate.bind({})
+export const Multiline: Story = {
+  render: CustomInputTemplate,
+  args: {
+    multiline: true,
+    minRows: 3,
+  },
+}
 
-TitleContent.args = {
+export const TitleContent: Story = {
+  render: CustomInputTemplate,
+  args: {
   startIcon: <SearchIcon />,
   titleContent: (
     <>
@@ -218,11 +227,12 @@ TitleContent.args = {
   placeholder: 'Search the marketplace',
   showClearButton: true,
   suffix: '',
+},
 }
 
-export const Version2: StoryFn = CustomInputV2Template.bind({})
-
-Version2.args = {
+export const Version2: Story = {
+  render: CustomInputV2Template,
+  args: {
   startIcon: <SearchIcon />,
   // endIcon: <TagIcon />,
   titleContent: (
@@ -237,4 +247,6 @@ Version2.args = {
   prefix: '',
   disabled: false,
   error: false,
+},
 }
+

@@ -1,12 +1,15 @@
 import { Div, Flex, H4 } from 'honorable'
 
 import RepositoryCard from '../components/RepositoryCard'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'RepositoryCard',
   component: RepositoryCard,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -109,9 +112,9 @@ function ListTemplate(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
+export const Default: Story = {
+  render: Template,
+  args: {
   installed: true,
   title: 'Plural',
   priv: true,
@@ -132,7 +135,11 @@ Default.args = {
     'Cricket',
     'Support',
   ],
+},
 }
 
-export const List: StoryFn = ListTemplate.bind({})
-List.args = { width: '500px', ...Default.args }
+export const List: Story = {
+  render: ListTemplate,
+  args: { width: '500px', ...Default.args },
+}
+

@@ -3,12 +3,15 @@ import { Flex } from 'honorable'
 import { goCode, jsCode, tfCode } from '../constants'
 
 import { Divider, Highlight } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Highlight',
   component: Highlight,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
   return (
@@ -27,4 +30,6 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: Story = {
+  render: Template,
+}

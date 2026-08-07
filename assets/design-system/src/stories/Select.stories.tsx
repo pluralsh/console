@@ -2,7 +2,7 @@ import { type ComponentProps, useEffect, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   AppIcon,
@@ -26,9 +26,9 @@ import {
   WrapWithIf,
 } from '../index'
 
-export default {
+const meta = {
   title: 'Select',
-  component: 'Select',
+  component: Select,
   argTypes: {
     onFillLevel: {
       options: [0, 1, 2, 3],
@@ -43,8 +43,9 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const H4 = styled.h4(({ theme }) => ({
   ...theme.partials.text.subtitle1,
   margin: 0,
@@ -663,6 +664,8 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {},
+}
 
-Default.args = {}

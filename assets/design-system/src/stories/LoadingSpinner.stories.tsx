@@ -1,14 +1,17 @@
 import { Div } from 'honorable'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import LoadingSpinner, {
   type LoadingSpinnerProps,
 } from '../components/LoadingSpinner'
 
-export default {
+const meta = {
   title: 'LoadingSpinner',
   component: LoadingSpinner,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: LoadingSpinnerProps) {
   return (
@@ -32,12 +35,14 @@ function Template(args: LoadingSpinnerProps) {
   )
 }
 
-export const Primary: StoryFn = Template.bind({})
-
-Primary.args = {
-  show: true,
-  spinnerDelay: 200,
-  spinnerWidth: 96,
-  centered: true,
-  animateTransitions: true,
+export const Primary: Story = {
+  render: Template,
+  args: {
+    show: true,
+    spinnerDelay: 200,
+    spinnerWidth: 96,
+    centered: true,
+    animateTransitions: true,
+  },
 }
+

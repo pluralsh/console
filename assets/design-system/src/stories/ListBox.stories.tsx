@@ -2,7 +2,7 @@ import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { type Key } from '@react-types/shared'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   AppIcon,
@@ -15,10 +15,13 @@ import {
   PersonIcon,
 } from '../index'
 
-export default {
+const meta = {
   title: 'List Box',
   component: ListBox,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const portrait = (
   <AppIcon
@@ -317,6 +320,8 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: Story = {
+  render: Template,
+  args: {},
+}
 
-Default.args = {}

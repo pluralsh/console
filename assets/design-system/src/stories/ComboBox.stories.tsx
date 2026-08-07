@@ -21,11 +21,11 @@ import {
 
 import { ClusterTagsTemplate } from './ClusterTagsTemplate'
 import TagMultiSelectTemplate from './TagMultiselectTemplate'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Combo Box',
-  component: 'ComboBox',
+  component: ComboBox,
   argTypes: {
     onFillLevel: {
       options: [0, 1, 2, 3],
@@ -40,8 +40,9 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const portrait = (
   <AppIcon
     spacing="none"
@@ -197,6 +198,7 @@ function Template({
 }: {
   onFillLevel: any
   withTitleContent: boolean
+  loading?: boolean
 }) {
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
@@ -214,9 +216,17 @@ function Template({
     [filteredItems]
   )
 
-  const searchResults = useMemo(() => {
+  const searchResults = useMemo((): {
+    item: Item
+    score: number
+    refIndex: number
+  }[] => {
     if (inputValue) {
-      return fuse.search(inputValue)
+      return fuse.search(inputValue).map(({ item, score, refIndex }) => ({
+        item,
+        score: score ?? 1,
+        refIndex,
+      }))
     }
 
     return filteredItems.map((item, i) => ({ item, score: 1, refIndex: i }))
@@ -275,18 +285,16 @@ function Template({
               : {})}
             {...args}
           >
-            {searchResults.map(
-              ({ item, score: _score, refIndex: _refIndex }) => (
-                <ListBoxItem
-                  key={item.key}
-                  label={item.label}
-                  textValue={`${item.label} – ${item.description}`}
-                  description={item.description}
-                  leftContent={portrait}
-                  selected={selectedKeys.has(item.key)}
-                />
-              )
-            )}
+            {searchResults.map(({ item }) => (
+              <ListBoxItem
+                key={item.key}
+                label={item.label}
+                textValue={`${item.label} – ${item.description}`}
+                description={item.description}
+                leftContent={portrait}
+                selected={selectedKeys.has(item.key)}
+              />
+            ))}
           </ComboBox>
           {!(selectedKeys.size === 0) && (
             <ChipList
@@ -321,6 +329,7 @@ function TagsTemplate({
 }: {
   onFillLevel: any
   withTitleContent: boolean
+  loading?: boolean
 }) {
   const [selectedKeys, setSelectedKeys] = useState(new Set<Key>())
   const [inputValue, setInputValue] = useState('')
@@ -351,9 +360,17 @@ function TagsTemplate({
     [filteredItems]
   )
 
-  const searchResults = useMemo(() => {
+  const searchResults = useMemo((): {
+    item: Item
+    score: number
+    refIndex: number
+  }[] => {
     if (inputValue) {
-      return fuse.search(inputValue)
+      return fuse.search(inputValue).map(({ item, score, refIndex }) => ({
+        item,
+        score: score ?? 1,
+        refIndex,
+      }))
     }
 
     return filteredItems.map((item, i) => ({ item, score: 1, refIndex: i }))
@@ -437,16 +454,14 @@ function TagsTemplate({
               : {})}
             {...args}
           >
-            {searchResults.map(
-              ({ item, score: _score, refIndex: _refIndex }) => (
-                <ListBoxItem
-                  key={item.key}
-                  label={item.key}
-                  textValue={`${item.key}`}
-                  selected={selectedKeys.has(item.key)}
-                />
-              )
-            )}
+            {searchResults.map(({ item }) => (
+              <ListBoxItem
+                key={item.key}
+                label={item.key}
+                textValue={`${item.key}`}
+                selected={selectedKeys.has(item.key)}
+              />
+            ))}
           </ComboBox>
           {!(selectedKeys.size === 0) && (
             <ChipList
@@ -474,23 +489,28 @@ function TagsTemplate({
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  loading: false,
-  withTitleContent: false,
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    loading: false,
+    withTitleContent: false,
+  },
 }
 
-export const Tags: StoryFn = TagsTemplate.bind({})
-Tags.args = {
-  loading: false,
-  withTitleContent: false,
+export const Tags: StoryObj<Parameters<typeof TagsTemplate>[0]> = {
+  render: TagsTemplate,
+  args: {
+    loading: false,
+    withTitleContent: false,
+  },
 }
 
-export const ClusterTags: StoryFn = ClusterTagsTemplate.bind({})
-ClusterTags.args = {
-  loading: false,
-  withTitleContent: false,
+export const ClusterTags: StoryObj<Parameters<typeof ClusterTagsTemplate>[0]> = {
+  render: ClusterTagsTemplate,
+  args: {
+    loading: false,
+    withTitleContent: false,
+  },
 }
 
 const TAGS = [
@@ -511,18 +531,21 @@ const TAGS = [
 ]
 const tags = uniqWith(TAGS, isEqual)
 
-export const TagMultiSelect: StoryFn = TagMultiSelectTemplate.bind({})
-TagMultiSelect.args = {
+export const TagMultiSelect: StoryObj<Parameters<typeof TagMultiSelectTemplate>[0]> = {
+  render: TagMultiSelectTemplate,
+  args: {
   loading: false,
   options: tags.map((tag) => `${tag.name}:${tag.value}`),
   width: 100,
-  onSelectedTagsChange: (keys: Set<Key>) => {
+  onSelectedTagsChange: (keys) => {
     console.log('Selected keys:', keys)
   },
-  onFilterChange: (filter: string) => {
+  onFilterChange: (filter) => {
     console.log('Filter:', filter)
   },
-  onChangeMatchType: (matchType: 'AND' | 'OR') => {
+  onChangeMatchType: (matchType) => {
     console.log('Match type: ', matchType)
   },
+},
 }
+

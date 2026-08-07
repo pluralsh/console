@@ -6,9 +6,9 @@ import styled from 'styled-components'
 import { Button, Card, Code, FormField, Input2, Modal, SearchIcon } from '..'
 import { SEVERITIES } from '../components/Modal'
 import { jsCode } from '../constants'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Modal',
   component: Modal,
   args: {
@@ -28,7 +28,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function ExtraContent() {
   return (
@@ -189,28 +192,32 @@ function NonScrollTemplate(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  header: 'Default',
-  form: false,
-  size: 'medium',
-  hasActions: true,
+export const Default: Story = {
+  render: Template,
+  args: {
+    header: 'Default',
+    form: false,
+    size: 'medium',
+    hasActions: true,
+  },
 }
 
-export const Form: StoryFn = Template.bind({})
-
-Form.args = {
-  header: 'Form',
-  form: true,
-  hasActions: true,
+export const Form: Story = {
+  render: Template,
+  args: {
+    header: 'Form',
+    form: true,
+    hasActions: true,
+  },
 }
 
-export const NonScrollable: StoryFn = NonScrollTemplate.bind({})
-
-NonScrollable.args = {
-  header: 'Non-scrollable',
-  size: 'large',
-  scrollable: false,
-  hasActions: true,
+export const NonScrollable: Story = {
+  render: NonScrollTemplate,
+  args: {
+    header: 'Non-scrollable',
+    size: 'large',
+    scrollable: false,
+    hasActions: true,
+  },
 }
+

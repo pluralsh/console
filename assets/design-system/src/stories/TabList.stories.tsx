@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   Tab,
@@ -13,10 +13,13 @@ import {
   TabPanel,
 } from '../index'
 
-export default {
+const meta = {
   title: 'Tab List',
   component: TabList,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const tabs = {
   lions: {
@@ -320,19 +323,28 @@ function TemplateComplex() {
   )
 }
 
-export const Default: StoryFn = TemplateBasic.bind({})
-Default.args = {}
-
-export const Vertical: StoryFn = TemplateBasic.bind({})
-Vertical.args = {
-  orientation: 'vertical',
+export const Default: Story = {
+  render: TemplateBasic,
+  args: {},
 }
 
-export const Scrollable: StoryFn = TemplateBasic.bind({})
-Scrollable.args = {
-  scrollable: true,
-  tabs: moreTabs,
+export const Vertical: Story = {
+  render: TemplateBasic,
+  args: {
+    orientation: 'vertical',
+  },
 }
 
-export const AdvancedContent: StoryFn = TemplateComplex.bind({})
-AdvancedContent.args = {}
+export const Scrollable: Story = {
+  render: TemplateBasic,
+  args: {
+    scrollable: true,
+    tabs: moreTabs,
+  },
+}
+
+export const AdvancedContent: Story = {
+  render: TemplateComplex,
+  args: {},
+}
+

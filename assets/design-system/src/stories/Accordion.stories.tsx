@@ -1,8 +1,8 @@
 import { Accordion } from '..'
 import { AccordionItem } from '../components/Accordion'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Accordion',
   component: Accordion,
   argTypes: {
@@ -37,16 +37,21 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  type: 'single',
-  padding: 'relaxed',
-  paddingArea: 'all',
-  caret: 'right',
-  trigger: 'Title',
-  children: 'Children',
+export default meta
+type Story = StoryObj<any>
+
+export const Default: Story = {
+  render: Template,
+  args: {
+    type: 'single',
+    padding: 'relaxed',
+    paddingArea: 'all',
+    caret: 'right',
+    trigger: 'Title',
+    children: 'Children',
+  },
 }
 
 function Template({

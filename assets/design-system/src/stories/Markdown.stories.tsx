@@ -1,7 +1,7 @@
 import { Div } from 'honorable'
 
 import { Markdown } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 const markdown = `# Plural Console
 
@@ -185,7 +185,6 @@ Deploying Chatwoot to Heroku is a breeze. It's as simple as clicking this button
 
 Follow this [link](https://www.chatwoot.com/docs/environment-variables) to understand setting the correct environment variables for the app to work with all the features. There might be breakages if you do not set the relevant environment variables.
 
-
 ### DigitalOcean 1-Click Kubernetes deployment
 
 Chatwoot now supports 1-Click deployment to DigitalOcean as a kubernetes app.
@@ -202,18 +201,15 @@ For other supported options, checkout our [deployment page](https://chatwoot.com
 
 Looking to report a vulnerability? Please refer our [SECURITY.md](./SECURITY.md) file.
 
-
 ## Community? Questions? Support ?
 
 If you need help or just want to hang out, come, say hi on our [Discord](https://discord.gg/cJXdrwS) server.
-
 
 ## Contributors ✨
 
 Thanks goes to all these [wonderful people](https://www.chatwoot.com/docs/contributors):
 
 <a href="https://github.com/chatwoot/chatwoot/graphs/contributors"><img src="https://opencollective.com/chatwoot/contributors.svg?width=890&button=false" /></a>
-
 
 *Chatwoot* &copy; 2017-2023, Chatwoot Inc - Released under the MIT License.
 
@@ -231,10 +227,13 @@ Thanks goes to all these [wonderful people](https://www.chatwoot.com/docs/contri
 | HTML         | Partial   | Some tags are supported      |
 `
 
-export default {
+const meta = {
   title: 'Markdown',
   component: Markdown,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
   return (
@@ -251,4 +250,6 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: Story = {
+  render: Template,
+}

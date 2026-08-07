@@ -8,7 +8,7 @@ import Divider from '../components/Divider'
 import { FlexWrap } from './FlexWrap'
 import { FilledBox } from './FilledBox'
 import { ItemLabel } from './ItemLabel'
-import type { StoryFn } from '@storybook/react'
+import type { StoryObj } from '@storybook/react'
 
 const ColorBox = styled(FilledBox)<{ $colorKey: string | number }>(
   ({ theme, $colorKey }) => ({
@@ -117,7 +117,9 @@ function Template() {
   )
 }
 
-const Exp: StoryFn = Template.bind({})
+const Exp: StoryObj = {
+  render: Template,
+  args: {},
+}
 
-Exp.args = {}
 export default Exp

@@ -1,10 +1,13 @@
 import { LightDarkSwitch, Switch } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Switch',
   component: Switch,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -17,12 +20,13 @@ function Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  children: 'Email notifications',
-  disabled: false,
-  readOnly: false,
+export const Default: Story = {
+  render: Template,
+  args: {
+    children: 'Email notifications',
+    disabled: false,
+    readOnly: false,
+  },
 }
 
 function LightDarkTemplate(args: any) {
@@ -36,9 +40,11 @@ function LightDarkTemplate(args: any) {
   )
 }
 
-export const LightDarkMode: StoryFn = LightDarkTemplate.bind({})
-
-LightDarkMode.args = {
-  disabled: false,
-  readOnly: false,
+export const LightDarkMode: Story = {
+  render: LightDarkTemplate,
+  args: {
+    disabled: false,
+    readOnly: false,
+  },
 }
+

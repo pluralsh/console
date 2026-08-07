@@ -4,9 +4,9 @@ import { useRef, useState } from 'react'
 import { type Key } from '@react-types/shared'
 
 import { SubTab, TabList, type TabListStateProps, TabPanel } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'ButtonGroup',
   component: SubTab,
   argTypes: {
@@ -17,7 +17,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const tabs = {
   lions: {
@@ -102,7 +105,10 @@ function TemplateBasic(args: any) {
   )
 }
 
-export const Default: StoryFn = TemplateBasic.bind({})
-Default.args = {
-  size: 'small',
+export const Default: Story = {
+  render: TemplateBasic,
+  args: {
+    size: 'small',
+  },
 }
+

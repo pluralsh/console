@@ -2,7 +2,7 @@ import { Flex } from 'honorable'
 import { useTheme } from 'styled-components'
 
 import { Card, Code, WrapWithIf } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   cCode,
@@ -13,7 +13,7 @@ import {
   tfCode,
 } from '../constants'
 
-export default {
+const meta = {
   title: 'Code',
   component: Code,
   argTypes: {
@@ -49,7 +49,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template({ onFillLevel, ...args }: any) {
   return (
@@ -233,20 +236,24 @@ function WithTabsTemplate({ onFillLevel, title, ...args }: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  title: '',
-  showLineNumbers: true,
-  showHeader: undefined,
+export const Default: Story = {
+  render: Template,
+  args: {
+    title: '',
+    showLineNumbers: true,
+    showHeader: undefined,
+  },
 }
 
-export const WithTabs: StoryFn = WithTabsTemplate.bind({})
-WithTabs.args = {
-  title: 'This is an optional title',
-  showLineNumbers: true,
-  showHeader: undefined,
-  onFillLevel: 0,
-  height: 300,
+export const WithTabs: Story = {
+  render: WithTabsTemplate,
+  args: {
+    title: 'This is an optional title',
+    showLineNumbers: true,
+    showHeader: undefined,
+    onFillLevel: 0,
+    height: 300,
+  },
 }
 
 const flowchartMermaid = `graph TD
@@ -351,12 +358,14 @@ function MermaidTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
-export const Mermaid: StoryFn = MermaidTemplate.bind({})
-Mermaid.args = {
-  title: '',
-  showLineNumbers: false,
-  showHeader: undefined,
-  onFillLevel: 0,
+export const Mermaid: Story = {
+  render: MermaidTemplate,
+  args: {
+    title: '',
+    showLineNumbers: false,
+    showHeader: undefined,
+    onFillLevel: 0,
+  },
 }
 
 const mermaidTabs = [
@@ -415,10 +424,13 @@ function MermaidWithTabsTemplate({ onFillLevel, title, ...args }: any) {
   )
 }
 
-export const MermaidWithTabs: StoryFn = MermaidWithTabsTemplate.bind({})
-MermaidWithTabs.args = {
-  title: 'Mermaid Diagrams',
-  showLineNumbers: false,
-  showHeader: undefined,
-  onFillLevel: 0,
+export const MermaidWithTabs: Story = {
+  render: MermaidWithTabsTemplate,
+  args: {
+    title: 'Mermaid Diagrams',
+    showLineNumbers: false,
+    showHeader: undefined,
+    onFillLevel: 0,
+  },
 }
+

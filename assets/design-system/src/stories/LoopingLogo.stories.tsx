@@ -1,12 +1,15 @@
 import { Flex } from 'honorable'
 
 import LoopingLogo, { type LoopingLogoProps } from '../components/LoopingLogo'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'LoopingLogo',
   component: LoopingLogo,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: LoopingLogoProps) {
   return (
@@ -19,10 +22,12 @@ function Template(args: LoopingLogoProps) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  isDark: false,
-  scale: 1,
-  animated: true,
+export const Default: Story = {
+  render: Template,
+  args: {
+    isDark: false,
+    scale: 1,
+    animated: true,
+  },
 }
+

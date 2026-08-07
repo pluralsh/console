@@ -1,12 +1,15 @@
 import { Div } from 'honorable'
 
 import CatalogCard from '../components/CatalogCard'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'CatalogCard',
   component: CatalogCard,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -44,9 +47,9 @@ function Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
+export const Default: Story = {
+  render: Template,
+  args: {
   name: 'Base catalog',
   author: 'Plural',
   category: 'Messaging',
@@ -62,4 +65,6 @@ Default.args = {
     'Cricket',
     'Support',
   ],
+},
 }
+

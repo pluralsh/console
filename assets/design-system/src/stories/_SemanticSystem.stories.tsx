@@ -7,12 +7,15 @@ import { baseSpacing } from '../theme/spacing'
 import { ItemLabel } from './ItemLabel'
 import { FilledBox } from './FilledBox'
 import { FlexWrap } from './FlexWrap'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Semantic System',
   component: null,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const fillLevelToBGColor: Record<FillLevel, string> = {
   0: 'fill-zero',
@@ -236,8 +239,10 @@ function Spacing() {
   )
 }
 
-export const Miscellaneous: StoryFn = Template.bind({})
-Miscellaneous.args = {}
+export const Miscellaneous: Story = {
+  render: Template,
+  args: {},
+}
 
 export { default as Colors } from './Colors'
 export { default as Typography } from './Typography'

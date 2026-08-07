@@ -1,17 +1,21 @@
 import Slider from '../components/Slider'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Slider',
   component: Slider,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return <Slider {...args} />
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
+export const Default: Story = {
+  render: Template,
+  args: {
   label: 'Applications',
   defaultValue: 30,
   minValue: 0,
@@ -29,4 +33,6 @@ Default.args = {
   tooltip: true,
   size: 600,
   colorized: true,
+},
 }
+

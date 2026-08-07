@@ -4,12 +4,15 @@ import { useState } from 'react'
 import { type Key } from '@react-types/shared'
 
 import { Button, Checkbox } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Checkbox',
   component: Checkbox,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 type CheckedVal = 'checked' | 'unchecked' | 'indeterminate'
 type CheckedVals = Record<string, CheckedVal>
@@ -87,18 +90,23 @@ function Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  small: false,
-  disabled: false,
-  defaultSelected: false,
-  tabIndex: 0,
+export const Default: Story = {
+  render: Template,
+  args: {
+    small: false,
+    disabled: false,
+    defaultSelected: false,
+    tabIndex: 0,
+  },
 }
 
-export const Small: StoryFn = Template.bind({})
-Small.args = {
-  small: true,
-  disabled: false,
-  defaultSelected: false,
-  tabIndex: 0,
+export const Small: Story = {
+  render: Template,
+  args: {
+    small: true,
+    disabled: false,
+    defaultSelected: false,
+    tabIndex: 0,
+  },
 }
+

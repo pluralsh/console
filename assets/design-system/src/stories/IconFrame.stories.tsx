@@ -1,12 +1,15 @@
 import { Div, Flex, H1, P } from 'honorable'
 
 import { IconFrame, type IconFrameProps, TrashCanIcon } from '../index'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Icon Frame',
   component: IconFrame,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 type Type = 'secondary' | 'tertiary' | 'floating'
 
@@ -66,8 +69,9 @@ function Template({
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
+export const Default: Story = {
+  render: Template,
+  args: {
   clickable: true,
   tooltip: true,
   tooltipProps: {
@@ -75,4 +79,6 @@ Default.args = {
     placement: 'top',
   },
   textValue: 'Delete',
+},
 }
+

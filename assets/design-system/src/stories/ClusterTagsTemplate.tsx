@@ -51,6 +51,7 @@ export function ClusterTagsTemplate({
 }: {
   onFillLevel: any
   withTitleContent: boolean
+  loading?: boolean
 }) {
   const theme = useTheme()
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())

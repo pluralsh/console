@@ -11,7 +11,7 @@ import React, {
 import type { Row } from '@tanstack/react-table'
 
 import { useTheme } from 'styled-components'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   AppIcon,
@@ -206,11 +206,12 @@ const expandingColumns = [
   }),
 ]
 
-export default {
+const meta = {
   title: 'Table',
   component: Table,
-}
+} satisfies Meta<any>
 
+export default meta
 function Template(args: any) {
   return <Table {...args} />
 }
@@ -358,39 +359,46 @@ const extremeLengthData = Array(200)
   .flat()
   .map((item, i) => ({ ...item, id: `id-${i}` }))
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns,
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns,
+  },
 }
 
-export const Empty: StoryFn = Template.bind({})
-Empty.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: [],
-  columns,
+export const Empty: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: [],
+    columns,
+  },
 }
 
-export const Loading: StoryFn = Template.bind({})
-Loading.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: [],
-  columns,
-  loading: true,
+export const Loading: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: [],
+    columns,
+    loading: true,
+  },
 }
 
-export const Highlighted: StoryFn = Template.bind({})
-Highlighted.args = {
+export const Highlighted: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
   fillLevel: 0,
   rowBg: 'base',
   width: '900px',
@@ -418,69 +426,77 @@ Highlighted.args = {
   })(),
   reactTableOptions: { getRowId: (_: any, index: any) => index },
   highlightedRowId: 1,
+},
 }
 
-export const VirtualizedRows: StoryFn = Template.bind({})
-VirtualizedRows.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  virtualizeRows: true,
-  width: '900px',
-  height: '400px',
-  data: extremeLengthData,
-  columns,
+export const VirtualizedRows: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    virtualizeRows: true,
+    width: '900px',
+    height: '400px',
+    data: extremeLengthData,
+    columns,
+  },
 }
 
-export const PagedData: StoryFn = PagedTemplate.bind({})
-PagedData.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  pageSize: 30,
-  width: '900px',
-  height: '400px',
-  data: extremeLengthData,
-  columns,
+export const PagedData: StoryObj<Parameters<typeof PagedTemplate>[0]> = {
+  render: PagedTemplate,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    pageSize: 30,
+    width: '900px',
+    height: '400px',
+    data: extremeLengthData,
+    columns,
+  },
 }
 
-export const Loose: StoryFn = Template.bind({})
-
-Loose.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns,
-  loose: true,
+export const Loose: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns,
+    loose: true,
+  },
 }
 
-export const Clickable: StoryFn = Template.bind({})
-
-Clickable.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns: expandingColumns,
-  onRowClick: (_e: MouseEvent, row: Row<any>) => console.info(row?.original),
+export const Clickable: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns: expandingColumns,
+    onRowClick: (_e: MouseEvent, row: Row<any>) => console.info(row?.original),
+  },
 }
 
-export const StickyColumn: StoryFn = Template.bind({})
-
-StickyColumn.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '400px',
-  height: '400px',
-  data: repeatedData,
-  columns,
-  stickyColumn: true,
+export const StickyColumn: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '400px',
+    height: '400px',
+    data: repeatedData,
+    columns,
+    stickyColumn: true,
+  },
 }
 
-export const Expandable: StoryFn = Template.bind({})
-
-Expandable.args = {
+export const Expandable: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
   fillLevel: 0,
   rowBg: 'base',
   width: '900px',
@@ -491,10 +507,12 @@ Expandable.args = {
   renderExpanded: ({ row }: { row: Row<Method> }) => (
     <P>{row.original.description}</P>
   ),
+},
 }
 
-export const FilterableAndSortable: StoryFn = FilterableTemplate.bind({})
-FilterableAndSortable.args = {
+export const FilterableAndSortable: StoryObj<Parameters<typeof FilterableTemplate>[0]> = {
+  render: FilterableTemplate,
+  args: {
   fillLevel: 0,
   rowBg: 'base',
   virtualizeRows: true,
@@ -505,22 +523,24 @@ FilterableAndSortable.args = {
   height: '400px',
   data: extremeLengthData,
   columns,
+},
 }
 
-export const Selectable: StoryFn = SelectableTemplate.bind({})
-
-Selectable.args = {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns: expandingColumns,
+export const Selectable: StoryObj<Parameters<typeof SelectableTemplate>[0]> = {
+  render: SelectableTemplate,
+  args: {
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns: expandingColumns,
+  },
 }
 
-export const LinkableRows: StoryFn = Template.bind({})
-
-LinkableRows.args = {
+export const LinkableRows: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
   fillLevel: 0,
   rowBg: 'base',
   width: '900px',
@@ -555,4 +575,6 @@ LinkableRows.args = {
   onRowClick: (_e: MouseEvent, row: Row<any>) => console.log(row?.original),
   getRowLink: (row: Row<Method>) =>
     `https://example.com/function/${row.original.function}`,
+},
 }
+

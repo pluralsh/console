@@ -1,12 +1,15 @@
 import styled from 'styled-components'
 
 import { Date } from '..'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Date',
   component: Date,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const RootWrap = styled.div(({ theme }) => ({
   display: 'flex',
@@ -40,8 +43,10 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  date: '2016-01-08T00:00:00-06:00',
+export const Default: Story = {
+  render: Template,
+  args: {
+    date: '2016-01-08T00:00:00-06:00',
+  },
 }
+

@@ -8,9 +8,9 @@ import Card from '../components/Card'
 import { SEVERITIES } from '../types'
 
 import { Link } from './NavigationContextStub'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Chip',
   component: Chip,
   argTypes: {
@@ -27,7 +27,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const sizes: ComponentProps<typeof Chip>['size'][] = [
   'small',
@@ -233,13 +236,16 @@ function Template({ onFillLevel, asLink, ...args }: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {
-  closeButton: true,
-  clickable: true,
-  disabled: false,
-  asLink: false,
-  onFillLevel: 0,
-  tooltip: false,
-  condensed: false,
+export const Default: Story = {
+  render: Template,
+  args: {
+    closeButton: true,
+    clickable: true,
+    disabled: false,
+    asLink: false,
+    onFillLevel: 0,
+    tooltip: false,
+    condensed: false,
+  },
 }
+

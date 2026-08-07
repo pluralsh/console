@@ -7,12 +7,15 @@ import DownloadIcon from '../components/icons/DownloadIcon'
 import GitHubLogoIcon from '../components/icons/GitHubLogoIcon'
 import MarketIcon from '../components/icons/MarketIcon'
 import TerminalIcon from '../components/icons/TerminalIcon'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Checklist',
   component: Checklist,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
   const [selected, setSelected] = useState<number>(0)
@@ -214,6 +217,8 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: Story = {
+  render: Template,
+  args: {},
+}
 
-Default.args = {}

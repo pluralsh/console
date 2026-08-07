@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import ValidatedInput, {
   type ValidationResponse,
 } from '../components/ValidatedInput'
 
-export default {
+const meta = {
   title: 'ValidatedInput',
   component: ValidatedInput,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
   const [value, setValue] = useState('')
@@ -33,4 +36,6 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
+export const Default: Story = {
+  render: Template,
+}

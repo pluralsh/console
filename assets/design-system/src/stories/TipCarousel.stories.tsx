@@ -1,9 +1,9 @@
 import { A } from 'honorable'
 
 import TipCarousel from '../components/TipCarousel'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'TipCarousel',
   component: TipCarousel,
   argTypes: {
@@ -16,7 +16,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -49,8 +52,10 @@ function Template(args: any) {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-
-Default.args = {
-  autoAdvanceTime: 10000,
+export const Default: Story = {
+  render: Template,
+  args: {
+    autoAdvanceTime: 10000,
+  },
 }
+

@@ -6,13 +6,16 @@ import { useNavigationContext } from '../components/contexts/NavigationContext'
 import { TreeNav, TreeNavEntry } from '../components/TreeNavigation'
 
 import { NavContextProviderStub } from './NavigationContextStub'
-import type { StoryFn } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Tree Navigation',
   component: TreeNav,
   argTypes: {},
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const getDirectory = () => [
   { path: 'dashboards', label: 'Dashboards', enabled: true },
@@ -224,5 +227,8 @@ function Template() {
   )
 }
 
-export const Default: StoryFn = Template.bind({})
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}
+
