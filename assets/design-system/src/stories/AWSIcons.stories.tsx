@@ -55,4 +55,3 @@ export const Default: Story = {
     size: 32,
   },
 }
-

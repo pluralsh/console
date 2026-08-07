@@ -58,4 +58,3 @@ export const Default: Story = {
     autoAdvanceTime: 10000,
   },
 }
-

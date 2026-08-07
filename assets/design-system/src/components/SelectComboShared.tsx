@@ -91,9 +91,9 @@ function useSelectComboStateProps<T extends TType>({
           }
           break
         default:
-          ;(onSelectionChange as ((key: Key | Selection) => void) | undefined)?.(
-            newKeyOrKeys
-          )
+          ;(
+            onSelectionChange as ((key: Key | Selection) => void) | undefined
+          )?.(newKeyOrKeys)
           break
       }
     },

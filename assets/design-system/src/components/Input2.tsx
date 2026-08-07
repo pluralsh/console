@@ -213,13 +213,11 @@ const InputAreaSC = styled.div((_) => ({
 }))
 const InputContentSC = styled.div<{
   $padStart?: keyof DefaultTheme['spacing'] | null
-}>(
-  ({ theme, $padStart }) => ({
-    display: 'flex',
-    alignSelf: 'stretch',
-    ...($padStart ? { paddingLeft: theme.spacing[$padStart] } : {}),
-  })
-)
+}>(({ theme, $padStart }) => ({
+  display: 'flex',
+  alignSelf: 'stretch',
+  ...($padStart ? { paddingLeft: theme.spacing[$padStart] } : {}),
+}))
 
 function Input2({
   ref,

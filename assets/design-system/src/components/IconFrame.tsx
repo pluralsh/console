@@ -37,7 +37,9 @@ function typeToHoverBG(theme: DefaultTheme): Record<Type, string | undefined> {
   }
 }
 
-function typeToSelectedBG(theme: DefaultTheme): Record<Type, string | undefined> {
+function typeToSelectedBG(
+  theme: DefaultTheme
+): Record<Type, string | undefined> {
   return {
     secondary: undefined,
     tertiary: undefined,

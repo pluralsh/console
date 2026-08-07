@@ -216,7 +216,9 @@ function ListBoxFooterPlus({
         leftContent || (
           <PlusIcon
             size={16}
-            color={(theme.colors?.['text-primary-accent'] ?? undefined) as string}
+            color={
+              (theme.colors?.['text-primary-accent'] ?? undefined) as string
+            }
           >
             {children || 'Add'}
           </PlusIcon>

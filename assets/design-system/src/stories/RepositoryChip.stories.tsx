@@ -47,4 +47,3 @@ export const Small: Story = {
     width: '200px',
   },
 }
-

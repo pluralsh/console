@@ -259,4 +259,3 @@ export const Standalone: Story = {
   render: StandaloneTemplate,
   args: {},
 }
-

@@ -77,4 +77,3 @@ export const Default: Story = {
   render: Template,
   args: {},
 }
-

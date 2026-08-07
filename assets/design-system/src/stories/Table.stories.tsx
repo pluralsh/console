@@ -402,34 +402,34 @@ export const Loading: StoryObj<Parameters<typeof Template>[0]> = {
 export const Highlighted: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns: (() => {
-    const c = [...columns]
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns: (() => {
+      const c = [...columns]
 
-    c.splice(
-      2,
-      0,
-      columnHelper.accessor((row) => row.id, {
-        id: 'h',
-        cell: ({ getValue }) => getValue(),
-        header: 'Highlight',
-        meta: {
-          highlight: true,
-          truncate: true,
-          gridTemplate: 'minmax(150px, 1fr)',
-        },
-      })
-    )
+      c.splice(
+        2,
+        0,
+        columnHelper.accessor((row) => row.id, {
+          id: 'h',
+          cell: ({ getValue }) => getValue(),
+          header: 'Highlight',
+          meta: {
+            highlight: true,
+            truncate: true,
+            gridTemplate: 'minmax(150px, 1fr)',
+          },
+        })
+      )
 
-    return c
-  })(),
-  reactTableOptions: { getRowId: (_: any, index: any) => index },
-  highlightedRowId: 1,
-},
+      return c
+    })(),
+    reactTableOptions: { getRowId: (_: any, index: any) => index },
+    highlightedRowId: 1,
+  },
 }
 
 export const VirtualizedRows: StoryObj<Parameters<typeof Template>[0]> = {
@@ -500,33 +500,35 @@ export const StickyColumn: StoryObj<Parameters<typeof Template>[0]> = {
 export const Expandable: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns: expandingColumns,
-  getRowCanExpand: (row: Row<Method>) => row.original.expandable,
-  renderExpanded: ({ row }: { row: Row<Method> }) => (
-    <P>{row.original.description}</P>
-  ),
-},
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns: expandingColumns,
+    getRowCanExpand: (row: Row<Method>) => row.original.expandable,
+    renderExpanded: ({ row }: { row: Row<Method> }) => (
+      <P>{row.original.description}</P>
+    ),
+  },
 }
 
-export const FilterableAndSortable: StoryObj<Parameters<typeof FilterableTemplate>[0]> = {
+export const FilterableAndSortable: StoryObj<
+  Parameters<typeof FilterableTemplate>[0]
+> = {
   render: FilterableTemplate,
   args: {
-  fillLevel: 0,
-  rowBg: 'base',
-  virtualizeRows: true,
-  emptyStateProps: {
-    message: 'No results match your query',
+    fillLevel: 0,
+    rowBg: 'base',
+    virtualizeRows: true,
+    emptyStateProps: {
+      message: 'No results match your query',
+    },
+    width: 'auto',
+    height: '400px',
+    data: extremeLengthData,
+    columns,
   },
-  width: 'auto',
-  height: '400px',
-  data: extremeLengthData,
-  columns,
-},
 }
 
 export const Selectable: StoryObj<Parameters<typeof SelectableTemplate>[0]> = {
@@ -544,40 +546,39 @@ export const Selectable: StoryObj<Parameters<typeof SelectableTemplate>[0]> = {
 export const LinkableRows: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {
-  fillLevel: 0,
-  rowBg: 'base',
-  width: '900px',
-  height: '400px',
-  data: repeatedData,
-  columns: [
-    ...columns.slice(0, 2),
-    columnHelper.display({
-      id: 'actions',
-      header: () => <span>Actions</span>,
-      cell: ({ row }) => (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            alert(`Action clicked for: ${row.original.function}`)
-          }}
-          style={{
-            padding: '4px 12px',
-            cursor: 'pointer',
-            background: '#1a1d24',
-            border: '1px solid #3d4149',
-            borderRadius: '4px',
-            color: '#babbbd',
-          }}
-        >
-          Action
-        </button>
-      ),
-    }),
-    ...columns.slice(2),
-  ],
-  onRowClick: (_e: MouseEvent, row: Row<any>) => console.log(row?.original),
-  getRowLink: (row: Row<Method>) =>
-    `https://example.com/function/${row.original.function}`,
-},
+    fillLevel: 0,
+    rowBg: 'base',
+    width: '900px',
+    height: '400px',
+    data: repeatedData,
+    columns: [
+      ...columns.slice(0, 2),
+      columnHelper.display({
+        id: 'actions',
+        header: () => <span>Actions</span>,
+        cell: ({ row }) => (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              alert(`Action clicked for: ${row.original.function}`)
+            }}
+            style={{
+              padding: '4px 12px',
+              cursor: 'pointer',
+              background: '#1a1d24',
+              border: '1px solid #3d4149',
+              borderRadius: '4px',
+              color: '#babbbd',
+            }}
+          >
+            Action
+          </button>
+        ),
+      }),
+      ...columns.slice(2),
+    ],
+    onRowClick: (_e: MouseEvent, row: Row<any>) => console.log(row?.original),
+    getRowLink: (row: Row<Method>) =>
+      `https://example.com/function/${row.original.function}`,
+  },
 }
-

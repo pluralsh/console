@@ -109,4 +109,3 @@ export const Small: Story = {
     tabIndex: 0,
   },
 }
-

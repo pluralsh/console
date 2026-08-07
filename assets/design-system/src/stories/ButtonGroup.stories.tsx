@@ -113,4 +113,3 @@ export const Default: Story = {
     size: 'small',
   },
 }
-

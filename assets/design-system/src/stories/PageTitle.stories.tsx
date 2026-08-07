@@ -38,25 +38,24 @@ export const Default: Story = {
 export const WithContent: Story = {
   render: Template,
   args: {
-  heading: (
-    <Div>
-      <strong>Customized</strong> <em>page</em> title
-    </Div>
-  ),
-  children: (
-    <Flex justifyContent="flex-end">
-      <Flex
-        marginRight="medium"
-        alignItems="center"
-        textAlign="right"
-        body2
-        color="text-xlight"
-      >
-        Unsaved changes
+    heading: (
+      <Div>
+        <strong>Customized</strong> <em>page</em> title
+      </Div>
+    ),
+    children: (
+      <Flex justifyContent="flex-end">
+        <Flex
+          marginRight="medium"
+          alignItems="center"
+          textAlign="right"
+          body2
+          color="text-xlight"
+        >
+          Unsaved changes
+        </Flex>
+        <Button>Save</Button>
       </Flex>
-      <Button>Save</Button>
-    </Flex>
-  ),
-},
+    ),
+  },
 }
-

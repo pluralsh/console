@@ -45,4 +45,3 @@ export const Primary: Story = {
     animateTransitions: true,
   },
 }
-

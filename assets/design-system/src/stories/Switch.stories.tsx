@@ -47,4 +47,3 @@ export const LightDarkMode: Story = {
     readOnly: false,
   },
 }
-

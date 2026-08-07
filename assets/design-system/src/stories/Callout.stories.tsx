@@ -274,4 +274,3 @@ export const OnCard: StoryObj<Parameters<typeof Template>[0]> = {
     expandable: false,
   },
 }
-

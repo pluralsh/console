@@ -112,4 +112,3 @@ export const Compact: Story = {
     compact: true,
   },
 }
-

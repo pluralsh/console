@@ -49,4 +49,3 @@ export const Default: Story = {
     date: '2016-01-08T00:00:00-06:00',
   },
 }
-

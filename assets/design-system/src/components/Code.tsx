@@ -274,8 +274,11 @@ function CodeTabs() {
 }
 
 function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
-  const { tabs: tabsProp, selectedKey, onSelectionChange } =
-    useContext(TabsContext)
+  const {
+    tabs: tabsProp,
+    selectedKey,
+    onSelectionChange,
+  } = useContext(TabsContext)
   const tabs = tabsProp ?? []
 
   const selectedTab = tabs.find((tab) => tab.key === selectedKey) || tabs[0]

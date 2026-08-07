@@ -62,4 +62,3 @@ export const Default: Story = {
     heading: 'Sidecar Title',
   },
 }
-

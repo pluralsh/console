@@ -68,4 +68,3 @@ export const DeletedFile: Story = {
     asCard: true,
   },
 }
-

@@ -5,11 +5,7 @@ import { type ContextProps, type StepConfig, WizardContext } from './context'
 
 const useActive = <T = unknown>() => {
   const ctx = useContext(WizardContext) as ContextProps<T>
-  const {
-    steps,
-    setSteps,
-    active: activeIdx,
-  } = ctx
+  const { steps, setSteps, active: activeIdx } = ctx
   const active: StepConfig<T> = useMemo<StepConfig<T>>(
     () => steps.at(activeIdx)!,
     [activeIdx, steps]

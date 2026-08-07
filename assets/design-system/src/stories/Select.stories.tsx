@@ -331,9 +331,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           }}
           defaultOpen={false}
           leftContent={<SearchIcon />}
-          rightContent={
-            <ListBoxItemChipList chips={curItem?.chips ?? []} />
-          }
+          rightContent={<ListBoxItemChipList chips={curItem?.chips ?? []} />}
           dropdownFooterFixed={
             <ListBoxFooterPlus onClick={createNewHandler}>
               Create new
@@ -525,9 +523,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           }}
           defaultOpen={false}
           leftContent={<SearchIcon />}
-          rightContent={
-            <ListBoxItemChipList chips={curItem?.chips ?? []} />
-          }
+          rightContent={<ListBoxItemChipList chips={curItem?.chips ?? []} />}
           dropdownFooterFixed={
             <ListBoxFooterPlus onClick={createNewHandler}>
               Create new
@@ -672,4 +668,3 @@ export const Default: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {},
 }
-

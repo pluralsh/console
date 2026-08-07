@@ -63,4 +63,3 @@ export const CustomCopy: Story = {
     children: 'npm i @pluralsh/design-system',
   },
 }
-

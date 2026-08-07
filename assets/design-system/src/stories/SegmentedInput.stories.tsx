@@ -119,4 +119,3 @@ export const CustomFormatInput: StoryObj<Parameters<typeof Template>[0]> = {
     segments: CUSTOM_SEGMENTS,
   },
 }
-

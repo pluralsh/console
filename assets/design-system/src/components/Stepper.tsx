@@ -90,8 +90,7 @@ function Stepper({
       return
     }
     setCollapseTitles(
-      !!forceCollapse ||
-        (eltRef.current?.clientWidth ?? 0) < collapseAtWidth
+      !!forceCollapse || (eltRef.current?.clientWidth ?? 0) < collapseAtWidth
     )
   }, [forceCollapse, eltRef, collapseAtWidth, vertical])
 

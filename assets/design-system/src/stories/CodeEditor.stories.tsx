@@ -126,4 +126,3 @@ export const Stretched: Story = {
   render: StretchedTemplate,
   args: {},
 }
-

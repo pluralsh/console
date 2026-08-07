@@ -50,21 +50,20 @@ function Template(args: any) {
 export const Default: Story = {
   render: Template,
   args: {
-  name: 'Base catalog',
-  author: 'Plural',
-  category: 'Messaging',
-  description:
-    'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-  tags: [
-    'Devops',
-    'Deployment',
-    'Fun',
-    'Turkey',
-    'Chickens',
-    'Handball',
-    'Cricket',
-    'Support',
-  ],
-},
+    name: 'Base catalog',
+    author: 'Plural',
+    category: 'Messaging',
+    description:
+      'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+    tags: [
+      'Devops',
+      'Deployment',
+      'Fun',
+      'Turkey',
+      'Chickens',
+      'Handball',
+      'Cricket',
+      'Support',
+    ],
+  },
 }
-

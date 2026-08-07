@@ -26,4 +26,3 @@ export const Text: Story = {
     text: "That's division allright!",
   },
 }
-

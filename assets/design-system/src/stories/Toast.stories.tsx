@@ -124,4 +124,3 @@ export const Default: StoryObj<Parameters<typeof Template>[0]> = {
 export const GraphQL: StoryObj = {
   render: GraphQLTemplate,
 }
-

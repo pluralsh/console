@@ -433,4 +433,3 @@ export const MermaidWithTabs: Story = {
     onFillLevel: 0,
   },
 }
-

@@ -217,36 +217,35 @@ export const Multiline: Story = {
 export const TitleContent: Story = {
   render: CustomInputTemplate,
   args: {
-  startIcon: <SearchIcon />,
-  titleContent: (
-    <>
-      <BrowseAppsIcon marginRight="small" />
-      Marketplace
-    </>
-  ),
-  placeholder: 'Search the marketplace',
-  showClearButton: true,
-  suffix: '',
-},
+    startIcon: <SearchIcon />,
+    titleContent: (
+      <>
+        <BrowseAppsIcon marginRight="small" />
+        Marketplace
+      </>
+    ),
+    placeholder: 'Search the marketplace',
+    showClearButton: true,
+    suffix: '',
+  },
 }
 
 export const Version2: Story = {
   render: CustomInputV2Template,
   args: {
-  startIcon: <SearchIcon />,
-  // endIcon: <TagIcon />,
-  titleContent: (
-    <>
-      <BrowseAppsIcon marginRight="small" />
-      Marketplace
-    </>
-  ),
-  placeholder: 'Search the marketplace',
-  showClearButton: true,
-  suffix: '',
-  prefix: '',
-  disabled: false,
-  error: false,
-},
+    startIcon: <SearchIcon />,
+    // endIcon: <TagIcon />,
+    titleContent: (
+      <>
+        <BrowseAppsIcon marginRight="small" />
+        Marketplace
+      </>
+    ),
+    placeholder: 'Search the marketplace',
+    showClearButton: true,
+    suffix: '',
+    prefix: '',
+    disabled: false,
+    error: false,
+  },
 }
-

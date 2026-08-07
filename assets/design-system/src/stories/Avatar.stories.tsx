@@ -41,4 +41,3 @@ export const Small: Story = {
     size: 32,
   },
 }
-

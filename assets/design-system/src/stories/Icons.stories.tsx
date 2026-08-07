@@ -240,4 +240,3 @@ export const PluralLogos: Story = {
     backgroundColor: 'transparent',
   },
 }
-

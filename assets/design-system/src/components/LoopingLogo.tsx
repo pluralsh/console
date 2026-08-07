@@ -14,9 +14,7 @@ export type LoopingLogoProps = ComponentPropsWithRef<'div'> & {
   scale?: number
 }
 
-export const scaling = (
-  scale?: number
-): { transform: string } | undefined =>
+export const scaling = (scale?: number): { transform: string } | undefined =>
   scale ? { transform: `scale(${scale})` } : undefined
 
 function LoopingLogo({

@@ -72,13 +72,12 @@ function Template({
 export const Default: Story = {
   render: Template,
   args: {
-  clickable: true,
-  tooltip: true,
-  tooltipProps: {
-    displayOn: 'hover',
-    placement: 'top',
+    clickable: true,
+    tooltip: true,
+    tooltipProps: {
+      displayOn: 'hover',
+      placement: 'top',
+    },
+    textValue: 'Delete',
   },
-  textValue: 'Delete',
-},
 }
-

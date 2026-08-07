@@ -220,4 +220,3 @@ export const NonScrollable: Story = {
     hasActions: true,
   },
 }
-

@@ -36,4 +36,3 @@ export const Determinate: Story = {
     progress: 0.25,
   },
 }
-

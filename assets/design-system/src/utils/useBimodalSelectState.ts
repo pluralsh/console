@@ -171,9 +171,7 @@ function useBimodalSelectState<T extends object>({
         ? (props.defaultSelectedKey ?? null)
         : props.selectedKeys
           ? Array.from(
-              props.selectedKeys === 'all'
-                ? getAllKeys()
-                : props.selectedKeys
+              props.selectedKeys === 'all' ? getAllKeys() : props.selectedKeys
             )
           : [],
     setValue: (newValue) => {

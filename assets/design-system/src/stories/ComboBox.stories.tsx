@@ -507,13 +507,14 @@ export const Tags: StoryObj<Parameters<typeof TagsTemplate>[0]> = {
   },
 }
 
-export const ClusterTags: StoryObj<Parameters<typeof ClusterTagsTemplate>[0]> = {
-  render: ClusterTagsTemplate,
-  args: {
-    loading: false,
-    withTitleContent: false,
-  },
-}
+export const ClusterTags: StoryObj<Parameters<typeof ClusterTagsTemplate>[0]> =
+  {
+    render: ClusterTagsTemplate,
+    args: {
+      loading: false,
+      withTitleContent: false,
+    },
+  }
 
 const TAGS = [
   { name: 'local', value: 'true' },
@@ -533,21 +534,22 @@ const TAGS = [
 ]
 const tags = uniqWith(TAGS, isEqual)
 
-export const TagMultiSelect: StoryObj<Parameters<typeof TagMultiSelectTemplate>[0]> = {
+export const TagMultiSelect: StoryObj<
+  Parameters<typeof TagMultiSelectTemplate>[0]
+> = {
   render: TagMultiSelectTemplate,
   args: {
-  loading: false,
-  options: tags.map((tag) => `${tag.name}:${tag.value}`),
-  width: 100,
-  onSelectedTagsChange: (keys) => {
-    console.log('Selected keys:', keys)
+    loading: false,
+    options: tags.map((tag) => `${tag.name}:${tag.value}`),
+    width: 100,
+    onSelectedTagsChange: (keys) => {
+      console.log('Selected keys:', keys)
+    },
+    onFilterChange: (filter) => {
+      console.log('Filter:', filter)
+    },
+    onChangeMatchType: (matchType) => {
+      console.log('Match type: ', matchType)
+    },
   },
-  onFilterChange: (filter) => {
-    console.log('Filter:', filter)
-  },
-  onChangeMatchType: (matchType) => {
-    console.log('Match type: ', matchType)
-  },
-},
 }
-

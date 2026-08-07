@@ -143,4 +143,3 @@ export const Default: Story = {
     severity: 'info',
   },
 }
-

@@ -25,4 +25,3 @@ export const Primary: Story = {
     message: 'Determine how this application is updated on a regular basis.',
   },
 }
-

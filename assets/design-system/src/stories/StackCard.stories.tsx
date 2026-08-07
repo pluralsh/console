@@ -60,13 +60,12 @@ function Template(args: any) {
 export const Default: Story = {
   render: Template,
   args: {
-  apps: [
-    { name: 'Airflow', imageUrl: '/logos/airflow-logo.svg' },
-    { name: 'Airbyte', imageUrl: '/logos/airbyte-logo.svg' },
-    { name: 'Console', imageUrl: '/logos/console-logo.png' },
-    { name: 'Crossplane', imageUrl: '/logos/crossplane-logo.png' },
-  ],
-  width: '420px',
-},
+    apps: [
+      { name: 'Airflow', imageUrl: '/logos/airflow-logo.svg' },
+      { name: 'Airbyte', imageUrl: '/logos/airbyte-logo.svg' },
+      { name: 'Console', imageUrl: '/logos/console-logo.png' },
+      { name: 'Crossplane', imageUrl: '/logos/crossplane-logo.png' },
+    ],
+    width: '420px',
+  },
 }
-

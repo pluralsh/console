@@ -25,4 +25,3 @@ export const Default: Story = {
     children: <Button>Click me!</Button>,
   },
 }
-

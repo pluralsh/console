@@ -91,41 +91,41 @@ function AllSizesTemplate(args: any) {
 export const Full: Story = {
   render: AllSizesTemplate,
   args: {
-  label: 'Label',
-  caption: 'Action',
-  maxLength: 120,
-  hint: 'Hint text',
-  startIcon: <MagnifyingGlassIcon />,
-  endIcon: (
-    <CaretDownIcon
-      size={10}
-      mt={0.333}
-      mx="3px"
-    />
-  ),
-},
+    label: 'Label',
+    caption: 'Action',
+    maxLength: 120,
+    hint: 'Hint text',
+    startIcon: <MagnifyingGlassIcon />,
+    endIcon: (
+      <CaretDownIcon
+        size={10}
+        mt={0.333}
+        mx="3px"
+      />
+    ),
+  },
 }
 
 export const FullError: Story = {
   render: AllSizesTemplate,
   args: {
-  ...Full.args,
-  ...{
-    label: 'Password',
-    hint: 'Something is wrong',
-    error: true,
+    ...Full.args,
+    ...{
+      label: 'Password',
+      hint: 'Something is wrong',
+      error: true,
+    },
   },
-},
 }
 
 export const FullDisabled: Story = {
   render: AllSizesTemplate,
   args: {
-  ...Full.args,
-  ...{
-    disabled: true,
+    ...Full.args,
+    ...{
+      disabled: true,
+    },
   },
-},
 }
 
 export const Horizontal: Story = {
@@ -167,10 +167,10 @@ export const Caption: Story = {
 export const LongCaption: Story = {
   render: AllSizesTemplate,
   args: {
-  label: 'Label',
-  caption:
-    'This will probably truncate, because it is ever so so longer than usual.',
-},
+    label: 'Label',
+    caption:
+      'This will probably truncate, because it is ever so so longer than usual.',
+  },
 }
 
 export const HintText: Story = {
@@ -192,20 +192,20 @@ export const MaxLength: Story = {
 export const ArbitraryHintContent: Story = {
   render: AllSizesTemplate,
   args: {
-  label: 'Label',
-  hint: (
-    <Div
-      backgroundColor="fill-one"
-      padding="medium"
-      width="100%"
-      textAlign="center"
-      border="1px solid border"
-      borderRadius="medium"
-    >
-      Put whatever you want in the hint!
-    </Div>
-  ),
-},
+    label: 'Label',
+    hint: (
+      <Div
+        backgroundColor="fill-one"
+        padding="medium"
+        width="100%"
+        textAlign="center"
+        border="1px solid border"
+        borderRadius="medium"
+      >
+        Put whatever you want in the hint!
+      </Div>
+    ),
+  },
 }
 
 export const Multiline: Story = {
@@ -217,4 +217,3 @@ export const Multiline: Story = {
     maxLength: 200,
   },
 }
-

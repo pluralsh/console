@@ -192,4 +192,3 @@ export const CustomClick: Story = {
     onClick: (value: string) => alert(value),
   },
 }
-

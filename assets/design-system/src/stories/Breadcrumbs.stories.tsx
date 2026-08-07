@@ -180,4 +180,3 @@ export const Manual: Story = {
     collapsible: true,
   },
 }
-

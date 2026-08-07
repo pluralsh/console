@@ -351,4 +351,3 @@ export const AdvancedContent: Story = {
   render: TemplateComplex,
   args: {},
 }
-

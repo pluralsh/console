@@ -141,57 +141,58 @@ function FillLevelTemplate({
 export const Default: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {
-  selected: false,
-  clickable: false,
-  disabled: false,
-  width: 150,
-  height: 150,
-  headerSize: 'medium',
-  headerContent: (
-    <Flex
-      justifyContent="space-between"
-      align="center"
-      width="100%"
-    >
-      <p>Header</p>
-      <Tooltip label="Tooltip">
-        <InfoOutlineIcon />
-      </Tooltip>
-    </Flex>
-  ),
-},
+    selected: false,
+    clickable: false,
+    disabled: false,
+    width: 150,
+    height: 150,
+    headerSize: 'medium',
+    headerContent: (
+      <Flex
+        justifyContent="space-between"
+        align="center"
+        width="100%"
+      >
+        <p>Header</p>
+        <Tooltip label="Tooltip">
+          <InfoOutlineIcon />
+        </Tooltip>
+      </Flex>
+    ),
+  },
 }
 
 export const Clickable: StoryObj<Parameters<typeof Template>[0]> = {
   render: Template,
   args: {
-  ...Default.args,
-  ...{
-    clickable: true,
+    ...Default.args,
+    ...{
+      clickable: true,
+    },
   },
-},
 }
 
-export const WithFillLevelContext: StoryObj<Parameters<typeof FillLevelTemplate>[0]> = {
+export const WithFillLevelContext: StoryObj<
+  Parameters<typeof FillLevelTemplate>[0]
+> = {
   render: FillLevelTemplate,
   args: {
-  selected: false,
-  clickable: false,
-  disabled: false,
-  width: 400,
-  headerSize: 'medium',
-  headerContent: (
-    <Flex
-      justifyContent="space-between"
-      align="center"
-      width="100%"
-    >
-      <p>Header</p>
-      <Tooltip label="Tooltip">
-        <InfoOutlineIcon />
-      </Tooltip>
-    </Flex>
-  ),
-},
+    selected: false,
+    clickable: false,
+    disabled: false,
+    width: 400,
+    headerSize: 'medium',
+    headerContent: (
+      <Flex
+        justifyContent="space-between"
+        align="center"
+        width="100%"
+      >
+        <p>Header</p>
+        <Tooltip label="Tooltip">
+          <InfoOutlineIcon />
+        </Tooltip>
+      </Flex>
+    ),
+  },
 }
-

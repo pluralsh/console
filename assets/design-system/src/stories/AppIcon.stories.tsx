@@ -118,4 +118,3 @@ export const Default: Story = {
     clickable: false,
   },
 }
-

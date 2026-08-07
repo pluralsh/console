@@ -39,4 +39,3 @@ export const Primary: Story = {
     children: 'Click me',
   },
 }
-
