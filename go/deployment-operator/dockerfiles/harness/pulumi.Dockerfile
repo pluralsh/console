@@ -49,5 +49,7 @@ ENV GOPATH="/plural/.cache/go"
 ENV GOCACHE="/plural/.cache/go-build"
 ENV NPM_CONFIG_CACHE="/plural/.cache/npm"
 ENV PULUMI_HOME="/plural/.pulumi"
+# Force ANSI color; --color=auto disables it when stdout is not a TTY.
+ENV PULUMI_OPTION_COLOR=always
 
 USER 65532:65532
