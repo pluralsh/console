@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.CloudQuery do
   use Console.AI.Tools.Agent.Base
+  alias Console.AI.Tools.Workbench.Output
   alias Console.Schema.{CloudConnection, WorkbenchTool}
   alias Cloudquery.{QueryInput, QueryResult}
 
@@ -27,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudQuery do
     with {:ok, client} <- Client.connect(),
          input = %QueryInput{query: query, connection: to_pb(connection)},
          {:ok, %QueryResult{result: result}} <- Stub.query(client, input, Client.cloud_query_rpc_opts()) do
-      {:ok, result}
+      {:ok, Output.truncate(result, "narrow the query, select fewer columns, or add a SQL limit")}
     end
   end
 end

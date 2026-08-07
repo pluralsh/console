@@ -5,6 +5,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{MetricsQueryInput, MetricsQueryOutput, MetricsOptions, AzureMetricsOptions, MetricPoint}
   alias Console.AI.Workbench.Conversion
+  alias Console.AI.Tools.Workbench.Output
 
   embedded_schema do
     field :tool, :map, virtual: true
@@ -57,6 +58,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
     cast(model, attrs, ~w(resource_id metrics_namespace aggregation filter order_by roll_up_by metrics_endpoint)a)
   end
 
+  @metric_limit 500
+
   def implement(%__MODULE__{} = tool) do
     tool = Map.put_new(tool, :time_range, TimeRange.default())
     with :ok <- TimeRange.safe(tool.time_range),
@@ -64,7 +67,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
          {:ok, input} <- input(tool),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input, Client.metrics_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
-      {:ok, %{content: content, metrics: Enum.map(output.metrics, &mapify/1)}}
+      {:ok, %{content: Output.truncate(content), metrics: Enum.map(Enum.take(output.metrics, @metric_limit), &mapify/1)}}
     end
   end
 

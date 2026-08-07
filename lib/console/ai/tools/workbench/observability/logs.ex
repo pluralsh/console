@@ -5,6 +5,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet, LogsOptions, AzureLogsOptions, LogEntry}
   alias Console.AI.Workbench.Conversion
+  alias Console.AI.Tools.Workbench.Output
 
   embedded_schema do
     field :tool,  :map, virtual: true
@@ -59,12 +60,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
     |> validate_required([:name, :value])
   end
 
+  @log_limit 500
+
   def implement(%__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
          {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input, Client.logs_rpc_opts()),
          {:ok, content} <- Protobuf.JSON.encode(output) do
-      {:ok, %{content: content, logs: Enum.map(output.logs, &to_log/1)}}
+      {:ok, %{content: Output.truncate(content), logs: Enum.map(Enum.take(output.logs, @log_limit), &to_log/1)}}
     end
   end
 

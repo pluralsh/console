@@ -3,6 +3,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
   import Piazza.Ecto.Schema
   alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias Console.AI.Tools.Workbench.Observability.Plrl.Logs
+  alias Console.AI.Tools.Workbench.Output
   alias Console.Logs.{Query, Provider}
 
   embedded_schema do
@@ -44,8 +45,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogsAggregate do
   def implement(%__MODULE__{user: user} = logs) do
     query = Logs.logs_query(logs)
     with {:ok, query} <- Query.accessible(query, user),
-         {:ok, logs} <- Provider.aggregate(query) do
-      Jason.encode(logs)
+         {:ok, logs} <- Provider.aggregate(query),
+         {:ok, content} <- Jason.encode(logs) do
+      {:ok, Output.truncate(content)}
     end
   end
 end

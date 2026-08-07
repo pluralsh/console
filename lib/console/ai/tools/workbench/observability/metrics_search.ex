@@ -5,6 +5,7 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{MetricsSearchInput, MetricsSearchOutput, MetricsSearchOptions, AzureMetricsSearchOptions}
   alias Console.AI.Workbench.Conversion
+  alias Console.AI.Tools.Workbench.Output
 
   embedded_schema do
     field :tool, :map, virtual: true
@@ -51,7 +52,9 @@ defmodule Console.AI.Tools.Workbench.Observability.MetricsSearch do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
          {:ok, %MetricsSearchOutput{} = output} <- Stub.metrics_search(conn, input, Client.metrics_rpc_opts()),
-      do: Protobuf.JSON.encode(output)
+         {:ok, content} <- Protobuf.JSON.encode(output) do
+      {:ok, Output.truncate(content)}
+    end
   end
 
   defp input(%__MODULE__{tool: tool, query: q, limit: l, options: options}) do

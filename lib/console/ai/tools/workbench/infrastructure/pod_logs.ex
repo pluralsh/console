@@ -1,5 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.PodLogs do
   use Console.AI.Tools.Workbench.Base
+  import Console.Services.Base, only: [when_ok: 2]
+  alias Console.AI.Tools.Workbench.Output
   alias Kazan.Apis.Core.V1, as: CoreV1
   alias Console.Deployments.Clusters
   alias Console.Schema.Cluster
@@ -35,10 +37,12 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.PodLogs do
 
   def implement(%__MODULE__{user: user, cluster: handle, name: n, namespace: ns} = comp) do
     with {:cluster, %Cluster{} = cluster} <- {:cluster, Clusters.get_cluster_by_handle(handle)} do
-      Map.take(comp, [:container, :since_seconds, :limit_bytes])
+      comp
+      |> Map.take([:container, :since_seconds, :limit_bytes])
       |> Map.to_list()
       |> then(&CoreV1.read_namespaced_pod_log!(ns, n, &1))
       |> Kazan.run(server: Clusters.control_plane(cluster, user))
+      |> when_ok(&Output.truncate(&1, "tweak limit_bytes or since_seconds to retrieve the remaining logs"))
     else
       {:cluster, _} -> {:error, "no cluster found matching handle=#{handle}"}
       err -> {:error, "error fetching pod logs: #{inspect(err)}"}
