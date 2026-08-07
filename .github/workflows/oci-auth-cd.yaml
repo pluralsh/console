@@ -78,7 +78,9 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Blacksmith Builder
-        uses: useblacksmith/setup-docker-builder@v1
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/oci-auth/Dockerfile
       - name: Build and push by digest
         id: build
         uses: useblacksmith/build-push-action@v2

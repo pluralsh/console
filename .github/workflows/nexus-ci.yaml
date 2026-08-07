@@ -82,7 +82,9 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Setup Blacksmith Builder
-        uses: useblacksmith/setup-docker-builder@v1
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/nexus/Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:

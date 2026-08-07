@@ -51,7 +51,9 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-qemu-action@v3
       - name: Setup Blacksmith Builder
-        uses: useblacksmith/setup-docker-builder@v1
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/demo/flaky-service/Dockerfile
       - uses: useblacksmith/build-push-action@v2
         with:
           context: "./go/demo/flaky-service"

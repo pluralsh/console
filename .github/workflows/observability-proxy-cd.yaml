@@ -100,7 +100,9 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Setup Blacksmith Builder
-        uses: useblacksmith/setup-docker-builder@v1
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/observability-proxy/Dockerfile
 
       - name: Build and push by digest
         id: build
