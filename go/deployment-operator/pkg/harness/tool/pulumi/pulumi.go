@@ -220,7 +220,7 @@ func (in *Pulumi) previewJSON() (*previewJSON, error) {
 func (in *Pulumi) previewText() (string, error) {
 	output, err := exec.NewExecutable(
 		"pulumi",
-		exec.WithArgs(in.previewArgs("--diff")),
+		exec.WithArgs(appendColor(in.previewArgs("--diff"))),
 		exec.WithDir(in.dir),
 		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
@@ -234,7 +234,7 @@ func (in *Pulumi) previewText() (string, error) {
 func (in *Pulumi) destroyPreviewText() (string, error) {
 	output, err := exec.NewExecutable(
 		"pulumi",
-		exec.WithArgs(in.destroyPreviewArgs("--diff")),
+		exec.WithArgs(appendColor(in.destroyPreviewArgs("--diff"))),
 		exec.WithDir(in.dir),
 		exec.WithEnv(in.env),
 	).RunWithOutput(context.Background())
