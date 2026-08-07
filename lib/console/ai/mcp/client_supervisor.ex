@@ -1,7 +1,7 @@
 defmodule Console.AI.MCP.ClientSupervisor do
   use Supervisor
 
-  alias Console.Schema.{ChatThread, McpServer, User}
+  alias Console.Schema.{ChatThread, McpServer, User, WorkbenchJob, WorkbenchTool}
   alias Console.AI.MCP.Agent
   alias Console.Jwt.MCP
 
@@ -26,7 +26,7 @@ defmodule Console.AI.MCP.ClientSupervisor do
         name: Agent.name(:client, t, s),
         transport_name: Agent.name(:transport, t, s),
         transport: {proto, [headers: auth_headers(t, s)] ++ url_arguments(url)}
-      ] ++ mcp_configuration(s)]},
+      ] ++ mcp_configuration(s, client_name(t, s))]},
       restart: :transient
     }
   end
@@ -44,11 +44,24 @@ defmodule Console.AI.MCP.ClientSupervisor do
   defp uri_path(path, _) when is_binary(path) and byte_size(path) > 0, do: path
   defp uri_path(_, _), do: "/"
 
-  @mcp_client_info [client_info: %{"name" => "Plural", "version" => "1.0.0"}]
+  @mcp_client_version "1.0.0"
 
-  def mcp_configuration(%McpServer{protocol: :sse}),
-    do: Keyword.put(@mcp_client_info, :protocol_version, "2024-11-05")
-  def mcp_configuration(_), do: Keyword.merge(@mcp_client_info, protocol_version: "2025-06-18")
+  def mcp_configuration(%McpServer{protocol: protocol}, client_name) do
+    [client_info: %{"name" => client_name, "version" => @mcp_client_version}]
+    |> Keyword.put(
+      :protocol_version,
+      if(protocol == :sse, do: "2024-11-05", else: "2025-06-18")
+    )
+  end
+
+  def mcp_configuration(_, client_name),
+    do: [client_info: %{"name" => client_name, "version" => @mcp_client_version}, protocol_version: "2025-06-18"]
+
+  def client_name(%ChatThread{id: thread_id}, %McpServer{id: server_id}),
+    do: "Plural-#{thread_id}-#{server_id}"
+
+  def client_name(%WorkbenchTool{id: tool_id}, %WorkbenchJob{id: job_id}),
+    do: "Plural-#{tool_id}-#{job_id}"
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)

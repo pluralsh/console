@@ -247,6 +247,31 @@ type AgentMessageMetadataAttributes struct {
 	Tool *AgentMessageToolAttributes `json:"tool,omitempty"`
 }
 
+type AgentMessageOutput struct {
+	// the command message this output belongs to
+	MessageID string `json:"messageId"`
+	// the agent run this output belongs to
+	AgentRunID string `json:"agentRunId"`
+	// the command standard output
+	Stdout *string `json:"stdout,omitempty"`
+	// the command standard error
+	Stderr *string `json:"stderr,omitempty"`
+}
+
+type AgentMessageOutputAttributes struct {
+	// the command message this output belongs to
+	MessageID string `json:"messageId"`
+	// the command standard output
+	Stdout *string `json:"stdout,omitempty"`
+	// the command standard error
+	Stderr *string `json:"stderr,omitempty"`
+}
+
+type AgentMessageOutputDelta struct {
+	Delta   *Delta              `json:"delta,omitempty"`
+	Payload *AgentMessageOutput `json:"payload,omitempty"`
+}
+
 type AgentMessageReasoning struct {
 	// the text of the reasoning
 	Text *string `json:"text,omitempty"`
@@ -391,6 +416,8 @@ type AgentRun struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// whether this run is a follow-up to a pull request
+	Followup *bool `json:"followup,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -7360,6 +7387,15 @@ type QueuedPromptEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type QueuedPromptSummary struct {
+	// unconsumed prompts that are eligible to dequeue
+	ReadyCount int64 `json:"readyCount"`
+	// unconsumed prompts waiting for dequeable_at
+	PendingCount int64 `json:"pendingCount"`
+	// earliest future dequeable_at among pending prompts
+	NextAt *string `json:"nextAt,omitempty"`
+}
+
 type RbacAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
@@ -10430,9 +10466,13 @@ type WorkbenchJob struct {
 	ReferencedJob *WorkbenchJob                   `json:"referencedJob,omitempty"`
 	Activities    *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	QueuedPrompts *QueuedPromptConnection         `json:"queuedPrompts,omitempty"`
-	MetricsTool   []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
-	LogsTool      []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
-	TracesTool    []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
+	// number of unconsumed queued prompts for this job
+	QueuedPromptCount int64 `json:"queuedPromptCount"`
+	// ready/pending breakdown for unconsumed queued prompts
+	QueuedPromptSummary QueuedPromptSummary           `json:"queuedPromptSummary"`
+	MetricsTool         []*WorkbenchJobActivityMetric `json:"metricsTool,omitempty"`
+	LogsTool            []*WorkbenchJobActivityLog    `json:"logsTool,omitempty"`
+	TracesTool          []*WorkbenchJobActivityTrace  `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`

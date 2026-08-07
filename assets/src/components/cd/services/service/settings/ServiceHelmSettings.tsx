@@ -3,7 +3,10 @@ import { Overline } from 'components/cd/utils/PermissionsModal'
 import { useLogin } from 'components/contexts'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import { GqlError } from 'components/utils/Alert'
-import { useUpdateServiceDeploymentMutation } from 'generated/graphql'
+import {
+  useServiceDeploymentHelmSettingsQuery,
+  useUpdateServiceDeploymentMutation,
+} from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
@@ -18,8 +21,12 @@ export function ServiceHelmSettings() {
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service?.id)
   const [helmValueErrors, setHelmValueErrors] = useState(false)
-  const filteredValuesFiles =
-    service?.helm?.valuesFiles?.filter(isNonNullable) ?? []
+  const { data: helmSettingsData } = useServiceDeploymentHelmSettingsQuery({
+    variables: { id: service?.id ?? '' },
+    skip: !service?.id || !isAdmin,
+  })
+  const helm = helmSettingsData?.serviceDeployment?.helm
+  const filteredValuesFiles = helm?.valuesFiles?.filter(isNonNullable) ?? []
 
   const {
     state,
@@ -30,13 +37,17 @@ export function ServiceHelmSettings() {
     ...(service?.helm?.url ? { helmUrl: service?.helm?.url } : {}),
     helmChart: service?.helm?.chart,
     helmVersion: service?.helm?.version,
-    helmValues: service?.helm?.values,
+    helmValues: helm?.values,
     helmValuesFiles: !isEmpty(filteredValuesFiles) ? filteredValuesFiles : [''],
   })
 
   useEffect(() => {
     if (service?.id !== prevServiceId) reset()
   }, [prevServiceId, reset, service?.id])
+
+  useEffect(() => {
+    if (helmSettingsData) reset()
+  }, [helmSettingsData, reset])
 
   const attributes = useMemo(() => {
     return state.helmChart && state.helmVersion
@@ -63,10 +74,8 @@ export function ServiceHelmSettings() {
         ...(state.helmUrl ? { url: state.helmUrl } : {}),
         helmChart: helm?.chart,
         helmVersion: helm?.version,
-        helmValues: helm?.values,
-        helmValuesFiles: !isEmpty(filteredValuesFiles)
-          ? filteredValuesFiles
-          : [''],
+        helmValues: state.helmValues,
+        helmValuesFiles: state.helmValuesFiles,
       })
     },
   })

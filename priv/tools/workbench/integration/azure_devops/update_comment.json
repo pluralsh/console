@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "description": "Edit an existing Azure DevOps pull request thread comment or work item comment.",
+  "properties": {
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "work_item"],
+      "description": "Resource containing the comment."
+    },
+    "organization": {
+      "type": "string",
+      "description": "Azure DevOps organization name when required by the configured API URL."
+    },
+    "project": {
+      "type": "string",
+      "description": "Team project name or GUID."
+    },
+    "repository": {
+      "type": "string",
+      "description": "Repository name or ID, required for pull_request."
+    },
+    "pull_request_id": {
+      "type": "integer",
+      "description": "Pull request ID, required for pull_request."
+    },
+    "thread_id": {
+      "type": "integer",
+      "description": "Pull request thread ID, required for pull_request."
+    },
+    "work_item_id": {
+      "type": "integer",
+      "description": "Work item ID, required for work_item."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment ID to update."
+    },
+    "body": {
+      "type": "string",
+      "description": "Replacement comment text."
+    }
+  },
+  "required": ["resource", "project", "comment_id", "body"],
+  "additionalProperties": false
+}

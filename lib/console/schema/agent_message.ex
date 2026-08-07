@@ -2,6 +2,22 @@ defmodule Console.Schema.AgentMessage do
   use Piazza.Ecto.Schema
   alias Console.Schema.AgentRun
 
+  defmodule Stdout do
+    @type t :: %__MODULE__{
+      message_id: binary,
+      agent_run_id: binary,
+      stdout: binary,
+      stderr: binary,
+      cluster: Console.Schema.Cluster.t()
+    }
+    defstruct [:message_id, :agent_run_id, :stdout, :stderr, :cluster]
+
+    @spec new(map(), Console.Schema.Cluster.t()) :: t()
+    def new(attrs, cluster) do
+      struct(__MODULE__, Map.put(attrs, :cluster, cluster))
+    end
+  end
+
   defenum ToolState, pending: 0, running: 1, completed: 2, error: 3
 
   schema "agent_messages" do

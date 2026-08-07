@@ -7,6 +7,7 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Tools do
     Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.PullRequestRead,
     Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.IssueRead,
     Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.CreateComment,
+    Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.UpdateComment,
     Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.ReactToComment
   ]
 

@@ -56,6 +56,7 @@ type AgentRun struct {
 	BabysitInterval int64
 	Approval        bool
 	ApprovedAt      *string
+	Followup        bool
 }
 
 type AgentSkill struct {
@@ -172,6 +173,9 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		run.Approval = *fragment.Approval
 	}
 	run.ApprovedAt = fragment.ApprovedAt
+	if fragment.Followup != nil {
+		run.Followup = *fragment.Followup
+	}
 
 	return run
 }

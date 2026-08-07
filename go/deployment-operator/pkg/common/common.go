@@ -2,10 +2,10 @@ package common
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/yaml"
@@ -57,7 +57,11 @@ func Unmarshal(s string) (map[string]interface{}, error) {
 
 // WithJitter adds a random jitter to the interval based on the global jitter factor.
 func WithJitter(interval time.Duration) time.Duration {
-	maxJitter := int64(float64(interval) * args.JitterFactor())
-	jitter := time.Duration(rand.Int63n(maxJitter*2) - maxJitter)
-	return interval + jitter
+	return WithJitterFactor(interval, args.JitterFactor())
+}
+
+// WithJitterFactor adds random jitter up to factor of interval in either direction.
+// Factor must be in the range [0, 1]; zero leaves the interval unchanged.
+func WithJitterFactor(interval time.Duration, factor float64) time.Duration {
+	return utils.WithJitterFactor(interval, factor)
 }

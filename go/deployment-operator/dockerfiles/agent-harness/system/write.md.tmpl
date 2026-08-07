@@ -19,8 +19,22 @@ This section records the **original user prompt** for this agent run. It is embe
 ---
 {{ end }}
 
+{{ if .Followup }}
+## Follow-up pull request work
+
+This run adds work to an existing pull request. The repository is already checked out on that pull request's branch.
+
+- Do **not** create or switch to a branch.
+- Do **not** open another pull request.
+- When the changes are complete, call Plural MCP `createCommit` to stage, commit, and push them to the current branch.
+{{ end }}
+
 Work **only** inside the assigned repository.
+{{ if .Followup }}
+Your goal: implement the user’s requested changes and commit them to the existing pull request branch.
+{{ else }}
 Your goal: implement the user’s requested changes and open **exactly one** pull request.
+{{ end }}
 Follow strict rules for semantic commit messages and pull request titles.
 Follow the steps below **in order**.
 You have to attempt to complete **all** steps to finish your task.

@@ -627,7 +627,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert job.modes.budget.tokens == 100
     end
 
-    test "merges explicit job modes on top of workbench modes" do
+    test "merges explicit job modes without elevating kubernetes permissions" do
       user = insert(:user)
 
       workbench =
@@ -663,10 +663,32 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert job.modes.coding.approval == false
       assert job.modes.coding.babysit == true
       assert job.modes.kubernetes.update == true
-      assert job.modes.kubernetes.delete == true
+      assert job.modes.kubernetes.delete == false
       assert job.modes.kubernetes.require_namespaces == ["default"]
       assert job.modes.budget.tokens == 100
       assert job.modes.budget.cost == 1.5
+    end
+
+    test "does not allow a job to enable kubernetes updates disabled on its workbench" do
+      user = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: user.id}],
+          modes: %WorkbenchJob.Modes{
+            kubernetes: %WorkbenchJob.Modes.Kubernetes{update: false, delete: true}
+          }
+        )
+
+      {:ok, job} =
+        Workbenches.create_workbench_job(
+          %{prompt: "test prompt", modes: %{kubernetes: %{update: true, delete: true}}},
+          workbench.id,
+          user
+        )
+
+      assert job.modes.kubernetes.update == false
+      assert job.modes.kubernetes.delete == true
     end
 
     test "users without read access cannot create a job" do

@@ -1,4 +1,10 @@
 import {
+  AzureDevopsLogoIcon,
+  BitBucketIcon,
+  GitHubLogoIcon,
+  GitLabLogoIcon,
+} from '@pluralsh/design-system'
+import {
   ClusterIcon,
   GitPullIcon,
   StackIcon,
@@ -8,7 +14,7 @@ import {
 import { ReactNode, useEffect, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { stackTypeLabel } from 'components/stacks/common/stackTypeUtils'
-import { StackType } from 'generated/graphql'
+import { ScmType, StackType } from 'generated/graphql'
 import { ChipAttrs, KIND_LABELS, MentionKind } from './mentionTypes'
 import { isEmpty } from 'lodash'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -19,6 +25,42 @@ const itemToIcon: Record<MentionKind, ReactNode> = {
   [MentionKind.Stack]: <StackIcon size={14} />,
   [MentionKind.Skill]: <WorkbenchIcon size={14} />,
   [MentionKind.Vulnerability]: <WarningShieldIcon size={14} />,
+  [MentionKind.Repository]: <GitPullIcon size={14} />,
+}
+
+function repositoryIcon(provider?: string): ReactNode {
+  switch (provider) {
+    case ScmType.Github:
+      return (
+        <GitHubLogoIcon
+          size={14}
+          fullColor
+        />
+      )
+    case ScmType.Gitlab:
+      return (
+        <GitLabLogoIcon
+          size={14}
+          fullColor
+        />
+      )
+    case ScmType.Bitbucket:
+      return (
+        <BitBucketIcon
+          size={14}
+          fullColor
+        />
+      )
+    case ScmType.AzureDevops:
+      return (
+        <AzureDevopsLogoIcon
+          size={14}
+          fullColor
+        />
+      )
+    default:
+      return itemToIcon[MentionKind.Repository]
+  }
 }
 
 function subtitleForItem(item: ChipAttrs) {
@@ -33,6 +75,8 @@ function subtitleForItem(item: ChipAttrs) {
       return item.description
     case MentionKind.Vulnerability:
       return item.resource ?? item['vuln-id'] ?? undefined
+    case MentionKind.Repository:
+      return item['repo-slug'] ? item['repo-url'] : undefined
   }
 }
 
@@ -92,7 +136,9 @@ export function MentionResults({
             }}
           >
             <span css={{ color: theme.colors['icon-light'] }}>
-              {itemToIcon[item.kind]}
+              {item.kind === MentionKind.Repository
+                ? repositoryIcon(item.provider)
+                : itemToIcon[item.kind]}
             </span>
             <RowTextSC>
               <RowTitleSC>{item['item-name']}</RowTitleSC>

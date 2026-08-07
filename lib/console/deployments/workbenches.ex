@@ -649,10 +649,25 @@ defmodule Console.Deployments.Workbenches do
   end
 
   defp merge_modes(attrs, %Workbench{modes: modes}) do
-    Console.mapify(modes || %{})
+    workbench_modes = Console.mapify(modes || %{})
+
+    workbench_modes
     |> DeepMerge.deep_merge(attrs[:modes] || %{})
+    |> restrict_kubernetes_modes(workbench_modes)
     |> then(&Map.put(attrs, :modes, &1))
   end
+
+  defp restrict_kubernetes_modes(%{kubernetes: %{} = job_modes} = modes, workbench_modes) do
+    wb_kubernetes = Map.get(workbench_modes, :kubernetes, %{})
+
+    kubernetes =
+      job_modes
+      |> Map.put(:update, job_modes[:update] && wb_kubernetes[:update])
+      |> Map.put(:delete, job_modes[:delete] && wb_kubernetes[:delete])
+
+    %{modes | kubernetes: kubernetes}
+  end
+  defp restrict_kubernetes_modes(modes, _), do: modes
 
   defp budget_available?(%Workbench{budget: %Budget{} = budget}), do: Budget.available?(budget)
   defp budget_available?(%Workbench{}), do: true

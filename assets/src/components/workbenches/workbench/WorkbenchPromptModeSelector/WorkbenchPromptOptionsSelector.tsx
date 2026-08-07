@@ -16,7 +16,11 @@ import {
 } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import type { WorkbenchJobModesAttributes } from 'generated/graphql'
+import type {
+  WorkbenchJobKubernetesModes,
+  WorkbenchJobModes,
+  WorkbenchJobModesAttributes,
+} from 'generated/graphql'
 import {
   cloneElement,
   type ReactNode,
@@ -61,11 +65,13 @@ export function WorkbenchPromptOptionsSelector({
   value,
   onChange,
   disabled = false,
+  workbenchModes,
 }: {
   workbenchId?: Nullable<string>
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   disabled?: boolean
+  workbenchModes?: WorkbenchJobModes | null
 }) {
   const theme = useTheme()
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -266,6 +272,7 @@ export function WorkbenchPromptOptionsSelector({
               value={value}
               onChange={onChange}
               onEmpty={() => setSidePanel(null)}
+              kubernetesModes={workbenchModes?.kubernetes}
             />
           )}
         </Flex>
@@ -474,16 +481,20 @@ function KubernetesSidePanel({
   value,
   onChange,
   onEmpty,
+  kubernetesModes,
 }: {
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   onEmpty: () => void
+  kubernetesModes?: WorkbenchJobKubernetesModes | null
 }) {
   return (
     <SidePanelContainer>
       <WorkbenchKubernetesMutationFields
         allowUpdates={!!value?.kubernetes?.update}
         allowDeletes={!!value?.kubernetes?.delete}
+        updatesDisabled={!kubernetesModes?.update}
+        deletesDisabled={!kubernetesModes?.delete}
         onAllowUpdatesChange={(checked) => {
           onChange({
             ...value,

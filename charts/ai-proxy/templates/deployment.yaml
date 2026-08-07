@@ -42,6 +42,8 @@ spec:
           args:
             - --provider={{ .Values.config.provider }}
             - --provider-host={{ .Values.config.providerHost }}
+            - --bedrock-mantle-aws-region={{ .Values.config.bedrockMantleAWSRegion }}
+            - --bedrock-mantle-model-prefixes={{ join "," .Values.config.bedrockMantleModelPrefixes }}
             {{- with .Values.args }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

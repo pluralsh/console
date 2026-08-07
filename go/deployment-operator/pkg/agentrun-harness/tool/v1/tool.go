@@ -111,6 +111,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		RepositoryDir:  in.Config.RepositoryDir,
 		Prompt:         in.Config.Run.Prompt,
 		Branch:         branch,
+		Followup:       in.Config.Run.Followup,
 	}
 }
 

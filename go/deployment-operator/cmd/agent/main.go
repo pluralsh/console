@@ -130,7 +130,7 @@ func main() {
 
 	// Initialize Pipeline Gate Cache
 	cache.InitGateCache(args.ControllerCacheTTL(), extConsoleClient)
-	cache.InitComponentShaCache(args.ComponentShaCacheTTL(), args.ComponentShaCacheJitter())
+	cache.InitComponentShaCache(args.ComponentShaCacheTTL())
 
 	dbStore := initDatabaseStoreOrDie(ctx)
 	defer func(dbStore store.Store) {
@@ -143,7 +143,7 @@ func main() {
 
 	runStoreCleanerInBackgroundOrDie(ctx, dbStore, args.StoreCleanerInterval(), args.StoreEntryTTL())
 
-	statusSynchronizer := streamline.NewStatusSynchronizer(extConsoleClient, args.ComponentShaCacheTTL(), args.ComponentShaCacheJitter())
+	statusSynchronizer := streamline.NewStatusSynchronizer(extConsoleClient, args.ComponentShaCacheTTL())
 
 	svcCache := pollycache.NewDynamicCache[console.ServiceDeploymentForAgent](
 		service.ControllerCacheTTLFunc(args.ControllerCacheTTL(), args.PollInterval()),

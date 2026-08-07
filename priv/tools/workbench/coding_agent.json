@@ -12,7 +12,11 @@
         },
         "base_branch": {
             "type": "string",
-            "description": "**OPTIONAL** branch to clone when starting the run and use as the pull request base.  This should **always** be left blank unless you are explicitly prompted to set it."
+            "description": "**OPTIONAL** branch to clone for a normal run and use as its pull request base. Leave it blank unless explicitly prompted to set it. Do not use this for follow-up runs."
+        },
+        "head_branch": {
+            "type": "string",
+            "description": "Required when `followup` is true. The existing pull request's head branch. The harness checks out this branch before starting the agent so it can commit and push its additional work there."
         },
         "prompt": {
             "type": "string", 
@@ -21,6 +25,10 @@
         "babysit": {
             "type": "boolean",
             "description": "When true, requests babysitting behavior for this run. Enables the agent to track CI failures and user comments.  Useful for application code prs or complex changes"
+        },
+        "followup": {
+            "type": "boolean",
+            "description": "When true, this run performs additional work on an existing pull request. Set `head_branch` to that pull request's head branch. The agent commits and pushes to the current branch; it does not create a branch or a new pull request."
         }
     },
     "required": ["mode", "repository", "prompt"]
