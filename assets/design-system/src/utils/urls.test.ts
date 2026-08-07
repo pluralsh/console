@@ -82,6 +82,8 @@ describe('URL utils', () => {
     externalUrls.forEach((url) => {
       expect(isExternalUrl(url)).toBeTruthy()
     })
+    expect(isExternalUrl(null)).toBeFalsy()
+    expect(isExternalUrl(undefined)).toBeFalsy()
   })
 
   it('should remove trailing slashes', () => {
