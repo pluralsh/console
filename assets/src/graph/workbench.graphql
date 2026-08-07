@@ -81,6 +81,7 @@ fragment Workbench on Workbench {
   agentRuntime {
     id
     name
+    allowedRepositories
   }
   repository {
     id
@@ -1225,6 +1226,14 @@ query WorkbenchJobActivities($id: ID!) {
     prompt
     workbench {
       id
+      agentRuntime {
+        allowedRepositories
+      }
+      configuration {
+        coding {
+          repositories
+        }
+      }
     }
     referencedJob {
       id

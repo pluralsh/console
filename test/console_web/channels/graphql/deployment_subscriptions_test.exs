@@ -1,6 +1,7 @@
 defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
   use ConsoleWeb.ChannelCase, async: false
   alias Console.{PubSub.Consumers.Rtc, PubSub}
+  alias Console.Schema.AgentMessage.Stdout
 
   describe "runLogsDelta" do
     test "new logs will broadcast deltas" do
@@ -103,6 +104,66 @@ defmodule ConsoleWeb.GraphQl.DeploymentsSubscriptionTest do
       assert delta["payload"]["id"]      == message.id
       assert delta["payload"]["message"] == message.message
       assert delta["payload"]["role"]    == "USER"
+    end
+  end
+
+  describe "agentMessageOutputDelta" do
+    test "command output broadcasts to users with access to the agent run" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime, user: user)
+      message = insert(:agent_message, agent_run: run)
+
+      {:ok, socket} = establish_socket(user)
+
+      ref = push_doc(socket, """
+        subscription AgentMessageOutputDelta($runId: ID!) {
+          agentMessageOutputDelta(runId: $runId) {
+            delta
+            payload {
+              messageId
+              agentRunId
+              stdout
+              stderr
+            }
+          }
+        }
+      """, variables: %{"runId" => run.id})
+
+      assert_reply(ref, :ok, %{subscriptionId: _})
+
+      output = %Stdout{
+        message_id: message.id,
+        agent_run_id: run.id,
+        stdout: "command output",
+        stderr: "command error"
+      }
+
+      Rtc.handle_event(%PubSub.AgentMessageStdoutCreated{item: output})
+
+      assert_push("subscription:data", %{result: %{data: %{"agentMessageOutputDelta" => delta}}})
+      assert delta["delta"] == "CREATE"
+      assert delta["payload"] == %{
+        "messageId" => message.id,
+        "agentRunId" => run.id,
+        "stdout" => "command output",
+        "stderr" => "command error"
+      }
+    end
+
+    test "users cannot subscribe to another user's agent run output" do
+      run = insert(:agent_run, user: insert(:user))
+      {:ok, socket} = establish_socket(insert(:user))
+
+      ref = push_doc(socket, """
+        subscription AgentMessageOutputDelta($runId: ID!) {
+          agentMessageOutputDelta(runId: $runId) {
+            payload { stdout }
+          }
+        }
+      """, variables: %{"runId" => run.id})
+
+      assert_reply(ref, :error, %{errors: [%{message: "forbidden"}]})
     end
   end
 end

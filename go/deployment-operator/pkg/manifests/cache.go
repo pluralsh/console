@@ -2,13 +2,13 @@ package manifests
 
 import (
 	"fmt"
-	"math/rand"
 	"net/url"
 	"os"
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"k8s.io/klog/v2/textlogger"
 )
 
@@ -24,20 +24,18 @@ type cacheLine struct {
 }
 
 type ManifestCache struct {
-	cache        cmap.ConcurrentMap[string, *cacheLine]
-	token        string
-	consoleURL   string
-	expiry       time.Duration
-	expiryJitter time.Duration
+	cache      cmap.ConcurrentMap[string, *cacheLine]
+	token      string
+	consoleURL string
+	expiry     time.Duration
 }
 
-func NewCache(expiry, expiryJitter time.Duration, token, consoleURL string) *ManifestCache {
+func NewCache(expiry time.Duration, token, consoleURL string) *ManifestCache {
 	return &ManifestCache{
-		cache:        cmap.New[*cacheLine](),
-		token:        token,
-		expiry:       expiry,
-		expiryJitter: expiryJitter,
-		consoleURL:   consoleURL,
+		cache:      cmap.New[*cacheLine](),
+		token:      token,
+		expiry:     expiry,
+		consoleURL: consoleURL,
 	}
 }
 
@@ -106,7 +104,7 @@ func (c *ManifestCache) Expire(id string) {
 }
 
 func (c *ManifestCache) ExpiryWithJitter() time.Duration {
-	return c.expiry + time.Duration(rand.Int63n(int64(c.expiryJitter)))
+	return utils.WithJitterFactor(c.expiry, 0.5)
 }
 
 func (l *cacheLine) live() bool {

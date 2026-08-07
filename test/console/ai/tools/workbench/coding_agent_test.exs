@@ -68,23 +68,26 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
   end
 
   describe "implement/1" do
-    test "passes approval and branch through to the agent run" do
+    test "passes approval, followup, and head branch through to the agent run" do
       user = insert(:user)
       runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
       Tool.context(user: user, runtime: runtime)
 
-      assert {:ok, %AgentRun{id: run_id, approval: true, branch: "release-1.2"}} =
+      assert {:ok, %AgentRun{id: run_id, approval: true, followup: true, branch: nil, head_branch: "agent/follow-up"}} =
                CodingAgent.implement(%CodingAgent{
                  mode: :write,
                  repository: "https://github.com/pluralsh/console.git",
                  prompt: "update the readme",
-                 base_branch: "release-1.2",
-                 approval: true
+                 approval: true,
+                 followup: true,
+                 head_branch: "agent/follow-up"
                })
 
       run = Repo.get!(AgentRun, run_id)
       assert run.approval == true
-      assert run.branch == "release-1.2"
+      assert run.followup == true
+      assert run.branch == nil
+      assert run.head_branch == "agent/follow-up"
     end
 
     test "creates an agent run when base_branch is nil" do

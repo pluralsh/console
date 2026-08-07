@@ -1,13 +1,15 @@
 import { ChatInputSimple } from 'components/ai/chatbot/input/ChatInput'
+import type { WorkbenchRepositorySource } from 'components/ai/chatbot/input/autocomplete/useMentionDataSources'
 import type { ComponentProps } from 'react'
 
 /**
- * Workbench prompt field with @ cluster/service/stack and / skill mention autocomplete,
+ * Workbench prompt field with @ cluster/service/stack/repository and / skill mention autocomplete,
  * matching `WorkbenchJobCreateInput` / `WorkbenchJobPromptInput`. Use `syncKey` when
  * replacing `prompt` from navigation or the server so the contenteditable remounts.
  */
 export function WorkbenchPromptRichInput({
   workbenchId,
+  workbenchRepositorySource,
   prompt,
   onPromptChange,
   placeholder,
@@ -17,6 +19,7 @@ export function WorkbenchPromptRichInput({
   wrapperStyles,
 }: {
   workbenchId: Nullable<string>
+  workbenchRepositorySource?: Nullable<WorkbenchRepositorySource>
   prompt: string
   onPromptChange: (next: string) => void
   placeholder?: string
@@ -30,6 +33,7 @@ export function WorkbenchPromptRichInput({
       key={syncKey}
       enableAutoComplete
       workbenchId={workbenchId}
+      workbenchRepositorySource={workbenchRepositorySource}
       deserializePlrlInitialValue
       placeholder={placeholder}
       disabled={disabled}

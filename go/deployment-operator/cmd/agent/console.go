@@ -72,7 +72,6 @@ func registerConsoleReconcilersOrDie(
 			svcCache,
 			store,
 			service.WithManifestTTL(args.ManifestCacheTTL()),
-			service.WithManifestTTLJitter(args.ManifestCacheJitter()),
 			service.WithWorkqueueBaseDelay(args.WorkqueueBaseDelay()),
 			service.WithWorkqueueMaxDelay(args.WorkqueueMaxDelay()),
 			service.WithWorkqueueQPS(args.WorkqueueQPS()),

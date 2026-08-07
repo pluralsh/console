@@ -33,6 +33,7 @@ defmodule Console.Schema.AgentRun do
     field :branch,           :string
     field :head_branch,      :string
     field :error,            :binary
+    field :followup,         :boolean, default: false
     field :consumed,         :binary_id
     field :approval,         :boolean, default: false
     field :approved_at,      :utc_datetime_usec
@@ -103,7 +104,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error)a
+  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -113,6 +114,7 @@ defmodule Console.Schema.AgentRun do
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:flow_id)
     |> validate_repository()
+    |> validate_branch()
     |> cast_embed(:pod_reference)
     |> cast_embed(:usage)
     |> cast_embed(:todos, with: &todo_changeset/2)
@@ -146,6 +148,16 @@ defmodule Console.Schema.AgentRun do
       ^field, "git@" <> _ -> []
       ^field, "https://" <> _ -> []
       ^field, _ -> [{field, "must be a valid https or ssh git clone URL (e.g. https://github.com/pluralsh/plural.git or git@github.com:pluralsh/plural.git)"}]
+    end)
+  end
+
+  @branch_blacklist ~w(main master develop)
+
+  defp validate_branch(cs, field \\ :head_branch, msg \\ "") do
+    validate_change(cs, field, fn
+      ^field, b when b in @branch_blacklist ->
+        [{field, "agent runs are forbidden on reserved branches #{Enum.join(@branch_blacklist, ", ")}#{msg}"}]
+      ^field, _ -> []
     end)
   end
 end

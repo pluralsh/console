@@ -59,6 +59,29 @@ func TestSystemPromptTemplate_OmitsOriginalTaskWhenPromptEmpty(t *testing.T) {
 	}
 }
 
+func TestSystemPromptTemplate_FollowupInstructions(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+	content, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		Followup:      true,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/repo",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() failed: %v", err)
+	}
+	for _, expected := range []string{
+		"existing pull request",
+		"Do **not** create or switch to a branch.",
+		"Do **not** open another pull request.",
+		"Plural MCP `createCommit`",
+	} {
+		if !strings.Contains(content, expected) {
+			t.Fatalf("expected follow-up instructions to contain %q", expected)
+		}
+	}
+}
+
 func TestSystemPromptTemplate_MemoryPersistenceInstructions(t *testing.T) {
 	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
 

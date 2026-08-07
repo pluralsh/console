@@ -299,6 +299,21 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert is_binary(content)
     end
 
+    test "returns stack details when repository metadata is unavailable" do
+      user = insert(:user)
+
+      stack =
+        insert(:stack,
+          repository: nil,
+          git: nil,
+          read_bindings: [%{user_id: user.id}]
+        )
+
+      assert {:ok, parsed} = Tool.validate(%StackInspect{user: user}, %{"stack_id" => stack.id})
+      assert {:ok, content} = StackInspect.implement(parsed)
+      assert content =~ "Repository details are unavailable"
+    end
+
     test "returns {:error, _} when the user cannot read the stack" do
       owner = insert(:user)
       other = insert(:user)

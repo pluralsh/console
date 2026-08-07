@@ -13,7 +13,10 @@ import {
   useState,
 } from 'react'
 import { ChipAttrs, MENTION_TRIGGERS, MentionTrigger } from './mentionTypes'
-import { useMentionDataSources } from './useMentionDataSources'
+import {
+  useMentionDataSources,
+  WorkbenchRepositorySource,
+} from './useMentionDataSources'
 
 type TriggerPosition = {
   trigger: MentionTrigger
@@ -56,11 +59,13 @@ function triggerHasValidContext(textNode: Text, offset: number): boolean {
 export function useMentionAutocomplete({
   containerRef,
   workbenchId,
+  workbenchRepositorySource,
   flowId,
   enabled,
 }: {
   containerRef: RefObject<HTMLElement | null>
   workbenchId?: Nullable<string>
+  workbenchRepositorySource?: Nullable<WorkbenchRepositorySource>
   flowId?: Nullable<string>
   enabled: boolean
 }) {
@@ -74,6 +79,7 @@ export function useMentionAutocomplete({
     trigger,
     query,
     workbenchId,
+    workbenchRepositorySource,
     flowId,
     enabled,
   })

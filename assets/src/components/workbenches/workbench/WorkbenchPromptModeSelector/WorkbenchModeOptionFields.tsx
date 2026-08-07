@@ -95,11 +95,15 @@ export function WorkbenchKubernetesMutationFields({
   allowDeletes,
   onAllowUpdatesChange,
   onAllowDeletesChange,
+  updatesDisabled = false,
+  deletesDisabled = false,
 }: {
   allowUpdates: boolean
   allowDeletes: boolean
   onAllowUpdatesChange: (checked: boolean) => void
   onAllowDeletesChange: (checked: boolean) => void
+  updatesDisabled?: boolean
+  deletesDisabled?: boolean
 }) {
   return (
     <>
@@ -112,6 +116,7 @@ export function WorkbenchKubernetesMutationFields({
         <Checkbox
           small
           checked={allowUpdates}
+          disabled={updatesDisabled}
           onChange={(e) => onAllowUpdatesChange(e.target.checked)}
         >
           Allow updates
@@ -119,6 +124,7 @@ export function WorkbenchKubernetesMutationFields({
         <Checkbox
           small
           checked={allowDeletes}
+          disabled={deletesDisabled}
           onChange={(e) => onAllowDeletesChange(e.target.checked)}
         >
           Allow deletes

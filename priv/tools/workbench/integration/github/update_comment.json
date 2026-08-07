@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "description": "Edit an existing GitHub issue comment, inline pull request review comment, or pull request review summary.",
+  "properties": {
+    "owner": {
+      "type": "string",
+      "description": "Repository owner (user or organization)."
+    },
+    "repo": {
+      "type": "string",
+      "description": "Repository name."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["issue_comment", "pull_request_review_comment", "pull_request_review"],
+      "description": "The type of comment to update. Issue comments include pull request timeline comments; pull_request_review is the review summary."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "ID of the issue comment, inline review comment, or review summary to update."
+    },
+    "pull_number": {
+      "type": "integer",
+      "description": "Pull request number, required only for pull_request_review."
+    },
+    "body": {
+      "type": "string",
+      "description": "Replacement Markdown body."
+    }
+  },
+  "required": ["owner", "repo", "resource", "comment_id", "body"],
+  "additionalProperties": false
+}

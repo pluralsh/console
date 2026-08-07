@@ -63,7 +63,7 @@ export function WorkbenchJobCreateInput({
   workbenchLoading,
   disabled = false,
   onCreated,
-  placeholder = 'Send a job to your workbench.  Use / for skills and @ to mention clusters, services or stacks',
+  placeholder = 'Send a job to your workbench.  Use / for skills and @ to mention clusters, services, stacks or repositories',
   wrapperStyles,
 }: {
   workbenchId: Nullable<string>
@@ -205,6 +205,7 @@ export function WorkbenchJobCreateInput({
           allowSubmit={!!prompt.trim() && !!workbenchId && !disabled}
           enableAutoComplete
           workbenchId={workbenchId}
+          workbenchRepositorySource={data?.workbench}
           flowId={flowId}
           options={
             <Flex
@@ -216,6 +217,7 @@ export function WorkbenchJobCreateInput({
                 value={promptModes}
                 onChange={setPromptModes}
                 disabled={disabled || loading}
+                workbenchModes={data?.workbench?.modes}
               />
               <WorkbenchModelSelector
                 value={selectedModel}

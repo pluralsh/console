@@ -117,6 +117,7 @@ export function WorkbenchJobPromptInput({
           }}
           enableAutoComplete
           workbenchId={job?.workbench?.id}
+          workbenchRepositorySource={job?.workbench}
           submitButton={
             canCancel ? (
               <Tooltip label="Cancel job">

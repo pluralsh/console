@@ -282,6 +282,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
                       <WorkbenchPromptRichInput
                         syncKey={`cron-prompt-${promptSyncKey}`}
                         workbenchId={workbenchId}
+                        workbenchRepositorySource={workbench}
                         prompt={formState.prompt}
                         disabled={isSaving}
                         onPromptChange={(next) =>

@@ -6,7 +6,7 @@ on:
       - "v*.*.*"
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
@@ -56,7 +56,7 @@ jobs:
         if: always()
   publish:
     name: Build and push Console container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: test
     permissions:
       contents: "read"
@@ -82,8 +82,10 @@ jobs:
             type=semver,pattern={{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: Dockerfile
       - uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: "projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github"
@@ -121,7 +123,7 @@ jobs:
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "."
           file: "./Dockerfile"
@@ -129,8 +131,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             GIT_COMMIT=${{ github.sha }}
             VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
@@ -146,7 +146,7 @@ jobs:
         if: always()
   release:
     name: Create GitHub release
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: publish
     permissions:
       contents: write
@@ -184,7 +184,7 @@ jobs:
 
   bump:
     name: Bump Chart Version
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [release]
     permissions:
       contents: write
@@ -248,7 +248,7 @@ jobs:
           base: master
   bump-rapid:
     name: Bump Rapid Chart Version
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [release]
     permissions:
       contents: write

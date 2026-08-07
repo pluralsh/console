@@ -33,6 +33,7 @@ import { useChatbot } from '../../AIContext.tsx'
 import { EditableSkillChipTooltip } from './autocomplete/EditableSkillChipTooltip.tsx'
 import { MentionMenu } from './autocomplete/MentionMenu.tsx'
 import { useMentionAutocomplete } from './autocomplete/useMentionAutocomplete.ts'
+import type { WorkbenchRepositorySource } from './autocomplete/useMentionDataSources.ts'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
 import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
@@ -162,6 +163,7 @@ export function ChatInputSimple({
   wrapperStyles,
   enableAutoComplete = false,
   workbenchId,
+  workbenchRepositorySource,
   flowId,
   submitOnEnter = true,
   showSubmitButton = true,
@@ -180,6 +182,7 @@ export function ChatInputSimple({
   wrapperStyles?: StyledObject
   enableAutoComplete?: boolean
   workbenchId?: Nullable<string>
+  workbenchRepositorySource?: Nullable<WorkbenchRepositorySource>
   flowId?: Nullable<string>
   submitOnEnter?: boolean
   showSubmitButton?: boolean
@@ -192,6 +195,7 @@ export function ChatInputSimple({
   const autocomplete = useMentionAutocomplete({
     containerRef: divRef,
     workbenchId,
+    workbenchRepositorySource,
     flowId,
     enabled: enableAutoComplete,
   })

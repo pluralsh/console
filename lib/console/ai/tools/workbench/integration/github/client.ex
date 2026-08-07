@@ -37,6 +37,10 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   def json_patch(%Tentacat.Client{} = client, path, body) when is_binary(path) and is_map(body),
     do: json_request(:patch, client, path, body, [])
 
+  @spec json_put(Tentacat.Client.t(), String.t(), map()) :: Tentacat.response() | {:error, String.t()}
+  def json_put(%Tentacat.Client{} = client, path, body) when is_binary(path) and is_map(body),
+    do: json_request(:put, client, path, body, [])
+
   @spec build(WorkbenchTool.t()) :: {:ok, Tentacat.Client.t()} | {:error, String.t()}
   def build(%WorkbenchTool{scm_connection: %ScmConnection{github: gh} = conn})
       when not is_nil(gh) and is_binary(gh.app_id) and is_binary(gh.installation_id) and

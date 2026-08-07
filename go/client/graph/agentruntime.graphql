@@ -296,6 +296,7 @@ fragment AgentRunFragment on AgentRun {
     babysitInterval
     approval
     approvedAt
+    followup
 }
 
 

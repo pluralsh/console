@@ -1,5 +1,9 @@
 import {
+  AzureDevopsLogoIcon,
+  BitBucketIcon,
   GitPullIcon,
+  GitHubLogoIcon,
+  GitLabLogoIcon,
   StackIcon,
   Tooltip,
   WarningShieldIcon,
@@ -7,7 +11,7 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { ClusterProviderIcon } from 'components/utils/Provider'
-import { ClusterDistro } from 'generated/graphql'
+import { ClusterDistro, ScmType } from 'generated/graphql'
 import {
   ComponentPropsWithoutRef,
   ComponentType,
@@ -196,12 +200,60 @@ function PlrlVulnerabilityChip(
   )
 }
 
+function PlrlRepositoryChip(props: RenderedChipProps<MentionKind.Repository>) {
+  const label =
+    chipDisplayText(MentionKind.Repository, {
+      'item-name': props['item-name'],
+    }) ||
+    props['repo-url'] ||
+    props['item-id']
+  const icon = repositoryChipIcon(props.provider)
+
+  return <ChipBody icon={icon}>{label}</ChipBody>
+}
+
+function repositoryChipIcon(provider?: string): ReactNode {
+  switch (provider) {
+    case ScmType.Github:
+      return (
+        <GitHubLogoIcon
+          size={12}
+          fullColor
+        />
+      )
+    case ScmType.Gitlab:
+      return (
+        <GitLabLogoIcon
+          size={12}
+          fullColor
+        />
+      )
+    case ScmType.Bitbucket:
+      return (
+        <BitBucketIcon
+          size={12}
+          fullColor
+        />
+      )
+    case ScmType.AzureDevops:
+      return (
+        <AzureDevopsLogoIcon
+          size={12}
+          fullColor
+        />
+      )
+    default:
+      return <GitPullIcon size={12} />
+  }
+}
+
 export const plrlChipComponents = {
   [MentionKind.Cluster]: PlrlClusterChip,
   [MentionKind.Service]: PlrlServiceChip,
   [MentionKind.Stack]: PlrlStackChip,
   [MentionKind.Skill]: PlrlSkillChip,
   [MentionKind.Vulnerability]: PlrlVulnerabilityChip,
+  [MentionKind.Repository]: PlrlRepositoryChip,
 } satisfies {
   [K in MentionKind]: ComponentType<RenderedChipProps<K>>
 }

@@ -51,8 +51,10 @@ jobs:
           images: ${{ env.REGISTRY_IMAGE }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/deployment-operator/dockerfiles/harness/base.Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -66,7 +68,7 @@ jobs:
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/harness/base.Dockerfile"
@@ -74,8 +76,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             VERSION=${{ steps.meta.outputs.version }}
       - name: Export digest
@@ -98,7 +98,7 @@ jobs:
       id-token: write
       packages: write
     needs: [build-base-image]
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     outputs:
       version: ${{ steps.meta.outputs.version }}
     steps:
@@ -119,8 +119,8 @@ jobs:
         with:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v1
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
@@ -140,7 +140,7 @@ jobs:
 
   publish-harness-terraform:
     name: Build and push harness terraform container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [publish-base-image]
     env:
       TERRAFORM_VERSION: 1.14.9
@@ -204,8 +204,10 @@ jobs:
             type=ref,event=pr,suffix=-terraform-${{ matrix.versions.minor }},priority=600
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/deployment-operator/dockerfiles/harness/terraform.Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -218,7 +220,7 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/harness/terraform.Dockerfile"
@@ -226,8 +228,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             TERRAFORM_IMAGE_TAG=${{ matrix.versions.full }}
             HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/stackrun-harness-base
@@ -235,7 +235,7 @@ jobs:
 
   publish-harness-terragrunt:
     name: Build and push harness terragrunt container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [publish-base-image]
     env:
       OPENTOFU_VERSION: 1.12.0
@@ -299,8 +299,10 @@ jobs:
             type=ref,event=pr,suffix=-terragrunt-${{ matrix.versions.minor }},priority=600
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/deployment-operator/dockerfiles/harness/terragrunt.Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -313,7 +315,7 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/harness/terragrunt.Dockerfile"
@@ -321,8 +323,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             TERRAFORM_IMAGE_TAG=${{ matrix.versions.full }}
             OPENTOFU_IMAGE_TAG=${{ env.OPENTOFU_VERSION }}
@@ -332,7 +332,7 @@ jobs:
 
   publish-harness-pulumi:
     name: Build and push harness pulumi container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [publish-base-image]
     env:
       PULUMI_VERSION: 3.251.0
@@ -371,8 +371,10 @@ jobs:
             type=ref,event=pr,suffix=-pulumi-${{ matrix.versions.minor }},priority=600
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/deployment-operator/dockerfiles/harness/pulumi.Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -385,7 +387,7 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/harness/pulumi.Dockerfile"
@@ -393,8 +395,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             PULUMI_VERSION=${{ matrix.versions.full }}
             HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/stackrun-harness-base
@@ -402,7 +402,7 @@ jobs:
 
   publish-harness-ansible:
     name: Build and push harness ansible container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [publish-base-image]
     strategy:
       matrix:
@@ -457,8 +457,10 @@ jobs:
             type=ref,event=pr,suffix=-ansible-${{ matrix.versions.minor }},priority=600
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/deployment-operator/dockerfiles/harness/ansible.Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -471,7 +473,7 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/harness/ansible.Dockerfile"
@@ -479,8 +481,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             ANSIBLE_VERSION=${{ matrix.versions.ansible }}
             PYTHON_VERSION=${{ matrix.versions.python }}
@@ -489,7 +489,7 @@ jobs:
 
   publish-harness-custom:
     name: Build and push harness custom container
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: [publish-base-image]
     permissions:
       contents: write
@@ -514,8 +514,10 @@ jobs:
             type=ref,event=pr,suffix=-custom,priority=600
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Setup Blacksmith Builder
+        uses: useblacksmith/setup-docker-builder@v2
+        with:
+          cache-key: go/deployment-operator/dockerfiles/harness/custom.Dockerfile
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -528,7 +530,7 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: "./go"
           file: "./go/deployment-operator/dockerfiles/harness/custom.Dockerfile"
@@ -536,8 +538,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           build-args: |
             HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/stackrun-harness-base
             HARNESS_BASE_IMAGE_TAG=${{ needs.publish-base-image.outputs.version }}
