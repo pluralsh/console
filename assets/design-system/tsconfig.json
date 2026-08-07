@@ -4,7 +4,9 @@
     "composite": true,
     "baseUrl": ".",
     "rootDir": "./src",
-    "outDir": "dist"
+    "outDir": "dist",
+    // Override parent tsconfig.app.json (keeps noImplicitAny off for console)
+    "noImplicitAny": true
   },
   "include": ["src/**/*"]
 }

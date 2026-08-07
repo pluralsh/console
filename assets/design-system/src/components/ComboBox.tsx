@@ -248,7 +248,7 @@ function ComboBox({
     isOpen = isOpenUncontrolled
   }
 
-  const wrappedOnOpenChange: typeof onOpenChange = useCallback(
+  const wrappedOnOpenChange: NonNullable<typeof onOpenChange> = useCallback(
     (nextIsOpen, menuTrigger) => {
       setIsOpenUncontrolled(nextIsOpen)
       if (nextIsOpen !== isOpen) {
@@ -265,17 +265,18 @@ function ComboBox({
     [wrappedOnOpenChange]
   )
 
-  const wrappedOnSelectionChange: typeof onSelectionChange = useCallback(
-    (newKey) => {
-      if (onSelectionChange) {
-        onSelectionChange(typeof newKey === 'string' ? newKey : '')
-        setIsOpen(false)
-      }
-    },
-    [onSelectionChange, setIsOpen]
-  )
+  const wrappedOnSelectionChange: NonNullable<typeof onSelectionChange> =
+    useCallback(
+      (newKey) => {
+        if (onSelectionChange) {
+          onSelectionChange(typeof newKey === 'string' ? newKey : '')
+          setIsOpen(false)
+        }
+      },
+      [onSelectionChange, setIsOpen]
+    )
 
-  const wrappedOnFocusChange: typeof onFocusChange = useCallback(
+  const wrappedOnFocusChange: NonNullable<typeof onFocusChange> = useCallback(
     (isFocused) => {
       // Enforce open on focus
       if (isFocused && !isOpen) {
@@ -288,7 +289,7 @@ function ComboBox({
     [isOpen, onFocusChange, setIsOpen]
   )
 
-  const wrappedOnInputChange: typeof onInputChange = useCallback(
+  const wrappedOnInputChange: NonNullable<typeof onInputChange> = useCallback(
     (input) => {
       if (input !== previousInputValue.current) {
         previousInputValue.current = input
