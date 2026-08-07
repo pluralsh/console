@@ -84,10 +84,10 @@ type ChecklistProps = ComponentPropsWithRef<'div'> & {
 }
 
 type ChecklistStateProps = {
-  onSelectionChange?: Dispatch<number>
+  onSelectionChange?: Dispatch<number | null>
   onFocusChange?: Dispatch<number>
   onOpenChange?: Dispatch<boolean>
-  selectedKey?: number
+  selectedKey?: number | null
   focusedKey?: number
   completedKey?: number
   isOpen?: boolean
@@ -124,7 +124,7 @@ function ChecklistUnstyled({
 
   const onSelectionChangeWrapper = useCallback(
     (idx: number | null) => {
-      if (idx === null || idx >= children.length || idx < 0) return
+      if (idx !== null && (idx >= children.length || idx < 0)) return
       onSelectionChange?.(idx)
     },
     [children, onSelectionChange]
