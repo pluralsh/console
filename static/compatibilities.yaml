@@ -10938,12 +10938,11 @@ addons:
   release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
   helm_repository_url: https://aws.github.io/eks-charts
   versions:
-  - version: 1.22.4
+  - version: 1.23.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 1.22.4
   - version: 1.22.1
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -19006,23 +19005,19 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 88.1.5
+  - version: 88.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Bumps the bundled **Grafana** Helm chart dependency to **v12.10.3**
-          (kube-prometheus-stack 88.1.5)., Bumps the bundled **kube-state-metrics**
-          Helm chart dependency to **v8.1.3** (kube-prometheus-stack 88.1.3).]
-      features: [No new end-user features called out; this is a dependency-bump patch
-          release (Grafana chart update)., 'Improves kube-state-metrics component
-          version via dependency bump (behavior changes, if any, would come from kube-state-metrics
-          8.1.3).']
+      chart_updates: [Bumps the kube-state-metrics subchart dependency from v8.1.3
+          (in 88.1.3) to v8.2.0 (in 88.2.0).]
+      features: [Includes kube-state-metrics v8.2.0 via subchart update.]
       breaking_changes: []
-    chart_version: 88.1.5
-    images: ['docker.io/grafana/grafana:13.1.2', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.5',
+    chart_version: 88.2.0
+    images: ['docker.io/grafana/grafana:13.1.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.5',
       'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.0',
       'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
       'quay.io/prometheus/prometheus:v3.13.2-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
@@ -23006,41 +23001,21 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.9
+  - version: 3.7.10
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ['No Helm chart changelog was provided in the notes you shared;
-          the items below are Traefik *application* changes between 3.7.0 and 3.7.9.
-          You should still review the Traefik Helm chart release notes for the chart
-          version you plan to deploy, because chart-level defaults/values may change
-          independently of the Traefik image version.']
-      features: ['Large set of Kubernetes-related enhancements introduced at 3.7.0,
-          especially for the ingress-nginx compatibility provider (many more supported
-          NGINX annotations, metamodel-based dynamic config generation, and connection/rate
-          limiting annotations).', 'Kubernetes Gateway API improvements (e.g., multiple
-          certificateRefs on listeners, BackendTLSPolicy CA secret support, updated
-          gateway-api dependency).', 'New/expanded security and routing capabilities
-          (providers routing precedence config, wildcard host support in Host/HostSNI
-          matchers, retries based on status/timeout/non-idempotent methods, service
-          failover by status code, new encodedCharacters middleware).', 'Observability
-          and UI improvements (more access log fields for Kubernetes ingress, OTel
-          access log compatibility tweaks, certificates menu/overview, dashboard naming
-          and UI improvements).', ACME enhancements including CertificateTimeout option
-          and several lego library bumps/renewal behavior tweaks.]
-      breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated in 3.7.0; plan
-          to migrate away from it if you rely on that option., 'Security/behavioral
-          changes around handling suspicious encoded characters became opt-in, and
-          request URL/path sanitization behavior was adjusted; validate any apps that
-          depend on unusual/encoded paths.', 'In 3.7.9, CONNECT request handling behavior
-          changed (payload deferred until backend accepts, CONNECT bodies discarded
-          in forwardauth, and CONNECT requests not re-pooled). If you tunnel via CONNECT
-          (proxies, some enterprise setups), test carefully and follow the migration
-          note.', 3.7.9 includes a security advisory fix (GHSA-3ccp-42pg-hgv6); treat
-          the upgrade as security-relevant and prioritize rollout.]
-    chart_version: 41.1.1
+      chart_updates: []
+      features: [Security-focused patch update to v3.7.10 that includes fixes for
+          three disclosed vulnerabilities (see GHSA advisories)., 'Kubernetes/Gateway
+          API stability improvements: avoids router name collisions and bumps gateway-api
+          dependency to v1.6.1.', 'Auth/middleware correctness improvements (e.g.,
+          forward auth singleflight key collision fix) plus routine dependency bumps
+          (ACME lego v5.3.1, dd-trace-go v2.8.1, x/net/x/text, compress).']
+      breaking_changes: []
+    chart_version: 41.2.0
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
