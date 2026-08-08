@@ -4,41 +4,21 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.9
+- version: 3.7.10
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ['No Helm chart changelog was provided in the notes you shared;
-        the items below are Traefik *application* changes between 3.7.0 and 3.7.9.
-        You should still review the Traefik Helm chart release notes for the chart
-        version you plan to deploy, because chart-level defaults/values may change
-        independently of the Traefik image version.']
-    features: ['Large set of Kubernetes-related enhancements introduced at 3.7.0,
-        especially for the ingress-nginx compatibility provider (many more supported
-        NGINX annotations, metamodel-based dynamic config generation, and connection/rate
-        limiting annotations).', 'Kubernetes Gateway API improvements (e.g., multiple
-        certificateRefs on listeners, BackendTLSPolicy CA secret support, updated
-        gateway-api dependency).', 'New/expanded security and routing capabilities
-        (providers routing precedence config, wildcard host support in Host/HostSNI
-        matchers, retries based on status/timeout/non-idempotent methods, service
-        failover by status code, new encodedCharacters middleware).', 'Observability
-        and UI improvements (more access log fields for Kubernetes ingress, OTel access
-        log compatibility tweaks, certificates menu/overview, dashboard naming and
-        UI improvements).', ACME enhancements including CertificateTimeout option
-        and several lego library bumps/renewal behavior tweaks.]
-    breaking_changes: [ForwardAuth.TrustForwardHeader was deprecated in 3.7.0; plan
-        to migrate away from it if you rely on that option., 'Security/behavioral
-        changes around handling suspicious encoded characters became opt-in, and request
-        URL/path sanitization behavior was adjusted; validate any apps that depend
-        on unusual/encoded paths.', 'In 3.7.9, CONNECT request handling behavior changed
-        (payload deferred until backend accepts, CONNECT bodies discarded in forwardauth,
-        and CONNECT requests not re-pooled). If you tunnel via CONNECT (proxies, some
-        enterprise setups), test carefully and follow the migration note.', 3.7.9
-        includes a security advisory fix (GHSA-3ccp-42pg-hgv6); treat the upgrade
-        as security-relevant and prioritize rollout.]
-  chart_version: 41.1.1
+    chart_updates: []
+    features: [Security-focused patch update to v3.7.10 that includes fixes for three
+        disclosed vulnerabilities (see GHSA advisories)., 'Kubernetes/Gateway API
+        stability improvements: avoids router name collisions and bumps gateway-api
+        dependency to v1.6.1.', 'Auth/middleware correctness improvements (e.g., forward
+        auth singleflight key collision fix) plus routine dependency bumps (ACME lego
+        v5.3.1, dd-trace-go v2.8.1, x/net/x/text, compress).']
+    breaking_changes: []
+  chart_version: 41.2.0
   images: []
 - version: 3.7.0
   kube: ['1.35', '1.34', '1.33', '1.32']
