@@ -82,3 +82,27 @@ func TestGetPluralEnvSlice(t *testing.T) {
 		})
 	}
 }
+
+func TestGetPluralEnvBool(t *testing.T) {
+	tests := []struct {
+		name     string
+		envValue string
+		fallback bool
+		want     bool
+	}{
+		{name: "unset environment returns fallback", fallback: true, want: true},
+		{name: "true enables value", envValue: "true", want: true},
+		{name: "false disables value", envValue: "false", fallback: true, want: false},
+		{name: "invalid value returns fallback", envValue: "not-a-bool", fallback: true, want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("PLRL_TEST_BOOL", tt.envValue)
+
+			if got := GetPluralEnvBool("TEST_BOOL", tt.fallback); got != tt.want {
+				t.Errorf("GetPluralEnvBool() = %t, want %t", got, tt.want)
+			}
+		})
+	}
+}

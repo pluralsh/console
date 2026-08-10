@@ -19,8 +19,9 @@ type MantleConfig struct {
 	APIKey        string
 	AWSRegion     string
 	ModelPrefixes []string
+	SigV4         bool
 }
 
 func (in MantleConfig) Enabled() bool {
-	return in.APIKey != ""
+	return in.APIKey != "" || in.SigV4
 }

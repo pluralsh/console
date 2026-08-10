@@ -13,6 +13,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/ollama/ollama v0.21.1
 	github.com/pluralsh/console/go/polly v0.0.0-00010101000000-000000000000
+	github.com/prometheus/sigv4 v0.4.1
 	github.com/samber/lo v1.53.0
 	github.com/spf13/pflag v1.0.10
 	golang.org/x/oauth2 v0.36.0

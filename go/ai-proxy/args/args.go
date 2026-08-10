@@ -21,6 +21,7 @@ const (
 	envBedrockMantleKey       = "BEDROCK_MANTLE_KEY"
 	envBedrockMantleAWSRegion = "BEDROCK_MANTLE_AWS_REGION"
 	envBedrockMantlePrefixes  = "BEDROCK_MANTLE_MODEL_PREFIXES"
+	envMantleSigV4            = "MANTLE_SIGV4"
 
 	defaultPort                   = 8000
 	defaultProvider               = api.ProviderOllama
@@ -37,6 +38,7 @@ var (
 	argBedrockMantleKey       = pflag.String("bedrock-mantle-key", helpers.GetPluralEnv(envBedrockMantleKey, ""), "Amazon Bedrock Mantle API key. Can be overridden via PLRL_BEDROCK_MANTLE_KEY env var.")
 	argBedrockMantleAWSRegion = pflag.String("bedrock-mantle-aws-region", helpers.GetPluralEnv(envBedrockMantleAWSRegion, defaultBedrockMantleAWSRegion), "AWS region for Amazon Bedrock Mantle. Defaults to us-east-1.")
 	argBedrockMantlePrefixes  = pflag.StringSlice("bedrock-mantle-model-prefixes", helpers.GetPluralEnvSlice(envBedrockMantlePrefixes, []string{"gpt-5.6"}), "OpenAI model prefixes routed to Amazon Bedrock Mantle.")
+	argMantleSigV4            = pflag.Bool("mantle-sigv4", helpers.GetPluralEnvBool(envMantleSigV4, false), "Use AWS SigV4 authentication from the default credentials chain for Amazon Bedrock Mantle. Can be overridden via PLRL_MANTLE_SIGV4 env var.")
 	argPort                   = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")
 	argAddress                = pflag.IP("address", net.ParseIP(defaultAddress), "The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).")
 )
@@ -127,6 +129,10 @@ func BedrockMantleModelPrefixes() []string {
 	}
 
 	return *argBedrockMantlePrefixes
+}
+
+func MantleSigV4() bool {
+	return argMantleSigV4 != nil && *argMantleSigV4
 }
 
 func Address() string {
