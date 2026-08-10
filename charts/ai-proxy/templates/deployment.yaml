@@ -42,9 +42,6 @@ spec:
           args:
             - --provider={{ .Values.config.provider }}
             - --provider-host={{ .Values.config.providerHost }}
-            - --bedrock-mantle-aws-region={{ .Values.config.bedrockMantleAWSRegion }}
-            - --mantle-sigv4={{ .Values.config.mantleSigV4 }}
-            - --bedrock-mantle-model-prefixes={{ join "," .Values.config.bedrockMantleModelPrefixes }}
             {{- with .Values.args }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -66,7 +63,15 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           
           env:
-            {{- toYaml .Values.env | nindent 12 }}
+            - name: PLRL_BEDROCK_MANTLE_AWS_REGION
+              value: {{ default "us-east-1" .Values.config.bedrockMantleAWSRegion | quote }}
+            - name: PLRL_MANTLE_SIGV4
+              value: {{ .Values.config.mantleSigV4 | quote }}
+            - name: PLRL_BEDROCK_MANTLE_MODEL_PREFIXES
+              value: {{ join "," .Values.config.bedrockMantleModelPrefixes | quote }}
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
 
           envFrom:
             - secretRef:

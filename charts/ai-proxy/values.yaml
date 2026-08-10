@@ -38,9 +38,7 @@ secrets:
 #  - --provider=openai # One of: ollama, openai
 #  - --provider-host='' # host address to access provider API i.e. https://api.openai.com
 #  - --provider-token='' # Provider token used to connect to the API. Can be overridden via PLRL_PROVIDER_TOKEN env var.
-#  - --bedrock-mantle-aws-region=us-east-1 # AWS region used for Amazon Bedrock Mantle.
-#  - --mantle-sigv4 # Use the default AWS credentials chain for Mantle authentication.
-#  - --bedrock-mantle-model-prefixes=gpt-5.6 # Comma-separated model prefixes routed to Mantle.
+# Bedrock Mantle settings are passed using PLRL_* environment variables for compatibility with older images.
 #  - --port=8000 # host address to access provider API i.e. https://api.openai.com
 #  - --address=0.0.0.0 # The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).
 args: []
