@@ -12056,6 +12056,7 @@ const (
 	AgentRuntimeTypeGemini   AgentRuntimeType = "GEMINI"
 	AgentRuntimeTypeCustom   AgentRuntimeType = "CUSTOM"
 	AgentRuntimeTypeCodex    AgentRuntimeType = "CODEX"
+	AgentRuntimeTypePi       AgentRuntimeType = "PI"
 )
 
 var AllAgentRuntimeType = []AgentRuntimeType{
@@ -12064,11 +12065,12 @@ var AllAgentRuntimeType = []AgentRuntimeType{
 	AgentRuntimeTypeGemini,
 	AgentRuntimeTypeCustom,
 	AgentRuntimeTypeCodex,
+	AgentRuntimeTypePi,
 }
 
 func (e AgentRuntimeType) IsValid() bool {
 	switch e {
-	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom, AgentRuntimeTypeCodex:
+	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom, AgentRuntimeTypeCodex, AgentRuntimeTypePi:
 		return true
 	}
 	return false

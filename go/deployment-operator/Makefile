@@ -414,6 +414,14 @@ docker-build-agent-harness-opencode: docker-build-agent-harness-base ## build op
 		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/opencode.Dockerfile \
 		$(WORKSPACES_DIR)
 
+.PHONY: docker-build-agent-harness-pi
+docker-build-agent-harness-pi: docker-build-agent-harness-base ## build Pi coding-agent harness image
+	docker build \
+		--build-arg=AGENT_HARNESS_BASE_IMAGE_TAG="latest" \
+		-t ghcr.io/pluralsh/agent-harness-pi \
+		-f $(WORKSPACES_DIR)/deployment-operator/dockerfiles/agent-harness/pi.Dockerfile \
+		$(WORKSPACES_DIR)
+
 .PHONY: docker-build-terraform-mcpserver
 docker-build-terraform-mcpserver: ## build mcp server docker image
 	docker build \

@@ -260,7 +260,8 @@
               "opencode",
               "gemini",
               "custom",
-              "codex"
+              "codex",
+              "pi"
             ],
             "type": "string"
           },

@@ -16,14 +16,18 @@ type simpleCacheLine[T any] struct {
 type SimpleCache[T any] struct {
 	sync.Mutex
 
-	cache  cmap.ConcurrentMap[string, simpleCacheLine[T]]
-	expiry time.Duration
+	cache    cmap.ConcurrentMap[string, simpleCacheLine[T]]
+	expiryFn func() time.Duration
 }
 
 func NewSimpleCache[T any](expiry time.Duration) *SimpleCache[T] {
+	return NewSimpleCacheWithExpiryFunc[T](func() time.Duration { return expiry })
+}
+
+func NewSimpleCacheWithExpiryFunc[T any](expiryFn func() time.Duration) *SimpleCache[T] {
 	return &SimpleCache[T]{
-		cache:  cmap.New[simpleCacheLine[T]](),
-		expiry: expiry,
+		cache:    cmap.New[simpleCacheLine[T]](),
+		expiryFn: expiryFn,
 	}
 }
 
@@ -57,7 +61,7 @@ func (c *SimpleCache[T]) Expire(id string) {
 }
 
 func (c *SimpleCache[T]) ExpiryWithJitter() time.Duration {
-	return utils.WithJitterFactor(c.expiry, 0.5)
+	return utils.WithJitterFactor(c.expiryFn(), 0.5)
 }
 
 func (l *simpleCacheLine[T]) live() bool {

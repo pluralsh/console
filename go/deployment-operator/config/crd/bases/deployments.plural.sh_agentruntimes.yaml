@@ -1813,6 +1813,39 @@ spec:
                         description: Timeout bounds a single codex run invocation.
                         type: string
                     type: object
+                  pi:
+                    description: Pi config for Pi coding-agent CLI runtime.
+                    properties:
+                      apiKeySecretRef:
+                        description: APIKeySecretRef references an API key. Optional with aiProxy enabled.
+                        properties:
+                          key:
+                            description: The key of the secret to select from. Must be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: Name of the referent.
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must be defined.
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      endpoint:
+                        description: Endpoint overrides the OpenAI-compatible provider base URL.
+                        type: string
+                      model:
+                        description: Model is the model id to use.
+                        type: string
+                      provider:
+                        description: Provider is Pi's provider id. Defaults to openai.
+                        type: string
+                      timeout:
+                        description: Timeout bounds a single Pi invocation.
+                        type: string
+                    type: object
                   gemini:
                     description: Config for Gemini CLI runtime.
                     properties:
@@ -10532,12 +10565,13 @@ spec:
               type:
                 description: |-
                   Type specifies the agent runtime to use for executing the stack.
-                  One of CLAUDE, OPENCODE, GEMINI, CODEX, CUSTOM.
+                  One of CLAUDE, OPENCODE, GEMINI, CODEX, PI, CUSTOM.
                 enum:
                 - CLAUDE
                 - OPENCODE
                 - GEMINI
                 - CODEX
+                - PI
                 - CUSTOM
                 type: string
             required:

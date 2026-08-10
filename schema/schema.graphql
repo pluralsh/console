@@ -1923,6 +1923,7 @@ enum AgentRuntimeType {
   GEMINI
   CUSTOM
   CODEX
+  PI
 }
 
 enum AgentRunStatus {

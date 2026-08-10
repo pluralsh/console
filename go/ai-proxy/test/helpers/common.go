@@ -42,6 +42,7 @@ func SetupServer() (*httptest.Server, error) {
 			APIKey:        args.BedrockMantleKey(),
 			AWSRegion:     args.BedrockMantleAWSRegion(),
 			ModelPrefixes: args.BedrockMantleModelPrefixes(),
+			SigV4:         args.MantleSigV4(),
 		}
 		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderAwsRegion(), tokenRotator, mantleConfig)
 		if err != nil {

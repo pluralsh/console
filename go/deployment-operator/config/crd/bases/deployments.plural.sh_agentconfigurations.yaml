@@ -54,6 +54,9 @@ spec:
                   CompatibilityUploadInterval determines how frequently the agent uploads compatibility data.
                   Set to "0s" to disable compatibility uploads.
                 type: string
+              componentShaCacheTTL:
+                description: ComponentShaCacheTTL specifies how long component SHA cache entries remain valid.
+                type: string
               disableWebsocket:
                 description: |-
                   DisableWebsocket disables the cluster websocket connection to the Console.

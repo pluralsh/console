@@ -34,8 +34,8 @@ type AgentRuntimeSpec struct {
 	TargetNamespace string `json:"targetNamespace"`
 
 	// Type specifies the agent runtime to use for executing the stack.
-	// One of CLAUDE, OPENCODE, GEMINI, CODEX, CUSTOM.
-	// +kubebuilder:validation:Enum=CLAUDE;OPENCODE;GEMINI;CODEX;CUSTOM
+	// One of CLAUDE, OPENCODE, GEMINI, CODEX, PI, CUSTOM.
+	// +kubebuilder:validation:Enum=CLAUDE;OPENCODE;GEMINI;CODEX;PI;CUSTOM
 	// +kubebuilder:validation:Required
 	Type console.AgentRuntimeType `json:"type"`
 
@@ -242,6 +242,10 @@ type AgentRuntimeConfig struct {
 	// Codex config for Codex CLI runtime.
 	// +kubebuilder:validation:Optional
 	Codex *CodexConfig `json:"codex,omitempty"`
+
+	// Pi config for Pi coding-agent CLI runtime.
+	// +kubebuilder:validation:Optional
+	Pi *PiConfig `json:"pi,omitempty"`
 }
 
 func (in *AgentRuntimeConfig) ToAgentRuntimeConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error), aiProxy bool) (*AgentRuntimeConfigRaw, error) {
@@ -268,12 +272,17 @@ func (in *AgentRuntimeConfig) ToAgentRuntimeConfigRaw(secretGetter func(corev1.S
 	if err != nil {
 		return nil, err
 	}
+	pi, err := in.Pi.ToPiConfigRaw(secretGetter)
+	if err != nil {
+		return nil, err
+	}
 
 	return &AgentRuntimeConfigRaw{
 		Gemini:   gemini,
 		Claude:   claude,
 		OpenCode: openCode,
 		Codex:    codex,
+		Pi:       pi,
 	}, nil
 }
 
@@ -298,6 +307,10 @@ type AgentRuntimeConfigRaw struct {
 	// Codex is the raw configuration for the Codex runtime.
 	// +kubebuilder:validation:Optional
 	Codex *CodexConfigRaw `json:"codex,omitempty"`
+
+	// Pi is the raw configuration for the Pi runtime.
+	// +kubebuilder:validation:Optional
+	Pi *PiConfigRaw `json:"pi,omitempty"`
 }
 
 func (in *ExaConnection) ToExaConnectionRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*ExaConnectionRaw, error) {
@@ -355,6 +368,63 @@ type CodexConfigRaw struct {
 	// Timeout bounds a single codex run invocation.
 	// +kubebuilder:validation:Optional
 	Timeout *metav1.Duration `json:"timeout,omitempty"`
+}
+
+// PiConfig configures the Pi coding-agent CLI runtime.
+type PiConfig struct {
+	// APIKeySecretRef references an API key. Optional with aiProxy enabled.
+	// +kubebuilder:validation:Optional
+	APIKeySecretRef *corev1.SecretKeySelector `json:"apiKeySecretRef,omitempty"`
+
+	// Provider is Pi's provider id. Defaults to openai.
+	// +kubebuilder:validation:Optional
+	Provider *string `json:"provider,omitempty"`
+
+	// Model is the model id to use.
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
+	// Endpoint overrides the OpenAI-compatible provider base URL.
+	// +kubebuilder:validation:Optional
+	Endpoint *string `json:"endpoint,omitempty"`
+
+	// Timeout bounds a single Pi invocation.
+	// +kubebuilder:validation:Optional
+	Timeout *metav1.Duration `json:"timeout,omitempty"`
+}
+
+func (in *PiConfig) ToPiConfigRaw(secretGetter func(corev1.SecretKeySelector) (*corev1.Secret, error)) (*PiConfigRaw, error) {
+	if in == nil {
+		return nil, nil
+	}
+	result := &PiConfigRaw{
+		Provider: in.Provider,
+		Model:    in.Model,
+		Endpoint: in.Endpoint,
+		Timeout:  in.Timeout,
+	}
+	if !secretKeySelectorSet(in.APIKeySecretRef) {
+		return result, nil
+	}
+	secret, err := secretGetter(*in.APIKeySecretRef)
+	if err != nil {
+		return nil, err
+	}
+	value, exists := secret.Data[in.APIKeySecretRef.Key]
+	if !exists {
+		return nil, fmt.Errorf("API key secret does not contain key %s", in.APIKeySecretRef.Key)
+	}
+	result.APIKey = string(value)
+	return result, nil
+}
+
+// PiConfigRaw contains resolved credentials and configuration for Pi.
+type PiConfigRaw struct {
+	APIKey   string           `json:"apiKey,omitempty"`
+	Provider *string          `json:"provider,omitempty"`
+	Model    *string          `json:"model,omitempty"`
+	Endpoint *string          `json:"endpoint,omitempty"`
+	Timeout  *metav1.Duration `json:"timeout,omitempty"`
 }
 
 type CodexConfig struct {

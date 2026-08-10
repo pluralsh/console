@@ -72,7 +72,7 @@ func TestHandleNotificationDispatchesToPublisher(t *testing.T) {
 	s.handleNotification(2, notification{
 		Resource:   "service",
 		ResourceID: "svc-123",
-		Kick:       boolPtr(true),
+		Kick:       new(true),
 	})
 
 	if pub.id != "svc-123" {
@@ -92,7 +92,7 @@ func TestHandleNotificationDispatchesUppercaseResourceToPublisher(t *testing.T) 
 	s.handleNotification(2, notification{
 		Resource:   "SERVICE",
 		ResourceID: "svc-456",
-		Kick:       boolPtr(false),
+		Kick:       new(false),
 	})
 
 	if pub.id != "svc-456" {
@@ -212,10 +212,6 @@ func newPublisherMapWith(event string, publisher Publisher) cmap.ConcurrentMap[s
 	m := cmap.New[Publisher]()
 	m.Set(event, publisher)
 	return m
-}
-
-func boolPtr(v bool) *bool {
-	return &v
 }
 
 func mustWebsocketURL(t *testing.T) *url.URL {

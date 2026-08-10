@@ -9,11 +9,15 @@ var (
 )
 
 func InitComponentShaCache(expireAfter time.Duration) {
+	InitComponentShaCacheWithExpiryFunc(func() time.Duration { return expireAfter })
+}
+
+func InitComponentShaCacheWithExpiryFunc(expiryFn func() time.Duration) {
 	if componentShaCache != nil {
 		return
 	}
 
-	componentShaCache = NewSimpleCache[string](expireAfter)
+	componentShaCache = NewSimpleCacheWithExpiryFunc[string](expiryFn)
 }
 
 func ComponentShaCache() *SimpleCache[string] {

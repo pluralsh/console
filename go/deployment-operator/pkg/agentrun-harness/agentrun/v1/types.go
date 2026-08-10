@@ -81,6 +81,7 @@ type AgentRuntimeConfig struct {
 	OpenCode *OpencodeConfig `json:"opencode,omitempty"`
 	Gemini   *GeminiConfig   `json:"gemini,omitempty"`
 	Codex    *CodexConfig    `json:"codex,omitempty"`
+	Pi       *PiConfig       `json:"pi,omitempty"`
 }
 
 type OpencodeConfig struct {
@@ -116,6 +117,14 @@ type CodexConfig struct {
 	Method   string        `json:"method,omitempty"`
 	Timeout  time.Duration `json:"timeout"`
 	Endpoint *string       `json:"endpoint,omitempty"`
+}
+
+type PiConfig struct {
+	APIKey   string        `json:"apiKey"`
+	Provider string        `json:"provider,omitempty"`
+	Model    string        `json:"model,omitempty"`
+	Endpoint *string       `json:"endpoint,omitempty"`
+	Timeout  time.Duration `json:"timeout"`
 }
 
 // FromAgentRunFragment converts Console API fragment to harness type
@@ -254,6 +263,16 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvCodexEndpoint, ""); endpoint != "" {
 			config.Codex.Endpoint = &endpoint
+		}
+	case console.AgentRuntimeTypePi:
+		config.Pi = &PiConfig{
+			APIKey:   helpers.GetPluralEnv(controller.EnvPiAPIKey, ""),
+			Provider: helpers.GetPluralEnv(controller.EnvPiProvider, ""),
+			Model:    helpers.GetPluralEnv(controller.EnvPiModel, ""),
+			Timeout:  helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
+		}
+		if endpoint := helpers.GetPluralEnv(controller.EnvPiEndpoint, ""); endpoint != "" {
+			config.Pi.Endpoint = &endpoint
 		}
 	}
 
