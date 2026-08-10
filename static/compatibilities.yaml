@@ -16648,6 +16648,39 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.9.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '## Helm / values changes to review
+
+        - **New opt-in pod fields:** chart adds optional `schedulerName` and `runtimeClassName`
+        for pods. If you need non-default scheduling or a RuntimeClass (e.g., gVisor/Kata),
+        set these values; otherwise no action needed.
+
+        - **Conjur chart/install behavior:** Conjur-related Helm install now includes
+        an `InstallTimeout` and the Conjur server image version is pinned. If you
+        deploy the Conjur provider/test setup via the chart, ensure your install/upgrade
+        timeouts align and verify the pinned image meets your requirements.
+
+        - **CRD install toggle/caching fix:** a chart fix addresses cache enablement
+        being removed when `installCRD=false`. If you run with `installCRD: false`,
+        recheck cache-related values after upgrade.
+
+        '
+      chart_updates: [Adds opt-in `schedulerName` and `runtimeClassName` support for
+          pods., 'Conjur Helm installation improvements: adds install timeout and
+          pins Conjur server image version.', Fixes chart behavior where cache enablement
+          could be removed when `installCRD=false`., Assorted dependency/security
+          maintenance in the release pipeline (no chart action required).]
+      features: ['1Password SDK: adds **environments** support, enabling selection/segmentation
+          across 1Password environments.', 'Helm chart: opt-in support for configuring
+          `schedulerName` and `runtimeClassName` on pods for advanced scheduling and
+          runtime isolation.']
+      breaking_changes: []
+    chart_version: 2.9.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.9.0']
   - version: 2.8.0
     kube: ['1.36', '1.35']
     requirements: []
@@ -30063,18 +30096,17 @@ addons:
   helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imagePullSecret.password=dummy
   chart_name: wiz-sensor
   versions:
-  - version: 1.0.11678
+  - version: 1.0.11966
     kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ['Only release metadata and chart asset are provided; no changelog
-          entries detailing chart template, values, or behavior changes were included
-          in the supplied notes.']
-      features: []
+      chart_updates: []
+      features: [Release package published for wiz-sensor chart/application version
+          1.0.11966.]
       breaking_changes: []
-    chart_version: 1.0.11678
+    chart_version: 1.0.11966
     images: ['wizio.azurecr.io/sensor:v1']
   - version: 1.0.3999
     kube: ['1.36', '1.35', '1.34', '1.33']
