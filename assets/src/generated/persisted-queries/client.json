@@ -1572,40 +1572,40 @@
          "name": "ComplianceReports",
          "body": "query ComplianceReports($id: ID, $name: String, $after: String, $before: String, $first: Int, $last: Int) {\n  complianceReportGenerator(id: $id, name: $name) {\n    complianceReports(after: $after, before: $before, first: $first, last: $last) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...ComplianceReport\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment ComplianceReport on ComplianceReports {\n  insertedAt\n  id\n  name\n  sha256\n  __typename\n}"
       },
-      "sha256:ee00909a96b9516ee691b5fa62a0821e36146a4cc92fec36b217351147618c50": {
+      "sha256:0468fee7007cd42f554905a16c0d76a3687919152ff4153e640562564e003ac7": {
          "type": "query",
          "name": "Projects",
-         "body": "query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {\n  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...Project\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  __typename\n}"
+         "body": "query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {\n  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...Project\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  disableInsights\n  __typename\n}"
       },
       "sha256:7cb24e9ce6d31296196ec15a6dcf2de203a241d4cdaebebfca2a2e81c6c0cab6": {
          "type": "query",
          "name": "ProjectsTiny",
          "body": "query ProjectsTiny($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {\n  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...ProjectTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
-      "sha256:3ee2135f3e87e26075fa23444f53e027129bb4fe4983635242481ba2e9f8c971": {
+      "sha256:bcd6cfbb22db495884e8b05f7fea95e1415dc10ab4226388d587e6611558fd3d": {
          "type": "query",
          "name": "Project",
-         "body": "query Project($id: ID, $name: String) {\n  project(id: $id, name: $name) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  __typename\n}"
+         "body": "query Project($id: ID, $name: String) {\n  project(id: $id, name: $name) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  disableInsights\n  __typename\n}"
       },
       "sha256:1bf42433346dfebd9b0fe8b643a692bdaea3a0bd54304651fba892587a072907": {
          "type": "query",
          "name": "ProjectBindings",
          "body": "query ProjectBindings($id: ID!) {\n  project(id: $id) {\n    ...ProjectBindings\n    __typename\n  }\n}\n\nfragment ProjectBindings on Project {\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  writeBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:ab8ec4fdf55287f1fcf1166bf06f7f940f9d0e092a9d8ed6938b866e5c26da4b": {
+      "sha256:11904b2f819e3339c014a86eb526911b72d7d562497006af0d60de06e05214e7": {
          "type": "mutation",
          "name": "CreateProject",
-         "body": "mutation CreateProject($attributes: ProjectAttributes!) {\n  createProject(attributes: $attributes) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  __typename\n}"
+         "body": "mutation CreateProject($attributes: ProjectAttributes!) {\n  createProject(attributes: $attributes) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  disableInsights\n  __typename\n}"
       },
-      "sha256:23cfc4c611663c1d1a9cc4d4df44b21b3c4983b9ce5f158eed89b8f84ef4cd78": {
+      "sha256:812f912eb18695852eda3e459424f6e09bc96dadccaf063b202551e153ab5fe8": {
          "type": "mutation",
          "name": "UpdateProject",
-         "body": "mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {\n  updateProject(id: $id, attributes: $attributes) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  __typename\n}"
+         "body": "mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {\n  updateProject(id: $id, attributes: $attributes) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  disableInsights\n  __typename\n}"
       },
-      "sha256:48f9c4ef8e210074a13db8e2d77012e2a539cf04418c0a615e57531ec649a1ee": {
+      "sha256:8509c0eba1eb745c2fc7795dfab0ab3dc4687f4f10d86c7929993c308e1d10fd": {
          "type": "mutation",
          "name": "DeleteProject",
-         "body": "mutation DeleteProject($id: ID!) {\n  deleteProject(id: $id) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  __typename\n}"
+         "body": "mutation DeleteProject($id: ID!) {\n  deleteProject(id: $id) {\n    ...Project\n    __typename\n  }\n}\n\nfragment Project on Project {\n  id\n  insertedAt\n  updatedAt\n  name\n  default\n  description\n  disableInsights\n  __typename\n}"
       },
       "sha256:b4ab744f8d5aeb72a323756efad14ad2f72845d037426504850863308b8113a6": {
          "type": "mutation",

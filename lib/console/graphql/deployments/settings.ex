@@ -19,6 +19,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :project_attributes do
     field :name, non_null(:string)
     field :description, :string
+    field :disable_insights, :boolean
     field :read_bindings, list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
   end
@@ -394,6 +395,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :name, non_null(:string)
     field :description, :string
     field :default, :boolean
+    field :disable_insights, :boolean
 
     @desc "list all alerts discovered for this project"
     connection field :alerts, node_type: :alert do

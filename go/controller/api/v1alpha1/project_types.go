@@ -86,6 +86,10 @@ type ProjectSpec struct {
 	// +kubebuilder:example:=my project description
 	Description *string `json:"description,omitempty"`
 
+	// DisableInsights indicates whether to disable AI insights and vector storage for this project.
+	// +kubebuilder:validation:Optional
+	DisableInsights *bool `json:"disableInsights,omitempty"`
+
 	// Bindings contain read and write policies that control access to all resources
 	// within this project, enabling fine-grained permission management and multi-tenancy.
 	// +kubebuilder:validation:Optional

@@ -6177,6 +6177,7 @@ enum Provider {
 input ProjectAttributes {
   name: String!
   description: String
+  disableInsights: Boolean
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
 }
@@ -6611,6 +6612,8 @@ type Project {
   description: String
 
   default: Boolean
+
+  disableInsights: Boolean
 
   "list all alerts discovered for this project"
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection

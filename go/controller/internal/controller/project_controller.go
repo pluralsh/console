@@ -205,8 +205,9 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 
 func (in *ProjectReconciler) attributes(project *v1alpha1.Project) (*console.ProjectAttributes, error) {
 	attrs := &console.ProjectAttributes{
-		Name:        project.ConsoleName(),
-		Description: project.Spec.Description,
+		Name:            project.ConsoleName(),
+		Description:     project.Spec.Description,
+		DisableInsights: project.Spec.DisableInsights,
 	}
 
 	if project.Spec.Bindings != nil {

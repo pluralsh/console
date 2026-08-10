@@ -4155,6 +4155,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of the project. |  | Required: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description provides a human-readable explanation of this project's purpose<br />and the resources it manages within the organizational hierarchy. |  | Optional: \{\} <br />Type: string <br /> |
+| `disableInsights` _boolean_ | DisableInsights indicates whether to disable AI insights and vector storage for this project. |  | Optional: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 

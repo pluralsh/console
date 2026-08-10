@@ -7113,10 +7113,11 @@ type PreviewEnvironmentTemplateEdge struct {
 
 // A unit of organization to control permissions for a set of objects within your Console instance
 type Project struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
-	Default     *bool   `json:"default,omitempty"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Description     *string `json:"description,omitempty"`
+	Default         *bool   `json:"default,omitempty"`
+	DisableInsights *bool   `json:"disableInsights,omitempty"`
 	// list all alerts discovered for this project
 	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// read policy across this project
@@ -7128,10 +7129,11 @@ type Project struct {
 }
 
 type ProjectAttributes struct {
-	Name          string                     `json:"name"`
-	Description   *string                    `json:"description,omitempty"`
-	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	Name            string                     `json:"name"`
+	Description     *string                    `json:"description,omitempty"`
+	DisableInsights *bool                      `json:"disableInsights,omitempty"`
+	ReadBindings    []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings   []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ProjectConnection struct {

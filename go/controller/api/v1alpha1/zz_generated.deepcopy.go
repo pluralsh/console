@@ -7545,6 +7545,11 @@ func (in *ProjectSpec) DeepCopyInto(out *ProjectSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.DisableInsights != nil {
+		in, out := &in.DisableInsights, &out.DisableInsights
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
 		*out = new(Bindings)
