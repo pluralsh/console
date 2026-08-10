@@ -36,6 +36,9 @@ type AgentConfigurationSpec struct {
 	// Set to "0s" to disable pipeline gate checks.
 	PipelineGateInterval *string `json:"pipelineGateInterval,omitempty"`
 
+	// ComponentShaCacheTTL specifies how long duplicate component updates are cached.
+	ComponentShaCacheTTL *string `json:"componentShaCacheTTL,omitempty"`
+
 	// MaxConcurrentReconciles controls the maximum number of concurrent reconcile loops.
 	// Higher values can increase throughput at the cost of resource usage.
 	MaxConcurrentReconciles *int `json:"maxConcurrentReconciles,omitempty"`

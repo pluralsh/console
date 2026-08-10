@@ -31,6 +31,7 @@ func TestLoadAgentConfigurationUsesDefaultsWhenMissing(t *testing.T) {
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetStackPollInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
+	assertDuration(t, 6*time.Hour, common.GetConfigurationManager().GetComponentShaCacheTTL())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
 
@@ -48,6 +49,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 				CompatibilityUploadInterval:  ptr("30m"),
 				DisableWebsocket:             &disableWebsocket,
 				PipelineGateInterval:         ptr("0s"),
+				ComponentShaCacheTTL:         ptr("12h"),
 				ServicePollInterval:          ptr("10m"),
 				ManagedNamespacePollInterval: ptr("15m"),
 				SentinelPollInterval:         ptr("5m"),
@@ -65,6 +67,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 	assertDuration(t, 0, common.GetConfigurationManager().GetStackPollInterval())
 	assertDuration(t, 5*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
+	assertDuration(t, 12*time.Hour, common.GetConfigurationManager().GetComponentShaCacheTTL())
 	assert.True(t, common.GetConfigurationManager().IsWebsocketDisabled())
 
 	require.NoError(t, common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{}))
@@ -75,6 +78,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetStackPollInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
+	assertDuration(t, 6*time.Hour, common.GetConfigurationManager().GetComponentShaCacheTTL())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
 
@@ -159,6 +163,7 @@ func agentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 		StackPollInterval:            ptr("2m"),
 		SentinelPollInterval:         ptr("3m"),
 		PipelineGateInterval:         ptr("0s"),
+		ComponentShaCacheTTL:         ptr("6h"),
 		DisableWebsocket:             &disableWebsocket,
 	}
 }

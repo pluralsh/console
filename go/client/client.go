@@ -48198,6 +48198,7 @@ fragment AgentRunFragment on AgentRun {
 	babysitInterval
 	approval
 	approvedAt
+	followup
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48454,6 +48455,7 @@ fragment AgentRunFragment on AgentRun {
 	babysitInterval
 	approval
 	approvedAt
+	followup
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48697,6 +48699,7 @@ fragment AgentRunFragment on AgentRun {
 	babysitInterval
 	approval
 	approvedAt
+	followup
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48878,6 +48881,7 @@ fragment AgentRunFragment on AgentRun {
 	babysitInterval
 	approval
 	approvedAt
+	followup
 }
 fragment AgentTodoFragment on AgentTodo {
 	description

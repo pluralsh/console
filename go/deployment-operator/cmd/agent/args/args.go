@@ -64,8 +64,8 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
-	defaultComponentShaCacheTTL         = "3h"
-	defaultComponentShaCacheTTLDuration = 3 * time.Hour
+	defaultComponentShaCacheTTL         = "6h"
+	defaultComponentShaCacheTTLDuration = 6 * time.Hour
 
 	// Deprecated: cache jitter is now fixed at 50% of the cache TTL.
 	defaultManifestCacheJitter = "30m"
@@ -541,6 +541,7 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	stackPollInterval := StackPollInterval().String()
 	sentinelPollInterval := SentinelPollInterval().String()
 	pipelineGateInterval := PipelineGatesInterval().String()
+	componentShaCacheTTL := ComponentShaCacheTTL().String()
 	disableWebsocket := DisableWebsocket()
 
 	return v1alpha1.AgentConfigurationSpec{
@@ -551,6 +552,7 @@ func AgentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 		StackPollInterval:            &stackPollInterval,
 		SentinelPollInterval:         &sentinelPollInterval,
 		PipelineGateInterval:         &pipelineGateInterval,
+		ComponentShaCacheTTL:         &componentShaCacheTTL,
 		DisableWebsocket:             &disableWebsocket,
 	}
 }

@@ -125,12 +125,22 @@ func main() {
 	kubeManager := initKubeManagerOrDie(config)
 	consoleManager := initConsoleManagerOrDie()
 
+	// Apply AgentConfiguration before initializing caches. Direct apiserver load is
+	// sufficient for startup; the kube reconciler continues to own live updates afterward.
+	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
+	if err := deferPollOnInstall(ctx, kubeManager.GetAPIReader(), args.DeferPollOnInstall(), time.Now()); err != nil {
+		setupLog.Error(err, "unable to determine deployment operator age for initial poll")
+	}
+
 	// Start the discovery cache manager in background.
 	runDiscoveryManagerOrDie(ctx, discoveryCache)
 
 	// Initialize Pipeline Gate Cache
 	cache.InitGateCache(args.ControllerCacheTTL(), extConsoleClient)
-	cache.InitComponentShaCache(args.ComponentShaCacheTTL())
+	componentShaCacheTTL := func() time.Duration {
+		return *common.GetConfigurationManager().GetComponentShaCacheTTL()
+	}
+	cache.InitComponentShaCacheWithExpiryFunc(componentShaCacheTTL)
 
 	dbStore := initDatabaseStoreOrDie(ctx)
 	defer func(dbStore store.Store) {
@@ -143,7 +153,7 @@ func main() {
 
 	runStoreCleanerInBackgroundOrDie(ctx, dbStore, args.StoreCleanerInterval(), args.StoreEntryTTL())
 
-	statusSynchronizer := streamline.NewStatusSynchronizer(extConsoleClient, args.ComponentShaCacheTTL())
+	statusSynchronizer := streamline.NewStatusSynchronizerWithCacheTTLFunc(extConsoleClient, componentShaCacheTTL)
 
 	svcCache := pollycache.NewDynamicCache[console.ServiceDeploymentForAgent](
 		service.ControllerCacheTTLFunc(args.ControllerCacheTTL(), args.PollInterval()),
@@ -162,13 +172,6 @@ func main() {
 
 	// Start the metrics scarper in background.
 	scraper.RunMetricsScraperInBackgroundOrDie(ctx, kubeManager.GetClient(), discoveryCache, config)
-
-	// Apply AgentConfiguration before poll controllers start. Direct apiserver load is
-	// sufficient for startup; the kube reconciler continues to own live updates afterward.
-	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
-	if err := deferPollOnInstall(ctx, kubeManager.GetAPIReader(), args.DeferPollOnInstall(), time.Now()); err != nil {
-		setupLog.Error(err, "unable to determine deployment operator age for initial poll")
-	}
 
 	go runKubeManagerOrDie(ctx, kubeManager)
 

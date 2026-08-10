@@ -63,6 +63,11 @@ const (
 	EnvCodexEndpoint = "PLRL_CODEX_ENDPOINT"
 	EnvCodexMethod   = "PLRL_CODEX_METHOD"
 
+	EnvPiModel    = "PLRL_PI_MODEL"
+	EnvPiAPIKey   = "PLRL_PI_API_KEY"
+	EnvPiProvider = "PLRL_PI_PROVIDER"
+	EnvPiEndpoint = "PLRL_PI_ENDPOINT"
+
 	EnvDindEnabled    = "PLRL_DIND_ENABLED"
 	EnvBrowserEnabled = "PLRL_BROWSER_ENABLED"
 	EnvMemoryEnabled  = "PLRL_MEMORY_ENABLED"
@@ -650,6 +655,20 @@ func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alp
 		}
 		if config.Codex.Endpoint != nil {
 			result[EnvCodexEndpoint] = lo.FromPtr(config.Codex.Endpoint)
+		}
+	}
+	if runtimeType == console.AgentRuntimeTypePi {
+		if config.Pi == nil {
+			return result
+		}
+		result[EnvPiModel] = lo.FromPtr(config.Pi.Model)
+		result[EnvPiAPIKey] = config.Pi.APIKey
+		result[EnvPiProvider] = lo.FromPtr(config.Pi.Provider)
+		if config.Pi.Timeout != nil {
+			result[EnvExecTimeout] = config.Pi.Timeout.Duration.String()
+		}
+		if config.Pi.Endpoint != nil {
+			result[EnvPiEndpoint] = lo.FromPtr(config.Pi.Endpoint)
 		}
 	}
 

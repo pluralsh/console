@@ -3,7 +3,7 @@ defmodule Console.Schema.AgentRuntime do
   alias Console.Schema.{Cluster, PolicyBinding, ScmConnection}
   alias Console.Deployments.{Policies.Rbac, Pr.Git}
 
-  defenum Type, claude: 0, opencode: 1, gemini: 3, custom: 4, codex: 5
+  defenum Type, claude: 0, opencode: 1, gemini: 3, custom: 4, codex: 5, pi: 6
 
   schema "agent_runtimes" do
     field :name,                 :string

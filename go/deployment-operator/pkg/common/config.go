@@ -34,6 +34,7 @@ type ConfigurationManager struct {
 	sentinelPollInterval         *time.Duration
 	compatibilityUploadInterval  *time.Duration
 	pipelineGateInterval         *time.Duration
+	componentShaCacheTTL         *time.Duration
 	maxConcurrentReconciles      *int
 	maxSentinelRunJobs           *int
 	maxStackRunJobs              *int
@@ -82,6 +83,12 @@ func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfiguration
 		return err
 	}
 	s.pipelineGateInterval = interval
+
+	interval, err = setDuration(config.ComponentShaCacheTTL)
+	if err != nil {
+		return err
+	}
+	s.componentShaCacheTTL = interval
 
 	interval, err = setDuration(config.StackPollInterval)
 	if err != nil {
@@ -151,6 +158,9 @@ func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfiguration
 	if overrides.PipelineGateInterval != nil {
 		merged.PipelineGateInterval = overrides.PipelineGateInterval
 	}
+	if overrides.ComponentShaCacheTTL != nil {
+		merged.ComponentShaCacheTTL = overrides.ComponentShaCacheTTL
+	}
 	if overrides.MaxConcurrentReconciles != nil {
 		merged.MaxConcurrentReconciles = overrides.MaxConcurrentReconciles
 	}
@@ -216,6 +226,12 @@ func (s *ConfigurationManager) GetPipelineGateInterval() *time.Duration {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.pipelineGateInterval
+}
+
+func (s *ConfigurationManager) GetComponentShaCacheTTL() *time.Duration {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.componentShaCacheTTL
 }
 
 func (s *ConfigurationManager) GetStackPollInterval() *time.Duration {

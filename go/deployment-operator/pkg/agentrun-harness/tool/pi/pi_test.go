@@ -1,0 +1,73 @@
+package pi
+
+import (
+	"encoding/json"
+	"reflect"
+	"testing"
+
+	console "github.com/pluralsh/console/go/client"
+	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+)
+
+func TestArgsIncludesJSONModeSessionAndMCPConfig(t *testing.T) {
+	tool := &Pi{
+		DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{WorkDir: "/work"}},
+		model:       "openai/gpt-5.4",
+		provider:    "openai",
+	}
+	want := []string{
+		"--mode", "json",
+		"--approve",
+		"--provider", "openai",
+		"--model", "openai/gpt-5.4",
+		"--session-dir", "/work/.pi/agent/sessions",
+		"--extension", piMCPExtensionPath,
+		"--mcp-config", "/work/.pi/agent/mcp.json",
+		"--session", "session-1",
+		"write a test",
+	}
+	if got := tool.args("write a test", "session-1"); !reflect.DeepEqual(got, want) {
+		t.Fatalf("args = %#v, want %#v", got, want)
+	}
+}
+
+func TestMapStreamEventMapsToolLifecycle(t *testing.T) {
+	tool := &Pi{}
+	start, callID := tool.mapStreamEvent(&StreamEvent{
+		Type:       "tool_execution_start",
+		ToolCallID: "call-1",
+		ToolName:   "bash",
+		Args:       json.RawMessage(`{"command":"go test ./..."}`),
+	})
+	if callID != "call-1" {
+		t.Fatalf("call id = %q", callID)
+	}
+	if start.Metadata == nil || start.Metadata.Tool == nil || *start.Metadata.Tool.State != console.AgentMessageToolStateRunning {
+		t.Fatalf("expected running tool message, got %#v", start)
+	}
+
+	end, callID := tool.mapStreamEvent(&StreamEvent{
+		Type:       "tool_execution_end",
+		ToolCallID: "call-1",
+		ToolName:   "bash",
+		Args:       json.RawMessage(`{"command":"go test ./..."}`),
+		Result:     json.RawMessage(`{"content":[{"type":"text","text":"ok"}]}`),
+	})
+	if callID != "call-1" {
+		t.Fatalf("call id = %q", callID)
+	}
+	if end.Metadata == nil || end.Metadata.Tool == nil || *end.Metadata.Tool.State != console.AgentMessageToolStateCompleted {
+		t.Fatalf("expected completed tool message, got %#v", end)
+	}
+}
+
+func TestMessageEndExtractsAssistantText(t *testing.T) {
+	tool := &Pi{}
+	message := tool.messageEnd(&AgentMessage{
+		Role:    "assistant",
+		Content: json.RawMessage(`[{"type":"text","text":"done"}]`),
+	})
+	if message == nil || message.Message != "done" {
+		t.Fatalf("message = %#v, want assistant text", message)
+	}
+}

@@ -31,7 +31,7 @@ func TestSecretKeySelectorSet(t *testing.T) {
 func TestCodexConfig_ToCodexConfigRawWithoutSecret(t *testing.T) {
 	method := console.OpenAiMethodChat
 	cfg := &CodexConfig{
-		Model:  strPtr("gpt-5.4"),
+		Model:  new("gpt-5.4"),
 		Method: &method,
 	}
 
@@ -54,7 +54,7 @@ func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatible(t *testing.T) {
 	cfg := &OpenCodeConfig{
 		OpenAICompatible: &OpenCodeOpenAICompatibleConfig{
 			Endpoint: "https://litellm.example/v1",
-			Model:    strPtr("gpt-4"),
+			Model:    new("gpt-4"),
 			TokenSecretRef: &corev1.SecretKeySelector{
 				LocalObjectReference: corev1.LocalObjectReference{Name: "litellm"},
 				Key:                  "api-key",
@@ -84,11 +84,11 @@ func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatible(t *testing.T) {
 
 func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatibleIgnoredWithAiProxy(t *testing.T) {
 	cfg := &OpenCodeConfig{
-		Provider: strPtr("openai"),
-		Model:    strPtr("gpt-5.4"),
+		Provider: new("openai"),
+		Model:    new("gpt-5.4"),
 		OpenAICompatible: &OpenCodeOpenAICompatibleConfig{
 			Endpoint: "https://litellm.example/v1",
-			Model:    strPtr("gpt-4"),
+			Model:    new("gpt-4"),
 		},
 	}
 
@@ -108,8 +108,4 @@ func TestOpenCodeConfig_ToOpenCodeConfigRawOpenAICompatibleIgnoredWithAiProxy(t 
 	if raw.Endpoint != nil && *raw.Endpoint != "" {
 		t.Fatalf("endpoint = %v, want unset", raw.Endpoint)
 	}
-}
-
-func strPtr(s string) *string {
-	return &s
 }

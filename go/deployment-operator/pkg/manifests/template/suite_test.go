@@ -19,6 +19,7 @@ package template
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -45,6 +46,9 @@ var utilFactory util.Factory
 var mapper meta.RESTMapper
 var testEnv *envtest.Environment
 var discoveryClient *discovery.DiscoveryClient
+var originalKubeconfig string
+var hadKubeconfig bool
+var testKubeconfig string
 
 func TestControllers(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -52,6 +56,32 @@ func TestControllers(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	// Helm's EnvSettings follows KUBECONFIG. Point it at each spec's local
+	// /version endpoint instead of allowing the developer's active cluster
+	// configuration to leak into this suite.
+	originalKubeconfig, hadKubeconfig = os.LookupEnv("KUBECONFIG")
+	kubeconfig, err := os.CreateTemp("", "template-test-kubeconfig-*")
+	Expect(err).NotTo(HaveOccurred())
+	testKubeconfig = kubeconfig.Name()
+	Expect(kubeconfig.Close()).To(Succeed())
+	Expect(os.WriteFile(testKubeconfig, []byte(`apiVersion: v1
+kind: Config
+clusters:
+- name: test
+  cluster:
+    server: http://127.0.0.1:8080
+contexts:
+- name: test
+  context:
+    cluster: test
+    user: test
+current-context: test
+users:
+- name: test
+  user: {}
+`), 0600)).To(Succeed())
+	Expect(os.Setenv("KUBECONFIG", testKubeconfig)).To(Succeed())
+
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	By("bootstrapping test environment")
@@ -88,4 +118,10 @@ var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
+	Expect(os.Remove(testKubeconfig)).To(Succeed())
+	if hadKubeconfig {
+		Expect(os.Setenv("KUBECONFIG", originalKubeconfig)).To(Succeed())
+	} else {
+		Expect(os.Unsetenv("KUBECONFIG")).To(Succeed())
+	}
 })

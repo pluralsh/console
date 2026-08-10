@@ -11,7 +11,7 @@ nameSuffix: -dev
 configMapGenerator:
   - literals:
       - username=demo-user
-    name: 
+    name: nginx
 
 secretGenerator:
   - literals:

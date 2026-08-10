@@ -123,6 +123,7 @@ var (
 		console.AgentRuntimeTypeGemini:   "%s-gemini-0.44.1",
 		console.AgentRuntimeTypeOpencode: "%s-opencode-1.17.3",
 		console.AgentRuntimeTypeCodex:    "%s-codex-0.104.0",
+		console.AgentRuntimeTypePi:       "%s-pi-0.84.1",
 	}
 
 	defaultBrowserImages = map[v1alpha1.Browser]string{

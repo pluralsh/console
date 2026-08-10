@@ -43,6 +43,8 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 		providerDir = ".opencode/prompts"
 	case console.AgentRuntimeTypeCodex:
 		providerDir = ".codex"
+	case console.AgentRuntimeTypePi:
+		providerDir = ".pi/agent"
 	}
 
 	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
@@ -79,6 +81,8 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 		providerDir = ".opencode/prompts"
 	case console.AgentRuntimeTypeCodex:
 		providerDir = ".codex"
+	case console.AgentRuntimeTypePi:
+		providerDir = ".pi/agent"
 	}
 
 	outputFile := path.Join(in.Config.WorkDir, providerDir, SystemPromptFile)
