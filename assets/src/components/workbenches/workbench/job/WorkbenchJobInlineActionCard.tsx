@@ -130,6 +130,14 @@ export function WorkbenchJobInlineActionCard({
       {expanded && (
         <>
           {error && <GqlError error={error} />}
+          {!!activity.result?.explanation?.trim() && (
+            <ActionData>
+              <CaptionP $color="text-xlight">EXPLANATION</CaptionP>
+              <CaptionP $color="text-light">
+                {activity.result.explanation}
+              </CaptionP>
+            </ActionData>
+          )}
           {!isKubernetes && (
             <CaptionP $color="text-xlight">
               {getActionDescription(activity)}

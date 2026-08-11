@@ -4037,6 +4037,9 @@ type WorkbenchJobActivityResult {
   "error from the activity"
   error: String
 
+  "why this action is needed and its expected effect"
+  explanation: String
+
   "function call approval payload when present"
   functionCall: WorkbenchJobActivityFunctionCall
 

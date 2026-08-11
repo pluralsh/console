@@ -59,6 +59,7 @@ fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
   status
   prompt
   result {
+    explanation
     functionCall {
       name
       input

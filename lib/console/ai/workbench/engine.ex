@@ -247,6 +247,7 @@ defmodule Console.AI.Workbench.Engine do
       tool_call: tool_attrs(request),
       result: %{
         output: "request pending user approval",
+        explanation: request.explanation,
         kube_request: Console.mapify(request)
       }
     }

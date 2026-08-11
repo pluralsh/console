@@ -431,6 +431,7 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
 fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
   output
   error
+  explanation
   functionCall {
     name
     input
@@ -1303,6 +1304,7 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
   result {
     output
     error
+    explanation
     functionCall {
       name
       input

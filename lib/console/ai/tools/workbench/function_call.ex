@@ -11,20 +11,28 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
   alias Configuration.{CloudFunctionConnection, CloudRunConnection, LambdaConnection, HttpConfiguration}
 
   embedded_schema do
-    field :tool,  :map, virtual: true
-    field :job,   :map, virtual: true
-    field :input, :map
+    field :tool,        :map, virtual: true
+    field :job,         :map, virtual: true
+    field :input,       :map
+    field :explanation, :string
   end
 
-  @valid ~w(input)a
+  @valid ~w(input explanation)a
   @default_schema %{"type" => "object", "properties" => %{}, "required" => []}
 
   def json_schema(%{tool: tool}) do
-    case input_schema(tool) do
-      %{} = input ->
-        %{"type" => "object", "properties" => %{"input" => input}, "required" => ["input"]}
-      _ -> @default_schema
-    end
+    input = input_schema(tool) || @default_schema
+
+    explanation = %{
+      "type" => "string",
+      "description" => "Clearly explain why this action is needed, what it will do, and the target it affects so the user can make an informed approval decision."
+    }
+
+    %{
+      "type" => "object",
+      "properties" => %{"input" => input, "explanation" => explanation},
+      "required" => ["input", "explanation"]
+    }
   end
 
   def name(%__MODULE__{tool: %WorkbenchTool{name: name, tool: tool}}),
@@ -38,7 +46,7 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
 
     model
     |> cast(attrs, @valid)
-    |> validate_required([:input])
+    |> validate_required([:input, :explanation])
     |> validate_change(:input, fn :input, input ->
       ExJsonSchema.Schema.resolve(schema)
       |> ExJsonSchema.Validator.validate(input)
@@ -51,11 +59,12 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
 
   def implement(%__MODULE__{} = model), do: {:ok, model}
 
-  def invoke(%__MODULE__{tool: %WorkbenchTool{approval: true} = tool, job: job, input: input}) do
+  def invoke(%__MODULE__{tool: %WorkbenchTool{approval: true} = tool, job: job, input: input, explanation: explanation}) do
     Workbenches.create_job_activity(%{
       prompt: prompt(tool),
       result: %{
         output: "waiting for user approval",
+        explanation: explanation,
         function_call: %{
           name: tool.name,
           tool_id: tool.id,
@@ -69,7 +78,7 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
   end
 
 
-  def invoke(%__MODULE__{tool: %WorkbenchTool{} = tool, job: job, input: input}) do
+  def invoke(%__MODULE__{tool: %WorkbenchTool{} = tool, job: job, input: input, explanation: explanation}) do
     case call_function(tool, input) do
       {:ok, output} -> output
       {:error, err} -> "Tool call invocation failed: #{inspect(err)}"
@@ -78,6 +87,7 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
       prompt: prompt(tool),
       result: %{
         output: &1,
+        explanation: explanation,
         function_call: %{
           name: tool.name,
           tool_id: tool.id,

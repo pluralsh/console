@@ -691,6 +691,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_activity_result do
     field :output,          :string, description: "output from the activity"
     field :error,           :string, description: "error from the activity"
+    field :explanation,     :string, description: "why this action is needed and its expected effect"
     field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
     field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"

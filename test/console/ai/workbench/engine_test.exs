@@ -203,7 +203,10 @@ defmodule Console.AI.Workbench.EngineTest do
           %Tool{
             id: "1",
             name: "http_function_call_example_http_function",
-            arguments: %{"input" => %{}}
+            arguments: %{
+              "input" => %{},
+              "explanation" => "Check that the configured HTTP function is reachable."
+            }
           }
         ]}
       end)
