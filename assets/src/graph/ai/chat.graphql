@@ -107,6 +107,33 @@ fragment CloudConnectionTiny on CloudConnection {
   provider
 }
 
+fragment CloudConnection on CloudConnection {
+  ...CloudConnectionTiny
+  configuration {
+    aws {
+      accessKeyId
+      region
+      assumeRoleArn
+    }
+    gcp {
+      projectId
+    }
+    azure {
+      subscriptionId
+      tenantId
+      clientId
+    }
+    vsphere {
+      server
+      user
+      allowUnverifiedSsl
+    }
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+}
+
 fragment AgentSession on AgentSession {
   id
   type
@@ -271,6 +298,27 @@ query CloudConnections(
 mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {
   upsertCloudConnection(attributes: $attributes) {
     ...CloudConnectionTiny
+  }
+}
+
+query CloudConnection($id: ID!) {
+  cloudConnection(id: $id) {
+    ...CloudConnection
+  }
+}
+
+mutation UpdateCloudConnection(
+  $id: ID!
+  $attributes: CloudConnectionAttributes!
+) {
+  updateCloudConnection(id: $id, attributes: $attributes) {
+    ...CloudConnectionTiny
+  }
+}
+
+mutation DeleteCloudConnection($id: ID!) {
+  deleteCloudConnection(id: $id) {
+    id
   }
 }
 

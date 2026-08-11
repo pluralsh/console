@@ -17955,6 +17955,8 @@ export type ChatThreadSettingsFragment = { __typename?: 'ChatThreadSettings', me
 
 export type CloudConnectionTinyFragment = { __typename?: 'CloudConnection', id: string, name: string, provider: Provider };
 
+export type CloudConnectionFragment = { __typename?: 'CloudConnection', id: string, name: string, provider: Provider, configuration: { __typename?: 'CloudConnectionConfiguration', aws?: { __typename?: 'AwsConnectionAttributes', accessKeyId?: string | null, region?: string | null, assumeRoleArn?: string | null } | null, gcp?: { __typename?: 'GcpConnectionAttributes', projectId: string } | null, azure?: { __typename?: 'AzureConnectionAttributes', subscriptionId: string, tenantId: string, clientId: string } | null, vsphere?: { __typename?: 'VsphereConnectionAttributes', server: string, user: string, allowUnverifiedSsl?: boolean | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
 export type AgentSessionFragment = { __typename?: 'AgentSession', id: string, type?: AgentSessionType | null, done?: boolean | null, connection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null, cluster?: { __typename?: 'Cluster', id: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequest?: { __typename?: 'PullRequest', id: string, url: string } | null };
 
 export type ServiceDeploymentChatFragment = { __typename?: 'ServiceDeployment', protect?: boolean | null, id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, group?: string | null, version: string, kind: string, name: string, namespace?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null };
@@ -18018,6 +18020,28 @@ export type UpsertCloudConnectionMutationVariables = Exact<{
 
 
 export type UpsertCloudConnectionMutation = { __typename?: 'RootMutationType', upsertCloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null };
+
+export type CloudConnectionQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CloudConnectionQuery = { __typename?: 'RootQueryType', cloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider, configuration: { __typename?: 'CloudConnectionConfiguration', aws?: { __typename?: 'AwsConnectionAttributes', accessKeyId?: string | null, region?: string | null, assumeRoleArn?: string | null } | null, gcp?: { __typename?: 'GcpConnectionAttributes', projectId: string } | null, azure?: { __typename?: 'AzureConnectionAttributes', subscriptionId: string, tenantId: string, clientId: string } | null, vsphere?: { __typename?: 'VsphereConnectionAttributes', server: string, user: string, allowUnverifiedSsl?: boolean | null } | null }, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type UpdateCloudConnectionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: CloudConnectionAttributes;
+}>;
+
+
+export type UpdateCloudConnectionMutation = { __typename?: 'RootMutationType', updateCloudConnection?: { __typename?: 'CloudConnection', id: string, name: string, provider: Provider } | null };
+
+export type DeleteCloudConnectionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteCloudConnectionMutation = { __typename?: 'RootMutationType', deleteCloudConnection?: { __typename?: 'CloudConnection', id: string } | null };
 
 export type HybridChatMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
@@ -22799,6 +22823,42 @@ export const ChatThreadMessagesFragmentDoc = gql`
 }
     ${PageInfoFragmentDoc}
 ${ChatFragmentDoc}`;
+export const CloudConnectionTinyFragmentDoc = gql`
+    fragment CloudConnectionTiny on CloudConnection {
+  id
+  name
+  provider
+}
+    `;
+export const CloudConnectionFragmentDoc = gql`
+    fragment CloudConnection on CloudConnection {
+  ...CloudConnectionTiny
+  configuration {
+    aws {
+      accessKeyId
+      region
+      assumeRoleArn
+    }
+    gcp {
+      projectId
+    }
+    azure {
+      subscriptionId
+      tenantId
+      clientId
+    }
+    vsphere {
+      server
+      user
+      allowUnverifiedSsl
+    }
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+}
+    ${CloudConnectionTinyFragmentDoc}
+${PolicyBindingFragmentDoc}`;
 export const ServiceDeploymentTinyFragmentDoc = gql`
     fragment ServiceDeploymentTiny on ServiceDeployment {
   id
@@ -27088,13 +27148,6 @@ export const VulnerabilityReportConnectionFragmentDoc = gql`
 }
     ${PageInfoFragmentDoc}
 ${VulnerabilityReportTinyFragmentDoc}`;
-export const CloudConnectionTinyFragmentDoc = gql`
-    fragment CloudConnectionTiny on CloudConnection {
-  id
-  name
-  provider
-}
-    `;
 export const WorkbenchToolTinyFragmentDoc = gql`
     fragment WorkbenchToolTiny on WorkbenchTool {
   id
@@ -29097,6 +29150,116 @@ export function useUpsertCloudConnectionMutation(baseOptions?: Apollo.MutationHo
 export type UpsertCloudConnectionMutationHookResult = ReturnType<typeof useUpsertCloudConnectionMutation>;
 export type UpsertCloudConnectionMutationResult = Apollo.MutationResult<UpsertCloudConnectionMutation>;
 export type UpsertCloudConnectionMutationOptions = Apollo.BaseMutationOptions<UpsertCloudConnectionMutation, UpsertCloudConnectionMutationVariables>;
+export const CloudConnectionDocument = gql`
+    query CloudConnection($id: ID!) {
+  cloudConnection(id: $id) {
+    ...CloudConnection
+  }
+}
+    ${CloudConnectionFragmentDoc}`;
+
+/**
+ * __useCloudConnectionQuery__
+ *
+ * To run a query within a React component, call `useCloudConnectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCloudConnectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCloudConnectionQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCloudConnectionQuery(baseOptions: Apollo.QueryHookOptions<CloudConnectionQuery, CloudConnectionQueryVariables> & ({ variables: CloudConnectionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CloudConnectionQuery, CloudConnectionQueryVariables>(CloudConnectionDocument, options);
+      }
+export function useCloudConnectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CloudConnectionQuery, CloudConnectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CloudConnectionQuery, CloudConnectionQueryVariables>(CloudConnectionDocument, options);
+        }
+// @ts-ignore
+export function useCloudConnectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CloudConnectionQuery, CloudConnectionQueryVariables>): Apollo.UseSuspenseQueryResult<CloudConnectionQuery, CloudConnectionQueryVariables>;
+export function useCloudConnectionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CloudConnectionQuery, CloudConnectionQueryVariables>): Apollo.UseSuspenseQueryResult<CloudConnectionQuery | undefined, CloudConnectionQueryVariables>;
+export function useCloudConnectionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<CloudConnectionQuery, CloudConnectionQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CloudConnectionQuery, CloudConnectionQueryVariables>(CloudConnectionDocument, options);
+        }
+export type CloudConnectionQueryHookResult = ReturnType<typeof useCloudConnectionQuery>;
+export type CloudConnectionLazyQueryHookResult = ReturnType<typeof useCloudConnectionLazyQuery>;
+export type CloudConnectionSuspenseQueryHookResult = ReturnType<typeof useCloudConnectionSuspenseQuery>;
+export type CloudConnectionQueryResult = Apollo.QueryResult<CloudConnectionQuery, CloudConnectionQueryVariables>;
+export const UpdateCloudConnectionDocument = gql`
+    mutation UpdateCloudConnection($id: ID!, $attributes: CloudConnectionAttributes!) {
+  updateCloudConnection(id: $id, attributes: $attributes) {
+    ...CloudConnectionTiny
+  }
+}
+    ${CloudConnectionTinyFragmentDoc}`;
+export type UpdateCloudConnectionMutationFn = Apollo.MutationFunction<UpdateCloudConnectionMutation, UpdateCloudConnectionMutationVariables>;
+
+/**
+ * __useUpdateCloudConnectionMutation__
+ *
+ * To run a mutation, you first call `useUpdateCloudConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateCloudConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateCloudConnectionMutation, { data, loading, error }] = useUpdateCloudConnectionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateCloudConnectionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCloudConnectionMutation, UpdateCloudConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateCloudConnectionMutation, UpdateCloudConnectionMutationVariables>(UpdateCloudConnectionDocument, options);
+      }
+export type UpdateCloudConnectionMutationHookResult = ReturnType<typeof useUpdateCloudConnectionMutation>;
+export type UpdateCloudConnectionMutationResult = Apollo.MutationResult<UpdateCloudConnectionMutation>;
+export type UpdateCloudConnectionMutationOptions = Apollo.BaseMutationOptions<UpdateCloudConnectionMutation, UpdateCloudConnectionMutationVariables>;
+export const DeleteCloudConnectionDocument = gql`
+    mutation DeleteCloudConnection($id: ID!) {
+  deleteCloudConnection(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteCloudConnectionMutationFn = Apollo.MutationFunction<DeleteCloudConnectionMutation, DeleteCloudConnectionMutationVariables>;
+
+/**
+ * __useDeleteCloudConnectionMutation__
+ *
+ * To run a mutation, you first call `useDeleteCloudConnectionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCloudConnectionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCloudConnectionMutation, { data, loading, error }] = useDeleteCloudConnectionMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCloudConnectionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCloudConnectionMutation, DeleteCloudConnectionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCloudConnectionMutation, DeleteCloudConnectionMutationVariables>(DeleteCloudConnectionDocument, options);
+      }
+export type DeleteCloudConnectionMutationHookResult = ReturnType<typeof useDeleteCloudConnectionMutation>;
+export type DeleteCloudConnectionMutationResult = Apollo.MutationResult<DeleteCloudConnectionMutation>;
+export type DeleteCloudConnectionMutationOptions = Apollo.BaseMutationOptions<DeleteCloudConnectionMutation, DeleteCloudConnectionMutationVariables>;
 export const HybridChatDocument = gql`
     mutation HybridChat($messages: [ChatMessage], $threadId: ID) {
   hybridChat(messages: $messages, threadId: $threadId) {
@@ -47685,6 +47848,7 @@ export const namedOperations = {
     ChatThreadDetails: 'ChatThreadDetails',
     ChatThreadMessages: 'ChatThreadMessages',
     CloudConnections: 'CloudConnections',
+    CloudConnection: 'CloudConnection',
     InfraResearch: 'InfraResearch',
     InfraResearches: 'InfraResearches',
     AiInsight: 'AiInsight',
@@ -47938,6 +48102,8 @@ export const namedOperations = {
     ShareAgentRun: 'ShareAgentRun',
     CreateClusterUpgrade: 'CreateClusterUpgrade',
     UpsertCloudConnection: 'UpsertCloudConnection',
+    UpdateCloudConnection: 'UpdateCloudConnection',
+    DeleteCloudConnection: 'DeleteCloudConnection',
     HybridChat: 'HybridChat',
     ConfirmChat: 'ConfirmChat',
     ConfirmChatPlan: 'ConfirmChatPlan',
@@ -48151,6 +48317,7 @@ export const namedOperations = {
     ChatThreadMessages: 'ChatThreadMessages',
     ChatThreadSettings: 'ChatThreadSettings',
     CloudConnectionTiny: 'CloudConnectionTiny',
+    CloudConnection: 'CloudConnection',
     AgentSession: 'AgentSession',
     ServiceDeploymentChat: 'ServiceDeploymentChat',
     StackChat: 'StackChat',

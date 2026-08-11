@@ -1,10 +1,10 @@
 import {
   Button,
-  EmptyState,
   Flex,
   FormField,
   Input2,
-  ReturnIcon,
+  ListBoxItem,
+  Select,
   SidePanelOpenIcon,
   Switch,
 } from '@pluralsh/design-system'
@@ -24,10 +24,12 @@ import {
 import {
   AwsCloudConnectionAttributes,
   AzureCloudConnectionAttributes,
+  CloudConnectionFragment,
   CloudConnectionAttributes,
   GcpCloudConnectionAttributes,
   PolicyBindingFragment,
   Provider,
+  useUpdateCloudConnectionMutation,
   useUpsertCloudConnectionMutation,
   VsphereCloudConnectionAttributes,
   WorkbenchToolType,
@@ -43,20 +45,45 @@ import {
   WORKBENCHES_TOOLS_TYPE_PARAM,
 } from '../WorkbenchToolCreateOrEdit'
 import { EditableDivWrapperSC } from '../WorkbenchToolFormFields'
-import { getWorkbenchToolLabel, isProvider } from '../workbenchToolsUtils'
+import {
+  getWorkbenchToolLabel,
+  isProvider,
+  PROVIDER_TO_ICON,
+} from '../workbenchToolsUtils'
 import {
   getCloudConnectionSetupGuideDocumentationUrl,
   getCloudConnectionSetupGuideMarkdownPath,
 } from './cloudConnectionSetupGuides'
 import { useWebhookSetupGuidePanel } from '../../workbench/webhooks/WebhookSetupGuidePanel'
 
-export function CloudConnectionCreateForm() {
+export function CloudConnectionCreateForm({
+  existingConnection,
+  backPath,
+  onSaved,
+  selectableProvider = false,
+  onProviderChange,
+  showSetupGuideButton = true,
+}: {
+  existingConnection?: CloudConnectionFragment
+  backPath?: string
+  onSaved?: () => void
+  selectableProvider?: boolean
+  onProviderChange?: (provider: Provider) => void
+  showSetupGuideButton?: boolean
+}) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { popToast } = useSimpleToast()
 
   const providerParam = searchParams.get('provider')
-  const provider = isProvider(providerParam) ? providerParam : null
+  const [selectedProvider, setSelectedProvider] = useState<Provider>(
+    isProvider(providerParam) ? providerParam : Provider.Aws
+  )
+  const provider =
+    existingConnection?.provider ??
+    (isProvider(providerParam) ? providerParam : selectedProvider)
+  const isEditing = !!existingConnection
+  const resolvedBackPath = backPath ?? WORKBENCHES_TOOLS_CREATE_ABS_PATH
   const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
   const setupGuideMarkdownPath = provider
@@ -74,30 +101,37 @@ export function CloudConnectionCreateForm() {
     return params
   }, [provider])
 
-  const [name, setName] = useState('')
+  const [name, setName] = useState(existingConnection?.name ?? '')
   const [aws, setAws] = useState<AwsCloudConnectionAttributes>({
-    accessKeyId: '',
+    accessKeyId: existingConnection?.configuration.aws?.accessKeyId ?? '',
     secretAccessKey: '',
-    region: '',
-    assumeRoleArn: '',
+    region: existingConnection?.configuration.aws?.region ?? '',
+    assumeRoleArn: existingConnection?.configuration.aws?.assumeRoleArn ?? '',
   })
   const [gcp, setGcp] = useState<GcpCloudConnectionAttributes>({
     serviceAccountKey: '',
-    projectId: '',
+    projectId: existingConnection?.configuration.gcp?.projectId ?? '',
   })
   const [azure, setAzure] = useState<AzureCloudConnectionAttributes>({
-    subscriptionId: '',
-    tenantId: '',
-    clientId: '',
+    subscriptionId:
+      existingConnection?.configuration.azure?.subscriptionId ?? '',
+    tenantId: existingConnection?.configuration.azure?.tenantId ?? '',
+    clientId: existingConnection?.configuration.azure?.clientId ?? '',
     clientSecret: '',
   })
   const [vsphere, setVsphere] = useState<VsphereCloudConnectionAttributes>({
-    server: '',
-    user: '',
+    server: existingConnection?.configuration.vsphere?.server ?? '',
+    user: existingConnection?.configuration.vsphere?.user ?? '',
     password: '',
-    allowUnverifiedSsl: false,
+    allowUnverifiedSsl:
+      existingConnection?.configuration.vsphere?.allowUnverifiedSsl ?? false,
   })
-  const [readBindings, setReadBindings] = useState<PolicyBindingFragment[]>([])
+  const [readBindings, setReadBindings] = useState<PolicyBindingFragment[]>(
+    () =>
+      (existingConnection?.readBindings?.filter(
+        (binding): binding is PolicyBindingFragment => !!binding
+      ) ?? []) as PolicyBindingFragment[]
+  )
 
   const attributes = useMemo<Nullable<CloudConnectionAttributes>>(() => {
     if (!provider) return null
@@ -157,22 +191,39 @@ export function CloudConnectionCreateForm() {
     }
   }, [provider, name, readBindings, aws, gcp, azure, vsphere])
 
-  const [upsert, { loading, error }] = useUpsertCloudConnectionMutation({
-    onCompleted: ({ upsertCloudConnection }) => {
-      if (!upsertCloudConnection) return
-      popToast({
-        content: `${upsertCloudConnection.name} created`,
-        severity: 'success',
-      })
-      returnParams.set(
-        CLOUD_CONNECTION_SELECTED_QUERY_PARAM,
-        upsertCloudConnection.id
-      )
-      navigate(`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`)
-    },
-    refetchQueries: ['CloudConnections'],
-    awaitRefetchQueries: true,
-  })
+  const complete = (
+    connection: { id: string; name: string } | null | undefined
+  ) => {
+    if (!connection) return
+    popToast({
+      content: `${connection.name} ${isEditing ? 'updated' : 'created'}`,
+      severity: 'success',
+    })
+    if (onSaved) {
+      onSaved()
+      return
+    }
+    returnParams.set(CLOUD_CONNECTION_SELECTED_QUERY_PARAM, connection.id)
+    navigate(`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`)
+  }
+  const [upsert, { loading: upserting, error: upsertError }] =
+    useUpsertCloudConnectionMutation({
+      onCompleted: ({ upsertCloudConnection }) => {
+        complete(upsertCloudConnection)
+      },
+      refetchQueries: ['CloudConnections'],
+      awaitRefetchQueries: true,
+    })
+  const [update, { loading: updating, error: updateError }] =
+    useUpdateCloudConnectionMutation({
+      onCompleted: ({ updateCloudConnection }) => {
+        complete(updateCloudConnection)
+      },
+      refetchQueries: ['CloudConnections'],
+      awaitRefetchQueries: true,
+    })
+  const loading = upserting || updating
+  const error = upsertError || updateError
 
   useEffect(() => {
     if (!isOpen) return
@@ -193,19 +244,6 @@ export function CloudConnectionCreateForm() {
     closeSetupGuidePanel,
   ])
 
-  if (!provider)
-    return (
-      <EmptyState message="Missing or invalid cloud provider">
-        <Button
-          as={Link}
-          to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
-          startIcon={<ReturnIcon />}
-        >
-          Back
-        </Button>
-      </EmptyState>
-    )
-
   const canSave =
     !!attributes &&
     !!name.trim() &&
@@ -222,52 +260,94 @@ export function CloudConnectionCreateForm() {
     >
       {error && <GqlError error={error} />}
 
-      <Flex gap="medium">
-        <FormCardSC css={{ maxWidth: 750, width: '100%' }}>
-          <OverlineH3 $color="text-xlight">
-            New {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
-            connection
-          </OverlineH3>
-          <FormField
-            required
-            label="Name"
-          >
-            <Input2
-              placeholder="Connection name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </FormField>
+      <Flex
+        gap="medium"
+        justify={showSetupGuideButton ? undefined : 'center'}
+      >
+        <Flex
+          direction="column"
+          gap="large"
+          css={{ maxWidth: 750, width: '100%' }}
+        >
+          <FormCardSC css={{ maxWidth: 750, width: '100%' }}>
+            <OverlineH3 $color="text-xlight">
+              {isEditing ? 'Edit' : 'New'}{' '}
+              {getWorkbenchToolLabel(WorkbenchToolType.Cloud, provider)}{' '}
+              connection
+            </OverlineH3>
+            {selectableProvider && !isEditing && (
+              <FormField
+                required
+                label="Provider"
+              >
+                <Select
+                  selectedKey={provider}
+                  label="Cloud provider"
+                  leftContent={(() => {
+                    const ProviderIcon = PROVIDER_TO_ICON[provider]
+                    return <ProviderIcon fullColor />
+                  })()}
+                  onSelectionChange={(key) => {
+                    if (!key) return
+                    const nextProvider = key as Provider
+                    setSelectedProvider(nextProvider)
+                    onProviderChange?.(nextProvider)
+                  }}
+                >
+                  {Object.values(Provider).map((option) => {
+                    const ProviderIcon = PROVIDER_TO_ICON[option]
+                    return (
+                      <ListBoxItem
+                        key={option}
+                        leftContent={<ProviderIcon fullColor />}
+                        label={getWorkbenchToolLabel(
+                          WorkbenchToolType.Cloud,
+                          option
+                        )}
+                      />
+                    )
+                  })}
+                </Select>
+              </FormField>
+            )}
+            <FormField
+              required
+              label="Name"
+            >
+              <Input2
+                placeholder="Connection name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </FormField>
 
-          {provider === Provider.Aws && (
-            <AwsFields
-              state={aws}
-              setState={setAws}
-            />
-          )}
-          {provider === Provider.Gcp && (
-            <GcpFields
-              state={gcp}
-              setState={setGcp}
-            />
-          )}
-          {provider === Provider.Azure && (
-            <AzureFields
-              state={azure}
-              setState={setAzure}
-            />
-          )}
-          {provider === Provider.Vsphere && (
-            <VSphereFields
-              state={vsphere}
-              setState={setVsphere}
-            />
-          )}
+            {provider === Provider.Aws && (
+              <AwsFields
+                state={aws}
+                setState={setAws}
+              />
+            )}
+            {provider === Provider.Gcp && (
+              <GcpFields
+                state={gcp}
+                setState={setGcp}
+              />
+            )}
+            {provider === Provider.Azure && (
+              <AzureFields
+                state={azure}
+                setState={setAzure}
+              />
+            )}
+            {provider === Provider.Vsphere && (
+              <VSphereFields
+                state={vsphere}
+                setState={setVsphere}
+              />
+            )}
+          </FormCardSC>
 
-          <Flex
-            direction="column"
-            gap="xsmall"
-          >
+          <FormCardSC css={{ maxWidth: 750, width: '100%' }}>
             <OverlineH3 $color="text-xlight">Read permissions</OverlineH3>
             <FormBindings
               bindings={readBindings}
@@ -279,28 +359,33 @@ export function CloudConnectionCreateForm() {
                 group: 'Groups with read permissions for this connection',
               }}
             />
-          </Flex>
+          </FormCardSC>
           <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
             <Button
               secondary
               as={Link}
-              to={`${WORKBENCHES_TOOLS_CREATE_ABS_PATH}?${returnParams}`}
+              to={resolvedBackPath}
               disabled={loading}
             >
               Back
             </Button>
             <Button
-              onClick={() =>
-                attributes && upsert({ variables: { attributes } })
-              }
+              onClick={() => {
+                if (!attributes) return
+                if (existingConnection)
+                  update({
+                    variables: { id: existingConnection.id, attributes },
+                  })
+                else upsert({ variables: { attributes } })
+              }}
               loading={loading}
               disabled={!canSave}
             >
               Save
             </Button>
           </StickyActionsFooterSC>
-        </FormCardSC>
-        {!isOpen && !!setupGuideMarkdownPath && (
+        </Flex>
+        {showSetupGuideButton && !isOpen && !!setupGuideMarkdownPath && (
           <div css={{ width: 200 }}>
             <Button
               secondary

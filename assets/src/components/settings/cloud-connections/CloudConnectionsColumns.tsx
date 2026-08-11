@@ -5,34 +5,37 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { ChatProviderConnectionFragment } from 'generated/graphql'
+import { CloudConnectionTinyFragment } from 'generated/graphql'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getChatbotsSettingsEditAbsPath } from 'routes/settingsRoutesConst'
+import { getCloudConnectionsSettingsEditAbsPath } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
-import { chatProviderConnectionIcon } from 'components/workbenches/workbench/chatbots/utils'
-import { DeleteChatbotConnectionModal } from './DeleteChatbotConnectionModal'
+import { PROVIDER_TO_ICON } from 'components/workbenches/tools/workbenchToolsUtils'
+import { DeleteCloudConnectionModal } from './DeleteCloudConnectionModal'
 
-const columnHelper = createColumnHelper<ChatProviderConnectionFragment>()
+const columnHelper = createColumnHelper<CloudConnectionTinyFragment>()
 
-export function getChatbotColumns({ refetch }: { refetch?: () => void }) {
+export function getCloudConnectionColumns({
+  refetch,
+}: {
+  refetch?: () => void
+}) {
   return [
-    columnHelper.accessor((chatbot) => chatbot, {
+    columnHelper.accessor((connection) => connection, {
       id: 'provider',
       meta: { gridTemplate: '40px' },
       cell: ({ getValue }) => {
-        const chatbot = getValue()
-
+        const ProviderIcon = PROVIDER_TO_ICON[getValue().provider]
         return (
           <IconFrame
             size="small"
             type="floating"
-            icon={chatProviderConnectionIcon(chatbot.type)}
+            icon={<ProviderIcon fullColor />}
           />
         )
       },
     }),
-    columnHelper.accessor((chatbot) => chatbot.name, {
+    columnHelper.accessor((connection) => connection.name, {
       id: 'name',
       meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
       cell: ({ getValue }) => getValue(),
@@ -42,8 +45,8 @@ export function getChatbotColumns({ refetch }: { refetch?: () => void }) {
       meta: { gridTemplate: 'fit-content(72px)' },
       cell: function Cell({ row }) {
         return (
-          <ChatbotActions
-            chatbot={row.original}
+          <CloudConnectionActions
+            connection={row.original}
             refetch={refetch}
           />
         )
@@ -52,11 +55,11 @@ export function getChatbotColumns({ refetch }: { refetch?: () => void }) {
   ]
 }
 
-function ChatbotActions({
-  chatbot,
+function CloudConnectionActions({
+  connection,
   refetch,
 }: {
-  chatbot: ChatProviderConnectionFragment
+  connection: CloudConnectionTinyFragment
   refetch?: () => void
 }) {
   const theme = useTheme()
@@ -71,24 +74,24 @@ function ChatbotActions({
     >
       <IconFrame
         clickable
-        tooltip="Edit chatbot"
+        tooltip="Edit cloud connection"
         icon={<PencilIcon />}
         onClick={() =>
           navigate(
-            getChatbotsSettingsEditAbsPath({
-              chatbotId: chatbot.id,
+            getCloudConnectionsSettingsEditAbsPath({
+              cloudConnectionId: connection.id,
             })
           )
         }
       />
       <IconFrame
         clickable
-        tooltip="Delete chatbot"
+        tooltip="Delete cloud connection"
         icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
         onClick={() => setDeleting(true)}
       />
-      <DeleteChatbotConnectionModal
-        chatbot={chatbot}
+      <DeleteCloudConnectionModal
+        connection={connection}
         open={deleting}
         refetch={refetch}
         onClose={() => setDeleting(false)}

@@ -51,6 +51,9 @@ import {
   CHATBOTS_SETTINGS_CREATE_REL_PATH,
   CHATBOTS_SETTINGS_EDIT_REL_PATH,
   CHATBOTS_SETTINGS_REL_PATH,
+  CLOUD_CONNECTIONS_SETTINGS_CREATE_REL_PATH,
+  CLOUD_CONNECTIONS_SETTINGS_EDIT_REL_PATH,
+  CLOUD_CONNECTIONS_SETTINGS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
   NOTIFICATIONS_ROUTERS_REL_PATH,
@@ -73,6 +76,9 @@ import { WebhookCreateSettings } from 'components/settings/webhooks/WebhookCreat
 import { WebhookEditSettings } from 'components/settings/webhooks/WebhookEditSettings'
 import { ChatbotCreateSettings } from 'components/settings/chatbots/ChatbotCreateSettings'
 import { ChatbotEditSettings } from 'components/settings/chatbots/ChatbotEditSettings'
+import CloudConnectionsSettings from 'components/settings/cloud-connections/CloudConnectionsSettings'
+import { CloudConnectionCreateSettings } from 'components/settings/cloud-connections/CloudConnectionCreateSettings'
+import { CloudConnectionEditSettings } from 'components/settings/cloud-connections/CloudConnectionEditSettings'
 
 const userManagementRoutes = (
   <Route
@@ -246,6 +252,23 @@ const chatbotsSettingsRoutes = (
   </>
 )
 
+const cloudConnectionsSettingsRoutes = (
+  <>
+    <Route
+      path={CLOUD_CONNECTIONS_SETTINGS_REL_PATH}
+      element={<CloudConnectionsSettings />}
+    />
+    <Route
+      path={`${CLOUD_CONNECTIONS_SETTINGS_REL_PATH}/${CLOUD_CONNECTIONS_SETTINGS_CREATE_REL_PATH}`}
+      element={<CloudConnectionCreateSettings />}
+    />
+    <Route
+      path={`${CLOUD_CONNECTIONS_SETTINGS_REL_PATH}/${CLOUD_CONNECTIONS_SETTINGS_EDIT_REL_PATH}`}
+      element={<CloudConnectionEditSettings />}
+    />
+  </>
+)
+
 const projectSettingsRoutes = (
   <Route
     path={PROJECT_SETTINGS_REL_PATH}
@@ -324,6 +347,7 @@ export const settingsRoutes = (
     {aiSettingsRoutes}
     {webhooksSettingsRoutes}
     {chatbotsSettingsRoutes}
+    {cloudConnectionsSettingsRoutes}
     {projectSettingsRoutes}
     {notificationsRoutes}
     {auditRoutes}

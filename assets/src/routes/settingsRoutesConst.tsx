@@ -68,6 +68,25 @@ export const getChatbotsSettingsEditAbsPath = ({
   chatbotId: Nullable<string>
 }) => `${CHATBOTS_SETTINGS_ABS_PATH}/${chatbotId ?? ''}/edit`
 
+// cloud connections
+export const CLOUD_CONNECTIONS_SETTINGS_REL_PATH = 'cloud-connections' as const
+export const CLOUD_CONNECTIONS_SETTINGS_ABS_PATH =
+  `${SETTINGS_ABS_PATH}/${CLOUD_CONNECTIONS_SETTINGS_REL_PATH}` as const
+export const CLOUD_CONNECTIONS_SETTINGS_CREATE_REL_PATH = 'create' as const
+export const CLOUD_CONNECTIONS_SETTINGS_CREATE_ABS_PATH =
+  `${CLOUD_CONNECTIONS_SETTINGS_ABS_PATH}/${CLOUD_CONNECTIONS_SETTINGS_CREATE_REL_PATH}` as const
+export const CLOUD_CONNECTIONS_SETTINGS_CLOUD_CONNECTION_ID_PARAM_ID =
+  'cloudConnectionId' as const
+export const CLOUD_CONNECTIONS_SETTINGS_EDIT_REL_PATH =
+  `:${CLOUD_CONNECTIONS_SETTINGS_CLOUD_CONNECTION_ID_PARAM_ID}/edit` as const
+export const CLOUD_CONNECTIONS_SETTINGS_EDIT_PATH_MATCHER_ABS =
+  `${CLOUD_CONNECTIONS_SETTINGS_ABS_PATH}/${CLOUD_CONNECTIONS_SETTINGS_EDIT_REL_PATH}` as const
+export const getCloudConnectionsSettingsEditAbsPath = ({
+  cloudConnectionId,
+}: {
+  cloudConnectionId: Nullable<string>
+}) => `${CLOUD_CONNECTIONS_SETTINGS_ABS_PATH}/${cloudConnectionId ?? ''}/edit`
+
 // project
 export const PROJECT_SETTINGS_REL_PATH = 'projects' as const
 export const PROJECT_SETTINGS_ABS_PATH =

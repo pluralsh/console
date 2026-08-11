@@ -122,6 +122,21 @@
          "name": "UpsertCloudConnection",
          "body": "mutation UpsertCloudConnection($attributes: CloudConnectionAttributes!) {\n  upsertCloudConnection(attributes: $attributes) {\n    ...CloudConnectionTiny\n    __typename\n  }\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}"
       },
+      "sha256:2a119856fe9527347677a15ba5dd2b78f7fb89e64dd15939b96e42bfb568685d": {
+         "type": "query",
+         "name": "CloudConnection",
+         "body": "query CloudConnection($id: ID!) {\n  cloudConnection(id: $id) {\n    ...CloudConnection\n    __typename\n  }\n}\n\nfragment CloudConnection on CloudConnection {\n  ...CloudConnectionTiny\n  configuration {\n    aws {\n      accessKeyId\n      region\n      assumeRoleArn\n      __typename\n    }\n    gcp {\n      projectId\n      __typename\n    }\n    azure {\n      subscriptionId\n      tenantId\n      clientId\n      __typename\n    }\n    vsphere {\n      server\n      user\n      allowUnverifiedSsl\n      __typename\n    }\n    __typename\n  }\n  readBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:8eec6d7e1347188aa290d941a210b6b0fd1c012b61bdadcfcccb59f518d71c63": {
+         "type": "mutation",
+         "name": "UpdateCloudConnection",
+         "body": "mutation UpdateCloudConnection($id: ID!, $attributes: CloudConnectionAttributes!) {\n  updateCloudConnection(id: $id, attributes: $attributes) {\n    ...CloudConnectionTiny\n    __typename\n  }\n}\n\nfragment CloudConnectionTiny on CloudConnection {\n  id\n  name\n  provider\n  __typename\n}"
+      },
+      "sha256:2da90f833066eba0618c458eda5cd8e7e7283966a6d42e7cf0971d9cc7e277d2": {
+         "type": "mutation",
+         "name": "DeleteCloudConnection",
+         "body": "mutation DeleteCloudConnection($id: ID!) {\n  deleteCloudConnection(id: $id) {\n    id\n    __typename\n  }\n}"
+      },
       "sha256:ff07136eea5b84da154d692f8aefbceeeb67aa2ba3889344d87ba17fff9546d5": {
          "type": "mutation",
          "name": "HybridChat",
