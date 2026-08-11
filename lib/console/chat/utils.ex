@@ -58,7 +58,7 @@ defmodule Console.Chat.Utils do
             workbench_id: chatbot.workbench_id,
             modes: Console.mapify(chatbot.modes),
             chatbot_message: chatbot_message
-          }, chatbot.workbench_id, user)
+          }, Workbenches.get_workbench!(chatbot.workbench_id), user)
       end
     else
       _ -> :ok

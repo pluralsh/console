@@ -124,6 +124,30 @@ defmodule ConsoleWeb.OpenAPI.AI.WorkbenchJobControllerTest do
       assert result["result"]
     end
 
+    test "creates a workbench job by name reference", %{conn: conn} do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project, name: "named-workbench")
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/ai/workbenches/name:named-workbench/jobs", %{prompt: "hello world"})
+        |> json_response(200)
+
+      assert result["workbench_id"] == workbench.id
+    end
+
+    test "does not create a workbench job by name without access", %{conn: conn} do
+      user = insert(:user)
+      insert(:workbench, name: "forbidden-named-workbench")
+
+      conn
+      |> add_auth_headers(user)
+      |> json_post("/v1/api/ai/workbenches/name:forbidden-named-workbench/jobs", %{prompt: "nope"})
+      |> json_response(403)
+    end
+
     test "users without access cannot create workbench jobs", %{conn: conn} do
       user = insert(:user)
       workbench = insert(:workbench)

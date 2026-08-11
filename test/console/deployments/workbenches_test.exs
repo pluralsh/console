@@ -597,7 +597,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       project = insert(:project)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}], project: project)
 
-      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench, user)
 
       assert job.workbench_id == workbench.id
       assert job.status == :pending
@@ -619,7 +619,7 @@ defmodule Console.Deployments.WorkbenchesTest do
           }
         )
 
-      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench, user)
 
       assert job.modes.plan == true
       assert job.modes.coding.approval == true
@@ -655,7 +655,7 @@ defmodule Console.Deployments.WorkbenchesTest do
               budget: %{cost: 1.5}
             }
           },
-          workbench.id,
+          workbench,
           user
         )
 
@@ -683,7 +683,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, job} =
         Workbenches.create_workbench_job(
           %{prompt: "test prompt", modes: %{kubernetes: %{update: true, delete: true}}},
-          workbench.id,
+          workbench,
           user
         )
 
@@ -695,7 +695,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       workbench = insert(:workbench)
 
-      {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+      {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench, user)
     end
 
     test "users with flow read access can create associated flow jobs without workbench read access" do
@@ -707,7 +707,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, job} =
         Workbenches.create_workbench_job(
           %{prompt: "test prompt", flow_id: flow.id},
-          workbench.id,
+          workbench,
           user
         )
 
@@ -725,7 +725,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert {:error, "this flow is not associated with the workbench"} =
                Workbenches.create_workbench_job(
                  %{prompt: "test prompt", flow_id: flow.id},
-                 workbench.id,
+                 workbench,
                  user
                )
 
@@ -747,7 +747,7 @@ defmodule Console.Deployments.WorkbenchesTest do
               chat_connection_id: chat_connection.id
             }
           },
-          workbench.id,
+          workbench,
           user
         )
 

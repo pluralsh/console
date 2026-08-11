@@ -88,6 +88,8 @@ export function WorkbenchPromptOptionsSelector({
     maxHeight: PANEL_MAX_HEIGHT,
     minHeight: 0,
     placement: 'left',
+    flipFallbackStrategy: 'bestFit',
+    flipBeforeSize: true,
   })
   const { buttonProps } = useButton(
     {
@@ -111,7 +113,7 @@ export function WorkbenchPromptOptionsSelector({
       aria-label="Configure modes and token limit"
       css={{
         width: 32,
-        height: '100%',
+        height: 32,
         justifyContent: 'center',
         padding: 0,
         borderRadius: '50%',
@@ -588,7 +590,7 @@ function SelectedOptionPill({
   return (
     <ChatOptionPill
       showArrow={false}
-      css={{ height: '100%' }}
+      css={{ height: 32 }}
     >
       {icon}
       <span>{label}</span>

@@ -73,7 +73,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
   defp sentinel_tools(_), do: []
 
   defp run_and_poll_sentinel(%RunSentinel{user: user, sentinel: %{id: id}, overrides: overrides} = tool) do
-    with {:ok, run} <- Sentinels.run_sentinel(overrides || %{}, id, user),
+    with {:ok, run} <- Sentinels.run_sentinel(overrides || %{}, Sentinels.get_sentinel!(id), user),
          {:ok, run} <- poll_sentinel_run(run) do
       run
       |> FetchSentinelRun.run_summary()

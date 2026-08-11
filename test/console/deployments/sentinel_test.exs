@@ -106,7 +106,7 @@ defmodule Console.Deployments.SentinelTest do
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       sentinel = insert(:sentinel, project: project, crontab: "*/5 * * * *")
 
-      {:ok, run} = Sentinels.run_sentinel(%{}, sentinel.id, user)
+      {:ok, run} = Sentinels.run_sentinel(%{}, sentinel, user)
 
       assert run.sentinel_id == sentinel.id
 
@@ -118,7 +118,7 @@ defmodule Console.Deployments.SentinelTest do
       project = insert(:project)
       sentinel = insert(:sentinel, project: project)
 
-      {:error, _} = Sentinels.run_sentinel(%{}, sentinel.id, user)
+      {:error, _} = Sentinels.run_sentinel(%{}, sentinel, user)
 
       assert refetch(sentinel)
     end
@@ -141,7 +141,7 @@ defmodule Console.Deployments.SentinelTest do
         }
       ])
 
-      {:ok, run} = Sentinels.run_sentinel(%{tags: %{"tier" => "staging", "region" => "us"}}, sentinel.id, user)
+      {:ok, run} = Sentinels.run_sentinel(%{tags: %{"tier" => "staging", "region" => "us"}}, sentinel, user)
 
       [check] = run.checks
       assert check.configuration.integration_test.tags == %{"tier" => "staging", "region" => "us"}

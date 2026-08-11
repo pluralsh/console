@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   alias Console.Deployments.Sentinels
   alias Console.Schema.Sentinel
 
-  plug Scope, [resource: :ai, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :ai, action: :read] when action in [:show, :show_by_name, :index]
   plug Scope, [resource: :ai, action: :write] when action in [:trigger]
 
   @doc """
@@ -28,6 +28,24 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   def show(conn, %{"id" => id}) do
     user = Console.Guardian.Plug.current_resource(conn)
     Sentinels.get_sentinel!(id)
+    |> allow(user, :read)
+    |> successful(conn, OpenAPI.AI.Sentinel)
+  end
+
+  @doc """
+  Fetches a sentinel by name.
+  """
+  operation :show_by_name,
+    operation_id: "GetSentinelByName",
+    tags: ["sentinel"],
+    "x-required-scopes": ["ai.read"],
+    parameters: [
+      name: [in: :query, schema: %{type: :string}, required: true, description: "The exact name of the sentinel"]
+    ],
+    responses: [ok: OpenAPI.AI.Sentinel]
+  def show_by_name(conn, %{"name" => name}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+    Sentinels.get_sentinel_by_name!(name)
     |> allow(user, :read)
     |> successful(conn, OpenAPI.AI.Sentinel)
   end
@@ -77,7 +95,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
     tags: ["sentinel"],
     "x-required-scopes": ["ai.write"],
     parameters: [
-      id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the sentinel to trigger"]
+      id: [in: :path, schema: %{type: :string}, required: true, description: "The sentinel ID or name:<name> reference to trigger"]
     ],
     request_body: OpenAPI.AI.SentinelRunOverridesInput,
     responses: [ok: OpenAPI.AI.SentinelRun]
@@ -86,8 +104,11 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
 
     conn.private.oaskit.body_params
     |> to_attrs()
-    |> then(&Sentinels.run_sentinel(&1, id, user))
+    |> Sentinels.run_sentinel(resolve_sentinel(id), user)
     |> when_ok(&Repo.preload(&1, [:jobs]))
     |> successful(conn, OpenAPI.AI.SentinelRun)
   end
+
+  defp resolve_sentinel("name:" <> name), do: Sentinels.get_sentinel_by_name!(name)
+  defp resolve_sentinel(id), do: Sentinels.get_sentinel!(id)
 end

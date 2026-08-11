@@ -219,6 +219,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
   minWidth: 0,
-  maxWidth: theme.breakpoints.desktopLarge,
   padding: theme.spacing.large,
 }))

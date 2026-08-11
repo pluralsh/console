@@ -52,6 +52,7 @@ defmodule Console.Schema.WorkbenchTool do
     coding: 11,
     verification: 12,
     observability: 13
+
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do

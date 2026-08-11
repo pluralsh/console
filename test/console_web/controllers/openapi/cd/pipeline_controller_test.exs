@@ -35,6 +35,33 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
     end
   end
 
+  describe "#show_by_name/2" do
+    test "returns the pipeline by name", %{conn: conn} do
+      user = admin_user()
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      pipeline = insert(:pipeline, project: project, name: "named-pipeline")
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/pipelines/name?name=named-pipeline")
+        |> json_response(200)
+
+      assert result["id"] == pipeline.id
+    end
+
+    test "403s if the user cannot read the pipeline", %{conn: conn} do
+      user = insert(:user)
+      project = insert(:project)
+      insert(:pipeline, project: project, name: "forbidden-named-pipeline")
+
+      conn
+      |> add_auth_headers(user)
+      |> get("/v1/api/cd/pipelines/name?name=forbidden-named-pipeline")
+      |> json_response(403)
+    end
+  end
+
   describe "#index/2" do
     test "returns the list of pipelines", %{conn: conn} do
       user = admin_user()
@@ -136,6 +163,33 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
 
       assert result["id"]
       assert result["pipeline_id"] == pipeline.id
+    end
+
+    test "it can trigger a pipeline by name reference", %{conn: conn} do
+      user = admin_user()
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      pipeline = insert(:pipeline, project: project, name: "named-pipeline", write_bindings: [%{user_id: user.id}])
+      stage = insert(:pipeline_stage, pipeline: pipeline)
+      insert(:pipeline_edge, pipeline: pipeline, from: stage, to: insert(:pipeline_stage, pipeline: pipeline))
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/cd/pipelines/name:named-pipeline/trigger", %{context: %{}})
+        |> json_response(200)
+
+      assert result["pipeline_id"] == pipeline.id
+    end
+
+    test "non-writers cannot trigger a pipeline by name reference", %{conn: conn} do
+      user = insert(:user)
+      project = insert(:project)
+      pipeline = insert(:pipeline, project: project, name: "forbidden-named-pipeline")
+
+      conn
+      |> add_auth_headers(user)
+      |> json_post("/v1/api/cd/pipelines/name:#{pipeline.name}/trigger", %{context: %{}})
+      |> json_response(403)
     end
 
     test "non-writers cannot trigger a pipeline", %{conn: conn} do

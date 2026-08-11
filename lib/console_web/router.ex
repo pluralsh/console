@@ -173,6 +173,7 @@ defmodule ConsoleWeb.Router do
           post "/globalservices/:id/sync", GlobalServiceController, :sync
 
           get "/pipelines",             PipelineController, :index
+          get "/pipelines/name",        PipelineController, :show_by_name
           get "/pipelines/:id",         PipelineController, :show
           post "/pipelines/:id/trigger", PipelineController, :trigger
         end
@@ -195,6 +196,7 @@ defmodule ConsoleWeb.Router do
 
           get "/catalogs/:catalog_id/prautomations",  PrAutomationController, :index_for_catalog
           get "/prautomations",                       PrAutomationController, :index
+          get "/prautomations/name",                  PrAutomationController, :show_by_name
           get "/prautomations/:id",                   PrAutomationController, :show
           post "/prautomations/:id/invoke",           PrAutomationController, :invoke
         end
@@ -235,6 +237,7 @@ defmodule ConsoleWeb.Router do
           post "/workbenches/:id/jobs",  WorkbenchJobController, :create
 
           get "/sentinels",                   SentinelController, :index
+          get "/sentinels/name",              SentinelController, :show_by_name
           get "/sentinels/:id",               SentinelController, :show
           post "/sentinels/:id/trigger",      SentinelController, :trigger
           get "/sentinels/:sentinel_id/runs", SentinelRunController, :index

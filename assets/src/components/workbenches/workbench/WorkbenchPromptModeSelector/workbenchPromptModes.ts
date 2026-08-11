@@ -205,7 +205,7 @@ export function defaultPromptModesFromWorkbench(
     return undefined
 
   return (
-    modesFormValue(workbench.modes) ??
+    modesAttributes(modesFormValue(workbench.modes)) ??
     (workbench.configuration?.coding?.enableBabysitting
       ? { coding: { babysit: true } }
       : null)

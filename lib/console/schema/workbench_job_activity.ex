@@ -36,9 +36,9 @@ defmodule Console.Schema.WorkbenchJobActivity do
     end
 
     embeds_one :result, WorkbenchJobResult, on_replace: :update, primary_key: false do
-      field :output,          :string
-      field :error,           :string
-      field :explanation,     :string
+      field :output,      :string
+      field :error,       :string
+      field :explanation, :string
 
       embeds_one :function_call, FunctionCall, on_replace: :update do
         field :name,    :string

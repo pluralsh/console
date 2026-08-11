@@ -424,7 +424,7 @@ defmodule Console.Deployments.Workbenches do
       prompt: prompt || "Update the skills as necessary",
       referenced_job_id: job_id,
       type: :skill
-    }, eval.workbench_job.workbench_id, user)
+    }, get_workbench!(eval.workbench_job.workbench_id), user)
   end
 
   def workbench_eval_skill(result_id, prompt, %User{} = user) when is_binary(result_id) do
@@ -441,7 +441,7 @@ defmodule Console.Deployments.Workbenches do
       prompt: "No specific guidance provided, update the skills as necessary",
       referenced_job_id: job.id,
       type: :skill
-    }, job.workbench_id, Console.Services.Rbac.preload(user))
+    }, get_workbench!(job.workbench_id), Console.Services.Rbac.preload(user))
   end
 
   def infer_skill(job_id, user) when is_binary(job_id) do
@@ -623,12 +623,12 @@ defmodule Console.Deployments.Workbenches do
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
   @spec create_workbench_job(map, binary | Workbench.t(), User.t()) :: job_resp
-  def create_workbench_job(attrs, %Workbench{id: id}, %User{} = user),
-    do: create_workbench_job(attrs, id, user)
-  def create_workbench_job(attrs, workbench_id, %User{} = user) when is_binary(workbench_id) do
+  def create_workbench_job(attrs, %Workbench{id: wid}, %User{} = user),
+    do: create_workbench_job(attrs, wid, user)
+  def create_workbench_job(attrs, id, %User{} = user) when is_binary(id) do
     start_transaction()
     |> add_operation(:budget, fn _ ->
-      bench = get_workbench_with_lock!(workbench_id)
+      bench = get_workbench_with_lock!(id)
       case budget_available?(bench) do
         true -> {:ok, bench}
         false -> {:error, "workbench budget is exhausted"}
