@@ -113,23 +113,3 @@ func TestGetOwnerRefsAnnotationRequests_MissingOwner(t *testing.T) {
 
 	assert.Len(t, requests, 0)
 }
-
-func TestRemoveOwnerRefAnnotation(t *testing.T) {
-	scheme := runtime.NewScheme()
-	_ = corev1.AddToScheme(scheme)
-
-	owner := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "owner-pod", Namespace: "default"}}
-	otherOwner := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "other-owner-pod", Namespace: "default"}}
-	object := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "owned-cm", Namespace: "default"}}
-	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(object).Build()
-
-	assert.NoError(t, utils.AddOwnerRefAnnotation(context.Background(), client, owner, object))
-	assert.NoError(t, client.Get(context.Background(), types.NamespacedName{Name: object.Name, Namespace: object.Namespace}, object))
-	assert.NoError(t, utils.AddOwnerRefAnnotation(context.Background(), client, otherOwner, object))
-	assert.NoError(t, client.Get(context.Background(), types.NamespacedName{Name: object.Name, Namespace: object.Namespace}, object))
-	assert.NoError(t, utils.RemoveOwnerRefAnnotation(context.Background(), client, owner, object))
-
-	assert.NoError(t, client.Get(context.Background(), types.NamespacedName{Name: object.Name, Namespace: object.Namespace}, object))
-	assert.NotContains(t, object.Annotations[utils.OwnerRefAnnotation], "/Pod/default/owner-pod")
-	assert.Contains(t, object.Annotations[utils.OwnerRefAnnotation], "/Pod/default/other-owner-pod")
-}

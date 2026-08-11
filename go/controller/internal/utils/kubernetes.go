@@ -33,12 +33,20 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 		objectAnnotations = map[string]string{}
 	}
 
-	ownerRef, err := ownerRefAnnotation(client, owner)
-	if err != nil {
-		return err
+	objectOwnersAnnotation := objectAnnotations[OwnerRefAnnotation]
+	objectOwners := containers.NewSet[string]()
+	for _, s := range strings.Split(strings.ReplaceAll(objectOwnersAnnotation, " ", ""), ",") {
+		if strings.Contains(s, "/") {
+			objectOwners.Add(s)
+		}
 	}
 
-	objectOwners := ownerRefsFromAnnotation(objectAnnotations[OwnerRefAnnotation])
+	gvk, err := apiutil.GVKForObject(owner, client.Scheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GVK for owner %s: %w", owner.GetName(), err)
+	}
+
+	ownerRef := fmt.Sprintf("%s/%s/%s/%s", gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName())
 	if !objectOwners.Has(ownerRef) {
 		objectOwners.Add(ownerRef)
 		objectAnnotations[OwnerRefAnnotation] = strings.Join(objectOwners.List(), ",")
@@ -50,53 +58,6 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 	}
 
 	return nil
-}
-
-func RemoveOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client, owner, object ctrlruntimeclient.Object) error {
-	objectAnnotations := object.GetAnnotations()
-	if objectAnnotations == nil {
-		return nil
-	}
-
-	ownerRef, err := ownerRefAnnotation(client, owner)
-	if err != nil {
-		return err
-	}
-
-	objectOwners := ownerRefsFromAnnotation(objectAnnotations[OwnerRefAnnotation])
-	if !objectOwners.Has(ownerRef) {
-		return nil
-	}
-
-	objectOwners.Remove(ownerRef)
-	if objectOwners.Len() == 0 {
-		delete(objectAnnotations, OwnerRefAnnotation)
-	} else {
-		objectAnnotations[OwnerRefAnnotation] = strings.Join(objectOwners.List(), ",")
-	}
-	object.SetAnnotations(objectAnnotations)
-
-	return TryToUpdate(ctx, client, object)
-}
-
-func ownerRefsFromAnnotation(annotation string) containers.Set[string] {
-	objectOwners := containers.NewSet[string]()
-	for _, ownerRef := range strings.Split(strings.ReplaceAll(annotation, " ", ""), ",") {
-		if strings.Contains(ownerRef, "/") {
-			objectOwners.Add(ownerRef)
-		}
-	}
-
-	return objectOwners
-}
-
-func ownerRefAnnotation(client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object) (string, error) {
-	gvk, err := apiutil.GVKForObject(owner, client.Scheme())
-	if err != nil {
-		return "", fmt.Errorf("failed to get GVK for owner %s: %w", owner.GetName(), err)
-	}
-
-	return fmt.Sprintf("%s/%s/%s/%s", gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName()), nil
 }
 
 func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, owner ctrlruntimeclient.Object) []reconcile.Request {

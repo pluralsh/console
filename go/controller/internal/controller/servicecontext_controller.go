@@ -118,11 +118,7 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 		}
 	}
 
-	configMapRefs, err := r.mergeConfigMapRefs(ctx, sc, configMap)
-	if err != nil {
-		return nil, err
-	}
-	if err := r.removeStaleConfigMapAnnotations(ctx, sc, configMapRefs); err != nil {
+	if err := r.mergeConfigMapRefs(ctx, sc, configMap); err != nil {
 		return nil, err
 	}
 
@@ -165,9 +161,9 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 	return r.ConsoleClient.SaveServiceContext(sc.ConsoleName(), attributes)
 }
 
-func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v1alpha1.ServiceContext, configuration map[string]interface{}) (map[types.NamespacedName]struct{}, error) {
+func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v1alpha1.ServiceContext, configuration map[string]interface{}) error {
 	if sc.Spec.ConfigMapRef != nil && len(sc.Spec.ConfigMapRefs) > 0 {
-		return nil, fmt.Errorf("spec.configMapRef and spec.configMapRefs are mutually exclusive")
+		return fmt.Errorf("spec.configMapRef and spec.configMapRefs are mutually exclusive")
 	}
 
 	refs := sc.Spec.ConfigMapRefs
@@ -179,7 +175,6 @@ func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v
 		}}
 	}
 
-	configMapRefs := make(map[types.NamespacedName]struct{})
 	for i, ref := range refs {
 		namespace := ref.Namespace
 		if legacyRef {
@@ -190,20 +185,19 @@ func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v
 			var err error
 			namespace, err = validateConfigMapReference(ref, i, sc.GetNamespace())
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 
 		cm := &corev1.ConfigMap{}
 		configMapRef := types.NamespacedName{Name: ref.Name, Namespace: namespace}
 		if err := r.Get(ctx, configMapRef, cm); err != nil {
-			return nil, fmt.Errorf("failed to get configmap %s/%s: %w", namespace, ref.Name, err)
+			return fmt.Errorf("failed to get configmap %s/%s: %w", namespace, ref.Name, err)
 		}
 
 		if err := utils.AddOwnerRefAnnotation(ctx, r.Client, sc, cm); err != nil {
-			return nil, err
+			return err
 		}
-		configMapRefs[configMapRef] = struct{}{}
 
 		if ref.Scope != "" {
 			data := cm.Data
@@ -216,25 +210,6 @@ func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v
 
 		for key, value := range cm.Data {
 			configuration[key] = value
-		}
-	}
-
-	return configMapRefs, nil
-}
-
-func (r *ServiceContextReconciler) removeStaleConfigMapAnnotations(ctx context.Context, sc *v1alpha1.ServiceContext, configMapRefs map[types.NamespacedName]struct{}) error {
-	configMaps := &corev1.ConfigMapList{}
-	if err := r.List(ctx, configMaps); err != nil {
-		return fmt.Errorf("failed to list configmaps while removing stale ServiceContext annotations: %w", err)
-	}
-
-	for i := range configMaps.Items {
-		configMap := &configMaps.Items[i]
-		if _, found := configMapRefs[client.ObjectKeyFromObject(configMap)]; found {
-			continue
-		}
-		if err := utils.RemoveOwnerRefAnnotation(ctx, r.Client, sc, configMap); err != nil {
-			return err
 		}
 	}
 
