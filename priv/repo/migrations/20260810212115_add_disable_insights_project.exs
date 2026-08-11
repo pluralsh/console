@@ -3,7 +3,7 @@ defmodule Console.Repo.Migrations.AddDisableInsightsProject do
 
   def change do
     alter table(:projects) do
-      add :disable_insights, :boolean, default: false
+      add_if_not_exists :disable_insights, :boolean, default: false
     end
   end
 end
