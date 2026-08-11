@@ -117,6 +117,9 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 			return nil, fmt.Errorf("failed to parse configuration JSON: %w", err)
 		}
 	}
+	if configMap == nil {
+		configMap = make(map[string]interface{})
+	}
 
 	if err := r.mergeConfigMapRefs(ctx, sc, configMap); err != nil {
 		return nil, err

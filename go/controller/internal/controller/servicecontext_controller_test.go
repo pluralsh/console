@@ -296,6 +296,33 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			Expect(updatedConfigMap.GetAnnotations()[utils.OwnerRefAnnotation]).To(ContainSubstring(namespace + "/" + scName))
 		})
 
+		It("should treat null configuration as an empty object when merging ConfigMap refs", func() {
+			source := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "null-configuration-source", Namespace: namespace}, Data: map[string]string{"endpoint": "https://example.test"}}
+			Expect(k8sClient.Create(ctx, source)).To(Succeed())
+
+			scKey := types.NamespacedName{Name: "null-configuration", Namespace: namespace}
+			sc := &v1alpha1.ServiceContext{
+				ObjectMeta: metav1.ObjectMeta{Name: scKey.Name, Namespace: scKey.Namespace},
+				Spec: v1alpha1.ServiceContextSpec{
+					Configuration: runtime.RawExtension{Raw: []byte(`null`)},
+					ConfigMapRefs: []v1alpha1.ConfigMapReference{
+						{Name: source.Name},
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, sc)).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
+			fakeConsoleClient.On("SaveServiceContext", mock.Anything, mock.MatchedBy(configurationMatches(map[string]interface{}{
+				"endpoint": "https://example.test",
+			}))).Return(&gqlclient.ServiceContextFragment{ID: "null-configuration"}, nil)
+
+			nr := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: fakeConsoleClient}
+			_, err := nr.Reconcile(ctx, reconcile.Request{NamespacedName: scKey})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should merge multiple ConfigMap refs with scoped data and ordered flat overrides", func() {
 			flatOne := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "multi-flat-one", Namespace: namespace}, Data: map[string]string{"shared": "first", "one": "1"}}
 			scoped := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "multi-scoped", Namespace: namespace}, Data: map[string]string{"host": "db", "port": "5432"}}
