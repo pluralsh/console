@@ -25057,7 +25057,7 @@ addons:
           from earlier behavior (3.4 series note), ensure secrets use the vMajor.Minor.Patch
           format under argocd.argoproj.io/kubernetes-version; mismatches can break
           cluster selection logic.']
-    chart_version: 10.3.0
+    chart_version: 10.3.2
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.0']
   - version: 3.4.1
@@ -25584,7 +25584,7 @@ addons:
       breaking_changes: [No breaking changes are listed in the provided notes; they
           direct you to consult the upstream upgrading guide and CHANGELOG for breaking/known
           issues. Treat this as 'unknown from provided data' and verify before upgrading.]
-    chart_version: 1.0.23
+    chart_version: 1.0.24
     images: ['quay.io/argoproj/argocli:v4.0.8', 'quay.io/argoproj/workflow-controller:v4.0.8',
       'registry.k8s.io/kubectl:v1.36.3']
   - version: 4.0.2
