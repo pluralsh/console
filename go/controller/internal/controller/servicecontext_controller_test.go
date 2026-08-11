@@ -370,6 +370,47 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("should remove annotations from ConfigMaps that are no longer referenced", func() {
+			staleSource := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "stale-configmap-source", Namespace: namespace}, Data: map[string]string{"value": "stale"}}
+			currentSource := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "current-configmap-source", Namespace: namespace}, Data: map[string]string{"value": "current"}}
+			Expect(k8sClient.Create(ctx, staleSource)).To(Succeed())
+			Expect(k8sClient.Create(ctx, currentSource)).To(Succeed())
+
+			scKey := types.NamespacedName{Name: "replace-configmap-source", Namespace: namespace}
+			sc := &v1alpha1.ServiceContext{ObjectMeta: metav1.ObjectMeta{Name: scKey.Name, Namespace: scKey.Namespace}, Spec: v1alpha1.ServiceContextSpec{
+				ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: staleSource.Name}},
+			}}
+			Expect(k8sClient.Create(ctx, sc)).To(Succeed())
+
+			firstConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			firstConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
+			firstConsoleClient.On("SaveServiceContext", mock.Anything, mock.MatchedBy(configurationMatches(map[string]interface{}{"value": "stale"}))).Return(&gqlclient.ServiceContextFragment{ID: "replace"}, nil)
+			firstReconciler := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: firstConsoleClient}
+			_, err := firstReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: scKey})
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedSC := &v1alpha1.ServiceContext{}
+			Expect(k8sClient.Get(ctx, scKey, updatedSC)).To(Succeed())
+			updatedSC.Spec.ConfigMapRefs = []v1alpha1.ConfigMapReference{{Name: currentSource.Name}}
+			Expect(k8sClient.Update(ctx, updatedSC)).To(Succeed())
+
+			secondConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			secondConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
+			secondConsoleClient.On("SaveServiceContext", mock.Anything, mock.MatchedBy(configurationMatches(map[string]interface{}{"value": "current"}))).Return(&gqlclient.ServiceContextFragment{ID: "replace"}, nil)
+			secondReconciler := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: secondConsoleClient}
+			_, err = secondReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: scKey})
+			Expect(err).NotTo(HaveOccurred())
+
+			updatedStaleSource := &corev1.ConfigMap{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: staleSource.Name, Namespace: staleSource.Namespace}, updatedStaleSource)).To(Succeed())
+			Expect(updatedStaleSource.GetAnnotations()[utils.OwnerRefAnnotation]).NotTo(ContainSubstring(namespace + "/" + scKey.Name))
+			Expect(utils.GetOwnerRefsAnnotationRequests(ctx, k8sClient, updatedStaleSource, &v1alpha1.ServiceContext{})).To(BeEmpty())
+
+			updatedCurrentSource := &corev1.ConfigMap{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: currentSource.Name, Namespace: currentSource.Namespace}, updatedCurrentSource)).To(Succeed())
+			Expect(utils.GetOwnerRefsAnnotationRequests(ctx, k8sClient, updatedCurrentSource, &v1alpha1.ServiceContext{})).To(ConsistOf(reconcile.Request{NamespacedName: scKey}))
+		})
+
 		DescribeTable("should reject invalid ConfigMap sources", func(name string, spec v1alpha1.ServiceContextSpec, expectedError string) {
 			scKey := types.NamespacedName{Name: name, Namespace: namespace}
 			sc := &v1alpha1.ServiceContext{ObjectMeta: metav1.ObjectMeta{Name: scKey.Name, Namespace: scKey.Namespace}, Spec: spec}
