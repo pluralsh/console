@@ -37,7 +37,7 @@ versions:
         earlier behavior (3.4 series note), ensure secrets use the vMajor.Minor.Patch
         format under argocd.argoproj.io/kubernetes-version; mismatches can break cluster
         selection logic.']
-  chart_version: 10.3.0
+  chart_version: 10.3.2
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.5.0']
 - version: 3.4.1

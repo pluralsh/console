@@ -18,7 +18,7 @@ versions:
     breaking_changes: [No breaking changes are listed in the provided notes; they
         direct you to consult the upstream upgrading guide and CHANGELOG for breaking/known
         issues. Treat this as 'unknown from provided data' and verify before upgrading.]
-  chart_version: 1.0.23
+  chart_version: 1.0.24
   images: ['quay.io/argoproj/argocli:v4.0.8', 'quay.io/argoproj/workflow-controller:v4.0.8',
     'registry.k8s.io/kubectl:v1.36.3']
 - version: 4.0.2
