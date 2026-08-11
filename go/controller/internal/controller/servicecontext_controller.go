@@ -179,17 +179,9 @@ func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v
 	}
 
 	for i, ref := range refs {
-		namespace := ref.Namespace
-		if legacyRef {
-			if namespace == "" {
-				namespace = sc.GetNamespace()
-			}
-		} else {
-			var err error
-			namespace, err = validateConfigMapReference(ref, i, sc.GetNamespace())
-			if err != nil {
-				return err
-			}
+		namespace, err := validateConfigMapReference(ref, i, sc.GetNamespace())
+		if err != nil {
+			return err
 		}
 
 		cm := &corev1.ConfigMap{}
