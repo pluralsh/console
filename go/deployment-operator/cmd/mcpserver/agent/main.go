@@ -78,6 +78,8 @@ func run() error {
 		return fmt.Errorf("could not setup environment: %w", err)
 	}
 
+	startSCMCredentialsRefresh(ctx, extClient, args.AgentRunID(), scmCredentialsRefreshInterval)
+
 	grpcServer := scm.NewServer()
 
 	mcpErrChan := startMcpServer(mcpServer)
