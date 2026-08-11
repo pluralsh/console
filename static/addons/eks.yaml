@@ -4648,6 +4648,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.63.10000020260808-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.63.10000020260805-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4800,6 +4808,15 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.21.10001020260809-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.21.10001020260805-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4906,6 +4923,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.20009020260425-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10009020260809-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
