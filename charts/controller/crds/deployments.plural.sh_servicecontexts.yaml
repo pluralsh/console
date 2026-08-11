@@ -54,6 +54,7 @@ spec:
                 description: |-
                   ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.
                   The keys and values from the ConfigMap will be merged into the Configuration JSON.
+                  Deprecated: use ConfigMapRefs instead. ConfigMapRef and ConfigMapRefs are mutually exclusive.
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -95,6 +96,32 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              configMapRefs:
+                description: |-
+                  ConfigMapRefs references ConfigMaps containing configuration data to merge into the Configuration.
+                  Sources are processed in order. Unscoped sources merge their keys at the top level, with later
+                  sources overwriting earlier unscoped keys. A scoped source is placed under its scope key and cannot
+                  conflict with another scoped source or an unscoped key.
+                items:
+                  description: ConfigMapReference identifies a ConfigMap source for
+                    a ServiceContext configuration.
+                  properties:
+                    name:
+                      description: Name is the name of the referenced ConfigMap.
+                      minLength: 1
+                      type: string
+                    namespace:
+                      description: Namespace is the namespace of the referenced ConfigMap.
+                        If omitted, the ServiceContext namespace is used.
+                      type: string
+                    scope:
+                      description: Scope places this ConfigMap's data beneath this
+                        top-level configuration key. If omitted, data is merged flat.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
               configuration:
                 description: |-
                   Configuration is a reusable configuration context that can include any JSON-compatible configuration data

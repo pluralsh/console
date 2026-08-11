@@ -20,8 +20,16 @@ type ServiceContextSpec struct {
 
 	// ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.
 	// The keys and values from the ConfigMap will be merged into the Configuration JSON.
+	// Deprecated: use ConfigMapRefs instead. ConfigMapRef and ConfigMapRefs are mutually exclusive.
 	// +kubebuilder:validation:Optional
 	ConfigMapRef *v1.ObjectReference `json:"configMapRef,omitempty"`
+
+	// ConfigMapRefs references ConfigMaps containing configuration data to merge into the Configuration.
+	// Sources are processed in order. Unscoped sources merge their keys at the top level, with later
+	// sources overwriting earlier unscoped keys. A scoped source is placed under its scope key and cannot
+	// conflict with another scoped source or an unscoped key.
+	// +kubebuilder:validation:Optional
+	ConfigMapRefs []ConfigMapReference `json:"configMapRefs,omitempty"`
 
 	// SecretRef references a Secret containing configuration data to merge into the Configuration.
 	// The keys and values from the Secret will be merged into the Configuration JSON.
@@ -37,6 +45,21 @@ type ServiceContextSpec struct {
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+}
+
+// ConfigMapReference identifies a ConfigMap source for a ServiceContext configuration.
+type ConfigMapReference struct {
+	// Name is the name of the referenced ConfigMap.
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
+
+	// Namespace is the namespace of the referenced ConfigMap. If omitted, the ServiceContext namespace is used.
+	// +kubebuilder:validation:Optional
+	Namespace string `json:"namespace,omitempty"`
+
+	// Scope places this ConfigMap's data beneath this top-level configuration key. If omitted, data is merged flat.
+	// +kubebuilder:validation:Optional
+	Scope string `json:"scope,omitempty"`
 }
 
 // +kubebuilder:object:root=true
