@@ -20,7 +20,7 @@ type ServiceContextSpec struct {
 
 	// ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.
 	// The keys and values from the ConfigMap will be merged into the Configuration JSON.
-	// Deprecated: use ConfigMapRefs instead. ConfigMapRef and ConfigMapRefs are mutually exclusive.
+	// ConfigMapRef and ConfigMapRefs are mutually exclusive.
 	// +kubebuilder:validation:Optional
 	ConfigMapRef *v1.ObjectReference `json:"configMapRef,omitempty"`
 
