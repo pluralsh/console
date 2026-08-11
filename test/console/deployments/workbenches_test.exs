@@ -1113,6 +1113,24 @@ defmodule Console.Deployments.WorkbenchesTest do
       refute prompt.consumed_at
     end
 
+    test "stores mode overrides for the deferred prompt" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      modes = %{plan: true, model: %{provider: :anthropic, model: "claude-sonnet-4-5"}}
+
+      {:ok, prompt} =
+        Workbenches.create_queued_prompt(
+          %{prompt: "deferred follow-up", dequeable_at: DateTime.utc_now(), modes: modes},
+          job.id,
+          user
+        )
+
+      assert prompt.modes.plan
+      assert prompt.modes.model.provider == :anthropic
+      assert prompt.modes.model.model == "claude-sonnet-4-5"
+    end
+
     test "users without read access cannot queue a prompt for a job" do
       user = insert(:user)
       job = insert(:workbench_job)
@@ -1165,6 +1183,33 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.user_id == user.id
       assert Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
       assert refetch(job).status == :pending
+    end
+
+    test "applies queued mode overrides when creating the message" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          status: :successful,
+          modes: %WorkbenchJob.Modes{plan: false, verification: true}
+        )
+
+      prompt =
+        insert(:queued_prompt,
+          workbench_job: job,
+          user: user,
+          modes: %{plan: true, model: %{provider: :anthropic, model: "claude-sonnet-4-5"}}
+        )
+
+      {:ok, _activity} = Workbenches.dequeue_prompt(prompt)
+
+      job = refetch(job)
+      assert job.modes.plan
+      assert job.modes.verification
+      assert job.modes.model.provider == :anthropic
+      assert job.modes.model.model == "claude-sonnet-4-5"
     end
 
     test "does not consume the prompt when the job is active" do

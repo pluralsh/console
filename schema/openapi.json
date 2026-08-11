@@ -2145,6 +2145,9 @@
             "format": "date-time",
             "type": "string"
           },
+          "modes": {
+            "$ref": "#/components/schemas/WorkbenchJobModes"
+          },
           "prompt": {
             "description": "The prompt text",
             "type": "string"
@@ -2172,6 +2175,9 @@
             "description": "When the prompt becomes eligible to dequeue",
             "format": "date-time",
             "type": "string"
+          },
+          "modes": {
+            "$ref": "#/components/schemas/WorkbenchJobModes"
           },
           "prompt": {
             "description": "The prompt to send when dequeued",

@@ -638,7 +638,7 @@ defmodule Console.Deployments.Workbenches do
       %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
       |> WorkbenchJob.changeset(
         attrs
-        |> merge_modes(wb)
+        |> merge_modes(wb.modes, wb)
         |> Map.put(:result, %{working_theory: "", conclusion: ""})
       )
       |> allow(user, :read)
@@ -648,14 +648,21 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:create, user)
   end
 
-  defp merge_modes(attrs, %Workbench{modes: modes}) do
-    workbench_modes = Console.mapify(modes || %{})
-
-    workbench_modes
-    |> DeepMerge.deep_merge(attrs[:modes] || %{})
-    |> restrict_kubernetes_modes(workbench_modes)
+  defp merge_modes(attrs, base_modes, %Workbench{modes: workbench_modes}) do
+    base_modes
+    |> then(&Console.mapify(&1 || %{}))
+    |> DeepMerge.deep_merge(compact_modes(attrs[:modes] || %{}))
+    |> restrict_kubernetes_modes(Console.mapify(workbench_modes || %{}))
     |> then(&Map.put(attrs, :modes, &1))
   end
+
+  defp compact_modes(%{} = modes) do
+    modes
+    |> Console.mapify()
+    |> Enum.reject(fn {_, value} -> is_nil(value) end)
+    |> Map.new(fn {key, value} -> {key, compact_modes(value)} end)
+  end
+  defp compact_modes(value), do: value
 
   defp restrict_kubernetes_modes(%{kubernetes: %{} = job_modes} = modes, workbench_modes) do
     wb_kubernetes = Map.get(workbench_modes, :kubernetes, %{})
@@ -806,14 +813,17 @@ defmodule Console.Deployments.Workbenches do
       end
     end)
     |> add_operation(:job, fn %{idle: job} ->
-      job = Repo.preload(job, :result, force: true)
+      job = Repo.preload(job, [:result, :workbench], force: true)
       with {:ok, job} <- allow(job, user, :prompt) do
-        WorkbenchJob.changeset(job, %{
+        %{
           status: :pending,
           error: nil,
           user_id: user.id,
+          modes: attrs[:modes],
           result: %{todos: []}
-        })
+        }
+        |> merge_modes(job.modes, job.workbench)
+        |> then(&WorkbenchJob.changeset(job, &1))
         |> Repo.update()
       end
     end)
@@ -867,7 +877,7 @@ defmodule Console.Deployments.Workbenches do
 
   @spec dequeue_prompt(QueuedPrompt.t()) :: activity_resp
   def dequeue_prompt(%QueuedPrompt{} = prompt) do
-    %{user: user, workbench_job: job} = Repo.preload(prompt, [:workbench_job, user: [:groups]])
+    %{user: user, workbench_job: job} = Repo.preload(prompt, [workbench_job: :workbench, user: [:groups]])
 
     start_transaction()
     |> add_operation(:consume, fn _ ->
@@ -877,7 +887,8 @@ defmodule Console.Deployments.Workbenches do
     end)
     |> add_operation(:job, fn %{consume: prompt} ->
       create_message(%{
-        prompt: prompt.prompt
+        prompt: prompt.prompt,
+        modes: prompt.modes
       }, job, user)
     end)
     |> execute(extract: :job)

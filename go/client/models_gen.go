@@ -7362,6 +7362,8 @@ type QueuedPrompt struct {
 	DequeableAt *string `json:"dequeableAt,omitempty"`
 	// when this prompt was consumed
 	ConsumedAt *string `json:"consumedAt,omitempty"`
+	// mode-specific overrides applied when this prompt is dequeued
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// user this prompt will run as
 	UserID *string `json:"userId,omitempty"`
 	// the job this prompt will be sent to
@@ -7377,6 +7379,8 @@ type QueuedPromptAttributes struct {
 	Prompt string `json:"prompt"`
 	// when this prompt becomes eligible to dequeue
 	DequeableAt string `json:"dequeableAt"`
+	// mode-specific overrides to apply when this prompt is dequeued
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type QueuedPromptConnection struct {
@@ -10579,6 +10583,8 @@ type WorkbenchJobActivityResult struct {
 	Output *string `json:"output,omitempty"`
 	// error from the activity
 	Error *string `json:"error,omitempty"`
+	// why this action is needed and its expected effect
+	Explanation *string `json:"explanation,omitempty"`
 	// function call approval payload when present
 	FunctionCall *WorkbenchJobActivityFunctionCall `json:"functionCall,omitempty"`
 	// kubernetes request approval payload when present

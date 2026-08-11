@@ -441,6 +441,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :queued_prompt_attributes do
     field :prompt,       non_null(:string), description: "the prompt to send when dequeued"
     field :dequeable_at, non_null(:datetime), description: "when this prompt becomes eligible to dequeue"
+    field :modes,        :workbench_job_modes_attributes, description: "mode-specific overrides to apply when this prompt is dequeued"
   end
 
   object :queued_prompt_summary do
@@ -897,6 +898,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,       :string, description: "the prompt text"
     field :dequeable_at, :datetime, description: "when this prompt becomes eligible to dequeue"
     field :consumed_at,  :datetime, description: "when this prompt was consumed"
+    field :modes,        :workbench_job_modes, description: "mode-specific overrides applied when this prompt is dequeued"
     field :user_id,      :id, description: "user this prompt will run as"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this prompt will be sent to"

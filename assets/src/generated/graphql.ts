@@ -8824,6 +8824,8 @@ export type QueuedPrompt = {
   /** the id of the queued prompt */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** mode-specific overrides applied when this prompt is dequeued */
+  modes?: Maybe<WorkbenchJobModes>;
   /** the prompt text */
   prompt?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -8838,6 +8840,8 @@ export type QueuedPrompt = {
 export type QueuedPromptAttributes = {
   /** when this prompt becomes eligible to dequeue */
   dequeableAt: Scalars['DateTime']['input'];
+  /** mode-specific overrides to apply when this prompt is dequeued */
+  modes?: InputMaybe<WorkbenchJobModesAttributes>;
   /** the prompt to send when dequeued */
   prompt: Scalars['String']['input'];
 };

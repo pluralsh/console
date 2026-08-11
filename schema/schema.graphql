@@ -3630,6 +3630,9 @@ input QueuedPromptAttributes {
 
   "when this prompt becomes eligible to dequeue"
   dequeableAt: DateTime!
+
+  "mode-specific overrides to apply when this prompt is dequeued"
+  modes: WorkbenchJobModesAttributes
 }
 
 type QueuedPromptSummary {
@@ -4383,6 +4386,9 @@ type QueuedPrompt {
 
   "when this prompt was consumed"
   consumedAt: DateTime
+
+  "mode-specific overrides applied when this prompt is dequeued"
+  modes: WorkbenchJobModes
 
   "user this prompt will run as"
   userId: ID
