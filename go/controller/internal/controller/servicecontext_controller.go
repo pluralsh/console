@@ -117,27 +117,12 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 			return nil, fmt.Errorf("failed to parse configuration JSON: %w", err)
 		}
 	}
+	if configMap == nil {
+		configMap = make(map[string]interface{})
+	}
 
-	// Merge configmap data if specified
-	if sc.Spec.ConfigMapRef != nil {
-		cm := &corev1.ConfigMap{}
-		namespace := sc.Spec.ConfigMapRef.Namespace
-		if namespace == "" {
-			namespace = sc.GetNamespace()
-		}
-		if err := r.Get(ctx, types.NamespacedName{Name: sc.Spec.ConfigMapRef.Name, Namespace: namespace}, cm); err != nil {
-			return nil, fmt.Errorf("failed to get configmap %s/%s: %w", namespace, sc.Spec.ConfigMapRef.Name, err)
-		}
-
-		if err := utils.AddOwnerRefAnnotation(ctx, r.Client, sc, cm); err != nil {
-			return nil, err
-		}
-
-		if cm.Data != nil {
-			for k, v := range cm.Data {
-				configMap[k] = v
-			}
-		}
+	if err := r.mergeConfigMapRefs(ctx, sc, configMap); err != nil {
+		return nil, err
 	}
 
 	// Merge secret data if specified
@@ -177,6 +162,65 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 	}
 
 	return r.ConsoleClient.SaveServiceContext(sc.ConsoleName(), attributes)
+}
+
+func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v1alpha1.ServiceContext, configuration map[string]interface{}) error {
+	if sc.Spec.ConfigMapRef != nil && len(sc.Spec.ConfigMapRefs) > 0 {
+		return fmt.Errorf("spec.configMapRef and spec.configMapRefs are mutually exclusive")
+	}
+
+	refs := sc.Spec.ConfigMapRefs
+	legacyRef := sc.Spec.ConfigMapRef != nil
+	if legacyRef {
+		refs = []v1alpha1.ConfigMapReference{{
+			Name:      sc.Spec.ConfigMapRef.Name,
+			Namespace: sc.Spec.ConfigMapRef.Namespace,
+		}}
+	}
+
+	for i, ref := range refs {
+		namespace, err := validateConfigMapReference(ref, i, sc.GetNamespace())
+		if err != nil {
+			return err
+		}
+
+		cm := &corev1.ConfigMap{}
+		configMapRef := types.NamespacedName{Name: ref.Name, Namespace: namespace}
+		if err := r.Get(ctx, configMapRef, cm); err != nil {
+			return fmt.Errorf("failed to get configmap %s/%s: %w", namespace, ref.Name, err)
+		}
+
+		if err := utils.AddOwnerRefAnnotation(ctx, r.Client, sc, cm); err != nil {
+			return err
+		}
+
+		if ref.Scope != "" {
+			data := cm.Data
+			if data == nil {
+				data = map[string]string{}
+			}
+			configuration[ref.Scope] = data
+			continue
+		}
+
+		for key, value := range cm.Data {
+			configuration[key] = value
+		}
+	}
+
+	return nil
+}
+
+func validateConfigMapReference(ref v1alpha1.ConfigMapReference, index int, defaultNamespace string) (string, error) {
+	if ref.Name == "" {
+		return "", fmt.Errorf("configMapRefs[%d].name must not be empty", index)
+	}
+
+	if ref.Namespace == "" {
+		return defaultNamespace, nil
+	}
+
+	return ref.Namespace, nil
 }
 
 func (r *ServiceContextReconciler) handleExisting(sc *v1alpha1.ServiceContext) bool {
