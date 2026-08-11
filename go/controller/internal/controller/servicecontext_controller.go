@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	console "github.com/pluralsh/console/go/client"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
@@ -119,7 +118,7 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 		}
 	}
 
-	scopedKeys, configMapRefs, err := r.mergeConfigMapRefs(ctx, sc, configMap)
+	configMapRefs, err := r.mergeConfigMapRefs(ctx, sc, configMap)
 	if err != nil {
 		return nil, err
 	}
@@ -145,9 +144,6 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 
 		if secret.Data != nil {
 			for k, v := range secret.Data {
-				if scopedKeys[k] {
-					return nil, fmt.Errorf("secret key %q conflicts with ConfigMap scope", k)
-				}
 				configMap[k] = string(v)
 			}
 		}
@@ -169,9 +165,9 @@ func (r *ServiceContextReconciler) sync(ctx context.Context, sc *v1alpha1.Servic
 	return r.ConsoleClient.SaveServiceContext(sc.ConsoleName(), attributes)
 }
 
-func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v1alpha1.ServiceContext, configuration map[string]interface{}) (map[string]bool, map[types.NamespacedName]struct{}, error) {
+func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v1alpha1.ServiceContext, configuration map[string]interface{}) (map[types.NamespacedName]struct{}, error) {
 	if sc.Spec.ConfigMapRef != nil && len(sc.Spec.ConfigMapRefs) > 0 {
-		return nil, nil, fmt.Errorf("spec.configMapRef and spec.configMapRefs are mutually exclusive")
+		return nil, fmt.Errorf("spec.configMapRef and spec.configMapRefs are mutually exclusive")
 	}
 
 	refs := sc.Spec.ConfigMapRefs
@@ -183,7 +179,6 @@ func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v
 		}}
 	}
 
-	scopedKeys := make(map[string]bool)
 	configMapRefs := make(map[types.NamespacedName]struct{})
 	for i, ref := range refs {
 		namespace := ref.Namespace
@@ -195,44 +190,36 @@ func (r *ServiceContextReconciler) mergeConfigMapRefs(ctx context.Context, sc *v
 			var err error
 			namespace, err = validateConfigMapReference(ref, i, sc.GetNamespace())
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 		}
 
 		cm := &corev1.ConfigMap{}
 		configMapRef := types.NamespacedName{Name: ref.Name, Namespace: namespace}
 		if err := r.Get(ctx, configMapRef, cm); err != nil {
-			return nil, nil, fmt.Errorf("failed to get configmap %s/%s: %w", namespace, ref.Name, err)
+			return nil, fmt.Errorf("failed to get configmap %s/%s: %w", namespace, ref.Name, err)
 		}
 
 		if err := utils.AddOwnerRefAnnotation(ctx, r.Client, sc, cm); err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		configMapRefs[configMapRef] = struct{}{}
 
 		if ref.Scope != "" {
-			if _, exists := configuration[ref.Scope]; exists {
-				return nil, nil, fmt.Errorf("configMapRefs[%d].scope %q conflicts with an existing configuration key", i, ref.Scope)
-			}
-
 			data := cm.Data
 			if data == nil {
 				data = map[string]string{}
 			}
 			configuration[ref.Scope] = data
-			scopedKeys[ref.Scope] = true
 			continue
 		}
 
 		for key, value := range cm.Data {
-			if scopedKeys[key] {
-				return nil, nil, fmt.Errorf("configMapRefs[%d] key %q conflicts with a ConfigMap scope", i, key)
-			}
 			configuration[key] = value
 		}
 	}
 
-	return scopedKeys, configMapRefs, nil
+	return configMapRefs, nil
 }
 
 func (r *ServiceContextReconciler) removeStaleConfigMapAnnotations(ctx context.Context, sc *v1alpha1.ServiceContext, configMapRefs map[types.NamespacedName]struct{}) error {
@@ -255,17 +242,8 @@ func (r *ServiceContextReconciler) removeStaleConfigMapAnnotations(ctx context.C
 }
 
 func validateConfigMapReference(ref v1alpha1.ConfigMapReference, index int, defaultNamespace string) (string, error) {
-	if strings.TrimSpace(ref.Name) == "" {
+	if ref.Name == "" {
 		return "", fmt.Errorf("configMapRefs[%d].name must not be empty", index)
-	}
-	if ref.Name != strings.TrimSpace(ref.Name) {
-		return "", fmt.Errorf("configMapRefs[%d].name must not contain leading or trailing whitespace", index)
-	}
-	if ref.Namespace != "" && strings.TrimSpace(ref.Namespace) == "" {
-		return "", fmt.Errorf("configMapRefs[%d].namespace must not be blank", index)
-	}
-	if ref.Scope != "" && strings.TrimSpace(ref.Scope) == "" {
-		return "", fmt.Errorf("configMapRefs[%d].scope must not be blank", index)
 	}
 
 	if ref.Namespace == "" {

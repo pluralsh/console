@@ -423,39 +423,41 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			Expect(err).To(MatchError(ContainSubstring(expectedError)))
 		},
 			Entry("when a source ConfigMap is missing", "missing-configmap", v1alpha1.ServiceContextSpec{ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: "does-not-exist"}}}, "failed to get configmap default/does-not-exist"),
-			Entry("when a source name is blank", "blank-configmap-name", v1alpha1.ServiceContextSpec{ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: " "}}}, "configMapRefs[0].name must not be empty"),
-			Entry("when a source scope is blank", "blank-configmap-scope", v1alpha1.ServiceContextSpec{ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: "valid", Scope: " "}}}, "configMapRefs[0].scope must not be blank"),
 			Entry("when legacy and list references are both set", "both-configmap-refs", v1alpha1.ServiceContextSpec{ConfigMapRef: &corev1.ObjectReference{Name: "legacy"}, ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: "new"}}}, "mutually exclusive"),
 		)
 
-		It("should reject scope and flat-key conflicts instead of silently overwriting data", func() {
-			scoped := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "conflicting-scoped", Namespace: namespace}, Data: map[string]string{"value": "scoped"}}
-			flat := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "conflicting-flat", Namespace: namespace}, Data: map[string]string{"database": "flat"}}
+		It("should resolve scope and flat-key collisions in declaration order", func() {
+			scoped := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "colliding-scoped", Namespace: namespace}, Data: map[string]string{"value": "scoped"}}
+			flat := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "colliding-flat", Namespace: namespace}, Data: map[string]string{"database": "flat"}}
 			Expect(k8sClient.Create(ctx, scoped)).To(Succeed())
 			Expect(k8sClient.Create(ctx, flat)).To(Succeed())
 
-			scKey := types.NamespacedName{Name: "scope-flat-conflict", Namespace: namespace}
+			scKey := types.NamespacedName{Name: "scope-flat-order", Namespace: namespace}
 			sc := &v1alpha1.ServiceContext{ObjectMeta: metav1.ObjectMeta{Name: scKey.Name, Namespace: scKey.Namespace}, Spec: v1alpha1.ServiceContextSpec{
 				ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: scoped.Name, Scope: "database"}, {Name: flat.Name}},
 			}}
 			Expect(k8sClient.Create(ctx, sc)).To(Succeed())
 
-			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
-			nr := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: fakeConsoleClient}
-			_, err := nr.Reconcile(ctx, reconcile.Request{NamespacedName: scKey})
-			Expect(err).To(MatchError(ContainSubstring(`key "database" conflicts with a ConfigMap scope`)))
+			firstConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			firstConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
+			firstConsoleClient.On("SaveServiceContext", mock.Anything, mock.MatchedBy(configurationMatches(map[string]interface{}{"database": "flat"}))).Return(&gqlclient.ServiceContextFragment{ID: "scope-flat"}, nil)
+			firstReconciler := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: firstConsoleClient}
+			_, err := firstReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: scKey})
+			Expect(err).NotTo(HaveOccurred())
 
-			reverseKey := types.NamespacedName{Name: "flat-scope-conflict", Namespace: namespace}
+			reverseKey := types.NamespacedName{Name: "flat-scope-order", Namespace: namespace}
 			reverse := &v1alpha1.ServiceContext{ObjectMeta: metav1.ObjectMeta{Name: reverseKey.Name, Namespace: reverseKey.Namespace}, Spec: v1alpha1.ServiceContextSpec{
 				ConfigMapRefs: []v1alpha1.ConfigMapReference{{Name: flat.Name}, {Name: scoped.Name, Scope: "database"}},
 			}}
 			Expect(k8sClient.Create(ctx, reverse)).To(Succeed())
-			reverseConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			reverseConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
-			reverseReconciler := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: reverseConsoleClient}
-			_, err = reverseReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: reverseKey})
-			Expect(err).To(MatchError(ContainSubstring(`scope "database" conflicts with an existing configuration key`)))
+			secondConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			secondConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
+			secondConsoleClient.On("SaveServiceContext", mock.Anything, mock.MatchedBy(configurationMatches(map[string]interface{}{
+				"database": map[string]interface{}{"value": "scoped"},
+			}))).Return(&gqlclient.ServiceContextFragment{ID: "flat-scope"}, nil)
+			secondReconciler := &controller.ServiceContextReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: secondConsoleClient}
+			_, err = secondReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: reverseKey})
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 	})

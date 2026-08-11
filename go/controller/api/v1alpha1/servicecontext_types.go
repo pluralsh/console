@@ -25,9 +25,8 @@ type ServiceContextSpec struct {
 	ConfigMapRef *v1.ObjectReference `json:"configMapRef,omitempty"`
 
 	// ConfigMapRefs references ConfigMaps containing configuration data to merge into the Configuration.
-	// Sources are processed in order. Unscoped sources merge their keys at the top level, with later
-	// sources overwriting earlier unscoped keys. A scoped source is placed under its scope key and cannot
-	// conflict with another scoped source or an unscoped key.
+	// Sources are processed in order and later sources overwrite earlier values at the same top-level key.
+	// A scoped source is placed under its scope key while an unscoped source merges its keys at the top level.
 	// +kubebuilder:validation:Optional
 	ConfigMapRefs []ConfigMapReference `json:"configMapRefs,omitempty"`
 
