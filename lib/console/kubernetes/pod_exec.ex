@@ -4,14 +4,17 @@ defmodule Console.Kubernetes.PodExec do
   defmodule State, do: defstruct [:pid]
 
   def exec_url(ns, name, container, opts \\ []) do
-    args = URI.encode_query(%{
-      container: container,
-      command: opts[:command] || "/bin/sh",
-      tty: "true",
-      stdin: "true",
-      stdout: "true",
-      stderr: "true"
-    })
+    command = opts[:command] || "/bin/sh"
+    parsed_command = OptionParser.split(command) |> Enum.map(& {"command", &1})
+    args = URI.encode_query(
+      [{"container", container} | parsed_command] ++
+      [
+        {"tty", "true"},
+        {"stdin", "true"},
+        {"stdout", "true"},
+        {"stderr", "true"}
+      ]
+    )
 
     "/api/v1/namespaces/#{Console.namespace(ns)}/pods/#{name}/exec?#{args}"
   end

@@ -35,6 +35,7 @@ import {
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
+import { WorkbenchJobExecDetails } from './WorkbenchJobExecDetails'
 
 export function WorkbenchJobActionDetail({
   activity,
@@ -48,6 +49,7 @@ export function WorkbenchJobActionDetail({
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+  const isExec = activity.type === WorkbenchJobActivityType.Exec
   const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
   const isKubeDiff =
     isKubernetes &&
@@ -131,6 +133,11 @@ export function WorkbenchJobActionDetail({
         <WorkbenchJobKubeUpdateDiff
           activityId={activity.id}
           kubeRequest={activity.result?.kubeRequest}
+          enabled
+        />
+      ) : isExec ? (
+        <WorkbenchJobExecDetails
+          activity={activity}
           enabled
         />
       ) : (

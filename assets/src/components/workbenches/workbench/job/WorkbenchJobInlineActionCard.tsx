@@ -40,6 +40,7 @@ import {
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
+import { WorkbenchJobExecDetails } from './WorkbenchJobExecDetails'
 
 export function WorkbenchJobInlineActionCard({
   activity,
@@ -48,12 +49,14 @@ export function WorkbenchJobInlineActionCard({
 }) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(
-    activity.status === WorkbenchJobActivityStatus.NeedsApproval
+    activity.status === WorkbenchJobActivityStatus.NeedsApproval ||
+      activity.status === WorkbenchJobActivityStatus.Running
   )
   const [error, setError] = useState<string | null>(null)
   const needsApproval =
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+  const isExec = activity.type === WorkbenchJobActivityType.Exec
   const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
   const isKubeDiff =
     isKubernetes &&
@@ -130,11 +133,15 @@ export function WorkbenchJobInlineActionCard({
       {expanded && (
         <>
           {error && <GqlError error={error} />}
-          {!!activity.result?.explanation?.trim() && (
+          {!!(
+            activity.result?.explanation?.trim() ??
+            activity.result?.kubeExec?.explanation?.trim()
+          ) && (
             <ActionData>
               <CaptionP $color="text-xlight">EXPLANATION</CaptionP>
               <CaptionP $color="text-light">
-                {activity.result.explanation}
+                {activity.result?.explanation ??
+                  activity.result?.kubeExec?.explanation}
               </CaptionP>
             </ActionData>
           )}
@@ -149,6 +156,26 @@ export function WorkbenchJobInlineActionCard({
               kubeRequest={activity.result?.kubeRequest}
               enabled={expanded}
             />
+          ) : isExec ? (
+            <>
+              <WorkbenchJobExecDetails
+                activity={activity}
+                enabled={expanded}
+              />
+              {!!resultJson &&
+                activity.status === WorkbenchJobActivityStatus.Failed && (
+                  <ActionData>
+                    <CaptionP $color="text-xlight">ERROR</CaptionP>
+                    <Code
+                      language={resultLanguage}
+                      showHeader={false}
+                      css={{ borderColor: theme.colors['border-danger'] }}
+                    >
+                      {resultJson}
+                    </Code>
+                  </ActionData>
+                )}
+            </>
           ) : (
             <>
               {!!inputJson && (

@@ -37,6 +37,7 @@ fragment WorkbenchJobModesFields on WorkbenchJobModes {
   kubernetes {
     update
     delete
+    exec
     excludeNamespaces
     requireNamespaces
   }
@@ -459,6 +460,14 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     path
     queryParams
     contentType
+  }
+  kubeExec {
+    handle
+    command
+    namespace
+    pod
+    container
+    explanation
   }
   jobUpdate {
     diff
@@ -1292,6 +1301,13 @@ query WorkbenchJobActionSummary($id: ID!, $first: Int = 1) {
         }
       }
     }
+    execActions: activities(first: $first, type: EXEC) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
   }
 }
 
@@ -1336,6 +1352,14 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
       queryParams
       contentType
     }
+    kubeExec {
+      handle
+      command
+      namespace
+      pod
+      container
+      explanation
+    }
   }
 }
 
@@ -1350,6 +1374,13 @@ query WorkbenchJobActions($id: ID!) {
       }
     }
     kubernetesActions: activities(first: 100, type: KUBERNETES) {
+      edges {
+        node {
+          ...WorkbenchJobAction
+        }
+      }
+    }
+    execActions: activities(first: 100, type: EXEC) {
       edges {
         node {
           ...WorkbenchJobAction
@@ -1705,5 +1736,13 @@ subscription WorkbenchTextStream($jobId: ID!) {
 subscription WorkbenchCanvasStream($jobId: ID!, $activityId: ID) {
   workbenchCanvasStream(jobId: $jobId, activityId: $activityId) {
     ...WorkbenchCanvasBlock
+  }
+}
+
+subscription WorkbenchExecStream($activityId: ID!) {
+  workbenchExecStream(activityId: $activityId) {
+    activityId
+    text
+    seq
   }
 }

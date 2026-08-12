@@ -477,6 +477,7 @@ function modesToAttributes(
       ? {
           update: modes.kubernetes.update ?? false,
           delete: modes.kubernetes.delete ?? false,
+          exec: modes.kubernetes.exec ?? false,
           requireNamespaces: modes.kubernetes.requireNamespaces ?? [],
           excludeNamespaces: modes.kubernetes.excludeNamespaces ?? [],
         }

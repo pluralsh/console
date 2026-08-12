@@ -86,6 +86,13 @@ fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
       method
       path
     }
+    kubeExec {
+      handle
+      command
+      namespace
+      pod
+      container
+    }
   }
   workbenchJob {
     id

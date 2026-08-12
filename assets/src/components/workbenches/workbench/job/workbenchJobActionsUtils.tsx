@@ -1,5 +1,6 @@
 import {
   CancelledFilledIcon,
+  CommandIcon,
   KubernetesIcon,
   StatusIpIcon,
   StatusOkIcon,
@@ -48,6 +49,7 @@ export type WorkbenchJobActionSection = {
 const ACTION_TYPES = new Set([
   WorkbenchJobActivityType.Function,
   WorkbenchJobActivityType.Kubernetes,
+  WorkbenchJobActivityType.Exec,
 ])
 
 export function isWorkbenchJobAction(
@@ -188,14 +190,15 @@ export function getActionDetailButtonLabel(
   activity: Pick<WorkbenchJobActionFragment, 'status' | 'type'>
 ): string {
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+  const isExec = activity.type === WorkbenchJobActivityType.Exec
 
   switch (activity.status) {
     case WorkbenchJobActivityStatus.NeedsApproval:
-      return isKubernetes ? 'View diff' : 'View JSON'
+      return isKubernetes ? 'View diff' : isExec ? 'View command' : 'View JSON'
     case WorkbenchJobActivityStatus.Failed:
       return 'View error'
     case WorkbenchJobActivityStatus.Successful:
-      return isKubernetes ? 'View results' : 'View JSON'
+      return isKubernetes || isExec ? 'View results' : 'View JSON'
     case WorkbenchJobActivityStatus.Cancelled:
     case WorkbenchJobActivityStatus.Rejected:
       return 'View reason'
@@ -212,6 +215,9 @@ export function getActionTitle(activity: WorkbenchJobActionFragment): string {
     return getKubeActionTitle(activity.result?.kubeRequest)
   }
 
+  if (activity.type === WorkbenchJobActivityType.Exec)
+    return activity.result?.kubeExec?.pod?.trim() || 'Pod command'
+
   return (
     activity.result?.functionCall?.name?.trim() ||
     activity.prompt?.trim() ||
@@ -224,6 +230,13 @@ export function getActionSubtitle(
 ): string {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
     return getKubeActionSubtitle(activity.result?.kubeRequest)
+  }
+
+  if (activity.type === WorkbenchJobActivityType.Exec) {
+    const exec = activity.result?.kubeExec
+    return [exec?.handle, exec?.namespace, exec?.container]
+      .filter(isNonNullable)
+      .join(' · ')
   }
 
   const toolType = activity.result?.functionCall?.tool?.tool
@@ -251,6 +264,9 @@ export function getActionDescription(
 }
 
 export function getActionIcon(activity: WorkbenchJobActionFragment) {
+  if (activity.type === WorkbenchJobActivityType.Exec)
+    return <CommandIcon size={16} />
+
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
     return (
       <KubernetesIcon
@@ -310,6 +326,17 @@ export function getActionInputJson(
     })
   }
 
+  const exec = activity.result?.kubeExec
+  if (exec) {
+    return formatActionJson({
+      handle: exec.handle,
+      namespace: exec.namespace,
+      pod: exec.pod,
+      container: exec.container,
+      command: exec.command,
+    })
+  }
+
   return ''
 }
 
@@ -333,12 +360,16 @@ export function getActionResultJson(
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
     return toKubeYaml(output)
   }
+  if (activity.type === WorkbenchJobActivityType.Exec) return String(output)
+
   return formatActionJson(output)
 }
 
 export function getActionResultLanguage(
   activity: WorkbenchJobActionFragment
-): 'json' | 'yaml' {
+): 'bash' | 'json' | 'yaml' {
+  if (activity.type === WorkbenchJobActivityType.Exec) return 'bash'
+
   return activity.type === WorkbenchJobActivityType.Kubernetes &&
     !activity.result?.error?.trim()
     ? 'yaml'
