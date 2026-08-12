@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.EngineTest do
   use Mimic
   alias Console.AI.Workbench.{Engine, Subagents}
   alias Console.AI.{Provider, Tool}
+  alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
 
   setup :set_mimic_global
@@ -427,10 +428,14 @@ defmodule Console.AI.Workbench.EngineTest do
           assert activity.result.kube_exec.handle == cluster.handle
           assert activity.result.kube_exec.pod == "api-0"
 
-          Console.Deployments.Workbenches.update_job_activity(
-            %{status: :successful, result: %{output: "api-0"}},
-            activity
-          )
+          {:ok, activity} =
+            Console.Deployments.Workbenches.update_job_activity(
+              %{status: :successful, result: %{output: "api-0"}},
+              activity
+            )
+
+          Recurse.handle_event(%Console.PubSub.WorkbenchJobActivityUpdated{item: activity})
+          {:ok, activity}
         end)
 
       assert {:ok, result} = Engine.run(engine)

@@ -3,6 +3,7 @@ defmodule Console.AI.Agents.UpgradeTest do
   alias Console.AI.Agents.Upgrade
   alias Console.AI.{Provider, VectorStore}
   alias Console.AI.Tool
+  alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
   use Mimic
 
@@ -58,12 +59,12 @@ defmodule Console.AI.Agents.UpgradeTest do
 
       assert_receive :poll, :timer.seconds(2)
 
-      step = refetch(step)
-      assert step.agent_run_id
+      step = await_agent_run(step)
 
       run = Repo.get(Console.Schema.AgentRun, step.agent_run_id)
       insert(:pull_request, agent_run: run)
-      update_record(run, %{status: :successful})
+      {:ok, run} = update_record(run, %{status: :successful})
+      Recurse.handle_event(%Console.PubSub.AgentRunUpdated{item: run})
 
       assert_receive {:result, result}, :timer.seconds(20)
 
@@ -73,6 +74,17 @@ defmodule Console.AI.Agents.UpgradeTest do
       assert step.status == :completed
       assert step.agent_run_id == run.id
       assert step.agent_run.prompt == "some prompt"
+    end
+  end
+
+  defp await_agent_run(step, attempts \\ 20)
+  defp await_agent_run(_, 0), do: flunk("timed out waiting for upgrade agent run")
+  defp await_agent_run(step, attempts) do
+    case refetch(step) do
+      %{agent_run_id: id} = step when is_binary(id) -> step
+      _ ->
+        Process.sleep(50)
+        await_agent_run(step, attempts - 1)
     end
   end
 end

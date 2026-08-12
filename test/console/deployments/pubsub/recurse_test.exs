@@ -635,6 +635,26 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       {:error, _} = Recurse.handle_event(event)
     end
   end
+
+  describe "WorkbenchJobActivityUpdated" do
+    test "it requeues an inactive workbench job after an action is approved" do
+      job = insert(:workbench_job, status: :failed)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :function, status: :successful)
+
+      :ok = Recurse.handle_event(%PubSub.WorkbenchJobActivityUpdated{item: activity})
+
+      assert refetch(job).status == :pending
+    end
+
+    test "it ignores non-action activities" do
+      job = insert(:workbench_job, status: :failed)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :memo, status: :successful)
+
+      :ok = Recurse.handle_event(%PubSub.WorkbenchJobActivityUpdated{item: activity})
+
+      assert refetch(job).status == :failed
+    end
+  end
 end
 
 

@@ -763,6 +763,18 @@ defmodule Console.Deployments.Workbenches do
   def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
 
   @doc """
+  Requeues an inactive workbench job for processing.
+  """
+  @spec resume_job(WorkbenchJob.t()) :: job_resp
+  def resume_job(%WorkbenchJob{status: status} = job) when status != :running do
+    job
+    |> WorkbenchJob.changeset(%{status: :pending})
+    |> Repo.update()
+    |> notify(:update)
+  end
+  def resume_job(%WorkbenchJob{} = job), do: {:ok, job}
+
+  @doc """
   Marks a workbench job as paused, and cancels its activities so they can be restarted later.
   """
   @spec pause_job(WorkbenchJob.t()) :: job_resp

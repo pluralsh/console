@@ -24,7 +24,8 @@ defmodule Console.AI.Workbench.Engine do
     Message,
     Supervisor,
     Heartbeat,
-    Canvas
+    Canvas,
+    Activity
   }
   alias Console.AI.Tools.Workbench.{
     Lua,
@@ -149,7 +150,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, msgs, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.minutes(30))
+    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
     |> Enum.flat_map(fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
       {:ok, {:error, error}} ->
@@ -276,25 +277,11 @@ defmodule Console.AI.Workbench.Engine do
 
   defp spawn_activity(_, _), do: :ignore
 
-  @max_poll_iterations 6 * 30
-  @poll_interval :timer.seconds(10)
-  @approval_pending_statuses [:needs_approval, :running]
-
-  defp poll_activity(activity, iter \\ 0)
-  defp poll_activity(%WorkbenchJobActivity{status: status} = activity, iter)
-       when status in @approval_pending_statuses and iter < @max_poll_iterations do
-    case Repo.get(WorkbenchJobActivity, activity.id) do
-      %WorkbenchJobActivity{status: status} = activity when status in @approval_pending_statuses ->
-        :timer.sleep(poll_interval())
-        poll_activity(activity, iter + 1)
-      %WorkbenchJobActivity{} = activity -> {:ok, activity}
-      nil -> {:error, "the activity was deleted before completion"}
+  defp poll_activity(%WorkbenchJobActivity{} = activity) do
+    with {:ok, %WorkbenchJobActivity{} = activity} <- Activity.await_activity(activity) do
+      {:ok, Repo.preload(activity, [:workbench_job, :agent_run, :agent_runs, :thoughts, :user])}
     end
   end
-  defp poll_activity(activity, _), do: {:ok, activity}
-
-  defp poll_interval,
-    do: Console.conf(:workbench_activity_poll_interval) || @poll_interval
 
   defp existing_canvas(%WorkbenchJob{result: %Console.Schema.WorkbenchJobResult{canvas: canvas}}) when is_list(canvas), do: canvas
   defp existing_canvas(_), do: []

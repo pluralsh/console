@@ -24,7 +24,7 @@ defmodule Console.AI.Agents.Upgrade do
     %{steps: steps, user: user} = upgrade = Repo.preload(upgrade, [:steps, :cluster, :user, :runtime])
     user = Console.Services.Rbac.preload(user)
 
-    Task.async_stream(steps, &exec_step(&1, upgrade, user), max_concurrency: 10, timeout: :timer.minutes(30))
+    Task.async_stream(steps, &exec_step(&1, upgrade, user), max_concurrency: 10, timeout: :timer.hours(4))
     |> Enum.any?(&match?({:ok, %{status: :failed}}, &1))
     |> then(&ClusterUpgrade.changeset(upgrade, %{status: if(&1, do: :failed, else: :completed)}))
     |> Repo.update()
@@ -71,7 +71,7 @@ defmodule Console.AI.Agents.Upgrade do
   end
 
   defp run_status(%AgentRun{id: id} = run) do
-    case poll_run(run) do
+    case poll_run(run) |> preload_run() do
       {:timeout, _} -> %{status: :failed, error: "agent run #{id} timed out"}
       {:failed, %AgentRun{error: error}} -> %{status: :failed, error: "Agent run failed: #{error}"}
       {:success, %AgentRun{mode: :write, pull_requests: [_ | _]}} -> %{status: :completed, agent_run_id: id}
@@ -79,6 +79,8 @@ defmodule Console.AI.Agents.Upgrade do
         %{status: :failed, agent_run_id: id, error: "agent run #{id} completed successfully but in an unexpected mode"}
     end
   end
+
+  defp preload_run({result, %AgentRun{} = run}), do: {result, Repo.preload(run, [:pull_requests])}
 
   defp callback(%ClusterUpgradeStep{id: id, upgrade_id: upgrade_id}, {:content, content}) when is_binary(content),
     do: publish_absinthe(%{step_id: id, text: content}, cluster_upgrade_progress: "clusters:upgrades:#{upgrade_id}")
