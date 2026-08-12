@@ -4,23 +4,23 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.0.8
-  kube: ['1.33', '1.32', '1.31']
+- version: 4.1.0
+  kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [Release notes provided for v4.0.8 and v4.0.2 mostly include installation/asset
-        info and pointers to the blog/changelog rather than enumerated feature changes.
-        No concrete new features between 4.0.2 and 4.0.8 are listed in the provided
-        notes.]
+    features: ["Release notes provided are generic \u201CQuick Start\u201D pages and\
+        \ do not enumerate new features between v4.0.2 and v4.1.0.", 'v4.1.0 adds
+        a new quick-start manifest asset: `quick-start-telemetry.yaml` (indicates
+        telemetry quickstart support/docs were added).']
     breaking_changes: [No breaking changes are listed in the provided notes; they
-        direct you to consult the upstream upgrading guide and CHANGELOG for breaking/known
-        issues. Treat this as 'unknown from provided data' and verify before upgrading.]
-  chart_version: 1.0.24
-  images: ['quay.io/argoproj/argocli:v4.0.8', 'quay.io/argoproj/workflow-controller:v4.0.8',
-    'registry.k8s.io/kubectl:v1.36.3']
+        refer readers to the upstream upgrading guide and changelog for breaking changes/known
+        issues.]
+  chart_version: 2.0.0
+  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.0', 'quay.io/argoproj/argocli:v4.1.0',
+    'quay.io/argoproj/workflow-controller:v4.1.0']
 - version: 4.0.2
   kube: ['1.33', '1.32', '1.31']
   requirements: []
