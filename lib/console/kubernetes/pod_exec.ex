@@ -1,16 +1,19 @@
 defmodule Console.Kubernetes.PodExec do
   use WebSockex
 
+  @remote_command_protocol "v4.channel.k8s.io"
+
   defmodule State, do: defstruct [:pid]
 
   def exec_url(ns, name, container, opts \\ []) do
     command = opts[:command] || "/bin/sh"
+    stdin = if opts[:stdin] == false, do: "false", else: "true"
     parsed_command = OptionParser.split(command) |> Enum.map(& {"command", &1})
     args = URI.encode_query(
       [{"container", container} | parsed_command] ++
       [
         {"tty", "true"},
-        {"stdin", "true"},
+        {"stdin", stdin},
         {"stdout", "true"},
         {"stderr", "true"}
       ]
@@ -22,7 +25,7 @@ defmodule Console.Kubernetes.PodExec do
   def start_link(path, pid, %{url: url, ca_cert: cert, auth: auth}) do
     Path.join(to_ws(url), path)
     |> WebSockex.start_link(__MODULE__, %State{pid: pid}, [
-      extra_headers: [{"Authorization", "Bearer #{auth.token}"}],
+      extra_headers: headers(auth.token),
       cacerts: certs(cert)
     ])
   end
@@ -31,7 +34,7 @@ defmodule Console.Kubernetes.PodExec do
   def start(path, pid, %{url: url, ca_cert: cert, auth: auth}) do
     Path.join(to_ws(url), path)
     |> WebSockex.start(__MODULE__, %State{pid: pid}, [
-      extra_headers: [{"Authorization", "Bearer #{auth.token}"}],
+      extra_headers: headers(auth.token),
       cacerts: certs(cert)
     ])
   end
@@ -59,12 +62,19 @@ defmodule Console.Kubernetes.PodExec do
   defp deliver_frame(<<2, frame::binary>>, pid),
     do: send_frame(pid, frame)
   defp deliver_frame(<<3, frame::binary>>, pid),
-    do: send_frame(pid, frame)
-  defp deliver_frame(<<255, frame::binary>>, pid),
-    do: send(pid, {:stream_closed, frame})
+    do: send(pid, {:exec_status, frame})
+  defp deliver_frame(<<255, _frame::binary>>, _pid),
+    do: :ok
   defp deliver_frame(frame, pid), do: send_frame(pid, frame)
 
   defp send_frame(pid, frame), do: send(pid, {:stdo, frame})
+
+  defp headers(token) do
+    [
+      {"Authorization", "Bearer #{token}"},
+      {"Sec-WebSocket-Protocol", @remote_command_protocol}
+    ]
+  end
 
   defp to_ws("https://" <> url), do: "wss://#{url}"
   defp to_ws("http://" <> url), do: "ws://#{url}"

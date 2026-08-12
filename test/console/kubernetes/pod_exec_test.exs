@@ -49,6 +49,31 @@ defmodule Console.Kubernetes.PodExecTest do
 
       assert command_args(url) == ["/bin/sh"]
     end
+
+    test "disables stdin for non-interactive commands" do
+      url = PodExec.exec_url("default", "api-0", "api", command: "echo hello", stdin: false)
+
+      assert {"stdin", "false"} in query_pairs(url)
+    end
+  end
+
+  describe "handle_frame/2" do
+    test "delivers the Kubernetes exit status separately from command output" do
+      status = ~s({"status":"Success"})
+
+      assert {:ok, %PodExec.State{}} =
+               PodExec.handle_frame({:binary, <<3>> <> status}, %PodExec.State{pid: self()})
+
+      assert_receive {:exec_status, ^status}
+      refute_receive {:stdo, _}
+    end
+
+    test "does not treat a v5 stream-close control frame as command completion" do
+      assert {:ok, %PodExec.State{}} =
+               PodExec.handle_frame({:binary, <<255, 0>>}, %PodExec.State{pid: self()})
+
+      refute_receive _
+    end
   end
 
   defp command_args(url) do

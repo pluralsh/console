@@ -1571,13 +1571,13 @@ defmodule Console.Deployments.WorkbenchesTest do
           }
         )
 
-      url = PodExec.exec_url("default", "api-0", "api", command: "cat /etc/hostname")
+      url = PodExec.exec_url("default", "api-0", "api", command: "cat /etc/hostname", stdin: false)
 
       expect(PodExec, :start, fn ^url, collector_pid, %Kazan.Server{} ->
         shell_pid =
           spawn(fn ->
             send(collector_pid, {:stdo, "api-0\n"})
-            send(collector_pid, {:stream_closed, ""})
+            send(collector_pid, {:exec_status, ~s({"status":"Success"})})
             receive do
               _ -> :ok
             end

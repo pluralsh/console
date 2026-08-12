@@ -48,6 +48,11 @@ defmodule Console.AI.Tools.KubeShellCollector do
     {:noreply, emit(frame, state)}
   end
 
+  def handle_info({:exec_status, status}, %State{callback_pid: callback_pid} = state) do
+    send(callback_pid, {:exec_status, status})
+    {:noreply, state}
+  end
+
   def handle_info({:stream_closed, frame}, %State{callback_pid: callback_pid} = state) do
     send(callback_pid, :exec_stream_closed)
     {:noreply, emit(frame, state)}
@@ -113,27 +118,40 @@ defmodule Console.AI.Tools.Workbench.KubeShell do
       }, user) do
     cluster = Clusters.get_cluster_by_handle(handle)
     server = Clusters.control_plane(cluster, user)
-    url = PodExec.exec_url(ns, p, ct, command: command)
-    with {:ok, pid} <- KubeShellCollector.start(
-      callback_pid: self(),
-      activity: activity
-    ),
+    url = PodExec.exec_url(ns, p, ct, command: command, stdin: false)
+    with {:ok, pid} <- KubeShellCollector.start(callback_pid: self(), activity: activity),
          {:ok, shell_pid} <- PodExec.start(url, pid, server) do
       KubeShellCollector.monitor(pid, shell_pid)
-      result =
-        receive do
-          :exec_stream_closed -> KubeShellCollector.output(pid)
-        after
-          @timeout ->
-            output = KubeShellCollector.output(pid)
-            "#{output}\n\nShell command timed out after 60 minutes, might need to try a different approach"
+      try do
+        case wait_for_result() do
+          :ok -> {:ok, KubeShellCollector.output(pid)}
+          {:error, reason} -> {:error, reason}
         end
-      Process.exit(shell_pid, :shutdown)
-      Process.exit(pid, :shutdown)
-      {:ok, result}
+      after
+        Process.exit(shell_pid, :shutdown)
+        Process.exit(pid, :shutdown)
+      end
     else
       {:error, reason} ->
         {:error, "failed to execute shell command, check your RBAC permissions, you must have pod/exec on the given pod to perform this action: #{inspect reason}"}
+    end
+  end
+
+  defp wait_for_result() do
+    receive do
+      {:exec_status, status} -> parse_exec_status(status)
+      :exec_stream_closed -> :ok
+    after
+      @timeout -> {:error, "shell command timed out after 30 minutes"}
+    end
+  end
+
+  defp parse_exec_status(status) do
+    case Jason.decode(status) do
+      {:ok, %{"status" => "Success"}} -> :ok
+      {:ok, %{"message" => message}} when is_binary(message) -> {:error, message}
+      {:ok, response} -> {:error, "unexpected Kubernetes exec status: #{inspect(response)}"}
+      {:error, _} -> {:error, "invalid Kubernetes exec status: #{status}"}
     end
   end
 end
