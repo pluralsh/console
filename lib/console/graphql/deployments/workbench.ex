@@ -53,6 +53,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_kubernetes_modes_attributes do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -638,6 +639,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_kubernetes_modes do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -695,6 +697,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :explanation,     :string, description: "why this action is needed and its expected effect"
     field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
     field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
+    field :kube_exec,       :workbench_job_activity_kube_exec, description: "kubernetes exec payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
     field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
@@ -727,6 +730,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     @desc "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
     field :current, :map, resolve: &Deployments.kube_request_current/3
+  end
+
+  object :workbench_job_activity_kube_exec do
+    field :handle,    :string, description: "the target cluster handle"
+    field :command,   :string, description: "the command executed in the pod"
+    field :namespace, :string, description: "the target namespace"
+    field :pod,       :string, description: "the target pod name"
+    field :container, :string, description: "the target container name"
+    field :explanation, :string, description: "why this command is needed and its expected effect"
   end
 
   object :workbench_job_activity_job_update do
@@ -1312,6 +1324,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_text_stream do
     field :activity_id, :id
     field :text,        :string
+  end
+
+  object :workbench_job_exec_stream do
+    field :activity_id, :id
+    field :text,        :string
+    field :seq,         :integer
   end
 
   connection node_type: :workbench
@@ -2021,6 +2039,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
         %{job_id: job_id}, ctx ->
           with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
             do: {:ok, topic: "workbench_jobs:#{job_id}:canvas_stream"}
+      end
+    end
+
+    field :workbench_exec_stream, :workbench_job_exec_stream do
+      arg :activity_id, non_null(:id)
+
+      config fn %{activity_id: activity_id}, ctx ->
+        with {:ok, _} <- Deployments.workbench_job_activity(%{id: activity_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{activity_id}:exec_stream"}
       end
     end
   end

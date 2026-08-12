@@ -112,7 +112,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   def log_error(pass, _), do: pass
 
   defp jitter_sleep() do
-    time = :timer.seconds(10)
+    time = Console.conf(:workbench_agent_run_poll_interval) || :timer.seconds(10)
     :timer.sleep(time + Console.jitter(time))
   end
 end

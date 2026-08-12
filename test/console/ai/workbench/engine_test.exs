@@ -364,5 +364,91 @@ defmodule Console.AI.Workbench.EngineTest do
 
       assert result.status == :successful
     end
+
+    test "creates and polls an exec activity until it is approved" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      cluster = insert(:cluster, handle: "exec-activity-cluster")
+
+      expect(Provider, :completion, fn _, opts ->
+        assert Enum.any?(opts[:plural], &(Tool.name(&1) == "exec_k8s_pod"))
+
+        {:ok, "inspect the pod", [
+          %Tool{
+            id: "exec-1",
+            name: "exec_k8s_pod",
+            arguments: %{
+              "cluster" => cluster.handle,
+              "namespace" => "default",
+              "pod" => "api-0",
+              "container" => "api",
+              "command" => "cat /etc/hostname",
+              "explanation" => "Inspect the pod hostname."
+            }
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "hostname inspected",
+              "todos" => [%{name: "inspect pod", description: "inspect pod", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, modes: %{kubernetes: %{exec: true}})
+
+      {:ok, engine} = Engine.new(job)
+      assert engine.job.modes.kubernetes.exec
+      approver =
+        Task.async(fn ->
+          activity = await_job_activity(job.id)
+          assert activity.type == :exec
+          assert activity.status == :needs_approval
+          assert activity.prompt =~ "cat /etc/hostname"
+          assert activity.result.kube_exec.handle == cluster.handle
+          assert activity.result.kube_exec.pod == "api-0"
+
+          Console.Deployments.Workbenches.update_job_activity(
+            %{status: :successful, result: %{output: "api-0"}},
+            activity
+          )
+        end)
+
+      assert {:ok, result} = Engine.run(engine)
+      assert {:ok, activity} = Task.await(approver, :timer.seconds(5))
+      assert activity.status == :successful
+      assert result.status == :successful
+      assert result.result.conclusion == "hostname inspected"
+    end
+  end
+
+  defp await_job_activity(job_id, attempts \\ 80)
+  defp await_job_activity(_, 0), do: flunk("timed out waiting for exec activity")
+  defp await_job_activity(job_id, attempts) do
+    case Console.Repo.get_by(Console.Schema.WorkbenchJobActivity, workbench_job_id: job_id) do
+      %Console.Schema.WorkbenchJobActivity{} = activity -> activity
+      nil ->
+        Process.sleep(50)
+        await_job_activity(job_id, attempts - 1)
+    end
   end
 end

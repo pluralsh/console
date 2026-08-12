@@ -38,6 +38,8 @@ defmodule Console.AI.Workbench.Engine do
     SkillBackfill,
     FunctionCall,
     KubeRequest,
+    KubeShell,
+    Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
@@ -136,6 +138,7 @@ defmodule Console.AI.Workbench.Engine do
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
       %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
+      %KubeShell{} = kube_shell, {msgs, acts} -> {:cont, {msgs, [kube_shell | acts]}}
       msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
     |> case do
@@ -255,9 +258,25 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity)
   end
 
+  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{job: job}) do
+    attrs = %{
+      type: :exec,
+      status: :needs_approval,
+      prompt: "dispatching kubernetes exec command `#{command}` against #{p} in container #{ct} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result: %{
+        output: "request pending user approval",
+        explanation: request.explanation,
+        kube_exec: Console.mapify(request)
+      }
+    }
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+      do: poll_activity(activity)
+  end
+
   defp spawn_activity(_, _), do: :ignore
 
-  @max_poll_iterations 60
+  @max_poll_iterations 6 * 30
   @poll_interval :timer.seconds(10)
   @approval_pending_statuses [:needs_approval, :running]
 
@@ -266,13 +285,16 @@ defmodule Console.AI.Workbench.Engine do
        when status in @approval_pending_statuses and iter < @max_poll_iterations do
     case Repo.get(WorkbenchJobActivity, activity.id) do
       %WorkbenchJobActivity{status: status} = activity when status in @approval_pending_statuses ->
-        :timer.sleep(@poll_interval)
+        :timer.sleep(poll_interval())
         poll_activity(activity, iter + 1)
       %WorkbenchJobActivity{} = activity -> {:ok, activity}
       nil -> {:error, "the activity was deleted before completion"}
     end
   end
   defp poll_activity(activity, _), do: {:ok, activity}
+
+  defp poll_interval,
+    do: Console.conf(:workbench_activity_poll_interval) || @poll_interval
 
   defp existing_canvas(%WorkbenchJob{result: %Console.Schema.WorkbenchJobResult{canvas: canvas}}) when is_list(canvas), do: canvas
   defp existing_canvas(_), do: []
@@ -339,10 +361,11 @@ defmodule Console.AI.Workbench.Engine do
     do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
   defp function_tools(_), do: []
 
-  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}} = job) do
+  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do
     Enum.reject([
       (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
-      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil)
+      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil),
+      (if e, do: %KubeExec{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []

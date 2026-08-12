@@ -2,7 +2,8 @@ defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
-  alias Console.AI.Tools.Workbench.KubeRequest
+  alias Console.AI.Tools.Workbench.{KubeRequest, KubeShell}
+  alias Console.Kubernetes.PodExec
   alias Console.PubSub
   alias Console.Deployments.Workbenches
   alias Console.Schema.{QueuedPrompt, WorkbenchJob, WorkbenchJobActivity}
@@ -1542,6 +1543,62 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert reloaded.status == :successful
     end
 
+    test "users with read access approve an exec activity and collect pod output" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "exec-approval-cluster")
+
+      shell = %{
+        handle: cluster.handle,
+        namespace: "default",
+        pod: "api-0",
+        container: "api",
+        command: "cat /etc/hostname",
+        explanation: "Inspect the pod hostname."
+      }
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :exec,
+          status: :needs_approval,
+          prompt: "approve the pod exec",
+          result: %{
+            output: "request pending user approval",
+            kube_exec: shell
+          }
+        )
+
+      url = PodExec.exec_url("default", "api-0", "api", command: "cat /etc/hostname")
+
+      expect(PodExec, :start, fn ^url, collector_pid, %Kazan.Server{} ->
+        shell_pid =
+          spawn(fn ->
+            send(collector_pid, {:stdo, "api-0\n"})
+            send(collector_pid, {:stream_closed, ""})
+            receive do
+              _ -> :ok
+            end
+          end)
+
+        {:ok, shell_pid}
+      end)
+
+      assert %KubeShell{handle: "exec-approval-cluster"} = activity.result.kube_exec
+
+      {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
+      assert updated.status == :running
+
+      completed = await_activity_status(activity.id, :successful)
+      assert completed.result.output == "api-0\n"
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert reloaded.result.output == "api-0\n"
+    end
+
     test "users with read access approve a function activity and invoke the underlying grpc function" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -1847,7 +1904,7 @@ defmodule Console.Deployments.WorkbenchesTest do
         {:ok, :mock_conn}
       end)
 
-      assert {:error, "activity does not support function calling"} =
+      assert {:error, "activity does not support action approval"} =
                Workbenches.approve_job_activity(activity.id, user)
 
       refute_receive {:function_call_attempted, _}
@@ -3101,6 +3158,17 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_workbench_chatbot(bot.id, user)
 
       assert refetch(bot)
+    end
+  end
+
+  defp await_activity_status(activity_id, status, attempts \\ 20)
+  defp await_activity_status(_, _, 0), do: flunk("timed out waiting for exec activity completion")
+  defp await_activity_status(activity_id, status, attempts) do
+    case Repo.get(WorkbenchJobActivity, activity_id) do
+      %WorkbenchJobActivity{status: ^status} = activity -> activity
+      _ ->
+        Process.sleep(50)
+        await_activity_status(activity_id, status, attempts - 1)
     end
   end
 

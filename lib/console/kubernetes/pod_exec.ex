@@ -25,6 +25,14 @@ defmodule Console.Kubernetes.PodExec do
   end
   def start_link(path, pid), do: start_link(path, pid, Kazan.Server.in_cluster())
 
+  def start(path, pid, %{url: url, ca_cert: cert, auth: auth}) do
+    Path.join(to_ws(url), path)
+    |> WebSockex.start(__MODULE__, %State{pid: pid}, [
+      extra_headers: [{"Authorization", "Bearer #{auth.token}"}],
+      cacerts: certs(cert)
+    ])
+  end
+
   def handle_info(:ping, state) do
     {:reply, {:binary, <<0>>}, state}
   end
@@ -49,6 +57,8 @@ defmodule Console.Kubernetes.PodExec do
     do: send_frame(pid, frame)
   defp deliver_frame(<<3, frame::binary>>, pid),
     do: send_frame(pid, frame)
+  defp deliver_frame(<<255, frame::binary>>, pid),
+    do: send(pid, {:stream_closed, frame})
   defp deliver_frame(frame, pid), do: send_frame(pid, frame)
 
   defp send_frame(pid, frame), do: send(pid, {:stdo, frame})

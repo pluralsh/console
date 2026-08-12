@@ -12732,6 +12732,7 @@ export type RootSubscriptionType = {
   runLogsDelta?: Maybe<RunLogsDelta>;
   toolThoughts?: Maybe<ToolThought>;
   workbenchCanvasStream?: Maybe<WorkbenchCanvasBlock>;
+  workbenchExecStream?: Maybe<WorkbenchJobExecStream>;
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
@@ -12781,6 +12782,11 @@ export type RootSubscriptionTypeToolThoughtsArgs = {
 export type RootSubscriptionTypeWorkbenchCanvasStreamArgs = {
   activityId?: InputMaybe<Scalars['ID']['input']>;
   jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchExecStreamArgs = {
+  activityId: Scalars['ID']['input'];
 };
 
 
@@ -16339,6 +16345,22 @@ export type WorkbenchJobActivityJobUpdate = {
   workingTheory?: Maybe<Scalars['String']['output']>;
 };
 
+export type WorkbenchJobActivityKubeExec = {
+  __typename?: 'WorkbenchJobActivityKubeExec';
+  /** the command executed in the pod */
+  command?: Maybe<Scalars['String']['output']>;
+  /** the target container name */
+  container?: Maybe<Scalars['String']['output']>;
+  /** why this command is needed and its expected effect */
+  explanation?: Maybe<Scalars['String']['output']>;
+  /** the target cluster handle */
+  handle?: Maybe<Scalars['String']['output']>;
+  /** the target namespace */
+  namespace?: Maybe<Scalars['String']['output']>;
+  /** the target pod name */
+  pod?: Maybe<Scalars['String']['output']>;
+};
+
 export type WorkbenchJobActivityKubeRequest = {
   __typename?: 'WorkbenchJobActivityKubeRequest';
   /** the Kubernetes API request body */
@@ -16384,6 +16406,8 @@ export type WorkbenchJobActivityResult = {
   functionCall?: Maybe<WorkbenchJobActivityFunctionCall>;
   /** job update (diff, theory, conclusion) when present */
   jobUpdate?: Maybe<WorkbenchJobActivityJobUpdate>;
+  /** kubernetes exec payload when present */
+  kubeExec?: Maybe<WorkbenchJobActivityKubeExec>;
   /** kubernetes request approval payload when present */
   kubeRequest?: Maybe<WorkbenchJobActivityKubeRequest>;
   /** logs emitted by the activity */
@@ -16434,6 +16458,7 @@ export enum WorkbenchJobActivityType {
   Canvas = 'CANVAS',
   Coding = 'CODING',
   Conclusion = 'CONCLUSION',
+  Exec = 'EXEC',
   Function = 'FUNCTION',
   History = 'HISTORY',
   Infrastructure = 'INFRASTRUCTURE',
@@ -16507,12 +16532,21 @@ export type WorkbenchJobEdge = {
   node?: Maybe<WorkbenchJob>;
 };
 
+export type WorkbenchJobExecStream = {
+  __typename?: 'WorkbenchJobExecStream';
+  activityId?: Maybe<Scalars['ID']['output']>;
+  seq?: Maybe<Scalars['Int']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
+};
+
 export type WorkbenchJobKubernetesModes = {
   __typename?: 'WorkbenchJobKubernetesModes';
   /** whether kubernetes delete actions are enabled */
   delete?: Maybe<Scalars['Boolean']['output']>;
   /** namespaces the agent can never act in */
   excludeNamespaces?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** whether kubernetes exec actions are enabled */
+  exec?: Maybe<Scalars['Boolean']['output']>;
   /** if set, actions are only allowed in these namespaces */
   requireNamespaces?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** whether kubernetes update actions are enabled */
@@ -16524,6 +16558,8 @@ export type WorkbenchJobKubernetesModesAttributes = {
   delete?: InputMaybe<Scalars['Boolean']['input']>;
   /** namespaces the agent can never act in */
   excludeNamespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** whether kubernetes exec actions are enabled */
+  exec?: InputMaybe<Scalars['Boolean']['input']>;
   /** if set, actions are only allowed in these namespaces */
   requireNamespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** whether kubernetes update actions are enabled */

@@ -3,6 +3,7 @@ defmodule Console.Deployments.Workbenches do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.AI.Workbench.Mentions
+  import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.Schema.{
     User,
     Workbench,
@@ -31,7 +32,7 @@ defmodule Console.Deployments.Workbenches do
     QueuedPrompt
   }
   alias Console.AI.{Provider, VectorStore}
-  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
+  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt, KubeShell}
   alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -1016,14 +1017,13 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :approve)
     end)
     |> add_operation(:claim, fn
-      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = _}} = activity} ->
-        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
+      %{activity: %WorkbenchJobActivity{type: type} = activity} when is_action(type) ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :running,
+          user_id: user.id
+        })
         |> Repo.update()
-      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{}}} = activity} ->
-        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
-        |> Repo.update()
-      _ ->
-        {:error, "activity does not support function calling"}
+      _ -> {:error, "activity does not support action approval"}
     end)
     |> execute(extract: :claim)
     |> when_ok(&execute_approved_activity(&1, user))
@@ -1049,11 +1049,31 @@ defmodule Console.Deployments.Workbenches do
   end
 
   defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :exec, result: %{kube_exec: %KubeShell{} = shell}} = activity,
+    user
+  ) do
+    Task.Supervisor.start_child(Console.AI.TaskSupervisor, fn ->
+      case KubeShell.invoke(%{shell | activity: activity}, user) do
+        {:ok, result} ->
+          WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: result}})
+        {:error, err} ->
+          WorkbenchJobActivity.changeset(activity, %{
+            status: :failed,
+            result: %{error: "Kubernetes shell execution failed: #{inspect(err)}"}
+          })
+      end
+      |> Repo.update()
+      |> notify(:update)
+    end)
+
+    {:ok, activity}
+  end
+
+  defp execute_approved_activity(
     %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity,
     user
   ) do
-    KubeRequest.invoke(request, user)
-    |> case do
+    case KubeRequest.invoke(request, user) do
       {:ok, %{} = output} ->
         output
         |> KUtils.sanitize_kube_resource()
