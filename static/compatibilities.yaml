@@ -19038,6 +19038,28 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 88.3.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- If you set `externalUrl` for components (e.g., Prometheus/Alertmanager/Grafana),
+        note it now supports TLS configuration. Review your `values.yaml` for any
+        `externalUrl` usage and adjust to the new expected format/options introduced
+        by the chart.
+
+        '
+      chart_updates: ['`externalUrl` handling was updated to support TLS configuration
+          (PR #7121).']
+      features: ['`externalUrl` can now be configured to support TLS (e.g., HTTPS-related
+          settings) for exposed component URLs.']
+      breaking_changes: []
+    chart_version: 88.3.0
+    images: ['docker.io/grafana/grafana:13.1.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.5',
+      'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.0',
+      'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.13.2-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 88.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -23114,7 +23136,7 @@ addons:
           to >=3.5 (including 3.6).']
     chart_version: 37.3.0
     images: ['docker.io/traefik:v3.6.0']
-    eolAt: '2026-05-05'
+    eolAt: '2026-08-16'
   - version: 3.5.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -25570,23 +25592,23 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.0.8
-    kube: ['1.33', '1.32', '1.31']
+  - version: 4.1.0
+    kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [Release notes provided for v4.0.8 and v4.0.2 mostly include installation/asset
-          info and pointers to the blog/changelog rather than enumerated feature changes.
-          No concrete new features between 4.0.2 and 4.0.8 are listed in the provided
-          notes.]
+      features: ["Release notes provided are generic \u201CQuick Start\u201D pages\
+          \ and do not enumerate new features between v4.0.2 and v4.1.0.", 'v4.1.0
+          adds a new quick-start manifest asset: `quick-start-telemetry.yaml` (indicates
+          telemetry quickstart support/docs were added).']
       breaking_changes: [No breaking changes are listed in the provided notes; they
-          direct you to consult the upstream upgrading guide and CHANGELOG for breaking/known
-          issues. Treat this as 'unknown from provided data' and verify before upgrading.]
-    chart_version: 1.0.24
-    images: ['quay.io/argoproj/argocli:v4.0.8', 'quay.io/argoproj/workflow-controller:v4.0.8',
-      'registry.k8s.io/kubectl:v1.36.3']
+          refer readers to the upstream upgrading guide and changelog for breaking
+          changes/known issues.]
+    chart_version: 2.0.0
+    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.0', 'quay.io/argoproj/argocli:v4.1.0',
+      'quay.io/argoproj/workflow-controller:v4.1.0']
   - version: 4.0.2
     kube: ['1.33', '1.32', '1.31']
     requirements: []
