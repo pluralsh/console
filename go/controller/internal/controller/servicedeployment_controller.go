@@ -12,6 +12,7 @@ import (
 	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -88,7 +89,10 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	}
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
-			reterr = err
+			// The object already deleted
+			if !apierrors.IsNotFound(err) {
+				reterr = err
+			}
 		}
 	}()
 
@@ -104,7 +108,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	}
 
 	// Handle resource deletion both in Kubernetes cluster and in Console API.
-	if result := r.addOrRemoveFinalizer(service); result != nil {
+	if result := r.addOrRemoveFinalizer(ctx, service); result != nil {
 		return *result, nil
 	}
 
@@ -661,7 +665,7 @@ func (r *ServiceDeploymentReconciler) addConfigurationSecretRefs(ctx context.Con
 	return utils.AddOwnerRefAnnotation(ctx, r.Client, service, configurationSecret)
 }
 
-func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.ServiceDeployment) *ctrl.Result {
+func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(ctx context.Context, service *v1alpha1.ServiceDeployment) *ctrl.Result {
 	// If the service is not being deleted and if it does not have the finalizer, then let's add it.
 	if service.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		controllerutil.AddFinalizer(service, ServiceFinalizer)
@@ -669,29 +673,43 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 
 	// If the service is being deleted, cleanup and remove the finalizer.
 	if !service.DeletionTimestamp.IsZero() {
+		serviceID := service.Status.GetID()
+
+		if serviceID == "" {
+			resolvedID, err := r.getServiceIDForDeletion(ctx, service)
+			if err != nil {
+				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return lo.ToPtr(common.WaitForResources())
+			}
+			serviceID = resolvedID
+			if serviceID != "" {
+				service.Status.ID = new(serviceID)
+			}
+		}
+
 		// If the service does not have an ID, the finalizer can be removed.
-		if !service.Status.HasID() {
+		if serviceID == "" {
 			controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 			return &ctrl.Result{}
 		}
 
 		// If the service is already being deleted from Console API, requeue.
-		if r.ConsoleClient.IsServiceDeleting(service.Status.GetID()) {
+		if r.ConsoleClient.IsServiceDeleting(serviceID) {
 			return lo.ToPtr(common.Wait())
 		}
 
-		exists, err := r.ConsoleClient.IsServiceExisting(service.Status.GetID())
+		exists, err := r.ConsoleClient.IsServiceExisting(serviceID)
 		if err != nil {
 			return lo.ToPtr(common.WaitForResources())
 		}
 
-		// Remove service from Console API if it exists and is not read-only.
-		if exists && !service.Status.IsReadonly() {
-			if err := r.deleteService(service.Status.GetID(), service.Spec.Detach); err != nil {
+		// Remove service from Console API if it exists.
+		if exists {
+			if err := r.deleteService(serviceID, service.Spec.Detach); err != nil {
 				// If it fails to delete the external dependency here, return with the error
 				// so that it can be retried.
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &ctrl.Result{}
+				return lo.ToPtr(common.WaitForResources())
 			}
 
 			// If the deletion process started requeue so that we can make sure the service
@@ -707,6 +725,27 @@ func (r *ServiceDeploymentReconciler) addOrRemoveFinalizer(service *v1alpha1.Ser
 	}
 
 	return nil
+}
+
+func (r *ServiceDeploymentReconciler) getServiceIDForDeletion(ctx context.Context, service *v1alpha1.ServiceDeployment) (string, error) {
+	clusterID, err := r.getClusterID(ctx, service)
+	if err != nil {
+		return "", err
+	}
+
+	// get service by name
+	existingService, err := r.ConsoleClient.GetService(clusterID, service.ConsoleName())
+	if errors.IsNotFound(err) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	if existingService == nil {
+		return "", nil
+	}
+
+	return existingService.ID, nil
 }
 
 func (r *ServiceDeploymentReconciler) deleteService(id string, detach bool) error {
