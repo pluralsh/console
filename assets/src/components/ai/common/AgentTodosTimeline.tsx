@@ -47,7 +47,7 @@ export function AgentTodosTimeline({
                 <NodeSC>
                   {todo.done ? (
                     <CheckOutlineIcon
-                      color={colors['icon-light']}
+                      color={colors['icon-success']}
                       size={16}
                     />
                   ) : isActivePending ? (

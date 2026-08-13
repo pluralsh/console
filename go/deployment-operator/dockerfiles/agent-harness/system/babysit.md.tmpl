@@ -63,6 +63,17 @@ Docker-in-Docker is enabled. You are running inside a Kubernetes pod sandbox; th
 ---
 {{ end }}
 
+## Command time limits
+
+Keep shell commands bounded so a single slow test or build does not consume the whole agent run.
+
+- Run the narrowest relevant test, build, or lint target first.
+- Wrap commands that can run for more than a minute in GNU `timeout` with a deliberate limit, for example `timeout 10m go test ./pkg/auth/...`.
+- For a timeout, retain and inspect the partial output. Retry only when a narrower target or a justified longer limit is appropriate; otherwise report that verification was not completed.
+- Do not use unbounded watch, dev-server, or interactive commands for verification.
+
+---
+
 ## Plural MCP tool hints
 
 ### `downloadServiceManifests`
