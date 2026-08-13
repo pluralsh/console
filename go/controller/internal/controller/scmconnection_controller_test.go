@@ -460,11 +460,11 @@ var _ = Describe("SCM Connection Secret reconciliation", Ordered, func() {
 
 	It("maps a shared Secret annotation to every SCM connection", func() {
 		secretKey := types.NamespacedName{Name: "scm-shared-secret", Namespace: namespace}
-		firstKey := types.NamespacedName{Name: "scm-shared-first", Namespace: namespace}
-		secondKey := types.NamespacedName{Name: "scm-shared-second", Namespace: namespace}
+		firstKey := types.NamespacedName{Name: "scm-shared-first"}
+		secondKey := types.NamespacedName{Name: "scm-shared-second"}
 		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretKey.Name, Namespace: secretKey.Namespace}}
-		first := &v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: firstKey.Name, Namespace: firstKey.Namespace}, Spec: v1alpha1.ScmConnectionSpec{Name: firstKey.Name, Type: gqlclient.ScmTypeGithub}}
-		second := &v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: secondKey.Name, Namespace: secondKey.Namespace}, Spec: v1alpha1.ScmConnectionSpec{Name: secondKey.Name, Type: gqlclient.ScmTypeGithub}}
+		first := &v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: firstKey.Name}, Spec: v1alpha1.ScmConnectionSpec{Name: firstKey.Name, Type: gqlclient.ScmTypeGithub}}
+		second := &v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: secondKey.Name}, Spec: v1alpha1.ScmConnectionSpec{Name: secondKey.Name, Type: gqlclient.ScmTypeGithub}}
 		Expect(k8sClient.Create(ctx, secret)).To(Succeed())
 		Expect(k8sClient.Create(ctx, first)).To(Succeed())
 		Expect(k8sClient.Create(ctx, second)).To(Succeed())
