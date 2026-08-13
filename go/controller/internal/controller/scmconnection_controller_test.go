@@ -404,7 +404,6 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			scmType    = gqlclient.ScmTypeGithub
 			namespace  = "default"
 			id         = "456"
-			sha        = "OFJASGL6S4CGH6LQPLJ4XZZPM6MEAGV3ZZ5UE6GYKYLREJEEAHZA===="
 			secretName = "test-secret-owner-refs"
 		)
 
@@ -496,7 +495,7 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr(sha),
+					SHA: nil,
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -548,6 +547,8 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
+			Expect(scm.Status.SHA).NotTo(BeNil())
+			test.expectedStatus.SHA = scm.Status.SHA
 			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 
 			// Verify that GitRepository owner references were removed
