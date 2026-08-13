@@ -28,8 +28,7 @@ type CustomHealthSpec struct {
 	// The script must assign a Lua table to the global `healthStatus`; a Lua `return { ... }` is not consumed.
 	// The table uses `status` and an optional `message`, for example: `healthStatus = { status = "Healthy", message = "resource is ready" }`.
 	//
-	// Supported/intended status values are `Healthy` (console Running), `Degraded` (console Failed), `Paused`
-	// (console Paused), and `Unknown`, `Progressing`, `Suspended`, or `Missing` (console Pending).
+	// Supported/intended status values are `Healthy`, `Degraded`, `Paused`, `Unknown`, `Progressing`, `Suspended`, and `Missing`.
 	//
 	// See https://docs.plural.sh/plural-features/continuous-deployment/deployment-operator/custom-health for the full guide.
 	Script string `json:"script,omitempty"`

@@ -585,7 +585,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `script` _string_ | Script is a Lua health-assessment script. The target resource is available as the global `Obj`.<br />The script must assign a Lua table to the global `healthStatus`; a Lua `return \{ ... \}` is not consumed.<br />The table uses `status` and an optional `message`, for example: `healthStatus = \{ status = "Healthy", message = "resource is ready" \}`.<br />Supported/intended status values are `Healthy` (console Running), `Degraded` (console Failed), `Paused`<br />(console Paused), and `Unknown`, `Progressing`, `Suspended`, or `Missing` (console Pending).<br />See https://docs.plural.sh/plural-features/continuous-deployment/deployment-operator/custom-health for the full guide. |  |  |
+| `script` _string_ | Script is a Lua health-assessment script. The target resource is available as the global `Obj`.<br />The script must assign a Lua table to the global `healthStatus`; a Lua `return \{ ... \}` is not consumed.<br />The table uses `status` and an optional `message`, for example: `healthStatus = \{ status = "Healthy", message = "resource is ready" \}`.<br />Supported/intended status values are `Healthy`, `Degraded`, `Paused`, `Unknown`, `Progressing`, `Suspended`, and `Missing`.<br />See https://docs.plural.sh/plural-features/continuous-deployment/deployment-operator/custom-health for the full guide. |  |  |
 | `group` _string_ |  |  | Optional: \{\} <br /> |
 | `version` _string_ |  |  | Optional: \{\} <br /> |
 | `kind` _string_ |  |  | Optional: \{\} <br /> |
