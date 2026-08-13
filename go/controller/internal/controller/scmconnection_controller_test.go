@@ -29,7 +29,6 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			scmType         = gqlclient.ScmTypeGithub
 			namespace       = "default"
 			id              = "123"
-			sha             = "6L2JPZZWD3FCA7SB7I2WXH2XTRJR5VID37X3RVIZ2NSKYKOSGLGQ===="
 			secretName      = "test-secret"
 			readonlyScmName = "readonly-scm-connection"
 			readonlyScmID   = "readonly"
@@ -124,7 +123,7 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr(sha),
+					SHA: nil,
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -170,10 +169,13 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
+			Expect(scm.Status.SHA).NotTo(BeNil())
+			test.expectedStatus.SHA = scm.Status.SHA
 			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+
 		})
 
-		It("should successfully reconcile the resource on update", func() {
+		It("updates the managed SCM connection when the referenced Secret changes", func() {
 			By("Update resource")
 			test := struct {
 				returnGetScmConnection *gqlclient.ScmConnectionFragment
@@ -181,7 +183,7 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr(sha),
+					SHA: nil,
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -207,17 +209,18 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 				},
 			}
 
-			Expect(common.MaybePatch(k8sClient, &v1alpha1.ScmConnection{
-				ObjectMeta: metav1.ObjectMeta{Name: scmName, Namespace: namespace},
-			}, func(p *v1alpha1.ScmConnection) {
-				p.Status.ID = lo.ToPtr(id)
-				p.Status.SHA = lo.ToPtr("ABC")
-			})).To(Succeed())
+			scmBeforeSecretChange := &v1alpha1.ScmConnection{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, scmBeforeSecretChange)).To(Succeed())
+			Expect(scmBeforeSecretChange.Status.SHA).NotTo(BeNil())
+
+			secret := &corev1.Secret{}
+			Expect(k8sClient.Get(ctx, secretNamespacedName, secret)).To(Succeed())
+			secret.Data["token"] = []byte("rotated-token")
+			Expect(k8sClient.Update(ctx, secret)).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetScmConnectionByName", mock.Anything, mock.Anything).Return(test.returnGetScmConnection, nil)
 			fakeConsoleClient.On("IsScmConnectionExists", mock.Anything, mock.Anything).Return(true, nil).Once()
-			fakeConsoleClient.On("UpdateScmConnection", mock.Anything, mock.Anything, mock.Anything).Return(test.returnGetScmConnection, nil)
+			fakeConsoleClient.On("UpdateScmConnection", mock.Anything, mock.Anything, mock.Anything).Return(test.returnGetScmConnection, nil).Once()
 			serviceReconciler := &controller.ScmConnectionReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
@@ -234,6 +237,9 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
+			Expect(scm.Status.SHA).NotTo(BeNil())
+			Expect(*scm.Status.SHA).NotTo(Equal(*scmBeforeSecretChange.Status.SHA))
+			test.expectedStatus.SHA = scm.Status.SHA
 			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
@@ -398,7 +404,6 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			scmType    = gqlclient.ScmTypeGithub
 			namespace  = "default"
 			id         = "456"
-			sha        = "OFJASGL6S4CGH6LQPLJ4XZZPM6MEAGV3ZZ5UE6GYKYLREJEEAHZA===="
 			secretName = "test-secret-owner-refs"
 		)
 
@@ -490,7 +495,7 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr(sha),
+					SHA: nil,
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -542,6 +547,8 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
+			Expect(scm.Status.SHA).NotTo(BeNil())
+			test.expectedStatus.SHA = scm.Status.SHA
 			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 
 			// Verify that GitRepository owner references were removed

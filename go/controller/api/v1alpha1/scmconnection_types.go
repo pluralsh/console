@@ -103,13 +103,39 @@ func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client
 	return attr, nil
 }
 
-func (s *ScmConnection) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(s.Spec)
+func (s *ScmConnection) Diff(hasher Hasher, tokenSecret *corev1.Secret) (changed bool, sha string, err error) {
+	if tokenSecret == nil {
+		return false, "", fmt.Errorf("token secret is nil")
+	}
+
+	currentSha, err := hasher(scmConnectionDesiredState{
+		Spec: s.Spec,
+		TokenSecret: scmConnectionTokenSecretState{
+			Name:      tokenSecret.Name,
+			Namespace: tokenSecret.Namespace,
+			Type:      tokenSecret.Type,
+			Immutable: tokenSecret.Immutable,
+			Data:      tokenSecret.Data,
+		},
+	})
 	if err != nil {
 		return false, "", err
 	}
 
 	return !s.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
+type scmConnectionDesiredState struct {
+	Spec        ScmConnectionSpec             `json:"spec"`
+	TokenSecret scmConnectionTokenSecretState `json:"tokenSecret"`
+}
+
+type scmConnectionTokenSecretState struct {
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Type      corev1.SecretType `json:"type"`
+	Immutable *bool             `json:"immutable,omitempty"`
+	Data      map[string][]byte `json:"data"`
 }
 
 func (s *ScmConnection) SetCondition(condition metav1.Condition) {

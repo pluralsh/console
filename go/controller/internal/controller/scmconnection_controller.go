@@ -117,7 +117,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	}
 
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
-	changed, sha, err := scm.Diff(utils.HashObject)
+	changed, sha, err := scm.Diff(utils.HashObject, secret)
 	if err != nil {
 		logger.Error(err, "unable to calculate scm SHA")
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
