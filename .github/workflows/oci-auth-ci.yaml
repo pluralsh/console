@@ -20,7 +20,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -35,7 +35,7 @@ jobs:
       - run: PATH=$PATH:$GOPATH/bin make build
   unit-test:
     name: Unit tests
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
