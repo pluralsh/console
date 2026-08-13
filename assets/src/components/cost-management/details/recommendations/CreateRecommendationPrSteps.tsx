@@ -8,6 +8,7 @@ import {
   Markdown,
   PrOpenIcon,
   Table,
+  WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { AiStream } from 'components/ai/chatbot/AISuggestFix'
 import { PRA_DOCS_URL } from 'components/self-service/pr/automations/PrAutomations'
@@ -36,9 +37,11 @@ import { MethodType } from './CreateRecommendationPrModal'
 export function SelectPrTypeStep({
   type,
   setType,
+  hasWorkbenches = false,
 }: {
   type: MethodType
   setType: (type: MethodType) => void
+  hasWorkbenches?: boolean
 }) {
   return (
     <Flex gap="medium">
@@ -55,19 +58,35 @@ export function SelectPrTypeStep({
           second="Choose from a list of filtered PR automations to optimize costs."
         />
       </PrTypeCardSC>
-      <PrTypeCardSC
-        clickable
-        $selected={type === 'aiGen'}
-        onClick={() => setType('aiGen')}
-      >
-        <AiSparkleFilledIcon size={24} />
-        <StackedText
-          first="AI-generated PR"
-          firstPartialType="body2Bold"
-          firstColor="text"
-          second="Preview and create an AI-generated PR to optimize costs."
-        />
-      </PrTypeCardSC>
+      {hasWorkbenches ? (
+        <PrTypeCardSC
+          clickable
+          $selected={type === 'workbench'}
+          onClick={() => setType('workbench')}
+        >
+          <WorkbenchIcon size={24} />
+          <StackedText
+            first="Send recommendation to workbench"
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="Ask a workbench to validate and apply this cost recommendation."
+          />
+        </PrTypeCardSC>
+      ) : (
+        <PrTypeCardSC
+          clickable
+          $selected={type === 'aiGen'}
+          onClick={() => setType('aiGen')}
+        >
+          <AiSparkleFilledIcon size={24} />
+          <StackedText
+            first="AI-generated PR"
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="Preview and create an AI-generated PR to optimize costs."
+          />
+        </PrTypeCardSC>
+      )}
     </Flex>
   )
 }

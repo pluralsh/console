@@ -56,10 +56,30 @@ export function SendInsightToWorkbenchButton({
   insight: Nullable<AiInsightFragment>
   flowId?: Nullable<string>
 } & ButtonProps) {
-  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions(
-    flowId,
-    !!insight?.id
+  if (!insight?.id) return null
+
+  return (
+    <SendToWorkbenchButton
+      initialPrompt={buildInsightWorkbenchPrompt(insight)}
+      popoverTitle="Send insights to workbench"
+      flowId={flowId}
+      {...props}
+    />
   )
+}
+
+export function SendToWorkbenchButton({
+  flowId,
+  initialPrompt,
+  popoverTitle = 'Send to workbench',
+  ...props
+}: {
+  flowId?: Nullable<string>
+  initialPrompt: string
+  popoverTitle?: string
+} & ButtonProps) {
+  const { hasWorkbenches, loading: workbenchesLoading } =
+    useWorkbenchOptions(flowId)
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   const [promptKey, setPromptKey] = useState(0)
@@ -98,7 +118,7 @@ export function SendInsightToWorkbenchButton({
   const openPopover = () => {
     setOpen((value) => {
       if (!value) {
-        setPrompt(buildInsightWorkbenchPrompt(insight))
+        setPrompt(initialPrompt)
         setPromptKey((key) => key + 1)
         setWorkbenchJob(null)
       }
@@ -106,7 +126,7 @@ export function SendInsightToWorkbenchButton({
     })
   }
 
-  if (!insight?.id || workbenchesLoading || !hasWorkbenches) return null
+  if (workbenchesLoading || !hasWorkbenches) return null
 
   return (
     <>
@@ -152,9 +172,7 @@ export function SendInsightToWorkbenchButton({
                       type="tertiary"
                       icon={<WorkbenchIcon />}
                     />
-                    <Body1P $color="text-light">
-                      Send insights to workbench
-                    </Body1P>
+                    <Body1P $color="text-light">{popoverTitle}</Body1P>
                   </Flex>
                   <IconFrame
                     clickable
@@ -172,7 +190,7 @@ export function SendInsightToWorkbenchButton({
                     workbenchId={workbenchJob.workbench?.id ?? ''}
                   />
                 ) : (
-                  <SendInsightForm
+                  <SendToWorkbenchForm
                     flowId={flowId}
                     prompt={prompt}
                     promptKey={promptKey}
@@ -189,7 +207,7 @@ export function SendInsightToWorkbenchButton({
   )
 }
 
-function SendInsightForm({
+export function SendToWorkbenchForm({
   flowId,
   prompt,
   promptKey,

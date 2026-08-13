@@ -184,6 +184,7 @@ query ClusterUsageScalingRecommendations(
     cluster {
       id
       name
+      distro
     }
     recommendations(
       after: $after
