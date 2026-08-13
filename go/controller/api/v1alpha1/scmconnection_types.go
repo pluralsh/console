@@ -38,7 +38,7 @@ type ScmConnection struct {
 	// +kubebuilder:validation:Required
 	Spec ScmConnectionSpec `json:"spec"`
 	// +kubebuilder:validation:Optional
-	Status Status `json:"status,omitempty"`
+	Status ScmConnectionStatus `json:"status,omitempty"`
 }
 
 // ConsoleID implements PluralResource interface
@@ -49,6 +49,22 @@ func (s *ScmConnection) ConsoleID() *string {
 // ConsoleName implements PluralResource interface
 func (s *ScmConnection) ConsoleName() string {
 	return s.Spec.Name
+}
+
+// ScmConnectionStatus defines the observed state of ScmConnection.
+type ScmConnectionStatus struct {
+	Status `json:",inline"`
+	// AppliedTokenSecretRef records the identity and resource version of the token Secret last applied to Console.
+	// It intentionally excludes Secret data and any token-derived values.
+	// +kubebuilder:validation:Optional
+	AppliedTokenSecretRef *AppliedSecretReference `json:"appliedTokenSecretRef,omitempty"`
+}
+
+// AppliedSecretReference identifies a Secret version safely, without exposing Secret data.
+type AppliedSecretReference struct {
+	Name            string `json:"name"`
+	Namespace       string `json:"namespace"`
+	ResourceVersion string `json:"resourceVersion"`
 }
 
 func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client, token *string) (*console.ScmConnectionAttributes, error) {

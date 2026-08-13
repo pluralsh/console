@@ -12,6 +12,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	gqlclient "github.com/pluralsh/console/go/client"
@@ -20,6 +21,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/controller"
 	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 var _ = Describe("SCM Connection Controller", Ordered, func() {
@@ -170,7 +172,7 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(scm.Status.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 		It("should successfully reconcile the resource on update", func() {
@@ -234,7 +236,7 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(scm.Status.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 		It("should successfully reconcile the resource", func() {
@@ -329,7 +331,7 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, readonlyTypeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(scm.Status.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 		It("should successfully reconcile readonly resource", func() {
@@ -386,8 +388,133 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, readonlyTypeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(scm.Status.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
+	})
+})
+
+var _ = Describe("SCM Connection Secret reconciliation", Ordered, func() {
+	const namespace = "default"
+
+	ctx := context.Background()
+
+	It("updates an external SCM connection after its token Secret rotates", func() {
+		secretKey := types.NamespacedName{Name: "scm-secret-rotation", Namespace: namespace}
+		scmKey := types.NamespacedName{Name: "scm-secret-rotation", Namespace: namespace}
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{Name: secretKey.Name, Namespace: secretKey.Namespace},
+			StringData: map[string]string{"token": "v1"},
+		}
+		scm := &v1alpha1.ScmConnection{
+			ObjectMeta: metav1.ObjectMeta{Name: scmKey.Name, Namespace: scmKey.Namespace},
+			Spec: v1alpha1.ScmConnectionSpec{
+				Name:           scmKey.Name,
+				Type:           gqlclient.ScmTypeGithub,
+				TokenSecretRef: &corev1.SecretReference{Name: secretKey.Name, Namespace: secretKey.Namespace},
+			},
+		}
+		Expect(k8sClient.Create(ctx, secret)).To(Succeed())
+		Expect(k8sClient.Create(ctx, scm)).To(Succeed())
+		DeferCleanup(func() {
+			for _, object := range []client.Object{&v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: scmKey.Name, Namespace: scmKey.Namespace}}, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretKey.Name, Namespace: secretKey.Namespace}}} {
+				Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, object))).To(Succeed())
+			}
+		})
+
+		connection := &gqlclient.ScmConnectionFragment{ID: "external-scm", Name: scmKey.Name}
+		firstClient := mocks.NewConsoleClientMock(mocks.TestingT)
+		firstClient.On("GetScmConnectionByName", mock.Anything, scmKey.Name).Return(connection, nil).Once()
+		firstClient.On("IsScmConnectionExists", mock.Anything, scmKey.Name).Return(true, nil).Once()
+		firstClient.On("GetScmConnectionByName", mock.Anything, scmKey.Name).Return(connection, nil).Once()
+		firstClient.On("UpdateScmConnection", mock.Anything, connection.ID, mock.MatchedBy(func(attr gqlclient.ScmConnectionAttributes) bool {
+			return attr.Token != nil && *attr.Token == "v1"
+		})).Return(connection, nil).Once()
+		firstReconciler := &controller.ScmConnectionReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: firstClient}
+		_, err := firstReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: scmKey})
+		Expect(err).NotTo(HaveOccurred())
+		firstClient.AssertExpectations(GinkgoT())
+
+		updatedScm := &v1alpha1.ScmConnection{}
+		Expect(k8sClient.Get(ctx, scmKey, updatedScm)).To(Succeed())
+		Expect(updatedScm.Status.AppliedTokenSecretRef).NotTo(BeNil())
+		Expect(updatedScm.Status.AppliedTokenSecretRef.Name).To(Equal(secretKey.Name))
+		Expect(updatedScm.Status.AppliedTokenSecretRef.Namespace).To(Equal(secretKey.Namespace))
+		Expect(updatedScm.Status.AppliedTokenSecretRef.ResourceVersion).NotTo(BeEmpty())
+
+		updatedSecret := &corev1.Secret{}
+		Expect(k8sClient.Get(ctx, secretKey, updatedSecret)).To(Succeed())
+		updatedSecret.StringData = map[string]string{"token": "v2"}
+		Expect(k8sClient.Update(ctx, updatedSecret)).To(Succeed())
+
+		secondClient := mocks.NewConsoleClientMock(mocks.TestingT)
+		secondClient.On("IsScmConnectionExists", mock.Anything, scmKey.Name).Return(true, nil).Once()
+		secondClient.On("GetScmConnectionByName", mock.Anything, scmKey.Name).Return(connection, nil).Once()
+		secondClient.On("UpdateScmConnection", mock.Anything, connection.ID, mock.MatchedBy(func(attr gqlclient.ScmConnectionAttributes) bool {
+			return attr.Token != nil && *attr.Token == "v2"
+		})).Return(connection, nil).Once()
+		secondReconciler := &controller.ScmConnectionReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: secondClient}
+		_, err = secondReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: scmKey})
+		Expect(err).NotTo(HaveOccurred())
+		secondClient.AssertExpectations(GinkgoT())
+	})
+
+	It("maps a shared Secret annotation to every SCM connection", func() {
+		secretKey := types.NamespacedName{Name: "scm-shared-secret", Namespace: namespace}
+		firstKey := types.NamespacedName{Name: "scm-shared-first", Namespace: namespace}
+		secondKey := types.NamespacedName{Name: "scm-shared-second", Namespace: namespace}
+		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretKey.Name, Namespace: secretKey.Namespace}}
+		first := &v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: firstKey.Name, Namespace: firstKey.Namespace}, Spec: v1alpha1.ScmConnectionSpec{Name: firstKey.Name, Type: gqlclient.ScmTypeGithub}}
+		second := &v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: secondKey.Name, Namespace: secondKey.Namespace}, Spec: v1alpha1.ScmConnectionSpec{Name: secondKey.Name, Type: gqlclient.ScmTypeGithub}}
+		Expect(k8sClient.Create(ctx, secret)).To(Succeed())
+		Expect(k8sClient.Create(ctx, first)).To(Succeed())
+		Expect(k8sClient.Create(ctx, second)).To(Succeed())
+		DeferCleanup(func() {
+			for _, object := range []client.Object{first, second, secret} {
+				Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, object))).To(Succeed())
+			}
+		})
+
+		Expect(utils.AddOwnerRefAnnotation(ctx, k8sClient, first, secret)).To(Succeed())
+		Expect(utils.AddOwnerRefAnnotation(ctx, k8sClient, second, secret)).To(Succeed())
+		updatedSecret := &corev1.Secret{}
+		Expect(k8sClient.Get(ctx, secretKey, updatedSecret)).To(Succeed())
+		Expect(utils.GetOwnerRefsAnnotationRequests(ctx, k8sClient, updatedSecret, new(v1alpha1.ScmConnection))).To(ConsistOf(
+			reconcile.Request{NamespacedName: firstKey},
+			reconcile.Request{NamespacedName: secondKey},
+		))
+	})
+
+	It("does not add an SCMConnection owner reference to a referenced Secret", func() {
+		secretKey := types.NamespacedName{Name: "scm-no-owner-reference", Namespace: namespace}
+		scmKey := types.NamespacedName{Name: "scm-no-owner-reference", Namespace: namespace}
+		secret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretKey.Name, Namespace: secretKey.Namespace}, StringData: map[string]string{"token": "token"}}
+		scm := &v1alpha1.ScmConnection{
+			ObjectMeta: metav1.ObjectMeta{Name: scmKey.Name, Namespace: scmKey.Namespace},
+			Spec:       v1alpha1.ScmConnectionSpec{Name: scmKey.Name, Type: gqlclient.ScmTypeGithub, TokenSecretRef: &corev1.SecretReference{Name: secretKey.Name, Namespace: secretKey.Namespace}},
+		}
+		Expect(k8sClient.Create(ctx, secret)).To(Succeed())
+		Expect(k8sClient.Create(ctx, scm)).To(Succeed())
+		DeferCleanup(func() {
+			for _, object := range []client.Object{&v1alpha1.ScmConnection{ObjectMeta: metav1.ObjectMeta{Name: scmKey.Name, Namespace: scmKey.Namespace}}, &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretKey.Name, Namespace: secretKey.Namespace}}} {
+				Expect(client.IgnoreNotFound(k8sClient.Delete(ctx, object))).To(Succeed())
+			}
+		})
+
+		consoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+		consoleClient.On("GetScmConnectionByName", mock.Anything, scmKey.Name).Return(nil, errors.NewNotFound(schema.GroupResource{}, scmKey.Name)).Once()
+		consoleClient.On("IsScmConnectionExists", mock.Anything, scmKey.Name).Return(false, nil).Once()
+		consoleClient.On("CreateScmConnection", mock.Anything, mock.Anything).Return(&gqlclient.ScmConnectionFragment{ID: "managed-scm"}, nil).Once()
+		reconciler := &controller.ScmConnectionReconciler{Client: k8sClient, Scheme: k8sClient.Scheme(), ConsoleClient: consoleClient}
+		_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: scmKey})
+		Expect(err).NotTo(HaveOccurred())
+		consoleClient.AssertExpectations(GinkgoT())
+
+		updatedSecret := &corev1.Secret{}
+		Expect(k8sClient.Get(ctx, secretKey, updatedSecret)).To(Succeed())
+		for _, ownerReference := range updatedSecret.OwnerReferences {
+			Expect(ownerReference.Kind).NotTo(Equal("ScmConnection"))
+		}
+		Expect(updatedSecret.OwnerReferences).To(BeEmpty())
 	})
 })
 
@@ -542,7 +669,7 @@ var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(scm.Status.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 
 			// Verify that GitRepository owner references were removed
 			ownerRefs := scm.GetOwnerReferences()
@@ -660,7 +787,7 @@ var _ = Describe("waiting for Secret", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(common.SanitizeStatusConditions(scm.Status.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 	})

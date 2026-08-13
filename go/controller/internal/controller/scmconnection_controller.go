@@ -81,6 +81,26 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return *result, err
 	}
 
+	secret, err := r.getTokenSecret(ctx, scm)
+	if err != nil {
+		return common.HandleRequeue(nil, err, scm.SetCondition)
+	}
+	if secret != nil {
+		// Remove only legacy Kubernetes owner references. User-provided Secrets are never owned by SCMConnections,
+		// because they can be shared and must not be garbage-collected with a connection.
+		if err := utils.TryRemoveOwnerRef(ctx, r.Client, scm, secret, r.Scheme); err != nil {
+			return common.HandleRequeue(nil, err, scm.SetCondition)
+		}
+
+		// Keep the legacy association while migrating to the multi-owner annotation.
+		if err := common.TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil { //nolint:staticcheck
+			return common.HandleRequeue(nil, err, scm.SetCondition)
+		}
+		if err := utils.AddOwnerRefAnnotation(ctx, r.Client, scm, secret); err != nil {
+			return common.HandleRequeue(nil, err, scm.SetCondition)
+		}
+	}
+
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, scm)
 	if err != nil {
@@ -90,7 +110,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if exists {
 		logger.V(9).Info("ScmConnection already exists in the API, running in read-only mode")
 		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExistingScmConnection(ctx, scm)
+		return r.handleExistingScmConnection(ctx, scm, secret, r.tokenSecretRefChanged(scm, secret))
 	}
 	if r.shouldMarkAsReadonly(scm) {
 		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
@@ -101,21 +121,6 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
-	if err != nil {
-		return common.HandleRequeue(nil, err, scm.SetCondition)
-	}
-
-	// This is just a temporary cleanup step to remove the owner reference from the secret.
-	// We can probably remove this in the future.
-	if err := utils.TryRemoveOwnerRef(ctx, r.Client, scm, secret, r.Scheme); err != nil {
-		return common.HandleRequeue(nil, err, scm.SetCondition)
-	}
-
-	if err := common.TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil { //nolint:staticcheck
-		return common.HandleRequeue(nil, err, scm.SetCondition)
-	}
-
 	// Get ScmConnection SHA that can be saved back in the status to check for changes
 	changed, sha, err := scm.Diff(utils.HashObject)
 	if err != nil {
@@ -125,13 +130,14 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	}
 
 	// Sync ScmConnection CRD with the Console API
-	apiScmConnection, err := r.sync(ctx, scm, changed)
+	apiScmConnection, err := r.sync(ctx, scm, secret, changed || r.tokenSecretRefChanged(scm, secret))
 	if err != nil {
 		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
 	scm.Status.ID = &apiScmConnection.ID
 	scm.Status.SHA = &sha
+	scm.Status.AppliedTokenSecretRef = appliedSecretReference(secret)
 
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
@@ -139,7 +145,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	return scm.Spec.Reconciliation.Requeue(), nil
 }
 
-func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection) (reconcile.Result, error) {
+func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection, secret *corev1.Secret, tokenSecretRefChanged bool) (reconcile.Result, error) {
 	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
 	if err != nil {
 		return common.HandleRequeue(nil, err, scm.SetCondition)
@@ -155,18 +161,20 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
-	// Default field should also be editable even if the resource is in the read-only mode.
-	if scm.Spec.Default != nil {
-		if apiScmConnection, err = r.ConsoleClient.UpdateScmConnection(ctx, apiScmConnection.ID, console.ScmConnectionAttributes{
-			Name:    scm.ConsoleName(),
-			Type:    scm.Spec.Type,
-			Default: scm.Spec.Default,
-		}); err != nil {
+	// Default remains editable for external connections. A changed token Secret must also be applied even when
+	// the SCMConnection spec generation is unchanged.
+	if scm.Spec.Default != nil || tokenSecretRefChanged {
+		attr, err := r.attributes(ctx, scm, secret)
+		if err != nil {
+			return common.HandleRequeue(nil, err, scm.SetCondition)
+		}
+		if apiScmConnection, err = r.ConsoleClient.UpdateScmConnection(ctx, apiScmConnection.ID, *attr); err != nil {
 			return common.HandleRequeue(nil, err, scm.SetCondition)
 		}
 	}
 
 	scm.Status.ID = &apiScmConnection.ID
+	scm.Status.AppliedTokenSecretRef = appliedSecretReference(secret)
 
 	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
@@ -231,20 +239,15 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 	return nil, nil
 }
 
-func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, changed bool) (*console.ScmConnectionFragment, error) {
+func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, secret *corev1.Secret, changed bool) (*console.ScmConnectionFragment, error) {
 	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
-	if err != nil {
-		return nil, err
-	}
-
-	token, err := r.getTokenFromSecret(ctx, scm)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update only if ScmConnection has changed
 	if changed && exists {
-		attr, err := scm.Attributes(ctx, r.Client, token)
+		attr, err := r.attributes(ctx, scm, secret)
 		if err != nil {
 			return nil, err
 		}
@@ -257,29 +260,53 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 	}
 
 	// Create the ScmConnection in Console API if it doesn't exist
-	attr, err := scm.Attributes(ctx, r.Client, token)
+	attr, err := r.attributes(ctx, scm, secret)
 	if err != nil {
 		return nil, err
 	}
 	return r.ConsoleClient.CreateScmConnection(ctx, *attr)
 }
 
-func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (*string, error) {
+func (r *ScmConnectionReconciler) getTokenSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (*corev1.Secret, error) {
 	if scm.Spec.TokenSecretRef == nil {
 		return nil, nil
 	}
-	const tokenKeyName = "token"
 
-	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
-	if err != nil {
-		return nil, err
+	return utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
+}
+
+func (r *ScmConnectionReconciler) attributes(ctx context.Context, scm *v1alpha1.ScmConnection, secret *corev1.Secret) (*console.ScmConnectionAttributes, error) {
+	var token *string
+	if secret != nil {
+		secretToken, exists := secret.Data["token"]
+		if !exists {
+			return nil, fmt.Errorf("%q key does not exist in referenced credential secret", "token")
+		}
+		token = lo.ToPtr(string(secretToken))
 	}
 
-	token, exists := secret.Data[tokenKeyName]
-	if !exists {
-		return nil, fmt.Errorf("%q key does not exist in referenced credential secret", tokenKeyName)
+	return scm.Attributes(ctx, r.Client, token)
+}
+
+func (r *ScmConnectionReconciler) tokenSecretRefChanged(scm *v1alpha1.ScmConnection, secret *corev1.Secret) bool {
+	applied := scm.Status.AppliedTokenSecretRef
+	if secret == nil {
+		return applied != nil
 	}
-	return lo.ToPtr(string(token)), nil
+
+	return applied == nil || applied.Name != secret.Name || applied.Namespace != secret.Namespace || applied.ResourceVersion != secret.ResourceVersion
+}
+
+func appliedSecretReference(secret *corev1.Secret) *v1alpha1.AppliedSecretReference {
+	if secret == nil {
+		return nil
+	}
+
+	return &v1alpha1.AppliedSecretReference{
+		Name:            secret.Name,
+		Namespace:       secret.Namespace,
+		ResourceVersion: secret.ResourceVersion,
+	}
 }
 
 func (r *ScmConnectionReconciler) shouldMarkAsReadonly(scm *v1alpha1.ScmConnection) bool {
@@ -298,5 +325,6 @@ func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Watches(&corev1.Secret{}, common.OwnedByEventHandler(&metav1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})). //nolint:staticcheck
+		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.ScmConnection))).
 		Complete(r)
 }
