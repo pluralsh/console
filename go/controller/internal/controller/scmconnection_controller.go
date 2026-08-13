@@ -81,12 +81,11 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return *result, err
 	}
 
-	if scm.Spec.TokenSecretRef != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-	}
-
 	secret, err := r.getTokenSecret(ctx, scm)
 	if err != nil {
+		if scm.Spec.TokenSecretRef != nil {
+			utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+		}
 		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 	if secret != nil {
