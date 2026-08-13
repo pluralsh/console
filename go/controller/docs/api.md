@@ -249,6 +249,24 @@ _Appears in:_
 | `deletePlaybook` _string_ | DeletePlaybook is the playbook to run when deleting the stack. |  | Optional: \{\} <br /> |
 
 
+#### AppliedSecretReference
+
+
+
+AppliedSecretReference identifies a Secret version safely, without exposing Secret data.
+
+
+
+_Appears in:_
+- [ScmConnectionStatus](#scmconnectionstatus)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  |  |
+| `namespace` _string_ |  |  |  |
+| `resourceVersion` _string_ |  |  |  |
+
+
 
 
 #### AzureCloudConnection
@@ -4348,6 +4366,8 @@ _Appears in:_
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
+
+
 #### ScmGithubConnection
 
 
@@ -5269,6 +5289,7 @@ _Appears in:_
 - [ClusterStatus](#clusterstatus)
 - [GeneratedSecretStatus](#generatedsecretstatus)
 - [GitRepositoryStatus](#gitrepositorystatus)
+- [ScmConnectionStatus](#scmconnectionstatus)
 - [ServiceStatus](#servicestatus)
 
 | Field | Description | Default | Validation |
