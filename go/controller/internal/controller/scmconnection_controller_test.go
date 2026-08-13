@@ -173,9 +173,6 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			test.expectedStatus.SHA = scm.Status.SHA
 			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 
-			secret := &corev1.Secret{}
-			Expect(k8sClient.Get(ctx, secretNamespacedName, secret)).To(Succeed())
-			Expect(secret.GetAnnotations()).NotTo(HaveKey("deployments.plural.sh/owned-by"))
 		})
 
 		It("updates the managed SCM connection when the referenced Secret changes", func() {

@@ -13,9 +13,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -39,7 +39,6 @@ const (
 	// ScmConnectionProtectionFinalizerName defines name for the main finalizer that synchronizes
 	// resource deletion from the Console API prior to removing the CRD.
 	ScmConnectionProtectionFinalizerName = "scmconnections.deployments.plural.sh/scmconnection-protection"
-	scmConnectionTokenSecretRefField     = "spec.tokenSecretRef"
 )
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=scmconnections,verbs=get;list;watch;create;update;patch;delete
@@ -107,8 +106,17 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
-	// Get ScmConnection SHA that can be saved back in the status to check for changes.
-	// The hash includes the resolved Secret so credential rotations trigger an API update.
+	// This is just a temporary cleanup step to remove the owner reference from the secret.
+	// We can probably remove this in the future.
+	if err := utils.TryRemoveOwnerRef(ctx, r.Client, scm, secret, r.Scheme); err != nil {
+		return common.HandleRequeue(nil, err, scm.SetCondition)
+	}
+
+	if err := common.TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil { //nolint:staticcheck
+		return common.HandleRequeue(nil, err, scm.SetCondition)
+	}
+
+	// Get ScmConnection SHA that can be saved back in the status to check for changes
 	changed, sha, err := scm.Diff(utils.HashObject, secret)
 	if err != nil {
 		logger.Error(err, "unable to calculate scm SHA")
@@ -278,56 +286,17 @@ func (r *ScmConnectionReconciler) shouldMarkAsReadonly(scm *v1alpha1.ScmConnecti
 	return scm.Spec.TokenSecretRef == nil
 }
 
-func scmConnectionTokenSecretRefIndex(obj client.Object) []string {
-	scm, ok := obj.(*v1alpha1.ScmConnection)
-	if !ok || scm.Spec.TokenSecretRef == nil {
-		return nil
-	}
-
-	return []string{scmConnectionSecretRefKey(scm.Spec.TokenSecretRef)}
-}
-
-func scmConnectionSecretRefKey(ref *corev1.SecretReference) string {
-	if ref == nil {
-		return ""
-	}
-
-	namespace := ref.Namespace
-	if namespace == "" {
-		namespace = "default"
-	}
-
-	return fmt.Sprintf("%s/%s", namespace, ref.Name)
-}
-
-func (r *ScmConnectionReconciler) requestsForSecret(ctx context.Context, secret client.Object) []reconcile.Request {
-	scmConnections := new(v1alpha1.ScmConnectionList)
-	secretRef := &corev1.SecretReference{Name: secret.GetName(), Namespace: secret.GetNamespace()}
-	if err := r.List(ctx, scmConnections, client.MatchingFields{
-		scmConnectionTokenSecretRefField: scmConnectionSecretRefKey(secretRef),
-	}); err != nil {
-		log.FromContext(ctx).Error(err, "failed to list SCM connections for Secret", "secret", secret.GetName(), "namespace", secret.GetNamespace())
-		return nil
-	}
-
-	requests := make([]reconcile.Request, 0, len(scmConnections.Items))
-	for _, scm := range scmConnections.Items {
-		requests = append(requests, reconcile.Request{NamespacedName: client.ObjectKeyFromObject(&scm)})
-	}
-
-	return requests
-}
-
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "scmconnection_reconciler")
-	if err := mgr.GetFieldIndexer().IndexField(context.Background(), &v1alpha1.ScmConnection{}, scmConnectionTokenSecretRefField, scmConnectionTokenSecretRefIndex); err != nil {
-		return fmt.Errorf("failed to index SCM connections by token Secret reference: %w", err)
+	gvk, err := apiutil.GVKForObject(&v1alpha1.ScmConnection{}, mgr.GetScheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GroupKind for ScmConnection: %w", err)
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Watches(&corev1.Secret{}, handler.EnqueueRequestsFromMapFunc(r.requestsForSecret)).
+		Watches(&corev1.Secret{}, common.OwnedByEventHandler(&metav1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})). //nolint:staticcheck
 		Complete(r)
 }
