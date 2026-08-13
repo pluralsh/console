@@ -72,6 +72,9 @@ type PRComment struct {
 	Author        string                 `protobuf:"bytes,3,opt,name=author,proto3" json:"author,omitempty"`
 	Body          string                 `protobuf:"bytes,4,opt,name=body,proto3" json:"body,omitempty"`
 	CreatedAtUnix int64                  `protobuf:"varint,5,opt,name=created_at_unix,json=createdAtUnix,proto3" json:"created_at_unix,omitempty"`
+	FilePath      string                 `protobuf:"bytes,6,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
+	StartLine     int32                  `protobuf:"varint,7,opt,name=start_line,json=startLine,proto3" json:"start_line,omitempty"`
+	Line          int32                  `protobuf:"varint,8,opt,name=line,proto3" json:"line,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -137,6 +140,27 @@ func (x *PRComment) GetBody() string {
 func (x *PRComment) GetCreatedAtUnix() int64 {
 	if x != nil {
 		return x.CreatedAtUnix
+	}
+	return 0
+}
+
+func (x *PRComment) GetFilePath() string {
+	if x != nil {
+		return x.FilePath
+	}
+	return ""
+}
+
+func (x *PRComment) GetStartLine() int32 {
+	if x != nil {
+		return x.StartLine
+	}
+	return 0
+}
+
+func (x *PRComment) GetLine() int32 {
+	if x != nil {
+		return x.Line
 	}
 	return 0
 }
@@ -343,13 +367,17 @@ const file_internal_proto_scm_scm_proto_rawDesc = "" +
 	"\n" +
 	"\x1cinternal/proto/scm/scm.proto\x12\ababysit\",\n" +
 	"\x13GetPRDetailsRequest\x12\x15\n" +
-	"\x06pr_url\x18\x01 \x01(\tR\x05prUrl\"\x83\x01\n" +
+	"\x06pr_url\x18\x01 \x01(\tR\x05prUrl\"\xd3\x01\n" +
 	"\tPRComment\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12\x16\n" +
 	"\x06author\x18\x03 \x01(\tR\x06author\x12\x12\n" +
 	"\x04body\x18\x04 \x01(\tR\x04body\x12&\n" +
-	"\x0fcreated_at_unix\x18\x05 \x01(\x03R\rcreatedAtUnix\"w\n" +
+	"\x0fcreated_at_unix\x18\x05 \x01(\x03R\rcreatedAtUnix\x12\x1b\n" +
+	"\tfile_path\x18\x06 \x01(\tR\bfilePath\x12\x1d\n" +
+	"\n" +
+	"start_line\x18\a \x01(\x05R\tstartLine\x12\x12\n" +
+	"\x04line\x18\b \x01(\x05R\x04line\"w\n" +
 	"\aCICheck\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1e\n" +

@@ -130,12 +130,21 @@ func (c *gitHubClient) allComments(ctx context.Context, owner, repo string, numb
 			return nil, fmt.Errorf("list review comments: %w", err)
 		}
 		for _, c := range batch {
+			line := c.GetLine()
+			if line == 0 {
+				// GitHub omits line when the comment's diff position is
+				// outdated; original_line still identifies the reviewed code.
+				line = c.GetOriginalLine()
+			}
 			all = append(all, PRComment{
 				ID:        strconv.FormatInt(c.GetID(), 10),
 				Type:      PRCommentTypeReview,
 				Author:    c.GetUser().GetLogin(),
 				Body:      c.GetBody(),
 				CreatedAt: c.GetCreatedAt().Time,
+				FilePath:  c.GetPath(),
+				StartLine: c.GetStartLine(),
+				Line:      line,
 			})
 		}
 		if resp.NextPage == 0 {

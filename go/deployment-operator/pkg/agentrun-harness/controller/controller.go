@@ -457,7 +457,9 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 
 	var sb strings.Builder
 	_, _ = fmt.Fprintf(&sb,
-		"Your pull requests have new activity since %s. Please take the following actions.\n\n",
+		"Your pull requests have new activity since %s. Act on the new comments and failures now.\n"+
+			"Every human-authored comment below is actionable unless it is clearly informational; prioritize it over resuming the original task. "+
+			"Consider bot and automated feedback too, but do not let it displace actionable human instructions.\n\n",
 		lastCheckedStr,
 	)
 
@@ -468,12 +470,16 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			sb.WriteString("### New or updated comments since last reprompt\n\n")
 			for _, c := range e.NewComments {
 				body := strings.ReplaceAll(c.Body, "\n", "\n  > ")
+				location := ""
+				if commentLocation := c.Location(); commentLocation != "" {
+					location = fmt.Sprintf(" on `%s`", commentLocation)
+				}
 				if c.Reactable() {
-					_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
-						c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+					_, _ = fmt.Fprintf(&sb, "- **%s**%s at %s (commentId: `%s`):\n  > %s\n\n",
+						c.Author, location, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
 				} else {
-					_, _ = fmt.Fprintf(&sb, "- **%s** at %s (reviewId: `%s`, not reactable):\n  > %s\n\n",
-						c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+					_, _ = fmt.Fprintf(&sb, "- **%s**%s at %s (reviewId: `%s`, not reactable):\n  > %s\n\n",
+						c.Author, location, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
 				}
 			}
 		} else {

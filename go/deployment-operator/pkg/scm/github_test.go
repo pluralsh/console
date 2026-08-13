@@ -29,6 +29,9 @@ func TestGitHubAllCommentsIncludesReviewSummaries(t *testing.T) {
 				"id": 22,
 				"user": {"login": "reviewer"},
 				"body": "inline review comment",
+				"path": "pkg/auth/session.go",
+				"start_line": 12,
+				"line": 14,
 				"created_at": "2026-01-01T00:01:00Z"
 			}]`)
 		case "/repos/o/r/pulls/1/reviews":
@@ -65,6 +68,7 @@ func TestGitHubAllCommentsIncludesReviewSummaries(t *testing.T) {
 	require.Equal(t, "issue comment", comments[0].Body)
 	require.Equal(t, PRCommentTypeReview, comments[1].Type)
 	require.Equal(t, "inline review comment", comments[1].Body)
+	require.Equal(t, "pkg/auth/session.go:12-14", comments[1].Location())
 	require.Equal(t, PRCommentTypeReviewSummary, comments[2].Type)
 	require.Equal(t, "bot-reviewer", comments[2].Author)
 	require.Equal(t, "summary review feedback", comments[2].Body)

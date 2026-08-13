@@ -75,7 +75,7 @@ var (
 	})
 	babysitAgent = agentJSON("babysit", agentDef{
 		Description: "Autonomous agent responding to pull request feedback. Commits to the existing PR branch. Does NOT create new PRs. Use PROACTIVELY.",
-		Prompt:      "You are an autonomous coding agent. Your pull request is already open. Address reviewer comments and fix CI failures, then commit to the existing branch.",
+		Prompt:      "You are an autonomous coding agent. Your pull request is already open. Treat every human-authored PR comment as actionable unless it is clearly informational, and prioritize it over resuming the original task. Consider bot feedback and CI failures too, then commit scoped fixes to the existing branch.",
 		Tools: appendTools(
 			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch"},
 			appendTools(babysitPluralMCPTools, codebaseMemoryMCPTools),

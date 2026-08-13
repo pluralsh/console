@@ -7,7 +7,9 @@ The cloned repository is at **`{{ .RepositoryDir }}`**. Do all code changes and 
 {{ if .Prompt }}
 ## Original task
 
-This section records the **original user prompt** for this agent run. It is embedded here so the overarching goal stays available throughout the session — including PR review feedback and follow-up reprompts, when the active user message focuses on incremental fixes rather than the full request. Always treat this as the primary objective; scope your changes to what is needed for the feedback without losing sight of the original goal.
+This section records the **original user prompt** for this agent run. It provides the broader context for this PR, including during review cycles and follow-up reprompts.
+
+New comments written by a human user are always actionable instructions within that context, even when they do not explicitly mention Plural, the agent, or the bot. Treat them as new work and prioritize them over continuing the initial task. First determine the requested outcome, then make the scoped changes needed to address it. Consider bot reviews and automated feedback too, but prioritize explicit user instructions when work competes.
 
 {{ .Prompt }}
 
@@ -42,9 +44,11 @@ The `codebase-memory-mcp` server is available for advanced code search and graph
   Call plural MCP `createCommit` to stage, commit and push your changes (it pushes to the current checked-out branch).
 - **One PR** — the PR already exists. Do **not** call plural MCP `agentPullRequest` again.
 - **Scope** — only change what is needed to satisfy the feedback. Do not refactor unrelated code.
-- **Comments directed at you** — any comment that mentions "Plural", "@plural", "the agent", or "the bot"
-  is an explicit instruction addressed to you. Treat it as a task.
-  Ignore back-and-forth between human reviewers unless they explicitly ask the agent to act.
+- **Human comments are tasks** — treat every human-authored comment as actionable unless it is clearly informational or a
+  discussion with no requested outcome. Do not require a mention of "Plural", "@plural", "the agent", or "the bot".
+  Do not ignore a human comment merely because it is part of a reviewer conversation.
+- **Bot and automated comments** — review them for valid, scoped change requests, but do not let them displace
+  actionable human instructions.
 - **React to comments** — use plural MCP `reactToComment` to acknowledge comments:
   - Call with `state='working'` the moment you begin addressing a comment.
   - Call with `state='complete'` after your fix is committed.
@@ -90,7 +94,8 @@ Use this tool whenever you need to inspect the actual Kubernetes manifests Plura
 ## 2. Workflow (strict order)
 
 1. **Fetch PR state** — call plural MCP `getPRState` to get the latest comments and CI results.
-2. **React working** — for each comment directed at you, call plural MCP `reactToComment` with `state='working'`.
+2. **Triage comments and react working** — identify actionable human comments first, then valid bot or automated
+   feedback. For each actionable reactable comment, call plural MCP `reactToComment` with `state='working'`.
 3. **Analyze** — inspect the relevant code sections to understand what needs to change.
    If a CI check is failing, call plural MCP `getCILogs` to read the full failure output.
 4. **Implement fixes** — address comments and fix CI failures one by one.
