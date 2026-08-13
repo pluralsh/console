@@ -475,8 +475,9 @@ var _ = Describe("SCM Connection Secret reconciliation", Ordered, func() {
 		})
 
 		Expect(utils.AddOwnerRefAnnotation(ctx, k8sClient, first, secret)).To(Succeed())
-		Expect(utils.AddOwnerRefAnnotation(ctx, k8sClient, second, secret)).To(Succeed())
 		updatedSecret := &corev1.Secret{}
+		Expect(k8sClient.Get(ctx, secretKey, updatedSecret)).To(Succeed())
+		Expect(utils.AddOwnerRefAnnotation(ctx, k8sClient, second, updatedSecret)).To(Succeed())
 		Expect(k8sClient.Get(ctx, secretKey, updatedSecret)).To(Succeed())
 		Expect(utils.GetOwnerRefsAnnotationRequests(ctx, k8sClient, updatedSecret, new(v1alpha1.ScmConnection))).To(ConsistOf(
 			reconcile.Request{NamespacedName: firstKey},
