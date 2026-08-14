@@ -1,11 +1,12 @@
 defmodule Console.AI.Tools.KubeShellCollector do
   use GenServer
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
+  alias Console.Kubernetes.PodExec
 
   defmodule State do
     @hint "consider reducing output via pipes or other techniques to avoid truncation"
 
-    defstruct [:activity, :callback_pid, :monitor_ref, seq: 0, stdo: []]
+    defstruct [:activity, :callback_pid, :monitor_ref, :exec_status, seq: 0, stdo: []]
 
     def result(%__MODULE__{stdo: stdo}) do
       Enum.reverse(stdo)
@@ -39,8 +40,18 @@ defmodule Console.AI.Tools.KubeShellCollector do
     {:reply, :ok, %{state | monitor_ref: ref}}
   end
 
-  def handle_info({:DOWN, ref, :process, _pid, _reason}, %State{callback_pid: callback_pid, monitor_ref: ref} = state) do
-    send(callback_pid, :exec_stream_closed)
+  def handle_info(
+    {:DOWN, ref, :process, _pid, reason},
+    %State{callback_pid: callback_pid, monitor_ref: ref, exec_status: status} = state
+  ) do
+    if is_nil(status) do
+      send(
+        callback_pid,
+        {:exec_stream_closed,
+         {:error, "exec stream closed before Kubernetes returned a completion status: #{inspect(reason)}"}}
+      )
+    end
+
     {:noreply, state}
   end
 
@@ -49,17 +60,17 @@ defmodule Console.AI.Tools.KubeShellCollector do
   end
 
   def handle_info({:exec_status, status}, %State{callback_pid: callback_pid} = state) do
-    send(callback_pid, {:exec_status, status})
-    {:noreply, state}
+    send(callback_pid, {:exec_status, PodExec.parse_exec_status(status)})
+    {:noreply, %{state | exec_status: status}}
   end
 
   def handle_info({:stream_closed, frame}, %State{callback_pid: callback_pid} = state) do
-    send(callback_pid, :exec_stream_closed)
+    send(callback_pid, {:exec_stream_closed, PodExec.parse_exec_status(frame)})
     {:noreply, emit(frame, state)}
   end
 
   def handle_info(:timeout, %State{callback_pid: callback_pid} = state) do
-    send(callback_pid, :exec_stream_closed)
+    send(callback_pid, {:exec_stream_closed, {:error, "exec stream timed out"}})
     {:noreply, state}
   end
 
@@ -118,7 +129,7 @@ defmodule Console.AI.Tools.Workbench.KubeShell do
       }, user) do
     cluster = Clusters.get_cluster_by_handle(handle)
     server = Clusters.control_plane(cluster, user)
-    url = PodExec.exec_url(ns, p, ct, command: command, stdin: false)
+    url = PodExec.exec_url(ns, p, ct, command: command, stdin: false, tty: false)
     with {:ok, pid} <- KubeShellCollector.start(callback_pid: self(), activity: activity),
          {:ok, shell_pid} <- PodExec.start(url, pid, server) do
       KubeShellCollector.monitor(pid, shell_pid)
@@ -139,8 +150,8 @@ defmodule Console.AI.Tools.Workbench.KubeShell do
 
   defp wait_for_result() do
     receive do
-      {:exec_status, status} -> PodExec.parse_exec_status(status)
-      :exec_stream_closed -> :ok
+      {:exec_status, result} -> result
+      {:exec_stream_closed, result} -> result
     after
       @timeout -> {:error, "shell command timed out after 30 minutes"}
     end
