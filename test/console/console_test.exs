@@ -9,6 +9,22 @@ defmodule ConsoleTest do
     end
   end
 
+  describe "#format_duration/1" do
+    test "formats zero seconds" do
+      assert Console.format_duration(0) == "0s"
+    end
+
+    test "preserves non-zero units below the largest unit" do
+      assert Console.format_duration(61) == "1m1s"
+      assert Console.format_duration(3_661) == "1h1m1s"
+      assert Console.format_duration(90_061) == "1d1h1m1s"
+    end
+
+    test "accepts the float seconds returned by Timex durations" do
+      assert Console.format_duration(90.0) == "1m30s"
+    end
+  end
+
   describe "#put_path/3" do
     test "it can deep insert a value into a nested map" do
       map = %{

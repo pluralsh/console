@@ -55,6 +55,12 @@ defmodule Console.Kubernetes.PodExecTest do
 
       assert {"stdin", "false"} in query_pairs(url)
     end
+
+    test "disables tty when requested for non-interactive commands" do
+      url = PodExec.exec_url("default", "api-0", "api", command: "echo hello", tty: false)
+
+      assert {"tty", "false"} in query_pairs(url)
+    end
   end
 
   describe "handle_frame/2" do

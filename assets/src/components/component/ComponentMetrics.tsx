@@ -6,11 +6,12 @@ import RangePicker from 'components/utils/RangePicker'
 import { useServiceDeploymentComponentMetricsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 
-import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
+import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 import {
@@ -26,7 +27,7 @@ function Metric({
   serviceId,
   componentId,
   podReservations,
-  duration: { step, offset },
+  duration: { offset },
   ...props
 }: {
   serviceId?: string
@@ -37,10 +38,8 @@ function Metric({
   overflowY?: string
 }) {
   const theme = useTheme()
-  const start = useMemo(
-    () => dayjs().subtract(offset, 'second').toISOString(),
-    [offset]
-  )
+  const start = useMetricsQueryStart(offset)
+  const step = getMetricQueryStep(offset)
   const { data, loading } = useServiceDeploymentComponentMetricsQuery({
     variables: {
       id: serviceId,

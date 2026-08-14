@@ -8,11 +8,12 @@ defmodule Console.Kubernetes.PodExec do
   def exec_url(ns, name, container, opts \\ []) do
     command = opts[:command] || "/bin/sh"
     stdin = if opts[:stdin] == false, do: "false", else: "true"
+    tty = if opts[:tty] == false, do: "false", else: "true"
     parsed_command = OptionParser.split(command) |> Enum.map(& {"command", &1})
     args = URI.encode_query(
       [{"container", container} | parsed_command] ++
       [
-        {"tty", "true"},
+        {"tty", tty},
         {"stdin", stdin},
         {"stdout", "true"},
         {"stderr", "true"}
