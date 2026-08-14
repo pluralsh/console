@@ -428,6 +428,24 @@ defmodule Console do
     end
   end
 
+  @duration_parts [{86_400, "d"}, {3_600, "h"}, {60, "m"}, {1, "s"}]
+
+
+  def format_duration(seconds) when is_float(seconds) and seconds >= 0,
+    do: format_duration(round(seconds))
+  def format_duration(0), do: "0s"
+  def format_duration(seconds) when is_integer(seconds) and seconds > 0 do
+    Enum.reduce(@duration_parts, {seconds, []}, fn {unit, suffix}, {remaining, parts} ->
+      case {div(remaining, unit), rem(remaining, unit)} do
+        {0, remaining} -> {remaining, parts}
+        {count, rem} -> {rem, ["#{count}#{suffix}" | parts]}
+      end
+    end)
+    |> elem(1)
+    |> Enum.reverse()
+    |> Enum.join()
+  end
+
   defp parse_dur_str(""), do: 0
   defp parse_dur_str(str) do
     case Integer.parse(str) do

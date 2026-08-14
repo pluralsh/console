@@ -25,6 +25,7 @@ defmodule Console.Deployments.Observability do
   @ttl :timer.minutes(30)
 
   @noisy_threshold 3
+  @minimum_rate_window_seconds 5 * 60
 
   require Logger
 
@@ -294,19 +295,19 @@ defmodule Console.Deployments.Observability do
   @spec query(Cluster.t | {Cluster.t, binary} | ServiceComponent.t, binary, binary, binary) :: {:ok, map} | error
   def query(%Cluster{handle: cluster}, start, stop, step) do
     queries(:cluster)
-    |> bulk_range_query(%{cluster: cluster, rate: step}, start, stop, step)
+    |> bulk_range_query(%{cluster: cluster, rate: rate_window(step)}, start, stop, step)
   end
 
   def query({%Cluster{handle: cluster}, node}, start, stop, step) do
     queries(:node)
-    |> bulk_range_query(%{cluster: cluster, instance: node, rate: step}, start, stop, step)
+    |> bulk_range_query(%{cluster: cluster, instance: node, rate: rate_window(step)}, start, stop, step)
   end
 
   def query(%Service{namespace: ns} = service, start, stop, step) do
     service = Repo.preload(service, [:cluster])
     bulk_range_query(
       queries(:service),
-      [cluster: service.cluster.handle, namespace: ns, rate: step],
+      [cluster: service.cluster.handle, namespace: ns, rate: rate_window(step)],
       start,
       stop,
       step
@@ -317,7 +318,7 @@ defmodule Console.Deployments.Observability do
     component = Repo.preload(component, [service: :cluster])
     with {:ok, args} <- component_args(component) do
       queries(:component)
-      |> bulk_range_query(Keyword.put(args, :rate, step), start, stop, step)
+      |> bulk_range_query(Keyword.put(args, :rate, rate_window(step)), start, stop, step)
     end
   end
 
@@ -331,6 +332,20 @@ defmodule Console.Deployments.Observability do
     when kind in ~w(StatefulSet statefulsets),
       do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[0-9]+"]}
   defp component_args(%ServiceComponent{group: g, kind: k}), do: {:error, "unsupported component kind #{g}/#{k}"}
+
+  # Keep CPU rates stable even when range-query resolution is shortened for a
+  # higher-density chart.  A rate window below five minutes is unreliable for
+  # the common 30-60 second Prometheus scrape intervals.
+  defp rate_window(step) do
+    with {:ok, duration} <- Console.convert_duration(step) do
+      duration
+      |> Timex.Duration.to_seconds()
+      |> max(@minimum_rate_window_seconds)
+      |> Console.format_duration()
+    else
+      _ -> "5m"
+    end
+  end
 
   defp bulk_query(queries, ctx) do
     with {:ok, client} <- get_connection(:prometheus) do

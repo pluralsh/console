@@ -18,6 +18,37 @@ export const HOUR_TO_SECONDS = MINUTE_TO_SECONDS * 60
 export const DAY_TO_SECONDS = HOUR_TO_SECONDS * 24
 export const DAY_TO_MILLISECONDS = DAY_TO_SECONDS * SECOND_TO_MILLISECONDS
 
+const METRIC_STEP_CANDIDATES = [
+  { seconds: 15, value: '15s' },
+  { seconds: 30, value: '30s' },
+  { seconds: MINUTE_TO_SECONDS, value: '1m' },
+  { seconds: 2 * MINUTE_TO_SECONDS, value: '2m' },
+  { seconds: 5 * MINUTE_TO_SECONDS, value: '5m' },
+  { seconds: 10 * MINUTE_TO_SECONDS, value: '10m' },
+  { seconds: 15 * MINUTE_TO_SECONDS, value: '15m' },
+  { seconds: 30 * MINUTE_TO_SECONDS, value: '30m' },
+  { seconds: HOUR_TO_SECONDS, value: '1h' },
+  { seconds: 2 * HOUR_TO_SECONDS, value: '2h' },
+] as const
+
+const METRIC_TARGET_POINTS = 240
+
+/**
+ * Chooses a Prometheus range-query resolution near the desired chart density.
+ * It keeps short time ranges detailed while bounding the returned samples for
+ * longer ranges.
+ */
+export function getMetricQueryStep(rangeSeconds: number): string {
+  const targetStep = rangeSeconds / METRIC_TARGET_POINTS
+
+  return METRIC_STEP_CANDIDATES.reduce((closest, candidate) =>
+    Math.abs(candidate.seconds - targetStep) <
+    Math.abs(closest.seconds - targetStep)
+      ? candidate
+      : closest
+  ).value
+}
+
 export function parseDurationToMinutes(
   duration: string
 ): number | null | undefined {
