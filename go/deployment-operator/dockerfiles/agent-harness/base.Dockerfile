@@ -39,7 +39,7 @@ RUN CGO_ENABLED=0 \
     -trimpath \
     -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent.Version=${VERSION}" \
     -o /agent-mcpserver \
-    cmd/mcpserver/agent/main.go
+    ./cmd/mcpserver/agent
 
 # Build agent bootstrap binary
 RUN CGO_ENABLED=0 \

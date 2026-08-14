@@ -4933,14 +4933,15 @@ func (t *PreviewEnvironmentTemplateFragment) GetTemplate() *PreviewEnvironmentTe
 }
 
 type ProjectFragment struct {
-	ID            string                   "json:\"id\" graphql:\"id\""
-	InsertedAt    *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	UpdatedAt     *string                  "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
-	Name          string                   "json:\"name\" graphql:\"name\""
-	Default       *bool                    "json:\"default,omitempty\" graphql:\"default\""
-	Description   *string                  "json:\"description,omitempty\" graphql:\"description\""
-	ReadBindings  []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
-	WriteBindings []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	ID              string                   "json:\"id\" graphql:\"id\""
+	InsertedAt      *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt       *string                  "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	Name            string                   "json:\"name\" graphql:\"name\""
+	Default         *bool                    "json:\"default,omitempty\" graphql:\"default\""
+	Description     *string                  "json:\"description,omitempty\" graphql:\"description\""
+	DisableInsights *bool                    "json:\"disableInsights,omitempty\" graphql:\"disableInsights\""
+	ReadBindings    []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	WriteBindings   []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 }
 
 func (t *ProjectFragment) GetID() string {
@@ -4978,6 +4979,12 @@ func (t *ProjectFragment) GetDescription() *string {
 		t = &ProjectFragment{}
 	}
 	return t.Description
+}
+func (t *ProjectFragment) GetDisableInsights() *bool {
+	if t == nil {
+		t = &ProjectFragment{}
+	}
+	return t.DisableInsights
 }
 func (t *ProjectFragment) GetReadBindings() []*PolicyBindingFragment {
 	if t == nil {
@@ -30810,438 +30817,6 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 	return t.PrivateKeyFile
 }
 
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform struct {
-	Address *string "json:\"address,omitempty\" graphql:\"address\""
-	Lock    *string "json:\"lock,omitempty\" graphql:\"lock\""
-	Unlock  *string "json:\"unlock,omitempty\" graphql:\"unlock\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform) GetAddress() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform{}
-	}
-	return t.Address
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform) GetLock() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform{}
-	}
-	return t.Lock
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform) GetUnlock() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform{}
-	}
-	return t.Unlock
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls struct {
-	Terraform *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform "json:\"terraform,omitempty\" graphql:\"terraform\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls) GetTerraform() *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls{}
-	}
-	return t.Terraform
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds struct {
-	Token *string "json:\"token,omitempty\" graphql:\"token\""
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds) GetToken() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.Token
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
-	Name  string "json:\"name\" graphql:\"name\""
-	Value string "json:\"value\" graphql:\"value\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
-	}
-	return t.Name
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
-	}
-	return t.Value
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
-	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
-	Secret    string "json:\"secret\" graphql:\"secret\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
-	}
-	return t.ConfigMap
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
-	}
-	return t.Secret
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
-	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
-	Key      *string "json:\"key,omitempty\" graphql:\"key\""
-	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
-	Value    *string "json:\"value,omitempty\" graphql:\"value\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Effect
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Key
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Operator
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Value
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.Parallelism
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.Refresh
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
-	}
-	return t.ApproveEmpty
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
-	}
-	return t.Parallelism
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terragrunt{}
-	}
-	return t.Refresh
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi struct {
-	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
-	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
-	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
-	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.ApproveEmpty
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.BackendURL
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.Parallel
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.Refresh
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.Stack
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
-	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
-	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
-	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
-	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetConfigFile() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.ConfigFile
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.Inventory
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.Playbook
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.PrivateKeyFile
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
-	Name  string "json:\"name\" graphql:\"name\""
-	Value string "json:\"value\" graphql:\"value\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
-	}
-	return t.Name
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
-	}
-	return t.Value
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
-	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
-	Secret    string "json:\"secret\" graphql:\"secret\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
-	}
-	return t.ConfigMap
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
-	}
-	return t.Secret
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations struct {
-	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
-	Key      *string "json:\"key,omitempty\" graphql:\"key\""
-	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
-	Value    *string "json:\"value,omitempty\" graphql:\"value\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Effect
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Key
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Operator
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
-	}
-	return t.Value
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.Parallelism
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetRefresh() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.Refresh
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt struct {
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
-	}
-	return t.ApproveEmpty
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetParallelism() *int64 {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
-	}
-	return t.Parallelism
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt) GetRefresh() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terragrunt{}
-	}
-	return t.Refresh
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi struct {
-	ApproveEmpty *bool   "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-	BackendURL   *string "json:\"backendUrl,omitempty\" graphql:\"backendUrl\""
-	Parallel     *int64  "json:\"parallel,omitempty\" graphql:\"parallel\""
-	Refresh      *bool   "json:\"refresh,omitempty\" graphql:\"refresh\""
-	Stack        *string "json:\"stack,omitempty\" graphql:\"stack\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.ApproveEmpty
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetBackendURL() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.BackendURL
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetParallel() *int64 {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.Parallel
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetRefresh() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.Refresh
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi) GetStack() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Pulumi{}
-	}
-	return t.Stack
-}
-
-type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
-	ConfigFile     *string "json:\"configFile,omitempty\" graphql:\"configFile\""
-	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
-	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
-	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
-}
-
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetConfigFile() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.ConfigFile
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.Inventory
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.Playbook
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
-	}
-	return t.PrivateKeyFile
-}
-
 type CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -46832,10 +46407,10 @@ func (t *GetStackRunBase) GetStackRun() *StackRunBaseFragment {
 }
 
 type UpdateStackRun struct {
-	UpdateStackRun *StackRunBaseFragment "json:\"updateStackRun,omitempty\" graphql:\"updateStackRun\""
+	UpdateStackRun *StackRunIDFragment "json:\"updateStackRun,omitempty\" graphql:\"updateStackRun\""
 }
 
-func (t *UpdateStackRun) GetUpdateStackRun() *StackRunBaseFragment {
+func (t *UpdateStackRun) GetUpdateStackRun() *StackRunIDFragment {
 	if t == nil {
 		t = &UpdateStackRun{}
 	}
@@ -49836,6 +49411,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -49912,6 +49488,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -49988,6 +49565,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -58179,6 +57757,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -58251,6 +57830,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -61519,6 +61099,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -61642,6 +61223,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -61765,6 +61347,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -62950,6 +62533,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -63012,6 +62596,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -63097,6 +62682,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -63155,6 +62741,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -63214,6 +62801,7 @@ fragment ProjectFragment on Project {
 	name
 	default
 	description
+	disableInsights
 	readBindings {
 		... PolicyBindingFragment
 	}
@@ -66873,326 +66461,11 @@ func (c *Client) GetStackRunBase(ctx context.Context, id string, interceptors ..
 
 const UpdateStackRunDocument = `mutation UpdateStackRun ($id: ID!, $attributes: StackRunAttributes!) {
 	updateStackRun(id: $id, attributes: $attributes) {
-		... StackRunBaseFragment
+		... StackRunIdFragment
 	}
 }
-fragment StackRunBaseFragment on StackRun {
+fragment StackRunIdFragment on StackRun {
 	id
-	type
-	status
-	approval
-	approvedAt
-	tarball
-	workdir
-	manageState
-	variables
-	dryRun
-	stateUrls {
-		terraform {
-			address
-			lock
-			unlock
-		}
-	}
-	pluralCreds {
-		url
-		token
-	}
-	actor {
-		... UserFragment
-	}
-	stack {
-		... InfrastructureStackFragment
-	}
-	state {
-		... StackStateFragment
-	}
-	steps {
-		... RunStepFragment
-	}
-	files {
-		... StackFileFragment
-	}
-	git {
-		... GitRefFragment
-	}
-	repository {
-		... GitRepositoryFragment
-	}
-	jobSpec {
-		... JobSpecFragment
-	}
-	configuration {
-		... StackConfigurationFragment
-	}
-	environment {
-		... StackEnvironmentFragment
-	}
-	output {
-		... StackOutputFragment
-	}
-	errors {
-		... ServiceErrorFragment
-	}
-	violations {
-		... StackPolicyViolationFragment
-	}
-	policyEngine {
-		... PolicyEngineFragment
-	}
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-fragment InfrastructureStackFragment on InfrastructureStack {
-	id
-	name
-	type
-	variables
-	approval
-	workdir
-	manageState
-	deletedAt
-	git {
-		... GitRefFragment
-	}
-	jobSpec {
-		... JobSpecFragment
-	}
-	configuration {
-		... StackConfigurationFragment
-	}
-	cluster {
-		... TinyClusterFragment
-	}
-	project {
-		... TinyProjectFragment
-	}
-	files {
-		... StackFileFragment
-	}
-	environment {
-		... StackEnvironmentFragment
-	}
-	output {
-		... StackOutputFragment
-	}
-	state {
-		... StackStateFragment
-	}
-	repository {
-		... GitRepositoryFragment
-	}
-	writeBindings {
-		... PolicyBindingFragment
-	}
-	readBindings {
-		... PolicyBindingFragment
-	}
-	policyEngine {
-		... PolicyEngineFragment
-	}
-}
-fragment GitRefFragment on GitRef {
-	folder
-	ref
-}
-fragment JobSpecFragment on JobGateSpec {
-	namespace
-	raw
-	containers {
-		... ContainerSpecFragment
-	}
-	labels
-	annotations
-	serviceAccount
-	requests {
-		... ContainerResourcesFragment
-	}
-	nodeSelector
-	tolerations {
-		key
-		operator
-		value
-		effect
-	}
-}
-fragment ContainerSpecFragment on ContainerSpec {
-	name
-	image
-	args
-	env {
-		name
-		value
-	}
-	envFrom {
-		configMap
-		secret
-	}
-}
-fragment ContainerResourcesFragment on ContainerResources {
-	requests {
-		... ResourceRequestFragment
-	}
-	limits {
-		... ResourceRequestFragment
-	}
-}
-fragment ResourceRequestFragment on ResourceRequest {
-	cpu
-	memory
-}
-fragment StackConfigurationFragment on StackConfiguration {
-	image
-	version
-	tag
-	hooks {
-		... StackHookFragment
-	}
-	terraform {
-		parallelism
-		refresh
-		approveEmpty
-	}
-	terragrunt {
-		parallelism
-		refresh
-		approveEmpty
-	}
-	pulumi {
-		parallel
-		refresh
-		approveEmpty
-		stack
-		backendUrl
-	}
-	ansible {
-		inventory
-		playbook
-		privateKeyFile
-		configFile
-	}
-}
-fragment StackHookFragment on StackHook {
-	cmd
-	args
-	afterStage
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
-}
-fragment StackFileFragment on StackFile {
-	path
-	content
-}
-fragment StackEnvironmentFragment on StackEnvironment {
-	name
-	value
-	secret
-}
-fragment StackOutputFragment on StackOutput {
-	name
-	value
-	secret
-}
-fragment StackStateFragment on StackState {
-	id
-	plan
-	state {
-		... StackStateResourceFragment
-	}
-}
-fragment StackStateResourceFragment on StackStateResource {
-	identifier
-	resource
-	name
-	configuration
-	links
-}
-fragment GitRepositoryFragment on GitRepository {
-	id
-	error
-	health
-	authMethod
-	url
-	decrypt
-	recurseSubmodules
-}
-fragment PolicyBindingFragment on PolicyBinding {
-	id
-	group {
-		... GroupFragment
-	}
-	user {
-		... UserFragment
-	}
-}
-fragment GroupFragment on Group {
-	id
-	name
-	description
-	global
-}
-fragment PolicyEngineFragment on PolicyEngine {
-	type
-	maxSeverity
-	customPolicies
-}
-fragment RunStepFragment on RunStep {
-	id
-	status
-	stage
-	name
-	cmd
-	args
-	requireApproval
-	index
-}
-fragment ServiceErrorFragment on ServiceError {
-	source
-	message
-}
-fragment StackPolicyViolationFragment on StackPolicyViolation {
-	id
-	title
-	description
-	policyId
-	policyModule
-	policyUrl
-	severity
-	resolution
-	causes {
-		... StackViolationCauseFragment
-	}
-}
-fragment StackViolationCauseFragment on StackViolationCause {
-	start
-	end
-	resource
-	filename
-	lines {
-		... StackViolationCauseLineFragment
-	}
-}
-fragment StackViolationCauseLineFragment on StackViolationCauseLine {
-	first
-	last
-	content
-	line
 }
 `
 

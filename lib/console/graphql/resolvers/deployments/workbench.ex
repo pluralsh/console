@@ -367,7 +367,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     do: Workbenches.delete_tool(id, user)
 
   def create_workbench_job(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
-    do: Workbenches.create_workbench_job(attrs, workbench_id, user)
+    do: Workbenches.create_workbench_job(attrs, Workbenches.get_workbench!(workbench_id), user)
 
   def create_queued_prompt(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_queued_prompt(attrs, job_id, user)

@@ -25,12 +25,15 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
           updateProject(id: $id, attributes: $attrs) {
             id
             name
+            disableInsights
           }
         }
-      """, %{"attrs" => %{"name" => "test"}, "id" => proj.id}, %{current_user: admin_user()})
+      """, %{"attrs" => %{"name" => "test", "disableInsights" => true}, "id" => proj.id}, %{current_user: admin_user()})
 
       assert update["id"] == proj.id
       assert update["name"] == "test"
+      assert update["disableInsights"]
+      assert refetch(proj).disable_insights
     end
   end
 

@@ -4,12 +4,13 @@ defmodule Console.AI.Tools.Workbench.KubeRequest do
   alias Console.Deployments.Clusters
 
   embedded_schema do
-    field :handle,   :string
+    field :handle,       :string
     field :method,       :string
     field :path,         :string
     field :body,         :string
     field :query_params, :map, default: %{}
     field :content_type, :string
+    field :explanation,  :string
   end
 
   def new(attrs) do
@@ -18,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.KubeRequest do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(handle method path body query_params content_type)a)
+    |> cast(attrs, ~w(handle method path body query_params content_type explanation)a)
     |> validate_required([:handle, :method, :path, :content_type])
   end
 

@@ -59,6 +59,7 @@ func (in *environment) cloneRepository() error {
 	if _, err := in.configureGitCredentials(); err != nil {
 		return err
 	}
+	userName, userEmail := in.commitIdentity()
 	if err := ConfigureGitSafeDirectory(repoDirPath); err != nil {
 		return fmt.Errorf("failed to configure git safe directory: %w", err)
 	}
@@ -68,7 +69,7 @@ func (in *environment) cloneRepository() error {
 		if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
 			return err
 		}
-		return in.configureRepository(repoDirPath, "", "")
+		return in.configureRepository(repoDirPath, userName, userEmail)
 	}
 
 	// Set proxy for clone via environment variable so it takes effect immediately.
@@ -93,12 +94,28 @@ func (in *environment) cloneRepository() error {
 		return err
 	}
 
-	var userName, userEmail string
-	if in.consoleTokenClient != nil {
+	repoDirPath = path.Join(in.dir, repoDir)
+	return in.configureRepository(repoDirPath, userName, userEmail)
+}
+
+// commitIdentity resolves the author identity for commits created by this run.
+// The initiating user is part of the AgentRun response, unlike Me(), which is
+// evaluated using the run's deploy token and may identify a service account.
+func (in *environment) commitIdentity() (userName, userEmail string) {
+	if in.agentRun.User != nil {
+		userName = in.agentRun.User.Name
+		userEmail = in.agentRun.User.Email
+	}
+
+	if (userName == "" || userEmail == "") && in.consoleTokenClient != nil {
 		user, _ := in.consoleTokenClient.Me()
-		if user != nil && user.Name != "" && user.Email != "" {
-			userName = user.Name
-			userEmail = user.Email
+		if user != nil {
+			if userName == "" {
+				userName = user.Name
+			}
+			if userEmail == "" {
+				userEmail = user.Email
+			}
 		}
 	}
 
@@ -106,11 +123,10 @@ func (in *environment) cloneRepository() error {
 		userName = in.agentRun.ScmCreds.Username
 	}
 	if userEmail == "" {
-		userEmail = "agent@plural.sh" // fallback
+		userEmail = "agent@plural.sh"
 	}
 
-	repoDirPath = path.Join(in.dir, repoDir)
-	return in.configureRepository(repoDirPath, userName, userEmail)
+	return userName, userEmail
 }
 
 func (in *environment) checkoutRequestedBranch(repoDirPath string) error {

@@ -1,6 +1,7 @@
 import {
   Button,
   Chip,
+  CommandIcon,
   Flex,
   IconFrame,
   TrashCanIcon,
@@ -45,20 +46,28 @@ export function AwaitingReviewWorkbenchActivityItem({
   const tool = functionCall?.tool
   const toolType = tool?.tool
   const kubeRequest = result?.kubeRequest
+  const kubeExec = result?.kubeExec
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
+  const isExec = activity.type === WorkbenchJobActivityType.Exec
   const kubeVariant = isKubernetes
     ? getKubeActionVariant(kubeRequest?.method)
     : null
 
   const title = isKubernetes
     ? getKubeActionTitle(kubeRequest)
-    : tool?.name?.trim() || functionCall?.name?.trim() || 'Approval required'
+    : isExec
+      ? kubeExec?.pod?.trim() || 'Pod command'
+      : tool?.name?.trim() || functionCall?.name?.trim() || 'Approval required'
 
   const subtitle = isKubernetes
     ? getKubeActionSubtitle(kubeRequest)
-    : toolType
-      ? getWorkbenchToolLabel(toolType)
-      : (functionCall?.name ?? 'Action')
+    : isExec
+      ? [kubeExec?.handle, kubeExec?.namespace, kubeExec?.container]
+          .filter(Boolean)
+          .join(' · ')
+      : toolType
+        ? getWorkbenchToolLabel(toolType)
+        : (functionCall?.name ?? 'Action')
 
   const description =
     workbenchJob?.result?.workingTheory?.trim() ||
@@ -99,6 +108,8 @@ export function AwaitingReviewWorkbenchActivityItem({
           icon={
             isKubernetes ? (
               <KubeActionIcon variant={kubeVariant} />
+            ) : isExec ? (
+              <CommandIcon size={16} />
             ) : toolType ? (
               <WorkbenchToolIcon
                 type={toolType}

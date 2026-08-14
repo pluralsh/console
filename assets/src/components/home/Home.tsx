@@ -46,7 +46,6 @@ import {
   GettingStartedContentHomeVariant,
   GettingStartedPopup,
 } from './GettingStarted.tsx'
-import { isNil } from 'lodash'
 import { Body1BoldP } from 'components/utils/typography/Text.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
@@ -104,6 +103,7 @@ function HomeClusters() {
     variables: {
       projectId,
       first: healthmapClusterCount,
+      healthRange: healthScoreLabelToRange[healthScoreOption],
     },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -143,21 +143,9 @@ function HomeClusters() {
         aggregatedUpgradeStats: aggregateUpgradeStats(
           upgradeData?.upgradeStatistics ?? {}
         ),
-        heatmapList: clusters.filter(({ healthScore }) => {
-          const range = healthScoreLabelToRange[healthScoreOption]
-          return (
-            !range ||
-            (!isNil(healthScore) &&
-              healthScore <= range.max &&
-              healthScore >= range.min)
-          )
-        }),
+        heatmapList: clusters,
       }
-    }, [
-      healthScoreOption,
-      healthScoresData?.clusters,
-      upgradeData?.upgradeStatistics,
-    ])
+    }, [healthScoresData?.clusters, upgradeData?.upgradeStatistics])
 
   const isLoading = !tableData && tableLoading
   const noClustersYet =

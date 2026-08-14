@@ -40,6 +40,17 @@ func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
 			if tc.name == "analyze" && !strings.Contains(content, "updateAgentRunAnalysis") {
 				t.Fatal("expected updateAgentRunAnalysis in analyze system prompt")
 			}
+			if tc.name == "babysit" {
+				for _, expected := range []string{
+					"human user are always actionable instructions",
+					"prioritize them over continuing the initial task",
+					"Human comments are tasks",
+				} {
+					if !strings.Contains(content, expected) {
+						t.Fatalf("expected babysit instructions to contain %q", expected)
+					}
+				}
+			}
 		})
 	}
 }

@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
   use Mimic
   alias Console.AI.Workbench.{Subagents, Environment}
   alias Console.AI.{Provider, Tool}
+  alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
 
   setup :set_mimic_global
@@ -60,7 +61,8 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
       wait_for_agent_runs(activity.id, 1)
       [run] = agent_runs(activity.id)
       insert(:pull_request, agent_run: run)
-      update_record(run, %{status: :successful})
+      {:ok, run} = update_record(run, %{status: :successful})
+      Recurse.handle_event(%Console.PubSub.AgentRunUpdated{item: run})
 
       assert_receive {:result, result}, :timer.seconds(20)
 
@@ -131,7 +133,8 @@ defmodule Console.AI.Workbench.Subagents.CodingTest do
 
       Enum.each(runs, fn run ->
         insert(:pull_request, agent_run: run)
-        update_record(run, %{status: :successful})
+        {:ok, run} = update_record(run, %{status: :successful})
+        Recurse.handle_event(%Console.PubSub.AgentRunUpdated{item: run})
       end)
 
       assert_receive {:agent_results, tool_messages}, :timer.seconds(20)

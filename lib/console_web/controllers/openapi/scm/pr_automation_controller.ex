@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
   alias Console.Deployments.Git
   alias Console.Schema.PrAutomation
 
-  plug Scope, [resource: :catalog, action: :read] when action in [:show, :index, :index_for_catalog]
+  plug Scope, [resource: :catalog, action: :read] when action in [:show, :show_by_name, :index, :index_for_catalog]
   plug Scope, [resource: :catalog, action: :write] when action in [:invoke]
 
   @doc """
@@ -26,6 +26,22 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     responses: [ok: OpenAPI.SCM.PrAutomation]
   def show(conn, %{"id" => id}) do
     Git.get_pr_automation!(id)
+    |> successful(conn, OpenAPI.SCM.PrAutomation)
+  end
+
+  @doc """
+  Fetches a PR automation by name.
+  """
+  operation :show_by_name,
+    operation_id: "GetPrAutomationByName",
+    tags: ["prautomation"],
+    "x-required-scopes": ["catalog.read"],
+    parameters: [
+      name: [in: :query, schema: %{type: :string}, required: true, description: "The exact name of the PR automation"]
+    ],
+    responses: [ok: OpenAPI.SCM.PrAutomation]
+  def show_by_name(conn, %{"name" => name}) do
+    Git.get_pr_automation_by_name!(name)
     |> successful(conn, OpenAPI.SCM.PrAutomation)
   end
 
@@ -87,7 +103,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     tags: ["prautomation"],
     "x-required-scopes": ["catalog.write"],
     parameters: [
-      id: [in: :path, schema: %{type: :string}, required: true, description: "The PR automation id to invoke"]
+      id: [in: :path, schema: %{type: :string}, required: true, description: "The PR automation ID or name:<name> reference to invoke"]
     ],
     request_body: OpenAPI.SCM.CreatePullRequestInput,
     responses: [ok: OpenAPI.SCM.PullRequest]
@@ -99,9 +115,12 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     identifier = body_params.identifier
     context = body_params.context || %{}
 
-    Git.create_pull_request(%{}, context, id, branch, identifier, user)
+    Git.create_pull_request(%{}, context, resolve_pr_automation(id), branch, identifier, user)
     |> successful(conn, OpenAPI.SCM.PullRequest)
   end
+
+  defp resolve_pr_automation("name:" <> name), do: Git.get_pr_automation_by_name!(name)
+  defp resolve_pr_automation(id), do: id
 
   defp apply_filters(query, params) do
     Enum.reduce(params, query, fn

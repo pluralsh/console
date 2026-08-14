@@ -4,11 +4,13 @@ defmodule Console.Schema.Project do
   alias Console.Schema.{PolicyBinding, User}
 
   schema "projects" do
-    field :name,        :string
-    field :description, :string
-    field :default,     :boolean
-    field :write_policy_id, :binary_id
-    field :read_policy_id,  :binary_id
+    field :name,             :string
+    field :description,      :string
+    field :default,          :boolean
+    field :disable_insights, :boolean, default: false
+
+    field :write_policy_id,  :binary_id
+    field :read_policy_id,   :binary_id
 
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
@@ -43,7 +45,7 @@ defmodule Console.Schema.Project do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name description default)a)
+    |> cast(attrs, ~w(name description default disable_insights)a)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "there is an active stack in this project")

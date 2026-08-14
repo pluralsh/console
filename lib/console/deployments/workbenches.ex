@@ -3,6 +3,7 @@ defmodule Console.Deployments.Workbenches do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.AI.Workbench.Mentions
+  import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
   alias Console.Schema.{
     User,
     Workbench,
@@ -31,7 +32,7 @@ defmodule Console.Deployments.Workbenches do
     QueuedPrompt
   }
   alias Console.AI.{Provider, VectorStore}
-  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt}
+  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt, KubeShell}
   alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -424,7 +425,7 @@ defmodule Console.Deployments.Workbenches do
       prompt: prompt || "Update the skills as necessary",
       referenced_job_id: job_id,
       type: :skill
-    }, eval.workbench_job.workbench_id, user)
+    }, get_workbench!(eval.workbench_job.workbench_id), user)
   end
 
   def workbench_eval_skill(result_id, prompt, %User{} = user) when is_binary(result_id) do
@@ -441,7 +442,7 @@ defmodule Console.Deployments.Workbenches do
       prompt: "No specific guidance provided, update the skills as necessary",
       referenced_job_id: job.id,
       type: :skill
-    }, job.workbench_id, Console.Services.Rbac.preload(user))
+    }, get_workbench!(job.workbench_id), Console.Services.Rbac.preload(user))
   end
 
   def infer_skill(job_id, user) when is_binary(job_id) do
@@ -623,12 +624,12 @@ defmodule Console.Deployments.Workbenches do
   Creates a new workbench job for a workbench. Requires read access to the workbench.
   """
   @spec create_workbench_job(map, binary | Workbench.t(), User.t()) :: job_resp
-  def create_workbench_job(attrs, %Workbench{id: id}, %User{} = user),
-    do: create_workbench_job(attrs, id, user)
-  def create_workbench_job(attrs, workbench_id, %User{} = user) when is_binary(workbench_id) do
+  def create_workbench_job(attrs, %Workbench{id: wid}, %User{} = user),
+    do: create_workbench_job(attrs, wid, user)
+  def create_workbench_job(attrs, id, %User{} = user) when is_binary(id) do
     start_transaction()
     |> add_operation(:budget, fn _ ->
-      bench = get_workbench_with_lock!(workbench_id)
+      bench = get_workbench_with_lock!(id)
       case budget_available?(bench) do
         true -> {:ok, bench}
         false -> {:error, "workbench budget is exhausted"}
@@ -638,7 +639,7 @@ defmodule Console.Deployments.Workbenches do
       %WorkbenchJob{user_id: user.id, workbench_id: wb_id}
       |> WorkbenchJob.changeset(
         attrs
-        |> merge_modes(wb)
+        |> merge_modes(wb.modes, wb)
         |> Map.put(:result, %{working_theory: "", conclusion: ""})
       )
       |> allow(user, :read)
@@ -648,14 +649,21 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:create, user)
   end
 
-  defp merge_modes(attrs, %Workbench{modes: modes}) do
-    workbench_modes = Console.mapify(modes || %{})
-
-    workbench_modes
-    |> DeepMerge.deep_merge(attrs[:modes] || %{})
-    |> restrict_kubernetes_modes(workbench_modes)
+  defp merge_modes(attrs, base_modes, %Workbench{modes: workbench_modes}) do
+    base_modes
+    |> then(&Console.mapify(&1 || %{}))
+    |> DeepMerge.deep_merge(compact_modes(attrs[:modes] || %{}))
+    |> restrict_kubernetes_modes(Console.mapify(workbench_modes || %{}))
     |> then(&Map.put(attrs, :modes, &1))
   end
+
+  defp compact_modes(%{} = modes) do
+    modes
+    |> Console.mapify()
+    |> Enum.reject(fn {_, value} -> is_nil(value) end)
+    |> Map.new(fn {key, value} -> {key, compact_modes(value)} end)
+  end
+  defp compact_modes(value), do: value
 
   defp restrict_kubernetes_modes(%{kubernetes: %{} = job_modes} = modes, workbench_modes) do
     wb_kubernetes = Map.get(workbench_modes, :kubernetes, %{})
@@ -755,6 +763,18 @@ defmodule Console.Deployments.Workbenches do
   def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
 
   @doc """
+  Requeues an inactive workbench job for processing.
+  """
+  @spec resume_job(WorkbenchJob.t()) :: job_resp
+  def resume_job(%WorkbenchJob{status: status} = job) when status != :running do
+    job
+    |> WorkbenchJob.changeset(%{status: :pending})
+    |> Repo.update()
+    |> notify(:update)
+  end
+  def resume_job(%WorkbenchJob{} = job), do: {:ok, job}
+
+  @doc """
   Marks a workbench job as paused, and cancels its activities so they can be restarted later.
   """
   @spec pause_job(WorkbenchJob.t()) :: job_resp
@@ -806,14 +826,17 @@ defmodule Console.Deployments.Workbenches do
       end
     end)
     |> add_operation(:job, fn %{idle: job} ->
-      job = Repo.preload(job, :result, force: true)
+      job = Repo.preload(job, [:result, :workbench], force: true)
       with {:ok, job} <- allow(job, user, :prompt) do
-        WorkbenchJob.changeset(job, %{
+        %{
           status: :pending,
           error: nil,
           user_id: user.id,
+          modes: attrs[:modes],
           result: %{todos: []}
-        })
+        }
+        |> merge_modes(job.modes, job.workbench)
+        |> then(&WorkbenchJob.changeset(job, &1))
         |> Repo.update()
       end
     end)
@@ -867,7 +890,7 @@ defmodule Console.Deployments.Workbenches do
 
   @spec dequeue_prompt(QueuedPrompt.t()) :: activity_resp
   def dequeue_prompt(%QueuedPrompt{} = prompt) do
-    %{user: user, workbench_job: job} = Repo.preload(prompt, [:workbench_job, user: [:groups]])
+    %{user: user, workbench_job: job} = Repo.preload(prompt, [workbench_job: :workbench, user: [:groups]])
 
     start_transaction()
     |> add_operation(:consume, fn _ ->
@@ -877,7 +900,8 @@ defmodule Console.Deployments.Workbenches do
     end)
     |> add_operation(:job, fn %{consume: prompt} ->
       create_message(%{
-        prompt: prompt.prompt
+        prompt: prompt.prompt,
+        modes: prompt.modes
       }, job, user)
     end)
     |> execute(extract: :job)
@@ -1005,14 +1029,13 @@ defmodule Console.Deployments.Workbenches do
       |> allow(user, :approve)
     end)
     |> add_operation(:claim, fn
-      %{activity: %WorkbenchJobActivity{type: :function, result: %{function_call: %{} = _}} = activity} ->
-        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
+      %{activity: %WorkbenchJobActivity{type: type} = activity} when is_action(type) ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :running,
+          user_id: user.id
+        })
         |> Repo.update()
-      %{activity: %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{}}} = activity} ->
-        WorkbenchJobActivity.changeset(activity, %{status: :running, user_id: user.id})
-        |> Repo.update()
-      _ ->
-        {:error, "activity does not support function calling"}
+      _ -> {:error, "activity does not support action approval"}
     end)
     |> execute(extract: :claim)
     |> when_ok(&execute_approved_activity(&1, user))
@@ -1038,11 +1061,31 @@ defmodule Console.Deployments.Workbenches do
   end
 
   defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :exec, result: %{kube_exec: %KubeShell{} = shell}} = activity,
+    user
+  ) do
+    Task.Supervisor.start_child(Console.AI.TaskSupervisor, fn ->
+      case KubeShell.invoke(%{shell | activity: activity}, user) do
+        {:ok, result} ->
+          WorkbenchJobActivity.changeset(activity, %{status: :successful, result: %{output: result}})
+        {:error, err} ->
+          WorkbenchJobActivity.changeset(activity, %{
+            status: :failed,
+            result: %{error: "Kubernetes shell execution failed: #{inspect(err)}"}
+          })
+      end
+      |> Repo.update()
+      |> notify(:update)
+    end)
+
+    {:ok, activity}
+  end
+
+  defp execute_approved_activity(
     %WorkbenchJobActivity{type: :kubernetes, result: %{kube_request: %KubeRequest{} = request}} = activity,
     user
   ) do
-    KubeRequest.invoke(request, user)
-    |> case do
+    case KubeRequest.invoke(request, user) do
       {:ok, %{} = output} ->
         output
         |> KUtils.sanitize_kube_resource()

@@ -2,7 +2,8 @@ defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.AI.{Provider, Tools.Workbench.SavedPrompt}
-  alias Console.AI.Tools.Workbench.KubeRequest
+  alias Console.AI.Tools.Workbench.{KubeRequest, KubeShell}
+  alias Console.Kubernetes.PodExec
   alias Console.PubSub
   alias Console.Deployments.Workbenches
   alias Console.Schema.{QueuedPrompt, WorkbenchJob, WorkbenchJobActivity}
@@ -597,7 +598,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       project = insert(:project)
       workbench = insert(:workbench, read_bindings: [%{user_id: user.id}], project: project)
 
-      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench, user)
 
       assert job.workbench_id == workbench.id
       assert job.status == :pending
@@ -619,7 +620,7 @@ defmodule Console.Deployments.WorkbenchesTest do
           }
         )
 
-      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+      {:ok, job} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench, user)
 
       assert job.modes.plan == true
       assert job.modes.coding.approval == true
@@ -655,7 +656,7 @@ defmodule Console.Deployments.WorkbenchesTest do
               budget: %{cost: 1.5}
             }
           },
-          workbench.id,
+          workbench,
           user
         )
 
@@ -683,7 +684,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, job} =
         Workbenches.create_workbench_job(
           %{prompt: "test prompt", modes: %{kubernetes: %{update: true, delete: true}}},
-          workbench.id,
+          workbench,
           user
         )
 
@@ -695,7 +696,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       workbench = insert(:workbench)
 
-      {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+      {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench, user)
     end
 
     test "users with flow read access can create associated flow jobs without workbench read access" do
@@ -707,7 +708,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:ok, job} =
         Workbenches.create_workbench_job(
           %{prompt: "test prompt", flow_id: flow.id},
-          workbench.id,
+          workbench,
           user
         )
 
@@ -725,7 +726,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert {:error, "this flow is not associated with the workbench"} =
                Workbenches.create_workbench_job(
                  %{prompt: "test prompt", flow_id: flow.id},
-                 workbench.id,
+                 workbench,
                  user
                )
 
@@ -747,7 +748,7 @@ defmodule Console.Deployments.WorkbenchesTest do
               chat_connection_id: chat_connection.id
             }
           },
-          workbench.id,
+          workbench,
           user
         )
 
@@ -1113,6 +1114,24 @@ defmodule Console.Deployments.WorkbenchesTest do
       refute prompt.consumed_at
     end
 
+    test "stores mode overrides for the deferred prompt" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, workbench: workbench)
+      modes = %{plan: true, model: %{provider: :anthropic, model: "claude-sonnet-4-5"}}
+
+      {:ok, prompt} =
+        Workbenches.create_queued_prompt(
+          %{prompt: "deferred follow-up", dequeable_at: DateTime.utc_now(), modes: modes},
+          job.id,
+          user
+        )
+
+      assert prompt.modes.plan
+      assert prompt.modes.model.provider == :anthropic
+      assert prompt.modes.model.model == "claude-sonnet-4-5"
+    end
+
     test "users without read access cannot queue a prompt for a job" do
       user = insert(:user)
       job = insert(:workbench_job)
@@ -1165,6 +1184,33 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.user_id == user.id
       assert Console.Repo.get!(QueuedPrompt, prompt.id).consumed_at
       assert refetch(job).status == :pending
+    end
+
+    test "applies queued mode overrides when creating the message" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          status: :successful,
+          modes: %WorkbenchJob.Modes{plan: false, verification: true}
+        )
+
+      prompt =
+        insert(:queued_prompt,
+          workbench_job: job,
+          user: user,
+          modes: %{plan: true, model: %{provider: :anthropic, model: "claude-sonnet-4-5"}}
+        )
+
+      {:ok, _activity} = Workbenches.dequeue_prompt(prompt)
+
+      job = refetch(job)
+      assert job.modes.plan
+      assert job.modes.verification
+      assert job.modes.model.provider == :anthropic
+      assert job.modes.model.model == "claude-sonnet-4-5"
     end
 
     test "does not consume the prompt when the job is active" do
@@ -1497,6 +1543,62 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert reloaded.status == :successful
     end
 
+    test "users with read access approve an exec activity and collect pod output" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      cluster = insert(:cluster, handle: "exec-approval-cluster")
+
+      shell = %{
+        handle: cluster.handle,
+        namespace: "default",
+        pod: "api-0",
+        container: "api",
+        command: "cat /etc/hostname",
+        explanation: "Inspect the pod hostname."
+      }
+
+      activity =
+        insert(:workbench_job_activity,
+          workbench_job: job,
+          type: :exec,
+          status: :needs_approval,
+          prompt: "approve the pod exec",
+          result: %{
+            output: "request pending user approval",
+            kube_exec: shell
+          }
+        )
+
+      url = PodExec.exec_url("default", "api-0", "api", command: "cat /etc/hostname", stdin: false)
+
+      expect(PodExec, :start, fn ^url, collector_pid, %Kazan.Server{} ->
+        shell_pid =
+          spawn(fn ->
+            send(collector_pid, {:stdo, "api-0\n"})
+            send(collector_pid, {:exec_status, ~s({"status":"Success"})})
+            receive do
+              _ -> :ok
+            end
+          end)
+
+        {:ok, shell_pid}
+      end)
+
+      assert %KubeShell{handle: "exec-approval-cluster"} = activity.result.kube_exec
+
+      {:ok, updated} = Workbenches.approve_job_activity(activity.id, user)
+      assert updated.status == :running
+
+      completed = await_activity_status(activity.id, :successful)
+      assert completed.result.output == "api-0\n"
+
+      reloaded = refetch(activity)
+      assert reloaded.status == :successful
+      assert reloaded.result.output == "api-0\n"
+    end
+
     test "users with read access approve a function activity and invoke the underlying grpc function" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -1802,7 +1904,7 @@ defmodule Console.Deployments.WorkbenchesTest do
         {:ok, :mock_conn}
       end)
 
-      assert {:error, "activity does not support function calling"} =
+      assert {:error, "activity does not support action approval"} =
                Workbenches.approve_job_activity(activity.id, user)
 
       refute_receive {:function_call_attempted, _}
@@ -3056,6 +3158,17 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_workbench_chatbot(bot.id, user)
 
       assert refetch(bot)
+    end
+  end
+
+  defp await_activity_status(activity_id, status, attempts \\ 20)
+  defp await_activity_status(_, _, 0), do: flunk("timed out waiting for exec activity completion")
+  defp await_activity_status(activity_id, status, attempts) do
+    case Repo.get(WorkbenchJobActivity, activity_id) do
+      %WorkbenchJobActivity{status: ^status} = activity -> activity
+      _ ->
+        Process.sleep(50)
+        await_activity_status(activity_id, status, attempts - 1)
     end
   end
 

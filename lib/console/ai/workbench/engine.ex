@@ -24,7 +24,8 @@ defmodule Console.AI.Workbench.Engine do
     Message,
     Supervisor,
     Heartbeat,
-    Canvas
+    Canvas,
+    Activity
   }
   alias Console.AI.Tools.Workbench.{
     Lua,
@@ -38,6 +39,8 @@ defmodule Console.AI.Workbench.Engine do
     SkillBackfill,
     FunctionCall,
     KubeRequest,
+    KubeShell,
+    Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
@@ -136,6 +139,7 @@ defmodule Console.AI.Workbench.Engine do
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
       %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
+      %KubeShell{} = kube_shell, {msgs, acts} -> {:cont, {msgs, [kube_shell | acts]}}
       msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
     |> case do
@@ -146,7 +150,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, msgs, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.minutes(30))
+    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
     |> Enum.flat_map(fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
       {:ok, {:error, error}} ->
@@ -247,7 +251,24 @@ defmodule Console.AI.Workbench.Engine do
       tool_call: tool_attrs(request),
       result: %{
         output: "request pending user approval",
+        explanation: request.explanation,
         kube_request: Console.mapify(request)
+      }
+    }
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+      do: poll_activity(activity)
+  end
+
+  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{job: job}) do
+    attrs = %{
+      type: :exec,
+      status: :needs_approval,
+      prompt: "dispatching kubernetes exec command `#{command}` against #{p} in container #{ct} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result: %{
+        output: "request pending user approval",
+        explanation: request.explanation,
+        kube_exec: Console.mapify(request)
       }
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
@@ -256,22 +277,11 @@ defmodule Console.AI.Workbench.Engine do
 
   defp spawn_activity(_, _), do: :ignore
 
-  @max_poll_iterations 60
-  @poll_interval :timer.seconds(10)
-  @approval_pending_statuses [:needs_approval, :running]
-
-  defp poll_activity(activity, iter \\ 0)
-  defp poll_activity(%WorkbenchJobActivity{status: status} = activity, iter)
-       when status in @approval_pending_statuses and iter < @max_poll_iterations do
-    case Repo.get(WorkbenchJobActivity, activity.id) do
-      %WorkbenchJobActivity{status: status} = activity when status in @approval_pending_statuses ->
-        :timer.sleep(@poll_interval)
-        poll_activity(activity, iter + 1)
-      %WorkbenchJobActivity{} = activity -> {:ok, activity}
-      nil -> {:error, "the activity was deleted before completion"}
+  defp poll_activity(%WorkbenchJobActivity{} = activity) do
+    with {:ok, %WorkbenchJobActivity{} = activity} <- Activity.await_activity(activity) do
+      {:ok, Repo.preload(activity, [:workbench_job, :agent_run, :agent_runs, :thoughts, :user])}
     end
   end
-  defp poll_activity(activity, _), do: {:ok, activity}
 
   defp existing_canvas(%WorkbenchJob{result: %Console.Schema.WorkbenchJobResult{canvas: canvas}}) when is_list(canvas), do: canvas
   defp existing_canvas(_), do: []
@@ -338,10 +348,11 @@ defmodule Console.AI.Workbench.Engine do
     do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
   defp function_tools(_), do: []
 
-  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}} = job) do
+  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do
     Enum.reject([
       (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
-      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil)
+      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil),
+      (if e, do: %KubeExec{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []

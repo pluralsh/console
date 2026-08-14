@@ -19,9 +19,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
     field :name,            :string
     field :namespace,       :string
     field :json,            :string
+    field :explanation,     :string
   end
 
-  @valid ~w(cluster operation group version kind name namespace json)a
+  @valid ~w(cluster operation group version kind name namespace json explanation)a
 
   def changeset(model, attrs) do
     model
@@ -39,7 +40,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
       end
     end)
     |> check_policy(model.job)
-    |> validate_required([:cluster, :version, :kind, :name, :json])
+    |> validate_required([:cluster, :version, :kind, :name, :json, :explanation])
   end
 
   def check_policy(changeset, %WorkbenchJob{modes: %{kubernetes: %{} = k8s}}) do
@@ -71,11 +72,11 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
     """
   end
 
-  def implement(%__MODULE__{operation: op, cluster: handle, group: g, version: v, kind: k, json: json} = comp) do
+  def implement(%__MODULE__{operation: op, cluster: handle, group: g, version: v, kind: k, json: json, explanation: explanation} = comp) do
     with {:cluster, %Cluster{} = cluster} <- {:cluster, Clusters.get_cluster_by_handle(handle)},
          {:kind, kind} <- {:kind, get_kind(cluster, g, v, k)},
          path <- Kube.Client.Base.path(g, v, kind, comp.namespace, comp.name) do
-      build_request(op, handle, path, json)
+      build_request(op, handle, path, json, explanation)
     else
       {:kind, _} -> {:ok, "I cannot fetch the details of secrets for you"}
       {:cluster, _} -> {:ok, "No cluster found matching handle=#{handle}"}
@@ -83,24 +84,26 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
     end
   end
 
-  defp build_request(:apply, handle, path, json) do
+  defp build_request(:apply, handle, path, json, explanation) do
     KubeRequest.new(
       handle: handle,
       method: "patch",
       path: path,
       content_type: "application/apply-patch+yaml",
       query_params: %{"fieldManager" => "plural", "force" => "true"},
-      body: json
+      body: json,
+      explanation: explanation
     )
   end
 
-  defp build_request(_, handle, path, json) do
+  defp build_request(_, handle, path, json, explanation) do
     KubeRequest.new(
       handle: handle,
       method: "put",
       path: path,
       content_type: "application/json",
-      body: json
+      body: json,
+      explanation: explanation
     )
   end
 end

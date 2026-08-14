@@ -1,0 +1,15 @@
+Investigate and, if appropriate, apply this Kubernetes resource recommendation for <%- cluster %><% if (service) { %> in the Plural service <%- service %><% } %>.
+
+## Kubernetes object
+- **Type:** <%- resource.type %>
+- **Namespace:** <%- resource.namespace %>
+- **Name:** <%- resource.name %>
+- **Container:** <%- resource.container %>
+
+## Recommendation
+| Resource | Current request | Recommended request |
+| --- | --- | --- |
+| CPU | <%- recommendation.cpuRequest %> | <%- recommendation.cpuRecommendation %> |
+| Memory | <%- recommendation.memoryRequest %> | <%- recommendation.memoryRecommendation %> |
+
+Gather the resource's full context, validate the proposed values against its workload requirements, and apply the recommendation if it is appropriate.

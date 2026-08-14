@@ -432,7 +432,7 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
             value={gitFolder}
             label="Git folder"
             placeholder="e.g. workbenches/skills"
-            hint="Folder within the source tree where skills files are located"
+            hint="Folder in the repository to scan for skill files"
             onChange={(e) =>
               update((d) => {
                 d.skills ??= {}
@@ -442,8 +442,8 @@ function GitSkillsSubStep({ formState, setFormState }: WorkbenchFormStepProps) {
             }
           />
           <FormField
-            label="Skills file names"
-            hint="Paste file names, using a newline per name.  Path is relative to the skills folder."
+            label="Additional skills file names"
+            hint="Any SKILL.md file in this folder, including nested paths, is discovered automatically. List other skill files here, one per line. Each file needs YAML front matter with a name and description, followed by Markdown instructions."
           >
             <EditableDivWrapperSC>
               <EditableDiv

@@ -147,6 +147,8 @@ func (c *gitLabClient) allComments(ctx context.Context, projectPath string, mrII
 					Author:    n.Author.Username,
 					Body:      n.Body,
 					CreatedAt: lo.FromPtr(n.CreatedAt),
+					FilePath:  n.Position.NewPath,
+					Line:      int(n.Position.NewLine),
 				})
 			}
 		}

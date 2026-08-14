@@ -7,6 +7,8 @@ defmodule Console.Schema.QueuedPrompt do
     field :dequeable_at, :utc_datetime_usec
     field :consumed_at,  :utc_datetime_usec
 
+    embeds_one :modes, WorkbenchJob.Modes, on_replace: :update
+
     belongs_to :workbench_job, WorkbenchJob
     belongs_to :user,          User
 
@@ -60,6 +62,7 @@ defmodule Console.Schema.QueuedPrompt do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:modes)
     |> put_new_change(:id, &Piazza.Ecto.UUID.generate_monotonic/0)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:workbench_job_id)

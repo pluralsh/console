@@ -79,12 +79,14 @@ export function WorkbenchModesForm({
   const kubernetesSummary = [
     kubernetes?.update ? 'Allow updates' : null,
     kubernetes?.delete ? 'Allow deletes' : null,
+    kubernetes?.exec ? 'Allow command execution' : null,
   ]
     .filter(Boolean)
     .join(', ')
 
   const codingEnabled = coding != null
-  const kubernetesEnabled = !!kubernetes?.update || !!kubernetes?.delete
+  const kubernetesEnabled =
+    !!kubernetes?.update || !!kubernetes?.delete || !!kubernetes?.exec
   const selectedActionKeys = useMemo(() => {
     const keys = new Set<Key>()
     if (codingEnabled) keys.add('coding')
@@ -235,6 +237,7 @@ export function WorkbenchModesForm({
               <WorkbenchKubernetesMutationFields
                 allowUpdates={!!kubernetes?.update}
                 allowDeletes={!!kubernetes?.delete}
+                allowExec={!!kubernetes?.exec}
                 onAllowUpdatesChange={(checked) => {
                   onChange({
                     ...value,
@@ -243,9 +246,11 @@ export function WorkbenchModesForm({
                       ...value?.kubernetes,
                       update: checked,
                       delete: value?.kubernetes?.delete ?? false,
+                      exec: value?.kubernetes?.exec ?? false,
                     },
                   })
-                  if (!checked && !kubernetes?.delete) setOpenPanel(null)
+                  if (!checked && !kubernetes?.delete && !kubernetes?.exec)
+                    setOpenPanel(null)
                 }}
                 onAllowDeletesChange={(checked) => {
                   onChange({
@@ -255,9 +260,25 @@ export function WorkbenchModesForm({
                       ...value?.kubernetes,
                       update: value?.kubernetes?.update ?? false,
                       delete: checked,
+                      exec: value?.kubernetes?.exec ?? false,
                     },
                   })
-                  if (!checked && !kubernetes?.update) setOpenPanel(null)
+                  if (!checked && !kubernetes?.update && !kubernetes?.exec)
+                    setOpenPanel(null)
+                }}
+                onAllowExecChange={(checked) => {
+                  onChange({
+                    ...value,
+                    plan: false,
+                    kubernetes: {
+                      ...value?.kubernetes,
+                      update: value?.kubernetes?.update ?? false,
+                      delete: value?.kubernetes?.delete ?? false,
+                      exec: checked,
+                    },
+                  })
+                  if (!checked && !kubernetes?.update && !kubernetes?.delete)
+                    setOpenPanel(null)
                 }}
               />
             </ModeActionRow>
@@ -324,6 +345,7 @@ function WorkbenchKubernetesNamespaceFields({
       kubernetes: {
         update: kubernetes?.update ?? false,
         delete: kubernetes?.delete ?? false,
+        exec: kubernetes?.exec ?? false,
         requireNamespaces,
         excludeNamespaces,
         ...kubernetes,

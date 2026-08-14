@@ -5,6 +5,7 @@ fragment Project on Project {
   name
   default
   description
+  disableInsights
 }
 
 fragment ProjectTiny on Project {

@@ -22,6 +22,7 @@ import {
   AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
   CHATBOTS_SETTINGS_REL_PATH,
+  CLOUD_CONNECTIONS_SETTINGS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
   PROJECT_SETTINGS_REL_PATH,
@@ -39,6 +40,7 @@ const getDirectory = (
   { path: AI_SETTINGS_REL_PATH, label: 'AI settings' },
   { path: WEBHOOKS_SETTINGS_REL_PATH, label: 'Webhooks settings' },
   { path: CHATBOTS_SETTINGS_REL_PATH, label: 'Chatbots settings' },
+  { path: CLOUD_CONNECTIONS_SETTINGS_REL_PATH, label: 'Cloud Connections' },
   { path: PROJECT_SETTINGS_REL_PATH, label: 'Project settings' },
   { path: NOTIFICATIONS_REL_PATH, label: 'Notifications' },
   {

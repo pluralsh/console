@@ -28,6 +28,19 @@
             "maximum": 100,
             "description": "Optional filter to return only clusters with a health_score less than or equal to this value."
         },
+        "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100,
+            "description": "Maximum number of clusters to return. Defaults to 100."
+        },
+        "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Number of matching clusters to skip for pagination. Use the prior offset plus limit to fetch the next page."
+        },
         "tags": {
             "type": "array",
             "description": "Key/value tags to filter and organize clusters.  Multiple tag pairs combined with AND semantics. If ignored, will search across all tags.",

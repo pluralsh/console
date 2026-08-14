@@ -1,17 +1,23 @@
 defmodule Console.Kubernetes.PodExec do
   use WebSockex
 
+  @remote_command_protocol "v4.channel.k8s.io"
+
   defmodule State, do: defstruct [:pid]
 
   def exec_url(ns, name, container, opts \\ []) do
-    args = URI.encode_query(%{
-      container: container,
-      command: opts[:command] || "/bin/sh",
-      tty: "true",
-      stdin: "true",
-      stdout: "true",
-      stderr: "true"
-    })
+    command = opts[:command] || "/bin/sh"
+    stdin = if opts[:stdin] == false, do: "false", else: "true"
+    parsed_command = OptionParser.split(command) |> Enum.map(& {"command", &1})
+    args = URI.encode_query(
+      [{"container", container} | parsed_command] ++
+      [
+        {"tty", "true"},
+        {"stdin", stdin},
+        {"stdout", "true"},
+        {"stderr", "true"}
+      ]
+    )
 
     "/api/v1/namespaces/#{Console.namespace(ns)}/pods/#{name}/exec?#{args}"
   end
@@ -19,11 +25,19 @@ defmodule Console.Kubernetes.PodExec do
   def start_link(path, pid, %{url: url, ca_cert: cert, auth: auth}) do
     Path.join(to_ws(url), path)
     |> WebSockex.start_link(__MODULE__, %State{pid: pid}, [
-      extra_headers: [{"Authorization", "Bearer #{auth.token}"}],
+      extra_headers: headers(auth.token),
       cacerts: certs(cert)
     ])
   end
   def start_link(path, pid), do: start_link(path, pid, Kazan.Server.in_cluster())
+
+  def start(path, pid, %{url: url, ca_cert: cert, auth: auth}) do
+    Path.join(to_ws(url), path)
+    |> WebSockex.start(__MODULE__, %State{pid: pid}, [
+      extra_headers: headers(auth.token),
+      cacerts: certs(cert)
+    ])
+  end
 
   def handle_info(:ping, state) do
     {:reply, {:binary, <<0>>}, state}
@@ -43,15 +57,33 @@ defmodule Console.Kubernetes.PodExec do
     WebSockex.send_frame(client, {:binary, <<4>> <> resize})
   end
 
+  def parse_exec_status(status) do
+    case Jason.decode(status) do
+      {:ok, %{"status" => "Success"}} -> :ok
+      {:ok, %{"message" => message}} when is_binary(message) -> {:error, message}
+      {:ok, response} -> {:error, "unexpected Kubernetes exec status: #{inspect(response)}"}
+      {:error, _} -> {:error, "invalid Kubernetes exec status: #{status}"}
+    end
+  end
+
   defp deliver_frame(<<1, frame::binary>>, pid),
     do: send_frame(pid, frame)
   defp deliver_frame(<<2, frame::binary>>, pid),
     do: send_frame(pid, frame)
   defp deliver_frame(<<3, frame::binary>>, pid),
-    do: send_frame(pid, frame)
+    do: send(pid, {:exec_status, frame})
+  defp deliver_frame(<<255, _frame::binary>>, _pid),
+    do: :ok
   defp deliver_frame(frame, pid), do: send_frame(pid, frame)
 
   defp send_frame(pid, frame), do: send(pid, {:stdo, frame})
+
+  defp headers(token) do
+    [
+      {"Authorization", "Bearer #{token}"},
+      {"Sec-WebSocket-Protocol", @remote_command_protocol}
+    ]
+  end
 
   defp to_ws("https://" <> url), do: "wss://#{url}"
   defp to_ws("http://" <> url), do: "ws://#{url}"

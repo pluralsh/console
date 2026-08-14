@@ -16,7 +16,7 @@ on:
 jobs:
   test:
     name: Unit test
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -30,7 +30,7 @@ jobs:
       - run: yarn test
   lint:
     name: Lint
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash

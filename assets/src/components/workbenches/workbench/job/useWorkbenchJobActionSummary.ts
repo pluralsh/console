@@ -13,7 +13,8 @@ export function useWorkbenchJobActionSummary(jobId: string) {
   return {
     hasActions:
       (job?.functionActions?.edges ?? []).some((edge) => !!edge?.node?.id) ||
-      (job?.kubernetesActions?.edges ?? []).some((edge) => !!edge?.node?.id),
+      (job?.kubernetesActions?.edges ?? []).some((edge) => !!edge?.node?.id) ||
+      (job?.execActions?.edges ?? []).some((edge) => !!edge?.node?.id),
     hasActionsAwaitingApproval: (job?.pendingActions?.edges ?? []).some(
       (edge) => !!edge?.node?.id
     ),

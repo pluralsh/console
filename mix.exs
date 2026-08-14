@@ -187,7 +187,7 @@ defmodule Console.MixProject do
       {:scribe, "~> 0.11"},
       {:bandit, "~> 1.12"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.18"},
+      {:req_llm, "~> 1.20"},
       {:sweet_xml, ">= 0.0.0"},
       {:jaqex, "~> 0.1.3"},
       {:waffle, "~> 1.1", git: "https://github.com/jopedroliveira/waffle.git", tag: "v1.1.9-azure.3", override: true},
@@ -198,7 +198,7 @@ defmodule Console.MixProject do
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},
-      {:req, "~> 0.5.15", override: true},
+      {:req, "~> 0.7.2", override: true},
       {:mint, "~> 1.6", override: true},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},

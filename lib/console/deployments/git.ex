@@ -100,6 +100,7 @@ defmodule Console.Deployments.Git do
   def get_catalog!(id), do: Repo.get!(Catalog, id)
 
   def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
+  def get_pr_automation_by_name!(name), do: Repo.get_by!(PrAutomation, name: name)
 
   def get_governance_by_name!(name), do: Repo.get_by!(PrGovernance, name: name)
 

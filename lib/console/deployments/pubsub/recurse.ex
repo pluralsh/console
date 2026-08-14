@@ -289,9 +289,14 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunCreated do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
+  alias Console.AI.Workbench.Activity
   alias Console.Deployments.Agents
+  alias Console.Schema.AgentRun
 
-  def process(%@for{item: run}), do: Agents.record_repository(run)
+  def process(%@for{item: %AgentRun{} = run}) do
+    Activity.publish(run)
+    Agents.record_repository(run)
+  end
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
@@ -334,6 +339,28 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do
   def process(%{item: %{type: :user} = activity}), do: Console.Pipelines.AI.Workbench.Producer.kick(activity)
+  def process(_), do: :ok
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityUpdated do
+  alias Console.AI.Workbench.Activity
+  alias Console.Schema.WorkbenchJobActivity
+  import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
+  alias Console.Deployments.Workbenches
+
+  def process(%{item: %WorkbenchJobActivity{type: type, workbench_job_id: job_id} = activity}) when is_action(type) do
+    Activity.publish(activity)
+
+    case Workbenches.get_workbench_job(job_id) do
+      %Console.Schema.WorkbenchJob{status: status} = job when status != :running ->
+        with {:ok, job} <- Workbenches.resume_job(job) do
+          Console.Pipelines.AI.Workbench.Producer.kick(job)
+        end
+      _ ->
+        :ok
+    end
+  end
+  def process(%{item: %WorkbenchJobActivity{} = activity}), do: Activity.publish(activity)
   def process(_), do: :ok
 end
 

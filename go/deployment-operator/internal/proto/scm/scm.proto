@@ -18,6 +18,9 @@ message PRComment {
   string author = 3;
   string body = 4;
   int64 created_at_unix = 5;
+  string file_path = 6;
+  int32 start_line = 7;
+  int32 line = 8;
 }
 
 message CICheck {

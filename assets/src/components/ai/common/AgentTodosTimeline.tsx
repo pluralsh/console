@@ -5,7 +5,7 @@ import {
 } from '@pluralsh/design-system'
 import {
   Body2BoldP,
-  Body2P,
+  CaptionP,
   Subtitle1H1,
 } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
@@ -47,7 +47,7 @@ export function AgentTodosTimeline({
                 <NodeSC>
                   {todo.done ? (
                     <CheckOutlineIcon
-                      color={colors['icon-light']}
+                      color={colors['icon-success']}
                       size={16}
                     />
                   ) : isActivePending ? (
@@ -207,7 +207,7 @@ const TodoBodySC = styled.div(({ theme }) => ({
   paddingBottom: theme.spacing.small,
 }))
 
-const DescriptionSC = styled(Body2P)<{ $expanded?: boolean }>(
+const DescriptionSC = styled(CaptionP)<{ $expanded?: boolean }>(
   ({ $expanded }) => ({
     ...(!$expanded && {
       display: '-webkit-box',

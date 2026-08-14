@@ -5,6 +5,7 @@ fragment ProjectFragment on Project {
     name
     default
     description
+    disableInsights
     readBindings { ...PolicyBindingFragment }
     writeBindings { ...PolicyBindingFragment }
 }

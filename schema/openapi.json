@@ -2145,6 +2145,9 @@
             "format": "date-time",
             "type": "string"
           },
+          "modes": {
+            "$ref": "#/components/schemas/WorkbenchJobModes"
+          },
           "prompt": {
             "description": "The prompt text",
             "type": "string"
@@ -2172,6 +2175,9 @@
             "description": "When the prompt becomes eligible to dequeue",
             "format": "date-time",
             "type": "string"
+          },
+          "modes": {
+            "$ref": "#/components/schemas/WorkbenchJobModes"
           },
           "prompt": {
             "description": "The prompt to send when dequeued",
@@ -3922,6 +3928,39 @@
         ]
       }
     },
+    "/v1/api/ai/sentinels/name": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sentinel"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetSentinelByName",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
     "/v1/api/ai/sentinels/{id}": {
       "get": {
         "tags": [
@@ -5471,6 +5510,41 @@
         ]
       }
     },
+    "/v1/api/cd/pipelines/name": {
+      "get": {
+        "tags": [
+          "pipelines"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "description": "Retrieves a single pipeline by its exact name, including its stages, edges, and gates",
+        "operationId": "GetPipelineByName",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "summary": "Get a pipeline by name",
+        "x-required-scopes": [
+          "pipelines.read"
+        ]
+      }
+    },
     "/v1/api/cd/pipelines/{id}": {
       "get": {
         "tags": [
@@ -6353,6 +6427,39 @@
             "required": false,
             "schema": {
               "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/prautomations/name": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrAutomation"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetPrAutomationByName",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ],

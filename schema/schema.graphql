@@ -1662,6 +1662,8 @@ type RootSubscriptionType {
     jobId: ID!
   ): WorkbenchCanvasBlock
 
+  workbenchExecStream(activityId: ID!): WorkbenchJobExecStream
+
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
@@ -2776,6 +2778,7 @@ enum WorkbenchJobActivityType {
   FUNCTION
   KUBERNETES
   VERIFY
+  EXEC
 }
 
 enum WorkbenchCanvasBlockType {
@@ -2876,6 +2879,9 @@ input WorkbenchJobKubernetesModesAttributes {
 
   "whether kubernetes delete actions are enabled"
   delete: Boolean
+
+  "whether kubernetes exec actions are enabled"
+  exec: Boolean
 
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
@@ -3630,6 +3636,9 @@ input QueuedPromptAttributes {
 
   "when this prompt becomes eligible to dequeue"
   dequeableAt: DateTime!
+
+  "mode-specific overrides to apply when this prompt is dequeued"
+  modes: WorkbenchJobModesAttributes
 }
 
 type QueuedPromptSummary {
@@ -3923,6 +3932,9 @@ type WorkbenchJobKubernetesModes {
   "whether kubernetes delete actions are enabled"
   delete: Boolean
 
+  "whether kubernetes exec actions are enabled"
+  exec: Boolean
+
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
 
@@ -4037,11 +4049,17 @@ type WorkbenchJobActivityResult {
   "error from the activity"
   error: String
 
+  "why this action is needed and its expected effect"
+  explanation: String
+
   "function call approval payload when present"
   functionCall: WorkbenchJobActivityFunctionCall
 
   "kubernetes request approval payload when present"
   kubeRequest: WorkbenchJobActivityKubeRequest
+
+  "kubernetes exec payload when present"
+  kubeExec: WorkbenchJobActivityKubeExec
 
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
@@ -4112,6 +4130,26 @@ type WorkbenchJobActivityKubeRequest {
 
   "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
   current: Map
+}
+
+type WorkbenchJobActivityKubeExec {
+  "the target cluster handle"
+  handle: String
+
+  "the command executed in the pod"
+  command: String
+
+  "the target namespace"
+  namespace: String
+
+  "the target pod name"
+  pod: String
+
+  "the target container name"
+  container: String
+
+  "why this command is needed and its expected effect"
+  explanation: String
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -4380,6 +4418,9 @@ type QueuedPrompt {
 
   "when this prompt was consumed"
   consumedAt: DateTime
+
+  "mode-specific overrides applied when this prompt is dequeued"
+  modes: WorkbenchJobModes
 
   "user this prompt will run as"
   userId: ID
@@ -5067,6 +5108,12 @@ type WorkbenchJobProgress {
 type WorkbenchTextStream {
   activityId: ID
   text: String
+}
+
+type WorkbenchJobExecStream {
+  activityId: ID
+  text: String
+  seq: Int
 }
 
 type WorkbenchConnection {
@@ -6177,6 +6224,7 @@ enum Provider {
 input ProjectAttributes {
   name: String!
   description: String
+  disableInsights: Boolean
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
 }
@@ -6611,6 +6659,8 @@ type Project {
   description: String
 
   default: Boolean
+
+  disableInsights: Boolean
 
   "list all alerts discovered for this project"
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection

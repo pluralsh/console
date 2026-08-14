@@ -80,7 +80,8 @@ export function WorkbenchJobActivity({
 
   if (
     type === WorkbenchJobActivityType.Function ||
-    type === WorkbenchJobActivityType.Kubernetes
+    type === WorkbenchJobActivityType.Kubernetes ||
+    type === WorkbenchJobActivityType.Exec
   )
     return <WorkbenchJobInlineActionCard activity={activity} />
 

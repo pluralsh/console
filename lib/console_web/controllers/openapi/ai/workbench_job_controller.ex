@@ -62,7 +62,7 @@ defmodule ConsoleWeb.OpenAPI.AI.WorkbenchJobController do
     tags: ["workbench"],
     "x-required-scopes": ["workbench.read"],
     parameters: [
-      id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the workbench"]
+      id: [in: :path, schema: %{type: :string}, required: true, description: "The workbench ID or name:<name> reference"]
     ],
     request_body: OpenAPI.AI.WorkbenchJobInput,
     responses: [ok: OpenAPI.AI.WorkbenchJob]
@@ -70,8 +70,11 @@ defmodule ConsoleWeb.OpenAPI.AI.WorkbenchJobController do
     user = Console.Guardian.Plug.current_resource(conn)
 
     to_attrs(conn.private.oaskit.body_params)
-    |> Workbenches.create_workbench_job(workbench_id, user)
+    |> Workbenches.create_workbench_job(resolve_workbench(workbench_id), user)
     |> when_ok(&Console.Repo.preload(&1, :result))
     |> successful(conn, OpenAPI.AI.WorkbenchJob)
   end
+
+  defp resolve_workbench("name:" <> name), do: Workbenches.get_workbench_by_name!(name)
+  defp resolve_workbench(id), do: Workbenches.get_workbench!(id)
 end

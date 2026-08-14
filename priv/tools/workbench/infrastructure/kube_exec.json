@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "cluster": {
+      "type": "string",
+      "description": "The Plural cluster handle identifying the cluster that contains the target pod"
+    },
+    "namespace": {
+      "type": "string",
+      "description": "The Kubernetes namespace containing the target pod"
+    },
+    "pod": {
+      "type": "string",
+      "description": "The exact name of the pod in which to execute the command"
+    },
+    "container": {
+      "type": "string",
+      "description": "The exact name of the container in the target pod in which to execute the command"
+    },
+    "command": {
+      "type": "string",
+      "description": "The complete command to execute in the target container. Prefer read-only diagnostic commands and limit output when possible."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Clearly explain why this command is needed, the target pod and container, the command's expected effect, and any potential impact so the user can make an informed approval decision"
+    }
+  },
+  "required": ["cluster", "namespace", "pod", "container", "command", "explanation"]
+}

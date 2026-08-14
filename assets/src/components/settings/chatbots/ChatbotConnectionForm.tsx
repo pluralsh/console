@@ -148,13 +148,13 @@ export function ChatbotConnectionForm({
                   type: key as ChatProviderConnectionType,
                 }))
               }
-              leftContent={chatProviderConnectionIcon(formState.type, false)}
+              leftContent={chatProviderConnectionIcon(formState.type)}
             >
               {SUPPORTED_TYPES.map((type) => (
                 <ListBoxItem
                   key={type}
                   label={chatProviderConnectionLabel(type)}
-                  leftContent={chatProviderConnectionIcon(type, false)}
+                  leftContent={chatProviderConnectionIcon(type)}
                 />
               ))}
             </Select>

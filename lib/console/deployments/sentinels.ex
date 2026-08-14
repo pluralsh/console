@@ -84,13 +84,13 @@ defmodule Console.Deployments.Sentinels do
   @doc """
   Runs a sentinel if the user has write access to the sentinel
   """
-  @spec run_sentinel(binary, User.t) :: sentinel_run_resp
-  def run_sentinel(overrides, id, %User{} = user) do
+  @spec run_sentinel(map, binary | Sentinel.t(), User.t()) :: sentinel_run_resp
+  def run_sentinel(overrides, id, %User{} = user) when is_binary(id),
+    do: run_sentinel(overrides, get_sentinel!(id), user)
+
+  def run_sentinel(overrides, %Sentinel{} = sentinel, %User{} = user) do
     start_transaction()
-    |> add_operation(:fetch, fn _ ->
-      get_sentinel!(id)
-      |> allow(user, :write)
-    end)
+    |> add_operation(:fetch, fn _ -> allow(sentinel, user, :write) end)
     |> add_operation(:run, fn %{fetch: sentinel} -> run_sentinel(overrides, sentinel) end)
     |> execute(extract: :run)
   end

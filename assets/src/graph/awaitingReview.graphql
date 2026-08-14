@@ -59,6 +59,7 @@ fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
   status
   prompt
   result {
+    explanation
     functionCall {
       name
       input
@@ -84,6 +85,13 @@ fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
       handle
       method
       path
+    }
+    kubeExec {
+      handle
+      command
+      namespace
+      pod
+      container
     }
   }
   workbenchJob {

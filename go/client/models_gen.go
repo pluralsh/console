@@ -7113,10 +7113,11 @@ type PreviewEnvironmentTemplateEdge struct {
 
 // A unit of organization to control permissions for a set of objects within your Console instance
 type Project struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
-	Default     *bool   `json:"default,omitempty"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Description     *string `json:"description,omitempty"`
+	Default         *bool   `json:"default,omitempty"`
+	DisableInsights *bool   `json:"disableInsights,omitempty"`
 	// list all alerts discovered for this project
 	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// read policy across this project
@@ -7128,10 +7129,11 @@ type Project struct {
 }
 
 type ProjectAttributes struct {
-	Name          string                     `json:"name"`
-	Description   *string                    `json:"description,omitempty"`
-	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	Name            string                     `json:"name"`
+	Description     *string                    `json:"description,omitempty"`
+	DisableInsights *bool                      `json:"disableInsights,omitempty"`
+	ReadBindings    []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings   []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ProjectConnection struct {
@@ -7360,6 +7362,8 @@ type QueuedPrompt struct {
 	DequeableAt *string `json:"dequeableAt,omitempty"`
 	// when this prompt was consumed
 	ConsumedAt *string `json:"consumedAt,omitempty"`
+	// mode-specific overrides applied when this prompt is dequeued
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// user this prompt will run as
 	UserID *string `json:"userId,omitempty"`
 	// the job this prompt will be sent to
@@ -7375,6 +7379,8 @@ type QueuedPromptAttributes struct {
 	Prompt string `json:"prompt"`
 	// when this prompt becomes eligible to dequeue
 	DequeableAt string `json:"dequeableAt"`
+	// mode-specific overrides to apply when this prompt is dequeued
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type QueuedPromptConnection struct {
@@ -10542,6 +10548,21 @@ type WorkbenchJobActivityJobUpdate struct {
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
 }
 
+type WorkbenchJobActivityKubeExec struct {
+	// the target cluster handle
+	Handle *string `json:"handle,omitempty"`
+	// the command executed in the pod
+	Command *string `json:"command,omitempty"`
+	// the target namespace
+	Namespace *string `json:"namespace,omitempty"`
+	// the target pod name
+	Pod *string `json:"pod,omitempty"`
+	// the target container name
+	Container *string `json:"container,omitempty"`
+	// why this command is needed and its expected effect
+	Explanation *string `json:"explanation,omitempty"`
+}
+
 type WorkbenchJobActivityKubeRequest struct {
 	// the target cluster handle
 	Handle *string `json:"handle,omitempty"`
@@ -10577,10 +10598,14 @@ type WorkbenchJobActivityResult struct {
 	Output *string `json:"output,omitempty"`
 	// error from the activity
 	Error *string `json:"error,omitempty"`
+	// why this action is needed and its expected effect
+	Explanation *string `json:"explanation,omitempty"`
 	// function call approval payload when present
 	FunctionCall *WorkbenchJobActivityFunctionCall `json:"functionCall,omitempty"`
 	// kubernetes request approval payload when present
 	KubeRequest *WorkbenchJobActivityKubeRequest `json:"kubeRequest,omitempty"`
+	// kubernetes exec payload when present
+	KubeExec *WorkbenchJobActivityKubeExec `json:"kubeExec,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
 	// dashboard canvas blocks for this activity
@@ -10668,11 +10693,19 @@ type WorkbenchJobEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobExecStream struct {
+	ActivityID *string `json:"activityId,omitempty"`
+	Text       *string `json:"text,omitempty"`
+	Seq        *int64  `json:"seq,omitempty"`
+}
+
 type WorkbenchJobKubernetesModes struct {
 	// whether kubernetes update actions are enabled
 	Update *bool `json:"update,omitempty"`
 	// whether kubernetes delete actions are enabled
 	Delete *bool `json:"delete,omitempty"`
+	// whether kubernetes exec actions are enabled
+	Exec *bool `json:"exec,omitempty"`
 	// namespaces the agent can never act in
 	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
 	// if set, actions are only allowed in these namespaces
@@ -10684,6 +10717,8 @@ type WorkbenchJobKubernetesModesAttributes struct {
 	Update *bool `json:"update,omitempty"`
 	// whether kubernetes delete actions are enabled
 	Delete *bool `json:"delete,omitempty"`
+	// whether kubernetes exec actions are enabled
+	Exec *bool `json:"exec,omitempty"`
 	// namespaces the agent can never act in
 	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
 	// if set, actions are only allowed in these namespaces
@@ -18006,6 +18041,7 @@ const (
 	WorkbenchJobActivityTypeFunction       WorkbenchJobActivityType = "FUNCTION"
 	WorkbenchJobActivityTypeKubernetes     WorkbenchJobActivityType = "KUBERNETES"
 	WorkbenchJobActivityTypeVerify         WorkbenchJobActivityType = "VERIFY"
+	WorkbenchJobActivityTypeExec           WorkbenchJobActivityType = "EXEC"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -18026,11 +18062,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeFunction,
 	WorkbenchJobActivityTypeKubernetes,
 	WorkbenchJobActivityTypeVerify,
+	WorkbenchJobActivityTypeExec,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify, WorkbenchJobActivityTypeExec:
 		return true
 	}
 	return false

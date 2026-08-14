@@ -1,14 +1,21 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   use Console.AI.Tools.Agent.Base
+  alias Console.AI.Tools.Workbench.Output
   alias Console.Deployments.Clusters
   alias Console.Repo
   alias Console.Schema.{Cluster, User}
 
+  @default_limit 100
+  @max_limit 500
+
   embedded_schema do
-    field :user, :map, virtual: true
+    field :user,    :map, virtual: true
     field :q,       :string
     field :project, :string
     field :distro,  Console.Schema.Cluster.Distro
+    field :limit,   :integer, default: @default_limit
+    field :offset,  :integer, default: 0
+
     field :max_health_score, :integer
 
     embeds_many :tags, Tag, on_replace: :delete do
@@ -17,12 +24,14 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
     end
   end
 
-  @valid ~w(q project distro max_health_score)a
+  @valid ~w(q project distro max_health_score limit offset)a
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
     |> validate_number(:max_health_score, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
+    |> validate_number(:limit, greater_than: 0, less_than_or_equal_to: @max_limit)
+    |> validate_number(:offset, greater_than_or_equal_to: 0)
     |> cast_embed(:tags, with: &tag_changeset/2)
   end
 
@@ -30,9 +39,18 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "plrl_clusters"
-  def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON; use plrl_cluster with a handle or cluster_id for full details."
+  def description(_), do: "List Kubernetes clusters the current user can read. Returns compact JSON in pages of up to #{@max_limit} clusters; use limit and offset to paginate, or plrl_cluster with a handle or cluster_id for full details."
 
-  def implement(%__MODULE__{user: %User{} = user, q: q, project: project, distro: distro, tags: tags, max_health_score: max_health_score}) do
+  def implement(%__MODULE__{
+        user: %User{} = user,
+        q: q,
+        project: project,
+        distro: distro,
+        tags: tags,
+        max_health_score: max_health_score,
+        limit: limit,
+        offset: offset
+      }) do
     Cluster.ordered()
     |> Cluster.for_user(user)
     |> maybe_distro(distro)
@@ -41,9 +59,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
     |> maybe_max_health_score(max_health_score)
     |> Cluster.preloaded([:tags, :project])
     |> maybe_search(q)
-    |> Repo.all()
+    |> Repo.paginate(limit: limit, offset: offset)
     |> Enum.map(&cluster_brief/1)
-    |> Jason.encode()
+    |> Output.json()
   end
 
   defp maybe_search(query, q) when is_binary(q) and q != "", do: Cluster.search(query, q)

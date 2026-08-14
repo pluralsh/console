@@ -37,6 +37,7 @@ type AgentRun struct {
 	Mode       console.AgentRunMode   `json:"mode"`
 	Status     console.AgentRunStatus `json:"status"`
 	FlowID     *string                `json:"flowId,omitempty"`
+	User       *AgentUser             `json:"user,omitempty"`
 
 	// Credentials for SCM and Plural Console
 	ScmCreds    *console.ScmCredentialFragment `json:"scmCreds,omitempty"`
@@ -57,6 +58,13 @@ type AgentRun struct {
 	Approval        bool
 	ApprovedAt      *string
 	Followup        bool
+}
+
+// AgentUser is the Console user who initiated the agent run. Git commits
+// created by the run use this identity when it is available.
+type AgentUser struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type AgentSkill struct {
@@ -151,6 +159,13 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 					Contents:    skill.Contents,
 				}
 			}),
+	}
+
+	if fragment.User != nil {
+		run.User = &AgentUser{
+			Name:  fragment.User.Name,
+			Email: fragment.User.Email,
+		}
 	}
 
 	if fragment.Flow != nil {

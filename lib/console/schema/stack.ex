@@ -296,7 +296,11 @@ defmodule Console.Schema.Stack do
 
   def ai_pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(a in query, where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now, order_by: [asc: :ai_poll_at])
+    from(a in query,
+      join: p in assoc(a, :project),
+      where: (is_nil(p.disable_insights) or not p.disable_insights) and (is_nil(a.ai_poll_at) or a.ai_poll_at < ^now),
+      order_by: [asc: :ai_poll_at]
+    )
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)

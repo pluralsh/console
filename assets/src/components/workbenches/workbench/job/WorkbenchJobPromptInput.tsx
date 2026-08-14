@@ -1,13 +1,15 @@
 import {
   useCancelWorkbenchJobMutation,
   useCreateQueuedPromptMutation,
-  useCreateWorkbenchMessageMutation,
+  useWorkbenchQuery,
   WorkbenchJobActivitiesQuery,
+  WorkbenchJobModelAttributes,
+  WorkbenchJobModesAttributes,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
 
-import { Tooltip } from '@pluralsh/design-system'
+import { Flex, Tooltip } from '@pluralsh/design-system'
 import {
   ChatInputSimple,
   ChatInputSimpleRef,
@@ -15,12 +17,20 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import styled from 'styled-components'
-import { appendActivityToCache } from './useWorkbenchJobStreams'
-import { isJobRunning } from './WorkbenchJobActivity'
 import {
   queuedPromptsFromJob,
   WorkbenchJobPromptQueue,
 } from './WorkbenchJobPromptQueue'
+import { WorkbenchModelSelector } from '../WorkbenchModelSelector'
+import {
+  WorkbenchPromptOptionPills,
+  WorkbenchPromptOptionsSelector,
+} from '../WorkbenchPromptModeSelector/WorkbenchPromptOptionsSelector'
+import {
+  defaultPromptModesFromWorkbench,
+  modesAttributes,
+  modesFormValue,
+} from '../WorkbenchPromptModeSelector/workbenchPromptModes'
 
 const QUEUE_REFETCH_QUERIES = [
   'WorkbenchJobActivities',
@@ -35,18 +45,25 @@ export function WorkbenchJobPromptInput({
 }) {
   const [newMessage, setNewMessage] = useState('')
   const [cancelModalOpen, setCancelModalOpen] = useState(false)
+  const [promptModes, setPromptModes] =
+    useState<WorkbenchJobModesAttributes | null>(null)
+  const [selectedModel, setSelectedModel] =
+    useState<WorkbenchJobModelAttributes | null>(null)
   const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const queuedPrompts = queuedPromptsFromJob(job)
-
-  const [
-    createMessage,
-    { loading: createMessageLoading, error: createMessageError },
-  ] = useCreateWorkbenchMessageMutation({
-    update: (cache, { data }) =>
-      appendActivityToCache(cache, job?.id ?? '', data?.createWorkbenchMessage),
-    onCompleted: () => chatInputRef.current?.resetInput?.(),
-    refetchQueries: ['WorkbenchJob'],
+  const workbenchId = job?.workbench?.id
+  const { data: workbenchData } = useWorkbenchQuery({
+    variables: { id: workbenchId },
+    skip: !workbenchId,
   })
+  const effectivePromptModes =
+    promptModes ??
+    modesAttributes(modesFormValue(job?.modes)) ??
+    defaultPromptModesFromWorkbench(
+      workbenchData?.workbench,
+      workbenchId ?? null
+    ) ??
+    null
 
   const [
     createQueuedPrompt,
@@ -63,31 +80,33 @@ export function WorkbenchJobPromptInput({
       onCompleted: () => setCancelModalOpen(false),
     })
 
-  const isRunning = isJobRunning(job?.status)
   const canCancel =
     job?.status === WorkbenchJobStatus.Pending ||
     job?.status === WorkbenchJobStatus.Running
-  const submitLoading = createMessageLoading || createQueuedLoading
-  const submitError = createMessageError || createQueuedError
+  const submitLoading = createQueuedLoading
+  const submitError = createQueuedError
 
   const submitJob = () => {
     if (!job?.id || !newMessage) return
 
-    if (isRunning) {
-      createQueuedPrompt({
-        variables: {
-          jobId: job.id,
-          attributes: {
-            prompt: newMessage,
-            dequeableAt: new Date().toISOString(),
-          },
-        },
-      })
-      return
-    }
+    const promptModeAttributes = modesAttributes(effectivePromptModes)
+    const modes =
+      promptModeAttributes || selectedModel
+        ? {
+            ...(promptModeAttributes ?? {}),
+            ...(selectedModel ? { model: selectedModel } : {}),
+          }
+        : undefined
 
-    createMessage({
-      variables: { jobId: job.id, attributes: { prompt: newMessage } },
+    createQueuedPrompt({
+      variables: {
+        jobId: job.id,
+        attributes: {
+          prompt: newMessage,
+          dequeableAt: new Date().toISOString(),
+          ...(modes ? { modes } : {}),
+        },
+      },
     })
   }
 
@@ -118,6 +137,31 @@ export function WorkbenchJobPromptInput({
           enableAutoComplete
           workbenchId={job?.workbench?.id}
           workbenchRepositorySource={job?.workbench}
+          options={
+            <Flex
+              align="center"
+              gap="xsmall"
+              wrap="wrap"
+              css={{ minHeight: 32, minWidth: 0 }}
+            >
+              <WorkbenchPromptOptionsSelector
+                workbenchId={workbenchId}
+                value={effectivePromptModes}
+                onChange={setPromptModes}
+                disabled={!job || submitLoading}
+                workbenchModes={workbenchData?.workbench?.modes}
+              />
+              <WorkbenchModelSelector
+                value={selectedModel}
+                onChange={(model) => setSelectedModel(model ?? null)}
+                disabled={!job || submitLoading}
+              />
+              <WorkbenchPromptOptionPills
+                value={effectivePromptModes}
+                onChange={setPromptModes}
+              />
+            </Flex>
+          }
           submitButton={
             canCancel ? (
               <Tooltip label="Cancel job">

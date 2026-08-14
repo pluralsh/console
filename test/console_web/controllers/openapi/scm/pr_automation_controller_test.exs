@@ -22,6 +22,21 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
     end
   end
 
+  describe "#show_by_name/2" do
+    test "returns the PR automation by name", %{conn: conn} do
+      user = admin_user()
+      pra = insert(:pr_automation, name: "named-automation")
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/scm/prautomations/name?name=named-automation")
+        |> json_response(200)
+
+      assert result["id"] == pra.id
+    end
+  end
+
   describe "#index/2" do
     test "returns the list of PR automations", %{conn: conn} do
       user = admin_user()
@@ -173,6 +188,38 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       conn
       |> add_auth_headers(user)
       |> json_post("/v1/api/scm/prautomations/#{pra.id}/invoke", %{
+        branch: "feature-branch",
+        context: %{key: "value"}
+      })
+      |> json_response(403)
+    end
+
+    test "it invokes a PR automation by name reference", %{conn: conn} do
+      user = admin_user()
+      insert(:pr_automation, name: "named-automation", create_bindings: [%{user_id: user.id}])
+      expect(Dispatcher, :create, fn _, _, _ ->
+        {:ok, %{url: "https://github.com/test/repo/pull/1", title: "Test PR"}}
+      end)
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> json_post("/v1/api/scm/prautomations/name:named-automation/invoke", %{
+          branch: "feature-branch",
+          context: %{key: "value"}
+        })
+        |> json_response(200)
+
+      assert result["id"]
+    end
+
+    test "it respects create bindings for name references", %{conn: conn} do
+      user = insert(:user)
+      pra = insert(:pr_automation, name: "forbidden-named-automation")
+
+      conn
+      |> add_auth_headers(user)
+      |> json_post("/v1/api/scm/prautomations/name:#{pra.name}/invoke", %{
         branch: "feature-branch",
         context: %{key: "value"}
       })

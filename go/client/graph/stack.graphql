@@ -357,7 +357,7 @@ query GetStackRunBase($id: ID!) {
 
 mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
     updateStackRun(id: $id, attributes: $attributes) {
-        ...StackRunBaseFragment
+        ...StackRunIdFragment
     }
 }
 
