@@ -4,6 +4,45 @@ release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
 helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
+- version: 0.20.0
+  kube: ['1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['KServe 0.20.0 includes new/updated CRD and resources Helm chart
+        artifacts (kserve-crd, kserve-resources, llmisvc-crd/resources, localmodel-crd/resources,
+        runtime-configs). Expect CRD and controller rollout as part of upgrade.',
+      Gateway API dependency bumped to v1.5.1; Envoy AI Gateway bumped to v1.0.0 and
+        Envoy Gateway to v1.8.1 (ensure cluster dependencies match)., 'LLMInferenceService
+        routing resources migrated to llm-d.ai CRDs; e2e updates indicate API group
+        changes for related CRDs (e.g., InferenceObjective).', Modelcache RBAC updated
+        (adds delete verb for localmodel PV/PVC)., LocalModel controller and related
+        resources include race-condition fixes; storage/OCI mounting support expanded.,
+      'LLMInferenceService webhook install/rollout ordering tightened in CI, implying
+        upgrade sequencing/rollout readiness is important. Look for webhook cert readiness
+        before proceeding.']
+    features: [Forward Authorization header from transformer to predictor (helps auth
+        propagation through inference pipeline)., 'Support multiple OCI sources in
+        storageUris and add oci+native:// ImageVolume mounting for OCI artifacts.',
+      Add vLLM as a supported runtime; plus new AutoGluon server runtime option.,
+      'LLMInferenceService: model-based routing gates with models surfaced in status;
+        stable/version-independent URLs discovery; traffic splitting APIs including
+        group routing machinery and readiness gating.', 'LLMInferenceService: KV cache
+        offloading spec (CPU tiering + secondary filesystem tiers) and additional
+        llm-d baseline default alignments.', Add Managed DRA support for LLMInferenceService
+        (resource allocation integrations)., Add platform hooks for InferenceService
+        service customization; canary rollout support for RawDeployment mode., Add
+        support for confidential model serving.]
+    breaking_changes: [LLMInferenceService routing resources migrated to llm-d.ai
+        CRDs; existing clusters may need CRD updates and any manifests/controllers
+        referencing old API groups must be updated accordingly., 'Dependency bumps
+        (Gateway API v1.5.1, Envoy AI Gateway v1.0.0, Envoy Gateway v1.8.1) can require
+        compatible versions installed in-cluster; mismatches may break HTTPRoute/Gateway
+        behavior.', 'Security/dependency update: Starlette bumped to >=1.0.1 (CVE
+        fix). If you pin images or python deps in custom runtimes, ensure compatibility.']
+  chart_version: v0.20.0
+  images: []
 - version: 0.19.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
