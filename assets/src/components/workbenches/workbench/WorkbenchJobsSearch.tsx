@@ -181,7 +181,10 @@ function WorkbenchJobSearchResultRow({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <PRsModalIcon prs={prs} />
+        <PRsModalIcon
+          prs={prs}
+          type="tertiary"
+        />
         <JobConclusionIcon result={job.result} />
         <RunStatusIcon
           fullColor

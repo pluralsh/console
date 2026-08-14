@@ -139,19 +139,10 @@ defmodule Console.AI.Tools.Workbench.KubeShell do
 
   defp wait_for_result() do
     receive do
-      {:exec_status, status} -> parse_exec_status(status)
+      {:exec_status, status} -> PodExec.parse_exec_status(status)
       :exec_stream_closed -> :ok
     after
       @timeout -> {:error, "shell command timed out after 30 minutes"}
-    end
-  end
-
-  defp parse_exec_status(status) do
-    case Jason.decode(status) do
-      {:ok, %{"status" => "Success"}} -> :ok
-      {:ok, %{"message" => message}} when is_binary(message) -> {:error, message}
-      {:ok, response} -> {:error, "unexpected Kubernetes exec status: #{inspect(response)}"}
-      {:error, _} -> {:error, "invalid Kubernetes exec status: #{status}"}
     end
   end
 end

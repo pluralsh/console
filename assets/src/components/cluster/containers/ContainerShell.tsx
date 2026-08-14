@@ -56,8 +56,9 @@ export function Shell({
 }) {
   const { command, setCommand, defaultCommand, isDefault } = useCommand(null)
 
-  const cluster = clusterId ?? ''
-  const room = `pod:${cluster}:${namespace}:${name}:${container}`
+  const room = clusterId
+    ? `pod:${clusterId}:${namespace}:${name}:${container}`
+    : `pod:${namespace}:${name}:${container}`
 
   return (
     <Flex

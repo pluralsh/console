@@ -40,6 +40,15 @@ defmodule ConsoleWeb.ShellChannel do
     {:noreply, socket}
   end
 
+  def handle_info({:exec_status, status}, socket) do
+    case PodExec.parse_exec_status(status) do
+      :ok -> :ok
+      {:error, message} -> push(socket, "stdo", %{message: "\r\nError: #{message}\r\n"})
+    end
+
+    {:noreply, socket}
+  end
+
   def handle_in("command", %{"cmd" => cmd}, socket) do
     PodExec.command(socket.assigns.wss_pid, fmt_cmd(cmd))
     {:reply, :ok, socket}

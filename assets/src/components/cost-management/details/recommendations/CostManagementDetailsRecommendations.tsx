@@ -116,6 +116,7 @@ export function CostManagementDetailsRecommendations() {
         <GqlError error={error} />
       ) : (
         <Table
+          key={cluster?.id ?? 'loading'}
           fullHeightWrap
           virtualizeRows
           fillLevel={1}

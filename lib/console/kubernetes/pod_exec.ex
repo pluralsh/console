@@ -57,6 +57,15 @@ defmodule Console.Kubernetes.PodExec do
     WebSockex.send_frame(client, {:binary, <<4>> <> resize})
   end
 
+  def parse_exec_status(status) do
+    case Jason.decode(status) do
+      {:ok, %{"status" => "Success"}} -> :ok
+      {:ok, %{"message" => message}} when is_binary(message) -> {:error, message}
+      {:ok, response} -> {:error, "unexpected Kubernetes exec status: #{inspect(response)}"}
+      {:error, _} -> {:error, "invalid Kubernetes exec status: #{status}"}
+    end
+  end
+
   defp deliver_frame(<<1, frame::binary>>, pid),
     do: send_frame(pid, frame)
   defp deliver_frame(<<2, frame::binary>>, pid),

@@ -76,6 +76,21 @@ defmodule Console.Kubernetes.PodExecTest do
     end
   end
 
+  describe "parse_exec_status/1" do
+    test "returns successful Kubernetes exec statuses" do
+      assert PodExec.parse_exec_status(~s({"status":"Success"})) == :ok
+    end
+
+    test "returns Kubernetes exec error messages" do
+      assert PodExec.parse_exec_status(~s({"status":"Failure","message":"shell not found"})) ==
+               {:error, "shell not found"}
+    end
+
+    test "returns an error for invalid Kubernetes exec statuses" do
+      assert PodExec.parse_exec_status("not json") == {:error, "invalid Kubernetes exec status: not json"}
+    end
+  end
+
   defp command_args(url) do
     query_pairs(url)
     |> Enum.flat_map(fn
