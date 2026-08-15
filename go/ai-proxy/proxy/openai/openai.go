@@ -102,7 +102,7 @@ func NewOpenAIProxy(host string, tokenRotator *helpers.RoundRobinTokenRotator, m
 				targetPath = "/v1/responses"
 			}
 
-			target := parsedURL
+			target := *parsedURL
 			token := tokenRotator.GetNextToken()
 			upstreamPath := targetPath
 			mantleRequest := mantleConfig.Enabled() && routeToMantle(r, mantleConfig.ModelPrefixes)

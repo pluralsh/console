@@ -109,6 +109,86 @@ func TestOpenAIProxyUsesSigV4ForMantle(t *testing.T) {
 	}
 }
 
+func TestOpenAIProxyKeepsOpenAIResponsesIsolatedAfterSigV4MantleRequest(t *testing.T) {
+	t.Setenv("AWS_ACCESS_KEY_ID", "test-access-key")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "test-secret-key")
+	t.Setenv("AWS_EC2_METADATA_DISABLED", "true")
+
+	tokenRotator := helpers.NewRoundRobinTokenRotator([]string{"openai-key"})
+	proxy, err := NewOpenAIProxy("https://api.openai.com", tokenRotator, api.MantleConfig{
+		AWSRegion:     "us-east-1",
+		ModelPrefixes: []string{"gpt-5.4"},
+		SigV4:         true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type upstreamRequest struct {
+		url           string
+		authorization string
+		body          string
+	}
+	var requests []upstreamRequest
+	proxy.(*OpenAIProxy).proxy.Transport = roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			return nil, err
+		}
+		requests = append(requests, upstreamRequest{
+			url:           r.URL.String(),
+			authorization: r.Header.Get("Authorization"),
+			body:          string(body),
+		})
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(bytes.NewBufferString(`{}`)),
+		}, nil
+	})
+
+	for _, body := range []string{
+		`{"model":"gpt-5.4","input":"mantle"}`,
+		`{"model":"gpt-4.1","input":"openai"}`,
+	} {
+		request := httptest.NewRequest(http.MethodPost, "/openai/v1/responses", bytes.NewBufferString(body))
+		proxy.Proxy().ServeHTTP(httptest.NewRecorder(), request)
+	}
+
+	if got, want := len(requests), 2; got != want {
+		t.Fatalf("upstream request count: got %d, want %d", got, want)
+	}
+	if got, want := requests[0].url, "https://bedrock-mantle.us-east-1.api.aws/openai/v1/responses"; got != want {
+		t.Errorf("Mantle URL: got %q, want %q", got, want)
+	}
+	if got := requests[0].authorization; got != "" {
+		t.Errorf("Mantle Authorization: got %q, want no Bearer authorization before SigV4 signing", got)
+	}
+	assertRequestModel(t, requests[0].body, "openai.gpt-5.4")
+
+	if got, want := requests[1].url, "https://api.openai.com/v1/responses"; got != want {
+		t.Errorf("OpenAI URL: got %q, want %q", got, want)
+	}
+	if got, want := requests[1].authorization, "Bearer openai-key"; got != want {
+		t.Errorf("OpenAI Authorization: got %q, want %q", got, want)
+	}
+	assertRequestModel(t, requests[1].body, "gpt-4.1")
+}
+
+func assertRequestModel(t *testing.T, body, want string) {
+	t.Helper()
+
+	var payload struct {
+		Model string `json:"model"`
+	}
+	if err := json.Unmarshal([]byte(body), &payload); err != nil {
+		t.Fatal(err)
+	}
+	if got := payload.Model; got != want {
+		t.Errorf("model: got %q, want %q", got, want)
+	}
+}
+
 func TestNewMantleSigV4RoundTripperRequiresRegion(t *testing.T) {
 	_, err := newMantleSigV4RoundTripper(context.Background(), api.MantleConfig{SigV4: true})
 	if err == nil {
