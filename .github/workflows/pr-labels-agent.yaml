@@ -10,7 +10,7 @@ permissions:
 jobs:
   add-default-label:
     name: Add default enhancement label to agent PRs
-    if: github.event.pull_request.head.ref == 'agent/sideload-workbench-followup-1753735967000'
+    if: startsWith(github.event.pull_request.head.ref, 'agent/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v8
