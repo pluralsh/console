@@ -26,7 +26,7 @@ func TestOpenAIProxyRoutesMatchingModelsToMantle(t *testing.T) {
 	proxy, err := NewOpenAIProxy("https://api.openai.com", tokenRotator, api.MantleConfig{
 		APIKey:        "mantle-key",
 		AWSRegion:     "us-east-1",
-		ModelPrefixes: []string{"gpt-5.6"},
+		ModelPrefixes: []string{"gpt-5.4"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -42,7 +42,7 @@ func TestOpenAIProxyRoutesMatchingModelsToMantle(t *testing.T) {
 		}, nil
 	})
 
-	request := httptest.NewRequest(http.MethodPost, "/openai/v1/responses", bytes.NewBufferString(`{"model":"gpt-5.6-terra","input":"test"}`))
+	request := httptest.NewRequest(http.MethodPost, "/openai/v1/responses", bytes.NewBufferString(`{"model":"gpt-5.4","input":"test"}`))
 	response := httptest.NewRecorder()
 	proxy.Proxy().ServeHTTP(response, request)
 
@@ -64,7 +64,7 @@ func TestOpenAIProxyRoutesMatchingModelsToMantle(t *testing.T) {
 	if err := json.Unmarshal(body, &payload); err != nil {
 		t.Fatal(err)
 	}
-	if got, want := payload["model"], "openai.gpt-5.6-terra"; got != want {
+	if got, want := payload["model"], "openai.gpt-5.4"; got != want {
 		t.Errorf("model: got %q, want %q", got, want)
 	}
 }
