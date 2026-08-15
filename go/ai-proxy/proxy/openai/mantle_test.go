@@ -140,6 +140,15 @@ func TestMantleSigV4RoundTripperSignsMantleRequests(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	request.Header.Set("Connection", "Custom-Proxy-Header")
+	request.Header.Set("Custom-Proxy-Header", "proxy-value")
+	request.Header.Set("Forwarded", "for=192.0.2.1;proto=https")
+	request.Header.Set("Proxy-Connection", "keep-alive")
+	request.Header.Set("Via", "1.1 proxy")
+	request.Header.Set("X-Forwarded-For", "192.0.2.1")
+	request.Header.Set("X-Forwarded-Host", "console.example.com")
+	request.Header.Set("X-Forwarded-Proto", "https")
+	request.Header.Set("X-Real-IP", "192.0.2.1")
 	if _, err := transport.RoundTrip(request); err != nil {
 		t.Fatal(err)
 	}
@@ -155,6 +164,75 @@ func TestMantleSigV4RoundTripperSignsMantleRequests(t *testing.T) {
 	}
 	if gotRequest.Header.Get("X-Amz-Date") == "" {
 		t.Error("expected X-Amz-Date header")
+	}
+
+	signedHeaders := sigV4SignedHeaders(t, gotRequest.Header.Get("Authorization"))
+	for _, name := range []string{
+		"Connection",
+		"Custom-Proxy-Header",
+		"Forwarded",
+		"Proxy-Connection",
+		"Via",
+		"X-Forwarded-For",
+		"X-Forwarded-Host",
+		"X-Forwarded-Proto",
+		"X-Real-IP",
+	} {
+		if got := gotRequest.Header.Get(name); got != "" {
+			t.Errorf("%s: got %q, want removed before signing", name, got)
+		}
+		if signedHeaders[strings.ToLower(name)] {
+			t.Errorf("Authorization SignedHeaders includes %q", name)
+		}
+	}
+}
+
+func sigV4SignedHeaders(t *testing.T, authorization string) map[string]bool {
+	t.Helper()
+
+	for _, field := range strings.Split(authorization, ",") {
+		if _, signedHeaders, ok := strings.Cut(strings.TrimSpace(field), "SignedHeaders="); ok {
+			result := make(map[string]bool)
+			for _, name := range strings.Split(signedHeaders, ";") {
+				result[name] = true
+			}
+			return result
+		}
+	}
+
+	t.Fatal("expected SigV4 Authorization header to include SignedHeaders")
+	return nil
+}
+
+func TestMantleSigV4RoundTripperLeavesNonMantleForwardingHeadersUnchanged(t *testing.T) {
+	var gotRequest *http.Request
+	transport := mantleSigV4RoundTripper{
+		mantleHost: "bedrock-mantle.us-east-1.api.aws",
+		next: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+			gotRequest = r
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Header:     make(http.Header),
+				Body:       io.NopCloser(bytes.NewBufferString(`{}`)),
+			}, nil
+		}),
+	}
+
+	request := httptest.NewRequest(http.MethodPost, "https://api.openai.com/v1/responses", nil)
+	request.Header.Set("X-Forwarded-For", "192.0.2.1")
+	request.Header.Set("X-Forwarded-Host", "console.example.com")
+	request.Header.Set("X-Forwarded-Proto", "https")
+	if _, err := transport.RoundTrip(request); err != nil {
+		t.Fatal(err)
+	}
+
+	if gotRequest == nil {
+		t.Fatal("expected non-Mantle request to reach the next transport")
+	}
+	for _, name := range []string{"X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto"} {
+		if got := gotRequest.Header.Get(name); got == "" {
+			t.Errorf("%s: got no value, want forwarding header preserved for non-Mantle request", name)
+		}
 	}
 }
 
