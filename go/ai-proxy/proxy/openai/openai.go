@@ -33,10 +33,39 @@ type mantleSigV4RoundTripper struct {
 
 func (in mantleSigV4RoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
 	if request.URL.Host == in.mantleHost {
+		removeMantleSigV4ProxyHeaders(request.Header)
 		return in.signer.RoundTrip(request)
 	}
 
 	return in.next.RoundTrip(request)
+}
+
+func removeMantleSigV4ProxyHeaders(header http.Header) {
+	for _, connection := range header.Values("Connection") {
+		for _, name := range strings.Split(connection, ",") {
+			header.Del(strings.TrimSpace(name))
+		}
+	}
+
+	for _, name := range []string{
+		"Connection",
+		"Forwarded",
+		"Keep-Alive",
+		"Proxy-Authenticate",
+		"Proxy-Authorization",
+		"Proxy-Connection",
+		"Te",
+		"Trailer",
+		"Transfer-Encoding",
+		"Upgrade",
+		"Via",
+		"X-Forwarded-For",
+		"X-Forwarded-Host",
+		"X-Forwarded-Proto",
+		"X-Real-IP",
+	} {
+		header.Del(name)
+	}
 }
 
 func (o *OpenAIProxy) Proxy() http.HandlerFunc {
