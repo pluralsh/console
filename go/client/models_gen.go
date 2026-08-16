@@ -6541,6 +6541,36 @@ type PodTolerationAttributes struct {
 	Effect   *string `json:"effect,omitempty"`
 }
 
+// A project-scoped policy that can be associated with workbenches to enforce policy decisions.
+type Policy struct {
+	// unique policy identifier
+	ID string `json:"id"`
+	// unique policy name
+	Name string `json:"name"`
+	// human-readable policy description
+	Description *string `json:"description,omitempty"`
+	// policy source text
+	Policy string `json:"policy"`
+	// project that owns this policy
+	Project *Project `json:"project,omitempty"`
+	// Sampled evaluations that include this policy.
+	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
+	InsertedAt        *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
+}
+
+// Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy.
+type PolicyAttributes struct {
+	// unique policy name
+	Name *string `json:"name,omitempty"`
+	// human-readable policy description
+	Description *string `json:"description,omitempty"`
+	// policy source text
+	Policy *string `json:"policy,omitempty"`
+	// project that owns the policy; defaults to the deployment's default project when omitted
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
 type PolicyBinding struct {
 	ID    *string `json:"id,omitempty"`
 	User  *User   `json:"user,omitempty"`
@@ -6551,6 +6581,11 @@ type PolicyBindingAttributes struct {
 	ID      *string `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
 	GroupID *string `json:"groupId,omitempty"`
+}
+
+type PolicyConnection struct {
+	PageInfo PageInfo      `json:"pageInfo"`
+	Edges    []*PolicyEdge `json:"edges,omitempty"`
 }
 
 // A OPA Gatekeeper Constraint reference
@@ -6593,6 +6628,11 @@ type PolicyConstraintEdge struct {
 	Cursor *string           `json:"cursor,omitempty"`
 }
 
+type PolicyEdge struct {
+	Node   *Policy `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
 // Configuration for applying policy enforcement to a stack
 type PolicyEngine struct {
 	// the policy engine to use with this stack
@@ -6614,6 +6654,30 @@ type PolicyEngineAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// git reference within the policy repository or stack repository
 	Git *GitRefAttributes `json:"git,omitempty"`
+}
+
+// A sampled policy decision for a tool invocation.
+type PolicyEvaluation struct {
+	// unique policy evaluation identifier
+	ID string `json:"id"`
+	// policies evaluated for this decision
+	PolicyIds []string `json:"policyIds"`
+	// tool input evaluated by the policy
+	Input map[string]any `json:"input"`
+	// policy evaluation result
+	Output     map[string]any `json:"output"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+type PolicyEvaluationConnection struct {
+	PageInfo PageInfo                `json:"pageInfo"`
+	Edges    []*PolicyEvaluationEdge `json:"edges,omitempty"`
+}
+
+type PolicyEvaluationEdge struct {
+	Node   *PolicyEvaluation `json:"node,omitempty"`
+	Cursor *string           `json:"cursor,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet
@@ -10060,11 +10124,12 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings   []*PolicyBinding           `json:"writeBindings,omitempty"`
-	Runs            *WorkbenchJobConnection    `json:"runs,omitempty"`
-	Crons           *WorkbenchCronConnection   `json:"crons,omitempty"`
-	Prompts         *WorkbenchPromptConnection `json:"prompts,omitempty"`
-	WorkbenchSkills *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	WriteBindings     []*PolicyBinding           `json:"writeBindings,omitempty"`
+	WorkbenchPolicies *WorkbenchPolicyConnection `json:"workbenchPolicies,omitempty"`
+	Runs              *WorkbenchJobConnection    `json:"runs,omitempty"`
+	Crons             *WorkbenchCronConnection   `json:"crons,omitempty"`
+	Prompts           *WorkbenchPromptConnection `json:"prompts,omitempty"`
+	WorkbenchSkills   *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -10894,6 +10959,46 @@ type WorkbenchObservabilityAttributes struct {
 	Logs *bool `json:"logs,omitempty"`
 	// enable metrics capability
 	Metrics *bool `json:"metrics,omitempty"`
+}
+
+type WorkbenchPolicy struct {
+	ID         string                  `json:"id"`
+	Matches    *WorkbenchPolicyMatches `json:"matches,omitempty"`
+	Policy     *Policy                 `json:"policy,omitempty"`
+	Workbench  *Workbench              `json:"workbench,omitempty"`
+	InsertedAt *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchPolicyAttributes struct {
+	// the policy to associate with this workbench
+	PolicyID string `json:"policyId"`
+	// criteria that determine when the policy applies
+	Matches *WorkbenchPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
+type WorkbenchPolicyConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*WorkbenchPolicyEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchPolicyEdge struct {
+	Node   *WorkbenchPolicy `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
+}
+
+type WorkbenchPolicyMatches struct {
+	Regexes []*string `json:"regexes,omitempty"`
+}
+
+type WorkbenchPolicyMatchesAttributes struct {
+	// regular expressions that select inputs for this policy
+	Regexes []*string `json:"regexes,omitempty"`
+}
+
+type WorkbenchPolicyUpdateAttributes struct {
+	// criteria that determine when the policy applies
+	Matches *WorkbenchPolicyMatchesAttributes `json:"matches,omitempty"`
 }
 
 type WorkbenchPrMergeRateByWorkbenchEntry struct {

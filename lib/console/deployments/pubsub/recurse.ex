@@ -3,6 +3,18 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.GitRepositoryCreated do
   def process(%{item: repo}), do: Discovery.start(repo)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.PolicySampled do
+  alias Console.Schema.PolicyEvaluation
+
+  def process(%@for{ids: ids, input: input, result: {:ok, output}}) do
+    %PolicyEvaluation{}
+    |> PolicyEvaluation.changeset(%{policy_ids: ids, input: input, output: output})
+    |> Console.Repo.insert()
+  end
+
+  def process(_), do: :ok
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceComponentsUpdated do
   alias Console.Schema.{Service, ServiceComponent}
   alias Console.Deployments.{Services}

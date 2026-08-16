@@ -13,7 +13,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     tools = tools(environment)
 
     MemoryEngine.new(tools, 50,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
         callback: &callback(activity, &1),

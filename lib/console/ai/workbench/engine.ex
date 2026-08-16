@@ -89,7 +89,7 @@ defmodule Console.AI.Workbench.Engine do
     end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
+    |> MemoryEngine.new(50, engine_opts(environment) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
     |> MemoryEngine.reduce([{:user, job.prompt} | Enum.reverse(messages)], &reducer/2)
     |> case do
       {:ok, %Complete{

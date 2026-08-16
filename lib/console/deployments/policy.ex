@@ -11,11 +11,84 @@ defmodule Console.Deployments.Policy do
     ComplianceReportGenerator,
     User
   }
+  alias Console.Deployments.Settings
+  alias Console.PubSub
 
   require Logger
 
   @type summary_resp :: {:ok, integer} | Console.error
   @type generator_resp :: {:ok, ComplianceReportGenerator.t} | Console.error
+  @type policy_resp :: {:ok, Console.Schema.Policy.t} | Console.error
+
+  def get_policy!(id), do: Repo.get!(Console.Schema.Policy, id)
+  def get_policy(id), do: Repo.get(Console.Schema.Policy, id)
+  def get_policy_by_name(name), do: Repo.get_by(Console.Schema.Policy, name: name)
+  def get_policy_by_name!(name), do: Repo.get_by!(Console.Schema.Policy, name: name)
+
+  @doc "Creates a project-scoped policy."
+  @spec create_policy(map, User.t) :: policy_resp
+  def create_policy(attrs, %User{} = user) do
+    %Console.Schema.Policy{}
+    |> Console.Schema.Policy.changeset(Settings.add_project_id(attrs, user))
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc "Updates a project-scoped policy."
+  @spec update_policy(map, binary, User.t) :: policy_resp
+  def update_policy(attrs, id, %User{} = user) do
+    get_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(&Console.Schema.Policy.changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update)
+  end
+
+  @doc "Deletes a project-scoped policy."
+  @spec delete_policy(binary, User.t) :: policy_resp
+  def delete_policy(id, %User{} = user) do
+    get_policy!(id)
+    |> Repo.preload(:workbench_policies)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete)
+  end
+
+  @workbench_policy_base Console.priv_file!("policy/wb.rego")
+
+  def eval_policy(engine, input, ids, path \\ "data.plrl.wb.admission.result") do
+    with {:ok, engine} <- Regolix.set_input(engine, input) do
+      Regolix.eval_query(engine, path)
+      |> maybe_sample(input, ids)
+    end
+  end
+
+  def evaluate_policy(%Console.Schema.Policy{} = policy, input) do
+    with {:ok, engine} <- Regolix.new(),
+         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", @workbench_policy_base),
+         {:ok, engine} <- Regolix.add_policy(engine, policy.name, policy.policy) do
+      eval_policy(engine, input, [])
+    end
+  end
+
+  def evaluate_policy(id, input, %User{} = user) do
+    get_policy(id)
+    |> allow(user, :read)
+    |> when_ok(&evaluate_policy(&1, input))
+  end
+
+  defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
+    if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do
+      Console.PubSub.Broadcaster.notify(%Console.PubSub.PolicySampled{
+        ids: ids,
+        input: input,
+        result: res
+      })
+    end
+    res
+  end
+  defp maybe_sample(res, _, _), do: res
+
 
   @doc """
   Returns a constraint if present or nil otherwise
@@ -200,4 +273,10 @@ defmodule Console.Deployments.Policy do
     |> allow(user, :write)
     |> when_ok(:delete)
   end
+
+  def notify({:ok, %Console.Schema.Policy{} = policy}, :update),
+    do: handle_notify(PubSub.PolicyUpdated, policy)
+  def notify({:ok, %Console.Schema.Policy{} = policy}, :delete),
+    do: handle_notify(PubSub.PolicyDeleted, policy)
+  def notify(pass, _), do: pass
 end

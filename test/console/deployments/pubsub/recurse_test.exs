@@ -655,6 +655,25 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       assert refetch(job).status == :failed
     end
   end
+
+  describe "PolicySampled" do
+    test "persists a sampled policy evaluation" do
+      policy = insert(:policy)
+      input = %{"tool" => "kube_update", "namespace" => "production"}
+      output = %{"deny" => [], "sample" => 0.5}
+
+      assert {:ok, evaluation} =
+               Recurse.handle_event(%PubSub.PolicySampled{
+                 ids: [policy.id],
+                 input: input,
+                 result: {:ok, output}
+               })
+
+      assert evaluation.policy_ids == [policy.id]
+      assert evaluation.input == input
+      assert evaluation.output == output
+    end
+  end
 end
 
 

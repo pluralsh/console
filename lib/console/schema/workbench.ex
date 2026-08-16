@@ -15,6 +15,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchSkill,
     WorkbenchEval,
     PolicyBinding,
+    WorkbenchPolicy,
     FlowWorkbench,
     User,
     AgentRun,
@@ -159,10 +160,12 @@ defmodule Console.Schema.Workbench do
     has_many :prompts,           WorkbenchPrompt,  on_replace: :delete
     has_many :flows_workbenches, FlowWorkbench,    on_replace: :delete
     has_many :workbench_skills,  WorkbenchSkill,   on_replace: :delete
+    has_many :workbench_policies, WorkbenchPolicy, on_replace: :delete
     has_many :alerts,            Alert
     has_one :eval,               WorkbenchEval
 
     has_many :tools, through: [:tool_associations, :tool]
+    has_many :policies, through: [:workbench_policies, :policy]
     timestamps()
   end
 

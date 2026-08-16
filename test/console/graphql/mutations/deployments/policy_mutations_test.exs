@@ -1,6 +1,84 @@
 defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
   use Console.DataCase, async: true
 
+  describe "policy CRUD" do
+    test "project writers can create and query policies" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"createPolicy" => policy}}} = run_query("""
+        mutation CreatePolicy($attributes: PolicyAttributes!) {
+          createPolicy(attributes: $attributes) {
+            id
+            name
+            description
+            policy
+            project { id }
+          }
+        }
+      """, %{"attributes" => %{
+        "name" => "writer-policy",
+        "description" => "Created by a project writer",
+        "policy" => "package workbench",
+        "projectId" => project.id
+      }}, %{current_user: user})
+
+      assert policy["name"] == "writer-policy"
+      assert policy["project"]["id"] == project.id
+
+      {:ok, %{data: %{"policy" => fetched}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id name policy }
+        }
+      """, %{"id" => policy["id"]}, %{current_user: user})
+
+      assert fetched["id"] == policy["id"]
+      assert fetched["policy"] == "package workbench"
+    end
+
+    test "project readers cannot create policies" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreatePolicy($attributes: PolicyAttributes!) {
+          createPolicy(attributes: $attributes) { id }
+        }
+      """, %{"attributes" => %{
+        "name" => "reader-policy",
+        "policy" => "package workbench",
+        "projectId" => project.id
+      }}, %{current_user: user})
+    end
+
+    test "project writers can update and delete policies" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      {:ok, %{data: %{"updatePolicy" => updated}}} = run_query("""
+        mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
+          updatePolicy(id: $id, attributes: $attributes) { id description }
+        }
+      """, %{
+        "id" => policy.id,
+        "attributes" => %{"description" => "Updated policy"}
+      }, %{current_user: user})
+
+      assert updated["id"] == policy.id
+      assert updated["description"] == "Updated policy"
+
+      {:ok, %{data: %{"deletePolicy" => deleted}}} = run_query("""
+        mutation DeletePolicy($id: ID!) {
+          deletePolicy(id: $id) { id }
+        }
+      """, %{"id" => policy.id}, %{current_user: user})
+
+      assert deleted["id"] == policy.id
+      refute refetch(policy)
+    end
+  end
+
   describe "upsertPolicyConstraints" do
     test "it can create some constraints" do
       {:ok, %{data: %{"upsertPolicyConstraints" => 1}}} = run_query("""

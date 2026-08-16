@@ -23,7 +23,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
 
     tools(target_job, environment)
     |> MemoryEngine.new(20,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: String.trim(system_prompt(job: target_job)),
         continue_msg: cont_msg(),
         acc: %{},

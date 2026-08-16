@@ -514,6 +514,31 @@ defmodule Console.Factory do
     }
   end
 
+  def policy_factory do
+    %Schema.Policy{
+      name: sequence(:policy, & "policy-#{&1}"),
+      description: "A test policy",
+      policy: "package test",
+      project: build(:project)
+    }
+  end
+
+  def policy_evaluation_factory do
+    %Schema.PolicyEvaluation{
+      policy_ids: [Ecto.UUID.generate()],
+      input: %{"tool" => "test"},
+      output: %{"deny" => []}
+    }
+  end
+
+  def workbench_policy_factory do
+    %Schema.WorkbenchPolicy{
+      policy: build(:policy),
+      workbench: build(:workbench),
+      matches: %{regexes: [".*"]}
+    }
+  end
+
   def constraint_violation_factory do
     %Schema.ConstraintViolation{
       constraint: build(:policy_constraint),

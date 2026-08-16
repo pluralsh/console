@@ -38,7 +38,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     objective = WorkbenchJob.objective(job)
 
     MemoryEngine.new(tools, 50,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
         acc: %{},
         continue_msg: cont_msg(),

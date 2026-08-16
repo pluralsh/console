@@ -394,4 +394,74 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       """, %{"id" => gen.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "policyEvaluations" do
+    test "lists only sampled evaluations containing a readable policy" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      other_policy = insert(:policy)
+
+      evaluation =
+        %Console.Schema.PolicyEvaluation{}
+        |> Console.Schema.PolicyEvaluation.changeset(%{
+          policy_ids: [policy.id, other_policy.id],
+          input: %{"tool" => "kube_update"},
+          output: %{"deny" => []}
+        })
+        |> Repo.insert!()
+
+      {:ok, %{data: %{"policy" => %{"policyEvaluations" => found}}}} = run_query("""
+        query PolicyEvaluations($policyId: ID!) {
+          policy(id: $policyId) {
+            policyEvaluations(first: 5) {
+              edges { node { id policyIds input output } }
+            }
+          }
+        }
+      """, %{"policyId" => policy.id}, %{current_user: user})
+
+      assert from_connection(found) |> ids_equal([evaluation])
+    end
+
+    test "evaluates readable policies against supplied input" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+
+      policy = insert(:policy,
+        project: project,
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "blocked"}] if {
+          input.blocked == true
+        }
+        """
+      )
+
+      {:ok, %{data: %{"evaluatePolicy" => result}}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!) {
+          evaluatePolicy(policyId: $policyId, input: $input)
+        }
+      """, %{"policyId" => policy.id, "input" => Jason.encode!(%{"blocked" => true})}, %{current_user: user})
+
+      assert [%{"message" => "blocked"}] = result["deny"]
+    end
+
+    test "denies evaluation history to users without policy access" do
+      policy = insert(:policy)
+
+      {:ok, %{data: %{"policy" => nil}, errors: [_ | _]}} = run_query("""
+        query PolicyEvaluations($policyId: ID!) {
+          policy(id: $policyId) {
+            policyEvaluations(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"policyId" => policy.id}, %{current_user: insert(:user)})
+    end
+  end
 end

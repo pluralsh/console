@@ -3162,6 +3162,77 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "workbench policy CRUD" do
+    test "workbench writers can create, update, and delete policy associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+
+      {:ok, association} =
+        Workbenches.create_workbench_policy(
+          %{policy_id: policy.id, matches: %{regexes: ["^kubernetes\\."]}},
+          workbench.id,
+          user
+        )
+
+      assert association.workbench_id == workbench.id
+      assert association.policy_id == policy.id
+      assert association.matches.regexes == ["^kubernetes\\."]
+
+      {:ok, updated} =
+        Workbenches.update_workbench_policy(
+          %{matches: %{regexes: ["^terraform\\."]}},
+          association.id,
+          user
+        )
+
+      assert updated.matches.regexes == ["^terraform\\."]
+
+      {:ok, deleted} = Workbenches.delete_workbench_policy(updated.id, user)
+
+      assert deleted.id == updated.id
+      refute refetch(updated)
+    end
+
+    test "workbench readers cannot create policy associations" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+
+      assert {:error, _} =
+               Workbenches.create_workbench_policy(
+                 %{policy_id: policy.id, matches: %{regexes: [".*"]}},
+                 workbench.id,
+                 user
+               )
+    end
+
+    test "workbench writers need policy read access to create or update associations" do
+      user = insert(:user)
+      workbench_project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: workbench_project)
+      policy = insert(:policy)
+
+      assert {:error, _} =
+               Workbenches.create_workbench_policy(
+                 %{policy_id: policy.id, matches: %{regexes: [".*"]}},
+                 workbench.id,
+                 user
+               )
+
+      association = insert(:workbench_policy, workbench: workbench, policy: policy)
+
+      assert {:error, _} =
+               Workbenches.update_workbench_policy(
+                 %{matches: %{regexes: ["^kubernetes\\."]}},
+                 association.id,
+                 user
+               )
+    end
+  end
+
   defp await_activity_status(activity_id, status, attempts \\ 20)
   defp await_activity_status(_, _, 0), do: flunk("timed out waiting for exec activity completion")
   defp await_activity_status(activity_id, status, attempts) do

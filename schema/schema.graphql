@@ -376,6 +376,33 @@ type RootQueryType {
 
   unreadAppNotifications: Int
 
+  policy(id: ID, name: String): Policy
+
+  policies(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter policies by project"
+    projectId: ID
+
+    "filter policies by name"
+    q: String
+  ): PolicyConnection
+
+  "Evaluates a policy against the supplied tool input."
+  evaluatePolicy(
+    "policy to evaluate"
+    policyId: ID!
+
+    "JSON-encoded tool input to evaluate"
+    input: Json!
+  ): Map
+
   policyConstraints(
     after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], violated: Boolean, q: String
   ): PolicyConstraintConnection
@@ -1138,6 +1165,15 @@ type RootMutationType {
 
   deleteComplianceReportGenerator(id: ID!): ComplianceReportGenerator
 
+  "Creates a policy in a project. Requires policy write scope and write access to the target project."
+  createPolicy(attributes: PolicyAttributes!): Policy
+
+  "Updates a project-scoped policy. Requires policy write scope and write access to the policy's project."
+  updatePolicy(id: ID!, attributes: PolicyAttributes!): Policy
+
+  "Deletes a project-scoped policy. Requires policy write scope and write access to the policy's project."
+  deletePolicy(id: ID!): Policy
+
   createGlobalService(
     serviceId: ID
 
@@ -1309,6 +1345,17 @@ type RootMutationType {
   updateWorkbench(id: ID!, attributes: WorkbenchAttributes): Workbench
 
   deleteWorkbench(id: ID!): Workbench
+
+  createWorkbenchPolicy(
+    "the workbench to associate with this policy"
+    workbenchId: ID!
+
+    attributes: WorkbenchPolicyAttributes!
+  ): WorkbenchPolicy
+
+  updateWorkbenchPolicy(id: ID!, attributes: WorkbenchPolicyUpdateAttributes!): WorkbenchPolicy
+
+  deleteWorkbenchPolicy(id: ID!): WorkbenchPolicy
 
   createWorkbenchTool(attributes: WorkbenchToolAttributes): WorkbenchTool
 
@@ -3030,6 +3077,24 @@ input WorkbenchToolAssociationAttributes {
   toolId: ID!
 }
 
+input WorkbenchPolicyMatchesAttributes {
+  "regular expressions that select inputs for this policy"
+  regexes: [String]
+}
+
+input WorkbenchPolicyAttributes {
+  "the policy to associate with this workbench"
+  policyId: ID!
+
+  "criteria that determine when the policy applies"
+  matches: WorkbenchPolicyMatchesAttributes
+}
+
+input WorkbenchPolicyUpdateAttributes {
+  "criteria that determine when the policy applies"
+  matches: WorkbenchPolicyMatchesAttributes
+}
+
 input WorkbenchCronAttributes {
   "cron expression (e.g. *\/5 * * * *) (required for create)"
   crontab: String
@@ -3697,6 +3762,8 @@ type Workbench {
 
   "write policy of this service"
   writeBindings: [PolicyBinding]
+
+  workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
 
   runs(
     after: String
@@ -4741,6 +4808,19 @@ type WorkbenchTool {
   updatedAt: DateTime
 }
 
+type WorkbenchPolicy {
+  id: ID!
+  matches: WorkbenchPolicyMatches
+  policy: Policy
+  workbench: Workbench
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type WorkbenchPolicyMatches {
+  regexes: [String]
+}
+
 type WorkbenchToolConfiguration {
   "http tool configuration"
   http: WorkbenchToolHttpConfiguration
@@ -5124,6 +5204,11 @@ type WorkbenchConnection {
 type WorkbenchToolConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchToolEdge]
+}
+
+type WorkbenchPolicyConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchPolicyEdge]
 }
 
 type WorkbenchJobConnection {
@@ -9078,6 +9163,21 @@ input PolicyConstraintAttributes {
   enforcement: ConstraintEnforcement
 }
 
+"Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy."
+input PolicyAttributes {
+  "unique policy name"
+  name: String
+
+  "human-readable policy description"
+  description: String
+
+  "policy source text"
+  policy: String
+
+  "project that owns the policy; defaults to the deployment's default project when omitted"
+  projectId: ID
+}
+
 input ConstraintRefAttributes {
   kind: String!
   name: String!
@@ -9196,6 +9296,50 @@ input ComplianceReportGeneratorAttributes {
   name: String!
 
   readBindings: [PolicyBindingAttributes]
+}
+
+"A project-scoped policy that can be associated with workbenches to enforce policy decisions."
+type Policy {
+  "unique policy identifier"
+  id: ID!
+
+  "unique policy name"
+  name: String!
+
+  "human-readable policy description"
+  description: String
+
+  "policy source text"
+  policy: String!
+
+  "project that owns this policy"
+  project: Project
+
+  "Sampled evaluations that include this policy."
+  policyEvaluations(after: String, first: Int, before: String, last: Int): PolicyEvaluationConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A sampled policy decision for a tool invocation."
+type PolicyEvaluation {
+  "unique policy evaluation identifier"
+  id: ID!
+
+  "policies evaluated for this decision"
+  policyIds: [ID!]!
+
+  "tool input evaluated by the policy"
+  input: Map!
+
+  "policy evaluation result"
+  output: Map!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "A OPA Gatekeeper Constraint reference"
@@ -9414,6 +9558,16 @@ type ComplianceReportGenerator {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type PolicyConnection {
+  pageInfo: PageInfo!
+  edges: [PolicyEdge]
+}
+
+type PolicyEvaluationConnection {
+  pageInfo: PageInfo!
+  edges: [PolicyEvaluationEdge]
 }
 
 type PolicyConstraintConnection {
@@ -17119,6 +17273,16 @@ type PolicyConstraintEdge {
   cursor: String
 }
 
+type PolicyEvaluationEdge {
+  node: PolicyEvaluation
+  cursor: String
+}
+
+type PolicyEdge {
+  node: Policy
+  cursor: String
+}
+
 type ManagedNamespaceEdge {
   node: ManagedNamespace
   cursor: String
@@ -17266,6 +17430,11 @@ type WorkbenchJobActivityEdge {
 
 type WorkbenchJobEdge {
   node: WorkbenchJob
+  cursor: String
+}
+
+type WorkbenchPolicyEdge {
+  node: WorkbenchPolicy
   cursor: String
 }
 

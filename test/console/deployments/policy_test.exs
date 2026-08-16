@@ -3,6 +3,78 @@ defmodule Console.Deployments.PolicyTest do
   alias Console.Deployments.Policy
   alias Console.Schema.{PolicyConstraint, VulnerabilityReport}
 
+  describe "create_policy/2" do
+    test "project writers can create a policy" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, policy} = Policy.create_policy(%{
+        name: "allow-workbench-tools",
+        description: "Allows approved workbench tools",
+        policy: "package workbench",
+        project_id: project.id
+      }, user)
+
+      assert policy.project_id == project.id
+      assert policy.name == "allow-workbench-tools"
+    end
+
+    test "project readers cannot create a policy" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+
+      assert {:error, _} =
+               Policy.create_policy(%{
+                 name: "deny-workbench-tools",
+                 policy: "package workbench",
+                 project_id: project.id
+               }, user)
+    end
+  end
+
+  describe "update_policy/3" do
+    test "project writers can update a policy" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      {:ok, updated} = Policy.update_policy(%{description: "Updated policy"}, policy.id, user)
+
+      assert updated.description == "Updated policy"
+    end
+
+    test "project readers cannot update a policy" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      assert {:error, _} = Policy.update_policy(%{description: "Updated policy"}, policy.id, user)
+      assert refetch(policy).description != "Updated policy"
+    end
+  end
+
+  describe "delete_policy/2" do
+    test "project writers can delete a policy" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      {:ok, deleted} = Policy.delete_policy(policy.id, user)
+
+      assert deleted.id == policy.id
+      refute refetch(policy)
+    end
+
+    test "project readers cannot delete a policy" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      assert {:error, _} = Policy.delete_policy(policy.id, user)
+      assert refetch(policy)
+    end
+  end
+
   describe "#upsert_vulnerabilities/2" do
     test "it can upsert vulnerabilities for a cluster" do
       cluster = insert(:cluster)
