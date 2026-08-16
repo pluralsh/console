@@ -19,6 +19,23 @@ defmodule Console.AI.Tool do
 
   @type t :: %__MODULE__{}
 
+  defmodule Approval do
+    defstruct [:reason]
+
+    def new([_ | _] = reasons) do
+      Enum.map(reasons, fn
+        %{"reason" => reason} -> reason
+        %{"msg" => msg} -> msg
+        _ -> "approval granted"
+      end)
+      |> then(& struct(__MODULE__, reason: "Automatically approved due to: #{Enum.join(&1, ", ")}"))
+    end
+    def new(reason), do: struct(__MODULE__, reason: reason)
+
+    def attrs(%__MODULE__{reason: reason}), do: %{approval_reason: reason, auto_approve: true}
+    def attrs(_), do: %{}
+  end
+
   defmodule Policy do
     @type t :: %__MODULE__{
       regexes: [Regex.t],
@@ -146,24 +163,29 @@ defmodule Console.AI.Tool do
   def policy(tool, input, [_ | _] = policies) do
     with [_ | _] = pols <- Enum.filter(policies, &Policy.matches?(&1, name(tool))) do
       case compile_policies(pols) do
-        {:ok, engine} -> validate_policy(engine, input, pols)
+        {:ok, engine} -> validate_policy(engine, tool,  input, pols)
         err -> err
       end
     else
-      _ -> :ok
+      _ -> {:ok, tool}
     end
   end
-  def policy(_, _, _), do: :ok
+  def policy(tool, _, _), do: {:ok, tool}
 
   @policy_base Console.priv_file!("policy/wb.rego")
 
-  defp validate_policy(engine, input, policies) do
+  defp validate_policy(engine, tool, input, policies) do
     Enum.map(policies, & &1.policy_id)
     |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"input" => input}), &1))
     |> case do
       {:ok, %{"deny" => [_ | _] = denials}} -> {:error, "Policy denied: #{inspect(denials)}"}
+      {:ok, %{"approve" => [_ | _] = approvals}} ->
+        case tool do
+          %{approval: _} = tool -> {:ok, %{tool | approval: Approval.new(approvals)}}
+          _ -> {:ok, tool}
+        end
       {:error, _} = err -> err
-      _ -> :ok
+      _ -> {:ok, tool}
     end
   end
 

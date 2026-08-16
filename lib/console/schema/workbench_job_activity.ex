@@ -37,9 +37,11 @@ defmodule Console.Schema.WorkbenchJobActivity do
     end
 
     embeds_one :result, WorkbenchJobResult, on_replace: :update, primary_key: false do
-      field :output,      :string
-      field :error,       :string
-      field :explanation, :string
+      field :output,          :string
+      field :error,           :string
+      field :explanation,     :string
+      field :auto_approve,    :boolean
+      field :approval_reason, :string
 
       embeds_one :function_call, FunctionCall, on_replace: :update do
         field :name,    :string
@@ -158,7 +160,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
   defp result_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(output error explanation)a)
+    |> cast(attrs, ~w(output error explanation auto_approve approval_reason)a)
     |> cast_embed(:function_call, with: &function_call_changeset/2)
     |> cast_embed(:job_update, with: &job_update_changeset/2)
     |> cast_embed(:metrics, with: &metric_changeset/2)

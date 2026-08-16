@@ -1172,6 +1172,10 @@ defmodule Console.Deployments.Workbenches do
   defp execute_approved_activity(_, _),
     do: {:error, "activity does not support function calling"}
 
+  def auto_approve_activity(%WorkbenchJobActivity{id: id, result: %{auto_approve: true}}, %User{} = user),
+    do: approve_job_activity(id, user)
+  def auto_approve_activity(%WorkbenchJobActivity{} = activity, _), do: {:ok, activity}
+
   @doc """
   Rejects a job activity by marking it rejected and setting the output to the reason.
 

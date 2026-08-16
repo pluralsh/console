@@ -7,9 +7,15 @@ defmodule Console.AI.ToolTest do
     def name, do: :protected_tool
   end
 
+  defmodule ApprovalTool do
+    defstruct [:approval]
+
+    def name(_), do: "protected_tool"
+  end
+
   describe "policy/3" do
     test "allows tool input when its matching policy succeeds" do
-      assert :ok =
+      assert {:ok, ProtectedTool} =
                Tool.policy(ProtectedTool, %{"blocked" => false}, [
                  policy("^protected_tool$")
                ])
@@ -25,7 +31,7 @@ defmodule Console.AI.ToolTest do
     end
 
     test "does not apply policies that do not match the tool name" do
-      assert :ok =
+      assert {:ok, ProtectedTool} =
                Tool.policy(ProtectedTool, %{"blocked" => true}, [
                  policy("^other_tool$")
                ])
@@ -40,6 +46,20 @@ defmodule Console.AI.ToolTest do
                ])
 
       assert message =~ "Policy denied"
+    end
+
+    test "attaches automatic approval to the tool returned by policy validation" do
+      assert {:ok, %ApprovalTool{approval: %Tool.Approval{reason: reason}}} =
+               Tool.policy(%ApprovalTool{}, %{}, [
+                 approval_policy("^protected_tool$")
+               ])
+
+      assert reason =~ "safe operation"
+    end
+
+    test "leaves approval unset when no policy matches" do
+      assert {:ok, %ApprovalTool{approval: nil}} =
+               Tool.policy(%ApprovalTool{}, %{}, [approval_policy("^other_tool$")])
     end
   end
 
@@ -72,6 +92,23 @@ defmodule Console.AI.ToolTest do
 
       deny[{"message": "actor is blocked"}] if {
         input.actor.email == "blocked@example.com"
+      }
+      """
+    }
+  end
+
+  defp approval_policy(regex) do
+    %Tool.Policy{
+      regexes: [Regex.compile!(regex)],
+      name: "auto-approve",
+      policy_id: Ecto.UUID.generate(),
+      policy: """
+      package plrl.wb.admission
+
+      sample := 0
+
+      approve[{"reason": "safe operation"}] if {
+        true
       }
       """
     }

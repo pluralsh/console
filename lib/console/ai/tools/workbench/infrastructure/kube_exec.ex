@@ -8,6 +8,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeExec do
   embedded_schema do
     field :user,        :map, virtual: true
     field :job,         :map, virtual: true
+    field :approval,    :map, virtual: true
     field :cluster,     :string
     field :namespace,   :string
     field :pod,         :string

@@ -144,7 +144,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     by_name = Map.new(impls, & {Tool.name(&1), &1})
     Enum.reduce_while(tools, {[], engine}, fn %Tool{id: id, name: name, arguments: args} = tool, {acc, engine} ->
       with {:ok, impl}   <- Map.fetch(by_name, name),
-           :ok           <- Tool.policy(impl, args, pols),
+           {:ok, impl}   <- Tool.policy(impl, args, pols),
            {:ok, parsed} <- Tool.validate(impl, args) do
         case Tool.implement(impl, Map.put(parsed, :id, tool)) do
           %EnabledTools{} = enabled ->
