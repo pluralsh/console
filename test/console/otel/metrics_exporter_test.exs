@@ -34,7 +34,7 @@ defmodule Console.Otel.MetricsExporterTest do
   end
 
   describe "export via GenServer message" do
-    test "exports service and cluster metrics when enabled" do
+    test "exports service metrics and aggregate cluster health when enabled" do
       project = insert(:project)
       cluster = insert(:cluster, project: project, pinged_at: Timex.now())
       insert(:service, cluster: cluster, status: :healthy, namespace: "apps", name: "api")
@@ -50,7 +50,10 @@ defmodule Console.Otel.MetricsExporterTest do
       metrics = collect_all_metrics()
 
       assert Enum.any?(metrics, &(&1["name"] == "plural.service.health"))
-      assert Enum.any?(metrics, &(&1["name"] == "plural.cluster.health"))
+      assert Enum.any?(metrics, &(&1["name"] == "plural.cluster.health.total"))
+      assert Enum.any?(metrics, &(&1["name"] == "plural.cluster.health.healthy"))
+      assert Enum.any?(metrics, &(&1["name"] == "plural.cluster.health.unhealthy"))
+      refute Enum.any?(metrics, &(&1["name"] == "plural.cluster.health"))
     end
 
     test "does nothing when metrics export is disabled" do
