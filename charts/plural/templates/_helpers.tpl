@@ -56,6 +56,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
   valueFrom:
     fieldRef:
       fieldPath: status.podIP
+{{/* These values reference the chart-managed Zalando PostgreSQL cluster. */}}
 {{ if .Values.postgres.create }}
 - name: POSTGRES_PASSWORD
   valueFrom:
