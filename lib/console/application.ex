@@ -22,6 +22,7 @@ defmodule Console.Application do
       Console.LocalCache,
       {DNSCluster, query: Application.get_env(:console, :dns_cluster_query) || :ignore},
       {Task.Supervisor, name: Console.AI.TaskSupervisor},
+      {Task.Supervisor, name: Console.Cron.TaskSupervisor},
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},

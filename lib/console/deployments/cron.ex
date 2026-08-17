@@ -31,6 +31,8 @@ defmodule Console.Deployments.Cron do
 
   require Logger
 
+  @prune_timeout :timer.seconds(300)
+
   def prune_services() do
     Logger.info "attempting to prune dangling deleted services"
     Service.deleted()
@@ -244,6 +246,7 @@ defmodule Console.Deployments.Cron do
 
   def place_run_workers() do
     StackRun.running()
+    |> StackRun.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
     |> Console.throttle(count: 100, pause: 20)
     |> Stream.each(fn run ->
@@ -362,8 +365,8 @@ defmodule Console.Deployments.Cron do
       Logger.info "pruning #{length(chunk)} workbench jobs"
       Enum.map(chunk, & &1.id)
       |> WorkbenchJob.for_ids()
-      |> Repo.delete_all(timeout: 300_000)
-    end, max_concurrency: 5)
+      |> Repo.delete_all(timeout: @prune_timeout)
+    end, max_concurrency: 5, timeout: @prune_timeout)
     |> Stream.run()
   end
 
@@ -381,8 +384,8 @@ defmodule Console.Deployments.Cron do
       chunk
       |> Enum.map(& &1.id)
       |> PolicyEvaluation.with_ids()
-      |> Repo.delete_all(timeout: 300_000)
-    end, max_concurrency: 5)
+      |> Repo.delete_all(timeout: @prune_timeout)
+    end, max_concurrency: 5, timeout: @prune_timeout)
     |> Stream.run()
   end
 

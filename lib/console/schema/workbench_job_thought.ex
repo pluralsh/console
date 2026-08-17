@@ -32,6 +32,7 @@ defmodule Console.Schema.WorkbenchJobThought do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> sanitize_text([:content, :tool_name, :tool_args])
     |> cast_embed(:attributes, with: &attributes_changeset/2)
     |> foreign_key_constraint(:activity_id)
     |> validate_required([:activity_id])

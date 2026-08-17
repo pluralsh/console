@@ -1431,6 +1431,35 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.type == :memo
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
     end
+
+    test "persists sanitized AI responses and tool call arguments" do
+      job = insert(:workbench_job)
+      invalid = <<0xC3, 0x28>>
+
+      {:ok, activity} =
+        Workbenches.create_job_activity(
+          %{
+            status: :successful,
+            type: :function,
+            prompt: "prompt" <> <<0>>,
+            result: %{output: "output" <> <<0>> <> invalid},
+            tool_call: %{
+              call_id: "call" <> <<0>>,
+              name: "tool" <> invalid,
+              arguments: %{"argument" <> <<0>> => "value" <> invalid}
+            }
+          },
+          job
+        )
+
+      activity = refetch(activity)
+
+      assert activity.prompt == "prompt"
+      assert activity.result.output == "output�("
+      assert activity.tool_call.call_id == "call"
+      assert activity.tool_call.name == "tool�("
+      assert activity.tool_call.arguments == %{"argument" => "value�("}
+    end
   end
 
   describe "update_job_activity/2" do

@@ -104,6 +104,27 @@ defmodule Console.Schema.Base do
     end))
   end
 
+  def sanitize_text(cs, fields) do
+    Enum.reduce(fields, cs, fn field, cs ->
+      update_change(cs, field, fn value -> sanitize_text_value(value) end)
+    end)
+  end
+
+  defp sanitize_text_value(value) when is_binary(value) do
+    value
+    |> String.replace_invalid("�")
+    |> String.replace(<<0>>, "")
+  end
+
+  defp sanitize_text_value(value) when is_map(value) do
+    Map.new(value, fn {key, value} ->
+      {sanitize_text_value(key), sanitize_text_value(value)}
+    end)
+  end
+
+  defp sanitize_text_value(value) when is_list(value), do: Enum.map(value, &sanitize_text_value/1)
+  defp sanitize_text_value(value), do: value
+
   def seconds(%Duration{hour: h, minute: m, second: s}), do: h * 3600 + m * 60 + s
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)
