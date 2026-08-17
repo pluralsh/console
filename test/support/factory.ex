@@ -539,6 +539,22 @@ defmodule Console.Factory do
     }
   end
 
+  def binding_policy_factory do
+    %Schema.BindingPolicy{
+      policy: build(:policy),
+      bind_policy: build(:policy),
+      type: :workbench,
+      matches: %{workbench: %{regexes: [".*"]}}
+    }
+  end
+
+  def stack_policy_factory do
+    %Schema.StackPolicy{
+      policy: build(:policy),
+      stack: build(:stack)
+    }
+  end
+
   def constraint_violation_factory do
     %Schema.ConstraintViolation{
       constraint: build(:policy_constraint),

@@ -203,6 +203,10 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :configuration, :stack_configuration_attributes
   end
 
+  input_object :stack_policy_attributes do
+    field :policy_id, non_null(:id), description: "the policy to associate with this stack"
+  end
+
   input_object :custom_step_attributes do
     field :stage,            :step_stage
     field :cmd,              non_null(:string)
@@ -297,6 +301,10 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     connection field :custom_stack_runs, node_type: :custom_stack_run do
       resolve &Deployments.list_custom_runs/3
+    end
+
+    connection field :stack_policies, node_type: :stack_policy do
+      resolve &Deployments.list_stack_policies/3
     end
 
     field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter stacks"
@@ -601,6 +609,15 @@ defmodule Console.GraphQl.Deployments.Stack do
     timestamps()
   end
 
+  object :stack_policy do
+    field :id, non_null(:id)
+
+    field :policy, :policy, resolve: dataloader(Deployments)
+    field :stack,  :infrastructure_stack, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   object :stack_run_approval_result do
     field :reason, :string, description: "the reason for the approval decision by the ai"
     field :result, :approval_result, description: "the result of the approval decision by the ai"
@@ -656,6 +673,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :stack_run
   connection node_type: :custom_stack_run
   connection node_type: :stack_definition
+  connection node_type: :stack_policy
 
   delta :run_logs
 
@@ -737,6 +755,16 @@ defmodule Console.GraphQl.Deployments.Stack do
       resolve &Deployments.resolve_stack_definition/2
     end
 
+    field :stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_stack_policy/2
+    end
+
     connection field :stack_definitions, node_type: :stack_definition do
       middleware Authenticated
       middleware Scope,
@@ -811,6 +839,38 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_stack/2
+    end
+
+    field :create_stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
+      arg :stack_id, non_null(:id), description: "the stack to associate with this policy"
+      arg :attributes, non_null(:stack_policy_attributes)
+
+      resolve &Deployments.create_stack_policy/2
+    end
+
+    field :update_stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:stack_policy_attributes)
+
+      resolve &Deployments.update_stack_policy/2
+    end
+
+    field :delete_stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_stack_policy/2
     end
 
     @desc "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"

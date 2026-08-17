@@ -2,6 +2,11 @@ defmodule Console.Deployments.Policy do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.Schema.{
+    BindingPolicy,
+    StackPolicy,
+    WorkbenchPolicy,
+    Stack,
+    Workbench,
     PolicyConstraint,
     ConstraintViolation,
     Cluster,
@@ -12,6 +17,8 @@ defmodule Console.Deployments.Policy do
     User
   }
   alias Console.Deployments.Settings
+  alias Console.Deployments.{Stacks, Workbenches}
+  alias Console.Services.Users
   alias Console.PubSub
 
   require Logger
@@ -19,11 +26,14 @@ defmodule Console.Deployments.Policy do
   @type summary_resp :: {:ok, integer} | Console.error
   @type generator_resp :: {:ok, ComplianceReportGenerator.t} | Console.error
   @type policy_resp :: {:ok, Console.Schema.Policy.t} | Console.error
+  @type binding_policy_resp :: {:ok, BindingPolicy.t} | Console.error
 
   def get_policy!(id), do: Repo.get!(Console.Schema.Policy, id)
   def get_policy(id), do: Repo.get(Console.Schema.Policy, id)
   def get_policy_by_name(name), do: Repo.get_by(Console.Schema.Policy, name: name)
   def get_policy_by_name!(name), do: Repo.get_by!(Console.Schema.Policy, name: name)
+  def get_binding_policy!(id), do: Repo.get!(BindingPolicy, id)
+  def get_binding_policy(id), do: Repo.get(BindingPolicy, id)
 
   @doc "Creates a project-scoped policy."
   @spec create_policy(map, User.t) :: policy_resp
@@ -54,7 +64,34 @@ defmodule Console.Deployments.Policy do
     |> notify(:delete)
   end
 
+  @doc "Creates a policy binding. Requires write access to the associated policy."
+  @spec create_binding_policy(map, User.t) :: binding_policy_resp
+  def create_binding_policy(attrs, %User{} = user) do
+    %BindingPolicy{}
+    |> BindingPolicy.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc "Updates a policy binding. Requires write access to the associated policy."
+  @spec update_binding_policy(map, binary, User.t) :: binding_policy_resp
+  def update_binding_policy(attrs, id, %User{} = user) do
+    get_binding_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(&BindingPolicy.changeset(&1, attrs))
+    |> when_ok(:update)
+  end
+
+  @doc "Deletes a policy binding. Requires write access to the associated policy."
+  @spec delete_binding_policy(binary, User.t) :: binding_policy_resp
+  def delete_binding_policy(id, %User{} = user) do
+    get_binding_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
   @workbench_policy_base Console.priv_file!("policy/wb.rego")
+  @binding_policy_base Console.priv_file!("policy/binding.rego")
 
   def eval_policy(engine, input, ids, path \\ "data.plrl.wb.admission.result") do
     with {:ok, engine} <- Regolix.set_input(engine, input) do
@@ -77,13 +114,93 @@ defmodule Console.Deployments.Policy do
     |> when_ok(&evaluate_policy(&1, input))
   end
 
+  def evaluate_binding_policy(%BindingPolicy{bind_policy: %{id: id, name: name, policy: policy}}, input) do
+    with {:ok, engine} <- Regolix.new(),
+         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", @binding_policy_base),
+         {:ok, engine} <- Regolix.add_policy(engine, name, policy) do
+      eval_policy(engine, input, [id], "data.plrl.binding.result")
+    end
+  end
+
+  def next_binding_poll(%BindingPolicy{} = binding) do
+    binding
+    |> BindingPolicy.next_poll_changeset(binding.interval)
+    |> Repo.update()
+  end
+
+  def reconcile(%BindingPolicy{} = binding) do
+    binding = Repo.preload(binding, :bind_policy)
+
+    targets(binding)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 50, pause: :timer.seconds(1))
+    |> Stream.each(&reconcile_binding(binding, &1))
+    |> Stream.run()
+  end
+
+  defp targets(%BindingPolicy{type: :workbench}) do
+    Workbench.stream()
+    |> Workbench.preloaded()
+  end
+  defp targets(%BindingPolicy{type: :stack}) do
+    Stack.stream()
+    |> Stack.preloaded([:project])
+  end
+
+  defp reconcile_binding(%BindingPolicy{} = binding, target) do
+    user = bot()
+    case evaluate_binding_policy(binding, binding_input(target)) do
+      {:ok, %{"bind" => true}} -> attach_binding(binding, target, user)
+      {:ok, %{"bind" => false}} -> detach_binding(binding, target, user)
+      error -> Logger.error("Failed to evaluate binding policy #{binding.id}: #{inspect(error)}")
+    end
+  end
+
+  defp binding_input(target) do
+    target
+    |> Map.from_struct()
+    |> Console.clean()
+  end
+
+  defp attach_binding(%BindingPolicy{policy_id: policy_id} = binding, %Workbench{} = workbench, user) do
+    case Repo.get_by(WorkbenchPolicy, policy_id: policy_id, workbench_id: workbench.id) do
+      nil -> Workbenches.create_workbench_policy(%{policy_id: policy_id, matches: BindingPolicy.workbench_matches(binding)}, workbench.id, user)
+      _ -> :ok
+    end
+  end
+
+  defp attach_binding(%BindingPolicy{policy_id: policy_id}, %Stack{} = stack, user) do
+    case Repo.get_by(StackPolicy, policy_id: policy_id, stack_id: stack.id) do
+      nil -> Stacks.create_stack_policy(%{policy_id: policy_id}, stack.id, user)
+      _ -> :ok
+    end
+  end
+
+  defp detach_binding(%BindingPolicy{policy_id: policy_id}, %Workbench{} = workbench, user) do
+    case Repo.get_by(WorkbenchPolicy, policy_id: policy_id, workbench_id: workbench.id) do
+      %WorkbenchPolicy{} = policy -> Workbenches.delete_workbench_policy(policy.id, user)
+      nil -> :ok
+    end
+  end
+
+  defp detach_binding(%BindingPolicy{policy_id: policy_id}, %Stack{} = stack, user) do
+    case Repo.get_by(StackPolicy, policy_id: policy_id, stack_id: stack.id) do
+      %StackPolicy{} = policy -> Stacks.delete_stack_policy(policy.id, user)
+      nil -> :ok
+    end
+  end
+
+  defp bot(), do: Users.admin_bot()
+
   defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
     if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do
-      Console.PubSub.Broadcaster.notify(%Console.PubSub.PolicySampled{
+      %Console.PubSub.PolicySampled{
         ids: ids,
         input: input,
         result: res
-      })
+      }
+      |> Map.put(:source_pid, self())
+      |> Console.PubSub.Broadcaster.notify()
     end
     res
   end

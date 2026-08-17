@@ -1,7 +1,7 @@
 defmodule Console.Deployments.PolicyTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Policy
-  alias Console.Schema.{PolicyConstraint, VulnerabilityReport}
+  alias Console.Schema.{BindingPolicy, PolicyConstraint, VulnerabilityReport}
 
   describe "create_policy/2" do
     test "project writers can create a policy" do
@@ -72,6 +72,121 @@ defmodule Console.Deployments.PolicyTest do
 
       assert {:error, _} = Policy.delete_policy(policy.id, user)
       assert refetch(policy)
+    end
+  end
+
+  describe "binding policy CRUD" do
+    test "policy writers can create, update, and delete bindings" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project)
+
+      {:ok, binding} =
+        Policy.create_binding_policy(
+          %{policy_id: policy.id, bind_policy_id: bind_policy.id, type: :workbench, matches: %{workbench: %{regexes: ["^kubernetes\\."]}}},
+          user
+        )
+
+      assert binding.policy_id == policy.id
+      assert binding.bind_policy_id == bind_policy.id
+      assert binding.matches.workbench.regexes == ["^kubernetes\\."]
+
+      {:ok, updated} =
+        Policy.update_binding_policy(
+          %{type: :stack, matches: %{workbench: %{regexes: ["^terraform\\."]}}},
+          binding.id,
+          user
+        )
+
+      assert updated.type == :stack
+      assert updated.matches.workbench.regexes == ["^terraform\\."]
+
+      {:ok, deleted} = Policy.delete_binding_policy(updated.id, user)
+      assert deleted.id == updated.id
+      refute refetch(updated)
+    end
+
+    test "policy readers cannot manage bindings" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project)
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy)
+
+      assert {:error, _} = Policy.create_binding_policy(%{policy_id: policy.id, bind_policy_id: bind_policy.id, type: :stack}, user)
+      assert {:error, _} = Policy.update_binding_policy(%{type: :stack}, binding.id, user)
+      assert {:error, _} = Policy.delete_binding_policy(binding.id, user)
+    end
+  end
+
+  describe "binding policy polling" do
+    test "defaults to an hourly interval and immediately schedules new policies" do
+      changeset = BindingPolicy.changeset(%BindingPolicy{}, %{policy_id: Ecto.UUID.generate(), bind_policy_id: Ecto.UUID.generate(), type: :workbench})
+
+      assert changeset.valid?
+      assert Ecto.Changeset.get_field(changeset, :interval) == "1h"
+      assert Ecto.Changeset.get_field(changeset, :next_poll_at)
+    end
+
+    test "rejects intervals below thirty minutes" do
+      changeset = BindingPolicy.changeset(
+        %BindingPolicy{},
+        %{policy_id: Ecto.UUID.generate(), bind_policy_id: Ecto.UUID.generate(), type: :workbench, interval: "29m"}
+      )
+
+      assert [interval: _] = Keyword.take(changeset.errors, [:interval])
+    end
+
+    test "only considers due bindings pollable" do
+      due = insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), -1, :hour))
+      insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), 1, :hour))
+
+      assert ids_equal(Repo.all(BindingPolicy.pollable()), [due])
+    end
+
+    test "adds and removes workbench policy bindings without duplicates" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, matches: %{workbench: %{regexes: [".*"]}})
+
+      :ok = Policy.reconcile(binding)
+      :ok = Policy.reconcile(binding)
+
+      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+
+      {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
+
+      assert 0 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+    end
+
+    test "pipeline handling always schedules the next poll" do
+      binding = insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), -1, :hour))
+
+      :ok = Console.Pipelines.BindingPolicy.Pipeline.handle_event(binding)
+
+      assert Timex.after?(refetch(binding).next_poll_at, DateTime.utc_now())
+    end
+
+    test "adds and removes stack policy bindings" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
+
+      :ok = Policy.reconcile(binding)
+      assert 1 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+
+      {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
+
+      assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
     end
   end
 

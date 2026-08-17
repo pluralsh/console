@@ -79,6 +79,54 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
     end
   end
 
+  describe "binding policy CRUD" do
+    test "policy writers can manage binding policies" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project)
+
+      {:ok, %{data: %{"createBindingPolicy" => binding}}} = run_query("""
+        mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
+          createBindingPolicy(attributes: $attributes) { id type matches { workbench { regexes } } policy { id } bindPolicy { id } }
+        }
+      """, %{"attributes" => %{
+        "policyId" => policy.id,
+        "bindPolicyId" => bind_policy.id,
+        "type" => "WORKBENCH",
+        "matches" => %{"workbench" => %{"regexes" => ["^kubernetes\\."]}}
+      }}, %{current_user: user})
+
+      assert binding["policy"]["id"] == policy.id
+      assert binding["bindPolicy"]["id"] == bind_policy.id
+      assert binding["type"] == "WORKBENCH"
+      assert binding["matches"]["workbench"]["regexes"] == ["^kubernetes\\."]
+
+      {:ok, %{data: %{"updateBindingPolicy" => updated}}} = run_query("""
+        mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+          updateBindingPolicy(id: $id, attributes: $attributes) { id type matches { workbench { regexes } } }
+        }
+      """, %{
+        "id" => binding["id"],
+        "attributes" => %{
+          "type" => "STACK",
+          "matches" => %{"workbench" => %{"regexes" => ["^terraform\\."]}}
+        }
+      }, %{current_user: user})
+
+      assert updated["type"] == "STACK"
+      assert updated["matches"]["workbench"]["regexes"] == ["^terraform\\."]
+
+      {:ok, %{data: %{"deleteBindingPolicy" => deleted}}} = run_query("""
+        mutation DeleteBindingPolicy($id: ID!) {
+          deleteBindingPolicy(id: $id) { id }
+        }
+      """, %{"id" => binding["id"]}, %{current_user: user})
+
+      assert deleted["id"] == binding["id"]
+    end
+  end
+
   describe "upsertPolicyConstraints" do
     test "it can create some constraints" do
       {:ok, %{data: %{"upsertPolicyConstraints" => 1}}} = run_query("""

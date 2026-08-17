@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Policy, Clusters, Policies}
-  alias Console.Schema.{PolicyConstraint, PolicyEvaluation, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
+  alias Console.Schema.{BindingPolicy, PolicyConstraint, PolicyEvaluation, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
   alias Console.Schema.Policy, as: PolicySchema
 
   def resolve_policy(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
@@ -21,6 +21,21 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> PolicySchema.ordered()
     |> maybe_search(PolicySchema, args)
     |> policy_filters(args)
+    |> paginate(args)
+  end
+
+  def resolve_binding_policy(%{id: id}, %{context: %{current_user: user}}) do
+    Policy.get_binding_policy(id)
+    |> Policies.allow(user, :read)
+  end
+
+  def list_binding_policies(args, %{context: %{current_user: user}}) do
+    BindingPolicy.for_user(user)
+    |> paginate(args)
+  end
+
+  def list_binding_policies(policy, args, _) do
+    BindingPolicy.for_policy(policy.id)
     |> paginate(args)
   end
 
@@ -166,6 +181,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   def delete_policy(%{id: id}, %{context: %{current_user: user}}),
     do: Policy.delete_policy(id, user)
+
+  def create_binding_policy(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.create_binding_policy(attrs, user)
+
+  def update_binding_policy(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.update_binding_policy(attrs, id, user)
+
+  def delete_binding_policy(%{id: id}, %{context: %{current_user: user}}),
+    do: Policy.delete_binding_policy(id, user)
 
   defp policy_filters(query, args) do
     Enum.reduce(args, query, fn

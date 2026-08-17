@@ -185,6 +185,11 @@ defmodule Console.Schema.Workbench do
     from(w in query, where: ilike(w.name, ^"%#{q}%"))
   end
 
+  def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
+
+  def preloaded(query \\ __MODULE__, preloads \\ [:project, :tools]),
+    do: from(w in query, preload: ^preloads)
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(w in query, order_by: ^order)
   end

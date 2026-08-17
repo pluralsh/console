@@ -1,9 +1,12 @@
 defmodule Console.Schema.Policy do
   use Console.Schema.Base
-  alias Console.Schema.{Project, WorkbenchPolicy}
+  alias Console.Schema.{BindingPolicy, Project, StackPolicy, WorkbenchPolicy}
+
+  defenum Type, workbench: 0, stack: 1, binding: 3
 
   schema "policies" do
     field :name,        :string
+    field :type,        Type, default: :workbench
     field :description, :string
     field :policy,      :binary
 
@@ -11,6 +14,9 @@ defmodule Console.Schema.Policy do
 
     has_many :workbench_policies, WorkbenchPolicy, on_replace: :delete
     has_many :workbenches, through: [:workbench_policies, :workbench]
+    has_many :binding_policies, BindingPolicy, on_replace: :delete
+    has_many :stack_policies, StackPolicy, on_replace: :delete
+    has_many :stacks, through: [:stack_policies, :stack]
 
     timestamps()
   end
@@ -36,14 +42,14 @@ defmodule Console.Schema.Policy do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
   end
 
-  @valid ~w(name description policy project_id)a
+  @valid ~w(name type description policy project_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
-    |> validate_required([:name, :policy, :project_id])
+    |> validate_required([:name, :type, :policy, :project_id])
     |> validate_length(:name, max: 255)
     |> validate_length(:description, max: 1_000)
     |> validate_length(:policy, max: 1_000_000)

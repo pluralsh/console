@@ -394,6 +394,10 @@ type RootQueryType {
     q: String
   ): PolicyConnection
 
+  bindingPolicy(id: ID!): BindingPolicy
+
+  bindingPolicies(after: String, first: Int, before: String, last: Int): BindingPolicyConnection
+
   "Evaluates a policy against the supplied tool input."
   evaluatePolicy(
     "policy to evaluate"
@@ -450,6 +454,8 @@ type RootQueryType {
   infrastructureStack(id: ID, name: String): InfrastructureStack
 
   stackDefinition(id: ID!): StackDefinition
+
+  stackPolicy(id: ID!): StackPolicy
 
   stackDefinitions(after: String, first: Int, before: String, last: Int): StackDefinitionConnection
 
@@ -1174,6 +1180,12 @@ type RootMutationType {
   "Deletes a project-scoped policy. Requires policy write scope and write access to the policy's project."
   deletePolicy(id: ID!): Policy
 
+  createBindingPolicy(attributes: BindingPolicyAttributes!): BindingPolicy
+
+  updateBindingPolicy(id: ID!, attributes: BindingPolicyUpdateAttributes!): BindingPolicy
+
+  deleteBindingPolicy(id: ID!): BindingPolicy
+
   createGlobalService(
     serviceId: ID
 
@@ -1212,6 +1224,17 @@ type RootMutationType {
   deleteStack(id: ID!): InfrastructureStack
 
   detachStack(id: ID!): InfrastructureStack
+
+  createStackPolicy(
+    "the stack to associate with this policy"
+    stackId: ID!
+
+    attributes: StackPolicyAttributes!
+  ): StackPolicy
+
+  updateStackPolicy(id: ID!, attributes: StackPolicyAttributes!): StackPolicy
+
+  deleteStackPolicy(id: ID!): StackPolicy
 
   "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"
   restoreStack(id: ID!): InfrastructureStack
@@ -8107,6 +8130,11 @@ input StackDefinitionAttributes {
   configuration: StackConfigurationAttributes
 }
 
+input StackPolicyAttributes {
+  "the policy to associate with this stack"
+  policyId: ID!
+}
+
 input CustomStepAttributes {
   stage: StepStage
   cmd: String!
@@ -8240,6 +8268,8 @@ type InfrastructureStack {
   actor: User
 
   customStackRuns(after: String, first: Int, before: String, last: Int): CustomStackRunConnection
+
+  stackPolicies(after: String, first: Int, before: String, last: Int): StackPolicyConnection
 
   "key\/value tags to filter stacks"
   tags: [Tag]
@@ -8685,6 +8715,14 @@ type StackDefinition {
   updatedAt: DateTime
 }
 
+type StackPolicy {
+  id: ID!
+  policy: Policy
+  stack: InfrastructureStack
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type StackRunApprovalResult {
   "the reason for the approval decision by the ai"
   reason: String
@@ -8772,6 +8810,11 @@ type CustomStackRunConnection {
 type StackDefinitionConnection {
   pageInfo: PageInfo!
   edges: [StackDefinitionEdge]
+}
+
+type StackPolicyConnection {
+  pageInfo: PageInfo!
+  edges: [StackPolicyEdge]
 }
 
 type RunLogsDelta {
@@ -9134,6 +9177,17 @@ enum ComplianceReportFormat {
   JSON
 }
 
+enum PolicyType {
+  WORKBENCH
+  STACK
+  BINDING
+}
+
+enum BindingPolicyType {
+  WORKBENCH
+  STACK
+}
+
 enum PolicyAggregate {
   CLUSTER
   ENFORCEMENT
@@ -9168,6 +9222,9 @@ input PolicyAttributes {
   "unique policy name"
   name: String
 
+  "policy implementation type"
+  type: PolicyType
+
   "human-readable policy description"
   description: String
 
@@ -9176,6 +9233,44 @@ input PolicyAttributes {
 
   "project that owns the policy; defaults to the deployment's default project when omitted"
   projectId: ID
+}
+
+input BindingPolicyAttributes {
+  "the policy to attach to matching targets"
+  policyId: ID!
+
+  "the policy that determines whether a target should be bound"
+  bindPolicyId: ID!
+
+  "the resource type this policy can bind to"
+  type: BindingPolicyType!
+
+  "how often the binding policy is evaluated; defaults to 1h and cannot be below 30m"
+  interval: String
+
+  "criteria that determine when the policy applies"
+  matches: BindingPolicyMatchesAttributes
+}
+
+input BindingPolicyUpdateAttributes {
+  "the policy to attach to matching targets"
+  policyId: ID
+
+  "the policy that determines whether a target should be bound"
+  bindPolicyId: ID
+
+  "the resource type this policy can bind to"
+  type: BindingPolicyType!
+
+  "how often the binding policy is evaluated; cannot be below 30m"
+  interval: String
+
+  "criteria that determine when the policy applies"
+  matches: BindingPolicyMatchesAttributes
+}
+
+input BindingPolicyMatchesAttributes {
+  workbench: WorkbenchPolicyMatchesAttributes
 }
 
 input ConstraintRefAttributes {
@@ -9306,6 +9401,9 @@ type Policy {
   "unique policy name"
   name: String!
 
+  "policy implementation type"
+  type: PolicyType!
+
   "human-readable policy description"
   description: String
 
@@ -9318,9 +9416,28 @@ type Policy {
   "Sampled evaluations that include this policy."
   policyEvaluations(after: String, first: Int, before: String, last: Int): PolicyEvaluationConnection
 
+  bindingPolicies(after: String, first: Int, before: String, last: Int): BindingPolicyConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"Associates a policy with a bindable resource type."
+type BindingPolicy {
+  id: ID!
+  type: BindingPolicyType!
+  interval: String!
+  nextPollAt: DateTime
+  matches: BindingPolicyMatches
+  policy: Policy
+  bindPolicy: Policy
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type BindingPolicyMatches {
+  workbench: WorkbenchPolicyMatches
 }
 
 "A sampled policy decision for a tool invocation."
@@ -9563,6 +9680,11 @@ type ComplianceReportGenerator {
 type PolicyConnection {
   pageInfo: PageInfo!
   edges: [PolicyEdge]
+}
+
+type BindingPolicyConnection {
+  pageInfo: PageInfo!
+  edges: [BindingPolicyEdge]
 }
 
 type PolicyEvaluationConnection {
@@ -17278,6 +17400,11 @@ type PolicyEvaluationEdge {
   cursor: String
 }
 
+type BindingPolicyEdge {
+  node: BindingPolicy
+  cursor: String
+}
+
 type PolicyEdge {
   node: Policy
   cursor: String
@@ -17290,6 +17417,11 @@ type ManagedNamespaceEdge {
 
 type GlobalServiceEdge {
   node: GlobalService
+  cursor: String
+}
+
+type StackPolicyEdge {
+  node: StackPolicy
   cursor: String
 }
 

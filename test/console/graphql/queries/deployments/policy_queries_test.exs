@@ -464,4 +464,28 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       """, %{"policyId" => policy.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "bindingPolicies" do
+    test "lists bindings for accessible policies" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project)
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
+      insert(:binding_policy)
+
+      {:ok, %{data: %{"bindingPolicies" => found}}} = run_query("""
+        query {
+          bindingPolicies(first: 5) {
+            edges { node { id type policy { id } } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      [node] = from_connection(found)
+      assert node["id"] == binding.id
+      assert node["type"] == "STACK"
+      assert node["policy"]["id"] == policy.id
+    end
+  end
 end

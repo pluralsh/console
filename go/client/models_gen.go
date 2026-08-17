@@ -1439,6 +1439,63 @@ type BindingAttributes struct {
 	GroupID *string `json:"groupId,omitempty"`
 }
 
+// Associates a policy with a bindable resource type.
+type BindingPolicy struct {
+	ID         string                `json:"id"`
+	Type       BindingPolicyType     `json:"type"`
+	Interval   string                `json:"interval"`
+	NextPollAt *string               `json:"nextPollAt,omitempty"`
+	Matches    *BindingPolicyMatches `json:"matches,omitempty"`
+	Policy     *Policy               `json:"policy,omitempty"`
+	BindPolicy *Policy               `json:"bindPolicy,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type BindingPolicyAttributes struct {
+	// the policy to attach to matching targets
+	PolicyID string `json:"policyId"`
+	// the policy that determines whether a target should be bound
+	BindPolicyID string `json:"bindPolicyId"`
+	// the resource type this policy can bind to
+	Type BindingPolicyType `json:"type"`
+	// how often the binding policy is evaluated; defaults to 1h and cannot be below 30m
+	Interval *string `json:"interval,omitempty"`
+	// criteria that determine when the policy applies
+	Matches *BindingPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
+type BindingPolicyConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*BindingPolicyEdge `json:"edges,omitempty"`
+}
+
+type BindingPolicyEdge struct {
+	Node   *BindingPolicy `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type BindingPolicyMatches struct {
+	Workbench *WorkbenchPolicyMatches `json:"workbench,omitempty"`
+}
+
+type BindingPolicyMatchesAttributes struct {
+	Workbench *WorkbenchPolicyMatchesAttributes `json:"workbench,omitempty"`
+}
+
+type BindingPolicyUpdateAttributes struct {
+	// the policy to attach to matching targets
+	PolicyID *string `json:"policyId,omitempty"`
+	// the policy that determines whether a target should be bound
+	BindPolicyID *string `json:"bindPolicyId,omitempty"`
+	// the resource type this policy can bind to
+	Type BindingPolicyType `json:"type"`
+	// how often the binding policy is evaluated; cannot be below 30m
+	Interval *string `json:"interval,omitempty"`
+	// criteria that determine when the policy applies
+	Matches *BindingPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
 // Requirements for Bitbucket Data Center / Server authentication
 type BitbucketDatacenterAttributes struct {
 	// the user slug for Bitbucket Data Center / Server
@@ -4350,6 +4407,7 @@ type InfrastructureStack struct {
 	// the actor of this stack (defaults to root console user)
 	Actor           *User                     `json:"actor,omitempty"`
 	CustomStackRuns *CustomStackRunConnection `json:"customStackRuns,omitempty"`
+	StackPolicies   *StackPolicyConnection    `json:"stackPolicies,omitempty"`
 	// key/value tags to filter stacks
 	Tags []*Tag `json:"tags,omitempty"`
 	// Infracost resource rows attached to this stack (newest first)
@@ -6547,6 +6605,8 @@ type Policy struct {
 	ID string `json:"id"`
 	// unique policy name
 	Name string `json:"name"`
+	// policy implementation type
+	Type PolicyType `json:"type"`
 	// human-readable policy description
 	Description *string `json:"description,omitempty"`
 	// policy source text
@@ -6555,6 +6615,7 @@ type Policy struct {
 	Project *Project `json:"project,omitempty"`
 	// Sampled evaluations that include this policy.
 	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
+	BindingPolicies   *BindingPolicyConnection    `json:"bindingPolicies,omitempty"`
 	InsertedAt        *string                     `json:"insertedAt,omitempty"`
 	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
 }
@@ -6563,6 +6624,8 @@ type Policy struct {
 type PolicyAttributes struct {
 	// unique policy name
 	Name *string `json:"name,omitempty"`
+	// policy implementation type
+	Type *PolicyType `json:"type,omitempty"`
 	// human-readable policy description
 	Description *string `json:"description,omitempty"`
 	// policy source text
@@ -9135,6 +9198,29 @@ type StackOverridesAttributes struct {
 	Terragrunt *TerragruntConfigurationAttributes `json:"terragrunt,omitempty"`
 	// the pulumi configuration for this stack
 	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
+}
+
+type StackPolicy struct {
+	ID         string               `json:"id"`
+	Policy     *Policy              `json:"policy,omitempty"`
+	Stack      *InfrastructureStack `json:"stack,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+type StackPolicyAttributes struct {
+	// the policy to associate with this stack
+	PolicyID string `json:"policyId"`
+}
+
+type StackPolicyConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*StackPolicyEdge `json:"edges,omitempty"`
+}
+
+type StackPolicyEdge struct {
+	Node   *StackPolicy `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
 }
 
 type StackPolicyViolation struct {
@@ -12876,6 +12962,61 @@ func (e AutoscalingTarget) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type BindingPolicyType string
+
+const (
+	BindingPolicyTypeWorkbench BindingPolicyType = "WORKBENCH"
+	BindingPolicyTypeStack     BindingPolicyType = "STACK"
+)
+
+var AllBindingPolicyType = []BindingPolicyType{
+	BindingPolicyTypeWorkbench,
+	BindingPolicyTypeStack,
+}
+
+func (e BindingPolicyType) IsValid() bool {
+	switch e {
+	case BindingPolicyTypeWorkbench, BindingPolicyTypeStack:
+		return true
+	}
+	return false
+}
+
+func (e BindingPolicyType) String() string {
+	return string(e)
+}
+
+func (e *BindingPolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BindingPolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BindingPolicyType", str)
+	}
+	return nil
+}
+
+func (e BindingPolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *BindingPolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e BindingPolicyType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type ChatProviderConnectionType string
 
 const (
@@ -15895,6 +16036,63 @@ func (e *PolicyEngineType) UnmarshalJSON(b []byte) error {
 }
 
 func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PolicyType string
+
+const (
+	PolicyTypeWorkbench PolicyType = "WORKBENCH"
+	PolicyTypeStack     PolicyType = "STACK"
+	PolicyTypeBinding   PolicyType = "BINDING"
+)
+
+var AllPolicyType = []PolicyType{
+	PolicyTypeWorkbench,
+	PolicyTypeStack,
+	PolicyTypeBinding,
+}
+
+func (e PolicyType) IsValid() bool {
+	switch e {
+	case PolicyTypeWorkbench, PolicyTypeStack, PolicyTypeBinding:
+		return true
+	}
+	return false
+}
+
+func (e PolicyType) String() string {
+	return string(e)
+}
+
+func (e *PolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PolicyType", str)
+	}
+	return nil
+}
+
+func (e PolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PolicyType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

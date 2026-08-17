@@ -170,6 +170,7 @@ export function WorkbenchIssuesTable({
 
   return (
     <Table
+      hideHeader
       fullHeightWrap
       virtualizeRows
       data={issues}

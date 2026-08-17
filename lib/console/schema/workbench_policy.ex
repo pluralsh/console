@@ -44,7 +44,7 @@ defmodule Console.Schema.WorkbenchPolicy do
     |> validate_required([:policy_id, :workbench_id])
   end
 
-  defp matches_changeset(model, attrs) do
+  def matches_changeset(model, attrs) do
     model
     |> cast(attrs, [:regexes, :ignore])
     |> validate_required([:regexes])

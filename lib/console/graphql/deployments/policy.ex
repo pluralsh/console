@@ -8,6 +8,8 @@ defmodule Console.GraphQl.Deployments.Policy do
   ecto_enum :vuln_attack_vector, Console.Schema.Vulnerability.AttackVector
   ecto_enum :vuln_user_interaction, Console.Schema.Vulnerability.UserInteraction
   ecto_enum :compliance_report_format, Console.Schema.ComplianceReportGenerator.Format
+  ecto_enum :policy_type, Console.Schema.Policy.Type
+  ecto_enum :binding_policy_type, Console.Schema.BindingPolicy.Type
 
   enum :policy_aggregate do
     value :cluster
@@ -34,9 +36,30 @@ defmodule Console.GraphQl.Deployments.Policy do
   @desc "Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy."
   input_object :policy_attributes do
     field :name,        :string, description: "unique policy name"
+    field :type,        :policy_type, description: "policy implementation type"
     field :description, :string, description: "human-readable policy description"
     field :policy,      :string, description: "policy source text"
     field :project_id,  :id, description: "project that owns the policy; defaults to the deployment's default project when omitted"
+  end
+
+  input_object :binding_policy_attributes do
+    field :policy_id, non_null(:id), description: "the policy to attach to matching targets"
+    field :bind_policy_id, non_null(:id), description: "the policy that determines whether a target should be bound"
+    field :type,      non_null(:binding_policy_type), description: "the resource type this policy can bind to"
+    field :interval,  :string, description: "how often the binding policy is evaluated; defaults to 1h and cannot be below 30m"
+    field :matches,   :binding_policy_matches_attributes, description: "criteria that determine when the policy applies"
+  end
+
+  input_object :binding_policy_update_attributes do
+    field :policy_id, :id, description: "the policy to attach to matching targets"
+    field :bind_policy_id, :id, description: "the policy that determines whether a target should be bound"
+    field :type, non_null(:binding_policy_type), description: "the resource type this policy can bind to"
+    field :interval, :string, description: "how often the binding policy is evaluated; cannot be below 30m"
+    field :matches, :binding_policy_matches_attributes, description: "criteria that determine when the policy applies"
+  end
+
+  input_object :binding_policy_matches_attributes do
+    field :workbench, :workbench_policy_matches_attributes
   end
 
   input_object :constraint_ref_attributes do
@@ -148,6 +171,7 @@ defmodule Console.GraphQl.Deployments.Policy do
   object :policy do
     field :id,          non_null(:id), description: "unique policy identifier"
     field :name,        non_null(:string), description: "unique policy name"
+    field :type,        non_null(:policy_type), description: "policy implementation type"
     field :description, :string, description: "human-readable policy description"
     field :policy,      non_null(:string), description: "policy source text"
     field :project,     :project, resolve: dataloader(Deployments), description: "project that owns this policy"
@@ -157,7 +181,29 @@ defmodule Console.GraphQl.Deployments.Policy do
       resolve &Deployments.list_policy_evaluations/3
     end
 
+    connection field :binding_policies, node_type: :binding_policy do
+      resolve &Deployments.list_binding_policies/3
+    end
+
     timestamps()
+  end
+
+  @desc "Associates a policy with a bindable resource type."
+  object :binding_policy do
+    field :id,           non_null(:id)
+    field :type,         non_null(:binding_policy_type)
+    field :interval,     non_null(:string)
+    field :next_poll_at, :datetime
+    field :matches, :binding_policy_matches
+
+    field :policy, :policy, resolve: dataloader(Deployments)
+    field :bind_policy, :policy, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  object :binding_policy_matches do
+    field :workbench, :workbench_policy_matches
   end
 
   @desc "A sampled policy decision for a tool invocation."
@@ -368,6 +414,7 @@ defmodule Console.GraphQl.Deployments.Policy do
   end
 
   connection node_type: :policy
+  connection node_type: :binding_policy
   connection node_type: :policy_evaluation
   connection node_type: :policy_constraint
   connection node_type: :vulnerability_report
@@ -389,6 +436,19 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :q,          :string, description: "filter policies by name"
 
       resolve &Deployments.list_policies/2
+    end
+
+    field :binding_policy, :binding_policy do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_binding_policy/2
+    end
+
+    connection field :binding_policies, node_type: :binding_policy do
+      middleware Authenticated
+
+      resolve &Deployments.list_binding_policies/2
     end
 
     @desc "Evaluates a policy against the supplied tool input."
@@ -560,6 +620,37 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_policy/2
+    end
+
+    field :create_binding_policy, :binding_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :policy,
+        action: :write
+      arg :attributes, non_null(:binding_policy_attributes)
+
+      resolve &Deployments.create_binding_policy/2
+    end
+
+    field :update_binding_policy, :binding_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :policy,
+        action: :write
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:binding_policy_update_attributes)
+
+      resolve &Deployments.update_binding_policy/2
+    end
+
+    field :delete_binding_policy, :binding_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :policy,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_binding_policy/2
     end
   end
 end

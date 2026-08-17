@@ -1753,6 +1753,72 @@ export type BindingAttributes = {
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+/** Associates a policy with a bindable resource type. */
+export type BindingPolicy = {
+  __typename?: 'BindingPolicy';
+  bindPolicy?: Maybe<Policy>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  interval: Scalars['String']['output'];
+  matches?: Maybe<BindingPolicyMatches>;
+  nextPollAt?: Maybe<Scalars['DateTime']['output']>;
+  policy?: Maybe<Policy>;
+  type: BindingPolicyType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type BindingPolicyAttributes = {
+  /** the policy that determines whether a target should be bound */
+  bindPolicyId: Scalars['ID']['input'];
+  /** how often the binding policy is evaluated; defaults to 1h and cannot be below 30m */
+  interval?: InputMaybe<Scalars['String']['input']>;
+  /** criteria that determine when the policy applies */
+  matches?: InputMaybe<BindingPolicyMatchesAttributes>;
+  /** the policy to attach to matching targets */
+  policyId: Scalars['ID']['input'];
+  /** the resource type this policy can bind to */
+  type: BindingPolicyType;
+};
+
+export type BindingPolicyConnection = {
+  __typename?: 'BindingPolicyConnection';
+  edges?: Maybe<Array<Maybe<BindingPolicyEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type BindingPolicyEdge = {
+  __typename?: 'BindingPolicyEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<BindingPolicy>;
+};
+
+export type BindingPolicyMatches = {
+  __typename?: 'BindingPolicyMatches';
+  workbench?: Maybe<WorkbenchPolicyMatches>;
+};
+
+export type BindingPolicyMatchesAttributes = {
+  workbench?: InputMaybe<WorkbenchPolicyMatchesAttributes>;
+};
+
+export enum BindingPolicyType {
+  Stack = 'STACK',
+  Workbench = 'WORKBENCH'
+}
+
+export type BindingPolicyUpdateAttributes = {
+  /** the policy that determines whether a target should be bound */
+  bindPolicyId?: InputMaybe<Scalars['ID']['input']>;
+  /** how often the binding policy is evaluated; cannot be below 30m */
+  interval?: InputMaybe<Scalars['String']['input']>;
+  /** criteria that determine when the policy applies */
+  matches?: InputMaybe<BindingPolicyMatchesAttributes>;
+  /** the policy to attach to matching targets */
+  policyId?: InputMaybe<Scalars['ID']['input']>;
+  /** the resource type this policy can bind to */
+  type: BindingPolicyType;
+};
+
 /** Requirements for Bitbucket Data Center / Server authentication */
 export type BitbucketDatacenterAttributes = {
   /** the user slug for Bitbucket Data Center / Server */
@@ -5263,6 +5329,7 @@ export type InfrastructureStack = {
   /** the git repository you're sourcing IaC from */
   repository?: Maybe<GitRepository>;
   runs?: Maybe<StackRunConnection>;
+  stackPolicies?: Maybe<StackPolicyConnection>;
   /** the most recent state of this stack */
   state?: Maybe<StackState>;
   /** The status of the last run of the stack */
@@ -5307,6 +5374,14 @@ export type InfrastructureStackRunsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   pullRequestId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type InfrastructureStackStackPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type InfrastructureStackConnection = {
@@ -7904,6 +7979,7 @@ export type PodTolerationAttributes = {
 /** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
 export type Policy = {
   __typename?: 'Policy';
+  bindingPolicies?: Maybe<BindingPolicyConnection>;
   /** human-readable policy description */
   description?: Maybe<Scalars['String']['output']>;
   /** unique policy identifier */
@@ -7917,7 +7993,18 @@ export type Policy = {
   policyEvaluations?: Maybe<PolicyEvaluationConnection>;
   /** project that owns this policy */
   project?: Maybe<Project>;
+  /** policy implementation type */
+  type: PolicyType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type PolicyBindingPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -7945,6 +8032,8 @@ export type PolicyAttributes = {
   policy?: InputMaybe<Scalars['String']['input']>;
   /** project that owns the policy; defaults to the deployment's default project when omitted */
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** policy implementation type */
+  type?: InputMaybe<PolicyType>;
 };
 
 export type PolicyBinding = {
@@ -8078,6 +8167,12 @@ export type PolicyStatistic = {
   /** the count for this aggregate */
   count?: Maybe<Scalars['Int']['output']>;
 };
+
+export enum PolicyType {
+  Binding = 'BINDING',
+  Stack = 'STACK',
+  Workbench = 'WORKBENCH'
+}
 
 export type Port = {
   __typename?: 'Port';
@@ -9225,6 +9320,7 @@ export type RootMutationType = {
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
   createAgentSession?: Maybe<ChatThread>;
   createAlertResolution?: Maybe<AlertResolution>;
+  createBindingPolicy?: Maybe<BindingPolicy>;
   createBootstrapToken?: Maybe<BootstrapToken>;
   createCluster?: Maybe<Cluster>;
   /** upserts a cluster backup resource */
@@ -9274,6 +9370,7 @@ export type RootMutationType = {
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createStack?: Maybe<InfrastructureStack>;
   createStackDefinition?: Maybe<StackDefinition>;
+  createStackPolicy?: Maybe<StackPolicy>;
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   createWorkbench?: Maybe<Workbench>;
@@ -9293,6 +9390,7 @@ export type RootMutationType = {
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
   deleteAgentRuntime?: Maybe<AgentRuntime>;
+  deleteBindingPolicy?: Maybe<BindingPolicy>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
   /** deletes a chat from a users history */
@@ -9350,6 +9448,7 @@ export type RootMutationType = {
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
   deleteStackDefinition?: Maybe<StackDefinition>;
+  deleteStackPolicy?: Maybe<StackPolicy>;
   deleteThread?: Maybe<ChatThread>;
   deleteUpgradePlanCallout?: Maybe<UpgradePlanCallout>;
   deleteUser?: Maybe<User>;
@@ -9451,6 +9550,7 @@ export type RootMutationType = {
   updateAgentRun?: Maybe<AgentRun>;
   updateAgentRunAnalysis?: Maybe<AgentRun>;
   updateAgentRunTodos?: Maybe<AgentRun>;
+  updateBindingPolicy?: Maybe<BindingPolicy>;
   updateCloudConnection?: Maybe<CloudConnection>;
   updateCluster?: Maybe<Cluster>;
   updateClusterIsoImage?: Maybe<ClusterIsoImage>;
@@ -9490,6 +9590,7 @@ export type RootMutationType = {
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateStack?: Maybe<InfrastructureStack>;
   updateStackDefinition?: Maybe<StackDefinition>;
+  updateStackPolicy?: Maybe<StackPolicy>;
   updateStackRun?: Maybe<StackRun>;
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
@@ -9714,6 +9815,11 @@ export type RootMutationTypeCreateAgentSessionArgs = {
 export type RootMutationTypeCreateAlertResolutionArgs = {
   attributes: AlertResolutionAttributes;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateBindingPolicyArgs = {
+  attributes: BindingPolicyAttributes;
 };
 
 
@@ -9949,6 +10055,12 @@ export type RootMutationTypeCreateStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeCreateStackPolicyArgs = {
+  attributes: StackPolicyAttributes;
+  stackId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateThreadArgs = {
   attributes: ChatThreadAttributes;
 };
@@ -10030,6 +10142,11 @@ export type RootMutationTypeDeleteAccessTokenArgs = {
 
 
 export type RootMutationTypeDeleteAgentRuntimeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteBindingPolicyArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10296,6 +10413,11 @@ export type RootMutationTypeDeleteStackArgs = {
 
 
 export type RootMutationTypeDeleteStackDefinitionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteStackPolicyArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10683,6 +10805,12 @@ export type RootMutationTypeUpdateAgentRunTodosArgs = {
 };
 
 
+export type RootMutationTypeUpdateBindingPolicyArgs = {
+  attributes: BindingPolicyUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateCloudConnectionArgs = {
   attributes: CloudConnectionAttributes;
   id: Scalars['ID']['input'];
@@ -10903,6 +11031,12 @@ export type RootMutationTypeUpdateStackArgs = {
 
 export type RootMutationTypeUpdateStackDefinitionArgs = {
   attributes: StackDefinitionAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateStackPolicyArgs = {
+  attributes: StackPolicyAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -11133,6 +11267,8 @@ export type RootQueryType = {
   availableModels?: Maybe<Array<Maybe<AvailableModel>>>;
   averageEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsAverage>>>;
   averageWorkbenchEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsWorkbenchAverage>>>;
+  bindingPolicies?: Maybe<BindingPolicyConnection>;
+  bindingPolicy?: Maybe<BindingPolicy>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
@@ -11327,6 +11463,7 @@ export type RootQueryType = {
   sharedAgentRun?: Maybe<AgentRun>;
   stackDefinition?: Maybe<StackDefinition>;
   stackDefinitions?: Maybe<StackDefinitionConnection>;
+  stackPolicy?: Maybe<StackPolicy>;
   stackRun?: Maybe<StackRun>;
   /** fetches the files from a stack's git tarball */
   stackTarball?: Maybe<Array<Maybe<ServiceFile>>>;
@@ -11496,6 +11633,19 @@ export type RootQueryTypeAverageEvalResultsArgs = {
 
 export type RootQueryTypeAverageWorkbenchEvalResultsArgs = {
   period?: InputMaybe<EvalResultsPeriod>;
+};
+
+
+export type RootQueryTypeBindingPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeBindingPolicyArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -12657,6 +12807,11 @@ export type RootQueryTypeStackDefinitionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeStackPolicyArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -14691,6 +14846,32 @@ export type StackOverridesAttributes = {
   terraform?: InputMaybe<TerraformConfigurationAttributes>;
   /** the terragrunt configuration for this stack */
   terragrunt?: InputMaybe<TerragruntConfigurationAttributes>;
+};
+
+export type StackPolicy = {
+  __typename?: 'StackPolicy';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  policy?: Maybe<Policy>;
+  stack?: Maybe<InfrastructureStack>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackPolicyAttributes = {
+  /** the policy to associate with this stack */
+  policyId: Scalars['ID']['input'];
+};
+
+export type StackPolicyConnection = {
+  __typename?: 'StackPolicyConnection';
+  edges?: Maybe<Array<Maybe<StackPolicyEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type StackPolicyEdge = {
+  __typename?: 'StackPolicyEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<StackPolicy>;
 };
 
 export type StackPolicyViolation = {

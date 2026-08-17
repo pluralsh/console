@@ -2,7 +2,10 @@ defmodule Console.AI.Workbench.Activity do
   @moduledoc false
 
   alias Console.Repo
-  alias Console.Schema.{AgentRun, WorkbenchJobActivity}
+  alias Console.Schema.{
+    AgentRun,
+    WorkbenchJobActivity
+  }
 
   @timeout :timer.hours(4)
   @iter_timeout :timer.minutes(2)
@@ -17,6 +20,7 @@ defmodule Console.AI.Workbench.Activity do
     :pg.get_members(group(id))
     |> Enum.each(&send(&1, {:wb_activity, activity}))
   end
+
   def publish(%AgentRun{id: id} = run) when is_binary(id) do
     :pg.get_members(agent_group(id))
     |> Enum.each(&send(&1, {:wb_agent, run}))
@@ -85,9 +89,11 @@ defmodule Console.AI.Workbench.Activity do
   end
 
   defp refetch(%type{id: id}), do: Repo.get(type, id)
+
   defp max_iterations(timeout), do: ceil(timeout / min(timeout, @iter_timeout))
 
   defp group(id), do: {:wb_activity, id}
+
   defp agent_group(id), do: {:wb_agent, id}
 
   defp completed_activity?(%WorkbenchJobActivity{status: status}),
