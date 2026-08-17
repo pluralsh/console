@@ -244,6 +244,15 @@ defmodule Console.Deployments.Workbenches do
     |> notify(:delete, user)
   end
 
+  @doc "Deletes the specified policy association from a workbench. Requires write access to the workbench."
+  @spec delete_workbench_policy(binary, binary, User.t()) :: workbench_policy_resp
+  def delete_workbench_policy(policy_id, workbench_id, %User{} = user) do
+    Repo.get_by!(WorkbenchPolicy, policy_id: policy_id, workbench_id: workbench_id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
   @doc """
   Creates a new workbench tool.
   """

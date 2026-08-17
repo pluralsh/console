@@ -542,7 +542,7 @@ defmodule Console.Factory do
   def binding_policy_factory do
     %Schema.BindingPolicy{
       policy: build(:policy),
-      bind_policy: build(:policy),
+      bind_policy: build(:policy, type: :binding),
       type: :workbench,
       matches: %{workbench: %{regexes: [".*"]}}
     }

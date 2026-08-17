@@ -80,7 +80,7 @@ defmodule Console.Deployments.PolicyTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       policy = insert(:policy, project: project)
-      bind_policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding)
 
       {:ok, binding} =
         Policy.create_binding_policy(
@@ -111,12 +111,25 @@ defmodule Console.Deployments.PolicyTest do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       policy = insert(:policy, project: project)
-      bind_policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding)
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy)
 
       assert {:error, _} = Policy.create_binding_policy(%{policy_id: policy.id, bind_policy_id: bind_policy.id, type: :stack}, user)
       assert {:error, _} = Policy.update_binding_policy(%{type: :stack}, binding.id, user)
       assert {:error, _} = Policy.delete_binding_policy(binding.id, user)
+    end
+
+    test "requires a binding policy to evaluate target bindings" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      invalid_bind_policy = insert(:policy, project: project)
+
+      assert {:error, "the binding policy needs to have binding type"} =
+               Policy.create_binding_policy(
+                 %{policy_id: policy.id, bind_policy_id: invalid_bind_policy.id, type: :workbench},
+                 user
+               )
     end
   end
 
@@ -148,9 +161,10 @@ defmodule Console.Deployments.PolicyTest do
     test "adds and removes workbench policy bindings without duplicates" do
       insert(:user, bot_name: "console")
       project = insert(:project)
-      workbench = insert(:workbench, project: project)
+      workbench = insert(:workbench, project: project, name: "bound-workbench")
+      retained = insert(:workbench, project: project, name: "retained-workbench")
       policy = insert(:policy, project: project)
-      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.name == \"bound-workbench\"")
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, matches: %{workbench: %{regexes: [".*"]}})
 
       :ok = Policy.reconcile(binding)
@@ -158,10 +172,19 @@ defmodule Console.Deployments.PolicyTest do
 
       assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
 
-      {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+      insert(:workbench_policy, policy: policy, workbench: retained)
+
+      {:ok, bind_policy} =
+        Policy.update_policy(
+          %{policy: "package plrl.binding\nbind := true if input.name == \"retained-workbench\""},
+          bind_policy.id,
+          admin_user()
+        )
+
       :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
 
       assert 0 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(retained.id) |> Repo.aggregate(:count)
     end
 
     test "pipeline handling always schedules the next poll" do

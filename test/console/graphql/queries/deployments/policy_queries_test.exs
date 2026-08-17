@@ -450,6 +450,20 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert [%{"message" => "blocked"}] = result["deny"]
     end
 
+    test "evaluates binding policies with the binding base" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
+
+      {:ok, %{data: %{"evaluatePolicy" => result}}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!) {
+          evaluatePolicy(policyId: $policyId, input: $input)
+        }
+      """, %{"policyId" => policy.id, "input" => Jason.encode!(%{})}, %{current_user: user})
+
+      assert result["bind"]
+    end
+
     test "denies evaluation history to users without policy access" do
       policy = insert(:policy)
 

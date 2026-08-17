@@ -282,6 +282,14 @@ defmodule Console.Deployments.Stacks do
     |> when_ok(:delete)
   end
 
+  @doc "Deletes the specified policy association from a stack. Requires stack write access."
+  @spec delete_stack_policy(binary, binary, User.t) :: stack_policy_resp
+  def delete_stack_policy(policy_id, stack_id, %User{} = user) do
+    Repo.get_by!(StackPolicy, policy_id: policy_id, stack_id: stack_id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
   @doc """
   creates a new stack definition
   """

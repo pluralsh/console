@@ -84,7 +84,7 @@ defmodule Console.GraphQl.Deployments.PolicyMutationsTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       policy = insert(:policy, project: project)
-      bind_policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding)
 
       {:ok, %{data: %{"createBindingPolicy" => binding}}} = run_query("""
         mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
