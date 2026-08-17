@@ -99,7 +99,11 @@ export const useNamespaces = () => {
   return namespaces
 }
 
-export default function Cluster() {
+export default function Cluster({
+  getDefaultClusterPath = getKubernetesAbsPath,
+}: {
+  getDefaultClusterPath?: (clusterId: string) => string
+}) {
   const theme = useTheme()
   const { popToast } = useSimpleToast()
   const projectId = useProjectId()
@@ -230,7 +234,7 @@ export default function Cluster() {
     return (
       <Navigate
         replace
-        to={`${getKubernetesAbsPath(defaultClusterId)}${search}`}
+        to={`${getDefaultClusterPath(defaultClusterId)}${search}`}
       />
     )
 
