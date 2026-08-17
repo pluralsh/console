@@ -118,6 +118,41 @@ var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 			))
 		})
 
+		It("should upsert an empty createBindings list when bindings are removed", func() {
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.AgentRuntimePolicy{
+				ObjectMeta: metav1.ObjectMeta{Name: policyName, Namespace: namespace},
+			}, func(p *v1alpha1.AgentRuntimePolicy) {
+				p.Spec.Bindings = nil
+			})).To(Succeed())
+
+			runtimeFragment := &gqlclient.AgentRuntimeFragment{
+				ID:   id,
+				Name: policyName,
+				Type: gqlclient.AgentRuntimeTypeClaude,
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetClusterByHandle", lo.ToPtr(clusterHandle)).Return(&gqlclient.ClusterFragment{
+				ID:     clusterID,
+				Handle: lo.ToPtr(clusterHandle),
+			}, nil)
+			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, policyName, clusterID).Return(runtimeFragment, nil)
+			fakeConsoleClient.On("UpsertAgentRuntime", mock.Anything, mock.MatchedBy(func(attrs gqlclient.AgentRuntimeAttributes) bool {
+				return attrs.Name == policyName &&
+					attrs.CreateBindings != nil &&
+					len(attrs.CreateBindings) == 0
+			})).Return(runtimeFragment, nil)
+
+			reconciler := &controller.AgentRuntimePolicyReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should wait when the agent runtime is missing", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetClusterByHandle", lo.ToPtr(clusterHandle)).Return(&gqlclient.ClusterFragment{

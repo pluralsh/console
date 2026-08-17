@@ -116,16 +116,17 @@ func (in *AgentRuntimePolicyReconciler) getAgentRuntime(ctx context.Context, run
 }
 
 func createBindingsAttributes(policy *v1alpha1.AgentRuntimePolicy) []*console.AgentBindingAttributes {
-	if policy.Spec.Bindings == nil || policy.Spec.Bindings.Create == nil {
-		return []*console.AgentBindingAttributes{}
+	bindings := make([]*console.AgentBindingAttributes, 0)
+	if policy.Spec.Bindings == nil {
+		return bindings
 	}
 
-	return algorithms.Map(policy.Spec.Bindings.Create, func(b v1alpha1.Binding) *console.AgentBindingAttributes {
+	return append(bindings, algorithms.Map(policy.Spec.Bindings.Create, func(b v1alpha1.Binding) *console.AgentBindingAttributes {
 		return &console.AgentBindingAttributes{
 			UserEmail: b.UserEmail,
 			GroupName: b.GroupName,
 		}
-	})
+	})...)
 }
 
 func agentRuntimePolicyAttributes(runtime *console.AgentRuntimeFragment, clusterID string, createBindings []*console.AgentBindingAttributes) console.AgentRuntimeAttributes {
