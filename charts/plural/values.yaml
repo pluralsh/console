@@ -413,14 +413,6 @@ postgresql:
     registry: gcr.io
     repository: pluralsh/postgres
     tag: 11.7.0-debian-10-r9
-  metrics:
-    enabled: true
-    image:
-      registry: gcr.io
-      repository: pluralsh/postgres-exporter
-      tag: 0.8.0
-    serviceMonitor:
-      enabled: true
   postgresqlExtendedConf:
     max_connections: 100
   postgresqlUsername: plural

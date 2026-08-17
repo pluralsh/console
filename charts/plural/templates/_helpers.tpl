@@ -56,6 +56,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
   valueFrom:
     fieldRef:
       fieldPath: status.podIP
+{{ if .Values.postgres.create }}
 - name: POSTGRES_PASSWORD
   valueFrom:
     secretKeyRef:
@@ -82,6 +83,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
   value: plural-plural
 - name: DBSSL
   value: 'true'
+{{ end }}
 {{ if .Values.sentryDsn }}
 - name: SENTRY_DSN
   value: {{ .Values.sentryDsn | quote }}
