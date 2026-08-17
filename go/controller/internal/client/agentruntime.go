@@ -23,3 +23,14 @@ func (c *client) GetAgentRuntime(ctx context.Context, name, clusterId string) (*
 	}
 	return response.AgentRuntime, err
 }
+
+func (c *client) UpsertAgentRuntime(ctx context.Context, attributes console.AgentRuntimeAttributes) (*console.AgentRuntimeFragment, error) {
+	response, err := c.consoleClient.UpsertAgentRuntime(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if response == nil {
+		return nil, err
+	}
+	return response.UpsertAgentRuntime, nil
+}

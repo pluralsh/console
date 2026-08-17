@@ -10828,6 +10828,65 @@ func (_c *ConsoleClientMock_UpdateWorkbenchWebhook_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// UpsertAgentRuntime provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertAgentRuntime(ctx context.Context, attributes client.AgentRuntimeAttributes) (*client.AgentRuntimeFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertAgentRuntime")
+	}
+
+	var r0 *client.AgentRuntimeFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.AgentRuntimeAttributes) (*client.AgentRuntimeFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.AgentRuntimeAttributes) *client.AgentRuntimeFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.AgentRuntimeFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.AgentRuntimeAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertAgentRuntime_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertAgentRuntime'
+type ConsoleClientMock_UpsertAgentRuntime_Call struct {
+	*mock.Call
+}
+
+// UpsertAgentRuntime is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.AgentRuntimeAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertAgentRuntime(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertAgentRuntime_Call {
+	return &ConsoleClientMock_UpsertAgentRuntime_Call{Call: _e.mock.On("UpsertAgentRuntime", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertAgentRuntime_Call) Run(run func(ctx context.Context, attributes client.AgentRuntimeAttributes)) *ConsoleClientMock_UpsertAgentRuntime_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.AgentRuntimeAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertAgentRuntime_Call) Return(_a0 *client.AgentRuntimeFragment, _a1 error) *ConsoleClientMock_UpsertAgentRuntime_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertAgentRuntime_Call) RunAndReturn(run func(context.Context, client.AgentRuntimeAttributes) (*client.AgentRuntimeFragment, error)) *ConsoleClientMock_UpsertAgentRuntime_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpsertCatalog provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) UpsertCatalog(ctx context.Context, attributes *client.CatalogAttributes) (*client.CatalogFragment, error) {
 	ret := _m.Called(ctx, attributes)

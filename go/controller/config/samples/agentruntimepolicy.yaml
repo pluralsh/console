@@ -1,0 +1,11 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: AgentRuntimePolicy
+metadata:
+  name: claude
+spec:
+  # runtime defaults to metadata.name when omitted
+  runtime: claude
+  bindings:
+    create:
+      - userEmail: admin@plural.sh
+      - groupName: engineering

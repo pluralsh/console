@@ -31,6 +31,15 @@ func newQueueRateLimiter() workqueue.TypedRateLimiter[ctrl.Request] {
 
 // register all controllers with the controller manager.
 func init() {
+	types.RegisterController(types.AgentRuntimePolicyReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.AgentRuntimePolicyReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
+
 	types.RegisterController(types.BootstrapTokenReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.BootstrapTokenReconciler{
