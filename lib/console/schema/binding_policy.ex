@@ -23,6 +23,10 @@ defmodule Console.Schema.BindingPolicy do
     from(p in query, where: p.policy_id == ^policy_id)
   end
 
+  def for_type(query \\ __MODULE__, type) do
+    from(p in query, where: p.type == ^type)
+  end
+
   def for_user(query \\ __MODULE__, user) do
     projects = Console.Schema.Project.for_user(user)
 

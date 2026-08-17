@@ -35,6 +35,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Preview,
   Console.Deployments.PubSub.Email,
   Console.Deployments.PubSub.Governance,
+  Console.Deployments.PubSub.Binding,
   Console.PubSub.Consumers.Cache,
   Console.AI.PubSub.Consumer,
   Console.AI.PubSub.Vector.Consumer,

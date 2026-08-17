@@ -148,6 +148,12 @@ defmodule Console.Deployments.Policy do
     |> Stream.run()
   end
 
+  def reconcile(%BindingPolicy{type: :workbench} = binding, %Workbench{} = target),
+    do: reconcile_binding(Repo.preload(binding, :bind_policy), target)
+  def reconcile(%BindingPolicy{type: :stack} = binding, %Stack{} = target),
+    do: reconcile_binding(Repo.preload(binding, :bind_policy), target)
+  def reconcile(_, _), do: :ok
+
   defp targets(%BindingPolicy{type: :workbench}) do
     Workbench.stream()
     |> Workbench.preloaded()
