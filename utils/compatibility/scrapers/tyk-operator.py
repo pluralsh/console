@@ -97,7 +97,7 @@ def parse_gateway_compatibility(table) -> dict[str, list[str]]:
             continue
 
         requirements = [
-            f"Tyk Gateway {gateway_version}"
+            OrderedDict([("name", "Tyk Gateway"), ("version", gateway_version)])
             for gateway_version, value in zip(headers, cells[1:])
             if value.strip().upper() == "Y"
         ]
