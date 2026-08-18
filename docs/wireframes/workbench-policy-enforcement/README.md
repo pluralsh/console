@@ -130,9 +130,10 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 | `STACK` | Place the policy **runs** (tool admission on stacks) | **Enforcement** | `StackIcon` + “Runs on stacks” |
 | `BINDING` | **Auto-attach logic** (`BindingPolicy.bindPolicy`, `bind: true/false`). Not a third place. Not Console RBAC policy bindings. | **Auto-attach** | `LinksIcon` / `ArrowRightLeftIcon` + “Auto-attach · not a place” |
 
-- Default list = Enforcement. Second tab = Auto-attach.
-- Workbench attach picker = `type: WORKBENCH` only. Stack and BINDING policies are hidden.
-- Create form groups type the same way: Enforcement (Workbench / Stack) vs Auto-attach (Binding). Opening create from the Auto-attach tab defaults to `BINDING`.
+- **Policies** tab = `WORKBENCH` + `STACK` documents only. Place chip (Workbench / Stack), not Binding.
+- **Attachment rules** tab = `bindingPolicies` query. Each row is attach `policy.name` **when** `bindPolicy.name` **on** `type`.
+- BINDING documents are created from the rule’s **When** field, not listed as a third type on Policies.
+- Workbench attach picker = `type: WORKBENCH` only.
 
 ### Example auto-attach Rego
 
@@ -180,8 +181,9 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 | # | Screen | Route |
 | --- | --- | --- |
 | 1 | Security overview (new sidenav) | `/security/overview` |
-| 2 | Policies list — Enforcement tab | `/security/policies` |
-| 2b | Policies list — Auto-attach tab | `/security/policies` (`type: BINDING`) |
+| 2 | Policies list | `/security/policies` |
+| 2b | Attachment rules (`BindingPolicy` rows) | `/security/policies` (rules tab) |
+| 2c | New / edit attachment | `/security/policies/attachments/create` |
 | 3 | Policies empty (same tabs) | `/security/policies` |
 | 4 | Create policy (details + policy body text) | `/security/policies/create` |
 | 5 | Policy body (all Policy fields) | `/security/policies/:id` |
