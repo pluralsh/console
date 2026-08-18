@@ -1,9 +1,12 @@
 defmodule Console.AI.Tools.Workbench.Codemode do
   use Console.AI.Tools.Workbench.Base
   alias Console.AI.Tools.Workbench.OutputType
+  alias Console.AI.Tools.Workbench.Output
   alias Console.AI.Tool
 
   require EEx
+
+  @max_output_bytes 100_000
 
   embedded_schema do
     field(:tools, {:array, :map}, virtual: true)
@@ -40,7 +43,11 @@ defmodule Console.AI.Tools.Workbench.Codemode do
     )
     |> case do
       {:ok, result, stdo} ->
-        Jason.encode(%{result: ExMonty.Elixirable.to_elixir(result), stdout: stdo})
+        Output.json(
+          %{result: ExMonty.Elixirable.to_elixir(result), stdout: stdo},
+          "return fewer fields or summarize the result",
+          @max_output_bytes
+        )
 
       {:error, err} ->
         {:error, "Failed to execute Python code: #{inspect(err)}"}

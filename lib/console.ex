@@ -388,7 +388,7 @@ defmodule Console do
   def throttle(enum, %{count: count, pause: pause}) do
     Stream.with_index(enum)
     |> Stream.map(fn {r, ind} ->
-      if rem(ind, count) == 0 do
+      if rem(ind, count) == 0 && ind != 0 do
         :timer.sleep(pause)
       end
 

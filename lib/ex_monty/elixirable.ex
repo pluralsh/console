@@ -9,6 +9,14 @@ defmodule ExMonty.Elixirable do
   @doc """
   Recursively converts an `ExMonty` result to its Elixir representation.
   """
+  defimpl Jason.Encoder, for: MapSet do
+    def encode(value, opts) do
+      value
+      |> MapSet.to_list()
+      |> Jason.Encode.list(opts)
+    end
+  end
+
   @spec to_elixir(term()) :: term()
   def to_elixir({:bytes, value}) when is_binary(value), do: value
   def to_elixir({:path, value}) when is_binary(value), do: value
@@ -42,7 +50,6 @@ defmodule ExMonty.Elixirable do
     value
     |> Tuple.to_list()
     |> Enum.map(&to_elixir/1)
-    |> List.to_tuple()
   end
 
   def to_elixir(%MapSet{} = value), do: MapSet.new(value, &to_elixir/1)
