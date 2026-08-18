@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Workbench Policy Enforcement — wireframes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --fill-accent: #0E1015;
+      --fill-zero: #12151B;
+      --fill-zero-hover: #1B1F27;
+      --fill-zero-selected: #171A21;
+      --fill-one: #1B1F27;
+      --fill-one-hover: #252932;
+      --fill-one-selected: #21242C;
+      --fill-two: #252932;
+      --fill-primary: #4A51F2;
+      --fill-primary-hover: #5D63F4;
+      --border: #252932;
+      --border-fill-one: #2A2E37;
+      --border-input: #454954;
+      --border-primary: #747AF6;
+      --border-success: #3CECAF;
+      --border-danger: #F2788D;
+      --border-warning: #FFF59E;
+      --text: #EEF0F1;
+      --text-light: #C5C9D2;
+      --text-xlight: #A1A5B0;
+      --text-disabled: #454954;
+      --icon-default: #C5C9D2;
+      --icon-light: #A1A5B0;
+      --icon-danger: #F2788D;
+      --icon-success: #3CECAF;
+      --icon-warning: #FFF59E;
+      --purple-200: #9FA3F9;
+      --blue-200: #99C9FF;
+      --green-200: #99F5D5;
+      --red-200: #F8A9B6;
+      --yellow-200: #FFF59E;
+      --sidebar: 64px;
+      --sidenav: 220px;
+      --radius: 6px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--fill-accent); color: var(--text); font-family: Inter, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; letter-spacing: 0.2px; }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--blue-200); text-decoration: none; }
+    a:hover { color: #C2DFFF; }
+
+    /* Reviewer chrome */
+    .picker {
+      position: sticky; top: 0; z-index: 50;
+      background: #171A21; border-bottom: 1px solid var(--border);
+      padding: 8px 12px; display: flex; gap: 8px; align-items: center; overflow-x: auto;
+    }
+    .picker-label { color: var(--text-xlight); font-size: 12px; white-space: nowrap; margin-right: 4px; }
+    .picker button {
+      background: var(--fill-one); border: 1px solid var(--border-fill-one); color: var(--text-light);
+      border-radius: 4px; padding: 4px 8px; font-size: 12px; white-space: nowrap;
+    }
+    .picker button.active { background: var(--fill-primary); border-color: var(--fill-primary); color: #fff; }
+    .note {
+      margin: 0 12px 0 auto; color: var(--text-xlight); font-size: 12px; white-space: nowrap;
+    }
+
+    /* App chrome */
+    .app { display: grid; grid-template-columns: var(--sidebar) 1fr; height: calc(100vh - 41px); }
+    .app-sidebar {
+      background: var(--fill-accent); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; padding: 12px 8px; gap: 4px;
+    }
+    .nav-ico {
+      width: 40px; height: 40px; border-radius: 6px; display: grid; place-items: center;
+      color: var(--icon-light); background: transparent; border: 0;
+    }
+    .nav-ico:hover { background: var(--fill-zero-hover); color: var(--text); }
+    .nav-ico.active { background: var(--fill-one-selected); color: var(--text); }
+    .nav-ico svg { width: 18px; height: 18px; }
+    .app-main { display: flex; flex-direction: column; min-width: 0; background: var(--fill-zero); }
+    .topbar, .crumbs {
+      background: var(--fill-accent); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 40px;
+    }
+    .crumbs { min-height: 48px; color: var(--text-xlight); font-size: 13px; }
+    .crumbs b { color: var(--text); font-weight: 500; }
+    .crumb-link { color: var(--text-xlight); cursor: pointer; }
+    .crumb-link:hover { color: var(--text); }
+    .project { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--text-light); font-size: 13px; }
+    .spacer { flex: 1; }
+    .avatar { width: 24px; height: 24px; border-radius: 50%; background: #3D424D; display: grid; place-items: center; font-size: 11px; }
+
+    /* Layouts */
+    .with-sidenav {
+      display: grid; grid-template-columns: var(--sidenav) 1fr; height: 100%; min-height: 0; padding: 16px 16px 16px 8px; gap: 24px;
+    }
+    .sidenav { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; }
+    .sidenav button {
+      text-align: left; background: transparent; border: 0; border-radius: 4px;
+      padding: 8px 12px; color: var(--text-light);
+    }
+    .sidenav button:hover { background: var(--fill-zero-hover); color: var(--text); }
+    .sidenav button.active { background: var(--fill-one-selected); color: var(--text); font-weight: 600; }
+    .page { min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 16px; }
+    .page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; min-height: 40px; }
+    .title { font-size: 20px; line-height: 24px; font-weight: 500; margin: 0; }
+    .subtitle { color: var(--text-light); margin: 4px 0 0; max-width: 640px; }
+
+    .btn { border: 0; border-radius: 3px; padding: 8px 12px; font-weight: 600; background: var(--fill-primary); color: #fff; }
+    .btn:hover { background: var(--fill-primary-hover); }
+    .btn.secondary { background: var(--fill-two); color: var(--text); border: 1px solid var(--border-fill-one); }
+    .btn.secondary:hover { background: var(--fill-one-hover); }
+    .btn.small { padding: 4px 10px; font-size: 13px; }
+    .btn.danger { background: transparent; color: var(--icon-danger); border: 1px solid var(--border-danger); }
+    .btn.ghost { background: transparent; color: var(--text-light); }
+    .btn[disabled] { opacity: .45; pointer-events: none; }
+
+    .card { background: var(--fill-one); border: 1px solid var(--border-fill-one); border-radius: var(--radius); }
+    .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table th { text-align: left; color: var(--text-xlight); font-weight: 500; padding: 10px 12px; border-bottom: 1px solid var(--border-fill-one); }
+    .table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .table tr.click:hover td { background: var(--fill-one-hover); cursor: pointer; }
+    .row-title { font-weight: 500; }
+    .row-sub { color: var(--text-xlight); font-size: 12px; margin-top: 2px; }
+
+    .chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 3px; padding: 0 8px; height: 20px; font-size: 12px; border: 1px solid var(--border-fill-one); background: var(--fill-two); color: var(--text-light); }
+    .chip.ok { border-color: #1B4332; background: #13261E; color: var(--green-200); }
+    .chip.bad { border-color: #5C2A35; background: #2A151A; color: var(--red-200); }
+    .chip.info { border-color: #1B3352; background: #132033; color: var(--blue-200); }
+    .chip.warn { border-color: #4A4420; background: #2A2714; color: var(--yellow-200); }
+
+    .icon-btn { width: 28px; height: 28px; border: 0; background: transparent; color: var(--icon-light); border-radius: 4px; display: grid; place-items: center; }
+    .icon-btn:hover { background: var(--fill-zero-hover); color: var(--text); }
+    .icon-btn.danger:hover { color: var(--icon-danger); }
+
+    .empty { padding: 48px 24px; text-align: center; }
+    .empty h3 { margin: 0 0 8px; font-weight: 500; }
+    .empty p { margin: 0 0 16px; color: var(--text-xlight); }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .label { font-size: 13px; font-weight: 600; }
+    .hint { color: var(--text-xlight); font-size: 12px; }
+    .input, .select, .textarea {
+      background: var(--fill-zero); border: 1px solid var(--border-input); border-radius: 3px;
+      padding: 8px 10px; outline: none;
+    }
+    .input:focus, .select:focus, .textarea:focus { border-color: var(--border-primary); }
+    .textarea { min-height: 88px; resize: vertical; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; background: var(--fill-zero); border: 1px solid var(--border-input); border-radius: 3px; min-height: 40px; }
+    .tag { display: inline-flex; align-items: center; gap: 4px; background: var(--fill-two); border-radius: 3px; padding: 2px 8px; font-family: "JetBrains Mono", monospace; font-size: 12px; }
+    .tag button { border: 0; background: 0; color: var(--text-xlight); padding: 0; }
+    .tags input { border: 0; background: 0; outline: 0; flex: 1; min-width: 120px; padding: 4px; }
+
+    .split { display: flex; gap: 16px; min-height: 0; }
+    .step-nav { width: 180px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; }
+    .step-nav button { text-align: left; background: transparent; border: 0; border-radius: 4px; padding: 8px; color: var(--text); }
+    .step-nav button.active { background: var(--fill-one-selected); }
+    .form-card { flex: 1; max-width: 750px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .footer-actions { display: flex; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); margin-top: auto; }
+
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+    .tabs button { background: 0; border: 0; color: var(--text-xlight); padding: 8px 12px; border-bottom: 2px solid transparent; }
+    .tabs button.active { color: var(--text); border-bottom-color: var(--fill-primary); font-weight: 600; }
+
+    .editor {
+      font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 18px;
+      background: #0E1015; border: 1px solid var(--border); border-radius: 4px;
+      padding: 12px; color: #C5C9D2; white-space: pre; overflow: auto; min-height: 280px;
+    }
+    .kw { color: #9FA3F9; } .str { color: #99F5D5; } .cmt { color: #5D626F; } .fn { color: #99C9FF; }
+
+    .json {
+      font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 18px;
+      background: #0E1015; border: 1px solid var(--border); border-radius: 4px;
+      padding: 12px; white-space: pre; overflow: auto; min-height: 360px; color: #C5C9D2;
+    }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-height: 0; }
+    .panel-label { font-size: 12px; color: var(--text-xlight); margin-bottom: 6px; display: flex; justify-content: space-between; }
+
+    /* Workbench */
+    .wb { display: flex; height: 100%; min-height: 0; }
+    .wb-side { width: 250px; flex-shrink: 0; background: var(--fill-accent); border-right: 1px solid var(--border-fill-one); padding: 16px; overflow: auto; }
+    .wb-body { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 16px 20px; gap: 12px; }
+    .wb-head { display: flex; align-items: center; gap: 12px; }
+    .section { margin-bottom: 20px; }
+    .section + .section { border-top: 1px solid var(--border-fill-one); padding-top: 16px; }
+    .section h4 { margin: 0 0 8px; font-size: 12px; font-weight: 500; color: var(--text-xlight); display: flex; justify-content: space-between; }
+    .side-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; color: var(--text-light); font-size: 13px; }
+    .side-item .ico { width: 20px; height: 20px; display: grid; place-items: center; color: var(--icon-light); }
+    .add-link { background: 0; border: 0; color: var(--text-xlight); font-size: 12px; padding: 0; }
+    .add-link:hover { color: var(--text-light); }
+    .prompt { background: var(--fill-one); border: 1px solid var(--border-fill-one); border-radius: 8px; min-height: 88px; padding: 12px; color: var(--text-xlight); }
+
+    .subtabs { display: flex; gap: 4px; }
+    .subtabs button { background: var(--fill-one); border: 1px solid var(--border-fill-one); color: var(--text-light); padding: 4px 10px; border-radius: 3px; }
+    .subtabs button.active { background: var(--fill-zero-selected); color: var(--text); border-color: var(--border-input); }
+
+    .menu {
+      position: absolute; right: 20px; top: 92px; width: 220px; background: var(--fill-one);
+      border: 1px solid var(--border-fill-one); border-radius: 6px; padding: 6px; box-shadow: 0 8px 24px #0008; z-index: 5;
+    }
+    .menu button { width: 100%; text-align: left; background: 0; border: 0; padding: 8px 10px; border-radius: 4px; display: flex; gap: 8px; align-items: center; color: var(--text-light); }
+    .menu button:hover { background: var(--fill-zero-hover); color: var(--text); }
+    .menu button.danger { color: var(--icon-danger); }
+    .menu .sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+    .banner { padding: 10px 12px; border-radius: 4px; display: flex; gap: 10px; align-items: center; font-size: 13px; }
+    .banner.ok { background: #13261E; border: 1px solid #1B4332; color: var(--green-200); }
+    .banner.bad { background: #2A151A; border: 1px solid #5C2A35; color: var(--red-200); }
+    .banner.info { background: #132033; border: 1px solid #1B3352; color: var(--blue-200); }
+
+    .callout { font-size: 12px; color: var(--text-xlight); background: var(--fill-zero); border: 1px dashed var(--border-input); border-radius: 4px; padding: 8px 10px; }
+
+    .mono { font-family: "JetBrains Mono", monospace; font-size: 12px; }
+    .row-actions { display: flex; justify-content: flex-end; gap: 4px; }
+    .center-col { max-width: 750px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px; }
+    .search { display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="picker">
+    <span class="picker-label">Screens</span>
+    <button data-go="security-overview">1. Security sidenav</button>
+    <button data-go="policies">2. Policies list</button>
+    <button data-go="policies-empty">3. Empty</button>
+    <button data-go="policy-create">4. Create policy</button>
+    <button data-go="policy-body">5. Editor</button>
+    <button data-go="policy-evaluations">6. Evaluations</button>
+    <button data-go="policy-simulate">7. Simulate</button>
+    <button data-go="gatekeeper">8. Gatekeeper</button>
+    <button data-go="wb-policies">9. WB policies</button>
+    <button data-go="wb-policies-empty">10. WB empty</button>
+    <button data-go="wb-attach">11. Attach</button>
+    <button data-go="wb-launch">12. WB launch</button>
+    <span class="note">Wireframe · not production UI · data from PR 4014</span>
+  </div>
+  <div class="app" id="app"></div>
+
+  <script>
+    const I = {
+      home: '<svg viewBox="0 0 16 16" fill="none"><path d="M2 7.5 8 2l6 5.5V14H9.5V10h-3v4H2V7.5Z" stroke="currentColor" stroke-width="1.3"/></svg>',
+      cd: '<svg viewBox="0 0 16 16" fill="none"><path d="M3 12.5 8 3l5 9.5" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="12.5" r="1.4" fill="currentColor"/></svg>',
+      stacks: '<svg viewBox="0 0 16 16" fill="none"><path d="M2 11 8 14l6-3M2 8l6 3 6-3M2 5l6 3 6-3L8 2 2 5Z" stroke="currentColor" stroke-width="1.3"/></svg>',
+      flows: '<svg viewBox="0 0 16 16" fill="none"><path d="M3 3h4v4H3V3Zm6 6h4v4H9V9ZM5 7v2a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.3"/></svg>',
+      wb: '<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 6h12" stroke="currentColor" stroke-width="1.3"/></svg>',
+      k8s: '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 3v10M3.5 8h9" stroke="currentColor" stroke-width="1.3"/></svg>',
+      ai: '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2v3M8 11v3M2 8h3M11 8h3M4 4l2 2M10 10l2 2M12 4l-2 2M6 10l-2 2" stroke="currentColor" stroke-width="1.3"/></svg>',
+      shield: '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2 3 4v4.5c0 3.2 2.1 5.3 5 6.5 2.9-1.2 5-3.3 5-6.5V4L8 2Z" stroke="currentColor" stroke-width="1.3"/></svg>',
+      cost: '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v6M6 6.5h3.2a1.3 1.3 0 0 1 0 2.6H6.8a1.3 1.3 0 0 0 0 2.6H10" stroke="currentColor" stroke-width="1.3"/></svg>',
+      gear: '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 2.5v2M8 11.5v2M2.5 8h2M11.5 8h2M4.1 4.1l1.4 1.4M10.5 10.5l1.4 1.4M11.9 4.1l-1.4 1.4M5.5 10.5 4.1 11.9" stroke="currentColor" stroke-width="1.3"/></svg>',
+      plus: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4"/></svg>',
+      search: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.3"/><path d="m9.5 9.5 3 3" stroke="currentColor" stroke-width="1.3"/></svg>',
+      pencil: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.8 10.2 3.5 4 9.7H2.3V8Z" stroke="currentColor" stroke-width="1.2"/></svg>',
+      trash: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M5 3V2h2v1M3.5 3l.5 7h4l.5-7" stroke="currentColor" stroke-width="1.2"/></svg>',
+      more: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3.5" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="8" cy="12.5" r="1.2"/></svg>',
+      bot: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="3" y="5" width="10" height="8" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 5V3M6 9h.01M10 9h.01" stroke="currentColor" stroke-width="1.3"/></svg>',
+      hook: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4h8M4 8h5a3 3 0 1 1 0 6H6" stroke="currentColor" stroke-width="1.3"/></svg>',
+      clock: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3"/></svg>',
+      tools: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3a3 3 0 0 1 3 3c0 .6-.2 1.1-.5 1.5L8 12.9 4.1 9 8.5 4.5A3 3 0 0 1 10 3Z" stroke="currentColor" stroke-width="1.3"/></svg>',
+      play: '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M3 2v8l7-4-7-4Z"/></svg>',
+      back: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 3 4 7l4 4" stroke="currentColor" stroke-width="1.4"/></svg>',
+    }
+
+    const REGO = `<span class="kw">package</span> plrl.wb.admission
+
+<span class="cmt"># Deny destructive kube tools outside break-glass group.</span>
+<span class="fn">deny</span> contains {<span class="str">"reason"</span>: sprintf(<span class="str">"%s is not allowed for %s"</span>, [input.tool, actor.email])} <span class="kw">if</span> {
+  input.tool <span class="kw">in</span> {<span class="str">"kube.exec"</span>, <span class="str">"kube.delete"</span>}
+  <span class="kw">not</span> <span class="str">"break-glass"</span> <span class="kw">in</span> actor.groups
+}
+
+<span class="kw">default</span> sample := <span class="str">0.5</span>`
+
+    const INPUT_JSON = `{
+  "input": {
+    "tool": "kube.exec",
+    "namespace": "prod-payments",
+    "pod": "checkout-7f9c",
+    "command": ["sh"]
+  },
+  "actor": {
+    "id": "usr_18f2",
+    "name": "Ada Lovelace",
+    "email": "ada@plural.sh",
+    "groups": ["platform"]
+  }
+}`
+
+    const OUTPUT_DENY = `{
+  "sample": 0.5,
+  "deny": [
+    { "reason": "kube.exec is not allowed for ada@plural.sh" }
+  ],
+  "approve": []
+}`
+
+    const OUTPUT_ALLOW = `{
+  "sample": 0.5,
+  "deny": [],
+  "approve": []
+}`
+
+    let state = { screen: 'policies', menu: false, simulated: false }
+
+    function go(screen) {
+      state.screen = screen
+      state.menu = false
+      if (screen !== 'policy-simulate') state.simulated = false
+      location.hash = screen
+      render()
+    }
+
+    function chrome({ area = 'security', crumb, body }) {
+      const items = [
+        ['home', I.home, false],
+        ['cd', I.cd, false],
+        ['stacks', I.stacks, false],
+        ['flows', I.flows, false],
+        ['wb', I.wb, area === 'workbench'],
+        ['k8s', I.k8s, false],
+        ['ai', I.ai, false],
+        ['shield', I.shield, area === 'security'],
+        ['cost', I.cost, false],
+        ['gear', I.gear, false],
+      ]
+      return `
+        <aside class="app-sidebar">
+          ${items.map(([k, svg, on]) => `<button class="nav-ico ${on ? 'active' : ''}" title="${k}" onclick="go('${k === 'wb' ? 'wb-launch' : k === 'shield' ? 'security-overview' : 'security-overview'}')">${svg}</button>`).join('')}
+        </aside>
+        <section class="app-main">
+          <div class="topbar">
+            <div class="project">● production</div>
+            <div class="spacer"></div>
+            <button class="icon-btn">${I.search}</button>
+            <button class="icon-btn">${I.ai}</button>
+            <div class="avatar">AL</div>
+          </div>
+          <div class="crumbs">${crumb}</div>
+          ${body}
+        </section>`
+    }
+
+    function sidenav(active) {
+      const items = [
+        ['security-overview', 'Overview'],
+        ['policies', 'Policies'],
+        ['gatekeeper', 'Gatekeeper'],
+        ['security-overview', 'Vulnerability reports'],
+        ['security-overview', 'Compliance reports'],
+      ]
+      return `<nav class="sidenav">${items.map(([s, l]) => `<button class="${s === active ? 'active' : ''}" onclick="go('${s}')">${l}</button>`).join('')}</nav>`
+    }
+
+    function securityPage(active, inner) {
+      return chrome({
+        area: 'security',
+        crumb: inner.crumb,
+        body: `<div class="with-sidenav">${sidenav(active)}<div class="page">${inner.html}</div></div>`
+      })
+    }
+
+    const screens = {
+      'security-overview': () => securityPage('security-overview', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <b>overview</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title">Security overview</h1>
+              <p class="subtitle">Cluster posture, Gatekeeper violations, and vulnerability rollups. Top tabs become this sidenav so Policies can sit next to Gatekeeper without crowding.</p>
+            </div>
+          </div>
+          <div class="split">
+            <div class="card" style="flex:1;padding:16px">
+              <div class="row-sub">Gatekeeper violations</div>
+              <div style="font-size:28px;margin-top:8px">128</div>
+            </div>
+            <div class="card" style="flex:1;padding:16px">
+              <div class="row-sub">Workbenches with policies</div>
+              <div style="font-size:28px;margin-top:8px">6</div>
+            </div>
+            <div class="card" style="flex:1;padding:16px">
+              <div class="row-sub">Sampled evaluations (7d)</div>
+              <div style="font-size:28px;margin-top:8px">1.2k</div>
+            </div>
+          </div>
+          <div class="callout">IA change: <code>Security.tsx</code> TabList → <code>GridLayoutWithSideNav</code> + <code>SideNavEntries</code>, same pattern as Settings. Route <code>/security/policies</code> is the new system; Gatekeeper keeps the old constraint list at <code>/security/gatekeeper</code>.</div>`
+      }),
+
+      policies: () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <b>policies</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title">Policies</h1>
+              <p class="subtitle">OPA/Rego documents that govern tool execution. Attach them to workbenches (and later stacks). If any matching policy denies, the tool call is rejected.</p>
+            </div>
+            <button class="btn small" onclick="go('policy-create')">New policy</button>
+          </div>
+          <div class="search">
+            <span class="icon-btn">${I.search}</span>
+            <input class="input" style="max-width:280px" placeholder="Search by name" />
+            <span class="chip">Type: all</span>
+            <span class="chip">Project: production</span>
+          </div>
+          <div class="card" style="overflow:hidden">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Type</th><th>Description</th><th>Last evaluation</th><th></th></tr></thead>
+              <tbody>
+                <tr class="click" onclick="go('policy-body')">
+                  <td><div class="row-title mono">tool-admission.rego</div><div class="row-sub">updated 2h ago</div></td>
+                  <td><span class="chip info">Workbench</span></td>
+                  <td>Block kube.exec / kube.delete unless actor is in break-glass.</td>
+                  <td><span class="chip bad">deny</span> <span class="row-sub">12m ago</span></td>
+                  <td class="row-actions"><button class="icon-btn" onclick="event.stopPropagation();go('policy-body')">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
+                </tr>
+                <tr class="click" onclick="go('policy-body')">
+                  <td><div class="row-title mono">prod-write-guard.rego</div><div class="row-sub">updated yesterday</div></td>
+                  <td><span class="chip info">Workbench</span></td>
+                  <td>Require approval for terraform apply-shaped cloud writes.</td>
+                  <td><span class="chip ok">allow</span> <span class="row-sub">3h ago</span></td>
+                  <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
+                </tr>
+                <tr class="click">
+                  <td><div class="row-title mono">auto-bind-prod.rego</div><div class="row-sub">updated last week</div></td>
+                  <td><span class="chip warn">Binding</span></td>
+                  <td>Bind tool-admission to workbenches labeled env=prod.</td>
+                  <td><span class="row-sub">not sampled</span></td>
+                  <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">List: <code>policies(projectId, q)</code> → <code>Policy { name type description }</code>. Name is unique and usually a <code>.rego</code> filename. Type is already on the model (<code>workbench | stack | binding</code>).</div>`
+      }),
+
+      'policies-empty': () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <b>policies</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title">Policies</h1>
+              <p class="subtitle">OPA/Rego documents that govern tool execution.</p>
+            </div>
+          </div>
+          <div class="card empty">
+            <h3>No policies yet</h3>
+            <p>Create a Rego policy, then attach it to a workbench to control which tools can run and for whom.</p>
+            <button class="btn" onclick="go('policy-create')">New policy</button>
+          </div>`
+      }),
+
+      'policy-create': () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>create</b>`,
+        html: `
+          <div class="page-head"><h1 class="title">New policy</h1></div>
+          <div class="split">
+            <div class="step-nav">
+              <button class="active">Details</button>
+              <button>Policy body</button>
+            </div>
+            <div class="card form-card">
+              <div class="field"><span class="label">Name *</span>
+                <input class="input mono" value="tool-admission.rego" />
+                <span class="hint">Unique. Treat like a filename; <code>.rego</code> suffix is conventional.</span>
+              </div>
+              <div class="field"><span class="label">Type *</span>
+                <select class="select"><option>Workbench</option><option>Stack</option><option>Binding</option></select>
+                <span class="hint">Workbench policies evaluate tool calls. Binding policies decide auto-attach. Stack is reserved.</span>
+              </div>
+              <div class="field"><span class="label">Description</span>
+                <textarea class="textarea">Block kube.exec and kube.delete unless the actor is in the break-glass group.</textarea>
+              </div>
+              <div class="field"><span class="label">Project</span>
+                <select class="select"><option>production (current)</option></select>
+              </div>
+              <div class="footer-actions">
+                <button class="btn secondary" onclick="go('policies')">Cancel</button>
+                <button class="btn" onclick="go('policy-body')">Continue to body</button>
+              </div>
+            </div>
+          </div>
+          <div class="callout">Mutation: <code>createPolicy({ name, type, description, policy, projectId })</code>. Body is required by the changeset; the second step writes the Rego before insert, or we create with a stub package and immediately open the editor.</div>`
+      }),
+
+      'policy-body': () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>tool-admission.rego</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title mono">tool-admission.rego</h1>
+              <p class="subtitle">Block kube.exec / kube.delete unless actor is in break-glass. · Workbench · production</p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn secondary small" onclick="go('policy-evaluations')">Evaluations</button>
+              <button class="btn danger small">Delete</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <button class="active">Body</button>
+            <button onclick="go('policy-evaluations')">Evaluations</button>
+            <button onclick="go('wb-policies')">Workbenches</button>
+          </div>
+          <div class="field">
+            <span class="label">Rego</span>
+            <span class="hint">Compiled against <code>priv/policy/wb.rego</code>. Expose <code>deny</code> / <code>approve</code> / <code>sample</code>. Invalid Rego cannot be saved.</span>
+            <div class="editor">${REGO}</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button class="btn secondary small" onclick="go('policy-simulate')">Simulate against last evaluation</button>
+            <button class="btn small">Save</button>
+          </div>`
+      }),
+
+      'policy-evaluations': () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <b>evaluations</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title mono">tool-admission.rego</h1>
+              <p class="subtitle">Sampled production decisions. Use any row as the input for a simulation against the current body.</p>
+            </div>
+          </div>
+          <div class="tabs">
+            <button onclick="go('policy-body')">Body</button>
+            <button class="active">Evaluations</button>
+            <button onclick="go('wb-policies')">Workbenches</button>
+          </div>
+          <div class="card" style="overflow:hidden">
+            <table class="table">
+              <thead><tr><th>When</th><th>Tool</th><th>Actor</th><th>Result</th><th></th></tr></thead>
+              <tbody>
+                <tr class="click" onclick="go('policy-simulate')">
+                  <td>12 minutes ago</td>
+                  <td class="mono">kube.exec</td>
+                  <td>ada@plural.sh</td>
+                  <td><span class="chip bad">deny</span></td>
+                  <td class="row-actions"><button class="btn small secondary" onclick="event.stopPropagation();go('policy-simulate')">${I.play} Simulate</button></td>
+                </tr>
+                <tr class="click" onclick="go('policy-simulate')">
+                  <td>3 hours ago</td>
+                  <td class="mono">kube.get</td>
+                  <td>ada@plural.sh</td>
+                  <td><span class="chip ok">allow</span></td>
+                  <td class="row-actions"><button class="btn small secondary">Simulate</button></td>
+                </tr>
+                <tr class="click">
+                  <td>Yesterday</td>
+                  <td class="mono">kube.delete</td>
+                  <td>bot@plural.sh</td>
+                  <td><span class="chip bad">deny</span></td>
+                  <td class="row-actions"><button class="btn small secondary">Simulate</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">Connection: <code>policy.policyEvaluations</code> → <code>PolicyEvaluation { input output policyIds insertedAt }</code>. Samples persist about a week. <code>sample</code> in the result (clamped to 50%) controls capture rate.</div>`
+      }),
+
+      'policy-simulate': () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <span class="crumb-link" onclick="go('policy-evaluations')">evaluations</span> / <b>simulate</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title">Simulate evaluation</h1>
+              <p class="subtitle">Replay a captured tool payload through the current policy body. Same loop as Spacelift’s policy workbench.</p>
+            </div>
+            <button class="btn" onclick="state.simulated=true;render()">${I.play} Simulate</button>
+          </div>
+          <div class="banner info">Using evaluation from <b>12 minutes ago</b> · original result <span class="chip bad">deny</span> · query <code>evaluatePolicy(policyId, input)</code></div>
+          ${state.simulated ? '<div class="banner ok">Current body would <b>allow</b> this input. Original was deny — confirm before saving the body change.</div>' : ''}
+          <div class="compare">
+            <div>
+              <div class="panel-label"><span>Input (editable)</span><span class="chip">PolicyEvaluation.input</span></div>
+              <div class="json">${INPUT_JSON}</div>
+            </div>
+            <div>
+              <div class="panel-label">
+                <span>Output</span>
+                <span class="chip ${state.simulated ? 'ok' : 'bad'}">${state.simulated ? 'simulated allow' : 'original deny'}</span>
+              </div>
+              <div class="json">${state.simulated ? OUTPUT_ALLOW : OUTPUT_DENY}</div>
+            </div>
+          </div>
+          <div class="callout">Simulate does not write an evaluation; it only runs <code>evaluatePolicy</code>. Save on the Body tab persists Rego via <code>updatePolicy</code>.</div>`
+      }),
+
+      gatekeeper: () => securityPage('gatekeeper', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <b>gatekeeper</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title">Gatekeeper</h1>
+              <p class="subtitle">OPA Gatekeeper constraints installed on clusters. This is the existing Policies table, renamed so it is not confused with programmable workbench policies.</p>
+            </div>
+            <div class="search"><span class="icon-btn">${I.search}</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 250px;gap:16px;min-height:0">
+            <div class="card" style="overflow:hidden">
+              <table class="table">
+                <thead><tr><th>Policy</th><th>Cluster</th><th>Violations</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td>allowed-repos</td><td>mgmt-prod</td><td><span class="chip bad">14</span></td><td>Restrict images to approved registries.</td></tr>
+                  <tr><td>required-labels</td><td>mgmt-prod</td><td><span class="chip ok">0</span></td><td>Require app / owner labels.</td></tr>
+                  <tr><td>block-privileged</td><td>workload-1</td><td><span class="chip bad">3</span></td><td>Disallow privileged pods.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card" style="padding:12px">
+              <div class="label" style="margin-bottom:8px">Filters</div>
+              <div class="chip">All</div>
+              <div class="row-sub" style="margin-top:12px">Kinds, namespaces, clusters stay as they are today.</div>
+            </div>
+          </div>
+          <div class="callout">Keep existing <code>policyConstraints</code> queries and <code>/security/policies/:id</code> detail routes, but move them under <code>/security/gatekeeper</code>. Redirect old URLs.</div>`
+      }),
+
+      'wb-policies': () => chrome({
+        area: 'workbench',
+        crumb: `<span class="crumb-link" onclick="go('wb-launch')">workbenches</span> / <span class="crumb-link" onclick="go('wb-launch')">payments-sre</span> / <b>policies</b>`,
+        body: `<div class="wb-body"><div class="center-col">
+          <div>
+            <div style="font-weight:600">payments-sre</div>
+            <div class="row-sub">Investigate payment cluster incidents and open PRs</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--text-light)">Attach policies to control tool execution on this workbench.</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn secondary small" onclick="go('policies')">Manage policies ↗</button>
+              <button class="btn small" onclick="go('wb-attach')">Add policy</button>
+            </div>
+          </div>
+          <div class="card" style="overflow:hidden">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <td style="width:46px"><div class="icon-btn" style="background:var(--fill-two);border-radius:50%">${I.shield}</div></td>
+                  <td>
+                    <div class="row-title mono">tool-admission.rego</div>
+                    <div class="row-sub">regexes: kube\\.(exec|delete|shell) · ignore: kube.get</div>
+                  </td>
+                  <td class="row-actions">
+                    <button class="icon-btn" onclick="go('wb-attach')">${I.pencil}</button>
+                    <button class="icon-btn danger">${I.trash}</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="icon-btn" style="background:var(--fill-two);border-radius:50%">${I.shield}</div></td>
+                  <td>
+                    <div class="row-title mono">prod-write-guard.rego</div>
+                    <div class="row-sub">Applies to all tools</div>
+                  </td>
+                  <td class="row-actions">
+                    <button class="icon-btn">${I.pencil}</button>
+                    <button class="icon-btn danger">${I.trash}</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">Same list chrome as <code>Chatbots.tsx</code> / <code>WebhookTriggers.tsx</code>: hideHeader table, manage-global + add, pencil/trash. Data: <code>workbench.workbenchPolicies { policy { name } matches { regexes ignore } }</code>.</div>
+        </div></div>`
+      }),
+
+      'wb-policies-empty': () => chrome({
+        area: 'workbench',
+        crumb: `<span class="crumb-link" onclick="go('wb-launch')">workbenches</span> / <span class="crumb-link" onclick="go('wb-launch')">payments-sre</span> / <b>policies</b>`,
+        body: `<div class="wb-body"><div class="center-col">
+          <div>
+            <div style="font-weight:600">payments-sre</div>
+            <div class="row-sub">Investigate payment cluster incidents and open PRs</div>
+          </div>
+          <div class="card empty">
+            <h3>No policies attached</h3>
+            <p>No policy connected. Select an existing policy or create one in Security.</p>
+            <div style="display:flex;gap:8px;justify-content:center">
+              <button class="btn secondary small" onclick="go('policies')">Manage policies ↗</button>
+              <button class="btn small" onclick="go('wb-attach')">Select existing policy</button>
+            </div>
+          </div>
+        </div></div>`
+      }),
+
+      'wb-attach': () => chrome({
+        area: 'workbench',
+        crumb: `<span class="crumb-link" onclick="go('wb-launch')">workbenches</span> / <span class="crumb-link" onclick="go('wb-launch')">payments-sre</span> / <span class="crumb-link" onclick="go('wb-policies')">policies</span> / <b>attach</b>`,
+        body: `<div class="wb-body"><div class="center-col" style="max-width:968px">
+          <div>
+            <div style="font-weight:600">payments-sre</div>
+            <div class="row-sub">Investigate payment cluster incidents and open PRs</div>
+          </div>
+          <div class="split">
+            <div class="step-nav">
+              <button class="active">Configuration</button>
+            </div>
+            <div class="card form-card">
+              <div class="field">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <span class="label">Select policy *</span>
+                  <a href="#" onclick="event.preventDefault();go('policy-create')">Create policy in security</a>
+                </div>
+                <select class="select">
+                  <option>tool-admission.rego — Workbench</option>
+                  <option>prod-write-guard.rego — Workbench</option>
+                </select>
+              </div>
+              <div class="field">
+                <span class="label">Tool name regexes</span>
+                <div class="tags">
+                  <span class="tag">kube\\.(exec|delete|shell) <button>×</button></span>
+                  <input placeholder="Add regex and press enter" />
+                </div>
+                <span class="hint">If empty, this policy applies to every tool on the workbench.</span>
+              </div>
+              <div class="field">
+                <span class="label">Ignore tool names</span>
+                <div class="tags">
+                  <span class="tag">kube.get <button>×</button></span>
+                  <span class="tag">kube.list <button>×</button></span>
+                  <input placeholder="Exact tool name to skip" />
+                </div>
+                <span class="hint">Ignored names never run this policy, even if a regex matches.</span>
+              </div>
+              <div class="callout">Multiple attachments can match the same tool. <b>Any deny rejects the call.</b> Unique on <code>(policy_id, workbench_id)</code>.</div>
+              <div class="footer-actions">
+                <button class="btn secondary" onclick="go('wb-policies')">Back to all policies</button>
+                <button class="btn" onclick="go('wb-policies')">Save</button>
+              </div>
+            </div>
+          </div>
+        </div></div>`
+      }),
+
+      'wb-launch': () => chrome({
+        area: 'workbench',
+        crumb: `<span class="crumb-link">workbenches</span> / <b>payments-sre</b>`,
+        body: `<div class="wb" style="position:relative">
+          <aside class="wb-side">
+            <div class="section">
+              <h4>Tools <button class="add-link">${I.plus}</button></h4>
+              <div class="side-item"><span class="ico">${I.k8s}</span> Kubernetes</div>
+              <div class="side-item"><span class="ico">${I.cd}</span> GitHub</div>
+            </div>
+            <div class="section">
+              <h4>Webhooks <button class="add-link">${I.plus}</button></h4>
+              <div class="side-item"><span class="ico">${I.hook}</span> pagerduty-incidents</div>
+            </div>
+            <div class="section">
+              <h4>Chatbots <button class="add-link">${I.plus}</button></h4>
+              <div class="side-item"><span class="ico">${I.bot}</span> #payments-sre</div>
+            </div>
+            <div class="section">
+              <h4>Policies <button class="add-link" onclick="go('wb-attach')">${I.plus}</button></h4>
+              <div class="side-item" onclick="go('wb-attach')" style="cursor:pointer"><span class="ico">${I.shield}</span> tool-admission.rego</div>
+              <div class="side-item" onclick="go('wb-attach')" style="cursor:pointer"><span class="ico">${I.shield}</span> prod-write-guard.rego</div>
+            </div>
+            <div class="section">
+              <h4>Cron schedules <button class="add-link">${I.plus}</button></h4>
+              <div class="side-item"><span class="ico">${I.clock}</span> 0 9 * * 1-5</div>
+            </div>
+          </aside>
+          <div class="wb-body">
+            <div class="wb-head">
+              <div>
+                <div class="title">payments-sre</div>
+              </div>
+              <div class="spacer"></div>
+              <div class="subtabs">
+                <button class="active">Launch</button>
+                <button>Jobs</button>
+                <button>Issues</button>
+                <button>Alerts</button>
+                <button>Evals</button>
+              </div>
+              <button class="btn small">Edit workbench</button>
+              <button class="icon-btn" onclick="state.menu=!state.menu;render()">${I.more}</button>
+            </div>
+            <div class="row-sub">Investigate payment cluster incidents and open PRs</div>
+            <div class="prompt">Ask this workbench to investigate an incident…</div>
+            ${state.menu ? `<div class="menu">
+              <button>${I.gear} Edit workbench</button>
+              <button>${I.tools} Tools</button>
+              <button>${I.clock} Cron schedules</button>
+              <button>${I.hook} Webhook triggers</button>
+              <button>${I.bot} Chatbots</button>
+              <button onclick="go('wb-policies')">${I.shield} Policies</button>
+              <button>Saved prompts</button>
+              <button>Eval settings</button>
+              <div class="sep"></div>
+              <button class="danger">${I.trash} Delete workbench</button>
+            </div>` : ''}
+            <div class="callout">Add Policies to the ⋯ menu (<code>WorkbenchMoreMenuKey.Policies</code>) and a side-panel section after Chatbots, matching Webhooks/Chatbots rows (click → edit attach).</div>
+          </div>
+        </div>`
+      }),
+    }
+
+    function render() {
+      document.getElementById('app').innerHTML = (screens[state.screen] || screens.policies)()
+      document.querySelectorAll('.picker button').forEach((b) => {
+        b.classList.toggle('active', b.dataset.go === state.screen)
+      })
+    }
+
+    document.querySelector('.picker').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-go]')
+      if (btn) go(btn.dataset.go)
+    })
+    window.go = go
+    if (location.hash.slice(1) && screens[location.hash.slice(1)]) state.screen = location.hash.slice(1)
+    render()
+  </script>
+</body>
+</html>
