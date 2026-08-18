@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Policy, Clusters, Policies}
-  alias Console.Schema.{BindingPolicy, PolicyConstraint, PolicyEvaluation, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
+  alias Console.Schema.{BindingPolicy, StackPolicy, WorkbenchPolicy, PolicyConstraint, PolicyEvaluation, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
   alias Console.Schema.Policy, as: PolicySchema
 
   def resolve_policy(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
@@ -34,8 +34,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> paginate(args)
   end
 
-  def list_binding_policies(policy, args, _) do
-    BindingPolicy.for_policy(policy.id)
+  def list_policy_stack_policies(policy, args, _) do
+    StackPolicy.for_policy(policy.id)
+    |> paginate(args)
+  end
+
+  def list_policy_workbench_policies(policy, args, _) do
+    WorkbenchPolicy.for_policy(policy.id)
     |> paginate(args)
   end
 

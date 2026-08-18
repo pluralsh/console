@@ -478,16 +478,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :repository,    :git_repository,           resolve: dataloader(Deployments), description: "the git repository for this workbench"
     field :agent_runtime, :agent_runtime,            resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
     field :bot_user,      :user,                     resolve: dataloader(User), description: "the service account user used for automated workbench agent runs"
-    field :tools,         list_of(:workbench_tool),  resolve: dataloader(Deployments), description: "tools associated with this workbench"
+    field :tools, list_of(:workbench_tool), description: "tools associated with this workbench" do
+      middleware Nested, check: true, msg: "workbench tools cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
 
     field :read_bindings, list_of(:policy_binding),  resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
     connection field :workbench_policies, node_type: :workbench_policy do
+      middleware Nested, check: true, msg: "workbench policies cannot be fetched through a policy"
       resolve &Deployments.list_workbench_policies/3
     end
 
     connection field :runs, node_type: :workbench_job do
+      middleware Nested, check: true, msg: "workbench runs cannot be fetched through a policy"
       arg :alert, :boolean, description: "show runs spawned from alerts"
       arg :issue, :boolean, description: "show runs spawned from issues"
 
@@ -495,45 +500,60 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     connection field :crons, node_type: :workbench_cron do
+      middleware Nested, check: true, msg: "workbench crons cannot be fetched through a policy"
       resolve &Deployments.list_workbench_crons/3
     end
 
     connection field :prompts, node_type: :workbench_prompt do
+      middleware Nested, check: true, msg: "workbench prompts cannot be fetched through a policy"
       resolve &Deployments.list_workbench_prompts/3
     end
 
     connection field :workbench_skills, node_type: :workbench_skill do
+      middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
       resolve &Deployments.list_workbench_skills/3
     end
 
-    field :eval, :workbench_eval,
-      description: "eval configuration for this workbench (at most one; null if none configured)",
-      resolve: dataloader(Deployments)
+    field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do
+      middleware Nested, check: true, msg: "workbench eval configuration cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
 
     connection field :eval_results, node_type: :workbench_eval_result do
+      middleware Nested, check: true, msg: "workbench eval results cannot be fetched through a policy"
       resolve &Deployments.list_eval_results/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
+      middleware Nested, check: true, msg: "workbench webhooks cannot be fetched through a policy"
       resolve &Deployments.list_workbench_webhooks/3
     end
 
     connection field :chatbots, node_type: :workbench_chatbot do
+      middleware Nested, check: true, msg: "workbench chatbots cannot be fetched through a policy"
       resolve &Deployments.list_workbench_chatbots/3
     end
 
     connection field :alerts, node_type: :alert do
+      middleware Nested, check: true, msg: "workbench alerts cannot be fetched through a policy"
       resolve &Deployments.list_alerts/3
     end
 
     connection field :issues, node_type: :issue do
+      middleware Nested, check: true, msg: "workbench issues cannot be fetched through a policy"
       resolve &Deployments.list_issues/3
     end
 
     @desc "users that have read or write access to this workbench"
-    field :users, list_of(:user), resolve: &Deployments.accessible_users/3
+    field :users, list_of(:user) do
+      middleware Nested, check: true, msg: "workbench users cannot be fetched through a policy"
+      resolve &Deployments.accessible_users/3
+    end
 
-    field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
+    field :all_skills, list_of(:unified_workbench_skill) do
+      middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
+      resolve &Deployments.all_skills/3
+    end
 
     timestamps()
   end

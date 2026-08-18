@@ -6615,7 +6615,8 @@ type Policy struct {
 	Project *Project `json:"project,omitempty"`
 	// Sampled evaluations that include this policy.
 	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
-	BindingPolicies   *BindingPolicyConnection    `json:"bindingPolicies,omitempty"`
+	StackPolicies     *StackPolicyConnection      `json:"stackPolicies,omitempty"`
+	WorkbenchPolicies *WorkbenchPolicyConnection  `json:"workbenchPolicies,omitempty"`
 	InsertedAt        *string                     `json:"insertedAt,omitempty"`
 	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
 }

@@ -13,6 +13,10 @@ defmodule Console.Schema.StackPolicy do
     from(p in query, where: p.stack_id == ^stack_id)
   end
 
+  def for_policy(query \\ __MODULE__, policy_id) do
+    from(p in query, where: p.policy_id == ^policy_id)
+  end
+
   @valid ~w(policy_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do

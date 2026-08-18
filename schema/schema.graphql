@@ -9416,7 +9416,9 @@ type Policy {
   "Sampled evaluations that include this policy."
   policyEvaluations(after: String, first: Int, before: String, last: Int): PolicyEvaluationConnection
 
-  bindingPolicies(after: String, first: Int, before: String, last: Int): BindingPolicyConnection
+  stackPolicies(after: String, first: Int, before: String, last: Int): StackPolicyConnection
+
+  workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
 
   insertedAt: DateTime
 

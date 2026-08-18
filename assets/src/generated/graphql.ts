@@ -7979,7 +7979,6 @@ export type PodTolerationAttributes = {
 /** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
 export type Policy = {
   __typename?: 'Policy';
-  bindingPolicies?: Maybe<BindingPolicyConnection>;
   /** human-readable policy description */
   description?: Maybe<Scalars['String']['output']>;
   /** unique policy identifier */
@@ -7993,14 +7992,16 @@ export type Policy = {
   policyEvaluations?: Maybe<PolicyEvaluationConnection>;
   /** project that owns this policy */
   project?: Maybe<Project>;
+  stackPolicies?: Maybe<StackPolicyConnection>;
   /** policy implementation type */
   type: PolicyType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
 };
 
 
 /** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
-export type PolicyBindingPoliciesArgs = {
+export type PolicyPolicyEvaluationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8009,7 +8010,16 @@ export type PolicyBindingPoliciesArgs = {
 
 
 /** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
-export type PolicyPolicyEvaluationsArgs = {
+export type PolicyStackPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type PolicyWorkbenchPoliciesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;

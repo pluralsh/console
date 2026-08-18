@@ -181,8 +181,12 @@ defmodule Console.GraphQl.Deployments.Policy do
       resolve &Deployments.list_policy_evaluations/3
     end
 
-    connection field :binding_policies, node_type: :binding_policy do
-      resolve &Deployments.list_binding_policies/3
+    connection field :stack_policies, node_type: :stack_policy do
+      resolve &Deployments.list_policy_stack_policies/3
+    end
+
+    connection field :workbench_policies, node_type: :workbench_policy do
+      resolve &Deployments.list_policy_workbench_policies/3
     end
 
     timestamps()
@@ -424,6 +428,7 @@ defmodule Console.GraphQl.Deployments.Policy do
   object :policy_queries do
     field :policy, :policy do
       middleware Authenticated
+      middleware Nested, enforce: true
       arg :id,   :id
       arg :name, :string
 
@@ -432,6 +437,7 @@ defmodule Console.GraphQl.Deployments.Policy do
 
     connection field :policies, node_type: :policy do
       middleware Authenticated
+      middleware Nested, enforce: true
       arg :project_id, :id, description: "filter policies by project"
       arg :q,          :string, description: "filter policies by name"
 

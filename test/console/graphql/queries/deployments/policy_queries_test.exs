@@ -480,6 +480,120 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
   end
 
   describe "bindingPolicies" do
+    test "lists stack and workbench policy associations" do
+      policy = insert(:policy)
+      stack_policies = insert_list(2, :stack_policy, policy: policy)
+      workbench_policies = insert_list(2, :workbench_policy, policy: policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            stackPolicies(first: 5) {
+              edges { node { id policy { id } stack { id } } }
+            }
+            workbenchPolicies(first: 5) {
+              edges { node { id policy { id } workbench { id } } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["stackPolicies"]) |> ids_equal(stack_policies)
+      assert from_connection(found["workbenchPolicies"]) |> ids_equal(workbench_policies)
+    end
+
+    test "blocks sensitive stack data nested under a policy" do
+      policy = insert(:policy)
+      insert(:stack_policy, policy: policy)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            stackPolicies(first: 5) {
+              edges { node { stack { runs(first: 5) { edges { node { id } } } } } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert message == "stack runs cannot be fetched through a policy"
+    end
+
+    test "blocks sensitive workbench data nested under a policy" do
+      policy = insert(:policy)
+      insert(:workbench_policy, policy: policy)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            workbenchPolicies(first: 5) {
+              edges { node { workbench { runs(first: 5) { edges { node { id } } } } } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert message == "workbench runs cannot be fetched through a policy"
+    end
+
+    test "permits allowed stack and workbench fields nested under a policy" do
+      policy = insert(:policy)
+      stack_policy = insert(:stack_policy, policy: policy)
+      workbench_policy = insert(:workbench_policy, policy: policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            stackPolicies(first: 5) {
+              edges { node { stack { id readBindings { id } } } }
+            }
+            workbenchPolicies(first: 5) {
+              edges { node { workbench { id readBindings { id } } } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      [%{"node" => %{"stack" => stack}}] = found["stackPolicies"]["edges"]
+      [%{"node" => %{"workbench" => workbench}}] = found["workbenchPolicies"]["edges"]
+
+      assert stack["id"] == stack_policy.stack_id
+      assert workbench["id"] == workbench_policy.workbench_id
+    end
+
+    test "permits nested stack and workbench data outside a policy query" do
+      stack = insert(:stack)
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"infrastructureStack" => stack_result, "workbench" => workbench_result}}} = run_query("""
+        query Resources($stackId: ID!, $workbenchId: ID!) {
+          infrastructureStack(id: $stackId) {
+            runs(first: 5) { edges { node { id } } }
+          }
+          workbench(id: $workbenchId) {
+            runs(first: 5) { edges { node { id } } }
+          }
+        }
+      """, %{"stackId" => stack.id, "workbenchId" => workbench.id}, %{current_user: admin_user()})
+
+      assert stack_result["runs"] == %{"edges" => []}
+      assert workbench_result["runs"] == %{"edges" => []}
+    end
+
+    test "does not expose bindings through individual policies" do
+      policy = insert(:policy)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            bindingPolicies(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+    end
+
     test "lists bindings for accessible policies" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
