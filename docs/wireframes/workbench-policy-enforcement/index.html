@@ -505,26 +505,16 @@
             <button onclick="go('policy-evaluations')">Evaluations</button>
             <button onclick="go('policy-bindings')">Bindings</button>
           </div>
-          <div class="split">
-            <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
-              <div class="field"><span class="label">name *</span>
-                <input class="input mono" value="tool-admission.rego" />
-              </div>
-              <div class="field"><span class="label">type *</span>
-                <select class="select"><option>WORKBENCH</option><option>STACK</option><option>BINDING</option></select>
-              </div>
-              <div class="field"><span class="label">description</span>
-                <textarea class="textarea">Block kube.exec / kube.delete unless actor is in break-glass.</textarea>
-              </div>
-              <div class="field"><span class="label">project</span>
-                <select class="select"><option>production</option></select>
-              </div>
-            </div>
-            <div style="flex:2;min-width:0" class="field">
-              <span class="label">policy *</span>
-              <span class="hint">Rego source string. Validated on save. <code>updatePolicy(id, { name, type, description, policy, projectId })</code></span>
-              <div class="editor">${REGO}</div>
-            </div>
+          <div class="field" style="flex:1;min-height:0">
+            <textarea class="textarea" style="flex:1;min-height:420px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre">package plrl.wb.admission
+
+# Deny destructive kube tools outside break-glass group.
+deny contains {"reason": sprintf("%s is not allowed for %s", [input.tool, actor.email])} if {
+  input.tool in {"kube.exec", "kube.delete"}
+  not "break-glass" in actor.groups
+}
+
+default sample := 0.5</textarea>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:8px">
             <button class="btn secondary small" onclick="go('policy-simulate')">Simulate with a sampled input</button>

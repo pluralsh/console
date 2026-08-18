@@ -116,7 +116,7 @@ Workbench admission result (`priv/policy/wb.rego`):
 
 Policy list columns are `name`, `type`, `description`, `project`, `updatedAt`. Do not show last-evaluation as a Policy field.
 
-Policy detail tabs are **Body** (`name`, `type`, `description`, `project`, `policy`) · **Evaluations** (`policyEvaluations`) · **Bindings** (`bindingPolicies`). Not a Workbenches tab.
+Policy detail tabs are **Body** (open text for `policy`) · **Evaluations** (`policyEvaluations`) · **Bindings** (`bindingPolicies`). Name/type/description/project are set on create, not on the body tab.
 
 Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool/actor/result are only inside those maps.
 
@@ -124,7 +124,7 @@ Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool
 
 **Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools.
 
-**Editor.** Policy detail edits every writable Policy field, not just the Rego string: `name`, `type`, `description`, `projectId`, `policy`.
+**Editor.** Policy Body is a single open text field for `policy` (the Rego source). Name, type, description, and project stay on create; Body is just the source string.
 
 **Evaluations + simulate.** `PolicyEvaluation` is sampled JSON in/out plus `policyIds`. Simulate replays `input` through `evaluatePolicy`; it does not write a new evaluation.
 
@@ -142,7 +142,7 @@ Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool
 | 2 | Policies list | `/security/policies` |
 | 3 | Policies empty | `/security/policies` |
 | 4 | Create policy | `/security/policies/create` |
-| 5 | Policy body (all Policy fields) | `/security/policies/:id` |
+| 5 | Policy body (open text for `policy`) | `/security/policies/:id` |
 | 6 | Policy bindings | `/security/policies/:id/bindings` |
 | 7 | Policy evaluations | `/security/policies/:id/evaluations` |
 | 8 | Simulate evaluation | `/security/policies/:id/evaluations/:evalId` |
