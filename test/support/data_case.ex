@@ -28,9 +28,40 @@ defmodule Console.DataCase do
   end
 
   setup tags do
-    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(Console.Repo, shared: not tags[:async])
-    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
+    owner = Ecto.Adapters.SQL.Sandbox.start_owner!(Console.Repo, shared: not tags[:async])
+
+    on_exit(fn ->
+      stop_background_agents()
+      Ecto.Adapters.SQL.Sandbox.stop_owner(owner)
+    end)
+
     :ok
+  end
+
+  defp stop_background_agents do
+    Console.AI.Agents
+    |> Registry.select([{{{:workbench_heartbeat, :_}, :"$1", :_}, [], [:"$1"]}])
+    |> stop_agents()
+
+    Console.Deployments.Git.Agent.registry()
+    |> Registry.select([{{{:git, :_}, :"$1", :_}, [], [:"$1"]}])
+    |> stop_agents()
+
+    Console.Deployments.Helm.Agent.registry()
+    |> Registry.select([{{{:helm, :_}, :"$1", :_}, [], [:"$1"]}])
+    |> stop_agents()
+  end
+
+  defp stop_agents(pids) do
+    Enum.each(pids, fn pid ->
+      if Process.alive?(pid) do
+        try do
+          GenServer.stop(pid, :normal, 5_000)
+        catch
+          _, _ -> :ok
+        end
+      end
+    end)
   end
 
   @doc """

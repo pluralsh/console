@@ -196,6 +196,7 @@ defmodule Console.MixProject do
       {:ex_aws_auth, "~> 1.4"},
       {:pgvector, "~> 0.3.0"},
       {:regolix, "~> 0.3.3", git: "https://github.com/pluralsh/regolix.git", tag: "master"},
+      {:ex_monty, "~> 0.6.0", git: "https://github.com/pluralsh/ex_monty.git", branch: "master"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

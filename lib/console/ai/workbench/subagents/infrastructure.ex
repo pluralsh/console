@@ -8,7 +8,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Skill,
     Scratchpad,
     History,
-    Lua,
+    Codemode,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.Cluster,
@@ -64,7 +64,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
+  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{policies: policies, skills: skills, job: job, activities: activities} = environment, %FileCache{} = cache) do
     skills = Environment.subagent_skills(skills, :infrastructure)
 
     core_tools(job, environment)
@@ -74,10 +74,10 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %Skills{skills: skills},
       %Skill{skills: skills},
       Scratchpad,
-      Lua,
       %History{job: job, activities: activities},
       Result
     ])
+    |> build_codemode(policies)
   end
 
   def core_tools(%WorkbenchJob{workbench: bench, user: user} = job, %Environment{} = environment) do
@@ -147,6 +147,19 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
   defp manifests_tools(_, _, _, _), do: []
+
+  defp build_codemode(tools, policies) do
+    case Enum.split_with(tools, &codemode?/1) do
+      {[_ | _] = codemode, regular} ->
+        [%Codemode{tools: codemode, policies: policies} | regular]
+      _ -> tools
+    end
+  end
+
+  defp codemode?(%KubeGet{}), do: true
+  defp codemode?(%KubeList{}), do: true
+  defp codemode?(%CloudQuery{}), do: true
+  defp codemode?(_), do: false
 
   defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user), do: [%Vulns{user: user}]
   defp vuln_tools(_, _), do: []

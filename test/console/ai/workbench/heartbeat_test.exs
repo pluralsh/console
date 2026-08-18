@@ -33,7 +33,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       Process.unlink(pid)
 
       on_exit(fn ->
-        if Process.alive?(pid), do: GenServer.stop(pid, :cancel)
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
       end)
 
       Heartbeat.usage_callback(
@@ -71,7 +71,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       Process.unlink(pid)
 
       on_exit(fn ->
-        if Process.alive?(pid), do: GenServer.stop(pid, :cancel)
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
       end)
 
       Heartbeat.usage_callback(
@@ -95,7 +95,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       Process.unlink(pid)
 
       on_exit(fn ->
-        if Process.alive?(pid), do: GenServer.stop(pid, :cancel)
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
       end)
 
       Heartbeat.usage_callback(job, %{
@@ -120,9 +120,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert_in_delta usage.output_cost, 0.026, 0.000_001
       assert_in_delta usage.total_cost, 0.041, 0.000_001
 
-      ExUnit.CaptureLog.capture_log(fn ->
-        GenServer.stop(pid, :cancel)
-      end)
+      GenServer.stop(pid, :normal)
     end
 
     test "persists accumulated usage when the job is cancelled" do
@@ -149,7 +147,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       |> Console.Repo.update!()
       Heartbeat.kill(job)
 
-      assert_receive {:DOWN, ^ref, :process, ^pid, :cancel}
+      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
       persisted_job = Console.Repo.get!(WorkbenchJob, job.id)
 
@@ -165,4 +163,5 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert Console.Repo.get!(Workbench, workbench.id).budget.last == 875
     end
   end
+
 end
