@@ -120,6 +120,20 @@ Policy detail tabs are **Body** (`name`, `type`, `description`, `project`, `poli
 
 Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool/actor/result are only inside those maps.
 
+## `Policy.type` is place vs auto-attach
+
+Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if they were three product areas.
+
+| GraphQL value | What it is | List tab | Icon |
+| --- | --- | --- | --- |
+| `WORKBENCH` | Place the policy **runs** (tool admission on workbenches) | **Enforcement** (default) | `WorkbenchIcon` + “Runs on workbenches” |
+| `STACK` | Place the policy **runs** (tool admission on stacks) | **Enforcement** | `StackIcon` + “Runs on stacks” |
+| `BINDING` | **Auto-attach logic** (`BindingPolicy.bindPolicy`, `bind: true/false`). Not a third place. Not Console RBAC policy bindings. | **Auto-attach** | `LinksIcon` / `ArrowRightLeftIcon` + “Auto-attach · not a place” |
+
+- Default list = Enforcement. Second tab = Auto-attach.
+- Workbench attach picker = `type: WORKBENCH` only. Stack and BINDING policies are hidden.
+- Create form groups type the same way: Enforcement (Workbench / Stack) vs Auto-attach (Binding). Opening create from the Auto-attach tab defaults to `BINDING`.
+
 ## Interaction notes
 
 **Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools.
@@ -130,7 +144,7 @@ Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool
 
 **Edit attach.** `updateWorkbenchPolicy` only accepts `matches`. Changing which Policy is bound means delete + create.
 
-**Types.** `Policy.type` is required (`WORKBENCH` default). Filter the list by it. Stack attach is a later surface.
+**Types.** `Policy.type` is required (`WORKBENCH` default). Filter the list with Enforcement / Auto-attach tabs, not a flat type chip. Stack attach is a later surface.
 
 **Bindings.** `Policy.bindingPolicies` is the Policy-level child for auto-attach. Manual workbench attach stays on the workbench.
 
@@ -139,8 +153,9 @@ Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool
 | # | Screen | Route |
 | --- | --- | --- |
 | 1 | Security overview (new sidenav) | `/security/overview` |
-| 2 | Policies list | `/security/policies` |
-| 3 | Policies empty | `/security/policies` |
+| 2 | Policies list — Enforcement tab | `/security/policies` |
+| 2b | Policies list — Auto-attach tab | `/security/policies` (`type: BINDING`) |
+| 3 | Policies empty (same tabs) | `/security/policies` |
 | 4 | Create policy (details + policy body text) | `/security/policies/create` |
 | 5 | Policy body (all Policy fields) | `/security/policies/:id` |
 | 6 | Policy bindings | `/security/policies/:id/bindings` |

@@ -218,13 +218,26 @@
     .row-actions { display: flex; justify-content: flex-end; gap: 4px; }
     .center-col { max-width: 750px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: 16px; }
     .search { display: flex; align-items: center; gap: 8px; }
+    .type-groups { display: flex; flex-direction: column; gap: 16px; }
+    .type-group-label { font-size: 12px; color: var(--text-xlight); font-weight: 600; }
+    .type-opt {
+      display: block; width: 100%; text-align: left;
+      background: var(--fill-zero); border: 1px solid var(--border-input);
+      border-radius: 4px; padding: 10px 12px; margin-top: 6px;
+    }
+    .type-opt:hover { background: var(--fill-zero-hover); }
+    .type-opt.active { border-color: var(--border-primary); background: var(--fill-zero-selected); }
+    .type-opt .opt-title { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .type-opt .opt-title svg { width: 16px; height: 16px; color: var(--icon-light); }
+    .type-opt .opt-sub { color: var(--text-xlight); font-size: 12px; font-weight: 400; margin: 4px 0 0 24px; }
   </style>
 </head>
 <body>
   <div class="picker">
     <span class="picker-label">Screens</span>
     <button data-go="security-overview">1. Security sidenav</button>
-    <button data-go="policies">2. Policies list</button>
+    <button data-go="policies" data-kind="enforcement">2. Enforcement list</button>
+    <button data-go="policies" data-kind="autoattach">2b. Auto-attach list</button>
     <button data-go="policies-empty">3. Empty</button>
     <button data-go="policy-create">4. Create policy</button>
     <button data-go="policy-body">5. Editor</button>
@@ -248,6 +261,7 @@
       stacks: '<svg viewBox="0 0 16 16" fill="none"><path d="M2 11 8 14l6-3M2 8l6 3 6-3M2 5l6 3 6-3L8 2 2 5Z" stroke="currentColor" stroke-width="1.3"/></svg>',
       flows: '<svg viewBox="0 0 16 16" fill="none"><path d="M3 3h4v4H3V3Zm6 6h4v4H9V9ZM5 7v2a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.3"/></svg>',
       wb: '<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 6h12" stroke="currentColor" stroke-width="1.3"/></svg>',
+      links: '<svg viewBox="0 0 16 16" fill="none"><path d="M6.5 9.5 9.5 6.5M7 11.5 5.5 13A2.1 2.1 0 1 1 2.5 10L4 8.5M12 7.5 13.5 6A2.1 2.1 0 1 0 10.5 3L9 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>',
       k8s: '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 3v10M3.5 8h9" stroke="currentColor" stroke-width="1.3"/></svg>',
       ai: '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2v3M8 11v3M2 8h3M11 8h3M4 4l2 2M10 10l2 2M12 4l-2 2M6 10l-2 2" stroke="currentColor" stroke-width="1.3"/></svg>',
       shield: '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2 3 4v4.5c0 3.2 2.1 5.3 5 6.5 2.9-1.2 5-3.3 5-6.5V4L8 2Z" stroke="currentColor" stroke-width="1.3"/></svg>',
@@ -305,13 +319,16 @@
   "approve": []
 }`
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details' }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH' }
 
     function go(screen) {
       state.screen = screen
       state.menu = false
       if (screen !== 'policy-simulate') state.simulated = false
       if (screen !== 'policy-create') state.createStep = 'Details'
+      if (screen === 'policy-create') {
+        state.formType = state.policyKind === 'autoattach' ? 'BINDING' : (state.formType === 'BINDING' ? 'WORKBENCH' : (state.formType || 'WORKBENCH'))
+      }
       location.hash = screen
       render()
     }
@@ -398,48 +415,84 @@
           <div class="page-head">
             <div>
               <h1 class="title">Policies</h1>
-              <p class="subtitle">OPA/Rego documents that govern tool execution. Attach them to workbenches (and later stacks). If any matching policy denies, the tool call is rejected.</p>
+              <p class="subtitle">${state.policyKind === 'enforcement'
+                ? 'Tool-admission documents. Place icons are where the policy runs (workbench or stack) — not a third product area.'
+                : 'Auto-attach documents. These only decide whether another policy should be bound to a workbench or stack. They never admit or deny a tool call.'}</p>
             </div>
             <button class="btn small" onclick="go('policy-create')">New policy</button>
           </div>
-          <div class="search">
-            <span class="icon-btn">${I.search}</span>
-            <input class="input" style="max-width:280px" placeholder="Search by name" />
-            <span class="chip">Type: all</span>
-            <span class="chip">Project: production</span>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+            <div class="subtabs">
+              <button class="${state.policyKind === 'enforcement' ? 'active' : ''}" onclick="state.policyKind='enforcement';render()">Enforcement</button>
+              <button class="${state.policyKind === 'autoattach' ? 'active' : ''}" onclick="state.policyKind='autoattach';render()">Auto-attach</button>
+            </div>
+            <div class="search">
+              <span class="icon-btn">${I.search}</span>
+              <input class="input" style="max-width:240px" placeholder="Search by name" />
+              <span class="chip">Project: production</span>
+            </div>
           </div>
+          ${state.policyKind === 'enforcement' ? `
           <div class="card" style="overflow:hidden">
             <table class="table">
-              <thead><tr><th>name</th><th>type</th><th>description</th><th>project</th><th>updatedAt</th><th></th></tr></thead>
+              <thead><tr><th></th><th>name</th><th>description</th><th>project</th><th>updatedAt</th><th></th></tr></thead>
               <tbody>
                 <tr class="click" onclick="go('policy-body')">
-                  <td><div class="row-title mono">tool-admission.rego</div></td>
-                  <td><span class="chip info">WORKBENCH</span></td>
+                  <td style="width:40px"><span class="icon-btn" title="Workbench" style="color:var(--text-light)">${I.wb}</span></td>
+                  <td>
+                    <div class="row-title mono">tool-admission.rego</div>
+                    <div class="row-sub">Runs on workbenches</div>
+                  </td>
                   <td>Block kube.exec / kube.delete unless actor is in break-glass.</td>
                   <td>production</td>
                   <td class="row-sub">2h ago</td>
                   <td class="row-actions"><button class="icon-btn" onclick="event.stopPropagation();go('policy-body')">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
                 <tr class="click" onclick="go('policy-body')">
-                  <td><div class="row-title mono">prod-write-guard.rego</div></td>
-                  <td><span class="chip info">WORKBENCH</span></td>
+                  <td><span class="icon-btn" title="Workbench" style="color:var(--text-light)">${I.wb}</span></td>
+                  <td>
+                    <div class="row-title mono">prod-write-guard.rego</div>
+                    <div class="row-sub">Runs on workbenches</div>
+                  </td>
                   <td>Require approval for terraform apply-shaped cloud writes.</td>
                   <td>production</td>
                   <td class="row-sub">yesterday</td>
                   <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
                 <tr class="click" onclick="go('policy-body')">
-                  <td><div class="row-title mono">auto-bind-prod.rego</div></td>
-                  <td><span class="chip warn">BINDING</span></td>
-                  <td>Bind tool-admission to workbenches labeled env=prod.</td>
+                  <td><span class="icon-btn" title="Stack" style="color:var(--text-light)">${I.stacks}</span></td>
+                  <td>
+                    <div class="row-title mono">stack-plan-guard.rego</div>
+                    <div class="row-sub">Runs on stacks</div>
+                  </td>
+                  <td>Deny destructive stack plans outside the platform group.</td>
                   <td>production</td>
-                  <td class="row-sub">last week</td>
+                  <td class="row-sub">4d ago</td>
                   <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="callout"><code>Policy</code> list fields: <code>name type description project updatedAt</code>. Evaluations are <code>policy.policyEvaluations</code>, not a column on Policy. Workbench attach is <code>WorkbenchPolicy</code> on the workbench, not a Policy connection.</div>`
+          <div class="callout"><code>Policy.type</code> is still WORKBENCH or STACK on these rows. The list shows that as a <b>place icon</b> (<code>WorkbenchIcon</code> / <code>StackIcon</code>), not a type chip. Default filter: enforcement only.</div>` : `
+          <div class="card" style="overflow:hidden">
+            <table class="table">
+              <thead><tr><th></th><th>name</th><th>description</th><th>project</th><th>updatedAt</th><th></th></tr></thead>
+              <tbody>
+                <tr class="click" onclick="go('policy-bindings')">
+                  <td style="width:40px"><span class="icon-btn" title="Auto-attach" style="color:var(--text-light)">${I.links}</span></td>
+                  <td>
+                    <div class="row-title mono">auto-bind-prod.rego</div>
+                    <div class="row-sub">Auto-attach · not a place</div>
+                  </td>
+                  <td>If a workbench is labeled env=prod, attach tool-admission.rego.</td>
+                  <td>production</td>
+                  <td class="row-sub">last week</td>
+                  <td class="row-actions"><button class="icon-btn" onclick="event.stopPropagation();go('policy-body')">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">These are <code>Policy.type = BINDING</code>. Used as <code>BindingPolicy.bindPolicy</code>, never in the workbench attach picker. Icon: <code>LinksIcon</code> (or <code>ArrowRightLeftIcon</code>) — not a sibling of workbench/stack.</div>`}`
       }),
 
       'policies-empty': () => securityPage('policies', {
@@ -448,12 +501,23 @@
           <div class="page-head">
             <div>
               <h1 class="title">Policies</h1>
-              <p class="subtitle">OPA/Rego documents that govern tool execution.</p>
+              <p class="subtitle">${state.policyKind === 'enforcement'
+                ? 'No tool-admission documents in this project yet.'
+                : 'No auto-attach documents in this project yet.'}</p>
             </div>
           </div>
+          <div class="subtabs">
+            <button class="${state.policyKind === 'enforcement' ? 'active' : ''}" onclick="state.policyKind='enforcement';render()">Enforcement</button>
+            <button class="${state.policyKind === 'autoattach' ? 'active' : ''}" onclick="state.policyKind='autoattach';render()">Auto-attach</button>
+          </div>
           <div class="card empty">
-            <h3>No policies yet</h3>
-            <p>Create a Rego policy, then attach it to a workbench to control which tools can run and for whom.</p>
+            ${state.policyKind === 'enforcement' ? `
+              <h3>No enforcement policies</h3>
+              <p>Create a workbench or stack policy. Place icons show where it runs. Auto-attach stays on the other tab.</p>
+            ` : `
+              <h3>No auto-attach policies</h3>
+              <p>These are <code>BINDING</code> documents. They only decide which workbenches get other policies — they never admit or deny a tool call.</p>
+            `}
             <button class="btn" onclick="go('policy-create')">New policy</button>
           </div>`
       }),
@@ -474,8 +538,26 @@
                 <span class="hint">Unique. Treat like a filename; <code>.rego</code> suffix is conventional.</span>
               </div>
               <div class="field"><span class="label">Type *</span>
-                <select class="select"><option>Workbench</option><option>Stack</option><option>Binding</option></select>
-                <span class="hint">Workbench policies evaluate tool calls. Binding policies decide auto-attach. Stack is reserved.</span>
+                <div class="type-groups">
+                  <div>
+                    <div class="type-group-label">Enforcement — where the policy runs</div>
+                    <button type="button" class="type-opt ${state.formType === 'WORKBENCH' ? 'active' : ''}" onclick="state.formType='WORKBENCH';render()">
+                      <div class="opt-title">${I.wb} Workbench</div>
+                      <div class="opt-sub">Admit or deny tool calls on workbenches. Only this type appears in the workbench attach picker.</div>
+                    </button>
+                    <button type="button" class="type-opt ${state.formType === 'STACK' ? 'active' : ''}" onclick="state.formType='STACK';render()">
+                      <div class="opt-title">${I.stacks} Stack</div>
+                      <div class="opt-sub">Admit or deny tool calls on stacks. Same idea, later attach surface.</div>
+                    </button>
+                  </div>
+                  <div>
+                    <div class="type-group-label">Auto-attach — not a place</div>
+                    <button type="button" class="type-opt ${state.formType === 'BINDING' ? 'active' : ''}" onclick="state.formType='BINDING';render()">
+                      <div class="opt-title">${I.links} Binding</div>
+                      <div class="opt-sub">Used as <code>BindingPolicy.bindPolicy</code> (<code>bind: true/false</code>). Hidden from the workbench attach picker. Not Console RBAC policy bindings.</div>
+                    </button>
+                  </div>
+                </div>
               </div>
               <div class="field"><span class="label">Description</span>
                 <textarea class="textarea">Block kube.exec and kube.delete unless the actor is in the break-glass group.</textarea>
@@ -531,7 +613,12 @@ default sample := 0.5</textarea>
                 <input class="input mono" value="tool-admission.rego" />
               </div>
               <div class="field"><span class="label">type *</span>
-                <select class="select"><option>WORKBENCH</option><option>STACK</option><option>BINDING</option></select>
+                <select class="select">
+                  <option>WORKBENCH — run on workbenches</option>
+                  <option>STACK — run on stacks</option>
+                  <option>BINDING — auto-attach (not a place)</option>
+                </select>
+                <span class="hint">WORKBENCH / STACK = place. BINDING = auto-attach logic. Changing type can orphan attachments.</span>
               </div>
               <div class="field"><span class="label">description</span>
                 <textarea class="textarea">Block kube.exec / kube.delete unless actor is in break-glass.</textarea>
@@ -781,9 +868,10 @@ default sample := 0.5</textarea>
                   <a href="#" onclick="event.preventDefault();go('policy-create')">Create policy in security</a>
                 </div>
                 <select class="select">
-                  <option>tool-admission.rego — Workbench</option>
-                  <option>prod-write-guard.rego — Workbench</option>
+                  <option>tool-admission.rego</option>
+                  <option>prod-write-guard.rego</option>
                 </select>
+                <span class="hint">Scoped to <code>type: WORKBENCH</code>. Stack and auto-attach policies do not appear here.</span>
               </div>
               <div class="field">
                 <span class="label">matches.regexes</span>
@@ -905,15 +993,21 @@ default sample := 0.5</textarea>
     function render() {
       document.getElementById('app').innerHTML = (screens[state.screen] || screens.policies)()
       document.querySelectorAll('.picker button').forEach((b) => {
-        b.classList.toggle('active', b.dataset.go === state.screen)
+        const screenMatch = b.dataset.go === state.screen
+        const kindMatch = !b.dataset.kind || b.dataset.kind === state.policyKind
+        b.classList.toggle('active', screenMatch && kindMatch)
       })
     }
 
     document.querySelector('.picker').addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-go]')
-      if (btn) go(btn.dataset.go)
+      if (!btn) return
+      if (btn.dataset.kind) state.policyKind = btn.dataset.kind
+      go(btn.dataset.go)
     })
     window.go = go
+    const params = new URLSearchParams(location.search)
+    if (params.get('kind') === 'autoattach' || params.get('kind') === 'enforcement') state.policyKind = params.get('kind')
     if (location.hash.slice(1) && screens[location.hash.slice(1)]) state.screen = location.hash.slice(1)
     render()
   </script>
