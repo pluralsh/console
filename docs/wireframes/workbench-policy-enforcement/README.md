@@ -168,7 +168,7 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 
 **Editor.** Policy detail edits every writable Policy field, not just the Rego string: `name`, `type`, `description`, `projectId`, `policy`.
 
-**Evaluations + simulate.** `PolicyEvaluation` is sampled JSON in/out plus `policyIds`. Simulate replays `input` through `evaluatePolicy`; it does not write a new evaluation.
+**Definition + simulate.** One screen: Rego buffer on the left, simulate on the right. Pick a past evaluation to load `input`, Run against the unsaved buffer (`evaluatePolicy`). Recorded decision stays visible for comparison. Evaluations tab lists samples; Replay opens Definition with that input. Attachments tab is `Policy.bindingPolicies`.
 
 **Edit attach.** `updateWorkbenchPolicy` only accepts `matches`. Changing which Policy is bound means delete + create.
 

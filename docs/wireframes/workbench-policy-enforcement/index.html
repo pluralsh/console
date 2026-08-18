@@ -100,12 +100,14 @@
       display: grid; grid-template-columns: var(--sidenav) 1fr; height: 100%; min-height: 0; padding: 16px 16px 16px 8px; gap: 24px;
     }
     .sidenav { display: flex; flex-direction: column; gap: 2px; padding-top: 8px; }
+    .sidenav-label { font-size: 11px; letter-spacing: 0.08em; color: var(--text-xlight); padding: 4px 12px 8px; }
     .sidenav button {
       text-align: left; background: transparent; border: 0; border-radius: 4px;
-      padding: 8px 12px; color: var(--text-light);
+      padding: 8px 12px; color: var(--text-light); display: flex; align-items: center; gap: 8px;
     }
     .sidenav button:hover { background: var(--fill-zero-hover); color: var(--text); }
     .sidenav button.active { background: var(--fill-one-selected); color: var(--text); font-weight: 600; }
+    .nav-count { margin-left: auto; color: var(--text-xlight); font-size: 12px; font-weight: 500; }
     .page { min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 16px; }
     .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; min-height: 40px; }
     .title { font-size: 20px; line-height: 24px; font-weight: 500; margin: 0; }
@@ -185,6 +187,18 @@
     }
     .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-height: 0; }
     .panel-label { font-size: 12px; color: var(--text-xlight); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .workspace { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; min-height: 0; flex: 1; }
+    .panel { background: var(--fill-one); border: 1px solid var(--border-fill-one); border-radius: 6px; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+    .panel-head { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+    .panel-kicker { font-size: 11px; letter-spacing: 0.08em; color: var(--text-xlight); font-weight: 600; }
+    .panel-meta { color: var(--text-xlight); font-size: 12px; }
+    .panel-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; }
+    .editor.lined { min-height: 420px; }
+    .ln { color: #5D626F; display: inline-block; width: 28px; user-select: none; }
+    .sim-empty { border: 1px dashed var(--border-input); border-radius: 4px; padding: 28px 16px; text-align: center; color: var(--text-xlight); }
+    .tab-count { color: var(--text-xlight); font-weight: 400; margin-left: 6px; font-size: 12px; }
+    .head-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .recorded { display: flex; align-items: center; gap: 8px; color: var(--text-xlight); font-size: 13px; padding-top: 4px; }
 
     /* Workbench */
     .wb { display: flex; height: 100%; min-height: 0; }
@@ -247,11 +261,11 @@
     <button data-go="attachment-create">2c. New attachment</button>
     <button data-go="policies-empty">3. Empty</button>
     <button data-go="policy-create">4. Create policy</button>
-    <button data-go="policy-body">5. Editor</button>
+    <button data-go="policy-body">5. Definition + simulate</button>
     <button data-go="policy-bind-body">5b. Bind editor</button>
-    <button data-go="policy-bindings">6. Bindings</button>
+    <button data-go="policy-bindings">6. Attachments</button>
     <button data-go="policy-evaluations">7. Evaluations</button>
-    <button data-go="policy-simulate">8. Simulate</button>
+    <button data-go="policy-simulate">8. Simulate (same)</button>
     <button data-go="gatekeeper">9. Gatekeeper</button>
     <button data-go="wb-policies">10. WB policies</button>
     <button data-go="wb-policies-empty">11. WB empty</button>
@@ -300,19 +314,68 @@
 
 <span class="kw">default</span> sample := <span class="str">0.5</span>`
 
+    const DEFINITION_SRC = `package workbench.tools
+
+import rego.v1
+
+default allow := false
+
+# read-only tooling is always permitted
+allow if {
+    input.tool.name in {"read_file", "list_dir", "grep"}
+}
+
+# destructive kubectl needs the on-call group off production
+allow if {
+    startswith(input.tool.name, "kubectl_")
+    input.actor.groups[_] == "sre-oncall"
+    not input.cluster.production
+}
+
+deny contains msg if {
+    input.tool.name == "kubectl_delete"
+    input.cluster.production
+    msg := "kubectl_delete is not permitted on production"
+}`
+
     const INPUT_JSON = `{
-  "input": {
-    "tool": "kube.exec",
-    "namespace": "prod-payments",
-    "pod": "checkout-7f9c",
-    "command": ["sh"]
+  "tool": {
+    "name": "kubectl_delete",
+    "args": {
+      "target": "deploy/api",
+      "namespace": "payments"
+    }
   },
-  "actor": {
-    "id": "usr_18f2",
-    "name": "Ada Lovelace",
-    "email": "ada@plural.sh",
-    "groups": ["platform"]
-  }
+  "actor": { "groups": ["platform"] },
+  "cluster": { "production": true }
+}`
+
+    const INPUT_GET = `{
+  "tool": {
+    "name": "kubectl_get",
+    "args": { "resource": "pods", "namespace": "payments" }
+  },
+  "actor": { "groups": ["sre-oncall"] },
+  "cluster": { "production": true }
+}`
+
+    const EVALS = [
+      { id: '4f2c', tool: 'kubectl_delete', when: '2h ago', recorded: 'deny', input: null },
+      { id: '91c', tool: 'kubectl_get', when: '3h ago', recorded: 'allow', input: 'get' },
+      { id: '22ab', tool: 'kubectl_delete', when: 'Yesterday', recorded: 'deny', input: null },
+      { id: '7e1a', tool: 'read_file', when: 'Yesterday', recorded: 'allow', input: 'get' },
+      { id: 'b03', tool: 'kubectl_delete', when: '2 days ago', recorded: 'deny', input: null },
+      { id: 'c19', tool: 'kubectl_apply', when: 'Last week', recorded: 'deny', input: null },
+    ]
+
+    const SIM_DENY = `{
+  "allow": false,
+  "deny": ["kubectl_delete is not permitted on production"]
+}`
+
+    const SIM_ALLOW = `{
+  "allow": true,
+  "deny": []
 }`
 
     const OUTPUT_DENY = `{
@@ -489,12 +552,82 @@ bind := true if {
       return `<span class="chip">${type}</span>`
     }
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1' }
+    function linedRego(src) {
+      return highlightRego(src).split('\n').map((line, i) => `<span class="ln">${i + 1}</span>${line}`).join('\n')
+    }
+
+    function currentEval() {
+      return EVALS.find((e) => e.id === state.evalId) || EVALS[0]
+    }
+
+    function openEval(id) {
+      state.evalId = id
+      state.simulated = false
+      go('policy-body')
+    }
+
+    function policyDetailHead(tab) {
+      return `
+          <div class="page-head">
+            <div>
+              <h1 class="title">prod-guardrails.rego</h1>
+              <p class="subtitle">Restricts destructive kubectl and helm tooling on production clusters to the on-call group.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn secondary small">Revert</button>
+              <button class="btn small">Save policy</button>
+            </div>
+          </div>
+          <div class="tabs">
+            <button class="${tab === 'def' ? 'active' : ''}" onclick="go('policy-body')">Definition</button>
+            <button class="${tab === 'eval' ? 'active' : ''}" onclick="go('policy-evaluations')">Evaluations <span class="tab-count">6</span></button>
+            <button class="${tab === 'att' ? 'active' : ''}" onclick="go('policy-bindings')">Attachments <span class="tab-count">3</span></button>
+          </div>`
+    }
+
+    function simulatePanel() {
+      const ev = currentEval()
+      const input = ev.input === 'get' ? INPUT_GET : INPUT_JSON
+      const recordedDeny = ev.recorded === 'deny'
+      return `
+            <section class="panel">
+              <div class="panel-head">
+                <span class="panel-kicker">SIMULATE</span>
+                <div class="spacer"></div>
+                <button class="btn secondary small">Replay all</button>
+                <button class="btn small" onclick="state.simulated=true;render()">Run</button>
+              </div>
+              <div class="panel-body">
+                <select class="select" onchange="openEval(this.value)">
+                  ${EVALS.map((e) => `<option value="${e.id}" ${e.id === ev.id ? 'selected' : ''}>eval ${e.id} · ${e.tool} · ${e.when}</option>`).join('')}
+                </select>
+                <div>
+                  <div class="panel-label"><span>INPUT</span><span class="chip">PolicyEvaluation.input</span></div>
+                  <div class="json" style="min-height:160px">${input}</div>
+                </div>
+                <div>
+                  <div class="panel-label">
+                    <span>OUTPUT</span>
+                    <span class="chip ${state.simulated ? (recordedDeny && ev.input !== 'get' ? 'bad' : 'ok') : ''}">${state.simulated ? (ev.input === 'get' ? 'allow' : 'deny') : 'Not run yet'}</span>
+                  </div>
+                  ${state.simulated
+                    ? `<div class="json" style="min-height:120px">${ev.input === 'get' ? SIM_ALLOW : SIM_DENY}</div>`
+                    : `<div class="sim-empty">
+                        <div>No output yet. Pick a past evaluation or edit the input, then run it against the current buffer.</div>
+                        <div style="margin-top:12px"><button class="btn small" onclick="state.simulated=true;render()">Run simulation ⌘↵</button></div>
+                      </div>`}
+                </div>
+                <div class="recorded">Recorded decision for this evaluation: ${recordedDeny ? '<span class="chip bad">deny</span>' : '<span class="chip ok">allow</span>'}</div>
+              </div>
+            </section>`
+    }
+
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c' }
 
     function go(screen) {
       state.screen = screen
       state.menu = false
-      if (screen !== 'policy-simulate' && screen !== 'policy-bind-simulate') state.simulated = false
+      if (!['policy-simulate', 'policy-body', 'policy-bind-simulate', 'policy-bind-body'].includes(screen)) state.simulated = false
       if (screen !== 'policy-create') state.createStep = 'Details'
       if (screen === 'policy-create') {
         state.formType = state.policyKind === 'autoattach' ? 'BINDING' : (state.formType === 'BINDING' ? 'WORKBENCH' : (state.formType || 'WORKBENCH'))
@@ -536,13 +669,13 @@ bind := true if {
 
     function sidenav(active) {
       const items = [
-        ['security-overview', 'Security overview'],
-        ['policies', 'Policies'],
-        ['gatekeeper', 'Gatekeeper'],
-        ['security-overview', 'Vulnerability report'],
-        ['security-overview', 'Compliance report'],
+        ['security-overview', 'Overview', ''],
+        ['policies', 'Policies', '4'],
+        ['gatekeeper', 'Gatekeeper', '27'],
+        ['security-overview', 'Vulnerability reports', ''],
+        ['security-overview', 'Compliance reports', ''],
       ]
-      return `<nav class="sidenav">${items.map(([s, l]) => `<button class="${s === active ? 'active' : ''}" onclick="go('${s}')">${l}</button>`).join('')}</nav>`
+      return `<nav class="sidenav"><div class="sidenav-label">SECURITY</div>${items.map(([s, l, n]) => `<button class="${s === active ? 'active' : ''}" onclick="go('${s}')">${l}${n ? `<span class="nav-count">${n}</span>` : ''}</button>`).join('')}</nav>`
     }
 
     function securityPage(active, inner) {
@@ -867,98 +1000,79 @@ default sample := 0.5`}</textarea>
       }),
 
       'policy-body': () => securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>tool-admission.rego</b>`,
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>prod-guardrails.rego</b>`,
         html: `
-          <div class="page-head">
-            <div>
-              <h1 class="title mono">tool-admission.rego</h1>
-              <p class="subtitle">Policy · <code>id</code> pol_18f2 · insertedAt 3d ago</p>
-            </div>
-            <button class="btn danger small">Delete</button>
-          </div>
-          <div class="tabs">
-            <button class="active">Body</button>
-            <button onclick="go('policy-evaluations')">Evaluations</button>
-            <button onclick="go('policy-bindings')">Bindings</button>
-          </div>
-          <div class="split">
-            <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
-              <div class="field"><span class="label">name *</span>
-                <input class="input mono" value="tool-admission.rego" />
+          ${policyDetailHead('def')}
+          <div class="workspace">
+            <section class="panel">
+              <div class="panel-head">
+                <span class="panel-kicker">DEFINITION · REGO</span>
+                <span class="panel-meta">${DEFINITION_SRC.split('\n').length} lines</span>
+                <div class="spacer"></div>
+                <button class="btn secondary small">+ deny rule</button>
               </div>
-              <div class="field"><span class="label">type *</span>
-                <select class="select">
-                  <option>WORKBENCH — run on workbenches</option>
-                  <option>STACK — run on stacks</option>
-                  <option>BINDING — auto-attach (not a place)</option>
-                </select>
-                <span class="hint">WORKBENCH / STACK = place. BINDING = auto-attach logic. Changing type can orphan attachments.</span>
+              <div class="panel-body">
+                <div class="editor lined">${linedRego(DEFINITION_SRC)}</div>
+                <div class="hint">Simulation runs against this buffer, not the saved policy. Persist with <code>updatePolicy</code>.</div>
               </div>
-              <div class="field"><span class="label">description</span>
-                <textarea class="textarea">Block kube.exec / kube.delete unless actor is in break-glass.</textarea>
-              </div>
-              <div class="field"><span class="label">project</span>
-                <select class="select"><option>production</option></select>
-              </div>
-            </div>
-            <div style="flex:2;min-width:0" class="field">
-              <span class="label">policy *</span>
-              <span class="hint">Rego source string. Validated on save. <code>updatePolicy(id, { name, type, description, policy, projectId })</code></span>
-              <div class="editor">${REGO}</div>
-            </div>
-          </div>
-          <div style="display:flex;justify-content:flex-end;gap:8px">
-            <button class="btn secondary small" onclick="go('policy-simulate')">Simulate with a sampled input</button>
-            <button class="btn small">Save</button>
+            </section>
+            ${simulatePanel()}
           </div>`
       }),
 
       'policy-bind-body': () => {
         const p = currentBind()
+        const stack = /stack/.test(p.target) && !/workbench/.test(p.target)
+        const input = stack ? BIND_INPUT_STACK : BIND_INPUT_WB
         return securityPage('policies', {
         crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <b>${p.name}</b>`,
         html: `
           <div class="page-head">
             <div>
-              <h1 class="title mono">${p.name}</h1>
-              <p class="subtitle">Auto-attach · <code>type: BINDING</code> · used only as <code>BindingPolicy.bindPolicy</code></p>
+              <h1 class="title">${p.name}</h1>
+              <p class="subtitle">${p.desc}</p>
             </div>
-            <button class="btn danger small">Delete</button>
-          </div>
-          <div class="tabs">
-            <button class="active">Body</button>
-            <button onclick="go('policy-bind-simulate')">Evaluations</button>
-            <button onclick="go('policy-bindings')">Used by</button>
-          </div>
-          <div class="split">
-            <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
-              <div class="field"><span class="label">name *</span>
-                <input class="input mono" value="${p.name}" />
-              </div>
-              <div class="field"><span class="label">type *</span>
-                <select class="select">
-                  <option>WORKBENCH — run on workbenches</option>
-                  <option>STACK — run on stacks</option>
-                  <option selected>BINDING — auto-attach (not a place)</option>
-                </select>
-                <span class="hint">Must stay BINDING or <code>createBindingPolicy</code> rejects it.</span>
-              </div>
-              <div class="field"><span class="label">description</span>
-                <textarea class="textarea">${p.desc}</textarea>
-              </div>
-              <div class="field"><span class="label">project</span>
-                <select class="select"><option>production</option></select>
-              </div>
-            </div>
-            <div style="flex:2;min-width:0" class="field">
-              <span class="label">policy *</span>
-              <span class="hint">Package must be <code>plrl.binding</code>. Set <code>bind</code> only — do not emit <code>deny</code>. Path: <code>data.plrl.binding.result</code>.</span>
-              <div class="editor">${highlightRego(p.src)}</div>
+            <div class="head-actions">
+              <button class="btn secondary small">Revert</button>
+              <button class="btn small">Save policy</button>
             </div>
           </div>
-          <div style="display:flex;justify-content:flex-end;gap:8px">
-            <button class="btn secondary small" onclick="go('policy-bind-simulate')">Simulate bind</button>
-            <button class="btn small">Save</button>
+          <div class="workspace">
+            <section class="panel">
+              <div class="panel-head">
+                <span class="panel-kicker">DEFINITION · REGO</span>
+                <span class="panel-meta">${p.src.split('\n').length} lines · type BINDING</span>
+              </div>
+              <div class="panel-body">
+                <div class="editor lined">${linedRego(p.src)}</div>
+                <div class="hint">Must stay <code>package plrl.binding</code>. Simulation runs against this buffer.</div>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <span class="panel-kicker">SIMULATE</span>
+                <div class="spacer"></div>
+                <button class="btn small" onclick="state.simulated=true;render()">Run</button>
+              </div>
+              <div class="panel-body">
+                <div>
+                  <div class="panel-label"><span>INPUT · cleaned ${stack ? 'stack' : 'workbench'}</span></div>
+                  <div class="json" style="min-height:160px">${input}</div>
+                </div>
+                <div>
+                  <div class="panel-label">
+                    <span>OUTPUT</span>
+                    <span class="chip ${state.simulated ? 'ok' : ''}">${state.simulated ? 'bind: true' : 'Not run yet'}</span>
+                  </div>
+                  ${state.simulated
+                    ? `<div class="json" style="min-height:120px">${BIND_OUT_TRUE}</div>`
+                    : `<div class="sim-empty">
+                        <div>No output yet. Run against the current buffer.</div>
+                        <div style="margin-top:12px"><button class="btn small" onclick="state.simulated=true;render()">Run simulation ⌘↵</button></div>
+                      </div>`}
+                </div>
+              </div>
+            </section>
           </div>`
       })
       },
@@ -997,111 +1111,55 @@ default sample := 0.5`}</textarea>
       },
 
       'policy-bindings': () => securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <b>bindings</b>`,
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>prod-guardrails.rego</b>`,
         html: `
-          <div class="page-head">
-            <div>
-              <h1 class="title mono">tool-admission.rego</h1>
-              <p class="subtitle"><code>Policy.bindingPolicies</code> — auto-attach this policy to matching resources. Not workbench rows; those are <code>WorkbenchPolicy</code> on the workbench.</p>
-            </div>
-            <button class="btn small">New binding</button>
+          ${policyDetailHead('att')}
+          <div style="display:flex;justify-content:flex-end">
+            <button class="btn small" onclick="go('attachment-create')">New attachment</button>
           </div>
-          <div class="tabs">
-            <button onclick="go('policy-body')">Body</button>
-            <button onclick="go('policy-evaluations')">Evaluations</button>
-            <button class="active">Bindings</button>
-          </div>
-          <div class="card" style="overflow:hidden">
-            <table class="table">
-              <thead><tr><th>type</th><th>interval</th><th>bindPolicy</th><th>matches.workbench.regexes</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><span class="chip info">WORKBENCH</span></td>
-                  <td class="mono">1h</td>
-                  <td class="mono">auto-bind-prod-name.rego</td>
-                  <td class="mono">env-prod.*</td>
-                  <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="card empty" style="padding:24px">
-            <p style="margin:0;color:var(--text-xlight)">Empty is valid. Attach to a specific workbench from the workbench instead: <code>createWorkbenchPolicy(workbenchId, { policyId, matches })</code>.</p>
-          </div>`
+          <table class="table">
+            <thead><tr><th>Rules</th><th>Project</th><th>Updated</th><th></th><th></th></tr></thead>
+            <tbody>
+              ${RULES.slice(0, 3).map((r) => {
+                const bind = bindById(r.bind)
+                return `
+              <tr class="click" onclick="openRule('${r.id}')">
+                <td>
+                  <div class="row-title">${r.policy}</div>
+                  <div class="row-sub">when <span class="mono">${bind.name}</span></div>
+                </td>
+                <td>${r.project}</td>
+                <td class="row-sub">${r.updated}</td>
+                <td>${typeChip(r.type)}</td>
+                <td class="row-actions"><span class="caret">${I.caret}</span></td>
+              </tr>`
+              }).join('')}
+            </tbody>
+          </table>
+          <div class="callout"><code>Policy.bindingPolicies</code> — rules that auto-attach <b>this</b> document. Manual workbench attach stays on the workbench.</div>`
       }),
 
       'policy-evaluations': () => securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <b>evaluations</b>`,
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>prod-guardrails.rego</b>`,
         html: `
-          <div class="page-head">
-            <div>
-              <h1 class="title mono">tool-admission.rego</h1>
-              <p class="subtitle">Sampled production decisions. Use any row as the input for a simulation against the current body.</p>
-            </div>
-          </div>
-          <div class="tabs">
-            <button onclick="go('policy-body')">Body</button>
-            <button class="active">Evaluations</button>
-            <button onclick="go('policy-bindings')">Bindings</button>
-          </div>
-          <div class="card" style="overflow:hidden">
-            <table class="table">
-              <thead><tr><th>insertedAt</th><th>policyIds</th><th>input</th><th>output</th><th></th></tr></thead>
-              <tbody>
-                <tr class="click" onclick="go('policy-simulate')">
-                  <td>12 minutes ago</td>
-                  <td class="mono">[pol_18f2]</td>
-                  <td><div class="mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{ "input": { "tool": "kube.exec", … }, "actor": {…} }</div></td>
-                  <td><span class="chip bad">deny[]</span> <span class="row-sub mono">approve: []</span></td>
-                  <td class="row-actions"><button class="btn small secondary" onclick="event.stopPropagation();go('policy-simulate')">${I.play} Simulate</button></td>
-                </tr>
-                <tr class="click" onclick="go('policy-simulate')">
-                  <td>3 hours ago</td>
-                  <td class="mono">[pol_18f2, pol_22ab]</td>
-                  <td><div class="mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{ "input": { "tool": "kube.get", … } }</div></td>
-                  <td><span class="chip ok">deny: []</span></td>
-                  <td class="row-actions"><button class="btn small secondary">Simulate</button></td>
-                </tr>
-                <tr class="click" onclick="go('policy-simulate')">
-                  <td>Yesterday</td>
-                  <td class="mono">[pol_18f2]</td>
-                  <td><div class="mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{ "input": { "tool": "kube.delete", … } }</div></td>
-                  <td><span class="chip bad">deny[]</span></td>
-                  <td class="row-actions"><button class="btn small secondary">Simulate</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="callout"><code>PolicyEvaluation</code> has no tool/actor/result fields. Those live inside <code>input: Map!</code> and <code>output: Map!</code>. <code>policyIds</code> is a list — one sample can cover several policies. No create/update/delete; samples are written by the evaluator. Simulate calls <code>evaluatePolicy(policyId, input)</code>.</div>`
+          ${policyDetailHead('eval')}
+          <table class="table">
+            <thead><tr><th>Evaluation</th><th>input.tool</th><th>Recorded</th><th>insertedAt</th><th></th></tr></thead>
+            <tbody>
+              ${EVALS.map((e) => `
+              <tr class="click" onclick="openEval('${e.id}')">
+                <td class="mono">eval ${e.id}</td>
+                <td class="mono">${e.tool}</td>
+                <td>${e.recorded === 'deny' ? '<span class="chip bad">deny</span>' : '<span class="chip ok">allow</span>'}</td>
+                <td class="row-sub">${e.when}</td>
+                <td class="row-actions"><button class="btn small secondary" onclick="event.stopPropagation();openEval('${e.id}')">${I.play} Replay</button></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+          <div class="callout">Replay loads <code>PolicyEvaluation.input</code> into the simulate panel on Definition. <code>evaluatePolicy</code> is a query — it does not write a new sample.</div>`
       }),
 
-      'policy-simulate': () => securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <span class="crumb-link" onclick="go('policy-evaluations')">evaluations</span> / <b>simulate</b>`,
-        html: `
-          <div class="page-head">
-            <div>
-              <h1 class="title">Simulate evaluation</h1>
-              <p class="subtitle">Replay a captured tool payload through the current policy body. Same loop as Spacelift’s policy workbench.</p>
-            </div>
-            <button class="btn" onclick="state.simulated=true;render()">${I.play} Simulate</button>
-          </div>
-          <div class="banner info">Sample <code>id</code> ev_91c · <code>insertedAt</code> 12m ago · <code>policyIds</code> [pol_18f2] · original <code>output.deny</code> is non-empty · query <code>evaluatePolicy(policyId, input)</code></div>
-          ${state.simulated ? '<div class="banner ok">Simulated <code>output.deny</code> is empty (allow). Stored evaluation is unchanged until the next sampled run.</div>' : ''}
-          <div class="compare">
-            <div>
-              <div class="panel-label"><span>input: Map! (editable for what-if)</span><span class="chip">PolicyEvaluation.input</span></div>
-              <div class="json">${INPUT_JSON}</div>
-            </div>
-            <div>
-              <div class="panel-label">
-                <span>${state.simulated ? 'evaluatePolicy → Map' : 'output: Map!'}</span>
-                <span class="chip ${state.simulated ? 'ok' : 'bad'}">${state.simulated ? 'simulated deny: []' : 'stored deny[]'}</span>
-              </div>
-              <div class="json">${state.simulated ? OUTPUT_ALLOW : OUTPUT_DENY}</div>
-            </div>
-          </div>
-          <div class="callout">Evaluate is a query, not a mutation. It does not append to <code>policyEvaluations</code>. Persist body changes with <code>updatePolicy</code>.</div>`
-      }),
+      'policy-simulate': () => screens['policy-body'](),
 
       gatekeeper: () => securityPage('gatekeeper', {
         crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <b>gatekeeper</b>`,
@@ -1365,6 +1423,7 @@ default sample := 0.5`}</textarea>
     window.go = go
     window.openBind = openBind
     window.openRule = openRule
+    window.openEval = openEval
     const params = new URLSearchParams(location.search)
     if (params.get('kind') === 'autoattach' || params.get('kind') === 'enforcement') state.policyKind = params.get('kind')
     if (location.hash.slice(1) && screens[location.hash.slice(1)]) state.screen = location.hash.slice(1)
