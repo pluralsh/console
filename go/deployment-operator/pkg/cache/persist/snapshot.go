@@ -1,0 +1,192 @@
+package persist
+
+import (
+	"encoding/json"
+	"errors"
+	"os"
+	"path/filepath"
+	"time"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
+	pollycache "github.com/pluralsh/console/go/polly/cache"
+)
+
+const (
+	SnapshotVersion = 1
+
+	stateFileName = "state.json"
+	lockFileName  = "cache.lock"
+	ManifestsDir  = "manifests"
+)
+
+type ManifestRecord struct {
+	Dir     string        `json:"dir"`
+	SHA     string        `json:"sha"`
+	Created time.Time     `json:"created"`
+	Expiry  time.Duration `json:"expiry"`
+}
+
+type SHARecord struct {
+	Value     string    `json:"value"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
+
+type IdentityRecord struct {
+	Value   string    `json:"value"`
+	Created time.Time `json:"created"`
+}
+
+type PollyRecord[T any] struct {
+	Value   T         `json:"value"`
+	Created time.Time `json:"created"`
+}
+
+type Snapshot struct {
+	Version           int                                                      `json:"version"`
+	Manifests         map[string]ManifestRecord                                `json:"manifests"`
+	ComponentSHAs     map[string]SHARecord                                     `json:"componentShas"`
+	StatusSHAs        map[string]SHARecord                                     `json:"statusShas"`
+	UserIDs           map[string]IdentityRecord                                `json:"userIds"`
+	GroupIDs          map[string]IdentityRecord                                `json:"groupIds"`
+	ManagedNamespaces map[string]PollyRecord[console.ManagedNamespaceFragment] `json:"managedNamespaces"`
+}
+
+func SHARecordsFrom(c *cache.SimpleCache[string]) map[string]SHARecord {
+	if c == nil {
+		return nil
+	}
+
+	exported := c.Export()
+	records := make(map[string]SHARecord, len(exported))
+	for id, line := range exported {
+		records[id] = SHARecord{Value: line.Resource, ExpiresAt: line.ExpiresAt}
+	}
+	return records
+}
+
+func ApplySHARecords(c *cache.SimpleCache[string], records map[string]SHARecord) {
+	if c == nil || len(records) == 0 {
+		return
+	}
+
+	items := make(map[string]cache.ExportedLine[string], len(records))
+	for id, rec := range records {
+		items[id] = cache.ExportedLine[string]{Resource: rec.Value, ExpiresAt: rec.ExpiresAt}
+	}
+	c.Import(items)
+}
+
+func IdentityRecordsFrom(c cache.UserGroupCache) (users, groups map[string]IdentityRecord) {
+	if c == nil {
+		return nil, nil
+	}
+
+	exportedUsers, exportedGroups := c.Export()
+	return identityRecordsFrom(exportedUsers), identityRecordsFrom(exportedGroups)
+}
+
+func ApplyIdentityRecords(c cache.UserGroupCache, users, groups map[string]IdentityRecord) {
+	if c == nil {
+		return
+	}
+	c.Import(identityLinesFrom(users), identityLinesFrom(groups))
+}
+
+func identityRecordsFrom(items map[string]cache.IdentityLine) map[string]IdentityRecord {
+	records := make(map[string]IdentityRecord, len(items))
+	for id, line := range items {
+		records[id] = IdentityRecord{Value: line.Value, Created: line.Created}
+	}
+	return records
+}
+
+func identityLinesFrom(items map[string]IdentityRecord) map[string]cache.IdentityLine {
+	lines := make(map[string]cache.IdentityLine, len(items))
+	for id, rec := range items {
+		lines[id] = cache.IdentityLine{Value: rec.Value, Created: rec.Created}
+	}
+	return lines
+}
+
+func PollyRecordsFrom[T any](c *pollycache.Cache[T]) map[string]PollyRecord[T] {
+	if c == nil {
+		return nil
+	}
+
+	exported := c.Export()
+	records := make(map[string]PollyRecord[T], len(exported))
+	for id, line := range exported {
+		records[id] = PollyRecord[T]{Value: line.Resource, Created: line.Created}
+	}
+	return records
+}
+
+func ApplyPollyRecords[T any](c *pollycache.Cache[T], records map[string]PollyRecord[T]) {
+	if c == nil || len(records) == 0 {
+		return
+	}
+
+	items := make(map[string]pollycache.ExportedLine[T], len(records))
+	for id, rec := range records {
+		items[id] = pollycache.ExportedLine[T]{Resource: rec.Value, Created: rec.Created}
+	}
+	c.Import(items)
+}
+
+func (s *Store) Save(snap Snapshot) error {
+	if !s.Enabled() {
+		return nil
+	}
+
+	snap.Version = SnapshotVersion
+	if snap.Manifests == nil {
+		snap.Manifests = map[string]ManifestRecord{}
+	}
+	if snap.ComponentSHAs == nil {
+		snap.ComponentSHAs = map[string]SHARecord{}
+	}
+	if snap.StatusSHAs == nil {
+		snap.StatusSHAs = map[string]SHARecord{}
+	}
+	if snap.UserIDs == nil {
+		snap.UserIDs = map[string]IdentityRecord{}
+	}
+	if snap.GroupIDs == nil {
+		snap.GroupIDs = map[string]IdentityRecord{}
+	}
+	if snap.ManagedNamespaces == nil {
+		snap.ManagedNamespaces = map[string]PollyRecord[console.ManagedNamespaceFragment]{}
+	}
+
+	data, err := json.MarshalIndent(snap, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	tmp := filepath.Join(s.dir, stateFileName+".tmp")
+	final := filepath.Join(s.dir, stateFileName)
+	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+		return err
+	}
+	return os.Rename(tmp, final)
+}
+
+func (s *Store) Load() (Snapshot, error) {
+	var snap Snapshot
+	if !s.Enabled() {
+		return snap, nil
+	}
+
+	data, err := os.ReadFile(filepath.Join(s.dir, stateFileName))
+	if errors.Is(err, os.ErrNotExist) {
+		return Snapshot{Version: SnapshotVersion}, nil
+	}
+	if err != nil {
+		return snap, err
+	}
+	if err := json.Unmarshal(data, &snap); err != nil {
+		return snap, err
+	}
+	return snap, nil
+}

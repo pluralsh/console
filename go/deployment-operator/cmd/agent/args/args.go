@@ -64,6 +64,9 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
+	defaultCachePersistInterval         = "1m"
+	defaultCachePersistIntervalDuration = time.Minute
+
 	defaultComponentShaCacheTTL         = "6h"
 	defaultComponentShaCacheTTLDuration = 6 * time.Hour
 
@@ -153,6 +156,8 @@ var (
 	argResourceCacheTTL                     = flag.String("resource-cache-ttl", defaultResourceCacheTTL, "The time to live of each resource cache entry.")
 	argManifestCacheTTL                     = flag.String("manifest-cache-ttl", defaultManifestCacheTTL, "The time to live of service manifests in cache entry.")
 	argManifestCacheJitter                  = flag.String("manifest-cache-jitter", defaultManifestCacheJitter, "Deprecated: ignored; manifest cache jitter is fixed at 50% of its TTL.")
+	argCacheDir                             = flag.String("cache-dir", "", "Directory used to persist operator caches across restarts. Empty disables persistence.")
+	argCachePersistInterval                 = flag.String("cache-persist-interval", defaultCachePersistInterval, "Interval to flush in-memory caches to cache-dir.")
 	argComponentShaCacheTTL                 = flag.String("component-sha-cache-ttl", defaultComponentShaCacheTTL, "The time to live of the component sha cache entries.")
 	argComponentShaCacheJitter              = flag.String("component-sha-cache-jitter", defaultComponentShaCacheJitter, "Deprecated: ignored; component SHA cache jitter is fixed at 50% of its TTL.")
 	argControllerCacheTTL                   = flag.String("controller-cache-ttl", defaultControllerCacheTTL, "The time to live of console controller cache entries.")
@@ -372,6 +377,20 @@ func ManifestCacheTTL() time.Duration {
 	if err != nil {
 		klog.ErrorS(err, "Could not parse manifest-cache-ttl", "value", *argManifestCacheTTL, "default", defaultManifestCacheTTLDuration)
 		return defaultManifestCacheTTLDuration
+	}
+
+	return duration
+}
+
+func CacheDir() string {
+	return *argCacheDir
+}
+
+func CachePersistInterval() time.Duration {
+	duration, err := time.ParseDuration(*argCachePersistInterval)
+	if err != nil {
+		klog.ErrorS(err, "Could not parse cache-persist-interval", "value", *argCachePersistInterval, "default", defaultCachePersistIntervalDuration)
+		return defaultCachePersistIntervalDuration
 	}
 
 	return duration

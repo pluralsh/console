@@ -8,6 +8,11 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 )
 
+type ExportedLine[T any] struct {
+	Resource  T         `json:"resource"`
+	ExpiresAt time.Time `json:"expiresAt"`
+}
+
 type simpleCacheLine[T any] struct {
 	resource  *T
 	expiresAt time.Time
@@ -62,6 +67,31 @@ func (c *SimpleCache[T]) Expire(id string) {
 
 func (c *SimpleCache[T]) ExpiryWithJitter() time.Duration {
 	return utils.WithJitterFactor(c.expiryFn(), 0.5)
+}
+
+func (c *SimpleCache[T]) Export() map[string]ExportedLine[T] {
+	items := make(map[string]ExportedLine[T])
+	for id, line := range c.cache.Items() {
+		if !line.live() {
+			continue
+		}
+		items[id] = ExportedLine[T]{Resource: *line.resource, ExpiresAt: line.expiresAt}
+	}
+	return items
+}
+
+func (c *SimpleCache[T]) Import(items map[string]ExportedLine[T]) {
+	now := time.Now()
+	for id, line := range items {
+		if !now.Before(line.ExpiresAt) {
+			continue
+		}
+		resource := line.Resource
+		c.cache.Set(id, simpleCacheLine[T]{
+			resource:  &resource,
+			expiresAt: line.ExpiresAt,
+		})
+	}
 }
 
 func (l *simpleCacheLine[T]) live() bool {

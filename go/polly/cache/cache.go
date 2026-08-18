@@ -68,6 +68,33 @@ func (c *Cache[T]) Wipe() {
 	c.cache.Clear()
 }
 
+type ExportedLine[T any] struct {
+	Resource T
+	Created  time.Time
+}
+
+func (c *Cache[T]) Export() map[string]ExportedLine[T] {
+	items := make(map[string]ExportedLine[T])
+	for id, line := range c.cache.Items() {
+		if line == nil || line.resource == nil || !line.live(c.expiry) {
+			continue
+		}
+		items[id] = ExportedLine[T]{Resource: *line.resource, Created: line.created}
+	}
+	return items
+}
+
+func (c *Cache[T]) Import(items map[string]ExportedLine[T]) {
+	for id, line := range items {
+		resource := line.Resource
+		cl := &cacheLine[T]{resource: &resource, created: line.Created}
+		if !cl.live(c.expiry) {
+			continue
+		}
+		c.cache.Set(id, cl)
+	}
+}
+
 func (c *Cache[T]) Expire(id string) {
 	c.Lock()
 	defer c.Unlock()

@@ -78,6 +78,7 @@ type ServiceReconciler struct {
 	supervisor                                                           *streamline.Supervisor
 	discoveryCache                                                       discoverycache.Cache
 	namespaceCache                                                       streamline.NamespaceCache
+	cacheDir                                                             string
 }
 
 func NewServiceReconciler(consoleClient client.Client,
@@ -133,7 +134,7 @@ func (s *ServiceReconciler) init() (*ServiceReconciler, error) {
 		&workqueue.TypedBucketRateLimiter[string]{Limiter: rate.NewLimiter(rate.Limit(s.workqueueQPS), s.workqueueBurst)},
 	)
 	s.svcQueue = workqueue.NewTypedRateLimitingQueue(s.typedRateLimiter)
-	s.manifestCache = manis.NewCache(s.manifestTTL, deployToken, s.consoleURL)
+	s.manifestCache = manis.NewCache(s.manifestTTL, deployToken, s.consoleURL, s.cacheDir)
 	s.applier = applier.NewApplier(s.dynamicClient, s.discoveryCache, s.store,
 		applier.WithWaveDelay(s.waveDelay),
 		applier.WithFilter(applier.FilterCache, applier.CacheFilter()),
@@ -145,6 +146,10 @@ func (s *ServiceReconciler) init() (*ServiceReconciler, error) {
 
 func (s *ServiceReconciler) Queue() workqueue.TypedRateLimitingInterface[string] {
 	return s.svcQueue
+}
+
+func (s *ServiceReconciler) ManifestCache() *manis.ManifestCache {
+	return s.manifestCache
 }
 
 func (s *ServiceReconciler) Restart() {

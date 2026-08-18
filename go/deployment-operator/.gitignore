@@ -9,6 +9,7 @@ go.work.sum
 
 # Binaries for programs and plugins
 bin/
+/agent
 *.exe
 *.exe~
 *.dll

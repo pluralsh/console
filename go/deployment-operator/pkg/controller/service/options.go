@@ -14,6 +14,12 @@ func WithManifestTTL(manifestTTL time.Duration) ServiceReconcilerOption {
 	}
 }
 
+func WithCacheDir(cacheDir string) ServiceReconcilerOption {
+	return func(r *ServiceReconciler) {
+		r.cacheDir = cacheDir
+	}
+}
+
 func WithWorkqueueBaseDelay(workqueueBaseDelay time.Duration) ServiceReconcilerOption {
 	return func(r *ServiceReconciler) {
 		r.workqueueBaseDelay = workqueueBaseDelay

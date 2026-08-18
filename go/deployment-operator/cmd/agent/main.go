@@ -40,6 +40,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache/persist"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/ping"
@@ -51,6 +52,7 @@ import (
 	deploymentsv1alpha1 "github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/namespaces"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
 )
 
@@ -161,12 +163,49 @@ func main() {
 			return extConsoleClient.GetService(id)
 		})
 
+	cacheStore, err := persist.Open(args.CacheDir())
+	if err != nil {
+		setupLog.Error(err, "unable to open cache dir")
+		os.Exit(1)
+	}
+	defer func() {
+		if err := cacheStore.Close(); err != nil {
+			setupLog.Error(err, "unable to release cache dir lock")
+		}
+	}()
+
 	// Start synchronizer supervisor
 	supervisor := runSynchronizerSupervisorOrDie(ctx, dynamicClient, dbStore, statusSynchronizer, discoveryCache, namespaceCache, svcCache)
 	defer supervisor.Stop()
 
-	registerConsoleReconcilersOrDie(consoleManager, mapper, clientSet, kubeManager.GetClient(), dynamicClient, dbStore, kubeManager.GetScheme(), extConsoleClient, supervisor, discoveryCache, namespaceCache, svcCache)
-	registerKubeReconcilersOrDie(ctx, clientSet, kubeManager, consoleManager, config, extConsoleClient, discoveryCache, args.EnableKubecostProxy(), args.ConsoleUrl(), args.DeployToken())
+	userGroupCache := cache.NewUserGroupCache(extConsoleClient)
+
+	registerConsoleReconcilersOrDie(consoleManager, mapper, clientSet, kubeManager.GetClient(), dynamicClient, dbStore, kubeManager.GetScheme(), extConsoleClient, supervisor, discoveryCache, namespaceCache, svcCache, cacheStore.Dir())
+	registerKubeReconcilersOrDie(ctx, clientSet, kubeManager, consoleManager, config, extConsoleClient, discoveryCache, args.EnableKubecostProxy(), args.ConsoleUrl(), args.DeployToken(), userGroupCache)
+
+	svcReconciler := consoleManager.GetReconcilerOrDie(service.Identifier).(*service.ServiceReconciler)
+	nsReconciler := consoleManager.GetReconcilerOrDie(namespaces.Identifier).(*namespaces.NamespaceReconciler)
+	saveCaches := func() error {
+		userIDs, groupIDs := persist.IdentityRecordsFrom(userGroupCache)
+		return cacheStore.Save(persist.Snapshot{
+			Manifests:         svcReconciler.ManifestCache().Export(),
+			ComponentSHAs:     persist.SHARecordsFrom(cache.ComponentShaCache()),
+			StatusSHAs:        persist.SHARecordsFrom(statusSynchronizer.SHACache()),
+			UserIDs:           userIDs,
+			GroupIDs:          groupIDs,
+			ManagedNamespaces: persist.PollyRecordsFrom(nsReconciler.NamespaceCache()),
+		})
+	}
+	if snap, err := cacheStore.Load(); err != nil {
+		setupLog.Error(err, "unable to load durable cache, starting cold")
+	} else {
+		svcReconciler.ManifestCache().Import(snap.Manifests)
+		persist.ApplySHARecords(cache.ComponentShaCache(), snap.ComponentSHAs)
+		persist.ApplySHARecords(statusSynchronizer.SHACache(), snap.StatusSHAs)
+		persist.ApplyIdentityRecords(userGroupCache, snap.UserIDs, snap.GroupIDs)
+		persist.ApplyPollyRecords(nsReconciler.NamespaceCache(), snap.ManagedNamespaces)
+	}
+	cacheStore.StartPeriodic(ctx, args.CachePersistInterval(), saveCaches)
 
 	//+kubebuilder:scaffold:builder
 
@@ -189,6 +228,9 @@ func main() {
 	// Block the main thread until context cancel.
 	<-ctx.Done()
 	setupLog.Info("shutting down")
+	if err := saveCaches(); err != nil {
+		setupLog.Error(err, "unable to persist cache snapshot")
+	}
 }
 
 func loadAgentConfigurationOrDie(ctx context.Context, reader ctrlclient.Reader) {

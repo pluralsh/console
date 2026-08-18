@@ -34,3 +34,32 @@ func TestSimpleCacheUsesCurrentExpiryFunctionValue(t *testing.T) {
 	assert.False(t, line.expiresAt.Before(before.Add(time.Hour)))
 	assert.True(t, line.expiresAt.Before(after.Add(3*time.Hour)))
 }
+
+func TestSimpleCacheExportImportSkipsExpired(t *testing.T) {
+	src := NewSimpleCache[string](time.Hour)
+	src.Add("live", "keep")
+	src.cache.Set("expired", simpleCacheLine[string]{
+		resource:  ptr("drop"),
+		expiresAt: time.Now().Add(-time.Minute),
+	})
+
+	exported := src.Export()
+	assert.Contains(t, exported, "live")
+	assert.NotContains(t, exported, "expired")
+
+	dst := NewSimpleCache[string](time.Hour)
+	dst.Import(exported)
+	dst.Import(map[string]ExportedLine[string]{
+		"also-expired": {Resource: "nope", ExpiresAt: time.Now().Add(-time.Second)},
+	})
+
+	got, ok := dst.Get("live")
+	assert.True(t, ok)
+	assert.Equal(t, "keep", got)
+	_, ok = dst.Get("also-expired")
+	assert.False(t, ok)
+}
+
+func ptr[T any](v T) *T {
+	return &v
+}

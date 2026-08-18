@@ -32,11 +32,11 @@ const PluralCAPIClusterFinalizer = "deployments.plural.sh/plural-capi-cluster-pr
 
 type PluralCAPIClusterController struct {
 	k8sClient.Client
-	Scheme     *runtime.Scheme
-	ConsoleUrl string
+	Scheme         *runtime.Scheme
+	ConsoleUrl     string
+	UserGroupCache cache.UserGroupCache
 
-	userGroupCache cache.UserGroupCache
-	consoleClient  client.Client
+	consoleClient client.Client
 }
 
 func (in *PluralCAPIClusterController) Reconcile(ctx context.Context, req ctrl.Request) (_ reconcile.Result, reterr error) {
@@ -191,7 +191,9 @@ func (in *PluralCAPIClusterController) initConsoleClient(consoleToken string) er
 			return err
 		}
 		in.consoleClient = client.New(fmt.Sprintf("%s/gql", url), consoleToken)
-		in.userGroupCache = cache.NewUserGroupCache(in.consoleClient)
+		if in.UserGroupCache == nil {
+			in.UserGroupCache = cache.NewUserGroupCache(in.consoleClient)
+		}
 	}
 	return nil
 }
@@ -238,14 +240,14 @@ func (in *PluralCAPIClusterController) ensureCluster(cluster *v1alpha1.PluralCAP
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(cluster.Spec.Cluster.Bindings.Read, in.userGroupCache)
+	bindings, req, err := ensureBindings(cluster.Spec.Cluster.Bindings.Read, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 
 	cluster.Spec.Cluster.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(cluster.Spec.Cluster.Bindings.Write, in.userGroupCache)
+	bindings, req2, err := ensureBindings(cluster.Spec.Cluster.Bindings.Write, in.UserGroupCache)
 	if err != nil {
 		return err
 	}

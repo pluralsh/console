@@ -33,6 +33,10 @@ type StatusSynchronizer struct {
 	rateLimiter *rate.Limiter
 }
 
+func (in *StatusSynchronizer) SHACache() *cache.SimpleCache[string] {
+	return in.shaCache
+}
+
 func (in *StatusSynchronizer) UpdateServiceComponents(serviceId string, components []*console.ComponentAttributes) error {
 	// Ensure consistent ordering for comparison.
 	slices.SortFunc(components, func(a, b *console.ComponentAttributes) int {
