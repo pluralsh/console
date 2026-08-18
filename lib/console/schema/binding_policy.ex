@@ -31,9 +31,12 @@ defmodule Console.Schema.BindingPolicy do
     projects = Console.Schema.Project.for_user(user)
 
     from(p in query,
+      join: policy in assoc(p, :policy),
+      join: policy_project in subquery(projects),
+      on: policy_project.id == policy.project_id,
       join: bind_policy in assoc(p, :bind_policy),
-      join: project in subquery(projects),
-      on: project.id == bind_policy.project_id
+      join: bind_policy_project in subquery(projects),
+      on: bind_policy_project.id == bind_policy.project_id
     )
   end
 

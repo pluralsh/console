@@ -501,5 +501,53 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert node["type"] == "STACK"
       assert node["policy"]["id"] == policy.id
     end
+
+    test "lists bindings only when both child policies are accessible" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      inaccessible_project = insert(:project)
+
+      visible = insert(:binding_policy,
+        policy: insert(:policy, project: project),
+        bind_policy: insert(:policy, project: project, type: :binding)
+      )
+
+      insert(:binding_policy,
+        policy: insert(:policy, project: inaccessible_project),
+        bind_policy: insert(:policy, project: project, type: :binding)
+      )
+
+      insert(:binding_policy,
+        policy: insert(:policy, project: project),
+        bind_policy: insert(:policy, project: inaccessible_project, type: :binding)
+      )
+
+      {:ok, %{data: %{"bindingPolicies" => found}}} = run_query("""
+        query {
+          bindingPolicies(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found) |> ids_equal([visible])
+    end
+
+    test "does not fetch bindings by id when either child policy is inaccessible" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      inaccessible_project = insert(:project)
+
+      binding = insert(:binding_policy,
+        policy: insert(:policy, project: project),
+        bind_policy: insert(:policy, project: inaccessible_project, type: :binding)
+      )
+
+      {:ok, %{data: %{"bindingPolicy" => nil}, errors: [_ | _]}} = run_query("""
+        query BindingPolicy($id: ID!) {
+          bindingPolicy(id: $id) { id }
+        }
+      """, %{"id" => binding.id}, %{current_user: user})
+    end
   end
 end
