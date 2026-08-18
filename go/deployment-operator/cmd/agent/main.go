@@ -163,11 +163,7 @@ func main() {
 			return extConsoleClient.GetService(id)
 		})
 
-	cacheStore, err := persist.Open(args.CacheDir())
-	if err != nil {
-		setupLog.Error(err, "unable to open cache dir")
-		os.Exit(1)
-	}
+	cacheStore := openCacheStoreOrDie()
 	defer func() {
 		if err := cacheStore.Close(); err != nil {
 			setupLog.Error(err, "unable to release cache dir lock")
@@ -379,6 +375,15 @@ func runSynchronizerSupervisorOrDie(ctx context.Context, dynamicClient dynamic.I
 
 	setupLog.Info("started synchronizer supervisor with initial cache sync", "duration", time.Since(now))
 	return supervisor
+}
+
+func openCacheStoreOrDie() *persist.Store {
+	cacheStore, err := persist.Open(args.CacheDir())
+	if err != nil {
+		setupLog.Error(err, "unable to open cache dir")
+		os.Exit(1)
+	}
+	return cacheStore
 }
 
 func initDatabaseStoreOrDie(ctx context.Context) store.Store {
