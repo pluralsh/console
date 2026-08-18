@@ -6,6 +6,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -65,7 +66,7 @@ func (in *AgentRuntimePolicyReconciler) Reconcile(ctx context.Context, req recon
 		return ctrl.Result{}, nil
 	}
 
-	runtime, clusterID, result, err := in.getAgentRuntime(ctx, policy.RuntimeName())
+	runtime, clusterID, result, err := in.getAgentRuntime(ctx, policy)
 	if result != nil || err != nil {
 		return common.HandleRequeue(result, err, policy.SetCondition)
 	}
@@ -93,17 +94,13 @@ func (in *AgentRuntimePolicyReconciler) Reconcile(ctx context.Context, req recon
 	return policy.Spec.Reconciliation.Requeue(), nil
 }
 
-func (in *AgentRuntimePolicyReconciler) getAgentRuntime(ctx context.Context, runtimeName string) (*console.AgentRuntimeFragment, string, *ctrl.Result, error) {
-	cluster, err := in.ConsoleClient.GetClusterByHandle(lo.ToPtr(managementClusterHandle))
+func (in *AgentRuntimePolicyReconciler) getAgentRuntime(ctx context.Context, policy *v1alpha1.AgentRuntimePolicy) (*console.AgentRuntimeFragment, string, *ctrl.Result, error) {
+	clusterID, err := in.getClusterID(ctx, policy)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return nil, "", lo.ToPtr(common.Wait()), fmt.Errorf("cluster not found: %s", err.Error())
-		}
-
-		return nil, "", nil, fmt.Errorf("failed to get cluster: %s", err.Error())
+		return nil, "", lo.ToPtr(common.Wait()), fmt.Errorf("failed to get cluster handle: %s", err.Error())
 	}
 
-	apiAgentRuntime, err := in.ConsoleClient.GetAgentRuntime(ctx, runtimeName, cluster.ID)
+	apiAgentRuntime, err := in.ConsoleClient.GetAgentRuntime(ctx, policy.RuntimeName(), clusterID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, "", lo.ToPtr(common.Wait()), fmt.Errorf("agent runtime not found: %s", err.Error())
@@ -112,7 +109,26 @@ func (in *AgentRuntimePolicyReconciler) getAgentRuntime(ctx context.Context, run
 		return nil, "", nil, fmt.Errorf("failed to get agent runtime: %s", err.Error())
 	}
 
-	return apiAgentRuntime, cluster.ID, nil, nil
+	return apiAgentRuntime, clusterID, nil, nil
+}
+
+func (in *AgentRuntimePolicyReconciler) getClusterID(ctx context.Context, policy *v1alpha1.AgentRuntimePolicy) (string, error) {
+	if policy.Spec.Cluster != nil {
+		id, err := plural.Cache().GetClusterID(lo.FromPtr(policy.Spec.Cluster))
+		if err != nil {
+			return "", err
+		}
+		return lo.FromPtr(id), nil
+	}
+	cluster := &v1alpha1.Cluster{}
+	if err := in.Get(ctx, client.ObjectKey{Name: policy.Spec.ClusterRef.Name, Namespace: policy.Spec.ClusterRef.Namespace}, cluster); err != nil {
+		return "", err
+	}
+
+	if !cluster.Status.HasID() {
+		return "", fmt.Errorf("cluster is not ready")
+	}
+	return cluster.Status.GetID(), nil
 }
 
 func createBindingsAttributes(policy *v1alpha1.AgentRuntimePolicy) []*console.AgentBindingAttributes {

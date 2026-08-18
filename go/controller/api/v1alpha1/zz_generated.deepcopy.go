@@ -314,6 +314,12 @@ func (in *AgentRuntimePolicySpec) DeepCopyInto(out *AgentRuntimePolicySpec) {
 		*out = new(AgentRuntimePolicyBindings)
 		(*in).DeepCopyInto(*out)
 	}
+	out.ClusterRef = in.ClusterRef
+	if in.Cluster != nil {
+		in, out := &in.Cluster, &out.Cluster
+		*out = new(string)
+		**out = **in
+	}
 	if in.Reconciliation != nil {
 		in, out := &in.Reconciliation, &out.Reconciliation
 		*out = new(Reconciliation)

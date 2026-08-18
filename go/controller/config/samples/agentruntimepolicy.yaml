@@ -5,7 +5,7 @@ metadata:
 spec:
   # runtime defaults to metadata.name when omitted
   runtime: claude
+  cluster: mgmt
   bindings:
     create:
-      - userEmail: admin@plural.sh
-      - groupName: engineering
+      - userEmail: lukasz@plural.sh

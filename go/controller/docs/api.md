@@ -205,6 +205,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `runtime` _string_ | Runtime is the name of the AgentRuntime this policy applies to.<br />Defaults to metadata.name if not specified. |  | Optional: \{\} <br /> |
 | `bindings` _[AgentRuntimePolicyBindings](#agentruntimepolicybindings)_ | Bindings define who can create agent runs on the targeted runtime. |  | Optional: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Optional: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 

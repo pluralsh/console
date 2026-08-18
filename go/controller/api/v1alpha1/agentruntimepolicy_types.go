@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -70,6 +71,14 @@ type AgentRuntimePolicySpec struct {
 	// Bindings define who can create agent runs on the targeted runtime.
 	// +kubebuilder:validation:Optional
 	Bindings *AgentRuntimePolicyBindings `json:"bindings,omitempty"`
+
+	// ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead.
+	// +kubebuilder:validation:Optional
+	ClusterRef corev1.ObjectReference `json:"clusterRef"`
+
+	// Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead.
+	// +kubebuilder:validation:Optional
+	Cluster *string `json:"cluster,omitempty"`
 
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.
