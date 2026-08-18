@@ -134,6 +134,33 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 - Workbench attach picker = `type: WORKBENCH` only. Stack and BINDING policies are hidden.
 - Create form groups type the same way: Enforcement (Workbench / Stack) vs Auto-attach (Binding). Opening create from the Auto-attach tab defaults to `BINDING`.
 
+### Example auto-attach Rego
+
+Copy from [`examples/binding/`](./examples/binding/). Every file must stay `package plrl.binding`. The evaluator merges them with `priv/policy/binding.rego` (`default bind := false`, `default sample := 0.5`) and reads `data.plrl.binding.result`.
+
+Input is `Console.clean(workbench | stack)` — **no labels**. Useful fields:
+
+| Target | Fields |
+| --- | --- |
+| Workbench (`preloaded [:project, :tools]`) | `name`, `description`, `project.name`, `project.default`, `configuration.infrastructure.kubernetes`, `configuration.coding.repositories`, `tools[].tool`, `budget.enabled` |
+| Stack (`preloaded [:project]`) | `name`, `type`, `approval`, `paused`, `project.name` |
+
+| File | Bind when |
+| --- | --- |
+| `auto-bind-all.rego` | Always (`bind := true`) |
+| `auto-bind-prod-name.rego` | Name is `prod-*` or matches production |
+| `auto-bind-production-project.rego` | `project.name == "production"` or default project |
+| `auto-bind-sre-oncall.rego` | Name/description looks like SRE, on-call, incident |
+| `auto-bind-kube-workbenches.rego` | Kubernetes infrastructure is enabled |
+| `auto-bind-coding-prod-repos.rego` | A coding repo looks production-shaped |
+| `auto-bind-cloud-tools.rego` | Attached tools include cloud / azure / lambda |
+| `auto-bind-budgeted.rego` | Spend budget is enabled |
+| `auto-bind-except-sandbox.rego` | Everything except sandbox / scratch / local-dev names |
+| `auto-bind-terraform-stacks.rego` | Stack type is terraform or terragrunt |
+| `auto-bind-approved-stacks.rego` | Stack requires approval and is not paused |
+
+Do not redefine `default bind` in user Rego (conflicts with the base policy). Prefer `bind := true if …`.
+
 ## Interaction notes
 
 **Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools.
@@ -158,6 +185,7 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 | 3 | Policies empty (same tabs) | `/security/policies` |
 | 4 | Create policy (details + policy body text) | `/security/policies/create` |
 | 5 | Policy body (all Policy fields) | `/security/policies/:id` |
+| 5b | Auto-attach body + simulate bind | `/security/policies/:id` (`type: BINDING`) |
 | 6 | Policy bindings | `/security/policies/:id/bindings` |
 | 7 | Policy evaluations | `/security/policies/:id/evaluations` |
 | 8 | Simulate evaluation | `/security/policies/:id/evaluations/:evalId` |

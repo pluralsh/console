@@ -241,6 +241,7 @@
     <button data-go="policies-empty">3. Empty</button>
     <button data-go="policy-create">4. Create policy</button>
     <button data-go="policy-body">5. Editor</button>
+    <button data-go="policy-bind-body">5b. Bind editor</button>
     <button data-go="policy-bindings">6. Bindings</button>
     <button data-go="policy-evaluations">7. Evaluations</button>
     <button data-go="policy-simulate">8. Simulate</button>
@@ -319,12 +320,132 @@
   "approve": []
 }`
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH' }
+    const BIND_STARTER = `package plrl.binding
+
+# Must stay package plrl.binding. Base policy defaults bind to false.
+# Input is Console.clean(workbench | stack) — name, project, configuration, tools, type, approval.
+
+bind := true if startswith(input.name, "prod-")`
+
+    const BIND_INPUT_WB = `{
+  "name": "payments-sre",
+  "description": "Investigate payment cluster incidents and open PRs",
+  "configuration": {
+    "infrastructure": { "kubernetes": true, "stacks": true, "services": true },
+    "coding": { "repositories": ["pluralsh/payments", "pluralsh/prod-infra"] }
+  },
+  "budget": { "enabled": true, "maximum": 200, "unit": "dollar" },
+  "project": { "name": "production", "default": true },
+  "tools": [
+    { "name": "prod-eks", "tool": "cloud" },
+    { "name": "pagerduty", "tool": "pagerduty" }
+  ]
+}`
+
+    const BIND_INPUT_STACK = `{
+  "name": "prod-payments-tf",
+  "type": "terraform",
+  "approval": true,
+  "paused": false,
+  "project": { "name": "production", "default": true }
+}`
+
+    const BIND_OUT_TRUE = `{
+  "sample": 0.5,
+  "bind": true
+}`
+
+    const BIND_OUT_FALSE = `{
+  "sample": 0.5,
+  "bind": false
+}`
+
+    const BIND_POLICIES = [
+      { id: 'bind-all', name: 'auto-bind-all.rego', when: '3d ago', desc: 'Attach the paired enforcement policy to every polled workbench or stack.', target: 'workbench or stack', src: `package plrl.binding
+
+# Baseline: attach the paired enforcement policy to every workbench or stack
+# this BindingPolicy polls. default bind := false lives in priv/policy/binding.rego.
+
+bind := true` },
+      { id: 'bind-prod', name: 'auto-bind-prod-name.rego', when: 'last week', desc: 'If name starts with prod- or matches production.', target: 'workbench or stack', src: `package plrl.binding
+
+# Workbenches and stacks have no labels. Name is the stable signal.
+
+bind := true if startswith(input.name, "prod-")
+
+bind := true if regex.match("(?i).*(prod|production).*", input.name)` },
+      { id: 'bind-project', name: 'auto-bind-production-project.rego', when: '5d ago', desc: 'If project.name is production, or the project is the default.', target: 'workbench or stack', src: `package plrl.binding
+
+bind := true if input.project.name == "production"
+
+bind := true if input.project.default == true` },
+      { id: 'bind-sre', name: 'auto-bind-sre-oncall.rego', when: '2d ago', desc: 'If name or description looks like SRE / on-call / incident.', target: 'workbench', src: `package plrl.binding
+
+bind := true if regex.match("(?i).*(sre|oncall|incident|sev[1-3]).*", input.name)
+
+bind := true if regex.match("(?i).*(sre|oncall|incident).*", input.description)` },
+      { id: 'bind-kube', name: 'auto-bind-kube-workbenches.rego', when: 'yesterday', desc: 'If infrastructure.kubernetes is enabled on the workbench.', target: 'workbench', src: `package plrl.binding
+
+bind := true if input.configuration.infrastructure.kubernetes == true` },
+      { id: 'bind-repos', name: 'auto-bind-coding-prod-repos.rego', when: '6h ago', desc: 'If a configured coding repo looks production-shaped.', target: 'workbench', src: `package plrl.binding
+
+bind := true if {
+  some repo in input.configuration.coding.repositories
+  regex.match("(?i).*(prod|production|payments|platform).*", repo)
+}` },
+      { id: 'bind-cloud', name: 'auto-bind-cloud-tools.rego', when: '8h ago', desc: 'If attached tools include cloud / azure / lambda / functions.', target: 'workbench', src: `package plrl.binding
+
+bind := true if {
+  some tool in input.tools
+  tool.tool in {"cloud", "azure", "lambda", "cloud_run", "azure_function"}
+}` },
+      { id: 'bind-budget', name: 'auto-bind-budgeted.rego', when: '12h ago', desc: 'If the workbench has a spend budget enabled.', target: 'workbench', src: `package plrl.binding
+
+bind := true if input.budget.enabled == true` },
+      { id: 'bind-sandbox', name: 'auto-bind-except-sandbox.rego', when: '4d ago', desc: 'Attach everywhere except sandbox / scratch / local-dev names.', target: 'workbench or stack', src: `package plrl.binding
+
+sandbox if regex.match("(?i).*(sandbox|scratch|dev-local).*", input.name)
+
+bind := true if not sandbox` },
+      { id: 'bind-tf', name: 'auto-bind-terraform-stacks.rego', when: '3d ago', desc: 'If the stack type is terraform or terragrunt.', target: 'stack', src: `package plrl.binding
+
+bind := true if input.type == "terraform"
+
+bind := true if input.type == "terragrunt"` },
+      { id: 'bind-approve', name: 'auto-bind-approved-stacks.rego', when: '3d ago', desc: 'If the stack requires approval and is not paused.', target: 'stack', src: `package plrl.binding
+
+bind := true if {
+  input.approval == true
+  input.paused != true
+}` },
+    ]
+
+    function highlightRego(src) {
+      return String(src)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/#.*/g, (m) => `<span class="cmt">${m}</span>`)
+        .replace(/"([^"]*)"/g, '<span class="str">"$1"</span>')
+        .replace(/\b(package|if|in|not|some|default|contains)\b/g, '<span class="kw">$1</span>')
+        .replace(/\b(bind|deny|sample|approve|sandbox)\b/g, '<span class="fn">$1</span>')
+    }
+
+    function currentBind() {
+      return BIND_POLICIES.find((p) => p.id === state.bindId) || BIND_POLICIES[1]
+    }
+
+    function openBind(id) {
+      state.bindId = id
+      state.policyKind = 'autoattach'
+      go('policy-bind-body')
+    }
+
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod' }
 
     function go(screen) {
       state.screen = screen
       state.menu = false
-      if (screen !== 'policy-simulate') state.simulated = false
+      if (screen !== 'policy-simulate' && screen !== 'policy-bind-simulate') state.simulated = false
       if (screen !== 'policy-create') state.createStep = 'Details'
       if (screen === 'policy-create') {
         state.formType = state.policyKind === 'autoattach' ? 'BINDING' : (state.formType === 'BINDING' ? 'WORKBENCH' : (state.formType || 'WORKBENCH'))
@@ -476,23 +597,24 @@
           <div class="callout"><code>Policy.type</code> is still WORKBENCH or STACK on these rows. The list shows that as a <b>place icon</b> (<code>WorkbenchIcon</code> / <code>StackIcon</code>), not a type chip. Default filter: enforcement only.</div>` : `
           <div class="card" style="overflow:hidden">
             <table class="table">
-              <thead><tr><th></th><th>name</th><th>description</th><th>project</th><th>updatedAt</th><th></th></tr></thead>
+              <thead><tr><th></th><th>name</th><th>description</th><th>input</th><th>updatedAt</th><th></th></tr></thead>
               <tbody>
-                <tr class="click" onclick="go('policy-bindings')">
+                ${BIND_POLICIES.map((p) => `
+                <tr class="click" onclick="openBind('${p.id}')">
                   <td style="width:40px"><span class="icon-btn" title="Auto-attach" style="color:var(--text-light)">${I.links}</span></td>
                   <td>
-                    <div class="row-title mono">auto-bind-prod.rego</div>
+                    <div class="row-title mono">${p.name}</div>
                     <div class="row-sub">Auto-attach · not a place</div>
                   </td>
-                  <td>If a workbench is labeled env=prod, attach tool-admission.rego.</td>
-                  <td>production</td>
-                  <td class="row-sub">last week</td>
-                  <td class="row-actions"><button class="icon-btn" onclick="event.stopPropagation();go('policy-body')">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
-                </tr>
+                  <td>${p.desc}</td>
+                  <td class="row-sub">${p.target}</td>
+                  <td class="row-sub">${p.when}</td>
+                  <td class="row-actions"><button class="icon-btn" onclick="event.stopPropagation();openBind('${p.id}')">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
+                </tr>`).join('')}
               </tbody>
             </table>
           </div>
-          <div class="callout">These are <code>Policy.type = BINDING</code>. Used as <code>BindingPolicy.bindPolicy</code>, never in the workbench attach picker. Icon: <code>LinksIcon</code> (or <code>ArrowRightLeftIcon</code>) — not a sibling of workbench/stack.</div>`}`
+          <div class="callout">These are <code>Policy.type = BINDING</code>. Used as <code>BindingPolicy.bindPolicy</code>. Input is <code>Console.clean(workbench | stack)</code> — there are no labels. Evaluate <code>data.plrl.binding.result.bind</code>. Copyable sources live in <code>examples/binding/</code>.</div>`}`
       }),
 
       'policies-empty': () => securityPage('policies', {
@@ -534,7 +656,7 @@
             ${state.createStep === 'Details' ? `
             <div class="card form-card">
               <div class="field"><span class="label">Name *</span>
-                <input class="input mono" value="tool-admission.rego" />
+                <input class="input mono" value="${state.formType === 'BINDING' ? 'auto-bind-prod-name.rego' : 'tool-admission.rego'}" />
                 <span class="hint">Unique. Treat like a filename; <code>.rego</code> suffix is conventional.</span>
               </div>
               <div class="field"><span class="label">Type *</span>
@@ -560,7 +682,9 @@
                 </div>
               </div>
               <div class="field"><span class="label">Description</span>
-                <textarea class="textarea">Block kube.exec and kube.delete unless the actor is in the break-glass group.</textarea>
+                <textarea class="textarea">${state.formType === 'BINDING'
+                  ? 'If name starts with prod- or matches production, attach the paired enforcement policy.'
+                  : 'Block kube.exec and kube.delete unless the actor is in the break-glass group.'}</textarea>
               </div>
               <div class="field"><span class="label">Project</span>
                 <select class="select"><option>production (current)</option></select>
@@ -573,8 +697,10 @@
             <div class="card form-card">
               <div class="field">
                 <span class="label">policy *</span>
-                <span class="hint">Rego source. Required on create. <code>createPolicy({ name, type, description, policy, projectId })</code></span>
-                <textarea class="textarea" style="min-height:360px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre">package plrl.wb.admission
+                <span class="hint">${state.formType === 'BINDING'
+                  ? 'Must be <code>package plrl.binding</code>. Set <code>bind</code> only. Path: <code>data.plrl.binding.result</code>.'
+                  : 'Rego source. Required on create. <code>createPolicy({ name, type, description, policy, projectId })</code>'}</span>
+                <textarea class="textarea" style="min-height:360px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre">${state.formType === 'BINDING' ? BIND_STARTER : `package plrl.wb.admission
 
 # Deny destructive kube tools outside break-glass group.
 deny contains {"reason": sprintf("%s is not allowed for %s", [input.tool, actor.email])} if {
@@ -582,7 +708,7 @@ deny contains {"reason": sprintf("%s is not allowed for %s", [input.tool, actor.
   not "break-glass" in actor.groups
 }
 
-default sample := 0.5</textarea>
+default sample := 0.5`}</textarea>
               </div>
               <div class="footer-actions">
                 <button class="btn secondary" onclick="state.createStep='Details';render()">Back</button>
@@ -639,6 +765,89 @@ default sample := 0.5</textarea>
           </div>`
       }),
 
+      'policy-bind-body': () => {
+        const p = currentBind()
+        return securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <b>${p.name}</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title mono">${p.name}</h1>
+              <p class="subtitle">Auto-attach · <code>type: BINDING</code> · used only as <code>BindingPolicy.bindPolicy</code></p>
+            </div>
+            <button class="btn danger small">Delete</button>
+          </div>
+          <div class="tabs">
+            <button class="active">Body</button>
+            <button onclick="go('policy-bind-simulate')">Evaluations</button>
+            <button onclick="go('policy-bindings')">Used by</button>
+          </div>
+          <div class="split">
+            <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
+              <div class="field"><span class="label">name *</span>
+                <input class="input mono" value="${p.name}" />
+              </div>
+              <div class="field"><span class="label">type *</span>
+                <select class="select">
+                  <option>WORKBENCH — run on workbenches</option>
+                  <option>STACK — run on stacks</option>
+                  <option selected>BINDING — auto-attach (not a place)</option>
+                </select>
+                <span class="hint">Must stay BINDING or <code>createBindingPolicy</code> rejects it.</span>
+              </div>
+              <div class="field"><span class="label">description</span>
+                <textarea class="textarea">${p.desc}</textarea>
+              </div>
+              <div class="field"><span class="label">project</span>
+                <select class="select"><option>production</option></select>
+              </div>
+            </div>
+            <div style="flex:2;min-width:0" class="field">
+              <span class="label">policy *</span>
+              <span class="hint">Package must be <code>plrl.binding</code>. Set <code>bind</code> only — do not emit <code>deny</code>. Path: <code>data.plrl.binding.result</code>.</span>
+              <div class="editor">${highlightRego(p.src)}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px">
+            <button class="btn secondary small" onclick="go('policy-bind-simulate')">Simulate bind</button>
+            <button class="btn small">Save</button>
+          </div>`
+      })
+      },
+
+      'policy-bind-simulate': () => {
+        const p = currentBind()
+        const stack = /stack/.test(p.target) && !/workbench/.test(p.target)
+        const input = stack ? BIND_INPUT_STACK : BIND_INPUT_WB
+        return securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-bind-body')">${p.name}</span> / <b>simulate</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title">Simulate bind</h1>
+              <p class="subtitle">Replay a cleaned ${stack ? 'stack' : 'workbench'} through <code>${p.name}</code>. Query path is <code>data.plrl.binding.result</code>.</p>
+            </div>
+            <button class="btn" onclick="state.simulated=true;render()">${I.play} Simulate</button>
+          </div>
+          <div class="banner info">Input is <code>Console.clean(target)</code> — not a tool payload. <code>evaluatePolicy</code> does not persist a sample.</div>
+          ${state.simulated ? '<div class="banner ok">Simulated <code>bind: true</code>. The paired enforcement policy would attach (or stay attached) on this target.</div>' : ''}
+          <div class="compare">
+            <div>
+              <div class="panel-label"><span>${stack ? 'stack' : 'workbench'} (editable)</span><span class="chip">BindingPolicy input</span></div>
+              <div class="json">${input}</div>
+            </div>
+            <div>
+              <div class="panel-label">
+                <span>evaluatePolicy → data.plrl.binding.result</span>
+                <span class="chip ${state.simulated ? 'ok' : 'warn'}">${state.simulated ? 'bind: true' : 'not run'}</span>
+              </div>
+              <div class="json">${state.simulated ? BIND_OUT_TRUE : BIND_OUT_FALSE}</div>
+            </div>
+          </div>
+          <div class="callout"><code>bind: true</code> → attach the paired <code>Policy</code>. <code>bind: false</code> → detach if already present. Matches/regexes on the BindingPolicy still filter which tools the attached policy covers.</div>`
+      })
+      },
+
       'policy-bindings': () => securityPage('policies', {
         crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <b>bindings</b>`,
         html: `
@@ -661,7 +870,7 @@ default sample := 0.5</textarea>
                 <tr>
                   <td><span class="chip info">WORKBENCH</span></td>
                   <td class="mono">1h</td>
-                  <td class="mono">auto-bind-prod.rego</td>
+                  <td class="mono">auto-bind-prod-name.rego</td>
                   <td class="mono">env-prod.*</td>
                   <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
@@ -1006,6 +1215,7 @@ default sample := 0.5</textarea>
       go(btn.dataset.go)
     })
     window.go = go
+    window.openBind = openBind
     const params = new URLSearchParams(location.search)
     if (params.get('kind') === 'autoattach' || params.get('kind') === 'enforcement') state.policyKind = params.get('kind')
     if (location.hash.slice(1) && screens[location.hash.slice(1)]) state.screen = location.hash.slice(1)
