@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -23,17 +24,28 @@ import (
 var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			policyName    = "claude"
-			namespace     = "default"
-			id            = "runtime-123"
-			clusterID     = "cluster-123"
-			clusterHandle = "mgmt"
+			policyName  = "claude"
+			clusterName = "agent-runtime-policy-cluster"
+			namespace   = "default"
+			id          = "runtime-123"
+			clusterID   = "cluster-123"
 		)
 
 		ctx := context.Background()
 		typeNamespacedName := types.NamespacedName{Name: policyName, Namespace: namespace}
+		clusterRef := corev1.ObjectReference{Name: clusterName, Namespace: namespace}
 
 		BeforeAll(func() {
+			By("creating the custom resource for the Kind Cluster")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
+				Spec: v1alpha1.ClusterSpec{
+					Cloud: "aws",
+				},
+			}, func(p *v1alpha1.Cluster) {
+				p.Status.ID = lo.ToPtr(clusterID)
+			})).To(Succeed())
+
 			By("creating the custom resource for the Kind AgentRuntimePolicy")
 			policy := &v1alpha1.AgentRuntimePolicy{}
 			err := k8sClient.Get(ctx, typeNamespacedName, policy)
@@ -44,7 +56,8 @@ var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.AgentRuntimePolicySpec{
-						Runtime: lo.ToPtr(policyName),
+						Runtime:    lo.ToPtr(policyName),
+						ClusterRef: clusterRef,
 						Bindings: &v1alpha1.AgentRuntimePolicyBindings{
 							Create: []v1alpha1.Binding{
 								{UserEmail: lo.ToPtr("admin@plural.sh")},
@@ -62,6 +75,12 @@ var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 				By("Cleanup the specific resource instance AgentRuntimePolicy")
 				Expect(k8sClient.Delete(ctx, policy)).To(Succeed())
 			}
+
+			cluster := &v1alpha1.Cluster{}
+			if err := k8sClient.Get(ctx, types.NamespacedName{Name: clusterName, Namespace: namespace}, cluster); err == nil {
+				By("Cleanup the specific resource instance Cluster")
+				Expect(k8sClient.Delete(ctx, cluster)).To(Succeed())
+			}
 		})
 
 		It("should upsert the runtime with policy create bindings", func() {
@@ -72,10 +91,6 @@ var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetClusterByHandle", lo.ToPtr(clusterHandle)).Return(&gqlclient.ClusterFragment{
-				ID:     clusterID,
-				Handle: lo.ToPtr(clusterHandle),
-			}, nil)
 			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, policyName, clusterID).Return(runtimeFragment, nil)
 			fakeConsoleClient.On("UpsertAgentRuntime", mock.Anything, mock.MatchedBy(func(attrs gqlclient.AgentRuntimeAttributes) bool {
 				return attrs.Name == policyName &&
@@ -132,10 +147,6 @@ var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetClusterByHandle", lo.ToPtr(clusterHandle)).Return(&gqlclient.ClusterFragment{
-				ID:     clusterID,
-				Handle: lo.ToPtr(clusterHandle),
-			}, nil)
 			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, policyName, clusterID).Return(runtimeFragment, nil)
 			fakeConsoleClient.On("UpsertAgentRuntime", mock.Anything, mock.MatchedBy(func(attrs gqlclient.AgentRuntimeAttributes) bool {
 				return attrs.Name == policyName &&
@@ -155,10 +166,6 @@ var _ = Describe("AgentRuntimePolicy Controller", Ordered, func() {
 
 		It("should wait when the agent runtime is missing", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("GetClusterByHandle", lo.ToPtr(clusterHandle)).Return(&gqlclient.ClusterFragment{
-				ID:     clusterID,
-				Handle: lo.ToPtr(clusterHandle),
-			}, nil)
 			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, policyName, clusterID).Return(
 				nil, errors.NewNotFound(schema.GroupResource{}, policyName),
 			)

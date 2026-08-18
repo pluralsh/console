@@ -25,8 +25,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-const managementClusterHandle = "mgmt"
-
 // AgentRuntimePolicyReconciler reconciles a v1alpha1.AgentRuntimePolicy object.
 // Implements reconcile.Reconciler and types.Controller.
 type AgentRuntimePolicyReconciler struct {
