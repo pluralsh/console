@@ -305,12 +305,13 @@
   "approve": []
 }`
 
-    let state = { screen: 'policies', menu: false, simulated: false }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details' }
 
     function go(screen) {
       state.screen = screen
       state.menu = false
       if (screen !== 'policy-simulate') state.simulated = false
+      if (screen !== 'policy-create') state.createStep = 'Details'
       location.hash = screen
       render()
     }
@@ -463,9 +464,10 @@
           <div class="page-head"><h1 class="title">New policy</h1></div>
           <div class="split">
             <div class="step-nav">
-              <button class="active">Details</button>
-              <button>Policy body</button>
+              <button class="${state.createStep === 'Details' ? 'active' : ''}" onclick="state.createStep='Details';render()">Details</button>
+              <button class="${state.createStep === 'Policy body' ? 'active' : ''}" onclick="state.createStep='Policy body';render()">Policy body</button>
             </div>
+            ${state.createStep === 'Details' ? `
             <div class="card form-card">
               <div class="field"><span class="label">Name *</span>
                 <input class="input mono" value="tool-admission.rego" />
@@ -483,11 +485,29 @@
               </div>
               <div class="footer-actions">
                 <button class="btn secondary" onclick="go('policies')">Cancel</button>
-                <button class="btn" onclick="go('policy-body')">Continue to body</button>
+                <button class="btn" onclick="state.createStep='Policy body';render()">Continue to body</button>
               </div>
-            </div>
-          </div>
-          <div class="callout">Mutation: <code>createPolicy({ name, type, description, policy, projectId })</code>. Body is required by the changeset; the second step writes the Rego before insert, or we create with a stub package and immediately open the editor.</div>`
+            </div>` : `
+            <div class="card form-card">
+              <div class="field">
+                <span class="label">policy *</span>
+                <span class="hint">Rego source. Required on create. <code>createPolicy({ name, type, description, policy, projectId })</code></span>
+                <textarea class="textarea" style="min-height:360px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre">package plrl.wb.admission
+
+# Deny destructive kube tools outside break-glass group.
+deny contains {"reason": sprintf("%s is not allowed for %s", [input.tool, actor.email])} if {
+  input.tool in {"kube.exec", "kube.delete"}
+  not "break-glass" in actor.groups
+}
+
+default sample := 0.5</textarea>
+              </div>
+              <div class="footer-actions">
+                <button class="btn secondary" onclick="state.createStep='Details';render()">Back</button>
+                <button class="btn" onclick="go('policy-body')">Create policy</button>
+              </div>
+            </div>`}
+          </div>`
       }),
 
       'policy-body': () => securityPage('policies', {

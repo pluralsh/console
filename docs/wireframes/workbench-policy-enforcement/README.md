@@ -97,7 +97,7 @@ Workbench admission result (`priv/policy/wb.rego`):
 | Screen | Operations |
 | --- | --- |
 | List | `policies(projectId, q)` |
-| Create | `createPolicy(attributes: { name, type, description, policy, projectId })` |
+| Create | Details then Policy body (open text for `policy`). `createPolicy({ name, type, description, policy, projectId })` |
 | Edit / save body | `updatePolicy(id, attributes)` |
 | Delete | `deletePolicy(id)` |
 | Detail | `policy(id)` |
@@ -141,7 +141,7 @@ Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool
 | 1 | Security overview (new sidenav) | `/security/overview` |
 | 2 | Policies list | `/security/policies` |
 | 3 | Policies empty | `/security/policies` |
-| 4 | Create policy | `/security/policies/create` |
+| 4 | Create policy (details + policy body text) | `/security/policies/create` |
 | 5 | Policy body (all Policy fields) | `/security/policies/:id` |
 | 6 | Policy bindings | `/security/policies/:id/bindings` |
 | 7 | Policy evaluations | `/security/policies/:id/evaluations` |
