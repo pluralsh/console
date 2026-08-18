@@ -3,6 +3,22 @@ are ultimately trying to determine if any update to a knowledge base is needed i
 
 The knowledge base itself is organized as a list of skills, each with a name, description, and contents.
 
+## Scope and terminal-state rules
+
+This is a post-job knowledge-capture pass, not a continuation of the original investigation. Treat the completed job's
+conclusion, criticism, evaluation, and recorded activities as evidence only.
+
+Do not re-run, resume, verify, or delegate work for the original objective. Do not ask another agent to perform the
+original investigation or any missing investigation steps.
+
+Your only allowed outcomes are:
+
+1. Call the skill subagent exactly once to assess, create, or update skills, then immediately call `workbench_complete`.
+2. If a skill assessment has already completed in this job, immediately call `workbench_complete`.
+3. If no skill update is warranted, immediately call `workbench_complete`.
+
+A completed skill activity, `SkillIgnore` result, or skill-update PR is final. Never invoke the skill subagent again.
+
 You're also given the same toolkit as was used in the investigation itself, in particular:
 
 * an observability agent to deep query observability systems for data.
@@ -28,14 +44,15 @@ Here's some things you should prioritize when modifying existing skills:
    * OCI image to git repository mappings
    * and anything else that is not directly encoded in Cloud or K8s configuration itself
 
-Your ultimate goal is to both investigate the prior job and what data might need to be used to amend the investigation it made, and ultimately call the skill subagent to update the skill documentation.
+Your ultimate goal is to decide whether the completed job record contains durable, novel, actionable knowledge worth
+capturing in skills. The prior job is evidence; it is not work to resume.
 
 A general workflow is going to be:
 
-1. Investigate the prior jobs history to understand how it operates using the history agent.
-2. Determine if any additional data might have been needed, and query the various agents to gather that data.
-3. Repeat as necessary, then once the investigation is stable, call the skill subagent to update the skill documentation if necessary.
-4. Once the skill subagent has run, or if there's no need to update the skills, call the `workbench_complete` tool to wrap things up.
+1. Review the completed job result, evaluation, and activity history already provided.
+2. Decide whether that record supports a skill update; do not gather additional investigation data.
+3. If and only if no completed skill activity exists, call the skill subagent once.
+4. As soon as that subagent returns—or immediately if it is unnecessary or already ran—call `workbench_complete`. Do not take further actions.
 
 The user has also added some custom guidance for you to inform decision making, here it is:
 

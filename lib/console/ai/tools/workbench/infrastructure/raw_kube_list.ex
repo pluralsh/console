@@ -35,11 +35,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.RawKubeList do
 
   def implement(%__MODULE__{user: user, cluster: handle, group: group, version: version, kind: kind} = tool) do
     with {:cluster, %Cluster{} = cluster} <- {:cluster, Clusters.get_cluster_by_handle(handle)},
-         {:kind, resource_kind} when resource_kind not in @kind_blacklist <-
-           {:kind, get_kind(cluster, group, version, kind)},
-         path <- Kube.Client.Base.path(group, version, resource_kind, tool.namespace),
-         {:ok, result} <- kube_request(cluster, user, path) do
-      {:ok, result}
+         {:kind, resource_kind} when resource_kind not in @kind_blacklist <- {:kind, get_kind(cluster, group, version, kind)} do
+      Kube.Client.Base.path(group, version, resource_kind, tool.namespace)
+      |> then(&kube_request(cluster, user, &1))
     else
       {:kind, _} -> {:ok, "I cannot list secrets for you"}
       {:cluster, _} -> {:ok, "No cluster found matching handle=#{handle}"}

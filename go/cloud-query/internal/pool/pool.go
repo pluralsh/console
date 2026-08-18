@@ -68,10 +68,12 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 		DROP SCHEMA IF EXISTS %[1]s CASCADE;
 		CREATE SCHEMA %[1]s;
 
-		-- Create the user
+		-- Create the read-only query user. Configuration is performed by the
+		-- admin connection before this user can access the provider schema.
 		CREATE USER %[1]s WITH PASSWORD %[2]s;
 		ALTER USER %[1]s WITH NOSUPERUSER;
 		ALTER USER %[1]s SET SEARCH_PATH = %[1]s, extensions;
+		ALTER USER %[1]s SET default_transaction_read_only = on;
 
 		-- Allow connecting to the database
 		REVOKE CONNECT ON DATABASE %[4]s FROM PUBLIC;
@@ -79,21 +81,54 @@ func (c *ConnectionPool) setup(connection, provider string) error {
 
 		-- Allow using the schema
 		REVOKE ALL ON SCHEMA %[1]s FROM PUBLIC;
-		GRANT  ALL ON SCHEMA %[1]s TO %[1]s;
-
-		-- Allow accessing tables
-		REVOKE ALL ON ALL TABLES IN SCHEMA %[1]s FROM PUBLIC;
-		GRANT  ALL ON ALL TABLES IN SCHEMA %[1]s TO %[1]s;
+		GRANT USAGE ON SCHEMA %[1]s TO %[1]s;
 
 		-- Allow accessing to shared extensions
-		GRANT ALL ON SCHEMA extensions TO %[1]s;
+		GRANT USAGE ON SCHEMA extensions TO %[1]s;
 
-		-- Grant usage on foreign data wrapper and servers
+		-- Grant usage on the foreign data wrapper. Server and table access are
+		-- granted after the admin connection has configured the provider.
 		GRANT USAGE ON FOREIGN DATA WRAPPER %[3]s TO %[1]s;
 	`, pq.QuoteIdentifier(connection), pq.QuoteLiteral(connection), pq.QuoteIdentifier("steampipe_postgres_"+provider), pq.QuoteIdentifier(args.DatabaseName()))
 
 	_, err := c.admin.Exec(query)
 	return err
+}
+
+func (c *ConnectionPool) configure(connection string, configuration config.Configuration) error {
+	query, err := configuration.Query(connection)
+	if err != nil {
+		return fmt.Errorf("failed to get configuration query for provider %s: %w", configuration.Provider(), err)
+	}
+
+	query = fmt.Sprintf(
+		"SET search_path TO %s, extensions;\n%s\nRESET search_path;",
+		pq.QuoteIdentifier(connection),
+		query,
+	)
+
+	if _, err := c.admin.Exec(query); err != nil {
+		return fmt.Errorf("failed to configure provider %s: %w", configuration.Provider(), err)
+	}
+
+	return nil
+}
+
+func (c *ConnectionPool) grantReadOnlyAccess(connection string) error {
+	query := fmt.Sprintf(`
+		REVOKE ALL ON ALL TABLES IN SCHEMA %[1]s FROM PUBLIC;
+		GRANT SELECT ON ALL TABLES IN SCHEMA %[1]s TO %[1]s;
+		GRANT USAGE ON FOREIGN SERVER %[2]s TO %[1]s;
+	`,
+		pq.QuoteIdentifier(connection),
+		pq.QuoteIdentifier("steampipe_"+connection),
+	)
+
+	if _, err := c.admin.Exec(query); err != nil {
+		return fmt.Errorf("failed to grant read-only access to connection %q: %w", connection, err)
+	}
+
+	return nil
 }
 
 func (c *ConnectionPool) cleanup(connection string) error {
@@ -152,6 +187,7 @@ func (c *ConnectionPool) connect(config config.Configuration) (connection.Connec
 		connectionName := fmt.Sprintf("%x", id)
 		defer func() {
 			if err != nil {
+				_ = config.Cleanup(connectionName)
 				_ = c.cleanup(connectionName)
 			}
 		}()
@@ -161,17 +197,20 @@ func (c *ConnectionPool) connect(config config.Configuration) (connection.Connec
 			return nil, fmt.Errorf("setup failed: %w", err)
 		}
 
-		conn, err := connection.NewConnection(
-			connectionName,
-			common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), connectionName, connectionName),
-			&config,
-		)
-		if err != nil {
+		if err = c.configure(connectionName, config); err != nil {
 			return nil, err
 		}
 
-		if err = conn.Configure(); err != nil {
-			_ = conn.Close()
+		if err = c.grantReadOnlyAccess(connectionName); err != nil {
+			return nil, err
+		}
+
+		conn, err := connection.NewReadOnlyConnection(
+			connectionName,
+			common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), connectionName, connectionName)+" default_transaction_read_only=on",
+			&config,
+		)
+		if err != nil {
 			return nil, err
 		}
 
