@@ -30,36 +30,44 @@ Workbench
     └── :workbenchPolicyId/edit
 ```
 
-## Data model (from PR 4014)
+## Data model (GraphQL)
+
+CRUD maps 1:1 to these types. Nested objects are selected, not duplicated.
 
 ```
-Policy                        project-scoped source of truth
-├── name                      unique, usually a filename with .rego
-├── type                      WORKBENCH | STACK | BINDING
-├── description
-├── policy                    Rego body (validated on save)
-├── project
-├── policyEvaluations[]       sampled input/output
-└── workbenchPolicies[] / bindingPolicies[] / stackPolicies[]
+Policy                         project-scoped source document
+├── id
+├── name                       String!
+├── type                       PolicyType!   (WORKBENCH | STACK | BINDING)
+├── description                String
+├── policy                     String!       (Rego body)
+├── project                    Project
+├── policyEvaluations          PolicyEvaluationConnection
+├── bindingPolicies            BindingPolicyConnection
+├── insertedAt / updatedAt
+└── (no workbenches field)
 
-WorkbenchPolicy               attachment (unique per policy + workbench)
-├── policy
-├── workbench
-└── matches
-    ├── regexes[]             tool-name regexes; empty → all tools
-    └── ignore[]              tool names skipped even if a regex matches
+PolicyEvaluation               sampled decision; read-only
+├── id
+├── input                      Map!          (tool payload; may include actor)
+├── output                     Map!          (deny[] / approve[] / sample)
+├── policyIds                  [ID!]!        (one sample can cover many policies)
+└── insertedAt / updatedAt
 
-PolicyEvaluation              sampled decision (kept ~1 week)
-├── policyIds[]               policies that ran together
-├── input                     JSON tool payload (+ actor)
-└── output                    { sample, deny[], approve[] }
+WorkbenchPolicy                attachment of a Policy to a Workbench
+├── id
+├── policy                     Policy        (selected, not authored here)
+├── workbench                  Workbench
+├── matches                    WorkbenchPolicyMatches
+│   └── regexes                [String]      (only field; empty → all tools)
+└── insertedAt / updatedAt
 ```
 
-Matching (any matching policy that **denies** rejects the tool call):
+`WorkbenchPolicyMatches` does **not** expose `ignore`. Matching ignore exists on the Ecto schema only — do not put it in the attach form until it is on the API.
 
-1. If `ignore` contains the tool name → skip this policy.
-2. If `regexes` is non-empty → apply only when any regex matches the tool name.
-3. Otherwise the policy applies to every tool.
+`Policy` does **not** expose workbench attachments. Those are listed from `workbench.workbenchPolicies`. Policy’s child connections are `policyEvaluations` and `bindingPolicies`.
+
+There is no create/update/delete for `PolicyEvaluation`. Samples are written by the evaluator. The UI lists them and can call `evaluatePolicy(policyId, input)` to replay.
 
 Runtime input passed to Rego:
 
@@ -100,27 +108,31 @@ Workbench admission result (`priv/policy/wb.rego`):
 
 | Screen | Operations |
 | --- | --- |
-| List | `workbench.workbenchPolicies` |
-| Attach | `createWorkbenchPolicy(workbenchId, attributes: { policyId, matches })` |
-| Edit matches | `updateWorkbenchPolicy(id, attributes: { matches })` |
+| List | `workbench.workbenchPolicies` → `WorkbenchPolicy { id policy matches updatedAt }` |
+| Attach | `createWorkbenchPolicy(workbenchId, { policyId, matches: { regexes } })` |
+| Edit matches | `updateWorkbenchPolicy(id, { matches: { regexes } })` — policy is immutable |
 | Detach | `deleteWorkbenchPolicy(id)` |
 | Policy picker | `policies(projectId, q)` filtered to `type: WORKBENCH` |
 
-`matches.ignore` exists on the Ecto schema and in matching logic, but the GraphQL `WorkbenchPolicyMatches` object currently only exposes `regexes`. The attach form still shows ignore names; implementing it requires adding `ignore` to the GraphQL matches input/object.
+Policy list columns are `name`, `type`, `description`, `project`, `updatedAt`. Do not show last-evaluation as a Policy field.
+
+Policy detail tabs are **Body** (`name`, `type`, `description`, `project`, `policy`) · **Evaluations** (`policyEvaluations`) · **Bindings** (`bindingPolicies`). Not a Workbenches tab.
+
+Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool/actor/result are only inside those maps.
 
 ## Interaction notes
 
-**Create vs attach.** Same split as chatbots: Security owns the Rego document. A workbench never authors policy source; it only picks a policy and scoping (regexes / ignore). Empty match fields mean “all tools on this workbench.”
+**Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools.
 
-**Editor.** Policy detail is a Monaco `CodeEditor`. There is no bundled Rego language in Monaco today — register a lightweight `rego` tokenizer (keywords `package`, `import`, `if`, `contains`, `default`, `deny`, `approve`, `sample`) rather than falling back to plaintext.
+**Editor.** Policy detail edits every writable Policy field, not just the Rego string: `name`, `type`, `description`, `projectId`, `policy`.
 
-**Evaluations + simulate.** This is the Spacelift policy workbench loop: sampled production inputs, inspect JSON in/out, re-run against the current body without waiting for another job. Simulate should show original output vs new output so a deny→allow (or the reverse) is obvious before save.
+**Evaluations + simulate.** `PolicyEvaluation` is sampled JSON in/out plus `policyIds`. Simulate replays `input` through `evaluatePolicy`; it does not write a new evaluation.
 
-**Multiple policies.** The list and attach form copy should say that several attachments can target the same tool, and **any deny wins**.
+**Edit attach.** `updateWorkbenchPolicy` only accepts `matches`. Changing which Policy is bound means delete + create.
 
-**Types.** `type` is on `Policy` now (`workbench` default). The list filters by type. Stack binding is a later attach surface; do not hide the type field.
+**Types.** `Policy.type` is required (`WORKBENCH` default). Filter the list by it. Stack attach is a later surface.
 
-**Binding policies (backend-only for v1).** `BindingPolicy` can auto-attach a policy to workbenches/stacks using a second Rego document (`bind: true/false`) on an interval. Not in these screens. When we add it, it belongs under Security → Policies as a secondary object (policy detail → Bindings), not as another Security top-level item.
+**Bindings.** `Policy.bindingPolicies` is the Policy-level child for auto-attach. Manual workbench attach stays on the workbench.
 
 ## Screen inventory
 
@@ -130,11 +142,13 @@ Workbench admission result (`priv/policy/wb.rego`):
 | 2 | Policies list | `/security/policies` |
 | 3 | Policies empty | `/security/policies` |
 | 4 | Create policy | `/security/policies/create` |
-| 5 | Policy body editor | `/security/policies/:id` |
-| 6 | Policy evaluations | `/security/policies/:id/evaluations` |
-| 7 | Simulate evaluation | `/security/policies/:id/evaluations/:evalId` |
-| 8 | Gatekeeper (renamed) | `/security/gatekeeper` |
-| 9 | Workbench policies list | `/workbenches/:id/policies` |
-| 10 | Workbench policies empty | `/workbenches/:id/policies` |
-| 11 | Attach / edit policy | `/workbenches/:id/policies/create` |
-| 12 | Workbench launch + side panel + ⋯ menu | `/workbenches/:id` |
+| 5 | Policy body (all Policy fields) | `/security/policies/:id` |
+| 6 | Policy bindings | `/security/policies/:id/bindings` |
+| 7 | Policy evaluations | `/security/policies/:id/evaluations` |
+| 8 | Simulate evaluation | `/security/policies/:id/evaluations/:evalId` |
+| 9 | Gatekeeper (renamed) | `/security/gatekeeper` |
+| 10 | Workbench policies list | `/workbenches/:id/policies` |
+| 11 | Workbench policies empty | `/workbenches/:id/policies` |
+| 12 | Attach policy | `/workbenches/:id/policies/create` |
+| 13 | Edit attach (matches only) | `/workbenches/:id/policies/:id/edit` |
+| 14 | Workbench launch + side panel + ⋯ menu | `/workbenches/:id` |

@@ -228,13 +228,15 @@
     <button data-go="policies-empty">3. Empty</button>
     <button data-go="policy-create">4. Create policy</button>
     <button data-go="policy-body">5. Editor</button>
-    <button data-go="policy-evaluations">6. Evaluations</button>
-    <button data-go="policy-simulate">7. Simulate</button>
-    <button data-go="gatekeeper">8. Gatekeeper</button>
-    <button data-go="wb-policies">9. WB policies</button>
-    <button data-go="wb-policies-empty">10. WB empty</button>
-    <button data-go="wb-attach">11. Attach</button>
-    <button data-go="wb-launch">12. WB launch</button>
+    <button data-go="policy-bindings">6. Bindings</button>
+    <button data-go="policy-evaluations">7. Evaluations</button>
+    <button data-go="policy-simulate">8. Simulate</button>
+    <button data-go="gatekeeper">9. Gatekeeper</button>
+    <button data-go="wb-policies">10. WB policies</button>
+    <button data-go="wb-policies-empty">11. WB empty</button>
+    <button data-go="wb-attach">12. Attach</button>
+    <button data-go="wb-edit">13. Edit attach</button>
+    <button data-go="wb-launch">14. WB launch</button>
     <span class="note">Wireframe · not production UI · data from PR 4014</span>
   </div>
   <div class="app" id="app"></div>
@@ -407,33 +409,36 @@
           </div>
           <div class="card" style="overflow:hidden">
             <table class="table">
-              <thead><tr><th>Name</th><th>Type</th><th>Description</th><th>Last evaluation</th><th></th></tr></thead>
+              <thead><tr><th>name</th><th>type</th><th>description</th><th>project</th><th>updatedAt</th><th></th></tr></thead>
               <tbody>
                 <tr class="click" onclick="go('policy-body')">
-                  <td><div class="row-title mono">tool-admission.rego</div><div class="row-sub">updated 2h ago</div></td>
-                  <td><span class="chip info">Workbench</span></td>
+                  <td><div class="row-title mono">tool-admission.rego</div></td>
+                  <td><span class="chip info">WORKBENCH</span></td>
                   <td>Block kube.exec / kube.delete unless actor is in break-glass.</td>
-                  <td><span class="chip bad">deny</span> <span class="row-sub">12m ago</span></td>
+                  <td>production</td>
+                  <td class="row-sub">2h ago</td>
                   <td class="row-actions"><button class="icon-btn" onclick="event.stopPropagation();go('policy-body')">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
                 <tr class="click" onclick="go('policy-body')">
-                  <td><div class="row-title mono">prod-write-guard.rego</div><div class="row-sub">updated yesterday</div></td>
-                  <td><span class="chip info">Workbench</span></td>
+                  <td><div class="row-title mono">prod-write-guard.rego</div></td>
+                  <td><span class="chip info">WORKBENCH</span></td>
                   <td>Require approval for terraform apply-shaped cloud writes.</td>
-                  <td><span class="chip ok">allow</span> <span class="row-sub">3h ago</span></td>
+                  <td>production</td>
+                  <td class="row-sub">yesterday</td>
                   <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
-                <tr class="click">
-                  <td><div class="row-title mono">auto-bind-prod.rego</div><div class="row-sub">updated last week</div></td>
-                  <td><span class="chip warn">Binding</span></td>
+                <tr class="click" onclick="go('policy-body')">
+                  <td><div class="row-title mono">auto-bind-prod.rego</div></td>
+                  <td><span class="chip warn">BINDING</span></td>
                   <td>Bind tool-admission to workbenches labeled env=prod.</td>
-                  <td><span class="row-sub">not sampled</span></td>
+                  <td>production</td>
+                  <td class="row-sub">last week</td>
                   <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="callout">List: <code>policies(projectId, q)</code> → <code>Policy { name type description }</code>. Name is unique and usually a <code>.rego</code> filename. Type is already on the model (<code>workbench | stack | binding</code>).</div>`
+          <div class="callout"><code>Policy</code> list fields: <code>name type description project updatedAt</code>. Evaluations are <code>policy.policyEvaluations</code>, not a column on Policy. Workbench attach is <code>WorkbenchPolicy</code> on the workbench, not a Policy connection.</div>`
       }),
 
       'policies-empty': () => securityPage('policies', {
@@ -491,26 +496,73 @@
           <div class="page-head">
             <div>
               <h1 class="title mono">tool-admission.rego</h1>
-              <p class="subtitle">Block kube.exec / kube.delete unless actor is in break-glass. · Workbench · production</p>
+              <p class="subtitle">Policy · <code>id</code> pol_18f2 · insertedAt 3d ago</p>
             </div>
-            <div style="display:flex;gap:8px">
-              <button class="btn secondary small" onclick="go('policy-evaluations')">Evaluations</button>
-              <button class="btn danger small">Delete</button>
-            </div>
+            <button class="btn danger small">Delete</button>
           </div>
           <div class="tabs">
             <button class="active">Body</button>
             <button onclick="go('policy-evaluations')">Evaluations</button>
-            <button onclick="go('wb-policies')">Workbenches</button>
+            <button onclick="go('policy-bindings')">Bindings</button>
           </div>
-          <div class="field">
-            <span class="label">Rego</span>
-            <span class="hint">Compiled against <code>priv/policy/wb.rego</code>. Expose <code>deny</code> / <code>approve</code> / <code>sample</code>. Invalid Rego cannot be saved.</span>
-            <div class="editor">${REGO}</div>
+          <div class="split">
+            <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
+              <div class="field"><span class="label">name *</span>
+                <input class="input mono" value="tool-admission.rego" />
+              </div>
+              <div class="field"><span class="label">type *</span>
+                <select class="select"><option>WORKBENCH</option><option>STACK</option><option>BINDING</option></select>
+              </div>
+              <div class="field"><span class="label">description</span>
+                <textarea class="textarea">Block kube.exec / kube.delete unless actor is in break-glass.</textarea>
+              </div>
+              <div class="field"><span class="label">project</span>
+                <select class="select"><option>production</option></select>
+              </div>
+            </div>
+            <div style="flex:2;min-width:0" class="field">
+              <span class="label">policy *</span>
+              <span class="hint">Rego source string. Validated on save. <code>updatePolicy(id, { name, type, description, policy, projectId })</code></span>
+              <div class="editor">${REGO}</div>
+            </div>
           </div>
           <div style="display:flex;justify-content:flex-end;gap:8px">
-            <button class="btn secondary small" onclick="go('policy-simulate')">Simulate against last evaluation</button>
+            <button class="btn secondary small" onclick="go('policy-simulate')">Simulate with a sampled input</button>
             <button class="btn small">Save</button>
+          </div>`
+      }),
+
+      'policy-bindings': () => securityPage('policies', {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-body')">tool-admission.rego</span> / <b>bindings</b>`,
+        html: `
+          <div class="page-head">
+            <div>
+              <h1 class="title mono">tool-admission.rego</h1>
+              <p class="subtitle"><code>Policy.bindingPolicies</code> — auto-attach this policy to matching resources. Not workbench rows; those are <code>WorkbenchPolicy</code> on the workbench.</p>
+            </div>
+            <button class="btn small">New binding</button>
+          </div>
+          <div class="tabs">
+            <button onclick="go('policy-body')">Body</button>
+            <button onclick="go('policy-evaluations')">Evaluations</button>
+            <button class="active">Bindings</button>
+          </div>
+          <div class="card" style="overflow:hidden">
+            <table class="table">
+              <thead><tr><th>type</th><th>interval</th><th>bindPolicy</th><th>matches.workbench.regexes</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="chip info">WORKBENCH</span></td>
+                  <td class="mono">1h</td>
+                  <td class="mono">auto-bind-prod.rego</td>
+                  <td class="mono">env-prod.*</td>
+                  <td class="row-actions"><button class="icon-btn">${I.pencil}</button><button class="icon-btn danger">${I.trash}</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card empty" style="padding:24px">
+            <p style="margin:0;color:var(--text-xlight)">Empty is valid. Attach to a specific workbench from the workbench instead: <code>createWorkbenchPolicy(workbenchId, { policyId, matches })</code>.</p>
           </div>`
       }),
 
@@ -526,37 +578,37 @@
           <div class="tabs">
             <button onclick="go('policy-body')">Body</button>
             <button class="active">Evaluations</button>
-            <button onclick="go('wb-policies')">Workbenches</button>
+            <button onclick="go('policy-bindings')">Bindings</button>
           </div>
           <div class="card" style="overflow:hidden">
             <table class="table">
-              <thead><tr><th>When</th><th>Tool</th><th>Actor</th><th>Result</th><th></th></tr></thead>
+              <thead><tr><th>insertedAt</th><th>policyIds</th><th>input</th><th>output</th><th></th></tr></thead>
               <tbody>
                 <tr class="click" onclick="go('policy-simulate')">
                   <td>12 minutes ago</td>
-                  <td class="mono">kube.exec</td>
-                  <td>ada@plural.sh</td>
-                  <td><span class="chip bad">deny</span></td>
+                  <td class="mono">[pol_18f2]</td>
+                  <td><div class="mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{ "input": { "tool": "kube.exec", … }, "actor": {…} }</div></td>
+                  <td><span class="chip bad">deny[]</span> <span class="row-sub mono">approve: []</span></td>
                   <td class="row-actions"><button class="btn small secondary" onclick="event.stopPropagation();go('policy-simulate')">${I.play} Simulate</button></td>
                 </tr>
                 <tr class="click" onclick="go('policy-simulate')">
                   <td>3 hours ago</td>
-                  <td class="mono">kube.get</td>
-                  <td>ada@plural.sh</td>
-                  <td><span class="chip ok">allow</span></td>
+                  <td class="mono">[pol_18f2, pol_22ab]</td>
+                  <td><div class="mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{ "input": { "tool": "kube.get", … } }</div></td>
+                  <td><span class="chip ok">deny: []</span></td>
                   <td class="row-actions"><button class="btn small secondary">Simulate</button></td>
                 </tr>
-                <tr class="click">
+                <tr class="click" onclick="go('policy-simulate')">
                   <td>Yesterday</td>
-                  <td class="mono">kube.delete</td>
-                  <td>bot@plural.sh</td>
-                  <td><span class="chip bad">deny</span></td>
+                  <td class="mono">[pol_18f2]</td>
+                  <td><div class="mono" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{ "input": { "tool": "kube.delete", … } }</div></td>
+                  <td><span class="chip bad">deny[]</span></td>
                   <td class="row-actions"><button class="btn small secondary">Simulate</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="callout">Connection: <code>policy.policyEvaluations</code> → <code>PolicyEvaluation { input output policyIds insertedAt }</code>. Samples persist about a week. <code>sample</code> in the result (clamped to 50%) controls capture rate.</div>`
+          <div class="callout"><code>PolicyEvaluation</code> has no tool/actor/result fields. Those live inside <code>input: Map!</code> and <code>output: Map!</code>. <code>policyIds</code> is a list — one sample can cover several policies. No create/update/delete; samples are written by the evaluator. Simulate calls <code>evaluatePolicy(policyId, input)</code>.</div>`
       }),
 
       'policy-simulate': () => securityPage('policies', {
@@ -569,22 +621,22 @@
             </div>
             <button class="btn" onclick="state.simulated=true;render()">${I.play} Simulate</button>
           </div>
-          <div class="banner info">Using evaluation from <b>12 minutes ago</b> · original result <span class="chip bad">deny</span> · query <code>evaluatePolicy(policyId, input)</code></div>
-          ${state.simulated ? '<div class="banner ok">Current body would <b>allow</b> this input. Original was deny — confirm before saving the body change.</div>' : ''}
+          <div class="banner info">Sample <code>id</code> ev_91c · <code>insertedAt</code> 12m ago · <code>policyIds</code> [pol_18f2] · original <code>output.deny</code> is non-empty · query <code>evaluatePolicy(policyId, input)</code></div>
+          ${state.simulated ? '<div class="banner ok">Simulated <code>output.deny</code> is empty (allow). Stored evaluation is unchanged until the next sampled run.</div>' : ''}
           <div class="compare">
             <div>
-              <div class="panel-label"><span>Input (editable)</span><span class="chip">PolicyEvaluation.input</span></div>
+              <div class="panel-label"><span>input: Map! (editable for what-if)</span><span class="chip">PolicyEvaluation.input</span></div>
               <div class="json">${INPUT_JSON}</div>
             </div>
             <div>
               <div class="panel-label">
-                <span>Output</span>
-                <span class="chip ${state.simulated ? 'ok' : 'bad'}">${state.simulated ? 'simulated allow' : 'original deny'}</span>
+                <span>${state.simulated ? 'evaluatePolicy → Map' : 'output: Map!'}</span>
+                <span class="chip ${state.simulated ? 'ok' : 'bad'}">${state.simulated ? 'simulated deny: []' : 'stored deny[]'}</span>
               </div>
               <div class="json">${state.simulated ? OUTPUT_ALLOW : OUTPUT_DENY}</div>
             </div>
           </div>
-          <div class="callout">Simulate does not write an evaluation; it only runs <code>evaluatePolicy</code>. Save on the Body tab persists Rego via <code>updatePolicy</code>.</div>`
+          <div class="callout">Evaluate is a query, not a mutation. It does not append to <code>policyEvaluations</code>. Persist body changes with <code>updatePolicy</code>.</div>`
       }),
 
       gatekeeper: () => securityPage('gatekeeper', {
@@ -634,15 +686,19 @@
           </div>
           <div class="card" style="overflow:hidden">
             <table class="table">
+              <thead><tr><th></th><th>policy.name</th><th>policy.type</th><th>matches.regexes</th><th>updatedAt</th><th></th></tr></thead>
               <tbody>
                 <tr>
                   <td style="width:46px"><div class="icon-btn" style="background:var(--fill-two);border-radius:50%">${I.shield}</div></td>
                   <td>
                     <div class="row-title mono">tool-admission.rego</div>
-                    <div class="row-sub">regexes: kube\\.(exec|delete|shell) · ignore: kube.get</div>
+                    <div class="row-sub">WorkbenchPolicy id wbpol_01</div>
                   </td>
+                  <td><span class="chip info">WORKBENCH</span></td>
+                  <td class="mono">kube\\.(exec|delete|shell)</td>
+                  <td class="row-sub">2h ago</td>
                   <td class="row-actions">
-                    <button class="icon-btn" onclick="go('wb-attach')">${I.pencil}</button>
+                    <button class="icon-btn" onclick="go('wb-edit')">${I.pencil}</button>
                     <button class="icon-btn danger">${I.trash}</button>
                   </td>
                 </tr>
@@ -650,17 +706,20 @@
                   <td><div class="icon-btn" style="background:var(--fill-two);border-radius:50%">${I.shield}</div></td>
                   <td>
                     <div class="row-title mono">prod-write-guard.rego</div>
-                    <div class="row-sub">Applies to all tools</div>
+                    <div class="row-sub">WorkbenchPolicy id wbpol_02</div>
                   </td>
+                  <td><span class="chip info">WORKBENCH</span></td>
+                  <td class="row-sub">empty → all tools</td>
+                  <td class="row-sub">yesterday</td>
                   <td class="row-actions">
-                    <button class="icon-btn">${I.pencil}</button>
+                    <button class="icon-btn" onclick="go('wb-edit')">${I.pencil}</button>
                     <button class="icon-btn danger">${I.trash}</button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="callout">Same list chrome as <code>Chatbots.tsx</code> / <code>WebhookTriggers.tsx</code>: hideHeader table, manage-global + add, pencil/trash. Data: <code>workbench.workbenchPolicies { policy { name } matches { regexes ignore } }</code>.</div>
+          <div class="callout"><code>WorkbenchPolicy { id policy matches workbench insertedAt updatedAt }</code>. Name/type come from nested <code>policy</code>. <code>WorkbenchPolicyMatches</code> only has <code>regexes</code>. Delete is <code>deleteWorkbenchPolicy(id)</code>.</div>
         </div></div>`
       }),
 
@@ -707,23 +766,49 @@
                 </select>
               </div>
               <div class="field">
-                <span class="label">Tool name regexes</span>
+                <span class="label">matches.regexes</span>
                 <div class="tags">
                   <span class="tag">kube\\.(exec|delete|shell) <button>×</button></span>
                   <input placeholder="Add regex and press enter" />
                 </div>
-                <span class="hint">If empty, this policy applies to every tool on the workbench.</span>
+                <span class="hint">Only field on <code>WorkbenchPolicyMatches</code>. Empty list → policy applies to every tool on this workbench.</span>
+              </div>
+              <div class="callout"><code>createWorkbenchPolicy(workbenchId, { policyId, matches: { regexes } })</code>. Nested <code>policy</code> is selected, not authored here. Multiple attachments can match the same tool; any <code>output.deny</code> rejects.</div>
+              <div class="footer-actions">
+                <button class="btn secondary" onclick="go('wb-policies')">Back to all policies</button>
+                <button class="btn" onclick="go('wb-policies')">Save</button>
+              </div>
+            </div>
+          </div>
+        </div></div>`
+      }),
+
+      'wb-edit': () => chrome({
+        area: 'workbench',
+        crumb: `<span class="crumb-link" onclick="go('wb-launch')">workbenches</span> / <span class="crumb-link" onclick="go('wb-launch')">payments-sre</span> / <span class="crumb-link" onclick="go('wb-policies')">policies</span> / <b>edit</b>`,
+        body: `<div class="wb-body"><div class="center-col" style="max-width:968px">
+          <div>
+            <div style="font-weight:600">payments-sre</div>
+            <div class="row-sub">Investigate payment cluster incidents and open PRs</div>
+          </div>
+          <div class="split">
+            <div class="step-nav">
+              <button class="active">Configuration</button>
+            </div>
+            <div class="card form-card">
+              <div class="field">
+                <span class="label">policy</span>
+                <input class="input mono" value="tool-admission.rego" disabled />
+                <span class="hint">Not in <code>updateWorkbenchPolicy</code>. To switch policies, delete this row and attach another.</span>
               </div>
               <div class="field">
-                <span class="label">Ignore tool names</span>
+                <span class="label">matches.regexes</span>
                 <div class="tags">
-                  <span class="tag">kube.get <button>×</button></span>
-                  <span class="tag">kube.list <button>×</button></span>
-                  <input placeholder="Exact tool name to skip" />
+                  <span class="tag">kube\\.(exec|delete|shell) <button>×</button></span>
+                  <input placeholder="Add regex and press enter" />
                 </div>
-                <span class="hint">Ignored names never run this policy, even if a regex matches.</span>
+                <span class="hint">Only updatable field: <code>updateWorkbenchPolicy(id, { matches: { regexes } })</code>.</span>
               </div>
-              <div class="callout">Multiple attachments can match the same tool. <b>Any deny rejects the call.</b> Unique on <code>(policy_id, workbench_id)</code>.</div>
               <div class="footer-actions">
                 <button class="btn secondary" onclick="go('wb-policies')">Back to all policies</button>
                 <button class="btn" onclick="go('wb-policies')">Save</button>
@@ -753,8 +838,8 @@
             </div>
             <div class="section">
               <h4>Policies <button class="add-link" onclick="go('wb-attach')">${I.plus}</button></h4>
-              <div class="side-item" onclick="go('wb-attach')" style="cursor:pointer"><span class="ico">${I.shield}</span> tool-admission.rego</div>
-              <div class="side-item" onclick="go('wb-attach')" style="cursor:pointer"><span class="ico">${I.shield}</span> prod-write-guard.rego</div>
+              <div class="side-item" onclick="go('wb-edit')" style="cursor:pointer"><span class="ico">${I.shield}</span> tool-admission.rego</div>
+              <div class="side-item" onclick="go('wb-edit')" style="cursor:pointer"><span class="ico">${I.shield}</span> prod-write-guard.rego</div>
             </div>
             <div class="section">
               <h4>Cron schedules <button class="add-link">${I.plus}</button></h4>
