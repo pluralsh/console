@@ -95,14 +95,16 @@ function Tab({
             : theme.colors['text-xlight']
         }
         backgroundColor={
-          !active && activeSecondary ? theme.colors['fill-two'] : 'transparent'
+          active
+            ? theme.colors['fill-zero-selected']
+            : activeSecondary
+              ? theme.colors['fill-zero-hover']
+              : 'transparent'
         }
         {...{
           '&:hover': {
             color: theme.colors.text,
-            ...(!(!active && activeSecondary)
-              ? { backgroundColor: theme.colors['fill-zero-hover'] }
-              : {}),
+            backgroundColor: theme.colors['fill-zero-hover'],
           },
         }}
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"

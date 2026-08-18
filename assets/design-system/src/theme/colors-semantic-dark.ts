@@ -5,6 +5,9 @@ import { colorsCloudShellDark } from './colors-cloudshell-dark'
 import { colorsCodeBlockDark } from './colors-codeblock-dark'
 
 export const semanticColorsDark = {
+  // App shell canvas (html/body / console chrome) — independent from fill-zero
+  'page-background': '#171a21',
+
   // Fill
   //
   // fill-zero

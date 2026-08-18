@@ -60,6 +60,7 @@ const ListBoxCard = styled(Card)(({ theme }) => ({
   flexShrink: 1,
   overflowX: 'visible',
   overflowY: 'hidden',
+  // White floating panel — match notifications / header menus
   background:
     theme.mode === 'light'
       ? theme.colors['fill-zero']
@@ -206,7 +207,7 @@ function ListBox({
     children: useItemWrappedChildren(children, header, footer),
   }
 
-  const state = useListState<object>(listStateProps as any)
+  const state = useListState(listStateProps as any)
 
   stateRef.current = state
 

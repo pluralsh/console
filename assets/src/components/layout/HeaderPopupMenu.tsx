@@ -35,7 +35,7 @@ export function SimplePopupMenu({
       style={styles}
     >
       <MenuCardSC
-        fillLevel={2}
+        fillLevel={1}
         {...props}
         $linkStyles={linkStyles}
       >
@@ -47,11 +47,15 @@ export function SimplePopupMenu({
 
 const MenuCardSC = styled(Card)<{ $linkStyles?: boolean }>(
   ({ theme, $linkStyles }) => ({
-    width: 230,
-    padding: `${theme.spacing.xsmall}px 0`,
-    borderRadius: theme.borderRadiuses.medium,
-    display: 'flex',
-    flexDirection: 'column',
+    '&&': {
+      width: 230,
+      padding: `${theme.spacing.xsmall}px 0`,
+      borderRadius: theme.borderRadiuses.medium,
+      display: 'flex',
+      flexDirection: 'column',
+      // White floating panel — match notifications popover tone
+      backgroundColor: theme.colors['fill-zero'],
+    },
     ...($linkStyles && {
       [`& a, & button`]: {
         ...theme.partials.text.body2,

@@ -6,29 +6,33 @@ import { colorsCodeBlockLight } from './colors-codeblock-light'
 import { semanticColorsDark } from './colors-semantic-dark'
 
 export const semanticColorsLight = {
+  // App shell canvas (html/body / console chrome) — independent from fill-zero
+  'page-background': '#F9FAFA',
+
   // Fill
   //
+  // Pure Light: white surfaces on a soft grey page; hover/selected darken gently
   // fill-zero
   'fill-zero': '#FFFFFF',
-  'fill-zero-hover': grey[75],
-  'fill-zero-selected': '#FFFFFF',
+  'fill-zero-hover': grey[40],
+  'fill-zero-selected': grey[45],
   // fill-one
-  'fill-one': grey[50],
-  'fill-one-hover': grey[75],
-  'fill-one-selected': grey[50],
+  'fill-one': '#FFFFFF',
+  'fill-one-hover': grey[40],
+  'fill-one-selected': grey[45],
   // fill-two
-  'fill-two': grey[25],
-  'fill-two-hover': grey[125],
-  'fill-two-selected': grey[100],
+  'fill-two': grey[30],
+  'fill-two-hover': grey[45],
+  'fill-two-selected': grey[50],
   // fill-three
-  'fill-three': grey[100],
-  'fill-three-hover': grey[150],
-  'fill-three-selected': grey[175],
+  'fill-three': grey[40],
+  'fill-three-hover': grey[50],
+  'fill-three-selected': grey[50],
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
-  // accent- used sparingly
-  'fill-accent': '#FFFFFF',
+  // accent — nav / header chrome
+  'fill-accent': '#EEF0F1',
   // Action
   //
   // primary
@@ -55,13 +59,14 @@ export const semanticColorsLight = {
 
   // Border
   //
+  // Soft hairlines — readable on white / soft grey without hard chrome
   border: grey[100],
-  'border-fill-one': grey[50],
-  'border-fill-two': grey[100],
+  'border-fill-one': grey[100],
+  'border-fill-two': grey[125],
   'border-fill-three': grey[150],
   'border-selected': grey[800],
   'border-input': grey[100],
-  'border-disabled': grey[75],
+  'border-disabled': grey[50],
   'border-primary': purple[500],
   'border-secondary': blue[700],
   'border-info': blue[600],

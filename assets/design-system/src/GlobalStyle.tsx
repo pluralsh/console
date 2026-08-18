@@ -132,6 +132,11 @@ const GlobalStyle = createGlobalStyle(({ theme }) => ({
   [lightModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'light' }),
   },
+  // Keep html/body on the app-shell token (index.html reads --color-page-background).
+  // This is intentionally NOT fill-zero.
+  'html, body': {
+    backgroundColor: theme.colors['page-background'],
+  },
   '*': theme.partials.scrollBar({ fillLevel: 0 }),
 }))
 

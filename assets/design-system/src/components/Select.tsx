@@ -32,6 +32,7 @@ import {
 } from './SelectComboShared'
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import CaretDownIcon from './icons/CaretDownIcon'
+import { lightElevatedSurface } from '../theme/lightElevatedSurface'
 
 export const parentFillLevelToBackground = {
   0: 'fill-one',
@@ -56,7 +57,8 @@ type SelectButtonProps = {
 
 export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
   children:
-    ReactElement<ListBoxItemBaseProps> | ReactElement<ListBoxItemBaseProps>[]
+    | ReactElement<ListBoxItemBaseProps>
+    | ReactElement<ListBoxItemBaseProps>[]
   dropdownHeaderFixed?: ReactNode
   dropdownFooterFixed?: ReactNode
   dropdownHeader?: ReactElement<any>
@@ -158,7 +160,10 @@ const SelectButtonInner = styled.div<{
     color: theme.colors['text-light'],
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.medium,
-    overflow: 'hidden',
+    // Soft shadow needs to paint outside the control in light mode
+    overflow: theme.mode === 'light' ? 'visible' : 'hidden',
+    ...(theme.mode === 'light' && { backgroundClip: 'padding-box' }),
+    ...lightElevatedSurface(theme, { disabled: isDisabled }),
     '.content': {
       alignItems: 'center',
       display: 'flex',
@@ -189,6 +194,7 @@ const SelectButtonInner = styled.div<{
     },
     '&:focus-visible': {
       ...theme.partials.focus.default,
+      boxShadow: 'none',
     },
     '&:hover': {
       color: theme.colors.text,
@@ -196,6 +202,7 @@ const SelectButtonInner = styled.div<{
     },
     ...(isDisabled && {
       borderColor: theme.colors['border-disabled'],
+      boxShadow: 'none',
       color: theme.colors['text-input-disabled'],
       cursor: 'not-allowed',
 

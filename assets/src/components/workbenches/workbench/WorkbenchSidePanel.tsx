@@ -281,7 +281,12 @@ export function WorkbenchSidePanel({
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  backgroundColor: theme.colors['fill-accent'],
+  // Light: match the workbench page canvas (not the white prompt / fill-zero).
+  // Dark: keep raised fill-one panel.
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['page-background']
+      : theme.colors['fill-one'],
   borderRight: theme.borders['fill-one'],
   display: 'flex',
   flexDirection: 'column',

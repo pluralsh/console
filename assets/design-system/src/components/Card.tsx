@@ -9,6 +9,8 @@ import {
   useFillLevel,
 } from './contexts/FillLevelContext'
 import WrapWithIf from './WrapWithIf'
+import { lightElevatedSurface } from '../theme/lightElevatedSurface'
+import { borderWidths } from '../theme/borders'
 
 type CornerSize = 'medium' | 'large'
 type CardFillLevel = Exclude<FillLevel, 0>
@@ -99,7 +101,10 @@ const HeaderSC = styled.div<{
       ],
     height: size === 'large' ? 48 : 40,
     padding: `0 ${theme.spacing.medium}px`,
-    overflow: 'hidden',
+    // overflow:hidden + matching radius shears the 1px border at corners
+    // and can make the white fill look clipped against the border curve.
+    overflow: theme.mode === 'light' ? 'visible' : 'hidden',
+    ...(theme.mode === 'light' && { backgroundClip: 'padding-box' }),
   })
 )
 
@@ -133,6 +138,15 @@ const CardSC = styled(Div)<{
     borderRadius: $hasHeader
       ? `0 0 ${theme.borderRadiuses[cornerSize]}px ${theme.borderRadiuses[cornerSize]}px`
       : theme.borderRadiuses[cornerSize],
+    // Soft lift on the body when there's no header wrapper; header cards
+    // elevate via OuterWrapSC so the full card (header + body) casts one shadow.
+    ...(!$hasHeader ? lightElevatedSurface(theme) : null),
+    // Soft box-shadow paints outside the border box; hidden clips it flush.
+    ...(theme.mode === 'light' && { overflow: 'visible' }),
+    // Keep opaque fill inset from the border curve (outer radius − border width)
+    ...(theme.mode === 'light' && {
+      backgroundClip: 'padding-box',
+    }),
     ...($hasTabs && {
       borderTopLeftRadius: 0, // TODO: It should be applied only if first tab is active.
     }),
@@ -163,15 +177,28 @@ const CardSC = styled(Div)<{
   })
 )
 
-const OuterWrapSC = styled.div<{ $overflowVisible: boolean }>(
-  ({ $overflowVisible: overflowVisible }) => ({
+const OuterWrapSC = styled.div<{
+  $overflowVisible: boolean
+  $cornerSize: CornerSize
+}>(({ theme, $overflowVisible: overflowVisible, $cornerSize: cornerSize }) => {
+  const outerRadius = theme.borderRadiuses[cornerSize]
+  // Inner white/header pieces use outerRadius; shadow host uses outer+border
+  // so the curve isn’t flush with the opaque fill (reads as a hard clip).
+  const shadowRadius = outerRadius + borderWidths.default
+
+  return {
     display: 'flex',
     flexDirection: 'column',
-    overflow: overflowVisible ? 'visible' : 'hidden',
+    // Light mode cards use box-shadow; overflow:hidden clips it on all sides.
+    overflow: overflowVisible || theme.mode === 'light' ? 'visible' : 'hidden',
     width: '100%',
     height: '100%',
-  })
-)
+    ...(theme.mode === 'light' && {
+      borderRadius: shadowRadius,
+      boxShadow: theme.boxShadows.slight,
+    }),
+  }
+})
 
 function Card({
   ref,
@@ -200,6 +227,7 @@ function Card({
         wrapper={
           <OuterWrapSC
             $overflowVisible={hasTabs}
+            $cornerSize={cornerSize}
             {...(hasTabs ? tabsOuterProps : outerProps)}
           />
         }
