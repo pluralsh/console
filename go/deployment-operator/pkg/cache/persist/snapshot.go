@@ -139,6 +139,9 @@ func (s *Store) Save(snap Snapshot) error {
 		return nil
 	}
 
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	snap.Version = SnapshotVersion
 	if snap.Manifests == nil {
 		snap.Manifests = map[string]ManifestRecord{}

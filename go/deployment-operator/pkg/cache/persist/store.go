@@ -3,6 +3,7 @@ package persist
 import (
 	"context"
 	"os"
+	"sync"
 	"time"
 
 	"k8s.io/klog/v2"
@@ -11,6 +12,8 @@ import (
 type Store struct {
 	dir  string
 	lock *os.File
+	mu   sync.Mutex
+	wg   sync.WaitGroup
 }
 
 func Open(dir string) (*Store, error) {
@@ -57,7 +60,9 @@ func (s *Store) StartPeriodic(ctx context.Context, interval time.Duration, save 
 		return
 	}
 
+	s.wg.Add(1)
 	go func() {
+		defer s.wg.Done()
 		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
 
@@ -72,4 +77,11 @@ func (s *Store) StartPeriodic(ctx context.Context, interval time.Duration, save 
 			}
 		}
 	}()
+}
+
+func (s *Store) WaitPeriodic() {
+	if s == nil {
+		return
+	}
+	s.wg.Wait()
 }

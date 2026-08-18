@@ -228,6 +228,7 @@ func main() {
 	// Block the main thread until context cancel.
 	<-ctx.Done()
 	setupLog.Info("shutting down")
+	cacheStore.WaitPeriodic()
 	if err := saveCaches(); err != nil {
 		setupLog.Error(err, "unable to persist cache snapshot")
 	}

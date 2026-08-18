@@ -64,8 +64,8 @@ const (
 	defaultManifestCacheTTL         = "3h"
 	defaultManifestCacheTTLDuration = 3 * time.Hour
 
-	defaultCachePersistInterval         = "1m"
-	defaultCachePersistIntervalDuration = time.Minute
+	defaultCachePersistInterval         = "10s"
+	defaultCachePersistIntervalDuration = 10 * time.Second
 
 	defaultComponentShaCacheTTL         = "6h"
 	defaultComponentShaCacheTTLDuration = 6 * time.Hour

@@ -1,9 +1,12 @@
 package persist
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -198,4 +201,57 @@ func TestDisabledStoreIsNoop(t *testing.T) {
 	loaded, err := store.Load()
 	require.NoError(t, err)
 	require.Empty(t, loaded.Manifests)
+}
+
+func TestConcurrentSavesDoNotCorruptSnapshot(t *testing.T) {
+	dir := t.TempDir()
+	store, err := Open(dir)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = store.Close() })
+
+	var wg sync.WaitGroup
+	for i := 0; i < 20; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			id := fmt.Sprintf("svc-%d", i)
+			require.NoError(t, store.Save(Snapshot{
+				Manifests: map[string]ManifestRecord{
+					id: {Dir: "/tmp/" + id, SHA: id, Created: time.Now(), Expiry: time.Hour},
+				},
+			}))
+		}(i)
+	}
+	wg.Wait()
+
+	loaded, err := store.Load()
+	require.NoError(t, err)
+	require.Equal(t, SnapshotVersion, loaded.Version)
+	require.Len(t, loaded.Manifests, 1)
+	require.NoFileExists(t, filepath.Join(dir, stateFileName+".tmp"))
+}
+
+func TestWaitPeriodicJoinsBeforeFinalSave(t *testing.T) {
+	dir := t.TempDir()
+	store, err := Open(dir)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = store.Close() })
+
+	ctx, cancel := context.WithCancel(context.Background())
+	store.StartPeriodic(ctx, 10*time.Millisecond, func() error {
+		return store.Save(Snapshot{
+			Manifests: map[string]ManifestRecord{"tick": {SHA: "tick"}},
+		})
+	})
+	time.Sleep(30 * time.Millisecond)
+	cancel()
+	store.WaitPeriodic()
+
+	require.NoError(t, store.Save(Snapshot{
+		Manifests: map[string]ManifestRecord{"final": {SHA: "final"}},
+	}))
+	loaded, err := store.Load()
+	require.NoError(t, err)
+	require.Equal(t, "final", loaded.Manifests["final"].SHA)
+	require.NoFileExists(t, filepath.Join(dir, stateFileName+".tmp"))
 }
