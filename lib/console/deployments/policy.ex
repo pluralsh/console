@@ -184,7 +184,10 @@ defmodule Console.Deployments.Policy do
     end
   end
 
-  defp binding_input(target) do
+  defp binding_input(%Workbench{} = target), do: %{workbench: clean_binding_input(target)}
+  defp binding_input(%Stack{} = target), do: %{stack: clean_binding_input(target)}
+
+  defp clean_binding_input(target) do
     target
     |> Map.from_struct()
     |> Console.clean()

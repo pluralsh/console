@@ -178,7 +178,7 @@ defmodule Console.Deployments.PolicyTest do
       workbench = insert(:workbench, project: project, name: "bound-workbench")
       retained = insert(:workbench, project: project, name: "retained-workbench")
       policy = insert(:policy, project: project)
-      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.name == \"bound-workbench\"")
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.workbench.name == \"bound-workbench\"")
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, matches: %{workbench: %{regexes: [".*"]}})
 
       :ok = Policy.reconcile(binding)
@@ -190,7 +190,7 @@ defmodule Console.Deployments.PolicyTest do
 
       {:ok, bind_policy} =
         Policy.update_policy(
-          %{policy: "package plrl.binding\nbind := true if input.name == \"retained-workbench\""},
+          %{policy: "package plrl.binding\nbind := true if input.workbench.name == \"retained-workbench\""},
           bind_policy.id,
           admin_user()
         )
@@ -212,9 +212,14 @@ defmodule Console.Deployments.PolicyTest do
     test "adds and removes stack policy bindings" do
       insert(:user, bot_name: "console")
       project = insert(:project)
-      stack = insert(:stack, project: project)
+      stack = insert(:stack, project: project, name: "bound-stack")
       policy = insert(:policy, project: project, type: :stack)
-      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 
       :ok = Policy.reconcile(binding)

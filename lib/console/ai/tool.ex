@@ -176,7 +176,7 @@ defmodule Console.AI.Tool do
 
   defp validate_policy(engine, tool, input, policies) do
     Enum.map(policies, & &1.policy_id)
-    |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"input" => input}), &1))
+    |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"tool" => input, "tool_name" => name(tool)}), &1))
     |> case do
       {:ok, %{"deny" => [_ | _] = denials}} -> {:error, "Policy denied: #{inspect(denials)}"}
       {:ok, %{"approve" => [_ | _] = approvals}} ->
