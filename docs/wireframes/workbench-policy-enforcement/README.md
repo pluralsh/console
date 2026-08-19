@@ -201,7 +201,7 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 
 **Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools. An attachment **rule** is a `BindingPolicy`: two policy pointers plus interval and regexes.
 
-**Editor.** Policy detail is Definition + simulate: Rego buffer on the left, evaluate on the right. Persist with `updatePolicy`. Bind policies use the same layout against cleaned workbench/stack input (`bind: true/false`).
+**Editor.** Policy detail is Definition + simulate: Rego buffer on the left, evaluate on the right. **Revert / Save policy** only on Definition (`updatePolicy`). Evaluations and Attachments are read/management surfaces for other objects. Bind policies use the same layout against cleaned workbench/stack input (`bind: true/false`).
 
 **Definition + simulate.** One screen: Rego buffer on the left, simulate on the right. Pick a past evaluation to load `input`, Run against the unsaved buffer (`evaluatePolicy`). Recorded decision stays visible for comparison. **Evaluations** is a master-detail list (filters + side list + input/output), same pattern as workbench evals — not a substitute for the Definition / Evaluations / Attachments tabs. Replay opens Definition with that input. Attachments tab is `Policy.bindingPolicies`.
 

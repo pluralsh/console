@@ -972,10 +972,11 @@ bind := true if {
               <h1 class="title">prod-guardrails.rego</h1>
               <p class="subtitle">Restricts destructive kubectl and helm tooling on production clusters to the on-call group.</p>
             </div>
+            ${tab === 'def' ? `
             <div class="head-actions">
               <button class="btn secondary small">Revert</button>
               <button class="btn small">Save policy</button>
-            </div>
+            </div>` : ''}
           </div>
           <div class="tabs">
             <button class="${tab === 'def' ? 'active' : ''}" onclick="go('policy-body')">Definition</button>
