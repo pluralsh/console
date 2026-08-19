@@ -615,13 +615,47 @@ bind := true if {
     }
 
     function currentBind() {
-      return BIND_POLICIES.find((p) => p.id === state.bindId) || BIND_POLICIES[1]
+      return BIND_CATALOG.find((p) => p.id === state.bindId) || BIND_POLICIES.find((p) => p.id === state.bindId) || BIND_POLICIES[1]
     }
 
-    function openBind(id) {
+    function openBind(id, from) {
       state.bindId = id
       state.policyKind = 'autoattach'
+      state.bindFrom = from || null
       go('policy-bind-body')
+    }
+
+    function backFromBind() {
+      const from = state.bindFrom
+      state.bindFrom = null
+      state.policyKind = 'autoattach'
+      if (from === 'attachment-detail') go('attachment-detail')
+      else if (from === 'attachment-create') go('attachment-create')
+      else go('policies')
+    }
+
+    function bindReturnChrome(p) {
+      const from = state.bindFrom
+      if (from === 'attachment-detail') {
+        const r = currentRule()
+        return {
+          crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <span class="crumb-link" onclick="backFromBind()">attachment rule</span> / <b>${p.name}</b>`,
+          back: `<button class="btn secondary small" onclick="backFromBind()">${I.back} Back to attachment rule</button>`,
+          banner: `<div class="banner info">Editing the bind document for rule <code>${r.id}</code> · attaches <span class="mono">${r.policy}</span>. Save here, then return to the rule.</div>`,
+        }
+      }
+      if (from === 'attachment-create') {
+        return {
+          crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <span class="crumb-link" onclick="backFromBind()">new attachment rule</span> / <b>${p.name}</b>`,
+          back: `<button class="btn secondary small" onclick="backFromBind()">${I.back} Back to new rule</button>`,
+          banner: `<div class="banner info">Editing a bind document while creating an attachment rule. Return to finish the rule.</div>`,
+        }
+      }
+      return {
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <b>${p.name}</b>`,
+        back: `<button class="btn secondary small" onclick="state.policyKind='autoattach';go('policies')">${I.back} Back to attachment rules</button>`,
+        banner: '',
+      }
     }
 
     const ENFORCEMENT = [
@@ -689,7 +723,7 @@ bind := true if {
     ]
 
     function bindById(id) {
-      return BIND_POLICIES.find((p) => p.id === id) || BIND_POLICIES[1]
+      return BIND_CATALOG.find((p) => p.id === id) || BIND_POLICIES.find((p) => p.id === id) || BIND_POLICIES[1]
     }
 
     function policyDesc(name) {
@@ -1022,12 +1056,15 @@ bind := true if {
             </section>`
     }
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', evalFilter: 'all', evalPane: 'input', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h', bindCreate: false, bindName: 'auto-bind-prod-name.rego', bindDesc: 'bind := true if name starts with prod- or matches production.', bindBody: '' }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', bindFrom: null, ruleId: 'r1', evalId: '4f2c', evalFilter: 'all', evalPane: 'input', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h', bindCreate: false, bindName: 'auto-bind-prod-name.rego', bindDesc: 'bind := true if name starts with prod- or matches production.', bindBody: '' }
 
     function go(screen) {
       state.screen = screen
       state.menu = false
-      if (!['policy-simulate', 'policy-body', 'policy-bind-simulate', 'policy-bind-body'].includes(screen)) state.simulated = false
+      if (!['policy-simulate', 'policy-body', 'policy-bind-simulate', 'policy-bind-body'].includes(screen)) {
+        state.simulated = false
+        if (!['attachment-detail', 'attachment-create'].includes(screen)) state.bindFrom = null
+      }
       if (screen !== 'policy-create') state.createStep = 'Details'
       if (screen === 'policy-create' && state.formType === 'BINDING') state.formType = 'WORKBENCH'
       if (screen === 'attachment-create' || screen === 'attachment-detail') state.policyKind = 'autoattach'
@@ -1321,7 +1358,7 @@ bind := true if {
                 <span class="label">Bind policy</span>
                 <div style="display:flex;gap:8px;align-items:center">
                   <input class="input" style="flex:1" value="${bind.name}" disabled />
-                  <button class="btn secondary small" onclick="openBind('${bind.id}')">Edit bind policy</button>
+                  <button class="btn secondary small" onclick="openBind('${bind.id}', 'attachment-detail')">Edit bind policy</button>
                 </div>
                 <span class="hint">${bind.desc}</span>
               </div>
@@ -1440,15 +1477,18 @@ default sample := 0.5</textarea>
         const p = currentBind()
         const stack = /stack/.test(p.target) && !/workbench/.test(p.target)
         const input = stack ? BIND_INPUT_STACK : BIND_INPUT_WB
+        const ret = bindReturnChrome(p)
         return securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <b>${p.name}</b>`,
+        crumb: ret.crumb,
         html: `
+          ${ret.banner}
           <div class="page-head">
             <div>
               <h1 class="title">${p.name}</h1>
               <p class="subtitle">${p.desc}</p>
             </div>
             <div class="head-actions">
+              ${ret.back}
               <button class="btn secondary small">Revert</button>
               <button class="btn small">Save policy</button>
             </div>
@@ -1497,15 +1537,20 @@ default sample := 0.5</textarea>
         const p = currentBind()
         const stack = /stack/.test(p.target) && !/workbench/.test(p.target)
         const input = stack ? BIND_INPUT_STACK : BIND_INPUT_WB
+        const ret = bindReturnChrome(p)
         return securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <span class="crumb-link" onclick="go('policy-bind-body')">${p.name}</span> / <b>simulate</b>`,
+        crumb: `${ret.crumb.replace(`<b>${p.name}</b>`, `<span class="crumb-link" onclick="go('policy-bind-body')">${p.name}</span>`)} / <b>simulate</b>`,
         html: `
+          ${ret.banner}
           <div class="page-head">
             <div>
               <h1 class="title">Simulate bind</h1>
               <p class="subtitle">Replay a cleaned ${stack ? 'stack' : 'workbench'} through <code>${p.name}</code>. Query path is <code>data.plrl.binding.result</code>.</p>
             </div>
-            <button class="btn" onclick="state.simulated=true;render()">${I.play} Simulate</button>
+            <div class="head-actions">
+              ${ret.back}
+              <button class="btn" onclick="state.simulated=true;render()">${I.play} Simulate</button>
+            </div>
           </div>
           <div class="banner info">Input is <code>Console.clean(target)</code> — not a tool payload. <code>evaluatePolicy</code> does not persist a sample.</div>
           ${state.simulated ? '<div class="banner ok">Simulated <code>bind: true</code>. The paired enforcement policy would attach (or stay attached) on this target.</div>' : ''}
@@ -1906,6 +1951,7 @@ default sample := 0.5</textarea>
     })
     window.go = go
     window.openBind = openBind
+    window.backFromBind = backFromBind
     window.openRule = openRule
     window.openEval = openEval
     window.selectEval = selectEval
