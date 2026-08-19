@@ -4,6 +4,31 @@ helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 eolApiSlug: cilium
 versions:
+- version: 1.20.1
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **New/adjusted Helm values surfaced by this patch:**\n  - `envoy.httpUpstreamLingerTimeout`\
+      \ now **accepts `0`** and will be correctly templated into the Envoy config\
+      \ ConfigMap (previously `0` could be treated as \u201Cunset\u201D).\n  - `endpointPolicyUpdateTimeoutDuration`\
+      \ can now be **set via Helm** (previously not configurable from chart values).\n\
+      \n- **Potential behavior change to watch for (no action unless you rely on old\
+      \ behavior):**\n  - Envoy route idle timeout behavior is restored to use `http-idle-timeout`\
+      \ as the source again; if you had workarounds/tuning around idle timeouts, re-validate\
+      \ after upgrade."
+    chart_updates: [ClusterMesh documentation and guidance is updated/overhauled (Helm-first
+        setup and cert configuration instructions)., Fix for ClusterMesh MCS-API CRD
+        install/upgrade race when `clustermesh-apiserver` starts before the CRD version
+        is present., 'Helm templating fix so `envoy.httpUpstreamLingerTimeout: 0`
+        is rendered into the ConfigMap.', Helm support added to pass through `endpointPolicyUpdateTimeoutDuration`.]
+    features: [ClusterMesh documentation is substantially improved with Helm-first
+        setup and clearer certificate configuration guidance., Faster recovery for
+        disrupted TCP connections when accessing DSR-enabled Services (improves resiliency/perceived
+        reliability).]
+    breaking_changes: []
+  chart_version: 1.20.1
+  images: []
 - version: 1.20.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
