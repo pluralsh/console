@@ -32,6 +32,7 @@ defmodule Console.AI.Tools.Workbench.Codemode do
       python,
       functions: build_funcs(tools, policies),
       mounts: mounts(),
+      callback_timeout: :infinity,
       limits: %{
         # execution-time budget (always enforced)
         max_duration_secs: 60.0,
