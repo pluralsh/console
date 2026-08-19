@@ -161,17 +161,14 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 
 ### Attachment rule modal
 
-**Step 1 of 2 — pick the two documents**
+One screen. The rule is two pointers, not a file.
 
-- Left: **Attach which policy** — enforcement `.rego` list with Workbench / Stack chips.
-- Right: **Choose targets with which bind policy** — BINDING `.rego` only, filtered to binds that can run on the inferred target. Link: **Create a binding policy first**.
-- Footer: “Both fields are policy documents — the rule holds no Rego.” · **Next · tool scope**.
-
-**Step 2 of 2 — tool scope**
-
-- `interval` (default 1h, min 30m)
-- `matches.workbench.regexes` (empty → all tools)
-- Recap of inferred type. Create `BindingPolicy`.
+- Left: **Attach which policy** — WORKBENCH / STACK `.rego`. Infers `BindingPolicy.type`.
+- Right: **Bind when** — BINDING `.rego` filtered to that target. Link: **Create a binding policy first**.
+- Recap chip: “Attaches to workbenches/stacks — inferred, sent as `type`.”
+- **Tools (optional)** — only if inferred type is workbench. Maps to `matches.workbench.regexes`. Empty → all tools. Hidden for stacks (`StackPolicy` has no matches).
+- **Advanced · polls every 1h** — `interval`, defaulted, min 30m. Not a peer of the two pickers.
+- Create sends `createBindingPolicy({ policyId, bindPolicyId, type, interval?, matches? })`. No name, no Rego.
 
 ### Example auto-attach Rego
 
@@ -221,7 +218,8 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 | 1 | Security overview (new sidenav) | `/security/overview` |
 | 2 | Policies list (`WORKBENCH` + `STACK`) | `/security/policies` |
 | 2b | Attachment rules (`BindingPolicy` rows) | `/security/policies` (rules tab) |
-| 2c | New attachment rule (2-step modal) | `/security/policies/attachments/create` |
+| 2c | New attachment rule · workbench | `/security/policies/attachments/create` |
+| 2d | New attachment rule · stack (no regexes) | `/security/policies/attachments/create` |
 | 3 | Policies empty (same tabs) | `/security/policies` |
 | 4 | Create policy (details + policy body text) | `/security/policies/create` |
 | 5 | Definition + simulate | `/security/policies/:id` |

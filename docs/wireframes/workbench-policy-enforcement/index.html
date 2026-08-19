@@ -264,7 +264,7 @@
     .modal-foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 8px; border-top: 1px solid var(--border); }
     .pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .pick-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-    .pick-list { border: 1px solid var(--border-fill-one); border-radius: 6px; overflow: hidden; background: var(--fill-zero); max-height: 360px; overflow-y: auto; }
+    .pick-list { border: 1px solid var(--border-fill-one); border-radius: 6px; overflow: hidden; background: var(--fill-zero); max-height: 248px; overflow-y: auto; }
     .pick-row {
       display: block; width: 100%; text-align: left; padding: 10px 12px; border: 0;
       border-bottom: 1px solid var(--border); background: transparent; color: inherit;
@@ -274,6 +274,21 @@
     .pick-row.active { background: var(--fill-zero-selected); box-shadow: inset 0 0 0 1px var(--border-primary); }
     .pick-row .row-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .th { font-size: 11px; letter-spacing: 0.06em; color: var(--text-xlight); font-weight: 600; text-transform: uppercase; }
+    .inferred {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 10px 12px; background: var(--fill-zero); border: 1px solid var(--border-fill-one); border-radius: 6px;
+    }
+    .advanced-toggle {
+      background: 0; border: 0; color: var(--text-light); padding: 0; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .advanced-toggle:hover { color: var(--text); }
+    .advanced-toggle .caret { transition: transform .15s ease; }
+    .advanced-toggle.open .caret { transform: rotate(90deg); }
+    .mutation {
+      font-family: "JetBrains Mono", monospace; font-size: 11px; line-height: 16px;
+      background: #0E1015; border: 1px solid var(--border); border-radius: 4px;
+      padding: 10px 12px; color: #C5C9D2; white-space: pre; overflow: auto;
+    }
   </style>
 </head>
 <body>
@@ -282,7 +297,8 @@
     <button data-go="security-overview">1. Security sidenav</button>
     <button data-go="policies" data-kind="enforcement">2. Policies</button>
     <button data-go="policies" data-kind="autoattach">2b. Attachment rules</button>
-    <button data-go="attachment-create" data-kind="autoattach">2c. New attachment rule</button>
+    <button data-go="attachment-create" data-kind="autoattach" data-policy="prod-guardrails.rego">2c. New rule · workbench</button>
+    <button data-go="attachment-create" data-kind="autoattach" data-policy="change-window.rego">2d. New rule · stack</button>
     <button data-go="policies-empty">3. Empty</button>
     <button data-go="policy-create">4. Create policy</button>
     <button data-go="policy-body">5. Definition + simulate</button>
@@ -603,7 +619,7 @@ bind := true if {
             : 'Rules that decide which workbenches and stacks a policy attaches to. Each rule evaluates one bind policy against the target object — matching targets inherit the policy, narrowed by the rule’s tool regexes.'}</p>
           ${tab === 'policies'
             ? `<button class="btn small" onclick="go('policy-create')">New policy</button>`
-            : `<button class="btn small" onclick="state.attachStep=1;go('attachment-create')">New attachment rule</button>`}
+            : `<button class="btn small" onclick="state.attachAdvanced=false;go('attachment-create')">New attachment rule</button>`}
         </div>`
     }
 
@@ -710,7 +726,7 @@ bind := true if {
             </section>`
     }
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachStep: 1, attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod' }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachAdvanced: false, attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h' }
 
     function go(screen) {
       state.screen = screen
@@ -721,7 +737,11 @@ bind := true if {
         state.formType = state.policyKind === 'autoattach' ? 'BINDING' : (state.formType === 'BINDING' ? 'WORKBENCH' : (state.formType || 'WORKBENCH'))
       }
       if (screen === 'attachment-create' || screen === 'attachment-detail') state.policyKind = 'autoattach'
-      if (screen !== 'attachment-create') state.attachStep = 1
+      if (screen === 'attachment-create') {
+        const binds = compatibleBinds()
+        if (binds.length && !binds.some((p) => p.id === state.attachBind)) state.attachBind = binds[0].id
+      }
+      if (screen !== 'attachment-create') state.attachAdvanced = false
       location.hash = screen
       render()
     }
@@ -866,7 +886,7 @@ bind := true if {
             ${state.policyKind === 'autoattach' ? `
               <h3>No attachment rules</h3>
               <p>Pick an enforcement policy and a bind policy. The rule attaches the first when the second returns <code>bind: true</code>.</p>
-              <button class="btn" onclick="state.attachStep=1;go('attachment-create')">New attachment rule</button>
+              <button class="btn" onclick="state.attachAdvanced=false;go('attachment-create')">New attachment rule</button>
             ` : `
               <h3>No policies yet</h3>
               <p>Create a workbench or stack policy, then attach it from a workbench or an attachment rule.</p>
@@ -878,8 +898,24 @@ bind := true if {
       'attachment-create': () => {
         const attached = ENFORCEMENT.find((x) => x.id === state.attachPolicy) || ENFORCEMENT[0]
         const inferred = attached.type
+        const workbench = inferred === 'Workbench'
         const binds = BIND_POLICIES.filter((p) => p.target.includes(inferred.toLowerCase()))
         const selectedBind = binds.find((p) => p.id === state.attachBind) || binds[0]
+        const interval = state.attachInterval || '1h'
+        const mutation = workbench
+          ? `createBindingPolicy({
+  policyId:      "${attached.id}",
+  bindPolicyId:  "${selectedBind.name}",
+  type:          "workbench",   // inferred from Policy.type
+  interval:      "${interval}", // default 1h, min 30m
+  matches:       { workbench: { regexes: ["kube\\\\.(exec|delete|shell)"] } }
+})`
+          : `createBindingPolicy({
+  policyId:      "${attached.id}",
+  bindPolicyId:  "${selectedBind.name}",
+  type:          "stack",       // inferred from Policy.type
+  interval:      "${interval}"  // default 1h — no matches on StackPolicy
+})`
         return securityPage('policies', {
         crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <b>new attachment rule</b>`,
         html: `
@@ -887,19 +923,17 @@ bind := true if {
           ${attachmentRulesTable()}
           <div class="modal-scrim" onclick="if (event.target === this) { state.policyKind='autoattach'; go('policies') }">
             <div class="modal">
-              ${state.attachStep === 1 ? `
               <div class="modal-head">
                 <div>
-                  <div class="modal-kicker">STEP 1 OF 2</div>
                   <h2 class="modal-title">New attachment rule</h2>
-                  <p class="subtitle">Pick the enforcement document and the bind document. Target type is inferred from the attached policy — there is no separate place picker.</p>
+                  <p class="subtitle">Pick two policy documents. The rule itself has no name and no Rego — it only points at them.</p>
                 </div>
                 <button class="icon-btn" onclick="state.policyKind='autoattach';go('policies')">×</button>
               </div>
               <div class="pick-grid">
                 <div class="pick-col">
                   <div class="th">Attach which policy</div>
-                  <div class="hint"><code>BindingPolicy.policy</code> · WORKBENCH and STACK documents only. This is what gets attached.</div>
+                  <div class="hint">WORKBENCH or STACK document. This is what gets attached when bind is true.</div>
                   <div class="pick-list">
                     ${ENFORCEMENT.map((p) => `
                     <button type="button" class="pick-row ${p.id === attached.id ? 'active' : ''}" onclick="pickAttach('${p.id}')">
@@ -910,10 +944,10 @@ bind := true if {
                 </div>
                 <div class="pick-col">
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                    <div class="th">Choose targets with which bind policy</div>
+                    <div class="th">Bind when</div>
                     <a href="#" onclick="event.preventDefault();state.formType='BINDING';state.policyKind='autoattach';go('policy-create')">Create a binding policy first</a>
                   </div>
-                  <div class="hint"><code>BindingPolicy.bindPolicy</code> · BINDING documents only. Evaluates <code>bind: true/false</code> against a ${inferred.toLowerCase()}.</div>
+                  <div class="hint">BINDING document only. Evaluates <code>bind: true/false</code> against a cleaned ${inferred.toLowerCase()}.</div>
                   <div class="pick-list">
                     ${binds.map((p) => `
                     <button type="button" class="pick-row ${p.id === selectedBind.id ? 'active' : ''}" onclick="state.attachBind='${p.id}';render()">
@@ -923,41 +957,42 @@ bind := true if {
                   </div>
                 </div>
               </div>
-              <div class="modal-foot">
-                <span class="hint">Both fields are policy documents — the rule holds no Rego.</span>
-                <div style="display:flex;gap:8px">
-                  <button class="btn secondary" onclick="state.policyKind='autoattach';go('policies')">Cancel</button>
-                  <button class="btn" onclick="state.attachStep=2;state.attachBind='${selectedBind.id}';render()">Next · tool scope</button>
-                </div>
+              <div class="inferred">
+                <span class="hint">Attaches to</span>
+                ${typeChip(inferred + 's')}
+                <span class="hint">inferred from <span class="mono">${attached.id}</span> · sent as <code>type</code>, not chosen here</span>
               </div>
-              ` : `
-              <div class="modal-head">
-                <div>
-                  <div class="modal-kicker">STEP 2 OF 2 · TOOL SCOPE</div>
-                  <h2 class="modal-title">Narrow which tools the policy covers</h2>
-                  <p class="subtitle">Attaches <span class="mono">${attached.id}</span> to ${inferred.toLowerCase()}s when <span class="mono">${selectedBind.name}</span> returns <code>bind: true</code>. <code>BindingPolicy.type</code> = ${inferred} (inferred, not chosen).</p>
-                </div>
-                <button class="icon-btn" onclick="state.policyKind='autoattach';go('policies')">×</button>
-              </div>
+              ${workbench ? `
               <div class="field">
-                <span class="label">interval</span>
-                <input class="input mono" value="1h" />
-                <span class="hint">How often the bind policy is re-evaluated. Default 1h, minimum 30m.</span>
-              </div>
-              <div class="field">
-                <span class="label">matches.workbench.regexes</span>
+                <span class="label">Tools <span style="font-weight:400;color:var(--text-xlight)">(optional)</span></span>
                 <div class="tags">
-                  ${inferred === 'Workbench' ? `<span class="tag">kube\\\\.(exec|delete|shell) <button>×</button></span>` : ''}
+                  <span class="tag">kube\\.(exec|delete|shell) <button>×</button></span>
                   <input placeholder="Add regex and press enter" />
                 </div>
-                <span class="hint">Copied onto the created attachment when bind is true. Empty → all tools.</span>
+                <span class="hint">Copied onto each created <code>WorkbenchPolicy</code>. Empty → all tools. Hidden for stacks — <code>StackPolicy</code> has no matches.</span>
+              </div>` : `
+              <div class="inferred">
+                <span class="hint">No tool regexes. Matching stacks receive the whole policy (<code>StackPolicy</code> is <code>policyId</code> + <code>stackId</code> only).</span>
+              </div>`}
+              <div>
+                <button type="button" class="advanced-toggle ${state.attachAdvanced ? 'open' : ''}" onclick="state.attachAdvanced=!state.attachAdvanced;render()">
+                  <span class="caret">${I.caret}</span> Advanced · polls every ${interval}
+                </button>
+                ${state.attachAdvanced ? `
+                <div class="field" style="margin-top:10px">
+                  <span class="label">interval</span>
+                  <input class="input mono" style="max-width:160px" value="${interval}" onchange="state.attachInterval=this.value" />
+                  <span class="hint">How often the bind policy is re-evaluated. Default <code>1h</code>, minimum <code>30m</code>. Omit on create to keep the default.</span>
+                </div>` : ''}
               </div>
-              <div class="callout"><code>createBindingPolicy({ policyId, bindPolicyId, type: '${inferred.toLowerCase()}', interval, matches })</code> — type is inferred from the attached policy.</div>
+              <div class="mutation">${mutation}</div>
               <div class="modal-foot">
-                <button class="btn secondary" onclick="state.attachStep=1;render()">Back</button>
-                <button class="btn" onclick="state.policyKind='autoattach';go('policies')">Create attachment rule</button>
+                <span class="hint">Required: <code>policyId</code>, <code>bindPolicyId</code>, <code>type</code>. Interval and matches are optional.</span>
+                <div style="display:flex;gap:8px">
+                  <button class="btn secondary" onclick="state.policyKind='autoattach';go('policies')">Cancel</button>
+                  <button class="btn" onclick="state.policyKind='autoattach';go('policies')">Create attachment rule</button>
+                </div>
               </div>
-              `}
             </div>
           </div>`
       })
@@ -1213,7 +1248,7 @@ default sample := 0.5`}</textarea>
         html: `
           ${policyDetailHead('att')}
           <div style="display:flex;justify-content:flex-end">
-            <button class="btn small" onclick="state.attachPolicy='prod-guardrails.rego';state.attachStep=1;go('attachment-create')">New attachment rule</button>
+            <button class="btn small" onclick="state.attachPolicy='prod-guardrails.rego';state.attachAdvanced=false;go('attachment-create')">New attachment rule</button>
           </div>
           <table class="table">
             <thead><tr><th>Bind policy</th><th>Targets</th><th>Matched</th><th></th></tr></thead>
@@ -1507,7 +1542,8 @@ default sample := 0.5`}</textarea>
       document.querySelectorAll('.picker button').forEach((b) => {
         const screenMatch = b.dataset.go === state.screen
         const kindMatch = !b.dataset.kind || b.dataset.kind === state.policyKind
-        b.classList.toggle('active', screenMatch && kindMatch)
+        const policyMatch = !b.dataset.policy || b.dataset.policy === state.attachPolicy
+        b.classList.toggle('active', screenMatch && kindMatch && policyMatch)
       })
     }
 
@@ -1515,6 +1551,7 @@ default sample := 0.5`}</textarea>
       const btn = e.target.closest('button[data-go]')
       if (!btn) return
       if (btn.dataset.kind) state.policyKind = btn.dataset.kind
+      if (btn.dataset.policy) state.attachPolicy = btn.dataset.policy
       go(btn.dataset.go)
     })
     window.go = go
