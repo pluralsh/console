@@ -72,7 +72,7 @@ func (c *SimpleCache[T]) ExpiryWithJitter() time.Duration {
 func (c *SimpleCache[T]) Export() map[string]ExportedLine[T] {
 	items := make(map[string]ExportedLine[T])
 	for id, line := range c.cache.Items() {
-		if !line.live() {
+		if line.resource == nil || !line.live() {
 			continue
 		}
 		items[id] = ExportedLine[T]{Resource: *line.resource, ExpiresAt: line.expiresAt}

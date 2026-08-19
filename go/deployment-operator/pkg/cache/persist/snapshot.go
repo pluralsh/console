@@ -3,6 +3,7 @@ package persist
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -190,6 +191,9 @@ func (s *Store) Load() (Snapshot, error) {
 	}
 	if err := json.Unmarshal(data, &snap); err != nil {
 		return snap, err
+	}
+	if snap.Version != SnapshotVersion {
+		return Snapshot{}, fmt.Errorf("unsupported snapshot version %d", snap.Version)
 	}
 	return snap, nil
 }

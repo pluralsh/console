@@ -85,6 +85,19 @@ func TestLoadCorruptFileReturnsError(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestLoadUnsupportedVersionReturnsError(t *testing.T) {
+	dir := t.TempDir()
+	store, err := Open(dir)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = store.Close() })
+
+	require.NoError(t, os.WriteFile(filepath.Join(dir, stateFileName), []byte(`{"version": 99}`), 0o600))
+
+	_, err = store.Load()
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "unsupported snapshot version")
+}
+
 func TestSaveIsAtomic(t *testing.T) {
 	dir := t.TempDir()
 	store, err := Open(dir)

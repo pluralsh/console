@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
@@ -87,7 +88,10 @@ func (c *ManifestCache) prepareDir(id, sha string) (string, error) {
 		return os.MkdirTemp("", "manifests")
 	}
 
-	dir := filepath.Join(c.cacheDir, persist.ManifestsDir, id, sha)
+	dir, err := c.manifestDir(id, sha)
+	if err != nil {
+		return "", err
+	}
 	if err := os.RemoveAll(dir); err != nil {
 		return "", err
 	}
@@ -95,6 +99,41 @@ func (c *ManifestCache) prepareDir(id, sha string) (string, error) {
 		return "", err
 	}
 	return dir, nil
+}
+
+func (c *ManifestCache) manifestDir(id, sha string) (string, error) {
+	if err := safePathComponent(id); err != nil {
+		return "", err
+	}
+	if err := safePathComponent(sha); err != nil {
+		return "", err
+	}
+	return filepath.Join(c.cacheDir, persist.ManifestsDir, id, sha), nil
+}
+
+func safePathComponent(name string) error {
+	if name == "" || name == "." || name == ".." {
+		return fmt.Errorf("invalid cache path component %q", name)
+	}
+	if strings.ContainsRune(name, '/') || strings.ContainsRune(name, '\\') || strings.ContainsRune(name, filepath.Separator) {
+		return fmt.Errorf("invalid cache path component %q", name)
+	}
+	if strings.ContainsRune(name, 0) {
+		return fmt.Errorf("invalid cache path component %q", name)
+	}
+	return nil
+}
+
+func sameDir(a, b string) bool {
+	absA, err := filepath.Abs(a)
+	if err != nil {
+		return false
+	}
+	absB, err := filepath.Abs(b)
+	if err != nil {
+		return false
+	}
+	return absA == absB
 }
 
 func buildTarballURL(tarball, sha string) (*url.URL, error) {
@@ -147,9 +186,17 @@ func (c *ManifestCache) Export() map[string]persist.ManifestRecord {
 }
 
 func (c *ManifestCache) Import(items map[string]persist.ManifestRecord) {
+	if c.cacheDir == "" {
+		return
+	}
+
 	for id, rec := range items {
+		expected, err := c.manifestDir(id, rec.SHA)
+		if err != nil || !sameDir(expected, rec.Dir) {
+			continue
+		}
 		line := &cacheLine{
-			dir:     rec.Dir,
+			dir:     expected,
 			sha:     rec.SHA,
 			created: rec.Created,
 			expiry:  rec.Expiry,
@@ -157,7 +204,7 @@ func (c *ManifestCache) Import(items map[string]persist.ManifestRecord) {
 		if !line.live() {
 			continue
 		}
-		if _, err := os.Stat(rec.Dir); err != nil {
+		if _, err := os.Stat(expected); err != nil {
 			continue
 		}
 		c.cache.Set(id, line)

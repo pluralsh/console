@@ -119,3 +119,50 @@ func TestManifestCacheImportSkipsExpiredAndMissingDirs(t *testing.T) {
 	require.NotContains(t, exported, "expired")
 	require.NotContains(t, exported, "missing")
 }
+
+func TestPrepareDirRejectsPathTraversal(t *testing.T) {
+	cacheDir := t.TempDir()
+	c := NewCache(time.Hour, "", "", cacheDir)
+
+	_, err := c.prepareDir("../escape", "sha")
+	require.Error(t, err)
+	_, err = c.prepareDir("svc", "..")
+	require.Error(t, err)
+	_, err = c.prepareDir("svc/nested", "sha")
+	require.Error(t, err)
+	outside := filepath.Join(cacheDir, "..", "outside")
+	require.NoDirExists(t, outside)
+}
+
+func TestManifestCacheImportRejectsPathsOutsideCache(t *testing.T) {
+	cacheDir := t.TempDir()
+	outside := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(outside, "marker"), []byte("keep"), 0o600))
+
+	c := NewCache(time.Hour, "", "", cacheDir)
+	c.Import(map[string]persist.ManifestRecord{
+		"evil": {
+			Dir:     outside,
+			SHA:     "sha",
+			Created: time.Now(),
+			Expiry:  time.Hour,
+		},
+	})
+	require.Empty(t, c.Export())
+
+	c.Expire("evil")
+	require.FileExists(t, filepath.Join(outside, "marker"))
+
+	empty := NewCache(time.Hour, "", "", "")
+	liveDir := filepath.Join(cacheDir, persist.ManifestsDir, "live", "sha")
+	require.NoError(t, os.MkdirAll(liveDir, 0o755))
+	empty.Import(map[string]persist.ManifestRecord{
+		"live": {
+			Dir:     liveDir,
+			SHA:     "sha",
+			Created: time.Now(),
+			Expiry:  time.Hour,
+		},
+	})
+	require.Empty(t, empty.Export())
+}

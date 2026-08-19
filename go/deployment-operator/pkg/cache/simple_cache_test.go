@@ -60,6 +60,18 @@ func TestSimpleCacheExportImportSkipsExpired(t *testing.T) {
 	assert.False(t, ok)
 }
 
+func TestSimpleCacheExportSkipsNilResource(t *testing.T) {
+	src := NewSimpleCache[string](time.Hour)
+	src.cache.Set("nil", simpleCacheLine[string]{
+		expiresAt: time.Now().Add(time.Hour),
+	})
+
+	assert.NotPanics(t, func() {
+		exported := src.Export()
+		assert.NotContains(t, exported, "nil")
+	})
+}
+
 func ptr[T any](v T) *T {
 	return &v
 }
