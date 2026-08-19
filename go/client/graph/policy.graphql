@@ -1,0 +1,123 @@
+fragment TinyPolicyFragment on Policy {
+    id
+    name
+}
+
+fragment PolicyFragment on Policy {
+    id
+    name
+    type
+    description
+    policy
+    project {
+        ...TinyProjectFragment
+    }
+    insertedAt
+    updatedAt
+}
+
+fragment BindingPolicyFragment on BindingPolicy {
+    id
+    type
+    interval
+    nextPollAt
+    matches {
+        workbench {
+            regexes
+        }
+    }
+    policy {
+        ...TinyPolicyFragment
+    }
+    bindPolicy {
+        ...TinyPolicyFragment
+    }
+    insertedAt
+    updatedAt
+}
+
+query GetPolicy($id: ID, $name: String) {
+    policy(id: $id, name: $name) {
+        ...PolicyFragment
+    }
+}
+
+query GetPolicyTiny($id: ID, $name: String) {
+    policy(id: $id, name: $name) {
+        ...TinyPolicyFragment
+    }
+}
+
+query ListPolicies($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {
+    policies(after: $after, first: $first, before: $before, last: $last, projectId: $projectId, q: $q) {
+        edges {
+            node {
+                ...PolicyFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+mutation CreatePolicy($attributes: PolicyAttributes!) {
+    createPolicy(attributes: $attributes) {
+        ...PolicyFragment
+    }
+}
+
+mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
+    updatePolicy(id: $id, attributes: $attributes) {
+        ...PolicyFragment
+    }
+}
+
+mutation DeletePolicy($id: ID!) {
+    deletePolicy(id: $id) {
+        ...PolicyFragment
+    }
+}
+
+query GetBindingPolicy($id: ID!) {
+    bindingPolicy(id: $id) {
+        ...BindingPolicyFragment
+    }
+}
+
+query GetBindingPolicyTiny($id: ID!) {
+    bindingPolicy(id: $id) {
+        id
+    }
+}
+
+query ListBindingPolicies($after: String, $first: Int, $before: String, $last: Int) {
+    bindingPolicies(after: $after, first: $first, before: $before, last: $last) {
+        edges {
+            node {
+                ...BindingPolicyFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
+    createBindingPolicy(attributes: $attributes) {
+        ...BindingPolicyFragment
+    }
+}
+
+mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+    updateBindingPolicy(id: $id, attributes: $attributes) {
+        ...BindingPolicyFragment
+    }
+}
+
+mutation DeleteBindingPolicy($id: ID!) {
+    deleteBindingPolicy(id: $id) {
+        ...BindingPolicyFragment
+    }
+}

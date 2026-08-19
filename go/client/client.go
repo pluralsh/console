@@ -229,6 +229,18 @@ type ConsoleClient interface {
 	GetComplianceReportGenerator(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetComplianceReportGenerator, error)
 	UpsertComplianceReportGenerator(ctx context.Context, attributes ComplianceReportGeneratorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertComplianceReportGenerator, error)
 	DeleteComplianceReportGenerator(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteComplianceReportGenerator, error)
+	GetPolicy(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPolicy, error)
+	GetPolicyTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPolicyTiny, error)
+	ListPolicies(ctx context.Context, after *string, first *int64, before *string, last *int64, projectID *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicies, error)
+	CreatePolicy(ctx context.Context, attributes PolicyAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePolicy, error)
+	UpdatePolicy(ctx context.Context, id string, attributes PolicyAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePolicy, error)
+	DeletePolicy(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePolicy, error)
+	GetBindingPolicy(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetBindingPolicy, error)
+	GetBindingPolicyTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetBindingPolicyTiny, error)
+	ListBindingPolicies(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListBindingPolicies, error)
+	CreateBindingPolicy(ctx context.Context, attributes BindingPolicyAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateBindingPolicy, error)
+	UpdateBindingPolicy(ctx context.Context, id string, attributes BindingPolicyUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateBindingPolicy, error)
+	DeleteBindingPolicy(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteBindingPolicy, error)
 	GetPreviewEnvironmentTemplate(ctx context.Context, id *string, flowID *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPreviewEnvironmentTemplate, error)
 	UpsertPreviewEnvironmentTemplate(ctx context.Context, attributes PreviewEnvironmentTemplateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPreviewEnvironmentTemplate, error)
 	DeletePreviewEnvironmentTemplate(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePreviewEnvironmentTemplate, error)
@@ -4884,6 +4896,151 @@ func (t *ComplianceReportGeneratorFragment) GetReadBindings() []*PolicyBindingFr
 		t = &ComplianceReportGeneratorFragment{}
 	}
 	return t.ReadBindings
+}
+
+type TinyPolicyFragment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *TinyPolicyFragment) GetID() string {
+	if t == nil {
+		t = &TinyPolicyFragment{}
+	}
+	return t.ID
+}
+func (t *TinyPolicyFragment) GetName() string {
+	if t == nil {
+		t = &TinyPolicyFragment{}
+	}
+	return t.Name
+}
+
+type PolicyFragment struct {
+	ID          string               "json:\"id\" graphql:\"id\""
+	Name        string               "json:\"name\" graphql:\"name\""
+	Type        PolicyType           "json:\"type\" graphql:\"type\""
+	Description *string              "json:\"description,omitempty\" graphql:\"description\""
+	Policy      string               "json:\"policy\" graphql:\"policy\""
+	Project     *TinyProjectFragment "json:\"project,omitempty\" graphql:\"project\""
+	InsertedAt  *string              "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt   *string              "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+}
+
+func (t *PolicyFragment) GetID() string {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.ID
+}
+func (t *PolicyFragment) GetName() string {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.Name
+}
+func (t *PolicyFragment) GetType() *PolicyType {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return &t.Type
+}
+func (t *PolicyFragment) GetDescription() *string {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.Description
+}
+func (t *PolicyFragment) GetPolicy() string {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.Policy
+}
+func (t *PolicyFragment) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.Project
+}
+func (t *PolicyFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *PolicyFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &PolicyFragment{}
+	}
+	return t.UpdatedAt
+}
+
+type BindingPolicyFragment struct {
+	ID         string                         "json:\"id\" graphql:\"id\""
+	Type       BindingPolicyType              "json:\"type\" graphql:\"type\""
+	Interval   string                         "json:\"interval\" graphql:\"interval\""
+	NextPollAt *string                        "json:\"nextPollAt,omitempty\" graphql:\"nextPollAt\""
+	Matches    *BindingPolicyFragment_Matches "json:\"matches,omitempty\" graphql:\"matches\""
+	Policy     *TinyPolicyFragment            "json:\"policy,omitempty\" graphql:\"policy\""
+	BindPolicy *TinyPolicyFragment            "json:\"bindPolicy,omitempty\" graphql:\"bindPolicy\""
+	InsertedAt *string                        "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                        "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+}
+
+func (t *BindingPolicyFragment) GetID() string {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.ID
+}
+func (t *BindingPolicyFragment) GetType() *BindingPolicyType {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return &t.Type
+}
+func (t *BindingPolicyFragment) GetInterval() string {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.Interval
+}
+func (t *BindingPolicyFragment) GetNextPollAt() *string {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.NextPollAt
+}
+func (t *BindingPolicyFragment) GetMatches() *BindingPolicyFragment_Matches {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.Matches
+}
+func (t *BindingPolicyFragment) GetPolicy() *TinyPolicyFragment {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.Policy
+}
+func (t *BindingPolicyFragment) GetBindPolicy() *TinyPolicyFragment {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.BindPolicy
+}
+func (t *BindingPolicyFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *BindingPolicyFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &BindingPolicyFragment{}
+	}
+	return t.UpdatedAt
 }
 
 type PreviewEnvironmentTemplateFragment struct {
@@ -10189,6 +10346,28 @@ func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragm
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
 	}
 	return t.Service
+}
+
+type BindingPolicyFragment_Matches_Workbench struct {
+	Regexes []*string "json:\"regexes,omitempty\" graphql:\"regexes\""
+}
+
+func (t *BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
+	if t == nil {
+		t = &BindingPolicyFragment_Matches_Workbench{}
+	}
+	return t.Regexes
+}
+
+type BindingPolicyFragment_Matches struct {
+	Workbench *BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *BindingPolicyFragment_Matches) GetWorkbench() *BindingPolicyFragment_Matches_Workbench {
+	if t == nil {
+		t = &BindingPolicyFragment_Matches{}
+	}
+	return t.Workbench
 }
 
 type PreviewEnvironmentTemplateFragment_Flow struct {
@@ -26129,6 +26308,185 @@ func (t *ListComplianceReportGenerators_ComplianceReportGenerators) GetPageInfo(
 		t = &ListComplianceReportGenerators_ComplianceReportGenerators{}
 	}
 	return &t.PageInfo
+}
+
+type ListPolicies_Policies_Edges struct {
+	Node *PolicyFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListPolicies_Policies_Edges) GetNode() *PolicyFragment {
+	if t == nil {
+		t = &ListPolicies_Policies_Edges{}
+	}
+	return t.Node
+}
+
+type ListPolicies_Policies struct {
+	Edges    []*ListPolicies_Policies_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListPolicies_Policies) GetEdges() []*ListPolicies_Policies_Edges {
+	if t == nil {
+		t = &ListPolicies_Policies{}
+	}
+	return t.Edges
+}
+func (t *ListPolicies_Policies) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListPolicies_Policies{}
+	}
+	return &t.PageInfo
+}
+
+type GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench struct {
+	Regexes []*string "json:\"regexes,omitempty\" graphql:\"regexes\""
+}
+
+func (t *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
+	if t == nil {
+		t = &GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench{}
+	}
+	return t.Regexes
+}
+
+type GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches struct {
+	Workbench *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches_Workbench {
+	if t == nil {
+		t = &GetBindingPolicy_BindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Workbench
+}
+
+type GetBindingPolicyTiny_BindingPolicy struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetBindingPolicyTiny_BindingPolicy) GetID() string {
+	if t == nil {
+		t = &GetBindingPolicyTiny_BindingPolicy{}
+	}
+	return t.ID
+}
+
+type ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench struct {
+	Regexes []*string "json:\"regexes,omitempty\" graphql:\"regexes\""
+}
+
+func (t *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench{}
+	}
+	return t.Regexes
+}
+
+type ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches struct {
+	Workbench *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches) GetWorkbench() *ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches_Workbench {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies_Edges_Node_BindingPolicyFragment_Matches{}
+	}
+	return t.Workbench
+}
+
+type ListBindingPolicies_BindingPolicies_Edges struct {
+	Node *BindingPolicyFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListBindingPolicies_BindingPolicies_Edges) GetNode() *BindingPolicyFragment {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies_Edges{}
+	}
+	return t.Node
+}
+
+type ListBindingPolicies_BindingPolicies struct {
+	Edges    []*ListBindingPolicies_BindingPolicies_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                             "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
+func (t *ListBindingPolicies_BindingPolicies) GetEdges() []*ListBindingPolicies_BindingPolicies_Edges {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies{}
+	}
+	return t.Edges
+}
+func (t *ListBindingPolicies_BindingPolicies) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListBindingPolicies_BindingPolicies{}
+	}
+	return &t.PageInfo
+}
+
+type CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench struct {
+	Regexes []*string "json:\"regexes,omitempty\" graphql:\"regexes\""
+}
+
+func (t *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
+	if t == nil {
+		t = &CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench{}
+	}
+	return t.Regexes
+}
+
+type CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches struct {
+	Workbench *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches_Workbench {
+	if t == nil {
+		t = &CreateBindingPolicy_CreateBindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Workbench
+}
+
+type UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench struct {
+	Regexes []*string "json:\"regexes,omitempty\" graphql:\"regexes\""
+}
+
+func (t *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
+	if t == nil {
+		t = &UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench{}
+	}
+	return t.Regexes
+}
+
+type UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches struct {
+	Workbench *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches_Workbench {
+	if t == nil {
+		t = &UpdateBindingPolicy_UpdateBindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Workbench
+}
+
+type DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench struct {
+	Regexes []*string "json:\"regexes,omitempty\" graphql:\"regexes\""
+}
+
+func (t *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench) GetRegexes() []*string {
+	if t == nil {
+		t = &DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench{}
+	}
+	return t.Regexes
+}
+
+type DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches struct {
+	Workbench *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench "json:\"workbench,omitempty\" graphql:\"workbench\""
+}
+
+func (t *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches) GetWorkbench() *DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches_Workbench {
+	if t == nil {
+		t = &DeleteBindingPolicy_DeleteBindingPolicy_BindingPolicyFragment_Matches{}
+	}
+	return t.Workbench
 }
 
 type GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow struct {
@@ -46010,6 +46368,138 @@ func (t *DeleteComplianceReportGenerator) GetDeleteComplianceReportGenerator() *
 	return t.DeleteComplianceReportGenerator
 }
 
+type GetPolicy struct {
+	Policy *PolicyFragment "json:\"policy,omitempty\" graphql:\"policy\""
+}
+
+func (t *GetPolicy) GetPolicy() *PolicyFragment {
+	if t == nil {
+		t = &GetPolicy{}
+	}
+	return t.Policy
+}
+
+type GetPolicyTiny struct {
+	Policy *TinyPolicyFragment "json:\"policy,omitempty\" graphql:\"policy\""
+}
+
+func (t *GetPolicyTiny) GetPolicy() *TinyPolicyFragment {
+	if t == nil {
+		t = &GetPolicyTiny{}
+	}
+	return t.Policy
+}
+
+type ListPolicies struct {
+	Policies *ListPolicies_Policies "json:\"policies,omitempty\" graphql:\"policies\""
+}
+
+func (t *ListPolicies) GetPolicies() *ListPolicies_Policies {
+	if t == nil {
+		t = &ListPolicies{}
+	}
+	return t.Policies
+}
+
+type CreatePolicy struct {
+	CreatePolicy *PolicyFragment "json:\"createPolicy,omitempty\" graphql:\"createPolicy\""
+}
+
+func (t *CreatePolicy) GetCreatePolicy() *PolicyFragment {
+	if t == nil {
+		t = &CreatePolicy{}
+	}
+	return t.CreatePolicy
+}
+
+type UpdatePolicy struct {
+	UpdatePolicy *PolicyFragment "json:\"updatePolicy,omitempty\" graphql:\"updatePolicy\""
+}
+
+func (t *UpdatePolicy) GetUpdatePolicy() *PolicyFragment {
+	if t == nil {
+		t = &UpdatePolicy{}
+	}
+	return t.UpdatePolicy
+}
+
+type DeletePolicy struct {
+	DeletePolicy *PolicyFragment "json:\"deletePolicy,omitempty\" graphql:\"deletePolicy\""
+}
+
+func (t *DeletePolicy) GetDeletePolicy() *PolicyFragment {
+	if t == nil {
+		t = &DeletePolicy{}
+	}
+	return t.DeletePolicy
+}
+
+type GetBindingPolicy struct {
+	BindingPolicy *BindingPolicyFragment "json:\"bindingPolicy,omitempty\" graphql:\"bindingPolicy\""
+}
+
+func (t *GetBindingPolicy) GetBindingPolicy() *BindingPolicyFragment {
+	if t == nil {
+		t = &GetBindingPolicy{}
+	}
+	return t.BindingPolicy
+}
+
+type GetBindingPolicyTiny struct {
+	BindingPolicy *GetBindingPolicyTiny_BindingPolicy "json:\"bindingPolicy,omitempty\" graphql:\"bindingPolicy\""
+}
+
+func (t *GetBindingPolicyTiny) GetBindingPolicy() *GetBindingPolicyTiny_BindingPolicy {
+	if t == nil {
+		t = &GetBindingPolicyTiny{}
+	}
+	return t.BindingPolicy
+}
+
+type ListBindingPolicies struct {
+	BindingPolicies *ListBindingPolicies_BindingPolicies "json:\"bindingPolicies,omitempty\" graphql:\"bindingPolicies\""
+}
+
+func (t *ListBindingPolicies) GetBindingPolicies() *ListBindingPolicies_BindingPolicies {
+	if t == nil {
+		t = &ListBindingPolicies{}
+	}
+	return t.BindingPolicies
+}
+
+type CreateBindingPolicy struct {
+	CreateBindingPolicy *BindingPolicyFragment "json:\"createBindingPolicy,omitempty\" graphql:\"createBindingPolicy\""
+}
+
+func (t *CreateBindingPolicy) GetCreateBindingPolicy() *BindingPolicyFragment {
+	if t == nil {
+		t = &CreateBindingPolicy{}
+	}
+	return t.CreateBindingPolicy
+}
+
+type UpdateBindingPolicy struct {
+	UpdateBindingPolicy *BindingPolicyFragment "json:\"updateBindingPolicy,omitempty\" graphql:\"updateBindingPolicy\""
+}
+
+func (t *UpdateBindingPolicy) GetUpdateBindingPolicy() *BindingPolicyFragment {
+	if t == nil {
+		t = &UpdateBindingPolicy{}
+	}
+	return t.UpdateBindingPolicy
+}
+
+type DeleteBindingPolicy struct {
+	DeleteBindingPolicy *BindingPolicyFragment "json:\"deleteBindingPolicy,omitempty\" graphql:\"deleteBindingPolicy\""
+}
+
+func (t *DeleteBindingPolicy) GetDeleteBindingPolicy() *BindingPolicyFragment {
+	if t == nil {
+		t = &DeleteBindingPolicy{}
+	}
+	return t.DeleteBindingPolicy
+}
+
 type GetPreviewEnvironmentTemplate struct {
 	PreviewEnvironmentTemplate *PreviewEnvironmentTemplateFragment "json:\"previewEnvironmentTemplate,omitempty\" graphql:\"previewEnvironmentTemplate\""
 }
@@ -62408,6 +62898,532 @@ func (c *Client) DeleteComplianceReportGenerator(ctx context.Context, id string,
 	return &res, nil
 }
 
+const GetPolicyDocument = `query GetPolicy ($id: ID, $name: String) {
+	policy(id: $id, name: $name) {
+		... PolicyFragment
+	}
+}
+fragment PolicyFragment on Policy {
+	id
+	name
+	type
+	description
+	policy
+	project {
+		... TinyProjectFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) GetPolicy(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPolicy, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetPolicy
+	if err := c.Client.Post(ctx, "GetPolicy", GetPolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetPolicyTinyDocument = `query GetPolicyTiny ($id: ID, $name: String) {
+	policy(id: $id, name: $name) {
+		... TinyPolicyFragment
+	}
+}
+fragment TinyPolicyFragment on Policy {
+	id
+	name
+}
+`
+
+func (c *Client) GetPolicyTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetPolicyTiny, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetPolicyTiny
+	if err := c.Client.Post(ctx, "GetPolicyTiny", GetPolicyTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListPoliciesDocument = `query ListPolicies ($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {
+	policies(after: $after, first: $first, before: $before, last: $last, projectId: $projectId, q: $q) {
+		edges {
+			node {
+				... PolicyFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment PolicyFragment on Policy {
+	id
+	name
+	type
+	description
+	policy
+	project {
+		... TinyProjectFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListPolicies(ctx context.Context, after *string, first *int64, before *string, last *int64, projectID *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicies, error) {
+	vars := map[string]any{
+		"after":     after,
+		"first":     first,
+		"before":    before,
+		"last":      last,
+		"projectId": projectID,
+		"q":         q,
+	}
+
+	var res ListPolicies
+	if err := c.Client.Post(ctx, "ListPolicies", ListPoliciesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreatePolicyDocument = `mutation CreatePolicy ($attributes: PolicyAttributes!) {
+	createPolicy(attributes: $attributes) {
+		... PolicyFragment
+	}
+}
+fragment PolicyFragment on Policy {
+	id
+	name
+	type
+	description
+	policy
+	project {
+		... TinyProjectFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) CreatePolicy(ctx context.Context, attributes PolicyAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePolicy, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreatePolicy
+	if err := c.Client.Post(ctx, "CreatePolicy", CreatePolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdatePolicyDocument = `mutation UpdatePolicy ($id: ID!, $attributes: PolicyAttributes!) {
+	updatePolicy(id: $id, attributes: $attributes) {
+		... PolicyFragment
+	}
+}
+fragment PolicyFragment on Policy {
+	id
+	name
+	type
+	description
+	policy
+	project {
+		... TinyProjectFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) UpdatePolicy(ctx context.Context, id string, attributes PolicyAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePolicy, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdatePolicy
+	if err := c.Client.Post(ctx, "UpdatePolicy", UpdatePolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeletePolicyDocument = `mutation DeletePolicy ($id: ID!) {
+	deletePolicy(id: $id) {
+		... PolicyFragment
+	}
+}
+fragment PolicyFragment on Policy {
+	id
+	name
+	type
+	description
+	policy
+	project {
+		... TinyProjectFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) DeletePolicy(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePolicy, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeletePolicy
+	if err := c.Client.Post(ctx, "DeletePolicy", DeletePolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetBindingPolicyDocument = `query GetBindingPolicy ($id: ID!) {
+	bindingPolicy(id: $id) {
+		... BindingPolicyFragment
+	}
+}
+fragment BindingPolicyFragment on BindingPolicy {
+	id
+	type
+	interval
+	nextPollAt
+	matches {
+		workbench {
+			regexes
+		}
+	}
+	policy {
+		... TinyPolicyFragment
+	}
+	bindPolicy {
+		... TinyPolicyFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyPolicyFragment on Policy {
+	id
+	name
+}
+`
+
+func (c *Client) GetBindingPolicy(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetBindingPolicy, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetBindingPolicy
+	if err := c.Client.Post(ctx, "GetBindingPolicy", GetBindingPolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetBindingPolicyTinyDocument = `query GetBindingPolicyTiny ($id: ID!) {
+	bindingPolicy(id: $id) {
+		id
+	}
+}
+`
+
+func (c *Client) GetBindingPolicyTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetBindingPolicyTiny, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetBindingPolicyTiny
+	if err := c.Client.Post(ctx, "GetBindingPolicyTiny", GetBindingPolicyTinyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListBindingPoliciesDocument = `query ListBindingPolicies ($after: String, $first: Int, $before: String, $last: Int) {
+	bindingPolicies(after: $after, first: $first, before: $before, last: $last) {
+		edges {
+			node {
+				... BindingPolicyFragment
+			}
+		}
+		pageInfo {
+			... PageInfoFragment
+		}
+	}
+}
+fragment BindingPolicyFragment on BindingPolicy {
+	id
+	type
+	interval
+	nextPollAt
+	matches {
+		workbench {
+			regexes
+		}
+	}
+	policy {
+		... TinyPolicyFragment
+	}
+	bindPolicy {
+		... TinyPolicyFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyPolicyFragment on Policy {
+	id
+	name
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+`
+
+func (c *Client) ListBindingPolicies(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListBindingPolicies, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListBindingPolicies
+	if err := c.Client.Post(ctx, "ListBindingPolicies", ListBindingPoliciesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateBindingPolicyDocument = `mutation CreateBindingPolicy ($attributes: BindingPolicyAttributes!) {
+	createBindingPolicy(attributes: $attributes) {
+		... BindingPolicyFragment
+	}
+}
+fragment BindingPolicyFragment on BindingPolicy {
+	id
+	type
+	interval
+	nextPollAt
+	matches {
+		workbench {
+			regexes
+		}
+	}
+	policy {
+		... TinyPolicyFragment
+	}
+	bindPolicy {
+		... TinyPolicyFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyPolicyFragment on Policy {
+	id
+	name
+}
+`
+
+func (c *Client) CreateBindingPolicy(ctx context.Context, attributes BindingPolicyAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateBindingPolicy, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateBindingPolicy
+	if err := c.Client.Post(ctx, "CreateBindingPolicy", CreateBindingPolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateBindingPolicyDocument = `mutation UpdateBindingPolicy ($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+	updateBindingPolicy(id: $id, attributes: $attributes) {
+		... BindingPolicyFragment
+	}
+}
+fragment BindingPolicyFragment on BindingPolicy {
+	id
+	type
+	interval
+	nextPollAt
+	matches {
+		workbench {
+			regexes
+		}
+	}
+	policy {
+		... TinyPolicyFragment
+	}
+	bindPolicy {
+		... TinyPolicyFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyPolicyFragment on Policy {
+	id
+	name
+}
+`
+
+func (c *Client) UpdateBindingPolicy(ctx context.Context, id string, attributes BindingPolicyUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateBindingPolicy, error) {
+	vars := map[string]any{
+		"id":         id,
+		"attributes": attributes,
+	}
+
+	var res UpdateBindingPolicy
+	if err := c.Client.Post(ctx, "UpdateBindingPolicy", UpdateBindingPolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteBindingPolicyDocument = `mutation DeleteBindingPolicy ($id: ID!) {
+	deleteBindingPolicy(id: $id) {
+		... BindingPolicyFragment
+	}
+}
+fragment BindingPolicyFragment on BindingPolicy {
+	id
+	type
+	interval
+	nextPollAt
+	matches {
+		workbench {
+			regexes
+		}
+	}
+	policy {
+		... TinyPolicyFragment
+	}
+	bindPolicy {
+		... TinyPolicyFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment TinyPolicyFragment on Policy {
+	id
+	name
+}
+`
+
+func (c *Client) DeleteBindingPolicy(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteBindingPolicy, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteBindingPolicy
+	if err := c.Client.Post(ctx, "DeleteBindingPolicy", DeleteBindingPolicyDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetPreviewEnvironmentTemplateDocument = `query GetPreviewEnvironmentTemplate ($id: ID, $flowId: ID, $name: String) {
 	previewEnvironmentTemplate(id: $id, flowId: $flowId, name: $name) {
 		... PreviewEnvironmentTemplateFragment
@@ -72572,6 +73588,18 @@ var DocumentOperationNames = map[string]string{
 	GetComplianceReportGeneratorDocument:              "GetComplianceReportGenerator",
 	UpsertComplianceReportGeneratorDocument:           "UpsertComplianceReportGenerator",
 	DeleteComplianceReportGeneratorDocument:           "DeleteComplianceReportGenerator",
+	GetPolicyDocument:                                 "GetPolicy",
+	GetPolicyTinyDocument:                             "GetPolicyTiny",
+	ListPoliciesDocument:                              "ListPolicies",
+	CreatePolicyDocument:                              "CreatePolicy",
+	UpdatePolicyDocument:                              "UpdatePolicy",
+	DeletePolicyDocument:                              "DeletePolicy",
+	GetBindingPolicyDocument:                          "GetBindingPolicy",
+	GetBindingPolicyTinyDocument:                      "GetBindingPolicyTiny",
+	ListBindingPoliciesDocument:                       "ListBindingPolicies",
+	CreateBindingPolicyDocument:                       "CreateBindingPolicy",
+	UpdateBindingPolicyDocument:                       "UpdateBindingPolicy",
+	DeleteBindingPolicyDocument:                       "DeleteBindingPolicy",
 	GetPreviewEnvironmentTemplateDocument:             "GetPreviewEnvironmentTemplate",
 	UpsertPreviewEnvironmentTemplateDocument:          "UpsertPreviewEnvironmentTemplate",
 	DeletePreviewEnvironmentTemplateDocument:          "DeletePreviewEnvironmentTemplate",
