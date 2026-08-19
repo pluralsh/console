@@ -311,6 +311,7 @@
     .combo-meta { padding: 6px 10px; font-size: 11px; color: var(--text-xlight); }
     .combo-list { max-height: 220px; overflow: auto; }
     .combo-empty { padding: 16px; text-align: center; color: var(--text-xlight); font-size: 13px; }
+    .modal-scrim.over { z-index: 40; background: #000b; }
   </style>
 </head>
 <body>
@@ -321,6 +322,7 @@
     <button data-go="policies" data-kind="autoattach">2b. Attachment rules</button>
     <button data-go="attachment-create" data-kind="autoattach" data-policy="prod-guardrails.rego">2c. New rule · workbench</button>
     <button data-go="attachment-create" data-kind="autoattach" data-policy="change-window.rego">2d. New rule · stack</button>
+    <button data-go="attachment-create" data-kind="autoattach" data-policy="prod-guardrails.rego" data-bindcreate="1">2e. New bind policy</button>
     <button data-go="policies-empty">3. Empty</button>
     <button data-go="policy-create">4. Create policy</button>
     <button data-go="policy-body">5. Definition + simulate</button>
@@ -684,6 +686,93 @@ bind := true if {
       render()
     }
 
+    function openBindCreate() {
+      state.bindCreate = true
+      state.attachOpen = null
+      state.attachQ = ''
+      if (!state.bindName) state.bindName = 'auto-bind-prod-name.rego'
+      if (!state.bindDesc) state.bindDesc = 'bind := true if name starts with prod- or matches production.'
+      if (!state.bindBody) state.bindBody = BIND_STARTER
+      render()
+    }
+
+    function cancelBindCreate() {
+      state.bindCreate = false
+      render()
+    }
+
+    function saveBindCreate() {
+      const inferred = inferredAttachType().toLowerCase()
+      const id = 'bind-custom'
+      const doc = {
+        id,
+        name: state.bindName || 'auto-bind-custom.rego',
+        desc: state.bindDesc || 'bind := true if …',
+        target: inferred === 'stack' ? 'stack' : 'workbench or stack',
+        src: state.bindBody || BIND_STARTER,
+      }
+      const existing = BIND_CATALOG.findIndex((p) => p.id === id)
+      if (existing >= 0) BIND_CATALOG.splice(existing, 1)
+      BIND_CATALOG.unshift(doc)
+      state.attachBind = id
+      state.bindCreate = false
+      render()
+    }
+
+    function bindCreateModal() {
+      const inferred = inferredAttachType()
+      const name = state.bindName || 'auto-bind-prod-name.rego'
+      const desc = state.bindDesc || 'bind := true if name starts with prod- or matches production.'
+      const body = state.bindBody || BIND_STARTER
+      return `
+          <div class="modal-scrim over" onclick="if (event.target === this) cancelBindCreate()">
+            <div class="modal narrow">
+              <div class="modal-head">
+                <div>
+                  <div class="modal-kicker">NEW POLICY · TYPE FIXED</div>
+                  <h2 class="modal-title">New bind policy</h2>
+                  <p class="subtitle">A BINDING document decides <code>bind: true/false</code> against a cleaned ${inferred.toLowerCase()}. It is still <code>createPolicy</code> — not a <code>BindingPolicy</code> rule.</p>
+                </div>
+                <button class="icon-btn" onclick="cancelBindCreate()">×</button>
+              </div>
+              <div class="inferred">
+                <span class="hint">Type</span>
+                ${typeChip('Binding')}
+                <span class="hint">fixed · not a place · hidden from the Policies list and workbench attach picker</span>
+              </div>
+              <div class="field">
+                <span class="label">Name *</span>
+                <input class="input mono" value="${name}" oninput="state.bindName=this.value" />
+                <span class="hint">Unique. Treat like a filename; <code>.rego</code> suffix is conventional.</span>
+              </div>
+              <div class="field">
+                <span class="label">Description</span>
+                <textarea class="textarea" oninput="state.bindDesc=this.value">${desc}</textarea>
+                <span class="hint">Write it in bind language — <code>bind := true if …</code> — not enforcement copy.</span>
+              </div>
+              <div class="field">
+                <span class="label">policy *</span>
+                <span class="hint">Must stay <code>package plrl.binding</code>. Set <code>bind</code> only. Do not redefine <code>default bind</code>.</span>
+                <textarea class="textarea" style="min-height:200px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre" oninput="state.bindBody=this.value">${body}</textarea>
+              </div>
+              <div class="mutation">createPolicy({
+  name:        "${name}",
+  type:        "BINDING",
+  description: "${desc.replace(/"/g, '\\"')}",
+  policy:      "package plrl.binding …",
+  projectId:   current project
+})</div>
+              <div class="modal-foot">
+                <span class="hint">On create, this document is selected as <code>bindPolicyId</code>. You still have to create the attachment rule.</span>
+                <div style="display:flex;gap:8px">
+                  <button class="btn secondary" onclick="cancelBindCreate()">Back to rule</button>
+                  <button class="btn" onclick="saveBindCreate()">Create bind policy</button>
+                </div>
+              </div>
+            </div>
+          </div>`
+    }
+
     function filterDocs(items, getName) {
       const q = (state.attachQ || '').trim().toLowerCase()
       if (!q) return items
@@ -862,16 +951,14 @@ bind := true if {
             </section>`
     }
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h' }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h', bindCreate: false, bindName: 'auto-bind-prod-name.rego', bindDesc: 'bind := true if name starts with prod- or matches production.', bindBody: '' }
 
     function go(screen) {
       state.screen = screen
       state.menu = false
       if (!['policy-simulate', 'policy-body', 'policy-bind-simulate', 'policy-bind-body'].includes(screen)) state.simulated = false
       if (screen !== 'policy-create') state.createStep = 'Details'
-      if (screen === 'policy-create') {
-        state.formType = state.policyKind === 'autoattach' ? 'BINDING' : (state.formType === 'BINDING' ? 'WORKBENCH' : (state.formType || 'WORKBENCH'))
-      }
+      if (screen === 'policy-create' && state.formType === 'BINDING') state.formType = 'WORKBENCH'
       if (screen === 'attachment-create' || screen === 'attachment-detail') state.policyKind = 'autoattach'
       if (screen === 'attachment-create') {
         const binds = compatibleBinds()
@@ -881,6 +968,7 @@ bind := true if {
         state.attachAdvanced = false
         state.attachOpen = null
         state.attachQ = ''
+        state.bindCreate = false
       }
       location.hash = screen
       render()
@@ -1083,14 +1171,15 @@ bind := true if {
               ${comboField({
                 kind: 'bind',
                 label: 'Bind when',
-                caption: `<a href="#" onclick="event.preventDefault();state.formType='BINDING';state.policyKind='autoattach';go('policy-create')">Create a binding policy first</a>`,
-                hint: 'BINDING only. Filtered to binds that can run on a ${inferred.toLowerCase()}. Query is <code>policies(q, type: BINDING)</code>.',
+                caption: `<a href="#" onclick="event.preventDefault();openBindCreate()">New bind policy</a>`,
+                hint: 'BINDING only. Filtered to binds that can run on a ${inferred.toLowerCase()}. Missing one? Create it here — type is fixed, then it is selected in this field.',
                 selectedName: selectedBind.name,
                 selectedChip: '',
                 selectedDesc: selectedBind.desc,
                 items: binds,
                 itemName: (p) => p.name,
               })}
+              ${selectedBind.id === 'bind-custom' ? `<div class="inferred"><span class="chip ok">Just created</span><span class="mono">${selectedBind.name}</span><span class="hint">selected as <code>bindPolicyId</code> — still create the rule</span></div>` : ''}
               <div class="inferred">
                 <span class="hint">Attaches to</span>
                 ${typeChip(inferred + 's')}
@@ -1128,7 +1217,8 @@ bind := true if {
                 </div>
               </div>
             </div>
-          </div>`
+          </div>
+          ${state.bindCreate ? bindCreateModal() : ''}`
       })
       },
 
@@ -1204,35 +1294,25 @@ bind := true if {
             ${state.createStep === 'Details' ? `
             <div class="card form-card">
               <div class="field"><span class="label">Name *</span>
-                <input class="input mono" value="${state.formType === 'BINDING' ? 'auto-bind-prod-name.rego' : 'tool-admission.rego'}" />
+                <input class="input mono" value="${state.formType === 'STACK' ? 'change-window.rego' : 'tool-admission.rego'}" />
                 <span class="hint">Unique. Treat like a filename; <code>.rego</code> suffix is conventional.</span>
               </div>
               <div class="field"><span class="label">Type *</span>
                 <div class="type-groups">
-                  <div>
-                    <div class="type-group-label">Enforcement — where the policy runs</div>
-                    <button type="button" class="type-opt ${state.formType === 'WORKBENCH' ? 'active' : ''}" onclick="state.formType='WORKBENCH';render()">
-                      <div class="opt-title">${I.wb} Workbench</div>
-                      <div class="opt-sub">Admit or deny tool calls on workbenches. Only this type appears in the workbench attach picker.</div>
-                    </button>
-                    <button type="button" class="type-opt ${state.formType === 'STACK' ? 'active' : ''}" onclick="state.formType='STACK';render()">
-                      <div class="opt-title">${I.stacks} Stack</div>
-                      <div class="opt-sub">Admit or deny tool calls on stacks. Same idea, later attach surface.</div>
-                    </button>
-                  </div>
-                  <div>
-                    <div class="type-group-label">Auto-attach — not a place</div>
-                    <button type="button" class="type-opt ${state.formType === 'BINDING' ? 'active' : ''}" onclick="state.formType='BINDING';render()">
-                      <div class="opt-title">${I.links} Binding</div>
-                      <div class="opt-sub">Used as <code>BindingPolicy.bindPolicy</code> (<code>bind: true/false</code>). Hidden from the workbench attach picker. Not Console RBAC policy bindings.</div>
-                    </button>
-                  </div>
+                  <div class="type-group-label">Where the policy runs</div>
+                  <button type="button" class="type-opt ${state.formType === 'WORKBENCH' ? 'active' : ''}" onclick="state.formType='WORKBENCH';render()">
+                    <div class="opt-title">${I.wb} Workbench</div>
+                    <div class="opt-sub">Admit or deny tool calls on workbenches. Only this type appears in the workbench attach picker.</div>
+                  </button>
+                  <button type="button" class="type-opt ${state.formType === 'STACK' ? 'active' : ''}" onclick="state.formType='STACK';render()">
+                    <div class="opt-title">${I.stacks} Stack</div>
+                    <div class="opt-sub">Admit or deny tool calls on stacks. Same idea, later attach surface.</div>
+                  </button>
+                  <span class="hint">BINDING documents are created from an attachment rule → <b>New bind policy</b>, not here.</span>
                 </div>
               </div>
               <div class="field"><span class="label">Description</span>
-                <textarea class="textarea">${state.formType === 'BINDING'
-                  ? 'If name starts with prod- or matches production, attach the paired enforcement policy.'
-                  : 'Block kube.exec and kube.delete unless the actor is in the break-glass group.'}</textarea>
+                <textarea class="textarea">Block kube.exec and kube.delete unless the actor is in the break-glass group.</textarea>
               </div>
               <div class="field"><span class="label">Project</span>
                 <select class="select"><option>production (current)</option></select>
@@ -1245,10 +1325,8 @@ bind := true if {
             <div class="card form-card">
               <div class="field">
                 <span class="label">policy *</span>
-                <span class="hint">${state.formType === 'BINDING'
-                  ? 'Must be <code>package plrl.binding</code>. Set <code>bind</code> only. Path: <code>data.plrl.binding.result</code>.'
-                  : 'Rego source. Required on create. <code>createPolicy({ name, type, description, policy, projectId })</code>'}</span>
-                <textarea class="textarea" style="min-height:360px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre">${state.formType === 'BINDING' ? BIND_STARTER : `package plrl.wb.admission
+                <span class="hint">Rego source. Required on create. <code>createPolicy({ name, type, description, policy, projectId })</code></span>
+                <textarea class="textarea" style="min-height:360px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;white-space:pre">package plrl.wb.admission
 
 # Deny destructive kube tools outside break-glass group.
 deny contains {"reason": sprintf("%s is not allowed for %s", [input.tool, actor.email])} if {
@@ -1256,7 +1334,7 @@ deny contains {"reason": sprintf("%s is not allowed for %s", [input.tool, actor.
   not "break-glass" in actor.groups
 }
 
-default sample := 0.5`}</textarea>
+default sample := 0.5</textarea>
               </div>
               <div class="footer-actions">
                 <button class="btn secondary" onclick="state.createStep='Details';render()">Back</button>
@@ -1677,10 +1755,11 @@ default sample := 0.5`}</textarea>
         const screenMatch = b.dataset.go === state.screen
         const kindMatch = !b.dataset.kind || b.dataset.kind === state.policyKind
         const policyMatch = !b.dataset.policy || b.dataset.policy === state.attachPolicy
-        b.classList.toggle('active', screenMatch && kindMatch && policyMatch)
+        const nestedMatch = b.dataset.bindcreate ? !!state.bindCreate : (b.dataset.go !== 'attachment-create' || !state.bindCreate)
+        b.classList.toggle('active', screenMatch && kindMatch && policyMatch && nestedMatch)
       })
       const search = document.querySelector('[data-combo-search]')
-      if (search && state.attachOpen) {
+      if (search && state.attachOpen && !state.bindCreate) {
         search.focus()
         const n = search.value.length
         search.setSelectionRange(n, n)
@@ -1692,6 +1771,12 @@ default sample := 0.5`}</textarea>
       if (!btn) return
       if (btn.dataset.kind) state.policyKind = btn.dataset.kind
       if (btn.dataset.policy) state.attachPolicy = btn.dataset.policy
+      if (btn.dataset.bindcreate) {
+        go('attachment-create')
+        openBindCreate()
+        return
+      }
+      state.bindCreate = false
       go(btn.dataset.go)
     })
     window.go = go
@@ -1701,6 +1786,9 @@ default sample := 0.5`}</textarea>
     window.pickAttach = pickAttach
     window.pickBind = pickBind
     window.toggleCombo = toggleCombo
+    window.openBindCreate = openBindCreate
+    window.cancelBindCreate = cancelBindCreate
+    window.saveBindCreate = saveBindCreate
     const params = new URLSearchParams(location.search)
     if (params.get('kind') === 'autoattach' || params.get('kind') === 'enforcement') state.policyKind = params.get('kind')
     if (location.hash.slice(1) && screens[location.hash.slice(1)]) state.screen = location.hash.slice(1)

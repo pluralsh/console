@@ -155,7 +155,7 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 
 - **Policies** tab = `WORKBENCH` + `STACK` documents only. Place chip (Workbench / Stack), not Binding.
 - **Attachment rules** tab = join rows of `BindingPolicy`. Each row is attach `policy.name` **to** `type` **when** `bindPolicy.name` matches. The rule holds no Rego.
-- BINDING documents are authored from **Create a binding policy first** on the rule modal (or New policy → Binding). They are hidden from the Policies list.
+- BINDING documents are authored from **New bind policy** on the rule modal (`createPolicy` with type fixed). They are hidden from the Policies list and from **New policy**.
 - Infer `BindingPolicy.type` from the attached policy’s `Policy.type`. No separate place picker.
 - Workbench attach picker = `type: WORKBENCH` only.
 
@@ -163,7 +163,8 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 
 One screen. The rule is two pointers, not a file.
 
-- **Attach which policy** / **Bind when** — searchable ComboBox (`policies(projectId, q)` / `policies(q, type: BINDING)`), not a full list of every file. Bind options are filtered to the inferred target. Caption: **Create a binding policy first**.
+- **Attach which policy** / **Bind when** — searchable ComboBox (`policies(projectId, q)` / `policies(q, type: BINDING)`), not a full list of every file. Bind options are filtered to the inferred target.
+- **New bind policy** (nested modal) — `createPolicy({ type: BINDING })` with type fixed. Name + bind-language description + `package plrl.binding` body. On create, the document is selected as `bindPolicyId`. Does not leave the rule. Not offered on **New policy**.
 - Recap chip: “Attaches to workbenches/stacks — inferred, sent as `type`.”
 - **Tools (optional)** — only if inferred type is workbench. Maps to `matches.workbench.regexes`. Empty → all tools. Hidden for stacks (`StackPolicy` has no matches).
 - **Advanced · polls every 1h** — `interval`, defaulted, min 30m. Not a peer of the two pickers.
@@ -219,8 +220,9 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 | 2b | Attachment rules (`BindingPolicy` rows) | `/security/policies` (rules tab) |
 | 2c | New attachment rule · workbench | `/security/policies/attachments/create` |
 | 2d | New attachment rule · stack (no regexes) | `/security/policies/attachments/create` |
+| 2e | Nested new bind policy | overlay on create rule |
 | 3 | Policies empty (same tabs) | `/security/policies` |
-| 4 | Create policy (details + policy body text) | `/security/policies/create` |
+| 4 | Create policy (Workbench / Stack only) | `/security/policies/create` |
 | 5 | Definition + simulate | `/security/policies/:id` |
 | 5b | Bind editor + simulate bind | `/security/policies/:id` (`type: BINDING`) |
 | 6 | Policy attachments | `/security/policies/:id/attachments` |
