@@ -69,6 +69,9 @@ func ServiceTemplateAttributes(ctx context.Context, c runtimeclient.Client, name
 			LuaScript:           srv.Helm.LuaScript,
 			LuaFile:             srv.Helm.LuaFile,
 			LuaFolder:           srv.Helm.LuaFolder,
+			PythonScript:        srv.Helm.PythonScript,
+			PythonFile:          srv.Helm.PythonFile,
+			PythonFolder:        srv.Helm.PythonFolder,
 			KustomizePostrender: srv.Helm.KustomizePostrender,
 			Git:                 srv.Helm.Git.Attributes(),
 		}

@@ -68,6 +68,9 @@ defmodule Console.GraphQl.Deployments.Service do
     field :lua_script,           :string
     field :lua_file,             :string
     field :lua_folder,           :string
+    field :python_script,        :string
+    field :python_file,          :string
+    field :python_folder,        :string
     field :set,                  :helm_value_attributes
     field :repository,           :namespaced_name
     field :git,                  :git_ref_attributes
@@ -388,6 +391,9 @@ defmodule Console.GraphQl.Deployments.Service do
     field :lua_script,           :string, description: "a lua script to use for helm applies"
     field :lua_file,             :string, description: "a lua file to use for helm applies"
     field :lua_folder,           :string, description: "a folder of lua files to include in the final script used"
+    field :python_script,        :string, description: "a python script to use for helm applies"
+    field :python_file,          :string, description: "a python file to use for helm applies"
+    field :python_folder,        :string, description: "a folder of python files to include in the final script used"
     field :kustomize_postrender, :string, description: "a folder containing a kustomization to apply to the result of rendering this service's manifests"
   end
 

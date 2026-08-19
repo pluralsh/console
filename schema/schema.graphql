@@ -10737,6 +10737,12 @@ input HelmConfigAttributes {
 
   luaFolder: String
 
+  pythonScript: String
+
+  pythonFile: String
+
+  pythonFolder: String
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -11202,6 +11208,15 @@ type HelmSpec {
 
   "a folder of lua files to include in the final script used"
   luaFolder: String
+
+  "a python script to use for helm applies"
+  pythonScript: String
+
+  "a python file to use for helm applies"
+  pythonFile: String
+
+  "a folder of python files to include in the final script used"
+  pythonFolder: String
 
   "a folder containing a kustomization to apply to the result of rendering this service's manifests"
   kustomizePostrender: String

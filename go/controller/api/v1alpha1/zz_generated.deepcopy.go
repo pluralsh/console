@@ -9083,6 +9083,21 @@ func (in *ServiceHelm) DeepCopyInto(out *ServiceHelm) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.PythonScript != nil {
+		in, out := &in.PythonScript, &out.PythonScript
+		*out = new(string)
+		**out = **in
+	}
+	if in.PythonFile != nil {
+		in, out := &in.PythonFile, &out.PythonFile
+		*out = new(string)
+		**out = **in
+	}
+	if in.PythonFolder != nil {
+		in, out := &in.PythonFolder, &out.PythonFolder
+		*out = new(string)
+		**out = **in
+	}
 	if in.KustomizePostrender != nil {
 		in, out := &in.KustomizePostrender, &out.KustomizePostrender
 		*out = new(string)

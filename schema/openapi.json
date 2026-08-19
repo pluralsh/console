@@ -1547,6 +1547,18 @@
             "description": "Helm chart name (e.g., \"nginx\")",
             "type": "string"
           },
+          "python_file": {
+            "description": "A python file to use for helm applies",
+            "type": "string"
+          },
+          "python_folder": {
+            "description": "A folder of python files to include in the final script used",
+            "type": "string"
+          },
+          "python_script": {
+            "description": "A python script to use for helm applies",
+            "type": "string"
+          },
           "release": {
             "description": "Helm release name for the deployment",
             "type": "string"
@@ -1583,6 +1595,18 @@
         "properties": {
           "chart": {
             "description": "Name of the Helm chart to deploy",
+            "type": "string"
+          },
+          "python_file": {
+            "description": "A python file to use for helm applies",
+            "type": "string"
+          },
+          "python_folder": {
+            "description": "A folder of python files to include in the final script used",
+            "type": "string"
+          },
+          "python_script": {
+            "description": "A python script to use for helm applies",
             "type": "string"
           },
           "release": {

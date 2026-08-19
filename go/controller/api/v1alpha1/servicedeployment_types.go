@@ -117,6 +117,22 @@ type ServiceHelm struct {
 	// +kubebuilder:validation:Optional
 	LuaFolder *string `json:"luaFolder,omitempty"`
 
+	// PythonScript to use to generate Helm configuration.
+	// This can ultimately return a dict with keys "values" and "valuesFiles"
+	// to supply overlays for either dynamically based on git state or other metadata.
+	// +kubebuilder:validation:Optional
+	PythonScript *string `json:"pythonScript,omitempty"`
+
+	// PythonFile to use to generate Helm configuration.
+	// This can ultimately return a dict with keys "values" and "valuesFiles"
+	// to supply overlays for either dynamically based on Git state or other metadata.
+	// +kubebuilder:validation:Optional
+	PythonFile *string `json:"pythonFile,omitempty"`
+
+	// a folder of python files to include in the final script used
+	// +kubebuilder:validation:Optional
+	PythonFolder *string `json:"pythonFolder,omitempty"`
+
 	// KustomizePostrender is a folder containing a kustomization to apply to the result of rendering this service's manifests.
 	// +kubebuilder:validation:Optional
 	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`

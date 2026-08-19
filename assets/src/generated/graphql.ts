@@ -4999,6 +4999,9 @@ export type HelmConfigAttributes = {
   luaFile?: InputMaybe<Scalars['String']['input']>;
   luaFolder?: InputMaybe<Scalars['String']['input']>;
   luaScript?: InputMaybe<Scalars['String']['input']>;
+  pythonFile?: InputMaybe<Scalars['String']['input']>;
+  pythonFolder?: InputMaybe<Scalars['String']['input']>;
+  pythonScript?: InputMaybe<Scalars['String']['input']>;
   release?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
   /** pointer to a Plural GitRepository */
@@ -5098,6 +5101,12 @@ export type HelmSpec = {
   luaFolder?: Maybe<Scalars['String']['output']>;
   /** a lua script to use for helm applies */
   luaScript?: Maybe<Scalars['String']['output']>;
+  /** a python file to use for helm applies */
+  pythonFile?: Maybe<Scalars['String']['output']>;
+  /** a folder of python files to include in the final script used */
+  pythonFolder?: Maybe<Scalars['String']['output']>;
+  /** a python script to use for helm applies */
+  pythonScript?: Maybe<Scalars['String']['output']>;
   release?: Maybe<Scalars['String']['output']>;
   /** pointer to the flux helm repository resource used for this chart */
   repository?: Maybe<ObjectReference>;
