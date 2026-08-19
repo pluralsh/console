@@ -54,18 +54,28 @@ PolicyEvaluation               sampled decision; read-only
 ├── policyIds                  [ID!]!        (one sample can cover many policies)
 └── insertedAt / updatedAt
 
-WorkbenchPolicy                attachment of a Policy to a Workbench
+WorkbenchPolicy                manual attach of a Policy to a Workbench
 ├── id
 ├── policy                     Policy        (selected, not authored here)
 ├── workbench                  Workbench
 ├── matches                    WorkbenchPolicyMatches
 │   └── regexes                [String]      (only field; empty → all tools)
 └── insertedAt / updatedAt
+
+BindingPolicy                  attachment RULE — not a file, no Rego
+├── policyId                   Policy        (WORKBENCH or STACK document)
+├── bindPolicyId               Policy        (must be type BINDING)
+├── type                       workbench | stack  (infer from attached Policy.type)
+├── interval                   String        (default 1h, min 30m)
+├── matches.workbench.regexes  [String]      (tool scope copied onto the created attach)
+└── insertedAt / updatedAt
 ```
 
 `WorkbenchPolicyMatches` does **not** expose `ignore`. Matching ignore exists on the Ecto schema only — do not put it in the attach form until it is on the API.
 
 `Policy` does **not** expose workbench attachments. Those are listed from `workbench.workbenchPolicies`. Policy’s child connections are `policyEvaluations` and `bindingPolicies`.
+
+Do not confuse Console RBAC `PolicyBinding` (user/group grants) with `BindingPolicy` (auto-attach rule). BINDING `Policy.type` is the Rego that decides `bind: true/false`; the rule that points at it is `BindingPolicy`.
 
 There is no create/update/delete for `PolicyEvaluation`. Samples are written by the evaluator. The UI lists them and can call `evaluatePolicy(policyId, input)` to replay.
 
@@ -114,26 +124,54 @@ Workbench admission result (`priv/policy/wb.rego`):
 | Detach | `deleteWorkbenchPolicy(id)` |
 | Policy picker | `policies(projectId, q)` filtered to `type: WORKBENCH` |
 
-Policy list columns are `name`, `type`, `description`, `project`, `updatedAt`. Do not show last-evaluation as a Policy field.
+Policy list columns are **POLICY** (`name` + `description`), **PROJECT**, **UPDATED**, **TYPE** chip (Workbench / Stack). Do not show last-evaluation as a Policy field. Do not show a Binding chip.
 
-Policy detail tabs are **Body** (`name`, `type`, `description`, `project`, `policy`) · **Evaluations** (`policyEvaluations`) · **Bindings** (`bindingPolicies`). Not a Workbenches tab.
+Policy detail tabs are **Definition** (Rego buffer + simulate) · **Evaluations** (`policyEvaluations`) · **Attachments** (`bindingPolicies`). Not a Workbenches tab.
 
 Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool/actor/result are only inside those maps.
+
+**Attachment rules**
+
+| Screen | Operations |
+| --- | --- |
+| List | `bindingPolicies` (or `policies` → each `bindingPolicies`). Rows are rules, not BINDING files |
+| Create | Two-step modal. `createBindingPolicy({ policyId, bindPolicyId, type, interval, matches })` |
+| Edit | `updateBindingPolicy` — interval + `matches.workbench.regexes`. The two policy pointers stay as selected documents |
+| Delete | `deleteBindingPolicy(id)` |
+| Bind-policy picker | `policies` filtered to `type: BINDING`, further filtered by inferred target (workbench vs stack) |
+| Simulate bind | `evaluatePolicy(bindPolicyId, input)` with `Console.clean(workbench\|stack)`. There is **no** `evaluateBindingPolicy` |
+
+Attachment-rule columns: **Attaches policy** (`policy.name` + description) · **Targets** (`BindingPolicy.type`: Workbench / Stack) · **Bind policy** (BINDING `.rego` name + `bind := true if …` copy) · **Matched** (derived count, not a GraphQL field).
 
 ## `Policy.type` is place vs auto-attach
 
 Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if they were three product areas.
 
-| GraphQL value | What it is | List tab | Icon |
+| GraphQL value | What it is | Where it appears | Icon |
 | --- | --- | --- | --- |
-| `WORKBENCH` | Place the policy **runs** (tool admission on workbenches) | **Enforcement** (default) | `WorkbenchIcon` + “Runs on workbenches” |
-| `STACK` | Place the policy **runs** (tool admission on stacks) | **Enforcement** | `StackIcon` + “Runs on stacks” |
-| `BINDING` | **Auto-attach logic** (`BindingPolicy.bindPolicy`, `bind: true/false`). Not a third place. Not Console RBAC policy bindings. | **Auto-attach** | `LinksIcon` / `ArrowRightLeftIcon` + “Auto-attach · not a place” |
+| `WORKBENCH` | Place the policy **runs** (tool admission on workbenches) | **Policies** tab | `WorkbenchIcon` + “Runs on workbenches” |
+| `STACK` | Place the policy **runs** (tool admission on stacks) | **Policies** tab | `StackIcon` + “Runs on stacks” |
+| `BINDING` | **Auto-attach logic** (`BindingPolicy.bindPolicy`, `bind: true/false`). Not a third place. Not Console RBAC `PolicyBinding`. | Bind-policy picker on an attachment rule. Not a third Policies chip. | `LinksIcon` / `ArrowRightLeftIcon` + “Auto-attach · not a place” |
 
 - **Policies** tab = `WORKBENCH` + `STACK` documents only. Place chip (Workbench / Stack), not Binding.
-- **Attachment rules** tab = `bindingPolicies` query. Each row is attach `policy.name` **when** `bindPolicy.name` **on** `type`.
-- BINDING documents are created from the rule’s **When** field, not listed as a third type on Policies.
+- **Attachment rules** tab = join rows of `BindingPolicy`. Each row is attach `policy.name` **to** `type` **when** `bindPolicy.name` matches. The rule holds no Rego.
+- BINDING documents are authored from **Create a binding policy first** on the rule modal (or New policy → Binding). They are hidden from the Policies list.
+- Infer `BindingPolicy.type` from the attached policy’s `Policy.type`. No separate place picker.
 - Workbench attach picker = `type: WORKBENCH` only.
+
+### Attachment rule modal
+
+**Step 1 of 2 — pick the two documents**
+
+- Left: **Attach which policy** — enforcement `.rego` list with Workbench / Stack chips.
+- Right: **Choose targets with which bind policy** — BINDING `.rego` only, filtered to binds that can run on the inferred target. Link: **Create a binding policy first**.
+- Footer: “Both fields are policy documents — the rule holds no Rego.” · **Next · tool scope**.
+
+**Step 2 of 2 — tool scope**
+
+- `interval` (default 1h, min 30m)
+- `matches.workbench.regexes` (empty → all tools)
+- Recap of inferred type. Create `BindingPolicy`.
 
 ### Example auto-attach Rego
 
@@ -164,33 +202,33 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 
 ## Interaction notes
 
-**Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools.
+**Create vs attach.** Security owns the `Policy` document (`createPolicy` / `updatePolicy` / `deletePolicy`). A workbench never authors `policy` source; it creates a `WorkbenchPolicy` that points at an existing `Policy` and sets `matches.regexes`. Empty regexes mean all tools. An attachment **rule** is a `BindingPolicy`: two policy pointers plus interval and regexes.
 
-**Editor.** Policy detail edits every writable Policy field, not just the Rego string: `name`, `type`, `description`, `projectId`, `policy`.
+**Editor.** Policy detail is Definition + simulate: Rego buffer on the left, evaluate on the right. Persist with `updatePolicy`. Bind policies use the same layout against cleaned workbench/stack input (`bind: true/false`).
 
-**Definition + simulate.** One screen: Rego buffer on the left, simulate on the right. Pick a past evaluation to load `input`, Run against the unsaved buffer (`evaluatePolicy`). Recorded decision stays visible for comparison. Evaluations tab lists samples; Replay opens Definition with that input. Attachments tab is `Policy.bindingPolicies`.
+**Definition + simulate.** Pick a past evaluation to load `input`, Run against the unsaved buffer (`evaluatePolicy`). Recorded decision stays visible for comparison. Evaluations tab lists samples; Replay opens Definition with that input. Attachments tab is `Policy.bindingPolicies`.
 
 **Edit attach.** `updateWorkbenchPolicy` only accepts `matches`. Changing which Policy is bound means delete + create.
 
-**Types.** `Policy.type` is required (`WORKBENCH` default). Filter the list with Enforcement / Auto-attach tabs, not a flat type chip. Stack attach is a later surface.
+**Types.** `Policy.type` is required (`WORKBENCH` default). Filter documents with the **Policies** tab (`WORKBENCH` + `STACK`) and rules with **Attachment rules**. BINDING is not a third product area. Stack attach is a later surface.
 
-**Bindings.** `Policy.bindingPolicies` is the Policy-level child for auto-attach. Manual workbench attach stays on the workbench.
+**Bindings.** `Policy.bindingPolicies` is the Policy-level child for auto-attach. Do not confuse with Console RBAC `PolicyBinding`. Manual workbench attach stays on the workbench.
 
 ## Screen inventory
 
 | # | Screen | Route |
 | --- | --- | --- |
 | 1 | Security overview (new sidenav) | `/security/overview` |
-| 2 | Policies list | `/security/policies` |
+| 2 | Policies list (`WORKBENCH` + `STACK`) | `/security/policies` |
 | 2b | Attachment rules (`BindingPolicy` rows) | `/security/policies` (rules tab) |
-| 2c | New / edit attachment | `/security/policies/attachments/create` |
+| 2c | New attachment rule (2-step modal) | `/security/policies/attachments/create` |
 | 3 | Policies empty (same tabs) | `/security/policies` |
 | 4 | Create policy (details + policy body text) | `/security/policies/create` |
-| 5 | Policy body (all Policy fields) | `/security/policies/:id` |
-| 5b | Auto-attach body + simulate bind | `/security/policies/:id` (`type: BINDING`) |
-| 6 | Policy bindings | `/security/policies/:id/bindings` |
+| 5 | Definition + simulate | `/security/policies/:id` |
+| 5b | Bind editor + simulate bind | `/security/policies/:id` (`type: BINDING`) |
+| 6 | Policy attachments | `/security/policies/:id/attachments` |
 | 7 | Policy evaluations | `/security/policies/:id/evaluations` |
-| 8 | Simulate evaluation | `/security/policies/:id/evaluations/:evalId` |
+| 8 | Simulate (same as 5) | `/security/policies/:id` |
 | 9 | Gatekeeper (renamed) | `/security/gatekeeper` |
 | 10 | Workbench policies list | `/workbenches/:id/policies` |
 | 11 | Workbench policies empty | `/workbenches/:id/policies` |
