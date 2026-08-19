@@ -56,6 +56,7 @@ defmodule Console.AI.Tools.Workbench.Http do
       connect_options: [timeout: 10_000],
       receive_timeout: 10_000,
       decode_body: false,
+      redirect: false,
       retry: false
     )
   end

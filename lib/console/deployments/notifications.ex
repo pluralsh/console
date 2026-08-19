@@ -178,6 +178,7 @@ defmodule Console.Deployments.Notifications do
       ],
       body: body,
       decode_body: false,
+      redirect: false,
       retry: false
     )
     |> log_errors()
