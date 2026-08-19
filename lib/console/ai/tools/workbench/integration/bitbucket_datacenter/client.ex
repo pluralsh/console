@@ -70,16 +70,8 @@ defmodule Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Client do
     url = base <> path
     headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
 
-    case HTTPoison.put(url, Jason.encode!(body_map), headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "Bitbucket Data Center API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Bitbucket Data Center", reason)
-    end
+    Req.put(url, [headers: headers, body: Jason.encode!(body_map)] ++ http_opts())
+    |> Http.handle("Bitbucket Data Center")
   end
 
   @spec put_empty(map(), String.t()) :: {:ok, term()} | {:error, String.t()}

@@ -71,16 +71,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     headers = [{"PRIVATE-TOKEN", token}, {"Content-Type", "application/json"}]
     encoded = Jason.encode!(body_map)
 
-    case HTTPoison.put(url, encoded, headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "GitLab API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("GitLab", reason)
-    end
+    Req.put(url, [headers: headers, body: encoded] ++ http_opts())
+    |> Http.handle("GitLab")
   end
 
   @spec put(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
