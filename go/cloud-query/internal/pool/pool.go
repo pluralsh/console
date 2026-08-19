@@ -3,7 +3,6 @@ package pool
 import (
 	"fmt"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -19,12 +18,10 @@ import (
 )
 
 type ConnectionPool struct {
-	admin         connection.Connection
-	pool          cmap.ConcurrentMap[string, entry]
-	ttl           time.Duration
-	mux           sync.Mutex
-	isCleaningUp  atomic.Bool
-	isBulkCleanup atomic.Bool
+	admin connection.Connection
+	pool  cmap.ConcurrentMap[string, entry]
+	ttl   time.Duration
+	mux   sync.Mutex
 }
 
 func NewConnectionPool(ttl time.Duration) (*ConnectionPool, error) {
@@ -49,7 +46,6 @@ func (c *ConnectionPool) cleanupRoutine() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		c.isBulkCleanup.Store(true)
 		for item := range c.pool.IterBuffered() {
 			if !item.Val.alive(c.ttl) {
 				err := c.Remove(item)
@@ -58,7 +54,6 @@ func (c *ConnectionPool) cleanupRoutine() {
 				}
 			}
 		}
-		c.isBulkCleanup.Store(false)
 	}
 }
 
@@ -156,10 +151,8 @@ func (c *ConnectionPool) cleanup(connection string) error {
 }
 
 func (c *ConnectionPool) Connect(config config.Configuration) (connection.Connection, error) {
-	for c.isCleaningUp.Load() || c.isBulkCleanup.Load() {
-		klog.V(log.LogLevelVerbose).InfoS("waiting for cleanup to finish before connecting")
-		time.Sleep(100 * time.Millisecond)
-	}
+	c.mux.Lock()
+	defer c.mux.Unlock()
 
 	return c.connect(config)
 }
@@ -172,7 +165,7 @@ func (c *ConnectionPool) connect(config config.Configuration) (connection.Connec
 
 	data, exists := c.pool.Get(sha)
 	if exists && !data.alive(c.ttl) {
-		err = c.Remove(cmap.Tuple[string, entry]{Key: sha, Val: data})
+		err = c.remove(cmap.Tuple[string, entry]{Key: sha, Val: data})
 		if err != nil {
 			return nil, fmt.Errorf("failed to remove stale connection: %w", err)
 		}
@@ -232,27 +225,26 @@ func (c *ConnectionPool) Remove(t cmap.Tuple[string, entry]) error {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	c.isCleaningUp.Store(true)
-	defer func() {
-		c.isCleaningUp.Store(false)
-	}()
+	return c.remove(t)
+}
 
-	if !c.pool.Has(t.Key) {
+func (c *ConnectionPool) remove(t cmap.Tuple[string, entry]) error {
+	current, exists := c.pool.Get(t.Key)
+	if !exists || current.uuid != t.Val.uuid {
 		return nil
 	}
 
-	err := c.cleanup(t.Val.uuid)
-	if err != nil {
-		return err
-	}
+	c.pool.Remove(t.Key)
 
-	err = t.Val.connection.Close()
-	if err != nil {
+	if err := t.Val.connection.Close(); err != nil {
 		klog.ErrorS(err, "failed to close connection", "connection", t.Val.uuid)
 		return err
 	}
 
-	c.pool.Remove(t.Key)
+	if err := c.cleanup(t.Val.uuid); err != nil {
+		return err
+	}
+
 	klog.V(log.LogLevelExtended).InfoS("removed connection", "connection", t.Val.uuid)
 	return nil
 }
