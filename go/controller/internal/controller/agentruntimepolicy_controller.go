@@ -130,17 +130,17 @@ func (in *AgentRuntimePolicyReconciler) getClusterID(ctx context.Context, policy
 }
 
 func createBindingsAttributes(policy *v1alpha1.AgentRuntimePolicy) []*console.AgentBindingAttributes {
-	bindings := make([]*console.AgentBindingAttributes, 0)
-	if policy.Spec.Bindings == nil {
-		return bindings
+	var create []v1alpha1.Binding
+	if policy.Spec.Bindings != nil {
+		create = policy.Spec.Bindings.Create
 	}
 
-	return append(bindings, algorithms.Map(policy.Spec.Bindings.Create, func(b v1alpha1.Binding) *console.AgentBindingAttributes {
+	return algorithms.Map(create, func(b v1alpha1.Binding) *console.AgentBindingAttributes {
 		return &console.AgentBindingAttributes{
 			UserEmail: b.UserEmail,
 			GroupName: b.GroupName,
 		}
-	})...)
+	})
 }
 
 func agentRuntimePolicyAttributes(runtime *console.AgentRuntimeFragment, clusterID string, createBindings []*console.AgentBindingAttributes) console.AgentRuntimeAttributes {
