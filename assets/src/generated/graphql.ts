@@ -1753,6 +1753,72 @@ export type BindingAttributes = {
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+/** Associates a policy with a bindable resource type. */
+export type BindingPolicy = {
+  __typename?: 'BindingPolicy';
+  bindPolicy?: Maybe<Policy>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  interval: Scalars['String']['output'];
+  matches?: Maybe<BindingPolicyMatches>;
+  nextPollAt?: Maybe<Scalars['DateTime']['output']>;
+  policy?: Maybe<Policy>;
+  type: BindingPolicyType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type BindingPolicyAttributes = {
+  /** the policy that determines whether a target should be bound */
+  bindPolicyId: Scalars['ID']['input'];
+  /** how often the binding policy is evaluated; defaults to 1h and cannot be below 30m */
+  interval?: InputMaybe<Scalars['String']['input']>;
+  /** criteria that determine when the policy applies */
+  matches?: InputMaybe<BindingPolicyMatchesAttributes>;
+  /** the policy to attach to matching targets */
+  policyId: Scalars['ID']['input'];
+  /** the resource type this policy can bind to */
+  type: BindingPolicyType;
+};
+
+export type BindingPolicyConnection = {
+  __typename?: 'BindingPolicyConnection';
+  edges?: Maybe<Array<Maybe<BindingPolicyEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type BindingPolicyEdge = {
+  __typename?: 'BindingPolicyEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<BindingPolicy>;
+};
+
+export type BindingPolicyMatches = {
+  __typename?: 'BindingPolicyMatches';
+  workbench?: Maybe<WorkbenchPolicyMatches>;
+};
+
+export type BindingPolicyMatchesAttributes = {
+  workbench?: InputMaybe<WorkbenchPolicyMatchesAttributes>;
+};
+
+export enum BindingPolicyType {
+  Stack = 'STACK',
+  Workbench = 'WORKBENCH'
+}
+
+export type BindingPolicyUpdateAttributes = {
+  /** the policy that determines whether a target should be bound */
+  bindPolicyId?: InputMaybe<Scalars['ID']['input']>;
+  /** how often the binding policy is evaluated; cannot be below 30m */
+  interval?: InputMaybe<Scalars['String']['input']>;
+  /** criteria that determine when the policy applies */
+  matches?: InputMaybe<BindingPolicyMatchesAttributes>;
+  /** the policy to attach to matching targets */
+  policyId?: InputMaybe<Scalars['ID']['input']>;
+  /** the resource type this policy can bind to */
+  type: BindingPolicyType;
+};
+
 /** Requirements for Bitbucket Data Center / Server authentication */
 export type BitbucketDatacenterAttributes = {
   /** the user slug for Bitbucket Data Center / Server */
@@ -5263,6 +5329,7 @@ export type InfrastructureStack = {
   /** the git repository you're sourcing IaC from */
   repository?: Maybe<GitRepository>;
   runs?: Maybe<StackRunConnection>;
+  stackPolicies?: Maybe<StackPolicyConnection>;
   /** the most recent state of this stack */
   state?: Maybe<StackState>;
   /** The status of the last run of the stack */
@@ -5307,6 +5374,14 @@ export type InfrastructureStackRunsArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   pullRequestId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type InfrastructureStackStackPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type InfrastructureStackConnection = {
@@ -7901,11 +7976,75 @@ export type PodTolerationAttributes = {
   value?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type Policy = {
+  __typename?: 'Policy';
+  /** human-readable policy description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** unique policy identifier */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** unique policy name */
+  name: Scalars['String']['output'];
+  /** policy source text */
+  policy: Scalars['String']['output'];
+  /** Sampled evaluations that include this policy. */
+  policyEvaluations?: Maybe<PolicyEvaluationConnection>;
+  /** project that owns this policy */
+  project?: Maybe<Project>;
+  stackPolicies?: Maybe<StackPolicyConnection>;
+  /** policy implementation type */
+  type: PolicyType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
+};
+
+
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type PolicyPolicyEvaluationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type PolicyStackPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type PolicyWorkbenchPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export enum PolicyAggregate {
   Cluster = 'CLUSTER',
   Enforcement = 'ENFORCEMENT',
   Installed = 'INSTALLED'
 }
+
+/** Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy. */
+export type PolicyAttributes = {
+  /** human-readable policy description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** unique policy name */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** policy source text */
+  policy?: InputMaybe<Scalars['String']['input']>;
+  /** project that owns the policy; defaults to the deployment's default project when omitted */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** policy implementation type */
+  type?: InputMaybe<PolicyType>;
+};
 
 export type PolicyBinding = {
   __typename?: 'PolicyBinding';
@@ -7918,6 +8057,12 @@ export type PolicyBindingAttributes = {
   groupId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type PolicyConnection = {
+  __typename?: 'PolicyConnection';
+  edges?: Maybe<Array<Maybe<PolicyEdge>>>;
+  pageInfo: PageInfo;
 };
 
 /** A OPA Gatekeeper Constraint reference */
@@ -7963,6 +8108,12 @@ export type PolicyConstraintEdge = {
   node?: Maybe<PolicyConstraint>;
 };
 
+export type PolicyEdge = {
+  __typename?: 'PolicyEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Policy>;
+};
+
 /** Configuration for applying policy enforcement to a stack */
 export type PolicyEngine = {
   __typename?: 'PolicyEngine';
@@ -7991,6 +8142,33 @@ export enum PolicyEngineType {
   Trivy = 'TRIVY'
 }
 
+/** A sampled policy decision for a tool invocation. */
+export type PolicyEvaluation = {
+  __typename?: 'PolicyEvaluation';
+  /** unique policy evaluation identifier */
+  id: Scalars['ID']['output'];
+  /** tool input evaluated by the policy */
+  input: Scalars['Map']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** policy evaluation result */
+  output: Scalars['Map']['output'];
+  /** policies evaluated for this decision */
+  policyIds: Array<Scalars['ID']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PolicyEvaluationConnection = {
+  __typename?: 'PolicyEvaluationConnection';
+  edges?: Maybe<Array<Maybe<PolicyEvaluationEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PolicyEvaluationEdge = {
+  __typename?: 'PolicyEvaluationEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PolicyEvaluation>;
+};
+
 /** Aggregate statistics for policies across your fleet */
 export type PolicyStatistic = {
   __typename?: 'PolicyStatistic';
@@ -7999,6 +8177,12 @@ export type PolicyStatistic = {
   /** the count for this aggregate */
   count?: Maybe<Scalars['Int']['output']>;
 };
+
+export enum PolicyType {
+  Binding = 'BINDING',
+  Stack = 'STACK',
+  Workbench = 'WORKBENCH'
+}
 
 export type Port = {
   __typename?: 'Port';
@@ -9146,6 +9330,7 @@ export type RootMutationType = {
   /** Creates a chat thread and agent session that will operate autonomously based on the prompt provided */
   createAgentSession?: Maybe<ChatThread>;
   createAlertResolution?: Maybe<AlertResolution>;
+  createBindingPolicy?: Maybe<BindingPolicy>;
   createBootstrapToken?: Maybe<BootstrapToken>;
   createCluster?: Maybe<Cluster>;
   /** upserts a cluster backup resource */
@@ -9174,6 +9359,8 @@ export type RootMutationType = {
   createPinnedCustomResource?: Maybe<PinnedCustomResource>;
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
+  /** Creates a policy in a project. Requires policy write scope and write access to the target project. */
+  createPolicy?: Maybe<Policy>;
   createPrAutomation?: Maybe<PrAutomation>;
   createProject?: Maybe<Project>;
   createProviderCredential?: Maybe<ProviderCredential>;
@@ -9193,6 +9380,7 @@ export type RootMutationType = {
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createStack?: Maybe<InfrastructureStack>;
   createStackDefinition?: Maybe<StackDefinition>;
+  createStackPolicy?: Maybe<StackPolicy>;
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   createWorkbench?: Maybe<Workbench>;
@@ -9203,6 +9391,7 @@ export type RootMutationType = {
   /** Creates a new workbench job. Requires read access to the workbench. */
   createWorkbenchJob?: Maybe<WorkbenchJob>;
   createWorkbenchMessage?: Maybe<WorkbenchJobActivity>;
+  createWorkbenchPolicy?: Maybe<WorkbenchPolicy>;
   /** Creates a saved prompt for a workbench. Requires read access to the workbench. */
   createWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   /** Creates a saved skill for a workbench. Requires write access to the workbench. */
@@ -9211,6 +9400,7 @@ export type RootMutationType = {
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
   deleteAgentRuntime?: Maybe<AgentRuntime>;
+  deleteBindingPolicy?: Maybe<BindingPolicy>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
   deleteCatalog?: Maybe<Catalog>;
   /** deletes a chat from a users history */
@@ -9249,6 +9439,8 @@ export type RootMutationType = {
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
+  /** Deletes a project-scoped policy. Requires policy write scope and write access to the policy's project. */
+  deletePolicy?: Maybe<Policy>;
   deletePrAutomation?: Maybe<PrAutomation>;
   /** deletes a governance controller */
   deletePrGovernance?: Maybe<PrGovernance>;
@@ -9266,6 +9458,7 @@ export type RootMutationType = {
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
   deleteStackDefinition?: Maybe<StackDefinition>;
+  deleteStackPolicy?: Maybe<StackPolicy>;
   deleteThread?: Maybe<ChatThread>;
   deleteUpgradePlanCallout?: Maybe<UpgradePlanCallout>;
   deleteUser?: Maybe<User>;
@@ -9275,6 +9468,7 @@ export type RootMutationType = {
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Deletes the eval configuration for a workbench. Requires write access to the workbench. */
   deleteWorkbenchEval?: Maybe<WorkbenchEval>;
+  deleteWorkbenchPolicy?: Maybe<WorkbenchPolicy>;
   /** Deletes a saved workbench prompt. Requires read access to the workbench. */
   deleteWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   /** Deletes a saved workbench skill. Requires write access to the workbench. */
@@ -9366,6 +9560,7 @@ export type RootMutationType = {
   updateAgentRun?: Maybe<AgentRun>;
   updateAgentRunAnalysis?: Maybe<AgentRun>;
   updateAgentRunTodos?: Maybe<AgentRun>;
+  updateBindingPolicy?: Maybe<BindingPolicy>;
   updateCloudConnection?: Maybe<CloudConnection>;
   updateCluster?: Maybe<Cluster>;
   updateClusterIsoImage?: Maybe<ClusterIsoImage>;
@@ -9387,6 +9582,8 @@ export type RootMutationType = {
   updateObjectStore?: Maybe<ObjectStore>;
   updateOidcProvider?: Maybe<OidcProvider>;
   updatePersona?: Maybe<Persona>;
+  /** Updates a project-scoped policy. Requires policy write scope and write access to the policy's project. */
+  updatePolicy?: Maybe<Policy>;
   updatePrAutomation?: Maybe<PrAutomation>;
   updateProject?: Maybe<Project>;
   updatePullRequest?: Maybe<PullRequest>;
@@ -9403,6 +9600,7 @@ export type RootMutationType = {
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateStack?: Maybe<InfrastructureStack>;
   updateStackDefinition?: Maybe<StackDefinition>;
+  updateStackPolicy?: Maybe<StackPolicy>;
   updateStackRun?: Maybe<StackRun>;
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
@@ -9413,6 +9611,7 @@ export type RootMutationType = {
   updateWorkbenchEval?: Maybe<WorkbenchEval>;
   /** Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update. */
   updateWorkbenchJob?: Maybe<WorkbenchJob>;
+  updateWorkbenchPolicy?: Maybe<WorkbenchPolicy>;
   /** Updates a saved workbench prompt. Requires read access to the workbench. */
   updateWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   /** Updates a saved workbench skill. Requires write access to the workbench. */
@@ -9629,6 +9828,11 @@ export type RootMutationTypeCreateAlertResolutionArgs = {
 };
 
 
+export type RootMutationTypeCreateBindingPolicyArgs = {
+  attributes: BindingPolicyAttributes;
+};
+
+
 export type RootMutationTypeCreateBootstrapTokenArgs = {
   attributes: BootstrapTokenAttributes;
 };
@@ -9763,6 +9967,11 @@ export type RootMutationTypeCreatePipelineContextArgs = {
 };
 
 
+export type RootMutationTypeCreatePolicyArgs = {
+  attributes: PolicyAttributes;
+};
+
+
 export type RootMutationTypeCreatePrAutomationArgs = {
   attributes: PrAutomationAttributes;
 };
@@ -9856,6 +10065,12 @@ export type RootMutationTypeCreateStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeCreateStackPolicyArgs = {
+  attributes: StackPolicyAttributes;
+  stackId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateThreadArgs = {
   attributes: ChatThreadAttributes;
 };
@@ -9901,6 +10116,12 @@ export type RootMutationTypeCreateWorkbenchMessageArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchPolicyArgs = {
+  attributes: WorkbenchPolicyAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchPromptArgs = {
   attributes: WorkbenchPromptAttributes;
   workbenchId: Scalars['ID']['input'];
@@ -9931,6 +10152,11 @@ export type RootMutationTypeDeleteAccessTokenArgs = {
 
 
 export type RootMutationTypeDeleteAgentRuntimeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteBindingPolicyArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10121,6 +10347,11 @@ export type RootMutationTypeDeletePodArgs = {
 };
 
 
+export type RootMutationTypeDeletePolicyArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeletePrAutomationArgs = {
   id: Scalars['ID']['input'];
 };
@@ -10196,6 +10427,11 @@ export type RootMutationTypeDeleteStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeDeleteStackPolicyArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteThreadArgs = {
   id: Scalars['ID']['input'];
 };
@@ -10232,6 +10468,11 @@ export type RootMutationTypeDeleteWorkbenchCronArgs = {
 
 
 export type RootMutationTypeDeleteWorkbenchEvalArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchPolicyArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10574,6 +10815,12 @@ export type RootMutationTypeUpdateAgentRunTodosArgs = {
 };
 
 
+export type RootMutationTypeUpdateBindingPolicyArgs = {
+  attributes: BindingPolicyUpdateAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateCloudConnectionArgs = {
   attributes: CloudConnectionAttributes;
   id: Scalars['ID']['input'];
@@ -10694,6 +10941,12 @@ export type RootMutationTypeUpdatePersonaArgs = {
 };
 
 
+export type RootMutationTypeUpdatePolicyArgs = {
+  attributes: PolicyAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdatePrAutomationArgs = {
   attributes: PrAutomationAttributes;
   id: Scalars['ID']['input'];
@@ -10792,6 +11045,12 @@ export type RootMutationTypeUpdateStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeUpdateStackPolicyArgs = {
+  attributes: StackPolicyAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateStackRunArgs = {
   attributes: StackRunAttributes;
   id: Scalars['ID']['input'];
@@ -10837,6 +11096,12 @@ export type RootMutationTypeUpdateWorkbenchEvalArgs = {
 export type RootMutationTypeUpdateWorkbenchJobArgs = {
   attributes: WorkbenchJobUpdateAttributes;
   jobId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchPolicyArgs = {
+  attributes: WorkbenchPolicyUpdateAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -11012,6 +11277,8 @@ export type RootQueryType = {
   availableModels?: Maybe<Array<Maybe<AvailableModel>>>;
   averageEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsAverage>>>;
   averageWorkbenchEvalResults?: Maybe<Array<Maybe<WorkbenchEvalResultsWorkbenchAverage>>>;
+  bindingPolicies?: Maybe<BindingPolicyConnection>;
+  bindingPolicy?: Maybe<BindingPolicy>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
   catalog?: Maybe<Catalog>;
@@ -11076,6 +11343,8 @@ export type RootQueryType = {
   dependencyManagementServices?: Maybe<DependencyManagementServiceConnection>;
   deployment?: Maybe<Deployment>;
   deploymentSettings?: Maybe<DeploymentSettings>;
+  /** Evaluates a policy against the supplied tool input. */
+  evaluatePolicy?: Maybe<Scalars['Map']['output']>;
   federatedCredential?: Maybe<FederatedCredential>;
   /** Fetches the manifests from cache once the agent has given us them, will be null otherwise */
   fetchManifests?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -11156,6 +11425,8 @@ export type RootQueryType = {
   pluralServiceDeployment?: Maybe<PluralServiceDeployment>;
   pod?: Maybe<Pod>;
   pods?: Maybe<PodConnection>;
+  policies?: Maybe<PolicyConnection>;
+  policy?: Maybe<Policy>;
   policyConstraint?: Maybe<PolicyConstraint>;
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   policyStatistics?: Maybe<Array<Maybe<PolicyStatistic>>>;
@@ -11202,6 +11473,7 @@ export type RootQueryType = {
   sharedAgentRun?: Maybe<AgentRun>;
   stackDefinition?: Maybe<StackDefinition>;
   stackDefinitions?: Maybe<StackDefinitionConnection>;
+  stackPolicy?: Maybe<StackPolicy>;
   stackRun?: Maybe<StackRun>;
   /** fetches the files from a stack's git tarball */
   stackTarball?: Maybe<Array<Maybe<ServiceFile>>>;
@@ -11371,6 +11643,19 @@ export type RootQueryTypeAverageEvalResultsArgs = {
 
 export type RootQueryTypeAverageWorkbenchEvalResultsArgs = {
   period?: InputMaybe<EvalResultsPeriod>;
+};
+
+
+export type RootQueryTypeBindingPoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeBindingPolicyArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -11709,6 +11994,12 @@ export type RootQueryTypeDeploymentArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeEvaluatePolicyArgs = {
+  input: Scalars['Json']['input'];
+  policyId: Scalars['ID']['input'];
 };
 
 
@@ -12210,6 +12501,22 @@ export type RootQueryTypePodsArgs = {
 };
 
 
+export type RootQueryTypePoliciesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypePolicyArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypePolicyConstraintArgs = {
   id: Scalars['ID']['input'];
 };
@@ -12510,6 +12817,11 @@ export type RootQueryTypeStackDefinitionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeStackPolicyArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -14546,6 +14858,32 @@ export type StackOverridesAttributes = {
   terragrunt?: InputMaybe<TerragruntConfigurationAttributes>;
 };
 
+export type StackPolicy = {
+  __typename?: 'StackPolicy';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  policy?: Maybe<Policy>;
+  stack?: Maybe<InfrastructureStack>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackPolicyAttributes = {
+  /** the policy to associate with this stack */
+  policyId: Scalars['ID']['input'];
+};
+
+export type StackPolicyConnection = {
+  __typename?: 'StackPolicyConnection';
+  edges?: Maybe<Array<Maybe<StackPolicyEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type StackPolicyEdge = {
+  __typename?: 'StackPolicyEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<StackPolicy>;
+};
+
 export type StackPolicyViolation = {
   __typename?: 'StackPolicyViolation';
   /** the causes of this violation line-by-line in code */
@@ -15709,6 +16047,7 @@ export type Workbench = {
   /** users that have read or write access to this workbench */
   users?: Maybe<Array<Maybe<User>>>;
   webhooks?: Maybe<WorkbenchWebhookConnection>;
+  workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
   workbenchSkills?: Maybe<WorkbenchSkillConnection>;
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
@@ -15774,6 +16113,14 @@ export type WorkbenchRunsArgs = {
 
 
 export type WorkbenchWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchWorkbenchPoliciesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -16755,6 +17102,50 @@ export type WorkbenchObservabilityAttributes = {
   logs?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable metrics capability */
   metrics?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type WorkbenchPolicy = {
+  __typename?: 'WorkbenchPolicy';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  matches?: Maybe<WorkbenchPolicyMatches>;
+  policy?: Maybe<Policy>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchPolicyAttributes = {
+  /** criteria that determine when the policy applies */
+  matches?: InputMaybe<WorkbenchPolicyMatchesAttributes>;
+  /** the policy to associate with this workbench */
+  policyId: Scalars['ID']['input'];
+};
+
+export type WorkbenchPolicyConnection = {
+  __typename?: 'WorkbenchPolicyConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchPolicyEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchPolicyEdge = {
+  __typename?: 'WorkbenchPolicyEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchPolicy>;
+};
+
+export type WorkbenchPolicyMatches = {
+  __typename?: 'WorkbenchPolicyMatches';
+  regexes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type WorkbenchPolicyMatchesAttributes = {
+  /** regular expressions that select inputs for this policy */
+  regexes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type WorkbenchPolicyUpdateAttributes = {
+  /** criteria that determine when the policy applies */
+  matches?: InputMaybe<WorkbenchPolicyMatchesAttributes>;
 };
 
 export type WorkbenchPrMergeRateByWorkbenchEntry = {

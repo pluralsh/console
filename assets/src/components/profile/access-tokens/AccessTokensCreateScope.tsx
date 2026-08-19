@@ -28,6 +28,8 @@ const GRAPHQL_SCOPE_VALUES = [
   'observer.write',
   'pipeline.read',
   'pipeline.write',
+  'policy.read',
+  'policy.write',
   'project.read',
   'project.write',
   'repos.read',

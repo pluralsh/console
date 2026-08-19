@@ -1431,6 +1431,35 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.type == :memo
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
     end
+
+    test "persists sanitized AI responses and tool call arguments" do
+      job = insert(:workbench_job)
+      invalid = <<0xC3, 0x28>>
+
+      {:ok, activity} =
+        Workbenches.create_job_activity(
+          %{
+            status: :successful,
+            type: :function,
+            prompt: "prompt" <> <<0>>,
+            result: %{output: "output" <> <<0>> <> invalid},
+            tool_call: %{
+              call_id: "call" <> <<0>>,
+              name: "tool" <> invalid,
+              arguments: %{"argument" <> <<0>> => "value" <> invalid}
+            }
+          },
+          job
+        )
+
+      activity = refetch(activity)
+
+      assert activity.prompt == "prompt"
+      assert activity.result.output == "output�("
+      assert activity.tool_call.call_id == "call"
+      assert activity.tool_call.name == "tool�("
+      assert activity.tool_call.arguments == %{"argument" => "value�("}
+    end
   end
 
   describe "update_job_activity/2" do
@@ -3159,6 +3188,91 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_workbench_chatbot(bot.id, user)
 
       assert refetch(bot)
+    end
+  end
+
+  describe "workbench policy CRUD" do
+    test "workbench writers can create, update, and delete policy associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+
+      {:ok, association} =
+        Workbenches.create_workbench_policy(
+          %{policy_id: policy.id, matches: %{regexes: ["^kubernetes\\."]}},
+          workbench.id,
+          user
+        )
+
+      assert association.workbench_id == workbench.id
+      assert association.policy_id == policy.id
+      assert association.matches.regexes == ["^kubernetes\\."]
+
+      {:ok, updated} =
+        Workbenches.update_workbench_policy(
+          %{matches: %{regexes: ["^terraform\\."]}},
+          association.id,
+          user
+        )
+
+      assert updated.matches.regexes == ["^terraform\\."]
+
+      {:ok, deleted} = Workbenches.delete_workbench_policy(updated.id, user)
+
+      assert deleted.id == updated.id
+      refute refetch(updated)
+    end
+
+    test "requires workbench policy type when creating associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+
+      assert {:error, "workbench policies require a workbench policy"} =
+               Workbenches.create_workbench_policy(
+                 %{policy_id: policy.id, matches: %{regexes: [".*"]}},
+                 workbench.id,
+                 user
+               )
+    end
+
+    test "workbench readers cannot create policy associations" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+
+      assert {:error, _} =
+               Workbenches.create_workbench_policy(
+                 %{policy_id: policy.id, matches: %{regexes: [".*"]}},
+                 workbench.id,
+                 user
+               )
+    end
+
+    test "workbench writers need policy read access to create or update associations" do
+      user = insert(:user)
+      workbench_project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: workbench_project)
+      policy = insert(:policy)
+
+      assert {:error, _} =
+               Workbenches.create_workbench_policy(
+                 %{policy_id: policy.id, matches: %{regexes: [".*"]}},
+                 workbench.id,
+                 user
+               )
+
+      association = insert(:workbench_policy, workbench: workbench, policy: policy)
+
+      assert {:error, _} =
+               Workbenches.update_workbench_policy(
+                 %{matches: %{regexes: ["^kubernetes\\."]}},
+                 association.id,
+                 user
+               )
     end
   end
 

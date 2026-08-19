@@ -1535,4 +1535,47 @@ defmodule Console.Deployments.StacksSyncTest do
       {:error, _} = Console.Guardian.resource_from_token(token)
     end
   end
+
+  describe "stack policy CRUD" do
+    test "stack writers can create, update, and delete policy associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+      replacement = insert(:policy, project: project, type: :stack)
+
+      {:ok, association} = Stacks.create_stack_policy(%{policy_id: policy.id}, stack.id, user)
+      assert association.stack_id == stack.id
+      assert association.policy_id == policy.id
+
+      {:ok, updated} = Stacks.update_stack_policy(%{policy_id: replacement.id}, association.id, user)
+      assert updated.policy_id == replacement.id
+
+      {:ok, deleted} = Stacks.delete_stack_policy(updated.id, user)
+      assert deleted.id == updated.id
+      refute refetch(updated)
+    end
+
+    test "requires stack policy type when creating associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project, type: :workbench)
+
+      assert {:error, "stack policies require a stack policy"} =
+               Stacks.create_stack_policy(%{policy_id: policy.id}, stack.id, user)
+    end
+
+    test "stack readers cannot manage policy associations" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project)
+      association = insert(:stack_policy, stack: stack, policy: policy)
+
+      assert {:error, _} = Stacks.create_stack_policy(%{policy_id: policy.id}, stack.id, user)
+      assert {:error, _} = Stacks.update_stack_policy(%{policy_id: policy.id}, association.id, user)
+      assert {:error, _} = Stacks.delete_stack_policy(association.id, user)
+    end
+  end
 end

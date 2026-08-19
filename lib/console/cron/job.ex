@@ -12,9 +12,9 @@ defmodule Console.Cron.Job do
   def due?(%__MODULE__{next_run_at: at}), do: Timex.before?(at, Timex.now())
 
   def exec(%__MODULE__{crontab: tab, job: {m, f, a}} = job) do
-    Task.async(fn ->
+    Task.Supervisor.start_child(Console.Cron.TaskSupervisor, fn ->
       apply(m, f, a)
-    end)
+    end, shutdown: :timer.hours(2))
     %{job | next_run_at: Scheduler.get_next_run_date!(tab, next_date())}
   end
 

@@ -11,6 +11,7 @@ export type ToolCallKind =
   | 'grep'
   | 'edit'
   | 'command_execution'
+  | 'python_sandbox'
   | 'mcp_tool_call'
   | 'file_change'
   | 'web_search'
@@ -38,6 +39,7 @@ export function resolveToolCallKind(
   ) {
     return 'command_execution'
   }
+  if (name === 'python_sandbox') return 'python_sandbox'
   if (name === 'file_change') return 'file_change'
   if (name === 'web_search') return 'web_search'
   if (name === 'mcp_tool_call' || isMcpToolName(toolName)) {
@@ -56,6 +58,8 @@ export function toolCallBatchKey(kind: ToolCallKind): string {
   switch (kind) {
     case 'command_execution':
       return 'command'
+    case 'python_sandbox':
+      return 'python'
     case 'mcp_tool_call':
       return 'mcp'
     case 'file_change':
@@ -73,6 +77,7 @@ const BATCH_LABELS: Record<string, string> = {
   grep: 'grep',
   edit: 'edit',
   command: 'command',
+  python: 'python',
   mcp: 'mcp',
   files: 'file change',
   search: 'search',
@@ -97,6 +102,8 @@ export function toolCallDisplayTitle(
     case 'command_execution':
     case 'bash':
       return isShellCommand(getCommand(toolName, args)) ? 'Bash' : 'Command'
+    case 'python_sandbox':
+      return 'Python Sandbox'
     case 'file_change':
     case 'edit':
       return 'Files'
@@ -123,6 +130,8 @@ export function toolCallDisplaySubtitle(
     case 'command_execution':
     case 'bash':
       return truncate(getCommand(toolName, args), { length: 48 })
+    case 'python_sandbox':
+      return truncate(getPython(args), { length: 48 })
     case 'web_search':
       return truncate(getSearchQuery(args), { length: 48 })
     case 'mcp_tool_call':
@@ -148,6 +157,11 @@ export function getCommand(toolName: string, args?: ToolArguments): string {
 export function getSearchQuery(args?: ToolArguments): string {
   if (!args || Array.isArray(args)) return ''
   return typeof args.query === 'string' ? args.query : ''
+}
+
+export function getPython(args?: ToolArguments): string {
+  if (!args || Array.isArray(args)) return ''
+  return typeof args.python === 'string' ? args.python : ''
 }
 
 export function getMcpLabel(toolName: string, args?: ToolArguments): string {
@@ -205,6 +219,7 @@ export function styledToolCallKinds(): ToolCallKind[] {
   return [
     'bash',
     'command_execution',
+    'python_sandbox',
     'read',
     'grep',
     'edit',

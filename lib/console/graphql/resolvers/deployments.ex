@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ServiceComponent,
     GitRepository,
     PolicyBinding,
+    Policy,
     ApiDeprecation,
     Tag,
     GlobalService,
@@ -116,6 +117,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     WorkbenchJobThought,
     WorkbenchJobResult,
     WorkbenchTool,
+    WorkbenchPolicy,
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
@@ -146,6 +148,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterNodePool, _), do: ClusterNodePool
   def query(ClusterProvider, _), do: ClusterProvider
   def query(PolicyBinding, _), do: PolicyBinding
+  def query(Policy, _), do: Policy
   def query(Service, _), do: Service
   def query(Revision, _), do: Revision
   def query(ServiceComponent, _), do: ServiceComponent
@@ -226,6 +229,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterUpgrade, _), do: ClusterUpgrade
   def query(ClusterUpgradeStep, _), do: ClusterUpgradeStep
   def query(Workbench, _), do: Workbench
+  def query(WorkbenchPolicy, _), do: WorkbenchPolicy
   def query(WorkbenchJob, _), do: WorkbenchJob
   def query(WorkbenchJobActivity, _), do: WorkbenchJobActivity.ordered()
   def query(WorkbenchJobThought, _), do: WorkbenchJobThought.ordered()

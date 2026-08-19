@@ -25,6 +25,7 @@ import {
 import {
   formatFileChangeSummary,
   getCommand,
+  getPython,
   getSearchQuery,
   isStyledToolCall,
   resolveToolCallKind,
@@ -161,6 +162,35 @@ export function SimpleToolCall({
                   {result}
                 </Code>
               ) : null}
+            </Flex>
+          </SimpleAccordion>
+        )
+      }
+      case 'python_sandbox': {
+        const python = getPython(args)
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="small"
+              minWidth={0}
+              width="100%"
+              marginTop={spacing.xsmall}
+            >
+              <Code
+                language="python"
+                title="Python"
+                css={slimCodeCss}
+              >
+                {python}
+              </Code>
+              <ToolCallContent
+                content={content ?? ''}
+                attributes={attributes}
+                customResultBody={customResultBody}
+                hideArguments
+                isPending={isPending}
+              />
             </Flex>
           </SimpleAccordion>
         )

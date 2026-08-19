@@ -11,6 +11,7 @@ defmodule Console.AI.Tools.Workbench.KubeRequest do
     field :query_params, :map, default: %{}
     field :content_type, :string
     field :explanation,  :string
+    field :approval,     :map, virtual: true
   end
 
   def new(attrs) do
@@ -19,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.KubeRequest do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(handle method path body query_params content_type explanation)a)
+    |> cast(attrs, ~w(handle method path body query_params content_type explanation approval)a)
     |> validate_required([:handle, :method, :path, :content_type])
   end
 

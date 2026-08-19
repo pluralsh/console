@@ -2,6 +2,11 @@ defmodule Console.Deployments.Policy do
   use Console.Services.Base
   import Console.Deployments.Policies
   alias Console.Schema.{
+    BindingPolicy,
+    StackPolicy,
+    WorkbenchPolicy,
+    Stack,
+    Workbench,
     PolicyConstraint,
     ConstraintViolation,
     Cluster,
@@ -11,11 +16,222 @@ defmodule Console.Deployments.Policy do
     ComplianceReportGenerator,
     User
   }
+  alias Console.Deployments.Settings
+  alias Console.Deployments.{Stacks, Workbenches}
+  alias Console.Services.Users
+  alias Console.PubSub
 
   require Logger
 
   @type summary_resp :: {:ok, integer} | Console.error
   @type generator_resp :: {:ok, ComplianceReportGenerator.t} | Console.error
+  @type policy_resp :: {:ok, Console.Schema.Policy.t} | Console.error
+  @type binding_policy_resp :: {:ok, BindingPolicy.t} | Console.error
+
+  def get_policy!(id), do: Repo.get!(Console.Schema.Policy, id)
+  def get_policy(id), do: Repo.get(Console.Schema.Policy, id)
+  def get_policy_by_name(name), do: Repo.get_by(Console.Schema.Policy, name: name)
+  def get_policy_by_name!(name), do: Repo.get_by!(Console.Schema.Policy, name: name)
+  def get_binding_policy!(id), do: Repo.get!(BindingPolicy, id)
+  def get_binding_policy(id), do: Repo.get(BindingPolicy, id)
+
+  @doc "Creates a project-scoped policy."
+  @spec create_policy(map, User.t) :: policy_resp
+  def create_policy(attrs, %User{} = user) do
+    %Console.Schema.Policy{}
+    |> Console.Schema.Policy.changeset(Settings.add_project_id(attrs, user))
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc "Updates a project-scoped policy."
+  @spec update_policy(map, binary, User.t) :: policy_resp
+  def update_policy(attrs, id, %User{} = user) do
+    get_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(&Console.Schema.Policy.changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update)
+  end
+
+  @doc "Deletes a project-scoped policy."
+  @spec delete_policy(binary, User.t) :: policy_resp
+  def delete_policy(id, %User{} = user) do
+    get_policy!(id)
+    |> Repo.preload(:workbench_policies)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete)
+  end
+
+  @doc "Creates a policy binding. Requires write access to the associated policy."
+  @spec create_binding_policy(map, User.t) :: binding_policy_resp
+  def create_binding_policy(attrs, %User{} = user) do
+    start_transaction()
+    |> add_operation(:policy, fn _ ->
+      %BindingPolicy{}
+      |> BindingPolicy.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:check, fn %{policy: policy} ->
+      case Repo.preload(policy, :bind_policy) do
+        %BindingPolicy{bind_policy: %{type: :binding}} = binding ->
+          {:ok, binding}
+        _ -> {:error, "the binding policy needs to have binding type"}
+      end
+    end)
+    |> execute(extract: :policy)
+  end
+
+  @doc "Updates a policy binding. Requires write access to the associated policy."
+  @spec update_binding_policy(map, binary, User.t) :: binding_policy_resp
+  def update_binding_policy(attrs, id, %User{} = user) do
+    get_binding_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(&BindingPolicy.changeset(&1, attrs))
+    |> when_ok(:update)
+  end
+
+  @doc "Deletes a policy binding. Requires write access to the associated policy."
+  @spec delete_binding_policy(binary, User.t) :: binding_policy_resp
+  def delete_binding_policy(id, %User{} = user) do
+    get_binding_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  def eval_policy(engine, input, ids, path \\ "data.plrl.wb.admission.result") do
+    with {:ok, engine} <- Regolix.set_input(engine, input) do
+      Regolix.eval_query(engine, path)
+      |> maybe_sample(input, ids)
+    end
+  end
+
+  def evaluate_policy(%Console.Schema.Policy{} = policy, input),
+    do: evaluate_policy(policy, input, [])
+  def evaluate_policy(%Console.Schema.Policy{} = policy, input, ids) when is_list(ids) do
+    with {:ok, base, path} <- evaluation_base(policy.type),
+         {:ok, engine} <- Regolix.new(),
+         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", base),
+         {:ok, engine} <- Regolix.add_policy(engine, policy.name, policy.policy) do
+      eval_policy(engine, input, ids, path)
+    end
+  end
+
+  def evaluate_policy(id, input, %User{} = user) do
+    get_policy(id)
+    |> allow(user, :read)
+    |> when_ok(&evaluate_policy(&1, input))
+  end
+
+  @workbench_policy_base Console.priv_file!("policy/wb.rego")
+  @binding_policy_base Console.priv_file!("policy/binding.rego")
+
+  defp evaluation_base(:workbench), do: {:ok, @workbench_policy_base, "data.plrl.wb.admission.result"}
+  defp evaluation_base(:binding), do: {:ok, @binding_policy_base, "data.plrl.binding.result"}
+  defp evaluation_base(type), do: {:error, "policy type #{type} cannot be evaluated"}
+
+  def next_binding_poll(%BindingPolicy{} = binding) do
+    binding
+    |> BindingPolicy.next_poll_changeset(binding.interval)
+    |> Repo.update()
+  end
+
+  def reconcile(%BindingPolicy{} = binding) do
+    binding = Repo.preload(binding, [:bind_policy, :policy])
+
+    targets(binding)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 50, pause: :timer.seconds(1))
+    |> Stream.each(&reconcile_binding(binding, &1))
+    |> Stream.run()
+  end
+
+  def reconcile(%BindingPolicy{type: :workbench} = binding, %Workbench{} = target),
+    do: reconcile_target(binding, target)
+  def reconcile(%BindingPolicy{type: :stack} = binding, %Stack{} = target),
+    do: reconcile_target(binding, target)
+  def reconcile(_, _), do: :ok
+
+  defp targets(%BindingPolicy{type: :workbench, policy: %{project_id: project_id}}) do
+    Workbench.for_project(project_id)
+    |> Workbench.stream()
+    |> Workbench.preloaded()
+  end
+
+  defp targets(%BindingPolicy{type: :stack, policy: %{project_id: project_id}}) do
+    Stack.for_project(project_id)
+    |> Stack.stream()
+    |> Stack.preloaded([:project])
+  end
+
+  defp reconcile_target(binding, %{project_id: project_id} = target) do
+    binding = Repo.preload(binding, [:bind_policy, :policy])
+
+    case binding do
+      %{policy: %{project_id: ^project_id}} -> reconcile_binding(binding, target)
+      _ -> :ok
+    end
+  end
+
+  defp reconcile_binding(%BindingPolicy{} = binding, target) do
+    user = bot()
+    case evaluate_policy(binding.bind_policy, binding_input(target), [binding.bind_policy_id]) do
+      {:ok, %{"bind" => true}} -> attach_binding(binding, target, user)
+      {:ok, %{"bind" => false}} -> detach_binding(binding, target, user)
+      error -> Logger.error("Failed to evaluate binding policy #{binding.id}: #{inspect(error)}")
+    end
+  end
+
+  defp binding_input(target) do
+    target
+    |> Map.from_struct()
+    |> Console.clean()
+  end
+
+  defp attach_binding(%BindingPolicy{} = binding, target, user) do
+    case fetch(binding, target) do
+      %{} -> :ok
+      _ -> reconcile_target(:attach, binding, target, user)
+    end
+  end
+
+  defp detach_binding(%BindingPolicy{} = binding, target, user) do
+    case fetch(binding, target) do
+      %{} -> reconcile_target(:detach, binding, target, user)
+      _ -> :ok
+    end
+  end
+
+  defp fetch(%BindingPolicy{policy_id: id}, %Workbench{id: wid}), do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
+  defp fetch(%BindingPolicy{policy_id: id}, %Stack{id: sid}), do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid)
+
+  defp reconcile_target(:attach, %BindingPolicy{policy_id: id} = binding, %Workbench{} = wb, user),
+    do: Workbenches.create_workbench_policy(%{policy_id: id, matches: BindingPolicy.workbench_matches(binding)}, wb.id, user)
+  defp reconcile_target(:attach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
+    do: Stacks.create_stack_policy(%{policy_id: id}, stack.id, user)
+  defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
+    do: Workbenches.delete_workbench_policy(id, wb.id, user)
+  defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
+    do: Stacks.delete_stack_policy(id, stack.id, user)
+
+  defp bot(), do: Users.admin_bot()
+
+  defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
+    if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do
+      %Console.PubSub.PolicySampled{
+        ids: ids,
+        input: input,
+        result: res
+      }
+      |> Map.put(:source_pid, self())
+      |> Console.PubSub.Broadcaster.notify()
+    end
+    res
+  end
+  defp maybe_sample(res, _, _), do: res
+
 
   @doc """
   Returns a constraint if present or nil otherwise
@@ -143,7 +359,7 @@ defmodule Console.Deployments.Policy do
   def upsert_constraints(constraints, %Cluster{id: id}) do
     Enum.reduce(constraints, start_transaction(), fn %{name: name} = attrs, xact ->
       add_operation(xact, name, fn _ ->
-        constraint =case Repo.get_by(PolicyConstraint, cluster_id: id, name: name) do
+        constraint = case Repo.get_by(PolicyConstraint, cluster_id: id, name: name) do
           %PolicyConstraint{} = constraint -> Repo.preload(constraint, [:violations])
           nil -> %PolicyConstraint{cluster_id: id, updated_at: DateTime.utc_now()}
         end
@@ -200,4 +416,10 @@ defmodule Console.Deployments.Policy do
     |> allow(user, :write)
     |> when_ok(:delete)
   end
+
+  def notify({:ok, %Console.Schema.Policy{} = policy}, :update),
+    do: handle_notify(PubSub.PolicyUpdated, policy)
+  def notify({:ok, %Console.Schema.Policy{} = policy}, :delete),
+    do: handle_notify(PubSub.PolicyDeleted, policy)
+  def notify(pass, _), do: pass
 end

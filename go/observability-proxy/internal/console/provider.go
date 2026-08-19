@@ -59,20 +59,7 @@ func (p *CachingProvider) GetConfig(_ context.Context) (ObservabilityConfig, err
 	}
 	p.mu.RUnlock()
 
-	// singleflight ensures that only one refresh is in flight at a time
-	val, err, _ := p.sfGroup.Do("refresh", func() (interface{}, error) {
-		err := p.refresh(context.Background())
-		if err != nil {
-			return nil, err
-		}
-
-		p.mu.RLock()
-		cfg := *p.config
-		p.mu.RUnlock()
-
-		return cfg, nil
-	})
-
+	cfg, err := p.refreshConfig(context.Background())
 	if err != nil {
 		// fallback to cached config if refresh failed
 		p.mu.RLock()
@@ -85,12 +72,47 @@ func (p *CachingProvider) GetConfig(_ context.Context) (ObservabilityConfig, err
 		return ObservabilityConfig{}, err
 	}
 
+	return cfg, nil
+}
+
+// Refresh fetches the latest config, regardless of the cache TTL.
+func (p *CachingProvider) Refresh(ctx context.Context) error {
+	_, err := p.refreshConfig(ctx)
+	return err
+}
+
+func (p *CachingProvider) refreshConfig(ctx context.Context) (ObservabilityConfig, error) {
+	// singleflight ensures that only one refresh is in flight at a time.
+	val, err, _ := p.sfGroup.Do("refresh", func() (interface{}, error) {
+		err := p.refresh(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		p.mu.RLock()
+		cfg := *p.config
+		p.mu.RUnlock()
+
+		return cfg, nil
+	})
+
+	if err != nil {
+		return ObservabilityConfig{}, err
+	}
+
 	return val.(ObservabilityConfig), nil
 }
 
 func (p *CachingProvider) refresh(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	resp, err := p.client.GetObservabilityConfig(ctx)
 	if err != nil {
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
 		klog.ErrorS(err, "failed to refresh observability config")
 		return err
 	}

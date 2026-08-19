@@ -49,10 +49,10 @@ func run() error {
 	provider := console.NewCachingProvider(grpcClient, args.ConfigTTL())
 	reporter := metering.NewUsageReporter(grpcClient, args.MeterInterval())
 	defer startUsageReporter(reporter)()
-	warmConfig(provider)
 
 	srv := newHTTPServer(provider, reporter.AddBytes)
 	errCh := startHTTPServer(srv)
+	defer startConfigRefresher(provider, args.ConfigTTL())()
 
 	waitErr := waitForShutdownTrigger(errCh)
 	shutdownErr := shutdownHTTPServer(srv)
@@ -93,14 +93,46 @@ func startUsageReporter(reporter *metering.UsageReporter) func() {
 	}
 }
 
-func warmConfig(provider *console.CachingProvider) {
-	// Fetch config eagerly so readiness transitions quickly.
-	if _, err := provider.GetConfig(context.Background()); err != nil {
-		klog.Warningf("initial config fetch failed, service will remain unready until successful refresh: %v", err)
-		return
-	}
+const configRefreshRetryInterval = 5 * time.Second
 
-	klog.V(logging.LevelInfo).Infof("initial observability config loaded successfully")
+func startConfigRefresher(provider *console.CachingProvider, refreshInterval time.Duration) func() {
+	return startConfigRefresherWithRetry(provider, refreshInterval, configRefreshRetryInterval)
+}
+
+func startConfigRefresherWithRetry(provider *console.CachingProvider, refreshInterval, retryInterval time.Duration) func() {
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+
+		for {
+			delay := refreshInterval
+			if err := provider.Refresh(ctx); err != nil {
+				if ctx.Err() != nil {
+					return
+				}
+				delay = retryInterval
+			}
+
+			timer := time.NewTimer(delay)
+			select {
+			case <-ctx.Done():
+				if !timer.Stop() {
+					select {
+					case <-timer.C:
+					default:
+					}
+				}
+				return
+			case <-timer.C:
+			}
+		}
+	}()
+
+	return func() {
+		cancel()
+		<-done
+	}
 }
 
 func newHTTPServer(provider *console.CachingProvider, recordBytes func(int64)) *http.Server {

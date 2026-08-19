@@ -51,6 +51,9 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchJob,
     WorkbenchJobActivity,
     WorkbenchTool,
+    WorkbenchPolicy,
+    BindingPolicy,
+    StackPolicy,
     WorkbenchCron,
     WorkbenchPrompt,
     QueuedPrompt,
@@ -63,6 +66,7 @@ defmodule Console.Deployments.Policies.Rbac do
     ObservabilityWebhook,
     Monitor,
     ChatConnection,
+    Policy,
     ChatbotMessage
   }
 
@@ -149,6 +153,14 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(step, user, action, & &1.upgrade)
   def evaluate(%Workbench{} = workbench, user, action),
     do: recurse(workbench, user, action, & &1.project)
+  def evaluate(%WorkbenchPolicy{} = policy, user, action),
+    do: recurse(policy, user, action, & &1.workbench)
+  def evaluate(%BindingPolicy{} = policy, user, action),
+    do: recurse_all(policy, user, action, & [&1.policy, &1.bind_policy])
+  def evaluate(%StackPolicy{} = policy, user, action),
+    do: recurse(policy, user, action, & &1.stack)
+  def evaluate(%Policy{} = policy, user, action),
+    do: recurse(policy, user, action, & &1.project)
   def evaluate(%WorkbenchTool{} = tool, user, action),
     do: recurse(tool, user, action, & &1.project)
   def evaluate(%WorkbenchJob{} = job, user, action),
@@ -302,6 +314,14 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(step, [upgrade: [cluster: @top_preloads]])
   def preload(%Workbench{} = workbench),
     do: Repo.preload(workbench, [:read_bindings, :write_bindings, project: @bindings])
+  def preload(%WorkbenchPolicy{} = policy),
+    do: Repo.preload(policy, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%BindingPolicy{} = policy),
+    do: Repo.preload(policy, [policy: [project: @bindings], bind_policy: [project: @bindings]])
+  def preload(%StackPolicy{} = policy),
+    do: Repo.preload(policy, [stack: @stack_preloads])
+  def preload(%Policy{} = policy),
+    do: Repo.preload(policy, [project: @bindings])
   def preload(%WorkbenchTool{} = tool),
     do: Repo.preload(tool, [:read_bindings, :write_bindings, project: @bindings])
   def preload(%WorkbenchJob{} = job),
@@ -356,6 +376,18 @@ defmodule Console.Deployments.Policies.Rbac do
     end
   end
   defp recurse(_, _, _, _), do: false
+
+  defp recurse_all(%{} = resource, user, action, next) do
+    resource = preload(resource)
+
+    bindings(resource, action)
+    |> has_binding?(user)
+    |> case do
+      true -> true
+      _ -> next.(resource) |> Enum.all?(&evaluate(&1, user, action))
+    end
+  end
+  defp recurse_all(_, _, _, _), do: false
 
   defp has_binding?([_ | _] = bindings, %User{id: id} = user) do
     users = Enum.filter(bindings, & &1.user_id) |> MapSet.new(& &1.user_id)

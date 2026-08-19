@@ -1,7 +1,7 @@
 defmodule Console.Schema.Project do
   use Piazza.Ecto.Schema
   alias Console.Deployments.Policies.Rbac
-  alias Console.Schema.{PolicyBinding, User}
+  alias Console.Schema.{Policy, PolicyBinding, User}
 
   schema "projects" do
     field :name,             :string
@@ -20,6 +20,8 @@ defmodule Console.Schema.Project do
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :write_policy_id
+
+    has_many :policies, Policy
 
     timestamps()
   end
@@ -53,6 +55,7 @@ defmodule Console.Schema.Project do
     |> foreign_key_constraint(:id, name: :pipelines, match: :prefix, message: "there is an active pipeline in this project")
     |> foreign_key_constraint(:id, name: :global_services, match: :prefix, message: "there is an active global_service in this project")
     |> foreign_key_constraint(:id, name: :managed_namespaces, match: :prefix, message: "there is an active managed_namespace in this project")
+    |> foreign_key_constraint(:id, name: :policies, match: :prefix, message: "there are active policies in this project")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required(~w(name)a)

@@ -14,6 +14,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchJob,
     WorkbenchJobActivity,
     WorkbenchTool,
+    WorkbenchPolicy,
     WorkbenchCron,
     WorkbenchPrompt,
     QueuedPrompt,
@@ -119,6 +120,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_skills(workbench, args, _) do
     WorkbenchSkill.for_workbench(workbench.id)
     |> WorkbenchSkill.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_policies(workbench, args, _) do
+    WorkbenchPolicy.for_workbench(workbench.id)
     |> paginate(args)
   end
 
@@ -356,6 +362,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench(id, user)
+
+  def create_workbench_policy(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_policy(attrs, workbench_id, user)
+
+  def update_workbench_policy(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_policy(attrs, id, user)
+
+  def delete_workbench_policy(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_policy(id, user)
 
   def create_workbench_tool(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_tool(attrs, user)

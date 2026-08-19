@@ -55,11 +55,13 @@ export function ToolCallContent({
   content,
   attributes,
   customResultBody,
+  hideArguments = false,
   isPending,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
   customResultBody?: ReactNode
+  hideArguments?: boolean
   isPending?: boolean
 }) {
   const { spacing } = useTheme()
@@ -73,7 +75,7 @@ export function ToolCallContent({
       minHeight={0}
       marginTop={spacing.xsmall}
     >
-      {attributes?.tool?.arguments && (
+      {!hideArguments && attributes?.tool?.arguments && (
         <Code
           language="json"
           title="Arguments"

@@ -26,6 +26,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     continue_msg: "looks like we aren't done let's continue",
     messages: [],
     pre_enable: [],
+    policies: [],
     acc: [],
     tool_fmt: &Console.identity/1,
     tool_search: false,
@@ -139,10 +140,11 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)
 
   @spec call_tools(%__MODULE__{}, [Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}], t()} | {:error, binary}
-  defp call_tools(engine, tools, impls) do
+  defp call_tools(%__MODULE__{policies: pols} = engine, tools, impls) do
     by_name = Map.new(impls, & {Tool.name(&1), &1})
     Enum.reduce_while(tools, {[], engine}, fn %Tool{id: id, name: name, arguments: args} = tool, {acc, engine} ->
       with {:ok, impl}   <- Map.fetch(by_name, name),
+           {:ok, impl}   <- Tool.policy(impl, args, pols),
            {:ok, parsed} <- Tool.validate(impl, args) do
         case Tool.implement(impl, Map.put(parsed, :id, tool)) do
           %EnabledTools{} = enabled ->

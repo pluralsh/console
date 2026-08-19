@@ -17,6 +17,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     def changeset(model, attrs) do
       model
       |> cast(attrs, [:tool_name, :tool_args, :summary])
+      |> sanitize_text([:tool_name, :tool_args, :summary])
       |> validate_required([:tool_name])
     end
   end
@@ -61,6 +62,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     def changeset(model, attrs) do
       model
       |> cast(attrs, [:title, :summary])
+      |> sanitize_text([:title, :summary])
       |> cast_embed(:query, required: true)
       |> validate_required([:title])
     end
@@ -77,6 +79,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     def changeset(model, attrs) do
       model
       |> cast(attrs, [:label, :value])
+      |> sanitize_text([:label])
       |> validate_required([:label, :value])
     end
   end
@@ -116,6 +119,7 @@ defmodule Console.Schema.WorkbenchJobResult do
       def changeset(model, attrs) do
         model
         |> cast(attrs, [:title])
+        |> sanitize_text([:title])
         |> cast_embed(:data)
         |> validate_required([:title])
       end
@@ -150,6 +154,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     defp content_changeset(model, attrs) do
       model
       |> cast(attrs, [:markdown])
+      |> sanitize_text([:markdown])
       |> cast_embed(:metrics)
       |> cast_embed(:logs)
       |> cast_embed(:traces)
@@ -193,6 +198,7 @@ defmodule Console.Schema.WorkbenchJobResult do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> sanitize_text(~w(objective working_theory conclusion criticism topology)a)
     |> cast_embed(:todos, with: &todo_changeset/2)
     |> cast_embed(:metadata)
     |> cast_embed(:canvas)
@@ -203,6 +209,7 @@ defmodule Console.Schema.WorkbenchJobResult do
   def todo_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name description done)a)
+    |> sanitize_text([:name, :description])
     |> validate_required(~w(name description)a)
   end
 end

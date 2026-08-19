@@ -8,9 +8,9 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Skill,
     Scratchpad,
     History,
-    Lua,
-    Infrastructure.KubeGet,
-    Infrastructure.KubeList,
+    Codemode,
+    Infrastructure.RawKubeGet,
+    Infrastructure.RawKubeList,
     Infrastructure.Cluster,
     Infrastructure.ClusterList,
     Infrastructure.ClusterTags,
@@ -20,7 +20,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.StackList,
     Infrastructure.StackInspect,
     Infrastructure.CloudSchemas,
-    Infrastructure.CloudQuery,
+    Infrastructure.RawCloudQuery,
     Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
@@ -38,7 +38,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     objective = WorkbenchJob.objective(job)
 
     MemoryEngine.new(tools, 50,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
         acc: %{},
         continue_msg: cont_msg(),
@@ -74,25 +74,25 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %Skills{skills: skills},
       %Skill{skills: skills},
       Scratchpad,
-      Lua,
       %History{job: job, activities: activities},
       Result
     ])
   end
 
-  def core_tools(%WorkbenchJob{workbench: bench, user: user} = job, %Environment{} = environment) do
+  def core_tools(%WorkbenchJob{workbench: bench, user: user} = job, %Environment{policies: policies} = environment) do
     svc_tools(bench, job, user)
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(pod_logs_tools(bench, user))
     |> Enum.concat(cloud_tools(environment))
+    |> build_codemode(policies)
   end
 
   defp cloud_tools(%Environment{tools: tools}) do
     Enum.flat_map(tools, fn
       {_, %WorkbenchTool{tool: :cloud} = tool} -> [
         %CloudSchemas{tool: tool},
-        %CloudQuery{tool: tool},
+        %RawCloudQuery{tool: tool},
         %CloudTables{tool: tool}
       ]
       _ -> []
@@ -130,8 +130,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}, %User{} = user) do
     [
       SummarizeComponent,
-      %KubeGet{user: user},
-      %KubeList{user: user}
+      %RawKubeGet{user: user},
+      %RawKubeList{user: user}
     ]
   end
   defp k8s_tools(_, _), do: []
@@ -147,6 +147,19 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
   defp manifests_tools(_, _, _, _), do: []
+
+  defp build_codemode(tools, policies) do
+    case Enum.split_with(tools, &codemode?/1) do
+      {[_ | _] = codemode, regular} ->
+        [%Codemode{tools: codemode, policies: policies} | regular]
+      _ -> tools
+    end
+  end
+
+  defp codemode?(%RawKubeGet{}), do: true
+  defp codemode?(%RawKubeList{}), do: true
+  defp codemode?(%RawCloudQuery{}), do: true
+  defp codemode?(_), do: false
 
   defp vuln_tools(%Workbench{configuration: %{infrastructure: %{vulnerabilities: true}}}, %User{} = user), do: [%Vulns{user: user}]
   defp vuln_tools(_, _), do: []

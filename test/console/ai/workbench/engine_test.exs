@@ -8,27 +8,6 @@ defmodule Console.AI.Workbench.EngineTest do
 
   setup :set_mimic_global
 
-  # the heartbeat GenServer started by Engine.new/1 queries the db in its
-  # terminate/2 callback; stop it before the sandbox checks the connection
-  # back in so tests don't trip Postgrex disconnection errors between runs.
-  setup do
-    on_exit(fn ->
-      Console.AI.Agents
-      |> Registry.select([{{{:workbench_heartbeat, :_}, :"$1", :_}, [], [:"$1"]}])
-      |> Enum.each(fn pid ->
-        if Process.alive?(pid) do
-          try do
-            GenServer.stop(pid, :normal, 500)
-          catch
-            _, _ -> :ok
-          end
-        end
-      end)
-    end)
-
-    :ok
-  end
-
   describe "new/1" do
     test "returns an error if the job is not valid" do
       deployment_settings(

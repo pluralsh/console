@@ -53,81 +53,6 @@ defmodule Console.Otel.MetricsBuilderTest do
     end
   end
 
-  describe "build_cluster_metrics/2" do
-    test "builds health metric with correct attributes" do
-      project = insert(:project, name: "prod-project")
-      cluster = insert(:cluster,
-        name: "prod-cluster",
-        handle: "prod",
-        project: project,
-        distro: :eks,
-        version: "1.28",
-        current_version: "1.28.5",
-        pinged_at: Timex.now()
-      )
-      cluster = Repo.preload(cluster, [:project, :upgrade_insights])
-
-      timestamp = DateTime.utc_now()
-      [health_metric | _] = MetricsBuilder.build_cluster_metrics(cluster, timestamp)
-
-      assert health_metric.name == "plural.cluster.health"
-      assert health_metric.value == 1
-      assert health_metric.timestamp == timestamp
-      assert health_metric.attributes.cluster_id == cluster.id
-      assert health_metric.attributes.cluster_name == "prod-cluster"
-      assert health_metric.attributes.cluster_handle == "prod"
-      assert health_metric.attributes.project_name == "prod-project"
-      assert health_metric.attributes.distro == "eks"
-      assert health_metric.attributes.version == "1.28"
-      assert health_metric.attributes.current_version == "1.28.5"
-      assert health_metric.attributes.healthy == true
-    end
-
-    test "builds upgradeability metrics from upgrade insights" do
-      cluster = insert(:cluster, pinged_at: Timex.now())
-      insert(:upgrade_insight, cluster: cluster, status: :passing, version: "1.29", name: "k8s-upgrade")
-      insert(:upgrade_insight, cluster: cluster, status: :failed, version: "1.30", name: "k8s-upgrade")
-      cluster = Repo.preload(cluster, [:project, :upgrade_insights], force: true)
-
-      timestamp = DateTime.utc_now()
-      metrics = MetricsBuilder.build_cluster_metrics(cluster, timestamp)
-
-      assert length(metrics) == 3
-
-      upgrade_metrics = Enum.filter(metrics, &(&1.name == "plural.cluster.upgradeability"))
-      assert length(upgrade_metrics) == 2
-
-      passing_metric = Enum.find(upgrade_metrics, &(&1.attributes.target_version == "1.29"))
-      assert passing_metric.value == 1
-      assert passing_metric.attributes.status == "passing"
-      assert passing_metric.attributes.insight_name == "k8s-upgrade"
-
-      failed_metric = Enum.find(upgrade_metrics, &(&1.attributes.target_version == "1.30"))
-      assert failed_metric.value == -2
-      assert failed_metric.attributes.status == "failed"
-    end
-
-    test "marks unhealthy clusters correctly" do
-      cluster = insert(:cluster, pinged_at: Timex.now() |> Timex.shift(hours: -1))
-      cluster = Repo.preload(cluster, [:project, :upgrade_insights])
-
-      [health_metric | _] = MetricsBuilder.build_cluster_metrics(cluster, DateTime.utc_now())
-
-      assert health_metric.value == 0
-      assert health_metric.attributes.healthy == false
-    end
-
-    test "handles clusters without projects" do
-      cluster = insert(:cluster, project: nil, pinged_at: Timex.now())
-      cluster = Repo.preload(cluster, [:project, :upgrade_insights])
-
-      [health_metric | _] = MetricsBuilder.build_cluster_metrics(cluster, DateTime.utc_now())
-
-      assert health_metric.attributes.project_id == nil
-      assert health_metric.attributes.project_name == nil
-    end
-  end
-
   describe "service_status_to_value/1" do
     test "maps all status values correctly" do
       assert MetricsBuilder.service_status_to_value(:healthy) == 2
@@ -136,28 +61,6 @@ defmodule Console.Otel.MetricsBuilderTest do
       assert MetricsBuilder.service_status_to_value(:failed) == -1
       assert MetricsBuilder.service_status_to_value(:paused) == -2
       assert MetricsBuilder.service_status_to_value(:unknown) == 0
-    end
-  end
-
-  describe "upgrade_status_to_value/1" do
-    test "maps all status values correctly" do
-      assert MetricsBuilder.upgrade_status_to_value(:passing) == 1
-      assert MetricsBuilder.upgrade_status_to_value(:warning) == 0
-      assert MetricsBuilder.upgrade_status_to_value(:unknown) == -1
-      assert MetricsBuilder.upgrade_status_to_value(:failed) == -2
-      assert MetricsBuilder.upgrade_status_to_value(:other) == -1
-    end
-  end
-
-  describe "cluster_health_to_value/1" do
-    test "returns 1 for healthy cluster" do
-      cluster = insert(:cluster, pinged_at: Timex.now())
-      assert MetricsBuilder.cluster_health_to_value(cluster) == 1
-    end
-
-    test "returns 0 for unhealthy cluster" do
-      cluster = insert(:cluster, pinged_at: Timex.now() |> Timex.shift(hours: -1))
-      assert MetricsBuilder.cluster_health_to_value(cluster) == 0
     end
   end
 
@@ -176,16 +79,36 @@ defmodule Console.Otel.MetricsBuilderTest do
     end
   end
 
-  describe "cluster_metrics_stream/1" do
-    test "streams metrics for all clusters" do
+  describe "cluster_health_metrics/1" do
+    test "returns aggregate health counts without cluster attributes" do
       project = insert(:project)
       insert(:cluster, project: project, pinged_at: Timex.now())
-      insert(:cluster, project: project, pinged_at: Timex.now())
+      insert(:cluster, project: project, pinged_at: Timex.now() |> Timex.shift(hours: -1))
+      timestamp = DateTime.utc_now()
 
       Repo.transaction(fn ->
-        metrics = MetricsBuilder.cluster_metrics_stream() |> Enum.to_list()
-        health_metrics = Enum.filter(metrics, &(&1.name == "plural.cluster.health"))
-        assert length(health_metrics) == 2
+        metrics = MetricsBuilder.cluster_health_metrics(timestamp)
+
+        assert metrics == [
+                 %{
+                   name: "plural.cluster.health.total",
+                   value: 2,
+                   timestamp: timestamp,
+                   attributes: %{}
+                 },
+                 %{
+                   name: "plural.cluster.health.healthy",
+                   value: 1,
+                   timestamp: timestamp,
+                   attributes: %{}
+                 },
+                 %{
+                   name: "plural.cluster.health.unhealthy",
+                   value: 1,
+                   timestamp: timestamp,
+                   attributes: %{}
+                 }
+               ]
       end)
     end
   end

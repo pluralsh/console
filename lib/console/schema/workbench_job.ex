@@ -260,6 +260,7 @@ defmodule Console.Schema.WorkbenchJob do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> sanitize_text([:prompt, :error])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
     |> cast_embed(:modes)

@@ -26,7 +26,8 @@ defmodule Console.Deployments.Stacks do
     CustomStackRun,
     StackDefinition,
     StackCron,
-    AiInsight
+    AiInsight,
+    StackPolicy
   }
 
   @preloads [:environment, :files, :observable_metrics, :cron, :tags, :read_bindings, :write_bindings]
@@ -38,6 +39,7 @@ defmodule Console.Deployments.Stacks do
   @type log_resp :: {:ok, RunLog.t} | error
   @type custom_resp :: {:ok, CustomStackRun.t} | error
   @type def_resp :: {:ok, StackDefinition.t} | error
+  @type stack_policy_resp :: {:ok, StackPolicy.t} | error
 
   def count(), do: Repo.aggregate(Stack, :count)
 
@@ -52,6 +54,8 @@ defmodule Console.Deployments.Stacks do
 
   @spec get_stack_by_name!(binary) :: Stack.t | nil
   def get_stack_by_name!(name), do: Repo.get_by!(Stack, name: name)
+  def get_stack_policy!(id), do: Repo.get!(StackPolicy, id)
+  def get_stack_policy(id), do: Repo.get(StackPolicy, id)
 
   @spec get_run!(binary) :: StackRun.t
   def get_run!(id), do: Repo.get!(StackRun, id)
@@ -226,6 +230,64 @@ defmodule Console.Deployments.Stacks do
       |> when_ok(:update)
     end)
     |> execute(extract: :update)
+  end
+
+  @doc "Creates a policy association for a stack. Requires stack write access and policy read access."
+  @spec create_stack_policy(map, binary, User.t) :: stack_policy_resp
+  def create_stack_policy(attrs, stack_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:stack, fn _ ->
+      get_stack!(stack_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:stack_policy, fn _ ->
+      %StackPolicy{stack_id: stack_id}
+      |> StackPolicy.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> add_operation(:policy, fn %{stack_policy: stack_policy} ->
+      case stack_policy |> Repo.preload(:policy) |> Map.fetch!(:policy) do
+        %{type: :stack} = policy -> allow(policy, user, :read)
+        _ -> {:error, "stack policies require a stack policy"}
+      end
+    end)
+    |> execute(extract: :stack_policy)
+  end
+
+  @doc "Updates a stack policy association. Requires stack write access and policy read access."
+  @spec update_stack_policy(map, binary, User.t) :: stack_policy_resp
+  def update_stack_policy(attrs, id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:update, fn _ ->
+      get_stack_policy!(id)
+      |> Repo.preload(:policy)
+      |> allow(user, :write)
+      |> when_ok(&StackPolicy.changeset(&1, attrs))
+      |> when_ok(:update)
+    end)
+    |> add_operation(:policy, fn %{update: stack_policy} ->
+      stack_policy
+      |> Repo.preload(:policy, force: true)
+      |> Map.fetch!(:policy)
+      |> allow(user, :read)
+    end)
+    |> execute(extract: :update)
+  end
+
+  @doc "Deletes a stack policy association. Requires stack write access."
+  @spec delete_stack_policy(binary, User.t) :: stack_policy_resp
+  def delete_stack_policy(id, %User{} = user) do
+    get_stack_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @doc "Deletes the specified policy association from a stack. Requires stack write access."
+  @spec delete_stack_policy(binary, binary, User.t) :: stack_policy_resp
+  def delete_stack_policy(policy_id, stack_id, %User{} = user) do
+    Repo.get_by!(StackPolicy, policy_id: policy_id, stack_id: stack_id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """

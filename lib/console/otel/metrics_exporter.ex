@@ -105,7 +105,7 @@ defmodule Console.Otel.MetricsExporter do
 
     []
     |> Stream.concat(MetricsBuilder.service_metrics_stream(timestamp))
-    |> Stream.concat(MetricsBuilder.cluster_metrics_stream(timestamp))
+    |> Stream.concat(MetricsBuilder.cluster_health_metrics(timestamp))
     |> Stream.chunk_every(@chunk_size)
     |> Enum.reduce(0, fn chunk, count ->
       case Exporter.export(endpoint, chunk) do

@@ -7,6 +7,8 @@ defmodule Console.AI.Workbench.Environment do
     User
   }
   alias Console.{AI.ModelSelection, Deployments.Settings}
+  alias Console.AI.Tool
+  alias Console.Deployments.Workbenches
   alias Console.AI.Workbench.{Skill, Skills.Builtins, Heartbeat}
 
   @type t :: %__MODULE__{
@@ -15,14 +17,15 @@ defmodule Console.AI.Workbench.Environment do
     tools: %{binary => WorkbenchTool.t},
     functions: [WorkbenchTool.t],
     skills: %{binary => Skill.t},
-    activities: [WorkbenchJobActivity.t]
+    activities: [WorkbenchJobActivity.t],
+    policies: [Tool.Policy.t]
   }
 
   defmodule Actions, do: defstruct [:functions, :kubernetes]
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :user, functions: [], activities: [], verifiable: false]
+  defstruct [:job, :tools, :skills, :user, functions: [], activities: [], policies: [], verifiable: false]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     {functions, tools} = Enum.split_with(to_l(tools), fn
@@ -36,9 +39,32 @@ defmodule Console.AI.Workbench.Environment do
       job: job,
       tools: to_map(tools),
       functions: functions,
-      skills: to_map(skills)
+      skills: to_map(skills),
+      policies: policies(job)
     }
     |> save()
+  end
+
+  def engine_opts(%__MODULE__{job: job, policies: policies}) do
+    settings = Settings.cached()
+
+    case ModelSelection.tool_model(job, settings) do
+      %{model: model, provider: provider} ->
+        price_sheet = ModelSelection.price_sheet(settings, provider, model)
+
+        [
+          model: model,
+          provider: provider,
+          policies: policies,
+          usage_callback: &Heartbeat.usage_callback(job, provider, model, price_sheet, &1)
+        ]
+
+      _ ->
+        [
+          policies: policies,
+          usage_callback: &Heartbeat.usage_callback(job, &1)
+        ]
+    end
   end
 
   def engine_opts(%WorkbenchJob{} = job) do
@@ -58,6 +84,22 @@ defmodule Console.AI.Workbench.Environment do
         [usage_callback: &Heartbeat.usage_callback(job, &1)]
     end
   end
+
+  defp policies(%WorkbenchJob{workbench_id: id}) when is_binary(id) do
+    Workbenches.get_workbench_policies(id)
+    |> Enum.map(fn
+      %{policy: %{id: id, name: name, policy: source}, matches: matches} ->
+        matches = matches || %{}
+        %Tool.Policy{
+          regexes: Map.get(matches, :parsed_regexes, []),
+          ignore: Map.get(matches, :ignore, []),
+          name: name,
+          policy: source,
+          policy_id: id
+        }
+    end)
+  end
+  defp policies(_), do: []
 
   def actions(%__MODULE__{functions: funcs, job: job}) do
     %Actions{

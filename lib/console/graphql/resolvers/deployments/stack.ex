@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     DeploymentSettings,
     StackDefinition,
     StackInfracostResource,
+    StackPolicy,
     AgentSession
   }
 
@@ -91,6 +92,16 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def list_custom_runs(stack, args, _) do
     CustomStackRun.for_stack(stack.id)
     |> paginate(args)
+  end
+
+  def list_stack_policies(stack, args, _) do
+    StackPolicy.for_stack(stack.id)
+    |> paginate(args)
+  end
+
+  def resolve_stack_policy(%{id: id}, %{context: %{current_user: user}}) do
+    Stacks.get_stack_policy(id)
+    |> allow(user, :read)
   end
 
   def list_stack_infracost_resources(%Stack{id: stack_id} = stack, args, ctx) do
@@ -177,6 +188,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def detach_stack(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.detach_stack(id, user)
+
+  def create_stack_policy(%{stack_id: stack_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.create_stack_policy(attrs, stack_id, user)
+
+  def update_stack_policy(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.update_stack_policy(attrs, id, user)
+
+  def delete_stack_policy(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.delete_stack_policy(id, user)
 
   def restore_stack(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.restore_stack(id, user)

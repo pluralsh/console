@@ -2,6 +2,7 @@ defmodule Console.Pipelines.Supervisor do
   use Supervisor
   alias Console.Pipelines.{
     GlobalService,
+    BindingPolicy,
     Stack,
     AI,
     Sentinel,
@@ -19,6 +20,7 @@ defmodule Console.Pipelines.Supervisor do
   def init(_init_arg) do
     children = [
       GlobalService.Producer,
+      BindingPolicy.Producer,
       Stack.Producer,
       AI.Service.Producer,
       AI.Cluster.Producer,
@@ -33,6 +35,7 @@ defmodule Console.Pipelines.Supervisor do
       Monitor.Producer,
       PullRequest.Producer,
       {GlobalService.Pipeline, GlobalService.Producer},
+      {BindingPolicy.Pipeline, BindingPolicy.Producer},
       {Stack.Pipeline, Stack.Producer},
       {AI.Service.Pipeline, AI.Service.Producer},
       {AI.Cluster.Pipeline, AI.Cluster.Producer},

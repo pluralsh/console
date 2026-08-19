@@ -203,6 +203,10 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :configuration, :stack_configuration_attributes
   end
 
+  input_object :stack_policy_attributes do
+    field :policy_id, non_null(:id), description: "the policy to associate with this stack"
+  end
+
   input_object :custom_step_attributes do
     field :stage,            :step_stage
     field :cmd,              non_null(:string)
@@ -261,29 +265,51 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cancellation_reason, :string, description: "why this run was cancelled"
     field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"
-    field :variables,           :map, description: "Arbitrary variables to add to a stack run", resolve: fn
-      parent, _, context -> Deployments.safe_field(parent, :variables, context)
+    field :variables, :map, description: "Arbitrary variables to add to a stack run" do
+      middleware Nested, check: true, msg: "stack variables cannot be fetched through a policy"
+      resolve fn parent, _, context -> Deployments.safe_field(parent, :variables, context) end
     end
 
     connection field :runs, node_type: :stack_run do
+      middleware Nested, check: true, msg: "stack runs cannot be fetched through a policy"
       arg :pull_request_id, :id
       resolve &Deployments.list_stack_runs/3
     end
 
     connection field :pull_requests, node_type: :pull_request do
+      middleware Nested, check: true, msg: "stack pull requests cannot be fetched through a policy"
       resolve &Deployments.list_prs_for_stack/3
     end
 
-    field :files, list_of(:stack_file), resolve: filter_loader(dataloader(Deployments), &Deployments.safe_stack_field/3), description: "files bound to a run of this stack"
-    field :environment, list_of(:stack_environment), resolve: filter_loader(dataloader(Deployments), &Deployments.safe_stack_outputs/3), description: "environment variables for this stack"
+    field :files, list_of(:stack_file), description: "files bound to a run of this stack" do
+      middleware Nested, check: true, msg: "stack files cannot be fetched through a policy"
+      resolve filter_loader(dataloader(Deployments), &Deployments.safe_stack_field/3)
+    end
 
-    field :observable_metrics, list_of(:observable_metric), resolve: dataloader(Deployments), description: "a list of metrics to poll to determine if a stack run should be cancelled"
+    field :environment, list_of(:stack_environment), description: "environment variables for this stack" do
+      middleware Nested, check: true, msg: "stack environment cannot be fetched through a policy"
+      resolve filter_loader(dataloader(Deployments), &Deployments.safe_stack_outputs/3)
+    end
 
-    field :delete_run, :stack_run, resolve: dataloader(Deployments), description: "the run that physically destroys the stack"
-    field :output,     list_of(:stack_output),
-      resolve: filter_loader(dataloader(Deployments), &Deployments.safe_stack_outputs/3),
-      description: "the most recent output for this stack"
-    field :state,      :stack_state, resolve: filter_loader(dataloader(Deployments), &Deployments.safe_stack_field/3), description: "the most recent state of this stack"
+    field :observable_metrics, list_of(:observable_metric), description: "a list of metrics to poll to determine if a stack run should be cancelled" do
+      middleware Nested, check: true, msg: "stack metrics cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
+
+    field :delete_run, :stack_run, description: "the run that physically destroys the stack" do
+      middleware Nested, check: true, msg: "stack deletion runs cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
+
+    field :output, list_of(:stack_output), description: "the most recent output for this stack" do
+      middleware Nested, check: true, msg: "stack output cannot be fetched through a policy"
+      resolve filter_loader(dataloader(Deployments), &Deployments.safe_stack_outputs/3)
+    end
+
+    field :state, :stack_state, description: "the most recent state of this stack" do
+      middleware Nested, check: true, msg: "stack state cannot be fetched through a policy"
+      resolve filter_loader(dataloader(Deployments), &Deployments.safe_stack_field/3)
+    end
 
     field :project,    :project,            resolve: dataloader(Deployments), description: "The project this stack belongs to"
     field :cluster,    :cluster,            resolve: dataloader(Deployments), description: "the cluster this stack runs on"
@@ -296,13 +322,20 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :actor, :user, resolve: dataloader(User), description: "the actor of this stack (defaults to root console user)"
 
     connection field :custom_stack_runs, node_type: :custom_stack_run do
+      middleware Nested, check: true, msg: "custom stack runs cannot be fetched through a policy"
       resolve &Deployments.list_custom_runs/3
+    end
+
+    connection field :stack_policies, node_type: :stack_policy do
+      middleware Nested, check: true, msg: "stack policies cannot be fetched through a policy"
+      resolve &Deployments.list_stack_policies/3
     end
 
     field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter stacks"
 
     field :infracost_resources, list_of(:stack_infracost_resource),
       description: "Infracost resource rows attached to this stack (newest first)" do
+      middleware Nested, check: true, msg: "stack cost data cannot be fetched through a policy"
       arg :limit, :integer
       resolve &Deployments.list_stack_infracost_resources/3
     end
@@ -601,6 +634,15 @@ defmodule Console.GraphQl.Deployments.Stack do
     timestamps()
   end
 
+  object :stack_policy do
+    field :id, non_null(:id)
+
+    field :policy, :policy, resolve: dataloader(Deployments)
+    field :stack,  :infrastructure_stack, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   object :stack_run_approval_result do
     field :reason, :string, description: "the reason for the approval decision by the ai"
     field :result, :approval_result, description: "the result of the approval decision by the ai"
@@ -656,6 +698,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :stack_run
   connection node_type: :custom_stack_run
   connection node_type: :stack_definition
+  connection node_type: :stack_policy
 
   delta :run_logs
 
@@ -737,6 +780,16 @@ defmodule Console.GraphQl.Deployments.Stack do
       resolve &Deployments.resolve_stack_definition/2
     end
 
+    field :stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_stack_policy/2
+    end
+
     connection field :stack_definitions, node_type: :stack_definition do
       middleware Authenticated
       middleware Scope,
@@ -811,6 +864,38 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_stack/2
+    end
+
+    field :create_stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
+      arg :stack_id, non_null(:id), description: "the stack to associate with this policy"
+      arg :attributes, non_null(:stack_policy_attributes)
+
+      resolve &Deployments.create_stack_policy/2
+    end
+
+    field :update_stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:stack_policy_attributes)
+
+      resolve &Deployments.update_stack_policy/2
+    end
+
+    field :delete_stack_policy, :stack_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :stack,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_stack_policy/2
     end
 
     @desc "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"

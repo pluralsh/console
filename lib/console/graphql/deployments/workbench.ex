@@ -129,6 +129,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool_id, non_null(:id), description: "the workbench tool id to associate"
   end
 
+  input_object :workbench_policy_matches_attributes do
+    field :regexes, list_of(:string), description: "regular expressions that select inputs for this policy"
+  end
+
+  input_object :workbench_policy_attributes do
+    field :policy_id, non_null(:id), description: "the policy to associate with this workbench"
+    field :matches, :workbench_policy_matches_attributes, description: "criteria that determine when the policy applies"
+  end
+
+  input_object :workbench_policy_update_attributes do
+    field :matches, :workbench_policy_matches_attributes, description: "criteria that determine when the policy applies"
+  end
+
   input_object :workbench_cron_attributes do
     field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
@@ -465,12 +478,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :repository,    :git_repository,           resolve: dataloader(Deployments), description: "the git repository for this workbench"
     field :agent_runtime, :agent_runtime,            resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
     field :bot_user,      :user,                     resolve: dataloader(User), description: "the service account user used for automated workbench agent runs"
-    field :tools,         list_of(:workbench_tool),  resolve: dataloader(Deployments), description: "tools associated with this workbench"
+    field :tools, list_of(:workbench_tool), description: "tools associated with this workbench" do
+      middleware Nested, check: true, msg: "workbench tools cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
 
     field :read_bindings, list_of(:policy_binding),  resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
+    connection field :workbench_policies, node_type: :workbench_policy do
+      middleware Nested, check: true, msg: "workbench policies cannot be fetched through a policy"
+      resolve &Deployments.list_workbench_policies/3
+    end
+
     connection field :runs, node_type: :workbench_job do
+      middleware Nested, check: true, msg: "workbench runs cannot be fetched through a policy"
       arg :alert, :boolean, description: "show runs spawned from alerts"
       arg :issue, :boolean, description: "show runs spawned from issues"
 
@@ -478,45 +500,60 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     connection field :crons, node_type: :workbench_cron do
+      middleware Nested, check: true, msg: "workbench crons cannot be fetched through a policy"
       resolve &Deployments.list_workbench_crons/3
     end
 
     connection field :prompts, node_type: :workbench_prompt do
+      middleware Nested, check: true, msg: "workbench prompts cannot be fetched through a policy"
       resolve &Deployments.list_workbench_prompts/3
     end
 
     connection field :workbench_skills, node_type: :workbench_skill do
+      middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
       resolve &Deployments.list_workbench_skills/3
     end
 
-    field :eval, :workbench_eval,
-      description: "eval configuration for this workbench (at most one; null if none configured)",
-      resolve: dataloader(Deployments)
+    field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do
+      middleware Nested, check: true, msg: "workbench eval configuration cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
 
     connection field :eval_results, node_type: :workbench_eval_result do
+      middleware Nested, check: true, msg: "workbench eval results cannot be fetched through a policy"
       resolve &Deployments.list_eval_results/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
+      middleware Nested, check: true, msg: "workbench webhooks cannot be fetched through a policy"
       resolve &Deployments.list_workbench_webhooks/3
     end
 
     connection field :chatbots, node_type: :workbench_chatbot do
+      middleware Nested, check: true, msg: "workbench chatbots cannot be fetched through a policy"
       resolve &Deployments.list_workbench_chatbots/3
     end
 
     connection field :alerts, node_type: :alert do
+      middleware Nested, check: true, msg: "workbench alerts cannot be fetched through a policy"
       resolve &Deployments.list_alerts/3
     end
 
     connection field :issues, node_type: :issue do
+      middleware Nested, check: true, msg: "workbench issues cannot be fetched through a policy"
       resolve &Deployments.list_issues/3
     end
 
     @desc "users that have read or write access to this workbench"
-    field :users, list_of(:user), resolve: &Deployments.accessible_users/3
+    field :users, list_of(:user) do
+      middleware Nested, check: true, msg: "workbench users cannot be fetched through a policy"
+      resolve &Deployments.accessible_users/3
+    end
 
-    field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
+    field :all_skills, list_of(:unified_workbench_skill) do
+      middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
+      resolve &Deployments.all_skills/3
+    end
 
     timestamps()
   end
@@ -1088,6 +1125,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_policy do
+    field :id,      non_null(:id)
+    field :matches, :workbench_policy_matches
+
+    field :policy,    :policy,    resolve: dataloader(Deployments)
+    field :workbench, :workbench, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  object :workbench_policy_matches do
+    field :regexes, list_of(:string)
+  end
+
   object :workbench_tool_configuration do
     field :http,      :workbench_tool_http_configuration, description: "http tool configuration"
     field :elastic,   :workbench_tool_elastic_connection, description: "elasticsearch connection (no secrets)"
@@ -1334,6 +1385,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   connection node_type: :workbench
   connection node_type: :workbench_tool
+  connection node_type: :workbench_policy
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
@@ -1590,6 +1642,38 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench/2
+    end
+
+    field :create_workbench_policy, :workbench_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to associate with this policy"
+      arg :attributes, non_null(:workbench_policy_attributes)
+
+      resolve &Deployments.create_workbench_policy/2
+    end
+
+    field :update_workbench_policy, :workbench_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_policy_update_attributes)
+
+      resolve &Deployments.update_workbench_policy/2
+    end
+
+    field :delete_workbench_policy, :workbench_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_policy/2
     end
 
     field :create_workbench_tool, :workbench_tool do
