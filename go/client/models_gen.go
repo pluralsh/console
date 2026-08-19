@@ -4095,20 +4095,23 @@ type HelmChartVersion struct {
 }
 
 type HelmConfigAttributes struct {
-	Values      *string              `json:"values,omitempty"`
-	ValuesFiles []*string            `json:"valuesFiles,omitempty"`
-	Chart       *string              `json:"chart,omitempty"`
-	Version     *string              `json:"version,omitempty"`
-	Release     *string              `json:"release,omitempty"`
-	URL         *string              `json:"url,omitempty"`
-	IgnoreHooks *bool                `json:"ignoreHooks,omitempty"`
-	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
-	LuaScript   *string              `json:"luaScript,omitempty"`
-	LuaFile     *string              `json:"luaFile,omitempty"`
-	LuaFolder   *string              `json:"luaFolder,omitempty"`
-	Set         *HelmValueAttributes `json:"set,omitempty"`
-	Repository  *NamespacedName      `json:"repository,omitempty"`
-	Git         *GitRefAttributes    `json:"git,omitempty"`
+	Values       *string              `json:"values,omitempty"`
+	ValuesFiles  []*string            `json:"valuesFiles,omitempty"`
+	Chart        *string              `json:"chart,omitempty"`
+	Version      *string              `json:"version,omitempty"`
+	Release      *string              `json:"release,omitempty"`
+	URL          *string              `json:"url,omitempty"`
+	IgnoreHooks  *bool                `json:"ignoreHooks,omitempty"`
+	IgnoreCrds   *bool                `json:"ignoreCrds,omitempty"`
+	LuaScript    *string              `json:"luaScript,omitempty"`
+	LuaFile      *string              `json:"luaFile,omitempty"`
+	LuaFolder    *string              `json:"luaFolder,omitempty"`
+	PythonScript *string              `json:"pythonScript,omitempty"`
+	PythonFile   *string              `json:"pythonFile,omitempty"`
+	PythonFolder *string              `json:"pythonFolder,omitempty"`
+	Set          *HelmValueAttributes `json:"set,omitempty"`
+	Repository   *NamespacedName      `json:"repository,omitempty"`
+	Git          *GitRefAttributes    `json:"git,omitempty"`
 	// a folder containing a kustomization to apply to the result of rendering this service's manifests
 	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 	// pointer to a Plural GitRepository
@@ -4209,6 +4212,12 @@ type HelmSpec struct {
 	LuaFile *string `json:"luaFile,omitempty"`
 	// a folder of lua files to include in the final script used
 	LuaFolder *string `json:"luaFolder,omitempty"`
+	// a python script to use for helm applies
+	PythonScript *string `json:"pythonScript,omitempty"`
+	// a python file to use for helm applies
+	PythonFile *string `json:"pythonFile,omitempty"`
+	// a folder of python files to include in the final script used
+	PythonFolder *string `json:"pythonFolder,omitempty"`
 	// a folder containing a kustomization to apply to the result of rendering this service's manifests
 	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 }

@@ -65,6 +65,10 @@ defmodule Console.Schema.Service do
       field :lua_script,           :string
       field :lua_file,             :string
       field :lua_folder,           :string
+
+      field :python_script,        :string
+      field :python_file,          :string
+      field :python_folder,        :string
       field :kustomize_postrender, :string
 
       embeds_many :set, HelmValue, on_replace: :delete do
@@ -78,7 +82,7 @@ defmodule Console.Schema.Service do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id kustomize_postrender values_files lua_script lua_folder lua_file)a)
+      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id kustomize_postrender values_files lua_script lua_folder lua_file python_script python_folder python_file)a)
       |> cast_embed(:repository)
       |> cast_embed(:set, with: &set_changeset/2)
       |> helm_url(:url)

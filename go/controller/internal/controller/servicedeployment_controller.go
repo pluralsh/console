@@ -383,6 +383,9 @@ func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *
 		LuaScript:           service.Spec.Helm.LuaScript,
 		LuaFile:             service.Spec.Helm.LuaFile,
 		LuaFolder:           service.Spec.Helm.LuaFolder,
+		PythonScript:        service.Spec.Helm.PythonScript,
+		PythonFile:          service.Spec.Helm.PythonFile,
+		PythonFolder:        service.Spec.Helm.PythonFolder,
 		KustomizePostrender: service.Spec.Helm.KustomizePostrender,
 		Git:                 service.Spec.Helm.Git.Attributes(),
 	}

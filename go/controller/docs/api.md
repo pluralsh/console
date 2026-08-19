@@ -4949,6 +4949,9 @@ _Appears in:_
 | `luaScript` _string_ | LuaScript to use to generate Helm configuration.<br />This can ultimately return a lua table with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on git state or other metadata. |  | Optional: \{\} <br /> |
 | `luaFile` _string_ | LuaFile to use to generate Helm configuration.<br />This can ultimately return a Lua table with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on Git state or other metadata. |  | Optional: \{\} <br /> |
 | `luaFolder` _string_ | a folder of lua files to include in the final script used |  | Optional: \{\} <br /> |
+| `pythonScript` _string_ | PythonScript to use to generate Helm configuration.<br />This can ultimately return a dict with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on git state or other metadata. |  | Optional: \{\} <br /> |
+| `pythonFile` _string_ | PythonFile to use to generate Helm configuration.<br />This can ultimately return a dict with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on Git state or other metadata. |  | Optional: \{\} <br /> |
+| `pythonFolder` _string_ | a folder of python files to include in the final script used |  | Optional: \{\} <br /> |
 | `kustomizePostrender` _string_ | KustomizePostrender is a folder containing a kustomization to apply to the result of rendering this service's manifests. |  | Optional: \{\} <br /> |
 
 
