@@ -1500,6 +1500,14 @@
   publisher: sagemaker
 - name: amazon-sagemaker-spaces
   versions:
+  - version: v0.1.7-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.1.7-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4894,6 +4902,15 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.21.10001020260817-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.21.10001020260815-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5000,6 +5017,11 @@
     - '1.34'
     - '1.33'
   - version: v1.0.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.0.10000020260817-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5125,6 +5147,10 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.14.3-eksbuild.9
+    compatibilities:
+    - '1.36'
+    - '1.35'
   - version: v1.14.3-eksbuild.3
     compatibilities:
     - '1.36'
@@ -5137,6 +5163,12 @@
     compatibilities:
     - '1.36'
     - '1.35'
+  - version: v1.13.2-eksbuild.17
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.13.2-eksbuild.11
     compatibilities:
     - '1.36'
@@ -5176,6 +5208,11 @@
   - version: v1.13.1-eksbuild.1
     compatibilities:
     - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.12.4-eksbuild.24
+    compatibilities:
     - '1.35'
     - '1.34'
     - '1.33'
@@ -5234,6 +5271,14 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.11.4-eksbuild.46
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.40
     compatibilities:
     - '1.34'
