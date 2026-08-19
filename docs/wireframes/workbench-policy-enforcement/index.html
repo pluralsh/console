@@ -312,6 +312,54 @@
     .combo-list { max-height: 220px; overflow: auto; }
     .combo-empty { padding: 16px; text-align: center; color: var(--text-xlight); font-size: 13px; }
     .modal-scrim.over { z-index: 40; background: #000b; }
+    .folder {
+      display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: 0; flex: 1;
+      border: 1px solid var(--border-fill-one); border-radius: 6px; overflow: hidden; background: var(--fill-one);
+    }
+    .folder-list {
+      border-right: 1px solid var(--border-fill-one); background: var(--fill-accent);
+      display: flex; flex-direction: column; min-height: 0; min-width: 0;
+    }
+    .folder-filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; border-bottom: 1px solid var(--border); }
+    .folder-filters button {
+      background: var(--fill-one); border: 1px solid var(--border-fill-one); color: var(--text-light);
+      border-radius: 3px; padding: 2px 8px; font-size: 12px;
+    }
+    .folder-filters button.active { background: var(--fill-zero-selected); color: var(--text); border-color: var(--border-input); }
+    .folder-filters button.bad { color: var(--red-200); }
+    .folder-filters button.ok { color: var(--green-200); }
+    .folder-items { overflow: auto; flex: 1; }
+    .folder-item {
+      width: 100%; text-align: left; display: flex; gap: 10px; align-items: flex-start;
+      padding: 10px 12px; border: 0; border-bottom: 1px solid var(--border); background: transparent; color: inherit;
+    }
+    .folder-item:hover { background: var(--fill-zero-hover); }
+    .folder-item.active { background: var(--fill-one-selected); box-shadow: inset 2px 0 0 var(--fill-primary); }
+    .folder-score {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: grid; place-items: center; font-size: 11px; font-weight: 600;
+      background: var(--fill-two); color: var(--text-light); border: 1px solid var(--border-fill-one);
+    }
+    .folder-score.bad { background: #2A151A; border-color: #5C2A35; color: var(--red-200); }
+    .folder-score.ok { background: #13261E; border-color: #1B4332; color: var(--green-200); }
+    .folder-detail {
+      min-width: 0; min-height: 0; overflow: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 14px; background: var(--fill-zero);
+    }
+    .folder-detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .grade-ring {
+      width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 18px; font-weight: 600; border: 2px solid var(--border-fill-one);
+      background: var(--fill-one); flex-shrink: 0;
+    }
+    .grade-ring.bad { border-color: var(--border-danger); color: var(--red-200); }
+    .grade-ring.ok { border-color: var(--border-success); color: var(--green-200); }
+    .detail-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+    .detail-tabs button {
+      background: 0; border: 0; color: var(--text-xlight); padding: 8px 12px;
+      border-bottom: 2px solid transparent;
+    }
+    .detail-tabs button.active { color: var(--text); border-bottom-color: var(--fill-primary); font-weight: 600; }
   </style>
 </head>
 <body>
@@ -424,12 +472,12 @@ deny contains msg if {
 }`
 
     const EVALS = [
-      { id: '4f2c', tool: 'kubectl_delete', when: '2h ago', recorded: 'deny', input: null },
-      { id: '91c', tool: 'kubectl_get', when: '3h ago', recorded: 'allow', input: 'get' },
-      { id: '22ab', tool: 'kubectl_delete', when: 'Yesterday', recorded: 'deny', input: null },
-      { id: '7e1a', tool: 'read_file', when: 'Yesterday', recorded: 'allow', input: 'get' },
-      { id: 'b03', tool: 'kubectl_delete', when: '2 days ago', recorded: 'deny', input: null },
-      { id: 'c19', tool: 'kubectl_apply', when: 'Last week', recorded: 'deny', input: null },
+      { id: '4f2c', tool: 'kubectl_delete', when: '2h ago', recorded: 'deny', input: null, workbench: 'payments-sre', summary: 'Denied destructive delete on payments production. Actor was in platform, not on-call.' },
+      { id: '91c', tool: 'kubectl_get', when: '3h ago', recorded: 'allow', input: 'get', workbench: 'payments-sre', summary: 'Read-only get against payments pods. Allowed for sre-oncall on production.' },
+      { id: '22ab', tool: 'kubectl_delete', when: 'Yesterday', recorded: 'deny', input: null, workbench: 'prod-platform', summary: 'Same deny path as 4f2c — delete of deploy/api without break-glass.' },
+      { id: '7e1a', tool: 'read_file', when: 'Yesterday', recorded: 'allow', input: 'get', workbench: 'payments-sre', summary: 'Filesystem read matched the always-permit read tools rule.' },
+      { id: 'b03', tool: 'kubectl_delete', when: '2 days ago', recorded: 'deny', input: null, workbench: 'incident-bridge', summary: 'Delete blocked; incident workbench still lacks on-call group on this actor.' },
+      { id: 'c19', tool: 'kubectl_apply', when: 'Last week', recorded: 'deny', input: null, workbench: 'payments-sre', summary: 'Apply treated as destructive on production without on-call.' },
     ]
 
     const SIM_DENY = `{
@@ -889,10 +937,32 @@ bind := true if {
       return EVALS.find((e) => e.id === state.evalId) || EVALS[0]
     }
 
+    function selectEval(id) {
+      state.evalId = id
+      state.evalFilter = state.evalFilter || 'all'
+      state.evalPane = 'input'
+      state.simulated = false
+      go('policy-evaluations')
+    }
+
     function openEval(id) {
       state.evalId = id
       state.simulated = false
       go('policy-body')
+    }
+
+    function filteredEvals() {
+      const f = state.evalFilter || 'all'
+      if (f === 'deny') return EVALS.filter((e) => e.recorded === 'deny')
+      if (f === 'allow') return EVALS.filter((e) => e.recorded === 'allow')
+      return EVALS
+    }
+
+    function setEvalFilter(f) {
+      state.evalFilter = f
+      const list = filteredEvals()
+      if (!list.some((e) => e.id === state.evalId) && list[0]) state.evalId = list[0].id
+      render()
     }
 
     function policyDetailHead(tab) {
@@ -927,7 +997,7 @@ bind := true if {
                 <button class="btn small" onclick="state.simulated=true;render()">Run</button>
               </div>
               <div class="panel-body">
-                <select class="select" onchange="openEval(this.value)">
+                <select class="select" onchange="state.evalId=this.value;state.simulated=false;render()">
                   ${EVALS.map((e) => `<option value="${e.id}" ${e.id === ev.id ? 'selected' : ''}>eval ${e.id} · ${e.tool} · ${e.when}</option>`).join('')}
                 </select>
                 <div>
@@ -951,7 +1021,7 @@ bind := true if {
             </section>`
     }
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h', bindCreate: false, bindName: 'auto-bind-prod-name.rego', bindDesc: 'bind := true if name starts with prod- or matches production.', bindBody: '' }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', evalFilter: 'all', evalPane: 'input', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h', bindCreate: false, bindName: 'auto-bind-prod-name.rego', bindDesc: 'bind := true if name starts with prod- or matches production.', bindBody: '' }
 
     function go(screen) {
       state.screen = screen
@@ -1483,25 +1553,79 @@ default sample := 0.5</textarea>
           <div class="callout"><code>Policy.bindingPolicies</code> — rules that auto-attach <b>this</b> document. Manual workbench attach stays on the workbench.</div>`
       }),
 
-      'policy-evaluations': () => securityPage('policies', {
+      'policy-evaluations': () => {
+        const ev = currentEval()
+        const list = filteredEvals()
+        const denyN = EVALS.filter((e) => e.recorded === 'deny').length
+        const allowN = EVALS.filter((e) => e.recorded === 'allow').length
+        const deny = ev.recorded === 'deny'
+        const input = ev.input === 'get' ? INPUT_GET : INPUT_JSON
+        const output = deny ? SIM_DENY : SIM_ALLOW
+        const pane = state.evalPane || 'input'
+        return securityPage('policies', {
         crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>prod-guardrails.rego</b>`,
         html: `
           ${policyDetailHead('eval')}
-          <table class="table">
-            <thead><tr><th>Evaluation</th><th>input.tool</th><th>Recorded</th><th>insertedAt</th><th></th></tr></thead>
-            <tbody>
-              ${EVALS.map((e) => `
-              <tr class="click" onclick="openEval('${e.id}')">
-                <td class="mono">eval ${e.id}</td>
-                <td class="mono">${e.tool}</td>
-                <td>${e.recorded === 'deny' ? '<span class="chip bad">deny</span>' : '<span class="chip ok">allow</span>'}</td>
-                <td class="row-sub">${e.when}</td>
-                <td class="row-actions"><button class="btn small secondary" onclick="event.stopPropagation();openEval('${e.id}')">${I.play} Replay</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-          <div class="callout">Replay loads <code>PolicyEvaluation.input</code> into the simulate panel on Definition. <code>evaluatePolicy</code> is a query — it does not write a new sample.</div>`
-      }),
+          <div class="folder">
+            <aside class="folder-list">
+              <div class="folder-filters">
+                <button class="${(state.evalFilter || 'all') === 'all' ? 'active' : ''}" onclick="state.evalFilter='all';render()">All (${EVALS.length})</button>
+                <button class="bad ${(state.evalFilter || 'all') === 'deny' ? 'active' : ''}" onclick="setEvalFilter('deny')">Deny (${denyN})</button>
+                <button class="ok ${(state.evalFilter || 'all') === 'allow' ? 'active' : ''}" onclick="setEvalFilter('allow')">Allow (${allowN})</button>
+              </div>
+              <div class="folder-items">
+                ${list.map((e) => {
+                  const bad = e.recorded === 'deny'
+                  return `
+                <button type="button" class="folder-item ${e.id === ev.id ? 'active' : ''}" onclick="selectEval('${e.id}')">
+                  <div class="folder-score ${bad ? 'bad' : 'ok'}">${bad ? '✕' : '✓'}</div>
+                  <div style="min-width:0">
+                    <div class="row-title mono" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.tool}</div>
+                    <div class="row-sub">${e.workbench} · ${e.when}</div>
+                  </div>
+                </button>`
+                }).join('')}
+              </div>
+            </aside>
+            <div class="folder-detail">
+              <div class="folder-detail-head">
+                <div style="display:flex;gap:14px;align-items:flex-start;min-width:0">
+                  <div class="grade-ring ${deny ? 'bad' : 'ok'}">${deny ? 'deny' : 'allow'}</div>
+                  <div style="min-width:0">
+                    <div class="title" style="font-size:18px">eval ${ev.id}</div>
+                    <div class="row-sub" style="margin-top:4px"><span class="mono">${ev.tool}</span> on ${ev.workbench} · ${ev.when}</div>
+                    <p class="subtitle" style="margin-top:8px">${ev.summary}</p>
+                  </div>
+                </div>
+                <div class="head-actions">
+                  <button class="btn secondary small" onclick="openEval('${ev.id}')">${I.play} Replay on Definition</button>
+                </div>
+              </div>
+              <div class="detail-tabs">
+                <button class="${pane === 'input' ? 'active' : ''}" onclick="state.evalPane='input';render()">Input</button>
+                <button class="${pane === 'output' ? 'active' : ''}" onclick="state.evalPane='output';render()">Output</button>
+                <button class="${pane === 'meta' ? 'active' : ''}" onclick="state.evalPane='meta';render()">Recorded</button>
+              </div>
+              ${pane === 'input' ? `
+              <div>
+                <div class="panel-label"><span>PolicyEvaluation.input</span><span class="chip">tool payload</span></div>
+                <div class="json" style="min-height:240px">${input}</div>
+              </div>` : pane === 'output' ? `
+              <div>
+                <div class="panel-label"><span>PolicyEvaluation.output</span><span class="chip ${deny ? 'bad' : 'ok'}">${deny ? 'deny' : 'allow'}</span></div>
+                <div class="json" style="min-height:240px">${output}</div>
+              </div>` : `
+              <div class="card form-card" style="max-width:none">
+                <div class="field"><span class="label">Recorded decision</span><div>${deny ? '<span class="chip bad">deny</span>' : '<span class="chip ok">allow</span>'}</div></div>
+                <div class="field"><span class="label">policyIds</span><div class="mono">prod-guardrails.rego</div><span class="hint">One sample can cover many policies; this list is the ones that ran.</span></div>
+                <div class="field"><span class="label">insertedAt</span><div class="row-sub">${ev.when}</div></div>
+                <div class="callout"><code>evaluatePolicy</code> is a query used by Replay — it does not write a new <code>PolicyEvaluation</code>. Samples are written by the runtime evaluator.</div>
+              </div>`}
+            </div>
+          </div>
+          <div class="callout">Master-detail lives <b>inside</b> Evaluations — same pattern as workbench evals. Definition and Attachments stay separate tabs.</div>`
+      })
+      },
 
       'policy-simulate': () => screens['policy-body'](),
 
@@ -1783,6 +1907,8 @@ default sample := 0.5</textarea>
     window.openBind = openBind
     window.openRule = openRule
     window.openEval = openEval
+    window.selectEval = selectEval
+    window.setEvalFilter = setEvalFilter
     window.pickAttach = pickAttach
     window.pickBind = pickBind
     window.toggleCombo = toggleCombo

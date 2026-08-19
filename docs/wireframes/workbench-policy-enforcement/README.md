@@ -203,7 +203,7 @@ Do not redefine `default bind` in user Rego (conflicts with the base policy). Pr
 
 **Editor.** Policy detail is Definition + simulate: Rego buffer on the left, evaluate on the right. Persist with `updatePolicy`. Bind policies use the same layout against cleaned workbench/stack input (`bind: true/false`).
 
-**Definition + simulate.** Pick a past evaluation to load `input`, Run against the unsaved buffer (`evaluatePolicy`). Recorded decision stays visible for comparison. Evaluations tab lists samples; Replay opens Definition with that input. Attachments tab is `Policy.bindingPolicies`.
+**Definition + simulate.** One screen: Rego buffer on the left, simulate on the right. Pick a past evaluation to load `input`, Run against the unsaved buffer (`evaluatePolicy`). Recorded decision stays visible for comparison. **Evaluations** is a master-detail list (filters + side list + input/output), same pattern as workbench evals — not a substitute for the Definition / Evaluations / Attachments tabs. Replay opens Definition with that input. Attachments tab is `Policy.bindingPolicies`.
 
 **Edit attach.** `updateWorkbenchPolicy` only accepts `matches`. Changing which Policy is bound means delete + create.
 
