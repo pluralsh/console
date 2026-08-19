@@ -53,7 +53,7 @@ defmodule Console.AI.Tool do
         true -> false
       end
     end
-    def matches?(%__MODULE__{ignore: [_ | _] = ignore}, name), do: name in ignore
+    def matches?(%__MODULE__{ignore: [_ | _] = ignore}, name), do: name not in ignore
     def matches?(_, _), do: true
   end
 
