@@ -27,7 +27,7 @@ export function getChatbotColumns({ refetch }: { refetch?: () => void }) {
           <IconFrame
             size="small"
             type="floating"
-            icon={chatProviderConnectionIcon(chatbot.type, false)}
+            icon={chatProviderConnectionIcon(chatbot.type)}
           />
         )
       },

@@ -1,0 +1,44 @@
+# Python sandbox
+
+Use `python_sandbox` to write a small Python program that coordinates the configured functions below. This is useful when you need to filter, transform, aggregate, or iterate over tool results without making each intermediate step visible in the conversation.
+
+## Execution model
+
+- The program runs in an isolated Monty Python sandbox. It supports a deliberately limited, effect-free subset of Python and its standard library; do not rely on CPython, third-party packages, network access, environment variables, or host filesystem access.
+- `math`, `json`, `re`, and the supported parts of `datetime` are available. `pathlib` can read and write only under `/scratch`, an ephemeral overlay filesystem for this invocation.
+- Only the configured functions documented below can cross the sandbox boundary. They may perform external work, subject to their configured policies, so call only the function(s) needed for the task.
+- Execution is limited to 60 seconds, approximately 100 MB per allocation, and 100 levels of recursion.
+
+## Result and output
+
+The final expression in the script is the result. It must be cleanly JSON encodable: use `None`, booleans, numbers, strings, lists, and dictionaries with string keys. Convert tuples, sets, bytes, dates, and other Python-specific values into JSON-compatible structures before returning them. An assignment is not itself returned, so put the value you want to return on the last line:
+
+```python
+items = list_resources({"namespace": "default"})
+items
+```
+
+`print()` output is captured and returned as `stdout`. If the script or a configured function fails, the sandbox call returns an error; the current runner does not expose a separate `stderr` field.
+
+## Available functions
+
+<%= if Enum.empty?(@tools) do %>
+No functions are configured for this invocation.
+<% else %>
+<%= for tool <- @tools do %>
+### `<%= Tool.name(tool) %>`
+
+<%= Tool.description(tool) %>
+
+#### Parameters
+
+```json
+<%= Jason.encode!(Tool.json_schema(tool), pretty: true) %>
+```
+
+#### Returns
+
+<%= OutputType.output_type(tool) %>
+
+<% end %>
+<% end %>

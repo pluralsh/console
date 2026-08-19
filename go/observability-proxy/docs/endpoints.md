@@ -13,4 +13,4 @@ The proxy exposes these HTTP endpoints:
 Notes:
 
 - `/health` returns `200` when the process is alive.
-- `/ready` returns `200` only after observability config has been loaded from Console.
+- `/ready` returns `200` only after observability config has been loaded from Console. A background poller retries failed initial loads and refreshes the config at the configured cache TTL; neither probe performs configuration I/O.

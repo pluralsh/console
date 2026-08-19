@@ -32,9 +32,10 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
+import { DURATIONS, getMetricQueryStep } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { Prometheus } from 'utils/prometheus.ts'
+import { useMetricsQueryStart } from 'components/hooks/useMetricsQueryStart'
 
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
@@ -336,11 +337,7 @@ function ServiceMetricsTimeseries() {
   const theme = useTheme()
   const { serviceId } = useParams()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
-
-  const start = useMemo(
-    () => dayjs().subtract(duration.offset, 'second').toISOString(),
-    [duration.offset]
-  )
+  const start = useMetricsQueryStart(duration.offset)
   const {
     data,
     loading,
@@ -348,7 +345,7 @@ function ServiceMetricsTimeseries() {
   } = useServiceMetricsQuery({
     variables: {
       id: serviceId ?? '',
-      step: duration.step,
+      step: getMetricQueryStep(duration.offset),
       start,
     },
     skip: !serviceId,

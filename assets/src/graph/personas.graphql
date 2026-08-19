@@ -46,6 +46,7 @@ fragment Persona on Persona {
   id
   name
   description
+  role
   bindings {
     ...PolicyBinding
   }

@@ -375,6 +375,20 @@ defmodule Console.Deployments.AgentsTest do
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
+    test "it blocks pull requests for follow-up runs" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, followup: true)
+
+      assert {:error, "follow up agent runs cannot create additional pull requests"} =
+               Agents.agent_pull_request(%{
+                 title: "a pr",
+                 body: "a body",
+                 repository: "https://github.com/pluralsh/console.git",
+                 base: "main",
+                 head: "plrl/ai/pr-test"
+               }, run.id, user)
+    end
+
     test "it blocks pull requests until runs requiring approval are approved" do
       user    = insert(:user)
       runtime = insert(:agent_runtime, cluster: insert(:cluster))
@@ -781,6 +795,39 @@ defmodule Console.Deployments.AgentsTest do
     end
   end
 
+  describe "message_output/2" do
+    test "clusters can publish output for messages belonging to their agent runs" do
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      assert {:ok, %AgentMessage.Stdout{} = output} =
+               Agents.message_output(%{
+                 message_id: message.id,
+                 stdout: "command output",
+                 stderr: "command error"
+               }, cluster)
+
+      assert output.message_id == message.id
+      assert output.agent_run_id == run.id
+      assert output.stdout == "command output"
+      assert output.stderr == "command error"
+      assert output.cluster.id == cluster.id
+
+      assert_receive {:event, %PubSub.AgentMessageStdoutCreated{item: ^output}}
+    end
+
+    test "clusters cannot publish output for another cluster's agent run" do
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      assert {:error, "clusters can only update their own agent runs"} =
+               Agents.message_output(%{message_id: message.id, stdout: "command output"}, insert(:cluster))
+    end
+  end
+
   describe "update_agent_message/3" do
     test "it can update a long-running tool message" do
       runtime = insert(:agent_runtime)
@@ -795,11 +842,13 @@ defmodule Console.Deployments.AgentsTest do
         message: message.message,
         role: message.role,
         metadata: %{
+          started_at: ~U[2026-08-04 19:58:20.000000Z],
           completed_at: ~U[2026-08-04 20:00:00.000000Z],
           tool: %{name: "shell", state: :completed, input: "mix test", output: "0 failures"}
         }
       }, message.id, runtime.cluster)
 
+      assert updated.metadata.started_at == ~U[2026-08-04 19:58:20.000000Z]
       assert updated.metadata.completed_at == ~U[2026-08-04 20:00:00.000000Z]
       assert updated.metadata.tool.state == :completed
       assert updated.metadata.tool.output == "0 failures"

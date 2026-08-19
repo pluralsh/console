@@ -53,11 +53,17 @@ export const securityRoutes = [
       element={<Policies />}
     />
     <Route
-      path={`${VULNERABILITY_REPORTS_REL_PATH}/${KUBERNETES_PARAM_CLUSTER}`}
-      element={<Cluster />}
+      path={VULNERABILITY_REPORTS_REL_PATH}
+      element={
+        <Cluster
+          getDefaultClusterPath={(clusterId) =>
+            `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId}`
+          }
+        />
+      }
     >
       <Route
-        index
+        path={KUBERNETES_PARAM_CLUSTER}
         element={<VulnerabilityReports />}
       />
     </Route>

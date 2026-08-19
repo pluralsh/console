@@ -2,6 +2,7 @@ package manifests
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -24,4 +25,13 @@ func TestBuildTarballURL(t *testing.T) {
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "invalid tarball URL")
 	})
+}
+
+func TestExpiryWithJitterIsCenteredOnCacheTTL(t *testing.T) {
+	cache := NewCache(time.Hour, "", "")
+
+	expiry := cache.ExpiryWithJitter()
+
+	require.GreaterOrEqual(t, expiry, 30*time.Minute)
+	require.Less(t, expiry, 90*time.Minute)
 }

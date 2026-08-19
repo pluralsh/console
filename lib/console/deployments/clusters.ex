@@ -1204,7 +1204,7 @@ defmodule Console.Deployments.Clusters do
     |> Service.stream()
     |> Service.preloaded([:cluster])
     |> Repo.stream(method: :keyset)
-    |> Console.throttle(count: 100, pause: 100)
+    |> Console.throttle(count: 100, pause: :timer.seconds(10))
     |> Task.async_stream(fn svc ->
       Logger.info "applying agent migration #{id} for #{svc.id}"
 

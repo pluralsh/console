@@ -376,6 +376,37 @@ type RootQueryType {
 
   unreadAppNotifications: Int
 
+  policy(id: ID, name: String): Policy
+
+  policies(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter policies by project"
+    projectId: ID
+
+    "filter policies by name"
+    q: String
+  ): PolicyConnection
+
+  bindingPolicy(id: ID!): BindingPolicy
+
+  bindingPolicies(after: String, first: Int, before: String, last: Int): BindingPolicyConnection
+
+  "Evaluates a policy against the supplied tool input."
+  evaluatePolicy(
+    "policy to evaluate"
+    policyId: ID!
+
+    "JSON-encoded tool input to evaluate"
+    input: Json!
+  ): Map
+
   policyConstraints(
     after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], violated: Boolean, q: String
   ): PolicyConstraintConnection
@@ -423,6 +454,8 @@ type RootQueryType {
   infrastructureStack(id: ID, name: String): InfrastructureStack
 
   stackDefinition(id: ID!): StackDefinition
+
+  stackPolicy(id: ID!): StackPolicy
 
   stackDefinitions(after: String, first: Int, before: String, last: Int): StackDefinitionConnection
 
@@ -1138,6 +1171,21 @@ type RootMutationType {
 
   deleteComplianceReportGenerator(id: ID!): ComplianceReportGenerator
 
+  "Creates a policy in a project. Requires policy write scope and write access to the target project."
+  createPolicy(attributes: PolicyAttributes!): Policy
+
+  "Updates a project-scoped policy. Requires policy write scope and write access to the policy's project."
+  updatePolicy(id: ID!, attributes: PolicyAttributes!): Policy
+
+  "Deletes a project-scoped policy. Requires policy write scope and write access to the policy's project."
+  deletePolicy(id: ID!): Policy
+
+  createBindingPolicy(attributes: BindingPolicyAttributes!): BindingPolicy
+
+  updateBindingPolicy(id: ID!, attributes: BindingPolicyUpdateAttributes!): BindingPolicy
+
+  deleteBindingPolicy(id: ID!): BindingPolicy
+
   createGlobalService(
     serviceId: ID
 
@@ -1176,6 +1224,17 @@ type RootMutationType {
   deleteStack(id: ID!): InfrastructureStack
 
   detachStack(id: ID!): InfrastructureStack
+
+  createStackPolicy(
+    "the stack to associate with this policy"
+    stackId: ID!
+
+    attributes: StackPolicyAttributes!
+  ): StackPolicy
+
+  updateStackPolicy(id: ID!, attributes: StackPolicyAttributes!): StackPolicy
+
+  deleteStackPolicy(id: ID!): StackPolicy
 
   "un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure"
   restoreStack(id: ID!): InfrastructureStack
@@ -1309,6 +1368,17 @@ type RootMutationType {
   updateWorkbench(id: ID!, attributes: WorkbenchAttributes): Workbench
 
   deleteWorkbench(id: ID!): Workbench
+
+  createWorkbenchPolicy(
+    "the workbench to associate with this policy"
+    workbenchId: ID!
+
+    attributes: WorkbenchPolicyAttributes!
+  ): WorkbenchPolicy
+
+  updateWorkbenchPolicy(id: ID!, attributes: WorkbenchPolicyUpdateAttributes!): WorkbenchPolicy
+
+  deleteWorkbenchPolicy(id: ID!): WorkbenchPolicy
 
   createWorkbenchTool(attributes: WorkbenchToolAttributes): WorkbenchTool
 
@@ -1503,6 +1573,8 @@ type RootMutationType {
 
   createAgentMessage(runId: ID!, attributes: AgentMessageAttributes!): AgentMessage
 
+  agentMessageOutput(attributes: AgentMessageOutputAttributes!): AgentMessageOutput
+
   updateAgentMessage(id: ID!, attributes: AgentMessageAttributes!): AgentMessage
 
   createAgentRunUpload(runId: ID!, attributes: AgentRunUploadAttributes!): AgentRunUpload
@@ -1640,6 +1712,8 @@ type RootSubscriptionType {
 
   agentRunDelta(id: ID!): AgentRunDelta
 
+  agentMessageOutputDelta(runId: ID!): AgentMessageOutputDelta
+
   workbenchJobDelta(id: ID, workbenchId: ID): WorkbenchJobDelta
 
   workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
@@ -1657,6 +1731,8 @@ type RootSubscriptionType {
     "stream all events within the given job"
     jobId: ID!
   ): WorkbenchCanvasBlock
+
+  workbenchExecStream(activityId: ID!): WorkbenchJobExecStream
 
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
@@ -1919,6 +1995,7 @@ enum AgentRuntimeType {
   GEMINI
   CUSTOM
   CODEX
+  PI
 }
 
 enum AgentRunStatus {
@@ -2172,6 +2249,17 @@ input AgentMessageAttributes {
   metadata: AgentMessageMetadataAttributes
 }
 
+input AgentMessageOutputAttributes {
+  "the command message this output belongs to"
+  messageId: ID!
+
+  "the command standard output"
+  stdout: String
+
+  "the command standard error"
+  stderr: String
+}
+
 input AgentMessageCostAttributes {
   "the total cost of the message"
   total: Float!
@@ -2192,6 +2280,9 @@ input AgentMessageTokensAttributes {
 }
 
 input AgentMessageMetadataAttributes {
+  "when the tool\/message started, eg when create time differs from tool start"
+  startedAt: DateTime
+
   "when the message completed, eg for command based tool calls that take a while"
   completedAt: DateTime
 
@@ -2322,6 +2413,9 @@ type AgentRun {
 
   "the agent run this run consumed"
   consumed: ID
+
+  "whether this run is a follow-up to a pull request"
+  followup: Boolean
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -2491,6 +2585,20 @@ type AgentMessage {
   updatedAt: DateTime
 }
 
+type AgentMessageOutput {
+  "the command message this output belongs to"
+  messageId: ID!
+
+  "the agent run this output belongs to"
+  agentRunId: ID!
+
+  "the command standard output"
+  stdout: String
+
+  "the command standard error"
+  stderr: String
+}
+
 type AgentPrompt {
   id: ID!
 
@@ -2525,6 +2633,9 @@ type AgentMessageTokens {
 }
 
 type AgentMessageMetadata {
+  "when the tool\/message started"
+  startedAt: DateTime
+
   "when the message completed"
   completedAt: DateTime
 
@@ -2632,6 +2743,11 @@ type AgentMessageDelta {
   payload: AgentMessage
 }
 
+type AgentMessageOutputDelta {
+  delta: Delta
+  payload: AgentMessageOutput
+}
+
 type AgentRunDelta {
   delta: Delta
   payload: AgentRun
@@ -2732,6 +2848,7 @@ enum WorkbenchJobActivityType {
   FUNCTION
   KUBERNETES
   VERIFY
+  EXEC
 }
 
 enum WorkbenchCanvasBlockType {
@@ -2832,6 +2949,9 @@ input WorkbenchJobKubernetesModesAttributes {
 
   "whether kubernetes delete actions are enabled"
   delete: Boolean
+
+  "whether kubernetes exec actions are enabled"
+  exec: Boolean
 
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
@@ -2978,6 +3098,24 @@ input WorkbenchSkillsAttributes {
 input WorkbenchToolAssociationAttributes {
   "the workbench tool id to associate"
   toolId: ID!
+}
+
+input WorkbenchPolicyMatchesAttributes {
+  "regular expressions that select inputs for this policy"
+  regexes: [String]
+}
+
+input WorkbenchPolicyAttributes {
+  "the policy to associate with this workbench"
+  policyId: ID!
+
+  "criteria that determine when the policy applies"
+  matches: WorkbenchPolicyMatchesAttributes
+}
+
+input WorkbenchPolicyUpdateAttributes {
+  "criteria that determine when the policy applies"
+  matches: WorkbenchPolicyMatchesAttributes
 }
 
 input WorkbenchCronAttributes {
@@ -3586,6 +3724,9 @@ input QueuedPromptAttributes {
 
   "when this prompt becomes eligible to dequeue"
   dequeableAt: DateTime!
+
+  "mode-specific overrides to apply when this prompt is dequeued"
+  modes: WorkbenchJobModesAttributes
 }
 
 type QueuedPromptSummary {
@@ -3644,6 +3785,8 @@ type Workbench {
 
   "write policy of this service"
   writeBindings: [PolicyBinding]
+
+  workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
 
   runs(
     after: String
@@ -3879,6 +4022,9 @@ type WorkbenchJobKubernetesModes {
   "whether kubernetes delete actions are enabled"
   delete: Boolean
 
+  "whether kubernetes exec actions are enabled"
+  exec: Boolean
+
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
 
@@ -3993,11 +4139,17 @@ type WorkbenchJobActivityResult {
   "error from the activity"
   error: String
 
+  "why this action is needed and its expected effect"
+  explanation: String
+
   "function call approval payload when present"
   functionCall: WorkbenchJobActivityFunctionCall
 
   "kubernetes request approval payload when present"
   kubeRequest: WorkbenchJobActivityKubeRequest
+
+  "kubernetes exec payload when present"
+  kubeExec: WorkbenchJobActivityKubeExec
 
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
@@ -4068,6 +4220,26 @@ type WorkbenchJobActivityKubeRequest {
 
   "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
   current: Map
+}
+
+type WorkbenchJobActivityKubeExec {
+  "the target cluster handle"
+  handle: String
+
+  "the command executed in the pod"
+  command: String
+
+  "the target namespace"
+  namespace: String
+
+  "the target pod name"
+  pod: String
+
+  "the target container name"
+  container: String
+
+  "why this command is needed and its expected effect"
+  explanation: String
 }
 
 type WorkbenchJobActivityJobUpdate {
@@ -4336,6 +4508,9 @@ type QueuedPrompt {
 
   "when this prompt was consumed"
   consumedAt: DateTime
+
+  "mode-specific overrides applied when this prompt is dequeued"
+  modes: WorkbenchJobModes
 
   "user this prompt will run as"
   userId: ID
@@ -4654,6 +4829,19 @@ type WorkbenchTool {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchPolicy {
+  id: ID!
+  matches: WorkbenchPolicyMatches
+  policy: Policy
+  workbench: Workbench
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type WorkbenchPolicyMatches {
+  regexes: [String]
 }
 
 type WorkbenchToolConfiguration {
@@ -5025,6 +5213,12 @@ type WorkbenchTextStream {
   text: String
 }
 
+type WorkbenchJobExecStream {
+  activityId: ID
+  text: String
+  seq: Int
+}
+
 type WorkbenchConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchEdge]
@@ -5033,6 +5227,11 @@ type WorkbenchConnection {
 type WorkbenchToolConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchToolEdge]
+}
+
+type WorkbenchPolicyConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchPolicyEdge]
 }
 
 type WorkbenchJobConnection {
@@ -6133,6 +6332,7 @@ enum Provider {
 input ProjectAttributes {
   name: String!
   description: String
+  disableInsights: Boolean
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
 }
@@ -6567,6 +6767,8 @@ type Project {
   description: String
 
   default: Boolean
+
+  disableInsights: Boolean
 
   "list all alerts discovered for this project"
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
@@ -7928,6 +8130,11 @@ input StackDefinitionAttributes {
   configuration: StackConfigurationAttributes
 }
 
+input StackPolicyAttributes {
+  "the policy to associate with this stack"
+  policyId: ID!
+}
+
 input CustomStepAttributes {
   stage: StepStage
   cmd: String!
@@ -8061,6 +8268,8 @@ type InfrastructureStack {
   actor: User
 
   customStackRuns(after: String, first: Int, before: String, last: Int): CustomStackRunConnection
+
+  stackPolicies(after: String, first: Int, before: String, last: Int): StackPolicyConnection
 
   "key\/value tags to filter stacks"
   tags: [Tag]
@@ -8506,6 +8715,14 @@ type StackDefinition {
   updatedAt: DateTime
 }
 
+type StackPolicy {
+  id: ID!
+  policy: Policy
+  stack: InfrastructureStack
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type StackRunApprovalResult {
   "the reason for the approval decision by the ai"
   reason: String
@@ -8593,6 +8810,11 @@ type CustomStackRunConnection {
 type StackDefinitionConnection {
   pageInfo: PageInfo!
   edges: [StackDefinitionEdge]
+}
+
+type StackPolicyConnection {
+  pageInfo: PageInfo!
+  edges: [StackPolicyEdge]
 }
 
 type RunLogsDelta {
@@ -8955,6 +9177,17 @@ enum ComplianceReportFormat {
   JSON
 }
 
+enum PolicyType {
+  WORKBENCH
+  STACK
+  BINDING
+}
+
+enum BindingPolicyType {
+  WORKBENCH
+  STACK
+}
+
 enum PolicyAggregate {
   CLUSTER
   ENFORCEMENT
@@ -8982,6 +9215,62 @@ input PolicyConstraintAttributes {
   violations: [ViolationAttributes]
 
   enforcement: ConstraintEnforcement
+}
+
+"Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy."
+input PolicyAttributes {
+  "unique policy name"
+  name: String
+
+  "policy implementation type"
+  type: PolicyType
+
+  "human-readable policy description"
+  description: String
+
+  "policy source text"
+  policy: String
+
+  "project that owns the policy; defaults to the deployment's default project when omitted"
+  projectId: ID
+}
+
+input BindingPolicyAttributes {
+  "the policy to attach to matching targets"
+  policyId: ID!
+
+  "the policy that determines whether a target should be bound"
+  bindPolicyId: ID!
+
+  "the resource type this policy can bind to"
+  type: BindingPolicyType!
+
+  "how often the binding policy is evaluated; defaults to 1h and cannot be below 30m"
+  interval: String
+
+  "criteria that determine when the policy applies"
+  matches: BindingPolicyMatchesAttributes
+}
+
+input BindingPolicyUpdateAttributes {
+  "the policy to attach to matching targets"
+  policyId: ID
+
+  "the policy that determines whether a target should be bound"
+  bindPolicyId: ID
+
+  "the resource type this policy can bind to"
+  type: BindingPolicyType!
+
+  "how often the binding policy is evaluated; cannot be below 30m"
+  interval: String
+
+  "criteria that determine when the policy applies"
+  matches: BindingPolicyMatchesAttributes
+}
+
+input BindingPolicyMatchesAttributes {
+  workbench: WorkbenchPolicyMatchesAttributes
 }
 
 input ConstraintRefAttributes {
@@ -9102,6 +9391,74 @@ input ComplianceReportGeneratorAttributes {
   name: String!
 
   readBindings: [PolicyBindingAttributes]
+}
+
+"A project-scoped policy that can be associated with workbenches to enforce policy decisions."
+type Policy {
+  "unique policy identifier"
+  id: ID!
+
+  "unique policy name"
+  name: String!
+
+  "policy implementation type"
+  type: PolicyType!
+
+  "human-readable policy description"
+  description: String
+
+  "policy source text"
+  policy: String!
+
+  "project that owns this policy"
+  project: Project
+
+  "Sampled evaluations that include this policy."
+  policyEvaluations(after: String, first: Int, before: String, last: Int): PolicyEvaluationConnection
+
+  stackPolicies(after: String, first: Int, before: String, last: Int): StackPolicyConnection
+
+  workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"Associates a policy with a bindable resource type."
+type BindingPolicy {
+  id: ID!
+  type: BindingPolicyType!
+  interval: String!
+  nextPollAt: DateTime
+  matches: BindingPolicyMatches
+  policy: Policy
+  bindPolicy: Policy
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type BindingPolicyMatches {
+  workbench: WorkbenchPolicyMatches
+}
+
+"A sampled policy decision for a tool invocation."
+type PolicyEvaluation {
+  "unique policy evaluation identifier"
+  id: ID!
+
+  "policies evaluated for this decision"
+  policyIds: [ID!]!
+
+  "tool input evaluated by the policy"
+  input: Map!
+
+  "policy evaluation result"
+  output: Map!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 "A OPA Gatekeeper Constraint reference"
@@ -9320,6 +9677,21 @@ type ComplianceReportGenerator {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type PolicyConnection {
+  pageInfo: PageInfo!
+  edges: [PolicyEdge]
+}
+
+type BindingPolicyConnection {
+  pageInfo: PageInfo!
+  edges: [BindingPolicyEdge]
+}
+
+type PolicyEvaluationConnection {
+  pageInfo: PageInfo!
+  edges: [PolicyEvaluationEdge]
 }
 
 type PolicyConstraintConnection {
@@ -16172,6 +16544,7 @@ enum PersonaRole {
 enum Homepage {
   CLUSTERS
   WORKBENCHES
+  FLOWS
 }
 
 enum ReadType {
@@ -17024,6 +17397,21 @@ type PolicyConstraintEdge {
   cursor: String
 }
 
+type PolicyEvaluationEdge {
+  node: PolicyEvaluation
+  cursor: String
+}
+
+type BindingPolicyEdge {
+  node: BindingPolicy
+  cursor: String
+}
+
+type PolicyEdge {
+  node: Policy
+  cursor: String
+}
+
 type ManagedNamespaceEdge {
   node: ManagedNamespace
   cursor: String
@@ -17031,6 +17419,11 @@ type ManagedNamespaceEdge {
 
 type GlobalServiceEdge {
   node: GlobalService
+  cursor: String
+}
+
+type StackPolicyEdge {
+  node: StackPolicy
   cursor: String
 }
 
@@ -17171,6 +17564,11 @@ type WorkbenchJobActivityEdge {
 
 type WorkbenchJobEdge {
   node: WorkbenchJob
+  cursor: String
+}
+
+type WorkbenchPolicyEdge {
+  node: WorkbenchPolicy
   cursor: String
 }
 

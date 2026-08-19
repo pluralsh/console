@@ -103,6 +103,7 @@ export function modesFormValue(
       ? {
           update: modes.kubernetes.update,
           delete: modes.kubernetes.delete,
+          exec: modes.kubernetes.exec,
           requireNamespaces:
             modes.kubernetes.requireNamespaces?.filter(
               (namespace): namespace is string => !!namespace
@@ -153,6 +154,7 @@ export function disableKubernetesModes(
     ...current,
     update: false,
     delete: false,
+    exec: false,
   }
 }
 
@@ -160,12 +162,13 @@ export function disableKubernetesModes(
 export function enableKubernetesModes(
   current: WorkbenchJobKubernetesModesAttributes | null | undefined
 ): WorkbenchJobKubernetesModesAttributes {
-  const wasEnabled = !!current?.update || !!current?.delete
+  const wasEnabled = !!current?.update || !!current?.delete || !!current?.exec
 
   return {
     ...current,
     update: wasEnabled ? !!current?.update : true,
     delete: wasEnabled ? !!current?.delete : false,
+    exec: wasEnabled ? !!current?.exec : false,
   }
 }
 
@@ -205,7 +208,7 @@ export function defaultPromptModesFromWorkbench(
     return undefined
 
   return (
-    modesFormValue(workbench.modes) ??
+    modesAttributes(modesFormValue(workbench.modes)) ??
     (workbench.configuration?.coding?.enableBabysitting
       ? { coding: { babysit: true } }
       : null)

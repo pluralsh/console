@@ -13,10 +13,9 @@ import { useTheme } from 'styled-components'
 
 import {
   HelmConfigAttributes,
-  ServiceDeploymentDetailsFragment,
   ServiceDeploymentsRowFragment,
   ServiceUpdateAttributes,
-  useServiceDeploymentQuery,
+  useServiceDeploymentHelmSettingsQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
 
@@ -65,12 +64,8 @@ function ModalForm({
   onClose: Nullable<() => void>
   refetch: Nullable<() => void>
 }) {
-  const repo = serviceDeployment.helm?.repository
-  const { data } = useServiceDeploymentQuery({
-    variables: {
-      id: serviceDeployment.id || '',
-    },
-    skip: !repo?.name || !repo?.namespace,
+  const { data } = useServiceDeploymentHelmSettingsQuery({
+    variables: { id: serviceDeployment.id },
   })
 
   if (!data?.serviceDeployment) {
@@ -79,7 +74,9 @@ function ModalForm({
 
   return (
     <ModalFormInner
-      serviceDeployment={data.serviceDeployment}
+      serviceDeployment={serviceDeployment}
+      helmValues={data.serviceDeployment.helm?.values}
+      helmValuesFiles={data.serviceDeployment.helm?.valuesFiles}
       {...props}
     />
   )
@@ -87,33 +84,28 @@ function ModalForm({
 
 export function ModalFormInner({
   serviceDeployment,
+  helmValues,
+  helmValuesFiles,
   open,
   onClose,
   refetch,
 }: {
-  serviceDeployment: ServiceDeploymentDetailsFragment
+  serviceDeployment: ServiceDeploymentsRowFragment
+  helmValues: Nullable<string>
+  helmValuesFiles: Nullable<Nullable<string>[]>
   open: boolean
   onClose: Nullable<() => void>
   refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
-  const repo = serviceDeployment.helm?.repository
-  const { data } = useServiceDeploymentQuery({
-    variables: {
-      id: serviceDeployment.id || '',
-    },
-    skip: !repo?.name || !repo?.namespace,
-  })
-
-  const filteredValuesFiles =
-    data?.serviceDeployment?.helm?.valuesFiles?.filter(isNonNullable)
+  const filteredValuesFiles = helmValuesFiles?.filter(isNonNullable)
 
   const {
     state,
     update: updateState,
     hasUpdates,
   } = useUpdateState({
-    helmValues: data?.serviceDeployment?.helm?.values ?? '',
+    helmValues: helmValues ?? '',
     helmValuesFiles:
       filteredValuesFiles && !isEmpty(filteredValuesFiles)
         ? filteredValuesFiles

@@ -20,8 +20,8 @@ import {
   ColCpuChange,
   ColMemoryChange,
   ColName,
-  ColScalingPr,
   ColService,
+  getColScalingPr,
 } from './ClusterScalingRecsTableCols'
 
 import {
@@ -56,6 +56,21 @@ export function CostManagementDetailsRecommendations() {
   const recs = useMemo(
     () => mapExistingNodes(data?.clusterUsage?.recommendations),
     [data?.clusterUsage?.recommendations]
+  )
+  const cluster = data?.clusterUsage?.cluster
+  const cols = useMemo(
+    () =>
+      cluster
+        ? [
+            ColName,
+            ColContainer,
+            ColCpuChange,
+            ColMemoryChange,
+            ColService,
+            getColScalingPr(cluster),
+          ]
+        : [ColName, ColContainer, ColCpuChange, ColMemoryChange, ColService],
+    [cluster]
   )
 
   return (
@@ -101,6 +116,7 @@ export function CostManagementDetailsRecommendations() {
         <GqlError error={error} />
       ) : (
         <Table
+          key={cluster?.id ?? 'loading'}
           fullHeightWrap
           virtualizeRows
           fillLevel={1}
@@ -119,12 +135,3 @@ export function CostManagementDetailsRecommendations() {
     </Flex>
   )
 }
-
-const cols = [
-  ColName,
-  ColContainer,
-  ColCpuChange,
-  ColMemoryChange,
-  ColService,
-  ColScalingPr,
-]

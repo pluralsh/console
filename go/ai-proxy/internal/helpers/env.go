@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -30,4 +31,18 @@ func GetPluralEnvSlice(key string, fallback []string) []string {
 		return strings.Split(value, ",")
 	}
 	return fallback
+}
+
+func GetPluralEnvBool(key string, fallback bool) bool {
+	value := GetPluralEnv(key, "")
+	if value == "" {
+		return fallback
+	}
+
+	parsed, err := strconv.ParseBool(value)
+	if err != nil {
+		return fallback
+	}
+
+	return parsed
 }

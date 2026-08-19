@@ -80,6 +80,9 @@ func (in *grpcClient) fromGrpcPrDetails(resp *pb.GetPRDetailsResponse) (*PRDetai
 			Author:    c.GetAuthor(),
 			Body:      c.GetBody(),
 			CreatedAt: time.Unix(c.GetCreatedAtUnix(), 0).UTC(),
+			FilePath:  c.GetFilePath(),
+			StartLine: int(c.GetStartLine()),
+			Line:      int(c.GetLine()),
 		})
 	}
 

@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "description": "Edit an existing Bitbucket Data Center pull request or repository issue comment.",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "Repository selector as PROJECT_KEY/repository_slug."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "issue"],
+      "description": "Resource containing the comment."
+    },
+    "resource_id": {
+      "type": "integer",
+      "description": "Pull request ID or issue ID."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment ID to update."
+    },
+    "version": {
+      "type": "integer",
+      "description": "Current comment version, required by Bitbucket Data Center to detect concurrent edits."
+    },
+    "body": {
+      "type": "string",
+      "description": "Replacement comment text."
+    }
+  },
+  "required": ["project", "resource", "resource_id", "comment_id", "version", "body"],
+  "additionalProperties": false
+}

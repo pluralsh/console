@@ -139,6 +139,13 @@ mutation CreateAgentMessage($runId: ID!, $attributes: AgentMessageAttributes!) {
   }
 }
 
+mutation UpdateAgentMessage($id: ID!, $attributes: AgentMessageAttributes!) {
+  updateAgentMessage(id: $id, attributes: $attributes) {
+    id
+    message
+  }
+}
+
 mutation CreateAgentRunUpload($runId: ID!, $session: Upload, $screenRecording: Upload, $patch: Upload) {
   createAgentRunUpload(runId: $runId, attributes: {session: $session, screenRecording: $screenRecording, patch: $patch}) {
     ...AgentRunUploadFragment
@@ -289,6 +296,7 @@ fragment AgentRunFragment on AgentRun {
     babysitInterval
     approval
     approvedAt
+    followup
 }
 
 

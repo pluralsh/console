@@ -20,6 +20,7 @@ type Reconciler string
 // Please keep it that way :)
 // Note: If you add a new reconciler, please also register it in the cmd/register.go file
 const (
+	AgentRuntimePolicyReconciler         Reconciler = "agentruntimepolicy"
 	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
 	CatalogReconciler                    Reconciler = "catalog"
 	CloudConnectionReconciler            Reconciler = "cloudconnection"

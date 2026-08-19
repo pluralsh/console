@@ -1,5 +1,11 @@
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import { ArrowTopRightIcon, Button, PrOpenIcon } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Button,
+  PrOpenIcon,
+  WorkbenchIcon,
+} from '@pluralsh/design-system'
+import { useWorkbenchOptions } from 'components/ai/insights/SendInsightToWorkbench'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -11,6 +17,7 @@ import { useNavigate } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { CreateRecommendationPrModal } from './CreateRecommendationPrModal'
+import { ScalingRecommendationCluster } from './scalingRecommendationWorkbenchPrompt'
 
 const columnHelper = createColumnHelper<ClusterScalingRecommendationFragment>()
 
@@ -107,34 +114,42 @@ export const ColService = columnHelper.accessor((rec) => rec.service, {
   },
 })
 
-export const ColScalingPr = columnHelper.accessor((rec) => rec, {
-  id: 'scalingPr',
-  header: '',
-  meta: { gridTemplate: 'max-content' },
-  cell: function Cell({ getValue }) {
-    const { id, service } = getValue()
-    const [isOpen, setIsOpen] = useState(false)
-    if (!service) return null
+export const getColScalingPr = (cluster: ScalingRecommendationCluster) =>
+  columnHelper.accessor((rec) => rec, {
+    id: 'scalingPr',
+    header: '',
+    meta: { gridTemplate: 'max-content' },
+    cell: function Cell({ getValue }) {
+      const recommendation = getValue()
+      const [isOpen, setIsOpen] = useState(false)
+      const { hasWorkbenches, loading: workbenchesLoading } =
+        useWorkbenchOptions()
+      const canCreatePr = !!recommendation.service
 
-    return (
-      <>
-        <Button
-          small
-          floating
-          startIcon={<PrOpenIcon />}
-          onClick={() => setIsOpen(true)}
-        >
-          Create PR
-        </Button>
-        <CreateRecommendationPrModal
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-          scalingRecId={id}
-        />
-      </>
-    )
-  },
-})
+      if (workbenchesLoading || (!hasWorkbenches && !canCreatePr)) return null
+
+      return (
+        <>
+          <Button
+            small
+            floating
+            startIcon={hasWorkbenches ? <WorkbenchIcon /> : <PrOpenIcon />}
+            onClick={() => setIsOpen(true)}
+          >
+            {hasWorkbenches ? 'Send to Workbench' : 'Create PR'}
+          </Button>
+          <CreateRecommendationPrModal
+            open={isOpen}
+            onClose={() => setIsOpen(false)}
+            scalingRecId={recommendation.id}
+            cluster={cluster}
+            recommendation={recommendation}
+            startWithWorkbench={hasWorkbenches}
+          />
+        </>
+      )
+    },
+  })
 
 export const formatCpu = (cpu: Nullable<number>) => {
   if (isNullish(cpu)) return '--'

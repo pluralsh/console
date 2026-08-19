@@ -323,7 +323,10 @@ export function WorkbenchJobActionsRow({
         job={job}
         fillLevel={chipFillLevel}
       />
-      <PRsModalIcon prs={prs} />
+      <PRsModalIcon
+        prs={prs}
+        type="tertiary"
+      />
       <JobEvalBadge job={job} />
       <JobConclusionIcon result={job.result} />
       <WorkbenchQueuedPromptChip

@@ -12,7 +12,7 @@ defmodule Console.Pipelines.AI.WorkbenchCron.Pipeline do
         Workbenches.create_workbench_job(%{
           prompt: p,
           modes: Console.mapify(modes)
-        }, workbench.id, user)
+        }, workbench, user)
       _ -> :ok
     end
   end

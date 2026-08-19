@@ -53,7 +53,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 path: "/apis/apps/v1/namespaces/production/deployments/api",
                 content_type: "application/json",
                 query_params: %{},
-                body: body
+                body: body,
+                explanation: "Update the api deployment in production."
               }} = KubeUpdate.implement(update)
 
       assert Jason.decode!(body) == %{
@@ -71,6 +72,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 method: "delete",
                 path: "/apis/apps/v1/namespaces/production/deployments/api",
                 content_type: "application/json",
+                explanation: "Update the api deployment in production.",
                 body: nil
               }} = KubeDelete.implement(delete)
     end
@@ -100,7 +102,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 path: "/apis/apps/v1/namespaces/production/deployments/api",
                 content_type: "application/apply-patch+yaml",
                 query_params: %{"fieldManager" => "plural"},
-                body: body
+                body: body,
+                explanation: "Update the api deployment in production."
               }} = KubeUpdate.implement(update)
 
       assert Jason.decode!(body) == %{
@@ -127,6 +130,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
       "kind" => "Deployment",
       "name" => "api",
       "namespace" => namespace,
+      "explanation" => "Update the api deployment in production.",
       "json" =>
         Jason.encode!(%{
           apiVersion: "apps/v1",

@@ -36,6 +36,9 @@ type AgentConfigurationSpec struct {
 	// Set to "0s" to disable pipeline gate checks.
 	PipelineGateInterval *string `json:"pipelineGateInterval,omitempty"`
 
+	// ComponentShaCacheTTL specifies how long duplicate component updates are cached.
+	ComponentShaCacheTTL *string `json:"componentShaCacheTTL,omitempty"`
+
 	// MaxConcurrentReconciles controls the maximum number of concurrent reconcile loops.
 	// Higher values can increase throughput at the cost of resource usage.
 	MaxConcurrentReconciles *int `json:"maxConcurrentReconciles,omitempty"`
@@ -68,6 +71,11 @@ type AgentConfigurationSpec struct {
 	// push updates. This is useful in large-scale edge deployments where maintaining
 	// persistent websocket connections has an infeasible network cost.
 	DisableWebsocket *bool `json:"disableWebsocket,omitempty"`
+
+	// PollImmediately determines whether the agent should poll immediately upon startup.
+	// When set to true, the agent will perform an initial poll as soon as it starts.
+	// By default, it's set to true.
+	PollImmediately *bool `json:"pollImmediately,omitempty"`
 }
 
 //+kubebuilder:object:root=true

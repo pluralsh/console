@@ -1445,16 +1445,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
       middleware Scope,
         resource: :cluster,
         action: :read
-      arg :q,            :string
-      arg :healthy,      :boolean
-      arg :tag,          :tag_input
-      arg :tag_query,    :tag_query
-      arg :backups,      :boolean
-      arg :project_id,   :id
-      arg :parent_id,    :id
-      arg :upgradeable,  :boolean
-      arg :compliance,   :version_compliance
-      arg :health_range, :health_range
+
+      arg :q,                :string
+      arg :healthy,          :boolean
+      arg :tag,              :tag_input
+      arg :tag_query,        :tag_query
+      arg :backups,          :boolean
+      arg :project_id,       :id
+      arg :parent_id,        :id
+      arg :upgradeable,      :boolean
+      arg :compliance,       :version_compliance
+      arg :health_range,     :health_range
 
       resolve &Deployments.list_clusters/2
     end

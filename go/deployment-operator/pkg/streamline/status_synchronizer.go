@@ -15,10 +15,14 @@ import (
 )
 
 // NewStatusSynchronizer creates a new StatusSynchronizer with rate limiting set to 10 calls per second.
-func NewStatusSynchronizer(client client.Client, cacheTTL, cacheJitter time.Duration) StatusSynchronizer {
+func NewStatusSynchronizer(client client.Client, cacheTTL time.Duration) StatusSynchronizer {
+	return NewStatusSynchronizerWithCacheTTLFunc(client, func() time.Duration { return cacheTTL })
+}
+
+func NewStatusSynchronizerWithCacheTTLFunc(client client.Client, cacheTTL func() time.Duration) StatusSynchronizer {
 	return StatusSynchronizer{
 		client:      client,
-		shaCache:    cache.NewSimpleCache[string](cacheTTL, cacheJitter),
+		shaCache:    cache.NewSimpleCacheWithExpiryFunc[string](cacheTTL),
 		rateLimiter: rate.NewLimiter(rate.Limit(50), 10),
 	}
 }

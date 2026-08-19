@@ -38,6 +38,30 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:ok, []} = Jason.decode(json)
     end
 
+    test "paginates clusters with a default limit" do
+      user = insert(:user)
+
+      insert_list(101, :cluster,
+        self: false,
+        read_bindings: [%{user_id: user.id}]
+      )
+
+      assert {:ok, first_page} = Tool.validate(%ClusterList{user: user}, %{})
+      assert {:ok, first_json} = ClusterList.implement(first_page)
+      assert {:ok, first_clusters} = Jason.decode(first_json)
+      assert length(first_clusters) == 100
+
+      assert {:ok, second_page} = Tool.validate(%ClusterList{user: user}, %{"offset" => 100})
+      assert {:ok, second_json} = ClusterList.implement(second_page)
+      assert {:ok, [_]} = Jason.decode(second_json)
+    end
+
+    test "rejects invalid pagination values" do
+      assert {:error, changeset} = Tool.validate(%ClusterList{}, %{"limit" => 501, "offset" => -1})
+      assert Keyword.has_key?(changeset.errors, :limit)
+      assert Keyword.has_key?(changeset.errors, :offset)
+    end
+
     test "filters results by project name" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -297,6 +321,21 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CatalogToolsTest do
       assert {:ok, parsed} = Tool.validate(%StackInspect{user: user}, %{"stack_id" => stack.id})
       assert {:ok, content} = StackInspect.implement(parsed)
       assert is_binary(content)
+    end
+
+    test "returns stack details when repository metadata is unavailable" do
+      user = insert(:user)
+
+      stack =
+        insert(:stack,
+          repository: nil,
+          git: nil,
+          read_bindings: [%{user_id: user.id}]
+        )
+
+      assert {:ok, parsed} = Tool.validate(%StackInspect{user: user}, %{"stack_id" => stack.id})
+      assert {:ok, content} = StackInspect.implement(parsed)
+      assert content =~ "Repository details are unavailable"
     end
 
     test "returns {:error, _} when the user cannot read the stack" do

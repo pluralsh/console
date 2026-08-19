@@ -222,6 +222,8 @@ type AgentMessageFileAttributes struct {
 }
 
 type AgentMessageMetadata struct {
+	// when the tool/message started
+	StartedAt *string `json:"startedAt,omitempty"`
 	// when the message completed
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
@@ -233,6 +235,8 @@ type AgentMessageMetadata struct {
 }
 
 type AgentMessageMetadataAttributes struct {
+	// when the tool/message started, eg when create time differs from tool start
+	StartedAt *string `json:"startedAt,omitempty"`
 	// when the message completed, eg for command based tool calls that take a while
 	CompletedAt *string `json:"completedAt,omitempty"`
 	// the reasoning of the message
@@ -241,6 +245,31 @@ type AgentMessageMetadataAttributes struct {
 	File *AgentMessageFileAttributes `json:"file,omitempty"`
 	// the tool of the message
 	Tool *AgentMessageToolAttributes `json:"tool,omitempty"`
+}
+
+type AgentMessageOutput struct {
+	// the command message this output belongs to
+	MessageID string `json:"messageId"`
+	// the agent run this output belongs to
+	AgentRunID string `json:"agentRunId"`
+	// the command standard output
+	Stdout *string `json:"stdout,omitempty"`
+	// the command standard error
+	Stderr *string `json:"stderr,omitempty"`
+}
+
+type AgentMessageOutputAttributes struct {
+	// the command message this output belongs to
+	MessageID string `json:"messageId"`
+	// the command standard output
+	Stdout *string `json:"stdout,omitempty"`
+	// the command standard error
+	Stderr *string `json:"stderr,omitempty"`
+}
+
+type AgentMessageOutputDelta struct {
+	Delta   *Delta              `json:"delta,omitempty"`
+	Payload *AgentMessageOutput `json:"payload,omitempty"`
 }
 
 type AgentMessageReasoning struct {
@@ -387,6 +416,8 @@ type AgentRun struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// whether this run is a follow-up to a pull request
+	Followup *bool `json:"followup,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -1406,6 +1437,63 @@ type BindingAttributes struct {
 	ID      *string `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
 	GroupID *string `json:"groupId,omitempty"`
+}
+
+// Associates a policy with a bindable resource type.
+type BindingPolicy struct {
+	ID         string                `json:"id"`
+	Type       BindingPolicyType     `json:"type"`
+	Interval   string                `json:"interval"`
+	NextPollAt *string               `json:"nextPollAt,omitempty"`
+	Matches    *BindingPolicyMatches `json:"matches,omitempty"`
+	Policy     *Policy               `json:"policy,omitempty"`
+	BindPolicy *Policy               `json:"bindPolicy,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type BindingPolicyAttributes struct {
+	// the policy to attach to matching targets
+	PolicyID string `json:"policyId"`
+	// the policy that determines whether a target should be bound
+	BindPolicyID string `json:"bindPolicyId"`
+	// the resource type this policy can bind to
+	Type BindingPolicyType `json:"type"`
+	// how often the binding policy is evaluated; defaults to 1h and cannot be below 30m
+	Interval *string `json:"interval,omitempty"`
+	// criteria that determine when the policy applies
+	Matches *BindingPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
+type BindingPolicyConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*BindingPolicyEdge `json:"edges,omitempty"`
+}
+
+type BindingPolicyEdge struct {
+	Node   *BindingPolicy `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type BindingPolicyMatches struct {
+	Workbench *WorkbenchPolicyMatches `json:"workbench,omitempty"`
+}
+
+type BindingPolicyMatchesAttributes struct {
+	Workbench *WorkbenchPolicyMatchesAttributes `json:"workbench,omitempty"`
+}
+
+type BindingPolicyUpdateAttributes struct {
+	// the policy to attach to matching targets
+	PolicyID *string `json:"policyId,omitempty"`
+	// the policy that determines whether a target should be bound
+	BindPolicyID *string `json:"bindPolicyId,omitempty"`
+	// the resource type this policy can bind to
+	Type BindingPolicyType `json:"type"`
+	// how often the binding policy is evaluated; cannot be below 30m
+	Interval *string `json:"interval,omitempty"`
+	// criteria that determine when the policy applies
+	Matches *BindingPolicyMatchesAttributes `json:"matches,omitempty"`
 }
 
 // Requirements for Bitbucket Data Center / Server authentication
@@ -4319,6 +4407,7 @@ type InfrastructureStack struct {
 	// the actor of this stack (defaults to root console user)
 	Actor           *User                     `json:"actor,omitempty"`
 	CustomStackRuns *CustomStackRunConnection `json:"customStackRuns,omitempty"`
+	StackPolicies   *StackPolicyConnection    `json:"stackPolicies,omitempty"`
 	// key/value tags to filter stacks
 	Tags []*Tag `json:"tags,omitempty"`
 	// Infracost resource rows attached to this stack (newest first)
@@ -6510,6 +6599,42 @@ type PodTolerationAttributes struct {
 	Effect   *string `json:"effect,omitempty"`
 }
 
+// A project-scoped policy that can be associated with workbenches to enforce policy decisions.
+type Policy struct {
+	// unique policy identifier
+	ID string `json:"id"`
+	// unique policy name
+	Name string `json:"name"`
+	// policy implementation type
+	Type PolicyType `json:"type"`
+	// human-readable policy description
+	Description *string `json:"description,omitempty"`
+	// policy source text
+	Policy string `json:"policy"`
+	// project that owns this policy
+	Project *Project `json:"project,omitempty"`
+	// Sampled evaluations that include this policy.
+	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
+	StackPolicies     *StackPolicyConnection      `json:"stackPolicies,omitempty"`
+	WorkbenchPolicies *WorkbenchPolicyConnection  `json:"workbenchPolicies,omitempty"`
+	InsertedAt        *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
+}
+
+// Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy.
+type PolicyAttributes struct {
+	// unique policy name
+	Name *string `json:"name,omitempty"`
+	// policy implementation type
+	Type *PolicyType `json:"type,omitempty"`
+	// human-readable policy description
+	Description *string `json:"description,omitempty"`
+	// policy source text
+	Policy *string `json:"policy,omitempty"`
+	// project that owns the policy; defaults to the deployment's default project when omitted
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
 type PolicyBinding struct {
 	ID    *string `json:"id,omitempty"`
 	User  *User   `json:"user,omitempty"`
@@ -6520,6 +6645,11 @@ type PolicyBindingAttributes struct {
 	ID      *string `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
 	GroupID *string `json:"groupId,omitempty"`
+}
+
+type PolicyConnection struct {
+	PageInfo PageInfo      `json:"pageInfo"`
+	Edges    []*PolicyEdge `json:"edges,omitempty"`
 }
 
 // A OPA Gatekeeper Constraint reference
@@ -6562,6 +6692,11 @@ type PolicyConstraintEdge struct {
 	Cursor *string           `json:"cursor,omitempty"`
 }
 
+type PolicyEdge struct {
+	Node   *Policy `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
 // Configuration for applying policy enforcement to a stack
 type PolicyEngine struct {
 	// the policy engine to use with this stack
@@ -6583,6 +6718,30 @@ type PolicyEngineAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// git reference within the policy repository or stack repository
 	Git *GitRefAttributes `json:"git,omitempty"`
+}
+
+// A sampled policy decision for a tool invocation.
+type PolicyEvaluation struct {
+	// unique policy evaluation identifier
+	ID string `json:"id"`
+	// policies evaluated for this decision
+	PolicyIds []string `json:"policyIds"`
+	// tool input evaluated by the policy
+	Input map[string]any `json:"input"`
+	// policy evaluation result
+	Output     map[string]any `json:"output"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+type PolicyEvaluationConnection struct {
+	PageInfo PageInfo                `json:"pageInfo"`
+	Edges    []*PolicyEvaluationEdge `json:"edges,omitempty"`
+}
+
+type PolicyEvaluationEdge struct {
+	Node   *PolicyEvaluation `json:"node,omitempty"`
+	Cursor *string           `json:"cursor,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet
@@ -7082,10 +7241,11 @@ type PreviewEnvironmentTemplateEdge struct {
 
 // A unit of organization to control permissions for a set of objects within your Console instance
 type Project struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
-	Default     *bool   `json:"default,omitempty"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Description     *string `json:"description,omitempty"`
+	Default         *bool   `json:"default,omitempty"`
+	DisableInsights *bool   `json:"disableInsights,omitempty"`
 	// list all alerts discovered for this project
 	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// read policy across this project
@@ -7097,10 +7257,11 @@ type Project struct {
 }
 
 type ProjectAttributes struct {
-	Name          string                     `json:"name"`
-	Description   *string                    `json:"description,omitempty"`
-	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	Name            string                     `json:"name"`
+	Description     *string                    `json:"description,omitempty"`
+	DisableInsights *bool                      `json:"disableInsights,omitempty"`
+	ReadBindings    []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings   []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 type ProjectConnection struct {
@@ -7329,6 +7490,8 @@ type QueuedPrompt struct {
 	DequeableAt *string `json:"dequeableAt,omitempty"`
 	// when this prompt was consumed
 	ConsumedAt *string `json:"consumedAt,omitempty"`
+	// mode-specific overrides applied when this prompt is dequeued
+	Modes *WorkbenchJobModes `json:"modes,omitempty"`
 	// user this prompt will run as
 	UserID *string `json:"userId,omitempty"`
 	// the job this prompt will be sent to
@@ -7344,6 +7507,8 @@ type QueuedPromptAttributes struct {
 	Prompt string `json:"prompt"`
 	// when this prompt becomes eligible to dequeue
 	DequeableAt string `json:"dequeableAt"`
+	// mode-specific overrides to apply when this prompt is dequeued
+	Modes *WorkbenchJobModesAttributes `json:"modes,omitempty"`
 }
 
 type QueuedPromptConnection struct {
@@ -7354,6 +7519,15 @@ type QueuedPromptConnection struct {
 type QueuedPromptEdge struct {
 	Node   *QueuedPrompt `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type QueuedPromptSummary struct {
+	// unconsumed prompts that are eligible to dequeue
+	ReadyCount int64 `json:"readyCount"`
+	// unconsumed prompts waiting for dequeable_at
+	PendingCount int64 `json:"pendingCount"`
+	// earliest future dequeable_at among pending prompts
+	NextAt *string `json:"nextAt,omitempty"`
 }
 
 type RbacAttributes struct {
@@ -9027,6 +9201,29 @@ type StackOverridesAttributes struct {
 	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
 }
 
+type StackPolicy struct {
+	ID         string               `json:"id"`
+	Policy     *Policy              `json:"policy,omitempty"`
+	Stack      *InfrastructureStack `json:"stack,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+type StackPolicyAttributes struct {
+	// the policy to associate with this stack
+	PolicyID string `json:"policyId"`
+}
+
+type StackPolicyConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*StackPolicyEdge `json:"edges,omitempty"`
+}
+
+type StackPolicyEdge struct {
+	Node   *StackPolicy `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
+}
+
 type StackPolicyViolation struct {
 	ID           string       `json:"id"`
 	Severity     VulnSeverity `json:"severity"`
@@ -10014,11 +10211,12 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings   []*PolicyBinding           `json:"writeBindings,omitempty"`
-	Runs            *WorkbenchJobConnection    `json:"runs,omitempty"`
-	Crons           *WorkbenchCronConnection   `json:"crons,omitempty"`
-	Prompts         *WorkbenchPromptConnection `json:"prompts,omitempty"`
-	WorkbenchSkills *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	WriteBindings     []*PolicyBinding           `json:"writeBindings,omitempty"`
+	WorkbenchPolicies *WorkbenchPolicyConnection `json:"workbenchPolicies,omitempty"`
+	Runs              *WorkbenchJobConnection    `json:"runs,omitempty"`
+	Crons             *WorkbenchCronConnection   `json:"crons,omitempty"`
+	Prompts           *WorkbenchPromptConnection `json:"prompts,omitempty"`
+	WorkbenchSkills   *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -10426,9 +10624,13 @@ type WorkbenchJob struct {
 	ReferencedJob *WorkbenchJob                   `json:"referencedJob,omitempty"`
 	Activities    *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	QueuedPrompts *QueuedPromptConnection         `json:"queuedPrompts,omitempty"`
-	MetricsTool   []*WorkbenchJobActivityMetric   `json:"metricsTool,omitempty"`
-	LogsTool      []*WorkbenchJobActivityLog      `json:"logsTool,omitempty"`
-	TracesTool    []*WorkbenchJobActivityTrace    `json:"tracesTool,omitempty"`
+	// number of unconsumed queued prompts for this job
+	QueuedPromptCount int64 `json:"queuedPromptCount"`
+	// ready/pending breakdown for unconsumed queued prompts
+	QueuedPromptSummary QueuedPromptSummary           `json:"queuedPromptSummary"`
+	MetricsTool         []*WorkbenchJobActivityMetric `json:"metricsTool,omitempty"`
+	LogsTool            []*WorkbenchJobActivityLog    `json:"logsTool,omitempty"`
+	TracesTool          []*WorkbenchJobActivityTrace  `json:"tracesTool,omitempty"`
 	// whimsically describes current progress for you
 	Whimsey    *string `json:"whimsey,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -10490,11 +10692,27 @@ type WorkbenchJobActivityFunctionCall struct {
 
 type WorkbenchJobActivityJobUpdate struct {
 	Diff          *string                   `json:"diff,omitempty"`
+	Objective     *string                   `json:"objective,omitempty"`
 	WorkingTheory *string                   `json:"workingTheory,omitempty"`
 	Criticism     *string                   `json:"criticism,omitempty"`
 	Conclusion    *string                   `json:"conclusion,omitempty"`
 	Topology      *string                   `json:"topology,omitempty"`
 	Todos         []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+}
+
+type WorkbenchJobActivityKubeExec struct {
+	// the target cluster handle
+	Handle *string `json:"handle,omitempty"`
+	// the command executed in the pod
+	Command *string `json:"command,omitempty"`
+	// the target namespace
+	Namespace *string `json:"namespace,omitempty"`
+	// the target pod name
+	Pod *string `json:"pod,omitempty"`
+	// the target container name
+	Container *string `json:"container,omitempty"`
+	// why this command is needed and its expected effect
+	Explanation *string `json:"explanation,omitempty"`
 }
 
 type WorkbenchJobActivityKubeRequest struct {
@@ -10532,10 +10750,14 @@ type WorkbenchJobActivityResult struct {
 	Output *string `json:"output,omitempty"`
 	// error from the activity
 	Error *string `json:"error,omitempty"`
+	// why this action is needed and its expected effect
+	Explanation *string `json:"explanation,omitempty"`
 	// function call approval payload when present
 	FunctionCall *WorkbenchJobActivityFunctionCall `json:"functionCall,omitempty"`
 	// kubernetes request approval payload when present
 	KubeRequest *WorkbenchJobActivityKubeRequest `json:"kubeRequest,omitempty"`
+	// kubernetes exec payload when present
+	KubeExec *WorkbenchJobActivityKubeExec `json:"kubeExec,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
 	// dashboard canvas blocks for this activity
@@ -10623,11 +10845,19 @@ type WorkbenchJobEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobExecStream struct {
+	ActivityID *string `json:"activityId,omitempty"`
+	Text       *string `json:"text,omitempty"`
+	Seq        *int64  `json:"seq,omitempty"`
+}
+
 type WorkbenchJobKubernetesModes struct {
 	// whether kubernetes update actions are enabled
 	Update *bool `json:"update,omitempty"`
 	// whether kubernetes delete actions are enabled
 	Delete *bool `json:"delete,omitempty"`
+	// whether kubernetes exec actions are enabled
+	Exec *bool `json:"exec,omitempty"`
 	// namespaces the agent can never act in
 	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
 	// if set, actions are only allowed in these namespaces
@@ -10639,6 +10869,8 @@ type WorkbenchJobKubernetesModesAttributes struct {
 	Update *bool `json:"update,omitempty"`
 	// whether kubernetes delete actions are enabled
 	Delete *bool `json:"delete,omitempty"`
+	// whether kubernetes exec actions are enabled
+	Exec *bool `json:"exec,omitempty"`
 	// namespaces the agent can never act in
 	ExcludeNamespaces []*string `json:"excludeNamespaces,omitempty"`
 	// if set, actions are only allowed in these namespaces
@@ -10699,6 +10931,8 @@ type WorkbenchJobProgress struct {
 type WorkbenchJobResult struct {
 	// the id of the result
 	ID string `json:"id"`
+	// the sole active objective for this investigation
+	Objective *string `json:"objective,omitempty"`
 	// the working theory for this result
 	WorkingTheory *string `json:"workingTheory,omitempty"`
 	// a markdown-formatted critique of the work done so far, highlighting gaps, inconsistencies, and weaknesses in the current investigation
@@ -10812,6 +11046,46 @@ type WorkbenchObservabilityAttributes struct {
 	Logs *bool `json:"logs,omitempty"`
 	// enable metrics capability
 	Metrics *bool `json:"metrics,omitempty"`
+}
+
+type WorkbenchPolicy struct {
+	ID         string                  `json:"id"`
+	Matches    *WorkbenchPolicyMatches `json:"matches,omitempty"`
+	Policy     *Policy                 `json:"policy,omitempty"`
+	Workbench  *Workbench              `json:"workbench,omitempty"`
+	InsertedAt *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchPolicyAttributes struct {
+	// the policy to associate with this workbench
+	PolicyID string `json:"policyId"`
+	// criteria that determine when the policy applies
+	Matches *WorkbenchPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
+type WorkbenchPolicyConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*WorkbenchPolicyEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchPolicyEdge struct {
+	Node   *WorkbenchPolicy `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
+}
+
+type WorkbenchPolicyMatches struct {
+	Regexes []*string `json:"regexes,omitempty"`
+}
+
+type WorkbenchPolicyMatchesAttributes struct {
+	// regular expressions that select inputs for this policy
+	Regexes []*string `json:"regexes,omitempty"`
+}
+
+type WorkbenchPolicyUpdateAttributes struct {
+	// criteria that determine when the policy applies
+	Matches *WorkbenchPolicyMatchesAttributes `json:"matches,omitempty"`
 }
 
 type WorkbenchPrMergeRateByWorkbenchEntry struct {
@@ -12009,6 +12283,7 @@ const (
 	AgentRuntimeTypeGemini   AgentRuntimeType = "GEMINI"
 	AgentRuntimeTypeCustom   AgentRuntimeType = "CUSTOM"
 	AgentRuntimeTypeCodex    AgentRuntimeType = "CODEX"
+	AgentRuntimeTypePi       AgentRuntimeType = "PI"
 )
 
 var AllAgentRuntimeType = []AgentRuntimeType{
@@ -12017,11 +12292,12 @@ var AllAgentRuntimeType = []AgentRuntimeType{
 	AgentRuntimeTypeGemini,
 	AgentRuntimeTypeCustom,
 	AgentRuntimeTypeCodex,
+	AgentRuntimeTypePi,
 }
 
 func (e AgentRuntimeType) IsValid() bool {
 	switch e {
-	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom, AgentRuntimeTypeCodex:
+	case AgentRuntimeTypeClaude, AgentRuntimeTypeOpencode, AgentRuntimeTypeGemini, AgentRuntimeTypeCustom, AgentRuntimeTypeCodex, AgentRuntimeTypePi:
 		return true
 	}
 	return false
@@ -12682,6 +12958,61 @@ func (e *AutoscalingTarget) UnmarshalJSON(b []byte) error {
 }
 
 func (e AutoscalingTarget) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type BindingPolicyType string
+
+const (
+	BindingPolicyTypeWorkbench BindingPolicyType = "WORKBENCH"
+	BindingPolicyTypeStack     BindingPolicyType = "STACK"
+)
+
+var AllBindingPolicyType = []BindingPolicyType{
+	BindingPolicyTypeWorkbench,
+	BindingPolicyTypeStack,
+}
+
+func (e BindingPolicyType) IsValid() bool {
+	switch e {
+	case BindingPolicyTypeWorkbench, BindingPolicyTypeStack:
+		return true
+	}
+	return false
+}
+
+func (e BindingPolicyType) String() string {
+	return string(e)
+}
+
+func (e *BindingPolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BindingPolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BindingPolicyType", str)
+	}
+	return nil
+}
+
+func (e BindingPolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *BindingPolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e BindingPolicyType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -13875,16 +14206,18 @@ type Homepage string
 const (
 	HomepageClusters    Homepage = "CLUSTERS"
 	HomepageWorkbenches Homepage = "WORKBENCHES"
+	HomepageFlows       Homepage = "FLOWS"
 )
 
 var AllHomepage = []Homepage{
 	HomepageClusters,
 	HomepageWorkbenches,
+	HomepageFlows,
 }
 
 func (e Homepage) IsValid() bool {
 	switch e {
-	case HomepageClusters, HomepageWorkbenches:
+	case HomepageClusters, HomepageWorkbenches, HomepageFlows:
 		return true
 	}
 	return false
@@ -15704,6 +16037,63 @@ func (e *PolicyEngineType) UnmarshalJSON(b []byte) error {
 }
 
 func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PolicyType string
+
+const (
+	PolicyTypeWorkbench PolicyType = "WORKBENCH"
+	PolicyTypeStack     PolicyType = "STACK"
+	PolicyTypeBinding   PolicyType = "BINDING"
+)
+
+var AllPolicyType = []PolicyType{
+	PolicyTypeWorkbench,
+	PolicyTypeStack,
+	PolicyTypeBinding,
+}
+
+func (e PolicyType) IsValid() bool {
+	switch e {
+	case PolicyTypeWorkbench, PolicyTypeStack, PolicyTypeBinding:
+		return true
+	}
+	return false
+}
+
+func (e PolicyType) String() string {
+	return string(e)
+}
+
+func (e *PolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PolicyType", str)
+	}
+	return nil
+}
+
+func (e PolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PolicyType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -17955,6 +18345,7 @@ const (
 	WorkbenchJobActivityTypeFunction       WorkbenchJobActivityType = "FUNCTION"
 	WorkbenchJobActivityTypeKubernetes     WorkbenchJobActivityType = "KUBERNETES"
 	WorkbenchJobActivityTypeVerify         WorkbenchJobActivityType = "VERIFY"
+	WorkbenchJobActivityTypeExec           WorkbenchJobActivityType = "EXEC"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -17975,11 +18366,12 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeFunction,
 	WorkbenchJobActivityTypeKubernetes,
 	WorkbenchJobActivityTypeVerify,
+	WorkbenchJobActivityTypeExec,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory, WorkbenchJobActivityTypeConclusion, WorkbenchJobActivityTypeCanvas, WorkbenchJobActivityTypeSkill, WorkbenchJobActivityTypeHistory, WorkbenchJobActivityTypeSearch, WorkbenchJobActivityTypeFunction, WorkbenchJobActivityTypeKubernetes, WorkbenchJobActivityTypeVerify, WorkbenchJobActivityTypeExec:
 		return true
 	}
 	return false

@@ -1,7 +1,9 @@
 defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
   use Console.AI.Tools.Workbench.Base
   import Piazza.Ecto.Schema
+  alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias Console.Logs.{Query, Provider, Time, Line}
+  alias Console.AI.Tools.Workbench.Output
 
   embedded_schema do
     field :user,       :map, virtual: true
@@ -41,12 +43,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Logs do
     |> validate_required([:name, :value])
   end
 
+  @log_limit 500
+
   def implement(%__MODULE__{user: user} = logs) do
     query = logs_query(logs)
     with {:ok, query} <- Query.accessible(query, user),
          {:ok, logs} <- Provider.query(query),
          {:ok, content} <- Jason.encode(logs) do
-      {:ok, %{content: content, logs: Enum.map(logs, &to_log/1)}}
+      {:ok, %{content: Output.truncate(content), logs: Enum.map(Enum.take(logs, @log_limit), &to_log/1)}}
     end
   end
 

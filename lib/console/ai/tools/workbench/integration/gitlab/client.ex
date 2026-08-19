@@ -64,6 +64,25 @@ defmodule Console.AI.Tools.Workbench.Integration.Gitlab.Client do
     |> Http.handle("GitLab")
   end
 
+  @spec put_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
+  def put_json(%{base_url: base, token: token}, path, body_map)
+      when is_binary(path) and is_map(body_map) do
+    url = base <> path
+    headers = [{"PRIVATE-TOKEN", token}, {"Content-Type", "application/json"}]
+    encoded = Jason.encode!(body_map)
+
+    case HTTPoison.put(url, encoded, headers, http_opts()) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+        decode_json(body)
+
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, "GitLab API #{code}: #{inspect(body)}"}
+
+      {:error, reason} ->
+        Http.error("GitLab", reason)
+    end
+  end
+
   @spec put(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
   def put(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
     url = base <> path <> Query.query_string(query)

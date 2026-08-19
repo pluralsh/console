@@ -14,12 +14,6 @@ func WithManifestTTL(manifestTTL time.Duration) ServiceReconcilerOption {
 	}
 }
 
-func WithManifestTTLJitter(manifestTTLJitter time.Duration) ServiceReconcilerOption {
-	return func(r *ServiceReconciler) {
-		r.manifestTTLJitter = manifestTTLJitter
-	}
-}
-
 func WithWorkqueueBaseDelay(workqueueBaseDelay time.Duration) ServiceReconcilerOption {
 	return func(r *ServiceReconciler) {
 		r.workqueueBaseDelay = workqueueBaseDelay

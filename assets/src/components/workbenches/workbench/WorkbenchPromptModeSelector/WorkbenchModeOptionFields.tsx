@@ -93,13 +93,23 @@ export function WorkbenchCodingSupervisionFields({
 export function WorkbenchKubernetesMutationFields({
   allowUpdates,
   allowDeletes,
+  allowExec,
   onAllowUpdatesChange,
   onAllowDeletesChange,
+  onAllowExecChange,
+  updatesDisabled = false,
+  deletesDisabled = false,
+  execDisabled = false,
 }: {
   allowUpdates: boolean
   allowDeletes: boolean
+  allowExec: boolean
   onAllowUpdatesChange: (checked: boolean) => void
   onAllowDeletesChange: (checked: boolean) => void
+  onAllowExecChange: (checked: boolean) => void
+  updatesDisabled?: boolean
+  deletesDisabled?: boolean
+  execDisabled?: boolean
 }) {
   return (
     <>
@@ -112,6 +122,7 @@ export function WorkbenchKubernetesMutationFields({
         <Checkbox
           small
           checked={allowUpdates}
+          disabled={updatesDisabled}
           onChange={(e) => onAllowUpdatesChange(e.target.checked)}
         >
           Allow updates
@@ -119,9 +130,18 @@ export function WorkbenchKubernetesMutationFields({
         <Checkbox
           small
           checked={allowDeletes}
+          disabled={deletesDisabled}
           onChange={(e) => onAllowDeletesChange(e.target.checked)}
         >
           Allow deletes
+        </Checkbox>
+        <Checkbox
+          small
+          checked={allowExec}
+          disabled={execDisabled}
+          onChange={(e) => onAllowExecChange(e.target.checked)}
+        >
+          Allow command execution
         </Checkbox>
       </Flex>
     </>

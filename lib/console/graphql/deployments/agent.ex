@@ -114,6 +114,12 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :metadata, :agent_message_metadata_attributes
   end
 
+  input_object :agent_message_output_attributes do
+    field :message_id, non_null(:id), description: "the command message this output belongs to"
+    field :stdout,     :string, description: "the command standard output"
+    field :stderr,     :string, description: "the command standard error"
+  end
+
   input_object :agent_message_cost_attributes do
     field :total,  non_null(:float), description: "the total cost of the message"
     field :tokens, :agent_message_tokens_attributes, description: "the tokens of the message"
@@ -126,6 +132,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   input_object :agent_message_metadata_attributes do
+    field :started_at,   :datetime, description: "when the tool/message started, eg when create time differs from tool start"
     field :completed_at, :datetime, description: "when the message completed, eg for command based tool calls that take a while"
     field :reasoning,    :agent_message_reasoning_attributes, description: "the reasoning of the message"
     field :file,         :agent_message_file_attributes, description: "the file of the message"
@@ -190,6 +197,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approval,         :boolean, description: "whether this run requires approval before continuing"
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
+    field :followup,         :boolean, description: "whether this run is a follow-up to a pull request"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
     field :usage,            :agent_run_usage, description: "token and cost usage for this agent run"
@@ -289,6 +297,13 @@ defmodule Console.GraphQl.Deployments.Agent do
     timestamps()
   end
 
+  object :agent_message_output do
+    field :message_id,   non_null(:id), description: "the command message this output belongs to"
+    field :agent_run_id, non_null(:id), description: "the agent run this output belongs to"
+    field :stdout,       :string, description: "the command standard output"
+    field :stderr,       :string, description: "the command standard error"
+  end
+
   object :agent_prompt do
     field :id,     non_null(:id)
     field :prompt, non_null(:string), description: "the prompt to give this agent run"
@@ -309,6 +324,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   end
 
   object :agent_message_metadata do
+    field :started_at,   :datetime, description: "when the tool/message started"
     field :completed_at, :datetime, description: "when the message completed"
     field :reasoning, :agent_message_reasoning, description: "the reasoning of the message"
     field :file,      :agent_message_file, description: "the file of the message"
@@ -365,6 +381,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   connection node_type: :agent_run_repository
 
   delta :agent_message
+  delta :agent_message_output
   delta :agent_run
 
   object :public_agent_queries do
@@ -430,6 +447,13 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_message_attributes)
 
       resolve &Deployments.create_agent_message/2
+    end
+
+    field :agent_message_output, :agent_message_output do
+      middleware ClusterAuthenticated
+      arg :attributes, non_null(:agent_message_output_attributes)
+
+      resolve &Deployments.agent_message_output/2
     end
 
     field :update_agent_message, :agent_message do
@@ -587,6 +611,15 @@ defmodule Console.GraphQl.Deployments.Agent do
       config fn args, ctx ->
         with {:ok, run} <- Deployments.agent_run(args, ctx),
           do: {:ok, topic: "agent_runs:#{run.id}"}
+      end
+    end
+
+    field :agent_message_output_delta, :agent_message_output_delta do
+      arg :run_id, non_null(:id)
+
+      config fn %{run_id: run_id}, ctx ->
+        with {:ok, run} <- Deployments.agent_run(%{id: run_id}, ctx),
+          do: {:ok, topic: "agent_messages:#{run.id}:outputs"}
       end
     end
   end

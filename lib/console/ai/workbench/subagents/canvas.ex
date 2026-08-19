@@ -26,7 +26,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
   @spec run(WorkbenchJobActivity.t(), WorkbenchJob.t(), Environment.t()) :: binary
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, engine_opts(job) ++ [system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))), acc: %{}, callback: &callback(activity, &1)])
+    |> MemoryEngine.new(20, engine_opts(environment) ++ [system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))), acc: %{}, callback: &callback(activity, &1)])
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, output} -> output

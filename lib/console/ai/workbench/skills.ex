@@ -32,11 +32,11 @@ defmodule Console.AI.Workbench.Skills do
   @spec skills(Workbench.t) :: {:ok, [Skill.t]} | Console.error
   def skills(%Workbench{
     repository: %GitRepository{} = repository,
-    skills: %Workbench.Skills{ref: ref, files: [_ | _] = files},
+    skills: %Workbench.Skills{ref: ref, files: files},
     workbench_skills: db_skills
   }) do
     with {:ok, contents} <- Git.fetch(repository, ref) do
-      Enum.filter(contents, fn {k, _} -> k in files end)
+      Enum.filter(contents, &skill_file?(&1, files))
       |> Enum.reduce_while([], fn {file, skill}, acc ->
         case parse_skill(file, skill) do
           {:ok, skill} -> {:cont, [skill | acc]}
@@ -53,11 +53,17 @@ defmodule Console.AI.Workbench.Skills do
   end
   def skills(%Workbench{workbench_skills: db_skills}), do: {:ok, convert_db_skills(db_skills)}
 
-  def plural?(name, %Workbench{workbench_skills: [_ | _] = db}) do
-    Enum.any?(db, fn %WorkbenchSkill{name: n} -> n == name end)
-  end
-
+  def plural?(name, %Workbench{workbench_skills: [_ | _] = db}),
+    do: Enum.any?(db, fn %WorkbenchSkill{name: n} -> n == name end)
   def plural?(_name, _workbench), do: false
+
+  defp skill_file?({file, _}, files) do
+    cond do
+      is_list(files) and file in files -> true
+      String.ends_with?(file, "/SKILL.md") -> true
+      true -> false
+    end
+  end
 
   def skill_file(name, %Workbench{repository: %GitRepository{} = r, skills: %Workbench.Skills{ref: ref, files: [_ | _] = files}}) do
     with {:ok, contents} <- Git.fetch(r, ref) do

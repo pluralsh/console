@@ -18,16 +18,27 @@ config:
   provider: openai
   # Provider API URL
   providerHost: https://api.openai.com
+  # AWS region used when routing configured OpenAI model prefixes to Bedrock Mantle.
+  bedrockMantleAWSRegion: us-east-1
+  # Use AWS SigV4 authentication from the pod's default AWS credentials chain instead of a Mantle API key.
+  # Configure the service account with IRSA or another supported AWS workload identity when enabled.
+  mantleSigV4: false
+  # OpenAI model prefixes routed to Bedrock Mantle when authentication is configured.
+  bedrockMantleModelPrefixes:
+    - gpt-5.6
 
 secrets:
   token: ~
   serviceAccount: ~
+  # Amazon Bedrock Mantle API key. Enables routing of configured model prefixes.
+  bedrockMantleKey: ~
 
 # AI Proxy container args
 # Note: It can override config.provider and config.providerHost
 #  - --provider=openai # One of: ollama, openai
 #  - --provider-host='' # host address to access provider API i.e. https://api.openai.com
 #  - --provider-token='' # Provider token used to connect to the API. Can be overridden via PLRL_PROVIDER_TOKEN env var.
+# Bedrock Mantle settings are passed using PLRL_* environment variables for compatibility with older images.
 #  - --port=8000 # host address to access provider API i.e. https://api.openai.com
 #  - --address=0.0.0.0 # The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).
 args: []

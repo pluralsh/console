@@ -534,4 +534,39 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       assert step["args"] == ["Hello World!"]
     end
   end
+
+  describe "stack policy CRUD" do
+    test "stack writers can manage policy associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+      replacement = insert(:policy, project: project, type: :stack)
+
+      {:ok, %{data: %{"createStackPolicy" => association}}} = run_query("""
+        mutation CreateStackPolicy($stackId: ID!, $attributes: StackPolicyAttributes!) {
+          createStackPolicy(stackId: $stackId, attributes: $attributes) { id stack { id } policy { id } }
+        }
+      """, %{"stackId" => stack.id, "attributes" => %{"policyId" => policy.id}}, %{current_user: user})
+
+      assert association["stack"]["id"] == stack.id
+      assert association["policy"]["id"] == policy.id
+
+      {:ok, %{data: %{"updateStackPolicy" => updated}}} = run_query("""
+        mutation UpdateStackPolicy($id: ID!, $attributes: StackPolicyAttributes!) {
+          updateStackPolicy(id: $id, attributes: $attributes) { id policy { id } }
+        }
+      """, %{"id" => association["id"], "attributes" => %{"policyId" => replacement.id}}, %{current_user: user})
+
+      assert updated["policy"]["id"] == replacement.id
+
+      {:ok, %{data: %{"deleteStackPolicy" => deleted}}} = run_query("""
+        mutation DeleteStackPolicy($id: ID!) {
+          deleteStackPolicy(id: $id) { id }
+        }
+      """, %{"id" => association["id"]}, %{current_user: user})
+
+      assert deleted["id"] == association["id"]
+    end
+  end
 end

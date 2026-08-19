@@ -192,6 +192,7 @@ type ConsoleClient interface {
 	UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error)
 	DeleteUpgradePlanCallout(ctx context.Context, name string) error
 	GetAgentRuntime(ctx context.Context, name, clusterId string) (*console.AgentRuntimeFragment, error)
+	UpsertAgentRuntime(ctx context.Context, attributes console.AgentRuntimeAttributes) (*console.AgentRuntimeFragment, error)
 	CreateWorkbench(ctx context.Context, attributes console.WorkbenchAttributes) (*console.WorkbenchFragment, error)
 	UpdateWorkbench(ctx context.Context, id string, attributes console.WorkbenchAttributes) (*console.WorkbenchFragment, error)
 	GetWorkbench(ctx context.Context, id, name *string) (*console.WorkbenchFragment, error)

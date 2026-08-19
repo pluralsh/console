@@ -410,7 +410,8 @@ defmodule Console.Schema.Service do
     from(s in query,
       join: c in ^Cluster.health(Cluster, true),
         on: c.id == s.cluster_id and (is_nil(c.disable_ai) or not c.disable_ai),
-      where: (is_nil(s.ai_poll_at) or s.ai_poll_at < ^now),
+      join: p in assoc(c, :project),
+      where: (is_nil(p.disable_insights) or not p.disable_insights) and (is_nil(s.ai_poll_at) or s.ai_poll_at < ^now),
       order_by: [asc: :ai_poll_at]
     )
   end

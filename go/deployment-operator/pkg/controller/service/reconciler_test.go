@@ -87,7 +87,7 @@ var _ = Describe("Reconciler", Ordered, func() {
 		BeforeEach(func() {
 			var err error
 			dir, err = os.MkdirTemp("", "test")
-			cache.InitComponentShaCache(args.ComponentShaCacheTTL(), args.ComponentShaCacheJitter())
+			cache.InitComponentShaCache(args.ComponentShaCacheTTL())
 			Expect(err).NotTo(HaveOccurred())
 			err = kClient.Create(ctx, &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{

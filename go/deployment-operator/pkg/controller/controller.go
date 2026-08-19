@@ -22,6 +22,14 @@ import (
 	internallog "github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
+// DefaultInitialPollDelay returns a random delay in [0, interval).
+func DefaultInitialPollDelay(interval time.Duration) time.Duration {
+	if interval <= 0 {
+		return 0
+	}
+	return time.Duration(rand.Int63n(int64(interval)))
+}
+
 type Controller struct {
 	// Name is used to uniquely identify a Controller in tracing, logging and monitoring. Name is required.
 	Name string
@@ -48,6 +56,10 @@ type Controller struct {
 
 	// RecoverPanic indicates whether the panic caused by reconcile should be recovered.
 	RecoverPanic *bool
+
+	// InitialPollDelay optionally overrides the default jittered delay used when
+	// PollImmediately is false. If nil, DefaultInitialPollDelay is used.
+	InitialPollDelay func(interval time.Duration) time.Duration
 
 	// lastPollTime is the last time Reconciler.Poll was called.
 	lastPollTime time.Time
@@ -139,6 +151,23 @@ func (c *Controller) startPoller(ctx context.Context) {
 	defer c.Do.Shutdown()
 
 	klog.V(internallog.LogLevelExtended).InfoS("Starting controller poller", "ctrl", c.Name)
+
+	if !common.GetConfigurationManager().IsPollImmediately() {
+		if interval := c.Do.GetPollInterval()(); interval > 0 {
+			delayFn := c.InitialPollDelay
+			if delayFn == nil {
+				delayFn = DefaultInitialPollDelay
+			}
+			initialDelay := delayFn(interval)
+			klog.V(internallog.LogLevelExtended).InfoS("Delaying initial poll", "ctrl", c.Name, "delay", initialDelay)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(initialDelay):
+			}
+		}
+	}
+
 	_ = helpers.DynamicPollUntilContextCancel(ctx, c.Do.GetPollInterval(), func(_ context.Context) (bool, error) {
 		defer func() {
 			c.setLastPollTime(time.Now())

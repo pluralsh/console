@@ -64,6 +64,24 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
     |> Http.handle("Bitbucket Cloud")
   end
 
+  @spec put_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
+  def put_json(%{base_url: base, token: token}, path, body_map)
+      when is_binary(path) and is_map(body_map) do
+    url = base <> path
+    headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
+
+    case HTTPoison.put(url, Jason.encode!(body_map), headers, http_opts()) do
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+        decode_json(body)
+
+      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+        {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
+
+      {:error, reason} ->
+        Http.error("Bitbucket Cloud", reason)
+    end
+  end
+
   @spec repo_path(String.t(), String.t()) :: String.t()
   def repo_path(workspace, repo_slug),
     do: "/repositories/#{enc(workspace)}/#{enc(repo_slug)}"

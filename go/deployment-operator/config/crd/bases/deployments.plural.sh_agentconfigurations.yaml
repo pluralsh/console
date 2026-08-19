@@ -54,6 +54,9 @@ spec:
                   CompatibilityUploadInterval determines how frequently the agent uploads compatibility data.
                   Set to "0s" to disable compatibility uploads.
                 type: string
+              componentShaCacheTTL:
+                description: ComponentShaCacheTTL specifies how long component SHA cache entries remain valid.
+                type: string
               disableWebsocket:
                 description: |-
                   DisableWebsocket disables the cluster websocket connection to the Console.
@@ -61,6 +64,11 @@ spec:
                   push updates. This is useful in large-scale edge deployments where maintaining
                   persistent websocket connections has an infeasible network cost.
                 type: boolean
+              managedNamespacePollInterval:
+                description: |-
+                  ManagedNamespacePollInterval defines how often the agent polls for managed namespaces.
+                  Set to "0s" to disable managed namespace polling.
+                type: string
               maxAgentRunPods:
                 description: |-
                   MaxAgentRunPods limits the number of concurrent agent run pods that can be active at any given time.
@@ -84,16 +92,17 @@ spec:
                   Must be greater than 0. Set this field to nil (omit) to disable the limit.
                 minimum: 1
                 type: integer
-              managedNamespacePollInterval:
-                description: |-
-                  ManagedNamespacePollInterval defines how often the agent polls for managed namespaces.
-                  Set to "0s" to disable managed namespace polling.
-                type: string
               pipelineGateInterval:
                 description: |-
                   PipelineGateInterval specifies how frequently the agent checks pipeline gates.
                   Set to "0s" to disable pipeline gate checks.
                 type: string
+              pollImmediately:
+                description: |-
+                  PollImmediately determines whether the agent should poll immediately upon startup.
+                  When set to true, the agent will perform an initial poll as soon as it starts.
+                  By default, it's set to true.
+                type: boolean
               sentinelPollInterval:
                 description: |-
                   SentinelPollInterval sets how often the agent polls for sentinel run jobs.

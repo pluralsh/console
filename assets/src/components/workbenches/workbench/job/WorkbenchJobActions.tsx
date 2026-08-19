@@ -33,6 +33,7 @@ export function WorkbenchJobActions({ jobId }: { jobId: string }) {
       [
         ...mapActionNodes(data?.workbenchJob?.functionActions?.edges),
         ...mapActionNodes(data?.workbenchJob?.kubernetesActions?.edges),
+        ...mapActionNodes(data?.workbenchJob?.execActions?.edges),
       ].sort((a, b) => (a.insertedAt ?? '').localeCompare(b.insertedAt ?? '')),
     [data]
   )

@@ -178,6 +178,26 @@ func (c *azureDevOpsClient) allComments(ctx context.Context, gc adogit.Client, p
 			continue
 		}
 		inline := thread.ThreadContext != nil
+		filePath, startLine, line := "", 0, 0
+		if inline {
+			filePath = lo.FromPtr(thread.ThreadContext.FilePath)
+			if thread.ThreadContext.RightFileStart != nil {
+				startLine = lo.FromPtr(thread.ThreadContext.RightFileStart.Line)
+			}
+			if thread.ThreadContext.RightFileEnd != nil {
+				line = lo.FromPtr(thread.ThreadContext.RightFileEnd.Line)
+			}
+			// Deleted-file comments have positions only on the left side.
+			if line == 0 && thread.ThreadContext.LeftFileEnd != nil {
+				line = lo.FromPtr(thread.ThreadContext.LeftFileEnd.Line)
+			}
+			if startLine == 0 && thread.ThreadContext.LeftFileStart != nil {
+				startLine = lo.FromPtr(thread.ThreadContext.LeftFileStart.Line)
+			}
+			if line == 0 {
+				line = startLine
+			}
+		}
 		if thread.Comments == nil {
 			continue
 		}
@@ -212,6 +232,9 @@ func (c *azureDevOpsClient) allComments(ctx context.Context, gc adogit.Client, p
 				Author:    author,
 				Body:      lo.FromPtr(cm.Content),
 				CreatedAt: createdAt,
+				FilePath:  filePath,
+				StartLine: startLine,
+				Line:      line,
 			})
 		}
 	}

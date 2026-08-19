@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "description": "Edit an existing Bitbucket Cloud pull request or repository issue comment.",
+  "properties": {
+    "repository": {
+      "type": "string",
+      "description": "Repository selector as workspace/repo_slug."
+    },
+    "resource": {
+      "type": "string",
+      "enum": ["pull_request", "issue"],
+      "description": "Resource containing the comment."
+    },
+    "resource_id": {
+      "type": "integer",
+      "description": "Pull request ID or issue ID."
+    },
+    "comment_id": {
+      "type": "integer",
+      "description": "Comment ID to update."
+    },
+    "body": {
+      "type": "string",
+      "description": "Replacement raw Markdown comment body."
+    }
+  },
+  "required": ["repository", "resource", "resource_id", "comment_id", "body"],
+  "additionalProperties": false
+}

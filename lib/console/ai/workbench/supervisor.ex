@@ -23,11 +23,14 @@ defmodule Console.AI.Workbench.Supervisor do
         name: Agent.name(:client, t, job),
         transport_name: Agent.name(:transport, t, job),
         transport: MCP.transport(t, job)
-      ] ++ mcp_attrs(t)]},
+      ] ++ mcp_attrs(t, job)]},
       restart: :transient
     }
   end
 
-  defp mcp_attrs(%WorkbenchTool{mcp_server: %McpServer{} = server}), do: ClientSupervisor.mcp_configuration(server)
-  defp mcp_attrs(_), do: ClientSupervisor.mcp_configuration(:ignore)
+  defp mcp_attrs(%WorkbenchTool{mcp_server: %McpServer{} = server} = tool, job),
+    do: ClientSupervisor.mcp_configuration(server, ClientSupervisor.client_name(tool, job))
+
+  defp mcp_attrs(tool, job),
+    do: ClientSupervisor.mcp_configuration(:ignore, ClientSupervisor.client_name(tool, job))
 end

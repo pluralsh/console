@@ -8,6 +8,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/codex"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/opencode"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/pi"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"k8s.io/klog/v2"
@@ -27,6 +28,8 @@ func New(runtimeType console.AgentRuntimeType, config v1.Config) (v1.Tool, error
 		return gemini.New(config), nil
 	case console.AgentRuntimeTypeCodex:
 		return codex.New(config), nil
+	case console.AgentRuntimeTypePi:
+		return pi.New(config), nil
 
 	default:
 		return nil, fmt.Errorf("unsupported agent run type: %s", runtimeType)

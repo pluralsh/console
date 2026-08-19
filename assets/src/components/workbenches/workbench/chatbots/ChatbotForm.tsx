@@ -457,6 +457,7 @@ export function ChatbotForm({ mode }: { mode: 'create' | 'edit' }) {
                       >
                         <WorkbenchPromptRichInput
                           workbenchId={workbenchId}
+                          workbenchRepositorySource={workbench}
                           prompt={formState.prompt}
                           onPromptChange={(nextPrompt) =>
                             setFormState((prev) => ({

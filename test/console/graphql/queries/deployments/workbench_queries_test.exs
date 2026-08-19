@@ -1271,6 +1271,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
           type: :coding,
           result: %{
             output: "done",
+            explanation: "Check the rollout status before approving further changes.",
             function_call: %{
               name: "rollout_status",
               input: %{"namespace" => "default", "deployment" => "api"},
@@ -1293,6 +1294,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
             id
             result {
               output
+              explanation
               functionCall {
                 name
                 input
@@ -1318,6 +1320,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       assert found["id"] == activity.id
       assert found["result"]["output"] == "done"
+      assert found["result"]["explanation"] == "Check the rollout status before approving further changes."
       assert found["result"]["functionCall"]["name"] == "rollout_status"
       assert found["result"]["functionCall"]["input"] == %{"namespace" => "default", "deployment" => "api"}
       assert found["result"]["functionCall"]["toolId"] == tool.id

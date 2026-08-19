@@ -3,6 +3,7 @@ import {
   Card,
   CaretRightIcon,
   CloseIcon,
+  CommandIcon,
   ContainerRuntimeIcon,
   DiscoverIcon,
   Flex,
@@ -16,7 +17,11 @@ import {
 } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import type { WorkbenchJobModesAttributes } from 'generated/graphql'
+import type {
+  WorkbenchJobKubernetesModes,
+  WorkbenchJobModes,
+  WorkbenchJobModesAttributes,
+} from 'generated/graphql'
 import {
   cloneElement,
   type ReactNode,
@@ -61,11 +66,13 @@ export function WorkbenchPromptOptionsSelector({
   value,
   onChange,
   disabled = false,
+  workbenchModes,
 }: {
   workbenchId?: Nullable<string>
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   disabled?: boolean
+  workbenchModes?: WorkbenchJobModes | null
 }) {
   const theme = useTheme()
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -82,6 +89,8 @@ export function WorkbenchPromptOptionsSelector({
     maxHeight: PANEL_MAX_HEIGHT,
     minHeight: 0,
     placement: 'left',
+    flipFallbackStrategy: 'bestFit',
+    flipBeforeSize: true,
   })
   const { buttonProps } = useButton(
     {
@@ -105,7 +114,7 @@ export function WorkbenchPromptOptionsSelector({
       aria-label="Configure modes and token limit"
       css={{
         width: 32,
-        height: '100%',
+        height: 32,
         justifyContent: 'center',
         padding: 0,
         borderRadius: '50%',
@@ -266,6 +275,7 @@ export function WorkbenchPromptOptionsSelector({
               value={value}
               onChange={onChange}
               onEmpty={() => setSidePanel(null)}
+              kubernetesModes={workbenchModes?.kubernetes}
             />
           )}
         </Flex>
@@ -285,7 +295,10 @@ export function WorkbenchPromptOptionPills({
   const showRead = !!value?.plan
   const showCoding = !showRead && value?.coding != null
   const showKubernetes =
-    !showRead && (!!value?.kubernetes?.update || !!value?.kubernetes?.delete)
+    !showRead &&
+    (!!value?.kubernetes?.update ||
+      !!value?.kubernetes?.delete ||
+      !!value?.kubernetes?.exec)
 
   return (
     <>
@@ -337,6 +350,7 @@ export function WorkbenchPromptOptionPills({
             <>
               {value?.kubernetes?.update && <UpdatesIcon size={12} />}
               {value?.kubernetes?.delete && <TrashCanIcon size={12} />}
+              {value?.kubernetes?.exec && <CommandIcon size={12} />}
             </>
           }
           onClear={() =>
@@ -474,16 +488,22 @@ function KubernetesSidePanel({
   value,
   onChange,
   onEmpty,
+  kubernetesModes,
 }: {
   value: WorkbenchJobModesAttributes | null
   onChange: (value: WorkbenchJobModesAttributes | null) => void
   onEmpty: () => void
+  kubernetesModes?: WorkbenchJobKubernetesModes | null
 }) {
   return (
     <SidePanelContainer>
       <WorkbenchKubernetesMutationFields
         allowUpdates={!!value?.kubernetes?.update}
         allowDeletes={!!value?.kubernetes?.delete}
+        allowExec={!!value?.kubernetes?.exec}
+        updatesDisabled={!kubernetesModes?.update}
+        deletesDisabled={!kubernetesModes?.delete}
+        execDisabled={!kubernetesModes?.exec}
         onAllowUpdatesChange={(checked) => {
           onChange({
             ...value,
@@ -493,7 +513,12 @@ function KubernetesSidePanel({
               update: checked,
             },
           })
-          if (!checked && !value?.kubernetes?.delete) onEmpty()
+          if (
+            !checked &&
+            !value?.kubernetes?.delete &&
+            !value?.kubernetes?.exec
+          )
+            onEmpty()
         }}
         onAllowDeletesChange={(checked) => {
           onChange({
@@ -504,7 +529,28 @@ function KubernetesSidePanel({
               delete: checked,
             },
           })
-          if (!checked && !value?.kubernetes?.update) onEmpty()
+          if (
+            !checked &&
+            !value?.kubernetes?.update &&
+            !value?.kubernetes?.exec
+          )
+            onEmpty()
+        }}
+        onAllowExecChange={(checked) => {
+          onChange({
+            ...value,
+            plan: false,
+            kubernetes: {
+              ...value?.kubernetes,
+              exec: checked,
+            },
+          })
+          if (
+            !checked &&
+            !value?.kubernetes?.update &&
+            !value?.kubernetes?.delete
+          )
+            onEmpty()
         }}
       />
     </SidePanelContainer>
@@ -577,7 +623,7 @@ function SelectedOptionPill({
   return (
     <ChatOptionPill
       showArrow={false}
-      css={{ height: '100%' }}
+      css={{ height: 32 }}
     >
       {icon}
       <span>{label}</span>

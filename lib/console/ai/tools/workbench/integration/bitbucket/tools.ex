@@ -8,6 +8,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Tools do
     Console.AI.Tools.Workbench.Integration.Bitbucket.PullRequestRead,
     Console.AI.Tools.Workbench.Integration.Bitbucket.IssueRead,
     Console.AI.Tools.Workbench.Integration.Bitbucket.CreateComment,
+    Console.AI.Tools.Workbench.Integration.Bitbucket.UpdateComment,
     Console.AI.Tools.Workbench.Integration.Bitbucket.ReactToComment
   ]
 

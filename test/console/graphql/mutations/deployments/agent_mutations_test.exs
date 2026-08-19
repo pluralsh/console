@@ -536,6 +536,56 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "agentMessageOutput" do
+    test "a cluster can publish command output for an agent message" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      {:ok, %{data: %{"agentMessageOutput" => output}}} = run_query("""
+        mutation Output($attrs: AgentMessageOutputAttributes!) {
+          agentMessageOutput(attributes: $attrs) {
+            messageId
+            agentRunId
+            stdout
+            stderr
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "messageId" => message.id,
+          "stdout" => "command output",
+          "stderr" => "command error"
+        }
+      }, %{cluster: runtime.cluster})
+
+      assert output == %{
+        "messageId" => message.id,
+        "agentRunId" => run.id,
+        "stdout" => "command output",
+        "stderr" => "command error"
+      }
+    end
+
+    test "a user cannot publish command output" do
+      runtime = insert(:agent_runtime)
+      run = insert(:agent_run, runtime: runtime)
+      message = insert(:agent_message, agent_run: run)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation Output($attrs: AgentMessageOutputAttributes!) {
+          agentMessageOutput(attributes: $attrs) {
+            messageId
+          }
+        }
+      """, %{
+        "attrs" => %{"messageId" => message.id}
+      }, %{current_user: insert(:user)})
+
+      assert error.message == "unauthenticated"
+    end
+  end
+
   describe "updateAgentMessage" do
     test "a cluster can update an agent message" do
       runtime = insert(:agent_runtime)

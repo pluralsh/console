@@ -4,10 +4,11 @@ defmodule Console.Repo.Migrations.AddProjects do
 
   def change do
     create table(:projects, primary_key: false) do
-      add :id,          :uuid, primary_key: true
-      add :name,        :string
-      add :description, :string
-      add :default,     :boolean
+      add :id,               :uuid, primary_key: true
+      add :name,             :string
+      add :description,      :string
+      add :default,          :boolean
+      add :disable_insights, :boolean, default: false
 
       add :read_policy_id,  :uuid
       add :write_policy_id, :uuid

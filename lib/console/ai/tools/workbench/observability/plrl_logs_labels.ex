@@ -1,7 +1,9 @@
 defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
   use Console.AI.Tools.Workbench.Base
   import Piazza.Ecto.Schema
+  alias Console.AI.Tools.Workbench.Observability.TimeRange
   alias Console.AI.Tools.Workbench.Observability.Plrl.Logs
+  alias Console.AI.Tools.Workbench.Output
   alias Console.Logs.{Query, Provider}
 
   embedded_schema do
@@ -46,8 +48,9 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.LogLabels do
   def implement(%__MODULE__{user: user, field: field} = logs) do
     query = Logs.logs_query(logs) |> Map.put(:field, field)
     with {:ok, query} <- Query.accessible(query, user),
-         {:ok, labels} <- Provider.labels(query) do
-      Jason.encode(labels)
+         {:ok, labels} <- Provider.labels(query),
+         {:ok, content} <- Jason.encode(labels) do
+      {:ok, Output.truncate(content)}
     end
   end
 end

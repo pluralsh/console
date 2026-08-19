@@ -3,6 +3,7 @@ defmodule Console.Deployments.PubSub.CacheableTest do
   use Mimic
   alias Console.PubSub
   alias Console.PubSub.Consumers.Cache
+  alias Console.Schema.WorkbenchPolicy
 
   describe "WorkbenchWebhookCreated" do
     test "calls Console.Cache.delete with {:wb_webhooks, webhook_id} and the hook" do
@@ -220,5 +221,63 @@ defmodule Console.Deployments.PubSub.CacheableTest do
       event = %PubSub.PipelineStageUpdated{item: insert(:pipeline_stage)}
       Cache.handle_event(event)
     end
+  end
+
+  describe "policy cache invalidation" do
+    test "policy updates invalidate every associated workbench policy cache" do
+      policy = insert(:policy)
+      workbenches = insert_list(2, :workbench)
+      Enum.each(workbenches, &insert_workbench_policy(policy, &1))
+
+      keys = MapSet.new(workbenches, & {:wb_policies, &1.id})
+
+      expect(Console.Cache, :delete, 2, fn key ->
+        assert MapSet.member?(keys, key)
+        :ok
+      end)
+
+      Cache.handle_event(%PubSub.PolicyUpdated{item: policy})
+    end
+
+    test "policy deletions invalidate every associated workbench policy cache" do
+      policy = insert(:policy)
+      workbenches = insert_list(2, :workbench)
+      associations = Enum.map(workbenches, &insert_workbench_policy(policy, &1))
+      policy = %{policy | workbench_policies: associations}
+      keys = MapSet.new(workbenches, & {:wb_policies, &1.id})
+
+      expect(Console.Cache, :delete, 2, fn key ->
+        assert MapSet.member?(keys, key)
+        :ok
+      end)
+
+      Cache.handle_event(%PubSub.PolicyDeleted{item: policy})
+    end
+  end
+
+  describe "workbench policy cache invalidation" do
+    test "association lifecycle events invalidate the associated workbench policy cache" do
+      workbench = insert(:workbench)
+      association = insert_workbench_policy(insert(:policy), workbench)
+
+      expect(Console.Cache, :delete, 3, fn {:wb_policies, id} ->
+        assert id == workbench.id
+        :ok
+      end)
+
+      for event <- [
+            %PubSub.WorkbenchPolicyCreated{item: association},
+            %PubSub.WorkbenchPolicyUpdated{item: association},
+            %PubSub.WorkbenchPolicyDeleted{item: association}
+          ] do
+        Cache.handle_event(event)
+      end
+    end
+  end
+
+  defp insert_workbench_policy(policy, workbench) do
+    %WorkbenchPolicy{policy_id: policy.id, workbench_id: workbench.id}
+    |> WorkbenchPolicy.changeset(%{matches: %{regexes: [".*"]}})
+    |> Repo.insert!()
   end
 end

@@ -59,6 +59,10 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobThoughtCreated do
   def deliver(%{item: thought}), do: {thought, :create}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentMessageStdoutCreated do
+  def deliver(%{item: stdout}), do: {stdout, :create}
+end
+
 # defimpl Console.PubSub.Rtc, for: [
 #   Console.PubSub.ServiceCreated,
 #   Console.PubSub.ServiceDeleted,

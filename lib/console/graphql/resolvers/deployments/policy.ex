@@ -1,7 +1,57 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Policy, Clusters, Policies}
-  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
+  alias Console.Schema.{BindingPolicy, StackPolicy, WorkbenchPolicy, PolicyConstraint, PolicyEvaluation, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
+  alias Console.Schema.Policy, as: PolicySchema
+
+  def resolve_policy(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
+    Policy.get_policy(id)
+    |> Policies.allow(user, :read)
+  end
+
+  def resolve_policy(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
+    Policy.get_policy_by_name(name)
+    |> Policies.allow(user, :read)
+  end
+
+  def resolve_policy(_, _), do: {:error, "must specify either id or name"}
+
+  def list_policies(args, %{context: %{current_user: user}}) do
+    PolicySchema.for_user(user)
+    |> PolicySchema.ordered()
+    |> maybe_search(PolicySchema, args)
+    |> policy_filters(args)
+    |> paginate(args)
+  end
+
+  def resolve_binding_policy(%{id: id}, %{context: %{current_user: user}}) do
+    Policy.get_binding_policy(id)
+    |> Policies.allow(user, :read)
+  end
+
+  def list_binding_policies(args, %{context: %{current_user: user}}) do
+    BindingPolicy.for_user(user)
+    |> paginate(args)
+  end
+
+  def list_policy_stack_policies(policy, args, _) do
+    StackPolicy.for_policy(policy.id)
+    |> paginate(args)
+  end
+
+  def list_policy_workbench_policies(policy, args, _) do
+    WorkbenchPolicy.for_policy(policy.id)
+    |> paginate(args)
+  end
+
+  def list_policy_evaluations(policy, args, _) do
+    PolicyEvaluation.for_policy(policy.id)
+    |> PolicyEvaluation.ordered()
+    |> paginate(args)
+  end
+
+  def evaluate_policy(%{policy_id: id, input: input}, %{context: %{current_user: user}}),
+    do: Policy.evaluate_policy(id, input, user)
 
   def resolve_vulnerability(%{id: id}, %{context: %{current_user: user}}) do
     Policy.get_vulnerability(id)
@@ -127,6 +177,31 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   def delete_compliance_report_generator(%{id: id}, %{context: %{current_user: user}}),
     do: Policy.delete_compliance_report_generator(id, user)
+
+  def create_policy(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.create_policy(attrs, user)
+
+  def update_policy(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.update_policy(attrs, id, user)
+
+  def delete_policy(%{id: id}, %{context: %{current_user: user}}),
+    do: Policy.delete_policy(id, user)
+
+  def create_binding_policy(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.create_binding_policy(attrs, user)
+
+  def update_binding_policy(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Policy.update_binding_policy(attrs, id, user)
+
+  def delete_binding_policy(%{id: id}, %{context: %{current_user: user}}),
+    do: Policy.delete_binding_policy(id, user)
+
+  defp policy_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:project_id, project_id}, q when is_binary(project_id) -> PolicySchema.for_project(q, project_id)
+      _, q -> q
+    end)
+  end
 
   defp apply_filters(query, args) do
     Enum.reduce(args, query, fn

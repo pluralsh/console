@@ -20,12 +20,14 @@ func TestExaConnectionEnabled(t *testing.T) {
 
 func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	description := "Helps update README files"
+	followup := true
 	run := new(AgentRun).FromAgentRunFragment(&console.AgentRunFragment{
 		ID:         "run-123",
 		Prompt:     "update the readme",
 		Repository: "https://github.com/pluralsh/console.git",
 		Mode:       console.AgentRunModeWrite,
 		Status:     console.AgentRunStatusPending,
+		Followup:   &followup,
 		Skills: []*console.AgentRunFragment_Skills{
 			{
 				Name:        "readme-helper",
@@ -47,6 +49,9 @@ func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	}
 	if run.Skills[0].Contents != "Always keep examples runnable." {
 		t.Fatalf("expected skill contents copied, got %q", run.Skills[0].Contents)
+	}
+	if !run.Followup {
+		t.Fatal("expected followup to be copied")
 	}
 }
 
@@ -78,5 +83,29 @@ func TestFromAgentRunFragmentCopiesUsage(t *testing.T) {
 	}
 	if run.Usage.TotalCost == nil || *run.Usage.TotalCost != totalCost {
 		t.Fatalf("expected total cost copied, got %#v", run.Usage.TotalCost)
+	}
+}
+
+func TestFromAgentRunFragmentCopiesInitiatingUser(t *testing.T) {
+	run := new(AgentRun).FromAgentRunFragment(&console.AgentRunFragment{
+		ID:         "run-123",
+		Prompt:     "update the readme",
+		Repository: "https://github.com/pluralsh/console.git",
+		Mode:       console.AgentRunModeWrite,
+		Status:     console.AgentRunStatusPending,
+		User: &console.AgentRunFragment_User{
+			Name:  "Ada Lovelace",
+			Email: "ada@example.com",
+		},
+	})
+
+	if run.User == nil {
+		t.Fatal("expected initiating user to be copied")
+	}
+	if run.User.Name != "Ada Lovelace" {
+		t.Fatalf("expected initiating user name copied, got %q", run.User.Name)
+	}
+	if run.User.Email != "ada@example.com" {
+		t.Fatalf("expected initiating user email copied, got %q", run.User.Email)
 	}
 }

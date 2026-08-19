@@ -9,6 +9,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -30,6 +31,7 @@ func TestLoadAgentConfigurationUsesDefaultsWhenMissing(t *testing.T) {
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetStackPollInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
+	assertDuration(t, 6*time.Hour, common.GetConfigurationManager().GetComponentShaCacheTTL())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
 
@@ -47,6 +49,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 				CompatibilityUploadInterval:  ptr("30m"),
 				DisableWebsocket:             &disableWebsocket,
 				PipelineGateInterval:         ptr("0s"),
+				ComponentShaCacheTTL:         ptr("12h"),
 				ServicePollInterval:          ptr("10m"),
 				ManagedNamespacePollInterval: ptr("15m"),
 				SentinelPollInterval:         ptr("5m"),
@@ -64,6 +67,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 	assertDuration(t, 0, common.GetConfigurationManager().GetStackPollInterval())
 	assertDuration(t, 5*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
+	assertDuration(t, 12*time.Hour, common.GetConfigurationManager().GetComponentShaCacheTTL())
 	assert.True(t, common.GetConfigurationManager().IsWebsocketDisabled())
 
 	require.NoError(t, common.GetConfigurationManager().SetValue(v1alpha1.AgentConfigurationSpec{}))
@@ -74,6 +78,7 @@ func TestLoadAgentConfigurationOverlaysDefaultResource(t *testing.T) {
 	assertDuration(t, 2*time.Minute, common.GetConfigurationManager().GetStackPollInterval())
 	assertDuration(t, 3*time.Minute, common.GetConfigurationManager().GetSentinelPollInterval())
 	assertDuration(t, 0, common.GetConfigurationManager().GetPipelineGateInterval())
+	assertDuration(t, 6*time.Hour, common.GetConfigurationManager().GetComponentShaCacheTTL())
 	assert.False(t, common.GetConfigurationManager().IsWebsocketDisabled())
 }
 
@@ -94,6 +99,59 @@ func TestLoadAgentConfigurationReturnsInvalidDurationError(t *testing.T) {
 	require.Error(t, loadAgentConfiguration(context.Background(), reader, agentConfigurationDefaults()))
 }
 
+func TestDeferPollOnInstall(t *testing.T) {
+	now := time.Now()
+
+	tests := []struct {
+		name            string
+		deploymentAge   time.Duration
+		enabled         bool
+		pollImmediately bool
+	}{
+		{
+			name:            "defers for an operator older than one hour",
+			deploymentAge:   time.Hour + time.Second,
+			enabled:         true,
+			pollImmediately: false,
+		},
+		{
+			name:            "does not defer for a recently installed operator",
+			deploymentAge:   time.Hour - time.Second,
+			enabled:         true,
+			pollImmediately: true,
+		},
+		{
+			name:            "can be disabled",
+			deploymentAge:   time.Hour + time.Second,
+			enabled:         false,
+			pollImmediately: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Cleanup(resetAgentConfiguration)
+			resetAgentConfiguration()
+			t.Setenv("OPERATOR_NAMESPACE", "operator-system")
+
+			deployment := &appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:              "deployment-operator",
+					Namespace:         "operator-system",
+					CreationTimestamp: metav1.NewTime(now.Add(-tt.deploymentAge)),
+				},
+			}
+			reader := fake.NewClientBuilder().
+				WithScheme(agentConfigurationScheme(t)).
+				WithObjects(deployment).
+				Build()
+
+			require.NoError(t, deferPollOnInstall(context.Background(), reader, tt.enabled, now))
+			assert.Equal(t, tt.pollImmediately, common.GetConfigurationManager().IsPollImmediately())
+		})
+	}
+}
+
 func agentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 	disableWebsocket := false
 
@@ -105,6 +163,7 @@ func agentConfigurationDefaults() v1alpha1.AgentConfigurationSpec {
 		StackPollInterval:            ptr("2m"),
 		SentinelPollInterval:         ptr("3m"),
 		PipelineGateInterval:         ptr("0s"),
+		ComponentShaCacheTTL:         ptr("6h"),
 		DisableWebsocket:             &disableWebsocket,
 	}
 }
@@ -114,6 +173,7 @@ func agentConfigurationScheme(t *testing.T) *runtime.Scheme {
 
 	scheme := runtime.NewScheme()
 	require.NoError(t, v1alpha1.AddToScheme(scheme))
+	require.NoError(t, appsv1.AddToScheme(scheme))
 	return scheme
 }
 

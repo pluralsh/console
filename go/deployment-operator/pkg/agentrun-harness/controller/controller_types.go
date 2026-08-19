@@ -74,6 +74,10 @@ type agentRunController struct {
 	// seenPRCommentBodies tracks comment IDs and bodies already considered by
 	// babysit. This catches delayed SCM API visibility even when created_at is old.
 	seenPRCommentBodies map[string]string
+
+	// toolCallMessageIDs maps provider tool call IDs to Console agent message IDs
+	// so long-running tools can be created on start and updated on completion.
+	toolCallMessageIDs map[string]string
 }
 
 type Option func(*agentRunController)

@@ -77,9 +77,10 @@ defmodule Console do
     end
   end
 
-  def truncate(str, len) when byte_size(str) > len,
-    do: "#{String.slice(str, 0, len - 3)}..."
-  def truncate(str, _), do: str
+  def truncate(str, len, suffix \\ "...")
+  def truncate(str, len, suffix) when byte_size(str) > len,
+    do: "#{String.slice(str, 0, len - byte_size(suffix))}#{suffix}"
+  def truncate(str, _, _), do: str
 
   def byok?() do
     case {provider(), Console.conf(:byok)} do
@@ -387,7 +388,7 @@ defmodule Console do
   def throttle(enum, %{count: count, pause: pause}) do
     Stream.with_index(enum)
     |> Stream.map(fn {r, ind} ->
-      if rem(ind, count) == 0 do
+      if rem(ind, count) == 0 && ind != 0 do
         :timer.sleep(pause)
       end
 
@@ -425,6 +426,24 @@ defmodule Console do
         |> then(& {:ok, &1})
       _ -> {:error, "invalid duration: #{str}"}
     end
+  end
+
+  @duration_parts [{86_400, "d"}, {3_600, "h"}, {60, "m"}, {1, "s"}]
+
+
+  def format_duration(seconds) when is_float(seconds) and seconds >= 0,
+    do: format_duration(round(seconds))
+  def format_duration(0), do: "0s"
+  def format_duration(seconds) when is_integer(seconds) and seconds > 0 do
+    Enum.reduce(@duration_parts, {seconds, []}, fn {unit, suffix}, {remaining, parts} ->
+      case {div(remaining, unit), rem(remaining, unit)} do
+        {0, remaining} -> {remaining, parts}
+        {count, rem} -> {rem, ["#{count}#{suffix}" | parts]}
+      end
+    end)
+    |> elem(1)
+    |> Enum.reverse()
+    |> Enum.join()
   end
 
   defp parse_dur_str(""), do: 0

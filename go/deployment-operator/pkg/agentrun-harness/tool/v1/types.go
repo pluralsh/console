@@ -15,7 +15,15 @@ import (
 
 const (
 	SystemPromptFile = "AGENTS.md"
+
+	// RunningToolOutput is the placeholder tool output shown while a tool call is in progress.
+	RunningToolOutput = "running..."
 )
+
+// MessageCallback persists agent messages from a tool stream.
+// callID correlates a tool start (RUNNING/PENDING) with its completion update.
+// Empty callID means the controller should always create a new message.
+type MessageCallback func(message *console.AgentMessageAttributes, callID string)
 
 // EnrichedPR pairs the Console PR fragment with its live SCM state.
 type EnrichedPR struct {
@@ -60,7 +68,9 @@ type Tool interface {
 	Configure(consoleURL, consoleToken string) error
 
 	// OnMessage registers a callback called when a new message is received.
-	OnMessage(func(message *console.AgentMessageAttributes))
+	// callID correlates a tool start (RUNNING/PENDING) with its completion update.
+	// Empty callID means the controller should always create a new message.
+	OnMessage(MessageCallback)
 
 	// FollowUpRun re-invokes the provider CLI with a user prompt after the
 	// initial run, resuming the provider session when a session ID was captured

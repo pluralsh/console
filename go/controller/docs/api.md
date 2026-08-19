@@ -9,6 +9,7 @@
 Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 API group
 
 ### Resource Types
+- [AgentRuntimePolicy](#agentruntimepolicy)
 - [BootstrapToken](#bootstraptoken)
 - [Catalog](#catalog)
 - [CloudConnection](#cloudconnection)
@@ -150,6 +151,63 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `addon` _string_ | Addon the addon this callout applies to |  |  |
 | `template` _string_ | Template the template to use for this callout |  |  |
+
+
+#### AgentRuntimePolicy
+
+
+
+AgentRuntimePolicy centrally defines who can create agent runs on an AgentRuntime.
+Bindings must be managed from the management cluster: if a target cluster could set
+its own bindings, cluster operators could grant themselves clone/PR access against
+any repository reachable by the runtime's SCM credentials.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `AgentRuntimePolicy` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[AgentRuntimePolicySpec](#agentruntimepolicyspec)_ |  |  |  |
+
+
+#### AgentRuntimePolicyBindings
+
+
+
+AgentRuntimePolicyBindings defines create permissions for an AgentRuntime.
+
+
+
+_Appears in:_
+- [AgentRuntimePolicySpec](#agentruntimepolicyspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `create` _[Binding](#binding) array_ | Create bindings control who can create agent runs on this runtime. |  | Optional: \{\} <br /> |
+
+
+#### AgentRuntimePolicySpec
+
+
+
+AgentRuntimePolicySpec defines the desired access policy for an AgentRuntime.
+
+
+
+_Appears in:_
+- [AgentRuntimePolicy](#agentruntimepolicy)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `runtime` _string_ | Runtime is the name of the AgentRuntime this policy applies to.<br />Defaults to metadata.name if not specified. |  | Optional: \{\} <br /> |
+| `bindings` _[AgentRuntimePolicyBindings](#agentruntimepolicybindings)_ | Bindings define who can create agent runs on the targeted runtime. |  | Optional: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Optional: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### AgentRuntimeRef
@@ -345,6 +403,7 @@ Binding used to assign permissions to a resource for a user or a group in the sy
 
 
 _Appears in:_
+- [AgentRuntimePolicyBindings](#agentruntimepolicybindings)
 - [Bindings](#bindings)
 - [CatalogBindings](#catalogbindings)
 - [CloudConnectionSpec](#cloudconnectionspec)
@@ -1124,6 +1183,24 @@ _Appears in:_
 
 
 
+
+
+#### ConfigMapReference
+
+
+
+ConfigMapReference identifies a ConfigMap source for a ServiceContext configuration.
+
+
+
+_Appears in:_
+- [ServiceContextSpec](#servicecontextspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the name of the referenced ConfigMap. |  | MinLength: 1 <br /> |
+| `namespace` _string_ | Namespace is the namespace of the referenced ConfigMap. If omitted, the ServiceContext namespace is used. |  | Optional: \{\} <br /> |
+| `scope` _string_ | Scope places this ConfigMap's data beneath this top-level configuration key. If omitted, data is merged flat. |  | Optional: \{\} <br /> |
 
 
 #### Container
@@ -4137,6 +4214,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of the project. |  | Required: \{\} <br />Type: string <br /> |
 | `description` _string_ | Description provides a human-readable explanation of this project's purpose<br />and the resources it manages within the organizational hierarchy. |  | Optional: \{\} <br />Type: string <br /> |
+| `disableInsights` _boolean_ | DisableInsights indicates whether to disable AI insights and vector storage for this project. |  | Optional: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies that control access to all resources<br />within this project, enabling fine-grained permission management and multi-tenancy. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
@@ -4173,6 +4251,7 @@ Reconciliation parameters for a specific resource.
 
 
 _Appears in:_
+- [AgentRuntimePolicySpec](#agentruntimepolicyspec)
 - [BootstrapTokenSpec](#bootstraptokenspec)
 - [CatalogSpec](#catalogspec)
 - [CloudConnectionSpec](#cloudconnectionspec)
@@ -4778,7 +4857,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this service context.<br />If not provided, the name from ServiceContext.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `configuration` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Configuration is a reusable configuration context that can include any JSON-compatible configuration data<br />that needs to be shared across multiple services. |  |  |
-| `configMapRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.<br />The keys and values from the ConfigMap will be merged into the Configuration JSON. |  | Optional: \{\} <br /> |
+| `configMapRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.<br />The keys and values from the ConfigMap will be merged into the Configuration JSON.<br />ConfigMapRef and ConfigMapRefs are mutually exclusive. |  | Optional: \{\} <br /> |
+| `configMapRefs` _[ConfigMapReference](#configmapreference) array_ | ConfigMapRefs references ConfigMaps containing configuration data to merge into the Configuration.<br />Sources are processed in order and later sources overwrite earlier values at the same top-level key.<br />A scoped source is placed under its scope key while an unscoped source merges its keys at the top level. |  | Optional: \{\} <br /> |
 | `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef references a Secret containing configuration data to merge into the Configuration.<br />The keys and values from the Secret will be merged into the Configuration JSON. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this service context belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |

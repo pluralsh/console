@@ -16,7 +16,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
@@ -24,10 +24,11 @@ defmodule Console.AI.Workbench.Engine do
     Message,
     Supervisor,
     Heartbeat,
-    Canvas
+    Canvas,
+    Activity
   }
   alias Console.AI.Tools.Workbench.{
-    Lua,
+    Codemode,
     Complete,
     Subagents,
     Subagent,
@@ -38,9 +39,12 @@ defmodule Console.AI.Workbench.Engine do
     SkillBackfill,
     FunctionCall,
     KubeRequest,
+    KubeShell,
+    Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
+  alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
   require EEx
@@ -86,7 +90,7 @@ defmodule Console.AI.Workbench.Engine do
     end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
+    |> MemoryEngine.new(50, engine_opts(environment) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
     |> MemoryEngine.reduce([{:user, job.prompt} | Enum.reverse(messages)], &reducer/2)
     |> case do
       {:ok, %Complete{
@@ -136,6 +140,7 @@ defmodule Console.AI.Workbench.Engine do
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
       %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
+      %KubeShell{} = kube_shell, {msgs, acts} -> {:cont, {msgs, [kube_shell | acts]}}
       msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
     |> case do
@@ -146,7 +151,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, msgs, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.minutes(30))
+    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
     |> Enum.flat_map(fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
       {:ok, {:error, error}} ->
@@ -231,47 +236,54 @@ defmodule Console.AI.Workbench.Engine do
     |> Workbenches.update_job_status(job)
   end
 
-  defp spawn_activity(%FunctionCall{} = call, _) do
+  defp spawn_activity(%FunctionCall{} = call, %__MODULE__{user: user}) do
     case FunctionCall.invoke(call) do
       {:ok, %WorkbenchJobActivity{status: :successful} = activity} -> {:ok, activity}
-      {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity)
+      {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity, user)
       {:error, error} -> {:error, error}
     end
   end
 
-  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{job: job}) do
+  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :kubernetes,
       status: :needs_approval,
       prompt: "dispatching kubernetes #{m} request against #{p} on cluster #{handle}",
       tool_call: tool_attrs(request),
-      result: %{
+      result: Map.merge(%{
         output: "request pending user approval",
+        explanation: request.explanation,
         kube_request: Console.mapify(request)
-      }
+      }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
-      do: poll_activity(activity)
+      do: poll_activity(activity, user)
+  end
+
+  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
+    attrs = %{
+      type: :exec,
+      status: :needs_approval,
+      prompt: "dispatching kubernetes exec command `#{command}` against #{p} in container #{ct} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result: Map.merge(%{
+        output: "request pending user approval",
+        explanation: request.explanation,
+        kube_exec: Console.mapify(request)
+      }, Approval.attrs(request.approval))
+    }
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+      do: poll_activity(activity, user)
   end
 
   defp spawn_activity(_, _), do: :ignore
 
-  @max_poll_iterations 60
-  @poll_interval :timer.seconds(10)
-  @approval_pending_statuses [:needs_approval, :running]
-
-  defp poll_activity(activity, iter \\ 0)
-  defp poll_activity(%WorkbenchJobActivity{status: status} = activity, iter)
-       when status in @approval_pending_statuses and iter < @max_poll_iterations do
-    case Repo.get(WorkbenchJobActivity, activity.id) do
-      %WorkbenchJobActivity{status: status} = activity when status in @approval_pending_statuses ->
-        :timer.sleep(@poll_interval)
-        poll_activity(activity, iter + 1)
-      %WorkbenchJobActivity{} = activity -> {:ok, activity}
-      nil -> {:error, "the activity was deleted before completion"}
+  defp poll_activity(%WorkbenchJobActivity{} = activity, %User{} = user) do
+    with {:ok, %WorkbenchJobActivity{} = activity} <- Workbenches.auto_approve_activity(activity, user),
+         {:ok, %WorkbenchJobActivity{} = activity} <- Activity.await_activity(activity) do
+      {:ok, Repo.preload(activity, [:workbench_job, :agent_run, :agent_runs, :thoughts, :user])}
     end
   end
-  defp poll_activity(activity, _), do: {:ok, activity}
 
   defp existing_canvas(%WorkbenchJob{result: %Console.Schema.WorkbenchJobResult{canvas: canvas}}) when is_list(canvas), do: canvas
   defp existing_canvas(_), do: []
@@ -319,7 +331,7 @@ defmodule Console.AI.Workbench.Engine do
       %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
-      Lua,
+      %Codemode{tools: []},
       Notes,
       Complete,
     ] ++ type_tools(job)
@@ -338,10 +350,11 @@ defmodule Console.AI.Workbench.Engine do
     do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
   defp function_tools(_), do: []
 
-  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}} = job) do
+  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do
     Enum.reject([
       (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
-      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil)
+      (if d, do: %KubeDelete{job: job, user: job.user}, else: nil),
+      (if e, do: %KubeExec{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []

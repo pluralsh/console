@@ -82,6 +82,7 @@ _Appears in:_
 | `stackPollInterval` _string_ | StackPollInterval sets how often the agent polls for stack updates or changes.<br />Set to "0s" to disable stack polling. |  |  |
 | `sentinelPollInterval` _string_ | SentinelPollInterval sets how often the agent polls for sentinel run jobs.<br />Set to "0s" to disable sentinel run job polling. |  |  |
 | `pipelineGateInterval` _string_ | PipelineGateInterval specifies how frequently the agent checks pipeline gates.<br />Set to "0s" to disable pipeline gate checks. |  |  |
+| `componentShaCacheTTL` _string_ | ComponentShaCacheTTL specifies how long duplicate component updates are cached. |  |  |
 | `maxConcurrentReconciles` _integer_ | MaxConcurrentReconciles controls the maximum number of concurrent reconcile loops.<br />Higher values can increase throughput at the cost of resource usage. |  |  |
 | `vulnerabilityReportUploadInterval` _string_ | VulnerabilityReportUploadInterval sets how often vulnerability reports are uploaded.<br />Set to "0s" to disable vulnerability report uploads. |  |  |
 | `baseRegistryURL` _string_ | BaseRegistryURL allows overriding the default base registry URL.<br />For stack run jobs, agent run pods, sentinel run jobs. |  |  |
@@ -89,6 +90,7 @@ _Appears in:_
 | `maxStackRunJobs` _integer_ | MaxStackRunJobs limits the number of concurrent StackRunJobs that can be active at any given time.<br />Must be greater than 0. Set this field to nil (omit) to disable the limit. |  | Minimum: 1 <br /> |
 | `maxAgentRunPods` _integer_ | MaxAgentRunPods limits the number of concurrent agent run pods that can be active at any given time.<br />Must be greater than 0. Set this field to nil (omit) to disable the limit. |  | Minimum: 1 <br /> |
 | `disableWebsocket` _boolean_ | DisableWebsocket disables the cluster websocket connection to the Console.<br />When enabled, the agent will rely exclusively on polling instead of receiving<br />push updates. This is useful in large-scale edge deployments where maintaining<br />persistent websocket connections has an infeasible network cost. |  |  |
+| `pollImmediately` _boolean_ | PollImmediately determines whether the agent should poll immediately upon startup.<br />When set to true, the agent will perform an initial poll as soon as it starts.<br />By default, it's set to true. |  |  |
 
 
 #### AgentHelmConfiguration
@@ -227,6 +229,7 @@ _Appears in:_
 | `opencode` _[OpenCodeConfig](#opencodeconfig)_ | Config for OpenCode CLI runtime. |  | Optional: \{\} <br /> |
 | `gemini` _[GeminiConfig](#geminiconfig)_ | Config for Gemini CLI runtime. |  | Optional: \{\} <br /> |
 | `codex` _[CodexConfig](#codexconfig)_ | Codex config for Codex CLI runtime. |  | Optional: \{\} <br /> |
+| `pi` _[PiConfig](#piconfig)_ | Pi config for Pi coding-agent CLI runtime. |  | Optional: \{\} <br /> |
 
 
 
@@ -263,7 +266,7 @@ _Appears in:_
 | `name` _string_ | Name of this AgentRuntime.<br />If not provided, the name from AgentRuntime.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `default` _boolean_ | Default indicates whether this is the default agent runtime for coding agents. |  | Optional: \{\} <br /> |
 | `targetNamespace` _string_ |  |  | Required: \{\} <br /> |
-| `type` _[AgentRuntimeType](#agentruntimetype)_ | Type specifies the agent runtime to use for executing the stack.<br />One of CLAUDE, OPENCODE, GEMINI, CODEX, CUSTOM. |  | Enum: [CLAUDE OPENCODE GEMINI CODEX CUSTOM] <br />Required: \{\} <br /> |
+| `type` _[AgentRuntimeType](#agentruntimetype)_ | Type specifies the agent runtime to use for executing the stack.<br />One of CLAUDE, OPENCODE, GEMINI, CODEX, PI, CUSTOM. |  | Enum: [CLAUDE OPENCODE GEMINI CODEX PI CUSTOM] <br />Required: \{\} <br /> |
 | `bindings` _[AgentRuntimeBindings](#agentruntimebindings)_ | Bindings define the creation permissions for this agent runtime. |  | Optional: \{\} <br /> |
 | `template` _[PodTemplateSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#podtemplatespec-v1-core)_ | Template defines the pod template for this agent runtime. |  |  |
 | `config` _[AgentRuntimeConfig](#agentruntimeconfig)_ | Config contains typed configuration depending on the chosen runtime type. |  | Optional: \{\} <br /> |
@@ -582,7 +585,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `script` _string_ |  |  |  |
+| `script` _string_ | Script is a Lua health-assessment script. The target resource is available as the global `Obj`.<br />The script must assign a Lua table to the global `healthStatus`; a Lua `return \{ ... \}` is not consumed.<br />The table uses `status` and an optional `message`, for example: `healthStatus = \{ status = "Healthy", message = "resource is ready" \}`.<br />Supported/intended status values are `Healthy`, `Degraded`, `Paused`, `Unknown`, `Progressing`, `Suspended`, and `Missing`.<br />See https://docs.plural.sh/plural-features/continuous-deployment/deployment-operator/custom-health for the full guide. |  |  |
 | `group` _string_ |  |  | Optional: \{\} <br /> |
 | `version` _string_ |  |  | Optional: \{\} <br /> |
 | `kind` _string_ |  |  | Optional: \{\} <br /> |
@@ -935,6 +938,46 @@ _Appears in:_
 | `endpoint` _string_ | Endpoint is the OpenAI-compatible API base URL (for example https://litellm.example/v1). |  | MinLength: 1 <br />Required: \{\} <br /> |
 | `model` _string_ | Model is the model id exposed by that endpoint. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef references a Secret containing the API key for the endpoint. |  | Optional: \{\} <br /> |
+
+
+#### PiConfig
+
+
+
+PiConfig configures the Pi coding-agent CLI runtime.
+
+
+
+_Appears in:_
+- [AgentRuntimeConfig](#agentruntimeconfig)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | APIKeySecretRef references an API key. Optional with aiProxy enabled. |  | Optional: \{\} <br /> |
+| `provider` _string_ | Provider is Pi's provider id. Defaults to openai. |  | Optional: \{\} <br /> |
+| `model` _string_ | Model is the model id to use. |  | Optional: \{\} <br /> |
+| `endpoint` _string_ | Endpoint overrides the OpenAI-compatible provider base URL. |  | Optional: \{\} <br /> |
+| `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ | Timeout bounds a single Pi invocation. |  | Optional: \{\} <br /> |
+
+
+#### PiConfigRaw
+
+
+
+PiConfigRaw contains resolved credentials and configuration for Pi.
+
+
+
+_Appears in:_
+- [AgentRuntimeConfigRaw](#agentruntimeconfigraw)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiKey` _string_ |  |  |  |
+| `provider` _string_ |  |  |  |
+| `model` _string_ |  |  |  |
+| `endpoint` _string_ |  |  |  |
+| `timeout` _[Duration](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#duration-v1-meta)_ |  |  |  |
 
 
 #### PipelineGate

@@ -78,6 +78,8 @@ func run() error {
 		return fmt.Errorf("could not setup environment: %w", err)
 	}
 
+	startSCMCredentialsRefresh(ctx, extClient, args.AgentRunID(), scmCredentialsRefreshInterval)
+
 	grpcServer := scm.NewServer()
 
 	mcpErrChan := startMcpServer(mcpServer)
@@ -209,8 +211,18 @@ func createServerTools(client, runtimeClient console.Client, agentRun *consolecl
 	for _, excluded := range excludedTools {
 		delete(toolMap, excluded)
 	}
+	excludeFollowupTools(toolMap, agentRun)
 
 	return lo.Map(lo.Values(toolMap), func(t tool.Tool, _ int) agent.Option {
 		return agent.WithTool(t)
 	})
+}
+
+func excludeFollowupTools(toolMap map[tool.ID]tool.Tool, agentRun *consoleclient.AgentRunFragment) {
+	if agentRun == nil || agentRun.Followup == nil || !*agentRun.Followup {
+		return
+	}
+
+	delete(toolMap, tool.CreateBranchTool)
+	delete(toolMap, tool.CreatePullRequestTool)
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
@@ -39,20 +40,25 @@ func (e *ToolResultEvent) Validate() bool {
 	return e.Type == EventTypeToolResult && e.ToolID != ""
 }
 
-func (e *ToolResultEvent) Process(onMessage func(message *console.AgentMessageAttributes)) {
-	onMessage(e.Attributes())
+func (e *ToolResultEvent) Process(onMessage v1.MessageCallback) {
+	onMessage(e.Attributes(), e.ToolID)
 	klog.V(log.LogLevelDebug).Infof("processed tool result event for %s", e.ToolID)
 }
 
 func (e *ToolResultEvent) Attributes() *console.AgentMessageAttributes {
+	// Always set output so empty/missing results clear the "running..." placeholder on update.
+	output := lo.FromPtr(e.Output)
+	if output == "" && e.Error != nil {
+		output = e.Error.Message
+	}
 	attrs := &console.AgentMessageAttributes{
-		Message: "__plrl_ignore__",
+		Message: "Called tool",
 		Role:    console.AiRoleAssistant,
 		Metadata: &console.AgentMessageMetadataAttributes{
 			Tool: &console.AgentMessageToolAttributes{
 				Name:   lo.ToPtr(e.ToolID),
 				State:  e.Status.Attributes(),
-				Output: e.Output,
+				Output: lo.ToPtr(output),
 			},
 		},
 	}

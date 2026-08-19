@@ -17,10 +17,15 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
-import { ToolCallContent } from '../ToolCallContent'
+import {
+  RunningToolOutputCode,
+  ToolCallContent,
+  useSlimToolCodeCss,
+} from '../ToolCallContent'
 import {
   formatFileChangeSummary,
   getCommand,
+  getPython,
   getSearchQuery,
   isStyledToolCall,
   resolveToolCallKind,
@@ -75,16 +80,19 @@ export function SimpleToolCall({
   content,
   attributes,
   isPending,
+  toolRuntime,
   customResultBody,
   customLabel,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
   isPending?: boolean
+  toolRuntime?: string
   customResultBody?: ReactNode
   customLabel?: ReactNode
 }) {
-  const { colors } = useTheme()
+  const { colors, spacing } = useTheme()
+  const slimCodeCss = useSlimToolCodeCss()
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
@@ -99,6 +107,7 @@ export function SimpleToolCall({
       <CaptionP
         as="span"
         $color="text"
+        $shimmer={isPending}
       >
         {title}{' '}
         {subtitle && (
@@ -109,6 +118,15 @@ export function SimpleToolCall({
             {subtitle}
           </CaptionP>
         )}
+        {toolRuntime && (
+          <CaptionP
+            as="span"
+            $color="text-xlight"
+          >
+            {' '}
+            · {toolRuntime}
+          </CaptionP>
+        )}
       </CaptionP>
     )
 
@@ -116,21 +134,63 @@ export function SimpleToolCall({
       case 'bash':
       case 'command_execution': {
         const command = getCommand(toolName, args)
+        const result = content || undefined
         return (
           <SimpleAccordion label={label}>
             <Flex
               direction="column"
-              gap="xsmall"
+              gap="small"
               minWidth={0}
               width="100%"
+              marginTop={spacing.xsmall}
             >
               <Code
                 language="bash"
-                showHeader={false}
+                title="Command"
+                css={slimCodeCss}
               >
                 {command}
               </Code>
-              {content ? <Code showHeader={false}>{content}</Code> : null}
+              {isPending ? (
+                <RunningToolOutputCode />
+              ) : result ? (
+                <Code
+                  title="Response"
+                  showHeader
+                  css={slimCodeCss}
+                >
+                  {result}
+                </Code>
+              ) : null}
+            </Flex>
+          </SimpleAccordion>
+        )
+      }
+      case 'python_sandbox': {
+        const python = getPython(args)
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="small"
+              minWidth={0}
+              width="100%"
+              marginTop={spacing.xsmall}
+            >
+              <Code
+                language="python"
+                title="Python"
+                css={slimCodeCss}
+              >
+                {python}
+              </Code>
+              <ToolCallContent
+                content={content ?? ''}
+                attributes={attributes}
+                customResultBody={customResultBody}
+                hideArguments
+                isPending={isPending}
+              />
             </Flex>
           </SimpleAccordion>
         )
@@ -158,6 +218,7 @@ export function SimpleToolCall({
               content={content ?? ''}
               attributes={attributes}
               customResultBody={customResultBody}
+              isPending={isPending}
             />
           </SimpleAccordion>
         )
@@ -188,17 +249,18 @@ export function SimpleToolCall({
       }
       case 'read':
       case 'grep':
+      case 'generic':
+      default:
         return (
           <SimpleAccordion label={label}>
             <ToolCallContent
               content={content ?? ''}
               attributes={attributes}
               customResultBody={customResultBody}
+              isPending={isPending}
             />
           </SimpleAccordion>
         )
-      default:
-        break
     }
   }
 
@@ -212,6 +274,7 @@ export function SimpleToolCall({
           >
             {isPending ? 'Calling' : 'Called'} tool{' '}
             <span css={{ color: colors['text-light'] }}>{toolName}</span>
+            {toolRuntime ? ` · ${toolRuntime}` : ''}
           </CaptionP>
         )}
       </ClickableLabelSC>
@@ -228,6 +291,7 @@ export function SimpleToolCall({
         <ToolCallContent
           content={content ?? ''}
           attributes={attributes}
+          isPending={isPending}
           customResultBody={
             finishedAnimating ? (
               customResultBody

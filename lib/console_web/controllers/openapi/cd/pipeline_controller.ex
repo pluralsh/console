@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
   alias Console.Deployments.Pipelines
   alias Console.Schema.Pipeline
 
-  plug Scope, [resource: :pipelines, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :pipelines, action: :read] when action in [:show, :show_by_name, :index]
   plug Scope, [resource: :pipelines, action: :write] when action in [:trigger]
 
   @doc """
@@ -32,6 +32,27 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
   def show(conn, %{"id" => id}) do
     user = Console.Guardian.Plug.current_resource(conn)
     Pipelines.get_pipeline!(id)
+    |> Repo.preload([stages: [services: :criteria], edges: :gates])
+    |> allow(user, :read)
+    |> successful(conn, OpenAPI.CD.Pipeline)
+  end
+
+  @doc """
+  Fetches a pipeline by name.
+  """
+  operation :show_by_name,
+    operation_id: "GetPipelineByName",
+    summary: "Get a pipeline by name",
+    description: "Retrieves a single pipeline by its exact name, including its stages, edges, and gates",
+    tags: ["pipelines"],
+    "x-required-scopes": ["pipelines.read"],
+    parameters: [
+      name: [in: :query, schema: %{type: :string}, required: true, description: "The exact name of the pipeline"]
+    ],
+    responses: [ok: OpenAPI.CD.Pipeline]
+  def show_by_name(conn, %{"name" => name}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+    Pipelines.get_pipeline_by_name!(name)
     |> Repo.preload([stages: [services: :criteria], edges: :gates])
     |> allow(user, :read)
     |> successful(conn, OpenAPI.CD.Pipeline)
@@ -87,7 +108,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
     tags: ["pipelines"],
     "x-required-scopes": ["pipelines.write"],
     parameters: [
-      id: [in: :path, schema: %{type: :string}, required: true, description: "The unique identifier of the pipeline to trigger"]
+      id: [in: :path, schema: %{type: :string}, required: true, description: "The pipeline ID or name:<name> reference to trigger"]
     ],
     request_body: OpenAPI.CD.PipelineContextInput,
     responses: [ok: OpenAPI.CD.PipelineContext]
@@ -95,7 +116,10 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineController do
     user = Console.Guardian.Plug.current_resource(conn)
 
     to_attrs(conn.private.oaskit.body_params)
-    |> Pipelines.create_pipeline_context(id, user)
+    |> Pipelines.create_pipeline_context(resolve_pipeline(id), user)
     |> successful(conn, OpenAPI.CD.PipelineContext)
   end
+
+  defp resolve_pipeline("name:" <> name), do: Pipelines.get_pipeline_by_name(name)
+  defp resolve_pipeline(id), do: id
 end

@@ -22,6 +22,7 @@ defmodule Console.AI.Cron do
   require Logger
 
   @chunk 100
+  @prune_timeout :timer.seconds(300)
 
   def trim() do
     AiInsight.expired()
@@ -49,8 +50,8 @@ defmodule Console.AI.Cron do
       Logger.info "pruning #{length(chunk)} agent runs"
       Enum.map(chunk, & &1.id)
       |> AgentRun.for_ids()
-      |> Repo.delete_all(timeout: 300_000)
-    end, max_concurrency: 10)
+      |> Repo.delete_all(timeout: @prune_timeout)
+    end, max_concurrency: 10, timeout: @prune_timeout)
     |> Stream.run()
   end
 

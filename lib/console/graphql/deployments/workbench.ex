@@ -53,6 +53,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_kubernetes_modes_attributes do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -126,6 +127,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_association_attributes do
     field :tool_id, non_null(:id), description: "the workbench tool id to associate"
+  end
+
+  input_object :workbench_policy_matches_attributes do
+    field :regexes, list_of(:string), description: "regular expressions that select inputs for this policy"
+  end
+
+  input_object :workbench_policy_attributes do
+    field :policy_id, non_null(:id), description: "the policy to associate with this workbench"
+    field :matches, :workbench_policy_matches_attributes, description: "criteria that determine when the policy applies"
+  end
+
+  input_object :workbench_policy_update_attributes do
+    field :matches, :workbench_policy_matches_attributes, description: "criteria that determine when the policy applies"
   end
 
   input_object :workbench_cron_attributes do
@@ -441,6 +455,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :queued_prompt_attributes do
     field :prompt,       non_null(:string), description: "the prompt to send when dequeued"
     field :dequeable_at, non_null(:datetime), description: "when this prompt becomes eligible to dequeue"
+    field :modes,        :workbench_job_modes_attributes, description: "mode-specific overrides to apply when this prompt is dequeued"
   end
 
   object :queued_prompt_summary do
@@ -463,12 +478,21 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :repository,    :git_repository,           resolve: dataloader(Deployments), description: "the git repository for this workbench"
     field :agent_runtime, :agent_runtime,            resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
     field :bot_user,      :user,                     resolve: dataloader(User), description: "the service account user used for automated workbench agent runs"
-    field :tools,         list_of(:workbench_tool),  resolve: dataloader(Deployments), description: "tools associated with this workbench"
+    field :tools, list_of(:workbench_tool), description: "tools associated with this workbench" do
+      middleware Nested, check: true, msg: "workbench tools cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
 
     field :read_bindings, list_of(:policy_binding),  resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
+    connection field :workbench_policies, node_type: :workbench_policy do
+      middleware Nested, check: true, msg: "workbench policies cannot be fetched through a policy"
+      resolve &Deployments.list_workbench_policies/3
+    end
+
     connection field :runs, node_type: :workbench_job do
+      middleware Nested, check: true, msg: "workbench runs cannot be fetched through a policy"
       arg :alert, :boolean, description: "show runs spawned from alerts"
       arg :issue, :boolean, description: "show runs spawned from issues"
 
@@ -476,45 +500,60 @@ defmodule Console.GraphQl.Deployments.Workbench do
     end
 
     connection field :crons, node_type: :workbench_cron do
+      middleware Nested, check: true, msg: "workbench crons cannot be fetched through a policy"
       resolve &Deployments.list_workbench_crons/3
     end
 
     connection field :prompts, node_type: :workbench_prompt do
+      middleware Nested, check: true, msg: "workbench prompts cannot be fetched through a policy"
       resolve &Deployments.list_workbench_prompts/3
     end
 
     connection field :workbench_skills, node_type: :workbench_skill do
+      middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
       resolve &Deployments.list_workbench_skills/3
     end
 
-    field :eval, :workbench_eval,
-      description: "eval configuration for this workbench (at most one; null if none configured)",
-      resolve: dataloader(Deployments)
+    field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do
+      middleware Nested, check: true, msg: "workbench eval configuration cannot be fetched through a policy"
+      resolve dataloader(Deployments)
+    end
 
     connection field :eval_results, node_type: :workbench_eval_result do
+      middleware Nested, check: true, msg: "workbench eval results cannot be fetched through a policy"
       resolve &Deployments.list_eval_results/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
+      middleware Nested, check: true, msg: "workbench webhooks cannot be fetched through a policy"
       resolve &Deployments.list_workbench_webhooks/3
     end
 
     connection field :chatbots, node_type: :workbench_chatbot do
+      middleware Nested, check: true, msg: "workbench chatbots cannot be fetched through a policy"
       resolve &Deployments.list_workbench_chatbots/3
     end
 
     connection field :alerts, node_type: :alert do
+      middleware Nested, check: true, msg: "workbench alerts cannot be fetched through a policy"
       resolve &Deployments.list_alerts/3
     end
 
     connection field :issues, node_type: :issue do
+      middleware Nested, check: true, msg: "workbench issues cannot be fetched through a policy"
       resolve &Deployments.list_issues/3
     end
 
     @desc "users that have read or write access to this workbench"
-    field :users, list_of(:user), resolve: &Deployments.accessible_users/3
+    field :users, list_of(:user) do
+      middleware Nested, check: true, msg: "workbench users cannot be fetched through a policy"
+      resolve &Deployments.accessible_users/3
+    end
 
-    field :all_skills, list_of(:unified_workbench_skill), resolve: &Deployments.all_skills/3
+    field :all_skills, list_of(:unified_workbench_skill) do
+      middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
+      resolve &Deployments.all_skills/3
+    end
 
     timestamps()
   end
@@ -637,6 +676,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_kubernetes_modes do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
+    field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -691,8 +731,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_activity_result do
     field :output,          :string, description: "output from the activity"
     field :error,           :string, description: "error from the activity"
+    field :explanation,     :string, description: "why this action is needed and its expected effect"
     field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
     field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
+    field :kube_exec,       :workbench_job_activity_kube_exec, description: "kubernetes exec payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
     field :metrics,         list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
@@ -725,6 +767,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     @desc "the live kubernetes object at this path, used to render update diffs. expensive and should be requested only when reviewing an action"
     field :current, :map, resolve: &Deployments.kube_request_current/3
+  end
+
+  object :workbench_job_activity_kube_exec do
+    field :handle,    :string, description: "the target cluster handle"
+    field :command,   :string, description: "the command executed in the pod"
+    field :namespace, :string, description: "the target namespace"
+    field :pod,       :string, description: "the target pod name"
+    field :container, :string, description: "the target container name"
+    field :explanation, :string, description: "why this command is needed and its expected effect"
   end
 
   object :workbench_job_activity_job_update do
@@ -896,6 +947,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,       :string, description: "the prompt text"
     field :dequeable_at, :datetime, description: "when this prompt becomes eligible to dequeue"
     field :consumed_at,  :datetime, description: "when this prompt was consumed"
+    field :modes,        :workbench_job_modes, description: "mode-specific overrides applied when this prompt is dequeued"
     field :user_id,      :id, description: "user this prompt will run as"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this prompt will be sent to"
@@ -1071,6 +1123,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :scm_connection,   :scm_connection, resolve: dataloader(Deployments), description: "the SCM connection bound to this tool"
 
     timestamps()
+  end
+
+  object :workbench_policy do
+    field :id,      non_null(:id)
+    field :matches, :workbench_policy_matches
+
+    field :policy,    :policy,    resolve: dataloader(Deployments)
+    field :workbench, :workbench, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  object :workbench_policy_matches do
+    field :regexes, list_of(:string)
   end
 
   object :workbench_tool_configuration do
@@ -1311,8 +1377,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :text,        :string
   end
 
+  object :workbench_job_exec_stream do
+    field :activity_id, :id
+    field :text,        :string
+    field :seq,         :integer
+  end
+
   connection node_type: :workbench
   connection node_type: :workbench_tool
+  connection node_type: :workbench_policy
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
@@ -1569,6 +1642,38 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench/2
+    end
+
+    field :create_workbench_policy, :workbench_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to associate with this policy"
+      arg :attributes, non_null(:workbench_policy_attributes)
+
+      resolve &Deployments.create_workbench_policy/2
+    end
+
+    field :update_workbench_policy, :workbench_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_policy_update_attributes)
+
+      resolve &Deployments.update_workbench_policy/2
+    end
+
+    field :delete_workbench_policy, :workbench_policy do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_policy/2
     end
 
     field :create_workbench_tool, :workbench_tool do
@@ -2018,6 +2123,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
         %{job_id: job_id}, ctx ->
           with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
             do: {:ok, topic: "workbench_jobs:#{job_id}:canvas_stream"}
+      end
+    end
+
+    field :workbench_exec_stream, :workbench_job_exec_stream do
+      arg :activity_id, non_null(:id)
+
+      config fn %{activity_id: activity_id}, ctx ->
+        with {:ok, _} <- Deployments.workbench_job_activity(%{id: activity_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{activity_id}:exec_stream"}
       end
     end
   end

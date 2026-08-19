@@ -37,6 +37,7 @@ type AgentRun struct {
 	Mode       console.AgentRunMode   `json:"mode"`
 	Status     console.AgentRunStatus `json:"status"`
 	FlowID     *string                `json:"flowId,omitempty"`
+	User       *AgentUser             `json:"user,omitempty"`
 
 	// Credentials for SCM and Plural Console
 	ScmCreds    *console.ScmCredentialFragment `json:"scmCreds,omitempty"`
@@ -56,6 +57,14 @@ type AgentRun struct {
 	BabysitInterval int64
 	Approval        bool
 	ApprovedAt      *string
+	Followup        bool
+}
+
+// AgentUser is the Console user who initiated the agent run. Git commits
+// created by the run use this identity when it is available.
+type AgentUser struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type AgentSkill struct {
@@ -80,6 +89,7 @@ type AgentRuntimeConfig struct {
 	OpenCode *OpencodeConfig `json:"opencode,omitempty"`
 	Gemini   *GeminiConfig   `json:"gemini,omitempty"`
 	Codex    *CodexConfig    `json:"codex,omitempty"`
+	Pi       *PiConfig       `json:"pi,omitempty"`
 }
 
 type OpencodeConfig struct {
@@ -117,6 +127,14 @@ type CodexConfig struct {
 	Endpoint *string       `json:"endpoint,omitempty"`
 }
 
+type PiConfig struct {
+	APIKey   string        `json:"apiKey"`
+	Provider string        `json:"provider,omitempty"`
+	Model    string        `json:"model,omitempty"`
+	Endpoint *string       `json:"endpoint,omitempty"`
+	Timeout  time.Duration `json:"timeout"`
+}
+
 // FromAgentRunFragment converts Console API fragment to harness type
 func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *AgentRun {
 	run := &AgentRun{
@@ -141,6 +159,13 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 					Contents:    skill.Contents,
 				}
 			}),
+	}
+
+	if fragment.User != nil {
+		run.User = &AgentUser{
+			Name:  fragment.User.Name,
+			Email: fragment.User.Email,
+		}
 	}
 
 	if fragment.Flow != nil {
@@ -172,6 +197,9 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		run.Approval = *fragment.Approval
 	}
 	run.ApprovedAt = fragment.ApprovedAt
+	if fragment.Followup != nil {
+		run.Followup = *fragment.Followup
+	}
 
 	return run
 }
@@ -250,6 +278,16 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 		}
 		if endpoint := helpers.GetPluralEnv(controller.EnvCodexEndpoint, ""); endpoint != "" {
 			config.Codex.Endpoint = &endpoint
+		}
+	case console.AgentRuntimeTypePi:
+		config.Pi = &PiConfig{
+			APIKey:   helpers.GetPluralEnv(controller.EnvPiAPIKey, ""),
+			Provider: helpers.GetPluralEnv(controller.EnvPiProvider, ""),
+			Model:    helpers.GetPluralEnv(controller.EnvPiModel, ""),
+			Timeout:  helpers.GetPluralEnvDuration(controller.EnvExecTimeout, defaultTimeout),
+		}
+		if endpoint := helpers.GetPluralEnv(controller.EnvPiEndpoint, ""); endpoint != "" {
+			config.Pi.Endpoint = &endpoint
 		}
 	}
 

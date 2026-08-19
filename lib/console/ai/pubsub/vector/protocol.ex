@@ -9,21 +9,30 @@ defimpl Console.AI.PubSub.Vectorizable, for: Any do
   def resource(_), do: :ok
 end
 
-defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
-  alias Console.AI.Tool
-  alias Console.AI.PubSub.Vector.Indexable
-  alias Console.Deployments.Pr.Dispatcher
-  alias Console.Schema.{PullRequest, ScmConnection}
-
-  def resource(%@for{item: %PullRequest{status: s, url: url, flow_id: flow_id}})
-      when s in ~w(merged closed)a and is_binary(flow_id) do
-    with %ScmConnection{} = conn <- Tool.scm_connection(),
-         {:ok, files} <- Dispatcher.files(conn, url),
-      do: %Indexable{data: files, filters: [flow_id: flow_id]}
+defmodule Console.AI.PubSub.Vectorizable.Utils do
+  def if_enabled(struct, fun) when is_function(fun, 1) do
+    case Console.AI.Vector.Enabled.enabled?(struct) do
+      true -> fun.(struct)
+      false -> :ok
+    end
   end
-
-  def resource(_), do: :ok
 end
+
+# defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
+#   alias Console.AI.Tool
+#   alias Console.AI.PubSub.Vector.Indexable
+#   alias Console.Deployments.Pr.Dispatcher
+#   alias Console.Schema.{PullRequest, ScmConnection}
+
+#   def resource(%@for{item: %PullRequest{status: s, url: url, flow_id: flow_id}})
+#       when s in ~w(merged closed)a and is_binary(flow_id) do
+#     with %ScmConnection{} = conn <- Tool.scm_connection(),
+#          {:ok, files} <- Dispatcher.files(conn, url),
+#       do: %Indexable{data: files, filters: [flow_id: flow_id]}
+#   end
+
+#   def resource(_), do: :ok
+# end
 
 
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.AlertResolutionCreated do
@@ -66,16 +75,19 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackUpdated do
   alias Console.Schema.{StackState, Stack}
   alias Console.AI.PubSub.Vector.Indexable
   alias Console.AI.PubSub.Vectorizable.Stack, as: StackUtils
+  alias Console.AI.PubSub.Vectorizable.Utils, as: Utils
   require Logger
 
   @final ~w(successful failed)a
 
   def resource(%@for{item: %Stack{status: s} = stack}) when s in @final do
-    case Repo.preload(stack, [:state, :repository]) do
-      %Stack{state: %StackState{} = state} = stack ->
-        StackUtils.indexable(state, stack)
-      _ -> :ok
-    end
+    Utils.if_enabled(stack, fn stack ->
+      case Repo.preload(stack, [:state, :repository]) do
+        %Stack{state: %StackState{} = state} = stack ->
+          StackUtils.indexable(state, stack)
+        _ -> :ok
+      end
+    end)
   end
   def resource(_), do: :ok
 end
@@ -84,6 +96,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackRunCompleted do
   alias Console.AI.PubSub.Vector.Indexable
   alias Console.Schema.{Stack, StackRun, StackState}
   alias Console.AI.PubSub.Vectorizable.Stack, as: StackUtils
+  alias Console.AI.PubSub.Vectorizable.Utils, as: Utils
   require Logger
 
   def resource(%@for{item: %StackRun{status: :successful, id: id} = run}) do
@@ -91,7 +104,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.StackRunCompleted do
       %StackRun{stack: %Stack{delete_run_id: ^id}} ->
         %Indexable{delete: true, filters: [stack_id: run.stack_id, datatype: {:raw, :stack_state}]}
       %StackRun{stack: %Stack{state: %StackState{} = state} = stack} ->
-        StackUtils.indexable(state, stack)
+        Utils.if_enabled(stack, fn stack -> StackUtils.indexable(state, stack) end)
       _ -> :ok
     end
   end
@@ -101,22 +114,25 @@ end
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpdated do
   alias Console.Schema.{ServiceComponent, Service}
   alias Console.AI.PubSub.Vector.Indexable
+  alias Console.AI.PubSub.Vectorizable.Utils, as: Utils
   require Logger
 
   def resource(%@for{item: %Service{} = service}) do
     Console.debounce({:vectorizer, :components, service.id}, fn ->
       Logger.info("vectorizing service component update #{service.id}")
-      case Console.Repo.preload(service, [:repository, :cluster, :components]) do
-        %Service{components: [_ | _] = components} = service ->
-          minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
-                  |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})
-          {users, groups} = Console.AI.Authorizable.authorize(service)
-          [
-            %Indexable{delete: true, force: true, filters: [service_id: service.id, datatype: {:raw, :service_component}]},
-            %Indexable{data: minis, filters: [service_id: service.id, user_ids: users, group_ids: groups], force: true}
-          ]
-        _ -> :ok
-      end
+      Utils.if_enabled(service, fn service ->
+        case Console.Repo.preload(service, [:repository, :cluster, :components]) do
+          %Service{components: [_ | _] = components} = service ->
+            minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
+                    |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})
+            {users, groups} = Console.AI.Authorizable.authorize(service)
+            [
+              %Indexable{delete: true, force: true, filters: [service_id: service.id, datatype: {:raw, :service_component}]},
+              %Indexable{data: minis, filters: [service_id: service.id, user_ids: users, group_ids: groups], force: true}
+            ]
+          _ -> :ok
+        end
+      end)
     end, ttl: :timer.hours(2))
   end
   def resource(_), do: :ok
@@ -125,25 +141,28 @@ end
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ClusterPinged do
   alias Console.Schema.Cluster
   alias Console.AI.PubSub.Vector.Indexable
+  alias Console.AI.PubSub.Vectorizable.Utils, as: Utils
   alias Console.Deployments.Clusters
   require Logger
 
   def resource(%@for{item: %Cluster{} = cluster}) do
     # Preload cloud_addons and fetch runtime services with addon info hydrated
-    cluster = Console.Repo.preload(cluster, [:cloud_addons])
-    runtime_services = Clusters.runtime_services(cluster)
+    Utils.if_enabled(cluster, fn cluster ->
+      cluster = Console.Repo.preload(cluster, [:cloud_addons])
+      runtime_services = Clusters.runtime_services(cluster)
 
-    # Attach runtime services to the cluster struct for Mini.new/1
-    cluster_with_data = Map.put(cluster, :runtime_services, runtime_services)
+      # Attach runtime services to the cluster struct for Mini.new/1
+      cluster_with_data = Map.put(cluster, :runtime_services, runtime_services)
 
-    Console.debounce({:vectorizer, :cluster, cluster.id}, fn ->
-      {users, groups} = Console.AI.Authorizable.authorize(cluster)
-      Logger.info("vectorizing cluster #{cluster.id}")
-      [
-        %Indexable{delete: true, force: true, filters: [cluster_id: cluster.id, datatype: {:raw, :cluster}]},
-        %Indexable{data: Cluster.Mini.new(cluster_with_data), filters: [cluster_id: cluster.id, user_ids: users, group_ids: groups], force: true}
-      ]
-    end, ttl: :timer.hours(2))
+      Console.debounce({:vectorizer, :cluster, cluster.id}, fn ->
+        {users, groups} = Console.AI.Authorizable.authorize(cluster)
+        Logger.info("vectorizing cluster #{cluster.id}")
+        [
+          %Indexable{delete: true, force: true, filters: [cluster_id: cluster.id, datatype: {:raw, :cluster}]},
+          %Indexable{data: Cluster.Mini.new(cluster_with_data), filters: [cluster_id: cluster.id, user_ids: users, group_ids: groups], force: true}
+        ]
+      end, ttl: :timer.hours(2))
+    end)
   end
   def resource(_), do: :ok
 end

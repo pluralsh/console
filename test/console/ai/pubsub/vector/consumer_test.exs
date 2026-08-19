@@ -4,7 +4,6 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
   alias Console.PubSub
   alias Console.AI.PubSub.Vector.Consumer
   alias ElasticsearchUtils, as: ES
-  alias OpensearchUtils, as: OS
   alias Console.Deployments.Settings
 
   describe "PullRequestCreated" do

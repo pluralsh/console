@@ -6,6 +6,7 @@ import {
   IconProps,
   OpenCodeLogoIcon,
   OpenAILogoIcon,
+  PiLogoIcon,
 } from '@pluralsh/design-system'
 import { AgentRuntimeType } from 'generated/graphql'
 import { ComponentPropsWithRef, type ComponentType } from 'react'
@@ -38,4 +39,5 @@ export const runtimeToIcon = {
   [AgentRuntimeType.Opencode]: OpenCodeLogoIcon,
   [AgentRuntimeType.Custom]: AiSparkleFilledIcon,
   [AgentRuntimeType.Codex]: OpenAILogoIcon,
+  [AgentRuntimeType.Pi]: PiLogoIcon,
 } as const satisfies Record<AgentRuntimeType, ComponentType<IconProps>>

@@ -62,6 +62,8 @@ type bbCloudComment struct {
 	CreatedOn string `json:"created_on"` // ISO 8601
 	Inline    *struct {
 		Path string `json:"path"`
+		From int    `json:"from"`
+		To   int    `json:"to"`
 	} `json:"inline"` // non-null → inline diff comment
 	Deleted bool `json:"deleted"`
 }
@@ -133,8 +135,14 @@ func (c *bitBucketCloudClient) allComments(ctx context.Context, workspace, repo 
 				continue
 			}
 			cType := PRCommentTypeIssue
+			filePath, line := "", 0
 			if cm.Inline != nil {
 				cType = PRCommentTypeReview
+				filePath = cm.Inline.Path
+				line = cm.Inline.To
+				if line == 0 {
+					line = cm.Inline.From
+				}
 			}
 			all = append(all, PRComment{
 				ID:        strconv.FormatInt(cm.ID, 10),
@@ -142,6 +150,8 @@ func (c *bitBucketCloudClient) allComments(ctx context.Context, workspace, repo 
 				Author:    cm.User.Nickname,
 				Body:      cm.Content.Raw,
 				CreatedAt: parseBBCloudTime(cm.CreatedOn),
+				FilePath:  filePath,
+				Line:      line,
 			})
 		}
 		u = page.Next
@@ -275,6 +285,7 @@ type bbDCComment struct {
 	CreatedDate   int64 `json:"createdDate"` // Unix milliseconds
 	CommentAnchor *struct {
 		Path string `json:"path"`
+		Line int    `json:"line"`
 	} `json:"commentAnchor"` // non-null
 }
 
@@ -341,8 +352,11 @@ func (c *bitBucketDCClient) allComments(ctx context.Context, project, repo strin
 		}
 		for _, cm := range page.Values {
 			cType := PRCommentTypeIssue
+			filePath, line := "", 0
 			if cm.CommentAnchor != nil {
 				cType = PRCommentTypeReview
+				filePath = cm.CommentAnchor.Path
+				line = cm.CommentAnchor.Line
 			}
 			all = append(all, PRComment{
 				ID:        strconv.FormatInt(cm.ID, 10),
@@ -350,6 +364,8 @@ func (c *bitBucketDCClient) allComments(ctx context.Context, project, repo strin
 				Author:    cm.Author.Slug,
 				Body:      cm.Text,
 				CreatedAt: time.UnixMilli(cm.CreatedDate).UTC(),
+				FilePath:  filePath,
+				Line:      line,
 			})
 		}
 		if page.IsLastPage {

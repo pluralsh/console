@@ -15,6 +15,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchSkill,
     WorkbenchEval,
     PolicyBinding,
+    WorkbenchPolicy,
     FlowWorkbench,
     User,
     AgentRun,
@@ -159,10 +160,12 @@ defmodule Console.Schema.Workbench do
     has_many :prompts,           WorkbenchPrompt,  on_replace: :delete
     has_many :flows_workbenches, FlowWorkbench,    on_replace: :delete
     has_many :workbench_skills,  WorkbenchSkill,   on_replace: :delete
+    has_many :workbench_policies, WorkbenchPolicy, on_replace: :delete
     has_many :alerts,            Alert
     has_one :eval,               WorkbenchEval
 
     has_many :tools, through: [:tool_associations, :tool]
+    has_many :policies, through: [:workbench_policies, :policy]
     timestamps()
   end
 
@@ -181,6 +184,11 @@ defmodule Console.Schema.Workbench do
   def search(query \\ __MODULE__, q) do
     from(w in query, where: ilike(w.name, ^"%#{q}%"))
   end
+
+  def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
+
+  def preloaded(query \\ __MODULE__, preloads \\ [:project, :tools]),
+    do: from(w in query, preload: ^preloads)
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(w in query, order_by: ^order)

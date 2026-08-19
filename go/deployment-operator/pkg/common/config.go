@@ -34,12 +34,14 @@ type ConfigurationManager struct {
 	sentinelPollInterval         *time.Duration
 	compatibilityUploadInterval  *time.Duration
 	pipelineGateInterval         *time.Duration
+	componentShaCacheTTL         *time.Duration
 	maxConcurrentReconciles      *int
 	maxSentinelRunJobs           *int
 	maxStackRunJobs              *int
 	maxAgentRunPods              *int
 	baseRegistryURL              *string
 	disableWebsocket             *bool
+	pollImmediately              *bool
 }
 
 func GetConfigurationManager() *ConfigurationManager {
@@ -82,6 +84,12 @@ func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfiguration
 	}
 	s.pipelineGateInterval = interval
 
+	interval, err = setDuration(config.ComponentShaCacheTTL)
+	if err != nil {
+		return err
+	}
+	s.componentShaCacheTTL = interval
+
 	interval, err = setDuration(config.StackPollInterval)
 	if err != nil {
 		return err
@@ -118,6 +126,10 @@ func (s *ConfigurationManager) setValueLocked(config v1alpha1.AgentConfiguration
 	s.maxStackRunJobs = config.MaxStackRunJobs
 	s.maxAgentRunPods = config.MaxAgentRunPods
 	s.disableWebsocket = config.DisableWebsocket
+	if config.PollImmediately == nil {
+		config.PollImmediately = lo.ToPtr(true)
+	}
+	s.pollImmediately = config.PollImmediately
 
 	return nil
 }
@@ -146,6 +158,9 @@ func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfiguration
 	if overrides.PipelineGateInterval != nil {
 		merged.PipelineGateInterval = overrides.PipelineGateInterval
 	}
+	if overrides.ComponentShaCacheTTL != nil {
+		merged.ComponentShaCacheTTL = overrides.ComponentShaCacheTTL
+	}
 	if overrides.MaxConcurrentReconciles != nil {
 		merged.MaxConcurrentReconciles = overrides.MaxConcurrentReconciles
 	}
@@ -166,6 +181,9 @@ func mergeAgentConfigurationSpec(defaults, overrides v1alpha1.AgentConfiguration
 	}
 	if overrides.DisableWebsocket != nil {
 		merged.DisableWebsocket = overrides.DisableWebsocket
+	}
+	if overrides.PollImmediately != nil {
+		merged.PollImmediately = overrides.PollImmediately
 	}
 
 	return merged
@@ -208,6 +226,12 @@ func (s *ConfigurationManager) GetPipelineGateInterval() *time.Duration {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.pipelineGateInterval
+}
+
+func (s *ConfigurationManager) GetComponentShaCacheTTL() *time.Duration {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.componentShaCacheTTL
 }
 
 func (s *ConfigurationManager) GetStackPollInterval() *time.Duration {
@@ -277,6 +301,23 @@ func (s *ConfigurationManager) IsWebsocketDisabled() bool {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.disableWebsocket != nil && *s.disableWebsocket
+}
+
+func (s *ConfigurationManager) IsPollImmediately() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if s.pollImmediately == nil {
+		return true
+	}
+	return *s.pollImmediately
+}
+
+// SetPollImmediately overrides the initial polling behavior without changing
+// the remaining AgentConfiguration values.
+func (s *ConfigurationManager) SetPollImmediately(value bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.pollImmediately = &value
 }
 
 func (s *ConfigurationManager) SwapBaseRegistry(image string) string {

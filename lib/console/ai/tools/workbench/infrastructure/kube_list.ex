@@ -2,6 +2,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeList do
   use Console.AI.Tools.Agent.Base
   import Console.GraphQl.Resolvers.Kubernetes, only: [get_kind: 4]
   import Console.AI.Tools.Workbench.Infrastructure.KubeGet, only: [kube_request: 3]
+  alias Console.AI.Tools.Workbench.Output
   alias Console.Deployments.Clusters
   alias Console.Schema.{Cluster}
 
@@ -34,6 +35,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeList do
   end
 
   @kind_blacklist ~w(secrets)
+  @output_hint "narrow the query or use jq to retrieve the remaining data"
 
   def implement(%__MODULE__{user: user, cluster: handle, group: g, version: v, kind: k} = comp) do
     with {:cluster, %Cluster{} = cluster} <- {:cluster, Clusters.get_cluster_by_handle(handle)},
@@ -50,8 +52,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeList do
 
   defp maybe_jq(result, %__MODULE__{jq: jq}) when is_binary(jq) do
     with {:ok, json} <- Jason.encode(result),
-         {:ok, filtered} <- Jaqex.filter(json, jq),
-      do: Jason.encode(filtered)
+         {:ok, filtered} <- Jaqex.filter(json, jq) do
+      Output.json(filtered, @output_hint)
+    end
   end
-  defp maybe_jq(result, _), do: Jason.encode(result)
+  defp maybe_jq(result, _), do: Output.json(result, @output_hint)
 end

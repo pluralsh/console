@@ -10,7 +10,7 @@ defmodule Console.AI.Workbench.Subagents.History do
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools(environment, job)
     |> MemoryEngine.new(20,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
         callback: &callback(activity, &1),

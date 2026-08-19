@@ -40,6 +40,17 @@ func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
 			if tc.name == "analyze" && !strings.Contains(content, "updateAgentRunAnalysis") {
 				t.Fatal("expected updateAgentRunAnalysis in analyze system prompt")
 			}
+			if tc.name == "babysit" {
+				for _, expected := range []string{
+					"human user are always actionable instructions",
+					"prioritize them over continuing the initial task",
+					"Human comments are tasks",
+				} {
+					if !strings.Contains(content, expected) {
+						t.Fatalf("expected babysit instructions to contain %q", expected)
+					}
+				}
+			}
 		})
 	}
 }
@@ -56,6 +67,29 @@ func TestSystemPromptTemplate_OmitsOriginalTaskWhenPromptEmpty(t *testing.T) {
 	}
 	if strings.Contains(content, "## Original task") {
 		t.Fatal("did not expect Original task section when prompt is empty")
+	}
+}
+
+func TestSystemPromptTemplate_FollowupInstructions(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+	content, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		Followup:      true,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/repo",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() failed: %v", err)
+	}
+	for _, expected := range []string{
+		"existing pull request",
+		"Do **not** create or switch to a branch.",
+		"Do **not** open another pull request.",
+		"Plural MCP `createCommit`",
+	} {
+		if !strings.Contains(content, expected) {
+			t.Fatalf("expected follow-up instructions to contain %q", expected)
+		}
 	}
 }
 

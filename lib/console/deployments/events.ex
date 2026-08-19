@@ -101,6 +101,7 @@ defmodule Console.PubSub.AgentRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentMessageCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.AgentMessageUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.AgentMessageStdoutCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.PrAutomationCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PrAutomationUpdated, do: use Piazza.PubSub.Event
@@ -146,6 +147,16 @@ defmodule Console.PubSub.WorkbenchChatbotCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchChatbotUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchChatbotDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobThoughtCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchPolicyCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchPolicyUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchPolicyDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.PolicyUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.PolicyDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.PolicySampled do
+  defstruct [:ids, :input, :result]
+end
 
 defmodule Console.PubSub.IssueCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.IssueUpdated, do: use Piazza.PubSub.Event

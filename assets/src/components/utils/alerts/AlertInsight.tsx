@@ -134,7 +134,11 @@ export function AlertInsight({
             flowId={flowId}
           />
         )}
-        <AISuggestFix insight={insight} />
+        <AISuggestFix
+          insight={insight}
+          flowId={flowId}
+          workbenchEnabled={type !== 'flow' || !!flowId}
+        />
       </Flex>
       <InsightDisplay
         insight={insight}

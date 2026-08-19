@@ -12,7 +12,7 @@ func ProxyProvider(runtimeType console.AgentRuntimeType) string {
 	switch runtimeType {
 	case console.AgentRuntimeTypeClaude:
 		return "anthropic"
-	case console.AgentRuntimeTypeCodex, console.AgentRuntimeTypeOpencode:
+	case console.AgentRuntimeTypeCodex, console.AgentRuntimeTypeOpencode, console.AgentRuntimeTypePi:
 		return "openai"
 	case console.AgentRuntimeTypeGemini:
 		return "vertex"

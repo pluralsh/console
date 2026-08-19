@@ -35,12 +35,14 @@ jobs:
       GEMINI_VERSION: 0.44.1
       OPENCODE_VERSION: 1.17.3
       CODEX_VERSION: 0.104.0
+      PI_VERSION: 0.84.1
     outputs:
       node: ${{ env.NODE_VERSION }}
       claude: ${{ env.CLAUDE_VERSION }}
       gemini: ${{ env.GEMINI_VERSION }}
       opencode: ${{ env.OPENCODE_VERSION }}
       codex: ${{ env.CODEX_VERSION }}
+      pi: ${{ env.PI_VERSION }}
     steps:
       - run: |
           echo "NODE_VERSION=$NODE_VERSION"
@@ -48,6 +50,7 @@ jobs:
           echo "GEMINI_VERSION=$GEMINI_VERSION"
           echo "OPENCODE_VERSION=$OPENCODE_VERSION"
           echo "CODEX_VERSION=$CODEX_VERSION"
+          echo "PI_VERSION=$PI_VERSION"
 
   build-base-image:
     name: Build base image
@@ -183,6 +186,8 @@ jobs:
             version: 1.17.3
           - name: codex
             version: 0.104.0
+          - name: pi
+            version: 0.84.1
     permissions:
       contents: write
       discussions: write

@@ -20,7 +20,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     tools = tools(environment)
 
     MemoryEngine.new(tools, 20,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
         tool_search: length(tools) > 10,

@@ -34,6 +34,7 @@ defmodule Console.Schema.WorkbenchJob do
       embeds_one :kubernetes, Kubernetes, on_replace: :update do
         field :update, :boolean, default: false
         field :delete, :boolean, default: false
+        field :exec,   :boolean, default: false
 
         field :exclude_namespaces, {:array, :string}
         field :require_namespaces, {:array, :string}
@@ -77,7 +78,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     defp kubernetes_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(update delete exclude_namespaces require_namespaces)a)
+      |> cast(attrs, ~w(update delete exec exclude_namespaces require_namespaces)a)
     end
   end
 
@@ -259,6 +260,7 @@ defmodule Console.Schema.WorkbenchJob do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> sanitize_text([:prompt, :error])
     |> cast_assoc(:result)
     |> cast_assoc(:chatbot_message)
     |> cast_embed(:modes)

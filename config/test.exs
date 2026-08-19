@@ -51,7 +51,9 @@ config :console,
   prom_plugins: [],
   github_app_id: "1234567890",
   provider: :aws,
-  workbench_default: true
+  workbench_default: true,
+  workbench_activity_poll_interval: 10,
+  workbench_agent_run_poll_interval: 10
   # github_app_pem: priv_string
 
 config :console, :login_link,

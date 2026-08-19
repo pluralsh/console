@@ -45,7 +45,7 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 		in.postStart(retErr)
 	}()
 
-	if retErr = in.prepare(); retErr != nil {
+	if retErr = in.prepare(ctx); retErr != nil {
 		return retErr
 	}
 
@@ -53,15 +53,9 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 		return retErr
 	}
 
-	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes) {
-		if message == nil {
-			return
-		}
-
-		_, err := in.consoleClient.CreateAgentMessage(ctx, in.agentRunID, *message)
-		if err != nil {
-			klog.ErrorS(err, "failed to create agent message", "message", message)
-		}
+	in.ensureToolCallMessageIDs()
+	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes, callID string) {
+		in.handleAgentMessage(ctx, message, callID)
 	})
 
 	in.tool.Run(
@@ -95,12 +89,15 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 	return retErr
 }
 
-// prepare sets up the agent run environment and AI credentials
-func (in *agentRunController) prepare() error {
+// prepare sets up the agent run environment and AI credentials.
+func (in *agentRunController) prepare(ctx context.Context) error {
 	var err error
 	repositoryDir := filepath.Join(in.dir, "shared", "repository")
 	if err := environment.ConfigureGitSafeDirectory(repositoryDir); err != nil {
 		return fmt.Errorf("configure git safe directory: %w", err)
+	}
+	if err := in.checkoutFollowupBranch(ctx, repositoryDir); err != nil {
+		return err
 	}
 	if in.tool, err = tool.New(in.agentRun.Runtime.Type, toolv1.Config{
 		WorkDir:       in.dir,
@@ -114,6 +111,36 @@ func (in *agentRunController) prepare() error {
 	}
 
 	return in.tool.Configure(in.consoleUrl, *in.agentRun.PluralCreds.Token)
+}
+
+func (in *agentRunController) checkoutFollowupBranch(ctx context.Context, repositoryDir string) error {
+	if in.agentRun == nil || !in.agentRun.Followup {
+		return nil
+	}
+
+	headBranch := ""
+	if in.agentRun.HeadBranch != nil {
+		headBranch = strings.TrimSpace(*in.agentRun.HeadBranch)
+	}
+	if headBranch == "" {
+		return fmt.Errorf("follow-up agent run requires a head branch to check out")
+	}
+
+	if output, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"fetch", "origin", headBranch}),
+		exec.WithDir(repositoryDir),
+	).RunWithOutput(ctx); err != nil {
+		return fmt.Errorf("fetch follow-up head branch %q: %w: %s", headBranch, err, output)
+	}
+
+	if output, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"checkout", "-B", headBranch, "origin/" + headBranch}),
+		exec.WithDir(repositoryDir),
+	).RunWithOutput(ctx); err != nil {
+		return fmt.Errorf("check out follow-up head branch %q: %w: %s", headBranch, err, output)
+	}
+
+	return nil
 }
 
 // completeAgentRun updates the agent run status in the Console API
@@ -430,7 +457,9 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 
 	var sb strings.Builder
 	_, _ = fmt.Fprintf(&sb,
-		"Your pull requests have new activity since %s. Please take the following actions.\n\n",
+		"Your pull requests have new activity since %s. Act on the new comments and failures now.\n"+
+			"Every human-authored comment below is actionable unless it is clearly informational; prioritize it over resuming the original task. "+
+			"Consider bot and automated feedback too, but do not let it displace actionable human instructions.\n\n",
 		lastCheckedStr,
 	)
 
@@ -441,12 +470,16 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			sb.WriteString("### New or updated comments since last reprompt\n\n")
 			for _, c := range e.NewComments {
 				body := strings.ReplaceAll(c.Body, "\n", "\n  > ")
+				location := ""
+				if commentLocation := c.Location(); commentLocation != "" {
+					location = fmt.Sprintf(" on `%s`", commentLocation)
+				}
 				if c.Reactable() {
-					_, _ = fmt.Fprintf(&sb, "- **%s** at %s (commentId: `%s`):\n  > %s\n\n",
-						c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+					_, _ = fmt.Fprintf(&sb, "- **%s**%s at %s (commentId: `%s`):\n  > %s\n\n",
+						c.Author, location, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
 				} else {
-					_, _ = fmt.Fprintf(&sb, "- **%s** at %s (reviewId: `%s`, not reactable):\n  > %s\n\n",
-						c.Author, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
+					_, _ = fmt.Fprintf(&sb, "- **%s**%s at %s (reviewId: `%s`, not reactable):\n  > %s\n\n",
+						c.Author, location, c.CreatedAt.UTC().Format(time.RFC3339), c.ReactableID(), body)
 				}
 			}
 		} else {

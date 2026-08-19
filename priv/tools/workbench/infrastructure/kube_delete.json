@@ -24,7 +24,11 @@
         "namespace": {
             "type": "string",
             "description": "the kubernetes namespace this resource is in, ignore if this is a cluster scoped resource"
+        },
+        "explanation": {
+            "type": "string",
+            "description": "Clearly explain why this deletion is needed, what it will remove, and the target resource so the user can make an informed approval decision"
         }
     },
-    "required": ["cluster", "version", "kind", "name"]
+    "required": ["cluster", "version", "kind", "name", "explanation"]
 }

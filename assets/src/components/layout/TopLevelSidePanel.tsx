@@ -24,6 +24,8 @@ import { matchPath, useLocation } from 'react-router-dom'
 import {
   CHATBOTS_SETTINGS_CREATE_ABS_PATH,
   CHATBOTS_SETTINGS_EDIT_PATH_MATCHER_ABS,
+  CLOUD_CONNECTIONS_SETTINGS_CREATE_ABS_PATH,
+  CLOUD_CONNECTIONS_SETTINGS_EDIT_PATH_MATCHER_ABS,
   WEBHOOKS_SETTINGS_CREATE_ABS_PATH,
   WEBHOOKS_SETTINGS_EDIT_PATH_MATCHER_ABS,
 } from 'routes/settingsRoutesConst'
@@ -67,6 +69,8 @@ const ALLOWED_ROUTES: Record<Exclude<SidePanel, 'ai-chat'>, string[]> = {
     CHATBOTS_SETTINGS_CREATE_ABS_PATH,
     CHATBOTS_SETTINGS_EDIT_PATH_MATCHER_ABS,
     `${CHATBOTS_SETTINGS_EDIT_PATH_MATCHER_ABS}/*`,
+    CLOUD_CONNECTIONS_SETTINGS_CREATE_ABS_PATH,
+    CLOUD_CONNECTIONS_SETTINGS_EDIT_PATH_MATCHER_ABS,
   ],
   'workbench-job': [WORKBENCH_JOBS_PATH_MATCHER_ABS],
   'agent-run': [AI_AGENT_RUNS_PATH_MATCHER_ABS],
@@ -170,8 +174,9 @@ function TopLevelSidePanelContent({
     case 'agent-run':
       return <AgentRunPanelContent />
     case 'ai-chat':
-    default:
       return <ChatbotPanelContent />
+    default:
+      return null
   }
 }
 

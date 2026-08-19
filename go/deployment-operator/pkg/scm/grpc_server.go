@@ -65,6 +65,9 @@ func (in *scmGRPCServer) toGrpcPrDetails(pr *PRDetails) *pb.PRDetails {
 			Author:        c.Author,
 			Body:          c.Body,
 			CreatedAtUnix: c.CreatedAt.Unix(),
+			FilePath:      c.FilePath,
+			StartLine:     int32(c.StartLine),
+			Line:          int32(c.Line),
 		})
 	}
 

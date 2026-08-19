@@ -107,6 +107,7 @@
     import_fields :public_backup_mutations
     import_fields :notification_mutations
     import_fields :public_policy_mutations
+    import_fields :policy_mutations
     import_fields :global_mutations
     import_fields :public_stack_mutations
     import_fields :stack_mutations

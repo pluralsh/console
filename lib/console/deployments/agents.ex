@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Agents do
   use Console.Services.Base
+  use Nebulex.Caching
   require Logger
   import Console.Deployments.Policies
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
@@ -24,6 +25,8 @@ defmodule Console.Deployments.Agents do
     AgentRunUpload
   }
   require EEx
+
+  @multilevel_adapter Console.conf(:multilevel_cache)
 
   @type error :: Console.error
   @type agent_run_resp :: {:ok, AgentRun.t} | error
@@ -207,6 +210,26 @@ defmodule Console.Deployments.Agents do
     |> notify(:update)
   end
 
+  def message_output(%{message_id: message_id} = attrs, %Cluster{id: cluster_id} = cluster) do
+    with %AgentMessage{agent_run: %{runtime: %{cluster_id: ^cluster_id}} = run} <-
+           cached_agent_message(message_id) do
+      attrs
+      |> Map.put(:agent_run_id, run.id)
+      |> AgentMessage.Stdout.new(cluster)
+      |> then(&notify({:ok, &1}, :create))
+    else
+      _ -> {:error, "clusters can only update their own agent runs"}
+    end
+  end
+
+  @decorate cacheable(
+              cache: @multilevel_adapter,
+              key: {:agent_message_for_output, message_id},
+              opts: [ttl: :timer.hours(1)]
+            )
+  defp cached_agent_message(message_id),
+    do: Repo.get(AgentMessage, message_id) |> Repo.preload(agent_run: :runtime)
+
   @doc """
   Creates a new upload bundle for an agent run, can only be performed by the cluster it runs on.
   """
@@ -378,7 +401,7 @@ defmodule Console.Deployments.Agents do
     run = get_agent_run!(run_id)
           |> Repo.preload([runtime: :connection, workbench_job_activity_agent_run: :workbench_job_activity])
     shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
-    with {:ok, run} <- allow(run, user, :creds),
+    with {:ok, run} <- allow(run, user, :pr),
          %ScmConnection{} = conn <- scm_connection(run),
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
@@ -584,5 +607,7 @@ defmodule Console.Deployments.Agents do
     do: handle_notify(PubSub.AgentMessageCreated, msg)
   defp notify({:ok, %AgentMessage{} = msg}, :update),
     do: handle_notify(PubSub.AgentMessageUpdated, msg)
+  defp notify({:ok, %AgentMessage.Stdout{} = stdout}, :create),
+    do: handle_notify(PubSub.AgentMessageStdoutCreated, stdout)
   defp notify(pass, _), do: pass
 end

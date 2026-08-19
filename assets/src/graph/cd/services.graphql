@@ -83,10 +83,6 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   namespace
   message
   version
-  helm {
-    values
-    valuesFiles
-  }
   components {
     ...ServiceDeploymentComponent
   }
@@ -386,6 +382,15 @@ query ServiceDeploymentSecrets($id: ID!) {
     }
     helm {
       values
+    }
+  }
+}
+
+query ServiceDeploymentHelmSettings($id: ID!) {
+  serviceDeployment(id: $id) {
+    helm {
+      values
+      valuesFiles
     }
   }
 }

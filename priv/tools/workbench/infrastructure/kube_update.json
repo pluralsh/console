@@ -34,7 +34,11 @@
         "json": {
             "type": "string",
             "description": "The JSON resource definition to send to kubernetes. For replace this should be the full desired resource. For apply this may contain only the fields to manage via server-side apply. The status field is ignored"
+        },
+        "explanation": {
+            "type": "string",
+            "description": "Clearly explain why this update is needed, what it will change, and the target resource so the user can make an informed approval decision"
         }
     },
-    "required": ["cluster", "version", "kind", "name", "json"]
+    "required": ["cluster", "version", "kind", "name", "json", "explanation"]
 }

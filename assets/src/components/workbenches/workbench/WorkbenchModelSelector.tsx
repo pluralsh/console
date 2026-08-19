@@ -193,7 +193,7 @@ export function WorkbenchModelSelector({
         <ChatOptionPill
           isOpen={isOpen}
           disabled={triggerDisabled}
-          css={{ height: '100%', maxWidth: 220 }}
+          css={{ height: 32, maxWidth: 220 }}
         >
           {loading && !triggerModel ? (
             <RectangleSkeleton

@@ -5,7 +5,8 @@ defmodule Console.AI.Workbench.Heartbeat do
   alias Console.Deployments.Workbenches
   alias Console.AI.{Agents, ModelSelection}
 
-  @poll :timer.seconds(15)
+  @poll :timer.minutes(1)
+  @timeout :timer.hours(4)
 
   defmodule State do
     defstruct [:job, reprompt: false, booted: false, usage: %{}]
@@ -20,6 +21,7 @@ defmodule Console.AI.Workbench.Heartbeat do
   def init(job) do
     Process.flag(:trap_exit, true)
     :timer.send_interval(@poll, :heartbeat)
+    Process.send_after(self(), :timeout, @timeout)
     {:ok, %State{job: job, booted: true, usage: preserve_usage(job.usage), reprompt: reprompt(job)}}
   end
 
@@ -36,7 +38,7 @@ defmodule Console.AI.Workbench.Heartbeat do
     |> enforce_budget(state)
   end
   def handle_cast(:cancel, %State{job: job, booted: booted} = state),
-    do: {:stop, :cancel, %{state | job: job, booted: booted}}
+    do: {:stop, :normal, %{state | job: job, booted: booted}}
   def handle_cast(_, state), do: {:noreply, state}
 
   defp merge_usage(new_usage, usage) do
@@ -51,17 +53,21 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def handle_info({:EXIT, _, _}, state), do: {:stop, :shutdown, state}
+  def handle_info(:timeout, state), do: {:stop, :timeout, state}
 
   def handle_info(:heartbeat, %State{job: job, booted: booted} = state) do
     case Workbenches.heartbeat(job, booted) do
-      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :cancel, %{state | job: job, booted: false}}
+      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :normal, %{state | job: job, booted: false}}
       {:ok, %WorkbenchJob{} = job} -> {:noreply, %{state | job: job, booted: false}}
       _ -> {:noreply, %{state | job: job, booted: false}}
     end
   end
 
   def terminate(:cancel, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
+  def terminate(:normal, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:shutdown, %State{job: job, usage: usage}), do: Workbenches.pause_job(job, usage)
+  def terminate(:timeout, %State{job: job, usage: usage}),
+    do: Workbenches.fail_job("Workbench timed out after 4 hours", job, usage)
   def terminate({:shutdown, {:budget, dim, val}}, %State{job: job, usage: usage}),
     do: Workbenches.fail_job("Budget exceeded, #{dim} consumption of #{val} exceeded limit", job, usage)
   def terminate(_, %State{job: job, usage: usage}) do

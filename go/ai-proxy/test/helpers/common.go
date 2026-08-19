@@ -38,12 +38,18 @@ func SetupServer() (*httptest.Server, error) {
 	}
 
 	if args.OpenAICompatible() {
-		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderAwsRegion(), tokenRotator)
+		mantleConfig := api.MantleConfig{
+			APIKey:        args.BedrockMantleKey(),
+			AWSRegion:     args.BedrockMantleAWSRegion(),
+			ModelPrefixes: args.BedrockMantleModelPrefixes(),
+			SigV4:         args.MantleSigV4(),
+		}
+		op, err := proxy.NewOpenAIProxy(args.Provider(), args.ProviderHost(), args.ProviderAwsRegion(), tokenRotator, mantleConfig)
 		if err != nil {
 			klog.ErrorS(err, "Could not create proxy")
 			os.Exit(1)
 		}
-		ep, err := proxy.NewOpenAIEmbeddingsProxy(args.Provider(), args.ProviderHost(), args.ProviderAwsRegion(), tokenRotator)
+		ep, err := proxy.NewOpenAIEmbeddingsProxy(args.Provider(), args.ProviderHost(), args.ProviderAwsRegion(), tokenRotator, mantleConfig)
 		if err != nil {
 			klog.ErrorS(err, "Could not create embedding proxy")
 			os.Exit(1)

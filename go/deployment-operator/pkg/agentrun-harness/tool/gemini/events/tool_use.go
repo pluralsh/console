@@ -1,8 +1,11 @@
 package events
 
 import (
+	"encoding/json"
+
 	cmap "github.com/orcaman/concurrent-map/v2"
 	console "github.com/pluralsh/console/go/client"
+	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
@@ -21,15 +24,16 @@ func (e *ToolUseEvent) Validate() bool {
 	return e.Type == EventTypeToolUse && e.ToolID != "" && e.ToolName != ""
 }
 
-func (e *ToolUseEvent) Process(onMessage func(message *console.AgentMessageAttributes)) {
+func (e *ToolUseEvent) Process(onMessage v1.MessageCallback) {
 	// If any of the tools is called, send the current message and reset the builder.
 	if messageBuilder.Len() > 0 {
-		onMessage(e.Attributes())
+		onMessage(e.Attributes(), "")
 		messageBuilder.Reset()
 	}
 
 	toolUseCache.Set(e.ToolID, lo.FromPtr(e))
 	klog.V(log.LogLevelDebug).Infof("saved tool use in the cache: %s", e.ToolName)
+	onMessage(e.RunningAttributes(), e.ToolID)
 }
 
 func (e *ToolUseEvent) Attributes() *console.AgentMessageAttributes {
@@ -37,4 +41,24 @@ func (e *ToolUseEvent) Attributes() *console.AgentMessageAttributes {
 		Message: messageBuilder.String(),
 		Role:    console.AiRoleAssistant,
 	}
+}
+
+func (e *ToolUseEvent) RunningAttributes() *console.AgentMessageAttributes {
+	attrs := &console.AgentMessageAttributes{
+		Message: "Called tool",
+		Role:    console.AiRoleAssistant,
+		Metadata: &console.AgentMessageMetadataAttributes{
+			Tool: &console.AgentMessageToolAttributes{
+				Name:   lo.ToPtr(e.ToolName),
+				State:  lo.ToPtr(console.AgentMessageToolStateRunning),
+				Output: lo.ToPtr(v1.RunningToolOutput),
+			},
+		},
+	}
+	if len(e.Parameters) > 0 {
+		if input, err := json.Marshal(e.Parameters); err == nil {
+			attrs.Metadata.Tool.Input = lo.ToPtr(string(input))
+		}
+	}
+	return attrs
 }

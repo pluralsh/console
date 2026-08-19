@@ -109,6 +109,10 @@ spec:
                   and the resources it manages within the organizational hierarchy.
                 example: my project description
                 type: string
+              disableInsights:
+                description: DisableInsights indicates whether to disable AI insights
+                  and vector storage for this project.
+                type: boolean
               name:
                 description: Name of the project.
                 example: myprojectname

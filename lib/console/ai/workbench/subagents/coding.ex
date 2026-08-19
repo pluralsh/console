@@ -24,7 +24,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
     tools(activity, environment)
     |> MemoryEngine.new(20,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
         acc: %{},
         callback: &callback(activity, &1),
@@ -71,6 +71,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   defp persist_and_poll_run(%AgentRun{id: id, tool: tool} = run, job) do
     poll_run(run)
+    |> preload_run()
     |> record_usage(job)
     |> case do
       {:timeout, _} -> {:user, "agent run #{id} timed out"}
@@ -82,6 +83,8 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       {:success, _} -> {:user, "Agent run completed successfully, but no output was generated"}
     end
   end
+
+  defp preload_run({result, %AgentRun{} = run}), do: {result, Repo.preload(run, [:pull_requests])}
 
   defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage}} = pass, job) when result in [:failed, :success] do
     callback  = Environment.engine_opts(job) |> Keyword.fetch!(:usage_callback)

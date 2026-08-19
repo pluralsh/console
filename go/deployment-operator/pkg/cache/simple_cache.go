@@ -1,11 +1,11 @@
 package cache
 
 import (
-	"math/rand"
 	"sync"
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
+	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 )
 
 type simpleCacheLine[T any] struct {
@@ -16,16 +16,18 @@ type simpleCacheLine[T any] struct {
 type SimpleCache[T any] struct {
 	sync.Mutex
 
-	cache        cmap.ConcurrentMap[string, simpleCacheLine[T]]
-	expiry       time.Duration
-	expiryJitter time.Duration
+	cache    cmap.ConcurrentMap[string, simpleCacheLine[T]]
+	expiryFn func() time.Duration
 }
 
-func NewSimpleCache[T any](expiry, expiryJitter time.Duration) *SimpleCache[T] {
+func NewSimpleCache[T any](expiry time.Duration) *SimpleCache[T] {
+	return NewSimpleCacheWithExpiryFunc[T](func() time.Duration { return expiry })
+}
+
+func NewSimpleCacheWithExpiryFunc[T any](expiryFn func() time.Duration) *SimpleCache[T] {
 	return &SimpleCache[T]{
-		cache:        cmap.New[simpleCacheLine[T]](),
-		expiry:       expiry,
-		expiryJitter: expiryJitter,
+		cache:    cmap.New[simpleCacheLine[T]](),
+		expiryFn: expiryFn,
 	}
 }
 
@@ -59,11 +61,7 @@ func (c *SimpleCache[T]) Expire(id string) {
 }
 
 func (c *SimpleCache[T]) ExpiryWithJitter() time.Duration {
-	if c.expiryJitter <= 0 {
-		return c.expiry
-	}
-
-	return c.expiry + time.Duration(rand.Int63n(int64(c.expiryJitter)))
+	return utils.WithJitterFactor(c.expiryFn(), 0.5)
 }
 
 func (l *simpleCacheLine[T]) live() bool {

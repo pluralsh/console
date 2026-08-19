@@ -51,6 +51,12 @@ type PRComment struct {
 	Author    string
 	Body      string
 	CreatedAt time.Time
+	// FilePath and line fields normalize the location of an inline review
+	// comment across SCM providers. Line is the last line of the comment range;
+	// StartLine is zero for a single-line comment.
+	FilePath  string
+	StartLine int
+	Line      int
 }
 
 // ReactableID returns a composite key that encodes both the comment type and
@@ -67,6 +73,19 @@ func (c PRComment) Reactable() bool {
 	default:
 		return false
 	}
+}
+
+// Location returns a concise, human-readable location for an inline comment.
+// It is empty for top-level comments and for providers that do not return a
+// usable diff location.
+func (c PRComment) Location() string {
+	if c.FilePath == "" || c.Line <= 0 {
+		return ""
+	}
+	if c.StartLine > 0 && c.StartLine < c.Line {
+		return fmt.Sprintf("%s:%d-%d", c.FilePath, c.StartLine, c.Line)
+	}
+	return fmt.Sprintf("%s:%d", c.FilePath, c.Line)
 }
 
 // CICheckStatus values for CICheck.Status.

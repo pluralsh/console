@@ -15,7 +15,14 @@ defmodule Console.AI.Workbench.Subagents.Skill do
 
   require EEx
 
-  @skill_prompt {:user, "Given this, create or update whatever skill is necessary or abort based on the general parameters we've described for skill updates"}
+  @skill_prompt {:user, """
+  Perform one final, bounded knowledge-capture assessment from the completed job record.
+
+  Do not continue or re-investigate the original objective. Do not delegate any work.
+  First prefer `SkillIgnore`. Create or update a skill only for durable, novel, actionable knowledge
+  supported by the recorded result. After exactly one terminal tool call
+  (`SkillIgnore`, `SkillUpdate`, or `SkillCreate`), stop.
+  """}
 
   @spec run(WorkbenchJobActivity.t(), WorkbenchJob.t(), Environment.t()) :: map()
   def run(%WorkbenchJobActivity{} = activity, %WorkbenchJob{} = job, %Environment{} = environment) do
@@ -23,7 +30,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
 
     tools(target_job, environment)
     |> MemoryEngine.new(20,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: String.trim(system_prompt(job: target_job)),
         continue_msg: cont_msg(),
         acc: %{},

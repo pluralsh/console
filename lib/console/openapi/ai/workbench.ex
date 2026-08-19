@@ -234,6 +234,7 @@ defmodule Console.OpenAPI.AI.QueuedPrompt do
       prompt: string(description: "The prompt text"),
       dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue"),
       consumed_at: datetime(description: "When the prompt was consumed"),
+      modes: Console.OpenAPI.AI.WorkbenchJobModes,
       workbench_job_id: string(description: "ID of the workbench job this prompt targets"),
       user_id: string(description: "ID of the user this prompt runs as")
     })
@@ -250,7 +251,8 @@ defmodule Console.OpenAPI.AI.QueuedPromptInput do
     description: "Input for creating a deferred workbench prompt",
     properties: %{
       prompt: string(description: "The prompt to send when dequeued"),
-      dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue")
+      dequeable_at: datetime(description: "When the prompt becomes eligible to dequeue"),
+      modes: Console.OpenAPI.AI.WorkbenchJobModes
     },
     required: [:prompt, :dequeable_at]
   }

@@ -2,6 +2,7 @@ package opencode
 
 import (
 	"encoding/json"
+	"time"
 
 	console "github.com/pluralsh/console/go/client"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
@@ -116,7 +117,7 @@ type Opencode struct {
 	executable exec.Executable
 
 	// onMessage is a callback called when a new message is received.
-	onMessage func(message *console.AgentMessageAttributes)
+	onMessage toolv1.MessageCallback
 
 	// sessionID is the latest native OpenCode session identifier observed in stream events.
 	sessionID string
@@ -173,10 +174,17 @@ type StreamTokenCache struct {
 	Write float64 `json:"write"`
 }
 
+// StreamToolTime is present on completed tool_use events from `opencode run --format json`.
+type StreamToolTime struct {
+	Start int64 `json:"start,omitempty"`
+	End   int64 `json:"end,omitempty"`
+}
+
 type StreamToolState struct {
 	Status StreamToolStatus `json:"status"`
 	Input  json.RawMessage  `json:"input,omitempty"`
 	Output string           `json:"output,omitempty"`
+	Time   *StreamToolTime  `json:"time,omitempty"`
 }
 
 type StreamErrorData struct {
@@ -247,6 +255,16 @@ func (in *Event) fromToolState(part *StreamPart) {
 
 	if len(part.State.Input) > 0 && string(part.State.Input) != "null" {
 		in.Message.Metadata.Tool.Input = lo.ToPtr(string(part.State.Input))
+	}
+
+	// OpenCode JSON format emits tools only when finished; use event timestamps for duration.
+	if part.State.Time != nil {
+		if part.State.Time.Start > 0 {
+			in.Message.Metadata.StartedAt = lo.ToPtr(msToRFC3339(part.State.Time.Start))
+		}
+		if part.State.Time.End > 0 {
+			in.Message.Metadata.CompletedAt = lo.ToPtr(msToRFC3339(part.State.Time.End))
+		}
 	}
 
 	if in.seenToolCalls == nil {
@@ -328,4 +346,8 @@ func toAgentToolState(state StreamToolStatus) console.AgentMessageToolState {
 	default:
 		return console.AgentMessageToolStateCompleted
 	}
+}
+
+func msToRFC3339(ms int64) string {
+	return time.UnixMilli(ms).UTC().Format(time.RFC3339Nano)
 }

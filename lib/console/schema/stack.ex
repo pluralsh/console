@@ -21,7 +21,8 @@ defmodule Console.Schema.Stack do
     Project,
     StackDefinition,
     AiInsight,
-    StackInfracostResource
+    StackInfracostResource,
+    StackPolicy
   }
 
   defenum Type, terraform: 0, ansible: 1, custom: 2, terragrunt: 3, pulumi: 4
@@ -214,6 +215,8 @@ defmodule Console.Schema.Stack do
     has_many :output,      StackOutput, on_replace: :delete
     has_many :runs,        StackRun
     has_many :infracost_resources, StackInfracostResource, foreign_key: :stack_id
+    has_many :stack_policies, StackPolicy, on_replace: :delete
+    has_many :policies, through: [:stack_policies, :policy]
     has_many :tags,        Tag, on_replace: :delete
 
     has_many :observable_metrics, ObservableMetric, on_replace: :delete
@@ -296,7 +299,11 @@ defmodule Console.Schema.Stack do
 
   def ai_pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
-    from(a in query, where: is_nil(a.ai_poll_at) or a.ai_poll_at < ^now, order_by: [asc: :ai_poll_at])
+    from(a in query,
+      join: p in assoc(a, :project),
+      where: (is_nil(p.disable_insights) or not p.disable_insights) and (is_nil(a.ai_poll_at) or a.ai_poll_at < ^now),
+      order_by: [asc: :ai_poll_at]
+    )
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)

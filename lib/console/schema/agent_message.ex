@@ -2,6 +2,22 @@ defmodule Console.Schema.AgentMessage do
   use Piazza.Ecto.Schema
   alias Console.Schema.AgentRun
 
+  defmodule Stdout do
+    @type t :: %__MODULE__{
+      message_id: binary,
+      agent_run_id: binary,
+      stdout: binary,
+      stderr: binary,
+      cluster: Console.Schema.Cluster.t()
+    }
+    defstruct [:message_id, :agent_run_id, :stdout, :stderr, :cluster]
+
+    @spec new(map(), Console.Schema.Cluster.t()) :: t()
+    def new(attrs, cluster) do
+      struct(__MODULE__, Map.put(attrs, :cluster, cluster))
+    end
+  end
+
   defenum ToolState, pending: 0, running: 1, completed: 2, error: 3
 
   schema "agent_messages" do
@@ -19,6 +35,7 @@ defmodule Console.Schema.AgentMessage do
     end
 
     embeds_one :metadata, Metadata, on_replace: :update do
+      field :started_at,   :utc_datetime_usec
       field :completed_at, :utc_datetime_usec
       embeds_one :reasoning, Reasoning, on_replace: :update do
         field :text,  :string
@@ -77,7 +94,7 @@ defmodule Console.Schema.AgentMessage do
 
   defp metadata_changeset(model, attrs) do
     model
-    |> cast(attrs, [:completed_at])
+    |> cast(attrs, [:started_at, :completed_at])
     |> cast_embed(:reasoning, with: &reasoning_changeset/2)
     |> cast_embed(:file, with: &file_changeset/2)
     |> cast_embed(:tool, with: &tool_changeset/2)

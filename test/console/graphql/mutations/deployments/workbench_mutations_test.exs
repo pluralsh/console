@@ -2058,4 +2058,73 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       assert refetch(bot)
     end
   end
+
+  describe "workbench policy CRUD" do
+    test "workbench writers can create, update, and delete policy associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+
+      {:ok, %{data: %{"createWorkbenchPolicy" => association}}} = run_query("""
+        mutation CreateWorkbenchPolicy($workbenchId: ID!, $attributes: WorkbenchPolicyAttributes!) {
+          createWorkbenchPolicy(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            policy { id name }
+            matches { regexes }
+          }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{
+          "policyId" => policy.id,
+          "matches" => %{"regexes" => ["^kubernetes\\."]}
+        }
+      }, %{current_user: user})
+
+      assert association["policy"]["id"] == policy.id
+      assert association["matches"]["regexes"] == ["^kubernetes\\."]
+
+      {:ok, %{data: %{"updateWorkbenchPolicy" => updated}}} = run_query("""
+        mutation UpdateWorkbenchPolicy($id: ID!, $attributes: WorkbenchPolicyUpdateAttributes!) {
+          updateWorkbenchPolicy(id: $id, attributes: $attributes) {
+            id
+            matches { regexes }
+          }
+        }
+      """, %{
+        "id" => association["id"],
+        "attributes" => %{"matches" => %{"regexes" => ["^terraform\\."]}}
+      }, %{current_user: user})
+
+      assert updated["matches"]["regexes"] == ["^terraform\\."]
+
+      {:ok, %{data: %{"deleteWorkbenchPolicy" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchPolicy($id: ID!) {
+          deleteWorkbenchPolicy(id: $id) { id }
+        }
+      """, %{"id" => association["id"]}, %{current_user: user})
+
+      assert deleted["id"] == association["id"]
+    end
+
+    test "workbench readers cannot create policy associations" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchPolicy($workbenchId: ID!, $attributes: WorkbenchPolicyAttributes!) {
+          createWorkbenchPolicy(workbenchId: $workbenchId, attributes: $attributes) { id }
+        }
+      """, %{
+        "workbenchId" => workbench.id,
+        "attributes" => %{
+          "policyId" => policy.id,
+          "matches" => %{"regexes" => [".*"]}
+        }
+      }, %{current_user: user})
+    end
+  end
 end

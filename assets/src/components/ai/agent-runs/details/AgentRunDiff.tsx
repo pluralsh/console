@@ -7,6 +7,7 @@ import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { useQuery } from '@tanstack/react-query'
 import { useKeyDown } from '@react-hooks-library/core'
 import {
+  Button,
   ExpandIcon,
   FolderIcon,
   IconFrame,
@@ -211,10 +212,16 @@ export function AgentRunDiff({
   runId,
   isFullscreen = false,
   onFullscreenChange,
+  isApprovable = false,
+  onApprove,
+  approving = false,
 }: {
   runId: string
   isFullscreen?: boolean
   onFullscreenChange?: (fullscreen: boolean) => void
+  isApprovable?: boolean
+  onApprove?: () => void
+  approving?: boolean
 }) {
   const {
     data: content,
@@ -371,6 +378,15 @@ export function AgentRunDiff({
                 <DiffDeletionsSC>-{selectedFile.deletions}</DiffDeletionsSC>
                 <DiffAdditionsSC>+{selectedFile.additions}</DiffAdditionsSC>
               </DiffLineStatsSC>
+              {isApprovable && onApprove && (
+                <Button
+                  small
+                  onClick={onApprove}
+                  loading={approving}
+                >
+                  Approve & create PR
+                </Button>
+              )}
               {isFullscreen ? (
                 <DiffMinimizeControlSC>
                   <DiffEscHintSC>Esc to close</DiffEscHintSC>
