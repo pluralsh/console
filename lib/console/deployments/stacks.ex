@@ -246,10 +246,10 @@ defmodule Console.Deployments.Stacks do
       |> Repo.insert()
     end)
     |> add_operation(:policy, fn %{stack_policy: stack_policy} ->
-      stack_policy
-      |> Repo.preload(:policy)
-      |> Map.fetch!(:policy)
-      |> allow(user, :read)
+      case stack_policy |> Repo.preload(:policy) |> Map.fetch!(:policy) do
+        %{type: :stack} = policy -> allow(policy, user, :read)
+        _ -> {:error, "stack policies require a stack policy"}
+      end
     end)
     |> execute(extract: :stack_policy)
   end

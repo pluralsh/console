@@ -23,6 +23,13 @@ defmodule Console.Schema.BindingPolicy do
     from(p in query, where: p.policy_id == ^policy_id)
   end
 
+  def for_project(query \\ __MODULE__, project_id) do
+    from(p in query,
+      join: policy in assoc(p, :policy),
+      where: policy.project_id == ^project_id
+    )
+  end
+
   def for_type(query \\ __MODULE__, type) do
     from(p in query, where: p.type == ^type)
   end

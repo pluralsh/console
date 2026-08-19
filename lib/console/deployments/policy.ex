@@ -139,7 +139,7 @@ defmodule Console.Deployments.Policy do
   end
 
   def reconcile(%BindingPolicy{} = binding) do
-    binding = Repo.preload(binding, :bind_policy)
+    binding = Repo.preload(binding, [:bind_policy, :policy])
 
     targets(binding)
     |> Repo.stream(method: :keyset)
@@ -149,19 +149,30 @@ defmodule Console.Deployments.Policy do
   end
 
   def reconcile(%BindingPolicy{type: :workbench} = binding, %Workbench{} = target),
-    do: reconcile_binding(Repo.preload(binding, :bind_policy), target)
+    do: reconcile_target(binding, target)
   def reconcile(%BindingPolicy{type: :stack} = binding, %Stack{} = target),
-    do: reconcile_binding(Repo.preload(binding, :bind_policy), target)
+    do: reconcile_target(binding, target)
   def reconcile(_, _), do: :ok
 
-  defp targets(%BindingPolicy{type: :workbench}) do
-    Workbench.stream()
+  defp targets(%BindingPolicy{type: :workbench, policy: %{project_id: project_id}}) do
+    Workbench.for_project(project_id)
+    |> Workbench.stream()
     |> Workbench.preloaded()
   end
 
-  defp targets(%BindingPolicy{type: :stack}) do
-    Stack.stream()
+  defp targets(%BindingPolicy{type: :stack, policy: %{project_id: project_id}}) do
+    Stack.for_project(project_id)
+    |> Stack.stream()
     |> Stack.preloaded([:project])
+  end
+
+  defp reconcile_target(binding, %{project_id: project_id} = target) do
+    binding = Repo.preload(binding, [:bind_policy, :policy])
+
+    case binding do
+      %{policy: %{project_id: ^project_id}} -> reconcile_binding(binding, target)
+      _ -> :ok
+    end
   end
 
   defp reconcile_binding(%BindingPolicy{} = binding, target) do

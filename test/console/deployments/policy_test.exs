@@ -158,6 +158,20 @@ defmodule Console.Deployments.PolicyTest do
       assert ids_equal(Repo.all(BindingPolicy.pollable()), [due])
     end
 
+    test "scopes binding policies to their base policy project" do
+      project = insert(:project)
+      binding = insert(:binding_policy, policy: insert(:policy, project: project))
+      insert(:binding_policy)
+
+      bindings =
+        BindingPolicy
+        |> BindingPolicy.for_type(:workbench)
+        |> BindingPolicy.for_project(project.id)
+        |> Repo.all()
+
+      assert ids_equal(bindings, [binding])
+    end
+
     test "adds and removes workbench policy bindings without duplicates" do
       insert(:user, bot_name: "console")
       project = insert(:project)
@@ -199,7 +213,7 @@ defmodule Console.Deployments.PolicyTest do
       insert(:user, bot_name: "console")
       project = insert(:project)
       stack = insert(:stack, project: project)
-      policy = insert(:policy, project: project)
+      policy = insert(:policy, project: project, type: :stack)
       bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 

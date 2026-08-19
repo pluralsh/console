@@ -540,8 +540,8 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       stack = insert(:stack, project: project)
-      policy = insert(:policy, project: project)
-      replacement = insert(:policy, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+      replacement = insert(:policy, project: project, type: :stack)
 
       {:ok, %{data: %{"createStackPolicy" => association}}} = run_query("""
         mutation CreateStackPolicy($stackId: ID!, $attributes: StackPolicyAttributes!) {

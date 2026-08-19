@@ -35,11 +35,12 @@ defmodule Console.Deployments.PubSub.BindingTest do
       insert(:user, bot_name: "console")
       project = insert(:project)
       workbench = insert(:workbench, project: project, name: "target")
+      other_workbench = insert(:workbench)
       policy = insert(:policy, project: project)
       bind_policy = insert(:policy,
         project: project,
         type: :binding,
-        policy: "package plrl.binding\nbind := true if input.name == \"target\""
+        policy: "package plrl.binding\nbind := true"
       )
 
       insert(:binding_policy,
@@ -50,6 +51,9 @@ defmodule Console.Deployments.PubSub.BindingTest do
 
       :ok = Binding.handle_event(%PubSub.WorkbenchCreated{item: workbench})
       assert Repo.get_by(WorkbenchPolicy, policy_id: policy.id, workbench_id: workbench.id)
+
+      :ok = Binding.handle_event(%PubSub.WorkbenchCreated{item: other_workbench})
+      refute Repo.get_by(WorkbenchPolicy, policy_id: policy.id, workbench_id: other_workbench.id)
 
       {:ok, _} =
         Policy.update_policy(
@@ -66,12 +70,16 @@ defmodule Console.Deployments.PubSub.BindingTest do
       insert(:user, bot_name: "console")
       project = insert(:project)
       stack = insert(:stack, project: project)
-      policy = insert(:policy, project: project)
+      other_stack = insert(:stack)
+      policy = insert(:policy, project: project, type: :stack)
       bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
       insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 
       :ok = Binding.handle_event(%PubSub.StackCreated{item: stack})
       assert Repo.get_by(StackPolicy, policy_id: policy.id, stack_id: stack.id)
+
+      :ok = Binding.handle_event(%PubSub.StackCreated{item: other_stack})
+      refute Repo.get_by(StackPolicy, policy_id: policy.id, stack_id: other_stack.id)
 
       {:ok, _} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
 
@@ -84,7 +92,7 @@ defmodule Console.Deployments.PubSub.BindingTest do
       project = insert(:project)
       workbench = insert(:workbench, project: project)
       stack = insert(:stack, project: project)
-      policy = insert(:policy, project: project)
+      policy = insert(:policy, project: project, type: :stack)
       bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
       insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 

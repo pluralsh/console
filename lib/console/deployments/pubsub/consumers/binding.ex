@@ -13,6 +13,7 @@ defmodule Console.Deployments.PubSub.Binding do
     with %{} = target <- Bindable.target(event) do
       BindingPolicy
       |> BindingPolicy.for_type(binding_type(target))
+      |> BindingPolicy.for_project(target.project_id)
       |> Repo.stream(method: :keyset)
       |> Console.throttle(count: 10, pause: :timer.seconds(1))
       |> Stream.each(&Policy.reconcile(&1, target))

@@ -1541,8 +1541,8 @@ defmodule Console.Deployments.StacksSyncTest do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       stack = insert(:stack, project: project)
-      policy = insert(:policy, project: project)
-      replacement = insert(:policy, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+      replacement = insert(:policy, project: project, type: :stack)
 
       {:ok, association} = Stacks.create_stack_policy(%{policy_id: policy.id}, stack.id, user)
       assert association.stack_id == stack.id
@@ -1554,6 +1554,16 @@ defmodule Console.Deployments.StacksSyncTest do
       {:ok, deleted} = Stacks.delete_stack_policy(updated.id, user)
       assert deleted.id == updated.id
       refute refetch(updated)
+    end
+
+    test "requires stack policy type when creating associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project, type: :workbench)
+
+      assert {:error, "stack policies require a stack policy"} =
+               Stacks.create_stack_policy(%{policy_id: policy.id}, stack.id, user)
     end
 
     test "stack readers cannot manage policy associations" do

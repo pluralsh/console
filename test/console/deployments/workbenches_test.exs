@@ -3224,6 +3224,20 @@ defmodule Console.Deployments.WorkbenchesTest do
       refute refetch(updated)
     end
 
+    test "requires workbench policy type when creating associations" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      policy = insert(:policy, project: project, type: :stack)
+
+      assert {:error, "workbench policies require a workbench policy"} =
+               Workbenches.create_workbench_policy(
+                 %{policy_id: policy.id, matches: %{regexes: [".*"]}},
+                 workbench.id,
+                 user
+               )
+    end
+
     test "workbench readers cannot create policy associations" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])

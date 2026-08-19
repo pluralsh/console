@@ -210,10 +210,10 @@ defmodule Console.Deployments.Workbenches do
       |> when_ok(:insert)
     end)
     |> add_operation(:policy, fn %{workbench_policy: workbench_policy} ->
-      workbench_policy
-      |> Repo.preload(:policy)
-      |> Map.fetch!(:policy)
-      |> allow(user, :read)
+      case workbench_policy |> Repo.preload(:policy) |> Map.fetch!(:policy) do
+        %{type: :workbench} = policy -> allow(policy, user, :read)
+        _ -> {:error, "workbench policies require a workbench policy"}
+      end
     end)
     |> execute(extract: :workbench_policy)
     |> notify(:create, user)
