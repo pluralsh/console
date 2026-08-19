@@ -289,6 +289,28 @@
       background: #0E1015; border: 1px solid var(--border); border-radius: 4px;
       padding: 10px 12px; color: #C5C9D2; white-space: pre; overflow: auto;
     }
+    .modal.narrow { width: min(560px, 100%); }
+    .combo { position: relative; }
+    .combo-trigger {
+      width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      background: var(--fill-zero); border: 1px solid var(--border-input); border-radius: 3px; padding: 8px 10px;
+    }
+    .combo-trigger:hover { background: var(--fill-zero-hover); }
+    .combo.open .combo-trigger { border-color: var(--border-primary); }
+    .combo-pop {
+      position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 8;
+      background: var(--fill-one); border: 1px solid var(--border-fill-one); border-radius: 6px;
+      box-shadow: 0 12px 32px #0008; overflow: hidden;
+    }
+    .combo-search { padding: 8px; border-bottom: 1px solid var(--border); }
+    .combo-search input {
+      width: 100%; background: var(--fill-zero); border: 1px solid var(--border-input);
+      border-radius: 3px; padding: 6px 8px; outline: none;
+    }
+    .combo-search input:focus { border-color: var(--border-primary); }
+    .combo-meta { padding: 6px 10px; font-size: 11px; color: var(--text-xlight); }
+    .combo-list { max-height: 220px; overflow: auto; }
+    .combo-empty { padding: 16px; text-align: center; color: var(--text-xlight); font-size: 13px; }
   </style>
 </head>
 <body>
@@ -559,6 +581,51 @@ bind := true if {
       { id: 'pii-redaction.rego', desc: 'Denies tools that would return unmasked customer records', type: 'Stack' },
     ]
 
+    const ENFORCEMENT_CATALOG = ENFORCEMENT.concat([
+      ['prod-write-guard.rego', 'Blocks unapproved writes on production clusters', 'Workbench'],
+      ['staging-shell.rego', 'Restricts kube.exec in staging to platform', 'Workbench'],
+      ['break-glass-kube.rego', 'Break-glass kubectl must be sampled and ticketed', 'Workbench'],
+      ['repo-exfil.rego', 'Denies cloning repos outside the allowlist', 'Workbench'],
+      ['cost-query-cap.rego', 'Caps raw cloud query fan-out', 'Workbench'],
+      ['oncall-only-delete.rego', 'kube.delete only for the on-call group', 'Workbench'],
+      ['no-prod-apply.rego', 'Blocks helm/terraform apply against prod kubecontexts', 'Workbench'],
+      ['secrets-in-chat.rego', 'Denies tools that would echo secret values into chat', 'Workbench'],
+      ['network-sink.rego', 'Blocks posting cluster data to unknown HTTPS sinks', 'Workbench'],
+      ['jira-write.rego', 'Ticket writes limited to the incident project', 'Workbench'],
+      ['pr-to-main.rego', 'PRs from this workbench cannot target main', 'Workbench'],
+      ['db-migrate.rego', 'Migration tools require two-person approval', 'Workbench'],
+      ['lambda-invoke.rego', 'Prod lambda invoke is deny-by-default', 'Workbench'],
+      ['azure-sub-guard.rego', 'Azure tools stay inside the assigned subscription', 'Workbench'],
+      ['terraform-prod.rego', 'Terraform prod workspaces need change tickets', 'Stack'],
+      ['terragrunt-window.rego', 'Terragrunt applies only in the change window', 'Stack'],
+      ['stack-approval.rego', 'Unapproved stacks cannot run apply', 'Stack'],
+      ['state-lock.rego', 'Denies unlocking remote state without SRE', 'Stack'],
+      ['module-source.rego', 'Terraform modules must come from the private registry', 'Stack'],
+      ['destroy-guard.rego', 'stack destroy is always deny', 'Stack'],
+      ['plan-size.rego', 'Plans over 200 resources require extra approval', 'Stack'],
+      ['sandbox-only-apply.rego', 'Applies allowed only on sandbox stacks', 'Stack'],
+      ['aws-prod-account.rego', 'AWS stack runs must stay in the prod account', 'Stack'],
+      ['k8s-cluster-pin.rego', 'Stack kube tools pinned to the named cluster', 'Stack'],
+    ].map(([id, desc, type]) => ({ id, desc, type })))
+
+    const BIND_CATALOG = BIND_POLICIES.concat([
+      ['bind-eu', 'auto-bind-eu-west.rego', 'workbench or stack', 'bind := true if name contains eu-west'],
+      ['bind-us', 'auto-bind-us-east.rego', 'workbench or stack', 'bind := true if name contains us-east'],
+      ['bind-plat', 'auto-bind-platform.rego', 'workbench or stack', 'bind := true if project.name is platform'],
+      ['bind-pay', 'auto-bind-payments.rego', 'workbench', 'bind := true if name or description matches payments'],
+      ['bind-sec', 'auto-bind-security-wb.rego', 'workbench', 'bind := true if name matches sec-* or security'],
+      ['bind-obs', 'auto-bind-observability.rego', 'workbench', 'bind := true if attached tools include prometheus or loki'],
+      ['bind-mcp', 'auto-bind-mcp-enabled.rego', 'workbench', 'bind := true if an MCP server is configured'],
+      ['bind-gitops', 'auto-bind-gitops-repos.rego', 'workbench', 'bind := true if a coding repo is infrastructure-as-code'],
+      ['bind-sev', 'auto-bind-sev1.rego', 'workbench', 'bind := true if description mentions sev1 / incident'],
+      ['bind-nonprod', 'auto-bind-nonprod-project.rego', 'workbench or stack', 'bind := true if project.name is not production'],
+      ['bind-paused', 'auto-bind-unpaused-stacks.rego', 'stack', 'bind := true if the stack is not paused'],
+      ['bind-ansible', 'auto-bind-ansible-stacks.rego', 'stack', 'bind := true if stack type is ansible'],
+      ['bind-tf-prod', 'auto-bind-tf-prod.rego', 'stack', 'bind := true if terraform stack name matches prod'],
+      ['bind-drift', 'auto-bind-drift-detect.rego', 'stack', 'bind := true if the stack has drift detection on'],
+      ['bind-default', 'auto-bind-default-project.rego', 'workbench or stack', 'bind := true if project.default'],
+    ].map(([id, name, target, desc]) => ({ id, name, desc, target, src: BIND_POLICIES[0].src })))
+
     const RULES = [
       { id: 'r1', policy: 'prod-guardrails.rego', bind: 'bind-prod', type: 'Workbench', matched: '3 workbenches', interval: '1h', matches: 'kube\\.(exec|delete|shell)' },
       { id: 'r2', policy: 'pii-redaction.rego', bind: 'bind-sandbox', type: 'Stack', matched: '2 stacks', interval: '1h', matches: '' },
@@ -576,25 +643,94 @@ bind := true if {
     }
 
     function policyDesc(name) {
-      const p = ENFORCEMENT.find((x) => x.id === name)
+      const p = ENFORCEMENT_CATALOG.find((x) => x.id === name)
       return p ? p.desc : ''
     }
 
     function inferredAttachType() {
-      const p = ENFORCEMENT.find((x) => x.id === state.attachPolicy) || ENFORCEMENT[0]
+      const p = ENFORCEMENT_CATALOG.find((x) => x.id === state.attachPolicy) || ENFORCEMENT_CATALOG[0]
       return p.type
     }
 
     function compatibleBinds() {
       const key = inferredAttachType().toLowerCase()
-      return BIND_POLICIES.filter((p) => p.target.includes(key))
+      return BIND_CATALOG.filter((p) => p.target.includes(key))
     }
 
     function pickAttach(id) {
       state.attachPolicy = id
+      state.attachOpen = null
+      state.attachQ = ''
       const binds = compatibleBinds()
       if (!binds.some((p) => p.id === state.attachBind)) state.attachBind = binds[0].id
       render()
+    }
+
+    function pickBind(id) {
+      state.attachBind = id
+      state.attachOpen = null
+      state.attachQ = ''
+      render()
+    }
+
+    function toggleCombo(kind) {
+      if (state.attachOpen === kind) {
+        state.attachOpen = null
+        state.attachQ = ''
+      } else {
+        state.attachOpen = kind
+        state.attachQ = ''
+      }
+      render()
+    }
+
+    function filterDocs(items, getName) {
+      const q = (state.attachQ || '').trim().toLowerCase()
+      if (!q) return items
+      return items.filter((p) => {
+        const name = getName(p).toLowerCase()
+        return name.includes(q) || (p.desc || '').toLowerCase().includes(q)
+      })
+    }
+
+    function comboField({ kind, label, caption, hint, selectedName, selectedChip, selectedDesc, items, itemName }) {
+      const open = state.attachOpen === kind
+      const filtered = filterDocs(items, itemName)
+      return `
+        <div class="field">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <span class="label">${label} *</span>
+            ${caption || ''}
+          </div>
+          <div class="combo ${open ? 'open' : ''}">
+            <button type="button" class="combo-trigger" onclick="toggleCombo('${kind}')">
+              <div>
+                <div class="row-title"><span class="mono">${selectedName}</span>${selectedChip || ''}</div>
+                <div class="row-sub">${selectedDesc}</div>
+              </div>
+              <span class="caret">${I.caret}</span>
+            </button>
+            ${open ? `
+            <div class="combo-pop">
+              <div class="combo-search">
+                <input data-combo-search="1" placeholder="Search ${items.length} documents" value="${state.attachQ || ''}" oninput="state.attachQ=this.value;render()" />
+              </div>
+              <div class="combo-meta">${filtered.length === items.length ? `${items.length} in this project` : `Showing ${filtered.length} of ${items.length}`}</div>
+              <div class="combo-list">
+                ${filtered.length ? filtered.map((p) => {
+                  const name = itemName(p)
+                  const active = name === selectedName || p.id === selectedName
+                  return `
+                <button type="button" class="pick-row ${active ? 'active' : ''}" onclick="${kind === 'policy' ? `pickAttach('${p.id}')` : `pickBind('${p.id}')`}">
+                  <div class="row-title"><span class="mono">${name}</span>${p.type ? typeChip(p.type) : ''}</div>
+                  <div class="row-sub">${p.desc}</div>
+                </button>`
+                }).join('') : `<div class="combo-empty">No documents match “${state.attachQ}”</div>`}
+              </div>
+            </div>` : ''}
+          </div>
+          <span class="hint">${hint}</span>
+        </div>`
     }
 
     function currentRule() {
@@ -726,7 +862,7 @@ bind := true if {
             </section>`
     }
 
-    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachAdvanced: false, attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h' }
+    let state = { screen: 'policies', menu: false, simulated: false, createStep: 'Details', policyKind: 'enforcement', formType: 'WORKBENCH', bindId: 'bind-prod', ruleId: 'r1', evalId: '4f2c', attachAdvanced: false, attachOpen: null, attachQ: '', attachPolicy: 'prod-guardrails.rego', attachBind: 'bind-prod', attachInterval: '1h' }
 
     function go(screen) {
       state.screen = screen
@@ -741,7 +877,11 @@ bind := true if {
         const binds = compatibleBinds()
         if (binds.length && !binds.some((p) => p.id === state.attachBind)) state.attachBind = binds[0].id
       }
-      if (screen !== 'attachment-create') state.attachAdvanced = false
+      if (screen !== 'attachment-create') {
+        state.attachAdvanced = false
+        state.attachOpen = null
+        state.attachQ = ''
+      }
       location.hash = screen
       render()
     }
@@ -896,10 +1036,10 @@ bind := true if {
       }),
 
       'attachment-create': () => {
-        const attached = ENFORCEMENT.find((x) => x.id === state.attachPolicy) || ENFORCEMENT[0]
+        const attached = ENFORCEMENT_CATALOG.find((x) => x.id === state.attachPolicy) || ENFORCEMENT_CATALOG[0]
         const inferred = attached.type
         const workbench = inferred === 'Workbench'
-        const binds = BIND_POLICIES.filter((p) => p.target.includes(inferred.toLowerCase()))
+        const binds = compatibleBinds()
         const selectedBind = binds.find((p) => p.id === state.attachBind) || binds[0]
         const interval = state.attachInterval || '1h'
         const mutation = workbench
@@ -922,41 +1062,35 @@ bind := true if {
           ${policiesTabs('rules')}
           ${attachmentRulesTable()}
           <div class="modal-scrim" onclick="if (event.target === this) { state.policyKind='autoattach'; go('policies') }">
-            <div class="modal">
+            <div class="modal narrow">
               <div class="modal-head">
                 <div>
                   <h2 class="modal-title">New attachment rule</h2>
-                  <p class="subtitle">Pick two policy documents. The rule itself has no name and no Rego — it only points at them.</p>
+                  <p class="subtitle">Search existing documents. This project has ${ENFORCEMENT_CATALOG.length} enforcement policies and ${BIND_CATALOG.length} bind policies.</p>
                 </div>
                 <button class="icon-btn" onclick="state.policyKind='autoattach';go('policies')">×</button>
               </div>
-              <div class="pick-grid">
-                <div class="pick-col">
-                  <div class="th">Attach which policy</div>
-                  <div class="hint">WORKBENCH or STACK document. This is what gets attached when bind is true.</div>
-                  <div class="pick-list">
-                    ${ENFORCEMENT.map((p) => `
-                    <button type="button" class="pick-row ${p.id === attached.id ? 'active' : ''}" onclick="pickAttach('${p.id}')">
-                      <div class="row-title"><span class="mono">${p.id}</span>${typeChip(p.type)}</div>
-                      <div class="row-sub">${p.desc}</div>
-                    </button>`).join('')}
-                  </div>
-                </div>
-                <div class="pick-col">
-                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                    <div class="th">Bind when</div>
-                    <a href="#" onclick="event.preventDefault();state.formType='BINDING';state.policyKind='autoattach';go('policy-create')">Create a binding policy first</a>
-                  </div>
-                  <div class="hint">BINDING document only. Evaluates <code>bind: true/false</code> against a cleaned ${inferred.toLowerCase()}.</div>
-                  <div class="pick-list">
-                    ${binds.map((p) => `
-                    <button type="button" class="pick-row ${p.id === selectedBind.id ? 'active' : ''}" onclick="state.attachBind='${p.id}';render()">
-                      <div class="row-title"><span class="mono">${p.name}</span></div>
-                      <div class="row-sub">${p.desc}</div>
-                    </button>`).join('')}
-                  </div>
-                </div>
-              </div>
+              ${comboField({
+                kind: 'policy',
+                label: 'Attach which policy',
+                hint: 'WORKBENCH or STACK. <code>policies(projectId, q)</code> — ComboBox, not a list of every file.',
+                selectedName: attached.id,
+                selectedChip: typeChip(attached.type),
+                selectedDesc: attached.desc,
+                items: ENFORCEMENT_CATALOG,
+                itemName: (p) => p.id,
+              })}
+              ${comboField({
+                kind: 'bind',
+                label: 'Bind when',
+                caption: `<a href="#" onclick="event.preventDefault();state.formType='BINDING';state.policyKind='autoattach';go('policy-create')">Create a binding policy first</a>`,
+                hint: 'BINDING only. Filtered to binds that can run on a ${inferred.toLowerCase()}. Query is <code>policies(q, type: BINDING)</code>.',
+                selectedName: selectedBind.name,
+                selectedChip: '',
+                selectedDesc: selectedBind.desc,
+                items: binds,
+                itemName: (p) => p.name,
+              })}
               <div class="inferred">
                 <span class="hint">Attaches to</span>
                 ${typeChip(inferred + 's')}
@@ -1545,6 +1679,12 @@ default sample := 0.5`}</textarea>
         const policyMatch = !b.dataset.policy || b.dataset.policy === state.attachPolicy
         b.classList.toggle('active', screenMatch && kindMatch && policyMatch)
       })
+      const search = document.querySelector('[data-combo-search]')
+      if (search && state.attachOpen) {
+        search.focus()
+        const n = search.value.length
+        search.setSelectionRange(n, n)
+      }
     }
 
     document.querySelector('.picker').addEventListener('click', (e) => {
@@ -1559,6 +1699,8 @@ default sample := 0.5`}</textarea>
     window.openRule = openRule
     window.openEval = openEval
     window.pickAttach = pickAttach
+    window.pickBind = pickBind
+    window.toggleCombo = toggleCombo
     const params = new URLSearchParams(location.search)
     if (params.get('kind') === 'autoattach' || params.get('kind') === 'enforcement') state.policyKind = params.get('kind')
     if (location.hash.slice(1) && screens[location.hash.slice(1)]) state.screen = location.hash.slice(1)

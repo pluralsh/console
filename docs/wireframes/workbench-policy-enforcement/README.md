@@ -163,8 +163,7 @@ Do **not** flatten `WORKBENCH` / `STACK` / `BINDING` into one type chip as if th
 
 One screen. The rule is two pointers, not a file.
 
-- Left: **Attach which policy** — WORKBENCH / STACK `.rego`. Infers `BindingPolicy.type`.
-- Right: **Bind when** — BINDING `.rego` filtered to that target. Link: **Create a binding policy first**.
+- **Attach which policy** / **Bind when** — searchable ComboBox (`policies(projectId, q)` / `policies(q, type: BINDING)`), not a full list of every file. Bind options are filtered to the inferred target. Caption: **Create a binding policy first**.
 - Recap chip: “Attaches to workbenches/stacks — inferred, sent as `type`.”
 - **Tools (optional)** — only if inferred type is workbench. Maps to `matches.workbench.regexes`. Empty → all tools. Hidden for stacks (`StackPolicy` has no matches).
 - **Advanced · polls every 1h** — `interval`, defaulted, min 30m. Not a peer of the two pickers.
