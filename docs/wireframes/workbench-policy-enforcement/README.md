@@ -135,7 +135,7 @@ Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool
 | Screen | Operations |
 | --- | --- |
 | List | `bindingPolicies` (or `policies` → each `bindingPolicies`). Rows are rules, not BINDING files |
-| Create | Two-step modal. `createBindingPolicy({ policyId, bindPolicyId, type, interval, matches })` |
+| Create | Single modal. `createBindingPolicy({ policyId, bindPolicyId, type, interval?, matches? })`. `type` is inferred; matches only for workbench |
 | Edit | `updateBindingPolicy` — interval + `matches.workbench.regexes`. The two policy pointers stay as selected documents |
 | Delete | `deleteBindingPolicy(id)` |
 | Bind-policy picker | `policies` filtered to `type: BINDING`, further filtered by inferred target (workbench vs stack) |
