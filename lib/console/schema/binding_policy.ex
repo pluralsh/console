@@ -95,7 +95,7 @@ defmodule Console.Schema.BindingPolicy do
   defp validate_interval(changeset) do
     validate_change(changeset, :interval, fn :interval, interval ->
       with {:ok, duration} <- parse_duration(interval),
-           true <- seconds(duration) >= :timer.minutes(30) do
+           true <- seconds(duration) >= 30 * 60 do
         []
       else
         _ -> [interval: "must be at least 30m"]

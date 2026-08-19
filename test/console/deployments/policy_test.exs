@@ -151,6 +151,26 @@ defmodule Console.Deployments.PolicyTest do
       assert [interval: _] = Keyword.take(changeset.errors, [:interval])
     end
 
+    test "accepts intervals of at least thirty minutes" do
+      for interval <- ["30m", "6h"] do
+        changeset =
+          BindingPolicy.changeset(
+            %BindingPolicy{},
+            %{policy_id: Ecto.UUID.generate(), bind_policy_id: Ecto.UUID.generate(), type: :workbench, interval: interval}
+          )
+
+        assert changeset.valid?
+      end
+    end
+
+    test "schedules the next poll using the configured interval" do
+      now = DateTime.utc_now()
+      changeset = BindingPolicy.next_poll_changeset(%BindingPolicy{}, "6h")
+      next_poll_at = Ecto.Changeset.get_change(changeset, :next_poll_at)
+
+      assert DateTime.diff(next_poll_at, now, :second) in (3 * 60 * 60)..(9 * 60 * 60)
+    end
+
     test "only considers due bindings pollable" do
       due = insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), -1, :hour))
       insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), 1, :hour))
