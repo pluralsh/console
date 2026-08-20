@@ -182,17 +182,21 @@ func (c *ManifestCache) Export() map[string]persist.ManifestRecord {
 			Expiry:  line.expiry,
 		}
 	}
+	log.V(1).Info("exported manifest cache", "count", len(items))
 	return items
 }
 
 func (c *ManifestCache) Import(items map[string]persist.ManifestRecord) {
 	if c.cacheDir == "" {
+		log.V(1).Info("skipped manifest cache import, cache dir not set")
 		return
 	}
 
+	imported, skippedPath, skippedExpired, skippedMissing := 0, 0, 0, 0
 	for id, rec := range items {
 		expected, err := c.manifestDir(id, rec.SHA)
 		if err != nil || !sameDir(expected, rec.Dir) {
+			skippedPath++
 			continue
 		}
 		line := &cacheLine{
@@ -202,13 +206,23 @@ func (c *ManifestCache) Import(items map[string]persist.ManifestRecord) {
 			expiry:  rec.Expiry,
 		}
 		if !line.live() {
+			skippedExpired++
 			continue
 		}
 		if _, err := os.Stat(expected); err != nil {
+			skippedMissing++
 			continue
 		}
 		c.cache.Set(id, line)
+		imported++
 	}
+	log.Info("imported manifest cache",
+		"imported", imported,
+		"skippedPath", skippedPath,
+		"skippedExpired", skippedExpired,
+		"skippedMissing", skippedMissing,
+		"source", len(items),
+	)
 }
 
 func (l *cacheLine) live() bool {

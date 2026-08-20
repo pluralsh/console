@@ -11,6 +11,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	pollycache "github.com/pluralsh/console/go/polly/cache"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -173,7 +174,29 @@ func (s *Store) Save(snap Snapshot) error {
 	if err := os.WriteFile(tmp, data, 0o600); err != nil {
 		return err
 	}
-	return os.Rename(tmp, final)
+	if err := os.Rename(tmp, final); err != nil {
+		return err
+	}
+
+	s.logExport(len(data), snap)
+	return nil
+}
+
+func (s *Store) logExport(bytes int, snap Snapshot) {
+	keys := []any{
+		"dir", s.dir,
+		"bytes", bytes,
+		"manifests", len(snap.Manifests),
+		"componentShas", len(snap.ComponentSHAs),
+		"statusShas", len(snap.StatusSHAs),
+		"userIds", len(snap.UserIDs),
+		"groupIds", len(snap.GroupIDs),
+		"managedNamespaces", len(snap.ManagedNamespaces),
+	}
+	s.loggedSave.Do(func() {
+		klog.InfoS("exported durable cache snapshot", keys...)
+	})
+	klog.V(1).InfoS("exported durable cache snapshot", keys...)
 }
 
 func (s *Store) Load() (Snapshot, error) {
@@ -184,6 +207,7 @@ func (s *Store) Load() (Snapshot, error) {
 
 	data, err := os.ReadFile(filepath.Join(s.dir, stateFileName))
 	if errors.Is(err, os.ErrNotExist) {
+		klog.InfoS("no durable cache snapshot, starting empty", "dir", s.dir)
 		return Snapshot{Version: SnapshotVersion}, nil
 	}
 	if err != nil {
@@ -195,5 +219,15 @@ func (s *Store) Load() (Snapshot, error) {
 	if snap.Version != SnapshotVersion {
 		return Snapshot{}, fmt.Errorf("unsupported snapshot version %d", snap.Version)
 	}
+	klog.InfoS("loaded durable cache snapshot",
+		"dir", s.dir,
+		"bytes", len(data),
+		"manifests", len(snap.Manifests),
+		"componentShas", len(snap.ComponentSHAs),
+		"statusShas", len(snap.StatusSHAs),
+		"userIds", len(snap.UserIDs),
+		"groupIds", len(snap.GroupIDs),
+		"managedNamespaces", len(snap.ManagedNamespaces),
+	)
 	return snap, nil
 }

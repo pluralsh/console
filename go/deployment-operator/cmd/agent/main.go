@@ -195,11 +195,13 @@ func main() {
 	if snap, err := cacheStore.Load(); err != nil {
 		setupLog.Error(err, "unable to load durable cache, starting cold")
 	} else {
+		setupLog.Info("importing durable cache snapshot")
 		svcReconciler.ManifestCache().Import(snap.Manifests)
 		persist.ApplySHARecords(cache.ComponentShaCache(), snap.ComponentSHAs)
 		persist.ApplySHARecords(statusSynchronizer.SHACache(), snap.StatusSHAs)
 		persist.ApplyIdentityRecords(userGroupCache, snap.UserIDs, snap.GroupIDs)
 		persist.ApplyPollyRecords(nsReconciler.NamespaceCache(), snap.ManagedNamespaces)
+		setupLog.Info("durable cache import finished")
 	}
 	cacheStore.StartPeriodic(ctx, args.CachePersistInterval(), saveCaches)
 
@@ -225,6 +227,7 @@ func main() {
 	<-ctx.Done()
 	setupLog.Info("shutting down")
 	cacheStore.WaitPeriodic()
+	setupLog.Info("exporting durable cache snapshot")
 	if err := saveCaches(); err != nil {
 		setupLog.Error(err, "unable to persist cache snapshot")
 	}
