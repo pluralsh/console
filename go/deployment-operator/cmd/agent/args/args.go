@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/go/polly/containers"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/polly/containers"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -21,11 +22,13 @@ import (
 )
 
 const (
-	EnvDeployToken      = "DEPLOY_TOKEN"
-	EnvDatadogEnabled   = "DATADOG_ENABLED"
-	EnvPyroscopeEnabled = "PYROSCOPE_ENABLED"
-	EnvProfilerEnabled  = "PROFILER_ENABLED"
-	EnvLocal            = "LOCAL"
+	EnvDeployToken        = "DEPLOY_TOKEN"
+	EnvDatadogEnabled     = "DATADOG_ENABLED"
+	EnvDatadogHost        = "DATADOG_HOST"
+	EnvDatadogEnvironment = "DATADOG_ENV"
+	EnvPyroscopeEnabled   = "PYROSCOPE_ENABLED"
+	EnvProfilerEnabled    = "PROFILER_ENABLED"
+	EnvLocal              = "LOCAL"
 
 	defaultProbeAddress   = ":9001"
 	defaultMetricsAddress = ":8000"
@@ -164,8 +167,8 @@ var (
 	argRestoreNamespace                     = flag.String("restore-namespace", defaultRestoreNamespace, "The namespace where Velero restores are located.")
 	argServices                             = flag.String("services", "", "A comma separated list of service ids to reconcile. Leave empty to reconcile all.")
 	argPyroscopeAddress                     = flag.String("pyroscope-address", defaultPyroscopeAddress, "The address of the Pyroscope server.")
-	argDatadogHost                          = flag.String("datadog-host", defaultDatadogHost, "The address of the Datadog server.")
-	argDatadogEnv                           = flag.String("datadog-env", defaultDatadogEnv, "The environment of the Datadog server.")
+	argDatadogHost                          = flag.String("datadog-host", helpers.GetEnv(EnvDatadogHost, defaultDatadogHost), "The address of the Datadog server.")
+	argDatadogEnv                           = flag.String("datadog-env", helpers.GetEnv(EnvDatadogEnvironment, defaultDatadogEnv), "The environment of the Datadog server.")
 	argWorkqueueBaseDelay                   = flag.String("workqueue-base-delay", defaultWorkqueueBaseDelay, "The base delay for the workqueue.")
 	argWorkqueueMaxDelay                    = flag.String("workqueue-max-delay", defaultWorkqueueMaxDelay, "The maximum delay for the workqueue.")
 	argWorkqueueQPS                         = flag.Int("workqueue-qps", 10, "The maximum number of items to process per second.")
