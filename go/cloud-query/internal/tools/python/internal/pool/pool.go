@@ -14,7 +14,7 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/python/internal/protocol"
 )
 
-const wallTimeout = 15 * time.Second
+const wallTimeout = 65 * time.Second
 
 // Runner owns a bounded set of isolated worker processes. It replaces workers
 // after failures and recycles them after the configured number of successes.

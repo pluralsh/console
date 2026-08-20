@@ -1525,7 +1525,7 @@ message RunPythonOutput {
 }
 ```
 
-The runtime exposes no host filesystem, environment, network, subprocess, shell, package installation, third-party package, or host-tool callback. It limits source to 64 KiB, input and result JSON to 1 MiB, stdout to 64 KiB, execution to 10 seconds, memory to 64 MiB, recursion to 200 frames, wall time to 15 seconds, and concurrency to two runs per process. Up to 16 additional requests wait in a bounded FIFO queue. It uses gomonty `v0.0.14`, built against official Monty commit `c9802b5f30d11fecf9f153feb1dfdab3abda070e`; it is not CPython.
+The runtime exposes no host filesystem, environment, network, subprocess, shell, package installation, third-party package, or host-tool callback. It limits source to 64 KiB, input and result JSON to 1 MiB, stdout to 64 KiB, execution to 60 seconds, memory to 100 MiB, recursion to 100 frames, wall time to 65 seconds, and concurrency to two runs per process. Up to 16 additional requests wait in a bounded FIFO queue. It uses gomonty `v0.0.14`, built against official Monty commit `c9802b5f30d11fecf9f153feb1dfdab3abda070e`; it is not CPython.
 
 ## Invoke Lambda
 

@@ -12,9 +12,9 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/python/internal/contract"
 )
 
-const executionTimeout = 10 * time.Second
-const maxMemoryBytes = 64 << 20
-const maxRecursionDepth = 200
+const executionTimeout = 60 * time.Second
+const maxMemoryBytes = 100 << 20
+const maxRecursionDepth = 100
 
 type montyRuntime struct {
 	now func() time.Time

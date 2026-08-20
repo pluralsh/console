@@ -125,6 +125,12 @@ func testConfig() Config {
 	}
 }
 
+func TestWallTimeoutAllowsMontyExecutionLimit(t *testing.T) {
+	if wallTimeout != 65*time.Second {
+		t.Fatalf("wall timeout = %s, want 65s", wallTimeout)
+	}
+}
+
 func TestPoolStartupRecycleAndRemoteFailure(t *testing.T) {
 	factory := &fakeFactory{}
 	runner, err := newRunner(context.Background(), testConfig(), factory.new)

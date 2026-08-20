@@ -44,10 +44,10 @@ Limits:
 - Input and result JSON: 1 MiB each
 - Captured stdout: 64 KiB
 - Private diagnostics: 64 KiB
-- Monty execution: 10 seconds
-- Parent wall clock: 15 seconds or the caller's earlier deadline
-- Monty-managed memory: 64 MiB
-- Recursion: 200 frames
+- Monty execution: 60 seconds
+- Parent wall clock: 65 seconds or the caller's earlier deadline
+- Monty-managed memory: 100 MiB
+- Recursion: 100 frames
 - Active workers: 4
 - Waiting requests: 16 by default
 - Worker recycling: 10 successful requests

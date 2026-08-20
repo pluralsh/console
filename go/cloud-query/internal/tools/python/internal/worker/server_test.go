@@ -66,6 +66,13 @@ func TestMontyRuntimeFreshStateAndStdout(t *testing.T) {
 	}
 }
 
+func TestMontyRuntimeLimitsMatchWorkbenchDefaults(t *testing.T) {
+	limits := newMontyRuntime().limits()
+	if limits.MaxDuration != 60*time.Second || limits.MaxMemory != 100<<20 || limits.MaxRecursionDepth != 100 {
+		t.Fatalf("limits = %#v", limits)
+	}
+}
+
 func TestMontyRuntimeUsesUTCClockOnly(t *testing.T) {
 	runtime := &montyRuntime{
 		now: func() time.Time {
