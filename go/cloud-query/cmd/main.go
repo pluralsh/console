@@ -29,7 +29,7 @@ func startHealthzHandler() {
 
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "python-worker" {
-		if err := pythontools.RunWorker(os.Stdin, os.Stdout); err != nil {
+		if err := pythontools.NewWorker().Run(os.Stdin, os.Stdout); err != nil {
 			os.Exit(1)
 		}
 		return

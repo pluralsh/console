@@ -17,12 +17,13 @@ import (
 	lambdatools "github.com/pluralsh/console/go/cloud-query/internal/tools/lambda"
 	luatools "github.com/pluralsh/console/go/cloud-query/internal/tools/lua"
 	pythontools "github.com/pluralsh/console/go/cloud-query/internal/tools/python"
+	pythongrpc "github.com/pluralsh/console/go/cloud-query/internal/tools/python/grpc"
 )
 
 // ToolQueryService implements the toolquery.ToolQueryServer interface.
 type ToolQueryService struct {
 	toolquery.UnimplementedToolQueryServer
-	python *pythontools.Runner
+	python pythontools.Runner
 }
 
 // Install registers the ToolQuery service with the gRPC server.
@@ -34,19 +35,17 @@ func (in *ToolQueryService) Install(server *grpc.Server) {
 // NewToolQueryService creates a ToolQuery server and verifies its sandboxed
 // Python worker pool before the gRPC server starts accepting requests.
 func NewToolQueryService(ctx context.Context) (Service, error) {
-	runner, err := pythontools.New(ctx)
+	runner, err := pythontools.NewRunner(ctx, pythontools.RunnerConfig{})
 	if err != nil {
 		return nil, err
 	}
+
 	return &ToolQueryService{python: runner}, nil
 }
 
 // Close reaps all Python worker subprocesses.
 func (in *ToolQueryService) Close(ctx context.Context) error {
-	if in.python != nil {
-		return in.python.CloseContext(ctx)
-	}
-	return nil
+	return in.python.CloseContext(ctx)
 }
 
 func (in *ToolQueryService) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
@@ -223,44 +222,22 @@ func (in *ToolQueryService) RunPython(ctx context.Context, input *toolquery.RunP
 	if input == nil {
 		return nil, status.Error(codes.InvalidArgument, "input is required")
 	}
-	if in.python == nil {
-		return nil, status.Error(codes.Unavailable, "python runtime is unavailable")
-	}
-
 	output, err := in.python.Run(ctx, pythontools.RunInput{
 		Script:    input.GetScript(),
 		InputJSON: input.GetInputJson(),
 	})
 	if err != nil {
-		if pythontools.ErrorCode(err) == pythontools.Internal {
+		if pythontools.CodeOf(err) == pythontools.Internal {
 			klog.ErrorS(err, "python worker failed")
 		}
-		return nil, status.Error(pythonGRPCCode(err), err.Error())
+
+		return nil, pythongrpc.StatusError(err)
 	}
 
 	return &toolquery.RunPythonOutput{
 		ResultJson: output.ResultJSON,
 		Stdout:     output.Stdout,
 	}, nil
-}
-
-func pythonGRPCCode(err error) codes.Code {
-	switch pythontools.ErrorCode(err) {
-	case pythontools.InvalidArgument:
-		return codes.InvalidArgument
-	case pythontools.FailedPrecondition:
-		return codes.FailedPrecondition
-	case pythontools.Canceled:
-		return codes.Canceled
-	case pythontools.DeadlineExceeded:
-		return codes.DeadlineExceeded
-	case pythontools.ResourceExhausted:
-		return codes.ResourceExhausted
-	case pythontools.Unavailable:
-		return codes.Unavailable
-	default:
-		return codes.Internal
-	}
 }
 
 func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, query string, timeRange *toolquery.TimeRange) error {
