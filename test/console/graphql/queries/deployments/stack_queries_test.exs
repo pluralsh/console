@@ -746,4 +746,28 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       """, %{"id" => stack.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "stackPolicies" do
+    test "lists policies associated with a readable stack" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      stack = insert(:stack, project: project)
+      policy = insert(:policy, project: project)
+      association = insert(:stack_policy, stack: stack, policy: policy)
+
+      {:ok, %{data: %{"infrastructureStack" => %{"stackPolicies" => found}}}} = run_query("""
+        query StackPolicies($id: ID!) {
+          infrastructureStack(id: $id) {
+            stackPolicies(first: 5) {
+              edges { node { id policy { id } } }
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      [node] = from_connection(found)
+      assert node["id"] == association.id
+      assert node["policy"]["id"] == policy.id
+    end
+  end
 end

@@ -24,11 +24,14 @@ defmodule Console.Deployments.Cron do
     Revision,
     ClusterInsightComponent,
     ClusterUpgrade,
-    WorkbenchJob
+    WorkbenchJob,
+    PolicyEvaluation
   }
   alias Console.Deployments.Pipelines.Discovery
 
   require Logger
+
+  @prune_timeout :timer.seconds(300)
 
   def prune_services() do
     Logger.info "attempting to prune dangling deleted services"
@@ -243,6 +246,7 @@ defmodule Console.Deployments.Cron do
 
   def place_run_workers() do
     StackRun.running()
+    |> StackRun.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
     |> Console.throttle(count: 100, pause: 20)
     |> Stream.each(fn run ->
@@ -361,8 +365,27 @@ defmodule Console.Deployments.Cron do
       Logger.info "pruning #{length(chunk)} workbench jobs"
       Enum.map(chunk, & &1.id)
       |> WorkbenchJob.for_ids()
-      |> Repo.delete_all(timeout: 300_000)
-    end, max_concurrency: 5)
+      |> Repo.delete_all(timeout: @prune_timeout)
+    end, max_concurrency: 5, timeout: @prune_timeout)
+    |> Stream.run()
+  end
+
+  def prune_policy_evaluations() do
+    Logger.info "pruning policy evaluations older than one week"
+
+    PolicyEvaluation.expired()
+    |> PolicyEvaluation.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 10)
+    |> Stream.chunk_every(100)
+    |> Task.async_stream(fn chunk ->
+      Logger.info "pruning #{length(chunk)} policy evaluations"
+
+      chunk
+      |> Enum.map(& &1.id)
+      |> PolicyEvaluation.with_ids()
+      |> Repo.delete_all(timeout: @prune_timeout)
+    end, max_concurrency: 5, timeout: @prune_timeout)
     |> Stream.run()
   end
 

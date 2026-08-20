@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Schema.Base do
       import Absinthe.Resolution.Helpers
       import Console.GraphQl.Schema.Helpers
       import Console.GraphQl.Schema.Base
+      alias Console.Graphql.Middleware.Nested
       alias Console.Middleware.{Authenticated, AdminRequired, Rbac, Feature, ClusterAuthenticated, Scope, ErrorHandler, VectorStoreEnabled}
     end
   end

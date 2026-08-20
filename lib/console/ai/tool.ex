@@ -15,8 +15,47 @@ defmodule Console.AI.Tool do
   }
   alias Console.AI.Chat.Knowledge
   alias Console.Deployments.{Git, Settings, Agents}
+  alias Console.Deployments.Policy, as: PolicySvc
 
   @type t :: %__MODULE__{}
+
+  defmodule Approval do
+    defstruct [:reason]
+
+    def new([_ | _] = reasons) do
+      Enum.map(reasons, fn
+        %{"reason" => reason} -> reason
+        %{"msg" => msg} -> msg
+        _ -> "approval granted"
+      end)
+      |> then(& struct(__MODULE__, reason: "Automatically approved due to: #{Enum.join(&1, ", ")}"))
+    end
+    def new(reason), do: struct(__MODULE__, reason: reason)
+
+    def attrs(%__MODULE__{reason: reason}), do: %{approval_reason: reason, auto_approve: true}
+    def attrs(_), do: %{}
+  end
+
+  defmodule Policy do
+    @type t :: %__MODULE__{
+      regexes: [Regex.t],
+      ignore: [String.t],
+      name: String.t,
+      policy: String.t,
+      policy_id: String.t
+    }
+    defstruct [:regexes, :ignore, :name, :policy, :policy_id]
+
+    def matches?(%__MODULE__{regexes: [_ | _] = regexes, ignore: ignore}, name) do
+      cond do
+        is_list(ignore) and name in ignore -> false
+        is_list(regexes) and Enum.any?(regexes, &Regex.match?(&1, name)) -> true
+        true -> false
+      end
+    end
+    def matches?(%__MODULE__{ignore: [_ | _] = ignore}, name), do: name in ignore
+    def matches?(_, _), do: true
+  end
 
   defmodule Context do
     alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service, InfraResearch, AgentRuntime, WorkbenchJob}
@@ -120,6 +159,64 @@ defmodule Console.AI.Tool do
 
   def json_schema(t) when is_atom(t), do: t.json_schema()
   def json_schema(%tool{} = t), do: tool.json_schema(t)
+
+  def policy(tool, input, [_ | _] = policies) do
+    with [_ | _] = pols <- Enum.filter(policies, &Policy.matches?(&1, name(tool))) do
+      case compile_policies(pols) do
+        {:ok, engine} -> validate_policy(engine, tool,  input, pols)
+        err -> err
+      end
+    else
+      _ -> {:ok, tool}
+    end
+  end
+  def policy(tool, _, _), do: {:ok, tool}
+
+  @policy_base Console.priv_file!("policy/wb.rego")
+
+  defp validate_policy(engine, tool, input, policies) do
+    Enum.map(policies, & &1.policy_id)
+    |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"input" => input}), &1))
+    |> case do
+      {:ok, %{"deny" => [_ | _] = denials}} -> {:error, "Policy denied: #{inspect(denials)}"}
+      {:ok, %{"approve" => [_ | _] = approvals}} ->
+        case tool do
+          %{approval: _} = tool -> {:ok, %{tool | approval: Approval.new(approvals)}}
+          _ -> {:ok, tool}
+        end
+      {:error, _} = err -> err
+      _ -> {:ok, tool}
+    end
+  end
+
+  defp maybe_actor(input) do
+    case actor() do
+      %User{id: id, name: name, email: email, groups: groups} ->
+        Map.put(input, "actor", %{
+          "groups" => (if is_list(groups), do: Enum.map(groups, & &1.name), else: []),
+          "id" => id,
+          "email" => email,
+          "name" => name
+        })
+      _ -> input
+    end
+  end
+
+  defp compile_policies(policies) do
+    with {:ok, engine} <- Regolix.new(),
+         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", @policy_base) do
+      Enum.reduce_while(policies, engine, fn %{policy: p, name: n}, eng ->
+        case Regolix.add_policy(eng, n, p) do
+          {:ok, engine} -> {:cont, engine}
+          {:error, reason} -> {:halt, {:error, "Failed to add policy #{n}: #{inspect(reason)}"}}
+        end
+      end)
+      |> case do
+        {:error, _} = error -> error
+        engine -> {:ok, engine}
+      end
+    end
+  end
 
   def validate(tool, input) when is_atom(tool) do
     struct(tool, %{})

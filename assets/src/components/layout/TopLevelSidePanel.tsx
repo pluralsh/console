@@ -174,8 +174,9 @@ function TopLevelSidePanelContent({
     case 'agent-run':
       return <AgentRunPanelContent />
     case 'ai-chat':
-    default:
       return <ChatbotPanelContent />
+    default:
+      return null
   }
 }
 

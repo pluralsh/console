@@ -23,6 +23,7 @@ defmodule Console.Deployments.Workbenches do
     IssueWebhook,
     ChatConnection,
     WorkbenchChatbot,
+    WorkbenchPolicy,
     WorkbenchJobActivityAgentRun,
     WorkbenchJobThought,
     PullRequest,
@@ -52,6 +53,7 @@ defmodule Console.Deployments.Workbenches do
   @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
   @type chatbot_resp :: {:ok, WorkbenchChatbot.t()} | error
+  @type workbench_policy_resp :: {:ok, WorkbenchPolicy.t()} | error
 
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.hours(6)
@@ -93,6 +95,17 @@ defmodule Console.Deployments.Workbenches do
 
   def get_workbench_eval_result!(id), do: Repo.get!(WorkbenchEvalResult, id)
   def get_workbench_eval_result(id), do: Repo.get(WorkbenchEvalResult, id)
+  def get_workbench_policy!(id), do: Repo.get!(WorkbenchPolicy, id)
+  def get_workbench_policy(id), do: Repo.get(WorkbenchPolicy, id)
+
+  @decorate cacheable(cache: @cache_adapter, key: {:wb_policies, id}, ttl: :timer.hours(24))
+  def get_workbench_policies(id) do
+    WorkbenchPolicy.for_workbench(id)
+    |> WorkbenchPolicy.ordered(asc: :id)
+    |> Repo.all()
+    |> Repo.preload(:policy)
+    |> Enum.map(&WorkbenchPolicy.compile/1)
+  end
 
   def flow_association(flow_id, workbench_id) do
     Repo.get_by(FlowWorkbench, flow_id: flow_id, workbench_id: workbench_id)
@@ -181,6 +194,60 @@ defmodule Console.Deployments.Workbenches do
   @spec delete_workbench(binary, User.t()) :: workbench_resp
   def delete_workbench(id, %User{} = user) do
     get_workbench!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc "Creates a policy association for a workbench. Requires write access to the workbench and read access to the policy."
+  @spec create_workbench_policy(map, binary, User.t()) :: workbench_policy_resp
+  def create_workbench_policy(attrs, workbench_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:workbench_policy, fn _ ->
+      %WorkbenchPolicy{workbench_id: workbench_id}
+      |> WorkbenchPolicy.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:insert)
+    end)
+    |> add_operation(:policy, fn %{workbench_policy: workbench_policy} ->
+      case workbench_policy |> Repo.preload(:policy) |> Map.fetch!(:policy) do
+        %{type: :workbench} = policy -> allow(policy, user, :read)
+        _ -> {:error, "workbench policies require a workbench policy"}
+      end
+    end)
+    |> execute(extract: :workbench_policy)
+    |> notify(:create, user)
+  end
+
+  @doc "Updates a workbench policy association. Requires write access to the workbench and read access to its policy."
+  @spec update_workbench_policy(map, binary, User.t()) :: workbench_policy_resp
+  def update_workbench_policy(attrs, id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:update, fn _ ->
+      get_workbench_policy!(id)
+      |> Repo.preload(:policy)
+      |> WorkbenchPolicy.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:policy, fn %{update: %{policy: policy}} -> allow(policy, user, :read) end)
+    |> execute(extract: :update)
+    |> notify(:update, user)
+  end
+
+  @doc "Deletes a workbench policy association. Requires write access to the workbench."
+  @spec delete_workbench_policy(binary, User.t()) :: workbench_policy_resp
+  def delete_workbench_policy(id, %User{} = user) do
+    get_workbench_policy!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc "Deletes the specified policy association from a workbench. Requires write access to the workbench."
+  @spec delete_workbench_policy(binary, binary, User.t()) :: workbench_policy_resp
+  def delete_workbench_policy(policy_id, workbench_id, %User{} = user) do
+    Repo.get_by!(WorkbenchPolicy, policy_id: policy_id, workbench_id: workbench_id)
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
@@ -1114,6 +1181,10 @@ defmodule Console.Deployments.Workbenches do
   defp execute_approved_activity(_, _),
     do: {:error, "activity does not support function calling"}
 
+  def auto_approve_activity(%WorkbenchJobActivity{id: id, result: %{auto_approve: true}}, %User{} = user),
+    do: approve_job_activity(id, user)
+  def auto_approve_activity(%WorkbenchJobActivity{} = activity, _), do: {:ok, activity}
+
   @doc """
   Rejects a job activity by marking it rejected and setting the output to the reason.
 
@@ -1385,6 +1456,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchChatbotUpdated, chatbot, actor: user)
   defp notify({:ok, %WorkbenchChatbot{} = chatbot}, :delete, user),
     do: handle_notify(PubSub.WorkbenchChatbotDeleted, chatbot, actor: user)
+  defp notify({:ok, %WorkbenchPolicy{} = policy}, :create, user),
+    do: handle_notify(PubSub.WorkbenchPolicyCreated, policy, actor: user)
+  defp notify({:ok, %WorkbenchPolicy{} = policy}, :update, user),
+    do: handle_notify(PubSub.WorkbenchPolicyUpdated, policy, actor: user)
+  defp notify({:ok, %WorkbenchPolicy{} = policy}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchPolicyDeleted, policy, actor: user)
   defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create, user),
     do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
   defp notify(pass, _, _), do: pass

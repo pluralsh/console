@@ -40,16 +40,7 @@ spec:
     name: elasticsearch
   definition:
     policy:
-      phases:
-        warm:
-          min_age: 10d
-          actions:
-            forcemerge:
-              max_num_segments: 1
-        delete:
-          min_age: 30d
-          actions:
-            delete: {}
+      {{- toYaml .Values.cloud.o11y.ilm.logs | nindent 6 }}
 ---
 {{/* Rollover ILM for plrl-{inst}-logs-00000N via write alias */}}
 apiVersion: dbs.plural.sh/v1alpha1
@@ -63,23 +54,7 @@ spec:
     name: elasticsearch
   definition:
     policy:
-      phases:
-        hot:
-          actions:
-            rollover:
-              max_primary_shard_size: 30gb
-              min_primary_shard_size: 5gb
-              max_primary_shard_docs: 5000000
-              max_size: 100gb
-        warm:
-          min_age: 1d
-          actions:
-            shrink:
-              max_primary_shard_size: 30gb
-        delete:
-          min_age: 7d
-          actions:
-            delete: {}
+      {{- toYaml .Values.cloud.o11y.ilm.logsRollover | nindent 6 }}
 ---
 {{/* Lower priority: dated / catch-all indices, legacy ILM */}}
 apiVersion: dbs.plural.sh/v1alpha1

@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Lua, Python, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Codemode, Python, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
@@ -13,7 +13,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     tools = tools(environment)
 
     MemoryEngine.new(tools, 50,
-      engine_opts(job) ++ [
+      engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
         callback: &callback(activity, &1),
@@ -51,8 +51,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       %Skill{skills: skills},
       Scratchpad,
       ObservabilityResult,
-      Lua,
-      Python,
+      %Codemode{tools: []},
       %History{job: job, activities: activities}
     ])
   end

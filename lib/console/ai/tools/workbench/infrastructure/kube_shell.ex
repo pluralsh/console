@@ -107,6 +107,7 @@ defmodule Console.AI.Tools.Workbench.KubeShell do
     field :pod,         :string
     field :container,   :string
     field :explanation, :string
+    field :approval,    :map, virtual: true
   end
 
   def new(attrs) do

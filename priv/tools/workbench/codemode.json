@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "python": {
+      "type": "string",
+      "description": "Python code to execute in the sandbox. The final expression is returned as the result; use print() for diagnostic stdout."
+    }
+  },
+  "required": ["python"],
+  "additionalProperties": false
+}

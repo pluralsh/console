@@ -21,17 +21,30 @@ defmodule Console.Otel.MetricsBuilder do
   end
 
   @doc """
-  Returns a stream of cluster health and upgradeability metrics.
+  Returns aggregate cluster health metrics.
   Must be called within a Repo.transaction for Repo.stream to work.
   """
-  @spec cluster_metrics_stream(DateTime.t()) :: Enumerable.t()
-  def cluster_metrics_stream(timestamp \\ DateTime.utc_now()) do
-    Cluster
-    |> Cluster.ordered(asc: :id)
-    |> Cluster.preloaded([:project, :upgrade_insights])
-    |> Repo.stream(method: :keyset)
-    |> Console.throttle(count: 500, pause: 50)
-    |> Stream.flat_map(&build_cluster_metrics(&1, timestamp))
+  @spec cluster_health_metrics(DateTime.t()) :: [map()]
+  def cluster_health_metrics(timestamp \\ DateTime.utc_now()) do
+    {total, healthy} =
+      Cluster
+      |> Cluster.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle(count: 500, pause: 50)
+      |> Enum.reduce({0, 0}, fn cluster, {total, healthy} ->
+        {total + 1, healthy + if(Cluster.healthy?(cluster), do: 1, else: 0)}
+      end)
+
+    [
+      %{name: "plural.cluster.health.total", value: total, timestamp: timestamp, attributes: %{}},
+      %{name: "plural.cluster.health.healthy", value: healthy, timestamp: timestamp, attributes: %{}},
+      %{
+        name: "plural.cluster.health.unhealthy",
+        value: total - healthy,
+        timestamp: timestamp,
+        attributes: %{}
+      }
+    ]
   end
 
   @doc """
@@ -65,50 +78,6 @@ defmodule Console.Otel.MetricsBuilder do
   end
 
   @doc """
-  Builds cluster health and upgradeability metrics from a Cluster struct.
-  Returns a list containing one health metric and zero or more upgrade metrics.
-  """
-  @spec build_cluster_metrics(Cluster.t(), DateTime.t()) :: [map()]
-  def build_cluster_metrics(%Cluster{} = cluster, timestamp) do
-    project = cluster.project
-
-    base_attrs = %{
-      cluster_id: cluster.id,
-      cluster_name: cluster.name,
-      cluster_handle: cluster.handle,
-      project_id: project && project.id,
-      project_name: project && project.name,
-      distro: to_string(cluster.distro),
-      version: cluster.version,
-      current_version: cluster.current_version
-    }
-
-    health_metric = %{
-      name: "plural.cluster.health",
-      value: cluster_health_to_value(cluster),
-      timestamp: timestamp,
-      attributes: Map.put(base_attrs, :healthy, Cluster.healthy?(cluster))
-    }
-
-    upgrade_metrics =
-      (cluster.upgrade_insights || [])
-      |> Enum.map(fn insight ->
-        %{
-          name: "plural.cluster.upgradeability",
-          value: upgrade_status_to_value(insight.status),
-          timestamp: timestamp,
-          attributes:
-            base_attrs
-            |> Map.put(:target_version, insight.version)
-            |> Map.put(:insight_name, insight.name)
-            |> Map.put(:status, to_string(insight.status))
-        }
-      end)
-
-    [health_metric | upgrade_metrics]
-  end
-
-  @doc """
   Converts a service status atom to a numeric value for the metric.
   """
   @spec service_status_to_value(atom()) :: integer()
@@ -118,24 +87,6 @@ defmodule Console.Otel.MetricsBuilder do
   def service_status_to_value(:failed), do: -1
   def service_status_to_value(:paused), do: -2
   def service_status_to_value(_), do: 0
-
-  @doc """
-  Converts a cluster's health state to a numeric value.
-  """
-  @spec cluster_health_to_value(Cluster.t()) :: integer()
-  def cluster_health_to_value(%Cluster{} = cluster) do
-    if Cluster.healthy?(cluster), do: 1, else: 0
-  end
-
-  @doc """
-  Converts an upgrade insight status to a numeric value.
-  """
-  @spec upgrade_status_to_value(atom()) :: integer()
-  def upgrade_status_to_value(:passing), do: 1
-  def upgrade_status_to_value(:warning), do: 0
-  def upgrade_status_to_value(:unknown), do: -1
-  def upgrade_status_to_value(:failed), do: -2
-  def upgrade_status_to_value(_), do: -1
 
   defp get_in_safe(struct, keys) do
     Enum.reduce_while(keys, struct, fn key, acc ->

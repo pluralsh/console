@@ -1,6 +1,9 @@
 package connection
 
 import (
+	"context"
+	"database/sql"
+
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/log"
@@ -9,7 +12,13 @@ import (
 func (in *connection) Query(q string, args ...any) (columns []string, rows [][]any, err error) {
 	klog.V(log.LogLevelDebug).InfoS("running query", "query", q)
 
-	qResponse, err := in.db.Query(q, args...)
+	tx, err := in.db.BeginTx(context.Background(), &sql.TxOptions{ReadOnly: true})
+	if err != nil {
+		return columns, rows, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qResponse, err := tx.Query(q, args...)
 	if err != nil {
 		return columns, rows, err
 	}

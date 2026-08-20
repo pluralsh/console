@@ -151,6 +151,34 @@ func TestGetConfigDeduplicatesConcurrentStaleRefresh(t *testing.T) {
 	}
 }
 
+func TestRefreshBypassesCacheTTL(t *testing.T) {
+	client := &fakeConfigClient{resp: observabilityProto("http://prom-v1", "http://elastic")}
+	provider := NewCachingProvider(client, time.Hour)
+
+	if _, err := provider.GetConfig(context.Background()); err != nil {
+		t.Fatalf("prime config: %v", err)
+	}
+
+	client.mu.Lock()
+	client.resp = observabilityProto("http://prom-v2", "http://elastic")
+	client.mu.Unlock()
+
+	if err := provider.Refresh(context.Background()); err != nil {
+		t.Fatalf("refresh config: %v", err)
+	}
+
+	cfg, err := provider.GetConfig(context.Background())
+	if err != nil {
+		t.Fatalf("get refreshed config: %v", err)
+	}
+	if cfg.PrometheusHost != "http://prom-v2" {
+		t.Fatalf("unexpected refreshed host: got %q want %q", cfg.PrometheusHost, "http://prom-v2")
+	}
+	if got := client.Calls(); got != 2 {
+		t.Fatalf("unexpected grpc call count: got %d want 2", got)
+	}
+}
+
 func observabilityProto(promHost, elasticHost string) *pb.ObservabilityConfig {
 	return &pb.ObservabilityConfig{
 		PrometheusHost: &promHost,

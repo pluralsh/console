@@ -16,7 +16,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, ChatConnection, ChatbotMessage, User}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
@@ -28,7 +28,7 @@ defmodule Console.AI.Workbench.Engine do
     Activity
   }
   alias Console.AI.Tools.Workbench.{
-    Lua,
+    Codemode,
     Python,
     Complete,
     Subagents,
@@ -45,6 +45,7 @@ defmodule Console.AI.Workbench.Engine do
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
+  alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
   require EEx
@@ -90,7 +91,7 @@ defmodule Console.AI.Workbench.Engine do
     end
 
     tools(job, environment, activities)
-    |> MemoryEngine.new(50, engine_opts(job) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
+    |> MemoryEngine.new(50, engine_opts(environment) ++ [system_prompt: &sysprompt(job, environment, &1), acc: %Acc{messages: msgs}, tool_fmt: &tool_fmt/1, callback: &callback(job, &1)])
     |> MemoryEngine.reduce([{:user, job.prompt} | Enum.reverse(messages)], &reducer/2)
     |> case do
       {:ok, %Complete{
@@ -236,50 +237,51 @@ defmodule Console.AI.Workbench.Engine do
     |> Workbenches.update_job_status(job)
   end
 
-  defp spawn_activity(%FunctionCall{} = call, _) do
+  defp spawn_activity(%FunctionCall{} = call, %__MODULE__{user: user}) do
     case FunctionCall.invoke(call) do
       {:ok, %WorkbenchJobActivity{status: :successful} = activity} -> {:ok, activity}
-      {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity)
+      {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity, user)
       {:error, error} -> {:error, error}
     end
   end
 
-  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{job: job}) do
+  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :kubernetes,
       status: :needs_approval,
       prompt: "dispatching kubernetes #{m} request against #{p} on cluster #{handle}",
       tool_call: tool_attrs(request),
-      result: %{
+      result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
         kube_request: Console.mapify(request)
-      }
+      }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
-      do: poll_activity(activity)
+      do: poll_activity(activity, user)
   end
 
-  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{job: job}) do
+  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :exec,
       status: :needs_approval,
       prompt: "dispatching kubernetes exec command `#{command}` against #{p} in container #{ct} on cluster #{handle}",
       tool_call: tool_attrs(request),
-      result: %{
+      result: Map.merge(%{
         output: "request pending user approval",
         explanation: request.explanation,
         kube_exec: Console.mapify(request)
-      }
+      }, Approval.attrs(request.approval))
     }
     with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
-      do: poll_activity(activity)
+      do: poll_activity(activity, user)
   end
 
   defp spawn_activity(_, _), do: :ignore
 
-  defp poll_activity(%WorkbenchJobActivity{} = activity) do
-    with {:ok, %WorkbenchJobActivity{} = activity} <- Activity.await_activity(activity) do
+  defp poll_activity(%WorkbenchJobActivity{} = activity, %User{} = user) do
+    with {:ok, %WorkbenchJobActivity{} = activity} <- Workbenches.auto_approve_activity(activity, user),
+         {:ok, %WorkbenchJobActivity{} = activity} <- Activity.await_activity(activity) do
       {:ok, Repo.preload(activity, [:workbench_job, :agent_run, :agent_runs, :thoughts, :user])}
     end
   end
@@ -330,7 +332,7 @@ defmodule Console.AI.Workbench.Engine do
       %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
-      Lua,
+      %Codemode{tools: []},
       Python,
       Notes,
       Complete,

@@ -2,6 +2,7 @@ package connection
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/samber/lo"
@@ -18,6 +19,8 @@ const driverName = "postgres"
 
 var defaultDataSource = common.DataSource(args.DatabaseHost(), args.DatabasePort(), args.DatabaseName(), args.DatabaseUser(), args.DatabasePassword())
 
+var ErrReadOnlyConnection = errors.New("connection is read-only")
+
 type Connection interface {
 	Configure() error
 	Schema(table string) ([]cloudquery.SchemaResult, error)
@@ -31,12 +34,17 @@ type Connection interface {
 }
 
 type connection struct {
-	name   string
-	config *config.Configuration
-	db     *sql.DB
+	name     string
+	config   *config.Configuration
+	db       *sql.DB
+	readOnly bool
 }
 
 func (in *connection) Configure() error {
+	if in.readOnly {
+		return ErrReadOnlyConnection
+	}
+
 	q, err := in.config.Query(in.name)
 	if err != nil {
 		return fmt.Errorf("failed to get config query for provider %s: %w", in.provider(), err)
@@ -68,10 +76,18 @@ func (in *connection) provider() config.Provider {
 }
 
 func NewConnection(name, dataSource string, config *config.Configuration) (Connection, error) {
+	return newConnection(name, dataSource, config, false)
+}
+
+func NewReadOnlyConnection(name, dataSource string, config *config.Configuration) (Connection, error) {
+	return newConnection(name, dataSource, config, true)
+}
+
+func newConnection(name, dataSource string, config *config.Configuration, readOnly bool) (Connection, error) {
 	db, err := sql.Open(driverName, lo.Ternary(lo.IsEmpty(dataSource), defaultDataSource, dataSource))
 	if err != nil {
 		return nil, err
 	}
 
-	return &connection{name: name, db: db, config: config}, nil
+	return &connection{name: name, db: db, config: config, readOnly: readOnly}, nil
 }

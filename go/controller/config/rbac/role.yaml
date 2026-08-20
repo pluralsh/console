@@ -27,6 +27,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - agentruntimepolicies
   - bootstraptokens
   - catalogs
   - cloudconnections
@@ -86,6 +87,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - agentruntimepolicies/finalizers
   - bootstraptokens/finalizers
   - catalogs/finalizers
   - cloudconnections/finalizers
@@ -139,6 +141,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - agentruntimepolicies/status
   - bootstraptokens/status
   - catalogs/status
   - cloudconnections/status

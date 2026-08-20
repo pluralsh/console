@@ -1439,6 +1439,63 @@ type BindingAttributes struct {
 	GroupID *string `json:"groupId,omitempty"`
 }
 
+// Associates a policy with a bindable resource type.
+type BindingPolicy struct {
+	ID         string                `json:"id"`
+	Type       BindingPolicyType     `json:"type"`
+	Interval   string                `json:"interval"`
+	NextPollAt *string               `json:"nextPollAt,omitempty"`
+	Matches    *BindingPolicyMatches `json:"matches,omitempty"`
+	Policy     *Policy               `json:"policy,omitempty"`
+	BindPolicy *Policy               `json:"bindPolicy,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type BindingPolicyAttributes struct {
+	// the policy to attach to matching targets
+	PolicyID string `json:"policyId"`
+	// the policy that determines whether a target should be bound
+	BindPolicyID string `json:"bindPolicyId"`
+	// the resource type this policy can bind to
+	Type BindingPolicyType `json:"type"`
+	// how often the binding policy is evaluated; defaults to 1h and cannot be below 30m
+	Interval *string `json:"interval,omitempty"`
+	// criteria that determine when the policy applies
+	Matches *BindingPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
+type BindingPolicyConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*BindingPolicyEdge `json:"edges,omitempty"`
+}
+
+type BindingPolicyEdge struct {
+	Node   *BindingPolicy `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type BindingPolicyMatches struct {
+	Workbench *WorkbenchPolicyMatches `json:"workbench,omitempty"`
+}
+
+type BindingPolicyMatchesAttributes struct {
+	Workbench *WorkbenchPolicyMatchesAttributes `json:"workbench,omitempty"`
+}
+
+type BindingPolicyUpdateAttributes struct {
+	// the policy to attach to matching targets
+	PolicyID *string `json:"policyId,omitempty"`
+	// the policy that determines whether a target should be bound
+	BindPolicyID *string `json:"bindPolicyId,omitempty"`
+	// the resource type this policy can bind to
+	Type BindingPolicyType `json:"type"`
+	// how often the binding policy is evaluated; cannot be below 30m
+	Interval *string `json:"interval,omitempty"`
+	// criteria that determine when the policy applies
+	Matches *BindingPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
 // Requirements for Bitbucket Data Center / Server authentication
 type BitbucketDatacenterAttributes struct {
 	// the user slug for Bitbucket Data Center / Server
@@ -4038,20 +4095,23 @@ type HelmChartVersion struct {
 }
 
 type HelmConfigAttributes struct {
-	Values      *string              `json:"values,omitempty"`
-	ValuesFiles []*string            `json:"valuesFiles,omitempty"`
-	Chart       *string              `json:"chart,omitempty"`
-	Version     *string              `json:"version,omitempty"`
-	Release     *string              `json:"release,omitempty"`
-	URL         *string              `json:"url,omitempty"`
-	IgnoreHooks *bool                `json:"ignoreHooks,omitempty"`
-	IgnoreCrds  *bool                `json:"ignoreCrds,omitempty"`
-	LuaScript   *string              `json:"luaScript,omitempty"`
-	LuaFile     *string              `json:"luaFile,omitempty"`
-	LuaFolder   *string              `json:"luaFolder,omitempty"`
-	Set         *HelmValueAttributes `json:"set,omitempty"`
-	Repository  *NamespacedName      `json:"repository,omitempty"`
-	Git         *GitRefAttributes    `json:"git,omitempty"`
+	Values       *string              `json:"values,omitempty"`
+	ValuesFiles  []*string            `json:"valuesFiles,omitempty"`
+	Chart        *string              `json:"chart,omitempty"`
+	Version      *string              `json:"version,omitempty"`
+	Release      *string              `json:"release,omitempty"`
+	URL          *string              `json:"url,omitempty"`
+	IgnoreHooks  *bool                `json:"ignoreHooks,omitempty"`
+	IgnoreCrds   *bool                `json:"ignoreCrds,omitempty"`
+	LuaScript    *string              `json:"luaScript,omitempty"`
+	LuaFile      *string              `json:"luaFile,omitempty"`
+	LuaFolder    *string              `json:"luaFolder,omitempty"`
+	PythonScript *string              `json:"pythonScript,omitempty"`
+	PythonFile   *string              `json:"pythonFile,omitempty"`
+	PythonFolder *string              `json:"pythonFolder,omitempty"`
+	Set          *HelmValueAttributes `json:"set,omitempty"`
+	Repository   *NamespacedName      `json:"repository,omitempty"`
+	Git          *GitRefAttributes    `json:"git,omitempty"`
 	// a folder containing a kustomization to apply to the result of rendering this service's manifests
 	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 	// pointer to a Plural GitRepository
@@ -4152,6 +4212,12 @@ type HelmSpec struct {
 	LuaFile *string `json:"luaFile,omitempty"`
 	// a folder of lua files to include in the final script used
 	LuaFolder *string `json:"luaFolder,omitempty"`
+	// a python script to use for helm applies
+	PythonScript *string `json:"pythonScript,omitempty"`
+	// a python file to use for helm applies
+	PythonFile *string `json:"pythonFile,omitempty"`
+	// a folder of python files to include in the final script used
+	PythonFolder *string `json:"pythonFolder,omitempty"`
 	// a folder containing a kustomization to apply to the result of rendering this service's manifests
 	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 }
@@ -4350,6 +4416,7 @@ type InfrastructureStack struct {
 	// the actor of this stack (defaults to root console user)
 	Actor           *User                     `json:"actor,omitempty"`
 	CustomStackRuns *CustomStackRunConnection `json:"customStackRuns,omitempty"`
+	StackPolicies   *StackPolicyConnection    `json:"stackPolicies,omitempty"`
 	// key/value tags to filter stacks
 	Tags []*Tag `json:"tags,omitempty"`
 	// Infracost resource rows attached to this stack (newest first)
@@ -6541,6 +6608,42 @@ type PodTolerationAttributes struct {
 	Effect   *string `json:"effect,omitempty"`
 }
 
+// A project-scoped policy that can be associated with workbenches to enforce policy decisions.
+type Policy struct {
+	// unique policy identifier
+	ID string `json:"id"`
+	// unique policy name
+	Name string `json:"name"`
+	// policy implementation type
+	Type PolicyType `json:"type"`
+	// human-readable policy description
+	Description *string `json:"description,omitempty"`
+	// policy source text
+	Policy string `json:"policy"`
+	// project that owns this policy
+	Project *Project `json:"project,omitempty"`
+	// Sampled evaluations that include this policy.
+	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
+	StackPolicies     *StackPolicyConnection      `json:"stackPolicies,omitempty"`
+	WorkbenchPolicies *WorkbenchPolicyConnection  `json:"workbenchPolicies,omitempty"`
+	InsertedAt        *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
+}
+
+// Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy.
+type PolicyAttributes struct {
+	// unique policy name
+	Name *string `json:"name,omitempty"`
+	// policy implementation type
+	Type *PolicyType `json:"type,omitempty"`
+	// human-readable policy description
+	Description *string `json:"description,omitempty"`
+	// policy source text
+	Policy *string `json:"policy,omitempty"`
+	// project that owns the policy; defaults to the deployment's default project when omitted
+	ProjectID *string `json:"projectId,omitempty"`
+}
+
 type PolicyBinding struct {
 	ID    *string `json:"id,omitempty"`
 	User  *User   `json:"user,omitempty"`
@@ -6551,6 +6654,11 @@ type PolicyBindingAttributes struct {
 	ID      *string `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
 	GroupID *string `json:"groupId,omitempty"`
+}
+
+type PolicyConnection struct {
+	PageInfo PageInfo      `json:"pageInfo"`
+	Edges    []*PolicyEdge `json:"edges,omitempty"`
 }
 
 // A OPA Gatekeeper Constraint reference
@@ -6593,6 +6701,11 @@ type PolicyConstraintEdge struct {
 	Cursor *string           `json:"cursor,omitempty"`
 }
 
+type PolicyEdge struct {
+	Node   *Policy `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
 // Configuration for applying policy enforcement to a stack
 type PolicyEngine struct {
 	// the policy engine to use with this stack
@@ -6614,6 +6727,30 @@ type PolicyEngineAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// git reference within the policy repository or stack repository
 	Git *GitRefAttributes `json:"git,omitempty"`
+}
+
+// A sampled policy decision for a tool invocation.
+type PolicyEvaluation struct {
+	// unique policy evaluation identifier
+	ID string `json:"id"`
+	// policies evaluated for this decision
+	PolicyIds []string `json:"policyIds"`
+	// tool input evaluated by the policy
+	Input map[string]any `json:"input"`
+	// policy evaluation result
+	Output     map[string]any `json:"output"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
+}
+
+type PolicyEvaluationConnection struct {
+	PageInfo PageInfo                `json:"pageInfo"`
+	Edges    []*PolicyEvaluationEdge `json:"edges,omitempty"`
+}
+
+type PolicyEvaluationEdge struct {
+	Node   *PolicyEvaluation `json:"node,omitempty"`
+	Cursor *string           `json:"cursor,omitempty"`
 }
 
 // Aggregate statistics for policies across your fleet
@@ -9073,6 +9210,29 @@ type StackOverridesAttributes struct {
 	Pulumi *PulumiConfigurationAttributes `json:"pulumi,omitempty"`
 }
 
+type StackPolicy struct {
+	ID         string               `json:"id"`
+	Policy     *Policy              `json:"policy,omitempty"`
+	Stack      *InfrastructureStack `json:"stack,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
+}
+
+type StackPolicyAttributes struct {
+	// the policy to associate with this stack
+	PolicyID string `json:"policyId"`
+}
+
+type StackPolicyConnection struct {
+	PageInfo PageInfo           `json:"pageInfo"`
+	Edges    []*StackPolicyEdge `json:"edges,omitempty"`
+}
+
+type StackPolicyEdge struct {
+	Node   *StackPolicy `json:"node,omitempty"`
+	Cursor *string      `json:"cursor,omitempty"`
+}
+
 type StackPolicyViolation struct {
 	ID           string       `json:"id"`
 	Severity     VulnSeverity `json:"severity"`
@@ -10060,11 +10220,12 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings   []*PolicyBinding           `json:"writeBindings,omitempty"`
-	Runs            *WorkbenchJobConnection    `json:"runs,omitempty"`
-	Crons           *WorkbenchCronConnection   `json:"crons,omitempty"`
-	Prompts         *WorkbenchPromptConnection `json:"prompts,omitempty"`
-	WorkbenchSkills *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	WriteBindings     []*PolicyBinding           `json:"writeBindings,omitempty"`
+	WorkbenchPolicies *WorkbenchPolicyConnection `json:"workbenchPolicies,omitempty"`
+	Runs              *WorkbenchJobConnection    `json:"runs,omitempty"`
+	Crons             *WorkbenchCronConnection   `json:"crons,omitempty"`
+	Prompts           *WorkbenchPromptConnection `json:"prompts,omitempty"`
+	WorkbenchSkills   *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -10894,6 +11055,46 @@ type WorkbenchObservabilityAttributes struct {
 	Logs *bool `json:"logs,omitempty"`
 	// enable metrics capability
 	Metrics *bool `json:"metrics,omitempty"`
+}
+
+type WorkbenchPolicy struct {
+	ID         string                  `json:"id"`
+	Matches    *WorkbenchPolicyMatches `json:"matches,omitempty"`
+	Policy     *Policy                 `json:"policy,omitempty"`
+	Workbench  *Workbench              `json:"workbench,omitempty"`
+	InsertedAt *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchPolicyAttributes struct {
+	// the policy to associate with this workbench
+	PolicyID string `json:"policyId"`
+	// criteria that determine when the policy applies
+	Matches *WorkbenchPolicyMatchesAttributes `json:"matches,omitempty"`
+}
+
+type WorkbenchPolicyConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*WorkbenchPolicyEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchPolicyEdge struct {
+	Node   *WorkbenchPolicy `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
+}
+
+type WorkbenchPolicyMatches struct {
+	Regexes []*string `json:"regexes,omitempty"`
+}
+
+type WorkbenchPolicyMatchesAttributes struct {
+	// regular expressions that select inputs for this policy
+	Regexes []*string `json:"regexes,omitempty"`
+}
+
+type WorkbenchPolicyUpdateAttributes struct {
+	// criteria that determine when the policy applies
+	Matches *WorkbenchPolicyMatchesAttributes `json:"matches,omitempty"`
 }
 
 type WorkbenchPrMergeRateByWorkbenchEntry struct {
@@ -12766,6 +12967,61 @@ func (e *AutoscalingTarget) UnmarshalJSON(b []byte) error {
 }
 
 func (e AutoscalingTarget) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type BindingPolicyType string
+
+const (
+	BindingPolicyTypeWorkbench BindingPolicyType = "WORKBENCH"
+	BindingPolicyTypeStack     BindingPolicyType = "STACK"
+)
+
+var AllBindingPolicyType = []BindingPolicyType{
+	BindingPolicyTypeWorkbench,
+	BindingPolicyTypeStack,
+}
+
+func (e BindingPolicyType) IsValid() bool {
+	switch e {
+	case BindingPolicyTypeWorkbench, BindingPolicyTypeStack:
+		return true
+	}
+	return false
+}
+
+func (e BindingPolicyType) String() string {
+	return string(e)
+}
+
+func (e *BindingPolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = BindingPolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid BindingPolicyType", str)
+	}
+	return nil
+}
+
+func (e BindingPolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *BindingPolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e BindingPolicyType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -15790,6 +16046,63 @@ func (e *PolicyEngineType) UnmarshalJSON(b []byte) error {
 }
 
 func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PolicyType string
+
+const (
+	PolicyTypeWorkbench PolicyType = "WORKBENCH"
+	PolicyTypeStack     PolicyType = "STACK"
+	PolicyTypeBinding   PolicyType = "BINDING"
+)
+
+var AllPolicyType = []PolicyType{
+	PolicyTypeWorkbench,
+	PolicyTypeStack,
+	PolicyTypeBinding,
+}
+
+func (e PolicyType) IsValid() bool {
+	switch e {
+	case PolicyTypeWorkbench, PolicyTypeStack, PolicyTypeBinding:
+		return true
+	}
+	return false
+}
+
+func (e PolicyType) String() string {
+	return string(e)
+}
+
+func (e *PolicyType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PolicyType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PolicyType", str)
+	}
+	return nil
+}
+
+func (e PolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PolicyType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PolicyType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

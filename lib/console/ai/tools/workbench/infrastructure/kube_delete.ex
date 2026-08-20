@@ -9,6 +9,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeDelete do
   embedded_schema do
     field :user,       :map, virtual: true
     field :job,        :map, virtual: true
+    field :approval,   :map, virtual: true
     field :cluster,    :string
     field :group,      :string
     field :version,    :string

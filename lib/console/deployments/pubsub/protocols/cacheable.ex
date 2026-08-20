@@ -70,3 +70,32 @@ defimpl Console.PubSub.Cacheable, for: [
 ] do
   def cache(%@for{item: _}), do: {:del, :pipelined_services, :ignore}
 end
+
+defimpl Console.PubSub.Cacheable, for: [
+  Console.PubSub.PolicyUpdated,
+  Console.PubSub.PolicyDeleted,
+] do
+  alias Console.Repo
+  alias Console.Schema.{Policy, WorkbenchPolicy}
+
+  def cache(%@for{item: %Policy{} = policy}) do
+    Repo.preload(policy, :workbench_policies)
+    |> Map.get(:workbench_policies)
+    |> case do
+      [_ | _] = assocs -> {:del, Enum.map(assocs, & {:wb_policies, &1.workbench_id}), assocs}
+      _ -> :ok
+    end
+  end
+end
+
+defimpl Console.PubSub.Cacheable, for: [
+  Console.PubSub.WorkbenchPolicyCreated,
+  Console.PubSub.WorkbenchPolicyUpdated,
+  Console.PubSub.WorkbenchPolicyDeleted,
+] do
+  alias Console.Schema.WorkbenchPolicy
+
+  def cache(%@for{item: %WorkbenchPolicy{workbench_id: id} = policy}) when is_binary(id),
+    do: {:del, {:wb_policies, id}, policy}
+  def cache(_), do: :ok
+end

@@ -14,7 +14,7 @@ versions:
     features: ['No new features in v3.5.1; this is a patch release focused on stability,
         performance, and security hardening.']
     breaking_changes: []
-  chart_version: 10.3.3
+  chart_version: 10.4.0
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.5.1']
 - version: 3.5.0

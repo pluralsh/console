@@ -13,6 +13,7 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
   embedded_schema do
     field :tool,        :map, virtual: true
     field :job,         :map, virtual: true
+    field :approval,    :map, virtual: true
     field :input,       :map
     field :explanation, :string
   end
@@ -59,10 +60,10 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
 
   def implement(%__MODULE__{} = model), do: {:ok, model}
 
-  def invoke(%__MODULE__{tool: %WorkbenchTool{approval: true} = tool, job: job, input: input, explanation: explanation}) do
+  def invoke(%__MODULE__{approval: a, tool: %WorkbenchTool{approval: true} = tool, job: job, input: input, explanation: explanation}) do
     Workbenches.create_job_activity(%{
       prompt: prompt(tool),
-      result: %{
+      result: Map.merge(%{
         output: "waiting for user approval",
         explanation: explanation,
         function_call: %{
@@ -70,7 +71,7 @@ defmodule Console.AI.Tools.Workbench.FunctionCall do
           tool_id: tool.id,
           input: input
         }
-      },
+      }, Console.AI.Tool.Approval.attrs(a)),
       tool_call: tool_attrs(tool),
       type: :function,
       status: :needs_approval,

@@ -9,6 +9,8 @@ defmodule Console.Pipelines.AI.Workbench.Pipeline do
     case exec_job(job) do
       {:ok, _} ->
         Logger.info("Workbench job #{job.id} completed")
+      {:error, {:already_started, _}} ->
+        Logger.info("Workbench job #{job.id} already started")
       {:error, error} ->
         Logger.error("Workbench job #{job.id} failed: #{inspect(error)}")
     end

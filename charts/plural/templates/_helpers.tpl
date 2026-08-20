@@ -56,11 +56,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
   valueFrom:
     fieldRef:
       fieldPath: status.podIP
+{{/* These values reference the chart-managed Zalando PostgreSQL cluster. */}}
+{{ if .Values.postgres.create }}
 - name: POSTGRES_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ .Values.dbPasswordSecret }}
       key: password
+{{ end }}
 - name: RABBIT_USERNAME
   valueFrom:
     secretKeyRef:
@@ -78,10 +81,12 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
       key: influxdb-password
 - name: RABBIT_NAMESPACE
   value: {{ .Values.rabbitmqNamespace }}
+{{ if .Values.postgres.create }}
 - name: DBHOST
   value: plural-plural
 - name: DBSSL
   value: 'true'
+{{ end }}
 {{ if .Values.sentryDsn }}
 - name: SENTRY_DSN
   value: {{ .Values.sentryDsn | quote }}

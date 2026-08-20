@@ -11,6 +11,38 @@ cloud:
   enabled: false
   o11y:
     enabled: false
+    # ilm is the Elasticsearch index lifecycle policy bodies applied to cloud log indices.
+    # Override phases per policy; both default to warm after 1d and delete after 7d.
+    ilm:
+      logs:
+        phases:
+          warm:
+            min_age: 1d
+            actions:
+              forcemerge:
+                max_num_segments: 1
+          delete:
+            min_age: 7d
+            actions:
+              delete: {}
+      logsRollover:
+        phases:
+          hot:
+            actions:
+              rollover:
+                max_primary_shard_size: 30gb
+                min_primary_shard_size: 5gb
+                max_primary_shard_docs: 5000000
+                max_size: 100gb
+          warm:
+            min_age: 1d
+            actions:
+              shrink:
+                max_primary_shard_size: 30gb
+          delete:
+            min_age: 7d
+            actions:
+              delete: {}
   database:
     enabled: false
     shard: ~

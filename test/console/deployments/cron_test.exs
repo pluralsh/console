@@ -373,4 +373,26 @@ defmodule Console.Deployments.CronTest do
       for job <- keep, do: assert refetch(job)
     end
   end
+
+  describe "#prune_policy_evaluations/0" do
+    test "prunes policy evaluations older than one week" do
+      policy = insert(:policy)
+
+      stale = insert(:policy_evaluation,
+        policy_ids: [policy.id],
+        inserted_at: Timex.shift(Timex.now(), days: -8)
+      )
+
+      recent = insert(:policy_evaluation,
+        policy_ids: [policy.id],
+        inserted_at: Timex.shift(Timex.now(), days: -6)
+      )
+
+      :ok = Cron.prune_policy_evaluations()
+
+      refute refetch(stale)
+      assert refetch(recent)
+    end
+  end
+
 end

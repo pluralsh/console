@@ -1500,6 +1500,14 @@
   publisher: sagemaker
 - name: amazon-sagemaker-spaces
   versions:
+  - version: v0.1.7-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.1.7-eksbuild.1
     compatibilities:
     - '1.36'
@@ -1572,6 +1580,14 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.64.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.63.1-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4702,6 +4718,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.63.10000020260816-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.63.10000020260808-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4801,6 +4825,14 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v4.4.10000020260815-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v4.4.10000020260808-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4818,6 +4850,14 @@
     - '1.31'
     - '1.30'
   - version: v4.0.20001020260421-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.0.10000020260818-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -4870,6 +4910,24 @@
     - '1.30'
     - '1.29'
   - version: v1.21.20001020260426-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.21.10001020260817-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.21.10001020260815-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -4944,6 +5002,11 @@
   publisher: Chainguard
 - name: chainguard_coredns-fips
   versions:
+  - version: v1.47.10000020260815-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.47.10000020260806-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4970,6 +5033,11 @@
     - '1.34'
     - '1.33'
   - version: v1.0.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.0.10000020260817-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5007,6 +5075,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v0.0.10009020260817-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.0.10009020260812-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5028,6 +5101,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.10009020260423-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10000020260816-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5090,6 +5168,10 @@
   publisher: cloudsoft
 - name: coredns
   versions:
+  - version: v1.14.3-eksbuild.9
+    compatibilities:
+    - '1.36'
+    - '1.35'
   - version: v1.14.3-eksbuild.3
     compatibilities:
     - '1.36'
@@ -5102,6 +5184,12 @@
     compatibilities:
     - '1.36'
     - '1.35'
+  - version: v1.13.2-eksbuild.17
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.13.2-eksbuild.11
     compatibilities:
     - '1.36'
@@ -5141,6 +5229,11 @@
   - version: v1.13.1-eksbuild.1
     compatibilities:
     - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.12.4-eksbuild.24
+    compatibilities:
     - '1.35'
     - '1.34'
     - '1.33'
@@ -5199,6 +5292,14 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.11.4-eksbuild.46
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.11.4-eksbuild.40
     compatibilities:
     - '1.34'
@@ -6953,6 +7054,24 @@
   publisher: Elastic
 - name: external-dns
   versions:
+  - version: v0.21.0-eksbuild.8
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v0.21.0-eksbuild.7
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v0.21.0-eksbuild.6
     compatibilities:
     - '1.36'
@@ -9199,6 +9318,15 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.19.1-eksbuild.4
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.19.1-eksbuild.3
     compatibilities:
     - '1.36'
@@ -9450,6 +9578,18 @@
   publisher: eks
 - name: kubecost_kubecost
   versions:
+  - version: v3.2.3-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v3.2.1-eksbuild.1
     compatibilities:
     - '1.35'
@@ -10377,6 +10517,14 @@
   publisher: rafay-systems
 - name: snapshot-controller
   versions:
+  - version: v8.6.0-eksbuild.5
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v8.6.0-eksbuild.4
     compatibilities:
     - '1.36'

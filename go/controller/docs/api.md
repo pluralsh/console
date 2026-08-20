@@ -9,6 +9,7 @@
 Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 API group
 
 ### Resource Types
+- [AgentRuntimePolicy](#agentruntimepolicy)
 - [BootstrapToken](#bootstraptoken)
 - [Catalog](#catalog)
 - [CloudConnection](#cloudconnection)
@@ -150,6 +151,63 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `addon` _string_ | Addon the addon this callout applies to |  |  |
 | `template` _string_ | Template the template to use for this callout |  |  |
+
+
+#### AgentRuntimePolicy
+
+
+
+AgentRuntimePolicy centrally defines who can create agent runs on an AgentRuntime.
+Bindings must be managed from the management cluster: if a target cluster could set
+its own bindings, cluster operators could grant themselves clone/PR access against
+any repository reachable by the runtime's SCM credentials.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `AgentRuntimePolicy` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[AgentRuntimePolicySpec](#agentruntimepolicyspec)_ |  |  |  |
+
+
+#### AgentRuntimePolicyBindings
+
+
+
+AgentRuntimePolicyBindings defines create permissions for an AgentRuntime.
+
+
+
+_Appears in:_
+- [AgentRuntimePolicySpec](#agentruntimepolicyspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `create` _[Binding](#binding) array_ | Create bindings control who can create agent runs on this runtime. |  | Optional: \{\} <br /> |
+
+
+#### AgentRuntimePolicySpec
+
+
+
+AgentRuntimePolicySpec defines the desired access policy for an AgentRuntime.
+
+
+
+_Appears in:_
+- [AgentRuntimePolicy](#agentruntimepolicy)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `runtime` _string_ | Runtime is the name of the AgentRuntime this policy applies to.<br />Defaults to metadata.name if not specified. |  | Optional: \{\} <br /> |
+| `bindings` _[AgentRuntimePolicyBindings](#agentruntimepolicybindings)_ | Bindings define who can create agent runs on the targeted runtime. |  | Optional: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Optional: \{\} <br /> |
+| `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### AgentRuntimeRef
@@ -345,6 +403,7 @@ Binding used to assign permissions to a resource for a user or a group in the sy
 
 
 _Appears in:_
+- [AgentRuntimePolicyBindings](#agentruntimepolicybindings)
 - [Bindings](#bindings)
 - [CatalogBindings](#catalogbindings)
 - [CloudConnectionSpec](#cloudconnectionspec)
@@ -4192,6 +4251,7 @@ Reconciliation parameters for a specific resource.
 
 
 _Appears in:_
+- [AgentRuntimePolicySpec](#agentruntimepolicyspec)
 - [BootstrapTokenSpec](#bootstraptokenspec)
 - [CatalogSpec](#catalogspec)
 - [CloudConnectionSpec](#cloudconnectionspec)
@@ -4889,6 +4949,9 @@ _Appears in:_
 | `luaScript` _string_ | LuaScript to use to generate Helm configuration.<br />This can ultimately return a lua table with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on git state or other metadata. |  | Optional: \{\} <br /> |
 | `luaFile` _string_ | LuaFile to use to generate Helm configuration.<br />This can ultimately return a Lua table with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on Git state or other metadata. |  | Optional: \{\} <br /> |
 | `luaFolder` _string_ | a folder of lua files to include in the final script used |  | Optional: \{\} <br /> |
+| `pythonScript` _string_ | PythonScript to use to generate Helm configuration.<br />This can ultimately return a dict with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on git state or other metadata. |  | Optional: \{\} <br /> |
+| `pythonFile` _string_ | PythonFile to use to generate Helm configuration.<br />This can ultimately return a dict with keys "values" and "valuesFiles"<br />to supply overlays for either dynamically based on Git state or other metadata. |  | Optional: \{\} <br /> |
+| `pythonFolder` _string_ | a folder of python files to include in the final script used |  | Optional: \{\} <br /> |
 | `kustomizePostrender` _string_ | KustomizePostrender is a folder containing a kustomization to apply to the result of rendering this service's manifests. |  | Optional: \{\} <br /> |
 
 

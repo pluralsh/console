@@ -37,9 +37,11 @@ defmodule Console.Schema.WorkbenchJobActivity do
     end
 
     embeds_one :result, WorkbenchJobResult, on_replace: :update, primary_key: false do
-      field :output,      :string
-      field :error,       :string
-      field :explanation, :string
+      field :output,          :string
+      field :error,           :string
+      field :explanation,     :string
+      field :auto_approve,    :boolean
+      field :approval_reason, :string
 
       embeds_one :function_call, FunctionCall, on_replace: :update do
         field :name,    :string
@@ -143,6 +145,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> sanitize_text([:prompt])
     |> cast_embed(:result, with: &result_changeset/2)
     |> cast_embed(:tool_call, with: &tool_call_changeset/2)
     |> foreign_key_constraint(:workbench_job_id)
@@ -154,11 +157,13 @@ defmodule Console.Schema.WorkbenchJobActivity do
   defp tool_call_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(call_id name arguments)a)
+    |> sanitize_text([:call_id, :name, :arguments])
   end
 
   defp result_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(output error explanation)a)
+    |> cast(attrs, ~w(output error explanation auto_approve approval_reason)a)
+    |> sanitize_text([:output, :error, :explanation, :approval_reason])
     |> cast_embed(:function_call, with: &function_call_changeset/2)
     |> cast_embed(:job_update, with: &job_update_changeset/2)
     |> cast_embed(:metrics, with: &metric_changeset/2)
@@ -178,27 +183,32 @@ defmodule Console.Schema.WorkbenchJobActivity do
   defp function_call_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(name input tool_id)a)
+    |> sanitize_text([:name, :input])
     |> validate_required([:name, :input, :tool_id])
   end
 
   defp job_update_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(diff objective working_theory criticism conclusion topology)a)
+    |> sanitize_text(~w(diff objective working_theory criticism conclusion topology)a)
     |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
   end
 
   def metric_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp name value labels)a)
+    |> sanitize_text([:name, :labels])
   end
 
   def log_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp message labels)a)
+    |> sanitize_text([:message, :labels])
   end
 
   def trace_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(trace_id span_id parent_id name service start end tags)a)
+    |> sanitize_text(~w(trace_id span_id parent_id name service tags)a)
   end
 end

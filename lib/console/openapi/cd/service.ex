@@ -134,6 +134,9 @@ defmodule Console.OpenAPI.CD.HelmSpec do
       url: string(description: "URL of the Helm chart repository"),
       values_files: array_of(string(), description: "List of referenced values.yaml files"),
       repository_id: string(description: "ID of the Helm repository for this chart"),
+      python_script: string(description: "A python script to use for helm applies"),
+      python_file: string(description: "A python file to use for helm applies"),
+      python_folder: string(description: "A folder of python files to include in the final script used"),
     }
   }
 end
@@ -274,6 +277,9 @@ defmodule Console.OpenAPI.CD.HelmSpecInput do
       release: string(description: "Desired Helm release name"),
       url: string(description: "Helm chart repository URL"),
       repository_id: string(description: "ID of a GitRepository to use for sourcing this helm chart"),
+      python_script: string(description: "A python script to use for helm applies"),
+      python_file: string(description: "A python file to use for helm applies"),
+      python_folder: string(description: "A folder of python files to include in the final script used"),
     }
   }
 end
