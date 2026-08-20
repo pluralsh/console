@@ -80,7 +80,8 @@ defmodule Console.Deployments.Git.Discovery do
           |> Console.handle_rpc()
       end
     catch
-      :exit, reason -> {:error, {:rpc, reason}}
+      :exit, reason -> Console.handle_rpc({:rpc, reason})
+      :error, reason -> Console.handle_rpc(reason)
     end
   end
 

@@ -17,11 +17,16 @@ defmodule Console.Deployments.Helm.Discovery do
 
   defp maybe_rpc(url, fun) when is_function(fun, 1) do
     me = node()
-    case worker_node(url) do
-      ^me -> start_and_run(url, fun)
-      node ->
-        :erpc.call(node, __MODULE__, :start_and_run, [url, fun], :timer.seconds(30))
-        |> Console.handle_rpc()
+    try do
+      case worker_node(url) do
+        ^me -> start_and_run(url, fun)
+        node ->
+          :erpc.call(node, __MODULE__, :start_and_run, [url, fun], :timer.seconds(30))
+          |> Console.handle_rpc()
+      end
+    catch
+      :exit, reason -> Console.handle_rpc({:rpc, reason})
+      :error, reason -> Console.handle_rpc(reason)
     end
   end
 
