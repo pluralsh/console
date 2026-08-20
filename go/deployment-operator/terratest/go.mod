@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/deployment-operator/terratest
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/gruntwork-io/terratest v1.0.1

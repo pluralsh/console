@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/client
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/99designs/gqlgen v0.17.78

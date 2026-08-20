@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/kubernetes-agent
 
-go 1.26.5
+go 1.26.6
 
 replace (
 	github.com/pluralsh/console/go/client => ../../client
