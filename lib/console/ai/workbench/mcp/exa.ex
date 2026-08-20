@@ -6,7 +6,7 @@ defmodule Console.AI.Workbench.MCP.Exa do
   @base_url "https://mcp.exa.ai"
 
   def transport(%WorkbenchTool{tool: :exa, configuration: conf}, _),
-    do: {:streamable_http, [base_url: @base_url, mcp_path: path(conf, Console.conf(:exa_api_key))]}
+    do: {:streamable_http, [base_url: @base_url, mcp_path: path(conf, Console.conf(:exa_api_key)), enable_sse: true]}
 
   defp path(%Configuration{exa: %ExaConnection{api_key: api_key}}, _) when is_binary(api_key),
     do: "/mcp?apiKey=#{api_key}&tools=web_search_exa,web_fetch_exa"

@@ -6,19 +6,28 @@ defmodule Console.Deployments.Sentinel.Impl.Job do
   2. Polls for the status of the jobs every 30 seconds and either updates the runner or stops if all finished
   """
   use Console.Deployments.Sentinel.Impl.Base
+  import Console.Schema.SentinelRunJob, only: [is_terminal: 1]
   alias Console.Deployments.Sentinels
   alias Console.Repo
   alias Console.Schema.{SentinelRun, SentinelRunJob, Sentinel.SentinelCheck}
 
   require Logger
 
-  @poll :timer.seconds(30)
+  @poll :timer.seconds(60)
+
+  @spec publish(SentinelRunJob.t()) :: :ok
+  def publish(%SentinelRunJob{sentinel_run_id: id, check: check, status: status}) when is_terminal(status) do
+    :pg.get_members(group(id, check))
+    |> Enum.each(&send(&1, :poll))
+  end
+  def publish(_), do: :ok
 
   def start(%SentinelRun{} = run, %SentinelCheck{} = check, pid) when is_pid(pid) do
     GenServer.start(__MODULE__, {run, check, pid})
   end
 
   def init({%SentinelRun{} = run, %SentinelCheck{} = check, pid}) do
+    :ok = :pg.join(group(run.id, check.name), self())
     :timer.send_interval(@poll, :poll)
     {:ok, {run, check, pid}, {:continue, :setup}}
   end
@@ -62,4 +71,6 @@ defmodule Console.Deployments.Sentinel.Impl.Job do
       failed_count: Map.get(statistics, :failed, 0),
     }
   end
+
+  defp group(id, name), do: {:sentinel_run_jobs, id, name}
 end

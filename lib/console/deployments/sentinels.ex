@@ -121,6 +121,7 @@ defmodule Console.Deployments.Sentinels do
       |> Repo.insert()
     end)
     |> execute(extract: :run)
+    |> notify(:create)
   end
 
   defp apply_overrides(%{tags: %{} = tags}, checks) do
@@ -184,6 +185,7 @@ defmodule Console.Deployments.Sentinels do
     |> SentinelRunJob.changeset(attrs)
     |> allow(cluster, :write)
     |> when_ok(:update)
+    |> notify(:update)
   end
 
   @doc """
@@ -212,7 +214,11 @@ defmodule Console.Deployments.Sentinels do
     end)
   end
 
+  defp notify({:ok, %SentinelRun{} = sentinel}, :create),
+    do: handle_notify(PubSub.SentinelRunCreated, sentinel)
   defp notify({:ok, %SentinelRun{} = sentinel}, :update),
     do: handle_notify(PubSub.SentinelRunUpdated, sentinel)
+  defp notify({:ok, %SentinelRunJob{} = job}, :update),
+    do: handle_notify(PubSub.SentinelRunJobUpdated, job)
   defp notify(pass, _), do: pass
 end

@@ -300,6 +300,12 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunCreated do
   def process(%@for{item: run}), do: Console.Pipelines.SentinelRun.Producer.kick(run)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunJobUpdated do
+  alias Console.Deployments.Sentinel.Impl.Job
+
+  def process(%@for{item: job}), do: Job.publish(job)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
   alias Console.AI.Workbench.Activity
   alias Console.Deployments.Agents

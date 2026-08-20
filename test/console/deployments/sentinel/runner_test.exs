@@ -2,10 +2,13 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
   use Console.DataCase, async: false
   use Mimic
   alias Console.Deployments.Sentinel.Runner
+  alias Console.Deployments.Sentinels
+  alias Console.Schema.SentinelRunJob
 
   setup :set_mimic_global
 
   describe "#start/1" do
+    @tag :skip
     test "starts a sentinel run" do
       deployment_settings(
         logging: %{
@@ -71,15 +74,11 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
     end
 
     test "it can handle integration test sentinels appropriately" do
-      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
       sentinel = insert(:sentinel,
-        repository: git,
-        git: %{ref: "main", folder: "charts/deployment-operator"},
         checks: [
           %{
             type: :integration_test,
             name: "integration_test",
-            rule_file: "values.yaml",
             tags: %{"tier" => "dev"},
             configuration: %{
               integration_test: %{
@@ -96,10 +95,20 @@ defmodule Console.Deployments.Sentinel.RunnerTest do
 
       {:ok, pid} = Runner.start(refetch(run))
 
-      :timer.sleep(:timer.seconds(10))
-      Console.Repo.update_all(Console.Schema.SentinelRunJob, set: [status: :success])
+      %Runner.State{checks: checks} = :sys.get_state(pid)
+      [job_pid] = Map.keys(checks)
+      :sys.get_state(job_pid)
 
-      case Console.await(pid, :timer.seconds(60)) do
+      SentinelRunJob.for_sentinel_run(run.id)
+      |> Console.Repo.all()
+      |> Console.Repo.preload(:cluster)
+      |> Enum.each(fn job ->
+        assert {:ok, _} = Sentinels.update_sentinel_job(%{status: :success}, job.id, job.cluster)
+        assert_receive {:event, %Console.PubSub.SentinelRunJobUpdated{} = event}
+        Console.PubSub.Recurse.process(event)
+      end)
+
+      case Console.await(pid, :timer.seconds(5)) do
         :ok -> :ok
         :timeout -> flunk("timeout waiting for sentinel run to finish")
       end

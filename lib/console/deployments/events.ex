@@ -115,6 +115,7 @@ defmodule Console.PubSub.SentinelRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunJobCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.SentinelRunJobUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.WorkbenchCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchUpdated, do: use Piazza.PubSub.Event
