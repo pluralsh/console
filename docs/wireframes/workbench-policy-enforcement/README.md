@@ -126,7 +126,7 @@ Workbench admission result (`priv/policy/wb.rego`):
 
 Policy list columns are **POLICY** (`name` + `description`), **PROJECT**, **UPDATED**, **TYPE** chip (Workbench / Stack). Do not show last-evaluation as a Policy field. Do not show a Binding chip.
 
-Policy detail tabs are **Definition** (Rego buffer + simulate) · **Evaluations** (`policyEvaluations`) · **Attachments** (`bindingPolicies`). Not a Workbenches tab.
+Policy detail tabs are **Definition** (Rego buffer + simulate) · **Evaluations** (`policyEvaluations`) · **Attachments** (read-only `bindingPolicies` for this policy). Not a Workbenches tab. Create/edit rules only on the global **Attachment rules** tab.
 
 Evaluations table columns are `insertedAt`, `policyIds`, `input`, `output`. Tool/actor/result are only inside those maps.
 

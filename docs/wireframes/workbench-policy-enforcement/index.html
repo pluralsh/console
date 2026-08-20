@@ -1334,7 +1334,7 @@ bind := true if {
         const r = currentRule()
         const bind = bindById(r.bind)
         return securityPage('policies', {
-        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <b>${r.policy}</b>`,
+        crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">policies</span> / <span class="crumb-link" onclick="state.policyKind='autoattach';go('policies')">attachment rules</span> / <b>${r.id}</b>`,
         html: `
           ${policiesTabs('rules')}
           <div class="page-head">
@@ -1575,28 +1575,28 @@ default sample := 0.5</textarea>
         crumb: `<span class="crumb-link" onclick="go('security-overview')">security</span> / <span class="crumb-link" onclick="go('policies')">policies</span> / <b>prod-guardrails.rego</b>`,
         html: `
           ${policyDetailHead('att')}
-          <div style="display:flex;justify-content:flex-end">
-            <button class="btn small" onclick="state.attachPolicy='prod-guardrails.rego';state.attachAdvanced=false;go('attachment-create')">New attachment rule</button>
+          <div class="page-head" style="min-height:auto">
+            <p class="subtitle" style="margin:0">Rules that auto-attach this document. Create and edit them under Attachment rules — this tab is a read-only view for this policy.</p>
+            <button class="btn secondary small" onclick="state.policyKind='autoattach';go('policies')">Manage attachment rules ↗</button>
           </div>
           <table class="table">
-            <thead><tr><th>Bind policy</th><th>Targets</th><th>Matched</th><th></th></tr></thead>
+            <thead><tr><th>Bind policy</th><th>Targets</th><th>Matched</th></tr></thead>
             <tbody>
               ${POLICY_ATTACHMENTS.map((r) => {
                 const bind = bindById(r.bind)
                 return `
-              <tr class="click" onclick="openRule('${r.id}')">
+              <tr>
                 <td>
                   <div class="row-title">${bind.name}</div>
                   <div class="row-sub">${bind.desc}</div>
                 </td>
                 <td>${typeChip(r.type)}</td>
                 <td class="row-sub">${r.matched}</td>
-                <td class="row-actions"><span class="caret">${I.caret}</span></td>
               </tr>`
               }).join('')}
             </tbody>
           </table>
-          <div class="callout"><code>Policy.bindingPolicies</code> — rules that auto-attach <b>this</b> document. Manual workbench attach stays on the workbench.</div>`
+          <div class="callout"><code>Policy.bindingPolicies</code> scoped to this policy. No drill-in from here — open <b>Attachment rules</b> to add or edit. Manual workbench attach stays on the workbench.</div>`
       }),
 
       'policy-evaluations': () => {
