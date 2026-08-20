@@ -147,7 +147,7 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       |> Console.Repo.update!()
       Heartbeat.kill(job)
 
-      assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
+      assert_receive {:DOWN, ^ref, :process, ^pid, {:shutdown, :cancel}}
 
       persisted_job = Console.Repo.get!(WorkbenchJob, job.id)
 
@@ -161,6 +161,26 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert_in_delta persisted_job.usage.output_cost, @usage.output_cost, 0.000_001
       assert_in_delta persisted_job.usage.total_cost, @usage.total_cost, 0.000_001
       assert Console.Repo.get!(Workbench, workbench.id).budget.last == 875
+    end
+
+    test "terminates the linked engine process when cancelled" do
+      job = insert(:workbench_job, status: :running)
+      test = self()
+
+      {engine, ref} =
+        spawn_monitor(fn ->
+          {:ok, heartbeat} = Heartbeat.start_link(job)
+          send(test, {:heartbeat_started, heartbeat})
+          Process.sleep(:infinity)
+        end)
+
+      assert_receive {:heartbeat_started, heartbeat}
+      assert Process.alive?(engine)
+
+      Heartbeat.kill(job)
+
+      assert_receive {:DOWN, ^ref, :process, ^engine, {:shutdown, :cancel}}
+      refute Process.alive?(heartbeat)
     end
   end
 
