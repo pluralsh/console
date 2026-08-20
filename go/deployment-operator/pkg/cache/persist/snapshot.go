@@ -17,9 +17,9 @@ import (
 const (
 	SnapshotVersion = 1
 
-	stateFileName = "state.json"
-	lockFileName  = "cache.lock"
-	ManifestsDir  = "manifests"
+	stateFileName   = "state.json"
+	stateTmpPattern = "state.json.*.tmp"
+	ManifestsDir    = "manifests"
 )
 
 type ManifestRecord struct {
@@ -169,12 +169,27 @@ func (s *Store) Save(snap Snapshot) error {
 		return err
 	}
 
-	tmp := filepath.Join(s.dir, stateFileName+".tmp")
-	final := filepath.Join(s.dir, stateFileName)
-	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+	tmp, err := os.CreateTemp(s.dir, stateTmpPattern)
+	if err != nil {
 		return err
 	}
-	if err := os.Rename(tmp, final); err != nil {
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+
+	if err := tmp.Chmod(0o600); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if _, err := tmp.Write(data); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+
+	final := filepath.Join(s.dir, stateFileName)
+	if err := os.Rename(tmpName, final); err != nil {
 		return err
 	}
 

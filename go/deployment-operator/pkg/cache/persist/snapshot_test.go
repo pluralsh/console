@@ -48,7 +48,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	}
 
 	require.NoError(t, store.Save(snap))
-	require.NoFileExists(t, filepath.Join(dir, stateFileName+".tmp"))
+	requireNoTmpFiles(t, dir)
 
 	loaded, err := store.Load()
 	require.NoError(t, err)
@@ -119,7 +119,7 @@ func TestSaveIsAtomic(t *testing.T) {
 	require.NotContains(t, snap.Manifests, "a")
 }
 
-func TestSecondOpenFallsBackWhenLocked(t *testing.T) {
+func TestSecondOpenSharesCacheDir(t *testing.T) {
 	dir := t.TempDir()
 	first, err := Open(dir)
 	require.NoError(t, err)
@@ -128,8 +128,60 @@ func TestSecondOpenFallsBackWhenLocked(t *testing.T) {
 
 	second, err := Open(dir)
 	require.NoError(t, err)
-	require.False(t, second.Enabled())
-	require.Empty(t, second.Dir())
+	require.True(t, second.Enabled())
+	require.Equal(t, dir, second.Dir())
+	t.Cleanup(func() { _ = second.Close() })
+
+	require.NoError(t, first.Save(Snapshot{
+		Manifests: map[string]ManifestRecord{"a": {SHA: "1"}},
+	}))
+	require.NoError(t, second.Save(Snapshot{
+		Manifests: map[string]ManifestRecord{"b": {SHA: "2"}},
+	}))
+
+	loaded, err := first.Load()
+	require.NoError(t, err)
+	require.Equal(t, SnapshotVersion, loaded.Version)
+	require.NotEmpty(t, loaded.Manifests)
+	requireNoTmpFiles(t, dir)
+}
+
+func TestOverlappingStoresDoNotCorruptSnapshot(t *testing.T) {
+	dir := t.TempDir()
+	first, err := Open(dir)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = first.Close() })
+	second, err := Open(dir)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = second.Close() })
+
+	var wg sync.WaitGroup
+	for i := 0; i < 20; i++ {
+		wg.Add(2)
+		go func(i int) {
+			defer wg.Done()
+			require.NoError(t, first.Save(Snapshot{
+				Manifests: map[string]ManifestRecord{
+					fmt.Sprintf("a-%d", i): {SHA: fmt.Sprintf("a-%d", i)},
+				},
+			}))
+		}(i)
+		go func(i int) {
+			defer wg.Done()
+			require.NoError(t, second.Save(Snapshot{
+				Manifests: map[string]ManifestRecord{
+					fmt.Sprintf("b-%d", i): {SHA: fmt.Sprintf("b-%d", i)},
+				},
+			}))
+		}(i)
+	}
+	wg.Wait()
+
+	loaded, err := first.Load()
+	require.NoError(t, err)
+	require.Equal(t, SnapshotVersion, loaded.Version)
+	require.Len(t, loaded.Manifests, 1)
+	requireNoTmpFiles(t, dir)
 }
 
 func TestSHARecordsRoundTrip(t *testing.T) {
@@ -241,7 +293,7 @@ func TestConcurrentSavesDoNotCorruptSnapshot(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, SnapshotVersion, loaded.Version)
 	require.Len(t, loaded.Manifests, 1)
-	require.NoFileExists(t, filepath.Join(dir, stateFileName+".tmp"))
+	requireNoTmpFiles(t, dir)
 }
 
 func TestWaitPeriodicJoinsBeforeFinalSave(t *testing.T) {
@@ -266,5 +318,12 @@ func TestWaitPeriodicJoinsBeforeFinalSave(t *testing.T) {
 	loaded, err := store.Load()
 	require.NoError(t, err)
 	require.Equal(t, "final", loaded.Manifests["final"].SHA)
-	require.NoFileExists(t, filepath.Join(dir, stateFileName+".tmp"))
+	requireNoTmpFiles(t, dir)
+}
+
+func requireNoTmpFiles(t *testing.T, dir string) {
+	t.Helper()
+	matches, err := filepath.Glob(filepath.Join(dir, stateTmpPattern))
+	require.NoError(t, err)
+	require.Empty(t, matches)
 }

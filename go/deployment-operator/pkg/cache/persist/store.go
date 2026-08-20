@@ -11,7 +11,6 @@ import (
 
 type Store struct {
 	dir        string
-	lock       *os.File
 	mu         sync.Mutex
 	wg         sync.WaitGroup
 	loggedSave sync.Once
@@ -27,18 +26,12 @@ func Open(dir string) (*Store, error) {
 		return nil, err
 	}
 
-	lock, err := tryExclusiveLock(dir)
-	if err != nil {
-		klog.InfoS("cache dir already in use, falling back to ephemeral cache", "dir", dir, "error", err)
-		return &Store{}, nil
-	}
-
 	klog.InfoS("durable cache initialized", "dir", dir)
-	return &Store{dir: dir, lock: lock}, nil
+	return &Store{dir: dir}, nil
 }
 
 func (s *Store) Enabled() bool {
-	return s != nil && s.lock != nil
+	return s != nil && s.dir != ""
 }
 
 func (s *Store) Dir() string {
@@ -49,13 +42,7 @@ func (s *Store) Dir() string {
 }
 
 func (s *Store) Close() error {
-	if s == nil {
-		return nil
-	}
-
-	err := releaseLock(s.lock)
-	s.lock = nil
-	return err
+	return nil
 }
 
 func (s *Store) StartPeriodic(ctx context.Context, interval time.Duration, save func() error) {
