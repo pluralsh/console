@@ -605,8 +605,10 @@ cloudQuery:
 
   resources:
     requests:
-      memory: 250Mi
+      memory: 512Mi
       cpu: 100m
+    limits:
+      memory: 1Gi
 
   livenessProbe: ~
 

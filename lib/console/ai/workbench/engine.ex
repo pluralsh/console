@@ -29,6 +29,7 @@ defmodule Console.AI.Workbench.Engine do
   }
   alias Console.AI.Tools.Workbench.{
     Lua,
+    Python,
     Complete,
     Subagents,
     Subagent,
@@ -330,6 +331,7 @@ defmodule Console.AI.Workbench.Engine do
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Lua,
+      Python,
       Notes,
       Complete,
     ] ++ type_tools(job)

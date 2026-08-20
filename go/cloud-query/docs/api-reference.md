@@ -405,6 +405,8 @@ service ToolQuery {
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
+  rpc RunLua(RunLuaInput) returns (RunLuaOutput) {}
+  rpc RunPython(RunPythonInput) returns (RunPythonOutput) {}
 }
 ```
 
@@ -1506,6 +1508,24 @@ message JaegerTracesOptions {
   optional string duration_max = 4;
 }
 ```
+
+## Run Python
+
+`RunPython` synchronously executes Monty's limited Python subset in a fresh logical sandbox session. `input_json` is optional but, when present, must encode an object. It is exposed as the global `input`; scripts write their structured response to the global `output` dictionary. Printed text is returned separately.
+
+```protobuf
+message RunPythonInput {
+  string script = 1;
+  string input_json = 2;
+}
+
+message RunPythonOutput {
+  string result_json = 1;
+  string stdout = 2;
+}
+```
+
+The runtime exposes no host filesystem, environment, network, subprocess, shell, package installation, third-party package, or host-tool callback. It limits source to 64 KiB, input and result JSON to 1 MiB, stdout to 64 KiB, execution to 10 seconds, memory to 64 MiB, recursion to 200 frames, wall time to 15 seconds, and concurrency to two runs per process. Up to 16 additional requests wait in a bounded FIFO queue. It uses gomonty `v0.0.14`, built against official Monty commit `c9802b5f30d11fecf9f153feb1dfdab3abda070e`; it is not CPython.
 
 ## Invoke Lambda
 

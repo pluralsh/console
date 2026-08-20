@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Scratchpad,
     History,
     Lua,
+    Python,
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.Cluster,
@@ -75,6 +76,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
       %Skill{skills: skills},
       Scratchpad,
       Lua,
+      Python,
       %History{job: job, activities: activities},
       Result
     ])

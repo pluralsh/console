@@ -7,15 +7,19 @@ Cloud Query is a service part of the Plural Console ecosystem that provides clou
 - Query cloud resources across multiple providers
 - Embedded PostgreSQL database for data storage and retrieval through PostgreSQL FDW steampipe extension
 - gRPC API for integration with other services
+- Sandboxed execution for Lua and Monty's limited Python subset
 - Containerized deployment for easy scaling
 
 CloudQuery provider support includes AWS, Azure, GCP, and VMware vSphere.
 
 ## Prerequisites
 
-- Go 1.24.2 or higher
+- Go 1.26.6 or higher
 - Docker (for containerized deployment)
 - Make
+
+Running the complete service locally requires a writable temporary directory.
+The Python worker extracts gomonty's embedded native library there on first use.
 
 ## Getting Started
 
@@ -88,6 +92,14 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | Azure | Yes | Yes | Yes | No | Azure Monitor Go SDK with Azure AD client credentials                                                |
 
 ToolQuery also supports cloud function invocation via `InvokeLambda` for AWS Lambda, GCP Cloud Run services (Gen2), and Azure Functions using canonical identifiers and cloud connection credentials.
+
+### Sandboxed Python execution
+
+`RunPython` executes Monty's limited Python subset in a crash-isolated `cloud-query python-worker` subprocess. The request's optional JSON object is available as `input`; `output` starts as an empty dictionary and must remain a JSON-serializable dictionary. The response returns that dictionary as `result_json` and standard-output text from `print()` separately as `stdout`.
+
+This is not CPython. The sandbox has no host filesystem, environment, network, subprocess, shell, `pip`, third-party packages, or callback access. Two workers start with only `TMPDIR=/tmp`; each request gets a fresh gomonty REPL. Failed or canceled workers are killed and replaced, and healthy workers are periodically recycled. Source is limited to 64 KiB, input and result JSON to 1 MiB, stdout to 64 KiB, interpreter execution to 10 seconds, interpreter-managed memory to 64 MiB, and recursion to 200 frames. Two runs execute concurrently and up to 16 more wait in a FIFO queue. A full queue is rejected. A parent watchdog ends a run after 15 seconds or the caller's earlier deadline.
+
+The image embeds gomonty `v0.0.14` and its platform-specific glibc library, built against official Monty commit `c9802b5f30d11fecf9f153feb1dfdab3abda070e`. It contains no separate `monty` executable. Both pins are recorded in OCI labels. Monty's memory limit covers interpreter-managed allocations rather than total pod RSS; operators should measure the workload before reducing the default cloud-query memory allocation.
 
 ### Tool Provider Credentials and Permissions
 
