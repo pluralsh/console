@@ -639,6 +639,30 @@ defmodule Toolquery.RunLuaOutput do
   field :result_json, 1, type: :string, json_name: "resultJson"
 end
 
+defmodule Toolquery.RunPythonInput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.RunPythonInput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :script, 1, type: :string
+  field :input_json, 2, type: :string, json_name: "inputJson"
+end
+
+defmodule Toolquery.RunPythonOutput do
+  @moduledoc false
+
+  use Protobuf,
+    full_name: "toolquery.RunPythonOutput",
+    protoc_gen_elixir_version: "0.16.0",
+    syntax: :proto3
+
+  field :result_json, 1, type: :string, json_name: "resultJson"
+  field :stdout, 2, type: :string
+end
+
 defmodule Toolquery.ToolQuery.Service do
   @moduledoc false
 
@@ -657,6 +681,8 @@ defmodule Toolquery.ToolQuery.Service do
   rpc :InvokeLambda, Toolquery.InvokeLambdaInput, Toolquery.InvokeLambdaOutput
 
   rpc :RunLua, Toolquery.RunLuaInput, Toolquery.RunLuaOutput
+
+  rpc :RunPython, Toolquery.RunPythonInput, Toolquery.RunPythonOutput
 end
 
 defmodule Toolquery.ToolQuery.Stub do

@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/cloud-query
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.1
@@ -18,6 +18,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.89.1
 	github.com/aws/aws-sdk-go-v2/service/sts v1.42.2
 	github.com/elastic/go-elasticsearch/v9 v9.3.1
+	github.com/ewhauser/gomonty v0.0.14
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/lib/pq v1.12.3
 	github.com/orcaman/concurrent-map/v2 v2.0.1
@@ -58,6 +59,7 @@ require (
 	github.com/aws/smithy-go v1.27.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/elastic/elastic-transport-go/v8 v8.8.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -80,6 +82,8 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect

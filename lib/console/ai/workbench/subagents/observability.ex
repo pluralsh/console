@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Codemode, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Codemode, Python, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}

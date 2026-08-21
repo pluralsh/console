@@ -300,6 +300,22 @@ message RunLuaOutput {
   string result_json = 1;
 }
 
+message RunPythonInput {
+  // Python source. Write structured results to the global `output` dictionary.
+  string script = 1;
+
+  // Optional JSON object exposed as the global `input` dictionary. Empty means `{}`.
+  string input_json = 2;
+}
+
+message RunPythonOutput {
+  // JSON-encoded contents of the global `output` dictionary.
+  string result_json = 1;
+
+  // Text emitted by print() during the user script.
+  string stdout = 2;
+}
+
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
   rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
@@ -308,4 +324,5 @@ service ToolQuery {
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
   rpc InvokeLambda(InvokeLambdaInput) returns (InvokeLambdaOutput) {}
   rpc RunLua(RunLuaInput) returns (RunLuaOutput) {}
+  rpc RunPython(RunPythonInput) returns (RunPythonOutput) {}
 }

@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/observability-proxy
 
-go 1.26.5
+go 1.26.6
 
 require (
 	golang.org/x/sync v0.22.0

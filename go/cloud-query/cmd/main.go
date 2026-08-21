@@ -13,6 +13,7 @@ import (
 	"github.com/pluralsh/console/go/cloud-query/internal/pool"
 	"github.com/pluralsh/console/go/cloud-query/internal/server"
 	"github.com/pluralsh/console/go/cloud-query/internal/service"
+	pythontools "github.com/pluralsh/console/go/cloud-query/internal/tools/python"
 )
 
 func startHealthzHandler() {
@@ -27,9 +28,20 @@ func startHealthzHandler() {
 }
 
 func main() {
+	if len(os.Args) == 2 && os.Args[1] == "python-worker" {
+		if err := pythontools.NewWorker().Run(os.Stdin, os.Stdout); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
 	startHealthzHandler()
 
-	services := []service.Service{service.NewToolQueryService()}
+	toolQueryService, err := service.NewToolQueryService(context.Background())
+	if err != nil {
+		klog.Fatalf("failed to initialize tool query service: %v", err)
+	}
+	services := []service.Service{toolQueryService}
 
 	if args.DatabaseEnabled() {
 		p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
@@ -67,8 +79,5 @@ func handleShutdown(cancel context.CancelFunc, s *server.Server) {
 	<-signalChan
 	klog.Info("received shutdown signal, shutting down gracefully...")
 
-	s.Stop()
 	cancel()
-	klog.Info("stopped gracefully")
-	os.Exit(0)
 }

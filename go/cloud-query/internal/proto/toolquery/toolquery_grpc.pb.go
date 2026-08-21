@@ -26,6 +26,7 @@ const (
 	ToolQuery_Traces_FullMethodName             = "/toolquery.ToolQuery/Traces"
 	ToolQuery_InvokeLambda_FullMethodName       = "/toolquery.ToolQuery/InvokeLambda"
 	ToolQuery_RunLua_FullMethodName             = "/toolquery.ToolQuery/RunLua"
+	ToolQuery_RunPython_FullMethodName          = "/toolquery.ToolQuery/RunPython"
 )
 
 // ToolQueryClient is the client API for ToolQuery service.
@@ -39,6 +40,7 @@ type ToolQueryClient interface {
 	Traces(ctx context.Context, in *TracesQueryInput, opts ...grpc.CallOption) (*TracesQueryOutput, error)
 	InvokeLambda(ctx context.Context, in *InvokeLambdaInput, opts ...grpc.CallOption) (*InvokeLambdaOutput, error)
 	RunLua(ctx context.Context, in *RunLuaInput, opts ...grpc.CallOption) (*RunLuaOutput, error)
+	RunPython(ctx context.Context, in *RunPythonInput, opts ...grpc.CallOption) (*RunPythonOutput, error)
 }
 
 type toolQueryClient struct {
@@ -119,6 +121,16 @@ func (c *toolQueryClient) RunLua(ctx context.Context, in *RunLuaInput, opts ...g
 	return out, nil
 }
 
+func (c *toolQueryClient) RunPython(ctx context.Context, in *RunPythonInput, opts ...grpc.CallOption) (*RunPythonOutput, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RunPythonOutput)
+	err := c.cc.Invoke(ctx, ToolQuery_RunPython_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ToolQueryServer is the server API for ToolQuery service.
 // All implementations must embed UnimplementedToolQueryServer
 // for forward compatibility.
@@ -130,6 +142,7 @@ type ToolQueryServer interface {
 	Traces(context.Context, *TracesQueryInput) (*TracesQueryOutput, error)
 	InvokeLambda(context.Context, *InvokeLambdaInput) (*InvokeLambdaOutput, error)
 	RunLua(context.Context, *RunLuaInput) (*RunLuaOutput, error)
+	RunPython(context.Context, *RunPythonInput) (*RunPythonOutput, error)
 	mustEmbedUnimplementedToolQueryServer()
 }
 
@@ -160,6 +173,9 @@ func (UnimplementedToolQueryServer) InvokeLambda(context.Context, *InvokeLambdaI
 }
 func (UnimplementedToolQueryServer) RunLua(context.Context, *RunLuaInput) (*RunLuaOutput, error) {
 	return nil, status.Error(codes.Unimplemented, "method RunLua not implemented")
+}
+func (UnimplementedToolQueryServer) RunPython(context.Context, *RunPythonInput) (*RunPythonOutput, error) {
+	return nil, status.Error(codes.Unimplemented, "method RunPython not implemented")
 }
 func (UnimplementedToolQueryServer) mustEmbedUnimplementedToolQueryServer() {}
 func (UnimplementedToolQueryServer) testEmbeddedByValue()                   {}
@@ -308,6 +324,24 @@ func _ToolQuery_RunLua_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ToolQuery_RunPython_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RunPythonInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ToolQueryServer).RunPython(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ToolQuery_RunPython_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ToolQueryServer).RunPython(ctx, req.(*RunPythonInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ToolQuery_ServiceDesc is the grpc.ServiceDesc for ToolQuery service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -342,6 +376,10 @@ var ToolQuery_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RunLua",
 			Handler:    _ToolQuery_RunLua_Handler,
+		},
+		{
+			MethodName: "RunPython",
+			Handler:    _ToolQuery_RunPython_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

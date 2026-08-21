@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "description": "Execute a sandboxed Monty Python script for precise computation. Monty supports a limited Python subset for expressions, variables, collections, control flow, functions, and selected built-ins. The JSON object `input` is available to the script as a global dictionary; write structured results to the global `output` dictionary and use print() for diagnostic output. Filesystem, environment, network, subprocesses, pip, packages, and host tools are unavailable.",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Monty-compatible Python source code. Read the optional global input dictionary, assign JSON-serializable fields on the global output dictionary, and use print() for diagnostics."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Explanation of why you're running this script, such as 'I need to calculate the exact p95 latency from these samples.'."
+    },
+    "input": {
+      "type": "object",
+      "description": "Optional JSON object exposed to the script as the global input dictionary."
+    }
+  },
+  "required": [
+    "code",
+    "explanation"
+  ]
+}

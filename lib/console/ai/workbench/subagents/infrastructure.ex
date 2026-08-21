@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Scratchpad,
     History,
     Codemode,
+    Python,
     Infrastructure.RawKubeGet,
     Infrastructure.RawKubeList,
     Infrastructure.Cluster,
