@@ -14,7 +14,9 @@ defmodule Console.Deployments.Policy do
     Vulnerability,
     Service,
     ComplianceReportGenerator,
-    User
+    User,
+    Project,
+    GitRepository
   }
   alias Console.Deployments.Settings
   alias Console.Deployments.{Stacks, Workbenches}
@@ -108,13 +110,68 @@ defmodule Console.Deployments.Policy do
     end
   end
 
+  @doc "Builds the actor payload used as policy input."
+  def actor(%User{id: id, name: name, email: email, groups: groups}) do
+    %{
+      "id" => id,
+      "name" => name,
+      "email" => email,
+      "groups" => if(is_list(groups), do: Enum.map(groups, & &1.name), else: [])
+    }
+  end
+  def actor(_), do: %{}
+
+  @doc "Builds the stack payload used as policy input."
+  def stack(%Stack{name: name} = stack) do
+    %{
+      "name" => name,
+      "project" => stack_project(stack.project),
+      "git" => stack_git(stack)
+    }
+  end
+  def stack(_), do: %{}
+
+  defp stack_project(%Project{id: id, name: name}), do: %{"id" => id, "name" => name}
+  defp stack_project(_), do: %{}
+
+  defp stack_git(%Stack{git: git, repository: repo, sha: sha}) do
+    %{
+      "ref" => git_field(git, :ref),
+      "folder" => git_field(git, :folder),
+      "sha" => sha,
+      "url" => repo_url(repo)
+    }
+  end
+
+  defp git_field(%{ref: ref}, :ref), do: ref
+  defp git_field(%{folder: folder}, :folder), do: folder
+  defp git_field(_, _), do: nil
+
+  defp repo_url(%GitRepository{url: url}), do: url
+  defp repo_url(_), do: nil
+
+  @doc "Joins deny/approve reason objects into a single persisted string."
+  def policy_reason(items, fallback \\ "")
+  def policy_reason(items, fallback) when is_list(items) do
+    items
+    |> Enum.map(fn
+      %{"message" => msg} when is_binary(msg) -> msg
+      %{"reason" => reason} when is_binary(reason) -> reason
+      %{"msg" => msg} when is_binary(msg) -> msg
+      other -> inspect(other)
+    end)
+    |> Enum.join("; ")
+    |> case do
+      "" -> fallback
+      reason -> reason
+    end
+  end
+  def policy_reason(_, fallback), do: fallback
+
   def evaluate_policy(%Console.Schema.Policy{} = policy, input),
     do: evaluate_policy(policy, input, [])
   def evaluate_policy(%Console.Schema.Policy{} = policy, input, ids) when is_list(ids) do
-    with {:ok, base, path} <- evaluation_base(policy.type),
-         {:ok, engine} <- Regolix.new(),
-         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", base),
-         {:ok, engine} <- Regolix.add_policy(engine, policy.name, policy.policy) do
+    with {:ok, engine, path} <- compile_policies(policy.type, [policy]) do
       eval_policy(engine, input, ids, path)
     end
   end
@@ -125,11 +182,37 @@ defmodule Console.Deployments.Policy do
     |> when_ok(&evaluate_policy(&1, input))
   end
 
-  @workbench_policy_base Console.priv_file!("policy/wb.rego")
-  @binding_policy_base Console.priv_file!("policy/binding.rego")
+  @workbench_rego Path.expand("../../../priv/policy/wb.rego", __DIR__)
+  @binding_rego Path.expand("../../../priv/policy/binding.rego", __DIR__)
+  @stack_rego Path.expand("../../../priv/policy/stack.rego", __DIR__)
+  @external_resource @workbench_rego
+  @external_resource @binding_rego
+  @external_resource @stack_rego
+  @workbench_policy_base File.read!(@workbench_rego)
+  @binding_policy_base File.read!(@binding_rego)
+  @stack_policy_base File.read!(@stack_rego)
+
+  def compile_policies(type, policies) when is_list(policies) do
+    with {:ok, base, path} <- evaluation_base(type),
+         {:ok, engine} <- Regolix.new(),
+         {:ok, engine} <- Regolix.add_policy(engine, "plrl.rego", base),
+         {:ok, engine} <- add_policies(engine, policies) do
+      {:ok, engine, path}
+    end
+  end
+
+  defp add_policies(engine, policies) do
+    Enum.reduce_while(policies, {:ok, engine}, fn %{name: name, policy: policy}, {:ok, eng} ->
+      case Regolix.add_policy(eng, name, policy) do
+        {:ok, engine} -> {:cont, {:ok, engine}}
+        {:error, reason} -> {:halt, {:error, "Failed to add policy #{name}: #{inspect(reason)}"}}
+      end
+    end)
+  end
 
   defp evaluation_base(:workbench), do: {:ok, @workbench_policy_base, "data.plrl.wb.admission.result"}
   defp evaluation_base(:binding), do: {:ok, @binding_policy_base, "data.plrl.binding.result"}
+  defp evaluation_base(:stack), do: {:ok, @stack_policy_base, "data.plrl.stack.approval.result"}
   defp evaluation_base(type), do: {:error, "policy type #{type} cannot be evaluated"}
 
   def next_binding_poll(%BindingPolicy{} = binding) do

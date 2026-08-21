@@ -252,6 +252,115 @@ defmodule Console.Deployments.PolicyTest do
     end
   end
 
+  describe "evaluate_policy/2" do
+    test "evaluates stack approval policies with deny, defer, and approve" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: """
+        package plrl.stack.approval
+
+        sample := 0
+
+        deny[{"message": "blocked"}] if {
+          input.action == "destroy"
+        }
+
+        defer if input.action == "wait"
+
+        approve[{"reason": "safe"}] if {
+          input.action == "apply"
+        }
+        """
+      )
+
+      {:ok, denied} = Policy.evaluate_policy(policy, %{"action" => "destroy"})
+      assert [%{"message" => "blocked"}] = denied["deny"]
+      refute denied["defer"]
+      assert denied["approve"] == []
+
+      {:ok, deferred} = Policy.evaluate_policy(policy, %{"action" => "wait"})
+      assert deferred["deny"] == []
+      assert deferred["defer"]
+      assert deferred["approve"] == []
+
+      {:ok, approved} = Policy.evaluate_policy(policy, %{"action" => "apply"})
+      assert approved["deny"] == []
+      refute approved["defer"]
+      assert [%{"reason" => "safe"}] = approved["approve"]
+    end
+
+    test "returns empty deny/approve and false defer for a default stack policy" do
+      policy = insert(:policy, type: :stack, policy: "package plrl.stack.approval\nsample := 0")
+
+      {:ok, result} = Policy.evaluate_policy(policy, %{})
+
+      assert result["deny"] == []
+      refute result["defer"]
+      assert result["approve"] == []
+      assert result["sample"] == 0
+    end
+  end
+
+  describe "actor/1" do
+    test "builds a cleaned actor payload from a user" do
+      group = insert(:group, name: "admins")
+      user = insert(:user, name: "Pat", email: "pat@example.com")
+      insert(:group_member, group: group, user: user)
+      user = Repo.preload(user, :groups)
+
+      assert Policy.actor(user) == %{
+        "id" => user.id,
+        "name" => "Pat",
+        "email" => "pat@example.com",
+        "groups" => ["admins"]
+      }
+    end
+
+    test "returns an empty map when no user is present" do
+      assert Policy.actor(nil) == %{}
+    end
+  end
+
+  describe "stack/1" do
+    test "builds a cleaned stack payload with project and git information" do
+      project = insert(:project, name: "infra")
+      repo = insert(:git_repository, url: "https://github.com/acme/infra.git")
+      stack = insert(:stack,
+        name: "prod-network",
+        project: project,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"},
+        sha: "abc123"
+      )
+
+      assert Policy.stack(stack) == %{
+        "name" => "prod-network",
+        "project" => %{"id" => project.id, "name" => "infra"},
+        "git" => %{
+          "ref" => "main",
+          "folder" => "terraform",
+          "sha" => "abc123",
+          "url" => "https://github.com/acme/infra.git"
+        }
+      }
+    end
+
+    test "returns an empty map when no stack is present" do
+      assert Policy.stack(nil) == %{}
+    end
+  end
+
+  describe "policy_reason/2" do
+    test "joins message and reason fields" do
+      assert Policy.policy_reason([%{"message" => "blocked"}, %{"reason" => "safe"}]) ==
+               "blocked; safe"
+    end
+
+    test "uses the fallback when there are no reasons" do
+      assert Policy.policy_reason([], "denied by stack policy") == "denied by stack policy"
+    end
+  end
+
   describe "#upsert_vulnerabilities/2" do
     test "it can upsert vulnerabilities for a cluster" do
       cluster = insert(:cluster)

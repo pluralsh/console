@@ -3,7 +3,8 @@ defmodule Console.Schema.StackState do
   alias Console.Schema.{Stack, StackRun, AiInsight}
 
   schema "stack_states" do
-    field :plan, :binary
+    field :plan,      :string
+    field :plan_json, :map
 
     embeds_many :state, StateItem, on_replace: :delete do
       field :identifier,    :string
@@ -20,7 +21,7 @@ defmodule Console.Schema.StackState do
     timestamps()
   end
 
-  @valid ~w(plan stack_id run_id)a
+  @valid ~w(plan plan_json stack_id run_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

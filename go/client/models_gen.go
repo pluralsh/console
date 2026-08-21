@@ -9290,7 +9290,7 @@ type StackRun struct {
 	Workdir *string `json:"workdir,omitempty"`
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
-	// the result of the approval decision by the ai
+	// the result of the approval decision by stack policy or ai
 	ApprovalResult *StackRunApprovalResult `json:"approvalResult,omitempty"`
 	// Arbitrary variables to add to a stack run
 	Variables map[string]any `json:"variables,omitempty"`
@@ -9338,9 +9338,9 @@ type StackRun struct {
 }
 
 type StackRunApprovalResult struct {
-	// the reason for the approval decision by the ai
+	// the reason for the approval decision by stack policy or ai
 	Reason *string `json:"reason,omitempty"`
-	// the result of the approval decision by the ai
+	// the result of the approval decision by stack policy or ai
 	Result *ApprovalResult `json:"result,omitempty"`
 }
 
@@ -9384,9 +9384,11 @@ type StackSettingsAttributes struct {
 }
 
 type StackState struct {
-	ID    string                `json:"id"`
-	Plan  *string               `json:"plan,omitempty"`
-	State []*StackStateResource `json:"state,omitempty"`
+	ID   string  `json:"id"`
+	Plan *string `json:"plan,omitempty"`
+	// structured plan payload from the stack tool, e.g. terraform show -json
+	PlanJSON map[string]any        `json:"planJson,omitempty"`
+	State    []*StackStateResource `json:"state,omitempty"`
 	// an insight explaining the state of this stack state, eg the terraform plan it represents
 	Insight    *AiInsight `json:"insight,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -9394,8 +9396,10 @@ type StackState struct {
 }
 
 type StackStateAttributes struct {
-	Plan  *string                         `json:"plan,omitempty"`
-	State []*StackStateResourceAttributes `json:"state,omitempty"`
+	Plan *string `json:"plan,omitempty"`
+	// structured plan payload from the stack tool, e.g. terraform show -json
+	PlanJSON *string                         `json:"planJson,omitempty"`
+	State    []*StackStateResourceAttributes `json:"state,omitempty"`
 }
 
 type StackStateResource struct {

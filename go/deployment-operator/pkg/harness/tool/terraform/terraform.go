@@ -2,6 +2,7 @@ package terraform
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path"
 
@@ -51,9 +52,18 @@ func (in *Terraform) Plan() (*console.StackStateAttributes, error) {
 		return nil, err
 	}
 
-	return &console.StackStateAttributes{
+	attrs := &console.StackStateAttributes{
 		Plan: &plan,
-	}, nil
+	}
+
+	raw, err := in.planJSONRaw()
+	if err != nil {
+		klog.ErrorS(err, "could not read terraform plan JSON")
+		return attrs, nil
+	}
+
+	attrs.PlanJSON = &raw
+	return attrs, nil
 }
 
 // Output implements [v1.Tool] interface.
@@ -187,24 +197,44 @@ func (in *Terraform) planJSON() (*tfjson.Plan, error) {
 		return in.planJSONCache, nil
 	}
 
-	plan := new(tfjson.Plan)
-	output, err := exec.NewExecutable(
-		"terraform",
-		exec.WithArgs([]string{"show", "-json", in.planFileName}),
-		exec.WithDir(in.dir),
-	).RunWithOutput(context.Background())
+	raw, err := in.planJSONRaw()
 	if err != nil {
-		return nil, fmt.Errorf("failed executing terraform show -json: %s: %w", string(output), err)
+		return nil, err
 	}
 
-	err = plan.UnmarshalJSON(output)
-	if err != nil {
+	plan := new(tfjson.Plan)
+	if err = plan.UnmarshalJSON([]byte(raw)); err != nil {
 		return nil, fmt.Errorf("failed unmarshaling terraform plan JSON: %w", err)
 	}
 
 	in.planJSONCache = plan
 	klog.V(log.LogLevelTrace).InfoS("terraform plan JSON parsed successfully", "file", in.planFileName)
 	return plan, nil
+}
+
+// planJSONRaw returns the raw terraform show -json output for the plan file.
+func (in *Terraform) planJSONRaw() (string, error) {
+	if in.planJSONRawCache != nil {
+		return *in.planJSONRawCache, nil
+	}
+
+	output, err := exec.NewExecutable(
+		"terraform",
+		exec.WithArgs([]string{"show", "-json", in.planFileName}),
+		exec.WithDir(in.dir),
+	).RunWithOutput(context.Background())
+	if err != nil {
+		return "", fmt.Errorf("failed executing terraform show -json: %s: %w", string(output), err)
+	}
+
+	if !json.Valid(output) {
+		return "", fmt.Errorf("terraform show -json returned invalid JSON")
+	}
+
+	raw := string(output)
+	in.planJSONRawCache = &raw
+	klog.V(log.LogLevelTrace).InfoS("terraform plan JSON read successfully", "file", in.planFileName, "bytes", len(output))
+	return raw, nil
 }
 
 // HasChanges deterministically checks if the terraform plan contains any changes.

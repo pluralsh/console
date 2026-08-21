@@ -192,6 +192,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
     id
     plan
+    planJson
     state { ...StackStateResourceFragment}
 }
 

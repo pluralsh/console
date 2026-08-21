@@ -23,12 +23,7 @@ defmodule Console.AI.Tool do
     defstruct [:reason]
 
     def new([_ | _] = reasons) do
-      Enum.map(reasons, fn
-        %{"reason" => reason} -> reason
-        %{"msg" => msg} -> msg
-        _ -> "approval granted"
-      end)
-      |> then(& struct(__MODULE__, reason: "Automatically approved due to: #{Enum.join(&1, ", ")}"))
+      struct(__MODULE__, reason: "Automatically approved due to: #{PolicySvc.policy_reason(reasons, "approval granted")}")
     end
     def new(reason), do: struct(__MODULE__, reason: reason)
 
@@ -178,7 +173,7 @@ defmodule Console.AI.Tool do
     Enum.map(policies, & &1.policy_id)
     |> then(&PolicySvc.eval_policy(engine, maybe_actor(%{"tool" => input, "tool_name" => name(tool)}), &1))
     |> case do
-      {:ok, %{"deny" => [_ | _] = denials}} -> {:error, "Policy denied: #{inspect(denials)}"}
+      {:ok, %{"deny" => [_ | _] = denials}} -> {:error, "Policy denied: #{PolicySvc.policy_reason(denials)}"}
       {:ok, %{"approve" => [_ | _] = approvals}} ->
         case tool do
           %{approval: _} = tool -> {:ok, %{tool | approval: Approval.new(approvals)}}
@@ -189,18 +184,7 @@ defmodule Console.AI.Tool do
     end
   end
 
-  defp maybe_actor(input) do
-    case actor() do
-      %User{id: id, name: name, email: email, groups: groups} ->
-        Map.put(input, "actor", %{
-          "groups" => (if is_list(groups), do: Enum.map(groups, & &1.name), else: []),
-          "id" => id,
-          "email" => email,
-          "name" => name
-        })
-      _ -> input
-    end
-  end
+  defp maybe_actor(input), do: Map.put(input, "actor", PolicySvc.actor(actor()))
 
   defp compile_policies(policies) do
     with {:ok, engine} <- Regolix.new(),

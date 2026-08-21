@@ -11,6 +11,8 @@ defmodule Console.Deployments.Stacks do
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Services.Users
   alias Console.AI.{Provider, Tools.ApproveStack}
+  alias Console.Deployments.Policy, as: PolicyEngine
+  alias Console.Deployments.Stacks.Plan
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     User,
@@ -558,14 +560,52 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  Determines if a stack run should be approved based on a specified rules file.  Only available for terraform stacks and leverages
-  the approve_stack tool call.
+  Approves, cancels, or defers a pending stack run. Stack policies take priority over AI approval:
+  deny cancels, approve approves, and defer (or no decision) continues to AI when configured.
   """
-  @spec ai_stack_run_approval(StackRun.t) :: run_resp | :ok
-  def ai_stack_run_approval(%StackRun{
+  @spec stack_run_approval(StackRun.t) :: run_resp | :ok
+  def stack_run_approval(%StackRun{status: :pending_approval, approver_id: nil} = run) do
+    run = Repo.preload(run, [:state, :repository, actor: :groups, stack: [:policies, :project, :repository]])
+
+    case maybe_policy_approval(run) do
+      {:decide, approval} -> handle_approval(run, approval, :policy)
+      :continue -> maybe_ai_approval(run)
+      {:error, _} = err ->
+        Logger.error("Failed to evaluate stack policies for run #{run.id}: #{inspect(err)}")
+        err
+    end
+  end
+  def stack_run_approval(_), do: :ok
+
+  defp maybe_policy_approval(%StackRun{stack: %Stack{policies: [_ | _] = policies}} = run) do
+    with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
+         {:ok, result} <- PolicyEngine.eval_policy(engine, stack_policy_input(run), Enum.map(policies, & &1.id), path) do
+      case result do
+        %{"deny" => [_ | _] = denials} ->
+          {:decide, %{result: :rejected, reason: PolicyEngine.policy_reason(denials, "denied by stack policy")}}
+        %{"approve" => [_ | _] = approvals} ->
+          {:decide, %{result: :approved, reason: PolicyEngine.policy_reason(approvals, "approved by stack policy")}}
+        _ -> :continue
+      end
+    end
+  end
+  defp maybe_policy_approval(_), do: :continue
+
+  defp stack_policy_input(%StackRun{} = run) do
+    %{
+      "plan" => stack_plan(run),
+      "actor" => PolicyEngine.actor(run.actor),
+      "run_type" => Plan.run_type(run),
+      "stack" => PolicyEngine.stack(run.stack)
+    }
+  end
+
+  defp stack_plan(%StackRun{state: %StackState{plan_json: plan}}) when is_map(plan),
+    do: Plan.convert(plan)
+  defp stack_plan(_), do: Plan.convert(nil)
+
+  defp maybe_ai_approval(%StackRun{
     type: :terraform,
-    status: :pending_approval,
-    approver_id: nil,
     configuration: %Stack.Configuration{
       ai_approval: %Stack.Configuration.AiApproval{
         enabled: true, git: git, file: file
@@ -573,7 +613,7 @@ defmodule Console.Deployments.Stacks do
     }
   } = run) do
     with true <- Provider.enabled?(),
-         %{repository: %GitRepository{} = repo, state: %StackState{plan: p}} = run = Repo.preload(run, [:repository, :state]),
+         %StackRun{repository: %GitRepository{} = repo, state: %StackState{plan: p}} when is_binary(p) <- run,
          {:ok, f} <- Discovery.fetch(repo, git),
          {:ok, files} <- Tar.tar_stream(f),
          {_, rules} <- Enum.find(files, fn {k, _} -> k == file end) do
@@ -585,16 +625,19 @@ defmodule Console.Deployments.Stacks do
       ]
       |> Provider.simple_tool_call(ApproveStack)
       |> case do
-        {:ok, %ApproveStack{} = approval} -> handle_approval(run, approval)
+        {:ok, %ApproveStack{} = approval} -> handle_approval(run, approval, :ai)
         err -> err
       end
+    else
+      {:error, _} = err -> err
+      _ -> :ok
     end
   end
-  def ai_stack_run_approval(_), do: :ok
+  defp maybe_ai_approval(_), do: :ok
 
-  defp handle_approval(%StackRun{} = run, %ApproveStack{} = approval) do
-    StackRun.update_changeset(run, %{approval_result: Map.take(approval, ~w(reason result)a)})
-    |> approval_decision(run, approval)
+  defp handle_approval(%StackRun{} = run, %{reason: reason, result: result}, source) do
+    StackRun.update_changeset(run, %{approval_result: %{reason: reason, result: result}})
+    |> approval_decision(run, result, source)
     |> Repo.update()
     |> case do
       {:ok, %StackRun{status: s, approver_id: id} = run} when s == :cancelled or is_binary(id) ->
@@ -603,18 +646,15 @@ defmodule Console.Deployments.Stacks do
     end
   end
 
-  defp approval_decision(
-    cs,
-    %StackRun{configuration: %{ai_approval: %{ignore_cancel: true}}},
-    %ApproveStack{result: :rejected}
-  ), do: cs
-  defp approval_decision(cs, _, %ApproveStack{result: :approved}) do
+  defp approval_decision(cs, %StackRun{configuration: %{ai_approval: %{ignore_cancel: true}}}, :rejected, :ai),
+    do: cs
+  defp approval_decision(cs, _, :approved, _) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     StackRun.approve_changeset(cs, %{approver_id: bot.id, approved_at: Timex.now()})
   end
-  defp approval_decision(cs, _, %ApproveStack{result: :rejected}),
+  defp approval_decision(cs, _, :rejected, _),
     do: StackRun.update_changeset(cs, %{status: :cancelled})
-  defp approval_decision(cs, _, _), do: cs
+  defp approval_decision(cs, _, _, _), do: cs
 
   @doc """
   Updates run step attributes, only achievable by a cluster

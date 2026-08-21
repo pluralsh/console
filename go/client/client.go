@@ -6579,9 +6579,10 @@ func (t *StackOutputFragment) GetSecret() *bool {
 }
 
 type StackStateFragment struct {
-	ID    string                        "json:\"id\" graphql:\"id\""
-	Plan  *string                       "json:\"plan,omitempty\" graphql:\"plan\""
-	State []*StackStateResourceFragment "json:\"state,omitempty\" graphql:\"state\""
+	ID       string                        "json:\"id\" graphql:\"id\""
+	Plan     *string                       "json:\"plan,omitempty\" graphql:\"plan\""
+	PlanJSON map[string]any                "json:\"planJson,omitempty\" graphql:\"planJson\""
+	State    []*StackStateResourceFragment "json:\"state,omitempty\" graphql:\"state\""
 }
 
 func (t *StackStateFragment) GetID() string {
@@ -6595,6 +6596,12 @@ func (t *StackStateFragment) GetPlan() *string {
 		t = &StackStateFragment{}
 	}
 	return t.Plan
+}
+func (t *StackStateFragment) GetPlanJSON() map[string]any {
+	if t == nil {
+		t = &StackStateFragment{}
+	}
+	return t.PlanJSON
 }
 func (t *StackStateFragment) GetState() []*StackStateResourceFragment {
 	if t == nil {
@@ -66117,6 +66124,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -66588,6 +66596,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -67044,6 +67053,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -67386,6 +67396,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -67713,6 +67724,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -67948,6 +67960,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -68238,6 +68251,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -68945,6 +68959,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}
@@ -69291,6 +69306,7 @@ fragment StackOutputFragment on StackOutput {
 fragment StackStateFragment on StackState {
 	id
 	plan
+	planJson
 	state {
 		... StackStateResourceFragment
 	}

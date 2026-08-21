@@ -8141,6 +8141,10 @@ input StackFileAttributes {
 
 input StackStateAttributes {
   plan: String
+
+  "structured plan payload from the stack tool, e.g. terraform show -json"
+  planJson: Json
+
   state: [StackStateResourceAttributes]
 }
 
@@ -8577,7 +8581,7 @@ type StackRun {
   "whether you want Plural to manage the state of this stack"
   manageState: Boolean
 
-  "the result of the approval decision by the ai"
+  "the result of the approval decision by stack policy or ai"
   approvalResult: StackRunApprovalResult
 
   "Arbitrary variables to add to a stack run"
@@ -8718,6 +8722,9 @@ type StackState {
 
   plan: String
 
+  "structured plan payload from the stack tool, e.g. terraform show -json"
+  planJson: Map
+
   state: [StackStateResource]
 
   "an insight explaining the state of this stack state, eg the terraform plan it represents"
@@ -8787,10 +8794,10 @@ type StackPolicy {
 }
 
 type StackRunApprovalResult {
-  "the reason for the approval decision by the ai"
+  "the reason for the approval decision by stack policy or ai"
   reason: String
 
-  "the result of the approval decision by the ai"
+  "the result of the approval decision by stack policy or ai"
   result: ApprovalResult
 }
 

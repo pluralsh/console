@@ -200,7 +200,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   end
 
   def process(%@for{item: %StackRun{status: :pending_approval} = run}),
-    do: Stacks.ai_stack_run_approval(run)
+    do: Stacks.stack_run_approval(run)
 
   def process(%@for{item: %StackRun{pull_request_id: id, status: status} = run})
     when is_binary(id) and status != :queued do

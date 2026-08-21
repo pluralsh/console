@@ -307,6 +307,7 @@ fragment StackStateResource on StackStateResource {
 fragment StackState on StackState {
   id
   plan
+  planJson
   state {
     ...StackStateResource
   }
