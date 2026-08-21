@@ -459,8 +459,21 @@ versions:
         \ deprecations or behavior changes before upgrading."]
   chart_version: 0.26.0
   images: ['timberio/vector:0.33.0-distroless-libc']
-- version: 0.32.0
+- version: 0.32.2
   kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No functional changes were included in the provided notes beyond the
+        version bump to v0.32.2; only artifact listings are shown.]
+    breaking_changes: [No breaking changes are indicated in the provided notes; the
+        notes shown contain only release metadata and asset lists.]
+  chart_version: 0.25.0
+  images: ['timberio/vector:0.32.2-distroless-libc']
+- version: 0.32.0
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:

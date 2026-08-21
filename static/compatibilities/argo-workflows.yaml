@@ -8,7 +8,14 @@ versions:
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [No explicit feature list is included in the provided 4.1.1 notes; both
+        4.1.0 and 4.1.1 pages point to the main changelog/blog for details.]
+    breaking_changes: [No breaking changes are called out in the provided 4.1.1 notes;
+        both releases direct you to the upgrading guide and GitHub issues for breaking
+        changes/known issues.]
   chart_version: 2.0.1
   images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.1', 'quay.io/argoproj/argocli:v4.1.1',
     'quay.io/argoproj/workflow-controller:v4.1.1']
@@ -177,33 +184,21 @@ versions:
         so you must review that guide for 3.5.0-specific breaking changes before upgrading.']
   chart_version: 0.37.1
   images: ['quay.io/argoproj/argocli:v3.5.0', 'quay.io/argoproj/workflow-controller:v3.5.0']
-- version: 3.4.10
+- version: 3.4.11
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: []
-    breaking_changes: []
-  chart_version: 0.33.1
-  images: ['quay.io/argoproj/argocli:v3.4.10', 'quay.io/argoproj/workflow-controller:v3.4.10']
-- version: 3.4.9
-  kube: ['1.27', '1.26', '1.25']
-  requirements: []
-  incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: [No concrete feature list is included in the provided GitHub release-note
-        excerpts; both versions mostly point to the blog/CHANGELOG and provide install/CLI
-        instructions., 'v3.4.9 includes updated install manifests and new supply-chain
-        artifacts (cosign public key + checksums signature + SBOM) compared to v3.4.0,
-        which only listed sha256 files.']
-    breaking_changes: [No breaking changes are enumerated in the provided excerpts;
-        both releases defer to the installation guide for breaking changes/known issues.]
-  chart_version: 0.32.2
-  images: ['quay.io/argoproj/argocli:v3.4.9', 'quay.io/argoproj/workflow-controller:v3.4.9']
+    features: [Patch-level update within the v3.4.x line; release notes provided here
+        do not enumerate specific feature changes between v3.4.0 and v3.4.11., Update
+        includes newer controller/server images and a newer CLI binary matching v3.4.11.]
+    breaking_changes: [No breaking changes are listed in the provided notes; you should
+        still review the official Argo Workflows upgrading guide for any v3.4.x-specific
+        caveats.]
+  chart_version: 0.34.0
+  images: ['quay.io/argoproj/argocli:v3.4.11', 'quay.io/argoproj/workflow-controller:v3.4.11']
 - version: 3.4.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []

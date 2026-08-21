@@ -13703,7 +13703,7 @@ addons:
       'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
     eolAt: '2025-02-04'
   - version: 1.14.0
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -13854,46 +13854,6 @@ addons:
     images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
       'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
     eolAt: '2024-07-24'
-  - version: 1.13.5
-    kube: ['1.27', '1.26', '1.25']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: "- **New Helm value:** `envoyConfig.enabled` lets you enable the\
-        \ **CiliumEnvoyConfig (CEC) CRD** independently of the Cilium Ingress Controller.\
-        \ This matters if you use CEC for Envoy/L7 features but don\u2019t want to\
-        \ run Cilium Ingress.\n- **Ingress Service options:** Ingress now supports\
-        \ setting `loadBalancerIP` and `loadBalancerClass` on the created LoadBalancer\
-        \ Service, and Helm adds support for **nodePort allocation** for the Ingress\
-        \ LB service (useful when you run Ingress behind specific LB implementations\
-        \ or need fixed ports).\n- **Bugfix in chart behavior:** `cni.install=false`\
-        \ is now respected (previously CNI could still be installed). If you manage\
-        \ CNI config externally, re-check your values and rendered manifests to ensure\
-        \ the desired behavior.\n- **Operational note:** v1.13.5 includes an explicit\
-        \ warning to **not upgrade if using IPsec** (see breaking/upgrade blockers\
-        \ below)."
-      chart_updates: ['Ingress chart wiring updated to allow `loadBalancerIP`, `loadBalancerClass`,
-          and NodePort allocation for the Ingress LB Service.', Helm chart includes
-          support to toggle CiliumEnvoyConfig CRD via `envoyConfig.enabled` separate
-          from enabling Ingress., Chart behavior fixed to avoid installing the CNI
-          configuration when `cni.install=false`.]
-      features: ['Security: Envoy security fixes via bump to Envoy v1.24.x (includes
-          fixes for multiple Envoy CVEs/advisories listed in the release).', 'Ingress:
-          ability to set `loadBalancerIP` and `loadBalancerClass` on ingress services;
-          optional NodePort allocation for the ingress LB service.', 'Clustermesh:
-          option to disable external workloads support in clustermesh-apiserver for
-          performance when not needed.', 'Policy/L7 plumbing: ability to enable CiliumEnvoyConfig
-          CRD independently of Ingress controller (helps run CEC without Cilium Ingress).']
-      breaking_changes: ['Upgrade blocker: **Do NOT upgrade to v1.13.5 if you are
-          using IPsec** (release note warning). Treat as a hard stop until you identify
-          the recommended fixed version/mitigation from Cilium docs/issues.', 'Behavioral
-          change to be aware of: `cni.install=false` is enforced; if you previously
-          relied on the buggy behavior, upgrading may stop Cilium from writing/owning
-          the CNI config and could break node networking unless managed elsewhere.']
-    chart_version: 1.13.5
-    images: ['quay.io/cilium/cilium:v1.13.5@sha256:e02744b4413824093d25a6fb35e2e418f7301e55825fa53a8e1943fe7e9e5aef',
-      'quay.io/cilium/operator-generic:v1.13.5@sha256:d77f3e1472725b3c28b5d88d6a49c7fcba3072c0c08a26e2e16c1e9139c96207']
-    eolAt: '2024-07-24'
   - version: 1.13.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -13989,40 +13949,6 @@ addons:
     chart_version: 1.12.14
     images: ['quay.io/cilium/cilium:v1.12.14@sha256:a54b28a5c15e14f3491c772ca7cfa86266a2b1efb85326bc1ab6c95b91aeaa77',
       'quay.io/cilium/operator-generic:v1.12.14@sha256:b9ce66384c74f79a2982ef3a4602f649d49e9b8b79b58db5faa344c7451cb7c9']
-  - version: 1.12.12
-    kube: ['1.27', '1.26', '1.25']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: [No Helm chart changelog was provided in the notes you pasted;
-          the items below are chart-adjacent behaviors/values mentioned in the application
-          notes., 'If you had `cni.install=false`, v1.12.12 includes a fix where CNI
-          could still be installed; after upgrade confirm your chart values still
-          reflect the intended behavior.', 'Egress Gateway is now explicitly incompatible
-          with KVStore-backed identity allocation; if your deployment uses kvstore
-          identity allocation, you must keep EgressGW disabled (or change identity
-          allocation mode) before upgrading.']
-      features: [(From 1.12.0) Integrated Cilium Ingress Controller for Kubernetes
-          ingress handling., (From 1.12.0) Service Mesh capabilities with Cilium Envoy
-          Config (CEC) / Envoy CRDs and sidecar/sidecar-free options., (From 1.12.0)
-          Stable Egress Gateway plus additional service/LB features like backend quarantine/maintenance
-          states and initial NAT46/64 support., (From 1.12.0) New/expanded IPAM options
-          including delegated IPAM and dynamic PodCIDR allocation in cluster pool
-          v2., '(From 1.12.0) New GoBGP-backed BGP control plane and related enhancements
-          (IPv6 for BGP, PodCIDR announcements).', (From 1.12.12) Security fixes via
-          Envoy bumps (v1.24.9/1.24.10) and multiple improvements in network policy
-          and BGP stability.]
-      breaking_changes: ['v1.12.12: **Do NOT upgrade if you are using IPsec** (release
-          notes explicitly warn against upgrading with IPsec enabled).', 'v1.12.12:
-          Egress Gateway cannot be used with KVStore identity allocation; upgrading
-          without aligning configuration can break egress gateway behavior.', v1.12.0
-          introduced a new Egress Gateway CRD `CiliumEgressGatewayPolicy` and deprecated
-          `CiliumEgressNATPolicy`; older manifests may need migration before/after
-          upgrade.]
-    chart_version: 1.12.12
-    images: ['quay.io/cilium/cilium:v1.12.12@sha256:3cafa76253881a77c3613ed2967776b83b81fcdffcd2a90dae13b175297b92dd',
-      'quay.io/cilium/operator-generic:v1.12.12@sha256:fb2b1ef65fda0f102ef533f354a5cc462076bd70b281ce0eee71fc34badf551a']
   - version: 1.12.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -14085,25 +14011,6 @@ addons:
     chart_version: 1.12.0
     images: ['quay.io/cilium/cilium:v1.12.0@sha256:079baa4fa1b9fe638f96084f4e0297c84dd4fb215d29d2321dcbe54273f63ade',
       'quay.io/cilium/operator-generic:v1.12.0@sha256:bb2a42eda766e5d4a87ee8a5433f089db81b72dd04acf6b59fcbb445a95f9410']
-  - version: 1.11.19
-    kube: ['1.27', '1.26', '1.25']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [v1.11.19 includes security fixes by updating the embedded Envoy proxy
-          to patched releases (Envoy 1.23.10 / 1.24.x up to 1.24.10)., 'Network Policy
-          behavior received improvements and multiple policy/proxy related bugfixes
-          (e.g., handling of deny rules and missing Envoy listeners without crashing).',
-        'Operational tooling improved slightly (bugtool additions like BPF nodeid
-          list, extra tc data) and some documentation/CI refreshes landed.']
-      breaking_changes: [Do not upgrade to v1.11.19 if your cluster uses Cilium IPsec;
-          this release is explicitly flagged as unsafe for IPsec upgrades due to upgrade-time
-          packet drop issues in certain tunneling/encryption scenarios.]
-    chart_version: 1.11.19
-    images: ['quay.io/cilium/cilium:v1.11.19@sha256:f71c973a9159158704012e1a065a3d484353ff4c2b4e05e10a03382f055adad4',
-      'quay.io/cilium/operator-generic:v1.11.19@sha256:79b622067205037489dcfc3280a2b9a19b0ede9a1c83eb5b3064926fa6af6a23']
   - version: 1.11.6
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -19055,6 +18962,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 88.5.2
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Bumped `kube-state-metrics` Helm subchart to v8.4.0 (in 88.5.0).,
+        Bumped `quay.io/oauth2-proxy/oauth2-proxy` image tag to v7.15.4 (in 88.5.2).]
+      features: ['Updated bundled components: newer kube-state-metrics chart (v8.4.0).',
+        Updated oauth2-proxy container image tag (v7.15.4) used by the stack when
+          enabled.]
+      breaking_changes: []
+    chart_version: 88.5.2
+    images: ['docker.io/grafana/grafana:13.2.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.5',
+      'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 88.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -24376,7 +24301,7 @@ addons:
       'openpolicyagent/gatekeeper:v3.13.2']
     eolAt: '2024-02-05'
   - version: 3.13.0
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -25653,7 +25578,14 @@ addons:
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No explicit feature list is included in the provided 4.1.1 notes;
+          both 4.1.0 and 4.1.1 pages point to the main changelog/blog for details.]
+      breaking_changes: [No breaking changes are called out in the provided 4.1.1
+          notes; both releases direct you to the upgrading guide and GitHub issues
+          for breaking changes/known issues.]
     chart_version: 2.0.1
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.1', 'quay.io/argoproj/argocli:v4.1.1',
       'quay.io/argoproj/workflow-controller:v4.1.1']
@@ -25825,34 +25757,22 @@ addons:
           upgrading.']
     chart_version: 0.37.1
     images: ['quay.io/argoproj/argocli:v3.5.0', 'quay.io/argoproj/workflow-controller:v3.5.0']
-  - version: 3.4.10
+  - version: 3.4.11
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: []
-      breaking_changes: []
-    chart_version: 0.33.1
-    images: ['quay.io/argoproj/argocli:v3.4.10', 'quay.io/argoproj/workflow-controller:v3.4.10']
-  - version: 3.4.9
-    kube: ['1.27', '1.26', '1.25']
-    requirements: []
-    incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [No concrete feature list is included in the provided GitHub release-note
-          excerpts; both versions mostly point to the blog/CHANGELOG and provide install/CLI
-          instructions., 'v3.4.9 includes updated install manifests and new supply-chain
-          artifacts (cosign public key + checksums signature + SBOM) compared to v3.4.0,
-          which only listed sha256 files.']
-      breaking_changes: [No breaking changes are enumerated in the provided excerpts;
-          both releases defer to the installation guide for breaking changes/known
-          issues.]
-    chart_version: 0.32.2
-    images: ['quay.io/argoproj/argocli:v3.4.9', 'quay.io/argoproj/workflow-controller:v3.4.9']
+      features: [Patch-level update within the v3.4.x line; release notes provided
+          here do not enumerate specific feature changes between v3.4.0 and v3.4.11.,
+        Update includes newer controller/server images and a newer CLI binary matching
+          v3.4.11.]
+      breaking_changes: [No breaking changes are listed in the provided notes; you
+          should still review the official Argo Workflows upgrading guide for any
+          v3.4.x-specific caveats.]
+    chart_version: 0.34.0
+    images: ['quay.io/argoproj/argocli:v3.4.11', 'quay.io/argoproj/workflow-controller:v3.4.11']
   - version: 3.4.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -26396,8 +26316,21 @@ addons:
           \ deprecations or behavior changes before upgrading."]
     chart_version: 0.26.0
     images: ['timberio/vector:0.33.0-distroless-libc']
-  - version: 0.32.0
+  - version: 0.32.2
     kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No functional changes were included in the provided notes beyond
+          the version bump to v0.32.2; only artifact listings are shown.]
+      breaking_changes: [No breaking changes are indicated in the provided notes;
+          the notes shown contain only release metadata and asset lists.]
+    chart_version: 0.25.0
+    images: ['timberio/vector:0.32.2-distroless-libc']
+  - version: 0.32.0
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary:
@@ -28315,7 +28248,7 @@ addons:
     images: ['nvcr.io/nvidia/gpu-operator:v23.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
     incompatibilities: []
   - version: 23.3.2
-    kube: ['1.27', '1.26', '1.25']
+    kube: ['1.26', '1.25', '1.24']
     requirements: []
     chart_version: 23.3.2
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
@@ -28539,13 +28472,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 9.5.1
+  - version: 9.5.2
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 9.5.1
-    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+    chart_version: 9.5.2
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.5.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
