@@ -16,7 +16,7 @@ ENV CGO_ENABLED=0 \
 WORKDIR /sentinel/terratest
 
 # Copy test files
-COPY deployment-operator/terratest ./
+COPY --chown=65532:65532 deployment-operator/terratest ./
 
 RUN go mod download
 
