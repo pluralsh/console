@@ -186,7 +186,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp tool_msg(result, id, name, args, fmt, attrs) when is_function(fmt, 1) do
     case fmt.(result) do
       content when is_binary(content) -> {result, {:tool, content, %{call_id: id, name: name, arguments: args, attributes: attrs}}}
-      _ -> {result, tool_msg(tool_result_content(result), id, name, args, fmt, attrs)}
+      _ -> tool_msg(tool_result_content(result), id, name, args, fmt, attrs)
     end
   end
 
