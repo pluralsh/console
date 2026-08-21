@@ -39,7 +39,7 @@ func New(config v1.Config) v1.Tool {
 		}
 	}
 	if config.Run.IsProxyEnabled() {
-		result.provider = openAIProvider
+		result.provider = proxyProviderKey
 		result.model = proxymodel.ProxyModel(console.AgentRuntimeTypePi, result.model)
 	}
 	if err := result.ensure(); err != nil {
@@ -197,9 +197,15 @@ func (in *Pi) writeConfig() error {
 	}
 	provider := in.provider
 	if endpoint != "" {
-		// Pi's custom provider support is OpenAI-compatible. Keep the CLI provider
-		// stable and override its endpoint in the isolated PI config directory.
-		provider = openAIProvider
+		if in.Config.Run.IsProxyEnabled() {
+			// Use a non-"openai" provider key so the Pi CLI does not strip the
+			// "openai/" prefix from the model ID before calling the proxy endpoint.
+			provider = proxyProviderKey
+		} else {
+			// For custom non-proxy endpoints keep the openai provider so Pi uses
+			// its built-in OpenAI-compatible client.
+			provider = openAIProvider
+		}
 		in.provider = provider
 	}
 	models := map[string]any{"providers": map[string]any{}}
