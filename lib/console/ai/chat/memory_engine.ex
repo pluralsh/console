@@ -7,6 +7,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   alias Console.AI.{Provider, Tool}
   alias Console.AI.Chat.EnabledTools
   alias Console.AI.Tools.{EnableTools, ToolSearch}
+  alias Console.AI.Tools.Workbench.Output
   require Logger
 
   @type t :: %__MODULE__{}
@@ -180,14 +181,18 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp tool_msg(content, id, name, args, fun, attrs \\ %{})
   defp tool_msg(content, id, name, args, _, attrs) when is_binary(content),
     do: {:tool, content, %{call_id: id, name: name, arguments: args, attributes: attrs}}
-  defp tool_msg(%{content: content} = msg, id, name, args, _, _),
+  defp tool_msg(%{content: content} = msg, id, name, args, _, _) when is_binary(content),
     do: {:tool, content, %{call_id: id, name: name, arguments: args, attributes: Map.delete(msg, :content)}}
   defp tool_msg(result, id, name, args, fmt, attrs) when is_function(fmt, 1) do
     case fmt.(result) do
       content when is_binary(content) -> {result, {:tool, content, %{call_id: id, name: name, arguments: args, attributes: attrs}}}
-      _ -> result
+      _ -> {result, tool_msg(tool_result_content(result), id, name, args, fmt, attrs)}
     end
   end
+
+  defp tool_result_content(result), do: tool_result_content(result, Output.json(result))
+  defp tool_result_content(_, {:ok, content}), do: content
+  defp tool_result_content(result, {:error, _}), do: inspect(result)
 
   defp msg({res, {:tool, _, _}}, :result), do: res
   defp msg({_, {:tool, _, _} = tool}, :tool), do: tool
