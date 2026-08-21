@@ -482,6 +482,8 @@ export type AgentRun = {
   flow?: Maybe<Flow>;
   /** whether this run is a follow-up to a pull request */
   followup?: Maybe<Scalars['Boolean']['output']>;
+  /** the pull request URL this follow-up run is targeting */
+  followupPrUrl?: Maybe<Scalars['String']['output']>;
   /** the head branch this agent run has created for its pull request */
   headBranch?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -634,6 +636,8 @@ export type AgentRunStatusAttributes = {
   consumed?: InputMaybe<Scalars['ID']['input']>;
   /** the error reason of the agent run */
   error?: InputMaybe<Scalars['String']['input']>;
+  /** the pull request URL this follow-up run is targeting */
+  followupPrUrl?: InputMaybe<Scalars['String']['input']>;
   /** the head branch this agent run has created for its pull request */
   headBranch?: InputMaybe<Scalars['String']['input']>;
   /** the messages this agent run has generated during its run */
@@ -9477,6 +9481,8 @@ export type RootMutationType = {
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Deletes the eval configuration for a workbench. Requires write access to the workbench. */
   deleteWorkbenchEval?: Maybe<WorkbenchEval>;
+  /** Deletes saved workbench knowledge. Requires write access to the workbench. */
+  deleteWorkbenchKnowledge?: Maybe<WorkbenchKnowledge>;
   deleteWorkbenchPolicy?: Maybe<WorkbenchPolicy>;
   /** Deletes a saved workbench prompt. Requires read access to the workbench. */
   deleteWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
@@ -9620,6 +9626,8 @@ export type RootMutationType = {
   updateWorkbenchEval?: Maybe<WorkbenchEval>;
   /** Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update. */
   updateWorkbenchJob?: Maybe<WorkbenchJob>;
+  /** Updates saved workbench knowledge. Requires write access to the workbench. */
+  updateWorkbenchKnowledge?: Maybe<WorkbenchKnowledge>;
   updateWorkbenchPolicy?: Maybe<WorkbenchPolicy>;
   /** Updates a saved workbench prompt. Requires read access to the workbench. */
   updateWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
@@ -10481,6 +10489,11 @@ export type RootMutationTypeDeleteWorkbenchEvalArgs = {
 };
 
 
+export type RootMutationTypeDeleteWorkbenchKnowledgeArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteWorkbenchPolicyArgs = {
   id: Scalars['ID']['input'];
 };
@@ -11105,6 +11118,12 @@ export type RootMutationTypeUpdateWorkbenchEvalArgs = {
 export type RootMutationTypeUpdateWorkbenchJobArgs = {
   attributes: WorkbenchJobUpdateAttributes;
   jobId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchKnowledgeArgs = {
+  attributes: WorkbenchKnowledgeAttributes;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -16056,6 +16075,7 @@ export type Workbench = {
   /** users that have read or write access to this workbench */
   users?: Maybe<Array<Maybe<User>>>;
   webhooks?: Maybe<WorkbenchWebhookConnection>;
+  workbenchKnowledge?: Maybe<WorkbenchKnowledgeConnection>;
   workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
   workbenchSkills?: Maybe<WorkbenchSkillConnection>;
   /** write policy of this service */
@@ -16122,6 +16142,14 @@ export type WorkbenchRunsArgs = {
 
 
 export type WorkbenchWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchWorkbenchKnowledgeArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -17091,6 +17119,51 @@ export type WorkbenchJobUsage = {
   totalCost?: Maybe<Scalars['Float']['output']>;
   /** total tokens consumed by this job */
   totalTokens?: Maybe<Scalars['Int']['output']>;
+};
+
+export type WorkbenchKnowledge = {
+  __typename?: 'WorkbenchKnowledge';
+  /** the saved knowledge description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the id of the saved knowledge */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the saved knowledge contents */
+  knowledge?: Maybe<Scalars['String']['output']>;
+  /** labels associated with this knowledge */
+  labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** when this knowledge was last used */
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the saved knowledge name */
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** how many times this knowledge has been used */
+  usages?: Maybe<Scalars['Int']['output']>;
+  /** the workbench this knowledge belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchKnowledgeAttributes = {
+  /** the saved knowledge description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the saved knowledge contents */
+  knowledge: Scalars['String']['input'];
+  /** labels associated with this knowledge */
+  labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the saved knowledge name */
+  name: Scalars['String']['input'];
+};
+
+export type WorkbenchKnowledgeConnection = {
+  __typename?: 'WorkbenchKnowledgeConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchKnowledgeEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchKnowledgeEdge = {
+  __typename?: 'WorkbenchKnowledgeEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchKnowledge>;
 };
 
 export type WorkbenchMessageAttributes = {

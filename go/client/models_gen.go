@@ -418,6 +418,8 @@ type AgentRun struct {
 	Consumed *string `json:"consumed,omitempty"`
 	// whether this run is a follow-up to a pull request
 	Followup *bool `json:"followup,omitempty"`
+	// the pull request URL this follow-up run is targeting
+	FollowupPrURL *string `json:"followupPrUrl,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -534,6 +536,8 @@ type AgentRunStatusAttributes struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// the pull request URL this follow-up run is targeting
+	FollowupPrURL *string `json:"followupPrUrl,omitempty"`
 	// the skills available to this agent run
 	Skills []*AgentSkillAttributes `json:"skills,omitempty"`
 	// token and cost usage for this agent run
@@ -10220,12 +10224,13 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings     []*PolicyBinding           `json:"writeBindings,omitempty"`
-	WorkbenchPolicies *WorkbenchPolicyConnection `json:"workbenchPolicies,omitempty"`
-	Runs              *WorkbenchJobConnection    `json:"runs,omitempty"`
-	Crons             *WorkbenchCronConnection   `json:"crons,omitempty"`
-	Prompts           *WorkbenchPromptConnection `json:"prompts,omitempty"`
-	WorkbenchSkills   *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	WriteBindings      []*PolicyBinding              `json:"writeBindings,omitempty"`
+	WorkbenchPolicies  *WorkbenchPolicyConnection    `json:"workbenchPolicies,omitempty"`
+	Runs               *WorkbenchJobConnection       `json:"runs,omitempty"`
+	Crons              *WorkbenchCronConnection      `json:"crons,omitempty"`
+	Prompts            *WorkbenchPromptConnection    `json:"prompts,omitempty"`
+	WorkbenchSkills    *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
+	WorkbenchKnowledge *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -11036,6 +11041,48 @@ type WorkbenchJobUsage struct {
 	OutputCost *float64 `json:"outputCost,omitempty"`
 	// total token cost for this job
 	TotalCost *float64 `json:"totalCost,omitempty"`
+}
+
+type WorkbenchKnowledge struct {
+	// the id of the saved knowledge
+	ID string `json:"id"`
+	// the saved knowledge name
+	Name *string `json:"name,omitempty"`
+	// the saved knowledge description
+	Description *string `json:"description,omitempty"`
+	// the saved knowledge contents
+	Knowledge *string `json:"knowledge,omitempty"`
+	// labels associated with this knowledge
+	Labels []*string `json:"labels,omitempty"`
+	// how many times this knowledge has been used
+	Usages *int64 `json:"usages,omitempty"`
+	// when this knowledge was last used
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
+	// the workbench this knowledge belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchKnowledgeAttributes struct {
+	// the saved knowledge name
+	Name string `json:"name"`
+	// the saved knowledge description
+	Description *string `json:"description,omitempty"`
+	// the saved knowledge contents
+	Knowledge string `json:"knowledge"`
+	// labels associated with this knowledge
+	Labels []*string `json:"labels,omitempty"`
+}
+
+type WorkbenchKnowledgeConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*WorkbenchKnowledgeEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchKnowledgeEdge struct {
+	Node   *WorkbenchKnowledge `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
 }
 
 type WorkbenchMessageAttributes struct {

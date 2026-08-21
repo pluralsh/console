@@ -1428,6 +1428,12 @@ type RootMutationType {
   "Deletes a saved workbench skill. Requires write access to the workbench."
   deleteWorkbenchSkill(id: ID!): WorkbenchSkill
 
+  "Updates saved workbench knowledge. Requires write access to the workbench."
+  updateWorkbenchKnowledge(id: ID!, attributes: WorkbenchKnowledgeAttributes!): WorkbenchKnowledge
+
+  "Deletes saved workbench knowledge. Requires write access to the workbench."
+  deleteWorkbenchKnowledge(id: ID!): WorkbenchKnowledge
+
   "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."
   createWorkbenchEval(
     "the workbench to create an eval for"
@@ -2132,6 +2138,9 @@ input AgentRunStatusAttributes {
   "the agent run this run consumed"
   consumed: ID
 
+  "the pull request URL this follow-up run is targeting"
+  followupPrUrl: String
+
   "the skills available to this agent run"
   skills: [AgentSkillAttributes]
 
@@ -2416,6 +2425,9 @@ type AgentRun {
 
   "whether this run is a follow-up to a pull request"
   followup: Boolean
+
+  "the pull request URL this follow-up run is targeting"
+  followupPrUrl: String
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -3160,6 +3172,20 @@ input WorkbenchSkillAttributes {
   subagents: [WorkbenchSkillSubagent]
 }
 
+input WorkbenchKnowledgeAttributes {
+  "the saved knowledge name"
+  name: String!
+
+  "the saved knowledge description"
+  description: String
+
+  "the saved knowledge contents"
+  knowledge: String!
+
+  "labels associated with this knowledge"
+  labels: [String]
+}
+
 input WorkbenchEvalAttributes {
   "rules for evaluating job conclusions"
   conclusionRules: String
@@ -3809,6 +3835,8 @@ type Workbench {
   prompts(after: String, first: Int, before: String, last: Int): WorkbenchPromptConnection
 
   workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
+
+  workbenchKnowledge(after: String, first: Int, before: String, last: Int): WorkbenchKnowledgeConnection
 
   "eval configuration for this workbench (at most one; null if none configured)"
   eval: WorkbenchEval
@@ -4574,6 +4602,36 @@ type WorkbenchSkill {
   updatedAt: DateTime
 }
 
+type WorkbenchKnowledge {
+  "the id of the saved knowledge"
+  id: String!
+
+  "the saved knowledge name"
+  name: String
+
+  "the saved knowledge description"
+  description: String
+
+  "the saved knowledge contents"
+  knowledge: String
+
+  "labels associated with this knowledge"
+  labels: [String]
+
+  "how many times this knowledge has been used"
+  usages: Int
+
+  "when this knowledge was last used"
+  lastUsedAt: DateTime
+
+  "the workbench this knowledge belongs to"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 "A representation of a skill sourced from either the API or git"
 type UnifiedWorkbenchSkill {
   "the id of the saved skill (if it's API-derived, otherwise null)"
@@ -5262,6 +5320,11 @@ type WorkbenchPromptConnection {
 type WorkbenchSkillConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchSkillEdge]
+}
+
+type WorkbenchKnowledgeConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchKnowledgeEdge]
 }
 
 type WorkbenchEvalResultConnection {
@@ -17549,6 +17612,11 @@ type WorkbenchWebhookEdge {
 
 type WorkbenchEvalResultEdge {
   node: WorkbenchEvalResult
+  cursor: String
+}
+
+type WorkbenchKnowledgeEdge {
+  node: WorkbenchKnowledge
   cursor: String
 }
 

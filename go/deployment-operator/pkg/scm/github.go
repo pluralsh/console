@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -12,8 +11,6 @@ import (
 	gogithub "github.com/google/go-github/v68/github"
 	"golang.org/x/oauth2"
 )
-
-var githubPRPattern = regexp.MustCompile(`github(?:\.[^/]+)?/([^/]+)/([^/]+)/pull/(\d+)`)
 
 type gitHubClient struct {
 	gh *gogithub.Client
@@ -34,12 +31,10 @@ func newGitHubClient(token, host string) *gitHubClient {
 }
 
 func (c *gitHubClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetails, error) {
-	m := githubPRPattern.FindStringSubmatch(prURL)
-	if m == nil {
-		return nil, fmt.Errorf("cannot parse GitHub PR URL: %s", prURL)
+	owner, repo, number, err := parseGitHubPRURL(prURL)
+	if err != nil {
+		return nil, err
 	}
-	owner, repo := m[1], m[2]
-	number, _ := strconv.Atoi(m[3])
 
 	pr, _, err := c.gh.PullRequests.Get(ctx, owner, repo, number)
 	if err != nil {
@@ -73,12 +68,10 @@ func (c *gitHubClient) GetPRDetails(ctx context.Context, prURL string) (*PRDetai
 }
 
 func (c *gitHubClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
-	m := githubPRPattern.FindStringSubmatch(prURL)
-	if m == nil {
-		return nil, fmt.Errorf("cannot parse GitHub PR URL: %s", prURL)
+	owner, repo, number, err := parseGitHubPRURL(prURL)
+	if err != nil {
+		return nil, err
 	}
-	owner, repo := m[1], m[2]
-	number, _ := strconv.Atoi(m[3])
 
 	pr, _, err := c.gh.PullRequests.Get(ctx, owner, repo, number)
 	if err != nil {
@@ -215,11 +208,10 @@ func (c *gitHubClient) checkRuns(ctx context.Context, owner, repo, sha string) (
 // GetCILogs downloads the log text for a GitHub Actions job (check run).
 // go-github follows the redirect and returns the raw log body.
 func (c *gitHubClient) GetCILogs(ctx context.Context, prURL string, checkRunID int64) (string, error) {
-	m := githubPRPattern.FindStringSubmatch(prURL)
-	if m == nil {
-		return "", fmt.Errorf("cannot parse GitHub PR URL: %s", prURL)
+	owner, repo, _, err := parseGitHubPRURL(prURL)
+	if err != nil {
+		return "", err
 	}
-	owner, repo := m[1], m[2]
 
 	logsURL, resp, err := c.gh.Actions.GetWorkflowJobLogs(ctx, owner, repo, checkRunID, 3)
 	if err != nil {
@@ -247,11 +239,10 @@ func (c *gitHubClient) GetCILogs(ctx context.Context, prURL string, checkRunID i
 // working  → adds "eyes".
 // complete → removes "eyes" if present, then adds "+1".
 func (c *gitHubClient) ReactToComment(ctx context.Context, prURL string, reactableID string, state CommentReactState) error {
-	m := githubPRPattern.FindStringSubmatch(prURL)
-	if m == nil {
-		return fmt.Errorf("cannot parse GitHub PR URL: %s", prURL)
+	owner, repo, _, err := parseGitHubPRURL(prURL)
+	if err != nil {
+		return err
 	}
-	owner, repo := m[1], m[2]
 
 	parts := strings.SplitN(reactableID, ":", 2)
 	if len(parts) != 2 {

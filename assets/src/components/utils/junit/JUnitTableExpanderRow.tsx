@@ -9,9 +9,13 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
-import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
-import { TestCase, TestcaseResult, TestSuite } from 'utils/junitParse'
+import {
+  getTestcaseOutcome,
+  TestCase,
+  TestcaseResult,
+  TestSuite,
+} from 'utils/junitParse'
 import { StretchedFlex } from '../StretchedFlex'
 import { StackedText } from '../table/StackedText'
 import { JUnitPropertiesTable } from './JUnitPropertiesTable'
@@ -172,10 +176,16 @@ function ExpanderCodeBlock({
 }
 
 export const getTestcaseStatus = (testcase: TestCase): JUnitTestStatus => {
-  if (!isEmpty(testcase.skipped)) return JUnitTestStatus.Skipped
-  if (!isEmpty(testcase.error)) return JUnitTestStatus.Error
-  if (!isEmpty(testcase.failure)) return JUnitTestStatus.Failed
-  return JUnitTestStatus.Passed
+  switch (getTestcaseOutcome(testcase)) {
+    case 'skipped':
+      return JUnitTestStatus.Skipped
+    case 'error':
+      return JUnitTestStatus.Error
+    case 'failed':
+      return JUnitTestStatus.Failed
+    default:
+      return JUnitTestStatus.Passed
+  }
 }
 
 export const testStatusToIcon = ({

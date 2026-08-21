@@ -6,31 +6,32 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   alias Console.Deployments.Agents
 
   embedded_schema do
-    field :activity,     :map, virtual: true
-    field :workbench,    :map, virtual: true
-    field :job,          :map, virtual: true
-    field :skills,       :map, virtual: true
-    field :mode,         AgentRun.Mode
-    field :babysit,      :boolean
-    field :approval,     :boolean
-    field :followup,     :boolean
-    field :repository,   :string
-    field :base_branch,  :string
-    field :head_branch,  :string
-    field :prompt,       :string
+    field :activity,        :map, virtual: true
+    field :workbench,       :map, virtual: true
+    field :job,             :map, virtual: true
+    field :skills,          :map, virtual: true
+    field :mode,            AgentRun.Mode
+    field :babysit,         :boolean
+    field :approval,        :boolean
+    field :followup,        :boolean
+    field :followup_pr_url, :string
+    field :repository,      :string
+    field :base_branch,     :string
+    field :head_branch,     :string
+    field :prompt,          :string
   end
 
-  @valid ~w(mode repository base_branch head_branch prompt babysit approval followup)a
+  @valid ~w(mode repository base_branch head_branch prompt babysit approval followup followup_pr_url)a
 
   def changeset(%__MODULE__{workbench: bench, job: job} = model, attrs) do
     model
     |> cast(attrs, @valid)
-    |> validate_required(@valid -- [:base_branch, :head_branch, :babysit, :approval, :followup])
+    |> validate_required(@valid -- [:base_branch, :head_branch, :babysit, :approval, :followup, :followup_pr_url])
     |> fix_mode(bench, job)
     |> fix_babysit(bench, job)
     |> fix_approval(bench, job)
     |> validate_repository(bench)
-    |> validate_followup_branch()
+    |> validate_followup()
   end
 
   defp fix_mode(cs, _, %WorkbenchJob{modes: %WorkbenchJob.Modes{plan: true}}) do
@@ -79,7 +80,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def name(_), do: "workbench_coding_agent"
   def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt to either analyze the code in question or modify it and generate a reviewable PR."
 
-  @run_attrs ~w(mode repository prompt activity babysit approval followup head_branch)a
+  @run_attrs ~w(mode repository prompt activity babysit approval followup followup_pr_url head_branch)a
 
   def implement(%__MODULE__{id: tool} = args) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
@@ -96,17 +97,17 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   defp run_args(tool) do
     Map.take(tool, @run_attrs)
     |> Map.put(:skills, skills(tool.skills))
-    |> then(fn
+    |> case do
       %{followup: true} = args -> args
-      args -> args |> Map.delete(:head_branch) |> Map.put(:branch, tool.base_branch)
-    end)
+      args -> Map.drop(args, [:head_branch, :followup_pr_url])
+              |> Map.put(:branch, tool.base_branch)
+    end
   end
 
-  defp validate_followup_branch(cs) do
-    if get_field(cs, :followup) do
-      validate_required(cs, [:head_branch])
-    else
-      cs
+  defp validate_followup(cs) do
+    case get_field(cs, :followup) do
+      true -> validate_required(cs, [:head_branch, :followup_pr_url])
+      _ -> cs
     end
   end
 

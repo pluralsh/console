@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"regexp"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -22,10 +22,6 @@ const (
 	gitlabMRStateMerged = "merged"
 	gitlabMRStateClosed = "closed"
 )
-
-// gitlabMRPattern matches GitLab MR URLs, e.g.
-// https://gitlab.com/group/subgroup/project/-/merge_requests/123
-var gitlabMRPattern = regexp.MustCompile(`gitlab(?:\.[^/]+)?/(.+?)/-/merge_requests/(\d+)`)
 
 type gitLabClient struct {
 	gl *gogitlab.Client
@@ -270,15 +266,38 @@ func (c *gitLabClient) deleteAwardEmojiOnNote(ctx context.Context, projectPath s
 	return nil
 }
 
-// parseGitLabMRURL extracts the project path and MR IID from a GitLab MR URL.
+// parseGitLabMRURL extracts the project path and MR IID from a GitLab (or
+// self-hosted) merge request URL such as:
+//
+//	https://gitlab.com/group/subgroup/project/-/merge_requests/123
+//	https://git.internal.example.com/group/project/-/merge_requests/123
 func parseGitLabMRURL(prURL string) (string, int64, error) {
-	m := gitlabMRPattern.FindStringSubmatch(prURL)
-	if m == nil {
+	u, err := url.Parse(prURL)
+	if err != nil {
 		return "", 0, fmt.Errorf("cannot parse GitLab MR URL: %s", prURL)
 	}
-	mrIID, err := strconv.ParseInt(m[2], 10, 64)
+	path := strings.Trim(u.Path, "/")
+	projectPath, mrPath, ok := strings.Cut(path, "/-/")
+	if !ok {
+		return "", 0, fmt.Errorf("cannot parse GitLab MR URL: %s", prURL)
+	}
+	mrParts := strings.Split(mrPath, "/")
+	cleaned := make([]string, 0, len(mrParts))
+	for _, part := range mrParts {
+		if part != "" {
+			cleaned = append(cleaned, part)
+		}
+	}
+	if len(cleaned) < 2 || cleaned[0] != "merge_requests" {
+		return "", 0, fmt.Errorf("cannot parse GitLab MR URL: %s", prURL)
+	}
+	mrIID, err := strconv.ParseInt(cleaned[1], 10, 64)
 	if err != nil {
 		return "", 0, fmt.Errorf("invalid MR IID in URL %s: %w", prURL, err)
 	}
-	return m[1], mrIID, nil
+	projectPath = strings.TrimSuffix(strings.Trim(projectPath, "/"), ".git")
+	if projectPath == "" {
+		return "", 0, fmt.Errorf("cannot parse GitLab MR URL: %s", prURL)
+	}
+	return projectPath, mrIID, nil
 }

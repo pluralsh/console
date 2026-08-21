@@ -1460,6 +1460,84 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "updateWorkbenchKnowledge" do
+    test "it can update saved knowledge" do
+      workbench = insert(:workbench)
+      knowledge = insert(:workbench_knowledge, workbench: workbench, name: "old", description: "old", knowledge: "before")
+
+      {:ok, %{data: %{"updateWorkbenchKnowledge" => updated}}} = run_query("""
+        mutation UpdateWorkbenchKnowledge($id: ID!, $attributes: WorkbenchKnowledgeAttributes!) {
+          updateWorkbenchKnowledge(id: $id, attributes: $attributes) {
+            id
+            name
+            description
+            knowledge
+            labels
+          }
+        }
+      """, %{"id" => knowledge.id, "attributes" => %{"name" => "new", "description" => "new-desc", "knowledge" => "after", "labels" => ["updated"]}}, %{current_user: admin_user()})
+
+      assert updated["id"] == knowledge.id
+      assert updated["name"] == "new"
+      assert updated["description"] == "new-desc"
+      assert updated["knowledge"] == "after"
+      assert updated["labels"] == ["updated"]
+    end
+
+    test "project readers cannot update knowledge" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      knowledge = insert(:workbench_knowledge, workbench: workbench, name: "secret", knowledge: "secret")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchKnowledge($id: ID!, $attributes: WorkbenchKnowledgeAttributes!) {
+          updateWorkbenchKnowledge(id: $id, attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"id" => knowledge.id, "attributes" => %{"name" => "hacked", "knowledge" => "hacked"}}, %{current_user: user})
+
+      assert refetch(knowledge).name == "secret"
+    end
+  end
+
+  describe "deleteWorkbenchKnowledge" do
+    test "it can delete saved knowledge" do
+      workbench = insert(:workbench)
+      knowledge = insert(:workbench_knowledge, workbench: workbench)
+
+      {:ok, %{data: %{"deleteWorkbenchKnowledge" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchKnowledge($id: ID!) {
+          deleteWorkbenchKnowledge(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => knowledge.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == knowledge.id
+      refute refetch(knowledge)
+    end
+
+    test "project readers cannot delete knowledge" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      knowledge = insert(:workbench_knowledge, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchKnowledge($id: ID!) {
+          deleteWorkbenchKnowledge(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => knowledge.id}, %{current_user: user})
+
+      assert refetch(knowledge)
+    end
+  end
+
   describe "createWorkbenchEval" do
     test "it can create an eval with write access to the workbench" do
       workbench = insert(:workbench)

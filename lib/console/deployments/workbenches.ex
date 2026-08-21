@@ -16,6 +16,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
+    WorkbenchKnowledge,
     WorkbenchEval,
     WorkbenchEvalResult,
     WorkbenchWebhook,
@@ -50,6 +51,7 @@ defmodule Console.Deployments.Workbenches do
   @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
   @type queued_prompt_resp :: {:ok, QueuedPrompt.t()} | error
   @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
+  @type knowledge_resp :: {:ok, WorkbenchKnowledge.t()} | error
   @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
   @type chatbot_resp :: {:ok, WorkbenchChatbot.t()} | error
@@ -84,6 +86,8 @@ defmodule Console.Deployments.Workbenches do
   def get_queued_prompt(id), do: Repo.get(QueuedPrompt, id)
   def get_workbench_skill!(id), do: Repo.get!(WorkbenchSkill, id)
   def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
+  def get_workbench_knowledge!(id), do: Repo.get!(WorkbenchKnowledge, id)
+  def get_workbench_knowledge(id), do: Repo.get(WorkbenchKnowledge, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
 
@@ -432,6 +436,41 @@ defmodule Console.Deployments.Workbenches do
   @spec delete_workbench_skill(binary, User.t()) :: skill_resp
   def delete_workbench_skill(id, %User{} = user) do
     get_workbench_skill!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates saved workbench knowledge. Requires write access to the workbench.
+  """
+  @spec create_workbench_knowledge(map, binary, User.t()) :: knowledge_resp
+  def create_workbench_knowledge(attrs, workbench_id, %User{} = user) do
+    %WorkbenchKnowledge{workbench_id: workbench_id}
+    |> WorkbenchKnowledge.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates saved workbench knowledge. Requires write access to the workbench.
+  """
+  @spec update_workbench_knowledge(map, binary, User.t()) :: knowledge_resp
+  def update_workbench_knowledge(attrs, id, %User{} = user) do
+    get_workbench_knowledge!(id)
+    |> WorkbenchKnowledge.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes saved workbench knowledge. Requires write access to the workbench.
+  """
+  @spec delete_workbench_knowledge(binary, User.t()) :: knowledge_resp
+  def delete_workbench_knowledge(id, %User{} = user) do
+    get_workbench_knowledge!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
@@ -1438,6 +1477,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchSkillUpdated, skill, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :delete, user),
     do: handle_notify(PubSub.WorkbenchSkillDeleted, skill, actor: user)
+  defp notify({:ok, %WorkbenchKnowledge{} = knowledge}, :create, user),
+    do: handle_notify(PubSub.WorkbenchKnowledgeCreated, knowledge, actor: user)
+  defp notify({:ok, %WorkbenchKnowledge{} = knowledge}, :update, user),
+    do: handle_notify(PubSub.WorkbenchKnowledgeUpdated, knowledge, actor: user)
+  defp notify({:ok, %WorkbenchKnowledge{} = knowledge}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchKnowledgeDeleted, knowledge, actor: user)
   defp notify({:ok, %WorkbenchEval{} = eval}, :create, user),
     do: handle_notify(PubSub.WorkbenchEvalCreated, eval, actor: user)
   defp notify({:ok, %WorkbenchEval{} = eval}, :update, user),

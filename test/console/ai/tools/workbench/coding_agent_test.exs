@@ -42,6 +42,35 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
                |> Ecto.Changeset.apply_action(:update)
     end
 
+    test "followup requires a head branch and pr url" do
+      {:error, changeset} =
+        %CodingAgent{workbench: %Workbench{}, job: %WorkbenchJob{}}
+        |> CodingAgent.changeset(%{
+          "mode" => "write",
+          "repository" => "https://github.com/pluralsh/console.git",
+          "prompt" => "update the readme",
+          "followup" => true
+        })
+        |> Ecto.Changeset.apply_action(:update)
+
+      assert "can't be blank" in errors_on(changeset).head_branch
+      assert "can't be blank" in errors_on(changeset).followup_pr_url
+
+      assert {:ok, %CodingAgent{followup: true, head_branch: "agent/follow-up", followup_pr_url: url}} =
+               %CodingAgent{workbench: %Workbench{}, job: %WorkbenchJob{}}
+               |> CodingAgent.changeset(%{
+                 "mode" => "write",
+                 "repository" => "https://github.com/pluralsh/console.git",
+                 "prompt" => "update the readme",
+                 "followup" => true,
+                 "head_branch" => "agent/follow-up",
+                 "followup_pr_url" => "https://github.com/pluralsh/console/pull/1"
+               })
+               |> Ecto.Changeset.apply_action(:update)
+
+      assert url == "https://github.com/pluralsh/console/pull/1"
+    end
+
     test "job plan mode requires analyze mode" do
       job = %WorkbenchJob{modes: %WorkbenchJob.Modes{plan: true}}
 
@@ -68,19 +97,20 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
   end
 
   describe "implement/1" do
-    test "passes approval, followup, and head branch through to the agent run" do
+    test "passes approval, followup, head branch, and pr url through to the agent run" do
       user = insert(:user)
       runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
       Tool.context(user: user, runtime: runtime)
 
-      assert {:ok, %AgentRun{id: run_id, approval: true, followup: true, branch: nil, head_branch: "agent/follow-up"}} =
+      assert {:ok, %AgentRun{id: run_id, approval: true, followup: true, branch: nil, head_branch: "agent/follow-up", followup_pr_url: "https://github.com/pluralsh/console/pull/1"}} =
                CodingAgent.implement(%CodingAgent{
                  mode: :write,
                  repository: "https://github.com/pluralsh/console.git",
                  prompt: "update the readme",
                  approval: true,
                  followup: true,
-                 head_branch: "agent/follow-up"
+                 head_branch: "agent/follow-up",
+                 followup_pr_url: "https://github.com/pluralsh/console/pull/1"
                })
 
       run = Repo.get!(AgentRun, run_id)
@@ -88,6 +118,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
       assert run.followup == true
       assert run.branch == nil
       assert run.head_branch == "agent/follow-up"
+      assert run.followup_pr_url == "https://github.com/pluralsh/console/pull/1"
     end
 
     test "creates an agent run when base_branch is nil" do

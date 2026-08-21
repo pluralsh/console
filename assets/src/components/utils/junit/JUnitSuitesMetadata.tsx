@@ -1,7 +1,7 @@
 import { Card, Flex, HistoryIcon } from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
-import { TestSuites } from 'utils/junitParse'
+import { getTestStats, TestSuites } from 'utils/junitParse'
 import { StackedText } from '../table/StackedText'
 import { getCountFromStatus } from './JUnitTable'
 import { JUnitTestStatus } from './JUnitTableExpanderRow'
@@ -19,7 +19,7 @@ export function JUnitSuitesMetadata({
       />
       <MetadataItem
         heading="Total tests"
-        value={testSuites.tests ?? 0}
+        value={getTestStats(testSuites).tests}
       />
       <MetadataItem
         heading="Failures"

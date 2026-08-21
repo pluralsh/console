@@ -2645,6 +2645,106 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "create_workbench_knowledge/3" do
+    test "users with write access to the workbench can create knowledge" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, knowledge} =
+        Workbenches.create_workbench_knowledge(
+          %{name: "runbook", description: "ops notes", knowledge: "restart the pod", labels: ["ops"]},
+          workbench.id,
+          user
+        )
+
+      assert knowledge.workbench_id == workbench.id
+      assert knowledge.name == "runbook"
+      assert knowledge.description == "ops notes"
+      assert knowledge.knowledge == "restart the pod"
+      assert knowledge.labels == ["ops"]
+      assert_receive {:event, %PubSub.WorkbenchKnowledgeCreated{item: ^knowledge}}
+    end
+
+    test "users with read access cannot create knowledge" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, _} =
+        Workbenches.create_workbench_knowledge(
+          %{name: "nope", knowledge: "forbidden"},
+          workbench.id,
+          user
+        )
+    end
+  end
+
+  describe "update_workbench_knowledge/3" do
+    test "users with write access can update knowledge" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      knowledge = insert(:workbench_knowledge, workbench: workbench, name: "old", knowledge: "before")
+
+      {:ok, updated} =
+        Workbenches.update_workbench_knowledge(
+          %{name: "new", description: "new desc", knowledge: "after", labels: ["updated"]},
+          knowledge.id,
+          user
+        )
+
+      assert updated.id == knowledge.id
+      assert updated.name == "new"
+      assert updated.description == "new desc"
+      assert updated.knowledge == "after"
+      assert updated.labels == ["updated"]
+      assert_receive {:event, %PubSub.WorkbenchKnowledgeUpdated{item: ^updated}}
+    end
+
+    test "users without write access cannot update knowledge" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      knowledge = insert(:workbench_knowledge, workbench: workbench, name: "secret", knowledge: "secret body")
+
+      {:error, _} =
+        Workbenches.update_workbench_knowledge(
+          %{name: "hacked", knowledge: "hacked"},
+          knowledge.id,
+          user
+        )
+
+      assert refetch(knowledge).name == "secret"
+    end
+  end
+
+  describe "delete_workbench_knowledge/2" do
+    test "users with write access can delete knowledge" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      knowledge = insert(:workbench_knowledge, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_knowledge(knowledge.id, user)
+
+      assert deleted.id == knowledge.id
+      refute refetch(knowledge)
+      assert_receive {:event, %PubSub.WorkbenchKnowledgeDeleted{item: ^deleted}}
+    end
+
+    test "users without write access cannot delete knowledge" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      knowledge = insert(:workbench_knowledge, workbench: workbench)
+
+      {:error, _} = Workbenches.delete_workbench_knowledge(knowledge.id, user)
+
+      assert refetch(knowledge)
+    end
+  end
+
   describe "create_workbench_eval/3" do
     test "users with write access to the workbench can create an eval" do
       user = insert(:user)

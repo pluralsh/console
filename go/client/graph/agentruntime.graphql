@@ -297,6 +297,7 @@ fragment AgentRunFragment on AgentRun {
     approval
     approvedAt
     followup
+    followupPrUrl
 }
 
 

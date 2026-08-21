@@ -682,6 +682,7 @@ type AgentRunFragment struct {
 	Approval        *bool                      "json:\"approval,omitempty\" graphql:\"approval\""
 	ApprovedAt      *string                    "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
 	Followup        *bool                      "json:\"followup,omitempty\" graphql:\"followup\""
+	FollowupPrURL   *string                    "json:\"followupPrUrl,omitempty\" graphql:\"followupPrUrl\""
 }
 
 func (t *AgentRunFragment) GetID() string {
@@ -851,6 +852,12 @@ func (t *AgentRunFragment) GetFollowup() *bool {
 		t = &AgentRunFragment{}
 	}
 	return t.Followup
+}
+func (t *AgentRunFragment) GetFollowupPrURL() *string {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.FollowupPrURL
 }
 
 type AgentRunMinimalFragment struct {
@@ -48030,6 +48037,7 @@ fragment AgentRunFragment on AgentRun {
 	approval
 	approvedAt
 	followup
+	followupPrUrl
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48264,6 +48272,7 @@ fragment AgentRunFragment on AgentRun {
 	approval
 	approvedAt
 	followup
+	followupPrUrl
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48521,6 +48530,7 @@ fragment AgentRunFragment on AgentRun {
 	approval
 	approvedAt
 	followup
+	followupPrUrl
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48765,6 +48775,7 @@ fragment AgentRunFragment on AgentRun {
 	approval
 	approvedAt
 	followup
+	followupPrUrl
 }
 fragment AgentTodoFragment on AgentTodo {
 	description
@@ -48947,6 +48958,7 @@ fragment AgentRunFragment on AgentRun {
 	approval
 	approvedAt
 	followup
+	followupPrUrl
 }
 fragment AgentTodoFragment on AgentTodo {
 	description

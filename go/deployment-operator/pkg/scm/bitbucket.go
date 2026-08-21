@@ -33,7 +33,15 @@ func newBitBucketClient(token, host string) Client {
 }
 
 type bitBucketCloudClient struct {
-	token string
+	token   string
+	apiBase string // defaults to bbCloudAPIBase; tests override with httptest
+}
+
+func (c *bitBucketCloudClient) cloudAPI() string {
+	if c.apiBase != "" {
+		return strings.TrimRight(c.apiBase, "/")
+	}
+	return bbCloudAPIBase
 }
 
 type bbCloudPR struct {
@@ -81,7 +89,7 @@ func (c *bitBucketCloudClient) GetPRDetails(ctx context.Context, prURL string) (
 		return nil, err
 	}
 	var pr bbCloudPR
-	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", bbCloudAPIBase, workspace, repo, prID), &pr); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", c.cloudAPI(), workspace, repo, prID), &pr); err != nil {
 		return nil, fmt.Errorf("get PR: %w", err)
 	}
 	comments, err := c.allComments(ctx, workspace, repo, prID)
@@ -108,7 +116,7 @@ func (c *bitBucketCloudClient) GetPRSummary(ctx context.Context, prURL string) (
 		return nil, err
 	}
 	var pr bbCloudPR
-	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", bbCloudAPIBase, workspace, repo, prID), &pr); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", c.cloudAPI(), workspace, repo, prID), &pr); err != nil {
 		return nil, fmt.Errorf("get PR: %w", err)
 	}
 	return &PRDetails{
@@ -120,7 +128,7 @@ func (c *bitBucketCloudClient) GetPRSummary(ctx context.Context, prURL string) (
 }
 
 func (c *bitBucketCloudClient) allComments(ctx context.Context, workspace, repo string, prID int64) ([]PRComment, error) {
-	u := fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d/comments?pagelen=100", bbCloudAPIBase, workspace, repo, prID)
+	u := fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d/comments?pagelen=100", c.cloudAPI(), workspace, repo, prID)
 	var all []PRComment
 	for u != "" {
 		var page struct {
@@ -160,7 +168,7 @@ func (c *bitBucketCloudClient) allComments(ctx context.Context, workspace, repo 
 }
 
 func (c *bitBucketCloudClient) ciChecks(ctx context.Context, workspace, repo, sha string) ([]CICheck, error) {
-	u := fmt.Sprintf("%s/repositories/%s/%s/commit/%s/statuses?pagelen=100", bbCloudAPIBase, workspace, repo, sha)
+	u := fmt.Sprintf("%s/repositories/%s/%s/commit/%s/statuses?pagelen=100", c.cloudAPI(), workspace, repo, sha)
 	var all []CICheck
 	for u != "" {
 		var page struct {
@@ -190,10 +198,10 @@ func (c *bitBucketCloudClient) GetCILogs(ctx context.Context, prURL string, chec
 		return "", err
 	}
 	var pr bbCloudPR
-	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", bbCloudAPIBase, workspace, repo, prID), &pr); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("%s/repositories/%s/%s/pullrequests/%d", c.cloudAPI(), workspace, repo, prID), &pr); err != nil {
 		return "", fmt.Errorf("get PR: %w", err)
 	}
-	u := fmt.Sprintf("%s/repositories/%s/%s/commit/%s/statuses?pagelen=100", bbCloudAPIBase, workspace, repo, pr.Source.Commit.Hash)
+	u := fmt.Sprintf("%s/repositories/%s/%s/commit/%s/statuses?pagelen=100", c.cloudAPI(), workspace, repo, pr.Source.Commit.Hash)
 	for u != "" {
 		var page struct {
 			Values []bbCloudBuildStatus `json:"values"`
