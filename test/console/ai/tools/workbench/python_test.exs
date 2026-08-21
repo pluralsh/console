@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Workbench.PythonTest do
       assert request.input_json == ~s({"first":20,"second":22})
       assert opts == Client.cloud_query_rpc_opts()
 
-      {:ok, %RunPythonOutput{result_json: ~s({"total":42}), stdout: "calculated total\\n"}}
+      {:ok, %RunPythonOutput{result_json: ~s({"total":42}), stdout: "calculated total\n"}}
     end)
 
     assert {:ok, %{result: %{"total" => 42}, stdout: "calculated total\n"}} =
