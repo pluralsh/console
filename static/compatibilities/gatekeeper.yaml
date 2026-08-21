@@ -647,7 +647,7 @@ versions:
   images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.2', 'openpolicyagent/gatekeeper:v3.13.2']
   eolAt: '2024-02-05'
 - version: 3.13.0
-  kube: ['1.27', '1.26', '1.25']
+  kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary:
