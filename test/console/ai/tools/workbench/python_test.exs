@@ -3,7 +3,7 @@ defmodule Console.AI.Tools.Workbench.PythonTest do
   use Mimic
 
   alias CloudQuery.Client
-  alias Console.AI.Tools.Workbench.Python
+  alias Console.AI.Tools.Workbench.{Output, Python}
   alias Toolquery.{RunPythonOutput}
   alias Toolquery.ToolQuery.Stub
 
@@ -22,7 +22,7 @@ defmodule Console.AI.Tools.Workbench.PythonTest do
     assert %{code: ["can't be blank"], explanation: ["can't be blank"]} = errors_on(changeset)
   end
 
-  test "runs Monty Python with JSON input and returns decoded output and stdout" do
+  test "runs Monty Python with JSON input and returns serialized output and stdout" do
     expect(Client, :connect, fn -> {:ok, :channel} end)
 
     expect(Stub, :run_python, fn :channel, request, opts ->
@@ -33,11 +33,13 @@ defmodule Console.AI.Tools.Workbench.PythonTest do
       {:ok, %RunPythonOutput{result_json: ~s({"total":42}), stdout: "calculated total\n"}}
     end)
 
-    assert {:ok, %{result: %{"total" => 42}, stdout: "calculated total\n"}} =
+    assert {:ok, output} =
              Python.implement(%Python{
                code: "output['total'] = input['first'] + input['second']",
                input: %{"first" => 20, "second" => 22}
              })
+
+    assert Jason.decode!(output) == %{"result" => %{"total" => 42}, "stdout" => "calculated total\n"}
   end
 
   test "defaults omitted input to an empty JSON object" do
@@ -48,6 +50,20 @@ defmodule Console.AI.Tools.Workbench.PythonTest do
       {:ok, %RunPythonOutput{result_json: "{}", stdout: ""}}
     end)
 
-    assert {:ok, %{result: %{}, stdout: ""}} = Python.implement(%Python{code: "output = {}"})
+    assert {:ok, output} = Python.implement(%Python{code: "output = {}"})
+    assert Jason.decode!(output) == %{"result" => %{}, "stdout" => ""}
+  end
+
+  test "bounds oversized Python output" do
+    expect(Client, :connect, fn -> {:ok, :channel} end)
+
+    expect(Stub, :run_python, fn :channel, _request, _opts ->
+      result = Jason.encode!(%{"value" => String.duplicate("x", Output.max_bytes())})
+      {:ok, %RunPythonOutput{result_json: result, stdout: ""}}
+    end)
+
+    assert {:ok, output} = Python.implement(%Python{code: "output = {}"})
+    assert byte_size(output) == Output.max_bytes()
+    assert output =~ "output truncated at 50 KiB"
   end
 end

@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Workbench.Python do
   use Console.AI.Tools.Workbench.Base
   alias CloudQuery.Client
+  alias Console.AI.Tools.Workbench.Output
   alias Toolquery.ToolQuery.Stub
   alias Toolquery.{RunPythonInput, RunPythonOutput}
 
@@ -32,7 +33,7 @@ defmodule Console.AI.Tools.Workbench.Python do
          request = %RunPythonInput{script: code, input_json: input_json},
          {:ok, %RunPythonOutput{result_json: result_json, stdout: stdout}} <- Stub.run_python(client, request, Client.cloud_query_rpc_opts()),
          {:ok, result} <- Jason.decode(result_json) do
-      {:ok, %{result: result, stdout: stdout}}
+      Output.json(%{result: result, stdout: stdout})
     end
   end
 end
