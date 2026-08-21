@@ -403,17 +403,19 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
     test "users can fetch stack runs" do
       user = insert(:user)
       stack = insert(:stack, read_bindings: [%{user_id: user.id}])
-      run = insert(:stack_run, stack: stack)
+      run = insert(:stack_run, stack: stack, committer: "alice@example.com")
 
       {:ok, %{data: %{"stackRun" => found}}} = run_query("""
         query StackRun($id: ID!) {
           stackRun(id: $id) {
             id
+            committer
           }
         }
       """, %{"id" => run.id}, %{current_user: user})
 
       assert found["id"] == run.id
+      assert found["committer"] == "alice@example.com"
     end
 
     test "only writers can view variables" do

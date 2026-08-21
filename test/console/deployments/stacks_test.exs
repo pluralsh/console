@@ -166,7 +166,7 @@ defmodule Console.Deployments.StacksTest do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, stack} = Stacks.update_stack(%{
         name: "my-stack",
@@ -325,6 +325,30 @@ defmodule Console.Deployments.StacksTest do
     end
   end
 
+  describe "#require_approval/2" do
+    test "project writers can require approval on all stacks in a project" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      other = insert(:project)
+      stack1 = insert(:stack, project: project, approval: false)
+      stack2 = insert(:stack, project: project, approval: false)
+      ignored = insert(:stack, project: other, approval: false)
+
+      {:ok, 2} = Stacks.require_approval(project.id, user)
+
+      assert refetch(stack1).approval
+      assert refetch(stack2).approval
+      refute refetch(ignored).approval
+    end
+
+    test "random users cannot require approval" do
+      project = insert(:project)
+      insert(:stack, project: project, approval: false)
+
+      {:error, _} = Stacks.require_approval(project.id, insert(:user))
+    end
+  end
+
   describe "#spawn/1" do
     test "it can create a run in response to a stack cron" do
       stack = insert(:stack,
@@ -410,13 +434,14 @@ defmodule Console.Deployments.StacksTest do
         git: %{ref: "main", folder: "terraform"}
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -472,13 +497,14 @@ defmodule Console.Deployments.StacksTest do
         }
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -523,13 +549,14 @@ defmodule Console.Deployments.StacksTest do
         git: %{ref: "main", folder: "terraform"}
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -570,12 +597,13 @@ defmodule Console.Deployments.StacksTest do
       )
 
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -607,7 +635,7 @@ defmodule Console.Deployments.StacksTest do
       )
       pr = insert(:pull_request, stack: stack)
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(pr)
 
@@ -616,6 +644,7 @@ defmodule Console.Deployments.StacksTest do
       assert run.status == :queued
       assert run.dry_run
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -669,13 +698,14 @@ defmodule Console.Deployments.StacksTest do
         sha: "old-sha"
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -715,13 +745,14 @@ defmodule Console.Deployments.StacksTest do
         sha: "old-sha"
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -1061,6 +1092,8 @@ defmodule Console.Deployments.StacksTest do
           input.stack.project.name == "infra"
           input.stack.git.ref == "main"
           input.stack.git.folder == "terraform"
+          input.commit.committer == "alice@example.com"
+          input.commit.sha == "abc123"
           input.actor.email == "owner@example.com"
           "admins" in input.actor.groups
           not destroy
@@ -1075,7 +1108,14 @@ defmodule Console.Deployments.StacksTest do
       project = insert(:project, name: "infra")
       stack = insert(:stack, name: "prod-network", project: project, git: %{ref: "main", folder: "terraform"})
       insert(:stack_policy, stack: stack, policy: policy)
-      run = insert(:stack_run, stack: stack, status: :pending_approval, actor: actor)
+      run = insert(:stack_run,
+        stack: stack,
+        status: :pending_approval,
+        actor: actor,
+        committer: "alice@example.com",
+        git: %{ref: "abc123", folder: "terraform"},
+        message: "add web instance"
+      )
       insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(
         resource_changes: [
           tf_resource_change(
@@ -1697,7 +1737,7 @@ defmodule Console.Deployments.StacksTest do
 
   defp stack_rego(body) do
     """
-    package plrl.stack.approval
+    package plrl.stack
 
     sample := 0
 
@@ -1758,6 +1798,7 @@ defmodule Console.Deployments.StacksSyncTest do
       assert run.status == :queued
       refute run.dry_run
       assert run.message
+      assert run.committer
       assert run.stack_id == stack.id
       refute run.git.ref == stack.git.ref
     end

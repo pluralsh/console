@@ -8572,6 +8572,9 @@ type StackRun {
   "the commit message"
   message: String
 
+  "the committer email of the commit that spawned this run"
+  committer: String
+
   "when this run was approved"
   approvedAt: DateTime
 

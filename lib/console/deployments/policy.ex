@@ -16,7 +16,8 @@ defmodule Console.Deployments.Policy do
     ComplianceReportGenerator,
     User,
     Project,
-    GitRepository
+    GitRepository,
+    StackRun
   }
   alias Console.Deployments.Settings
   alias Console.Deployments.{Stacks, Workbenches}
@@ -131,6 +132,16 @@ defmodule Console.Deployments.Policy do
   end
   def stack(_), do: %{}
 
+  @doc "Builds the commit payload used as policy input."
+  def commit(%StackRun{} = run) do
+    %{
+      "sha" => git_field(run.git, :ref),
+      "message" => run.message,
+      "committer" => run.committer
+    }
+  end
+  def commit(_), do: %{}
+
   defp stack_project(%Project{id: id, name: name}), do: %{"id" => id, "name" => name}
   defp stack_project(_), do: %{}
 
@@ -212,7 +223,7 @@ defmodule Console.Deployments.Policy do
 
   defp evaluation_base(:workbench), do: {:ok, @workbench_policy_base, "data.plrl.wb.admission.result"}
   defp evaluation_base(:binding), do: {:ok, @binding_policy_base, "data.plrl.binding.result"}
-  defp evaluation_base(:stack), do: {:ok, @stack_policy_base, "data.plrl.stack.approval.result"}
+  defp evaluation_base(:stack), do: {:ok, @stack_policy_base, "data.plrl.stack.result"}
   defp evaluation_base(type), do: {:error, "policy type #{type} cannot be evaluated"}
 
   def next_binding_poll(%BindingPolicy{} = binding) do
@@ -250,10 +261,9 @@ defmodule Console.Deployments.Policy do
   end
 
   defp reconcile_target(binding, %{project_id: project_id} = target) do
-    binding = Repo.preload(binding, [:bind_policy, :policy])
-
-    case binding do
-      %{policy: %{project_id: ^project_id}} -> reconcile_binding(binding, target)
+    case Repo.preload(binding, [:bind_policy, :policy]) do
+      %{policy: %{project_id: ^project_id}} = binding ->
+        reconcile_binding(binding, target)
       _ -> :ok
     end
   end
@@ -295,14 +305,18 @@ defmodule Console.Deployments.Policy do
 
   defp reconcile_target(:attach, %BindingPolicy{policy_id: id} = binding, %Workbench{} = wb, user),
     do: Workbenches.create_workbench_policy(%{policy_id: id, matches: BindingPolicy.workbench_matches(binding)}, wb.id, user)
-  defp reconcile_target(:attach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
-    do: Stacks.create_stack_policy(%{policy_id: id}, stack.id, user)
+  defp reconcile_target(:attach, %BindingPolicy{} = binding, %Stack{} = stack, user),
+    do: Stacks.create_stack_policy(stack_policy_attrs(binding), stack.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
     do: Workbenches.delete_workbench_policy(id, wb.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
     do: Stacks.delete_stack_policy(id, stack.id, user)
 
   defp bot(), do: Users.admin_bot()
+
+  defp stack_policy_attrs(%BindingPolicy{policy_id: id, matches: %{stack: %{type: t}}})
+    when not is_nil(t), do: %{policy_id: id, type: t}
+  defp stack_policy_attrs(%BindingPolicy{policy_id: id}), do: %{policy_id: id, type: :approval}
 
   defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
     if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do

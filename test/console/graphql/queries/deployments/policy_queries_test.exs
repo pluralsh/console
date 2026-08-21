@@ -472,7 +472,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
         project: project,
         type: :stack,
         policy: """
-        package plrl.stack.approval
+        package plrl.stack
 
         sample := 0
 

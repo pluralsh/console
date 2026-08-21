@@ -1,6 +1,6 @@
 defmodule Console.Schema.BindingPolicy do
   use Console.Schema.Base
-  alias Console.Schema.{Policy, WorkbenchPolicy}
+  alias Console.Schema.{Policy, WorkbenchPolicy, StackPolicy}
 
   defenum Type, workbench: 0, stack: 1
 
@@ -11,6 +11,10 @@ defmodule Console.Schema.BindingPolicy do
 
     embeds_one :matches, Spec, on_replace: :update do
       embeds_one :workbench, WorkbenchPolicy.Matches, on_replace: :update
+
+      embeds_one :stack, StackSpec, on_replace: :update do
+        field :type, StackPolicy.Type, default: :approval
+      end
     end
 
     belongs_to :policy, Policy
@@ -89,7 +93,13 @@ defmodule Console.Schema.BindingPolicy do
     model
     |> cast(attrs, [])
     |> cast_embed(:workbench, with: &WorkbenchPolicy.matches_changeset/2)
+    |> cast_embed(:stack, with: &stack_changeset/2)
     |> validate_required([])
+  end
+
+  defp stack_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:type ])
   end
 
   defp validate_interval(changeset) do

@@ -96,7 +96,7 @@ const cols = [
     cell: function Cell({ getValue }) {
       const { colors } = useTheme()
       const { stack } = useOutletContext<Nullable<StackOutletContextT>>() ?? {}
-      const { id, message, status, git } = getValue()
+      const { id, message, committer, status, git } = getValue()
       return (
         <StackedText
           icon={
@@ -122,7 +122,7 @@ const cols = [
           second={
             <Flex gap="xsmall">
               <GitCommitIcon />
-              <span>{git.ref}</span>
+              <span>{committer ? `${git.ref} ${committer}` : git.ref}</span>
             </Flex>
           }
           secondPartialType="caption"

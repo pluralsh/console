@@ -15,9 +15,9 @@ defmodule Console.Deployments.Git.Cache do
 
   defmodule Line do
     @expiry -30
-    defstruct [:key, :file, :sha, :digest, :touched, :message, :jitter]
+    defstruct [:key, :file, :sha, :digest, :touched, :message, :jitter, :email]
 
-    def new(key, file, sha, message) do
+    def new(key, file, sha, message, email) do
       %__MODULE__{
         key: key,
         file: file,
@@ -25,7 +25,8 @@ defmodule Console.Deployments.Git.Cache do
         sha: sha,
         message: message,
         touched: Timex.now(),
-        jitter: Console.jitter(10)
+        jitter: Console.jitter(10),
+        email: email
       }
     end
 
@@ -193,7 +194,7 @@ defmodule Console.Deployments.Git.Cache do
 
   def changes(%__MODULE__{git: g} = c, sha1, sha2, folder) do
     case file_changes(g, sha1, sha2, folder) do
-      {:ok, [""]} -> {:ok, [], ""}
+      {:ok, [""]} -> {:ok, [], "", nil}
       {:ok, [_ | _] = changes} -> add_msgs(c, changes, sha2)
       {:ok, :pass} -> add_msgs(c, :pass, sha2)
       pass -> pass
@@ -202,16 +203,16 @@ defmodule Console.Deployments.Git.Cache do
 
   defp add_msgs(%__MODULE__{git: g}, changes, sha) do
     case msg(g, sha) do
-      {:ok, msg} -> {:ok, changes, msg}
-      _ -> {:ok, changes, ""}
+      {:ok, msg, email} -> {:ok, changes, msg, email}
+      _ -> {:ok, changes, "", nil}
     end
   end
 
   defp new_line(cache, key, repo, sha, path, filter) do
     with {:ok, _} <- git(repo, "checkout", ["-f", sha]),
-         {:ok, msg} <- msg(repo),
+         {:ok, msg, email} <- msg(repo),
          {:ok, f} <- tarball(cache, sha, path, filter),
-      do: {:ok, Line.new(key, f, sha, msg)}
+      do: {:ok, Line.new(key, f, sha, msg, email)}
   end
 
   defp find_head(tid, ref) do

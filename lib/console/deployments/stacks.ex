@@ -17,6 +17,7 @@ defmodule Console.Deployments.Stacks do
   alias Console.Schema.{
     User,
     Cluster,
+    Project,
     Stack,
     StackRun,
     StackState,
@@ -232,6 +233,21 @@ defmodule Console.Deployments.Stacks do
       |> when_ok(:update)
     end)
     |> execute(extract: :update)
+  end
+
+  @doc """
+  Requires approval on all stacks in a project
+  """
+  @spec require_approval(binary, User.t) :: {:ok, integer} | error
+  def require_approval(project_id, %User{} = user) do
+    Settings.get_project!(project_id)
+    |> allow(user, :write)
+    |> when_ok(fn %Project{id: id} ->
+      {count, _} =
+        Stack.for_project(id)
+        |> Repo.update_all(set: [approval: true, updated_at: DateTime.utc_now()])
+      count
+    end)
   end
 
   @doc "Creates a policy association for a stack. Requires stack write access and policy read access."
@@ -565,7 +581,7 @@ defmodule Console.Deployments.Stacks do
   """
   @spec stack_run_approval(StackRun.t) :: run_resp | :ok
   def stack_run_approval(%StackRun{status: :pending_approval, approver_id: nil} = run) do
-    run = Repo.preload(run, [:state, :repository, actor: :groups, stack: [:policies, :project, :repository]])
+    run = Repo.preload(run, [:state, :repository, actor: :groups, stack: [:project, :repository, stack_policies: :policy]])
 
     case maybe_policy_approval(run) do
       {:decide, approval} -> handle_approval(run, approval, :policy)
@@ -577,16 +593,23 @@ defmodule Console.Deployments.Stacks do
   end
   def stack_run_approval(_), do: :ok
 
-  defp maybe_policy_approval(%StackRun{stack: %Stack{policies: [_ | _] = policies}} = run) do
-    with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
-         {:ok, result} <- PolicyEngine.eval_policy(engine, stack_policy_input(run), Enum.map(policies, & &1.id), path) do
-      case result do
-        %{"deny" => [_ | _] = denials} ->
-          {:decide, %{result: :rejected, reason: PolicyEngine.policy_reason(denials, "denied by stack policy")}}
-        %{"approve" => [_ | _] = approvals} ->
-          {:decide, %{result: :approved, reason: PolicyEngine.policy_reason(approvals, "approved by stack policy")}}
-        _ -> :continue
-      end
+  defp maybe_policy_approval(%StackRun{stack: %Stack{stack_policies: [_ | _] = stack_policies}} = run) do
+    stack_policies
+    |> Enum.filter(& &1.type in [nil, :approval])
+    |> Enum.map(& &1.policy)
+    |> case do
+      [_ | _] = policies ->
+        with {:ok, engine, path} <- PolicyEngine.compile_policies(:stack, policies),
+             {:ok, result} <- PolicyEngine.eval_policy(engine, stack_policy_input(run), Enum.map(policies, & &1.id), path) do
+          case result do
+            %{"deny" => [_ | _] = denials} ->
+              {:decide, %{result: :rejected, reason: PolicyEngine.policy_reason(denials, "denied by stack policy")}}
+            %{"approve" => [_ | _] = approvals} ->
+              {:decide, %{result: :approved, reason: PolicyEngine.policy_reason(approvals, "approved by stack policy")}}
+            _ -> :continue
+          end
+        end
+      _ -> :continue
     end
   end
   defp maybe_policy_approval(_), do: :continue
@@ -596,7 +619,8 @@ defmodule Console.Deployments.Stacks do
       "plan" => stack_plan(run),
       "actor" => PolicyEngine.actor(run.actor),
       "run_type" => Plan.run_type(run),
-      "stack" => PolicyEngine.stack(run.stack)
+      "stack" => PolicyEngine.stack(run.stack),
+      "commit" => PolicyEngine.commit(run)
     }
   end
 
@@ -728,8 +752,8 @@ defmodule Console.Deployments.Stacks do
       %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
       on_new_sha(repo, git.ref, sha, ps, fn new_sha ->
         case new_changes(repo, git, sha, new_sha) do
-          {:ok, new_sha, msg} ->
-           create_run(stack, new_sha, %{message: msg})
+          {:ok, new_sha, msg, email} ->
+           create_run(stack, new_sha, %{message: msg, committer: email})
           err ->
             add_polled_sha(stack, new_sha)
             err
@@ -743,10 +767,10 @@ defmodule Console.Deployments.Stacks do
     %{stack: %{repository: repo} = stack} = pr = Repo.preload(pr, [stack: @poll_preloads])
     on_new_sha(repo, ref, sha, ps, fn new_sha ->
       case new_changes(repo, stack.git, sha, new_sha) do
-        {:ok, new_sha, msg} ->
+        {:ok, new_sha, msg, email} ->
           start_transaction()
           |> add_operation(:run, fn _ ->
-            create_run(stack, new_sha, %{pull_request_id: pr.id, message: msg, dry_run: true})
+            create_run(stack, new_sha, %{pull_request_id: pr.id, message: msg, committer: email, dry_run: true})
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{sha: new_sha})
@@ -787,8 +811,8 @@ defmodule Console.Deployments.Stacks do
 
   defp new_changes(repo, %{folder: folder}, sha1, sha2) do
     case Discovery.changes(repo, sha1, sha2, folder) do
-      {:ok, [_ | _], msg} -> {:ok, sha2, msg}
-      {:ok, :pass, msg} -> {:ok, sha2, msg}
+      {:ok, [_ | _], msg, email} -> {:ok, sha2, msg, email}
+      {:ok, :pass, msg, email} -> {:ok, sha2, msg, email}
       _ -> {:error, "no changes within #{folder}"}
     end
   end

@@ -20,7 +20,6 @@ import {
 } from 'generated/graphql'
 import { useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { formatDateTime } from 'utils/datetime'
 import {
   getActionDescription,
   getActionIcon,
@@ -40,6 +39,7 @@ import {
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
+import { WorkbenchJobActionDetails } from './WorkbenchJobActionDetails'
 import { WorkbenchJobExecDetails } from './WorkbenchJobExecDetails'
 
 export function WorkbenchJobInlineActionCard({
@@ -85,50 +85,53 @@ export function WorkbenchJobInlineActionCard({
 
   return (
     <CardSC $status={activity.status}>
-      <HeaderSC>
-        <Flex
-          align="center"
-          gap="small"
-          css={{ minWidth: 0, flex: 1 }}
-        >
-          <IconFrame
-            circle
-            size="medium"
-            type="secondary"
-            icon={icon ?? <KubernetesIcon size={16} />}
-            css={{
-              flexShrink: 0,
-              border: theme.borders.default,
-              backgroundColor: 'transparent',
-            }}
-          />
-          <StackedText
-            first={getActionTitle(activity)}
-            firstPartialType="body2Bold"
-            firstColor="text-light"
-            second={getActionSubtitle(activity)}
-            secondColor="text-xlight"
-            truncate
-            css={{ flex: 1, minWidth: 0 }}
-          />
-        </Flex>
-        <HeaderActionsSC>
-          <WorkbenchJobKubeActionChips
-            type={activity.type}
-            method={activity.result?.kubeRequest?.method}
-            statusChip={<InlineActionStatus activity={activity} />}
-          />
-          <ExpandButtonSC
-            type="button"
-            aria-label={expanded ? 'Collapse action' : 'Expand action'}
-            aria-expanded={expanded}
-            onClick={() => setExpanded((value) => !value)}
-            $expanded={expanded}
+      <HeaderBlockSC>
+        <HeaderSC>
+          <Flex
+            align="center"
+            gap="small"
+            css={{ minWidth: 0, flex: 1 }}
           >
-            <CaretDownIcon size={12} />
-          </ExpandButtonSC>
-        </HeaderActionsSC>
-      </HeaderSC>
+            <IconFrame
+              circle
+              size="medium"
+              type="secondary"
+              icon={icon ?? <KubernetesIcon size={16} />}
+              css={{
+                flexShrink: 0,
+                border: theme.borders.default,
+                backgroundColor: 'transparent',
+              }}
+            />
+            <StackedText
+              first={getActionTitle(activity)}
+              firstPartialType="body2Bold"
+              firstColor="text-light"
+              second={getActionSubtitle(activity)}
+              secondColor="text-xlight"
+              truncate
+              css={{ flex: 1, minWidth: 0 }}
+            />
+          </Flex>
+          <HeaderActionsSC>
+            <WorkbenchJobKubeActionChips
+              type={activity.type}
+              method={activity.result?.kubeRequest?.method}
+              statusChip={<InlineActionStatus activity={activity} />}
+            />
+            <ExpandButtonSC
+              type="button"
+              aria-label={expanded ? 'Collapse action' : 'Expand action'}
+              aria-expanded={expanded}
+              onClick={() => setExpanded((value) => !value)}
+              $expanded={expanded}
+            >
+              <CaretDownIcon size={12} />
+            </ExpandButtonSC>
+          </HeaderActionsSC>
+        </HeaderSC>
+        <WorkbenchJobActionDetails activity={activity} />
+      </HeaderBlockSC>
 
       {expanded && (
         <>
@@ -208,19 +211,6 @@ export function WorkbenchJobInlineActionCard({
             </>
           )}
           <WorkbenchJobActionDenialResult activity={activity} />
-          {!isKubeDiff && !!activity.insertedAt && (
-            <TimeSC>
-              <span>Start time</span>
-              <strong>
-                {formatDateTime(
-                  activity.insertedAt,
-                  'YYYY-MM-DD HH:mm:ss [UTC]',
-                  false,
-                  true
-                )}
-              </strong>
-            </TimeSC>
-          )}
           {needsApproval && (
             <ApprovalActionsSC>
               <WorkbenchJobActionDenyButton
@@ -304,6 +294,14 @@ const HeaderSC = styled.div({
   width: '100%',
 })
 
+const HeaderBlockSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  width: '100%',
+}))
+
 const HeaderActionsSC = styled.div({
   display: 'flex',
   alignItems: 'center',
@@ -339,16 +337,3 @@ const ApprovalActionsSC = styled.div({
   justifyContent: 'space-between',
   width: '100%',
 })
-
-const TimeSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xxsmall,
-  color: theme.colors['text-xlight'],
-  fontSize: 10,
-  strong: {
-    color: theme.colors['text-light'],
-    fontWeight: 400,
-  },
-}))

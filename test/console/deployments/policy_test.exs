@@ -257,7 +257,7 @@ defmodule Console.Deployments.PolicyTest do
       policy = insert(:policy,
         type: :stack,
         policy: """
-        package plrl.stack.approval
+        package plrl.stack
 
         sample := 0
 
@@ -290,7 +290,7 @@ defmodule Console.Deployments.PolicyTest do
     end
 
     test "returns empty deny/approve and false defer for a default stack policy" do
-      policy = insert(:policy, type: :stack, policy: "package plrl.stack.approval\nsample := 0")
+      policy = insert(:policy, type: :stack, policy: "package plrl.stack\nsample := 0")
 
       {:ok, result} = Policy.evaluate_policy(policy, %{})
 
@@ -347,6 +347,26 @@ defmodule Console.Deployments.PolicyTest do
 
     test "returns an empty map when no stack is present" do
       assert Policy.stack(nil) == %{}
+    end
+  end
+
+  describe "commit/1" do
+    test "builds a cleaned commit payload from a stack run" do
+      run = insert(:stack_run,
+        git: %{ref: "abc123", folder: "terraform"},
+        message: "add web instance",
+        committer: "alice@example.com"
+      )
+
+      assert Policy.commit(run) == %{
+        "sha" => "abc123",
+        "message" => "add web instance",
+        "committer" => "alice@example.com"
+      }
+    end
+
+    test "returns an empty map when no run is present" do
+      assert Policy.commit(nil) == %{}
     end
   end
 

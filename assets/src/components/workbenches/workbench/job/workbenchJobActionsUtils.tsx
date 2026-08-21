@@ -27,6 +27,8 @@ import {
   toKubeYaml,
 } from './workbenchJobKubeActionUtils'
 
+export { getActionPolicyToolName } from './workbenchJobActionPolicyUtils'
+
 export type WorkbenchJobActionSectionKey =
   'awaiting' | 'pending' | 'running' | 'failed' | 'succeeded' | 'denied'
 

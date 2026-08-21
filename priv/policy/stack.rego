@@ -1,4 +1,4 @@
-package plrl.stack.approval
+package plrl.stack
 
 result := {
     "sample": sample,

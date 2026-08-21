@@ -2,9 +2,13 @@ defmodule Console.Schema.StackPolicy do
   use Console.Schema.Base
   alias Console.Schema.{Policy, Stack}
 
+  defenum Type, approval: 0, run: 1
+
   schema "stack_policies" do
     belongs_to :policy, Policy
     belongs_to :stack, Stack
+
+    field :type, Type, default: :approval
 
     timestamps()
   end
@@ -17,7 +21,7 @@ defmodule Console.Schema.StackPolicy do
     from(p in query, where: p.policy_id == ^policy_id)
   end
 
-  @valid ~w(policy_id stack_id)a
+  @valid ~w(policy_id stack_id type)a
 
   def changeset(model, attrs \\ %{}) do
     model

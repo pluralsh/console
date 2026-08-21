@@ -173,6 +173,9 @@ export default function StackRunSidecar({
             />
           </SidecarItem>
         )}
+        {stackRun.committer && (
+          <SidecarItem heading="Committer">{stackRun.committer}</SidecarItem>
+        )}
         <SidecarItem heading="Observability metrics">
           <StackObservabilityMetrics
             observableMetrics={stackRun.stack?.observableMetrics}

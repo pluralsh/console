@@ -464,6 +464,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :approval,            :boolean, description: "whether to require approval"
     field :message,             :string, description: "the commit message"
+    field :committer,           :string, description: "the committer email of the commit that spawned this run"
     field :approved_at,         :datetime, description: "when this run was approved"
     field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"

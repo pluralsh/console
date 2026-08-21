@@ -35,6 +35,7 @@ import {
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
 import { WorkbenchJobActionDenyButton } from './WorkbenchJobActionDenyPopover'
 import { WorkbenchJobActionStatusChip } from './WorkbenchJobActionStatusChip'
+import { WorkbenchJobActionDetails } from './WorkbenchJobActionDetails'
 import { WorkbenchJobExecDetails } from './WorkbenchJobExecDetails'
 
 export function WorkbenchJobActionDetail({
@@ -89,43 +90,48 @@ export function WorkbenchJobActionDetail({
         Back to all actions
       </BackBtnSC>
 
-      <Flex
-        align="center"
-        justify="space-between"
-        gap="medium"
-      >
+      <HeaderBlockSC>
         <Flex
           align="center"
-          gap="small"
-          css={{ minWidth: 0, flex: 1 }}
+          justify="space-between"
+          gap="medium"
         >
-          <IconFrame
-            circle
-            size="medium"
-            type="secondary"
-            icon={icon ?? <KubernetesIcon size={16} />}
-            css={{
-              flexShrink: 0,
-              border: theme.borders['fill-two'],
-              backgroundColor: 'transparent',
-            }}
-          />
-          <StackedText
-            first={getActionTitle(activity)}
-            firstPartialType="body2Bold"
-            firstColor="text"
-            second={getActionSubtitle(activity)}
-            secondColor="text-xlight"
-            truncate
+          <Flex
+            align="center"
+            gap="small"
             css={{ minWidth: 0, flex: 1 }}
+          >
+            <IconFrame
+              circle
+              size="medium"
+              type="secondary"
+              icon={icon ?? <KubernetesIcon size={16} />}
+              css={{
+                flexShrink: 0,
+                border: theme.borders['fill-two'],
+                backgroundColor: 'transparent',
+              }}
+            />
+            <StackedText
+              first={getActionTitle(activity)}
+              firstPartialType="body2Bold"
+              firstColor="text"
+              second={getActionSubtitle(activity)}
+              secondColor="text-xlight"
+              truncate
+              css={{ minWidth: 0, flex: 1 }}
+            />
+          </Flex>
+          <WorkbenchJobKubeActionChips
+            type={activity.type}
+            method={activity.result?.kubeRequest?.method}
+            statusChip={
+              <WorkbenchJobActionStatusChip status={activity.status} />
+            }
           />
         </Flex>
-        <WorkbenchJobKubeActionChips
-          type={activity.type}
-          method={activity.result?.kubeRequest?.method}
-          statusChip={<WorkbenchJobActionStatusChip status={activity.status} />}
-        />
-      </Flex>
+        <WorkbenchJobActionDetails activity={activity} />
+      </HeaderBlockSC>
 
       {error && <GqlError error={error} />}
 
@@ -217,6 +223,13 @@ const DetailSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
+}))
+
+const HeaderBlockSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
 }))
 
 const BackBtnSC = styled.button(({ theme }) => ({
