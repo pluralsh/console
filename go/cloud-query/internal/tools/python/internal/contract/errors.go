@@ -117,7 +117,7 @@ func boundedCause(cause error) error {
 	if len(cause.Error()) <= MaxDetailBytes {
 		return cause
 	}
-	return truncatedCause{detail: truncateDetail(cause.Error()), cause: cause}
+	return truncatedCauseError{detail: truncateDetail(cause.Error()), cause: cause}
 }
 
 func truncateDetail(detail string) string {
@@ -125,17 +125,15 @@ func truncateDetail(detail string) string {
 		return detail
 	}
 	limit := MaxDetailBytes - len(detailTruncationMarker)
-	if limit < 0 {
-		limit = 0
-	}
+
 	return detail[:limit] + detailTruncationMarker
 }
 
-type truncatedCause struct {
+type truncatedCauseError struct {
 	detail string
 	cause  error
 }
 
-func (e truncatedCause) Error() string { return e.detail }
+func (e truncatedCauseError) Error() string { return e.detail }
 
-func (e truncatedCause) Unwrap() error { return e.cause }
+func (e truncatedCauseError) Unwrap() error { return e.cause }
