@@ -112,6 +112,12 @@ defmodule Console.AI.Tools.Workbench.FunctionCallTest do
           }
         )
 
+      expect(Req, :request, fn opts ->
+        assert opts[:method] == :get
+        assert opts[:url] == "https://example.com"
+        {:ok, %Req.Response{status: 200, body: "<!doctype html><html><body><h1>Example Domain</h1></body></html>"}}
+      end)
+
       assert {:ok, %WorkbenchJobActivity{status: :successful, type: :function} = activity} =
                FunctionCall.invoke(%FunctionCall{
                  tool: tool,
