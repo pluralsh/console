@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	defaultModel = "gpt-5.4"
+	defaultModel   = "gpt-5.4"
 	openAIProvider = "openai"
 	// proxyProviderKey is the models.json provider block name used when aiProxy is enabled.
 	// Using a non-"openai" name prevents the Pi CLI from stripping the "openai/" prefix
