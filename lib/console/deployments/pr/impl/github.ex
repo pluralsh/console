@@ -185,7 +185,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
 
   defp get_content(%Tentacat.Client{auth: auth, request_options: opts}, url) when is_binary(url) do
     headers = [{"authorization", "Token #{auth.access_token}"}]
-    with {:ok, %HTTPoison.Response{status_code: 200, body: content}} <- HTTPoison.get(url, headers, opts || []),
+    with {:ok, %Req.Response{status: 200, body: content}} <- Req.get(url, [headers: headers, decode_body: false, retry: false] ++ Console.Utils.HTTP.req_options(opts || [])),
          {:ok, %{"content" => content}} <- Jason.decode(content) do
       String.split(content)
       |> Enum.map(fn line ->

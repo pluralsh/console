@@ -7,15 +7,15 @@ defmodule Console.GraphQl.OAuthMutationsTest do
       %{id: id} = user = insert(:user)
       provider = insert(:oidc_provider, bindings: [%{user_id: user.id}])
 
-      expect(HTTPoison, :get, fn _, _ ->
+      expect(Req, :get, fn _, _ ->
         body = Jason.encode!(%{client: %{client_id: provider.client_id}})
-        {:ok, %{status_code: 200, body: body}}
+        {:ok, %{status: 200, body: body}}
       end)
 
-      expect(HTTPoison, :put, fn _, body, _ ->
+      expect(Req, :put, fn _, opts ->
         resp = Jason.encode!(%{redirect_to: "example.com"})
-        case Jason.decode!(body) do
-          %{"subject" => ^id} -> {:ok, %{status_code: 200, body: resp}}
+        case Jason.decode!(opts[:body]) do
+          %{"subject" => ^id} -> {:ok, %{status: 200, body: resp}}
           _ -> {:error, :invalid}
         end
       end)
@@ -35,11 +35,11 @@ defmodule Console.GraphQl.OAuthMutationsTest do
       user = insert(:user)
       provider = insert(:oidc_provider)
 
-      expect(HTTPoison, :put, fn _, _, _ ->
-        {:ok, %{status_code: 200, body: Jason.encode!(%{redirect_to: "example.com"})}}
+      expect(Req, :put, fn _, _ ->
+        {:ok, %{status: 200, body: Jason.encode!(%{redirect_to: "example.com"})}}
       end)
-      expect(HTTPoison, :get, fn _, _ ->
-        {:ok, %{status_code: 200, body: Jason.encode!(%{client: %{client_id: provider.client_id}})}}
+      expect(Req, :get, fn _, _ ->
+        {:ok, %{status: 200, body: Jason.encode!(%{client: %{client_id: provider.client_id}})}}
       end)
 
       {:ok, %{data: %{"oauthConsent" => result}}} = run_query("""

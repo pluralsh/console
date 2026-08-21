@@ -4,7 +4,9 @@ defmodule ConsoleWeb.AIController do
   alias Console.Schema.Cluster
   alias Console.Deployments.Agents
 
-  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
+  @options [receive_timeout: :timer.minutes(5), connect_options: [timeout: :timer.minutes(5)]]
+  @stream_timeout :timer.minutes(5)
+  @hop_by_hop_headers ~w(connection content-length keep-alive proxy-authenticate proxy-authorization te trailer transfer-encoding upgrade)
 
   plug :verify
 
@@ -44,43 +46,50 @@ defmodule ConsoleWeb.AIController do
 
     url = find_uri(upstream, conn.query_string)
 
-    case HTTPoison.post(
-      url,
-      Enum.reverse(body) |> IO.iodata_to_binary(),
-      convert_headers(conn, upstream),
-      [stream_to: self(), async: :once] ++ @options
-    ) do
-      {:ok, %HTTPoison.AsyncResponse{} = resp} ->
-        do_stream(conn, resp)
+    case Req.post(url, [
+      body: Enum.reverse(body) |> IO.iodata_to_binary(),
+      headers: convert_headers(conn, upstream),
+      into: :self,
+      decode_body: false,
+      retry: false
+    ] ++ @options) do
+      {:ok, %Req.Response{} = resp} ->
+        start_stream(conn, resp)
       {:error, _} ->
         send_resp(conn, 500, "error proxying request")
     end
   end
 
-  defp do_stream(conn, %HTTPoison.AsyncResponse{} = resp) do
-    with {:ok, resp} <- HTTPoison.stream_next(resp) do
-      receive do
-        %HTTPoison.AsyncStatus{code: code} ->
-          put_status(conn, code)
-          |> do_stream(resp)
+  defp start_stream(conn, %Req.Response{status: status, headers: headers} = resp) do
+    Enum.reduce(headers, put_status(conn, status), fn
+      {k, values}, conn when is_list(values) -> put_upstream_header(conn, String.downcase(k), values)
+      {k, value}, conn -> put_upstream_header(conn, String.downcase(k), [value])
+    end)
+    |> send_chunked(status)
+    |> do_stream(resp)
+  end
 
-        %HTTPoison.AsyncHeaders{headers: headers} ->
-          Enum.reduce(headers, conn, fn {k, v}, conn ->
-            put_resp_header(conn, String.downcase(k), v)
-          end)
-          |> send_chunked(conn.status)
-          |> do_stream(resp)
+  defp put_upstream_header(conn, name, _values) when name in @hop_by_hop_headers, do: conn
+  defp put_upstream_header(conn, name, values), do: put_resp_header(conn, name, Enum.join(values, ", "))
 
-        %HTTPoison.AsyncChunk{chunk: chunk} ->
-          case chunk(conn, chunk) do
-            {:ok, conn} -> do_stream(conn, resp)
-            {:error, _} -> conn
-          end
+  defp do_stream(conn, %Req.Response{body: %Req.Response.Async{ref: ref}} = resp) do
+    receive do
+      {^ref, {:data, chunk}} ->
+        case chunk(conn, chunk) do
+          {:ok, conn} -> do_stream(conn, resp)
+          {:error, _} -> conn
+        end
 
-        %HTTPoison.AsyncEnd{} -> conn
-      end
-    else
-      _ -> send_resp(conn, 500, "error streaming response")
+      {^ref, {:trailers, _}} ->
+        do_stream(conn, resp)
+
+      {^ref, :done} -> conn
+
+      {^ref, {:error, _}} -> conn
+    after
+      @stream_timeout ->
+        Req.cancel_async_response(resp)
+        conn
     end
   end
 

@@ -289,7 +289,7 @@ defmodule Console.AI.CronTest do
         _ -> {:ok, %{items: []}}
       end)
 
-      expect(Console.Logs.Provider, :query, 1, fn
+      stub(Console.Logs.Provider, :query, fn
         # Updated to expect the specific CSI driver query
         %Console.Logs.Query{
           query: "ebs.csi.aws.com",  # <-- Changed from generic error terms
@@ -308,6 +308,9 @@ defmodule Console.AI.CronTest do
               facets: []
             }
           ]}
+
+        # contextual before/after queries issued by Console.AI.Evidence.Logs.add_context/2
+        %Console.Logs.Query{} -> {:ok, []}
       end)
 
       expect(Console.AI.OpenAI, :tool_call, 3, fn

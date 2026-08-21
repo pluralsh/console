@@ -50,16 +50,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
   def get(%{base_url: base, token: token}, path, query \\ %{}) when is_binary(path) do
     url = base <> path <> Query.query_string(query)
 
-    case HTTPoison.get(url, auth_headers(token), http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Bitbucket Cloud", reason)
-    end
+    Req.get(url, [headers: auth_headers(token)] ++ http_opts())
+    |> Http.handle("Bitbucket Cloud")
   end
 
   @spec post_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
@@ -68,16 +60,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
     url = base <> path
     headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
 
-    case HTTPoison.post(url, Jason.encode!(body_map), headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Bitbucket Cloud", reason)
-    end
+    Req.post(url, [headers: headers, body: Jason.encode!(body_map)] ++ http_opts())
+    |> Http.handle("Bitbucket Cloud")
   end
 
   @spec put_json(map(), String.t(), map()) :: {:ok, term()} | {:error, String.t()}
@@ -86,16 +70,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
     url = base <> path
     headers = auth_headers(token) ++ [{"Content-Type", "application/json"}]
 
-    case HTTPoison.put(url, Jason.encode!(body_map), headers, http_opts()) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
-        decode_json(body)
-
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
-        {:error, "Bitbucket Cloud API #{code}: #{inspect(body)}"}
-
-      {:error, reason} ->
-        Http.error("Bitbucket Cloud", reason)
-    end
+    Req.put(url, [headers: headers, body: Jason.encode!(body_map)] ++ http_opts())
+    |> Http.handle("Bitbucket Cloud")
   end
 
   @spec repo_path(String.t(), String.t()) :: String.t()
@@ -109,17 +85,8 @@ defmodule Console.AI.Tools.Workbench.Integration.Bitbucket.Client do
     ]
   end
 
-  defp decode_json(""), do: {:ok, %{}}
-
-  defp decode_json(body) do
-    case Jason.decode(body) do
-      {:ok, data} -> {:ok, data}
-      {:error, _} -> {:error, "Bitbucket Cloud returned non-JSON body: #{inspect(body)}"}
-    end
-  end
-
   defp enc(s) when is_binary(s), do: URI.encode(String.trim(s), &URI.char_unreserved?/1)
 
   defp http_opts,
-    do: Application.get_env(:console, :httpoison_bitbucket_options, []) ++ [recv_timeout: 60_000]
+    do: Console.Utils.HTTP.client_options(:httpoison_bitbucket_options, :req_bitbucket_options)
 end

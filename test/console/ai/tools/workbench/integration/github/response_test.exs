@@ -8,7 +8,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
     test "merges multi-page Tentacat search bodies before encoding" do
       page1 = %{"incomplete_results" => false, "items" => [%{"id" => 1}], "total_count" => 2}
       page2 = %{"incomplete_results" => false, "items" => [%{"id" => 2}], "total_count" => 2}
-      fake = %HTTPoison.Response{}
+      fake = %Req.Response{}
 
       assert {:ok, json} =
                Response.json({200, [{200, page1, fake}, {200, page2, fake}], fake})
@@ -21,7 +21,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
 
     test "encodes a normal single-page Tentacat body" do
       body = %{"incomplete_results" => false, "items" => [%{"id" => 1}]}
-      fake = %HTTPoison.Response{}
+      fake = %Req.Response{}
 
       assert {:ok, json} = Response.json({200, body, fake})
       assert Jason.decode!(json) == body
@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
     test "includes manual pagination metadata" do
       body = [%{"id" => 1}]
       next = "https://api.github.com/repos/pluralsh/console/pulls?page=2&per_page=30"
-      fake = %HTTPoison.Response{headers: [{"Link", "<#{next}>; rel=\"next\""}]}
+      fake = %Req.Response{headers: %{"link" => ["<#{next}>; rel=\"next\""]}}
 
       assert {:ok, json} = Response.json({{200, body, fake}, next, nil})
 
@@ -47,14 +47,14 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
     end
 
     test "bubbles Tentacat transport failures as tool errors" do
-      error = %HTTPoison.Error{
+      error = %Req.TransportError{
         reason: {:tls_alert, {:unknown_ca, ~c"TLS client: certificate verify failed"}}
       }
 
       assert {:error, message} = Response.json({:error, error})
       assert message =~ "GitHub request failed: TLS unknown_ca:"
       assert message =~ "certificate verify failed"
-      refute message =~ "%HTTPoison.Error"
+      refute message =~ "%Req.TransportError"
     end
   end
 
@@ -62,18 +62,16 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
     test "safely decodes manually paginated object responses" do
       next = "https://api.github.com/repos/pluralsh/console/commits/sha/check-runs?page=2&per_page=30"
 
-      expect(HTTPoison, :request, fn
-        :get,
-        "https://api.github.com/repos/pluralsh/console/commits/sha/check-runs?page=1&per_page=30",
-        "",
-        _headers,
-        _opts ->
-          {:ok,
-           %HTTPoison.Response{
-             status_code: 200,
-             body: Jason.encode!(%{"total_count" => 1, "check_runs" => [%{"id" => 1}]}),
-             headers: [{"Link", "<#{next}>; rel=\"next\""}]
-           }}
+      expect(Req, :request, fn opts ->
+        assert opts[:method] == :get
+        assert opts[:url] == "https://api.github.com/repos/pluralsh/console/commits/sha/check-runs?page=1&per_page=30"
+
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body: Jason.encode!(%{"total_count" => 1, "check_runs" => [%{"id" => 1}]}),
+           headers: %{"link" => ["<#{next}>; rel=\"next\""]}
+         }}
       end)
 
       client = Tentacat.Client.new(%{access_token: "token"})
@@ -100,18 +98,16 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.ResponseTest do
     end
 
     test "returns an error for non-json GitHub responses instead of raising a decoder error" do
-      expect(HTTPoison, :request, fn
-        :get,
-        "https://api.github.com/bad/path",
-        "",
-        _headers,
-        _opts ->
-          {:ok,
-           %HTTPoison.Response{
-             status_code: 404,
-             body: "<html>not found</html>",
-             headers: []
-           }}
+      expect(Req, :request, fn opts ->
+        assert opts[:method] == :get
+        assert opts[:url] == "https://api.github.com/bad/path"
+
+        {:ok,
+         %Req.Response{
+           status: 404,
+           body: "<html>not found</html>",
+           headers: %{}
+         }}
       end)
 
       client = Tentacat.Client.new(%{access_token: "token"})

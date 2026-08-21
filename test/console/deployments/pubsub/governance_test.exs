@@ -9,9 +9,9 @@ defmodule Console.Deployments.PubSub.GovernanceTest do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, governance: governance, status: :open)
 
-      expect(HTTPoison, :post, fn "https://webhook.url/v1/open", _, _ ->
+      expect(Req, :post, fn "https://webhook.url/v1/open", _ ->
         state = Jason.encode!(%{service_now_id: "1234567890"})
-        {:ok, %HTTPoison.Response{status_code: 200, body: state}}
+        {:ok, %Req.Response{status: 200, body: state}}
       end)
 
       event = %PubSub.PullRequestCreated{item: pr}
@@ -26,9 +26,9 @@ defmodule Console.Deployments.PubSub.GovernanceTest do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, governance: governance, status: :open, governance_changed: true)
 
-      expect(HTTPoison, :post, fn "https://webhook.url/v1/open", _, _ ->
+      expect(Req, :post, fn "https://webhook.url/v1/open", _ ->
         state = Jason.encode!(%{service_now_id: "1234567890"})
-        {:ok, %HTTPoison.Response{status_code: 200, body: state}}
+        {:ok, %Req.Response{status: 200, body: state}}
       end)
 
       event = %PubSub.PullRequestUpdated{item: pr}
@@ -41,9 +41,9 @@ defmodule Console.Deployments.PubSub.GovernanceTest do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, governance: governance, status: :merged)
 
-      expect(HTTPoison, :post, fn "https://webhook.url/v1/close", _, _ ->
+      expect(Req, :post, fn "https://webhook.url/v1/close", _ ->
         state = Jason.encode!(%{service_now_id: "1234567890"})
-        {:ok, %HTTPoison.Response{status_code: 200, body: state}}
+        {:ok, %Req.Response{status: 200, body: state}}
       end)
 
       event = %PubSub.PullRequestUpdated{item: pr}

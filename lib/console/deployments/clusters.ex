@@ -1262,9 +1262,9 @@ defmodule Console.Deployments.Clusters do
   defp readme_fetch(url) do
     Enum.find_value(~w(main master), {:ok, nil}, fn branch ->
       String.replace(url, "{branch}", branch)
-      |> HTTPoison.get([], follow_redirect: true)
+      |> Req.get(redirect: true, decode_body: false, retry: false)
       |> case do
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}} -> {:ok, body}
+        {:ok, %Req.Response{status: 200, body: body}} -> {:ok, body}
         _ -> nil
       end
     end)

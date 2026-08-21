@@ -13,11 +13,11 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   def plain_get(%Tentacat.Client{} = client, path, extra_headers \\ []) when is_binary(path) do
     url = client.endpoint <> path
 
-    case HTTPoison.request(:get, url, "", request_headers(client, extra_headers), request_options(client)) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} when code >= 200 and code < 300 ->
+    case Req.request(req_opts(:get, url, "", request_headers(client, extra_headers), request_options(client))) do
+      {:ok, %Req.Response{status: code, body: body}} when code >= 200 and code < 300 ->
         {:ok, body}
 
-      {:ok, %HTTPoison.Response{status_code: code, body: body}} ->
+      {:ok, %Req.Response{status: code, body: body}} ->
         {:error, "GitHub API #{code}: #{inspect(body)}"}
 
       {:error, reason} ->
@@ -35,7 +35,7 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
 
   @spec json_patch(Tentacat.Client.t(), String.t(), map()) :: Tentacat.response() | {:error, String.t()}
   def json_patch(%Tentacat.Client{} = client, path, body) when is_binary(path) and is_map(body),
-    do: json_request(:patch, client, path, body, [])
+    do: json_request(:patch, client, path, Jason.encode!(body), [])
 
   @spec json_put(Tentacat.Client.t(), String.t(), map()) :: Tentacat.response() | {:error, String.t()}
   def json_put(%Tentacat.Client{} = client, path, body) when is_binary(path) and is_map(body),
@@ -123,15 +123,18 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
   defp json_request(method, %Tentacat.Client{} = client, path, body, opts) do
     url = client.endpoint <> path
 
-    body = if is_map(body), do: Jason.encode!(body), else: body
-
-    case HTTPoison.request(method, url, body, json_headers(client), request_options(client)) do
-      {:ok, %HTTPoison.Response{status_code: code, body: body} = resp} ->
+    case Req.request(req_opts(method, url, body, json_headers(client), request_options(client))) do
+      {:ok, %Req.Response{status: code, body: body} = resp} ->
         response(method, code, decode_json_body(body), resp, opts)
 
       {:error, reason} ->
         Http.error("GitHub", reason)
     end
+  end
+
+  defp req_opts(method, url, body, headers, options) do
+    [method: method, url: url, body: body, headers: headers, decode_body: false, retry: false] ++
+      Console.Utils.HTTP.req_options(options)
   end
 
   defp decode_json_body(body) when body in [nil, ""], do: %{}
@@ -143,21 +146,20 @@ defmodule Console.AI.Tools.Workbench.Integration.Github.Client do
     end
   end
 
-  defp response(:get, code, body, %HTTPoison.Response{} = resp, pagination: :manual),
+  defp response(:get, code, body, %Req.Response{} = resp, pagination: :manual),
     do: {{code, body, resp}, next_url(resp), nil}
 
-  defp response(:get, code, body, %HTTPoison.Response{} = resp, _) when is_list(body),
+  defp response(:get, code, body, %Req.Response{} = resp, _) when is_list(body),
     do: {{code, body, resp}, next_url(resp), nil}
 
-  defp response(_, code, body, %HTTPoison.Response{} = resp, _),
+  defp response(_, code, body, %Req.Response{} = resp, _),
     do: {code, body, resp}
 
-  defp next_url(%HTTPoison.Response{headers: headers}) do
-    Enum.find_value(headers, fn
-      {"Link", value} -> next_url(value)
-      {"link", value} -> next_url(value)
+  defp next_url(%Req.Response{} = resp) do
+    case Req.Response.get_header(resp, "link") do
+      [value | _] -> next_url(value)
       _ -> nil
-    end)
+    end
   end
 
   defp next_url(value) when is_binary(value) do

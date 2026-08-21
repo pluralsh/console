@@ -60,18 +60,20 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
       role = insert(:role, repositories: ["*"], permissions: %{read: true})
       insert(:role_binding, role: role, user: user)
       expect(Kazan, :run, fn _ -> {:ok, dashboard()} end)
-      expect(HTTPoison, :post, 3, fn
-        _, {:form, [{"query", "label-q"}, _, _, _]}, _ ->
-          {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
-        _, {:form, [{"query", "some-query"}, _, _, _]}, _ ->
-          {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
-            %{values: [[1, "1"]]}
-          ]}})}}
-        _, {:form, [{"query", "formatted-query"}, _, _, _]}, _ ->
-          {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
-            %{metric: %{"var" => "val"}, values: [[1, "1"]]},
-            %{metric: %{"var" => "val2"}, values: [[1, "1"]]}
-          ]}})}}
+      expect(Req, :post, 3, fn _, opts ->
+        case opts[:form] do
+          [{"query", "label-q"}, _, _, _] ->
+            {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [%{metric: %{other: "l"}}]}})}}
+          [{"query", "some-query"}, _, _, _] ->
+            {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+              %{values: [[1, "1"]]}
+            ]}})}}
+          [{"query", "formatted-query"}, _, _, _] ->
+            {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
+              %{metric: %{"var" => "val"}, values: [[1, "1"]]},
+              %{metric: %{"var" => "val2"}, values: [[1, "1"]]}
+            ]}})}}
+        end
       end)
 
       {:ok, %{data: %{"dashboard" => found}}} = run_query("""
@@ -130,8 +132,8 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
 
   describe "logs" do
     test "it can fetch logs for a loki query" do
-      expect(HTTPoison, :get, fn _, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+      expect(Req, :get, fn _, _ ->
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
             %{stream: %{"var" => "val"}, values: [["1", "hello"]]},
             %{stream: %{"var" => "val2"}, values: [["1", "world"]]}
           ]}}
@@ -160,8 +162,8 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
 
   describe "metric" do
     test "it can fetch metrics from prometheus" do
-      expect(HTTPoison, :post, fn _, _, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+      expect(Req, :post, fn _, _ ->
+        {:ok, %Req.Response{status: 200, body: Poison.encode!(%{data: %{result: [
           %{values: [[1, "1"]]}
         ]}})}}
       end)

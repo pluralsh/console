@@ -138,7 +138,7 @@ defmodule Console.Deployments.KubeVersions.Table do
   end
 
   def handle_info(:poll, %State{table: table, static: false, url: url} = state) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
+    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, decode_body: false, retry: false),
          {:ok, %{"kube_changelog" => changelog}} <- YamlElixir.read_from_string(body) do
       table = Enum.reduce(changelog, table, fn change, table ->
         changelog = Changelog.new(change)

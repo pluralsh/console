@@ -65,14 +65,14 @@ defmodule Console.Deployments.Compatibilities.CloudAddOns do
   end
 
   defp fetch_manifest(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url <> "manifest.yaml"),
+    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url <> "manifest.yaml", decode_body: false, retry: false),
          {:ok, %{"platforms" => platforms}} <- YamlElixir.read_from_string(body),
       do: platforms
   end
 
   defp fetch_platform(url, platform) do
-    case HTTPoison.get(url <> "#{platform}.yaml") do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+    case Req.get(url <> "#{platform}.yaml", decode_body: false, retry: false) do
+      {:ok, %Req.Response{status: 200, body: body}} ->
         decode_cloud_addon(platform, body)
       _ ->
         {:error, "failed to fetch platform #{platform}"}

@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Prom.Mocks do
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
 
   def run(_) do
-    {:ok, _} = Application.ensure_all_started(:hackney)
+    {:ok, _} = Application.ensure_all_started(:req)
 
     conn = %Connection{
       host: get_env("PROMETHEUS_HOST"),
@@ -39,14 +39,14 @@ defmodule Mix.Tasks.Prom.Mocks do
 
   defp query_range(conn, query) do
     Path.join(conn.host, "/api/v1/query_range")
-    |> HTTPoison.post({:form, [
+    |> Req.post(form: [
       {"query", query},
       {"end", @end_t},
       {"start", @start_t},
       {"step", "1d"}
-    ]}, headers(conn))
+    ], headers: headers(conn), decode_body: false, retry: false)
     |> case do
-      {:ok, %HTTPoison.Response{body: body, status_code: 200}} -> {:ok, body}
+      {:ok, %Req.Response{body: body, status: 200}} -> {:ok, body}
       _ -> {:error, "prometheus error"}
     end
   end
