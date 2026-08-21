@@ -31,6 +31,27 @@ func TestArgsIncludesJSONModeSessionAndMCPConfig(t *testing.T) {
 	}
 }
 
+func TestArgsWithProxyUsesPluralProvider(t *testing.T) {
+	tool := &Pi{
+		DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{WorkDir: "/work"}},
+		model:       "openai/gpt-5.4",
+		provider:    proxyProviderKey,
+	}
+	want := []string{
+		"--mode", "json",
+		"--approve",
+		"--provider", proxyProviderKey,
+		"--model", "openai/gpt-5.4",
+		"--session-dir", "/work/.pi/agent/sessions",
+		"--extension", piMCPExtensionPath,
+		"--mcp-config", "/work/.pi/agent/mcp.json",
+		"write a task",
+	}
+	if got := tool.args("write a task", ""); !reflect.DeepEqual(got, want) {
+		t.Fatalf("args = %#v, want %#v", got, want)
+	}
+}
+
 func TestMapStreamEventMapsToolLifecycle(t *testing.T) {
 	tool := &Pi{}
 	start, callID := tool.mapStreamEvent(&StreamEvent{
