@@ -54,6 +54,10 @@ func (n *NamespaceReconciler) Queue() workqueue.TypedRateLimitingInterface[strin
 	return n.namespaceQueue
 }
 
+func (n *NamespaceReconciler) NamespaceCache() *cache.Cache[console.ManagedNamespaceFragment] {
+	return n.namespaceCache
+}
+
 func (n *NamespaceReconciler) Restart() {
 	// Cleanup
 	n.namespaceQueue.ShutDown()
@@ -65,7 +69,6 @@ func (n *NamespaceReconciler) Restart() {
 
 func (n *NamespaceReconciler) Shutdown() {
 	n.namespaceQueue.ShutDown()
-	n.namespaceCache.Wipe()
 }
 
 func (n *NamespaceReconciler) GetPollInterval() func() time.Duration {

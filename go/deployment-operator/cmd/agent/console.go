@@ -60,6 +60,7 @@ func registerConsoleReconcilersOrDie(
 	discoveryCache discoverycache.Cache,
 	namespaceCache streamline.NamespaceCache,
 	svcCache cache.Store[console.ServiceDeploymentForAgent],
+	cacheDir string,
 ) {
 	mgr.AddReconcilerOrDie(service.Identifier, func() (v1.Reconciler, error) {
 		r, err := service.NewServiceReconciler(consoleClient,
@@ -72,6 +73,7 @@ func registerConsoleReconcilersOrDie(
 			svcCache,
 			store,
 			service.WithManifestTTL(args.ManifestCacheTTL()),
+			service.WithCacheDir(cacheDir),
 			service.WithWorkqueueBaseDelay(args.WorkqueueBaseDelay()),
 			service.WithWorkqueueMaxDelay(args.WorkqueueMaxDelay()),
 			service.WithWorkqueueQPS(args.WorkqueueQPS()),

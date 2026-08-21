@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/errors"
@@ -98,29 +97,20 @@ func fetchSha(consoleURL, token, serviceID string) (string, error) {
 	return getBody(url, token)
 }
 
-func fetch(url, token, sha string) (string, error) {
-	dir, err := os.MkdirTemp("", "manifests")
-	if err != nil {
-		return "", err
-	}
-
+func fetch(url, token, sha, dir string) error {
 	resp, header, err := GetReader(url, token)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Close()
 	tarballSha := header.Get(pluralDigestHeader)
 	if tarballSha != "" && sha != tarballSha {
-		return "", errors.NewDigestMismatchError(sha, tarballSha)
+		return errors.NewDigestMismatchError(sha, tarballSha)
 	}
 
 	log.V(1).Info("finished request to", "url", url)
 
-	if err := Untar(dir, resp); err != nil {
-		return "", err
-	}
-
-	return dir, nil
+	return Untar(dir, resp)
 }
 
 func sanitizeURL(consoleURL string) (string, error) {
