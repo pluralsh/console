@@ -18,6 +18,10 @@
             "type": "string",
             "description": "Required when `followup` is true. The existing pull request's head branch. The harness checks out this branch before starting the agent so it can commit and push its additional work there."
         },
+        "followup_pr_url": {
+            "type": "string",
+            "description": "Required when `followup` is true. The URL of the existing pull request this run is continuing. Always provide this whenever `followup` is true."
+        },
         "prompt": {
             "type": "string", 
             "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository.  Commonmark Markdown formatting is encouraged to convey structure and semantic importance."
@@ -28,7 +32,7 @@
         },
         "followup": {
             "type": "boolean",
-            "description": "When true, this run performs additional work on an existing pull request. Set `head_branch` to that pull request's head branch. The agent commits and pushes to the current branch; it does not create a branch or a new pull request."
+            "description": "When true, this run performs additional work on an existing pull request. You MUST always provide `followup_pr_url` (the existing PR URL) and `head_branch` (that PR's head branch). The agent commits and pushes to the current branch; it does not create a branch or a new pull request."
         }
     },
     "required": ["mode", "repository", "prompt"]

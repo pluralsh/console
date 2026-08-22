@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -28,8 +29,8 @@ type ResourceBase interface {
 	Name() string
 	Namespace() string
 	Create(t *testing.T) error
-	Delete(t *testing.T) error
-	Exists(t *testing.T) (bool, error)
+	Delete(ctx context.Context, t *testing.T) error
+	Exists(ctx context.Context, t *testing.T) (bool, error)
 }
 
 type baseResource struct {
@@ -54,7 +55,7 @@ func (in *baseResource) CreateWithCleanup(t *testing.T, timeout time.Duration) e
 
 	t.Cleanup(func() {
 		if err := in.DeleteWithTimeout(t, timeout); err != nil {
-			require.Fail(t, "could not delete resource %s/%s", in.GetNamespace(), in.GetName())
+			require.Failf(t, "could not delete resource", "%s/%s: %v", in.GetNamespace(), in.GetName(), err)
 		}
 	})
 
@@ -66,7 +67,10 @@ func (in *baseResource) DeleteWithTimeout(t *testing.T, timeout time.Duration) e
 		return fmt.Errorf("baseResource is missing self reference")
 	}
 
-	if err := in.self.Delete(t); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	if err := in.self.Delete(ctx, t); err != nil {
 		if apierrors.IsNotFound(err) {
 			return nil
 		}
@@ -77,15 +81,12 @@ func (in *baseResource) DeleteWithTimeout(t *testing.T, timeout time.Duration) e
 	ticker := time.NewTicker(defaultTickerInterval)
 	defer ticker.Stop()
 
-	timer := time.NewTimer(timeout)
-	defer timer.Stop()
-
 	for {
 		select {
-		case <-timer.C:
-			return fmt.Errorf("timed out waiting for resource to be deleted")
+		case <-ctx.Done():
+			return fmt.Errorf("timed out waiting for resource to be deleted: %w", ctx.Err())
 		case <-ticker.C:
-			exists, err := in.self.Exists(t)
+			exists, err := in.self.Exists(ctx, t)
 			if err != nil {
 				return runtimerrors.IgnoreNotFound(err)
 			}
@@ -103,8 +104,8 @@ func (in *baseResource) toKubectlOptions() *k8s.KubectlOptions {
 	}
 }
 
-func (in *baseResource) clientset(t *testing.T) (*kubernetes.Clientset, error) {
-	return k8s.GetKubernetesClientFromOptionsContextE(t, t.Context(), in.toKubectlOptions())
+func (in *baseResource) clientset(ctx context.Context, t *testing.T) (*kubernetes.Clientset, error) {
+	return k8s.GetKubernetesClientFromOptionsContextE(t, ctx, in.toKubectlOptions())
 }
 
 func (in *baseResource) toJSON(resource any) string {

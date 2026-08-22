@@ -58,6 +58,7 @@ type AgentRun struct {
 	Approval        bool
 	ApprovedAt      *string
 	Followup        bool
+	FollowupPrURL   string
 }
 
 // AgentUser is the Console user who initiated the agent run. Git commits
@@ -199,6 +200,9 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 	run.ApprovedAt = fragment.ApprovedAt
 	if fragment.Followup != nil {
 		run.Followup = *fragment.Followup
+	}
+	if fragment.FollowupPrURL != nil {
+		run.FollowupPrURL = *fragment.FollowupPrURL
 	}
 
 	return run

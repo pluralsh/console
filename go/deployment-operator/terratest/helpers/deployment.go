@@ -107,14 +107,14 @@ func (in *Deployment) Create(t *testing.T) error {
 	)
 }
 
-func (in *Deployment) Delete(t *testing.T) error {
-	clientset, err := in.clientset(t)
+func (in *Deployment) Delete(ctx context.Context, t *testing.T) error {
+	clientset, err := in.clientset(ctx, t)
 	if err != nil {
 		return err
 	}
 
 	return runtimerrors.IgnoreNotFound(
-		clientset.AppsV1().Deployments(in.Namespace()).Delete(context.Background(), in.Name(), metav1.DeleteOptions{}),
+		clientset.AppsV1().Deployments(in.Namespace()).Delete(ctx, in.Name(), metav1.DeleteOptions{}),
 	)
 }
 
@@ -122,8 +122,8 @@ func (in *Deployment) Get(t *testing.T) (*appsv1.Deployment, error) {
 	return k8s.GetDeploymentContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
-func (in *Deployment) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetDeploymentContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
+func (in *Deployment) Exists(ctx context.Context, t *testing.T) (bool, error) {
+	_, err := k8s.GetDeploymentContextE(t, ctx, in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}

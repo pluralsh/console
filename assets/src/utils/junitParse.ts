@@ -28,6 +28,8 @@ export type TestSuites = TestsuiteStats & {
 /** represents a `<testsuite>` tag.  */
 export type TestSuite = TestsuiteStats & {
   testcase?: TestCase[]
+  /** Nested suites; flattened onto the parent `<testsuites>` after parse. */
+  testsuite?: TestSuite[]
   file?: string
   disabled?: number
   hostname?: string
@@ -36,6 +38,15 @@ export type TestSuite = TestsuiteStats & {
   properties?: Property[]
   systemOut?: string[]
   systemErr?: string[]
+}
+
+export type TestcaseOutcome = 'passed' | 'failed' | 'error' | 'skipped'
+
+export type TestStatCounts = {
+  tests: number
+  failures: number
+  errors: number
+  skipped: number
 }
 
 /** represents a `<testcase>` tag.  */
@@ -89,17 +100,153 @@ export const parseJunit = (
   if (result == null) return null
 
   if ('testsuites' in result)
-    return _parseObject(result.testsuites) as TestSuites
+    return normalizeParsedTestSuites(
+      _parseObject(result.testsuites) as TestSuites
+    )
 
   // Wrap standalone <testsuite> in a TestSuites container with aggregate values
   if ('testsuite' in result) {
     const parsedSuite = _parseObject(result.testsuite) as TestSuite
     // spreading the object so TestStats are on the parent
     // technically will add extra testsuite-only properties to the parent but these will be ignored in practice
-    return { ...parsedSuite, testsuite: [parsedSuite] }
+    return normalizeParsedTestSuites({
+      ...parsedSuite,
+      testsuite: [parsedSuite],
+    })
   }
 
   return null
+}
+
+/**
+ * Outcome of a single `<testcase>`, matching the JUnit UI status chips.
+ * Presence of skipped/error/failure children wins over suite-level attributes.
+ */
+export const getTestcaseOutcome = (testcase: TestCase): TestcaseOutcome => {
+  if (hasResult(testcase.skipped)) return 'skipped'
+  if (hasResult(testcase.error)) return 'error'
+  if (hasResult(testcase.failure)) return 'failed'
+  return 'passed'
+}
+
+/**
+ * Rolls up tests/failures/errors/skipped for a suite or suite collection.
+ *
+ * gotestsum (and some other producers) omit package-level failures such as
+ * compile/import errors from `<testsuite tests="0" failures="0">` while still
+ * emitting a synthetic `<testcase name="TestMain"><failure/></testcase>`.
+ * Attribute-only rollup therefore reports an all-green summary for a failed run.
+ * Prefer the higher of declared attributes vs actual testcase outcomes, and
+ * walk nested `<testsuite>` children.
+ */
+export const getTestStats = (node: TestSuites | TestSuite): TestStatCounts => {
+  const nested = node.testsuite
+  const fromCases = countTestcases(
+    'testcase' in node ? node.testcase : undefined
+  )
+  const fromAttrs: TestStatCounts = {
+    tests: node.tests ?? 0,
+    failures: node.failures ?? 0,
+    errors: node.errors ?? 0,
+    skipped: node.skipped ?? 0,
+  }
+  const own = maxStats(fromAttrs, fromCases)
+
+  if (!nested?.length) return own
+
+  const fromChildren = nested.reduce<TestStatCounts>(
+    (acc, suite) => addStats(acc, getTestStats(suite)),
+    emptyStats()
+  )
+  return maxStats(own, fromChildren)
+}
+
+const emptyStats = (): TestStatCounts => ({
+  tests: 0,
+  failures: 0,
+  errors: 0,
+  skipped: 0,
+})
+
+const addStats = (a: TestStatCounts, b: TestStatCounts): TestStatCounts => ({
+  tests: a.tests + b.tests,
+  failures: a.failures + b.failures,
+  errors: a.errors + b.errors,
+  skipped: a.skipped + b.skipped,
+})
+
+const maxStats = (a: TestStatCounts, b: TestStatCounts): TestStatCounts => ({
+  tests: Math.max(a.tests, b.tests),
+  failures: Math.max(a.failures, b.failures),
+  errors: Math.max(a.errors, b.errors),
+  skipped: Math.max(a.skipped, b.skipped),
+})
+
+const countTestcases = (testcases: TestCase[] | undefined): TestStatCounts => {
+  const stats = emptyStats()
+  if (!testcases?.length) return stats
+
+  for (const testcase of testcases) {
+    stats.tests += 1
+    switch (getTestcaseOutcome(testcase)) {
+      case 'failed':
+        stats.failures += 1
+        break
+      case 'error':
+        stats.errors += 1
+        break
+      case 'skipped':
+        stats.skipped += 1
+        break
+      default:
+        break
+    }
+  }
+  return stats
+}
+
+const hasResult = (value: unknown): boolean => {
+  if (value == null || value === false || value === '') return false
+  if (Array.isArray(value)) return value.length > 0
+  if (typeof value === 'object') return Object.keys(value).length > 0
+  return true
+}
+
+/**
+ * Flatten nested suites and raise undercounted attributes so consumers that
+ * still read `tests` / `failures` on the parsed object stay consistent with
+ * the testcase list.
+ */
+const normalizeParsedTestSuites = (suites: TestSuites): TestSuites => {
+  const flattened = flattenTestSuites(suites.testsuite ?? []).map(
+    applyCaseCountsToSuite
+  )
+  const stats = getTestStats({ ...suites, testsuite: flattened })
+  return {
+    ...suites,
+    ...stats,
+    testsuite: flattened,
+  }
+}
+
+const flattenTestSuites = (suites: TestSuite[]): TestSuite[] => {
+  const flattened: TestSuite[] = []
+
+  for (const suite of suites) {
+    const nested = suite.testsuite
+    const rest = { ...suite }
+    delete rest.testsuite
+
+    if (nested?.length) flattened.push(...flattenTestSuites(nested))
+    if (rest.testcase?.length || !nested?.length) flattened.push(rest)
+  }
+
+  return flattened
+}
+
+const applyCaseCountsToSuite = (suite: TestSuite): TestSuite => {
+  const stats = getTestStats(suite)
+  return { ...suite, ...stats }
 }
 
 /**

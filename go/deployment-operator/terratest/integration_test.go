@@ -66,7 +66,7 @@ func runLoadBalancerTest(t *testing.T, lbFragment *client.TestCaseConfigurationF
 
 	namespaceResource := helpers.NewNamespace(namespaceName, helpers.WithNamespaceDefaults(defaults))
 	if err := namespaceResource.CreateWithCleanup(t, 5*time.Minute); err != nil {
-		require.Fail(t, "failed to create namespace: %v", err)
+		require.Failf(t, "failed to create namespace", "%v", err)
 	}
 
 	serviceResource := helpers.NewService(serviceName, namespaceName,
@@ -82,16 +82,16 @@ func runLoadBalancerTest(t *testing.T, lbFragment *client.TestCaseConfigurationF
 	)
 
 	if err := serviceResource.Create(t); err != nil {
-		require.Fail(t, "failed to create service: %v", err)
+		require.Failf(t, "failed to create service", "%v", err)
 	}
 
 	if err := serviceResource.WaitForReady(t, 2*time.Minute); err != nil {
-		require.Fail(t, "failed to wait for service to be ready: %v", err)
+		require.Failf(t, "failed to wait for service to be ready", "%v", err)
 	}
 
 	svc, err := serviceResource.Get(t)
 	if err != nil {
-		require.Fail(t, "failed to get service: %v", err)
+		require.Failf(t, "failed to get service", "%v", err)
 	}
 
 	require.Equal(t, "LoadBalancer", string(svc.Spec.Type))
@@ -169,7 +169,7 @@ func runPVCTest(t *testing.T, pvcFragment *client.TestCaseConfigurationFragment_
 
 	namespace := helpers.NewNamespace(namespaceName, helpers.WithNamespaceDefaults(defaults))
 	if err := namespace.CreateWithCleanup(t, 5*time.Minute); err != nil {
-		require.Fail(t, "failed to create namespace: %v", err)
+		require.Failf(t, "failed to create namespace", "%v", err)
 	}
 
 	// PVC requires at least one consumer to go into bound phase.
@@ -182,7 +182,7 @@ func runPVCTest(t *testing.T, pvcFragment *client.TestCaseConfigurationFragment_
 		helpers.WithPersistentVolumeClaimDefaults(defaults),
 	)
 	if err := pvc.Create(t); err != nil {
-		require.Fail(t, "failed to create pvc %s/%s: %v", namespaceName, pvcName, err)
+		require.Failf(t, "failed to create pvc", "%s/%s: %v", namespaceName, pvcName, err)
 	}
 
 	pod := helpers.NewPod(podName,
@@ -207,15 +207,15 @@ func runPVCTest(t *testing.T, pvcFragment *client.TestCaseConfigurationFragment_
 		helpers.WithPodDefaults(defaults),
 	)
 	if err := pod.Create(t); err != nil {
-		require.Fail(t, "failed to create pod %s/%s: %v", namespaceName, podName, err)
+		require.Failf(t, "failed to create pod", "%s/%s: %v", namespaceName, podName, err)
 	}
 
 	if err := pvc.WaitForReady(t, 5*time.Minute); err != nil {
-		require.Fail(t, "pvc %s/%s did not become ready: %v", namespaceName, pvcName, err)
+		require.Failf(t, "pvc did not become ready", "%s/%s: %v", namespaceName, pvcName, err)
 	}
 
 	if err := pod.WaitForReady(t, 5*time.Minute); err != nil {
-		require.Fail(t, "pod %s/%s did not succeed: %v", namespaceName, podName, err)
+		require.Failf(t, "pod did not succeed", "%s/%s: %v", namespaceName, podName, err)
 	}
 }
 

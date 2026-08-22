@@ -170,6 +170,7 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
       >
         <GitCommitIcon />
         {stackRun.git?.ref}
+        {stackRun.committer && <span>{stackRun.committer}</span>}
       </span>
     </div>
   )

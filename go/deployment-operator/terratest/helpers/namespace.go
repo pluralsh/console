@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -67,8 +68,8 @@ func (in *Namespace) Create(t *testing.T) error {
 	return nil
 }
 
-func (in *Namespace) Delete(t *testing.T) error {
-	err := k8s.DeleteNamespaceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
+func (in *Namespace) Delete(ctx context.Context, t *testing.T) error {
+	err := k8s.DeleteNamespaceContextE(t, ctx, in.toKubectlOptions(), in.Name())
 
 	if err != nil && !apierrors.IsNotFound(err) {
 		return err
@@ -81,8 +82,8 @@ func (in *Namespace) Get(t *testing.T) (*corev1.Namespace, error) {
 	return k8s.GetNamespaceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
-func (in *Namespace) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetNamespaceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
+func (in *Namespace) Exists(ctx context.Context, t *testing.T) (bool, error) {
+	_, err := k8s.GetNamespaceContextE(t, ctx, in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}

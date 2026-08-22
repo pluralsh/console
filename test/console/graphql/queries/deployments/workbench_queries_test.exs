@@ -318,6 +318,37 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert Enum.any?(nodes, & &1["name"] == "skill-two" and &1["description"] == "second" and &1["contents"] == "echo two")
     end
 
+    test "it can fetch workbench knowledge" do
+      workbench = insert(:workbench)
+      k1 = insert(:workbench_knowledge, workbench: workbench, name: "kb-one", description: "first", knowledge: "note one", labels: ["a"])
+      k2 = insert(:workbench_knowledge, workbench: workbench, name: "kb-two", description: "second", knowledge: "note two", labels: ["b"])
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            workbenchKnowledge(first: 5) {
+              edges {
+                node {
+                  id
+                  name
+                  description
+                  knowledge
+                  labels
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["workbenchKnowledge"])
+      assert ids_equal(nodes, [k1, k2])
+      assert Enum.any?(nodes, & &1["name"] == "kb-one" and &1["description"] == "first" and &1["knowledge"] == "note one" and &1["labels"] == ["a"])
+      assert Enum.any?(nodes, & &1["name"] == "kb-two" and &1["description"] == "second" and &1["knowledge"] == "note two" and &1["labels"] == ["b"])
+    end
+
     test "it returns null eval when no eval is configured" do
       workbench = insert(:workbench)
 

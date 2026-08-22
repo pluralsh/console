@@ -140,9 +140,10 @@ defmodule Console.Deployments.Git.AgentTest do
 
       {:ok, sha} = Discovery.sha(git, "main")
 
-      {:ok, :pass, msg} = Discovery.changes(git, nil, sha, "charts/deployment-operator")
+      {:ok, :pass, msg, email} = Discovery.changes(git, nil, sha, "charts/deployment-operator")
 
       assert is_binary(msg)
+      assert is_binary(email)
 
       Process.exit(pid, :kill)
     end

@@ -123,14 +123,10 @@ func (c *azureDevOpsClient) GetPRDetails(ctx context.Context, prURL string) (*PR
 		checks = nil
 	}
 
-	return &PRDetails{
-		Title:    lo.FromPtr(pr.Title),
-		Body:     lo.FromPtr(pr.Description),
-		HeadRef:  adoBranchName(sourceRef),
-		State:    adoPRState(pr.Status),
-		Comments: comments,
-		CIChecks: checks,
-	}, nil
+	details := adoSummaryFromPR(pr)
+	details.Comments = comments
+	details.CIChecks = checks
+	return details, nil
 }
 
 func (c *azureDevOpsClient) GetPRSummary(ctx context.Context, prURL string) (*PRDetails, error) {
@@ -153,13 +149,7 @@ func (c *azureDevOpsClient) GetPRSummary(ctx context.Context, prURL string) (*PR
 		return nil, fmt.Errorf("get PR: %w", err)
 	}
 
-	sourceRef := lo.FromPtr(pr.SourceRefName)
-	return &PRDetails{
-		Title:   lo.FromPtr(pr.Title),
-		Body:    lo.FromPtr(pr.Description),
-		HeadRef: adoBranchName(sourceRef),
-		State:   adoPRState(pr.Status),
-	}, nil
+	return adoSummaryFromPR(pr), nil
 }
 
 func (c *azureDevOpsClient) allComments(ctx context.Context, gc adogit.Client, parsed adoParsedURL) ([]PRComment, error) {
@@ -377,6 +367,16 @@ func adoPRState(status *adogit.PullRequestStatus) PRState {
 		return PRStateClosed
 	default:
 		return PRStateOpen
+	}
+}
+
+func adoSummaryFromPR(pr *adogit.GitPullRequest) *PRDetails {
+	sourceRef := lo.FromPtr(pr.SourceRefName)
+	return &PRDetails{
+		Title:   lo.FromPtr(pr.Title),
+		Body:    lo.FromPtr(pr.Description),
+		HeadRef: adoBranchName(sourceRef),
+		State:   adoPRState(pr.Status),
 	}
 }
 

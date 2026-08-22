@@ -25,6 +25,33 @@ defmodule ConsoleTest do
     end
   end
 
+  describe "#handle_rpc/1" do
+    test "converts genserver call timeouts into rate limits" do
+      reason = {:timeout, {GenServer, :call, [self(), {:digest, :ref}, 10000]}}
+
+      assert Console.handle_rpc({:rpc, reason}) == {:error, :rate_limited}
+      assert Console.handle_rpc({:erpc, reason}) == {:error, :rate_limited}
+      assert Console.handle_rpc(reason) == {:error, :rate_limited}
+      assert Console.handle_rpc(:timeout) == {:error, :rate_limited}
+    end
+
+    test "converts noproc errors from erpc into rate limits" do
+      reason = {:noproc, {GenServer, :call, [self(), {:digest, :ref}, 10000]}}
+
+      assert Console.handle_rpc({:rpc, reason}) == {:error, :rate_limited}
+      assert Console.handle_rpc({:erpc, {:exception, reason}}) == {:error, :rate_limited}
+      assert Console.handle_rpc({:exception, reason, []}) == {:error, :rate_limited}
+      assert Console.handle_rpc({:error, {:rpc, {:exception, {:norproc, self()}}}}) == {:error, :rate_limited}
+      assert Console.handle_rpc(:noproc) == {:error, :rate_limited}
+    end
+
+    test "leaves unrelated rpc failures as rpc errors" do
+      assert Console.handle_rpc(:noconnection) == {:error, {:rpc, :noconnection}}
+      assert Console.handle_rpc({:rpc, :badarg}) == {:error, {:rpc, :badarg}}
+      assert Console.handle_rpc({:ok, "sha"}) == {:ok, "sha"}
+    end
+  end
+
   describe "#put_path/3" do
     test "it can deep insert a value into a nested map" do
       map = %{

@@ -1,8 +1,9 @@
 defmodule Console.AI.Workbench.EngineTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.AI.Workbench.{Engine, Subagents}
+  alias Console.AI.Workbench.{Activity, Engine, Subagents}
   alias Console.AI.{Provider, Tool}
+  alias Console.Deployments.Clusters
   alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
 
@@ -343,6 +344,141 @@ defmodule Console.AI.Workbench.EngineTest do
       {:ok, result} = Engine.run(engine)
 
       assert result.status == :successful
+    end
+
+    test "auto-approves a kubernetes update when OPA policy approves and invokes the request" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      cluster = insert(:cluster, handle: "policy-approved-cluster")
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      policy =
+        insert(:policy,
+          project: project,
+          policy: """
+          package plrl.wb.admission
+
+          sample := 0
+
+          approve[{"reason": "production updates are safe"}] if {
+            input.tool_name == "update_k8s_resource"
+            input.tool.namespace == "production"
+          }
+          """
+        )
+
+      insert(:workbench_policy,
+        workbench: workbench,
+        policy: policy,
+        matches: %{regexes: ["^update_k8s_resource$"]}
+      )
+
+      arguments = %{
+        "cluster" => cluster.handle,
+        "group" => "apps",
+        "version" => "v1",
+        "kind" => "Deployment",
+        "name" => "api",
+        "namespace" => "production",
+        "explanation" => "Update the api deployment.",
+        "json" =>
+          Jason.encode!(%{
+            apiVersion: "apps/v1",
+            kind: "Deployment",
+            metadata: %{name: "api", namespace: "production"}
+          })
+      }
+
+      expect(Provider, :completion, fn _, opts ->
+        assert Enum.any?(opts[:plural], &(Tool.name(&1) == "update_k8s_resource"))
+
+        {:ok, "update deployment", [
+          %Tool{
+            id: "kube-update-1",
+            name: "update_k8s_resource",
+            arguments: arguments
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "deployment updated",
+              "todos" => [
+                %{name: "update deployment", description: "update deployment", done: true}
+              ]
+            }
+          }
+        ]}
+      end)
+
+      expect(Clusters, :api_discovery, fn fetched_cluster ->
+        assert fetched_cluster.id == cluster.id
+        %{{"apps", "v1", "Deployment"} => "deployments"}
+      end)
+
+      expect(Kazan, :run, fn %Kazan.Request{} = request, opts ->
+        assert request.method == "put"
+        assert request.path == "/apis/apps/v1/namespaces/production/deployments/api"
+        assert request.content_type == "application/json"
+        assert request.query_params == %{}
+        assert Jason.decode!(request.body) == %{
+                 "apiVersion" => "apps/v1",
+                 "kind" => "Deployment",
+                 "metadata" => %{"name" => "api", "namespace" => "production"}
+               }
+        assert %Kazan.Server{} = opts[:server]
+
+        {:ok, %{"kind" => "Deployment", "metadata" => %{"name" => "api"}}}
+      end)
+
+      expect(Activity, :await_activity, fn activity ->
+        assert activity.status == :successful
+        {:ok, activity}
+      end)
+
+      job =
+        insert(:workbench_job,
+          workbench: workbench,
+          user: user,
+          modes: %{kubernetes: %{update: true}}
+        )
+
+      {:ok, engine} = Engine.new(job)
+      assert {:ok, result} = Engine.run(engine)
+      assert result.status == :successful
+      assert result.result.conclusion == "deployment updated"
+
+      activity =
+        Console.Repo.get_by!(Console.Schema.WorkbenchJobActivity,
+          workbench_job_id: job.id,
+          type: :kubernetes
+        )
+
+      assert activity.status == :successful
+      assert activity.result.auto_approve
+      assert activity.result.approval_reason =~ "production updates are safe"
+      assert Jason.decode!(activity.result.output) == %{
+               "kind" => "Deployment",
+               "metadata" => %{"name" => "api"}
+             }
     end
 
     test "creates and polls an exec activity until it is approved" do

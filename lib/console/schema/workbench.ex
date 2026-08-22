@@ -13,6 +13,7 @@ defmodule Console.Schema.Workbench do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
+    WorkbenchKnowledge,
     WorkbenchEval,
     PolicyBinding,
     WorkbenchPolicy,
@@ -147,25 +148,28 @@ defmodule Console.Schema.Workbench do
       foreign_key: :policy_id,
       references:  :write_policy_id
 
-    belongs_to :project,   Project
-    belongs_to :repository, GitRepository
+    belongs_to :project,       Project
+    belongs_to :repository,    GitRepository
     belongs_to :agent_runtime, AgentRuntime
-    belongs_to :bot_user, User, foreign_key: :bot_user_id
+    belongs_to :bot_user,      User, foreign_key: :bot_user_id
 
-    has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
-    has_many :jobs,              WorkbenchJob,     on_replace: :delete
-    has_many :webhooks,          WorkbenchWebhook,  on_replace: :delete
-    has_many :workbench_chatbots, WorkbenchChatbot, on_replace: :delete
-    has_many :crons,             WorkbenchCron,     on_replace: :delete
-    has_many :prompts,           WorkbenchPrompt,  on_replace: :delete
-    has_many :flows_workbenches, FlowWorkbench,    on_replace: :delete
-    has_many :workbench_skills,  WorkbenchSkill,   on_replace: :delete
-    has_many :workbench_policies, WorkbenchPolicy, on_replace: :delete
-    has_many :alerts,            Alert
-    has_one :eval,               WorkbenchEval
+    has_many :tool_associations,   WorkbenchToolAssociation, on_replace: :delete
+    has_many :jobs,                WorkbenchJob,             on_replace: :delete
+    has_many :webhooks,            WorkbenchWebhook,         on_replace: :delete
+    has_many :workbench_chatbots,  WorkbenchChatbot,         on_replace: :delete
+    has_many :crons,               WorkbenchCron,            on_replace: :delete
+    has_many :prompts,             WorkbenchPrompt,          on_replace: :delete
+    has_many :flows_workbenches,   FlowWorkbench,            on_replace: :delete
+    has_many :workbench_skills,    WorkbenchSkill,           on_replace: :delete
+    has_many :workbench_knowledge, WorkbenchKnowledge,       on_replace: :delete
+    has_many :workbench_policies,  WorkbenchPolicy,          on_replace: :delete
+    has_many :alerts,              Alert
+
+    has_one :eval,                 WorkbenchEval
 
     has_many :tools, through: [:tool_associations, :tool]
     has_many :policies, through: [:workbench_policies, :policy]
+
     timestamps()
   end
 

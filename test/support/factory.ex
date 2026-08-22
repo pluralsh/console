@@ -1327,6 +1327,17 @@ defmodule Console.Factory do
     }
   end
 
+  def workbench_knowledge_factory do
+    %Schema.WorkbenchKnowledge{
+      name: sequence(:workbench_knowledge_name, &"workbench-knowledge-#{&1}"),
+      description: "saved knowledge description",
+      knowledge: "saved knowledge contents",
+      labels: ["docs"],
+      usages: 0,
+      workbench: build(:workbench)
+    }
+  end
+
   def workbench_eval_factory do
     %Schema.WorkbenchEval{
       conclusion_rules: "conclusion rules blob",

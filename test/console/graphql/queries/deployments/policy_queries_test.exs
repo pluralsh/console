@@ -464,6 +464,61 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert result["bind"]
     end
 
+    test "evaluates stack policies with the stack approval base" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+
+      policy = insert(:policy,
+        project: project,
+        type: :stack,
+        policy: """
+        package plrl.stack
+
+        sample := 0
+
+        deny[{"message": "blocked"}] if {
+          input.blocked == true
+        }
+
+        defer if input.wait == true
+
+        approve[{"reason": "safe"}] if {
+          input.approve == true
+        }
+        """
+      )
+
+      {:ok, %{data: %{"evaluatePolicy" => denied}}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!) {
+          evaluatePolicy(policyId: $policyId, input: $input)
+        }
+      """, %{"policyId" => policy.id, "input" => Jason.encode!(%{"blocked" => true})}, %{current_user: user})
+
+      assert [%{"message" => "blocked"}] = denied["deny"]
+      refute denied["defer"]
+      assert denied["approve"] == []
+
+      {:ok, %{data: %{"evaluatePolicy" => deferred}}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!) {
+          evaluatePolicy(policyId: $policyId, input: $input)
+        }
+      """, %{"policyId" => policy.id, "input" => Jason.encode!(%{"wait" => true})}, %{current_user: user})
+
+      assert deferred["deny"] == []
+      assert deferred["defer"]
+      assert deferred["approve"] == []
+
+      {:ok, %{data: %{"evaluatePolicy" => approved}}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!) {
+          evaluatePolicy(policyId: $policyId, input: $input)
+        }
+      """, %{"policyId" => policy.id, "input" => Jason.encode!(%{"approve" => true})}, %{current_user: user})
+
+      assert approved["deny"] == []
+      refute approved["defer"]
+      assert [%{"reason" => "safe"}] = approved["approve"]
+    end
+
     test "denies evaluation history to users without policy access" do
       policy = insert(:policy)
 

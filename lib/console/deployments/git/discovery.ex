@@ -37,7 +37,7 @@ defmodule Console.Deployments.Git.Discovery do
   @spec tags(GitRepository.t) :: {:ok, [binary]} | error
   def tags(%GitRepository{} = repo), do: maybe_rpc(repo, &Agent.tags/1)
 
-  @spec changes(GitRepository.t, binary, binary, binary) :: {:ok, [binary] | :pass, binary} | error
+  @spec changes(GitRepository.t, binary, binary, binary) :: {:ok, [binary] | :pass, binary, binary | nil} | error
   def changes(%GitRepository{} = repo, sha1, sha2, folder),
     do: maybe_rpc(repo, &Agent.changes(&1, sha1, sha2, folder))
 
@@ -80,7 +80,8 @@ defmodule Console.Deployments.Git.Discovery do
           |> Console.handle_rpc()
       end
     catch
-      :exit, reason -> {:error, {:rpc, reason}}
+      :exit, reason -> Console.handle_rpc({:rpc, reason})
+      :error, reason -> Console.handle_rpc(reason)
     end
   end
 

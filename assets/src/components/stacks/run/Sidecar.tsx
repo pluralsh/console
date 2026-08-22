@@ -58,49 +58,61 @@ export default function StackRunSidecar({
         gap: theme.spacing.medium,
       }}
     >
-      {aiApproval?.enabled && approvalResult?.result && (
-        <Sidecar css={aiGradientBorderStyles(theme)}>
+      {approvalResult?.result && (
+        <Sidecar
+          css={aiApproval?.enabled ? aiGradientBorderStyles(theme) : undefined}
+        >
           <SidecarItem
             heading={
               <StretchedFlex>
                 <span>Approval decision</span>
-                <AiSparkleFilledIcon
-                  color="icon-info"
-                  size={13}
-                />
+                {aiApproval?.enabled && (
+                  <AiSparkleFilledIcon
+                    color="icon-info"
+                    size={13}
+                  />
+                )}
               </StretchedFlex>
             }
           >
             <StackAIApprovalChip approvalResult={approvalResult.result} />
           </SidecarItem>
-          <SidecarItem heading="Approval reason">
-            <span>{approvalResult.reason}</span>
-          </SidecarItem>
-          <SidecarItem heading="Rule file">
-            <Tooltip
-              placement="top"
-              label={`${aiApproval.git.folder}/${aiApproval.file}`}
-            >
-              <div css={TRUNCATE_LEFT}>
-                {aiApproval.git.folder}/{aiApproval.file}
-              </div>
-            </Tooltip>
-          </SidecarItem>
-          {repository?.httpsPath && (
-            <SidecarItem heading="Repo">
-              <Tooltip
-                placement="top"
-                label={`${repository.httpsPath}@${aiApproval.git.ref}`}
-              >
-                <div css={TRUNCATE_LEFT}>
-                  {repository.httpsPath}@{aiApproval.git.ref}
-                </div>
-              </Tooltip>
+          {approvalResult.reason && (
+            <SidecarItem heading="Approval reason">
+              <span>{approvalResult.reason}</span>
             </SidecarItem>
           )}
-          <SidecarItem heading="Overridable">
-            <Chip size="small">{aiApproval.ignoreCancel ? 'Yes' : 'No'}</Chip>
-          </SidecarItem>
+          {aiApproval?.enabled && (
+            <>
+              <SidecarItem heading="Rule file">
+                <Tooltip
+                  placement="top"
+                  label={`${aiApproval.git.folder}/${aiApproval.file}`}
+                >
+                  <div css={TRUNCATE_LEFT}>
+                    {aiApproval.git.folder}/{aiApproval.file}
+                  </div>
+                </Tooltip>
+              </SidecarItem>
+              {repository?.httpsPath && (
+                <SidecarItem heading="Repo">
+                  <Tooltip
+                    placement="top"
+                    label={`${repository.httpsPath}@${aiApproval.git.ref}`}
+                  >
+                    <div css={TRUNCATE_LEFT}>
+                      {repository.httpsPath}@{aiApproval.git.ref}
+                    </div>
+                  </Tooltip>
+                </SidecarItem>
+              )}
+              <SidecarItem heading="Overridable">
+                <Chip size="small">
+                  {aiApproval.ignoreCancel ? 'Yes' : 'No'}
+                </Chip>
+              </SidecarItem>
+            </>
+          )}
         </Sidecar>
       )}
       {pr && (
@@ -160,6 +172,9 @@ export default function StackRunSidecar({
               second={stackRun.approver.email}
             />
           </SidecarItem>
+        )}
+        {stackRun.committer && (
+          <SidecarItem heading="Committer">{stackRun.committer}</SidecarItem>
         )}
         <SidecarItem heading="Observability metrics">
           <StackObservabilityMetrics

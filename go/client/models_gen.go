@@ -418,6 +418,8 @@ type AgentRun struct {
 	Consumed *string `json:"consumed,omitempty"`
 	// whether this run is a follow-up to a pull request
 	Followup *bool `json:"followup,omitempty"`
+	// the pull request URL this follow-up run is targeting
+	FollowupPrURL *string `json:"followupPrUrl,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -534,6 +536,8 @@ type AgentRunStatusAttributes struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// the pull request URL this follow-up run is targeting
+	FollowupPrURL *string `json:"followupPrUrl,omitempty"`
 	// the skills available to this agent run
 	Skills []*AgentSkillAttributes `json:"skills,omitempty"`
 	// token and cost usage for this agent run
@@ -9286,7 +9290,7 @@ type StackRun struct {
 	Workdir *string `json:"workdir,omitempty"`
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
-	// the result of the approval decision by the ai
+	// the result of the approval decision by stack policy or ai
 	ApprovalResult *StackRunApprovalResult `json:"approvalResult,omitempty"`
 	// Arbitrary variables to add to a stack run
 	Variables map[string]any `json:"variables,omitempty"`
@@ -9334,9 +9338,9 @@ type StackRun struct {
 }
 
 type StackRunApprovalResult struct {
-	// the reason for the approval decision by the ai
+	// the reason for the approval decision by stack policy or ai
 	Reason *string `json:"reason,omitempty"`
-	// the result of the approval decision by the ai
+	// the result of the approval decision by stack policy or ai
 	Result *ApprovalResult `json:"result,omitempty"`
 }
 
@@ -9380,9 +9384,11 @@ type StackSettingsAttributes struct {
 }
 
 type StackState struct {
-	ID    string                `json:"id"`
-	Plan  *string               `json:"plan,omitempty"`
-	State []*StackStateResource `json:"state,omitempty"`
+	ID   string  `json:"id"`
+	Plan *string `json:"plan,omitempty"`
+	// structured plan payload from the stack tool, e.g. terraform show -json
+	PlanJSON map[string]any        `json:"planJson,omitempty"`
+	State    []*StackStateResource `json:"state,omitempty"`
 	// an insight explaining the state of this stack state, eg the terraform plan it represents
 	Insight    *AiInsight `json:"insight,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -9390,8 +9396,10 @@ type StackState struct {
 }
 
 type StackStateAttributes struct {
-	Plan  *string                         `json:"plan,omitempty"`
-	State []*StackStateResourceAttributes `json:"state,omitempty"`
+	Plan *string `json:"plan,omitempty"`
+	// structured plan payload from the stack tool, e.g. terraform show -json
+	PlanJSON *string                         `json:"planJson,omitempty"`
+	State    []*StackStateResourceAttributes `json:"state,omitempty"`
 }
 
 type StackStateResource struct {
@@ -10220,12 +10228,13 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings     []*PolicyBinding           `json:"writeBindings,omitempty"`
-	WorkbenchPolicies *WorkbenchPolicyConnection `json:"workbenchPolicies,omitempty"`
-	Runs              *WorkbenchJobConnection    `json:"runs,omitempty"`
-	Crons             *WorkbenchCronConnection   `json:"crons,omitempty"`
-	Prompts           *WorkbenchPromptConnection `json:"prompts,omitempty"`
-	WorkbenchSkills   *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	WriteBindings      []*PolicyBinding              `json:"writeBindings,omitempty"`
+	WorkbenchPolicies  *WorkbenchPolicyConnection    `json:"workbenchPolicies,omitempty"`
+	Runs               *WorkbenchJobConnection       `json:"runs,omitempty"`
+	Crons              *WorkbenchCronConnection      `json:"crons,omitempty"`
+	Prompts            *WorkbenchPromptConnection    `json:"prompts,omitempty"`
+	WorkbenchSkills    *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
+	WorkbenchKnowledge *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -11036,6 +11045,48 @@ type WorkbenchJobUsage struct {
 	OutputCost *float64 `json:"outputCost,omitempty"`
 	// total token cost for this job
 	TotalCost *float64 `json:"totalCost,omitempty"`
+}
+
+type WorkbenchKnowledge struct {
+	// the id of the saved knowledge
+	ID string `json:"id"`
+	// the saved knowledge name
+	Name *string `json:"name,omitempty"`
+	// the saved knowledge description
+	Description *string `json:"description,omitempty"`
+	// the saved knowledge contents
+	Knowledge *string `json:"knowledge,omitempty"`
+	// labels associated with this knowledge
+	Labels []*string `json:"labels,omitempty"`
+	// how many times this knowledge has been used
+	Usages *int64 `json:"usages,omitempty"`
+	// when this knowledge was last used
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
+	// the workbench this knowledge belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchKnowledgeAttributes struct {
+	// the saved knowledge name
+	Name string `json:"name"`
+	// the saved knowledge description
+	Description *string `json:"description,omitempty"`
+	// the saved knowledge contents
+	Knowledge string `json:"knowledge"`
+	// labels associated with this knowledge
+	Labels []*string `json:"labels,omitempty"`
+}
+
+type WorkbenchKnowledgeConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*WorkbenchKnowledgeEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchKnowledgeEdge struct {
+	Node   *WorkbenchKnowledge `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
 }
 
 type WorkbenchMessageAttributes struct {

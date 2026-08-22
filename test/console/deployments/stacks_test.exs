@@ -6,6 +6,7 @@ defmodule Console.Deployments.StacksTest do
   alias Console.Schema.{StackRun, StackInfracostResource}
   alias Console.Deployments.{Stacks, Settings, Tar}
   alias Console.Deployments.Git.Discovery
+  alias Console.AI.{Provider, Tools.ApproveStack}
 
   describe "#create_stack/2" do
     test "admins can create a stack" do
@@ -165,7 +166,7 @@ defmodule Console.Deployments.StacksTest do
       user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, stack} = Stacks.update_stack(%{
         name: "my-stack",
@@ -324,6 +325,30 @@ defmodule Console.Deployments.StacksTest do
     end
   end
 
+  describe "#require_approval/2" do
+    test "project writers can require approval on all stacks in a project" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      other = insert(:project)
+      stack1 = insert(:stack, project: project, approval: false)
+      stack2 = insert(:stack, project: project, approval: false)
+      ignored = insert(:stack, project: other, approval: false)
+
+      {:ok, 2} = Stacks.require_approval(project.id, user)
+
+      assert refetch(stack1).approval
+      assert refetch(stack2).approval
+      refute refetch(ignored).approval
+    end
+
+    test "random users cannot require approval" do
+      project = insert(:project)
+      insert(:stack, project: project, approval: false)
+
+      {:error, _} = Stacks.require_approval(project.id, insert(:user))
+    end
+  end
+
   describe "#spawn/1" do
     test "it can create a run in response to a stack cron" do
       stack = insert(:stack,
@@ -409,13 +434,14 @@ defmodule Console.Deployments.StacksTest do
         git: %{ref: "main", folder: "terraform"}
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -471,13 +497,14 @@ defmodule Console.Deployments.StacksTest do
         }
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -522,13 +549,14 @@ defmodule Console.Deployments.StacksTest do
         git: %{ref: "main", folder: "terraform"}
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -569,12 +597,13 @@ defmodule Console.Deployments.StacksTest do
       )
 
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -606,7 +635,7 @@ defmodule Console.Deployments.StacksTest do
       )
       pr = insert(:pull_request, stack: stack)
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(pr)
 
@@ -615,6 +644,7 @@ defmodule Console.Deployments.StacksTest do
       assert run.status == :queued
       assert run.dry_run
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -668,13 +698,14 @@ defmodule Console.Deployments.StacksTest do
         sha: "old-sha"
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -714,13 +745,14 @@ defmodule Console.Deployments.StacksTest do
         sha: "old-sha"
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message", "dev@example.com"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
       assert run.message == "a commit message"
+      assert run.committer == "dev@example.com"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -1041,6 +1073,249 @@ defmodule Console.Deployments.StacksTest do
       run = insert(:stack_run, stack: stack)
 
       {:error, _} = Stacks.approve_stack_run(run.id, user)
+    end
+  end
+
+  describe "#stack_run_approval/1" do
+    test "approves a pending run when stack policy approves" do
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      group = insert(:group, name: "admins")
+      actor = insert(:user, email: "owner@example.com")
+      insert(:group_member, group: group, user: actor)
+
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        approve[{"reason": "safe apply"}] if {
+          input.run_type == "apply"
+          input.stack.name == "prod-network"
+          input.stack.project.name == "infra"
+          input.stack.git.ref == "main"
+          input.stack.git.folder == "terraform"
+          input.commit.committer == "alice@example.com"
+          input.commit.sha == "abc123"
+          input.actor.email == "owner@example.com"
+          "admins" in input.actor.groups
+          not destroy
+        }
+
+        destroy if {
+          some rc in input.plan.resource_changes
+          "delete" in rc.change.actions
+        }
+        """)
+      )
+      project = insert(:project, name: "infra")
+      stack = insert(:stack, name: "prod-network", project: project, git: %{ref: "main", folder: "terraform"})
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run,
+        stack: stack,
+        status: :pending_approval,
+        actor: actor,
+        committer: "alice@example.com",
+        git: %{ref: "abc123", folder: "terraform"},
+        message: "add web instance"
+      )
+      insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(
+        resource_changes: [
+          tf_resource_change(
+            type: "aws_instance",
+            name: "web",
+            actions: ["create"],
+            before: nil,
+            after: %{
+              "ami" => "ami-0c55b159cbfafe1f0",
+              "instance_type" => "t3.micro",
+              "tags" => %{"Name" => "web"}
+            },
+            after_unknown: %{"id" => true, "public_ip" => true}
+          )
+        ]
+      ))
+
+      {:ok, approved} = Stacks.stack_run_approval(run)
+
+      assert approved.status == :pending_approval
+      assert approved.approver_id == bot.id
+      assert approved.approved_at
+      assert approved.approval_result.result == :approved
+      assert approved.approval_result.reason == "safe apply"
+    end
+
+    test "cancels a pending run when stack policy denies" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"message": "destroys are forbidden"}] if {
+          some rc in input.plan.resource_changes
+          "delete" in rc.change.actions
+        }
+        """)
+      )
+      stack = insert(:stack)
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run,
+        stack: stack,
+        status: :pending_approval,
+        configuration: %{ai_approval: %{enabled: true, ignore_cancel: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
+      )
+      insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(
+        resource_changes: [
+          tf_resource_change(
+            type: "aws_db_instance",
+            name: "prod",
+            actions: ["delete"],
+            before: %{
+              "engine" => "postgres",
+              "identifier" => "prod-db",
+              "instance_class" => "db.t3.medium"
+            },
+            after: nil
+          )
+        ]
+      ))
+
+      {:ok, cancelled} = Stacks.stack_run_approval(run)
+
+      assert cancelled.status == :cancelled
+      refute cancelled.approver_id
+      assert cancelled.approval_result.result == :rejected
+      assert cancelled.approval_result.reason == "destroys are forbidden"
+    end
+
+    test "defers to ai approval when policy defers and ai is configured" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        defer if {
+          some rc in input.plan.resource_changes
+          startswith(rc.type, "aws_iam_")
+        }
+        """)
+      )
+      repo = insert(:git_repository)
+      stack = insert(:stack, repository: repo)
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run,
+        stack: stack,
+        repository: repo,
+        status: :pending_approval,
+        type: :terraform,
+        configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
+      )
+      insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(
+        resource_changes: [
+          tf_resource_change(
+            type: "aws_iam_policy",
+            name: "app",
+            actions: ["update"],
+            before: %{"policy" => ~s({"Statement":[{"Effect":"Allow","Action":"s3:GetObject","Resource":"*"}]})},
+            after: %{"policy" => ~s({"Statement":[{"Effect":"Allow","Action":"s3:*","Resource":"*"}]})}
+          )
+        ]
+      ))
+
+      {:ok, tarball} = Tar.tarball([{"contracts.yaml", "approve safe plans"}])
+      expect(Discovery, :fetch, fn ^repo, _ -> {:ok, tarball} end)
+      expect(Provider, :simple_tool_call, fn _, ApproveStack ->
+        {:ok, %ApproveStack{reason: "ai approved", result: :approved}}
+      end)
+
+      {:ok, approved} = Stacks.stack_run_approval(run)
+
+      assert approved.approver_id == bot.id
+      assert approved.approval_result.result == :approved
+      assert approved.approval_result.reason == "ai approved"
+    end
+
+    test "leaves the run unchanged when policy defers and ai is not configured" do
+      policy = insert(:policy, type: :stack, policy: stack_rego("defer if true"))
+      stack = insert(:stack)
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run, stack: stack, status: :pending_approval)
+      insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(resource_changes: []))
+
+      assert :ok = Stacks.stack_run_approval(run)
+      reloaded = refetch(run)
+      assert reloaded.status == :pending_approval
+      refute reloaded.approver_id
+      refute reloaded.approval_result
+    end
+
+    test "falls through to ai when no stack policies are present" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      repo = insert(:git_repository)
+      run = insert(:stack_run,
+        repository: repo,
+        status: :pending_approval,
+        type: :terraform,
+        configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
+      )
+      insert(:stack_state, run: run, plan: "terraform plan")
+
+      {:ok, tarball} = Tar.tarball([{"contracts.yaml", "approve safe plans"}])
+      expect(Discovery, :fetch, fn ^repo, _ -> {:ok, tarball} end)
+      expect(Provider, :simple_tool_call, fn _, ApproveStack ->
+        {:ok, %ApproveStack{reason: "ai approved", result: :approved}}
+      end)
+
+      {:ok, approved} = Stacks.stack_run_approval(run)
+
+      assert approved.approver_id == bot.id
+      assert approved.approval_result.result == :approved
+      assert approved.approval_result.reason == "ai approved"
+    end
+
+    test "cancels destroy runs when policy matches run_type" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      policy = insert(:policy,
+        type: :stack,
+        policy: stack_rego("""
+        deny[{"message": "destroy runs require review"}] if {
+          input.run_type == "destroy"
+        }
+        """)
+      )
+      stack = insert(:stack)
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run, stack: stack, status: :pending_approval, destroy: true)
+      insert(:stack_state, run: run, plan: "terraform plan", plan_json: terraform_plan(
+        resource_changes: [
+          tf_resource_change(
+            type: "aws_instance",
+            name: "web",
+            actions: ["delete"],
+            before: %{"instance_type" => "t3.micro"},
+            after: nil
+          )
+        ]
+      ))
+
+      {:ok, cancelled} = Stacks.stack_run_approval(run)
+
+      assert cancelled.status == :cancelled
+      assert cancelled.approval_result.result == :rejected
+      assert cancelled.approval_result.reason == "destroy runs require review"
+    end
+
+    test "does nothing when neither policies nor ai approval are configured" do
+      run = insert(:stack_run, status: :pending_approval)
+
+      assert :ok = Stacks.stack_run_approval(run)
+      assert refetch(run).status == :pending_approval
+    end
+
+    test "does nothing when the run is not pending approval" do
+      policy = insert(:policy, type: :stack, policy: stack_rego("approve[{\"reason\": \"safe\"}] if true"))
+      stack = insert(:stack)
+      insert(:stack_policy, stack: stack, policy: policy)
+      run = insert(:stack_run, stack: stack, status: :pending)
+
+      assert :ok = Stacks.stack_run_approval(run)
     end
   end
 
@@ -1460,6 +1735,49 @@ defmodule Console.Deployments.StacksTest do
     end
   end
 
+  defp stack_rego(body) do
+    """
+    package plrl.stack
+
+    sample := 0
+
+    #{body}
+    """
+  end
+
+  defp terraform_plan(opts) do
+    %{
+      "format_version" => "1.2",
+      "terraform_version" => "1.9.8",
+      "applyable" => true,
+      "complete" => true,
+      "errored" => false,
+      "resource_changes" => Keyword.get(opts, :resource_changes, []),
+      "deferred_changes" => Keyword.get(opts, :deferred_changes, []),
+      "output_changes" => %{}
+    }
+  end
+
+  defp tf_resource_change(attrs) do
+    type = Keyword.fetch!(attrs, :type)
+    name = Keyword.fetch!(attrs, :name)
+
+    %{
+      "address" => Keyword.get(attrs, :address, "#{type}.#{name}"),
+      "mode" => "managed",
+      "type" => type,
+      "name" => name,
+      "provider_name" => Keyword.get(attrs, :provider_name, "registry.terraform.io/hashicorp/aws"),
+      "change" => %{
+        "actions" => Keyword.fetch!(attrs, :actions),
+        "before" => Keyword.get(attrs, :before),
+        "after" => Keyword.get(attrs, :after),
+        "after_unknown" => Keyword.get(attrs, :after_unknown, %{}),
+        "before_sensitive" => false,
+        "after_sensitive" => false
+      }
+    }
+  end
 end
 
 defmodule Console.Deployments.StacksSyncTest do
@@ -1480,6 +1798,7 @@ defmodule Console.Deployments.StacksSyncTest do
       assert run.status == :queued
       refute run.dry_run
       assert run.message
+      assert run.committer
       assert run.stack_id == stack.id
       refute run.git.ref == stack.git.ref
     end

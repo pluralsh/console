@@ -29,6 +29,8 @@ defmodule Console.OpenAPI.AI.AgentRun do
       language: ecto_enum(Console.Schema.AgentRun.Language, description: "Programming language used in the agent run (javascript, python, java, cpp, csharp, go, ruby, php, terraform)"),
       language_version: string(description: "Specific version of the programming language to use"),
       error: string(description: "Error message if the agent run failed"),
+      followup: boolean(description: "Whether this agent run is a follow-up to a pull request"),
+      followup_pr_url: string(description: "The pull request URL this follow-up run is targeting"),
       shared: boolean(description: "Whether this agent run is shared publicly"),
       approval: boolean(description: "Whether this agent run requires approval before continuing"),
       approved_at: datetime(description: "When this agent run was approved"),

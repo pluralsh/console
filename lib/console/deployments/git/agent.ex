@@ -273,7 +273,11 @@ defmodule Console.Deployments.Git.Agent do
     hammer_key = :erlang.term_to_binary(key)
     with {:allow, _} <- Hammer.check_rate(hammer_key, @limit_interval, cache_agent_qps()),
          {:q, :ok} <- {:q, queue_limit(key, pid)} do
-      fun.()
+      try do
+        fun.()
+      catch
+        :exit, reason -> Console.handle_rpc({:rpc, reason})
+      end
     else
       {:deny, _} ->
         Logger.warning "rate limiting git/helm agent fetch"

@@ -34,6 +34,7 @@ defmodule Console.Schema.AgentRun do
     field :head_branch,      :string
     field :error,            :binary
     field :followup,         :boolean, default: false
+    field :followup_pr_url,  :string
     field :consumed,         :binary_id
     field :approval,         :boolean, default: false
     field :approved_at,      :utc_datetime_usec
@@ -104,7 +105,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup)a
+  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup followup_pr_url)a
 
   def changeset(model, attrs \\ %{}) do
     model

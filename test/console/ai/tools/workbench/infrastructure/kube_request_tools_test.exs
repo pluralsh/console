@@ -3,8 +3,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
   use Mimic
 
   alias Console.AI.Tool
-  alias Console.AI.Tools.Workbench.KubeRequest
-  alias Console.AI.Tools.Workbench.Infrastructure.{KubeDelete, KubeUpdate}
+  alias Console.AI.Tools.Workbench.{KubeRequest, KubeShell}
+  alias Console.AI.Tools.Workbench.Infrastructure.{KubeDelete, KubeExec, KubeUpdate}
   alias Console.Deployments.Clusters
   alias Console.Schema.WorkbenchJob
   alias Console.Schema.WorkbenchJob.Modes
@@ -35,6 +35,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
     test "returns kube request structs for allowed update and delete requests" do
       job = job_with_kubernetes_policy(require_namespaces: ["production"])
       cluster = insert(:cluster, handle: "cluster-a")
+      approval = %Tool.Approval{reason: "approved by policy"}
 
       expect(Clusters, :api_discovery, 2, fn fetched_cluster ->
         assert fetched_cluster.id == cluster.id
@@ -44,7 +45,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
       end)
 
       assert {:ok, update} =
-               Tool.validate(%KubeUpdate{job: job}, attrs("production"))
+               Tool.validate(
+                 %KubeUpdate{job: job, approval: approval},
+                 attrs("production")
+               )
 
       assert {:ok,
               %KubeRequest{
@@ -54,7 +58,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 content_type: "application/json",
                 query_params: %{},
                 body: body,
-                explanation: "Update the api deployment in production."
+                explanation: "Update the api deployment in production.",
+                approval: ^approval
               }} = KubeUpdate.implement(update)
 
       assert Jason.decode!(body) == %{
@@ -64,7 +69,10 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
              }
 
       assert {:ok, delete} =
-               Tool.validate(%KubeDelete{job: job}, Map.delete(attrs("production"), "json"))
+               Tool.validate(
+                 %KubeDelete{job: job, approval: approval},
+                 Map.delete(attrs("production"), "json")
+               )
 
       assert {:ok,
               %KubeRequest{
@@ -73,7 +81,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 path: "/apis/apps/v1/namespaces/production/deployments/api",
                 content_type: "application/json",
                 explanation: "Update the api deployment in production.",
-                body: nil
+                body: nil,
+                approval: ^approval
               }} = KubeDelete.implement(delete)
     end
 
@@ -111,6 +120,36 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                "kind" => "Deployment",
                "metadata" => %{"name" => "api", "namespace" => "production"}
              }
+    end
+
+    test "propagates policy approval to pod exec requests" do
+      job = job_with_kubernetes_policy([])
+      cluster = insert(:cluster, handle: "cluster-a")
+      approval = %Tool.Approval{reason: "approved by policy"}
+
+      assert {:ok, exec} =
+               Tool.validate(
+                 %KubeExec{job: job, approval: approval},
+                 %{
+                   "cluster" => cluster.handle,
+                   "namespace" => "production",
+                   "pod" => "api-0",
+                   "container" => "api",
+                   "command" => "cat /etc/hostname",
+                   "explanation" => "Inspect the pod hostname."
+                 }
+               )
+
+      assert {:ok,
+              %KubeShell{
+                handle: "cluster-a",
+                namespace: "production",
+                pod: "api-0",
+                container: "api",
+                command: "cat /etc/hostname",
+                explanation: "Inspect the pod hostname.",
+                approval: ^approval
+              }} = KubeExec.implement(exec)
     end
   end
 

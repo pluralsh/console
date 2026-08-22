@@ -54,6 +54,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approval,         :boolean, description: "whether this run requires approval before continuing"
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
+    field :followup_pr_url,  :string, description: "the pull request URL this follow-up run is targeting"
     field :skills,           list_of(:agent_skill_attributes), description: "the skills available to this agent run"
     field :usage,            :ai_usage_attributes, description: "token and cost usage for this agent run"
   end
@@ -198,6 +199,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
     field :followup,         :boolean, description: "whether this run is a follow-up to a pull request"
+    field :followup_pr_url,  :string, description: "the pull request URL this follow-up run is targeting"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
     field :usage,            :agent_run_usage, description: "token and cost usage for this agent run"

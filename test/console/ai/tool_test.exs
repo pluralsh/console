@@ -74,7 +74,8 @@ defmodule Console.AI.ToolTest do
       sample := 0
 
       deny[{"message": "blocked"}] if {
-        input.input.blocked == true
+        input.tool_name == "protected_tool"
+        input.tool.blocked == true
       }
       """
     }

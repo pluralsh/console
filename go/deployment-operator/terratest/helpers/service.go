@@ -104,14 +104,14 @@ func (in *Service) Create(t *testing.T) error {
 	)
 }
 
-func (in *Service) Delete(t *testing.T) error {
-	clientset, err := in.clientset(t)
+func (in *Service) Delete(ctx context.Context, t *testing.T) error {
+	clientset, err := in.clientset(ctx, t)
 	if err != nil {
 		return err
 	}
 
 	return runtimerrors.IgnoreNotFound(
-		clientset.CoreV1().Services(in.Namespace()).Delete(context.Background(), in.Name(), metav1.DeleteOptions{}),
+		clientset.CoreV1().Services(in.Namespace()).Delete(ctx, in.Name(), metav1.DeleteOptions{}),
 	)
 }
 
@@ -119,8 +119,8 @@ func (in *Service) Get(t *testing.T) (*corev1.Service, error) {
 	return k8s.GetServiceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
-func (in *Service) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetServiceContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
+func (in *Service) Exists(ctx context.Context, t *testing.T) (bool, error) {
+	_, err := k8s.GetServiceContextE(t, ctx, in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}

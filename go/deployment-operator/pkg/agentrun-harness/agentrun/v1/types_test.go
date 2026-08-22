@@ -21,13 +21,15 @@ func TestExaConnectionEnabled(t *testing.T) {
 func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	description := "Helps update README files"
 	followup := true
+	followupPrURL := "https://github.com/pluralsh/console/pull/1"
 	run := new(AgentRun).FromAgentRunFragment(&console.AgentRunFragment{
-		ID:         "run-123",
-		Prompt:     "update the readme",
-		Repository: "https://github.com/pluralsh/console.git",
-		Mode:       console.AgentRunModeWrite,
-		Status:     console.AgentRunStatusPending,
-		Followup:   &followup,
+		ID:            "run-123",
+		Prompt:        "update the readme",
+		Repository:    "https://github.com/pluralsh/console.git",
+		Mode:          console.AgentRunModeWrite,
+		Status:        console.AgentRunStatusPending,
+		Followup:      &followup,
+		FollowupPrURL: &followupPrURL,
 		Skills: []*console.AgentRunFragment_Skills{
 			{
 				Name:        "readme-helper",
@@ -52,6 +54,9 @@ func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	}
 	if !run.Followup {
 		t.Fatal("expected followup to be copied")
+	}
+	if run.FollowupPrURL != followupPrURL {
+		t.Fatalf("expected followup PR URL copied, got %q", run.FollowupPrURL)
 	}
 }
 

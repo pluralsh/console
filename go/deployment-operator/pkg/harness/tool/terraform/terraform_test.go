@@ -11,16 +11,27 @@ import (
 )
 
 const mockTerraformOutputEnv = "MOCK_TERRAFORM_OUTPUT"
+const mockTerraformJSONEnv = "MOCK_TERRAFORM_JSON"
 
 // setupMockTerraform creates a mock terraform executable in a temporary directory
-// and adds it to the PATH. The mock executable simply echoes the content of
-// the MOCK_TERRAFORM_OUTPUT environment variable.
-// This allows tests to control the output of "terraform show -json" by setting
-// the environment variable.
+// and adds it to the PATH. The mock executable echoes MOCK_TERRAFORM_JSON when
+// invoked with -json (falling back to MOCK_TERRAFORM_OUTPUT), otherwise it
+// echoes MOCK_TERRAFORM_OUTPUT. This allows tests to control terraform show
+// and terraform show -json independently.
 func setupMockTerraform(t *testing.T) {
 	tmpDir := t.TempDir()
 	script := filepath.Join(tmpDir, "terraform")
-	content := "#!/bin/sh\necho \"$" + mockTerraformOutputEnv + "\""
+	content := `#!/bin/sh
+for arg in "$@"; do
+  if [ "$arg" = "-json" ]; then
+    if [ -n "$` + mockTerraformJSONEnv + `" ]; then
+      echo "$` + mockTerraformJSONEnv + `"
+      exit 0
+    fi
+  fi
+done
+echo "$` + mockTerraformOutputEnv + `"
+`
 
 	err := os.WriteFile(script, []byte(content), 0755)
 	if err != nil {
@@ -178,11 +189,36 @@ func TestPlanUsesCachedText(t *testing.T) {
 	first, err := tf.Plan()
 	assert.NoError(t, err)
 	assert.Equal(t, "first\n", *first.Plan)
+	assert.Nil(t, first.PlanJSON)
 
 	t.Setenv(mockTerraformOutputEnv, "second")
 	second, err := tf.Plan()
 	assert.NoError(t, err)
 	assert.Equal(t, "first\n", *second.Plan)
+	assert.Nil(t, second.PlanJSON)
+}
+
+func TestPlanIncludesPlanJSON(t *testing.T) {
+	setupMockTerraform(t)
+
+	planJSON := `{"format_version":"1.0","resource_changes":[]}`
+	t.Setenv(mockTerraformOutputEnv, "Terraform will perform the following actions")
+	t.Setenv(mockTerraformJSONEnv, planJSON)
+
+	tf := &Terraform{
+		dir:          t.TempDir(),
+		planFileName: "terraform.tfplan",
+	}
+
+	result, err := tf.Plan()
+	assert.NoError(t, err)
+	assert.Equal(t, "Terraform will perform the following actions\n", *result.Plan)
+	assert.Equal(t, planJSON+"\n", *result.PlanJSON)
+
+	t.Setenv(mockTerraformJSONEnv, `{"format_version":"1.0","resource_changes":[{"address":"changed"}]}`)
+	cached, err := tf.Plan()
+	assert.NoError(t, err)
+	assert.Equal(t, planJSON+"\n", *cached.PlanJSON)
 }
 
 func TestStateUsesCachedJSON(t *testing.T) {

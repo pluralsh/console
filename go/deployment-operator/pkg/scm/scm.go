@@ -113,6 +113,11 @@ type CICheck struct {
 	CheckRunID int64
 }
 
+// Pollable reports whether the PR is still open and should keep the babysit loop running.
+func (d *PRDetails) Pollable() bool {
+	return d != nil && d.State == PRStateOpen
+}
+
 // CommentReactState is the agent's work state conveyed as a GitHub reaction.
 type CommentReactState string
 
@@ -185,17 +190,23 @@ func (d *dispatchClient) clientFor(prURL string) (Client, error) {
 	}
 	host := strings.ToLower(u.Host)
 	switch {
-	case strings.Contains(host, "github"):
-		return newGitHubClient(d.token, host), nil
-	case strings.Contains(host, "gitlab"):
+	case parseOK(func() error { _, _, err := parseGitLabMRURL(prURL); return err }):
 		return newGitLabClient(d.token, host), nil
-	case strings.Contains(host, "bitbucket"):
-		return newBitBucketClient(d.token, host), nil
-	case host == "dev.azure.com" || strings.HasSuffix(host, ".visualstudio.com"):
+	case parseOK(func() error { _, err := parseADOPRURL(prURL); return err }):
 		return newAzureDevOpsClient(d.token), nil
+	case parseOK(func() error { _, _, _, err := parseDCPRURL(prURL); return err }):
+		return newBitBucketClient(d.token, host), nil
+	case parseOK(func() error { _, _, _, err := parseCloudPRURL(prURL); return err }):
+		return newBitBucketClient(d.token, host), nil
+	case parseOK(func() error { _, _, _, err := parseGitHubPRURL(prURL); return err }):
+		return newGitHubClient(d.token, host), nil
 	default:
 		return nil, fmt.Errorf("unsupported SCM host %q: only GitHub, GitLab, Bitbucket and Azure DevOps are supported", host)
 	}
+}
+
+func parseOK(fn func() error) bool {
+	return fn() == nil
 }
 
 // PRStateHash produces a stable dedup hash over one or more PRDetails.

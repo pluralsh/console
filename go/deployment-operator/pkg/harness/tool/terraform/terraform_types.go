@@ -43,4 +43,7 @@ type Terraform struct {
 
 	// planJSONCache stores the parsed JSON plan for the lifetime of a harness run.
 	planJSONCache *tfjson.Plan
+
+	// planJSONRawCache stores the raw terraform show -json output for the lifetime of a harness run.
+	planJSONRawCache *string
 }

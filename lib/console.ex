@@ -454,15 +454,32 @@ defmodule Console do
     end
   end
 
-  def handle_rpc(r) when r in ~w(exception badarg noconnection timeout system_limit notsup)a,
+  def handle_rpc(reason) do
+    if recovering_rpc?(reason),
+      do: {:error, :rate_limited},
+      else: wrap_rpc(reason)
+  end
+
+  # Timeouts and missing processes during git/helm agent RPC are symptoms of a
+  # node or genserver recovering from restart; treat them as rate limits so
+  # callers retry instead of failing hard.
+  defp recovering_rpc?(reason) when reason in ~w(timeout noproc norproc)a, do: true
+  defp recovering_rpc?({:timeout, _}), do: true
+  defp recovering_rpc?({:noproc, _}), do: true
+  defp recovering_rpc?({:norproc, _}), do: true
+  defp recovering_rpc?({:exception, reason}), do: recovering_rpc?(reason)
+  defp recovering_rpc?({:exception, reason, _}), do: recovering_rpc?(reason)
+  defp recovering_rpc?({:erpc, reason}), do: recovering_rpc?(reason)
+  defp recovering_rpc?({:rpc, reason}), do: recovering_rpc?(reason)
+  defp recovering_rpc?({:error, reason}), do: recovering_rpc?(reason)
+  defp recovering_rpc?(_), do: false
+
+  defp wrap_rpc(r) when r in ~w(exception badarg noconnection timeout system_limit notsup)a,
     do: {:error, {:rpc, r}}
-  def handle_rpc({:exception, {:norproc, _}}), do: {:error, :rate_limited}
-  def handle_rpc({:exception, reason, _}), do: {:error, {:rpc, reason}}
-  def handle_rpc({:erpc, {:exception, {:norproc, _}}}), do: {:error, :rate_limited}
-  def handle_rpc({:rpc,  {:exception, {:norproc, _}}}), do: {:error, :rate_limited}
-  def handle_rpc({:erpc, reason}), do: {:error, {:rpc, reason}}
-  def handle_rpc({:rpc, reason}), do: {:error, {:rpc, reason}}
-  def handle_rpc(res), do: res
+  defp wrap_rpc({:exception, reason, _}), do: {:error, {:rpc, reason}}
+  defp wrap_rpc({:erpc, reason}), do: {:error, {:rpc, reason}}
+  defp wrap_rpc({:rpc, reason}), do: {:error, {:rpc, reason}}
+  defp wrap_rpc(res), do: res
 
   def jitter(seconds), do: :rand.uniform(seconds * 2) - seconds
 
