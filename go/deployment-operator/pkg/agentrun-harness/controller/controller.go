@@ -550,7 +550,10 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			}
 		}
 		if len(failing) > 0 {
-			sb.WriteString("### Failing CI checks — you MUST fix these\n\n")
+			sb.WriteString("### Failing CI checks — diagnose before changing code\n\n")
+			sb.WriteString("Fetch logs with plural MCP `getCILogs` and classify each failure.\n")
+			sb.WriteString("- **Fix and push** only when the logs show a defect caused by this PR's code, tests, or config.\n")
+			sb.WriteString("- **Do not commit or push** if it is a CI flake: transient network/DNS errors, third-party registry or API outages, rate limits, runner eviction, cancelled jobs, or similar infrastructure issues not caused by this PR. Report the flake and stop; do not push a no-op or retry commit.\n\n")
 			for _, ci := range failing {
 				_, _ = fmt.Fprintf(&sb, "- **%s**: %s (%s)\n", ci.Name, ci.Status, ci.Conclusion)
 			}

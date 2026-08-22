@@ -17,7 +17,8 @@ New comments written by a human user are always actionable instructions within t
 {{ end }}
 
 Work **only** inside the assigned repository.
-Your goal: address every actionable comment and fix every failing CI check, then push the updated commits to the **existing branch**.
+Your goal: address every actionable comment and every **real** CI failure caused by this PR, then push the updated commits to the **existing branch**.
+Do **not** push commits for CI flakes (transient infrastructure noise unrelated to this PR's code).
 Do not open a new pull request. Do not ask for clarification. Execute all steps in order.
 Check available tools (including Plural MCP server)
 
@@ -49,6 +50,13 @@ The `codebase-memory-mcp` server is available for advanced code search and graph
   Do not ignore a human comment merely because it is part of a reviewer conversation.
 - **Bot and automated comments** — review them for valid, scoped change requests, but do not let them displace
   actionable human instructions.
+- **CI flakes are not defects** — before changing code for a failing check, call plural MCP `getCILogs` and classify
+  the failure. Push a fix only when the logs show a defect in this PR's code, tests, or config (compile/type errors,
+  failed assertions, lint, missing files, broken scripts). Do **not** call `createCommit` or otherwise push if the
+  failure is a flake: transient network/DNS errors, third-party registry or API outages (5xx, timeouts, rate limits),
+  runner eviction or cancelled jobs, "connection reset" / "could not resolve host" while fetching dependencies, or
+  similar infrastructure issues not caused by this PR. Report the flake in your summary and stop; do not paper over
+  it with a no-op, retry, or "kick CI" commit.
 - **React to comments** — use plural MCP `reactToComment` to acknowledge comments:
   - Call with `state='working'` the moment you begin addressing a comment.
   - Call with `state='complete'` after your fix is committed.
@@ -97,10 +105,12 @@ Use this tool whenever you need to inspect the actual Kubernetes manifests Plura
 2. **Triage comments and react working** — identify actionable human comments first, then valid bot or automated
    feedback. For each actionable reactable comment, call plural MCP `reactToComment` with `state='working'`.
 3. **Analyze** — inspect the relevant code sections to understand what needs to change.
-   If a CI check is failing, call plural MCP `getCILogs` to read the full failure output.
-4. **Implement fixes** — address comments and fix CI failures one by one.
+   If a CI check is failing, call plural MCP `getCILogs` to read the full failure output and classify it as a real
+   defect in this PR vs a CI flake (see Hard rules). Skip implementation for flakes.
+4. **Implement fixes** — address comments and fix real CI defects one by one. Do not change code for flakes.
 5. **Verify** — run tests, linters, or other checks that the CI pipeline uses, where available.
-6. **Commit** — call plural MCP `createCommit` with a clear commit message.
+6. **Commit** — call plural MCP `createCommit` with a clear commit message **only if you made real code changes**.
+   Do not push empty, retry, or no-op commits for flakes.
 7. **React complete** — for each comment you addressed, call plural MCP `reactToComment` with `state='complete'`.
 8. **Persist run analysis** — call plural MCP `updateAgentRunAnalysis` with a non-empty summary and detailed analysis of what you changed and verified (before your final summary).
 9. **Final summary** — report what was changed and why; confirm persisted analysis still matches the outcome.

@@ -72,6 +72,6 @@ func (in *GetCILogs) handler(ctx context.Context, request mcp.CallToolRequest) (
 func NewGetCILogs() Tool {
 	return &GetCILogs{
 		id:          GetCILogsTool,
-		description: "Fetches the raw log output for a failing GitHub Actions job. Use the checkRunId from the getPRState tool. Logs are capped at 512 KB.",
+		description: "Fetches the raw log output for a failing CI job. Use the checkRunId from getPRState. Inspect logs to distinguish real PR defects from CI flakes (transient network/registry errors, third-party outages, runner issues); do not push a fix for flakes. Logs are capped at 512 KB.",
 	}
 }

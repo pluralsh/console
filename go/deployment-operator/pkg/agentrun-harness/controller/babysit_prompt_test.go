@@ -41,3 +41,32 @@ func TestBuildBabysitPromptPrioritizesHumanCommentsAndShowsLocation(t *testing.T
 	require.NotContains(t, prompt, "reviewId:")
 	require.Contains(t, prompt, "Handle this edge case.")
 }
+
+func TestBuildBabysitPromptInstructsNotToPushCIFlakes(t *testing.T) {
+	t.Parallel()
+
+	prompt := buildBabysitPrompt("feature/review", "", []toolv1.EnrichedPR{{
+		URL:   "https://github.com/o/r/pull/1",
+		Title: "CI failure",
+		Details: &scm.PRDetails{
+			CIChecks: []scm.CICheck{{
+				Name:       "test",
+				Status:     scm.CICheckStatusCompleted,
+				Conclusion: scm.CICheckConclusionFailure,
+			}},
+		},
+	}}, time.Time{})
+
+	for _, expected := range []string{
+		"Failing CI checks",
+		"diagnose before changing code",
+		"Do not commit or push",
+		"CI flake",
+		"transient network",
+		"test",
+	} {
+		require.Contains(t, prompt, expected)
+	}
+
+	require.NotContains(t, prompt, "you MUST fix these")
+}
