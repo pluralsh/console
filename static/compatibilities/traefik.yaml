@@ -4,21 +4,25 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.7.10
+- version: 3.7.11
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [Security-focused patch update to v3.7.10 that includes fixes for three
-        disclosed vulnerabilities (see GHSA advisories)., 'Kubernetes/Gateway API
-        stability improvements: avoids router name collisions and bumps gateway-api
-        dependency to v1.6.1.', 'Auth/middleware correctness improvements (e.g., forward
-        auth singleflight key collision fix) plus routine dependency bumps (ACME lego
-        v5.3.1, dd-trace-go v2.8.1, x/net/x/text, compress).']
+    features: ['Security: v3.7.11 includes fixes for four published CVEs (GHSA-5w68-77r2-r64c,
+        GHSA-g55h-rg46-x9c5, GHSA-j994-9gqj-9hwq, GHSA-m6wx-622r-48r9).', 'Kubernetes
+        CRD provider naming hardening: generated Service/resource naming is now scoped
+        more safely and can be configured to avoid collisions (new safe naming option
+        and improved naming rules).', 'TLS behavior controls: new options to (a) restrict
+        the namespace used for default TLS resources and (b) disable fallback to default
+        TLS options.', 'Gateway API correctness: fixes to router rules and URLRewrite/RequestRedirect
+        to preserve encoded path segments.', 'Ingress-NGINX provider improvements:
+        better deduping and default-backend behavior, plus more accurate default entrypoint
+        selection.']
     breaking_changes: []
-  chart_version: 41.2.0
+  chart_version: 41.3.0
   images: []
 - version: 3.7.0
   kube: ['1.35', '1.34', '1.33', '1.32']
