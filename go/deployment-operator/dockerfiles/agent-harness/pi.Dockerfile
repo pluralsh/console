@@ -29,3 +29,7 @@ USER root
 RUN ln -s ../lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/local/bin/pi && \
     chown -R 65532:65532 /usr/local/bin/node /usr/local/lib/node_modules /opt/pi-mcp-adapter
 USER 65532:65532
+
+# The base entrypoint execs /agent-harness as PID 1; verify that the active harness process remains alive.
+HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=5 \
+  CMD kill -0 1 || exit 1
