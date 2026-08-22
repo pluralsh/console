@@ -946,7 +946,14 @@ addons:
     kube: []
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t list specific changes; both versions\
+          \ only point to the project CHANGELOG for details."]
+      breaking_changes: [No breaking changes are called out in the provided release
+          notes; consult CHANGELOG-3.x.md for any upgrade-impacting changes between
+          v3.4.0 and v3.4.2.]
     chart_version: 4.4.2
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.5',
       'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.5',
@@ -18962,21 +18969,20 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 88.5.2
+  - version: 88.5.3
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Bumped `kube-state-metrics` Helm subchart to v8.4.0 (in 88.5.0).,
-        Bumped `quay.io/oauth2-proxy/oauth2-proxy` image tag to v7.15.4 (in 88.5.2).]
-      features: ['Updated bundled components: newer kube-state-metrics chart (v8.4.0).',
-        Updated oauth2-proxy container image tag (v7.15.4) used by the stack when
-          enabled.]
+      chart_updates: [Bumped `kube-state-metrics` Helm dependency to v8.4.0 (in kube-prometheus-stack
+          88.5.0)., Updated admission webhook cert generation image `ghcr.io/jkroepke/kube-webhook-certgen`
+          tag to v1.8.7 (in kube-prometheus-stack 88.5.3).]
+      features: []
       breaking_changes: []
-    chart_version: 88.5.2
-    images: ['docker.io/grafana/grafana:13.2.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.5',
+    chart_version: 88.5.3
+    images: ['docker.io/grafana/grafana:13.2.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.7',
       'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
       'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
       'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
@@ -23025,21 +23031,25 @@ addons:
   helm_repository_url: https://traefik.github.io/charts
   eolApiSlug: traefik
   versions:
-  - version: 3.7.10
+  - version: 3.7.11
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [Security-focused patch update to v3.7.10 that includes fixes for
-          three disclosed vulnerabilities (see GHSA advisories)., 'Kubernetes/Gateway
-          API stability improvements: avoids router name collisions and bumps gateway-api
-          dependency to v1.6.1.', 'Auth/middleware correctness improvements (e.g.,
-          forward auth singleflight key collision fix) plus routine dependency bumps
-          (ACME lego v5.3.1, dd-trace-go v2.8.1, x/net/x/text, compress).']
+      features: ['Security: v3.7.11 includes fixes for four published CVEs (GHSA-5w68-77r2-r64c,
+          GHSA-g55h-rg46-x9c5, GHSA-j994-9gqj-9hwq, GHSA-m6wx-622r-48r9).', 'Kubernetes
+          CRD provider naming hardening: generated Service/resource naming is now
+          scoped more safely and can be configured to avoid collisions (new safe naming
+          option and improved naming rules).', 'TLS behavior controls: new options
+          to (a) restrict the namespace used for default TLS resources and (b) disable
+          fallback to default TLS options.', 'Gateway API correctness: fixes to router
+          rules and URLRewrite/RequestRedirect to preserve encoded path segments.',
+        'Ingress-NGINX provider improvements: better deduping and default-backend
+          behavior, plus more accurate default entrypoint selection.']
       breaking_changes: []
-    chart_version: 41.2.0
+    chart_version: 41.3.0
     images: []
   - version: 3.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -25574,21 +25584,25 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   chart_name: argo-workflows
   versions:
-  - version: 4.1.1
+  - version: 4.1.2
     kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [No explicit feature list is included in the provided 4.1.1 notes;
-          both 4.1.0 and 4.1.1 pages point to the main changelog/blog for details.]
-      breaking_changes: [No breaking changes are called out in the provided 4.1.1
-          notes; both releases direct you to the upgrading guide and GitHub issues
-          for breaking changes/known issues.]
-    chart_version: 2.0.1
-    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.1', 'quay.io/argoproj/argocli:v4.1.1',
-      'quay.io/argoproj/workflow-controller:v4.1.1']
+      features: ['MySQL persistence config now correctly applies driver-level options,
+          fixing previously ignored settings.', 'Several dependency bumps address
+          security fixes (fasthttp, cel-go, moby/go-archive).', 'Controller and sync-lock
+          behavior improved: better handling of UID changes, transient lock errors,
+          and shutdown/termination cases.', Server SSO session tokens now use symmetric
+          encryption., Artifact staging behavior corrected to re-enter workingDir
+          after init-less input staging., OpenTelemetry process owner detection is
+          skipped to avoid issues in some environments.]
+      breaking_changes: []
+    chart_version: 2.0.2
+    images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.2', 'quay.io/argoproj/argocli:v4.1.2',
+      'quay.io/argoproj/workflow-controller:v4.1.2']
   - version: 4.1.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28103,6 +28117,12 @@ addons:
   helm_values: dcgmExporter.config.name=default
   readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
   versions:
+  - version: 26.7.0
+    kube: ['1.36', '1.35', '1.34']
+    requirements: []
+    chart_version: 26.7.0
+    images: ['nvcr.io/nvidia/gpu-operator:v26.7.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.19.0']
+    incompatibilities: []
   - version: 26.3.3
     kube: ['1.36', '1.35', '1.34']
     requirements: []

@@ -4,21 +4,24 @@ release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 chart_name: argo-workflows
 versions:
-- version: 4.1.1
+- version: 4.1.2
   kube: ['1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: [No explicit feature list is included in the provided 4.1.1 notes; both
-        4.1.0 and 4.1.1 pages point to the main changelog/blog for details.]
-    breaking_changes: [No breaking changes are called out in the provided 4.1.1 notes;
-        both releases direct you to the upgrading guide and GitHub issues for breaking
-        changes/known issues.]
-  chart_version: 2.0.1
-  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.1', 'quay.io/argoproj/argocli:v4.1.1',
-    'quay.io/argoproj/workflow-controller:v4.1.1']
+    features: ['MySQL persistence config now correctly applies driver-level options,
+        fixing previously ignored settings.', 'Several dependency bumps address security
+        fixes (fasthttp, cel-go, moby/go-archive).', 'Controller and sync-lock behavior
+        improved: better handling of UID changes, transient lock errors, and shutdown/termination
+        cases.', Server SSO session tokens now use symmetric encryption., Artifact
+        staging behavior corrected to re-enter workingDir after init-less input staging.,
+      OpenTelemetry process owner detection is skipped to avoid issues in some environments.]
+    breaking_changes: []
+  chart_version: 2.0.2
+  images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.2', 'quay.io/argoproj/argocli:v4.1.2',
+    'quay.io/argoproj/workflow-controller:v4.1.2']
 - version: 4.1.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []
