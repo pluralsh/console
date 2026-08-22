@@ -45,6 +45,9 @@ func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
 					"human user are always actionable instructions",
 					"prioritize them over continuing the initial task",
 					"Human comments are tasks",
+					"CI flakes are not defects",
+					"Do **not** call `createCommit`",
+					"transient network/DNS errors",
 				} {
 					if !strings.Contains(content, expected) {
 						t.Fatalf("expected babysit instructions to contain %q", expected)
