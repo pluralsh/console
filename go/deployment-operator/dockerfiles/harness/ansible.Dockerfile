@@ -55,12 +55,20 @@ RUN apk add --no-cache \
 
 # install plural cli
 ARG TARGETARCH
-RUN VERSION=$(curl -sL https://api.github.com/repos/pluralsh/plural-cli/releases/latest | jq -r '.tag_name' | tr -d v) && \
-    curl -L https://github.com/pluralsh/plural-cli/releases/download/v${VERSION}/plural-cli_${VERSION}_Linux_${TARGETARCH}.tar.gz \
-    | tar zx && \
-    mv plural /usr/local/bin/plural && \
+RUN set -eux; \
+    for attempt in 1 2 3; do \
+      if VERSION=$(curl -fsSL --retry 3 --retry-all-errors https://api.github.com/repos/pluralsh/plural-cli/releases/latest | jq -er '.tag_name | ltrimstr("v")') && \
+        curl -fsSL --retry 3 --retry-all-errors -o /tmp/plural-cli.tar.gz https://github.com/pluralsh/plural-cli/releases/download/v${VERSION}/plural-cli_${VERSION}_Linux_${TARGETARCH}.tar.gz && \
+        tar -xzf /tmp/plural-cli.tar.gz && \
+        test -x plural; then \
+        break; \
+      fi; \
+      rm -f plural /tmp/plural-cli.tar.gz; \
+      sleep "${attempt}"; \
+    done; \
+    test -x plural; \
+    mv plural /usr/local/bin/plural; \
     chmod +x /usr/local/bin/plural
-
 RUN addgroup --gid 65532 nonroot && \
     adduser --uid 65532 --ingroup nonroot --disabled-password --home /home/nonroot nonroot && \
     mkdir -p /home/nonroot/.cache/pip /home/nonroot/.local && \

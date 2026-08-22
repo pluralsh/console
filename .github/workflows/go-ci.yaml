@@ -42,3 +42,24 @@ jobs:
           working-directory: go
           version: v2.11.4
           args: -c .golangci.yml ${{ steps.lint-packages.outputs.packages }}
+
+  tools:
+    name: Verify tools
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/tools
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - name: Verify tools module and install goimports
+        run: |
+          go mod verify
+          version=$(go list -m -f '{{.Version}}' golang.org/x/tools)
+          bin=$(mktemp -d)
+          GOBIN="$bin" go install golang.org/x/tools/cmd/goimports@"$version"
+          test -x "$bin/goimports"

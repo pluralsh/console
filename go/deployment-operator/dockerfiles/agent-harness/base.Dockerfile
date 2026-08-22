@@ -119,10 +119,16 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
     rm -rf /var/lib/apt/lists/*
 
 # Install the Nix binary-cache Podman engine and rootless user mapping helpers
-RUN apt update && \
-    apt install -y uidmap && \
+RUN set -eux; \
+    for attempt in 1 2 3; do \
+      if apt-get update && apt-get install -y --no-install-recommends uidmap; then \
+        break; \
+      fi; \
+      rm -rf /var/lib/apt/lists/*; \
+      sleep "${attempt}"; \
+    done; \
+    dpkg -s uidmap > /dev/null; \
     rm -rf /var/lib/apt/lists/*
-
 COPY --from=podman /closure/nix/store /nix/store
 COPY --from=podman /podman /opt/podman
 RUN set -eux; \
