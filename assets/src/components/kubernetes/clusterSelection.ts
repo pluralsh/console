@@ -10,6 +10,17 @@ export function withCurrentCluster<T extends { id: string }>(
   return [current, ...clusters]
 }
 
+export function selectMatchingCluster<T extends { id: string }>(
+  clusterId: string | undefined,
+  candidates: Array<T | null | undefined>
+): T | undefined {
+  if (!clusterId) return undefined
+
+  return (
+    candidates.find((candidate) => candidate?.id === clusterId) ?? undefined
+  )
+}
+
 export function getDefaultKubernetesClusterId<
   T extends { id: string; self?: boolean | null },
 >(clusters: T[], lastSelectedClusterId: string | null): string | undefined {

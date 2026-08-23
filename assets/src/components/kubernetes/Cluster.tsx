@@ -39,6 +39,7 @@ import {
   getDefaultKubernetesClusterId,
   isKubernetesClusterMissing,
   LAST_SELECTED_CLUSTER_KEY,
+  selectMatchingCluster,
 } from './clusterSelection'
 import { DataSelectProvider } from './common/DataSelect'
 import { getNamespaceListLoadError } from './common/namespaceList'
@@ -138,13 +139,11 @@ export default function Cluster({
     () => mapExistingNodes(queryData?.clusters),
     [queryData?.clusters]
   )
-  const currentCluster = [data?.cluster, queryData?.cluster].find(
-    (candidate) => candidate?.id === clusterId
-  )
-  const cluster = currentCluster ?? clusters.find(({ id }) => id === clusterId)
-  // Don't unmount the dashboard while the new cluster(id:) result is in flight.
-  const clusterForContext =
-    cluster ?? (loading ? queryData?.cluster : undefined)
+  const cluster = selectMatchingCluster(clusterId, [
+    data?.cluster,
+    queryData?.cluster,
+    ...clusters,
+  ])
 
   const clusterMissing = isKubernetesClusterMissing({
     clusterId,
@@ -206,10 +205,10 @@ export default function Cluster({
       ({
         clusters,
         refetch,
-        cluster: clusterForContext,
+        cluster,
         namespaces,
       }) as ClusterContextT,
-    [clusters, refetch, clusterForContext, namespaces]
+    [clusters, refetch, cluster, namespaces]
   )
 
   const defaultClusterId = useMemo(

@@ -3,6 +3,7 @@ import { replaceKubernetesClusterId } from '../../routes/kubernetesRoutesConsts'
 import {
   getDefaultKubernetesClusterId,
   isKubernetesClusterMissing,
+  selectMatchingCluster,
   withCurrentCluster,
 } from './clusterSelection'
 
@@ -49,6 +50,18 @@ describe('withCurrentCluster', () => {
     expect(withCurrentCluster([{ id: 'a' }, { id: 'b' }], { id: 'a' })).toEqual(
       [{ id: 'a' }, { id: 'b' }]
     )
+  })
+})
+
+describe('selectMatchingCluster', () => {
+  it('never returns a cluster that does not match the route id', () => {
+    expect(
+      selectMatchingCluster('b', [{ id: 'a' }, undefined, { id: 'c' }])
+    ).toBeUndefined()
+  })
+
+  it('returns the matching cluster even when it is not first', () => {
+    expect(selectMatchingCluster('b', [{ id: 'a' }, { id: 'b' }])?.id).toBe('b')
   })
 })
 
