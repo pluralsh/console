@@ -184,4 +184,18 @@ defmodule Console.AI.Workbench.HeartbeatTest do
     end
   end
 
+  describe "start_link/1" do
+    test "returns the existing process if the heartbeat is already started" do
+      job = insert(:workbench_job, status: :running)
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      assert {:ok, ^pid} = Heartbeat.start_link(job)
+      assert Process.alive?(pid)
+    end
+  end
 end

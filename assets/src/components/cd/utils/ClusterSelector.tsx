@@ -21,6 +21,7 @@ import { ComponentPropsWithRef, useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
+import { withCurrentCluster } from '../../kubernetes/clusterSelection'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { ClusterUpgradeChip } from '../clusters/ClusterUpgradeButton'
 
@@ -66,8 +67,12 @@ export default function ClusterSelector({
   )
 
   const clusters = useMemo(
-    () => data?.clusters?.edges?.flatMap((e) => (e?.node ? e.node : [])) || [],
-    [data?.clusters?.edges]
+    () =>
+      withCurrentCluster(
+        data?.clusters?.edges?.flatMap((e) => (e?.node ? e.node : [])) || [],
+        data?.cluster
+      ),
+    [data?.cluster, data?.clusters?.edges]
   )
 
   const findCluster = useCallback(

@@ -19,13 +19,21 @@ defmodule Console.AI.Workbench.Supervisor do
   def client_child(%WorkbenchTool{} = t, %WorkbenchJob{} = job) do
     %{
       id: Agent.name(:client, t, job),
-      start: {Anubis.Client, :start_link, [[
+      start: {__MODULE__, :start_client, [[
         name: Agent.name(:client, t, job),
         transport_name: Agent.name(:transport, t, job),
         transport: MCP.transport(t, job)
       ] ++ mcp_attrs(t, job)]},
       restart: :transient
     }
+  end
+
+  def start_client(opts) do
+    case Anubis.Client.start_link(opts) do
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, pid}} -> {:ok, pid}
+      err -> err
+    end
   end
 
   defp mcp_attrs(%WorkbenchTool{mcp_server: %McpServer{} = server} = tool, job),

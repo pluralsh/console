@@ -14,7 +14,7 @@ import {
   useEffect,
   useMemo,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
@@ -88,7 +88,10 @@ export function ResourceList<
   setRefetch,
 }: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
+  const { clusterId: clusterIdParam } = useParams()
   const cluster = useCluster()
+  // Route param is the source of truth while context cluster is still resolving.
+  const requestClusterId = clusterIdParam || cluster?.id || ''
   const { filter, namespace, setNamespaced } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
     ...tableOptions,
@@ -96,7 +99,7 @@ export function ResourceList<
   })
 
   const options = queryOptions({
-    client: AxiosInstance(cluster?.id ?? ''),
+    client: AxiosInstance(requestClusterId),
     path: { ...(namespaced ? { namespace } : undefined), ...pathParams },
     query: {
       filterBy: `name,${filter}`,
@@ -109,7 +112,8 @@ export function ResourceList<
   const { data, isLoading, isFetching, hasNextPage, fetchNextPage, refetch } =
     useInfiniteQuery<TResourceList>({
       ...options,
-      queryKey: [...options.queryKey, 'clusterId ', cluster?.id], // Add clusterId to queryKey to refetch when cluster changes
+      queryKey: [...options.queryKey, 'clusterId ', requestClusterId], // Add clusterId to queryKey to refetch when cluster changes
+      enabled: !!requestClusterId,
       initialPageParam: DEFAULT_DATA_SELECT.page,
       getNextPageParam: (lastPage, allPages) => {
         const pages = allPages.length

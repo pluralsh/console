@@ -1,4 +1,4 @@
-import { ReactNode, useLayoutEffect, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -10,6 +10,7 @@ import {
   getKubernetesAbsPath,
   NETWORK_REL_PATH,
   RBAC_REL_PATH,
+  replaceKubernetesClusterId,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
 } from '../../routes/kubernetesRoutesConsts'
@@ -24,7 +25,7 @@ import { DataSelectInputs } from './common/DataSelect'
 
 export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
-export const LAST_SELECTED_CLUSTER_KEY = 'plural-last-selected-cluster'
+export { LAST_SELECTED_CLUSTER_KEY } from './clusterSelection'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
@@ -51,10 +52,6 @@ export default function Navigation() {
     []
   )
 
-  useLayoutEffect(() => {
-    if (clusterId) sessionStorage.setItem(LAST_SELECTED_CLUSTER_KEY, clusterId)
-  }, [pathname, clusterId])
-
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer>
@@ -72,7 +69,11 @@ export default function Navigation() {
             allowDeselect={false}
             hideTitleContent
             onClusterChange={(cluster) => {
-              if (cluster?.id) navigate(pathname.replace(clusterId, cluster.id))
+              if (!cluster?.id || cluster.id === clusterId) return
+
+              navigate(
+                replaceKubernetesClusterId(pathname, clusterId, cluster.id)
+              )
             }}
           />
           <SideNavEntries
