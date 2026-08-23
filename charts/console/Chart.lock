@@ -1,7 +1,7 @@
 dependencies:
 - name: controller
   repository: file://../controller
-  version: 0.0.206
+  version: 0.0.207
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.14.0
@@ -11,5 +11,5 @@ dependencies:
 - name: common
   repository: https://charts.bitnami.com/bitnami
   version: 2.34.0
-digest: sha256:660d2674af8a8975c544b977d9fa8aea51ad77d81a6f15b9dd80d9b4890e8102
-generated: "2026-08-22T16:59:00.772469634Z"
+digest: sha256:441d4359a9df101fcb68208893c65cf89d295f8fc233079f9be4255a9100a582
+generated: "2026-08-23T15:07:43.903582758Z"
