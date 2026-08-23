@@ -1,6 +1,12 @@
 import { EmptyState } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+} from 'react'
 import {
   Navigate,
   Outlet,
@@ -29,10 +35,13 @@ import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { useSimpleToast } from '../utils/SimpleToastContext'
+import {
+  getDefaultKubernetesClusterId,
+  isKubernetesClusterMissing,
+  LAST_SELECTED_CLUSTER_KEY,
+} from './clusterSelection'
 import { DataSelectProvider } from './common/DataSelect'
 import { getNamespaceListLoadError } from './common/namespaceList'
-
-import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
@@ -111,30 +120,39 @@ export default function Cluster({
   const { search } = useLocation()
   const navigate = useNavigate()
 
-  const { data, error, refetch, loading } = useKubernetesClustersQuery({
-    pollInterval: 60_000,
-    fetchPolicy: 'cache-and-network',
-    variables: {
-      currentClusterId: clusterId,
-      hasCurrentClusterId: !!clusterId,
-      projectId,
-    },
-  })
+  const { data, previousData, error, refetch, loading } =
+    useKubernetesClustersQuery({
+      pollInterval: 60_000,
+      fetchPolicy: 'cache-and-network',
+      variables: {
+        currentClusterId: clusterId,
+        hasCurrentClusterId: !!clusterId,
+        projectId,
+      },
+    })
 
+  // Variable changes miss the cache, so `data` is empty while the new cluster
+  // loads. Keep the previous result on screen so the dashboard doesn't unmount.
+  const queryData = data ?? previousData
   const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
+    () => mapExistingNodes(queryData?.clusters),
+    [queryData?.clusters]
   )
-  const currentCluster = data?.cluster
+  const currentCluster = [data?.cluster, queryData?.cluster].find(
+    (candidate) => candidate?.id === clusterId
+  )
+  const cluster = currentCluster ?? clusters.find(({ id }) => id === clusterId)
+  // Don't unmount the dashboard while the new cluster(id:) result is in flight.
+  const clusterForContext =
+    cluster ?? (loading ? queryData?.cluster : undefined)
 
-  const hasCurrentClusterId =
-    currentCluster?.id === clusterId ||
-    clusters.some(({ id }) => id === clusterId)
-
-  const cluster =
-    currentCluster?.id === clusterId
-      ? currentCluster
-      : clusters.find(({ id }) => id === clusterId)
+  const clusterMissing = isKubernetesClusterMissing({
+    clusterId,
+    loading,
+    hasData: !!data,
+    currentClusterId: data?.cluster?.id,
+    clusterIds: mapExistingNodes(data?.clusters).map(({ id }) => id),
+  })
 
   const namespaceQueryOptions = getNamespacesOptions({
     client: AxiosInstance(clusterId!),
@@ -184,39 +202,48 @@ export default function Cluster({
   }, [clusterId, namespaceListError, popToast])
 
   const context = useMemo(
-    () => ({ clusters, refetch, cluster, namespaces }) as ClusterContextT,
-    [clusters, refetch, cluster, namespaces]
+    () =>
+      ({
+        clusters,
+        refetch,
+        cluster: clusterForContext,
+        namespaces,
+      }) as ClusterContextT,
+    [clusters, refetch, clusterForContext, namespaces]
   )
 
-  const defaultClusterId = useMemo(() => {
-    if (isEmpty(clusters)) return undefined
+  const defaultClusterId = useMemo(
+    () =>
+      getDefaultKubernetesClusterId(
+        clusters,
+        sessionStorage.getItem(LAST_SELECTED_CLUSTER_KEY)
+      ),
+    [clusters]
+  )
 
-    const lastSelectedClusterId = sessionStorage.getItem(
-      LAST_SELECTED_CLUSTER_KEY
-    )
-    const lastSelectedClusterExists = clusters.some(
-      ({ id }) => id === lastSelectedClusterId
-    )
-    const mgmtCluster = clusters.find(({ self }) => !!self)
-
-    return lastSelectedClusterExists
-      ? lastSelectedClusterId
-      : mgmtCluster
-        ? mgmtCluster?.id
-        : clusters[0].id
-  }, [clusters])
+  useLayoutEffect(() => {
+    if (cluster && clusterId && cluster.id === clusterId) {
+      sessionStorage.setItem(LAST_SELECTED_CLUSTER_KEY, cluster.id)
+    }
+  }, [cluster, clusterId])
 
   useEffect(() => {
-    if (clusterId && defaultClusterId && !hasCurrentClusterId) {
-      navigate(`${defaultClusterId}${search}`, {
-        replace: true,
-      })
-    }
-  }, [defaultClusterId, navigate, search, clusterId, hasCurrentClusterId])
+    if (!clusterMissing || !defaultClusterId) return
+
+    navigate(`${getDefaultClusterPath(defaultClusterId)}${search}`, {
+      replace: true,
+    })
+  }, [
+    clusterMissing,
+    defaultClusterId,
+    getDefaultClusterPath,
+    navigate,
+    search,
+  ])
 
   useEffect(() => {
     refetchNamespaces()
-  }, [refetchNamespaces, cluster])
+  }, [refetchNamespaces, clusterId])
 
   if (error)
     return (
@@ -228,7 +255,7 @@ export default function Cluster({
       </div>
     )
 
-  if (loading && !data) return <LoadingIndicator />
+  if (!queryData) return <LoadingIndicator />
 
   if (!clusterId && defaultClusterId)
     return (
@@ -238,7 +265,7 @@ export default function Cluster({
       />
     )
 
-  if (!cluster) return <EmptyState message="No clusters found." />
+  if (!cluster && !loading) return <EmptyState message="No clusters found." />
 
   return (
     <ClusterContext value={context}>

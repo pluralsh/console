@@ -67,6 +67,8 @@ defmodule Console.AI.Workbench.Engine do
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
     else
+      {:error, {:already_started, _}} = err -> err
+      {:error, {:shutdown, {:failed_to_start_child, _, {:already_started, _}}}} = err -> err
       {:error, _} = err ->
         Workbenches.fail_job("Error loading workbench environment: #{inspect(err)}", job)
         err

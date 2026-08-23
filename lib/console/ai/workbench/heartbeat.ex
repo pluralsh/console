@@ -15,7 +15,11 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def start_link(%WorkbenchJob{} = job) do
-    GenServer.start_link(__MODULE__, job, name: via(job))
+    case GenServer.start_link(__MODULE__, job, name: via(job)) do
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, pid}} -> {:ok, pid}
+      err -> err
+    end
   end
 
   def kill(%WorkbenchJob{} = job), do: GenServer.cast(via(job), :cancel)

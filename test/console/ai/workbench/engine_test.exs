@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.EngineTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.AI.Workbench.{Activity, Engine, Subagents}
+  alias Console.AI.Workbench.{Activity, Engine, Heartbeat, Subagents}
   alias Console.AI.{Provider, Tool}
   alias Console.Deployments.Clusters
   alias Console.PubSub.Consumers.Recurse
@@ -10,6 +10,25 @@ defmodule Console.AI.Workbench.EngineTest do
   setup :set_mimic_global
 
   describe "new/1" do
+    test "reuses an already started heartbeat instead of failing the job" do
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      {:ok, engine} = Engine.new(job)
+
+      assert engine.job.id == job.id
+      assert Process.alive?(pid)
+      refute refetch(job).status == :failed
+      refute refetch(job).error
+    end
+
     test "returns an error if the job is not valid" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
