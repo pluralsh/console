@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Codemode, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Codemode, History, Infrastructure.PodLogs, Scratchpad}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces, Plrl}
   alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
   alias Console.AI.Workbench.{Environment, MCP}
@@ -18,7 +18,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
         acc: %{},
         callback: &callback(activity, &1),
         tool_search: length(tools) > 10,
-        pre_enable: [ObservabilityResult, %Skills{} ,%Skill{}],
+        pre_enable: [ObservabilityResult | skill_knowledge_pre_enable()],
         continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
       ]
     )
@@ -46,9 +46,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(pod_logs_tools(job, user))
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       ObservabilityResult,
       %Codemode{tools: []},

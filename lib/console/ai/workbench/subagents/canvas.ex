@@ -3,8 +3,6 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
   alias Console.AI.Tools.Workbench.{
     Result,
-    Skills,
-    Skill,
     Scratchpad,
     History
   }
@@ -43,9 +41,7 @@ defmodule Console.AI.Workbench.Subagents.Canvas do
 
   defp tools(%Environment{skills: skills, job: job, activities: activities} = env) do
     skills = Environment.subagent_skills(skills, :canvas)
-    [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       Result,
       Canvas,

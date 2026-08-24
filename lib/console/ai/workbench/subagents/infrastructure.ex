@@ -4,8 +4,6 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   alias Console.AI.Tools.Workbench.{
     SummarizeComponent,
     Result,
-    Skills,
-    Skill,
     Scratchpad,
     History,
     Codemode,
@@ -43,7 +41,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
         acc: %{},
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
-        pre_enable: [Result, %Skills{} ,%Skill{}],
+        pre_enable: [Result | skill_knowledge_pre_enable()],
         callback: &callback(activity, &1)
       ]
     )
@@ -70,9 +68,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     core_tools(job, environment)
     |> Enum.concat(vuln_tools(bench, user))
     |> Enum.concat(manifests_tools(bench, job, user, cache))
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %History{job: job, activities: activities},
       Result

@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http, Scratchpad}
+  alias Console.AI.Tools.Workbench.{Result, Http, Scratchpad}
   alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListMessages, ListUserGroups, PostMessage, ReactToMessage}
   alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
   alias Console.AI.Tools.Workbench.Integration.Gitlab.Tools, as: GitlabTools
@@ -24,7 +24,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
         tool_search: length(tools) > 10,
-        pre_enable: [Result, %Skills{} ,%Skill{}],
+        pre_enable: [Result | skill_knowledge_pre_enable()],
         callback: &callback(activity, &1),
         continue_msg: cont_msg()
       ]
@@ -51,9 +51,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
 
     workbench_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :integration), job))
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       Result
     ])

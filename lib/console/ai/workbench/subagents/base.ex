@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   alias Console.AI.Workbench.Activity
   alias Console.Deployments.Workbenches
   alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity}
+  alias Console.AI.Tools.Workbench.{Skills, Skill, ListKnowledge, Knowledge, KnowledgeUsed}
   require Logger
 
   defmacro __using__(_) do
@@ -98,4 +99,21 @@ defmodule Console.AI.Workbench.Subagents.Base do
   end
   def log_error(pass, _), do: pass
 
+  @doc """
+  Read-only skill and knowledge tools shared by the orchestrator and every subagent.
+  Includes listing/reading skills and knowledge, plus recording knowledge usage.
+  """
+  def skill_knowledge_tools(%WorkbenchJob{} = job, skills) do
+    [
+      %Skills{skills: skills},
+      %Skill{skills: skills},
+      %ListKnowledge{job: job},
+      %Knowledge{job: job},
+      %KnowledgeUsed{job: job}
+    ]
+  end
+
+  def skill_knowledge_pre_enable do
+    [%Skills{}, %Skill{}, %ListKnowledge{}, %Knowledge{}, %KnowledgeUsed{}]
+  end
 end

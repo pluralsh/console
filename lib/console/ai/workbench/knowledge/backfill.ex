@@ -4,7 +4,7 @@ defmodule Console.AI.Workbench.Knowledge.Backfill do
   alias Console.Deployments.Workbenches
   alias Console.Repo
   alias Console.AI.Workbench.Skills, as: SkillsUtils
-  alias Console.AI.Tools.Workbench.{Skills, Skill, SkillUpdate, SkillIgnore, SkillCreate}
+  alias Console.AI.Tools.Workbench.{SkillUpdate, SkillIgnore, SkillCreate}
 
   require EEx
 
@@ -56,9 +56,7 @@ defmodule Console.AI.Workbench.Knowledge.Backfill do
   defp terminal?(%SkillIgnore{}), do: true
 
   defp tools(job, skills) do
-    [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    skill_knowledge_tools(job, skills) ++ [
       %SkillUpdate{skills: skills, job: job},
       %SkillCreate{job: job},
       SkillIgnore

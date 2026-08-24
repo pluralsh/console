@@ -37,6 +37,15 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       result_output = "Investigation complete. CPU usage is at 50%."
 
       expect(Provider, :completion, fn _, _ ->
+        {:ok, "enabling tools", [
+          %Tool{
+            name: "enable_tools",
+            arguments: %{"tools" => [metrics_tool_name]},
+            id: "0"
+          }
+        ]}
+      end)
+      expect(Provider, :completion, fn _, _ ->
         {:ok, "querying metrics", [
           %Tool{
             name: metrics_tool_name,

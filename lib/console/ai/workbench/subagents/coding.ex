@@ -7,9 +7,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     AIUsage
   }
   alias Console.AI.Tools.Workbench.{
-    Skills,
     History,
-    Skill,
     Scratchpad,
     CodingAgent,
     Result,
@@ -103,8 +101,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     [
       %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},
       %PullRequests{job: job},
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    ] ++ skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %History{job: job, activities: activities},
       Result

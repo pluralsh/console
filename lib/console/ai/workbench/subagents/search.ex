@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Search do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Scratchpad}
+  alias Console.AI.Tools.Workbench.{Result, Scratchpad}
   alias Console.AI.Workbench.{Environment, MCP}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
@@ -38,9 +38,7 @@ defmodule Console.AI.Workbench.Subagents.Search do
     skills = Environment.subagent_skills(skills, :search)
 
     MCP.expand_tools(Environment.subagent_tools(tools, :search), job)
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       Result
     ])

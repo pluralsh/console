@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2, skill_knowledge_tools: 2]
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
   import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
@@ -32,8 +32,8 @@ defmodule Console.AI.Workbench.Engine do
     Complete,
     Subagents,
     Subagent,
-    Skills,
-    Skill,
+    KnowledgeUpsert,
+    KnowledgeDelete,
     Notes,
     FetchNotes,
     SkillBackfill,
@@ -327,9 +327,9 @@ defmodule Console.AI.Workbench.Engine do
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
 
-    [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    skill_knowledge_tools(job, skills) ++ [
+      %KnowledgeUpsert{job: job},
+      %KnowledgeDelete{job: job},
       %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
