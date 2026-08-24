@@ -6,13 +6,13 @@ import { type ContextProps, type StepConfig, WizardContext } from './context'
 const useActive = <T = unknown>() => {
   const ctx = useContext(WizardContext) as ContextProps<T>
   const { steps, setSteps, active: activeIdx } = ctx
-  const active: StepConfig<T> = useMemo<StepConfig<T>>(
-    () => steps.at(activeIdx)!,
-    [activeIdx, steps]
+  const active = useMemo(() => steps.at(activeIdx), [activeIdx, steps])
+  const valid = useMemo(
+    () => !active || active.isDefault || active.isValid,
+    [active]
   )
-  const valid = useMemo(() => active.isDefault || active.isValid, [active])
   const completed = useMemo(
-    () => !active.isDefault && active.isCompleted,
+    () => !!active && !active.isDefault && !!active.isCompleted,
     [active]
   )
 
@@ -100,7 +100,11 @@ const useNavigation = () => {
     if (idx < 0) return -1
     if (idx === steps.length - 1) return idx
 
-    while (steps.at(nextIdx)?.isPlaceholder) nextIdx++
+    while (nextIdx < steps.length && steps.at(nextIdx)?.isPlaceholder) {
+      nextIdx++
+    }
+
+    if (nextIdx >= steps.length) return idx
 
     setActive(nextIdx)
   }, [steps, active, setActive])
@@ -114,7 +118,11 @@ const useNavigation = () => {
     if (idx < 0) return -1
     if (idx === 0) return idx
 
-    while (steps.at(prevIdx)?.isPlaceholder) prevIdx--
+    while (prevIdx >= 0 && steps.at(prevIdx)?.isPlaceholder) {
+      prevIdx--
+    }
+
+    if (prevIdx < 0) return idx
 
     setActive(prevIdx)
   }, [steps, active, setActive])

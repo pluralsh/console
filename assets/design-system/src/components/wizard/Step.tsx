@@ -25,7 +25,9 @@ function UnstyledStep<T = unknown>({
 
   useEffect(
     () =>
-      !active.isDefault && !active.isPlaceholder ? setValid(valid) : undefined,
+      !active?.isDefault && !active?.isPlaceholder
+        ? setValid(valid)
+        : undefined,
     [valid, setValid, active]
   )
   useEffect(() => setData(data), [data, setData])

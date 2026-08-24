@@ -3,7 +3,7 @@ name: Design system / Chromatic
 on:
   push:
     branches:
-      - "**"
+      - master
     paths:
       - "assets/design-system/**"
       - ".github/workflows/chromatic.yml"
@@ -20,6 +20,7 @@ jobs:
     if: ${{ github.actor != 'renovate[bot]' }}
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     defaults:
       run:
@@ -36,14 +37,13 @@ jobs:
           cache-dependency-path: assets/yarn.lock
       - run: yarn --immutable
       - run: yarn workspace @pluralsh/design-system build:storybook
-      - uses: chromaui/action@latest
+      - uses: chromaui/action@534eebfc19023579541d106f7b61d5ad70ed65c7 # v18.5.0
         id: chromatic
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: assets/design-system
           storybookBuildDir: storybook-static
           exitOnceUploaded: true
-          exitZeroOnChanges: true
       - if: ${{ github.event_name == 'pull_request' && steps.chromatic.outcome == 'success' }}
         uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
         with:

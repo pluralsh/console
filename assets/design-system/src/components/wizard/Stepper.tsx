@@ -44,7 +44,7 @@ function ContextAwareStepper(): JSX.Element {
 
   return (
     <Stepper
-      stepIndex={filteredWizardSteps.findIndex((i) => i.key === active.key)}
+      stepIndex={filteredWizardSteps.findIndex((i) => i.key === active?.key)}
       steps={stepperSteps}
       compact
     />
