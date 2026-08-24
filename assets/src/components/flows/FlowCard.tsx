@@ -19,7 +19,7 @@ import { hasAccess } from 'components/utils/persona'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import pluralize from 'pluralize'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { getFlowDetailsPath } from 'routes/flowRoutesConsts'
 import styled from 'styled-components'
 
@@ -30,6 +30,7 @@ export function FlowCard({
   flow: FlowBasicWithBindingsFragment
   refetch: () => void
 }) {
+  const { search } = useLocation()
   const navigate = useNavigate()
   const { personaConfiguration } = useLogin()
   const showPermissionsBtn = hasAccess(
@@ -46,7 +47,7 @@ export function FlowCard({
       <CardSC
         fillLevel={1}
         forwardedAs={Link}
-        to={flowPath}
+        to={`${flowPath}/services${search}`}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
@@ -94,7 +95,7 @@ export function FlowCard({
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  navigate(`${flowPath}/pipelines`)
+                  navigate(`${flowPath}/pipelines${search}`)
                 }}
                 icon={<GitPullIcon color="icon-light" />}
               />
