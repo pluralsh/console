@@ -19,7 +19,6 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFlowsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -33,21 +32,8 @@ export function Flows() {
   useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [searchString, setSearchString] = useState(
-    () => searchParams.get('q') ?? ''
-  )
+  const searchString = searchParams.get('q') ?? ''
   const debouncedSearchString = useThrottle(searchString, 200)
-
-  useEffect(() => {
-    const q = searchParams.get('q')
-
-    if ((debouncedSearchString || null) !== q) {
-      setSearchParams(
-        { ...(debouncedSearchString && { q: debouncedSearchString }) },
-        { replace: true }
-      )
-    }
-  }, [debouncedSearchString, searchParams, setSearchParams])
 
   const { data, error, loading, pageInfo, refetch, fetchNextPage } =
     useFetchPaginatedData(
@@ -76,7 +62,12 @@ export function Flows() {
         placeholder="Search flows"
         startIcon={<SearchIcon />}
         value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
+        onChange={(e) =>
+          setSearchParams(
+            { ...(e.currentTarget.value && { q: e.currentTarget.value }) },
+            { replace: true }
+          )
+        }
       />
       {error && <GqlError error={error} />}
       {isEmpty(flows) ? (
