@@ -3473,6 +3473,7 @@ __metadata:
     "@types/lodash-es": "npm:4.17.12"
     "@types/react-transition-group": "npm:4.4.12"
     chroma-js: "npm:2.6.0"
+    chromatic: "npm:18.5.0"
     classnames: "npm:2.5.1"
     dayjs: "npm:1.11.21"
     elkjs: "npm:0.12.0"
@@ -7500,6 +7501,35 @@ __metadata:
   version: 2.6.0
   resolution: "chroma-js@npm:2.6.0"
   checksum: 10/245f0a0b1da7c4cedf30e490db9ab4e9e71fde207cbe1ca05e25ef5ba517df2509b96b29d2c168786237c8162a03dccea38721c4927249cd1d5c5fe0184fc13c
+  languageName: node
+  linkType: hard
+
+"chromatic@npm:18.5.0":
+  version: 18.5.0
+  resolution: "chromatic@npm:18.5.0"
+  dependencies:
+    semver: "npm:^7.3.5"
+  peerDependencies:
+    "@chromatic-com/cypress": ^0.*.* || ^1.0.0
+    "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+    "@chromatic-com/vitest": ^0.*.* || ^1.0.0
+  dependenciesMeta:
+    "@sentry/cli":
+      built: true
+    esbuild:
+      built: true
+  peerDependenciesMeta:
+    "@chromatic-com/cypress":
+      optional: true
+    "@chromatic-com/playwright":
+      optional: true
+    "@chromatic-com/vitest":
+      optional: true
+  bin:
+    chroma: dist/bin.cjs
+    chromatic: dist/bin.cjs
+    chromatic-cli: dist/bin.cjs
+  checksum: 10/c5d1d7b581f4d259cbebca77be316f84f6a3da9aa446437552564781dfd376d555c966757ca6942e8722d0183c55107d75e3e91398cbe1c972601ebeb6902c59
   languageName: node
   linkType: hard
 

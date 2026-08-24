@@ -152,7 +152,7 @@ export const useSwitch = ({
         $disabled: isDisabled,
         $checked: isSelected,
         $readOnly: isReadOnly,
-        $variant: variant,
+        $variant: variant ?? 'default',
       },
       state,
     }),

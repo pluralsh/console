@@ -121,9 +121,9 @@ export default function ProgressBar({
         top={0}
         bottom={0}
         backgroundColor={
-          progress >= 1 || complete ? completeColor : progressColor
+          (progress ?? 0) >= 1 || complete ? completeColor : progressColor
         }
-        right={`${(1 - progress) * 100}%`}
+        right={`${(1 - (progress ?? 0)) * 100}%`}
       />
     )
   }

@@ -8,7 +8,7 @@ import {
 import { type ComponentType } from 'react'
 
 export type BaseSchema<C extends Config = Config> = Omit<
-  Schema<C, ComponentType>,
+  Schema<C, ComponentType<any>>,
   'attributes'
 > & {
   description?: string

@@ -17,7 +17,7 @@ import {
   useRadio,
   useRadioGroup,
 } from 'react-aria'
-import { useRadioGroupState } from 'react-stately'
+import { type RadioGroupState, useRadioGroupState } from 'react-stately'
 
 import { useSpring } from '@react-spring/web'
 import classNames from 'classnames'
@@ -79,7 +79,7 @@ const SwitchSC = styled.div<{ $size: TextSwitchSize }>(({ theme, $size }) => ({
   },
 }))
 
-export const TextSwitchContext = createContext(null)
+export const TextSwitchContext = createContext<RadioGroupState | null>(null)
 
 const SwitchHandleSC = styled(AnimatedDiv)<{
   $size: TextSwitchSize
@@ -128,17 +128,18 @@ function TextSwitch({
   )
 
   useLayoutEffect(() => {
-    selectedElt.current = switchRef?.current?.querySelector(
-      `[data-value="${value}"]`
-    )
+    selectedElt.current =
+      switchRef.current?.querySelector(`[data-value="${value}"]`) ?? null
 
     const parentLeft = switchRef.current?.getBoundingClientRect()?.left
     const selectedR = selectedElt.current?.getBoundingClientRect()
 
     setSelectedLeft(
-      !selectedR.left ? undefined : selectedR.left - parentLeft - 1
+      !selectedR?.left || parentLeft == null
+        ? undefined
+        : selectedR.left - parentLeft - 1
     )
-    setSelectedWidth(!selectedR?.width ? undefined : selectedR?.width)
+    setSelectedWidth(!selectedR?.width ? undefined : selectedR.width)
   }, [value])
   const stateProps: AriaRadioGroupProps = {
     name,
@@ -298,17 +299,17 @@ function TextSwitchOption({
   ...props
 }: TextSwitchOptionProps) {
   const [selected, setSelected] = useState(defaultSelected || selectedProp)
-  const state = useContext(TextSwitchContext) || {
+  const state = (useContext(TextSwitchContext) || {
     setSelectedValue: () => {},
     selectedValue: selectedProp || selected ? value : undefined,
-  }
+  }) as RadioGroupState
 
   useEffect(() => {
     setSelected(selectedProp)
   }, [selectedProp])
 
   const labelId = useId()
-  const inputRef = useRef<any>(undefined)
+  const inputRef = useRef<any>(null)
   const { focusProps } = useFocusRing()
   const { inputProps, isSelected, isDisabled } = useRadio(
     {
@@ -330,8 +331,8 @@ function TextSwitchOption({
       htmlFor={inputProps.id}
       id={labelId}
       className={classNames({ selected: isSelected })}
-      $size={size}
-      $disabled={isDisabled}
+      $size={size ?? 'small'}
+      $disabled={!!isDisabled}
       data-value={value}
       {...props}
     >
@@ -345,7 +346,7 @@ function TextSwitchOption({
               onChange(e)
             }
             setSelected(!selected)
-            inputProps.onChange(e)
+            inputProps.onChange?.(e)
           }}
           ref={inputRef}
         />

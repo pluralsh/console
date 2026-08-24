@@ -4,8 +4,9 @@ import { useState } from 'react'
 
 import { type FillLevel } from '../components/contexts/FillLevelContext'
 import { Button, Callout, type CalloutProps, Card } from '..'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Callout',
   component: Callout,
   argTypes: {
@@ -29,8 +30,9 @@ export default {
       control: { type: 'boolean' },
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const styles: CalloutProps['severity'][] = [
   'info',
   'neutral',
@@ -186,71 +188,89 @@ function CloseableTemplate({ title }: CalloutProps) {
   )
 }
 
-export const Default = Template.bind({})
-Default.args = {
-  title: '',
-  size: 'full',
-  withButton: false,
-  onFillLevel: 0,
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: '',
+    size: 'full',
+    withButton: false,
+    onFillLevel: 0,
+  },
 }
 
-export const WithTitle = Template.bind({})
-WithTitle.args = {
-  title: 'Title text - How to write a dummy title',
-  size: 'full',
-  withButton: false,
-  onFillLevel: 0,
+export const WithTitle: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: 'Title text - How to write a dummy title',
+    size: 'full',
+    withButton: false,
+    onFillLevel: 0,
+  },
 }
 
-export const OnlyTitle = Template.bind({})
-OnlyTitle.args = {
-  title: 'Title text - How to write a dummy title',
-  size: 'full',
-  noContent: true,
-  withButton: false,
-  onFillLevel: 0,
+export const OnlyTitle: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: 'Title text - How to write a dummy title',
+    size: 'full',
+    noContent: true,
+    withButton: false,
+    onFillLevel: 0,
+  },
 }
 
-export const Compact = Template.bind({})
-Compact.args = {
-  title: '',
-  size: 'compact',
-  withButton: false,
-  onFillLevel: 0,
+export const Compact: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: '',
+    size: 'compact',
+    withButton: false,
+    onFillLevel: 0,
+  },
 }
 
-export const WithButton = Template.bind({})
-WithButton.args = {
-  title: '',
-  size: 'full',
-  withButton: true,
-  onFillLevel: 0,
+export const WithButton: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: '',
+    size: 'full',
+    withButton: true,
+    onFillLevel: 0,
+  },
 }
 
-export const Expandable = ExpandableTemplate.bind({})
-Expandable.args = {
-  title: 'Why do I need to authenticate with GitHub/GitLab?',
-  controlled: 'false',
+export const Expandable: StoryObj<Parameters<typeof ExpandableTemplate>[0]> = {
+  render: ExpandableTemplate,
+  args: {
+    title: 'Why do I need to authenticate with GitHub/GitLab?',
+    controlled: false,
+  },
 }
 
-export const Closeable = CloseableTemplate.bind({})
-Expandable.args = {
-  title: 'Why do I need to authenticate with GitHub/GitLab?',
+export const Closeable: StoryObj<Parameters<typeof CloseableTemplate>[0]> = {
+  render: CloseableTemplate,
+  args: {
+    title: 'Why do I need to authenticate with GitHub/GitLab?',
+  },
 }
 
-export const KitchenSink = Template.bind({})
-KitchenSink.args = {
-  title: 'Title text - How to write a dummy title',
-  size: 'full',
-  withButton: true,
-  onFillLevel: 0,
+export const KitchenSink: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: 'Title text - How to write a dummy title',
+    size: 'full',
+    withButton: true,
+    onFillLevel: 0,
+  },
 }
 
-export const OnCard = Template.bind({})
-OnCard.args = {
-  title: 'Title text - How to write a dummy title',
-  size: 'full',
-  withButton: true,
-  onFillLevel: 1,
-  expandable: false,
+export const OnCard: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    title: 'Title text - How to write a dummy title',
+    size: 'full',
+    withButton: true,
+    onFillLevel: 1,
+    expandable: false,
+  },
 }

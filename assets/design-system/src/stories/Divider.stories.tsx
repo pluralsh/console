@@ -1,22 +1,28 @@
 import Divider from '../components/Divider'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Divider',
   component: Divider,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return <Divider {...args} />
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  text: '',
+export const Default: Story = {
+  render: Template,
+  args: {
+    text: '',
+  },
 }
 
-export const Text = Template.bind({})
-
-Text.args = {
-  text: "That's division allright!",
+export const Text: Story = {
+  render: Template,
+  args: {
+    text: "That's division allright!",
+  },
 }

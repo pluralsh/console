@@ -1,4 +1,5 @@
 import { DiffMethod, DiffViewer } from '..'
+import type { Meta, StoryObj } from '@storybook/react'
 
 const OLD_VALUE = `apiVersion: v1
 kind: ConfigMap
@@ -19,7 +20,7 @@ data:
   extra: true
 `
 
-export default {
+const meta = {
   title: 'DiffViewer',
   component: DiffViewer,
   argTypes: {
@@ -33,7 +34,10 @@ export default {
       control: 'boolean',
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -43,20 +47,24 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
-Default.args = {
-  oldValue: OLD_VALUE,
-  newValue: NEW_VALUE,
-  splitView: false,
-  compareMethod: DiffMethod.LINES,
-  asCard: true,
+export const Default: Story = {
+  render: Template,
+  args: {
+    oldValue: OLD_VALUE,
+    newValue: NEW_VALUE,
+    splitView: false,
+    compareMethod: DiffMethod.LINES,
+    asCard: true,
+  },
 }
 
-export const DeletedFile = Template.bind({})
-DeletedFile.args = {
-  oldValue: OLD_VALUE,
-  newValue: '',
-  splitView: false,
-  compareMethod: DiffMethod.LINES,
-  asCard: true,
+export const DeletedFile: Story = {
+  render: Template,
+  args: {
+    oldValue: OLD_VALUE,
+    newValue: '',
+    splitView: false,
+    compareMethod: DiffMethod.LINES,
+    asCard: true,
+  },
 }

@@ -42,8 +42,9 @@ function NavigationUnstyled<T = unknown>({
   tooltip,
   ...props
 }: NavigationProps<T>): ReactElement<NavigationProps<T>> {
-  const { completed, setCompleted, limit } =
-    useContext<ContextProps<T>>(WizardContext)
+  const { completed, setCompleted, limit } = useContext(
+    WizardContext
+  ) as ContextProps<T>
   const {
     setCompleted: setStepCompleted,
     valid,

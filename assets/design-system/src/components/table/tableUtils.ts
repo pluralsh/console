@@ -5,8 +5,10 @@ import type {
   Row,
   TableOptions,
 } from '@tanstack/react-table'
-import type { VirtualItem } from '@tanstack/react-virtual'
-import { useVirtualizer } from '@tanstack/react-virtual'
+import type {
+  ReactVirtualizerOptions,
+  VirtualItem,
+} from '@tanstack/react-virtual'
 import {
   ReactElement,
   type CSSProperties,
@@ -45,7 +47,10 @@ export type TableBaseProps = {
   virtualizeRows?: boolean
   lockColumnsOnScroll?: boolean
   reactVirtualOptions?: Partial<
-    Omit<Parameters<typeof useVirtualizer>[0], 'count' | 'getScrollElement'>
+    Omit<
+      ReactVirtualizerOptions<HTMLDivElement, Element>,
+      'count' | 'getScrollElement'
+    >
   >
   reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void

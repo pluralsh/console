@@ -6,10 +6,10 @@ import { type FillLevel } from '../components/contexts/FillLevelContext'
 
 import type { CardProps } from '../components/Card'
 import { Card, Flex, InfoOutlineIcon, Tooltip } from '../index'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Card',
-  component: null,
   argTypes: {
     headerSize: {
       options: ['medium', 'large'],
@@ -19,8 +19,9 @@ export default {
       control: { type: 'text' },
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const fillLevels: (FillLevel | undefined)[] = [undefined, 1, 2, 3]
 const cornerSizes: ComponentProps<typeof Card>['cornerSize'][] = [
   'medium',
@@ -137,53 +138,61 @@ function FillLevelTemplate({
   )
 }
 
-export const Default = Template.bind({})
-Default.args = {
-  selected: false,
-  clickable: false,
-  disabled: false,
-  width: 150,
-  height: 150,
-  headerSize: 'medium',
-  headerContent: (
-    <Flex
-      justifyContent="space-between"
-      align="center"
-      width="100%"
-    >
-      <p>Header</p>
-      <Tooltip label="Tooltip">
-        <InfoOutlineIcon />
-      </Tooltip>
-    </Flex>
-  ),
-}
-
-export const Clickable = Template.bind({})
-Clickable.args = {
-  ...Default.args,
-  ...{
-    clickable: true,
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    selected: false,
+    clickable: false,
+    disabled: false,
+    width: 150,
+    height: 150,
+    headerSize: 'medium',
+    headerContent: (
+      <Flex
+        justifyContent="space-between"
+        align="center"
+        width="100%"
+      >
+        <p>Header</p>
+        <Tooltip label="Tooltip">
+          <InfoOutlineIcon />
+        </Tooltip>
+      </Flex>
+    ),
   },
 }
 
-export const WithFillLevelContext = FillLevelTemplate.bind({})
-WithFillLevelContext.args = {
-  selected: false,
-  clickable: false,
-  disabled: false,
-  width: 400,
-  headerSize: 'medium',
-  headerContent: (
-    <Flex
-      justifyContent="space-between"
-      align="center"
-      width="100%"
-    >
-      <p>Header</p>
-      <Tooltip label="Tooltip">
-        <InfoOutlineIcon />
-      </Tooltip>
-    </Flex>
-  ),
+export const Clickable: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {
+    ...Default.args,
+    ...{
+      clickable: true,
+    },
+  },
+}
+
+export const WithFillLevelContext: StoryObj<
+  Parameters<typeof FillLevelTemplate>[0]
+> = {
+  render: FillLevelTemplate,
+  args: {
+    selected: false,
+    clickable: false,
+    disabled: false,
+    width: 400,
+    headerSize: 'medium',
+    headerContent: (
+      <Flex
+        justifyContent="space-between"
+        align="center"
+        width="100%"
+      >
+        <p>Header</p>
+        <Tooltip label="Tooltip">
+          <InfoOutlineIcon />
+        </Tooltip>
+      </Flex>
+    ),
+  },
 }

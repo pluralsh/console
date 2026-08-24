@@ -22,6 +22,10 @@ const {
 
 export const colorsToCSSVars: (colors: unknown) => any = (colors) => {
   function inner(colors: unknown, prefix = '') {
+    if (!colors || typeof colors !== 'object') {
+      return
+    }
+
     Object.entries(colors).forEach(([key, value]) => {
       if (typeof value === 'string') {
         ;(cssVars as any)[`--color-${prefix}${key}`] = value

@@ -1,6 +1,7 @@
 import ProgressBar from '../components/ProgressBar'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Progress Bar',
   component: ProgressBar,
   argTypes: {
@@ -13,18 +14,25 @@ export default {
       },
     },
   },
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
+
+export const Indeterminate: Story = {
+  render: ProgressBar,
+  args: {
+    paused: false,
+    complete: false,
+  },
 }
 
-export const Indeterminate = ProgressBar.bind({})
-Indeterminate.args = {
-  paused: false,
-  complete: false,
-}
-
-export const Determinate = ProgressBar.bind({})
-Determinate.args = {
-  paused: false,
-  complete: false,
-  mode: 'determinate',
-  progress: 0.25,
+export const Determinate: Story = {
+  render: ProgressBar,
+  args: {
+    paused: false,
+    complete: false,
+    mode: 'determinate',
+    progress: 0.25,
+  },
 }

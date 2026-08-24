@@ -65,9 +65,11 @@ function Toast({
     if (closeTimeout === 'none') {
       return
     }
-    const timer = open ? setTimeout(() => close(), closeTimeout) : null
+    const timer = open ? setTimeout(() => close(), closeTimeout) : undefined
 
-    return () => clearTimeout(timer)
+    return () => {
+      if (timer != null) clearTimeout(timer)
+    }
   }, [close, closeTimeout, open])
 
   return (
@@ -111,7 +113,7 @@ function GraphQLToast({
       severity="danger"
       {...props}
     >
-      {error?.graphQLErrors[0]?.message}
+      {error?.graphQLErrors?.[0]?.message}
     </Toast>
   )
 }

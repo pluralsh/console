@@ -72,7 +72,7 @@ function BaseFlex({
   return (
     <WrapWithIf
       condition={!!tooltip}
-      wrapper={<Tooltip {...tooltip} />}
+      wrapper={<Tooltip {...tooltip!} />}
     >
       <FlexSC
         ref={ref}
@@ -127,8 +127,8 @@ const FlexSC = styled.div<{
     flexShrink: $shrink,
     alignItems: $align,
     justifyContent: $justify,
-    gap: theme.spacing[$gap] || 0,
-    padding: theme.spacing[$padding] || 0,
+    gap: ($gap != null ? theme.spacing[$gap] : 0) || 0,
+    padding: ($padding != null ? theme.spacing[$padding] : 0) || 0,
   })
 )
 
