@@ -173,6 +173,18 @@ type ConsoleClient interface {
 	CreatePersona(ctx context.Context, attr console.PersonaAttributes) (*console.PersonaFragment, error)
 	UpdatePersona(ctx context.Context, id string, attr console.PersonaAttributes) (*console.PersonaFragment, error)
 	DeletePersona(ctx context.Context, id string) error
+	GetPolicy(ctx context.Context, id, name *string) (*console.PolicyFragment, error)
+	GetPolicyTiny(ctx context.Context, id, name *string) (*console.TinyPolicyFragment, error)
+	CreatePolicy(ctx context.Context, attributes console.PolicyAttributes) (*console.PolicyFragment, error)
+	UpdatePolicy(ctx context.Context, id string, attributes console.PolicyAttributes) (*console.PolicyFragment, error)
+	DeletePolicy(ctx context.Context, id string) error
+	IsPolicyExists(ctx context.Context, id, name *string) (bool, error)
+	GetBindingPolicy(ctx context.Context, id string) (*console.BindingPolicyFragment, error)
+	GetBindingPolicyTiny(ctx context.Context, id string) (*console.GetBindingPolicyTiny_BindingPolicy, error)
+	CreateBindingPolicy(ctx context.Context, attributes console.BindingPolicyAttributes) (*console.BindingPolicyFragment, error)
+	UpdateBindingPolicy(ctx context.Context, id string, attributes console.BindingPolicyUpdateAttributes) (*console.BindingPolicyFragment, error)
+	DeleteBindingPolicy(ctx context.Context, id string) error
+	IsBindingPolicyExists(ctx context.Context, id string) (bool, error)
 	UpsertPrGovernance(ctx context.Context, attributes console.PrGovernanceAttributes) (*console.PrGovernanceFragment, error)
 	DeletePrGovernance(ctx context.Context, id string) error
 	GetPrGovernance(ctx context.Context, id, name *string) (*console.PrGovernanceFragment, error)
