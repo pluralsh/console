@@ -4,11 +4,15 @@ import BrowserIcon from '../components/icons/BrowserIcon'
 import CloudIcon from '../components/icons/CloudIcon'
 import GearTrainIcon from '../components/icons/GearTrainIcon'
 import GitHubIcon from '../components/icons/GitHubIcon'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Stepper',
   component: Stepper,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -50,49 +54,61 @@ const steps: StepperSteps = [
   },
 ]
 
-export const Default = Template.bind({})
-Default.args = {
-  stepIndex: 1,
-  steps,
-  compact: false,
+export const Default: Story = {
+  render: Template,
+  args: {
+    stepIndex: 1,
+    steps,
+    compact: false,
+  },
 }
 
-export const List03 = Template.bind({})
-List03.args = {
-  stepIndex: 1,
-  steps: steps.slice(0, 3),
-  compact: false,
+export const List03: Story = {
+  render: Template,
+  args: {
+    stepIndex: 1,
+    steps: steps.slice(0, 3),
+    compact: false,
+  },
 }
 
-export const List02 = Template.bind({})
-List02.args = {
-  stepIndex: 1,
-  steps: steps.slice(0, 2),
-  compact: false,
+export const List02: Story = {
+  render: Template,
+  args: {
+    stepIndex: 1,
+    steps: steps.slice(0, 2),
+    compact: false,
+  },
 }
 
-export const List01 = Template.bind({})
-List01.args = {
-  stepIndex: 0,
-  steps: steps.slice(0, 1),
-  compact: false,
+export const List01: Story = {
+  render: Template,
+  args: {
+    stepIndex: 0,
+    steps: steps.slice(0, 1),
+    compact: false,
+  },
 }
 
-export const Vertical = Template.bind({})
-Vertical.args = {
-  stepIndex: 1,
-  containerWidth: 170,
-  collapseAtWidth: 160,
-  forceCollapse: false,
-  showContainer: false,
-  vertical: true,
-  compact: false,
-  steps,
+export const Vertical: Story = {
+  render: Template,
+  args: {
+    stepIndex: 1,
+    containerWidth: 170,
+    collapseAtWidth: 160,
+    forceCollapse: false,
+    showContainer: false,
+    vertical: true,
+    compact: false,
+    steps,
+  },
 }
 
-export const Compact = Template.bind({})
-Compact.args = {
-  stepIndex: 1,
-  steps,
-  compact: true,
+export const Compact: Story = {
+  render: Template,
+  args: {
+    stepIndex: 1,
+    steps,
+    compact: true,
+  },
 }

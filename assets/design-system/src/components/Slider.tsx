@@ -202,7 +202,7 @@ function Slider({
   return (
     <SliderWrap
       $percent={(state.getThumbPercent(0) || 0) * 100}
-      $size={size}
+      $size={size ?? '100%'}
       $thumbRadius={thumbRadius}
       $colorized={colorized}
     >

@@ -14,8 +14,8 @@ export type LoopingLogoAlternativeProps = ComponentPropsWithRef<'div'> & {
   scale?: number
 }
 
-export const scaling = (scale: number): { transform: string } =>
-  scale ? { transform: `scale(${scale})` } : null
+export const scaling = (scale?: number): { transform: string } | undefined =>
+  scale ? { transform: `scale(${scale})` } : undefined
 
 const GradientBackground = styled.div<{ $scale?: number }>`
   @keyframes rotateGradient {

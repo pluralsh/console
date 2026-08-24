@@ -304,14 +304,14 @@ export function DynamicBreadcrumbs({
   minLength = 0,
   maxLength = Infinity,
   collapsible = true,
-  breadcrumbs,
+  breadcrumbs = [],
   wrapperRef: transitionRef,
   ...props
 }: BreadcrumbPropsBase & {
-  wrapperRef?: RefObject<HTMLDivElement>
+  wrapperRef?: RefObject<HTMLDivElement | null>
   style: any
 }) {
-  const wrapperRef = useRef<HTMLDivElement | undefined>(undefined)
+  const wrapperRef = useRef<HTMLDivElement | null>(null)
   const [visibleListId, setVisibleListId] = useState<string>('')
   const children: ReactNode[] = []
 
@@ -403,7 +403,7 @@ export function Breadcrumbs({
 }: BreadcrumbsProps & Omit<NavProps, 'ref'>) {
   const contextCrumbs = useContext(BreadcrumbsContext)?.breadcrumbs
   const breadcrumbs = propsCrumbs || contextCrumbs
-  const nodeRef = useRef<HTMLDivElement>(undefined)
+  const nodeRef = useRef<HTMLDivElement>(null)
 
   if (!breadcrumbs) {
     throw Error(

@@ -98,7 +98,7 @@ function PopoverCornerScale({
       {...portalProps}
     >
       <PopoverWrapper
-        $isOpen={isOpen}
+        $isOpen={!!isOpen}
         $placement={floating.placement}
         className="popoverWrapper"
         ref={floating.refs.setFloating}

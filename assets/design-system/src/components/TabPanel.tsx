@@ -79,12 +79,12 @@ function WrappedTabPanel({
   mode,
   ...props
 }: WrappedTabPanelProps) {
-  const ref = useRef(undefined)
+  const ref = useRef(null)
   let { tabPanelProps } = useTabPanel(stateProps, state, ref)
   const { visuallyHiddenProps } = useVisuallyHidden()
 
   if (mode === 'multipanel') {
-    const thisTabProps = tabProps[tabKey]
+    const thisTabProps = tabKey != null ? tabProps[tabKey] : undefined
 
     if (!thisTabProps) {
       console.warn(
@@ -92,8 +92,8 @@ function WrappedTabPanel({
       )
     }
     tabPanelProps = {
-      'aria-labelledby': thisTabProps.id,
-      id: thisTabProps['aria-controls'],
+      'aria-labelledby': thisTabProps?.id,
+      id: thisTabProps?.['aria-controls'],
       ...(state.selectedKey !== tabKey
         ? { ...visuallyHiddenProps, 'aria-hidden': true }
         : {}),
@@ -164,7 +164,7 @@ function TabPanel({
     return (
       <WrappedTabPanel
         mode={mode}
-        as={as}
+        as={as!}
         renderer={renderer}
         stateRef={stateRef}
         tabKey={tabKey}
@@ -179,8 +179,8 @@ function TabPanel({
 
   return (
     <TabPanelClone
-      tabRef={as.props?.ref}
-      cloneAs={as}
+      tabRef={as?.props?.ref}
+      cloneAs={as!}
     >
       {props.children}
     </TabPanelClone>

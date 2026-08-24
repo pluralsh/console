@@ -1,11 +1,12 @@
 import { Div, Flex, H1 } from 'honorable'
-import { useRef, useState } from 'react'
+import { type ComponentProps, useRef, useState } from 'react'
 
 import { type Key } from '@react-types/shared'
 
 import { SubTab, TabList, type TabListStateProps, TabPanel } from '..'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'ButtonGroup',
   component: SubTab,
   argTypes: {
@@ -16,7 +17,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const tabs = {
   lions: {
@@ -42,7 +46,9 @@ const tabs = {
 }
 
 function TemplateBasic(args: any) {
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef(null) as unknown as ComponentProps<
+    typeof TabList
+  >['stateRef']
   const [selectedKey, setSelectedKey] = useState<Key>('1')
   const orientation = 'horizontal'
   const tabListStateProps: TabListStateProps = {
@@ -101,7 +107,9 @@ function TemplateBasic(args: any) {
   )
 }
 
-export const Default = TemplateBasic.bind({})
-Default.args = {
-  size: 'small',
+export const Default: Story = {
+  render: TemplateBasic,
+  args: {
+    size: 'small',
+  },
 }

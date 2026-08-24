@@ -79,7 +79,7 @@ function Stepper({
   forceCollapse = false,
   compact = false,
 }: StepperProps) {
-  const eltRef = useRef<HTMLDivElement>(undefined)
+  const eltRef = useRef<HTMLDivElement>(null)
   const mergedRef = mergeRefs(ref, eltRef)
   const [collapseTitles, setCollapseTitles] = useState(true)
 
@@ -90,7 +90,7 @@ function Stepper({
       return
     }
     setCollapseTitles(
-      forceCollapse || eltRef?.current?.clientWidth < collapseAtWidth
+      !!forceCollapse || (eltRef.current?.clientWidth ?? 0) < collapseAtWidth
     )
   }, [forceCollapse, eltRef, collapseAtWidth, vertical])
 

@@ -27,12 +27,12 @@ function ValidatedInput({
   width,
   ...input
 }: ValidatedInputProps) {
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<ValidationResponse>(null)
   const wrappedOnChange = useCallback(
     (e: any) => {
       if (onChange) onChange(e)
       setError(
-        validation && e.target?.value ? validation(e.target.value) : undefined
+        validation && e.target?.value ? validation(e.target.value) : null
       )
     },
     [onChange, validation]

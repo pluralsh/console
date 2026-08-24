@@ -17,7 +17,7 @@ function ArrowScroll({
   color?: SemanticColorKey
   opacity?: number
 } & ComponentPropsWithRef<'div'>) {
-  const containerRef = useRef<HTMLDivElement>(undefined)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [showLeftGradient, setShowLeftGradient] = useState(false)
   const [showRightGradient, setShowRightGradient] = useState(false)
 

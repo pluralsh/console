@@ -27,7 +27,7 @@ export const Th = styled.th<{
       alignItems: 'center',
       display: hideHeader ? 'none' : 'flex',
       position: 'relative',
-      backgroundColor: theme.colors[tableHeaderColor(fillLevel, highlight)],
+      backgroundColor: theme.colors[tableHeaderColor(fillLevel, !!highlight)],
       zIndex: 4,
       borderBottom: highlight
         ? undefined

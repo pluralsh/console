@@ -38,7 +38,8 @@ type StepConfig<T = unknown> = {
   dependencyOf?: Set<string>
 }
 
-const createWizardContext = <T = any>() => createContext<ContextProps<T>>(null)
+const createWizardContext = <T = any>() =>
+  createContext<ContextProps<T> | null>(null)
 const WizardContext = createWizardContext()
 
 export type { ContextProps, StepConfig }

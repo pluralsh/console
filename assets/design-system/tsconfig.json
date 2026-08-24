@@ -5,14 +5,8 @@
     "baseUrl": ".",
     "rootDir": "./src",
     "outDir": "dist",
-
-    // TODO: get rid of all these once errors are fixed
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false
+    // Override parent tsconfig.app.json (keeps noImplicitAny off for console)
+    "noImplicitAny": true
   },
   "include": ["src/**/*"]
 }

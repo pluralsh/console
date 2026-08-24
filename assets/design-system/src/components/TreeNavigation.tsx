@@ -195,7 +195,7 @@ function NavLink({
             onClick={(e) => {
               e.stopPropagation()
               e.preventDefault()
-              onClickCaret()
+              onClickCaret?.()
             }}
           />
         )}
@@ -347,12 +347,12 @@ export function TreeNavEntry({
   return (
     <NavEntryContext.Provider value={navEntryContextVal}>
       <NavLink
-        isSubSection={hasSections}
+        isSubSection={!!hasSections}
         href={href}
         icon={icon}
         desktop={desktop}
-        isOpen={isOpen && hasSections}
-        active={active && !hasActiveDescendents}
+        isOpen={!!(isOpen && hasSections)}
+        active={!!(active && !hasActiveDescendents)}
         activeSecondary={hasActiveDescendents}
         onClick={(e: MouseEventHandler<HTMLAnchorElement>) => {
           onClick?.(e)

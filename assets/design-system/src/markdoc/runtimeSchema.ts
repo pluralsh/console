@@ -7,13 +7,17 @@ import { type Config } from '@markdoc/markdoc'
 
 function displayName(name: string) {
   // Pascal case
-  return name
-    .match(/[a-z]+/gi)
-    .map((word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
-    .join('')
+  return (
+    name
+      .match(/[a-z]+/gi)
+      ?.map(
+        (word) => word.charAt(0).toUpperCase() + word.substr(1).toLowerCase()
+      )
+      .join('') ?? name
+  )
 }
 
-function transformRecord(config: Record<string, any>) {
+function transformRecord(config?: Record<string, any>) {
   const output: Record<string, any> = {}
   const components: Record<string, any> = {}
 

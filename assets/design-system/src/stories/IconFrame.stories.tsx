@@ -1,11 +1,15 @@
 import { Div, Flex, H1, P } from 'honorable'
 
 import { IconFrame, type IconFrameProps, TrashCanIcon } from '../index'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Icon Frame',
   component: IconFrame,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 type Type = 'secondary' | 'tertiary' | 'floating'
 
@@ -27,47 +31,53 @@ function Template({
   tooltipProps,
   ...props
 }: Partial<IconFrameProps>) {
-  return types.map((type) => (
-    <Div key={type}>
-      <H1
-        caption
-        marginBottom="xxsmall"
-      >
-        type=&quot;{type}&quot;
-      </H1>
-      <Flex
-        gap="xsmall"
-        marginBottom="xlarge"
-        alignItems="center"
-        flexWrap="wrap"
-      >
-        {sizes.map((size) => (
-          <>
-            <P caption>size=&quot;{size}&quot;</P>
-            <IconFrame
-              size={size || 'medium'}
-              clickable={clickable === undefined ? true : clickable}
-              icon={icon || <TrashCanIcon />}
-              textValue={textValue || 'Delete'}
-              tooltip={tooltip}
-              tooltipProps={tooltipProps}
-              type={type}
-              {...props}
-            />
-          </>
-        ))}
-      </Flex>
-    </Div>
-  ))
+  return (
+    <>
+      {types.map((type) => (
+        <Div key={type}>
+          <H1
+            caption
+            marginBottom="xxsmall"
+          >
+            type=&quot;{type}&quot;
+          </H1>
+          <Flex
+            gap="xsmall"
+            marginBottom="xlarge"
+            alignItems="center"
+            flexWrap="wrap"
+          >
+            {sizes.map((size) => (
+              <>
+                <P caption>size=&quot;{size}&quot;</P>
+                <IconFrame
+                  size={size || 'medium'}
+                  clickable={clickable === undefined ? true : clickable}
+                  icon={icon || <TrashCanIcon />}
+                  textValue={textValue || 'Delete'}
+                  tooltip={tooltip}
+                  tooltipProps={tooltipProps}
+                  type={type}
+                  {...props}
+                />
+              </>
+            ))}
+          </Flex>
+        </Div>
+      ))}
+    </>
+  )
 }
 
-export const Default = Template.bind({})
-Default.args = {
-  clickable: true,
-  tooltip: true,
-  tooltipProps: {
-    displayOn: 'hover',
-    placement: 'top',
+export const Default: Story = {
+  render: Template,
+  args: {
+    clickable: true,
+    tooltip: true,
+    tooltipProps: {
+      displayOn: 'hover',
+      placement: 'top',
+    },
+    textValue: 'Delete',
   },
-  textValue: 'Delete',
 }

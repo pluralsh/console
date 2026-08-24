@@ -58,7 +58,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
 type TabInterfaceT = 'tabs' | 'dropdown'
 
 type TabsContext = {
-  tabInterface: TabInterfaceT
+  tabInterface?: TabInterfaceT
   setTabInterface: (arg: TabInterfaceT) => void
   tabStateRef?: RefObject<any>
   selectedKey?: string
@@ -206,12 +206,13 @@ function CodeTabs() {
     setTabInterface,
 
     tabStateRef,
-    tabs,
+    tabs: tabsProp,
     selectedKey,
     onSelectionChange,
   } = useContext(TabsContext)
-  const tabsRef = useRef<HTMLDivElement>(undefined)
-  const tabsWrapRef = useRef<HTMLDivElement>(undefined)
+  const tabs = tabsProp ?? []
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const tabsWrapRef = useRef<HTMLDivElement>(null)
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
     orientation: 'horizontal',
@@ -236,10 +237,12 @@ function CodeTabs() {
     }, [setTabInterface])
   )
 
+  if (!tabStateRef) return null
+
   return (
     <TabsWrap
       ref={tabsWrapRef}
-      $isDisabled={tabListStateProps.isDisabled}
+      $isDisabled={!!tabListStateProps.isDisabled}
     >
       <TabList
         className="my-tab-list"
@@ -271,7 +274,12 @@ function CodeTabs() {
 }
 
 function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
-  const { tabs, selectedKey, onSelectionChange } = useContext(TabsContext)
+  const {
+    tabs: tabsProp,
+    selectedKey,
+    onSelectionChange,
+  } = useContext(TabsContext)
+  const tabs = tabsProp ?? []
 
   const selectedTab = tabs.find((tab) => tab.key === selectedKey) || tabs[0]
 
@@ -283,7 +291,7 @@ function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
         width="max-content"
         placement="right"
         triggerButton={
-          <TabsDropdownButton>{selectedTab.label} </TabsDropdownButton>
+          <TabsDropdownButton>{selectedTab?.label} </TabsDropdownButton>
         }
       >
         {tabs.map((tab) => (
@@ -409,12 +417,12 @@ function CodeUnstyled({
 }: CodeProps) {
   const parentFillLevel = useFillLevel()
   const inferredFillLevel = fillLevelProp ?? parentFillLevel
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef<any>(null)
   const [selectedTabKey, setSelectedTabKey] = useState<string>(
     tabs?.[0]?.key || ''
   )
   const theme = useTheme()
-  const [tabInterface, setTabInterface] = useState<TabInterfaceT>()
+  const [tabInterface, setTabInterface] = useState<TabInterfaceT | undefined>()
 
   props.height = props.height || undefined
   const hasSetHeight = !!props.height || !!props.minHeight
@@ -508,7 +516,7 @@ function CodeUnstyled({
             isStreaming={isStreaming}
             setMermaidError={setMermaidError}
           >
-            {children}
+            {children ?? ''}
           </CodeContent>
         )}
       </Flex>

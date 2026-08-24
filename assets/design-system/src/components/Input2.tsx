@@ -211,13 +211,13 @@ const InputAreaSC = styled.div((_) => ({
   flex: '1 1',
   overflowX: 'auto',
 }))
-const InputContentSC = styled.div<{ $padStart: keyof DefaultTheme['spacing'] }>(
-  ({ theme, $padStart }) => ({
-    display: 'flex',
-    alignSelf: 'stretch',
-    paddingLeft: theme.spacing[$padStart],
-  })
-)
+const InputContentSC = styled.div<{
+  $padStart?: keyof DefaultTheme['spacing'] | null
+}>(({ theme, $padStart }) => ({
+  display: 'flex',
+  alignSelf: 'stretch',
+  ...($padStart ? { paddingLeft: theme.spacing[$padStart] } : {}),
+}))
 
 function Input2({
   ref,
@@ -266,7 +266,7 @@ function Input2({
       (inputAreaRef.current?.getBoundingClientRect().width ?? 0)
 
     if (scrollDiff > 0) {
-      inputAreaRef.current.scrollTo({
+      inputAreaRef.current?.scrollTo({
         left: scrollDiff + 1,
         behavior: 'smooth',
       })
@@ -293,32 +293,36 @@ function Input2({
   const inputPadStart = startIcon ? null : hasStartContent ? 'small' : 'medium'
   const inputPadEnd = endIcon ? null : hasEndContent ? 'small' : 'medium'
 
-  const wrappedOnChange: InputPropsFull['onChange'] = useCallback(
+  const wrappedOnChange: NonNullable<InputPropsFull['onChange']> = useCallback(
     (e) => {
       onChange?.(e)
     },
     [onChange]
   )
 
-  const wrappedOnKeyDown: InputPropsFull['onKeyDown'] = useCallback(
-    (e) => {
-      if (e.key === 'Enter' && typeof onEnter === 'function') {
-        onEnter?.(e)
-      }
-      if (e.key === 'Backspace' && inputRef?.current?.selectionStart === 0) {
-        onDeleteInputContent?.(e)
-      }
-      if (typeof onKeyDown === 'function') {
-        onKeyDown?.(e)
-      }
-    },
-    [onDeleteInputContent, onEnter, onKeyDown]
-  )
+  const wrappedOnKeyDown: NonNullable<InputPropsFull['onKeyDown']> =
+    useCallback(
+      (e) => {
+        if (e.key === 'Enter' && typeof onEnter === 'function') {
+          onEnter?.(e)
+        }
+        if (e.key === 'Backspace' && inputRef?.current?.selectionStart === 0) {
+          onDeleteInputContent?.(e)
+        }
+        if (typeof onKeyDown === 'function') {
+          onKeyDown?.(e)
+        }
+      },
+      [onDeleteInputContent, onEnter, onKeyDown]
+    )
 
-  const outerOnClick: InputPropsFull['onClick'] = useCallback((e) => {
-    e.preventDefault()
-    inputRef?.current?.focus()
-  }, [])
+  const outerOnClick: NonNullable<InputPropsFull['onClick']> = useCallback(
+    (e) => {
+      e.preventDefault()
+      inputRef?.current?.focus()
+    },
+    []
+  )
 
   return (
     <InputRootSC

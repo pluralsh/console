@@ -2,6 +2,7 @@ import { type ComponentProps, useEffect, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { type Key } from '@react-types/shared'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   AppIcon,
@@ -25,9 +26,9 @@ import {
   WrapWithIf,
 } from '../index'
 
-export default {
+const meta = {
   title: 'Select',
-  component: 'Select',
+  component: Select,
   argTypes: {
     onFillLevel: {
       options: [0, 1, 2, 3],
@@ -42,8 +43,9 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
 
+export default meta
 const H4 = styled.h4(({ theme }) => ({
   ...theme.partials.text.subtitle1,
   margin: 0,
@@ -121,7 +123,7 @@ const items = [
     key: 'sushi',
     label: 'Sushi',
     description: 'With ham and cheese',
-    chips: null,
+    chips: [],
     version: '0.2.26',
   },
   {
@@ -224,7 +226,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
 
   useTestKeyCapture()
 
-  const [selectedKey, setSelectedKey] = useState<Key>()
+  const [selectedKey, setSelectedKey] = useState<Key | null>(null)
   const shownStep = 4
   const [shownLimit, setShownLimit] = useState<number>(shownStep)
 
@@ -329,7 +331,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           }}
           defaultOpen={false}
           leftContent={<SearchIcon />}
-          rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
+          rightContent={<ListBoxItemChipList chips={curItem?.chips ?? []} />}
           dropdownFooterFixed={
             <ListBoxFooterPlus onClick={createNewHandler}>
               Create new
@@ -395,18 +397,18 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             rightContent={
-              curItem && (
+              curItem ? (
                 <ListBoxItemChipList
                   maxVisible={0}
                   showExtra
                   chips={curItem.chips}
                 />
-              )
+              ) : undefined
             }
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -442,18 +444,18 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             rightContent={
-              curItem && (
+              curItem ? (
                 <ListBoxItemChipList
                   maxVisible={0}
                   showExtra
                   chips={curItem.chips}
                 />
-              )
+              ) : undefined
             }
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -521,7 +523,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           }}
           defaultOpen={false}
           leftContent={<SearchIcon />}
-          rightContent={<ListBoxItemChipList chips={curItem?.chips} />}
+          rightContent={<ListBoxItemChipList chips={curItem?.chips ?? []} />}
           dropdownFooterFixed={
             <ListBoxFooterPlus onClick={createNewHandler}>
               Create new
@@ -588,9 +590,9 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -627,18 +629,18 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
               if (!open) setShownLimit(shownStep)
             }}
             rightContent={
-              curItem && (
+              curItem ? (
                 <ListBoxItemChipList
                   maxVisible={0}
                   showExtra
                   chips={curItem.chips}
                 />
-              )
+              ) : undefined
             }
             dropdownFooter={
-              shownLimit < items.length && (
+              shownLimit < items.length ? (
                 <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-              )
+              ) : undefined
             }
           >
             {items.slice(0, shownLimit).map(({ key, chips, version }) => (
@@ -662,6 +664,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {}
+export const Default: StoryObj<Parameters<typeof Template>[0]> = {
+  render: Template,
+  args: {},
+}
