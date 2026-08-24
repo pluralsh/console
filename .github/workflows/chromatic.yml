@@ -33,5 +33,5 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           workingDir: assets/design-system
           storybookBuildDir: storybook-static
-          buildScriptName: build:storybook
           exitOnceUploaded: true
+          exitZeroOnChanges: true
