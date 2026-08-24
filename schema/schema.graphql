@@ -2065,6 +2065,9 @@ input AgentRuntimeAttributes {
 
   "the name of the scm connection to use for this runtime"
   scmConnection: String
+
+  "default model override for runs on this runtime"
+  model: WorkbenchJobModelAttributes
 }
 
 input AgentBindingAttributes {
@@ -2364,6 +2367,9 @@ type AgentRuntime {
 
   "default interval in seconds between babysit checks for runs on this runtime"
   babysitInterval: Int
+
+  "default model override for runs on this runtime"
+  model: WorkbenchJobModel
 
   "the cluster this runtime is running on"
   cluster: Cluster

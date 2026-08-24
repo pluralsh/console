@@ -84,11 +84,12 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     end
   end
 
-  defp preload_run({result, %AgentRun{} = run}), do: {result, Repo.preload(run, [:pull_requests])}
+  defp preload_run({result, %AgentRun{} = run}),
+    do: {result, Repo.preload(run, [:pull_requests, :runtime])}
 
-  defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage}} = pass, job) when result in [:failed, :success] do
-    callback  = Environment.engine_opts(job) |> Keyword.fetch!(:usage_callback)
-    callback.(AIUsage.to_map(usage))
+  defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage} = run} = pass, job)
+       when result in [:failed, :success] do
+    Environment.runtime_usage_callback(job, run, AIUsage.to_map(usage))
     pass
   end
   defp record_usage(result, _), do: result

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
@@ -121,4 +122,36 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Error("ANALYZE mode coreTools should not include WriteFileTool or EditTool")
 		}
 	})
+}
+
+func TestSettingsTemplate_ExternalMCPServer(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
+
+	input := &ConfigTemplateInput{
+		Model:         ModelGemini31FlashLite,
+		RepositoryDir: "/repo",
+		AgentRunID:    "run-123",
+		AgentRunMode:  console.AgentRunModeWrite,
+	}
+	_, content, err := settings(input)
+	if err != nil {
+		t.Fatalf("settings() failed: %v", err)
+	}
+
+	var out map[string]any
+	if err := json.Unmarshal([]byte(content), &out); err != nil {
+		t.Fatalf("generated content is not valid JSON: %v", err)
+	}
+	linear := out["mcpServers"].(map[string]any)["linear"].(map[string]any)
+	if linear["httpUrl"] != "https://mcp.linear.app/mcp" {
+		t.Fatalf("httpUrl = %v", linear["httpUrl"])
+	}
+	headers := linear["headers"].(map[string]any)
+	if headers["Authorization"] != "Bearer secret" {
+		t.Fatalf("headers = %#v", headers)
+	}
+	includeTools := linear["includeTools"].([]any)
+	if len(includeTools) != 1 || includeTools[0] != "list_issues" {
+		t.Fatalf("includeTools = %#v", includeTools)
+	}
 }

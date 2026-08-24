@@ -600,6 +600,8 @@ type AgentRuntime struct {
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
 	// default interval in seconds between babysit checks for runs on this runtime
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// default model override for runs on this runtime
+	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// the cluster this runtime is running on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the policy for creating runs on this runtime
@@ -628,6 +630,8 @@ type AgentRuntimeAttributes struct {
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 	// the name of the scm connection to use for this runtime
 	ScmConnection *string `json:"scmConnection,omitempty"`
+	// default model override for runs on this runtime
+	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 }
 
 type AgentRuntimeConnection struct {
@@ -9284,6 +9288,8 @@ type StackRun struct {
 	Approval *bool `json:"approval,omitempty"`
 	// the commit message
 	Message *string `json:"message,omitempty"`
+	// the committer email of the commit that spawned this run
+	Committer *string `json:"committer,omitempty"`
 	// when this run was approved
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the subdirectory you want to run the stack's commands w/in

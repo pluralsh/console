@@ -1,6 +1,6 @@
 defmodule Console.Schema.AgentRuntime do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, PolicyBinding, ScmConnection}
+  alias Console.Schema.{Cluster, PolicyBinding, ScmConnection, WorkbenchJob.Modes}
   alias Console.Deployments.{Policies.Rbac, Pr.Git}
 
   defenum Type, claude: 0, opencode: 1, gemini: 3, custom: 4, codex: 5, pi: 6
@@ -14,6 +14,7 @@ defmodule Console.Schema.AgentRuntime do
     field :ai_proxy,             :boolean, default: false
     field :babysit_interval,     :integer
 
+    embeds_one :model, Modes.Model, on_replace: :update
 
     belongs_to :cluster,    Cluster
     belongs_to :connection, ScmConnection
@@ -67,6 +68,7 @@ defmodule Console.Schema.AgentRuntime do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:model, with: &Modes.model_changeset/2)
     |> unique_constraint(:default, message: "only one default runtime can be set at once")
     |> unique_constraint(:name, name: :agent_runtimes_cluster_id_name_uniq_index, message: "a runtime with this name already exists for this cluster")
     |> validate_length(:name, max: 255)
