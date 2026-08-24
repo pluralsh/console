@@ -3,7 +3,7 @@ import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 
 export function useLegacyAiChatEnabled() {
   const aiEnabled = useAIEnabled()
-  const { hasWorkbenches, loading } = useWorkbenchOptions()
+  const { confirmedNoWorkbenches } = useWorkbenchOptions()
 
-  return !!aiEnabled && !hasWorkbenches && !loading
+  return !!aiEnabled && confirmedNoWorkbenches
 }

@@ -42,7 +42,8 @@ export const getAIBreadcrumbs = (tab: string = '') => [
 export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
-  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions()
+  const { confirmedNoWorkbenches, loading: workbenchesLoading } =
+    useWorkbenchOptions()
   const [dismissedAIDialog, setDismissedAIDialog] = usePersistedState(
     DISMISSED_AI_ENABLED_DIALOG_KEY,
     false
@@ -57,14 +58,18 @@ export function AI() {
     () => [
       { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
       { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
-      ...(!hasWorkbenches && !workbenchesLoading
+      ...(confirmedNoWorkbenches
         ? [{ label: 'Chat threads', path: AI_THREADS_REL_PATH }]
         : []),
     ],
-    [hasWorkbenches, workbenchesLoading]
+    [confirmedNoWorkbenches]
   )
 
-  if (tab === AI_THREADS_REL_PATH && hasWorkbenches) {
+  if (
+    tab === AI_THREADS_REL_PATH &&
+    !workbenchesLoading &&
+    !confirmedNoWorkbenches
+  ) {
     return (
       <Navigate
         replace
@@ -94,7 +99,7 @@ export function AI() {
           />
         </StretchedFlex>
       </HeaderSC>
-      {loading ? (
+      {loading || (tab === AI_THREADS_REL_PATH && workbenchesLoading) ? (
         <RectangleSkeleton
           $height="100%"
           $width="100%"

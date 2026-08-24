@@ -69,7 +69,7 @@ export function ChatWithAIButton({
     closeChatbot,
   } = useChatbot()
   const aiEnabled = useAIEnabled()
-  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions()
+  const { confirmedNoWorkbenches } = useWorkbenchOptions()
   const bodyText = aiEnabled ? bodyTextProp : 'Enable AI to chat'
 
   const handleClick = () => {
@@ -82,7 +82,7 @@ export function ChatWithAIButton({
     })
   }
 
-  if (hasWorkbenches || workbenchesLoading) return null
+  if (!confirmedNoWorkbenches) return null
   if (!alwaysShow && !insightId && !flowId) return null
 
   return (

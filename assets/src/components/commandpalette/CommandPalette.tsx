@@ -48,9 +48,8 @@ export default function CommandPalette({
   openServiceAccountImpersonation: () => void
 }) {
   const aiEnabled = useAIEnabled()
-  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions()
-  const threadsEnabled =
-    (aiEnabled ?? false) && !hasWorkbenches && !workbenchesLoading
+  const { confirmedNoWorkbenches } = useWorkbenchOptions()
+  const threadsEnabled = (aiEnabled ?? false) && confirmedNoWorkbenches
   const theme = useTheme()
   const { setCmdkOpen, initialTab } = use(CommandPaletteContext)
   const onCmdKClose = () => setCmdkOpen(false)
