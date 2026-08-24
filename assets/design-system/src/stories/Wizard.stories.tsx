@@ -51,7 +51,7 @@ function Application({ ...props }: any): ReactElement<any> {
         color="text-xlight"
         paddingBottom="medium"
       >
-        configure {active.label}
+        configure {active?.label}
       </P>
       <FormField
         label="Domain"

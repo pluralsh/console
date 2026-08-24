@@ -21,7 +21,7 @@
     "build:fix:storybook": "perl -pi -w -e 's/%40/@/g;' storybook-static/index.html",
     "chromatic": "chromatic --storybook-build-dir=storybook-static --exit-once-uploaded",
     "storybook:serve-static": "yarn build:storybook && http-server storybook-static",
-    "build": "rimraf dist && tsc --noEmit && vite build",
+    "build": "rimraf dist && tsc --build && vite build",
     "build:no-tsc": "rimraf dist && vite build",
     "build:watch": "rimraf dist && vite build --watch",
     "clean": "rimraf storybook-static dist",
