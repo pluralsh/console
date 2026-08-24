@@ -12,13 +12,14 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { useMemo, useState } from 'react'
-import { Link, Outlet, useMatch } from 'react-router-dom'
+import { Link, Navigate, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
   AI_AGENT_RUNS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from 'routes/aiRoutesConsts'
+import { WORKBENCHES_ABS_PATH } from 'routes/workbenchesRoutesConsts'
 import {
   AI_SETTINGS_ABS_PATH,
   AI_SETTINGS_AI_PROVIDER_ABS_PATH,
@@ -28,15 +29,10 @@ import {
   useAIEnabled,
   useLoadingDeploymentSettings,
 } from '../contexts/DeploymentSettingsContext'
+import { useWorkbenchOptions } from '../workbenches/useWorkbenchOptions'
 import { AIDisabledState } from './AIThreads'
 
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
-
-const directory: SubtabDirectory = [
-  { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
-  { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
-  { label: 'Chat threads', path: AI_THREADS_REL_PATH },
-]
 
 export const getAIBreadcrumbs = (tab: string = '') => [
   { label: 'plural ai', url: AI_ABS_PATH },
@@ -46,6 +42,7 @@ export const getAIBreadcrumbs = (tab: string = '') => [
 export function AI() {
   const tab = useMatch(`${AI_ABS_PATH}/:tab/*`)?.params.tab
   const aiEnabled = useAIEnabled()
+  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions()
   const [dismissedAIDialog, setDismissedAIDialog] = usePersistedState(
     DISMISSED_AI_ENABLED_DIALOG_KEY,
     false
@@ -56,6 +53,25 @@ export function AI() {
     aiEnabled === false && !dismissedAIDialog && !sessionDismissed
   const loading = useLoadingDeploymentSettings()
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
+  const directory: SubtabDirectory = useMemo(
+    () => [
+      { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
+      { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
+      ...(!hasWorkbenches && !workbenchesLoading
+        ? [{ label: 'Chat threads', path: AI_THREADS_REL_PATH }]
+        : []),
+    ],
+    [hasWorkbenches, workbenchesLoading]
+  )
+
+  if (tab === AI_THREADS_REL_PATH && hasWorkbenches) {
+    return (
+      <Navigate
+        replace
+        to={WORKBENCHES_ABS_PATH}
+      />
+    )
+  }
 
   const handleDismiss = () => {
     if (dontShowAgain) setDismissedAIDialog(true)

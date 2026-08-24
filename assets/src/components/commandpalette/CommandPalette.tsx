@@ -23,6 +23,7 @@ import { AITableActions } from '../ai/AITableActions.tsx'
 import { AIEntryLabel, getThreadTimestamp } from '../ai/AITableEntry.tsx'
 import { ChatInput } from '../ai/chatbot/input/ChatInput.tsx'
 import { useAIEnabled } from '../contexts/DeploymentSettingsContext.tsx'
+import { useWorkbenchOptions } from '../workbenches/useWorkbenchOptions.ts'
 import { ButtonGroup } from '../utils/ButtonGroup.tsx'
 import { Body1BoldP, Body2P, CaptionP } from '../utils/typography/Text.tsx'
 import {
@@ -47,6 +48,9 @@ export default function CommandPalette({
   openServiceAccountImpersonation: () => void
 }) {
   const aiEnabled = useAIEnabled()
+  const { hasWorkbenches, loading: workbenchesLoading } = useWorkbenchOptions()
+  const threadsEnabled =
+    (aiEnabled ?? false) && !hasWorkbenches && !workbenchesLoading
   const theme = useTheme()
   const { setCmdkOpen, initialTab } = use(CommandPaletteContext)
   const onCmdKClose = () => setCmdkOpen(false)
@@ -54,6 +58,10 @@ export default function CommandPalette({
   const [tab, setTab] = useState<CommandPaletteTab>(initialTab)
   const [cmdValue, setCmdValue] = useState('')
   const [historyValue, setHistoryValue] = useState('')
+  const activeTab =
+    tab === CommandPaletteTab.Threads && !threadsEnabled
+      ? CommandPaletteTab.Commands
+      : tab
 
   // only show hidden commands if the user has typed something
   const commands = useCommands({
@@ -64,6 +72,7 @@ export default function CommandPalette({
 
   const { loading, history, fetchNextPage, pageInfo } = useHistory({
     filter: historyValue,
+    skip: !threadsEnabled,
     component: (thread) => (
       <HistoryItem
         key={thread.id}
@@ -78,7 +87,7 @@ export default function CommandPalette({
         {
           path: CommandPaletteTab.Threads,
           label: CommandPaletteTab.Threads,
-          enabled: aiEnabled ?? false,
+          enabled: threadsEnabled,
         },
         {
           path: CommandPaletteTab.Commands,
@@ -87,7 +96,7 @@ export default function CommandPalette({
           enabled: true,
         },
       ].filter((d) => d.enabled),
-    [aiEnabled]
+    [threadsEnabled]
   )
 
   const onScroll = useCallback(
@@ -97,47 +106,49 @@ export default function CommandPalette({
         e.currentTarget.scrollHeight - 100
       if (
         isNearBottom &&
-        tab === CommandPaletteTab.Threads &&
+        activeTab === CommandPaletteTab.Threads &&
         pageInfo?.hasNextPage
       ) {
         fetchNextPage()
       }
     },
-    [fetchNextPage, pageInfo?.hasNextPage, tab]
+    [fetchNextPage, pageInfo?.hasNextPage, activeTab]
   )
 
   return (
     <>
       <div id="cmdk-input-wrapper">
         <CommandAdvancedInput
-          curTab={tab}
+          curTab={activeTab}
           cmdValue={cmdValue}
           onCmdValueChange={setCmdValue}
           onHistoryValueChange={setHistoryValue}
           onCmdKClose={onCmdKClose}
           numItems={
-            tab === CommandPaletteTab.Threads ? history.length : commands.length
+            activeTab === CommandPaletteTab.Threads
+              ? history.length
+              : commands.length
           }
         />
         {directory.length > 1 && (
           <div id="cmdk-input-tabs">
             <ButtonGroup
               directory={directory}
-              tab={tab}
+              tab={activeTab}
               onClick={(t) => setTab(t)}
             />
           </div>
         )}
       </div>
       <Command.List onScroll={onScroll}>
-        {tab === CommandPaletteTab.Threads && (
+        {activeTab === CommandPaletteTab.Threads && (
           <CommandPaletteHistory
             history={history}
             loading={loading}
             value={historyValue}
           />
         )}
-        {tab === CommandPaletteTab.Commands && (
+        {activeTab === CommandPaletteTab.Commands && (
           <CommandPaletteCommands
             value={cmdValue}
             items={commands}

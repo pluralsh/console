@@ -30,7 +30,7 @@ import { useLogin } from '../../contexts.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import { hasAccess } from '../../utils/persona.tsx'
 import { AIPanel } from '../AIPanel.tsx'
-import { useWorkbenchOptions } from '../insights/SendInsightToWorkbench.tsx'
+import { useWorkbenchOptions } from '../../workbenches/useWorkbenchOptions.ts'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
 import { useStreamBuffer } from './useStreamBuffer.tsx'
 

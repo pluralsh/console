@@ -18,12 +18,10 @@ import {
   useApplyScalingRecommendationMutation,
 } from 'generated/graphql'
 
-import {
-  SendToWorkbenchForm,
-  useWorkbenchOptions,
-} from 'components/ai/insights/SendInsightToWorkbench'
+import { SendToWorkbenchForm } from 'components/ai/insights/SendInsightToWorkbench'
 import { GqlError } from 'components/utils/Alert'
 import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 
 import { PrStepKey } from 'components/self-service/pr/automations/CreatePrModal'
 import { usePrAutomationForm } from 'components/self-service/pr/automations/prConfigurationUtils'
