@@ -17,7 +17,7 @@ on:
 jobs:
   chromatic:
     name: Publish Storybook
-    if: ${{ github.actor != 'renovate[bot]' }}
+    if: ${{ github.actor != 'renovate[bot]' && github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
