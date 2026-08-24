@@ -1,0 +1,37 @@
+name: Design system / Chromatic
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "assets/design-system/**"
+      - ".github/workflows/chromatic.yml"
+
+jobs:
+  chromatic:
+    name: Publish Storybook
+    if: ${{ github.actor != 'renovate[bot]' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: assets
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: assets/yarn.lock
+      - run: yarn --immutable
+      - run: yarn workspace @pluralsh/design-system build:storybook
+      - uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: assets/design-system
+          storybookBuildDir: storybook-static
+          buildScriptName: build:storybook
+          exitOnceUploaded: true
