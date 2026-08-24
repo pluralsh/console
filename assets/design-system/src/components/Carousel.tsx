@@ -1,6 +1,6 @@
 import { keyframes } from '@emotion/react'
 import { Div, type DivProps, Flex } from 'honorable'
-import { Children, type ReactElement, useEffect, useState } from 'react'
+import { Children, type ReactElement, useEffect, useRef, useState } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
 type DotProps = DivProps & {
@@ -86,6 +86,34 @@ const transitionStyles = {
   },
 }
 
+function CarouselSlide({
+  active,
+  children,
+}: {
+  active: boolean
+  children: ReactElement
+}) {
+  const nodeRef = useRef<HTMLDivElement>(null)
+
+  return (
+    <CSSTransition
+      in={active}
+      appear
+      timeout={2000}
+      nodeRef={nodeRef}
+    >
+      <Flex
+        ref={nodeRef}
+        width="100%"
+        alignItems="center"
+        {...transitionStyles}
+      >
+        {children}
+      </Flex>
+    </CSSTransition>
+  )
+}
+
 function Carousel({
   autoAdvanceTime = 10000,
   children,
@@ -124,19 +152,7 @@ function Carousel({
             transform={`translateX(${-i * 100}%)`}
             pointerEvents={activeIndex === i ? 'auto' : 'none'}
           >
-            <CSSTransition
-              in={activeIndex === i}
-              appear
-              timeout={2000}
-            >
-              <Flex
-                width="100%"
-                alignItems="center"
-                {...transitionStyles}
-              >
-                {child}
-              </Flex>
-            </CSSTransition>
+            <CarouselSlide active={activeIndex === i}>{child}</CarouselSlide>
           </Flex>
         ))}
       </Flex>
