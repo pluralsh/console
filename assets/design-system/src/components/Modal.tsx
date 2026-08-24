@@ -165,8 +165,8 @@ function Modal({
       <ModalSC
         fillLevel={1}
         forwardedAs={asForm ? 'form' : undefined}
-        $width={sizeToWidth[size]}
-        $maxWidth={maxWidth}
+        $width={sizeToWidth[size] ?? 'auto'}
+        $maxWidth={maxWidth ?? 'auto'}
         {...(asForm ? formProps : {})}
       >
         <ModalContentSC

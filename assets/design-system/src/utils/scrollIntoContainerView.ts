@@ -38,9 +38,9 @@ function getNewScrollPos({
   scrollToPos,
   offset = 0,
 }: {
-  overshootStart?: number
-  overshootEnd?: number
-  curScrollPos?: number
+  overshootStart: number
+  overshootEnd: number
+  curScrollPos: number
   scrollToPos?: ScrollToPosition
   offset?: number
 }) {

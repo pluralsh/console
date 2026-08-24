@@ -30,7 +30,7 @@ const toStepperSteps = (items: Array<StepConfig>): StepperSteps =>
   })
 
 function ContextAwareStepper(): JSX.Element {
-  const { steps: wizardSteps, limit } = useContext(WizardContext)
+  const { steps: wizardSteps, limit } = useContext(WizardContext)!
   const { isFirst } = useNavigation()
   const { active } = useActive()
   const { selectedCount } = usePicker()
@@ -44,7 +44,7 @@ function ContextAwareStepper(): JSX.Element {
 
   return (
     <Stepper
-      stepIndex={filteredWizardSteps.findIndex((i) => i.key === active.key)}
+      stepIndex={filteredWizardSteps.findIndex((i) => i.key === active?.key)}
       steps={stepperSteps}
       compact
     />

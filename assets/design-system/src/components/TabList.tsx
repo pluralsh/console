@@ -91,13 +91,15 @@ function TabList({
   const state = useTabListState(finalStateProps)
 
   stateRef.current = {
-    updateTabPanel: () => {
-      console.warn("TabPanel didn't set stateRef.current.updateTabPanel")
-    },
     ...(stateRef.current || {}),
     state,
     stateProps: finalStateProps,
     tabProps: stateRef?.current?.tabProps || {},
+    updateTabPanel:
+      stateRef.current?.updateTabPanel ??
+      (() => {
+        console.warn("TabPanel didn't set stateRef.current.updateTabPanel")
+      }),
   }
   useEffect(() => {
     stateRef?.current?.updateTabPanel()
@@ -135,15 +137,17 @@ function TabList({
 
   return (
     <WrapWithIf
-      condition={scrollable}
+      condition={!!scrollable}
       wrapper={<ArrowScroll />}
     >
       <Flex
         {...tabListProps}
         {...props}
-        flexDirection={stateProps.orientation === 'vertical' ? 'column' : 'row'}
+        flexDirection={
+          stateProps?.orientation === 'vertical' ? 'column' : 'row'
+        }
         alignItems={
-          stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
+          stateProps?.orientation === 'vertical' ? 'flex-start' : 'flex-end'
         }
         css={{ ...(scrollable && { whiteSpace: 'nowrap' }) }}
         ref={mergedRef as any}
@@ -197,13 +201,16 @@ function TabRenderer({ item, state, stateProps, stateRef }: TabRendererProps) {
   const { tabProps: props } = useTab({ key: item.key }, state, ref)
 
   props['aria-controls'] =
-    props['aria-controls'] || props.id.replace('-tab-', '-tabpanel-')
+    props['aria-controls'] ||
+    (props.id ? props.id.replace('-tab-', '-tabpanel-') : undefined)
 
-  stateRef.current.tabProps = {
-    ...stateRef.current.tabProps,
-    ...{
-      [item.key]: { ...props },
-    },
+  if (stateRef.current) {
+    stateRef.current.tabProps = {
+      ...stateRef.current.tabProps,
+      ...{
+        [item.key]: { ...props },
+      },
+    }
   }
   const theme = useTheme()
 

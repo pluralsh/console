@@ -4,11 +4,15 @@ import { type ComponentProps, useState } from 'react'
 import { IconFrame, InfoIcon, Modal } from '..'
 
 import Tooltip from '../components/Tooltip'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Tooltip',
   component: Tooltip,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function CornerBox({ ref, ...props }: FlexProps) {
   return (
@@ -51,7 +55,7 @@ function ModalExample({
           >
             <Button
               secondary
-              onClick={() => onClose()}
+              onClick={() => onClose?.()}
             >
               Cancel
             </Button>
@@ -63,7 +67,7 @@ function ModalExample({
             <Button
               primary
               marginLeft="medium"
-              onClick={() => onClose()}
+              onClick={() => onClose?.()}
             >
               Done
             </Button>
@@ -163,6 +167,7 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}

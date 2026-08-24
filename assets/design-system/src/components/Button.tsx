@@ -123,7 +123,7 @@ const Button = memo(
         $size={buttonSize}
         $type={buttonType}
         $noPadding={props.padding === 'none'}
-        disabled={disabled}
+        disabled={disabled ?? undefined}
         css={{
           width,
           minWidth,

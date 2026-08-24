@@ -2,6 +2,7 @@ import { Div, Flex } from 'honorable'
 import { useState } from 'react'
 
 import { type Key } from '@react-types/shared'
+import type { Meta, StoryObj } from '@storybook/react'
 
 import {
   AppIcon,
@@ -14,10 +15,13 @@ import {
   PersonIcon,
 } from '../index'
 
-export default {
+const meta = {
   title: 'List Box',
   component: ListBox,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const portrait = (
   <AppIcon
@@ -98,7 +102,7 @@ const items = [
     key: 'sushi',
     label: 'Sushi',
     description: 'With ham and cheese',
-    chips: null,
+    chips: [],
     version: '0.2.26',
   },
   {
@@ -257,9 +261,9 @@ function Template() {
             setSelectedKey(key)
           }}
           footer={
-            shownLimit < items.length && (
+            shownLimit < items.length ? (
               <ListBoxFooterPlus>View more</ListBoxFooterPlus>
-            )
+            ) : undefined
           }
           onFooterClick={() => {
             setShownLimit(shownLimit + shownStep)
@@ -316,6 +320,7 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}

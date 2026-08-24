@@ -13,14 +13,18 @@ import { ListBoxItem } from '../components/ListBoxItem'
 import FormField from '../components/FormField'
 
 import { NavContextProviderStub } from './NavigationContextStub'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Breadcrumbs',
-  component: 'Breadcrumbs',
+  component: Breadcrumbs,
   argTypes: {
     maxLength: {},
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const crumbList: Breadcrumb[] = [
   {
@@ -159,18 +163,20 @@ function ManualTemplate(args: any) {
   )
 }
 
-export const UsingContext = WithContextTemplate.bind({})
-
-UsingContext.args = {
-  minLength: undefined,
-  maxLength: undefined,
-  collapsible: true,
+export const UsingContext: Story = {
+  render: WithContextTemplate,
+  args: {
+    minLength: undefined,
+    maxLength: undefined,
+    collapsible: true,
+  },
 }
 
-export const Manual = ManualTemplate.bind({})
-
-Manual.args = {
-  minLength: undefined,
-  maxLength: undefined,
-  collapsible: true,
+export const Manual: Story = {
+  render: ManualTemplate,
+  args: {
+    minLength: undefined,
+    maxLength: undefined,
+    collapsible: true,
+  },
 }

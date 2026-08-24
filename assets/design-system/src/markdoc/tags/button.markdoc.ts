@@ -27,7 +27,7 @@ export const button: BaseSchema = {
     const children = unwrapParagraphs(node.transformChildren(config))
     const attributes = node.transformAttributes(config)
 
-    return new Tag(this.render, attributes, children)
+    return new Tag(this.render as any, attributes, children)
   },
 }
 
@@ -42,6 +42,6 @@ export const buttonGroup: BaseSchema = {
     )
     const attributes = node.transformAttributes(config)
 
-    return new Tag(this.render, attributes, children)
+    return new Tag(this.render as any, attributes, children)
   },
 }

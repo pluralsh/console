@@ -175,7 +175,7 @@ function Checkbox({
   }
   const labelId = useId()
   const toggleState = useToggleState(toggleStateProps)
-  const inputRef = useRef<any>(undefined)
+  const inputRef = useRef<any>(null)
   const { isFocusVisible, focusProps } = useFocusRing()
   const { inputProps } = useCheckbox(
     {
@@ -195,9 +195,9 @@ function Checkbox({
   )
 
   const icon = indeterminate ? (
-    <IndeterminateIcon small={small} />
+    <IndeterminateIcon small={!!small} />
   ) : toggleState.isSelected ? (
-    <CheckedIcon small={small} />
+    <CheckedIcon small={!!small} />
   ) : null
 
   return (
@@ -209,8 +209,8 @@ function Checkbox({
         indeterminate,
       })}
       $isFocusVisible={isFocusVisible}
-      $small={small}
-      $disabled={disabled}
+      $small={!!small}
+      $disabled={!!disabled}
       display="flex"
       marginBottom="0"
       {...props}
@@ -224,7 +224,7 @@ function Checkbox({
             if (typeof onChange === 'function') {
               onChange(e)
             }
-            inputProps.onChange(e)
+            inputProps.onChange?.(e)
           }}
           ref={inputRef}
         />

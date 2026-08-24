@@ -15,7 +15,6 @@ export const getFocusPartials = () => {
     outline,
     button: outline,
     insetAbsolute: {
-      outline: 'none',
       position: 'absolute',
       content: "''",
       pointerEvents: 'none',

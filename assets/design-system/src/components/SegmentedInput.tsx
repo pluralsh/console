@@ -25,7 +25,7 @@ export type Segment = {
 
 export type SegmentedInputHandle = {
   clear: () => void
-  inputRef: React.RefObject<HTMLInputElement>
+  inputRef: React.RefObject<HTMLInputElement | null>
   setValue: (val: string) => void
 }
 

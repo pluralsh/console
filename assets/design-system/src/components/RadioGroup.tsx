@@ -1,9 +1,9 @@
 import { type PropsWithChildren, createContext } from 'react'
 import { Div, type DivProps } from 'honorable'
 import { type AriaRadioGroupProps, useRadioGroup } from 'react-aria'
-import { useRadioGroupState } from 'react-stately'
+import { type RadioGroupState, useRadioGroupState } from 'react-stately'
 
-export const RadioContext = createContext(null)
+export const RadioContext = createContext<RadioGroupState | null>(null)
 
 type RadioGroupProps = AriaRadioGroupProps & PropsWithChildren<DivProps>
 

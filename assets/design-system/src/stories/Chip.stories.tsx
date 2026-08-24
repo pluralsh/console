@@ -8,8 +8,9 @@ import Card from '../components/Card'
 import { SEVERITIES } from '../types'
 
 import { Link } from './NavigationContextStub'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Chip',
   component: Chip,
   argTypes: {
@@ -26,13 +27,16 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
 
-const sizes: ComponentProps<typeof Chip>['size'][] = [
+export default meta
+type Story = StoryObj<any>
+
+const sizes = [
   'small',
   'medium',
   'large',
-]
+] as const satisfies readonly NonNullable<ComponentProps<typeof Chip>['size']>[]
 
 const severities = SEVERITIES
 
@@ -232,13 +236,15 @@ function Template({ onFillLevel, asLink, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
-Default.args = {
-  closeButton: true,
-  clickable: true,
-  disabled: false,
-  asLink: false,
-  onFillLevel: 0,
-  tooltip: false,
-  condensed: false,
+export const Default: Story = {
+  render: Template,
+  args: {
+    closeButton: true,
+    clickable: true,
+    disabled: false,
+    asLink: false,
+    onFillLevel: 0,
+    tooltip: false,
+    condensed: false,
+  },
 }

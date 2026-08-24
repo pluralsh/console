@@ -42,7 +42,9 @@ function Tab({
       userSelect="none"
       cursor="pointer"
       borderBottom={
-        vertical ? null : `1px solid ${active ? 'border-primary' : 'border'}`
+        vertical
+          ? undefined
+          : `1px solid ${active ? 'border-primary' : 'border'}`
       }
       borderRight={
         vertical
@@ -53,7 +55,7 @@ function Tab({
                   ? 'border-fill-two'
                   : 'border'
             }`
-          : null
+          : undefined
       }
       {...borderRadiuses}
       _focusVisible={{
@@ -70,7 +72,7 @@ function Tab({
         align="center"
         borderBottom={
           vertical
-            ? null
+            ? undefined
             : `${TAB_INDICATOR_THICKNESS - 1}px solid ${
                 active ? theme.colors['border-primary'] : 'transparent'
               }`
@@ -84,7 +86,7 @@ function Tab({
                     ? theme.colors['border-fill-two']
                     : 'transparent'
               }`
-            : null
+            : undefined
         }
         {...borderRadiuses}
         color={

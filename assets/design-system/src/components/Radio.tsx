@@ -9,6 +9,8 @@ import {
 } from 'react-aria'
 import styled from 'styled-components'
 
+import { type RadioGroupState } from 'react-stately'
+
 import { RadioContext } from './RadioGroup'
 
 const CheckedIcon = memo(({ small }: { small: boolean }) => {
@@ -140,17 +142,17 @@ function Radio({
   ...props
 }: RadioProps) {
   const [checked, setChecked] = useState(defaultChecked || checkedProp)
-  const state = useContext(RadioContext) || {
+  const state = (useContext(RadioContext) || {
     setSelectedValue: () => {},
     selectedValue: checkedProp || checked ? value : undefined,
-  }
+  }) as RadioGroupState
 
   useEffect(() => {
     setChecked(checkedProp)
   }, [checkedProp])
 
   const labelId = useId()
-  const inputRef = useRef<any>(undefined)
+  const inputRef = useRef<any>(null)
   const { isFocusVisible, focusProps } = useFocusRing()
   const { inputProps, isSelected, isDisabled } = useRadio(
     {
@@ -167,7 +169,7 @@ function Radio({
     inputRef
   )
 
-  const icon = isSelected ? <CheckedIcon small={small} /> : null
+  const icon = isSelected ? <CheckedIcon small={!!small} /> : null
 
   return (
     <HonorableLabelStyled
@@ -176,8 +178,8 @@ function Radio({
       ref={ref}
       className={classNames({ checked: isSelected })}
       $isFocusVisible={isFocusVisible}
-      $small={small}
-      $disabled={isDisabled}
+      $small={!!small}
+      $disabled={!!isDisabled}
       display="flex"
       marginBottom="0"
       {...props}
@@ -192,7 +194,7 @@ function Radio({
               onChange(e)
             }
             setChecked(!checked)
-            inputProps.onChange(e)
+            inputProps.onChange?.(e)
           }}
           ref={inputRef}
         />

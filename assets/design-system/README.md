@@ -1,6 +1,6 @@
 # Plural's design system
 
-[Documentation](https://pluralsh-design.web.app)
+Storybook lives in this package (`yarn start`) and is published to Chromatic on design-system pushes.
 
 ## Installation
 
