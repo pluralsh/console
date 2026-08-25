@@ -1,4 +1,108 @@
 kube_changelog:
+- version: '1.36'
+  summary:
+    major_changes: ['Kubernetes v1.36 is a feature-heavy minor release with significant
+        Dynamic Resource Allocation (DRA) maturity, new/expanded workload & PodGroup
+        (gang/topology-aware) scheduling APIs, multiple GA promotions (MutatingAdmissionPolicy,
+        UserNamespacesSupport, NodeLogQuery, ProcMountType, KubeletPSI), and notable
+        operational changes in metrics, kubeadm, and client-go informer behavior.',
+      "Patch releases v1.36.1\u2013v1.36.4 are primarily stability/security updates,\
+        \ with several important DRA scheduling correctness fixes, a kubelet memory\
+        \ leak regression fix, and dependency security bumps."]
+    breaking_changes: ['Scheduler framework: PreBind plugins can now run in parallel;
+        plugin authors must update `PreBindPreFlight` to return a `PreBindPreFlightResult`
+        (returning nil retains sequential behavior, but parallel opt-in requires code
+        changes).', 'apiserver admission subsystem: internal use moved from `sets.String`
+        to `sets.Set[string]`, which is a breaking change for consumers of `NewLifecycle`.',
+      'kubeadm: integrated flex-volume support removed; continuing flex-volume use
+        requires custom KCM image (non-distroless), `--flex-volume-plugin-dir`, and
+        explicit mounts via `extraVolumes` before upgrading.', 'Scheduling framework
+        (early 1.36 cycle note): PostFilter plugins must return `PostFilterResult`
+        including preempted pods list when applicable; older plugins may need updates.',
+      "Metrics rename action required: `volume_operation_total_errors` \u2192 `volume_operation_errors_total`\
+        \ (kube-controller-manager) and `etcd_bookmark_counts` \u2192 `etcd_bookmark_total`\
+        \ (update dashboards/alerts)."]
+    deprecations: [Service `.spec.externalIPs` is now warned/deprecated (plan migrations
+        off externalIPs usage)., 'Direct access to `metav1.FieldsV1.Raw` is deprecated;
+        migrate to accessor helpers (`NewFieldsV1`, `GetRawBytes/String`, `SetRawBytes`).',
+      "Credential plugin allowlist field renamed `AllowlistEntry.Name` \u2192 `AllowlistEntry.Command`\
+        \ (update configs/tools).", '`git-repo` in-tree volume plugin disabled by
+        default with no option to re-enable (ensure no workloads depend on it).',
+      '`SeparateCacheWatchRPC` feature gate deprecated and locked false; removal planned
+        in a future release.']
+    removals: [Removed `scheduling.k8s.io/v1alpha1` Workload API (replaced by `scheduling.k8s.io/v1alpha2`
+        Workload/PodGroup)., Removed `SnapshotMetadataService` `v1alpha1` (now `v1beta1`).,
+      Removed in-tree Portworx volume plugin and GA `CSIMigrationPortworx` feature
+        gate (operations fully redirected to CSI)., Removed `v1alpha1` `WebhookAdmissionConfiguration`
+        (deprecated since v1.17 in favor of `apiserver.config.k8s.io/v1`)., Removed
+        feature gate `WatchFromStorageWithoutResourceVersion` (in 1.36)., Removed
+        GA feature gate `HonorPVReclaimPolicy` (locked enabled since v1.33).]
+    features: ['DRA: Device Binding Conditions graduated to beta and enabled by default;
+        device taints/tolerations graduated to beta; consumable capacity enabled by
+        default; partitionable devices promoted to beta; prioritized list promoted
+        to GA; plus new alpha capabilities like list-type attributes (`DRAListTypeAttributes`),
+        resource pool availability query API (`DRAResourcePoolStatus`), node-allocatable
+        resource mappings (`DRANodeAllocatableResources`), and optional CDI metadata
+        publishing.', 'Workload/PodGroup scheduling: Introduced/advanced `scheduling.k8s.io/v1alpha2`
+        Workload & PodGroup APIs, integrated with Job controllers for gang scheduling;
+        added topology-aware workload scheduling constructs (SchedulingConstraints,
+        PlacementGenerate/PlacementScore extension points, TopologyPlacement plugin)
+        behind `TopologyAwareWorkloadScheduling`; added workload-aware preemption
+        fields and behavior behind `WorkloadAwarePreemption`.', 'Admission & policy:
+        `MutatingAdmissionPolicy` promoted to GA and enabled by default; alpha manifest-based
+        admission control config (`ManifestBasedAdmissionControlConfig`) allows loading
+        webhook/CEL policies from static manifests at apiserver startup.', 'Kubelet
+        & node: `InPlacePodLevelResourcesVerticalScaling` promoted to beta and enabled
+        by default (pod-level CPU/memory in-place resize); `KubeletPSI` promoted to
+        GA; MemoryQoS improvements on cgroup v2 (tiered `memory.min`/`memory.low`)
+        and config additions (`MemoryReservationPolicy`); `ReloadKubeletClientCAFile`
+        enabled by default for dynamic client CA reload.', 'API server networking/validation:
+        `StrictIPCIDRValidation` enabled by default; improved APIService availability
+        check resilience; new TLS curve preferences flag; EgressSelector TLS `tlsServerName`
+        support.', 'Observability: Many core metrics promoted to beta; optional Prometheus
+        native histogram support across apiserver/controller-manager/scheduler/kubelet/kube-proxy
+        via feature gate; new alpha metrics for impersonation, informer cache RV/latency,
+        scheduler flushes, and more.', 'Client-go & informers: AtomicFIFO enabled
+        by default with more consistent store state during relist and better resync
+        contention handling; UnlockWhileProcessing enabled by default; new store sync
+        RV tracking (`LastStoreSyncResourceVersion`).', 'kubectl usability: multiple-condition
+        `kubectl wait`, new `--detach-keys` for attach/run, enhanced explain output
+        with external docs, better error messages and outputs, node wide output includes
+        ARCH, and other UX tweaks.', 'kubeadm: improved etcd learner handling and
+        join/init resilience; new `--allow-deprecated-api` for config validate; changes
+        to argument ordering behavior (overrides preserve order).']
+    bug_fixes: ['DRA correctness: Multiple fixes across 1.36.x for structured allocator
+        shared counter accounting, pool-name cache key collisions across drivers,
+        preventing double allocation scenarios, and preventing duplicate CDI device
+        IDs on retries of partially failed PrepareResources.', 'Scheduling stability:
+        Fixed race where a preemptor pod could get stuck unschedulable; fixed scheduler
+        panics related to DRA device taint rules and AllocationMode=All edge cases.',
+      'Kubelet stability: Fixed a 1.36 kubelet memory leak regression (leaked contexts
+        per Pod sync); fixed kubelet startup failure on ZFS due to missing cadvisor
+        plugin; improved plugin registration retry/backoff behavior.', 'Storage/network
+        reliability: Fixes around CSI republish error behavior that could leave stale
+        volume contents; kube-proxy fixes (nftables compatibility, reduced conntrack
+        cleanup complexity, IP reuse correctness) and Windows HNS endpoint cleanup
+        issues preventing DNS timeouts.', "Server-side apply regression fix (1.36):\
+        \ Restored prior behavior where patching container types wouldn\u2019t incorrectly\
+        \ return `422 required` for apply requests.", 'Security/maintenance: Updated
+        golang.org/x/net and golang.org/x/text (and related x/*) dependencies in v1.36.4
+        to include security updates; other dependency bumps (e.g., structured-merge-diff
+        patch).']
+    api_updates:
+      scheduling.k8s.io/v1alpha2: Introduces the newer Workload/PodGroup API version;
+        v1alpha1 Workload removed, so controllers/schedulers integrating these must
+        update.
+      resource.k8s.io (DRA): 'Multiple versioned capabilities: v1beta* for core DRA
+        features (binding conditions, taints/tolerations) and v1alpha1 APIs like ResourcePoolStatusRequest;
+        also introduces granular RBAC requirements when `DRAResourceClaimGranularStatusAuthorization`
+        is enabled.'
+      admissionregistration / policies: '`MutatingAdmissionPolicy` is GA (v1) and
+        enabled by default; plus optional manifest-based admission configuration via
+        AdmissionConfiguration static manifests.'
+      storage.k8s.io: VolumeAttributesClass locked enabled and preferred storage version
+        updated to `storage.k8s.io/v1`; SnapshotMetadataService promoted to v1beta1
+        (v1alpha1 removed).
 - version: '1.20'
   summary:
     major_changes: ["Kubernetes v1.20 is a feature-heavy minor release (with 1.20.1\u2013\

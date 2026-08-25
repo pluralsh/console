@@ -184,8 +184,8 @@ addons:
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
   - version: 1.64.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -201,8 +201,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.5', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.64.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260817-81577dc432-master']
   - version: 1.63.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -219,8 +219,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.63.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260720-39d457d26c-master']
   - version: 1.62.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -237,8 +237,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.62.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260615-b4199512ce-master']
   - version: 1.61.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -255,8 +255,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.2', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.61.1',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260601-2cbf4bdb47-master']
   - version: 1.60.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -272,8 +272,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.5', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.60.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260512-1f34ef0df3-master']
   - version: 1.59.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -290,8 +290,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.59.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260414-5a49ebcf1f-master']
   - version: 1.58.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -307,8 +307,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.58.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260316-e86cefa561-master']
   - version: 1.57.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -326,8 +326,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.57.1',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260316-e86cefa561-master']
   - version: 1.56.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -343,8 +343,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.18.0-eksbuild.1', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.56.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260217-29ba10ecec-master']
   - version: 1.55.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -360,8 +360,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.4', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.55.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260120-e2c483ffe9-master']
   - version: 1.54.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -378,8 +378,8 @@ addons:
       'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.54.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20251209-855adc2699-master']
   - version: 1.53.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
     summary:
@@ -1053,8 +1053,9 @@ addons:
       'public.ecr.aws/csi-components/csi-provisioner:v6.1.0-eksbuild.2', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.3',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.3.0']
   - version: 2.2.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
     requirements: []
     incompatibilities: []
     summary:
@@ -1070,6 +1071,23 @@ addons:
     images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2',
       'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.5', 'public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2',
       'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.2.0']
+  - version: 2.1.12
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ["Release notes provided don\u2019t include any concrete changes;\
+          \ they only reference the upstream CHANGELOG-2.x.md for details."]
+      breaking_changes: [Unknown from the provided notes; the release text contains
+          no breaking-change information and points to the full changelog for specifics.]
+    chart_version: 3.2.3
+    images: ['public.ecr.aws/csi-components/csi-node-driver-registrar:v2.14.0-eksbuild.5',
+      'public.ecr.aws/csi-components/csi-provisioner:v5.3.0-eksbuild.4', 'public.ecr.aws/csi-components/livenessprobe:v2.16.0-eksbuild.5',
+      'public.ecr.aws/efs-csi-driver/amazon/aws-efs-csi-driver:v2.1.12']
   - version: 2.1.2
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
@@ -1158,8 +1176,8 @@ addons:
   chart_name: aws-load-balancer-controller
   versions:
   - version: 3.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1207,8 +1225,8 @@ addons:
     chart_version: 3.5.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.5.0']
   - version: 3.4.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1232,8 +1250,8 @@ addons:
     chart_version: 3.4.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.4.0']
   - version: 3.3.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1272,8 +1290,8 @@ addons:
     chart_version: 3.3.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.3.0']
   - version: 3.2.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1316,8 +1334,8 @@ addons:
     chart_version: 3.2.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.2.0']
   - version: 3.1.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1345,8 +1363,8 @@ addons:
     chart_version: 3.1.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v3.1.0']
   - version: 3.0.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary: null
@@ -1359,8 +1377,8 @@ addons:
     incompatibilities: []
     summary: null
   - version: 2.9.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1411,8 +1429,8 @@ addons:
     chart_version: 1.9.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.9.0']
   - version: 2.8.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1460,8 +1478,8 @@ addons:
     chart_version: 1.8.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.8.0']
   - version: 2.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1494,8 +1512,8 @@ addons:
     chart_version: 1.7.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.7.0']
   - version: 2.6.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1512,8 +1530,8 @@ addons:
     chart_version: 1.6.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.6.0']
   - version: 2.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1555,8 +1573,8 @@ addons:
     chart_version: 1.5.0
     images: ['public.ecr.aws/eks/aws-load-balancer-controller:v2.5.0']
   - version: 2.4.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -1698,9 +1716,9 @@ addons:
     chart_version: 1.2.2
     images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.2.0']
   - version: 2.1.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-      '1.16', '1.15']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16', '1.15']
     requirements: []
     incompatibilities: []
     summary:
@@ -1730,9 +1748,9 @@ addons:
     chart_version: 1.1.1
     images: ['602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller:v2.1.0']
   - version: 2.0.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-      '1.16', '1.15']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16', '1.15']
     requirements: []
     incompatibilities: []
     summary: null
@@ -1744,6 +1762,119 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.31.0
+    kube: ['1.35']
+    requirements:
+    - name: Alloy
+      version: 4.3.2-bb.0
+    - name: Anchore Enterprise
+      version: 3.25.1-bb.1
+    - name: Argocd
+      version: 10.2.1-bb.0
+    - name: Authservice
+      version: 1.1.5-bb.7
+    - name: Bbctl
+      version: 3.0.1-bb.3
+    - name: Eck Operator
+      version: 3.4.1-bb.1
+    - name: Elasticsearch Kibana
+      version: 1.41.0-bb.0
+    - name: External Secrets Operator
+      version: 2.8.0-bb.0
+    - name: Fluentbit
+      version: 0.57.9-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.2
+    - name: Gatekeeper
+      version: 3.23.0-bb.0
+    - name: Gateway Api
+      version: 1.6.1-bb.0
+    - name: Gitlab
+      version: 10.2.4-bb.0
+    - name: Gitlab Runner
+      version: 0.88.3-bb.2
+    - name: Grafana
+      version: 10.5.15-bb.6
+    - name: Harbor
+      version: 1.19.2-bb.0
+    - name: Headlamp
+      version: 0.44.0-bb.0
+    - name: Istio Cni
+      version: 1.30.3-bb.0
+    - name: Istio Crds
+      version: 1.30.3-bb.0
+    - name: Istio Gateway
+      version: 1.30.3-bb.0
+    - name: Istiod
+      version: 1.30.3-bb.0
+    - name: Keycloak
+      version: 7.2.2-bb.1
+    - name: Kiali
+      version: 2.30.0-bb.0
+    - name: Kyverno
+      version: 3.8.2-bb.2
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.9.0-bb.1
+    - name: Loki
+      version: 6.55.0-bb.2
+    - name: Mattermost
+      version: 11.10.0-bb.0
+    - name: Mattermost Operator
+      version: 1.25.7-bb.3
+    - name: Metrics Server
+      version: 3.13.1-bb.1
+    - name: Mimir
+      version: 6.1.0-bb.1
+    - name: Minio
+      version: 7.1.1-bb.23
+    - name: Minio Operator
+      version: 7.1.1-bb.9
+    - name: Monitoring
+      version: 88.3.0-bb.0
+    - name: Neuvector
+      version: 2.11.0-bb.2
+    - name: Prometheus Operator Crds
+      version: 31.0.1-bb.0
+    - name: Renovate
+      version: 46.251.0-bb.0
+    - name: Sonarqube
+      version: 2026.4.0-bb.0
+    - name: Tempo
+      version: 2.1.0-bb.2
+    - name: Thanos
+      version: 17.4.0-bb.3
+    - name: Twistlock
+      version: 0.28.0-bb.3
+    - name: Vault
+      version: 0.34.0-bb.0
+    - name: Velero
+      version: 12.1.0-bb.3
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.3-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Big Bang umbrella upgrade 3.30.0 \u2192 3.31.0 with multiple\
+          \ subchart bumps across platform services (GitLab, Argo CD, Monitoring,\
+          \ Gatekeeper, ESO, Vault, etc.).", "Largest dependency jumps include GitLab\
+          \ 9.11.8-bb.0 \u2192 10.2.4-bb.0, Argo CD 10.1.4-bb.1 \u2192 10.2.1-bb.0,\
+          \ Monitoring 87.10.1-bb.3 \u2192 88.3.0-bb.0, and Renovate 46.31.6-bb.5\
+          \ \u2192 46.251.0-bb.0.", "CRD bundle bump: prometheus-operator-crds 30.0.1-bb.0\
+          \ \u2192 31.0.1-bb.0 (implies CRD updates during upgrade)."]
+      features: ['Updated component versions across the Big Bang stack, bringing in
+          upstream fixes and minor feature updates for GitOps (Argo CD), policy (Gatekeeper/Kyverno),
+          secrets (External Secrets), observability (Monitoring), and core services
+          (GitLab, Vault).']
+      breaking_changes: ["Potential breaking changes may exist in major/minor bumps\
+          \ (notably GitLab 9.x \u2192 10.x chart and Monitoring/Prometheus CRDs).\
+          \ Review each component\u2019s release notes and upgrade guides before applying\
+          \ in production."]
+    chart_version: 3.31.0
+    images: []
   - version: 3.30.0
     kube: ['1.35']
     requirements:
@@ -14776,60 +14907,61 @@ addons:
   helm_repository_url: https://coredns.github.io/helm
   versions:
   - version: 1.12.0
-    kube: ['1.35', '1.34', '1.33']
+    kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.42.2
     images: ['coredns/coredns:1.12.0']
   - version: 1.11.3
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.36.1
     images: ['coredns/coredns:1.11.3']
   - version: 1.11.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.31.0
     images: []
   - version: 1.10.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.24.5
     images: ['coredns/coredns:1.10.1']
   - version: 1.9.3
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.19.6
     images: ['coredns/coredns:1.9.3']
   - version: 1.8.6
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.16.6
     images: ['coredns/coredns:1.8.6']
   - version: 1.8.4
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 1.16.4
     images: ['coredns/coredns:1.8.4']
   - version: 1.8.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
     summary: null
@@ -16141,8 +16273,8 @@ addons:
   helm_repository_url: https://kubernetes-sigs.github.io/external-dns
   versions:
   - version: 0.21.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16175,8 +16307,8 @@ addons:
     chart_version: 1.21.1
     images: ['registry.k8s.io/external-dns/external-dns:v0.21.0']
   - version: 0.20.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16203,8 +16335,8 @@ addons:
     chart_version: 1.20.0
     images: ['registry.k8s.io/external-dns/external-dns:v0.20.0']
   - version: 0.19.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16242,8 +16374,8 @@ addons:
     chart_version: 1.19.0
     images: ['registry.k8s.io/external-dns/external-dns:v0.19.0']
   - version: 0.18.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16287,8 +16419,8 @@ addons:
     chart_version: 1.18.0
     images: ['registry.k8s.io/external-dns/external-dns:v0.18.0']
   - version: 0.17.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16331,8 +16463,8 @@ addons:
     chart_version: 1.17.0
     images: ['registry.k8s.io/external-dns/external-dns:v0.17.0']
   - version: 0.16.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16358,8 +16490,8 @@ addons:
     chart_version: 1.16.1
     images: ['registry.k8s.io/external-dns/external-dns:v0.16.1']
   - version: 0.15.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16391,8 +16523,8 @@ addons:
     chart_version: 1.15.0
     images: ['registry.k8s.io/external-dns/external-dns:v0.15.0']
   - version: 0.14.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16428,8 +16560,8 @@ addons:
     chart_version: 1.14.3
     images: ['registry.k8s.io/external-dns/external-dns:v0.14.0']
   - version: 0.13.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16463,8 +16595,8 @@ addons:
     chart_version: 1.12.0
     images: ['k8s.gcr.io/external-dns/external-dns:v0.13.1']
   - version: 0.12.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16496,8 +16628,8 @@ addons:
     chart_version: 1.10.1
     images: ['k8s.gcr.io/external-dns/external-dns:v0.12.0']
   - version: 0.11.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -16538,8 +16670,8 @@ addons:
     chart_version: 1.9.0
     images: ['k8s.gcr.io/external-dns/external-dns:v0.11.0']
   - version: 0.10.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -17408,7 +17540,7 @@ addons:
     incompatibilities: []
     summary: null
   - version: 2.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary: null
@@ -18970,8 +19102,8 @@ addons:
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
   - version: 88.5.4
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19083,8 +19215,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.33.1', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
       'quay.io/prometheus/prometheus:v3.13.2-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 87.21.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19365,8 +19497,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.33.0', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.12.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1']
   - version: 86.3.2
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19446,8 +19578,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.0']
   - version: 85.4.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19541,8 +19673,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.32.1', 'quay.io/prometheus/node-exporter:v1.11.1-distroless',
       'quay.io/prometheus/prometheus:v3.11.3-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 84.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19651,8 +19783,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
       'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 83.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19735,8 +19867,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.32.0', 'quay.io/prometheus/node-exporter:v1.11.1',
       'quay.io/prometheus/prometheus:v3.11.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 82.18.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -19775,6 +19907,26 @@ addons:
     chart_version: 82.0.0
     images: ['docker.io/grafana/grafana:12.3.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.7',
       'quay.io/kiwigrid/k8s-sidecar:2.5.0', 'quay.io/prometheus-operator/prometheus-operator:v0.89.0',
+      'quay.io/prometheus/alertmanager:v0.31.1', 'quay.io/prometheus/node-exporter:v1.10.2',
+      'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
+  - version: 81.6.9
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Fix admission webhook DNS name rendering (affects how the webhook
+          Service/endpoint DNS name is templated/rendered)., Bump bundled Grafana
+          Helm release to v11.1.5., 81.6.1 includes various non-major dependency updates
+          via Renovate (unspecified individual components).]
+      features: [No new user-facing features noted; changes are primarily bugfix +
+          dependency updates., Grafana chart/app version update to v11.1.5 is included
+          in 81.6.9.]
+      breaking_changes: []
+    chart_version: 81.6.9
+    images: ['docker.io/grafana/grafana:12.3.3', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.7',
+      'quay.io/kiwigrid/k8s-sidecar:2.5.0', 'quay.io/prometheus-operator/prometheus-operator:v0.88.1',
       'quay.io/prometheus/alertmanager:v0.31.1', 'quay.io/prometheus/node-exporter:v1.10.2',
       'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 81.6.1
@@ -19870,8 +20022,8 @@ addons:
       'quay.io/prometheus/alertmanager:v0.30.1', 'quay.io/prometheus/node-exporter:v1.10.2',
       'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.18.0']
   - version: 80.14.4
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20103,8 +20255,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   - version: 79.12.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20137,8 +20289,8 @@ addons:
     incompatibilities: []
     summary: null
   - version: 78.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20160,8 +20312,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.7.2',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   - version: 77.14.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20180,8 +20332,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.6.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   - version: 76.5.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20200,8 +20352,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 75.18.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20218,8 +20370,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 74.2.2
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20238,8 +20390,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   - version: 73.2.3
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -20265,8 +20417,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   - version: 72.9.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20289,8 +20441,8 @@ addons:
       'quay.io/prometheus/prometheus:v3.4.1', 'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   - version: 71.2.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20308,8 +20460,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.1',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   - version: 70.10.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20328,8 +20480,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   - version: 69.8.2
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20347,8 +20499,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.9.0', 'quay.io/prometheus/prometheus:v3.2.1',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   - version: 68.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20365,8 +20517,8 @@ addons:
       'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v3.1.0',
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
   - version: 67.11.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20386,8 +20538,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
   - version: 66.7.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20406,8 +20558,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
   - version: 65.8.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20427,8 +20579,8 @@ addons:
     chart_version: 65.8.1
     images: []
   - version: 64.0.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20453,8 +20605,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
   - version: 63.1.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20481,8 +20633,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
   - version: 62.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20507,8 +20659,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
   - version: 61.9.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20527,8 +20679,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
   - version: 60.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20558,8 +20710,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
   - version: 59.1.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20578,8 +20730,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
   - version: 58.7.2
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20596,8 +20748,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
   - version: 57.2.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20612,8 +20764,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
   - version: 56.21.4
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20640,8 +20792,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
   - version: 55.11.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -20658,8 +20810,8 @@ addons:
       'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
       'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
   - version: 54.2.2
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary: null
@@ -21958,7 +22110,7 @@ addons:
   helm_repository_url: https://kubernetes-sigs.github.io/metrics-server
   versions:
   - version: 0.9.0
-    kube: ['1.35', '1.34']
+    kube: ['1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary:
@@ -21977,7 +22129,7 @@ addons:
     chart_version: 3.14.0
     images: ['registry.k8s.io/metrics-server/metrics-server:v0.9.0']
   - version: 0.8.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -21998,7 +22150,8 @@ addons:
     chart_version: 3.13.0
     images: ['registry.k8s.io/metrics-server/metrics-server:v0.8.0']
   - version: 0.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27']
     requirements: []
     incompatibilities: []
     summary:
@@ -22030,8 +22183,8 @@ addons:
     chart_version: 3.12.0
     images: ['registry.k8s.io/metrics-server/metrics-server:v0.7.0']
   - version: 0.6.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
@@ -22059,9 +22212,9 @@ addons:
     chart_version: 3.8.0
     images: ['k8s.gcr.io/metrics-server/metrics-server:v0.6.0']
   - version: 0.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17',
-      '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9', '1.8']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17', '1.16', '1.15', '1.14', '1.13', '1.12', '1.11', '1.10', '1.9', '1.8']
     requirements: []
     incompatibilities: []
     summary: null
@@ -23034,7 +23187,7 @@ addons:
   eolApiSlug: traefik
   versions:
   - version: 3.7.11
-    kube: ['1.35', '1.34', '1.33', '1.32']
+    kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
@@ -23054,7 +23207,7 @@ addons:
     chart_version: 41.3.0
     images: []
   - version: 3.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32']
+    kube: ['1.36', '1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
@@ -28635,8 +28788,8 @@ addons:
   chart_name: rabbitmq-cluster-operator
   versions:
   - version: 2.16.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28653,8 +28806,8 @@ addons:
     chart_version: 4.4.34
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.1-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.4-debian-12-r0']
   - version: 2.16.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28669,8 +28822,8 @@ addons:
     chart_version: 4.4.32
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.0-debian-12-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r2']
   - version: 2.15.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28692,8 +28845,8 @@ addons:
     chart_version: 4.4.26
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.15.0-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r0']
   - version: 2.14.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28709,8 +28862,8 @@ addons:
     chart_version: 4.4.22
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.14.0-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.1-debian-12-r3']
   - version: 2.13.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28733,8 +28886,8 @@ addons:
     chart_version: 4.4.13
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.13.0-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.0-debian-12-r1']
   - version: 2.12.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28756,8 +28909,8 @@ addons:
     chart_version: 4.4.2
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.12.0-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r5']
   - version: 2.11.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28783,8 +28936,8 @@ addons:
     chart_version: 4.4.0
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.11.0-debian-12-r4', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r2']
   - version: 2.10.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28813,8 +28966,8 @@ addons:
     chart_version: 4.3.24
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.10.0-debian-12-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r6']
   - version: 2.9.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28832,8 +28985,8 @@ addons:
     chart_version: 4.3.20
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.9.0-debian-12-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r5']
   - version: 2.8.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28849,8 +29002,8 @@ addons:
     chart_version: 4.2.7
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.8.0-debian-12-r4', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.0-debian-12-r0']
   - version: 2.7.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28867,8 +29020,8 @@ addons:
     chart_version: 4.2.0
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.7.0-debian-12-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.13.0-debian-12-r7']
   - version: 2.6.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28888,8 +29041,8 @@ addons:
     chart_version: 3.14.0
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.6.0-debian-11-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.2-debian-11-r1']
   - version: 2.5.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28908,8 +29061,8 @@ addons:
     chart_version: 3.10.5
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.5.0-debian-11-r39', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.1-debian-11-r2']
   - version: 2.4.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28923,8 +29076,8 @@ addons:
     chart_version: 3.7.1
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.4.0-debian-11-r15', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-debian-11-r14']
   - version: 2.3.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28951,8 +29104,8 @@ addons:
     chart_version: 3.6.2
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.3.0-scratch-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-scratch-r2']
   - version: 2.2.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -28974,8 +29127,8 @@ addons:
     chart_version: 3.4.1
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.2.0-scratch-r7', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.3-scratch-r1']
   - version: 2.1.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -29004,8 +29157,8 @@ addons:
     chart_version: 3.2.5
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.1.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.1-scratch-r2']
   - version: 2.0.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -29030,8 +29183,8 @@ addons:
     chart_version: 3.1.5
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.0.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.0-scratch-r0']
   - version: 1.14.0
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary:
@@ -29055,8 +29208,8 @@ addons:
     chart_version: 2.7.4
     images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.14.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.8.0-scratch-r1']
   - version: 1.13.1
-    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
-      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
     summary: null
@@ -29070,7 +29223,7 @@ addons:
   chart_name: kserve
   versions:
   - version: 0.20.0
-    kube: ['1.35', '1.34', '1.33', '1.32']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
@@ -29109,7 +29262,7 @@ addons:
     chart_version: v0.20.0
     images: []
   - version: 0.19.0
-    kube: ['1.35', '1.34', '1.33', '1.32']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
@@ -29146,6 +29299,20 @@ addons:
           depended on the erroneous CRDs bundled in `llmisvc-crd`, your upgrade may
           remove/stop managing them and you must install any needed CRDs explicitly.']
     chart_version: v0.19.0
+    images: []
+  - version: 0.18.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [v0.18.1 is a patch release containing a cherry-picked Helm chart
+          fix; no functional application feature changes are called out in the release
+          notes., No chart/values details are provided in the supplied notes; expect
+          minor packaging/templating corrections only.]
+      features: []
+      breaking_changes: []
+    chart_version: v0.18.1
     images: []
   - version: 0.18.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -29185,6 +29352,30 @@ addons:
           you previously managed GIE CRDs separately, since they are now bundled with
           KServe in v0.18.0.']
     chart_version: v0.18.0
+    images: []
+  - version: 0.17.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- No Helm values changes are called out in the v0.17.1 notes.
+
+        - v0.17.1 is a patch release that primarily *fixes/republishes* Helm chart
+        and installation-script packaging issues from v0.17.0.
+
+        - Action: keep your existing `values.yaml` from 0.17.0, but run a `helm diff
+        upgrade` (or `helm template`) to confirm no rendered-manifest deltas beyond
+        chart packaging fixes.
+
+        '
+      chart_updates: [Includes the missing v0.17.0 installation scripts in the v0.17.1
+          release artifacts (fix/cherry-pick)., Applies a Helm chart fix via cherry-pick
+          (release primarily addresses chart/release packaging)., 'Version bump to
+          v0.17.1; new Helm chart tarballs published for all subcharts (kserve-crd,
+          kserve-resources, runtime-configs, llmisvc-*, localmodel-*).']
+      features: []
+      breaking_changes: []
+    chart_version: v0.17.1
     images: []
   - version: 0.17.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -29258,7 +29449,7 @@ addons:
     chart_version: v0.17.0
     images: []
   - version: 0.16.0
-    kube: ['1.35', '1.34', '1.33', '1.32']
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:

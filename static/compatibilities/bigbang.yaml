@@ -3,6 +3,119 @@ icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
 git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
+- version: 3.31.0
+  kube: ['1.35']
+  requirements:
+  - name: Alloy
+    version: 4.3.2-bb.0
+  - name: Anchore Enterprise
+    version: 3.25.1-bb.1
+  - name: Argocd
+    version: 10.2.1-bb.0
+  - name: Authservice
+    version: 1.1.5-bb.7
+  - name: Bbctl
+    version: 3.0.1-bb.3
+  - name: Eck Operator
+    version: 3.4.1-bb.1
+  - name: Elasticsearch Kibana
+    version: 1.41.0-bb.0
+  - name: External Secrets Operator
+    version: 2.8.0-bb.0
+  - name: Fluentbit
+    version: 0.57.9-bb.0
+  - name: Fortify
+    version: 26.2.0-bb.2
+  - name: Gatekeeper
+    version: 3.23.0-bb.0
+  - name: Gateway Api
+    version: 1.6.1-bb.0
+  - name: Gitlab
+    version: 10.2.4-bb.0
+  - name: Gitlab Runner
+    version: 0.88.3-bb.2
+  - name: Grafana
+    version: 10.5.15-bb.6
+  - name: Harbor
+    version: 1.19.2-bb.0
+  - name: Headlamp
+    version: 0.44.0-bb.0
+  - name: Istio Cni
+    version: 1.30.3-bb.0
+  - name: Istio Crds
+    version: 1.30.3-bb.0
+  - name: Istio Gateway
+    version: 1.30.3-bb.0
+  - name: Istiod
+    version: 1.30.3-bb.0
+  - name: Keycloak
+    version: 7.2.2-bb.1
+  - name: Kiali
+    version: 2.30.0-bb.0
+  - name: Kyverno
+    version: 3.8.2-bb.2
+  - name: Kyverno Policies
+    version: 3.3.4-bb.87
+  - name: Kyverno Reporter
+    version: 3.9.0-bb.1
+  - name: Loki
+    version: 6.55.0-bb.2
+  - name: Mattermost
+    version: 11.10.0-bb.0
+  - name: Mattermost Operator
+    version: 1.25.7-bb.3
+  - name: Metrics Server
+    version: 3.13.1-bb.1
+  - name: Mimir
+    version: 6.1.0-bb.1
+  - name: Minio
+    version: 7.1.1-bb.23
+  - name: Minio Operator
+    version: 7.1.1-bb.9
+  - name: Monitoring
+    version: 88.3.0-bb.0
+  - name: Neuvector
+    version: 2.11.0-bb.2
+  - name: Prometheus Operator Crds
+    version: 31.0.1-bb.0
+  - name: Renovate
+    version: 46.251.0-bb.0
+  - name: Sonarqube
+    version: 2026.4.0-bb.0
+  - name: Tempo
+    version: 2.1.0-bb.2
+  - name: Thanos
+    version: 17.4.0-bb.3
+  - name: Twistlock
+    version: 0.28.0-bb.3
+  - name: Vault
+    version: 0.34.0-bb.0
+  - name: Velero
+    version: 12.1.0-bb.3
+  - name: Wrapper
+    version: 0.4.15
+  - name: Ztunnel
+    version: 1.30.3-bb.0
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Big Bang umbrella upgrade 3.30.0 \u2192 3.31.0 with multiple\
+        \ subchart bumps across platform services (GitLab, Argo CD, Monitoring, Gatekeeper,\
+        \ ESO, Vault, etc.).", "Largest dependency jumps include GitLab 9.11.8-bb.0\
+        \ \u2192 10.2.4-bb.0, Argo CD 10.1.4-bb.1 \u2192 10.2.1-bb.0, Monitoring 87.10.1-bb.3\
+        \ \u2192 88.3.0-bb.0, and Renovate 46.31.6-bb.5 \u2192 46.251.0-bb.0.", "CRD\
+        \ bundle bump: prometheus-operator-crds 30.0.1-bb.0 \u2192 31.0.1-bb.0 (implies\
+        \ CRD updates during upgrade)."]
+    features: ['Updated component versions across the Big Bang stack, bringing in
+        upstream fixes and minor feature updates for GitOps (Argo CD), policy (Gatekeeper/Kyverno),
+        secrets (External Secrets), observability (Monitoring), and core services
+        (GitLab, Vault).']
+    breaking_changes: ["Potential breaking changes may exist in major/minor bumps\
+        \ (notably GitLab 9.x \u2192 10.x chart and Monitoring/Prometheus CRDs). Review\
+        \ each component\u2019s release notes and upgrade guides before applying in\
+        \ production."]
+  chart_version: 3.31.0
+  images: []
 - version: 3.30.0
   kube: ['1.35']
   requirements:
