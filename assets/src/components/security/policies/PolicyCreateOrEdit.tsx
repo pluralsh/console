@@ -334,7 +334,7 @@ function PolicyForm({
         <FormField label="Policy">
           <CodeEditor
             value={form.policy}
-            language="plaintext"
+            language="rego"
             onChange={(value) =>
               setForm((prev) => ({ ...prev, policy: value ?? '' }))
             }

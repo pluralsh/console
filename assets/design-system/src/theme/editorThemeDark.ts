@@ -30,6 +30,18 @@ export const editorThemeDark = {
       token: 'keyword',
     },
     {
+      foreground: semanticColors['code-block-light-green'],
+      token: 'string.rego',
+    },
+    {
+      foreground: semanticColors['code-block-mid-blue'],
+      token: 'support.function.rego',
+    },
+    {
+      foreground: semanticColors['code-block-dark-grey'],
+      token: 'comment.rego',
+    },
+    {
       foreground: semanticColors['code-block-purple'],
       token: 'support.constant.property-value',
     },
