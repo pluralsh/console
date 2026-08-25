@@ -189,6 +189,9 @@ defmodule Console.GraphQl.Deployments.Policy do
       resolve &Deployments.list_policy_workbench_policies/3
     end
 
+    @desc "how many workbenches and stacks currently match this bind policy"
+    field :match_count, :integer, resolve: &Deployments.policy_match_count/3
+
     timestamps()
   end
 

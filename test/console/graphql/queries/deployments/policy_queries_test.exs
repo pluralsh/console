@@ -535,6 +535,22 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
   end
 
   describe "bindingPolicies" do
+    test "returns matchCount for bind policies" do
+      bind_policy = insert(:policy, type: :binding)
+      attached = insert(:policy)
+      insert(:binding_policy, policy: attached, bind_policy: bind_policy, type: :workbench)
+      insert_list(2, :workbench_policy, policy: attached)
+      insert(:workbench_policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id matchCount }
+        }
+      """, %{"id" => bind_policy.id}, %{current_user: admin_user()})
+
+      assert found["matchCount"] == 2
+    end
+
     test "lists stack and workbench policy associations" do
       policy = insert(:policy)
       stack_policies = insert_list(2, :stack_policy, policy: policy)

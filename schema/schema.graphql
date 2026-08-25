@@ -9493,6 +9493,9 @@ type Policy {
 
   workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
 
+  "how many workbenches and stacks currently match this bind policy"
+  matchCount: Int
+
   insertedAt: DateTime
 
   updatedAt: DateTime

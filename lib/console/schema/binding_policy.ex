@@ -38,6 +38,35 @@ defmodule Console.Schema.BindingPolicy do
     from(p in query, where: p.type == ^type)
   end
 
+  def match_counts_for_bind_policies([]), do: %{}
+  def match_counts_for_bind_policies(policy_ids) do
+    workbench_counts =
+      from(wp in WorkbenchPolicy,
+        join: bp in __MODULE__,
+        on: bp.policy_id == wp.policy_id and bp.type == :workbench,
+        where: bp.bind_policy_id in ^policy_ids,
+        group_by: bp.bind_policy_id,
+        select: {bp.bind_policy_id, count(wp.workbench_id, :distinct)}
+      )
+      |> Console.Repo.all()
+      |> Map.new()
+
+    stack_counts =
+      from(sp in StackPolicy,
+        join: bp in __MODULE__,
+        on: bp.policy_id == sp.policy_id and bp.type == :stack,
+        where: bp.bind_policy_id in ^policy_ids,
+        group_by: bp.bind_policy_id,
+        select: {bp.bind_policy_id, count(sp.stack_id, :distinct)}
+      )
+      |> Console.Repo.all()
+      |> Map.new()
+
+    Map.new(policy_ids, fn id ->
+      {id, Map.get(workbench_counts, id, 0) + Map.get(stack_counts, id, 0)}
+    end)
+  end
+
   def for_user(query \\ __MODULE__, user) do
     projects = Console.Schema.Project.for_user(user)
 

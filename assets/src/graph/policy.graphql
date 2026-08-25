@@ -3,6 +3,7 @@ fragment PolicyTiny on Policy {
   name
   type
   description
+  matchCount
   project {
     ...ProjectTiny
   }

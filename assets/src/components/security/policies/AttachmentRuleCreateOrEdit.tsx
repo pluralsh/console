@@ -37,6 +37,7 @@ import {
   useUpdateBindingPolicyMutation,
 } from 'generated/graphql'
 import { isEqual, startCase, truncate } from 'lodash'
+import pluralize from 'pluralize'
 import { KeyboardEvent, ReactNode, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -307,6 +308,7 @@ function AttachmentRuleForm({
             selectedPolicy={selectedBindPolicy}
             selectedKey={form.bindPolicyId}
             placeholder="Select a bind policy"
+            showMatchChip
             isOpen={bindSelectOpen}
             onOpenChange={setBindSelectOpen}
             dropdownFooterFixed={
@@ -438,6 +440,7 @@ function PolicySelect({
   selectedKey,
   placeholder,
   showTypeChip = false,
+  showMatchChip = false,
   dropdownFooterFixed,
   isOpen,
   onOpenChange,
@@ -448,6 +451,7 @@ function PolicySelect({
   selectedKey: string
   placeholder: string
   showTypeChip?: boolean
+  showMatchChip?: boolean
   dropdownFooterFixed?: ReactNode
   isOpen?: boolean
   onOpenChange?: (isOpen: boolean) => void
@@ -460,11 +464,7 @@ function PolicySelect({
         label={placeholder}
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        rightContent={
-          showTypeChip && selectedPolicy?.type ? (
-            <TypeChip type={selectedPolicy.type} />
-          ) : undefined
-        }
+        rightContent={policyChip(selectedPolicy, showTypeChip, showMatchChip)}
         dropdownFooterFixed={dropdownFooterFixed}
         onSelectionChange={(key) => {
           if (key == null) return
@@ -483,15 +483,43 @@ function PolicySelect({
                 firstColor="text"
               />
             }
-            rightContent={
-              showTypeChip && policy.type ? (
-                <TypeChip type={policy.type} />
-              ) : undefined
-            }
+            rightContent={policyChip(policy, showTypeChip, showMatchChip)}
           />
         ))}
       </Select>
     </SelectWrapSC>
+  )
+}
+
+function policyChip(
+  policy: Nullable<PolicyTinyFragment>,
+  showTypeChip: boolean,
+  showMatchChip: boolean
+) {
+  if (showMatchChip && policy)
+    return <MatchesChip count={policy.matchCount ?? 0} />
+  if (showTypeChip && policy?.type) return <TypeChip type={policy.type} />
+
+  return undefined
+}
+
+function MatchesChip({ count }: { count: number }) {
+  const theme = useTheme()
+
+  return (
+    <Chip
+      size="small"
+      fillLevel={1}
+      css={{
+        borderRadius: 20,
+        minWidth: 80,
+        justifyContent: 'center',
+      }}
+    >
+      <span css={{ color: theme.colors['text-xlight'] }}>
+        {count} {pluralize('match', count)}
+      </span>
+    </Chip>
   )
 }
 
