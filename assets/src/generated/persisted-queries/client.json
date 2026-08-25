@@ -1622,6 +1622,21 @@
          "name": "DeleteBindingPolicy",
          "body": "mutation DeleteBindingPolicy($id: ID!) {\n  deleteBindingPolicy(id: $id) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
+      "sha256:83565d0edd2718fc17fdc5b9e75364cfc1ae6846d86b48a61c67ccb5336a1fb7": {
+         "type": "query",
+         "name": "BindingPolicy",
+         "body": "query BindingPolicy($id: ID!) {\n  bindingPolicy(id: $id) {\n    ...BindingPolicy\n    __typename\n  }\n}\n\nfragment BindingPolicy on BindingPolicy {\n  ...BindingPolicyTiny\n  interval\n  matches {\n    workbench {\n      regexes\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:b361fe6d20bb3627d7eb902abcd2f5c8d58751ceb54e65432ccd2a99c2572ff2": {
+         "type": "mutation",
+         "name": "CreateBindingPolicy",
+         "body": "mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {\n  createBindingPolicy(attributes: $attributes) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:206e81fa4bf005e2cb2f390633ee635e9f3f4a3e54cc9199455eac2437db7d95": {
+         "type": "mutation",
+         "name": "UpdateBindingPolicy",
+         "body": "mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {\n  updateBindingPolicy(id: $id, attributes: $attributes) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
       "sha256:0468fee7007cd42f554905a16c0d76a3687919152ff4153e640562564e003ac7": {
          "type": "query",
          "name": "Projects",

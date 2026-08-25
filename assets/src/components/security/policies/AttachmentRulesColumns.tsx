@@ -16,6 +16,8 @@ import {
 } from 'generated/graphql'
 import { startCase, truncate } from 'lodash'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getAttachmentRuleEditAbsPath } from 'routes/securityRoutesConsts'
 import { useTheme } from 'styled-components'
 import { Edge } from 'utils/graphql'
 
@@ -105,6 +107,7 @@ function AttachmentRuleActions({
   rule: Nullable<BindingPolicyTinyFragment>
 }) {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const label = rule?.policy?.name ?? 'attachment rule'
@@ -124,42 +127,48 @@ function AttachmentRuleActions({
     })
 
   return (
-    <Flex
-      align="center"
-      justify="flex-end"
-      gap="xxsmall"
-    >
-      <IconFrame
-        icon={<PencilIcon />}
-        tooltip="Edit attachment rule"
-        textValue={`Edit ${label}`}
-      />
-      <IconFrame
-        clickable
-        tooltip="Delete attachment rule"
-        textValue={`Delete ${label}`}
-        icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
-        onClick={() => setDeleteOpen(true)}
-      />
-      <Confirm
-        open={deleteOpen}
-        close={() => setDeleteOpen(false)}
-        destructive
-        title="Delete attachment rule"
-        label="Delete attachment rule"
-        loading={loading}
-        error={error}
-        submit={() => deleteBindingPolicy()}
-        text={
-          <span>
-            Are you sure you want to delete{' '}
-            <StrongSC $color="text-danger">
-              {truncate(label, { length: 40 })}
-            </StrongSC>
-            ?
-          </span>
-        }
-      />
-    </Flex>
+    <div onClick={(e) => e.stopPropagation()}>
+      <Flex
+        align="center"
+        justify="flex-end"
+        gap="xxsmall"
+      >
+        <IconFrame
+          clickable
+          icon={<PencilIcon />}
+          tooltip="Edit attachment rule"
+          textValue={`Edit ${label}`}
+          onClick={() => {
+            if (rule?.id) navigate(getAttachmentRuleEditAbsPath(rule.id))
+          }}
+        />
+        <IconFrame
+          clickable
+          tooltip="Delete attachment rule"
+          textValue={`Delete ${label}`}
+          icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
+          onClick={() => setDeleteOpen(true)}
+        />
+        <Confirm
+          open={deleteOpen}
+          close={() => setDeleteOpen(false)}
+          destructive
+          title="Delete attachment rule"
+          label="Delete attachment rule"
+          loading={loading}
+          error={error}
+          submit={() => deleteBindingPolicy()}
+          text={
+            <span>
+              Are you sure you want to delete{' '}
+              <StrongSC $color="text-danger">
+                {truncate(label, { length: 40 })}
+              </StrongSC>
+              ?
+            </span>
+          }
+        />
+      </Flex>
+    </div>
   )
 }

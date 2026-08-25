@@ -2,6 +2,7 @@ import { Navigate, Route } from 'react-router-dom'
 
 import { Gatekeeper } from 'components/security/gatekeeper/Gatekeeper'
 import Constraint from 'components/security/gatekeeper/constraint/Constraint'
+import { AttachmentRuleCreateOrEdit } from 'components/security/policies/AttachmentRuleCreateOrEdit'
 import { AttachmentRules } from 'components/security/policies/AttachmentRules'
 import { Policies } from 'components/security/policies/Policies'
 import { PoliciesList } from 'components/security/policies/PoliciesList'
@@ -11,6 +12,7 @@ import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnRe
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
 
 import {
+  ATTACHMENT_RULES_PARAM_ID,
   COMPLIANCE_REPORTS_ABS_PATH,
   GATEKEEPER_ABS_PATH,
   GATEKEEPER_AFFECTED_RESOURCES_PATH,
@@ -77,6 +79,14 @@ export const securityRoutes = [
     <Route
       path={`${POLICIES_REL_PATH}/:${POLICIES_PARAM_ID}/${POLICIES_EDIT_REL_PATH}`}
       element={<PolicyCreateOrEdit mode="edit" />}
+    />
+    <Route
+      path={`${POLICIES_REL_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
+      element={<AttachmentRuleCreateOrEdit mode="create" />}
+    />
+    <Route
+      path={`${POLICIES_REL_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}/:${ATTACHMENT_RULES_PARAM_ID}/${POLICIES_EDIT_REL_PATH}`}
+      element={<AttachmentRuleCreateOrEdit mode="edit" />}
     />
     <Route
       path={GATEKEEPER_REL_PATH}

@@ -102,3 +102,34 @@ mutation DeleteBindingPolicy($id: ID!) {
     ...BindingPolicyTiny
   }
 }
+
+fragment BindingPolicy on BindingPolicy {
+  ...BindingPolicyTiny
+  interval
+  matches {
+    workbench {
+      regexes
+    }
+  }
+}
+
+query BindingPolicy($id: ID!) {
+  bindingPolicy(id: $id) {
+    ...BindingPolicy
+  }
+}
+
+mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
+  createBindingPolicy(attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}
+
+mutation UpdateBindingPolicy(
+  $id: ID!
+  $attributes: BindingPolicyUpdateAttributes!
+) {
+  updateBindingPolicy(id: $id, attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}

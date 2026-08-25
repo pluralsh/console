@@ -21473,6 +21473,30 @@ export type DeleteBindingPolicyMutationVariables = Exact<{
 
 export type DeleteBindingPolicyMutation = { __typename?: 'RootMutationType', deleteBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
 
+export type BindingPolicyFragment = { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type BindingPolicyQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BindingPolicyQuery = { __typename?: 'RootQueryType', bindingPolicy?: { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
+export type CreateBindingPolicyMutationVariables = Exact<{
+  attributes: BindingPolicyAttributes;
+}>;
+
+
+export type CreateBindingPolicyMutation = { __typename?: 'RootMutationType', createBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
+export type UpdateBindingPolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: BindingPolicyUpdateAttributes;
+}>;
+
+
+export type UpdateBindingPolicyMutation = { __typename?: 'RootMutationType', updateBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, disableInsights?: boolean | null };
 
 export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null };
@@ -27192,6 +27216,17 @@ export const BindingPolicyTinyFragmentDoc = gql`
   }
 }
     ${PolicyTinyFragmentDoc}`;
+export const BindingPolicyFragmentDoc = gql`
+    fragment BindingPolicy on BindingPolicy {
+  ...BindingPolicyTiny
+  interval
+  matches {
+    workbench {
+      regexes
+    }
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
 export const ProjectFragmentDoc = gql`
     fragment Project on Project {
   id
@@ -42806,6 +42841,116 @@ export function useDeleteBindingPolicyMutation(baseOptions?: Apollo.MutationHook
 export type DeleteBindingPolicyMutationHookResult = ReturnType<typeof useDeleteBindingPolicyMutation>;
 export type DeleteBindingPolicyMutationResult = Apollo.MutationResult<DeleteBindingPolicyMutation>;
 export type DeleteBindingPolicyMutationOptions = Apollo.BaseMutationOptions<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>;
+export const BindingPolicyDocument = gql`
+    query BindingPolicy($id: ID!) {
+  bindingPolicy(id: $id) {
+    ...BindingPolicy
+  }
+}
+    ${BindingPolicyFragmentDoc}`;
+
+/**
+ * __useBindingPolicyQuery__
+ *
+ * To run a query within a React component, call `useBindingPolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBindingPolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBindingPolicyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useBindingPolicyQuery(baseOptions: Apollo.QueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables> & ({ variables: BindingPolicyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BindingPolicyQuery, BindingPolicyQueryVariables>(BindingPolicyDocument, options);
+      }
+export function useBindingPolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BindingPolicyQuery, BindingPolicyQueryVariables>(BindingPolicyDocument, options);
+        }
+// @ts-ignore
+export function useBindingPolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPolicyQuery, BindingPolicyQueryVariables>;
+export function useBindingPolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPolicyQuery | undefined, BindingPolicyQueryVariables>;
+export function useBindingPolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BindingPolicyQuery, BindingPolicyQueryVariables>(BindingPolicyDocument, options);
+        }
+export type BindingPolicyQueryHookResult = ReturnType<typeof useBindingPolicyQuery>;
+export type BindingPolicyLazyQueryHookResult = ReturnType<typeof useBindingPolicyLazyQuery>;
+export type BindingPolicySuspenseQueryHookResult = ReturnType<typeof useBindingPolicySuspenseQuery>;
+export type BindingPolicyQueryResult = Apollo.QueryResult<BindingPolicyQuery, BindingPolicyQueryVariables>;
+export const CreateBindingPolicyDocument = gql`
+    mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
+  createBindingPolicy(attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
+export type CreateBindingPolicyMutationFn = Apollo.MutationFunction<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>;
+
+/**
+ * __useCreateBindingPolicyMutation__
+ *
+ * To run a mutation, you first call `useCreateBindingPolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBindingPolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBindingPolicyMutation, { data, loading, error }] = useCreateBindingPolicyMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateBindingPolicyMutation(baseOptions?: Apollo.MutationHookOptions<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>(CreateBindingPolicyDocument, options);
+      }
+export type CreateBindingPolicyMutationHookResult = ReturnType<typeof useCreateBindingPolicyMutation>;
+export type CreateBindingPolicyMutationResult = Apollo.MutationResult<CreateBindingPolicyMutation>;
+export type CreateBindingPolicyMutationOptions = Apollo.BaseMutationOptions<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>;
+export const UpdateBindingPolicyDocument = gql`
+    mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+  updateBindingPolicy(id: $id, attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
+export type UpdateBindingPolicyMutationFn = Apollo.MutationFunction<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>;
+
+/**
+ * __useUpdateBindingPolicyMutation__
+ *
+ * To run a mutation, you first call `useUpdateBindingPolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBindingPolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBindingPolicyMutation, { data, loading, error }] = useUpdateBindingPolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateBindingPolicyMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>(UpdateBindingPolicyDocument, options);
+      }
+export type UpdateBindingPolicyMutationHookResult = ReturnType<typeof useUpdateBindingPolicyMutation>;
+export type UpdateBindingPolicyMutationResult = Apollo.MutationResult<UpdateBindingPolicyMutation>;
+export type UpdateBindingPolicyMutationOptions = Apollo.BaseMutationOptions<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>;
 export const ProjectsDocument = gql`
     query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
@@ -49013,6 +49158,7 @@ export const namedOperations = {
     Policies: 'Policies',
     Policy: 'Policy',
     BindingPolicies: 'BindingPolicies',
+    BindingPolicy: 'BindingPolicy',
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
@@ -49215,6 +49361,8 @@ export const namedOperations = {
     UpdatePolicy: 'UpdatePolicy',
     DeletePolicy: 'DeletePolicy',
     DeleteBindingPolicy: 'DeleteBindingPolicy',
+    CreateBindingPolicy: 'CreateBindingPolicy',
+    UpdateBindingPolicy: 'UpdateBindingPolicy',
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
@@ -49547,6 +49695,7 @@ export const namedOperations = {
     PolicyTiny: 'PolicyTiny',
     Policy: 'Policy',
     BindingPolicyTiny: 'BindingPolicyTiny',
+    BindingPolicy: 'BindingPolicy',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',

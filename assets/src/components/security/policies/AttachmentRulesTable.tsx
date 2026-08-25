@@ -1,7 +1,15 @@
 import { Table } from '@pluralsh/design-system'
+import type { Row } from '@tanstack/react-table'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
-import { BindingPoliciesQuery, PageInfoFragment } from 'generated/graphql'
+import {
+  BindingPoliciesQuery,
+  BindingPolicyTinyFragment,
+  PageInfoFragment,
+} from 'generated/graphql'
+import { useNavigate } from 'react-router-dom'
+import { getAttachmentRuleEditAbsPath } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
+import { Edge } from 'utils/graphql'
 import {
   ColActions,
   ColBindPolicy,
@@ -24,6 +32,8 @@ export function AttachmentRulesTable({
   fetchNextPage: () => void
   setVirtualSlice: (slice: VirtualSlice) => void
 }) {
+  const navigate = useNavigate()
+
   return (
     <WrapperSC>
       <Table
@@ -36,6 +46,13 @@ export function AttachmentRulesTable({
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        onRowClick={(
+          _e,
+          { original }: Row<Edge<BindingPolicyTinyFragment>>
+        ) => {
+          if (original.node?.id)
+            navigate(getAttachmentRuleEditAbsPath(original.node.id))
+        }}
         emptyStateProps={{ message: 'No attachment rules found.' }}
       />
     </WrapperSC>
