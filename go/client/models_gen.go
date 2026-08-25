@@ -9284,6 +9284,8 @@ type StackRun struct {
 	Approval *bool `json:"approval,omitempty"`
 	// the commit message
 	Message *string `json:"message,omitempty"`
+	// the committer email of the commit that spawned this run
+	Committer *string `json:"committer,omitempty"`
 	// when this run was approved
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the subdirectory you want to run the stack's commands w/in

@@ -71,3 +71,6 @@ data/
 release-notes.md
 # Rust binary artifacts
 /target/
+
+# Agents
+.codex/
