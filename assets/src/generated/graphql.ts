@@ -21410,6 +21410,8 @@ export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceR
 
 export type PolicyTinyFragment = { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
 
+export type PolicyFragment = { __typename?: 'Policy', policy: string, id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
+
 export type PoliciesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -21421,6 +21423,36 @@ export type PoliciesQueryVariables = Exact<{
 
 
 export type PoliciesQuery = { __typename?: 'RootQueryType', policies?: { __typename?: 'PolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyEdge', node?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null> | null } | null };
+
+export type PolicyQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', policy: string, id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type CreatePolicyMutationVariables = Exact<{
+  attributes: PolicyAttributes;
+}>;
+
+
+export type CreatePolicyMutation = { __typename?: 'RootMutationType', createPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type UpdatePolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: PolicyAttributes;
+}>;
+
+
+export type UpdatePolicyMutation = { __typename?: 'RootMutationType', updatePolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type DeletePolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePolicyMutation = { __typename?: 'RootMutationType', deletePolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
 
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, disableInsights?: boolean | null };
 
@@ -27121,6 +27153,12 @@ export const PolicyTinyFragmentDoc = gql`
   updatedAt
 }
     ${ProjectTinyFragmentDoc}`;
+export const PolicyFragmentDoc = gql`
+    fragment Policy on Policy {
+  ...PolicyTiny
+  policy
+}
+    ${PolicyTinyFragmentDoc}`;
 export const ProjectFragmentDoc = gql`
     fragment Project on Project {
   id
@@ -42504,6 +42542,150 @@ export type PoliciesQueryHookResult = ReturnType<typeof usePoliciesQuery>;
 export type PoliciesLazyQueryHookResult = ReturnType<typeof usePoliciesLazyQuery>;
 export type PoliciesSuspenseQueryHookResult = ReturnType<typeof usePoliciesSuspenseQuery>;
 export type PoliciesQueryResult = Apollo.QueryResult<PoliciesQuery, PoliciesQueryVariables>;
+export const PolicyDocument = gql`
+    query Policy($id: ID, $name: String) {
+  policy(id: $id, name: $name) {
+    ...Policy
+  }
+}
+    ${PolicyFragmentDoc}`;
+
+/**
+ * __usePolicyQuery__
+ *
+ * To run a query within a React component, call `usePolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function usePolicyQuery(baseOptions?: Apollo.QueryHookOptions<PolicyQuery, PolicyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyQuery, PolicyQueryVariables>(PolicyDocument, options);
+      }
+export function usePolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyQuery, PolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyQuery, PolicyQueryVariables>(PolicyDocument, options);
+        }
+// @ts-ignore
+export function usePolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyQuery, PolicyQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyQuery, PolicyQueryVariables>;
+export function usePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyQuery, PolicyQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyQuery | undefined, PolicyQueryVariables>;
+export function usePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyQuery, PolicyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyQuery, PolicyQueryVariables>(PolicyDocument, options);
+        }
+export type PolicyQueryHookResult = ReturnType<typeof usePolicyQuery>;
+export type PolicyLazyQueryHookResult = ReturnType<typeof usePolicyLazyQuery>;
+export type PolicySuspenseQueryHookResult = ReturnType<typeof usePolicySuspenseQuery>;
+export type PolicyQueryResult = Apollo.QueryResult<PolicyQuery, PolicyQueryVariables>;
+export const CreatePolicyDocument = gql`
+    mutation CreatePolicy($attributes: PolicyAttributes!) {
+  createPolicy(attributes: $attributes) {
+    ...PolicyTiny
+  }
+}
+    ${PolicyTinyFragmentDoc}`;
+export type CreatePolicyMutationFn = Apollo.MutationFunction<CreatePolicyMutation, CreatePolicyMutationVariables>;
+
+/**
+ * __useCreatePolicyMutation__
+ *
+ * To run a mutation, you first call `useCreatePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPolicyMutation, { data, loading, error }] = useCreatePolicyMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreatePolicyMutation(baseOptions?: Apollo.MutationHookOptions<CreatePolicyMutation, CreatePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePolicyMutation, CreatePolicyMutationVariables>(CreatePolicyDocument, options);
+      }
+export type CreatePolicyMutationHookResult = ReturnType<typeof useCreatePolicyMutation>;
+export type CreatePolicyMutationResult = Apollo.MutationResult<CreatePolicyMutation>;
+export type CreatePolicyMutationOptions = Apollo.BaseMutationOptions<CreatePolicyMutation, CreatePolicyMutationVariables>;
+export const UpdatePolicyDocument = gql`
+    mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
+  updatePolicy(id: $id, attributes: $attributes) {
+    ...PolicyTiny
+  }
+}
+    ${PolicyTinyFragmentDoc}`;
+export type UpdatePolicyMutationFn = Apollo.MutationFunction<UpdatePolicyMutation, UpdatePolicyMutationVariables>;
+
+/**
+ * __useUpdatePolicyMutation__
+ *
+ * To run a mutation, you first call `useUpdatePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePolicyMutation, { data, loading, error }] = useUpdatePolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdatePolicyMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePolicyMutation, UpdatePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePolicyMutation, UpdatePolicyMutationVariables>(UpdatePolicyDocument, options);
+      }
+export type UpdatePolicyMutationHookResult = ReturnType<typeof useUpdatePolicyMutation>;
+export type UpdatePolicyMutationResult = Apollo.MutationResult<UpdatePolicyMutation>;
+export type UpdatePolicyMutationOptions = Apollo.BaseMutationOptions<UpdatePolicyMutation, UpdatePolicyMutationVariables>;
+export const DeletePolicyDocument = gql`
+    mutation DeletePolicy($id: ID!) {
+  deletePolicy(id: $id) {
+    ...PolicyTiny
+  }
+}
+    ${PolicyTinyFragmentDoc}`;
+export type DeletePolicyMutationFn = Apollo.MutationFunction<DeletePolicyMutation, DeletePolicyMutationVariables>;
+
+/**
+ * __useDeletePolicyMutation__
+ *
+ * To run a mutation, you first call `useDeletePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePolicyMutation, { data, loading, error }] = useDeletePolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePolicyMutation(baseOptions?: Apollo.MutationHookOptions<DeletePolicyMutation, DeletePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePolicyMutation, DeletePolicyMutationVariables>(DeletePolicyDocument, options);
+      }
+export type DeletePolicyMutationHookResult = ReturnType<typeof useDeletePolicyMutation>;
+export type DeletePolicyMutationResult = Apollo.MutationResult<DeletePolicyMutation>;
+export type DeletePolicyMutationOptions = Apollo.BaseMutationOptions<DeletePolicyMutation, DeletePolicyMutationVariables>;
 export const ProjectsDocument = gql`
     query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
@@ -48709,6 +48891,7 @@ export const namedOperations = {
     ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReports: 'ComplianceReports',
     Policies: 'Policies',
+    Policy: 'Policy',
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
@@ -48907,6 +49090,9 @@ export const namedOperations = {
     DeletePersona: 'DeletePersona',
     UpsertComplianceReportGenerator: 'UpsertComplianceReportGenerator',
     DeleteComplianceReport: 'DeleteComplianceReport',
+    CreatePolicy: 'CreatePolicy',
+    UpdatePolicy: 'UpdatePolicy',
+    DeletePolicy: 'DeletePolicy',
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
@@ -49237,6 +49423,7 @@ export const namedOperations = {
     ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReport: 'ComplianceReport',
     PolicyTiny: 'PolicyTiny',
+    Policy: 'Policy',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',

@@ -10,6 +10,11 @@ fragment PolicyTiny on Policy {
   updatedAt
 }
 
+fragment Policy on Policy {
+  ...PolicyTiny
+  policy
+}
+
 query Policies(
   $after: String
   $first: Int
@@ -34,5 +39,29 @@ query Policies(
         ...PolicyTiny
       }
     }
+  }
+}
+
+query Policy($id: ID, $name: String) {
+  policy(id: $id, name: $name) {
+    ...Policy
+  }
+}
+
+mutation CreatePolicy($attributes: PolicyAttributes!) {
+  createPolicy(attributes: $attributes) {
+    ...PolicyTiny
+  }
+}
+
+mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
+  updatePolicy(id: $id, attributes: $attributes) {
+    ...PolicyTiny
+  }
+}
+
+mutation DeletePolicy($id: ID!) {
+  deletePolicy(id: $id) {
+    ...PolicyTiny
   }
 }
