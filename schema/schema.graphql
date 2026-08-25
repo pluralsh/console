@@ -17513,13 +17513,13 @@ type PolicyConstraintEdge {
   cursor: String
 }
 
-type PolicyAttachmentEdge {
-  node: PolicyAttachment
+type PolicyEvaluationEdge {
+  node: PolicyEvaluation
   cursor: String
 }
 
-type PolicyEvaluationEdge {
-  node: PolicyEvaluation
+type PolicyAttachmentEdge {
+  node: PolicyAttachment
   cursor: String
 }
 
