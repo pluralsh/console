@@ -10,7 +10,6 @@ import {
   Radio,
   RadioGroup,
   ReturnIcon,
-  ShieldLockIcon,
   StackIcon,
   WorkbenchIcon,
   useSetBreadcrumbs,
@@ -64,13 +63,7 @@ const TYPE_OPTIONS: {
     description: 'Admit or deny tool calls in stacks.',
     icon: <StackIcon size={16} />,
   },
-  {
-    value: PolicyType.Binding,
-    label: 'Bindings',
-    description:
-      'Admit or deny attaching a policy to matching workbenches and stacks.',
-    icon: <ShieldLockIcon size={16} />,
-  },
+  // Bindings are ignored here, they are handled in the attachment rules page.
 ]
 
 type PolicyFormState = {
