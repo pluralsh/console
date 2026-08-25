@@ -103,6 +103,11 @@ type PreviewEnvironmentTemplateSpec struct {
 	// +kubebuilder:validation:Optional
 	CommentTemplate *string `json:"commentTemplate,omitempty"`
 
+	// PreviewTTL specifies how long preview environments created from this template should live,
+	// as a Kubernetes duration (e.g. 1d, 12h, 30m). If omitted, the Console default is used.
+	// +kubebuilder:validation:Optional
+	PreviewTTL *string `json:"previewTtl,omitempty"`
+
 	// ScmConnectionRef references the source control management connection to use for PR operations.
 	// This connection is used to post comments on pull requests with preview environment information
 	// and to trigger environment creation based on PR events.

@@ -3636,6 +3636,8 @@ type Flow struct {
 	Metadata    map[string]any `json:"metadata,omitempty"`
 	// the git https urls of the application code repositories used in this flow
 	Repositories []*string `json:"repositories,omitempty"`
+	// the maximum number of preview environments allowed for this flow (1-25, default 10)
+	MaxPreviews *int64 `json:"maxPreviews,omitempty"`
 	// the agent runtime for this flow
 	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
 	// servers that are bound to this flow
@@ -3668,8 +3670,10 @@ type FlowAttributes struct {
 	ProjectID   *string `json:"projectId,omitempty"`
 	Metadata    *string `json:"metadata,omitempty"`
 	// the agent runtime for this flow
-	AgentRuntimeID     *string                           `json:"agentRuntimeId,omitempty"`
-	Repositories       []*string                         `json:"repositories,omitempty"`
+	AgentRuntimeID *string   `json:"agentRuntimeId,omitempty"`
+	Repositories   []*string `json:"repositories,omitempty"`
+	// the maximum number of preview environments allowed for this flow (1-25, default 10)
+	MaxPreviews        *int64                            `json:"maxPreviews,omitempty"`
 	ReadBindings       []*PolicyBindingAttributes        `json:"readBindings,omitempty"`
 	WriteBindings      []*PolicyBindingAttributes        `json:"writeBindings,omitempty"`
 	ServerAssociations []*McpServerAssociationAttributes `json:"serverAssociations,omitempty"`
@@ -7200,12 +7204,14 @@ type PrVendorSpecAttributes struct {
 
 // An instance of a preview environment template
 type PreviewEnvironmentInstance struct {
-	ID          string                      `json:"id"`
-	Service     *ServiceDeployment          `json:"service,omitempty"`
-	PullRequest *PullRequest                `json:"pullRequest,omitempty"`
-	Template    *PreviewEnvironmentTemplate `json:"template,omitempty"`
-	InsertedAt  *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt   *string                     `json:"updatedAt,omitempty"`
+	ID string `json:"id"`
+	// when this preview environment instance expires
+	PreviewExpiresAt *string                     `json:"previewExpiresAt,omitempty"`
+	Service          *ServiceDeployment          `json:"service,omitempty"`
+	PullRequest      *PullRequest                `json:"pullRequest,omitempty"`
+	Template         *PreviewEnvironmentTemplate `json:"template,omitempty"`
+	InsertedAt       *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt        *string                     `json:"updatedAt,omitempty"`
 }
 
 type PreviewEnvironmentInstanceConnection struct {
@@ -7220,9 +7226,11 @@ type PreviewEnvironmentInstanceEdge struct {
 
 // A template for generating preview environments
 type PreviewEnvironmentTemplate struct {
-	ID               string             `json:"id"`
-	Name             string             `json:"name"`
-	CommentTemplate  *string            `json:"commentTemplate,omitempty"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	CommentTemplate *string `json:"commentTemplate,omitempty"`
+	// how long preview environments should live, in seconds
+	PreviewTTL       *int64             `json:"previewTtl,omitempty"`
 	Flow             *Flow              `json:"flow,omitempty"`
 	ReferenceService *ServiceDeployment `json:"referenceService,omitempty"`
 	Template         *ServiceTemplate   `json:"template,omitempty"`
@@ -7244,6 +7252,8 @@ type PreviewEnvironmentTemplateAttributes struct {
 	Template ServiceTemplateAttributes `json:"template"`
 	// an scm connection id to use for PR preview comment generation
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)
+	PreviewTTL *string `json:"previewTtl,omitempty"`
 }
 
 type PreviewEnvironmentTemplateConnection struct {

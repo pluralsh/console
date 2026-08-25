@@ -186,13 +186,15 @@ defmodule Console.Deployments.FlowsTest do
         name: "test",
         flow_id: flow.id,
         template: %{namespace: "test-blah"},
-        reference_service_id: svc.id
+        reference_service_id: svc.id,
+        preview_ttl: "1d"
       }, user)
 
       assert template.name == "test"
       assert template.flow_id == flow.id
       assert template.template.namespace == "test-blah"
       assert template.reference_service_id == svc.id
+      assert template.preview_ttl == 86_400
 
       assert_receive {:event, %PubSub.PreviewEnvironmentTemplateCreated{item: ^template}}
     end

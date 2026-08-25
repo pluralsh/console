@@ -4387,6 +4387,8 @@ export type Flow = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   issues?: Maybe<IssueConnection>;
+  /** the maximum number of preview environments allowed for this flow (1-25, default 10) */
+  maxPreviews?: Maybe<Scalars['Int']['output']>;
   metadata?: Maybe<Scalars['Map']['output']>;
   name: Scalars['String']['output'];
   pipelines?: Maybe<PipelineConnection>;
@@ -4493,6 +4495,8 @@ export type FlowAttributes = {
   /** workbenches associated with this flow */
   flowWorkbenches?: InputMaybe<Array<InputMaybe<FlowWorkbenchAttributes>>>;
   icon?: InputMaybe<Scalars['String']['input']>;
+  /** the maximum number of preview environments allowed for this flow (1-25, default 10) */
+  maxPreviews?: InputMaybe<Scalars['Int']['input']>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
   name: Scalars['String']['input'];
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -8683,6 +8687,8 @@ export type PreviewEnvironmentInstance = {
   __typename?: 'PreviewEnvironmentInstance';
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when this preview environment instance expires */
+  previewExpiresAt?: Maybe<Scalars['DateTime']['output']>;
   pullRequest?: Maybe<PullRequest>;
   service?: Maybe<ServiceDeployment>;
   template?: Maybe<PreviewEnvironmentTemplate>;
@@ -8710,6 +8716,8 @@ export type PreviewEnvironmentTemplate = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  /** how long preview environments should live, in seconds */
+  previewTtl?: Maybe<Scalars['Int']['output']>;
   referenceService?: Maybe<ServiceDeployment>;
   template?: Maybe<ServiceTemplate>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -8724,6 +8732,8 @@ export type PreviewEnvironmentTemplateAttributes = {
   flowId: Scalars['ID']['input'];
   /** the name of the preview environment template */
   name: Scalars['String']['input'];
+  /** how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s) */
+  previewTtl?: InputMaybe<Scalars['String']['input']>;
   /** the service that will be cloned to create the preview environment */
   referenceServiceId: Scalars['ID']['input'];
   /** a set of service configuration overrides to use while cloning */

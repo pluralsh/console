@@ -8,6 +8,8 @@ defmodule Console.Schema.PreviewEnvironmentInstance do
   }
 
   schema "preview_environment_instances" do
+    field :preview_expires_at, :utc_datetime_usec
+
     embeds_one :status, Status, on_replace: :update do
       field :comment_id, :string
     end
@@ -37,6 +39,24 @@ defmodule Console.Schema.PreviewEnvironmentInstance do
     from(i in query, where: i.template_id == ^id)
   end
 
+  def active(query \\ __MODULE__) do
+    from(i in query,
+      join: s in assoc(i, :service),
+      where: is_nil(s.deleted_at)
+    )
+  end
+
+  def expired(query \\ __MODULE__) do
+    now = Timex.now()
+    from(i in query,
+      where: not is_nil(i.preview_expires_at) and i.preview_expires_at <= ^now
+    )
+  end
+
+  def stream(query \\ __MODULE__) do
+    from(i in query, order_by: [asc: :id])
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(i in query, order_by: ^order)
   end
@@ -45,7 +65,7 @@ defmodule Console.Schema.PreviewEnvironmentInstance do
     from(i in query, preload: ^preloads)
   end
 
-  @valid ~w(template_id service_id pull_request_id)a
+  @valid ~w(template_id service_id pull_request_id preview_expires_at)a
   @required ~w(template_id service_id pull_request_id)a
 
   def changeset(instance, attrs) do
