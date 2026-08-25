@@ -1,7 +1,15 @@
 import { Table } from '@pluralsh/design-system'
+import type { Row } from '@tanstack/react-table'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
-import { PageInfoFragment, PoliciesQuery } from 'generated/graphql'
+import {
+  PageInfoFragment,
+  PoliciesQuery,
+  PolicyTinyFragment,
+} from 'generated/graphql'
+import { useNavigate } from 'react-router-dom'
+import { getPolicyEditAbsPath } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
+import { Edge } from 'utils/graphql'
 import {
   ColActions,
   ColName,
@@ -25,6 +33,8 @@ export function PoliciesTable({
   fetchNextPage: () => void
   setVirtualSlice: (slice: VirtualSlice) => void
 }) {
+  const navigate = useNavigate()
+
   return (
     <WrapperSC>
       <Table
@@ -37,6 +47,9 @@ export function PoliciesTable({
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        onRowClick={(_e, { original }: Row<Edge<PolicyTinyFragment>>) => {
+          if (original.node?.id) navigate(getPolicyEditAbsPath(original.node.id))
+        }}
         emptyStateProps={{ message: 'No policies found.' }}
       />
     </WrapperSC>

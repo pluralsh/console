@@ -11,6 +11,9 @@ import {
 } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
 
+export const POLICIES_DESCRIPTION =
+  'OPA/Rego documents that govern tool execution. Attach them to workbenches and stacks. If any matching policy denies, the tool call is rejected.'
+
 const directory = [
   { label: 'Policies', path: '' },
   { label: 'Attachment rules', path: POLICIES_ATTACHMENT_RULES_REL_PATH },

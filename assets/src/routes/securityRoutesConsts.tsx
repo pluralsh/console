@@ -17,6 +17,15 @@ export const POLICIES_ABS_PATH =
 export const POLICIES_ATTACHMENT_RULES_REL_PATH = 'attachment-rules' as const
 export const POLICIES_ATTACHMENT_RULES_ABS_PATH =
   `${POLICIES_ABS_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}` as const
+export const POLICIES_CREATE_REL_PATH = 'create' as const
+export const POLICIES_CREATE_ABS_PATH =
+  `${POLICIES_ABS_PATH}/${POLICIES_CREATE_REL_PATH}` as const
+export const POLICIES_EDIT_REL_PATH = 'edit' as const
+export const POLICIES_PARAM_ID = 'policyId' as const
+
+export function getPolicyEditAbsPath(policyId: string) {
+  return `${POLICIES_ABS_PATH}/${policyId}/${POLICIES_EDIT_REL_PATH}`
+}
 
 export const GATEKEEPER_REL_PATH = 'gatekeeper' as const
 export const GATEKEEPER_ABS_PATH =
