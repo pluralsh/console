@@ -65,3 +65,45 @@ mutation DeletePolicy($id: ID!) {
     ...PolicyTiny
   }
 }
+
+fragment BindingPolicyTiny on BindingPolicy {
+  id
+  type
+  insertedAt
+  updatedAt
+  policy {
+    ...PolicyTiny
+  }
+  bindPolicy {
+    ...PolicyTiny
+  }
+}
+
+query BindingPolicies(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  bindingPolicies(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...BindingPolicyTiny
+      }
+    }
+  }
+}
+
+mutation DeleteBindingPolicy($id: ID!) {
+  deleteBindingPolicy(id: $id) {
+    ...BindingPolicyTiny
+  }
+}

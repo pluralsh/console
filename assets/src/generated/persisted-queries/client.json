@@ -1612,6 +1612,16 @@
          "name": "DeletePolicy",
          "body": "mutation DeletePolicy($id: ID!) {\n  deletePolicy(id: $id) {\n    ...PolicyTiny\n    __typename\n  }\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
+      "sha256:ceb7e25191505966253297491bb0e807f9af81fec7567af2421b99e89ed38190": {
+         "type": "query",
+         "name": "BindingPolicies",
+         "body": "query BindingPolicies($after: String, $first: Int, $before: String, $last: Int) {\n  bindingPolicies(after: $after, first: $first, before: $before, last: $last) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...BindingPolicyTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:e9368bee108601d8aafd09aa84699d785dfc41e8f3d6cb3e4d2581cac5538101": {
+         "type": "mutation",
+         "name": "DeleteBindingPolicy",
+         "body": "mutation DeleteBindingPolicy($id: ID!) {\n  deleteBindingPolicy(id: $id) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
       "sha256:0468fee7007cd42f554905a16c0d76a3687919152ff4153e640562564e003ac7": {
          "type": "query",
          "name": "Projects",

@@ -21454,6 +21454,25 @@ export type DeletePolicyMutationVariables = Exact<{
 
 export type DeletePolicyMutation = { __typename?: 'RootMutationType', deletePolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
 
+export type BindingPolicyTinyFragment = { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type BindingPoliciesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type BindingPoliciesQuery = { __typename?: 'RootQueryType', bindingPolicies?: { __typename?: 'BindingPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'BindingPolicyEdge', node?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null } | null> | null } | null };
+
+export type DeleteBindingPolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteBindingPolicyMutation = { __typename?: 'RootMutationType', deleteBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, disableInsights?: boolean | null };
 
 export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null };
@@ -27157,6 +27176,20 @@ export const PolicyFragmentDoc = gql`
     fragment Policy on Policy {
   ...PolicyTiny
   policy
+}
+    ${PolicyTinyFragmentDoc}`;
+export const BindingPolicyTinyFragmentDoc = gql`
+    fragment BindingPolicyTiny on BindingPolicy {
+  id
+  type
+  insertedAt
+  updatedAt
+  policy {
+    ...PolicyTiny
+  }
+  bindPolicy {
+    ...PolicyTiny
+  }
 }
     ${PolicyTinyFragmentDoc}`;
 export const ProjectFragmentDoc = gql`
@@ -42686,6 +42719,93 @@ export function useDeletePolicyMutation(baseOptions?: Apollo.MutationHookOptions
 export type DeletePolicyMutationHookResult = ReturnType<typeof useDeletePolicyMutation>;
 export type DeletePolicyMutationResult = Apollo.MutationResult<DeletePolicyMutation>;
 export type DeletePolicyMutationOptions = Apollo.BaseMutationOptions<DeletePolicyMutation, DeletePolicyMutationVariables>;
+export const BindingPoliciesDocument = gql`
+    query BindingPolicies($after: String, $first: Int, $before: String, $last: Int) {
+  bindingPolicies(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...BindingPolicyTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${BindingPolicyTinyFragmentDoc}`;
+
+/**
+ * __useBindingPoliciesQuery__
+ *
+ * To run a query within a React component, call `useBindingPoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBindingPoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBindingPoliciesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useBindingPoliciesQuery(baseOptions?: Apollo.QueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BindingPoliciesQuery, BindingPoliciesQueryVariables>(BindingPoliciesDocument, options);
+      }
+export function useBindingPoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BindingPoliciesQuery, BindingPoliciesQueryVariables>(BindingPoliciesDocument, options);
+        }
+// @ts-ignore
+export function useBindingPoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPoliciesQuery, BindingPoliciesQueryVariables>;
+export function useBindingPoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPoliciesQuery | undefined, BindingPoliciesQueryVariables>;
+export function useBindingPoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BindingPoliciesQuery, BindingPoliciesQueryVariables>(BindingPoliciesDocument, options);
+        }
+export type BindingPoliciesQueryHookResult = ReturnType<typeof useBindingPoliciesQuery>;
+export type BindingPoliciesLazyQueryHookResult = ReturnType<typeof useBindingPoliciesLazyQuery>;
+export type BindingPoliciesSuspenseQueryHookResult = ReturnType<typeof useBindingPoliciesSuspenseQuery>;
+export type BindingPoliciesQueryResult = Apollo.QueryResult<BindingPoliciesQuery, BindingPoliciesQueryVariables>;
+export const DeleteBindingPolicyDocument = gql`
+    mutation DeleteBindingPolicy($id: ID!) {
+  deleteBindingPolicy(id: $id) {
+    ...BindingPolicyTiny
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
+export type DeleteBindingPolicyMutationFn = Apollo.MutationFunction<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>;
+
+/**
+ * __useDeleteBindingPolicyMutation__
+ *
+ * To run a mutation, you first call `useDeleteBindingPolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteBindingPolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteBindingPolicyMutation, { data, loading, error }] = useDeleteBindingPolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteBindingPolicyMutation(baseOptions?: Apollo.MutationHookOptions<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>(DeleteBindingPolicyDocument, options);
+      }
+export type DeleteBindingPolicyMutationHookResult = ReturnType<typeof useDeleteBindingPolicyMutation>;
+export type DeleteBindingPolicyMutationResult = Apollo.MutationResult<DeleteBindingPolicyMutation>;
+export type DeleteBindingPolicyMutationOptions = Apollo.BaseMutationOptions<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>;
 export const ProjectsDocument = gql`
     query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
@@ -48892,6 +49012,7 @@ export const namedOperations = {
     ComplianceReports: 'ComplianceReports',
     Policies: 'Policies',
     Policy: 'Policy',
+    BindingPolicies: 'BindingPolicies',
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
@@ -49093,6 +49214,7 @@ export const namedOperations = {
     CreatePolicy: 'CreatePolicy',
     UpdatePolicy: 'UpdatePolicy',
     DeletePolicy: 'DeletePolicy',
+    DeleteBindingPolicy: 'DeleteBindingPolicy',
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
@@ -49424,6 +49546,7 @@ export const namedOperations = {
     ComplianceReport: 'ComplianceReport',
     PolicyTiny: 'PolicyTiny',
     Policy: 'Policy',
+    BindingPolicyTiny: 'BindingPolicyTiny',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',
