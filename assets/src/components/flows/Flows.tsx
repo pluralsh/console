@@ -1,3 +1,4 @@
+import { NetworkStatus } from '@apollo/client'
 import {
   ArrowTopRightIcon,
   Breadcrumb,
@@ -35,14 +36,24 @@ export function Flows() {
   const searchString = searchParams.get('q') ?? ''
   const debouncedSearchString = useThrottle(searchString, 200)
 
-  const { data, error, loading, pageInfo, refetch, fetchNextPage } =
-    useFetchPaginatedData(
-      { queryHook: useFlowsQuery, keyPath: ['flows'] },
-      { q: debouncedSearchString }
-    )
+  const {
+    data,
+    error,
+    loading,
+    networkStatus,
+    pageInfo,
+    refetch,
+    fetchNextPage,
+  } = useFetchPaginatedData(
+    { queryHook: useFlowsQuery, keyPath: ['flows'] },
+    { q: debouncedSearchString }
+  )
 
   const flows = mapExistingNodes(data?.flows)
   const hasActiveSearch = !!debouncedSearchString
+  const isSearchPending =
+    searchString !== debouncedSearchString ||
+    networkStatus === NetworkStatus.setVariables
 
   if (!data && loading) return <LoadingIndicator />
 
@@ -70,7 +81,9 @@ export function Flows() {
         }
       />
       {error && <GqlError error={error} />}
-      {isEmpty(flows) ? (
+      {isSearchPending ? (
+        <LoadingIndicator />
+      ) : isEmpty(flows) ? (
         hasActiveSearch ? (
           <Card css={{ padding: theme.spacing.large }}>
             <EmptyState message="No flows found" />
