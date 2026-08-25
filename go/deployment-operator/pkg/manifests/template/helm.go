@@ -172,7 +172,7 @@ func (h *helm) templateValues(svc *console.ServiceDeploymentForAgent) (map[strin
 		return nil, fmt.Errorf("python templating error: %w", err)
 	}
 
-	valuesFiles := append(luaValuesFiles, pythonValuesFiles...)
+	valuesFiles := slices.Concat(luaValuesFiles, pythonValuesFiles)
 	values, err := h.values(svc, lo.ToSlicePtr(valuesFiles))
 	if err != nil {
 		return nil, err
