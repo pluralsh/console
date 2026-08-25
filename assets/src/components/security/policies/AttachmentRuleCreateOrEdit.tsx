@@ -45,7 +45,6 @@ import {
   POLICIES_ATTACHMENT_RULES_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_CREATE_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_REL_PATH,
-  POLICIES_CREATE_ABS_PATH,
   POLICIES_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
@@ -54,6 +53,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { ATTACHMENT_RULES_DESCRIPTION } from './AttachmentRules'
+import { CreateBindingModal } from './CreateBindingModal'
 
 const DEFAULT_INTERVAL = '1h'
 
@@ -156,10 +156,11 @@ function AttachmentRuleForm({
   rule?: BindingPolicyFragment
   onCompleted: () => void
 }) {
-  const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const isCreate = mode === 'create'
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [bindingModalOpen, setBindingModalOpen] = useState(false)
+  const [bindSelectOpen, setBindSelectOpen] = useState(false)
   const [regexDraft, setRegexDraft] = useState('')
   const [form, setForm] = useState<AttachmentRuleFormState>(() =>
     sanitizeForm(rule)
@@ -294,7 +295,10 @@ function AttachmentRuleForm({
         <FormRowSC>
           <FormLabelSC>
             <Body2BoldP>Choose targets to bind policy</Body2BoldP>
-            <NewBindingLinkSC to={POLICIES_CREATE_ABS_PATH}>
+            <NewBindingLinkSC
+              type="button"
+              onClick={() => setBindingModalOpen(true)}
+            >
               New binding
             </NewBindingLinkSC>
           </FormLabelSC>
@@ -303,9 +307,14 @@ function AttachmentRuleForm({
             selectedPolicy={selectedBindPolicy}
             selectedKey={form.bindPolicyId}
             placeholder="Select a bind policy"
+            isOpen={bindSelectOpen}
+            onOpenChange={setBindSelectOpen}
             dropdownFooterFixed={
               <ListBoxFooterPlus
-                onClick={() => navigate(POLICIES_CREATE_ABS_PATH)}
+                onClick={() => {
+                  setBindSelectOpen(false)
+                  setBindingModalOpen(true)
+                }}
               >
                 New binding
               </ListBoxFooterPlus>
@@ -388,6 +397,14 @@ function AttachmentRuleForm({
           </Button>
         </Flex>
       </ActionsFooterSC>
+      <CreateBindingModal
+        open={bindingModalOpen}
+        onClose={() => setBindingModalOpen(false)}
+        onCreated={(created) => {
+          setForm((prev) => ({ ...prev, bindPolicyId: created.id }))
+          setBindingModalOpen(false)
+        }}
+      />
       <Confirm
         open={deleteOpen}
         close={() => setDeleteOpen(false)}
@@ -422,6 +439,8 @@ function PolicySelect({
   placeholder,
   showTypeChip = false,
   dropdownFooterFixed,
+  isOpen,
+  onOpenChange,
   onSelectionChange,
 }: {
   policies: PolicyTinyFragment[]
@@ -430,6 +449,8 @@ function PolicySelect({
   placeholder: string
   showTypeChip?: boolean
   dropdownFooterFixed?: ReactNode
+  isOpen?: boolean
+  onOpenChange?: (isOpen: boolean) => void
   onSelectionChange: (id: string) => void
 }) {
   return (
@@ -437,6 +458,8 @@ function PolicySelect({
       <Select
         selectedKey={selectedKey || null}
         label={placeholder}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
         rightContent={
           showTypeChip && selectedPolicy?.type ? (
             <TypeChip type={selectedPolicy.type} />
@@ -582,11 +605,13 @@ const SelectWrapSC = styled.div({
   '& .selectInner': { width: '100%' },
 })
 
-const NewBindingLinkSC = styled(Link)(({ theme }) => ({
+const NewBindingLinkSC = styled.button(({ theme }) => ({
+  ...theme.partials.reset.button,
   ...theme.partials.text.body2,
   color: theme.colors['text-primary-accent'],
   textDecoration: 'underline',
   width: 'fit-content',
+  cursor: 'pointer',
 }))
 
 const ActionsFooterSC = styled.div(({ theme }) => ({
