@@ -14,6 +14,8 @@ fragment PolicyTiny on Policy {
 fragment Policy on Policy {
   ...PolicyTiny
   policy
+  evaluationCount
+  attachmentCount
 }
 
 fragment PolicyAttachment on PolicyAttachment {

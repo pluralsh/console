@@ -7992,10 +7992,14 @@ export type PodTolerationAttributes = {
 /** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
 export type Policy = {
   __typename?: 'Policy';
+  /** how many workbenches and stacks are currently attached to this policy */
+  attachmentCount?: Maybe<Scalars['Int']['output']>;
   /** Workbench and stack associations currently attached to this policy. */
   attachments?: Maybe<PolicyAttachmentConnection>;
   /** human-readable policy description */
   description?: Maybe<Scalars['String']['output']>;
+  /** how many sampled evaluations include this policy */
+  evaluationCount?: Maybe<Scalars['Int']['output']>;
   /** unique policy identifier */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -21447,7 +21451,7 @@ export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceR
 
 export type PolicyTinyFragment = { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
 
-export type PolicyFragment = { __typename?: 'Policy', policy: string, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
+export type PolicyFragment = { __typename?: 'Policy', policy: string, evaluationCount?: number | null, attachmentCount?: number | null, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
 
 export type PolicyAttachmentFragment = { __typename?: 'PolicyAttachment', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null };
 
@@ -21469,7 +21473,7 @@ export type PolicyQueryVariables = Exact<{
 }>;
 
 
-export type PolicyQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', policy: string, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+export type PolicyQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', policy: string, evaluationCount?: number | null, attachmentCount?: number | null, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
 
 export type PolicyAttachmentsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -27249,6 +27253,8 @@ export const PolicyFragmentDoc = gql`
     fragment Policy on Policy {
   ...PolicyTiny
   policy
+  evaluationCount
+  attachmentCount
 }
     ${PolicyTinyFragmentDoc}`;
 export const PolicyAttachmentFragmentDoc = gql`

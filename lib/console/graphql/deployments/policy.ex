@@ -197,6 +197,12 @@ defmodule Console.GraphQl.Deployments.Policy do
     @desc "how many workbenches and stacks currently match this bind policy"
     field :match_count, :integer, resolve: &Deployments.policy_match_count/3
 
+    @desc "how many sampled evaluations include this policy"
+    field :evaluation_count, :integer, resolve: &Deployments.policy_evaluation_count/3
+
+    @desc "how many workbenches and stacks are currently attached to this policy"
+    field :attachment_count, :integer, resolve: &Deployments.policy_attachment_count/3
+
     timestamps()
   end
 

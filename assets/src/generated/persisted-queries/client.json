@@ -1592,10 +1592,10 @@
          "name": "Policies",
          "body": "query Policies($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {\n  policies(\n    after: $after\n    first: $first\n    before: $before\n    last: $last\n    projectId: $projectId\n    q: $q\n  ) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...PolicyTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
-      "sha256:bdfac33bf1a6546b8e9b5ffbf5a83c2bbad49196402a8201cf7c24ba7f1f1a3d": {
+      "sha256:15893d5ffd234ccf0944a5cc0c532aedaf302ce9d38383442ac1339b90520a3d": {
          "type": "query",
          "name": "Policy",
-         "body": "query Policy($id: ID, $name: String) {\n  policy(id: $id, name: $name) {\n    ...Policy\n    __typename\n  }\n}\n\nfragment Policy on Policy {\n  ...PolicyTiny\n  policy\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+         "body": "query Policy($id: ID, $name: String) {\n  policy(id: $id, name: $name) {\n    ...Policy\n    __typename\n  }\n}\n\nfragment Policy on Policy {\n  ...PolicyTiny\n  policy\n  evaluationCount\n  attachmentCount\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
       "sha256:6e93c47f569249df2457b166c1ea8d3d9d2df7dd2e0f3985ce4612368725487e": {
          "type": "query",

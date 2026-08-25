@@ -9499,6 +9499,12 @@ type Policy {
   "how many workbenches and stacks currently match this bind policy"
   matchCount: Int
 
+  "how many sampled evaluations include this policy"
+  evaluationCount: Int
+
+  "how many workbenches and stacks are currently attached to this policy"
+  attachmentCount: Int
+
   insertedAt: DateTime
 
   updatedAt: DateTime

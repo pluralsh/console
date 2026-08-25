@@ -69,6 +69,26 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     BindingPolicy.match_counts_for_bind_policies(ids)
   end
 
+  def policy_evaluation_count(%{id: id}, _, _) do
+    count =
+      PolicyEvaluation.for_policy(id)
+      |> Console.Repo.aggregate(:count)
+
+    {:ok, count}
+  end
+
+  def policy_attachment_count(%{id: id}, _, _) do
+    workbenches =
+      WorkbenchPolicy.for_policy(id)
+      |> Console.Repo.aggregate(:count)
+
+    stacks =
+      StackPolicy.for_policy(id)
+      |> Console.Repo.aggregate(:count)
+
+    {:ok, workbenches + stacks}
+  end
+
   def evaluate_policy(%{policy_id: id, input: input}, %{context: %{current_user: user}}),
     do: Policy.evaluate_policy(id, input, user)
 

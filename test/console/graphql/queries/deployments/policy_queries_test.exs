@@ -551,6 +551,35 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert found["matchCount"] == 2
     end
 
+    test "returns evaluationCount for a policy" do
+      policy = insert(:policy)
+      insert_list(3, :policy_evaluation, policy_ids: [policy.id])
+      insert(:policy_evaluation)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id evaluationCount }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert found["evaluationCount"] == 3
+    end
+
+    test "returns attachmentCount for workbench and stack associations" do
+      policy = insert(:policy)
+      insert_list(2, :workbench_policy, policy: policy)
+      insert(:stack_policy, policy: policy)
+      insert(:workbench_policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id attachmentCount }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert found["attachmentCount"] == 3
+    end
+
     test "lists stack and workbench policy associations" do
       policy = insert(:policy)
       stack_policies = insert_list(2, :stack_policy, policy: policy)

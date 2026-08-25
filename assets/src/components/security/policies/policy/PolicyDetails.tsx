@@ -28,12 +28,6 @@ export type PolicyDetailsContext = {
   loading: boolean
 }
 
-const directory = [
-  { label: 'Definition', path: POLICIES_DEFINITION_REL_PATH },
-  { label: 'Evaluations', path: POLICIES_EVALUATIONS_REL_PATH },
-  { label: 'Attachments', path: POLICIES_ATTACHMENTS_REL_PATH },
-]
-
 export function PolicyDetails() {
   const id = useParams()[POLICIES_PARAM_ID]
   const { tab = POLICIES_DEFINITION_REL_PATH } =
@@ -44,6 +38,30 @@ export function PolicyDetails() {
     fetchPolicy: 'cache-and-network',
   })
   const policy = data?.policy
+  const directory = useMemo(
+    () => [
+      { label: 'Definition', path: POLICIES_DEFINITION_REL_PATH },
+      {
+        label: (
+          <TabLabelWithCount
+            label="Evaluations"
+            count={policy?.evaluationCount}
+          />
+        ),
+        path: POLICIES_EVALUATIONS_REL_PATH,
+      },
+      {
+        label: (
+          <TabLabelWithCount
+            label="Attachments"
+            count={policy?.attachmentCount}
+          />
+        ),
+        path: POLICIES_ATTACHMENTS_REL_PATH,
+      },
+    ],
+    [policy?.attachmentCount, policy?.evaluationCount]
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -119,3 +137,23 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   overflow: 'hidden',
 }))
+
+function TabLabelWithCount({
+  label,
+  count,
+}: {
+  label: string
+  count?: number | null
+}) {
+  return (
+    <>
+      {label}
+      {count == null ? null : (
+        <>
+          {' '}
+          <span css={{ fontWeight: 400 }}>{count}</span>
+        </>
+      )}
+    </>
+  )
+}
