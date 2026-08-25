@@ -14,6 +14,9 @@ export const COMPLIANCE_REPORTS_ABS_PATH =
 export const POLICIES_REL_PATH = 'policies' as const
 export const POLICIES_ABS_PATH =
   `${SECURITY_ABS_PATH}/${POLICIES_REL_PATH}` as const
+export const POLICIES_ATTACHMENT_RULES_REL_PATH = 'attachment-rules' as const
+export const POLICIES_ATTACHMENT_RULES_ABS_PATH =
+  `${POLICIES_ABS_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}` as const
 
 export const GATEKEEPER_REL_PATH = 'gatekeeper' as const
 export const GATEKEEPER_ABS_PATH =

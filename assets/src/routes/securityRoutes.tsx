@@ -2,7 +2,9 @@ import { Navigate, Route } from 'react-router-dom'
 
 import { Gatekeeper } from 'components/security/gatekeeper/Gatekeeper'
 import Constraint from 'components/security/gatekeeper/constraint/Constraint'
+import { AttachmentRules } from 'components/security/policies/AttachmentRules'
 import { Policies } from 'components/security/policies/Policies'
+import { PoliciesList } from 'components/security/policies/PoliciesList'
 import { Security } from 'components/security/Security'
 import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnReports'
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
@@ -14,6 +16,7 @@ import {
   GATEKEEPER_DETAILS_PATH,
   GATEKEEPER_PARAM_ID,
   GATEKEEPER_REL_PATH,
+  POLICIES_ATTACHMENT_RULES_REL_PATH,
   POLICIES_REL_PATH,
   SECURITY_OVERVIEW_ABS_PATH,
   SECURITY_REL_PATH,
@@ -53,7 +56,16 @@ export const securityRoutes = [
     <Route
       path={POLICIES_REL_PATH}
       element={<Policies />}
-    />
+    >
+      <Route
+        index
+        element={<PoliciesList />}
+      />
+      <Route
+        path={POLICIES_ATTACHMENT_RULES_REL_PATH}
+        element={<AttachmentRules />}
+      />
+    </Route>
     <Route
       path={GATEKEEPER_REL_PATH}
       element={<Gatekeeper />}
