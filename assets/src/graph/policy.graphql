@@ -85,12 +85,7 @@ query BindingPolicies(
   $before: String
   $last: Int
 ) {
-  bindingPolicies(
-    after: $after
-    first: $first
-    before: $before
-    last: $last
-  ) {
+  bindingPolicies(after: $after, first: $first, before: $before, last: $last) {
     pageInfo {
       ...PageInfo
     }
