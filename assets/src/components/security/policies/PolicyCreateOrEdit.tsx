@@ -10,6 +10,7 @@ import {
   Radio,
   RadioGroup,
   ReturnIcon,
+  ShieldLockIcon,
   StackIcon,
   WorkbenchIcon,
   useSetBreadcrumbs,
@@ -81,6 +82,13 @@ const TYPE_OPTIONS: {
     label: 'Stacks',
     description: 'Admit or deny tool calls in stacks.',
     icon: <StackIcon size={16} />,
+  },
+  {
+    value: PolicyType.Binding,
+    label: 'Bindings',
+    description:
+      'Admit or deny attaching a policy to matching workbenches and stacks.',
+    icon: <ShieldLockIcon size={16} />,
   },
 ]
 
@@ -284,6 +292,7 @@ function PolicyForm({
             }
             css={{
               display: 'flex',
+              flexWrap: 'wrap',
               gap: theme.spacing.xsmall,
               width: '100%',
             }}
@@ -445,7 +454,7 @@ const FieldsRowSC = styled.div(({ theme }) => ({
 const TypeCardSC = styled(Card)<{ $selected: boolean }>(
   ({ theme, $selected }) => ({
     flex: 1,
-    minWidth: 0,
+    minWidth: 180,
     padding: theme.spacing.small,
     cursor: 'pointer',
     backgroundColor: theme.colors['fill-one'],
