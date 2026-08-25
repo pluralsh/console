@@ -9,7 +9,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
-import { TRUNCATE } from 'components/utils/truncate'
 import { StrongSC } from 'components/utils/typography/Text'
 import {
   BindingPolicyTinyFragment,
@@ -44,7 +43,7 @@ export const ColBindPolicy = columnHelper.accessor(
   {
     id: 'bindPolicy',
     header: 'Bind policy',
-    meta: { truncate: true, gridTemplate: 'minmax(0, 200px)' },
+    meta: { gridTemplate: 'auto' },
     cell: function Cell({ getValue }) {
       const theme = useTheme()
       const name = getValue()
@@ -53,8 +52,8 @@ export const ColBindPolicy = columnHelper.accessor(
         <span
           css={{
             ...theme.partials.text.code,
-            ...TRUNCATE,
             color: theme.colors['text-xlight'],
+            whiteSpace: 'nowrap',
           }}
         >
           {name}

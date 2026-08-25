@@ -58,6 +58,7 @@ const WrapperSC = styled.div(({ theme }) => ({
 
 const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
   gap: theme.spacing.medium,
 }))
