@@ -1587,6 +1587,11 @@
          "name": "ComplianceReports",
          "body": "query ComplianceReports($id: ID, $name: String, $after: String, $before: String, $first: Int, $last: Int) {\n  complianceReportGenerator(id: $id, name: $name) {\n    complianceReports(after: $after, before: $before, first: $first, last: $last) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...ComplianceReport\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment ComplianceReport on ComplianceReports {\n  insertedAt\n  id\n  name\n  sha256\n  __typename\n}"
       },
+      "sha256:2b8be7f88ddf7566c7c265dfb9d65cc327e43584577a897276f1768cc444ab75": {
+         "type": "query",
+         "name": "Policies",
+         "body": "query Policies($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {\n  policies(\n    after: $after\n    first: $first\n    before: $before\n    last: $last\n    projectId: $projectId\n    q: $q\n  ) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...PolicyTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
       "sha256:0468fee7007cd42f554905a16c0d76a3687919152ff4153e640562564e003ac7": {
          "type": "query",
          "name": "Projects",

@@ -21408,6 +21408,20 @@ export type ComplianceReportsQueryVariables = Exact<{
 
 export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', complianceReports?: { __typename?: 'ComplianceReportsConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportsEdge', node?: { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null } | null } | null> | null } | null } | null };
 
+export type PolicyTinyFragment = { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type PoliciesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PoliciesQuery = { __typename?: 'RootQueryType', policies?: { __typename?: 'PolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyEdge', node?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null> | null } | null };
+
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, disableInsights?: boolean | null };
 
 export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null };
@@ -27094,6 +27108,19 @@ export const ComplianceReportFragmentDoc = gql`
   sha256
 }
     `;
+export const PolicyTinyFragmentDoc = gql`
+    fragment PolicyTiny on Policy {
+  id
+  name
+  type
+  description
+  project {
+    ...ProjectTiny
+  }
+  insertedAt
+  updatedAt
+}
+    ${ProjectTinyFragmentDoc}`;
 export const ProjectFragmentDoc = gql`
     fragment Project on Project {
   id
@@ -42414,6 +42441,69 @@ export type ComplianceReportsQueryHookResult = ReturnType<typeof useComplianceRe
 export type ComplianceReportsLazyQueryHookResult = ReturnType<typeof useComplianceReportsLazyQuery>;
 export type ComplianceReportsSuspenseQueryHookResult = ReturnType<typeof useComplianceReportsSuspenseQuery>;
 export type ComplianceReportsQueryResult = Apollo.QueryResult<ComplianceReportsQuery, ComplianceReportsQueryVariables>;
+export const PoliciesDocument = gql`
+    query Policies($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {
+  policies(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    projectId: $projectId
+    q: $q
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PolicyTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PolicyTinyFragmentDoc}`;
+
+/**
+ * __usePoliciesQuery__
+ *
+ * To run a query within a React component, call `usePoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePoliciesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      projectId: // value for 'projectId'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function usePoliciesQuery(baseOptions?: Apollo.QueryHookOptions<PoliciesQuery, PoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PoliciesQuery, PoliciesQueryVariables>(PoliciesDocument, options);
+      }
+export function usePoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PoliciesQuery, PoliciesQueryVariables>(PoliciesDocument, options);
+        }
+// @ts-ignore
+export function usePoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<PoliciesQuery, PoliciesQueryVariables>;
+export function usePoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<PoliciesQuery | undefined, PoliciesQueryVariables>;
+export function usePoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PoliciesQuery, PoliciesQueryVariables>(PoliciesDocument, options);
+        }
+export type PoliciesQueryHookResult = ReturnType<typeof usePoliciesQuery>;
+export type PoliciesLazyQueryHookResult = ReturnType<typeof usePoliciesLazyQuery>;
+export type PoliciesSuspenseQueryHookResult = ReturnType<typeof usePoliciesSuspenseQuery>;
+export type PoliciesQueryResult = Apollo.QueryResult<PoliciesQuery, PoliciesQueryVariables>;
 export const ProjectsDocument = gql`
     query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
@@ -48618,6 +48708,7 @@ export const namedOperations = {
     ComplianceReportGenerators: 'ComplianceReportGenerators',
     ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReports: 'ComplianceReports',
+    Policies: 'Policies',
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
@@ -49145,6 +49236,7 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReport: 'ComplianceReport',
+    PolicyTiny: 'PolicyTiny',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',

@@ -1,0 +1,38 @@
+fragment PolicyTiny on Policy {
+  id
+  name
+  type
+  description
+  project {
+    ...ProjectTiny
+  }
+  insertedAt
+  updatedAt
+}
+
+query Policies(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $projectId: ID
+  $q: String
+) {
+  policies(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    projectId: $projectId
+    q: $q
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PolicyTiny
+      }
+    }
+  }
+}
