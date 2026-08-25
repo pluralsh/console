@@ -2,7 +2,6 @@ import {
   Button,
   Card,
   CodeEditor,
-  EmptyState,
   Flex,
   FormField,
   Input,
@@ -17,31 +16,23 @@ import {
 } from '@pluralsh/design-system'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
-import { Confirm } from 'components/utils/Confirm'
 import { ProjectSelect } from 'components/utils/ProjectSelector'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, StrongSC, Subtitle2H1 } from 'components/utils/typography/Text'
+import { Body2P, Subtitle2H1 } from 'components/utils/typography/Text'
 import {
   PolicyAttributes,
-  PolicyFragment,
   PolicyType,
   useCreatePolicyMutation,
-  useDeletePolicyMutation,
-  usePolicyQuery,
-  useUpdatePolicyMutation,
 } from 'generated/graphql'
-import { isEqual, truncate } from 'lodash'
+import { isEqual } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   POLICIES_ABS_PATH,
   POLICIES_CREATE_ABS_PATH,
-  POLICIES_PARAM_ID,
   POLICIES_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
-  getPolicyEditAbsPath,
 } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { POLICIES_DESCRIPTION } from './Policies'
@@ -81,76 +72,23 @@ type PolicyFormState = {
   policy: string
 }
 
-export function PolicyCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
+export function PolicyCreateOrEdit() {
   const navigate = useNavigate()
-  const id = useParams()[POLICIES_PARAM_ID]
   const defaultProjectId = useProjectId() ?? ''
-  const { data, loading, error } = usePolicyQuery({
-    variables: { id },
-    skip: mode === 'create' || !id,
-    fetchPolicy: 'network-only',
-  })
-  const policy = data?.policy
 
   useSetBreadcrumbs(
     useMemo(
       () => [
         { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
         { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
-        {
-          label: mode === 'create' ? 'create' : (policy?.name ?? id ?? 'edit'),
-          url:
-            mode === 'create'
-              ? POLICIES_CREATE_ABS_PATH
-              : getPolicyEditAbsPath(id ?? ''),
-        },
+        { label: 'create', url: POLICIES_CREATE_ABS_PATH },
       ],
-      [id, mode, policy?.name]
+      []
     )
   )
 
-  if (error) {
-    return (
-      <GqlError
-        margin="large"
-        error={error}
-      />
-    )
-  }
-
-  if (mode === 'edit' && !loading && !policy) {
-    return (
-      <EmptyState message="Policy not found">
-        <Button
-          as={Link}
-          to={POLICIES_ABS_PATH}
-          startIcon={<ReturnIcon />}
-        >
-          Back to all policies
-        </Button>
-      </EmptyState>
-    )
-  }
-
-  if (mode === 'edit' && loading && !policy) {
-    return (
-      <Flex
-        direction="column"
-        height="100%"
-      >
-        <RectangleSkeleton
-          $width="100%"
-          $height="100%"
-        />
-      </Flex>
-    )
-  }
-
   return (
     <PolicyForm
-      key={policy?.id ?? 'create'}
-      mode={mode}
-      policy={policy ?? undefined}
       defaultProjectId={defaultProjectId}
       onCompleted={() => navigate(POLICIES_ABS_PATH)}
     />
@@ -158,55 +96,28 @@ export function PolicyCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
 }
 
 function PolicyForm({
-  mode,
-  policy,
   defaultProjectId,
   onCompleted,
 }: {
-  mode: 'create' | 'edit'
-  policy?: PolicyFragment
   defaultProjectId: string
   onCompleted: () => void
 }) {
   const theme = useTheme()
   const { popToast } = useSimpleToast()
-  const isCreate = mode === 'create'
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const [form, setForm] = useState<PolicyFormState>(() =>
-    sanitizeForm(policy, defaultProjectId)
+    emptyForm(defaultProjectId)
   )
-  const [initialForm] = useState(() => sanitizeForm(policy, defaultProjectId))
+  const [initialForm] = useState(() => emptyForm(defaultProjectId))
 
-  const [createPolicy, { loading: createLoading, error: createError }] =
-    useCreatePolicyMutation({
-      onCompleted: () => {
-        popToast({ content: 'Policy created', severity: 'success' })
-        onCompleted()
-      },
-      refetchQueries: ['Policies'],
-      awaitRefetchQueries: true,
-    })
-  const [updatePolicy, { loading: updateLoading, error: updateError }] =
-    useUpdatePolicyMutation({
-      onCompleted: () => {
-        popToast({ content: 'Policy saved', severity: 'success' })
-        onCompleted()
-      },
-      refetchQueries: ['Policies', 'Policy'],
-      awaitRefetchQueries: true,
-    })
-  const [deletePolicy, { loading: deleteLoading, error: deleteError }] =
-    useDeletePolicyMutation({
-      onCompleted: () => {
-        popToast({ content: 'Policy deleted', severity: 'success' })
-        onCompleted()
-      },
-      refetchQueries: ['Policies'],
-      awaitRefetchQueries: true,
-    })
+  const [createPolicy, { loading, error }] = useCreatePolicyMutation({
+    onCompleted: () => {
+      popToast({ content: 'Policy created', severity: 'success' })
+      onCompleted()
+    },
+    refetchQueries: ['Policies'],
+    awaitRefetchQueries: true,
+  })
 
-  const mutationError = createError || updateError
-  const mutationLoading = createLoading || updateLoading
   const canSave =
     !!form.name.trim() &&
     !!form.policy.trim() &&
@@ -215,13 +126,8 @@ function PolicyForm({
 
   const onSave = () => {
     if (!canSave) return
-    const attributes = formToAttributes(form)
 
-    if (isCreate) {
-      createPolicy({ variables: { attributes } })
-      return
-    }
-    updatePolicy({ variables: { id: policy?.id ?? '', attributes } })
+    createPolicy({ variables: { attributes: formToAttributes(form) } })
   }
 
   return (
@@ -230,12 +136,10 @@ function PolicyForm({
         direction="column"
         gap="xxsmall"
       >
-        <Subtitle2H1 css={{ fontWeight: 400 }}>
-          {isCreate ? 'Create a new policy' : 'Edit policy'}
-        </Subtitle2H1>
+        <Subtitle2H1 css={{ fontWeight: 400 }}>Create a new policy</Subtitle2H1>
         <Body2P $color="text-xlight">{POLICIES_DESCRIPTION}</Body2P>
       </Flex>
-      {mutationError && <GqlError error={mutationError} />}
+      {error && <GqlError error={error} />}
       <FormCardSC>
         <FieldsRowSC>
           <FormField
@@ -343,68 +247,34 @@ function PolicyForm({
         </FormField>
       </FormCardSC>
       <ActionsFooterSC>
-        {isCreate ? (
-          <div />
-        ) : (
-          <Button
-            destructive
-            onClick={() => setDeleteOpen(true)}
-          >
-            Delete policy
-          </Button>
-        )}
-        <Flex gap="xsmall">
-          <Button
-            floating
-            as={Link}
-            to={POLICIES_ABS_PATH}
-            startIcon={<ReturnIcon />}
-          >
-            Back to all policies
-          </Button>
-          <Button
-            primary
-            disabled={!canSave}
-            loading={mutationLoading}
-            onClick={onSave}
-          >
-            Save
-          </Button>
-        </Flex>
+        <Button
+          floating
+          as={Link}
+          to={POLICIES_ABS_PATH}
+          startIcon={<ReturnIcon />}
+        >
+          Back to all policies
+        </Button>
+        <Button
+          primary
+          disabled={!canSave}
+          loading={loading}
+          onClick={onSave}
+        >
+          Save
+        </Button>
       </ActionsFooterSC>
-      <Confirm
-        open={deleteOpen}
-        close={() => setDeleteOpen(false)}
-        destructive
-        title="Delete policy"
-        label="Delete policy"
-        loading={deleteLoading}
-        error={deleteError}
-        submit={() => deletePolicy({ variables: { id: policy?.id ?? '' } })}
-        text={
-          <span>
-            Are you sure you want to delete{' '}
-            <StrongSC $color="text-danger">
-              {truncate(policy?.name ?? '', { length: 40 })}
-            </StrongSC>
-            ?
-          </span>
-        }
-      />
     </WrapperSC>
   )
 }
 
-function sanitizeForm(
-  policy: Nullable<PolicyFragment>,
-  defaultProjectId: string
-): PolicyFormState {
+function emptyForm(defaultProjectId: string): PolicyFormState {
   return {
-    name: policy?.name ?? '',
-    description: policy?.description ?? '',
-    projectId: policy?.project?.id ?? defaultProjectId,
-    type: policy?.type ?? PolicyType.Workbench,
-    policy: policy?.policy ?? '',
+    name: '',
+    description: '',
+    projectId: defaultProjectId,
+    type: PolicyType.Workbench,
+    policy: '',
   }
 }
 
@@ -456,7 +326,7 @@ const TypeCardSC = styled(Card)<{ $selected: boolean }>(
 
 const ActionsFooterSC = styled.div(({ theme }) => ({
   display: 'flex',
-  justifyContent: 'space-between',
+  justifyContent: 'flex-end',
   alignItems: 'center',
   gap: theme.spacing.medium,
   width: '100%',

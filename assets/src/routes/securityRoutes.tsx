@@ -81,7 +81,7 @@ export const securityRoutes = [
     </Route>
     <Route
       path={`${POLICIES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
-      element={<PolicyCreateOrEdit mode="create" />}
+      element={<PolicyCreateOrEdit />}
     />
     <Route
       path={`${POLICIES_REL_PATH}/:${POLICIES_PARAM_ID}`}
@@ -109,10 +109,6 @@ export const securityRoutes = [
         element={<PolicyAttachments />}
       />
     </Route>
-    <Route
-      path={`${POLICIES_REL_PATH}/:${POLICIES_PARAM_ID}/${POLICIES_EDIT_REL_PATH}`}
-      element={<PolicyCreateOrEdit mode="edit" />}
-    />
     <Route
       path={`${POLICIES_REL_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
       element={<AttachmentRuleCreateOrEdit mode="create" />}

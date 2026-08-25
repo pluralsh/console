@@ -23,10 +23,6 @@ export const POLICIES_DEFINITION_REL_PATH = 'definition' as const
 export const POLICIES_EVALUATIONS_REL_PATH = 'evaluations' as const
 export const POLICIES_ATTACHMENTS_REL_PATH = 'attachments' as const
 
-export function getPolicyEditAbsPath(policyId: string) {
-  return `${POLICIES_ABS_PATH}/${policyId}/${POLICIES_EDIT_REL_PATH}`
-}
-
 export function getPolicyDetailsAbsPath(
   policyId: string,
   tab: string = POLICIES_DEFINITION_REL_PATH
