@@ -3,8 +3,8 @@ import type { Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
-  PolicyStackAttachmentFragment,
-  PolicyWorkbenchAttachmentFragment,
+  BindingPolicyType,
+  PolicyAttachmentFragment,
   usePolicyAttachmentsQuery,
 } from 'generated/graphql'
 import { startCase } from 'lodash'
@@ -34,17 +34,14 @@ export function PolicyAttachments() {
     useFetchPaginatedData(
       {
         queryHook: usePolicyAttachmentsQuery,
-        keyPath: ['policy', 'workbenchPolicies'],
+        keyPath: ['policy', 'attachments'],
         skip: !id,
       },
-      { id, stackFirst: 100 }
+      { id }
     )
 
   const rows = useMemo(
-    () => [
-      ...mapExistingNodes(data?.policy?.workbenchPolicies).map(toWorkbenchRow),
-      ...mapExistingNodes(data?.policy?.stackPolicies).map(toStackRow),
-    ],
+    () => mapExistingNodes(data?.policy?.attachments).map(toAttachmentRow),
     [data]
   )
 
@@ -71,9 +68,25 @@ export function PolicyAttachments() {
   )
 }
 
-function toWorkbenchRow(
-  attachment: PolicyWorkbenchAttachmentFragment
+function toAttachmentRow(
+  attachment: PolicyAttachmentFragment
 ): PolicyAttachmentRow {
+  if (attachment.type === BindingPolicyType.Stack) {
+    return {
+      id: attachment.id,
+      kind: 'stack',
+      name: attachment.stack?.name,
+      description: attachment.stack?.type
+        ? startCase(attachment.stack.type.toLowerCase())
+        : 'Stack',
+      matchingArgs: [],
+      updatedAt: attachment.updatedAt,
+      href: attachment.stack?.id
+        ? getStacksAbsPath(attachment.stack.id)
+        : undefined,
+    }
+  }
+
   return {
     id: attachment.id,
     kind: 'workbench',
@@ -85,24 +98,6 @@ function toWorkbenchRow(
     updatedAt: attachment.updatedAt,
     href: attachment.workbench?.id
       ? getWorkbenchAbsPath(attachment.workbench.id)
-      : undefined,
-  }
-}
-
-function toStackRow(
-  attachment: PolicyStackAttachmentFragment
-): PolicyAttachmentRow {
-  return {
-    id: attachment.id,
-    kind: 'stack',
-    name: attachment.stack?.name,
-    description: attachment.stack?.type
-      ? startCase(attachment.stack.type.toLowerCase())
-      : 'Stack',
-    matchingArgs: [],
-    updatedAt: attachment.updatedAt,
-    href: attachment.stack?.id
-      ? getStacksAbsPath(attachment.stack.id)
       : undefined,
   }
 }

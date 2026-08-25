@@ -189,8 +189,24 @@ defmodule Console.GraphQl.Deployments.Policy do
       resolve &Deployments.list_policy_workbench_policies/3
     end
 
+    @desc "Workbench and stack associations currently attached to this policy."
+    connection field :attachments, node_type: :policy_attachment do
+      resolve &Deployments.list_policy_attachments/3
+    end
+
     @desc "how many workbenches and stacks currently match this bind policy"
     field :match_count, :integer, resolve: &Deployments.policy_match_count/3
+
+    timestamps()
+  end
+
+  @desc "A workbench or stack currently attached to a policy."
+  object :policy_attachment do
+    field :id,      non_null(:id)
+    field :type,    non_null(:binding_policy_type)
+    field :matches, :workbench_policy_matches
+    field :workbench, :workbench
+    field :stack,     :infrastructure_stack
 
     timestamps()
   end
@@ -422,6 +438,7 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   connection node_type: :policy
   connection node_type: :binding_policy
+  connection node_type: :policy_attachment
   connection node_type: :policy_evaluation
   connection node_type: :policy_constraint
   connection node_type: :vulnerability_report

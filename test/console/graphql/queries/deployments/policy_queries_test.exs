@@ -573,6 +573,74 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert from_connection(found["workbenchPolicies"]) |> ids_equal(workbench_policies)
     end
 
+    test "lists mixed workbench and stack attachments" do
+      policy = insert(:policy)
+      workbench_policy = insert(:workbench_policy, policy: policy)
+      stack_policy = insert(:stack_policy, policy: policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            attachments(first: 5) {
+              edges {
+                node {
+                  id
+                  type
+                  workbench { id }
+                  stack { id }
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      attachments = from_connection(found["attachments"])
+      by_id = Map.new(attachments, & {&1["id"], &1})
+
+      assert ids_equal(attachments, [workbench_policy, stack_policy])
+      assert by_id[workbench_policy.id]["type"] == "WORKBENCH"
+      assert by_id[workbench_policy.id]["workbench"]["id"] == workbench_policy.workbench_id
+      assert by_id[workbench_policy.id]["stack"] == nil
+      assert by_id[stack_policy.id]["type"] == "STACK"
+      assert by_id[stack_policy.id]["stack"]["id"] == stack_policy.stack_id
+      assert by_id[stack_policy.id]["workbench"] == nil
+    end
+
+    test "paginates mixed workbench and stack attachments" do
+      policy = insert(:policy)
+      insert_list(3, :workbench_policy, policy: policy)
+      insert_list(2, :stack_policy, policy: policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            attachments(first: 2) {
+              pageInfo { hasNextPage endCursor }
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert length(found["attachments"]["edges"]) == 2
+      assert found["attachments"]["pageInfo"]["hasNextPage"]
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!, $after: String) {
+          policy(id: $id) {
+            attachments(first: 5, after: $after) {
+              pageInfo { hasNextPage }
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => policy.id, "after" => found["attachments"]["pageInfo"]["endCursor"]}, %{current_user: admin_user()})
+
+      assert length(found["attachments"]["edges"]) == 3
+      refute found["attachments"]["pageInfo"]["hasNextPage"]
+    end
+
     test "blocks sensitive stack data nested under a policy" do
       policy = insert(:policy)
       insert(:stack_policy, policy: policy)
@@ -605,6 +673,23 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       """, %{"id" => policy.id}, %{current_user: admin_user()})
 
       assert message == "workbench runs cannot be fetched through a policy"
+    end
+
+    test "blocks sensitive stack data nested under policy attachments" do
+      policy = insert(:policy)
+      insert(:stack_policy, policy: policy)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) {
+            attachments(first: 5) {
+              edges { node { stack { runs(first: 5) { edges { node { id } } } } } }
+            }
+          }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert message == "stack runs cannot be fetched through a policy"
     end
 
     test "permits allowed stack and workbench fields nested under a policy" do

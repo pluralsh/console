@@ -7992,6 +7992,8 @@ export type PodTolerationAttributes = {
 /** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
 export type Policy = {
   __typename?: 'Policy';
+  /** Workbench and stack associations currently attached to this policy. */
+  attachments?: Maybe<PolicyAttachmentConnection>;
   /** human-readable policy description */
   description?: Maybe<Scalars['String']['output']>;
   /** unique policy identifier */
@@ -8012,6 +8014,15 @@ export type Policy = {
   type: PolicyType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
+};
+
+
+/** A project-scoped policy that can be associated with workbenches to enforce policy decisions. */
+export type PolicyAttachmentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -8046,6 +8057,30 @@ export enum PolicyAggregate {
   Enforcement = 'ENFORCEMENT',
   Installed = 'INSTALLED'
 }
+
+/** A workbench or stack currently attached to a policy. */
+export type PolicyAttachment = {
+  __typename?: 'PolicyAttachment';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  matches?: Maybe<WorkbenchPolicyMatches>;
+  stack?: Maybe<InfrastructureStack>;
+  type: BindingPolicyType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  workbench?: Maybe<Workbench>;
+};
+
+export type PolicyAttachmentConnection = {
+  __typename?: 'PolicyAttachmentConnection';
+  edges?: Maybe<Array<Maybe<PolicyAttachmentEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PolicyAttachmentEdge = {
+  __typename?: 'PolicyAttachmentEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PolicyAttachment>;
+};
 
 /** Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy. */
 export type PolicyAttributes = {
@@ -21414,6 +21449,8 @@ export type PolicyTinyFragment = { __typename?: 'Policy', id: string, name: stri
 
 export type PolicyFragment = { __typename?: 'Policy', policy: string, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
 
+export type PolicyAttachmentFragment = { __typename?: 'PolicyAttachment', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null };
+
 export type PoliciesQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -21425,10 +21462,6 @@ export type PoliciesQueryVariables = Exact<{
 
 
 export type PoliciesQuery = { __typename?: 'RootQueryType', policies?: { __typename?: 'PolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyEdge', node?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null> | null } | null };
-
-export type PolicyWorkbenchAttachmentFragment = { __typename?: 'WorkbenchPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null };
-
-export type PolicyStackAttachmentFragment = { __typename?: 'StackPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null };
 
 export type PolicyQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -21442,12 +21475,10 @@ export type PolicyAttachmentsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
-  stackFirst?: InputMaybe<Scalars['Int']['input']>;
-  stackAfter?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type PolicyAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, workbenchPolicies?: { __typename?: 'WorkbenchPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchPolicyEdge', node?: { __typename?: 'WorkbenchPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null } | null } | null> | null } | null, stackPolicies?: { __typename?: 'StackPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackPolicyEdge', node?: { __typename?: 'StackPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null } | null } | null> | null } | null } | null };
+export type PolicyAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, attachments?: { __typename?: 'PolicyAttachmentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyAttachmentEdge', node?: { __typename?: 'PolicyAttachment', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null } | null } | null> | null } | null } | null };
 
 export type CreatePolicyMutationVariables = Exact<{
   attributes: PolicyAttributes;
@@ -27220,9 +27251,10 @@ export const PolicyFragmentDoc = gql`
   policy
 }
     ${PolicyTinyFragmentDoc}`;
-export const PolicyWorkbenchAttachmentFragmentDoc = gql`
-    fragment PolicyWorkbenchAttachment on WorkbenchPolicy {
+export const PolicyAttachmentFragmentDoc = gql`
+    fragment PolicyAttachment on PolicyAttachment {
   id
+  type
   matches {
     regexes
   }
@@ -27231,13 +27263,6 @@ export const PolicyWorkbenchAttachmentFragmentDoc = gql`
     name
     description
   }
-  insertedAt
-  updatedAt
-}
-    `;
-export const PolicyStackAttachmentFragmentDoc = gql`
-    fragment PolicyStackAttachment on StackPolicy {
-  id
   stack {
     id
     name
@@ -42700,34 +42725,23 @@ export type PolicyLazyQueryHookResult = ReturnType<typeof usePolicyLazyQuery>;
 export type PolicySuspenseQueryHookResult = ReturnType<typeof usePolicySuspenseQuery>;
 export type PolicyQueryResult = Apollo.QueryResult<PolicyQuery, PolicyQueryVariables>;
 export const PolicyAttachmentsDocument = gql`
-    query PolicyAttachments($id: ID!, $first: Int, $after: String, $stackFirst: Int, $stackAfter: String) {
+    query PolicyAttachments($id: ID!, $first: Int, $after: String) {
   policy(id: $id) {
     id
-    workbenchPolicies(first: $first, after: $after) {
+    attachments(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
       }
       edges {
         node {
-          ...PolicyWorkbenchAttachment
-        }
-      }
-    }
-    stackPolicies(first: $stackFirst, after: $stackAfter) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...PolicyStackAttachment
+          ...PolicyAttachment
         }
       }
     }
   }
 }
     ${PageInfoFragmentDoc}
-${PolicyWorkbenchAttachmentFragmentDoc}
-${PolicyStackAttachmentFragmentDoc}`;
+${PolicyAttachmentFragmentDoc}`;
 
 /**
  * __usePolicyAttachmentsQuery__
@@ -42744,8 +42758,6 @@ ${PolicyStackAttachmentFragmentDoc}`;
  *      id: // value for 'id'
  *      first: // value for 'first'
  *      after: // value for 'after'
- *      stackFirst: // value for 'stackFirst'
- *      stackAfter: // value for 'stackAfter'
  *   },
  * });
  */
@@ -49809,8 +49821,7 @@ export const namedOperations = {
     ComplianceReport: 'ComplianceReport',
     PolicyTiny: 'PolicyTiny',
     Policy: 'Policy',
-    PolicyWorkbenchAttachment: 'PolicyWorkbenchAttachment',
-    PolicyStackAttachment: 'PolicyStackAttachment',
+    PolicyAttachment: 'PolicyAttachment',
     BindingPolicyTiny: 'BindingPolicyTiny',
     BindingPolicy: 'BindingPolicy',
     Project: 'Project',

@@ -9493,11 +9493,25 @@ type Policy {
 
   workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
 
+  "Workbench and stack associations currently attached to this policy."
+  attachments(after: String, first: Int, before: String, last: Int): PolicyAttachmentConnection
+
   "how many workbenches and stacks currently match this bind policy"
   matchCount: Int
 
   insertedAt: DateTime
 
+  updatedAt: DateTime
+}
+
+"A workbench or stack currently attached to a policy."
+type PolicyAttachment {
+  id: ID!
+  type: BindingPolicyType!
+  matches: WorkbenchPolicyMatches
+  workbench: Workbench
+  stack: InfrastructureStack
+  insertedAt: DateTime
   updatedAt: DateTime
 }
 
@@ -9763,6 +9777,11 @@ type PolicyConnection {
 type BindingPolicyConnection {
   pageInfo: PageInfo!
   edges: [BindingPolicyEdge]
+}
+
+type PolicyAttachmentConnection {
+  pageInfo: PageInfo!
+  edges: [PolicyAttachmentEdge]
 }
 
 type PolicyEvaluationConnection {
@@ -17485,6 +17504,11 @@ type VulnerabilityReportEdge {
 
 type PolicyConstraintEdge {
   node: PolicyConstraint
+  cursor: String
+}
+
+type PolicyAttachmentEdge {
+  node: PolicyAttachment
   cursor: String
 }
 

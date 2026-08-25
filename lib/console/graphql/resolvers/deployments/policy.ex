@@ -45,6 +45,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> paginate(args)
   end
 
+  def list_policy_attachments(policy, args, _) do
+    attachments =
+      (workbench_attachments(policy.id) ++ stack_attachments(policy.id))
+      |> Enum.sort_by(&attachment_timestamp/1, :desc)
+
+    Absinthe.Relay.Connection.from_list(attachments, args)
+  end
+
   def list_policy_evaluations(policy, args, _) do
     PolicyEvaluation.for_policy(policy.id)
     |> PolicyEvaluation.ordered()
@@ -206,6 +214,47 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   def delete_binding_policy(%{id: id}, %{context: %{current_user: user}}),
     do: Policy.delete_binding_policy(id, user)
+
+  defp workbench_attachments(policy_id) do
+    WorkbenchPolicy.for_policy(policy_id)
+    |> Console.Repo.all()
+    |> Console.Repo.preload(:workbench)
+    |> Enum.map(&workbench_attachment/1)
+  end
+
+  defp stack_attachments(policy_id) do
+    StackPolicy.for_policy(policy_id)
+    |> Console.Repo.all()
+    |> Console.Repo.preload(:stack)
+    |> Enum.map(&stack_attachment/1)
+  end
+
+  defp workbench_attachment(%WorkbenchPolicy{} = policy) do
+    %{
+      id: policy.id,
+      type: :workbench,
+      matches: policy.matches,
+      workbench: policy.workbench,
+      stack: nil,
+      inserted_at: policy.inserted_at,
+      updated_at: policy.updated_at
+    }
+  end
+
+  defp stack_attachment(%StackPolicy{} = policy) do
+    %{
+      id: policy.id,
+      type: :stack,
+      matches: nil,
+      workbench: nil,
+      stack: policy.stack,
+      inserted_at: policy.inserted_at,
+      updated_at: policy.updated_at
+    }
+  end
+
+  defp attachment_timestamp(%{updated_at: ts}) when not is_nil(ts), do: ts
+  defp attachment_timestamp(%{inserted_at: ts}), do: ts
 
   defp policy_filters(query, args) do
     Enum.reduce(args, query, fn

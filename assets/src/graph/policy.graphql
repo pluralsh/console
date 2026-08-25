@@ -16,8 +16,9 @@ fragment Policy on Policy {
   policy
 }
 
-fragment PolicyWorkbenchAttachment on WorkbenchPolicy {
+fragment PolicyAttachment on PolicyAttachment {
   id
+  type
   matches {
     regexes
   }
@@ -26,12 +27,6 @@ fragment PolicyWorkbenchAttachment on WorkbenchPolicy {
     name
     description
   }
-  insertedAt
-  updatedAt
-}
-
-fragment PolicyStackAttachment on StackPolicy {
-  id
   stack {
     id
     name
@@ -74,32 +69,16 @@ query Policy($id: ID, $name: String) {
   }
 }
 
-query PolicyAttachments(
-  $id: ID!
-  $first: Int
-  $after: String
-  $stackFirst: Int
-  $stackAfter: String
-) {
+query PolicyAttachments($id: ID!, $first: Int, $after: String) {
   policy(id: $id) {
     id
-    workbenchPolicies(first: $first, after: $after) {
+    attachments(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
       }
       edges {
         node {
-          ...PolicyWorkbenchAttachment
-        }
-      }
-    }
-    stackPolicies(first: $stackFirst, after: $stackAfter) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...PolicyStackAttachment
+          ...PolicyAttachment
         }
       }
     }
