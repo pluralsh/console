@@ -25,7 +25,7 @@ type MarkdownProps = {
 export const markdownSanitizeSchema: SanitizeOptions = { ...defaultSchema }
 
 export function getLastStringChild(children: any, depth = 0): any {
-  let lastChild = null
+  let lastChild: string | null = null
 
   Children.forEach(children, (child) => {
     if (typeof child === 'string') {
@@ -300,8 +300,8 @@ function MarkdownLink({
   ...props
 }: {
   href?: string
-  gitUrl: string
-  mainBranch: string
+  gitUrl?: string
+  mainBranch?: string
 }) {
   // Convert local readme hrefs to full path on github
   if (gitUrl && href && !isExternalUrl(href)) {

@@ -40,7 +40,7 @@ function ChipList<TValue = string>({
         <Chip
           key={(v as any).key || i}
           clickable={clickable}
-          onClick={() => clickable && onClick(v)}
+          onClick={() => clickable && onClick?.(v)}
           {...props}
         >
           {transformValue ? transformValue(v) : `${v}`}

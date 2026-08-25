@@ -1,9 +1,13 @@
 import { UserDetails } from '../index'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'User Details',
   component: UserDetails,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
   return (
@@ -14,5 +18,7 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}

@@ -7,11 +7,14 @@ import { baseSpacing } from '../theme/spacing'
 import { ItemLabel } from './ItemLabel'
 import { FilledBox } from './FilledBox'
 import { FlexWrap } from './FlexWrap'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Semantic System',
-  component: null,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const fillLevelToBGColor: Record<FillLevel, string> = {
   0: 'fill-zero',
@@ -91,7 +94,7 @@ function Shadows() {
 }
 
 const RadiusedBox = styled(FilledBox)<{ $radius?: 'medium' | 'large' }>(
-  ({ theme, $radius: radius }) => ({
+  ({ theme, $radius: radius = 'medium' }) => ({
     borderRadius: theme.borderRadiuses[radius],
   })
 )
@@ -119,7 +122,9 @@ const BorderedBox = styled(RadiusedBox).attrs(
   () => ({ radius: 'medium' }) as any
 )<{
   border?: string
-}>(({ theme, border }) => ({ border: (theme.borders as any)[border] }))
+}>(({ theme, border }) => ({
+  border: border ? (theme.borders as any)[border] : undefined,
+}))
 
 function BoxBorders() {
   const { borders } = useTheme()
@@ -138,7 +143,7 @@ function BoxBorders() {
 
 const ScrollbarBox = styled(FilledBox)<{
   $fillLevel?: FillLevel
-}>(({ theme, $fillLevel: fillLevel }) => ({
+}>(({ theme, $fillLevel: fillLevel = 0 }) => ({
   ...theme.partials.scrollBar({ fillLevel }),
   ...theme.partials.text.caption,
   backgroundColor: (theme.colors as any)[fillLevelToBGColor[fillLevel]],
@@ -235,8 +240,10 @@ function Spacing() {
   )
 }
 
-export const Miscellaneous = Template.bind({})
-Miscellaneous.args = {}
+export const Miscellaneous: Story = {
+  render: Template,
+  args: {},
+}
 
 export { default as Colors } from './Colors'
 export { default as Typography } from './Typography'

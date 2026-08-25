@@ -83,7 +83,10 @@ type TriggerProps = {
 
 function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   const ref = props.buttonRef
-  const { buttonProps } = useButton(props, ref)
+  const { buttonProps } = useButton(
+    props as unknown as Parameters<typeof useButton>[0],
+    ref
+  )
   const theme = useTheme()
 
   return cloneElement(buttonElt, {
@@ -178,7 +181,6 @@ const SelectButtonInner = styled.div<{
         marginLeft: theme.spacing.medium,
       },
       '.arrow': {
-        transition: 'transform 0.1s ease',
         display: 'flex',
         marginLeft: theme.spacing.medium,
         alignItems: 'center',
@@ -223,7 +225,7 @@ function SelectButton({
   return (
     <SelectButtonInner
       ref={ref}
-      $isOpen={isOpen}
+      $isOpen={!!isOpen}
       $size={size}
       $parentFillLevel={parentFillLevel}
       $transparent={transparent}
@@ -299,7 +301,7 @@ function Select({
 }: SelectProps) {
   const stateRef = useRef<BimodalSelectState<object> | null>(null)
   const [isOpenUncontrolled, setIsOpen] = useState(false)
-  const nextFocusedKeyRef = useRef<Key>(null)
+  const nextFocusedKeyRef = useRef<Key | null>(null)
 
   if (typeof isOpen !== 'boolean') {
     isOpen = isOpenUncontrolled
@@ -337,7 +339,7 @@ function Select({
   setNextFocusedKey({ nextFocusedKeyRef, state, stateRef })
 
   // Get props for the listbox element
-  const ref = useRef(undefined)
+  const ref = useRef<HTMLElement | null>(null)
   const { triggerProps, menuProps } = useSelect(selectStateProps, state, ref)
 
   label = label || ' '

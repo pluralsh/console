@@ -21,7 +21,7 @@ import { type AriaSelectProps } from '@react-types/select'
 import { type ListProps, type SelectState, useListState } from 'react-stately'
 import { useCallback, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
-import { type Key, type Node } from '@react-types/shared'
+import { type Key, type Node, type Selection } from '@react-types/shared'
 
 // TODO: we should probably revisit the conflicting typings/state management
 // we might be able to simplify a lot of this now that react-aria natively supports multi-select
@@ -58,9 +58,9 @@ function useBimodalSelectState<T extends object>({
   onSelectionChange: onSelectChangeProp,
   ...props
 }: BimodalSelectProps<T> & {
-  onSelectionChange: (arg: any) => any
+  onSelectionChange?: (arg: any) => any
 }): BimodalSelectState<T> {
-  const [selectedKey, setSelectedKey] = useControlledState<Key>(
+  const [selectedKey, setSelectedKey] = useControlledState<Key | null>(
     selectionMode === 'single' ? props.selectedKey : undefined,
     props.defaultSelectedKey ?? null,
     selectionMode === 'single' ? onSelectChangeProp : undefined
@@ -71,13 +71,17 @@ function useBimodalSelectState<T extends object>({
     []
   )
   const selectedKeys =
-    selectionMode === 'multiple' ? props.selectedKeys : new Set([selectedKey])
+    selectionMode === 'multiple'
+      ? props.selectedKeys
+      : selectedKey != null
+        ? new Set<Key>([selectedKey])
+        : new Set<Key>()
   const triggerState = useMenuTriggerState(props)
 
-  const onSelectionChange = useCallback<ListProps<object>['onSelectionChange']>(
-    (keys) => {
+  const onSelectionChange = useCallback(
+    (keys: Selection) => {
       if (selectionMode === 'single' && keys !== 'all') {
-        const key = keys.values().next().value
+        const key = keys.values().next().value ?? null
 
         // Always fire onSelectionChange, even if the key is the same
         // as the current key (useControlledState does not).
@@ -89,7 +93,7 @@ function useBimodalSelectState<T extends object>({
         triggerState.close()
       }
       if (selectionMode === 'multiple') {
-        onSelectChangeProp(keys === 'all' ? getAllKeys() : keys)
+        onSelectChangeProp?.(keys === 'all' ? getAllKeys() : keys)
       }
     },
     [
@@ -113,17 +117,23 @@ function useBimodalSelectState<T extends object>({
 
   listStateRef.current = listState
 
+  const selectedKeysIterable =
+    selectedKeys === 'all' ? getAllKeys() : (selectedKeys ?? [])
+
   const validationState = useFormValidationState({
     ...props,
-    value: selectionMode === 'single' ? selectedKey : selectedKeys,
+    value:
+      selectionMode === 'single'
+        ? selectedKey
+        : Array.from(selectedKeysIterable),
   })
 
   const selectedItem =
     selectedKey != null ? listState.collection.getItem(selectedKey) : null
 
-  const selectedItems = Array.from(selectedKeys).map((key) =>
-    listState.collection.getItem(key)
-  )
+  const selectedItems = Array.from(selectedKeysIterable)
+    .map((key) => (key != null ? listState.collection.getItem(key) : null))
+    .filter((item): item is Node<T> => item != null)
 
   const [isFocused, setFocused] = useState(false)
 
@@ -160,7 +170,9 @@ function useBimodalSelectState<T extends object>({
       selectionMode === 'single'
         ? (props.defaultSelectedKey ?? null)
         : props.selectedKeys
-          ? Array.from(props.selectedKeys)
+          ? Array.from(
+              props.selectedKeys === 'all' ? getAllKeys() : props.selectedKeys
+            )
           : [],
     setValue: (newValue) => {
       if (selectionMode === 'single') setSelectedKey(newValue as Key)

@@ -9,6 +9,8 @@ import {
 } from 'react'
 import styled from 'styled-components'
 
+import { type RadioGroupState } from 'react-stately'
+
 import { RadioContext } from './RadioGroup'
 
 type SelectItemWrapProps = {
@@ -59,8 +61,8 @@ function SelectItem({
   className,
   ...props
 }: SelectItemProps) {
-  const state = useContext(RadioContext)
-  const inputRef = useRef<any>(undefined)
+  const state = useContext(RadioContext) as RadioGroupState
+  const inputRef = useRef<any>(null)
   const { isFocusVisible, focusProps } = useFocusRing()
   const { inputProps, isSelected } = useRadio(
     {

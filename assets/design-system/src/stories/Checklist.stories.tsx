@@ -7,14 +7,18 @@ import DownloadIcon from '../components/icons/DownloadIcon'
 import GitHubLogoIcon from '../components/icons/GitHubLogoIcon'
 import MarketIcon from '../components/icons/MarketIcon'
 import TerminalIcon from '../components/icons/TerminalIcon'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Checklist',
   component: Checklist,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
-  const [selected, setSelected] = useState<number>(0)
+  const [selected, setSelected] = useState<number | null>(0)
   const [focused, setFocused] = useState<number>(-1)
   const [completed, setCompleted] = useState<number>(-1)
   const [open, setOpen] = useState<boolean>(true)
@@ -31,11 +35,11 @@ function Template() {
   }
 
   const isCompleted = useCallback(
-    () => completed >= selected,
+    () => selected !== null && completed >= selected,
     [completed, selected]
   )
   const canComplete = useCallback(
-    () => Math.abs(selected - completed) === 1,
+    () => selected !== null && Math.abs(selected - completed) === 1,
     [selected, completed]
   )
 
@@ -43,6 +47,7 @@ function Template() {
     <Button
       small
       onClick={() => {
+        if (selected === null) return
         setCompleted(selected)
         setSelected(selected + 1)
         setFocused(selected + 1)
@@ -213,6 +218,7 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}

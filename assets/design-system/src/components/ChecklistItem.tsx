@@ -170,7 +170,7 @@ type ChecklistItemInnerProps = Omit<ChecklistItemProps, 'children'> & {
   selected?: boolean
   focused?: boolean
   completed?: boolean
-  onSelectionChange: Dispatch<number>
+  onSelectionChange: Dispatch<number | null>
   onFocusChange: Dispatch<number>
 }
 
@@ -184,7 +184,7 @@ function ChecklistItemInnerUnstyled({
   onFocusChange,
   ...props
 }: ChecklistItemInnerProps): JSX.Element {
-  const headerRef = useRef<HTMLDivElement>(undefined)
+  const headerRef = useRef<HTMLDivElement>(null)
   const { keyboardProps } = useKeyboard({
     onKeyDown: (e) => {
       switch (e.key) {
@@ -209,7 +209,7 @@ function ChecklistItemInnerUnstyled({
 
   useEffect(() => {
     if (headerRef.current && focused) {
-      setTimeout(() => headerRef.current.focus())
+      setTimeout(() => headerRef.current?.focus())
     }
   }, [headerRef, focused])
 

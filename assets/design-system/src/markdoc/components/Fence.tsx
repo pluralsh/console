@@ -11,8 +11,8 @@ export function toCodeString({
   children,
 }: {
   process: boolean
-  content: string
-  children: RenderableTreeNode[] | RenderableTreeNode
+  content?: string
+  children?: RenderableTreeNode[] | RenderableTreeNode
 }): string {
   return process
     ? typeof children === 'string'

@@ -1,8 +1,9 @@
 import { A, Flex, H1 } from 'honorable'
 
 import Banner, { BANNER_SEVERITIES } from '../components/Banner'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Banner (AKA Toast Content)',
   component: Banner,
   argTypes: {
@@ -10,12 +11,14 @@ export default {
       type: 'boolean',
     },
     severity: {
-      type: 'select',
+      control: 'select',
       options: BANNER_SEVERITIES,
-      defaultValue: 'info',
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template({ closeButton, ...args }: any) {
   if (closeButton) {
@@ -133,9 +136,10 @@ function Template({ closeButton, ...args }: any) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  closeButton: false,
-  severity: 'info',
+export const Default: Story = {
+  render: Template,
+  args: {
+    closeButton: false,
+    severity: 'info',
+  },
 }

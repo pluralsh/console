@@ -5,6 +5,7 @@ import Card from '../components/Card'
 import ChipList from '../components/ChipList'
 import WrapWithIf from '../components/WrapWithIf'
 import { SEVERITIES } from '../types'
+import type { Meta, StoryObj } from '@storybook/react'
 
 const sizes: ComponentProps<typeof Chip>['size'][] = [
   'small',
@@ -14,7 +15,7 @@ const sizes: ComponentProps<typeof Chip>['size'][] = [
 
 const severities: ComponentProps<typeof Chip>['severity'][] = [...SEVERITIES]
 
-export default {
+const meta = {
   title: 'ChipList',
   component: ChipList,
   argTypes: {
@@ -37,7 +38,10 @@ export default {
       },
     },
   },
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function TextTemplate({ onFillLevel, ...args }: any) {
   const VALUES = [
@@ -151,32 +155,40 @@ function EmptyTemplate({ onFillLevel, ...args }: any) {
   )
 }
 
-export const Text = TextTemplate.bind({})
-Text.args = {
-  severity: 'info',
-  size: 'small',
-  onFillLevel: 0,
+export const Text: Story = {
+  render: TextTemplate,
+  args: {
+    severity: 'info',
+    size: 'small',
+    onFillLevel: 0,
+  },
 }
 
-export const Label = LabelTemplate.bind({})
-Label.args = {
-  severity: 'info',
-  size: 'small',
-  onFillLevel: 0,
+export const Label: Story = {
+  render: LabelTemplate,
+  args: {
+    severity: 'info',
+    size: 'small',
+    onFillLevel: 0,
+  },
 }
 
-export const Empty = EmptyTemplate.bind({})
-Empty.args = {
-  severity: 'info',
-  size: 'small',
-  onFillLevel: 0,
+export const Empty: Story = {
+  render: EmptyTemplate,
+  args: {
+    severity: 'info',
+    size: 'small',
+    onFillLevel: 0,
+  },
 }
 
-export const CustomClick = CustomClickTemplate.bind({})
-CustomClick.args = {
-  severity: 'info',
-  size: 'small',
-  onFillLevel: 0,
-  onClickCondition: (value: string) => value === 'avengers',
-  onClick: (value: string) => alert(value),
+export const CustomClick: Story = {
+  render: CustomClickTemplate,
+  args: {
+    severity: 'info',
+    size: 'small',
+    onFillLevel: 0,
+    onClickCondition: (value: string) => value === 'avengers',
+    onClick: (value: string) => alert(value),
+  },
 }
