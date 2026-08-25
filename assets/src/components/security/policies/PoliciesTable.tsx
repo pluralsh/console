@@ -7,7 +7,7 @@ import {
   PolicyTinyFragment,
 } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
-import { getPolicyEditAbsPath } from 'routes/securityRoutesConsts'
+import { getPolicyDetailsAbsPath } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
 import { Edge } from 'utils/graphql'
 import {
@@ -48,7 +48,8 @@ export function PoliciesTable({
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         onRowClick={(_e, { original }: Row<Edge<PolicyTinyFragment>>) => {
-          if (original.node?.id) navigate(getPolicyEditAbsPath(original.node.id))
+          if (original.node?.id)
+            navigate(getPolicyDetailsAbsPath(original.node.id))
         }}
         emptyStateProps={{ message: 'No policies found.' }}
       />

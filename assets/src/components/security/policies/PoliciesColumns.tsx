@@ -96,7 +96,7 @@ export const ColActions = columnHelper.display({
   cell: ({ row: { original } }) => (
     <IconFrame
       icon={<CaretRightIcon />}
-      textValue={`Edit ${original?.node?.name}`}
+      textValue={`View ${original?.node?.name}`}
     />
   ),
 })

@@ -6,7 +6,11 @@ import { AttachmentRuleCreateOrEdit } from 'components/security/policies/Attachm
 import { AttachmentRules } from 'components/security/policies/AttachmentRules'
 import { Policies } from 'components/security/policies/Policies'
 import { PoliciesList } from 'components/security/policies/PoliciesList'
+import { PolicyAttachments } from 'components/security/policies/policy/PolicyAttachments'
 import { PolicyCreateOrEdit } from 'components/security/policies/PolicyCreateOrEdit'
+import { PolicyDefinition } from 'components/security/policies/policy/PolicyDefinition'
+import { PolicyDetails } from 'components/security/policies/policy/PolicyDetails'
+import { PolicyEvaluations } from 'components/security/policies/policy/PolicyEvaluations'
 import { Security } from 'components/security/Security'
 import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnReports'
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
@@ -20,8 +24,11 @@ import {
   GATEKEEPER_PARAM_ID,
   GATEKEEPER_REL_PATH,
   POLICIES_ATTACHMENT_RULES_REL_PATH,
+  POLICIES_ATTACHMENTS_REL_PATH,
   POLICIES_CREATE_REL_PATH,
+  POLICIES_DEFINITION_REL_PATH,
   POLICIES_EDIT_REL_PATH,
+  POLICIES_EVALUATIONS_REL_PATH,
   POLICIES_PARAM_ID,
   POLICIES_REL_PATH,
   SECURITY_OVERVIEW_ABS_PATH,
@@ -76,6 +83,32 @@ export const securityRoutes = [
       path={`${POLICIES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
       element={<PolicyCreateOrEdit mode="create" />}
     />
+    <Route
+      path={`${POLICIES_REL_PATH}/:${POLICIES_PARAM_ID}`}
+      element={<PolicyDetails />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={POLICIES_DEFINITION_REL_PATH}
+          />
+        }
+      />
+      <Route
+        path={POLICIES_DEFINITION_REL_PATH}
+        element={<PolicyDefinition />}
+      />
+      <Route
+        path={POLICIES_EVALUATIONS_REL_PATH}
+        element={<PolicyEvaluations />}
+      />
+      <Route
+        path={POLICIES_ATTACHMENTS_REL_PATH}
+        element={<PolicyAttachments />}
+      />
+    </Route>
     <Route
       path={`${POLICIES_REL_PATH}/:${POLICIES_PARAM_ID}/${POLICIES_EDIT_REL_PATH}`}
       element={<PolicyCreateOrEdit mode="edit" />}
