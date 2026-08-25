@@ -26,7 +26,7 @@ import {
   PersonaConfigurationFragment,
 } from 'generated/graphql'
 import { ReactNode, createContext, use, useMemo, useState } from 'react'
-import { Link, Outlet, useMatch } from 'react-router-dom'
+import { Link, Outlet, useLocation, useMatch } from 'react-router-dom'
 import {
   FLOW_WORKBENCHES_REL_PATH,
   FLOWS_ABS_PATH,
@@ -93,6 +93,8 @@ export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
     : []
 
 export function Flow() {
+  const { search } = useLocation()
+  const flowsPath = `${FLOWS_ABS_PATH}${search}`
   const [showPermissions, setShowPermissions] = useState(false)
   const [sidePanelContent, setSidePanelContent] = useState<ReactNode | null>(
     null
@@ -131,7 +133,7 @@ export function Flow() {
         <Button
           floating
           as={Link}
-          to={FLOWS_ABS_PATH}
+          to={flowsPath}
           startIcon={<ReturnIcon />}
         >
           View Flows
@@ -157,7 +159,7 @@ export function Flow() {
                   as={Link}
                   size="large"
                   type="secondary"
-                  to={FLOWS_ABS_PATH}
+                  to={flowsPath}
                   tooltip="Return to flows"
                 />
                 <Flex
