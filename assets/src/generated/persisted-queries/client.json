@@ -1597,6 +1597,11 @@
          "name": "Policy",
          "body": "query Policy($id: ID, $name: String) {\n  policy(id: $id, name: $name) {\n    ...Policy\n    __typename\n  }\n}\n\nfragment Policy on Policy {\n  ...PolicyTiny\n  policy\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
+      "sha256:3539330c0c9c4ea3e92e2b063cffcbfa107d62e12b6b9ac57b220fac937ab3b3": {
+         "type": "query",
+         "name": "PolicyAttachments",
+         "body": "query PolicyAttachments($id: ID!, $first: Int, $after: String, $stackFirst: Int, $stackAfter: String) {\n  policy(id: $id) {\n    id\n    workbenchPolicies(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...PolicyWorkbenchAttachment\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    stackPolicies(first: $stackFirst, after: $stackAfter) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...PolicyStackAttachment\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyWorkbenchAttachment on WorkbenchPolicy {\n  id\n  matches {\n    regexes\n    __typename\n  }\n  workbench {\n    id\n    name\n    description\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment PolicyStackAttachment on StackPolicy {\n  id\n  stack {\n    id\n    name\n    type\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:0422f5a2aec92c45ccb16db0cd9897fd06d29227bdf3b5ad693d57109581b1d7": {
          "type": "mutation",
          "name": "CreatePolicy",

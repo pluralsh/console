@@ -21426,6 +21426,10 @@ export type PoliciesQueryVariables = Exact<{
 
 export type PoliciesQuery = { __typename?: 'RootQueryType', policies?: { __typename?: 'PolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyEdge', node?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null> | null } | null };
 
+export type PolicyWorkbenchAttachmentFragment = { __typename?: 'WorkbenchPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null };
+
+export type PolicyStackAttachmentFragment = { __typename?: 'StackPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null };
+
 export type PolicyQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -21433,6 +21437,17 @@ export type PolicyQueryVariables = Exact<{
 
 
 export type PolicyQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', policy: string, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type PolicyAttachmentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  stackFirst?: InputMaybe<Scalars['Int']['input']>;
+  stackAfter?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, workbenchPolicies?: { __typename?: 'WorkbenchPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchPolicyEdge', node?: { __typename?: 'WorkbenchPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null } | null } | null> | null } | null, stackPolicies?: { __typename?: 'StackPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackPolicyEdge', node?: { __typename?: 'StackPolicy', id: string, insertedAt?: string | null, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null } | null } | null> | null } | null } | null };
 
 export type CreatePolicyMutationVariables = Exact<{
   attributes: PolicyAttributes;
@@ -27205,6 +27220,33 @@ export const PolicyFragmentDoc = gql`
   policy
 }
     ${PolicyTinyFragmentDoc}`;
+export const PolicyWorkbenchAttachmentFragmentDoc = gql`
+    fragment PolicyWorkbenchAttachment on WorkbenchPolicy {
+  id
+  matches {
+    regexes
+  }
+  workbench {
+    id
+    name
+    description
+  }
+  insertedAt
+  updatedAt
+}
+    `;
+export const PolicyStackAttachmentFragmentDoc = gql`
+    fragment PolicyStackAttachment on StackPolicy {
+  id
+  stack {
+    id
+    name
+    type
+  }
+  insertedAt
+  updatedAt
+}
+    `;
 export const BindingPolicyTinyFragmentDoc = gql`
     fragment BindingPolicyTiny on BindingPolicy {
   id
@@ -42657,6 +42699,75 @@ export type PolicyQueryHookResult = ReturnType<typeof usePolicyQuery>;
 export type PolicyLazyQueryHookResult = ReturnType<typeof usePolicyLazyQuery>;
 export type PolicySuspenseQueryHookResult = ReturnType<typeof usePolicySuspenseQuery>;
 export type PolicyQueryResult = Apollo.QueryResult<PolicyQuery, PolicyQueryVariables>;
+export const PolicyAttachmentsDocument = gql`
+    query PolicyAttachments($id: ID!, $first: Int, $after: String, $stackFirst: Int, $stackAfter: String) {
+  policy(id: $id) {
+    id
+    workbenchPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyWorkbenchAttachment
+        }
+      }
+    }
+    stackPolicies(first: $stackFirst, after: $stackAfter) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyStackAttachment
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PolicyWorkbenchAttachmentFragmentDoc}
+${PolicyStackAttachmentFragmentDoc}`;
+
+/**
+ * __usePolicyAttachmentsQuery__
+ *
+ * To run a query within a React component, call `usePolicyAttachmentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyAttachmentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyAttachmentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      stackFirst: // value for 'stackFirst'
+ *      stackAfter: // value for 'stackAfter'
+ *   },
+ * });
+ */
+export function usePolicyAttachmentsQuery(baseOptions: Apollo.QueryHookOptions<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables> & ({ variables: PolicyAttachmentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>(PolicyAttachmentsDocument, options);
+      }
+export function usePolicyAttachmentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>(PolicyAttachmentsDocument, options);
+        }
+// @ts-ignore
+export function usePolicyAttachmentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>;
+export function usePolicyAttachmentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyAttachmentsQuery | undefined, PolicyAttachmentsQueryVariables>;
+export function usePolicyAttachmentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>(PolicyAttachmentsDocument, options);
+        }
+export type PolicyAttachmentsQueryHookResult = ReturnType<typeof usePolicyAttachmentsQuery>;
+export type PolicyAttachmentsLazyQueryHookResult = ReturnType<typeof usePolicyAttachmentsLazyQuery>;
+export type PolicyAttachmentsSuspenseQueryHookResult = ReturnType<typeof usePolicyAttachmentsSuspenseQuery>;
+export type PolicyAttachmentsQueryResult = Apollo.QueryResult<PolicyAttachmentsQuery, PolicyAttachmentsQueryVariables>;
 export const CreatePolicyDocument = gql`
     mutation CreatePolicy($attributes: PolicyAttributes!) {
   createPolicy(attributes: $attributes) {
@@ -49160,6 +49271,7 @@ export const namedOperations = {
     ComplianceReports: 'ComplianceReports',
     Policies: 'Policies',
     Policy: 'Policy',
+    PolicyAttachments: 'PolicyAttachments',
     BindingPolicies: 'BindingPolicies',
     BindingPolicy: 'BindingPolicy',
     Projects: 'Projects',
@@ -49697,6 +49809,8 @@ export const namedOperations = {
     ComplianceReport: 'ComplianceReport',
     PolicyTiny: 'PolicyTiny',
     Policy: 'Policy',
+    PolicyWorkbenchAttachment: 'PolicyWorkbenchAttachment',
+    PolicyStackAttachment: 'PolicyStackAttachment',
     BindingPolicyTiny: 'BindingPolicyTiny',
     BindingPolicy: 'BindingPolicy',
     Project: 'Project',

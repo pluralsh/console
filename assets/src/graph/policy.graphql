@@ -16,6 +16,31 @@ fragment Policy on Policy {
   policy
 }
 
+fragment PolicyWorkbenchAttachment on WorkbenchPolicy {
+  id
+  matches {
+    regexes
+  }
+  workbench {
+    id
+    name
+    description
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment PolicyStackAttachment on StackPolicy {
+  id
+  stack {
+    id
+    name
+    type
+  }
+  insertedAt
+  updatedAt
+}
+
 query Policies(
   $after: String
   $first: Int
@@ -46,6 +71,38 @@ query Policies(
 query Policy($id: ID, $name: String) {
   policy(id: $id, name: $name) {
     ...Policy
+  }
+}
+
+query PolicyAttachments(
+  $id: ID!
+  $first: Int
+  $after: String
+  $stackFirst: Int
+  $stackAfter: String
+) {
+  policy(id: $id) {
+    id
+    workbenchPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyWorkbenchAttachment
+        }
+      }
+    }
+    stackPolicies(first: $stackFirst, after: $stackAfter) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyStackAttachment
+        }
+      }
+    }
   }
 }
 
