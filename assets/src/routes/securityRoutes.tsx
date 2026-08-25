@@ -29,6 +29,7 @@ import {
   POLICIES_DEFINITION_REL_PATH,
   POLICIES_EDIT_REL_PATH,
   POLICIES_EVALUATIONS_REL_PATH,
+  POLICIES_EVAL_PARAM_ID,
   POLICIES_PARAM_ID,
   POLICIES_REL_PATH,
   SECURITY_OVERVIEW_ABS_PATH,
@@ -102,6 +103,10 @@ export const securityRoutes = [
       />
       <Route
         path={POLICIES_EVALUATIONS_REL_PATH}
+        element={<PolicyEvaluations />}
+      />
+      <Route
+        path={`${POLICIES_EVALUATIONS_REL_PATH}/:${POLICIES_EVAL_PARAM_ID}`}
         element={<PolicyEvaluations />}
       />
       <Route

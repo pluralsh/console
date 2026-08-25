@@ -87,6 +87,31 @@ query PolicyAttachments($id: ID!, $first: Int, $after: String) {
   }
 }
 
+fragment PolicyEvaluation on PolicyEvaluation {
+  id
+  policyIds
+  input
+  output
+  insertedAt
+  updatedAt
+}
+
+query PolicyEvaluations($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    policyEvaluations(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyEvaluation
+        }
+      }
+    }
+  }
+}
+
 mutation CreatePolicy($attributes: PolicyAttributes!) {
   createPolicy(attributes: $attributes) {
     ...PolicyTiny

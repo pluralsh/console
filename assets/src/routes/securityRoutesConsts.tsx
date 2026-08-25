@@ -22,12 +22,19 @@ export const POLICIES_PARAM_ID = 'policyId' as const
 export const POLICIES_DEFINITION_REL_PATH = 'definition' as const
 export const POLICIES_EVALUATIONS_REL_PATH = 'evaluations' as const
 export const POLICIES_ATTACHMENTS_REL_PATH = 'attachments' as const
+export const POLICIES_EVAL_PARAM_ID = 'evalId' as const
 
 export function getPolicyDetailsAbsPath(
   policyId: string,
   tab: string = POLICIES_DEFINITION_REL_PATH
 ) {
   return `${POLICIES_ABS_PATH}/${policyId}/${tab}`
+}
+
+export function getPolicyEvalAbsPath(policyId: string, evalId?: string) {
+  const base = getPolicyDetailsAbsPath(policyId, POLICIES_EVALUATIONS_REL_PATH)
+
+  return evalId ? `${base}/${evalId}` : base
 }
 
 export const POLICIES_ATTACHMENT_RULES_REL_PATH = 'attachment-rules' as const

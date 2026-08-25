@@ -1602,6 +1602,11 @@
          "name": "PolicyAttachments",
          "body": "query PolicyAttachments($id: ID!, $first: Int, $after: String) {\n  policy(id: $id) {\n    id\n    attachments(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...PolicyAttachment\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyAttachment on PolicyAttachment {\n  id\n  type\n  matches {\n    regexes\n    __typename\n  }\n  workbench {\n    id\n    name\n    description\n    __typename\n  }\n  stack {\n    id\n    name\n    type\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
+      "sha256:808e26af35fc1b9283a51318dc44beac986e8d8fc7b000eb1329836a0e8941e3": {
+         "type": "query",
+         "name": "PolicyEvaluations",
+         "body": "query PolicyEvaluations($id: ID!, $first: Int, $after: String) {\n  policy(id: $id) {\n    id\n    policyEvaluations(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...PolicyEvaluation\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyEvaluation on PolicyEvaluation {\n  id\n  policyIds\n  input\n  output\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:0422f5a2aec92c45ccb16db0cd9897fd06d29227bdf3b5ad693d57109581b1d7": {
          "type": "mutation",
          "name": "CreatePolicy",

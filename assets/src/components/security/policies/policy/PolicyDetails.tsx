@@ -1,6 +1,8 @@
 import {
+  ArrowTopRightIcon,
   Button,
   EmptyState,
+  Flex,
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -15,6 +17,7 @@ import {
   POLICIES_ATTACHMENTS_REL_PATH,
   POLICIES_DEFINITION_REL_PATH,
   POLICIES_EVALUATIONS_REL_PATH,
+  POLICIES_EVAL_PARAM_ID,
   POLICIES_PARAM_ID,
   POLICIES_REL_PATH,
   SECURITY_ABS_PATH,
@@ -30,8 +33,14 @@ export type PolicyDetailsContext = {
 
 export function PolicyDetails() {
   const id = useParams()[POLICIES_PARAM_ID]
-  const { tab = POLICIES_DEFINITION_REL_PATH } =
-    useMatch(`${POLICIES_ABS_PATH}/:${POLICIES_PARAM_ID}/:tab`)?.params ?? {}
+  const tabMatch = useMatch(`${POLICIES_ABS_PATH}/:${POLICIES_PARAM_ID}/:tab`)
+  const evalMatch = useMatch(
+    `${POLICIES_ABS_PATH}/:${POLICIES_PARAM_ID}/${POLICIES_EVALUATIONS_REL_PATH}/:${POLICIES_EVAL_PARAM_ID}`
+  )
+  const tab = evalMatch
+    ? POLICIES_EVALUATIONS_REL_PATH
+    : (tabMatch?.params.tab ?? POLICIES_DEFINITION_REL_PATH)
+  const evalId = evalMatch?.params[POLICIES_EVAL_PARAM_ID]
   const { data, loading, error } = usePolicyQuery({
     variables: { id },
     skip: !id,
@@ -40,7 +49,10 @@ export function PolicyDetails() {
   const policy = data?.policy
   const directory = useMemo(
     () => [
-      { label: 'Definition', path: POLICIES_DEFINITION_REL_PATH },
+      {
+        label: 'Definition',
+        path: getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH),
+      },
       {
         label: (
           <TabLabelWithCount
@@ -48,7 +60,7 @@ export function PolicyDetails() {
             count={policy?.evaluationCount}
           />
         ),
-        path: POLICIES_EVALUATIONS_REL_PATH,
+        path: getPolicyDetailsAbsPath(id ?? '', POLICIES_EVALUATIONS_REL_PATH),
       },
       {
         label: (
@@ -57,10 +69,10 @@ export function PolicyDetails() {
             count={policy?.attachmentCount}
           />
         ),
-        path: POLICIES_ATTACHMENTS_REL_PATH,
+        path: getPolicyDetailsAbsPath(id ?? '', POLICIES_ATTACHMENTS_REL_PATH),
       },
     ],
-    [policy?.attachmentCount, policy?.evaluationCount]
+    [id, policy?.attachmentCount, policy?.evaluationCount]
   )
 
   useSetBreadcrumbs(
@@ -118,11 +130,31 @@ export function PolicyDetails() {
         secondColor="text-xlight"
         gap="xxsmall"
       />
-      <SubTabs
-        directory={directory}
-        activeFn={(path) => path === tab}
-      />
-      <Outlet context={ctx} />
+      <Flex
+        align="center"
+        gap="small"
+      >
+        <SubTabs
+          directory={directory}
+          activeFn={(path) => path === getPolicyDetailsAbsPath(id ?? '', tab)}
+        />
+        <Flex grow={1} />
+        {tab === POLICIES_EVALUATIONS_REL_PATH && (
+          <Button
+            small
+            as={Link}
+            to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}${
+              evalId ? `?evalId=${evalId}` : ''
+            }`}
+            endIcon={<ArrowTopRightIcon />}
+          >
+            Simulate with evaluation
+          </Button>
+        )}
+      </Flex>
+      <ContentSC>
+        <Outlet context={ctx} />
+      </ContentSC>
     </WrapperSC>
   )
 }
@@ -137,6 +169,14 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   overflow: 'hidden',
 }))
+
+const ContentSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+})
 
 function TabLabelWithCount({
   label,
