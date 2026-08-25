@@ -20,7 +20,11 @@ const KEYWORDS = [
 const CONSTANTS = ['false', 'null', 'true']
 
 export function registerRegoLanguage(monaco: Monaco) {
-  if (monaco.languages.getLanguages().some((l) => l.id === REGO_LANGUAGE_ID)) {
+  if (
+    monaco.languages
+      .getLanguages()
+      .some((language: { id: string }) => language.id === REGO_LANGUAGE_ID)
+  ) {
     return
   }
 
