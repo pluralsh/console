@@ -11,6 +11,10 @@ export const COMPLIANCE_REPORTS_REL_PATH = 'compliance-reports' as const
 export const COMPLIANCE_REPORTS_ABS_PATH =
   `${SECURITY_ABS_PATH}/${COMPLIANCE_REPORTS_REL_PATH}` as const
 
+export const POLICIES_REL_PATH = 'policies' as const
+export const POLICIES_ABS_PATH =
+  `${SECURITY_ABS_PATH}/${POLICIES_REL_PATH}` as const
+
 export const GATEKEEPER_REL_PATH = 'gatekeeper' as const
 export const GATEKEEPER_ABS_PATH =
   `${SECURITY_ABS_PATH}/${GATEKEEPER_REL_PATH}` as const

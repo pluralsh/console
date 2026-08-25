@@ -8,6 +8,7 @@ import { Outlet, useMatch } from 'react-router-dom'
 import {
   COMPLIANCE_REPORTS_REL_PATH,
   GATEKEEPER_REL_PATH,
+  POLICIES_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_OVERVIEW_REL_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
@@ -16,6 +17,7 @@ import styled from 'styled-components'
 
 const directory = [
   { path: SECURITY_OVERVIEW_REL_PATH, label: 'Security overview' },
+  { path: POLICIES_REL_PATH, label: 'Policies' },
   { path: GATEKEEPER_REL_PATH, label: 'Gatekeeper' },
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerability reports' },
   { path: COMPLIANCE_REPORTS_REL_PATH, label: 'Compliance reports' },
