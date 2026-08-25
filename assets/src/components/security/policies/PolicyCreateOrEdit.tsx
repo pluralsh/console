@@ -327,7 +327,10 @@ function PolicyForm({
         </FormField>
       </FormCardSC>
       <FormCardSC>
-        <FormField label="Policy">
+        <FormField
+          label="Policy"
+          required
+        >
           <CodeEditor
             value={form.policy}
             language="rego"
