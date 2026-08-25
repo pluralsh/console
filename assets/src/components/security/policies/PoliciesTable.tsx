@@ -48,6 +48,7 @@ const WrapperSC = styled.div({
   flexDirection: 'column',
   flex: 1,
   minHeight: 0,
+  minWidth: 0,
   height: '100%',
   overflow: 'hidden',
 })

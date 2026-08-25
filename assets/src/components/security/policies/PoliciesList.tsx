@@ -51,6 +51,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   flex: 1,
   gap: theme.spacing.large,
   minHeight: 0,
+  minWidth: 0,
   overflow: 'hidden',
 }))
 

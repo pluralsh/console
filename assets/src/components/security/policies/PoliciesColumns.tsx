@@ -14,7 +14,7 @@ const columnHelper = createColumnHelper<Edge<PolicyTinyFragment>>()
 export const ColName = columnHelper.accessor(({ node }) => node, {
   id: 'name',
   header: 'Policies',
-  meta: { truncate: true, gridTemplate: 'minmax(250px, 1fr)' },
+  meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
   cell: function Cell({ getValue }) {
     const policy = getValue()
 
@@ -33,7 +33,7 @@ export const ColProject = columnHelper.accessor(
   {
     id: 'project',
     header: 'Project',
-    meta: { truncate: true, gridTemplate: 'minmax(120px, 140px)' },
+    meta: { truncate: true, gridTemplate: 'minmax(0, 140px)' },
     cell: function Cell({ getValue }) {
       return (
         <CaptionP
@@ -50,7 +50,7 @@ export const ColProject = columnHelper.accessor(
 export const ColUpdated = columnHelper.accessor(({ node }) => node?.updatedAt, {
   id: 'updated',
   header: 'Updated',
-  meta: { gridTemplate: 'max-content' },
+  meta: { gridTemplate: 'auto' },
   cell: function Cell({ getValue }) {
     const updatedAt = getValue()
 
@@ -65,7 +65,7 @@ export const ColUpdated = columnHelper.accessor(({ node }) => node?.updatedAt, {
 export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   id: 'type',
   header: 'Type',
-  meta: { gridTemplate: 'max-content' },
+  meta: { gridTemplate: 'auto' },
   cell: function Cell({ getValue }) {
     const theme = useTheme()
     const type = getValue()
@@ -75,10 +75,16 @@ export const ColType = columnHelper.accessor(({ node }) => node?.type, {
     return (
       <Chip
         size="small"
-        severity="neutral"
-        css={{ borderRadius: 12, color: theme.colors['text-disabled'] }}
+        fillLevel={1}
+        css={{
+          borderRadius: 20,
+          minWidth: 80,
+          justifyContent: 'center',
+        }}
       >
-        {startCase(type.toLowerCase())}
+        <span css={{ color: theme.colors['text-xlight'] }}>
+          {startCase(type.toLowerCase())}
+        </span>
       </Chip>
     )
   },
@@ -86,7 +92,7 @@ export const ColType = columnHelper.accessor(({ node }) => node?.type, {
 
 export const ColActions = columnHelper.display({
   id: 'actions',
-  meta: { gridTemplate: '40px' },
+  meta: { gridTemplate: 'auto' },
   cell: ({ row: { original } }) => (
     <IconFrame
       icon={<CaretRightIcon />}
