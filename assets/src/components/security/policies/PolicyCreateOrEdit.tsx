@@ -31,7 +31,7 @@ import {
   usePolicyQuery,
   useUpdatePolicyMutation,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
+import { isEqual, truncate } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -175,6 +175,7 @@ function PolicyForm({
   const [form, setForm] = useState<PolicyFormState>(() =>
     sanitizeForm(policy, defaultProjectId)
   )
+  const [initialForm] = useState(() => sanitizeForm(policy, defaultProjectId))
 
   const [createPolicy, { loading: createLoading, error: createError }] =
     useCreatePolicyMutation({
@@ -206,9 +207,14 @@ function PolicyForm({
 
   const mutationError = createError || updateError
   const mutationLoading = createLoading || updateLoading
-  const canSave = !!form.name.trim() && !!form.policy.trim() && !!form.type
+  const canSave =
+    !!form.name.trim() &&
+    !!form.policy.trim() &&
+    !!form.type &&
+    !isEqual(form, initialForm)
 
   const onSave = () => {
+    if (!canSave) return
     const attributes = formToAttributes(form)
 
     if (isCreate) {
