@@ -34,34 +34,31 @@ export const ColWorkbench = columnHelper.accessor((row) => row, {
   },
 })
 
-export const ColMatchingArg = columnHelper.accessor(
-  (row) => row.matchingArgs,
-  {
-    id: 'matchingArg',
-    header: 'Matching arg',
-    meta: { truncate: true, gridTemplate: 'minmax(0, 240px)' },
-    cell: function Cell({ getValue }) {
-      const theme = useTheme()
-      const matchingArgs = getValue().filter(Boolean)
+export const ColMatchingArg = columnHelper.accessor((row) => row.matchingArgs, {
+  id: 'matchingArg',
+  header: 'Matching arg',
+  meta: { truncate: true, gridTemplate: 'minmax(0, 240px)' },
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+    const matchingArgs = getValue().filter(Boolean)
 
-      if (matchingArgs.length === 0) {
-        return <CaptionP $color="text-xlight">--</CaptionP>
-      }
+    if (matchingArgs.length === 0) {
+      return <CaptionP $color="text-xlight">--</CaptionP>
+    }
 
-      return (
-        <span
-          css={{
-            ...theme.partials.text.code,
-            ...TRUNCATE,
-            color: theme.colors['text-xlight'],
-          }}
-        >
-          {matchingArgs.join(', ')}
-        </span>
-      )
-    },
-  }
-)
+    return (
+      <span
+        css={{
+          ...theme.partials.text.code,
+          ...TRUNCATE,
+          color: theme.colors['text-xlight'],
+        }}
+      >
+        {matchingArgs.join(', ')}
+      </span>
+    )
+  },
+})
 
 export const ColUpdated = columnHelper.accessor((row) => row.updatedAt, {
   id: 'updated',
