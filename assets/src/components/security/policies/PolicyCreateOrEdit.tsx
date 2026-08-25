@@ -260,7 +260,7 @@ function PolicyForm({
               setSelectedProject={(projectId) =>
                 setForm((prev) => ({ ...prev, projectId }))
               }
-              width="100%"
+              titleContent={null}
             />
           </FormField>
         </FieldsRowSC>
@@ -331,10 +331,7 @@ function PolicyForm({
         </FormField>
       </FormCardSC>
       <FormCardSC>
-        <FormField
-          label="Policy"
-          hint="Rego source. Required on create."
-        >
+        <FormField label="Policy">
           <CodeEditor
             value={form.policy}
             language="plaintext"
