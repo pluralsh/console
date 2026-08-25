@@ -46,25 +46,6 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { POLICIES_DESCRIPTION } from './Policies'
 
-const DEFAULT_POLICY_SOURCE = `package workbench.tools
-
-import rego.v1
-
-default allow := false
-
-# read-only tooling is always permitted
-allow if {
-        input.tool.name in {"read_file", "list_dir", "grep"}
-}
-
-# destructive kubectl needs the on-call group off production
-allow if {
-        startswith(input.tool.name, "kubectl_")
-        input.actor.groups[_] == "sre-oncall"
-        not input.cluster.production
-}
-`
-
 const TYPE_OPTIONS: {
   value: PolicyType
   label: string
@@ -414,7 +395,7 @@ function sanitizeForm(
     description: policy?.description ?? '',
     projectId: policy?.project?.id ?? defaultProjectId,
     type: policy?.type ?? PolicyType.Workbench,
-    policy: policy?.policy ?? DEFAULT_POLICY_SOURCE,
+    policy: policy?.policy ?? '',
   }
 }
 
