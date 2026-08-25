@@ -1,26 +1,26 @@
 import { Navigate, Route } from 'react-router-dom'
 
-import { Policies } from 'components/security/policies/Policies'
-import Policy from 'components/security/policies/policy/Policy'
+import { Gatekeeper } from 'components/security/gatekeeper/Gatekeeper'
+import Constraint from 'components/security/gatekeeper/constraint/Constraint'
 import { Security } from 'components/security/Security'
 import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnReports'
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
 
 import {
   COMPLIANCE_REPORTS_ABS_PATH,
-  POLICIES_ABS_PATH,
-  POLICIES_AFFECTED_RESOURCES_PATH,
-  POLICIES_DETAILS_PATH,
-  POLICIES_REL_PATH,
-  POLICY_PARAM_ID,
+  GATEKEEPER_ABS_PATH,
+  GATEKEEPER_AFFECTED_RESOURCES_PATH,
+  GATEKEEPER_DETAILS_PATH,
+  GATEKEEPER_PARAM_ID,
+  GATEKEEPER_REL_PATH,
   SECURITY_OVERVIEW_ABS_PATH,
   SECURITY_REL_PATH,
   VULNERABILITY_REPORT_PARAM_ID,
   VULNERABILITY_REPORTS_ABS_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
 } from './securityRoutesConsts'
-import PolicyDetails from 'components/security/policies/policy/details/PolicyDetails'
-import PolicyAffectedResources from 'components/security/policies/policy/affectedResources/PolicyAffectedResources'
+import ConstraintDetails from 'components/security/gatekeeper/constraint/details/ConstraintDetails'
+import ConstraintAffectedResources from 'components/security/gatekeeper/constraint/affectedResources/ConstraintAffectedResources'
 import { KUBERNETES_PARAM_CLUSTER } from './kubernetesRoutesConsts'
 import Cluster from 'components/kubernetes/Cluster'
 import { SecurityOverview } from 'components/security/overview/SecurityOverview'
@@ -49,8 +49,8 @@ export const securityRoutes = [
       element={<ComplianceReports />}
     />
     <Route
-      path={POLICIES_REL_PATH}
-      element={<Policies />}
+      path={GATEKEEPER_REL_PATH}
+      element={<Gatekeeper />}
     />
     <Route
       path={VULNERABILITY_REPORTS_REL_PATH}
@@ -73,25 +73,25 @@ export const securityRoutes = [
     element={<VulnerabilityReportDetails />}
   />,
   <Route
-    path={`${POLICIES_ABS_PATH}/:${POLICY_PARAM_ID}`}
-    element={<Policy />}
+    path={`${GATEKEEPER_ABS_PATH}/:${GATEKEEPER_PARAM_ID}`}
+    element={<Constraint />}
   >
     <Route
       index
       element={
         <Navigate
           replace
-          to={`${POLICIES_DETAILS_PATH}`}
+          to={`${GATEKEEPER_DETAILS_PATH}`}
         />
       }
     />
     <Route
-      path={`${POLICIES_DETAILS_PATH}`}
-      element={<PolicyDetails />}
+      path={`${GATEKEEPER_DETAILS_PATH}`}
+      element={<ConstraintDetails />}
     />
     <Route
-      path={`${POLICIES_AFFECTED_RESOURCES_PATH}`}
-      element={<PolicyAffectedResources />}
+      path={`${GATEKEEPER_AFFECTED_RESOURCES_PATH}`}
+      element={<ConstraintAffectedResources />}
     />
   </Route>,
 ]

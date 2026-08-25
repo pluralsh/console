@@ -13,8 +13,8 @@ import {
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import {
-  POLICIES_ABS_PATH,
-  POLICIES_REL_PATH,
+  GATEKEEPER_ABS_PATH,
+  GATEKEEPER_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
 } from 'routes/securityRoutesConsts'
@@ -22,12 +22,12 @@ import styled from 'styled-components'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
-import PoliciesFilter from './PoliciesFilter'
-import { PoliciesTable } from './PoliciesTable'
+import GatekeeperFilter from './GatekeeperFilter'
+import { GatekeeperTable } from './GatekeeperTable'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
-  { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
+  { label: GATEKEEPER_REL_PATH, url: GATEKEEPER_ABS_PATH },
 ]
 
 export enum ViolationFilter {
@@ -48,7 +48,7 @@ const violatedParam = (filter: ViolationFilter) => {
   }
 }
 
-export function Policies() {
+export function Gatekeeper() {
   useSetBreadcrumbs(breadcrumbs)
   const [searchString, setSearchString] = useState('')
   const [violationFilter, setViolationFilter] = useState(ViolationFilter.All)
@@ -111,8 +111,8 @@ export function Policies() {
   if (error) return <GqlError error={error} />
 
   return (
-    <PoliciesContainerSC>
-      <PoliciesTable
+    <GatekeeperContainerSC>
+      <GatekeeperTable
         fullHeightWrap
         data={data}
         loading={loading}
@@ -125,7 +125,7 @@ export function Policies() {
           setSelectedClusters([])
         }}
       />
-      <PoliciesFilter
+      <GatekeeperFilter
         violationsFilter={violationFilter}
         setViolationsFilter={setViolationFilter}
         selectedNamespaces={selectedNamespaces}
@@ -137,7 +137,7 @@ export function Policies() {
         kindsData={kindsData}
         namespacesData={namespacesData}
       />
-    </PoliciesContainerSC>
+    </GatekeeperContainerSC>
   )
 }
 
@@ -147,7 +147,7 @@ const FiltersWrapperSC = styled.div(({ theme }) => ({
   overflow: 'auto',
 }))
 
-const PoliciesContainerSC = styled.div(({ theme }) => ({
+const GatekeeperContainerSC = styled.div(({ theme }) => ({
   display: 'grid',
   gridTemplateColumns: '1fr 250px',
   gap: theme.spacing.medium,

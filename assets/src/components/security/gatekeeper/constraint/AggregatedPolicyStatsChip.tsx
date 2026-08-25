@@ -1,6 +1,6 @@
 import { Chip } from '@pluralsh/design-system'
 import { ViolationStatisticsQuery } from 'generated/graphql'
-import { ViolationFilter } from '../Policies'
+import { ViolationFilter } from '../Gatekeeper'
 
 export function AggregatedPolicyStatsChip({
   violationFilter,

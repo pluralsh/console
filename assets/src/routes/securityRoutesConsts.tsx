@@ -11,26 +11,26 @@ export const COMPLIANCE_REPORTS_REL_PATH = 'compliance-reports' as const
 export const COMPLIANCE_REPORTS_ABS_PATH =
   `${SECURITY_ABS_PATH}/${COMPLIANCE_REPORTS_REL_PATH}` as const
 
-export const POLICIES_REL_PATH = 'policies' as const
-export const POLICIES_ABS_PATH =
-  `${SECURITY_ABS_PATH}/${POLICIES_REL_PATH}` as const
-export const POLICY_PARAM_ID = 'policyId' as const
-export const POLICIES_DETAILS_PATH = `details` as const
-export const POLICIES_AFFECTED_RESOURCES_PATH = `affectedResources` as const
+export const GATEKEEPER_REL_PATH = 'gatekeeper' as const
+export const GATEKEEPER_ABS_PATH =
+  `${SECURITY_ABS_PATH}/${GATEKEEPER_REL_PATH}` as const
+export const GATEKEEPER_PARAM_ID = 'constraintId' as const
+export const GATEKEEPER_DETAILS_PATH = `details` as const
+export const GATEKEEPER_AFFECTED_RESOURCES_PATH = `affectedResources` as const
 
 export const VULNERABILITY_REPORTS_REL_PATH = `vulnerability-reports` as const
 export const VULNERABILITY_REPORTS_ABS_PATH =
   `${SECURITY_ABS_PATH}/${VULNERABILITY_REPORTS_REL_PATH}` as const
 export const VULNERABILITY_REPORT_PARAM_ID = 'vulnerabilityReportId' as const
 
-export function getPolicyPath({
-  policyId,
-  tab = POLICIES_DETAILS_PATH,
+export function getGatekeeperPath({
+  constraintId,
+  tab = GATEKEEPER_DETAILS_PATH,
 }: {
-  policyId: string | null | undefined
+  constraintId: string | null | undefined
   tab?: string
 }) {
-  return `${POLICIES_ABS_PATH}/${policyId}/${tab}`
+  return `${GATEKEEPER_ABS_PATH}/${constraintId}/${tab}`
 }
 
 export function getVulnerabilityReportsPath({

@@ -9,7 +9,7 @@ import {
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
-import { getPolicyPath } from 'routes/securityRoutesConsts'
+import { getGatekeeperPath } from 'routes/securityRoutesConsts'
 
 import {
   ColCluster,
@@ -17,7 +17,7 @@ import {
   ColPolicyName,
   ColViolations,
   ColActions,
-} from './PoliciesColumns'
+} from './GatekeeperColumns'
 
 const columns = [ColPolicyName, ColCluster, ColViolations, ColDescription]
 const columnsWithActions = [
@@ -28,7 +28,7 @@ const columnsWithActions = [
   ColActions,
 ]
 
-type PoliciesTableProps = {
+type GatekeeperTableProps = {
   caret?: boolean
   setRefetch?: (refetch: () => () => void) => void
   refetch: () => void
@@ -38,7 +38,7 @@ type PoliciesTableProps = {
   resetFilters?: () => void
 }
 
-export function PoliciesTable({
+export function GatekeeperTable({
   caret = false,
   setRefetch,
   refetch,
@@ -47,8 +47,8 @@ export function PoliciesTable({
   setVirtualSlice,
   resetFilters,
   ...props
-}: PoliciesTableProps &
-  Omit<TableProps, keyof PoliciesTableProps | 'data' | 'columns'>) {
+}: GatekeeperTableProps &
+  Omit<TableProps, keyof GatekeeperTableProps | 'data' | 'columns'>) {
   const theme = useTheme()
   const navigate = useNavigate()
 
@@ -78,8 +78,8 @@ export function PoliciesTable({
         columns={caret ? columnsWithActions : columns}
         onRowClick={(_e, { original }: Row<Edge<PolicyConstraintFragment>>) =>
           navigate(
-            getPolicyPath({
-              policyId: original.node?.id,
+            getGatekeeperPath({
+              constraintId: original.node?.id,
             })
           )
         }
