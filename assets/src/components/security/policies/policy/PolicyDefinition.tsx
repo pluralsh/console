@@ -29,7 +29,11 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
+import {
+  useNavigate,
+  useOutletContext,
+  useSearchParams,
+} from 'react-router-dom'
 import { POLICIES_ABS_PATH } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isValidJson } from 'utils/isValidJson'
