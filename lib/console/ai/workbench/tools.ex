@@ -28,10 +28,13 @@ defmodule Console.AI.Workbench.Tools do
     Sentry,
     Slack
   }
+  alias Console.Repo
   alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchTool}
 
   @type entry :: {module, WorkbenchTool.t}
   @type index :: %{binary => entry}
+
+  @tool_preloads [:cloud_connection, :mcp_server, :scm_connection]
 
   @obs_categories MapSet.new(~w(metrics logs traces error_tracking)a)
   @integration_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker)a
@@ -51,10 +54,16 @@ defmodule Console.AI.Workbench.Tools do
   @spec index(Workbench.t | [WorkbenchTool.t] | map, WorkbenchJob.t | nil) :: index
   def index(%Workbench{tools: tools}, job), do: index(tools, job)
   def index(tools, job) when is_list(tools) or is_map(tools) do
-    expand(tools, job)
-    |> Map.new(fn %mod{tool: %WorkbenchTool{} = wt} = instance ->
-      {Tool.name(instance), {mod, wt}}
+    tools
+    |> preload()
+    |> expand(job)
+    |> Enum.flat_map(fn
+      %mod{tool: %WorkbenchTool{} = wt} = instance ->
+        [{Tool.name(instance), {mod, wt}}]
+      _ ->
+        []
     end)
+    |> Map.new()
   end
 
   @doc "Looks up `{module, workbench_tool}` for a tool name against a workbench or prebuilt index."
@@ -62,6 +71,7 @@ defmodule Console.AI.Workbench.Tools do
   def get(%Workbench{} = workbench, name) when is_binary(name), do: get(index(workbench), name)
   def get(%Environment{} = environment, name) when is_binary(name), do: get(index(environment), name)
   def get(%{} = index, name) when is_binary(name), do: Map.get(index, name)
+  def get(_, _), do: nil
 
   @spec get(Workbench.t, WorkbenchJob.t, binary) :: entry | nil
   def get(%Workbench{} = workbench, %WorkbenchJob{} = job, name) when is_binary(name),
@@ -74,7 +84,7 @@ defmodule Console.AI.Workbench.Tools do
     do: expand(tool_values(tools) ++ List.wrap(funcs), job)
   def expand(%Workbench{tools: tools}, job), do: expand(tools, job)
   def expand(tools, job) do
-    tools = tool_values(tools)
+    tools = preload(tools)
 
     cloud_tools(tools)
     |> Enum.concat(obs_tools(tools))
@@ -87,7 +97,7 @@ defmodule Console.AI.Workbench.Tools do
   @spec cloud_tools(Workbench.t | [WorkbenchTool.t] | map) :: [struct]
   def cloud_tools(%Workbench{tools: tools}), do: cloud_tools(tools)
   def cloud_tools(tools) do
-    Enum.flat_map(tool_values(tools), fn
+    Enum.flat_map(preload(tools), fn
       %WorkbenchTool{tool: :cloud} = tool -> [
         %CloudSchemas{tool: tool},
         %RawCloudQuery{tool: tool},
@@ -175,6 +185,8 @@ defmodule Console.AI.Workbench.Tools do
   defp function_tool?(%WorkbenchTool{categories: [_ | _] = categories}), do: :function in categories
   defp function_tool?(%WorkbenchTool{tool: :http, configuration: %{http: %{function: true}}}), do: true
   defp function_tool?(_), do: false
+
+  defp preload(tools), do: Repo.preload(tool_values(tools), @tool_preloads)
 
   defp tool_values(%Workbench{tools: tools}), do: tool_values(tools)
   defp tool_values(nil), do: []

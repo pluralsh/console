@@ -7,8 +7,8 @@ Kubernetes Version: <%= @cluster.current_version %>
 Kubernetes Distribution: <%= @cluster.distro %>
 Extended Support: <%= Console.Deployments.Clusters.extended_support(@cluster) |> Jason.encode!() %>
 Metadata: <%= Jason.encode!(@cluster.metadata || %{}) %>
-Tags: <%= Enum.map(@cluster.tags, & %{name: &1.name, value: &1.value}) |> Jason.encode!() %>
-Project: <%= @cluster.project.name %>
+Tags: <%= Enum.map(@cluster.tags || [], & %{name: &1.name, value: &1.value}) |> Jason.encode!() %>
+Project: <%= @cluster.project && @cluster.project.name %>
 
 # Upgrade plan
 

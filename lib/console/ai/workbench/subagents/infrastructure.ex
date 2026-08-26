@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Subagents.Infrastructure do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchTool, WorkbenchJobActivity, Workbench, User}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, Workbench, User}
   alias Console.AI.Tools.Workbench.{
     SummarizeComponent,
     Result,
@@ -35,7 +35,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
     MemoryEngine.new(tools, 50,
       engine_opts(environment) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
+        system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment), engine: &1)),
         acc: %{},
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
@@ -82,12 +82,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> build_codemode(policies)
   end
 
-  defp has_cloud_tools?(tools) do
-    Enum.any?(tools, fn
-      {_, %WorkbenchTool{tool: :cloud}} -> true
-      _ -> false
-    end)
-  end
+  defp has_cloud_tools?(%Environment{tools: tools}), do: Tools.cloud_tools(tools) != []
+  defp has_cloud_tools?(tools), do: Tools.cloud_tools(tools) != []
 
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, %WorkbenchJob{} = job, user) do
     if_vector_store_enabled(ServiceComponent) ++ [

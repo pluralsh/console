@@ -41,6 +41,14 @@ defmodule Console.AI.Tools.Agent.BaseTest do
       assert {:vsphere, %VSphereCredentials{} = credentials} = pb.credentials
       assert credentials.allow_unverified_ssl == "false"
     end
+
+    test "returns nil when configuration or provider credentials are missing" do
+      assert is_nil(Base.to_pb(%CloudConnection{provider: :aws, configuration: nil}))
+      assert is_nil(Base.to_pb(%CloudConnection{
+        provider: :aws,
+        configuration: %CloudConnection.Configuration{aws: nil}
+      }))
+    end
   end
 
   defp vsphere_connection(allow_unverified_ssl) do

@@ -43,6 +43,31 @@ defmodule Console.AI.Workbench.ToolsTest do
       {Http, found} = Tools.get(workbench, "http_integration_example")
       assert found.id == http.id
       refute Tools.get(workbench, "missing")
+      refute Tools.get(%{}, nil)
+      refute Tools.get(nil, "http_integration_example")
+    end
+
+    test "preloads nested cloud_connection when indexing" do
+      connection = insert(:cloud_connection)
+      tool = insert(:workbench_tool,
+        tool: :cloud,
+        name: "aws",
+        categories: [:infrastructure],
+        cloud_connection: connection
+      )
+      # Simulate a caller that only loaded the tool row, not nested associations.
+      tool = Repo.get!(Console.Schema.WorkbenchTool, tool.id)
+      refute Ecto.assoc_loaded?(tool.cloud_connection)
+
+      index = Tools.index([tool])
+
+      assert_indexed(index, "cloud_schemas_aws", CloudSchemas, tool)
+      assert_indexed(index, "cloud_query_aws", RawCloudQuery, tool)
+      assert_indexed(index, "cloud_tables_aws", CloudTables, tool)
+
+      {RawCloudQuery, found} = Tools.get(index, "cloud_query_aws")
+      assert %Console.Schema.CloudConnection{id: id} = found.cloud_connection
+      assert id == connection.id
     end
 
     test "indexes function, slack, sentry, and scm tools" do
@@ -144,6 +169,19 @@ defmodule Console.AI.Workbench.ToolsTest do
       assert_indexed(index, "http_integration_example", Http, http)
       assert_indexed(index, "lambda_function_call_#{lambda.name}", FunctionCall, lambda)
     end
+
+    test "indexes cloud tools from an environment without crashing" do
+      workbench = insert(:workbench)
+      cloud = insert_associated_tool(workbench, :cloud, "aws", [:infrastructure], %{},
+        cloud_connection: insert(:cloud_connection)
+      )
+      job = insert(:workbench_job, workbench: workbench)
+      env = Environment.new(job, [cloud], [])
+
+      assert_indexed(env.tool_index, "cloud_query_aws", RawCloudQuery, cloud)
+      assert_indexed(env.tool_index, "cloud_schemas_aws", CloudSchemas, cloud)
+      assert_indexed(env.tool_index, "cloud_tables_aws", CloudTables, cloud)
+    end
   end
 
   describe "cloud_tools/1" do
@@ -156,10 +194,27 @@ defmodule Console.AI.Workbench.ToolsTest do
       )
 
       assert [
-               %CloudSchemas{tool: ^tool},
-               %RawCloudQuery{tool: ^tool},
-               %CloudTables{tool: ^tool}
+               %CloudSchemas{tool: found},
+               %RawCloudQuery{tool: found},
+               %CloudTables{tool: found}
              ] = Tools.cloud_tools([tool])
+      assert found.id == tool.id
+    end
+
+    test "preloads nested cloud_connection" do
+      connection = insert(:cloud_connection)
+      tool = insert(:workbench_tool,
+        tool: :cloud,
+        name: "aws",
+        categories: [:infrastructure],
+        cloud_connection: connection
+      )
+      tool = Repo.get!(Console.Schema.WorkbenchTool, tool.id)
+      refute Ecto.assoc_loaded?(tool.cloud_connection)
+
+      [%RawCloudQuery{tool: found}] = Enum.filter(Tools.cloud_tools([tool]), &match?(%RawCloudQuery{}, &1))
+      assert %Console.Schema.CloudConnection{id: id} = found.cloud_connection
+      assert id == connection.id
     end
   end
 

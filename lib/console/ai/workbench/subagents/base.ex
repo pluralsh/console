@@ -88,7 +88,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
       content: content,
       attributes: attributes,
       tool_name: name,
-      tool_args: args,
+      tool_args: if(is_map(args), do: args),
       tool_id: thought_tool_id(environment, name)
     })
     |> Repo.insert()
@@ -96,12 +96,13 @@ defmodule Console.AI.Workbench.Subagents.Base do
   end
   def save_thought(_, _, _, _), do: :ok
 
-  defp thought_tool_id(%Environment{tool_index: index}, name) do
+  defp thought_tool_id(%Environment{tool_index: index}, name) when is_binary(name) do
     case Tools.get(index || %{}, name) do
       {_, %WorkbenchTool{id: id}} -> id
       _ -> nil
     end
   end
+  defp thought_tool_id(_, _), do: nil
 
   def log_error({:error, error}, context) do
     Logger.error("#{context}: #{inspect(error)}")
