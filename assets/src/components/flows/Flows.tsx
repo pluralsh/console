@@ -1,4 +1,3 @@
-import { NetworkStatus } from '@apollo/client'
 import {
   ArrowTopRightIcon,
   Breadcrumb,
@@ -36,24 +35,15 @@ export function Flows() {
   const searchString = searchParams.get('q') ?? ''
   const debouncedSearchString = useThrottle(searchString, 200)
 
-  const {
-    data,
-    error,
-    loading,
-    networkStatus,
-    pageInfo,
-    refetch,
-    fetchNextPage,
-  } = useFetchPaginatedData(
-    { queryHook: useFlowsQuery, keyPath: ['flows'] },
-    { q: debouncedSearchString }
-  )
+  const { data, error, loading, pageInfo, refetch, fetchNextPage } =
+    useFetchPaginatedData(
+      { queryHook: useFlowsQuery, keyPath: ['flows'] },
+      { q: debouncedSearchString }
+    )
 
   const flows = mapExistingNodes(data?.flows)
   const hasActiveSearch = !!debouncedSearchString
-  const isSearchPending =
-    searchString !== debouncedSearchString ||
-    networkStatus === NetworkStatus.setVariables
+  const isSearchPending = searchString !== debouncedSearchString || loading
 
   if (!data && loading) return <LoadingIndicator />
 

@@ -1,6 +1,5 @@
 import {
   ErrorPolicy,
-  NetworkStatus,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
@@ -49,7 +48,6 @@ export type VirtualSlice = Parameters<
 export type FetchPaginatedDataResult<TQueryType> = {
   data: TQueryType | undefined
   loading: boolean
-  networkStatus: NetworkStatus
   error: any
   refetch: () => Promise<any>
   pageInfo: PageInfoFragment
@@ -134,7 +132,6 @@ export function useFetchPaginatedData<
   return {
     data,
     loading,
-    networkStatus: queryResult.networkStatus,
     error,
     refetch,
     pageInfo,
