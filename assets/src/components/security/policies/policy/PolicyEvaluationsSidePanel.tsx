@@ -1,12 +1,13 @@
 import { CheckIcon, Chip, CloseIcon, Flex } from '@pluralsh/design-system'
-import { type ComponentProps, useEffect, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { Body2P } from 'components/utils/typography/Text'
-import { VirtualList } from 'components/utils/VirtualList'
-import { formatDateTime } from 'utils/datetime'
-import { PolicyEvaluationFragment } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
 import type { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
+import { Body2P } from 'components/utils/typography/Text'
+import { VirtualList } from 'components/utils/VirtualList'
+import { PolicyEvaluationFragment } from 'generated/graphql'
+import { partition } from 'lodash'
+import { type ComponentProps, useEffect, useMemo, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 import {
   getPolicyEvalToolName,
   isPolicyEvalDenied,
@@ -15,6 +16,10 @@ import {
 
 type EvalFilter = 'all' | 'deny' | 'allow'
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
+type AnnotatedEval = {
+  evaluation: PolicyEvaluationFragment
+  denied: boolean
+}
 
 export function PolicyEvaluationsSidePanel({
   evals,
@@ -38,25 +43,29 @@ export function PolicyEvaluationsSidePanel({
   const theme = useTheme()
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
 
+  const annotatedEvals = useMemo<AnnotatedEval[]>(
+    () =>
+      evals.map((evaluation) => ({
+        evaluation,
+        denied: isPolicyEvalDenied(evaluation.output as PolicyEvalMap),
+      })),
+    [evals]
+  )
+
   const { filteredEvals, filterOptions } = useMemo(() => {
-    const denied = evals.filter((evaluation) =>
-      isPolicyEvalDenied(evaluation.output as PolicyEvalMap)
-    )
-    const allowed = evals.filter(
-      (evaluation) => !isPolicyEvalDenied(evaluation.output as PolicyEvalMap)
-    )
+    const [denied, allowed] = partition(annotatedEvals, 'denied')
 
     return {
       filteredEvals:
         activeFilter === 'all'
-          ? evals
+          ? annotatedEvals
           : activeFilter === 'deny'
             ? denied
             : allowed,
       filterOptions: [
         {
           key: 'all' as const,
-          count: evals.length,
+          count: annotatedEvals.length,
           severity: 'neutral' as ChipSeverity,
         },
         {
@@ -71,7 +80,7 @@ export function PolicyEvaluationsSidePanel({
         },
       ],
     }
-  }, [activeFilter, evals])
+  }, [activeFilter, annotatedEvals])
 
   useEffect(() => {
     if (isLoadingNextPage || !hasNextPage) return
@@ -131,44 +140,39 @@ export function PolicyEvaluationsSidePanel({
             isLoadingNextPage={isLoadingNextPage}
             loadNextPage={() => hasNextPage && fetchNextPage()}
             onVirtualSliceChange={onVirtualSliceChange}
+            getRowId={({ evaluation }) => evaluation.id}
             style={{ height: '100%' }}
-            renderer={({ rowData: evaluation }) => {
-              const denied = isPolicyEvalDenied(
-                evaluation.output as PolicyEvalMap
-              )
-
-              return (
-                <EvalLinkSC
-                  $active={selectedEvalId === evaluation.id}
-                  onClick={() => onSelectEvalId(evaluation.id)}
+            renderer={({ rowData: { evaluation, denied } }) => (
+              <EvalLinkSC
+                $active={selectedEvalId === evaluation.id}
+                onClick={() => onSelectEvalId(evaluation.id)}
+              >
+                <DecisionBadge denied={denied} />
+                <Flex
+                  direction="column"
+                  gap="xxsmall"
+                  minWidth={0}
                 >
-                  <DecisionBadge denied={denied} />
-                  <Flex
-                    direction="column"
-                    gap="xxsmall"
-                    minWidth={0}
+                  <span
+                    css={{
+                      ...theme.partials.text.body2LooseLineHeight,
+                      color: theme.colors['text-light'],
+                      ...TRUNCATE,
+                    }}
                   >
-                    <span
-                      css={{
-                        ...theme.partials.text.body2LooseLineHeight,
-                        color: theme.colors['text-light'],
-                        ...TRUNCATE,
-                      }}
-                    >
-                      {getPolicyEvalToolName(evaluation.input as PolicyEvalMap)}
-                    </span>
-                    <span
-                      css={{
-                        ...theme.partials.text.caption,
-                        color: theme.colors['text-light'],
-                      }}
-                    >
-                      {formatDateTime(evaluation.insertedAt, 'MMMM D, YYYY')}
-                    </span>
-                  </Flex>
-                </EvalLinkSC>
-              )
-            }}
+                    {getPolicyEvalToolName(evaluation.input as PolicyEvalMap)}
+                  </span>
+                  <span
+                    css={{
+                      ...theme.partials.text.caption,
+                      color: theme.colors['text-light'],
+                    }}
+                  >
+                    {formatDateTime(evaluation.insertedAt, 'MMMM D, YYYY')}
+                  </span>
+                </Flex>
+              </EvalLinkSC>
+            )}
           />
         ) : (
           <Body2P

@@ -10,7 +10,7 @@ import {
   WORKBENCHES_TOOLS_YOUR_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { getTabCrumb } from 'components/ai/AI'
+import { getTabCrumb } from 'utils/getTabCrumb'
 
 const directory = [
   { label: 'Workbenches', path: '' },

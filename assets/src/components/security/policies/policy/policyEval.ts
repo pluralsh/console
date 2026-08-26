@@ -1,4 +1,4 @@
-import { compact, get, isArray, isPlainObject, isString } from 'lodash'
+import { compact, find, get, isArray, isPlainObject, isString } from 'lodash'
 import { fromNow } from 'utils/datetime'
 
 export type PolicyEvalMap = Record<string, unknown>
@@ -14,12 +14,13 @@ export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
   const tool = rec?.tool
 
   return (
-    asString(rec?.tool_name) ??
-    asString(get(tool, 'name')) ??
-    asString(tool) ??
-    asString(rec?.run_type) ??
-    getPolicyEvalTarget(input) ??
-    'Evaluation'
+    find([
+      asString(rec?.tool_name),
+      asString(get(tool, 'name')),
+      asString(tool),
+      asString(rec?.run_type),
+      getPolicyEvalTarget(rec),
+    ]) ?? 'Evaluation'
   )
 }
 
@@ -30,12 +31,12 @@ export function getPolicyEvalTarget(
   const tool = asRecord(rec?.tool)
   const args = asRecord(get(tool, 'arguments')) ?? tool
 
-  return (
-    asString(get(rec, 'workbench.name')) ??
-    asString(get(rec, 'stack.name')) ??
-    asString(get(rec, 'cluster.name')) ??
-    asString(get(args, 'namespace'))
-  )
+  return find([
+    asString(get(rec, 'workbench.name')),
+    asString(get(rec, 'stack.name')),
+    asString(get(rec, 'cluster.name')),
+    asString(get(args, 'namespace')),
+  ])
 }
 
 export function getPolicyEvalReason(output?: PolicyEvalMap | null): string {
@@ -50,10 +51,11 @@ export function getPolicyEvalReason(output?: PolicyEvalMap | null): string {
       if (isString(item)) return item
 
       return (
-        asString(get(item, 'message')) ??
-        asString(get(item, 'reason')) ??
-        asString(get(item, 'msg')) ??
-        JSON.stringify(item)
+        find([
+          asString(get(item, 'message')),
+          asString(get(item, 'reason')),
+          asString(get(item, 'msg')),
+        ]) ?? JSON.stringify(item)
       )
     })
     .join('; ')

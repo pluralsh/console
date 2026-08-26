@@ -42,6 +42,7 @@ import { isValidJson } from 'utils/isValidJson'
 import { mapExistingNodes } from 'utils/graphql'
 import { PolicyDetailsContext } from './PolicyDetails'
 import { PolicyEditModal } from './PolicyEditModal'
+import { PolicyPanelHeader } from './PolicyPanelHeader'
 import {
   formatEvalSelectLabel,
   isPolicyEvalDenied,
@@ -89,8 +90,23 @@ export function PolicyDefinition() {
     () => mapExistingNodes(data?.policy?.policyEvaluations),
     [data]
   )
+  const evalOptions = useMemo(
+    () =>
+      evals.map((evaluation) => ({
+        id: evaluation.id,
+        label: formatEvalSelectLabel(
+          evaluation.id,
+          evaluation.input as PolicyEvalMap,
+          evaluation.insertedAt
+        ),
+      })),
+    [evals]
+  )
   const selectedEval =
     evals.find((evaluation) => evaluation.id === selectedEvalId) ?? null
+  const selectedEvalLabel = evalOptions.find(
+    (option) => option.id === selectedEval?.id
+  )?.label
   const waitingForEval =
     !!selectedEvalId &&
     !selectedEval &&
@@ -134,7 +150,7 @@ export function PolicyDefinition() {
     evaluatePolicy({
       variables: {
         policyId: policy.id,
-        input: JSON.stringify(JSON.parse(inputJson)),
+        input: JSON.parse(inputJson),
         policy: editorValue,
       },
     })
@@ -189,7 +205,7 @@ export function PolicyDefinition() {
     <>
       <WrapperSC>
         <EditorColumnSC>
-          <PanelHeaderSC>Editor</PanelHeaderSC>
+          <PolicyPanelHeader>Editor</PolicyPanelHeader>
           <EditorBodySC>
             <CaptionP $color="text-xlight">
               Simulation runs against this buffer, not the saved policy.
@@ -210,48 +226,27 @@ export function PolicyDefinition() {
         </EditorColumnSC>
         <SimulatorColumnSC>
           <SimulatorTopSC>
-            <PanelHeaderSC>Simulator</PanelHeaderSC>
+            <PolicyPanelHeader>Simulator</PolicyPanelHeader>
             <SimulatorBodySC>
               <FormField label="Past evals">
                 <Select
-                  isDisabled={evals.length === 0}
+                  isDisabled={evalOptions.length === 0}
                   label={
-                    selectedEval
-                      ? formatEvalSelectLabel(
-                          selectedEval.id,
-                          selectedEval.input as PolicyEvalMap,
-                          selectedEval.insertedAt
-                        )
-                      : evals.length === 0
-                        ? 'No past evaluations'
-                        : 'Select a past eval'
+                    selectedEvalLabel ??
+                    (evalOptions.length === 0
+                      ? 'No past evaluations'
+                      : 'Select a past eval')
                   }
                   onSelectionChange={(id) => onSelectEval(`${id}`)}
                   selectedKey={selectedEval?.id}
                 >
-                  {evals.length === 0 ? (
+                  {evalOptions.map(({ id, label }) => (
                     <ListBoxItem
-                      key="empty"
-                      label="No past evaluations"
-                      textValue="No past evaluations"
+                      key={id}
+                      label={label}
+                      textValue={label}
                     />
-                  ) : (
-                    evals.map((evaluation) => (
-                      <ListBoxItem
-                        key={evaluation.id}
-                        label={formatEvalSelectLabel(
-                          evaluation.id,
-                          evaluation.input as PolicyEvalMap,
-                          evaluation.insertedAt
-                        )}
-                        textValue={formatEvalSelectLabel(
-                          evaluation.id,
-                          evaluation.input as PolicyEvalMap,
-                          evaluation.insertedAt
-                        )}
-                      />
-                    ))
-                  )}
+                  ))}
                 </Select>
               </FormField>
               <JsonPanelSC>
@@ -458,21 +453,6 @@ const SimulatorTopSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   minHeight: 0,
   overflow: 'hidden',
-}))
-
-const PanelHeaderSC = styled.header(({ theme }) => ({
-  ...theme.partials.text.overline,
-  backgroundColor: theme.colors['fill-one'],
-  boxSizing: 'border-box',
-  color: theme.colors['text-xlight'],
-  display: 'flex',
-  alignItems: 'center',
-  flexShrink: 0,
-  lineHeight: 1,
-  minHeight: 40,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
-  borderBottom: theme.borders['fill-one'],
-  width: '100%',
 }))
 
 const EditorBodySC = styled.div(({ theme }) => ({

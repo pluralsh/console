@@ -3,8 +3,6 @@ import {
   CodeEditor,
   Flex,
   FormField,
-  Input,
-  Input2,
   Modal,
 } from '@pluralsh/design-system'
 import { useProjectId } from 'components/contexts/ProjectsContext'
@@ -16,6 +14,10 @@ import {
   useCreatePolicyMutation,
 } from 'generated/graphql'
 import { useEffect, useState } from 'react'
+import {
+  PolicyDescriptionField,
+  PolicyNameField,
+} from './PolicyIdentityFields'
 
 export function CreateBindingModal({
   open,
@@ -110,24 +112,14 @@ export function CreateBindingModal({
         gap="small"
       >
         {error && <GqlError error={error} />}
-        <FormField
-          label="Name"
-          required
-        >
-          <Input2
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </FormField>
-        <FormField label="Description">
-          <Input
-            multiline
-            minRows={2}
-            value={description}
-            placeholder="Describe what this policy governs"
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </FormField>
+        <PolicyNameField
+          value={name}
+          onChange={setName}
+        />
+        <PolicyDescriptionField
+          value={description}
+          onChange={setDescription}
+        />
         <FormField
           label="Policy"
           required

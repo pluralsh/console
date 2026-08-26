@@ -24,6 +24,7 @@ import {
   AI_SETTINGS_AI_PROVIDER_ABS_PATH,
 } from 'routes/settingsRoutesConst'
 import styled from 'styled-components'
+import { getTabCrumb } from 'utils/getTabCrumb'
 import {
   useAIEnabled,
   useLoadingDeploymentSettings,
@@ -145,6 +146,3 @@ const HeaderSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
 }))
-
-export const getTabCrumb = (prefix: string, tab: Nullable<string>) =>
-  tab ? [{ label: tab?.split('-').join(' '), url: `${prefix}/${tab}` }] : []

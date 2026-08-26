@@ -6,7 +6,7 @@ import {
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { getTabCrumb } from 'components/ai/AI'
+import { getTabCrumb } from 'utils/getTabCrumb'
 import { GqlError } from 'components/utils/Alert'
 import { SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'

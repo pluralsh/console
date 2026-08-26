@@ -51,7 +51,7 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { ATTACHMENT_RULES_DESCRIPTION } from './AttachmentRules'
 import { CreateBindingModal } from './CreateBindingModal'
-import { getPoliciesBreadcrumbs } from './Policies'
+import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 const DEFAULT_INTERVAL = '1h'
 

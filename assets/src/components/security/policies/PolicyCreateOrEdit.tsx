@@ -4,8 +4,6 @@ import {
   CodeEditor,
   Flex,
   FormField,
-  Input,
-  Input2,
   Radio,
   RadioGroup,
   ReturnIcon,
@@ -29,7 +27,12 @@ import { ReactNode, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { POLICIES_ABS_PATH } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { POLICIES_DESCRIPTION, getPoliciesBreadcrumbs } from './Policies'
+import { POLICIES_DESCRIPTION } from './Policies'
+import {
+  PolicyDescriptionField,
+  PolicyNameField,
+} from './PolicyIdentityFields'
+import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 const TYPE_OPTIONS: {
   value: PolicyType
@@ -127,17 +130,10 @@ function PolicyForm({
       {error && <GqlError error={error} />}
       <FormCardSC>
         <FieldsRowSC>
-          <FormField
-            label="Name"
-            required
-          >
-            <Input2
-              value={form.name}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, name: e.target.value }))
-              }
-            />
-          </FormField>
+          <PolicyNameField
+            value={form.name}
+            onChange={(name) => setForm((prev) => ({ ...prev, name }))}
+          />
           <FormField label="Project">
             <ProjectSelect
               selectedProject={form.projectId}
@@ -148,17 +144,12 @@ function PolicyForm({
             />
           </FormField>
         </FieldsRowSC>
-        <FormField label="Description">
-          <Input
-            multiline
-            minRows={2}
-            value={form.description}
-            placeholder="Describe what this policy governs"
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, description: e.target.value }))
-            }
-          />
-        </FormField>
+        <PolicyDescriptionField
+          value={form.description}
+          onChange={(description) =>
+            setForm((prev) => ({ ...prev, description }))
+          }
+        />
         <FormField label="Enforcement rules">
           <RadioGroup
             value={form.type}

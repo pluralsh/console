@@ -1,16 +1,13 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { getTabCrumb } from 'components/ai/AI'
 import { SubTabs } from 'components/utils/SubTabs'
 import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
   POLICIES_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_REL_PATH,
-  POLICIES_REL_PATH,
-  SECURITY_ABS_PATH,
-  SECURITY_REL_PATH,
 } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
+import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 export const POLICIES_DESCRIPTION =
   'OPA/Rego documents that govern tool execution. Attach them to workbenches and stacks. If any matching policy denies, the tool call is rejected.'
@@ -18,12 +15,6 @@ export const POLICIES_DESCRIPTION =
 const directory = [
   { label: 'Policies', path: '' },
   { label: 'Attachment rules', path: POLICIES_ATTACHMENT_RULES_REL_PATH },
-]
-
-export const getPoliciesBreadcrumbs = (tab?: Nullable<string>) => [
-  { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
-  { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
-  ...getTabCrumb(POLICIES_ABS_PATH, tab),
 ]
 
 export function Policies() {

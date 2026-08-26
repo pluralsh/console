@@ -1,15 +1,12 @@
-import {
-  Button,
-  Flex,
-  FormField,
-  Input,
-  Input2,
-  Modal,
-} from '@pluralsh/design-system'
+import { Button, Flex, Modal } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { PolicyFragment, useUpdatePolicyMutation } from 'generated/graphql'
 import { useEffect, useState } from 'react'
+import {
+  PolicyDescriptionField,
+  PolicyNameField,
+} from '../PolicyIdentityFields'
 
 export function PolicyEditModal({
   open,
@@ -100,24 +97,14 @@ export function PolicyEditModal({
         gap="small"
       >
         {error && <GqlError error={error} />}
-        <FormField
-          label="Name"
-          required
-        >
-          <Input2
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </FormField>
-        <FormField label="Description">
-          <Input
-            minRows={2}
-            multiline
-            placeholder="Describe what this policy governs"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </FormField>
+        <PolicyNameField
+          value={name}
+          onChange={setName}
+        />
+        <PolicyDescriptionField
+          value={description}
+          onChange={setDescription}
+        />
       </Flex>
     </Modal>
   )

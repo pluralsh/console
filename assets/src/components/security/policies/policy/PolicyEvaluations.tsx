@@ -28,6 +28,7 @@ import { formatDateTime, fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { PolicyDetailsContext } from './PolicyDetails'
 import { PolicyEvaluationsSidePanel } from './PolicyEvaluationsSidePanel'
+import { PolicyPanelHeader } from './PolicyPanelHeader'
 import {
   formatEvalId,
   getPolicyEvalReason,
@@ -208,7 +209,7 @@ function SummaryPanel({
 
   return (
     <PanelSC>
-      <PanelHeaderSC>
+      <PolicyPanelHeader>
         <Flex
           align="center"
           justify="space-between"
@@ -222,7 +223,7 @@ function SummaryPanel({
             icon={<InfoOutlineIcon />}
           />
         </Flex>
-      </PanelHeaderSC>
+      </PolicyPanelHeader>
       <PanelBodySC $scroll>
         <Flex
           align="center"
@@ -327,21 +328,6 @@ const PanelSC = styled.section<{ $trimRightBorder?: boolean }>(
     overflow: 'hidden',
   })
 )
-
-const PanelHeaderSC = styled.header(({ theme }) => ({
-  ...theme.partials.text.overline,
-  backgroundColor: theme.colors['fill-one'],
-  boxSizing: 'border-box',
-  color: theme.colors['text-xlight'],
-  display: 'flex',
-  alignItems: 'center',
-  flexShrink: 0,
-  lineHeight: 1,
-  minHeight: 40,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
-  borderBottom: theme.borders['fill-one'],
-  width: '100%',
-}))
 
 const PanelBodySC = styled.div<{ $scroll?: boolean }>(({ theme, $scroll }) => ({
   display: 'flex',

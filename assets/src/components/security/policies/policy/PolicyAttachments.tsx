@@ -8,7 +8,7 @@ import {
   PolicyType,
   usePolicyAttachmentsQuery,
 } from 'generated/graphql'
-import { startCase } from 'lodash'
+import { compact, startCase } from 'lodash'
 import { useMemo } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { POLICIES_PARAM_ID } from 'routes/securityRoutesConsts'
@@ -49,7 +49,7 @@ export function PolicyAttachments() {
         ...ColWorkbench,
         header: policy?.type === PolicyType.Stack ? 'Stack' : 'Workbench',
       },
-      ColMatchingArg,
+      ...(policy?.type === PolicyType.Stack ? [] : [ColMatchingArg]),
       ColUpdated,
     ],
     [policy?.type]
@@ -102,9 +102,7 @@ function toAttachmentRow(
     kind: 'workbench',
     name: attachment.workbench?.name,
     description: attachment.workbench?.description,
-    matchingArgs: (attachment.matches?.regexes ?? []).filter(
-      (regex): regex is string => !!regex
-    ),
+    matchingArgs: compact(attachment.matches?.regexes),
     updatedAt: attachment.updatedAt,
     href: attachment.workbench?.id
       ? getWorkbenchAbsPath(attachment.workbench.id)
