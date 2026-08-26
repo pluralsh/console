@@ -243,7 +243,7 @@ function SummaryPanel({
           }}
         >
           {toolName}
-          {target ? ` on ${target}` : ''}
+          {target && target !== toolName ? ` on ${target}` : ''}
           {evaluation.insertedAt ? ` · ${fromNow(evaluation.insertedAt)}` : ''}
         </span>
         <Subtitle1H1 css={{ marginTop: theme.spacing.large }}>

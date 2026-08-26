@@ -3,19 +3,21 @@ import { fromNow } from 'utils/datetime'
 export type PolicyEvalMap = Record<string, unknown>
 
 export function isPolicyEvalDenied(output?: PolicyEvalMap | null): boolean {
-  const deny = output?.deny
+  const deny = asEvalMap(output)?.deny
 
   return Array.isArray(deny) && deny.length > 0
 }
 
 export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
-  const toolName = asString(input?.tool_name)
-
-  if (toolName) return toolName
+  const rec = asEvalMap(input)
+  const tool = rec?.tool
 
   return (
-    asString(asRecord(input?.tool)?.name) ??
-    asString(input?.run_type) ??
+    asString(rec?.tool_name) ??
+    asString(asRecord(tool)?.name) ??
+    asString(tool) ??
+    asString(rec?.run_type) ??
+    getPolicyEvalTarget(input) ??
     'Evaluation'
   )
 }
@@ -23,19 +25,20 @@ export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
 export function getPolicyEvalTarget(
   input?: PolicyEvalMap | null
 ): string | undefined {
-  const tool = asRecord(input?.tool)
-  const args = asRecord(tool?.arguments) ?? asRecord(input?.tool)
+  const rec = asEvalMap(input)
+  const tool = asRecord(rec?.tool)
+  const args = asRecord(tool?.arguments) ?? tool
 
   return (
-    asString(asRecord(input?.workbench)?.name) ??
-    asString(asRecord(input?.stack)?.name) ??
-    asString(asRecord(input?.cluster)?.name) ??
+    asString(asRecord(rec?.workbench)?.name) ??
+    asString(asRecord(rec?.stack)?.name) ??
+    asString(asRecord(rec?.cluster)?.name) ??
     asString(args?.namespace)
   )
 }
 
 export function getPolicyEvalReason(output?: PolicyEvalMap | null): string {
-  const deny = output?.deny
+  const deny = asEvalMap(output)?.deny
 
   if (!Array.isArray(deny) || deny.length === 0) {
     return 'Allowed by policy.'
@@ -76,7 +79,19 @@ export function formatEvalSelectLabel(
 }
 
 export function stringifyEvalMap(value?: PolicyEvalMap | null): string {
-  return JSON.stringify(value ?? {}, null, 2)
+  return JSON.stringify(asEvalMap(value) ?? {}, null, 2)
+}
+
+function asEvalMap(value?: unknown): PolicyEvalMap | undefined {
+  if (typeof value === 'string') {
+    try {
+      return asRecord(JSON.parse(value))
+    } catch {
+      return undefined
+    }
+  }
+
+  return asRecord(value)
 }
 
 function asRecord(value: unknown): PolicyEvalMap | undefined {
