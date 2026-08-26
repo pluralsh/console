@@ -5,6 +5,7 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import {
   BindingPolicyType,
   PolicyAttachmentFragment,
+  PolicyType,
   usePolicyAttachmentsQuery,
 } from 'generated/graphql'
 import { startCase } from 'lodash'
@@ -22,8 +23,6 @@ import {
   PolicyAttachmentRow,
 } from './PolicyAttachmentsColumns'
 import { PolicyDetailsContext } from './PolicyDetails'
-
-const columns = [ColWorkbench, ColMatchingArg, ColUpdated]
 
 export function PolicyAttachments() {
   const navigate = useNavigate()
@@ -43,6 +42,17 @@ export function PolicyAttachments() {
   const rows = useMemo(
     () => mapExistingNodes(data?.policy?.attachments).map(toAttachmentRow),
     [data]
+  )
+  const columns = useMemo(
+    () => [
+      {
+        ...ColWorkbench,
+        header: policy?.type === PolicyType.Stack ? 'Stack' : 'Workbench',
+      },
+      ColMatchingArg,
+      ColUpdated,
+    ],
+    [policy?.type]
   )
 
   if (error) return <GqlError error={error} />
