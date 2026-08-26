@@ -266,7 +266,7 @@ function SummaryPanel({
             first="policy Ids"
             firstPartialType="caption"
             firstColor="text-xlight"
-            second={policyIds.join(', ') || '--'}
+            second={policyIds.join(', ')}
             secondPartialType="body2"
             secondColor="text"
             gap="xxsmall"
@@ -287,7 +287,7 @@ function SummaryPanel({
             second={
               evaluation.updatedAt
                 ? formatDateTime(evaluation.updatedAt, 'MMMM D, YYYY')
-                : '--'
+                : undefined
             }
             secondPartialType="body2"
             secondColor="text"

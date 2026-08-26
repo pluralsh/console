@@ -6,6 +6,7 @@ import {
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { getTabCrumb } from 'components/ai/AI'
 import { GqlError } from 'components/utils/Alert'
 import { SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -85,7 +86,7 @@ export function PolicyDetails() {
           label: policy?.name ?? id ?? '',
           url: getPolicyDetailsAbsPath(id ?? ''),
         },
-        { label: tab, url: getPolicyDetailsAbsPath(id ?? '', tab) },
+        ...getTabCrumb(`${POLICIES_ABS_PATH}/${id ?? ''}`, tab),
       ],
       [id, policy?.name, tab]
     )

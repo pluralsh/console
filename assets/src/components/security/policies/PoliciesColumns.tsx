@@ -70,7 +70,7 @@ export const ColType = columnHelper.accessor(({ node }) => node?.type, {
     const theme = useTheme()
     const type = getValue()
 
-    if (!type) return '--'
+    if (!type) return null
 
     return (
       <Chip

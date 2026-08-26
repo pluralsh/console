@@ -27,15 +27,9 @@ import {
 import { isEqual } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  POLICIES_ABS_PATH,
-  POLICIES_CREATE_ABS_PATH,
-  POLICIES_REL_PATH,
-  SECURITY_ABS_PATH,
-  SECURITY_REL_PATH,
-} from 'routes/securityRoutesConsts'
+import { POLICIES_ABS_PATH } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { POLICIES_DESCRIPTION } from './Policies'
+import { POLICIES_DESCRIPTION, getPoliciesBreadcrumbs } from './Policies'
 
 const TYPE_OPTIONS: {
   value: PolicyType
@@ -76,16 +70,7 @@ export function PolicyCreateOrEdit() {
   const navigate = useNavigate()
   const defaultProjectId = useProjectId() ?? ''
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
-        { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
-        { label: 'create', url: POLICIES_CREATE_ABS_PATH },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(useMemo(() => getPoliciesBreadcrumbs('create'), []))
 
   return (
     <PolicyForm

@@ -13,6 +13,7 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP, OverlineH1 } from 'components/utils/typography/Text'
@@ -58,6 +59,7 @@ const jsonEditorOptions = {
 export function PolicyDefinition() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { popToast } = useSimpleToast()
   const { policy, setHeaderActions } = useOutletContext<PolicyDetailsContext>()
   const [searchParams, setSearchParams] = useSearchParams()
   const evalIdFromSearch = searchParams.get('evalId')
@@ -68,6 +70,8 @@ export function PolicyDefinition() {
     evalIdFromSearch
   )
   const [editorEpoch, setEditorEpoch] = useState(0)
+  const [editOpen, setEditOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const appliedEvalId = useRef<string | null>(null)
   const editorValue = buffer ?? savedPolicy
   const dirty = editorValue !== savedPolicy
@@ -97,10 +101,55 @@ export function PolicyDefinition() {
     { data: evalResult, loading: evaluating, error: evalError },
   ] = useEvaluatePolicyLazyQuery({ fetchPolicy: 'network-only' })
   const [updatePolicy, { loading: saving, error: saveError }] =
-    useUpdatePolicyMutation()
+    useUpdatePolicyMutation({
+      onCompleted: () => {
+        popToast({ content: 'Policy saved', severity: 'success' })
+      },
+    })
+  const [deletePolicy, { loading: deleting, error: deleteError }] =
+    useDeletePolicyMutation({
+      variables: { id: policy?.id ?? '' },
+      onCompleted: () => navigate(POLICIES_ABS_PATH),
+    })
 
   const output = evalResult?.evaluatePolicy as PolicyEvalMap | undefined
   const denied = output ? isPolicyEvalDenied(output) : undefined
+
+  const onRevert = useCallback(() => {
+    setBuffer(savedPolicy)
+    setEditorEpoch((epoch) => epoch + 1)
+  }, [savedPolicy])
+
+  const onSave = useCallback(() => {
+    if (!policy?.id || !dirty) return
+
+    updatePolicy({
+      variables: { id: policy.id, attributes: { policy: editorValue } },
+    })
+  }, [dirty, editorValue, policy, updatePolicy])
+
+  const onRun = useCallback(() => {
+    if (!policy?.id || !inputIsValid) return
+
+    evaluatePolicy({
+      variables: {
+        policyId: policy.id,
+        input: JSON.stringify(JSON.parse(inputJson)),
+        policy: editorValue,
+      },
+    })
+  }, [editorValue, evaluatePolicy, inputIsValid, inputJson, policy])
+
+  const onSelectEval = useCallback(
+    (id: string) => {
+      setSelectedEvalId(id)
+      appliedEvalId.current = null
+      setSearchParams(id ? { evalId: id } : {}, { replace: true })
+    },
+    [setSearchParams]
+  )
+  const onEdit = useCallback(() => setEditOpen(true), [])
+  const onDelete = useCallback(() => setConfirmDelete(true), [])
 
   useEffect(() => {
     if (!waitingForEval || loading) return
@@ -120,51 +169,6 @@ export function PolicyDefinition() {
     appliedEvalId.current = selectedEval.id
     setInputJson(stringifyEvalMap(selectedEval.input as PolicyEvalMap))
   }, [selectedEval])
-
-  const onRevert = useCallback(() => {
-    setBuffer(savedPolicy)
-    setEditorEpoch((epoch) => epoch + 1)
-  }, [savedPolicy])
-
-  const onSave = useCallback(() => {
-    if (!policy?.id || !dirty) return
-
-    updatePolicy({
-      variables: { id: policy.id, attributes: { policy: editorValue } },
-    })
-  }, [dirty, editorValue, policy?.id, updatePolicy])
-
-  const onRun = useCallback(() => {
-    if (!policy?.id || !inputIsValid) return
-
-    evaluatePolicy({
-      variables: {
-        policyId: policy.id,
-        input: JSON.stringify(JSON.parse(inputJson)),
-        policy: editorValue,
-      },
-    })
-  }, [editorValue, evaluatePolicy, inputIsValid, inputJson, policy?.id])
-
-  const onSelectEval = useCallback(
-    (id: string) => {
-      setSelectedEvalId(id)
-      appliedEvalId.current = null
-      setSearchParams(id ? { evalId: id } : {}, { replace: true })
-    },
-    [setSearchParams]
-  )
-
-  const [editOpen, setEditOpen] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deletePolicy, { loading: deleting, error: deleteError }] =
-    useDeletePolicyMutation({
-      variables: { id: policy?.id ?? '' },
-      onCompleted: () => navigate(POLICIES_ABS_PATH),
-    })
-
-  const onEdit = useCallback(() => setEditOpen(true), [])
-  const onDelete = useCallback(() => setConfirmDelete(true), [])
 
   useLayoutEffect(() => {
     setHeaderActions(
