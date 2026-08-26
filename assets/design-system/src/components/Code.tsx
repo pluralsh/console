@@ -36,6 +36,7 @@ import {
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
+import { getCodeLanguageIcon } from './codeLanguageIcons'
 import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
 import CaretDownIcon from './icons/CaretDownIcon'
@@ -83,7 +84,7 @@ function CodeHeaderUnstyled({
 const CodeHeader = styled(CodeHeaderUnstyled)<{ $visuallyHidden?: boolean }>(
   ({ $visuallyHidden = false, fillLevel, theme }) => ({
     minHeight: theme.spacing.large,
-    padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
+    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
     borderBottom:
       fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
     backgroundColor:
@@ -156,6 +157,7 @@ type CodeTabData = {
 const TitleArea = styled.div<{ $shrinkable: boolean; $preserveCase?: boolean }>(
   ({ $shrinkable, $preserveCase = false, theme }) => ({
     display: 'flex',
+    alignItems: 'center',
     flexShrink: $shrinkable ? 1 : 0,
     flexGrow: 1,
     gap: theme.spacing.xxsmall,
@@ -447,12 +449,17 @@ function CodeUnstyled({
     [onSelectedTabChange, selectedTabKey, tabInterface, setTabInterface, tabs]
   )
 
+  const selectedTabLanguage = tabs?.find(
+    (tab) => tab.key === selectedTabKey
+  )?.language
+
   const titleArea =
     (tabs && title) || !tabs ? (
       <TitleArea
         $shrinkable={tabInterface === 'dropdown' || !tabs}
         $preserveCase={preserveTitleCase}
       >
+        {getCodeLanguageIcon(language || selectedTabLanguage)}
         {(title || language) && <div>{title || language}</div>}
       </TitleArea>
     ) : undefined

@@ -40,9 +40,13 @@ export function StackEntry({
           gap="small"
         >
           <AppIcon
-            icon={<StackTypeIcon stackType={stack.type} />}
-            size="xxsmall"
-            $boxSize={24}
+            icon={
+              <StackTypeIcon
+                stackType={stack.type}
+                size={16}
+              />
+            }
+            size="xxxsmall"
           />
           <NameSC $active={active}>{stack.name}</NameSC>
         </Flex>
@@ -66,7 +70,10 @@ const WrapperSC = styled.div<{ $active: boolean; $first: boolean }>(
     alignItems: 'center',
     padding: theme.spacing.medium,
     borderLeft: theme.borders.default,
-    borderRight: theme.borders.default,
+    borderRight: $active
+      ? `2px solid ${theme.colors['border-primary']}`
+      : theme.borders.default,
+    borderBottom: theme.borders.default,
     ...(theme.mode === 'light' && {
       // White on page-background — never transparent (same as page grey)
       backgroundColor: theme.colors['fill-zero'],
@@ -75,13 +82,9 @@ const WrapperSC = styled.div<{ $active: boolean; $first: boolean }>(
     ...($active
       ? {
           backgroundColor: theme.colors['fill-zero-selected'],
-          borderBottom: `2px solid ${theme.colors['border-primary']}`,
           cursor: 'default',
-          marginBottom: -1,
-          zIndex: theme.zIndexes.base + 1,
         }
       : {
-          borderBottom: theme.borders.default,
           cursor: 'pointer',
 
           '&:hover': {

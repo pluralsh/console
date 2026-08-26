@@ -57,8 +57,7 @@ type SelectButtonProps = {
 
 export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
   children:
-    | ReactElement<ListBoxItemBaseProps>
-    | ReactElement<ListBoxItemBaseProps>[]
+    ReactElement<ListBoxItemBaseProps> | ReactElement<ListBoxItemBaseProps>[]
   dropdownHeaderFixed?: ReactNode
   dropdownFooterFixed?: ReactNode
   dropdownHeader?: ReactElement<any>
