@@ -55,7 +55,7 @@ export function ProfileMenu() {
           tertiary
           onClick={() => setIsMenuOpen((open) => !open)}
           css={{
-            borderRadius: '50%',
+            borderRadius: theme.borderRadiuses.medium,
             padding: 0,
             ...(theme.mode === 'light' && {
               // Tertiary hover uses a light wash — keep the avatar chrome instead

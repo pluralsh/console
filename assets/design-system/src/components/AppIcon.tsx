@@ -112,17 +112,17 @@ const AppIconSC = styled.div<{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors[$color],
+    backgroundColor: $color ? theme.colors[$color] : undefined,
     borderRadius: $rounded ? '50%' : theme.borderRadiuses.medium,
     border: $hasBorder ? theme.borders.default : 'none',
-    borderColor: theme.colors[$borderColor],
+    borderColor: $borderColor ? theme.colors[$borderColor] : undefined,
     width: $boxSize,
     height: $boxSize,
     minWidth: $boxSize,
     minHeight: $boxSize,
     cursor: $clickable ? 'pointer' : 'auto',
     overflow: 'hidden',
-    _hover: $clickable ? { backgroundColor: $borderColor } : null,
+    _hover: $clickable ? { backgroundColor: $borderColor } : undefined,
   })
 )
 
@@ -189,7 +189,7 @@ function AppIcon({
       $boxSize={boxSize}
       $clickable={clickable}
       $rounded={rounded}
-      onClick={clickable ? onClose : null}
+      onClick={clickable ? onClose : undefined}
       {...props}
     >
       {url ? (

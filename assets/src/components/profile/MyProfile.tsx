@@ -50,7 +50,6 @@ export default function MyProfile() {
             name: me.name,
             url: me.profile,
             spacing: 'none',
-            rounded: true,
           }}
           subheading={me?.email}
         />

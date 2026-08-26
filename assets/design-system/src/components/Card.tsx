@@ -116,6 +116,7 @@ const CardSC = styled(Div)<{
   $selected: boolean
   $clickable: boolean
   $disabled: boolean
+  $overflowSpecified: boolean
 }>(
   ({
     theme,
@@ -126,6 +127,7 @@ const CardSC = styled(Div)<{
     $selected: selected,
     $clickable: clickable,
     $disabled: disabled,
+    $overflowSpecified,
   }) => ({
     ...theme.partials.reset.button,
     border: `1px solid ${
@@ -142,7 +144,10 @@ const CardSC = styled(Div)<{
     // elevate via OuterWrapSC so the full card (header + body) casts one shadow.
     ...(!$hasHeader ? lightElevatedSurface(theme) : null),
     // Soft box-shadow paints outside the border box; hidden clips it flush.
-    ...(theme.mode === 'light' && { overflow: 'visible' }),
+    // Skip when the caller set overflow so scrollable cards (e.g. stack logs)
+    // can still clip and scroll.
+    ...(theme.mode === 'light' &&
+      !$overflowSpecified && { overflow: 'visible' }),
     // Keep opaque fill inset from the border curve (outer radius − border width)
     ...(theme.mode === 'light' && {
       backgroundClip: 'padding-box',
@@ -211,11 +216,16 @@ function Card({
   clickable = false,
   disabled = false,
   children,
+  overflow,
+  overflowX,
+  overflowY,
   ...props
 }: CardProps) {
   const hasHeader = !!header
   const hasTabs = !!tabs
   const { size, content: headerContent, headerProps, outerProps } = header ?? {}
+  const overflowSpecified =
+    overflow != null || overflowX != null || overflowY != null
 
   const mainFillLevel = useDecideFillLevel({ fillLevel })
   const headerFillLevel = useDecideFillLevel({ fillLevel: mainFillLevel + 1 })
@@ -258,6 +268,10 @@ function Card({
             'data-clickable': 'true',
           })}
           $disabled={clickable && disabled}
+          $overflowSpecified={overflowSpecified}
+          overflow={overflow}
+          overflowX={overflowX}
+          overflowY={overflowY}
           {...props}
         >
           {children}

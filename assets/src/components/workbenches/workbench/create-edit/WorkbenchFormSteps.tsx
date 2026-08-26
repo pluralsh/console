@@ -946,7 +946,6 @@ export function WorkbenchAttachToolsStep({
                       css={{ minWidth: 0, flex: 1 }}
                     >
                       <IconFrame
-                        circle
                         type="secondary"
                         icon={
                           <WorkbenchToolIcon

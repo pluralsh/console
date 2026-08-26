@@ -214,7 +214,6 @@ export function WorkbenchesIntegrations() {
                               gap="medium"
                             >
                               <IconFrame
-                                circle
                                 type="secondary"
                                 icon={
                                   <WorkbenchToolIcon

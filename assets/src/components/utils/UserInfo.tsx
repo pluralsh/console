@@ -24,7 +24,6 @@ export default function UserInfo({
         name={name}
         spacing={avatar ? 'none' : undefined}
         size="xsmall"
-        rounded
       />
       <div css={{ display: 'flex', flexDirection: 'column' }}>
         <span css={{ fontWeight: 'bold' }}>{name}</span>

@@ -38,7 +38,6 @@ import {
 } from './contexts/FillLevelContext'
 import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
-import FileIcon from './icons/FileIcon'
 import CaretDownIcon from './icons/CaretDownIcon'
 
 type CodeProps = Omit<CardProps, 'children'> & {
@@ -83,16 +82,20 @@ function CodeHeaderUnstyled({
 
 const CodeHeader = styled(CodeHeaderUnstyled)<{ $visuallyHidden?: boolean }>(
   ({ $visuallyHidden = false, fillLevel, theme }) => ({
-    minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    minHeight: theme.spacing.large,
+    padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
     borderBottom:
       fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
     backgroundColor:
-      fillLevel >= 1 ? theme.colors['fill-three'] : theme.colors['fill-two'],
+      theme.mode === 'light'
+        ? theme.colors['fill-one']
+        : fillLevel >= 1
+          ? theme.colors['fill-three']
+          : theme.colors['fill-two'],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: theme.spacing.medium,
+    gap: theme.spacing.xsmall,
     borderTopLeftRadius: theme.borderRadiuses.medium + 2,
     borderTopRightRadius: theme.borderRadiuses.medium + 2,
     ...($visuallyHidden
@@ -155,8 +158,8 @@ const TitleArea = styled.div<{ $shrinkable: boolean; $preserveCase?: boolean }>(
     display: 'flex',
     flexShrink: $shrinkable ? 1 : 0,
     flexGrow: 1,
-    gap: theme.spacing.xsmall,
-    ...theme.partials.text.overline,
+    gap: theme.spacing.xxsmall,
+    ...theme.partials.text.caption,
     color: 'text-light',
     ...($preserveCase ? { textTransform: 'none' } : {}),
   })
@@ -384,8 +387,8 @@ const CodeContentSC = styled.div<{
   height: '100%',
   overflow: 'auto',
   alignItems: 'center',
-  padding: `${$multiLine ? theme.spacing.medium : theme.spacing.small}px ${
-    theme.spacing.medium
+  padding: `${$multiLine ? theme.spacing.small : theme.spacing.xsmall}px ${
+    theme.spacing.small
   }px`,
   borderBottomLeftRadius: theme.borderRadiuses.large,
   borderBottomRightRadius: theme.borderRadiuses.large,
@@ -450,7 +453,6 @@ function CodeUnstyled({
         $shrinkable={tabInterface === 'dropdown' || !tabs}
         $preserveCase={preserveTitleCase}
       >
-        <FileIcon />
         {(title || language) && <div>{title || language}</div>}
       </TitleArea>
     ) : undefined
@@ -458,7 +460,11 @@ function CodeUnstyled({
   const content = (
     <Card
       ref={ref}
-      fillLevel={toFillLevel(Math.min(inferredFillLevel + 1, 2))}
+      fillLevel={
+        theme.mode === 'light'
+          ? 1
+          : toFillLevel(Math.min(inferredFillLevel + 1, 2))
+      }
       borderColor={
         inferredFillLevel >= 1
           ? theme.colors['border-fill-three']

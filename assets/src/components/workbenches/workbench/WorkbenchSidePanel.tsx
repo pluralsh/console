@@ -281,12 +281,7 @@ export function WorkbenchSidePanel({
 
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
-  // Light: match the workbench page canvas (not the white prompt / fill-zero).
-  // Dark: keep accent chrome (unchanged from live).
-  backgroundColor:
-    theme.mode === 'light'
-      ? theme.colors['page-background']
-      : theme.colors['fill-accent'],
+  backgroundColor: theme.colors['fill-accent'],
   borderRight: theme.borders['fill-one'],
   display: 'flex',
   flexDirection: 'column',

@@ -2,6 +2,7 @@ import { Checkbox, Flex } from '@pluralsh/design-system'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import type { ReactElement } from 'react'
 import { useTheme } from 'styled-components'
+import { workbenchPromptPanelSurfaces } from './WorkbenchPromptModeSelector'
 
 export function WorkbenchPromptSupervisionOption({
   icon,
@@ -17,6 +18,7 @@ export function WorkbenchPromptSupervisionOption({
   onChange: (checked: boolean) => void
 }) {
   const theme = useTheme()
+  const { modeItemBackground } = workbenchPromptPanelSurfaces(theme)
 
   return (
     <button
@@ -34,7 +36,10 @@ export function WorkbenchPromptSupervisionOption({
         cursor: 'pointer',
         textAlign: 'left',
         '&:hover': {
-          backgroundColor: theme.colors['fill-three-hover'],
+          backgroundColor:
+            theme.mode === 'light'
+              ? modeItemBackground
+              : theme.colors['fill-three-hover'],
         },
       }}
     >
