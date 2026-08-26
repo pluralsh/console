@@ -59,7 +59,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   end
   def simplified_upgrade_plan(_), do: nil
 
-  defp simplify_addon(%{current: curr, fix: fix} = addon) do
+  defp simplify_addon(%{current: %{} = curr, fix: fix} = addon) do
     %{
       current: Map.take(curr, [:version, :summary])
                |> Map.put(:name, curr.addon && curr.addon.name)
@@ -70,7 +70,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
   end
   defp simplify_addon(_), do: nil
 
-  defp simplify_cloud_addon(%{current: curr, fix: fix} = addon) do
+  defp simplify_cloud_addon(%{current: %{} = curr, fix: fix} = addon) do
     %{
       current: Map.take(curr, [:version, :summary])
                |> Map.put(:addon_details, Map.drop(curr, [:addon])),

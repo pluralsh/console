@@ -32,10 +32,11 @@ import groupBy from 'lodash/groupBy'
 import isEmpty from 'lodash/isEmpty'
 import type { ComponentProps } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
   getWorkbenchSavedPromptCreateAbsPath,
+  WorkbenchLaunchRouteState,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -77,9 +78,13 @@ export function WorkbenchJobCreateInput({
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
 }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const inputRef = useAutofocusRef<ChatInputSimpleRef>()
-  const [prompt, setPrompt] = useState('')
-  const [promptSyncKey, setPromptSyncKey] = useState(0)
+  const navPrompt = (location.state as Nullable<WorkbenchLaunchRouteState>)
+    ?.prompt
+  const prevNavPromptRef = useRef(navPrompt)
+  const [prompt, setPrompt] = useState(navPrompt ?? '')
+  const [promptSyncKey, setPromptSyncKey] = useState(navPrompt ? 1 : 0)
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
   const [selectedModelState, setSelectedModelState] = useState<{
@@ -128,6 +133,13 @@ export function WorkbenchJobCreateInput({
     if (promptSyncKey > 0) inputRef.current?.focus()
   }, [inputRef, promptSyncKey])
 
+  useEffect(() => {
+    if (!navPrompt || navPrompt === prevNavPromptRef.current) return
+    prevNavPromptRef.current = navPrompt
+    setPrompt(navPrompt)
+    setPromptSyncKey((key) => key + 1)
+  }, [navPrompt])
+
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({
       onCompleted: ({ createWorkbenchJob }) => {
@@ -139,12 +151,13 @@ export function WorkbenchJobCreateInput({
           return
         }
         if (workbenchId)
-          navigate(
-            getWorkbenchJobAbsPath({
+          navigate({
+            pathname: getWorkbenchJobAbsPath({
               workbenchId,
               jobId: createWorkbenchJob.id,
-            })
-          )
+            }),
+            search: location.search,
+          })
       },
       refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
       awaitRefetchQueries: true,

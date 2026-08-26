@@ -113,6 +113,13 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	AgentRuntime *AgentRuntimeRef `json:"agentRuntime,omitempty"`
 
+	// MaxPreviews is the maximum number of preview environments allowed for this flow.
+	// Must be between 1 and 25. Defaults to 10 if omitted.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=25
+	MaxPreviews *int64 `json:"maxPreviews,omitempty"`
+
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional

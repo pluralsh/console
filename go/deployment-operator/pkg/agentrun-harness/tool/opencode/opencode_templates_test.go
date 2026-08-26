@@ -7,6 +7,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
@@ -77,15 +78,58 @@ func TestConfigTemplate_PluralMcpServer(t *testing.T) {
 	})
 }
 
-func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
-	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+func TestConfigTemplate_ExternalMCPServer(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
 
-	if out["autoupdate"] != false {
-		t.Fatalf("expected autoupdate=false, got %v", out["autoupdate"])
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+	mcpSection := out["mcp"].(map[string]any)
+	linear := mcpSection["linear"].(map[string]any)
+	if linear["type"] != "remote" {
+		t.Fatalf("type = %v", linear["type"])
 	}
-	if out["snapshot"] != false {
-		t.Fatalf("expected snapshot=false, got %v", out["snapshot"])
+	if linear["url"] != "https://mcp.linear.app/mcp" {
+		t.Fatalf("url = %v", linear["url"])
 	}
+	headers := linear["headers"].(map[string]any)
+	if headers["Authorization"] != "Bearer secret" {
+		t.Fatalf("headers = %#v", headers)
+	}
+	if linear["oauth"] != false {
+		t.Fatalf("oauth = %v", linear["oauth"])
+	}
+
+	tools := out["agent"].(map[string]any)["analysis"].(map[string]any)["tools"].(map[string]any)
+	if tools["linear_list_issues"] != true {
+		t.Fatalf("analysis tools = %#v", tools)
+	}
+}
+
+func TestConfigTemplate_ExternalMCPServerAllTools(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp"}]`)
+
+	out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+	mcpSection := out["mcp"].(map[string]any)
+	linear := mcpSection["linear"].(map[string]any)
+	if linear["oauth"] != false {
+		t.Fatalf("oauth = %v", linear["oauth"])
+	}
+	tools := out["agent"].(map[string]any)["analysis"].(map[string]any)["tools"].(map[string]any)
+	if tools["linear*"] != true {
+		t.Fatalf("analysis tools = %#v", tools)
+	}
+}
+
+func TestConfigTemplate_DisablesLocalStateFeatures(t *testing.T) {
+	t.Run("disables autoupdate and snapshot", func(t *testing.T) {
+		out := renderJSON(t, baseInput(console.AgentRunModeWrite))
+
+		if out["autoupdate"] != false {
+			t.Fatalf("expected autoupdate=false, got %v", out["autoupdate"])
+		}
+		if out["snapshot"] != false {
+			t.Fatalf("expected snapshot=false, got %v", out["snapshot"])
+		}
+	})
 }
 
 func TestConfigTemplate_AllowsSkillLoading(t *testing.T) {

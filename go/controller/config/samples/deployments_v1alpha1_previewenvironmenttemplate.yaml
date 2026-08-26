@@ -65,6 +65,7 @@ metadata:
 spec:
   template:
     namespace: default
+  previewTtl: 7d
   flowRef:
     name: flow-template
     namespace: default

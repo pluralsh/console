@@ -1,5 +1,5 @@
 defmodule Console.Schema.PreviewEnvironmentTemplate do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{
     Flow,
     Service,
@@ -7,9 +7,12 @@ defmodule Console.Schema.PreviewEnvironmentTemplate do
     ScmConnection
   }
 
+  @week_in_seconds 60 * 60 * 24 * 7
+
   schema "preview_environment_templates" do
     field :name,             :string
     field :comment_template, :string
+    field :preview_ttl,      :integer, default: @week_in_seconds
 
     belongs_to :flow,              Flow
     belongs_to :reference_service, Service
@@ -34,9 +37,11 @@ defmodule Console.Schema.PreviewEnvironmentTemplate do
     template
     |> cast(attrs, @valid)
     |> cast_assoc(:template)
+    |> duration_seconds(:preview_ttl)
     |> validate_required(@required)
     |> validate_length(:name, max: 255)
     |> foreign_key_constraint(:id, name: :preview_environment, match: :prefix, message: "there is an active preview environment instance for this template")
     |> validate_format(:name, ~r/\A[a-zA-Z0-9-]+\z/)
+    |> validate_number(:preview_ttl, greater_than: 0)
   end
 end

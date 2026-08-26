@@ -71,6 +71,27 @@ defmodule Console.Schema.Base do
     end
   end
 
+  def duration_seconds(cs, field) do
+    case duration_value(cs, field) do
+      val when is_binary(val) ->
+        case parse_duration(val) do
+          {:ok, duration} -> put_change(cs, field, seconds(duration))
+          {:error, _} -> add_error(cs, field, "invalid duration")
+        end
+      val when is_integer(val) ->
+        put_change(cs, field, val)
+      _ -> cs
+    end
+  end
+
+  defp duration_value(cs, field) do
+    get_change(cs, field) || duration_param(cs, field)
+  end
+
+  defp duration_param(%{params: params}, field) when is_map(params),
+    do: Map.get(params, Atom.to_string(field)) || Map.get(params, field)
+  defp duration_param(_, _), do: nil
+
   def helm_url(cs, field) do
     validate_change(cs, field, fn
       ^field, "http" <> _ -> []
@@ -125,10 +146,24 @@ defmodule Console.Schema.Base do
   defp sanitize_text_value(value) when is_list(value), do: Enum.map(value, &sanitize_text_value/1)
   defp sanitize_text_value(value), do: value
 
-  def seconds(%Duration{hour: h, minute: m, second: s}), do: h * 3600 + m * 60 + s
+  def seconds(%Duration{week: w, day: d, hour: h, minute: m, second: s}),
+    do: (w * 7 + d) * 86_400 + h * 3_600 + m * 60 + s
 
   def parse_duration("P" <> _ = duration), do: Duration.from_iso8601(duration)
-  def parse_duration(duration), do: Duration.from_iso8601(String.upcase("PT#{duration}"))
+  def parse_duration(duration) when is_binary(duration) do
+    duration
+    |> String.upcase()
+    |> to_iso8601_duration()
+    |> Duration.from_iso8601()
+  end
+
+  defp to_iso8601_duration(duration) do
+    case String.split(duration, "D", parts: 2) do
+      [days, ""] when days != "" -> "P#{days}D"
+      [days, rest] when days != "" and rest != "" -> "P#{days}DT#{rest}"
+      _ -> "PT#{duration}"
+    end
+  end
 
   def normalize_period(period) when period in ~w(day week month), do: period
   def normalize_period(period) when period in ~w(day week month)a, do: Atom.to_string(period)

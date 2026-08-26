@@ -1,6 +1,11 @@
 package claude
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
+)
 
 const (
 	mcpUpdateAnalysis    = "mcp__plural__updateAgentRunAnalysis"
@@ -57,6 +62,40 @@ func agentJSON(name string, def agentDef) string {
 
 func appendTools(base, extra []string) []string {
 	return append(append([]string(nil), base...), extra...)
+}
+
+func externalMCPAllowTools(servers []mcp.Server) []string {
+	var tools []string
+	for _, server := range servers {
+		if server.HasAllowedTools() {
+			for _, tool := range server.AllowedTools {
+				tools = append(tools, fmt.Sprintf("mcp__%s__%s", server.Name, tool))
+			}
+			continue
+		}
+		tools = append(tools, fmt.Sprintf("mcp__%s__*", server.Name))
+	}
+	return tools
+}
+
+func agentWithMCPTools(agentJSON string, extra []string) string {
+	if len(extra) == 0 {
+		return agentJSON
+	}
+
+	payload := map[string]agentDef{}
+	if err := json.Unmarshal([]byte(agentJSON), &payload); err != nil {
+		return agentJSON
+	}
+	for name, def := range payload {
+		def.Tools = appendTools(def.Tools, extra)
+		payload[name] = def
+	}
+	out, err := json.Marshal(payload)
+	if err != nil {
+		return agentJSON
+	}
+	return string(out)
 }
 
 var (

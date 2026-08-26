@@ -57,15 +57,17 @@ func BuildCodexConfig(repositoryDir string, agents []AgentInput, mcps []MCPInput
 	// Add MCP servers
 	for _, m := range mcps {
 		cfg.MCPServers[m.Name] = &MCPServer{
-			Type:          m.Type,
-			URL:           m.URL,
-			Command:       m.Command,
-			Args:          m.Args,
-			Env:           m.Env,
-			Headers:       m.Headers,
-			EnabledTools:  m.EnabledTools,
-			DisabledTools: m.DisabledTools,
-			TrustPolicy:   m.TrustPolicy,
+			Type:           m.Type,
+			URL:            m.URL,
+			Command:        m.Command,
+			Args:           m.Args,
+			Env:            m.Env,
+			Headers:        m.Headers,
+			HTTPHeaders:    m.HTTPHeaders,
+			EnvHTTPHeaders: m.EnvHTTPHeaders,
+			EnabledTools:   m.EnabledTools,
+			DisabledTools:  m.DisabledTools,
+			TrustPolicy:    m.TrustPolicy,
 		}
 	}
 

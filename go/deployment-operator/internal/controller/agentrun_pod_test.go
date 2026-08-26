@@ -413,6 +413,59 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	assert.Equal(t, []string{"/agent-bootstrap"}, bootstrap.Command)
 	assert.Contains(t, bootstrap.Args, "--working-dir")
 	assert.Contains(t, bootstrap.Args, common.AgentRunSharedWorkDir)
+	assertAgentBootstrapRestrictedSecurityContext(t, *bootstrap)
+	assert.Contains(t, bootstrap.Env, corev1.EnvVar{Name: "HOME", Value: defaultTmpVolumePath})
+
+	defaultC := requireContainer(t, pod.Spec.Containers, defaultContainer)
+	if assert.NotNil(t, defaultC.SecurityContext) && assert.NotNil(t, defaultC.SecurityContext.ReadOnlyRootFilesystem) {
+		assert.False(t, *defaultC.SecurityContext.ReadOnlyRootFilesystem)
+	}
+}
+
+func TestBuildAgentRunPod_PreservesCustomAgentBootstrapSecurityContext(t *testing.T) {
+	customSC := &corev1.SecurityContext{
+		ReadOnlyRootFilesystem: lo.ToPtr(false),
+		RunAsUser:              lo.ToPtr(int64(1000)),
+	}
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-run",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:            console.AgentRuntimeTypeClaude,
+			TargetNamespace: "default",
+			Template: &corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{{
+						Name:            agentBootstrapContainerName,
+						SecurityContext: customSC,
+					}},
+				},
+			},
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	bootstrap := requireContainer(t, pod.Spec.InitContainers, agentBootstrapContainerName)
+	if assert.NotNil(t, bootstrap.SecurityContext) {
+		assert.Equal(t, customSC.RunAsUser, bootstrap.SecurityContext.RunAsUser)
+		if assert.NotNil(t, bootstrap.SecurityContext.ReadOnlyRootFilesystem) {
+			assert.False(t, *bootstrap.SecurityContext.ReadOnlyRootFilesystem)
+		}
+	}
 }
 
 func TestGetAgentRunPodCompletion(t *testing.T) {
@@ -529,6 +582,26 @@ func TestGetAgentRunPodCompletion(t *testing.T) {
 				assert.Equal(t, tt.wantReason, *completion.reason)
 			}
 		})
+	}
+}
+
+func assertAgentBootstrapRestrictedSecurityContext(t *testing.T, bootstrap corev1.Container) {
+	t.Helper()
+	if !assert.NotNil(t, bootstrap.SecurityContext) {
+		return
+	}
+	sc := bootstrap.SecurityContext
+	if assert.NotNil(t, sc.ReadOnlyRootFilesystem) {
+		assert.True(t, *sc.ReadOnlyRootFilesystem)
+	}
+	if assert.NotNil(t, sc.AllowPrivilegeEscalation) {
+		assert.False(t, *sc.AllowPrivilegeEscalation)
+	}
+	if assert.NotNil(t, sc.RunAsNonRoot) {
+		assert.True(t, *sc.RunAsNonRoot)
+	}
+	if assert.NotNil(t, sc.Capabilities) {
+		assert.Equal(t, []corev1.Capability{"ALL"}, sc.Capabilities.Drop)
 	}
 }
 

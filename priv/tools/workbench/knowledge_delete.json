@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "knowledge_id": {
+      "type": "string",
+      "description": "The id of the knowledge entry to delete. Use workbench_list_knowledge to list ids and usage data first."
+    }
+  },
+  "required": ["knowledge_id"]
+}

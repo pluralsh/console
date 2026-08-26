@@ -25,7 +25,10 @@ defmodule Console.AI.Workbench.MCP do
     |> Enum.flat_map(fn tool ->
       case list_tools(tool, j) do
         {:ok, mcp_tools} ->
-          Enum.map(mcp_tools, & %MCPTool{tool: tool, mcp_tool: &1, job: j})
+          Enum.flat_map(mcp_tools, fn
+            %Tool{} = mcp_tool -> [%MCPTool{tool: tool, mcp_tool: mcp_tool, job: j}]
+            _ -> []
+          end)
         _ -> []
       end
     end)
@@ -37,8 +40,11 @@ defmodule Console.AI.Workbench.MCP do
       |> Anubis.Client.list_tools()
     end)
     |> case do
-      {:ok, %Anubis.MCP.Response{result: %{"tools" => found}}} ->
-        {:ok, Enum.map(found, &Tool.new/1)}
+      {:ok, %Anubis.MCP.Response{result: %{"tools" => found}}} when is_list(found) ->
+        {:ok, Enum.flat_map(found, fn
+          tool when is_map(tool) -> List.wrap(Tool.new(tool))
+          _ -> []
+        end)}
       err -> {:error, "failed to list tools: #{inspect(err)}"}
     end
   end

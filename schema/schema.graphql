@@ -2065,6 +2065,9 @@ input AgentRuntimeAttributes {
 
   "the name of the scm connection to use for this runtime"
   scmConnection: String
+
+  "default model override for runs on this runtime"
+  model: WorkbenchJobModelAttributes
 }
 
 input AgentBindingAttributes {
@@ -2364,6 +2367,9 @@ type AgentRuntime {
 
   "default interval in seconds between babysit checks for runs on this runtime"
   babysitInterval: Int
+
+  "default model override for runs on this runtime"
+  model: WorkbenchJobModel
 
   "the cluster this runtime is running on"
   cluster: Cluster
@@ -6030,6 +6036,9 @@ input FlowAttributes {
 
   repositories: [String]
 
+  "the maximum number of preview environments allowed for this flow (1-25, default 10)"
+  maxPreviews: Int
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -6098,6 +6107,9 @@ input PreviewEnvironmentTemplateAttributes {
 
   "an scm connection id to use for PR preview comment generation"
   connectionId: ID
+
+  "how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)"
+  previewTtl: String
 }
 
 type Flow {
@@ -6113,6 +6125,9 @@ type Flow {
 
   "the git https urls of the application code repositories used in this flow"
   repositories: [String]
+
+  "the maximum number of preview environments allowed for this flow (1-25, default 10)"
+  maxPreviews: Int
 
   "the agent runtime for this flow"
   agentRuntime: AgentRuntime
@@ -6250,23 +6265,42 @@ type McpServerTool {
 "A template for generating preview environments"
 type PreviewEnvironmentTemplate {
   id: ID!
+
   name: String!
+
   commentTemplate: String
+
+  "how long preview environments should live, in seconds"
+  previewTtl: Int
+
   flow: Flow
+
   referenceService: ServiceDeployment
+
   template: ServiceTemplate
+
   connection: ScmConnection
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
 "An instance of a preview environment template"
 type PreviewEnvironmentInstance {
   id: ID!
+
+  "when this preview environment instance expires"
+  previewExpiresAt: DateTime
+
   service: ServiceDeployment
+
   pullRequest: PullRequest
+
   template: PreviewEnvironmentTemplate
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

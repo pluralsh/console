@@ -61,6 +61,10 @@ fragment AgentRuntime on AgentRuntime {
   name
   type
   aiProxy
+  model {
+    model
+    provider
+  }
   cluster {
     ...ClusterTiny
   }

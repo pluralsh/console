@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	pkgcommon "github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
@@ -718,7 +719,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 			run := &v1alpha1.AgentRun{}
 			run.Status.ID = lo.ToPtr("run-456")
 
-			data := reconciler.getSecretData(run, nil, console.AgentRuntimeTypeClaude, nil, nil)
+			data := reconciler.getSecretData(run, nil, console.AgentRuntimeTypeClaude, nil, nil, nil)
 			Expect(data).Should(HaveLen(3))
 			Expect(data[EnvConsoleURL]).Should(Equal("https://console.test.com"))
 			Expect(data[EnvDeployToken]).Should(Equal("test-token-123"))
@@ -774,7 +775,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				},
 			}
 
-			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeClaude, nil, nil)
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeClaude, nil, nil, nil)
 			Expect(data[EnvClaudeModel]).Should(Equal("claude-3-opus"))
 			Expect(data[EnvClaudeToken]).Should(Equal("claude-api-key"))
 			Expect(data[EnvClaudeArgs]).Should(ContainSubstring("--verbose"))
@@ -798,7 +799,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				},
 			}
 
-			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeOpencode, nil, nil)
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeOpencode, nil, nil, nil)
 			Expect(data[EnvOpenCodeProvider]).Should(Equal("openai"))
 			Expect(data[EnvOpenCodeEndpoint]).Should(Equal("https://api.openai.com"))
 			Expect(data[EnvOpenCodeModel]).Should(Equal("gpt-4"))
@@ -823,7 +824,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				},
 			}
 
-			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeOpencode, nil, nil)
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeOpencode, nil, nil, nil)
 			Expect(data[EnvOpenCodeOpenAICompatible]).Should(Equal("true"))
 			Expect(data[EnvOpenCodeProvider]).Should(Equal("openai-compatible"))
 			Expect(data[EnvOpenCodeEndpoint]).Should(Equal("https://litellm.example/v1"))
@@ -844,7 +845,7 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				},
 			}
 
-			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeGemini, nil, nil)
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeGemini, nil, nil, nil)
 			Expect(data[EnvGeminiModel]).Should(Equal("gemini-pro"))
 			Expect(data[EnvGeminiAPIKey]).Should(Equal("gemini-api-key"))
 		})
@@ -867,11 +868,31 @@ var _ = Describe("AgentRun Controller", Ordered, func() {
 				},
 			}
 
-			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeCodex, nil, nil)
+			data := reconciler.getSecretData(run, config, console.AgentRuntimeTypeCodex, nil, nil, nil)
 			Expect(data[EnvCodexModel]).Should(Equal("gpt-5.4"))
 			Expect(data[EnvCodexAPIKey]).Should(Equal("codex-api-key"))
 			Expect(data[EnvCodexMethod]).Should(Equal("CHAT"))
 			Expect(data[EnvCodexEndpoint]).Should(Equal("https://litellm.example/v1"))
+		})
+
+		It("should include extra MCP servers in secret data", func() {
+			reconciler := &AgentRunReconciler{
+				ConsoleURL:  "https://console.test.com",
+				DeployToken: "test-token-123",
+			}
+			run := &v1alpha1.AgentRun{}
+			run.Status.ID = lo.ToPtr("run-123")
+
+			data := reconciler.getSecretData(run, nil, console.AgentRuntimeTypeCodex, nil, nil, []mcp.Server{{
+				Name: "linear",
+				URL:  "https://mcp.linear.app/mcp",
+				Headers: map[string]string{
+					"Authorization": "Bearer token",
+				},
+			}})
+			Expect(data[EnvMCPServers]).Should(ContainSubstring("linear"))
+			Expect(data[EnvMCPServers]).Should(ContainSubstring("https://mcp.linear.app/mcp"))
+			Expect(data[EnvMCPServers]).Should(ContainSubstring("Bearer token"))
 		})
 	})
 
