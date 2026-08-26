@@ -12068,6 +12068,7 @@ export type RootQueryTypeDeploymentArgs = {
 
 export type RootQueryTypeEvaluatePolicyArgs = {
   input: Scalars['Json']['input'];
+  policy?: InputMaybe<Scalars['String']['input']>;
   policyId: Scalars['ID']['input'];
 };
 
@@ -21508,7 +21509,16 @@ export type UpdatePolicyMutationVariables = Exact<{
 }>;
 
 
-export type UpdatePolicyMutation = { __typename?: 'RootMutationType', updatePolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+export type UpdatePolicyMutation = { __typename?: 'RootMutationType', updatePolicy?: { __typename?: 'Policy', policy: string, evaluationCount?: number | null, attachmentCount?: number | null, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type EvaluatePolicyQueryVariables = Exact<{
+  policyId: Scalars['ID']['input'];
+  input: Scalars['Json']['input'];
+  policy?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type EvaluatePolicyQuery = { __typename?: 'RootQueryType', evaluatePolicy?: Record<string, unknown> | null };
 
 export type DeletePolicyMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -42899,10 +42909,10 @@ export type CreatePolicyMutationOptions = Apollo.BaseMutationOptions<CreatePolic
 export const UpdatePolicyDocument = gql`
     mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
   updatePolicy(id: $id, attributes: $attributes) {
-    ...PolicyTiny
+    ...Policy
   }
 }
-    ${PolicyTinyFragmentDoc}`;
+    ${PolicyFragmentDoc}`;
 export type UpdatePolicyMutationFn = Apollo.MutationFunction<UpdatePolicyMutation, UpdatePolicyMutationVariables>;
 
 /**
@@ -42930,6 +42940,49 @@ export function useUpdatePolicyMutation(baseOptions?: Apollo.MutationHookOptions
 export type UpdatePolicyMutationHookResult = ReturnType<typeof useUpdatePolicyMutation>;
 export type UpdatePolicyMutationResult = Apollo.MutationResult<UpdatePolicyMutation>;
 export type UpdatePolicyMutationOptions = Apollo.BaseMutationOptions<UpdatePolicyMutation, UpdatePolicyMutationVariables>;
+export const EvaluatePolicyDocument = gql`
+    query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+  evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+}
+    `;
+
+/**
+ * __useEvaluatePolicyQuery__
+ *
+ * To run a query within a React component, call `useEvaluatePolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEvaluatePolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useEvaluatePolicyQuery({
+ *   variables: {
+ *      policyId: // value for 'policyId'
+ *      input: // value for 'input'
+ *      policy: // value for 'policy'
+ *   },
+ * });
+ */
+export function useEvaluatePolicyQuery(baseOptions: Apollo.QueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables> & ({ variables: EvaluatePolicyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>(EvaluatePolicyDocument, options);
+      }
+export function useEvaluatePolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>(EvaluatePolicyDocument, options);
+        }
+// @ts-ignore
+export function useEvaluatePolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>): Apollo.UseSuspenseQueryResult<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>;
+export function useEvaluatePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>): Apollo.UseSuspenseQueryResult<EvaluatePolicyQuery | undefined, EvaluatePolicyQueryVariables>;
+export function useEvaluatePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>(EvaluatePolicyDocument, options);
+        }
+export type EvaluatePolicyQueryHookResult = ReturnType<typeof useEvaluatePolicyQuery>;
+export type EvaluatePolicyLazyQueryHookResult = ReturnType<typeof useEvaluatePolicyLazyQuery>;
+export type EvaluatePolicySuspenseQueryHookResult = ReturnType<typeof useEvaluatePolicySuspenseQuery>;
+export type EvaluatePolicyQueryResult = Apollo.QueryResult<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>;
 export const DeletePolicyDocument = gql`
     mutation DeletePolicy($id: ID!) {
   deletePolicy(id: $id) {
@@ -49368,6 +49421,7 @@ export const namedOperations = {
     Policy: 'Policy',
     PolicyAttachments: 'PolicyAttachments',
     PolicyEvaluations: 'PolicyEvaluations',
+    EvaluatePolicy: 'EvaluatePolicy',
     BindingPolicies: 'BindingPolicies',
     BindingPolicy: 'BindingPolicy',
     Projects: 'Projects',

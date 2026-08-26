@@ -1612,10 +1612,15 @@
          "name": "CreatePolicy",
          "body": "mutation CreatePolicy($attributes: PolicyAttributes!) {\n  createPolicy(attributes: $attributes) {\n    ...PolicyTiny\n    __typename\n  }\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
       },
-      "sha256:db37ee8035e9a4616e6fec221a9e9f6708b480fa4b3062d0de45c6b6178c2d91": {
+      "sha256:0a6366005ede1d4a37989d3c3b0da4113fec6daa43fcbbeeebc00a88a8ac664c": {
          "type": "mutation",
          "name": "UpdatePolicy",
-         "body": "mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {\n  updatePolicy(id: $id, attributes: $attributes) {\n    ...PolicyTiny\n    __typename\n  }\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+         "body": "mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {\n  updatePolicy(id: $id, attributes: $attributes) {\n    ...Policy\n    __typename\n  }\n}\n\nfragment Policy on Policy {\n  ...PolicyTiny\n  policy\n  evaluationCount\n  attachmentCount\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:605cf7f5d80378bba38a5ae5dc42f2334afcec552bafeb91e720743e263e01d7": {
+         "type": "query",
+         "name": "EvaluatePolicy",
+         "body": "query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {\n  evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)\n}"
       },
       "sha256:ef553f0836479413a9f0222659668a56d0813bee7a5ca7f7bbc3f59160141a22": {
          "type": "mutation",

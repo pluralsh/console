@@ -491,6 +491,7 @@ defmodule Console.GraphQl.Deployments.Policy do
         action: :read
       arg :policy_id, non_null(:id), description: "policy to evaluate"
       arg :input, non_null(:json), description: "JSON-encoded tool input to evaluate"
+      arg :policy, :string, description: "optional unsaved policy source to evaluate instead of the stored policy"
 
       resolve &Deployments.evaluate_policy/2
     end

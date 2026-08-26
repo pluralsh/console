@@ -120,8 +120,12 @@ mutation CreatePolicy($attributes: PolicyAttributes!) {
 
 mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
   updatePolicy(id: $id, attributes: $attributes) {
-    ...PolicyTiny
+    ...Policy
   }
+}
+
+query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+  evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
 }
 
 mutation DeletePolicy($id: ID!) {

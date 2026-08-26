@@ -405,6 +405,9 @@ type RootQueryType {
 
     "JSON-encoded tool input to evaluate"
     input: Json!
+
+    "optional unsaved policy source to evaluate instead of the stored policy"
+    policy: String
   ): Map
 
   policyConstraints(
