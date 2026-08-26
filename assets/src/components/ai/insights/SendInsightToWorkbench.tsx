@@ -22,28 +22,33 @@ import {
   SelectButton,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { EditableSkillChipTooltip } from 'components/ai/chatbot/input/autocomplete/EditableSkillChipTooltip'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
-import { GqlError } from 'components/utils/Alert'
-import { EditableDiv } from 'components/utils/EditableDiv'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
+import { MetadataIcons } from 'components/utils/MetadataIcons'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body1P } from 'components/utils/typography/Text'
-import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
 import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
+import { TRUNCATE } from 'components/utils/truncate'
+import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
+import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
 import {
   AgentRuntimeType,
   AiInsightFragment,
-  useCreateWorkbenchJobMutation,
-  WorkbenchJobFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  getWorkbenchLaunchAbsPath,
+  WorkbenchLaunchRouteState,
+} from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { buildInsightWorkbenchPrompt } from './insightWorkbenchPrompt'
+import { isNonNullable } from 'utils/isNonNullable'
 
 const POPOVER_WIDTH = 568
+const MAX_VISIBLE_TOOLS = 5
 
 export function SendInsightToWorkbenchButton({
   insight,
@@ -59,6 +64,7 @@ export function SendInsightToWorkbenchButton({
     <SendToWorkbenchButton
       initialPrompt={buildInsightWorkbenchPrompt(insight)}
       popoverTitle="Send insights to workbench"
+      backLabel="Insights"
       flowId={flowId}
       {...props}
     />
@@ -69,21 +75,18 @@ export function SendToWorkbenchButton({
   flowId,
   initialPrompt,
   popoverTitle = 'Send to workbench',
+  backLabel,
   ...props
 }: {
   flowId?: Nullable<string>
   initialPrompt: string
   popoverTitle?: string
+  backLabel?: string
 } & ButtonProps) {
   const { hasWorkbenches, loading: workbenchesLoading } =
     useWorkbenchOptions(flowId)
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const [promptKey, setPromptKey] = useState(0)
-  const [prompt, setPrompt] = useState('')
-  const [workbenchJob, setWorkbenchJob] = useState<WorkbenchJobFragment | null>(
-    null
-  )
 
   const {
     refs: { setReference, setFloating },
@@ -102,26 +105,12 @@ export function SendToWorkbenchButton({
     whileElementsMounted: autoUpdate,
   })
 
-  const close = () => {
-    setOpen(false)
-    setWorkbenchJob(null)
-  }
+  const close = () => setOpen(false)
 
   const popoverMaxHeight =
     y == null
       ? `calc(100vh - ${theme.spacing.medium * 2}px)`
       : `calc(100vh - ${Math.max(y, 0) + theme.spacing.small}px)`
-
-  const openPopover = () => {
-    setOpen((value) => {
-      if (!value) {
-        setPrompt(initialPrompt)
-        setPromptKey((key) => key + 1)
-        setWorkbenchJob(null)
-      }
-      return !value
-    })
-  }
 
   if (workbenchesLoading || !hasWorkbenches) return null
 
@@ -134,7 +123,7 @@ export function SendToWorkbenchButton({
         startIcon={<WorkbenchIcon />}
         {...props}
         floating={!hasWorkbenches}
-        onClick={openPopover}
+        onClick={() => setOpen((value) => !value)}
       >
         Send to workbench
       </Button>
@@ -180,21 +169,11 @@ export function SendToWorkbenchButton({
                     onClick={close}
                   />
                 </StretchedFlex>
-                {workbenchJob ? (
-                  <WorkbenchStartedJobPanel
-                    initialJob={workbenchJob}
-                    jobId={workbenchJob.id}
-                    workbenchId={workbenchJob.workbench?.id ?? ''}
-                  />
-                ) : (
-                  <SendToWorkbenchForm
-                    flowId={flowId}
-                    prompt={prompt}
-                    promptKey={promptKey}
-                    setPrompt={setPrompt}
-                    setWorkbenchJob={setWorkbenchJob}
-                  />
-                )}
+                <SendToWorkbenchForm
+                  flowId={flowId}
+                  prompt={initialPrompt}
+                  backLabel={backLabel}
+                />
               </PopoverSC>
             </Popover>
           </PopoverWrapper>
@@ -207,43 +186,28 @@ export function SendToWorkbenchButton({
 export function SendToWorkbenchForm({
   flowId,
   prompt,
-  promptKey,
-  setPrompt,
-  setWorkbenchJob,
+  backLabel,
+  submitLabel = 'Send to workbench',
 }: {
   flowId?: Nullable<string>
   prompt: string
-  promptKey: number
-  setPrompt: (prompt: string) => void
-  setWorkbenchJob: (job: WorkbenchJobFragment) => void
+  backLabel?: string
+  submitLabel?: string
 }) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [workbenchId, setWorkbenchId] = useState<Nullable<string>>(null)
   const { workbenches, loading } = useWorkbenchOptions(flowId)
-  const promptInputRef = useRef<HTMLDivElement>(null)
+  const selectedWorkbenchId =
+    (workbenchId &&
+    workbenches.some((workbench) => workbench.id === workbenchId)
+      ? workbenchId
+      : workbenches[0]?.id) ?? null
 
-  useEffect(() => {
-    setWorkbenchId((current) => {
-      if (!workbenches.length) return null
-      if (workbenches.some((workbench) => workbench.id === current))
-        return current
-      return workbenches[0]?.id ?? null
-    })
-  }, [workbenches])
-
-  const [createWorkbenchJob, { loading: mutationLoading, error }] =
-    useCreateWorkbenchJobMutation({
-      onCompleted: ({ createWorkbenchJob }) =>
-        createWorkbenchJob && setWorkbenchJob(createWorkbenchJob),
-      refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
-      awaitRefetchQueries: true,
-    })
-
-  const canSubmit =
-    !!workbenchId && !!prompt.trim() && !mutationLoading && !loading
+  const canSubmit = !!selectedWorkbenchId && !!prompt.trim() && !loading
 
   return (
     <>
-      {error && <GqlError error={error} />}
       <FormField
         label={
           <Flex
@@ -254,7 +218,7 @@ export function SendToWorkbenchForm({
             <IconFrame
               size="small"
               type="tertiary"
-              tooltip="Choose which workbench should investigate this insight with full context."
+              tooltip="Choose which workbench should investigate this with full context."
               icon={<InfoOutlineIcon size={12} />}
             />
           </Flex>
@@ -262,44 +226,37 @@ export function SendToWorkbenchForm({
       >
         <FillLevelDiv fillLevel={2}>
           <WorkbenchSelector
-            workbenchId={workbenchId}
+            workbenchId={selectedWorkbenchId}
             setWorkbenchId={setWorkbenchId}
             workbenches={workbenches}
             loading={loading}
           />
         </FillLevelDiv>
       </FormField>
-      <PromptInputBoxSC>
-        <EditableDiv
-          key={promptKey}
-          ref={promptInputRef}
-          initialValue={prompt}
-          setValue={setPrompt}
-          deserializePlrlInitialValue
-          placeholder="Enter a prompt for the workbench"
-          disabled={mutationLoading}
-          css={{ minHeight: 200 }}
+      <PromptPreviewBoxSC>
+        <WorkbenchStoredPromptMarkdown
+          text={prompt}
+          promptColor="text-light"
         />
-        <EditableSkillChipTooltip containerRef={promptInputRef} />
-      </PromptInputBoxSC>
+      </PromptPreviewBoxSC>
       <Button
         disabled={!canSubmit}
-        loading={mutationLoading}
         alignSelf="end"
-        onClick={() =>
-          workbenchId &&
-          createWorkbenchJob({
-            variables: {
-              workbenchId,
-              attributes: {
-                prompt,
-                ...(flowId ? { flowId } : {}),
-              },
-            },
-          })
-        }
+        onClick={() => {
+          if (!selectedWorkbenchId) return
+          navigate(
+            getWorkbenchLaunchAbsPath({
+              workbenchId: selectedWorkbenchId,
+              backTo: `${location.pathname}${location.search}`,
+              backLabel,
+            }),
+            {
+              state: { prompt } satisfies WorkbenchLaunchRouteState,
+            }
+          )
+        }}
       >
-        Send to workbench
+        {submitLabel}
       </Button>
     </>
   )
@@ -320,11 +277,6 @@ function WorkbenchSelector({
   const selectedWorkbench = workbenches.find(
     (workbench) => workbench.id === workbenchId
   )
-  const SelectedIcon = selectedWorkbench
-    ? runtimeToIcon[
-        selectedWorkbench.agentRuntime?.type ?? AgentRuntimeType.Custom
-      ]
-    : null
 
   return (
     <Select
@@ -337,13 +289,14 @@ function WorkbenchSelector({
       onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
       triggerButton={
         <SelectButton
-          css={{ width: '100%' }}
-          leftContent={
-            SelectedIcon ? (
-              <SelectedIcon
-                fullColor
-                size={16}
-              />
+          css={{
+            width: '100%',
+            '.children': { minWidth: 0, overflow: 'hidden' },
+            '.content': { paddingTop: 10, paddingBottom: 10 },
+          }}
+          rightContent={
+            selectedWorkbench ? (
+              <WorkbenchToolIcons workbench={selectedWorkbench} />
             ) : undefined
           }
         >
@@ -352,8 +305,10 @@ function WorkbenchSelector({
               $bright
               $width={120}
             />
+          ) : selectedWorkbench ? (
+            <WorkbenchOptionLabel workbench={selectedWorkbench} />
           ) : (
-            (selectedWorkbench?.name ?? 'Select workbench')
+            'Select workbench'
           )}
         </SelectButton>
       }
@@ -366,16 +321,81 @@ function WorkbenchSelector({
           <ListBoxItem
             key={workbench.id}
             label={workbench.name}
+            description={workbench.description ?? undefined}
+            descriptionProps={{ style: TRUNCATE }}
             leftContent={
               <ProviderIcon
                 fullColor
                 size={16}
               />
             }
+            rightContent={<WorkbenchToolIcons workbench={workbench} />}
           />
         )
       })}
     </Select>
+  )
+}
+
+function WorkbenchOptionLabel({
+  workbench,
+}: {
+  workbench: WorkbenchTinyFragment
+}) {
+  const ProviderIcon =
+    runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
+
+  return (
+    <Flex
+      direction="column"
+      minWidth={0}
+    >
+      <Flex
+        align="center"
+        gap="xsmall"
+        minWidth={0}
+      >
+        <ProviderIcon
+          fullColor
+          size={16}
+        />
+        <Body2P css={{ ...TRUNCATE, minWidth: 0 }}>{workbench.name}</Body2P>
+      </Flex>
+      {workbench.description && (
+        <CaptionP
+          $color="text-xlight"
+          css={{ ...TRUNCATE, minWidth: 0 }}
+        >
+          {workbench.description}
+        </CaptionP>
+      )}
+    </Flex>
+  )
+}
+
+function WorkbenchToolIcons({
+  workbench,
+}: {
+  workbench: WorkbenchTinyFragment
+}) {
+  const tools = workbench.tools?.filter(isNonNullable) ?? []
+  if (!tools.length) return null
+
+  return (
+    <MetadataIcons
+      maxVisibleItems={MAX_VISIBLE_TOOLS}
+      items={tools.map((tool) => ({
+        id: tool.id,
+        label: tool.name,
+        icon: (
+          <WorkbenchToolIcon
+            type={tool.tool}
+            provider={tool.cloudConnection?.provider}
+            size={12}
+          />
+        ),
+      }))}
+    />
   )
 }
 
@@ -393,14 +413,13 @@ const PopoverSC = styled.div(({ theme }) => ({
   boxShadow: theme.boxShadows.moderate,
 }))
 
-const PromptInputBoxSC = styled(Card)(({ theme }) => ({
+const PromptPreviewBoxSC = styled(Card)(({ theme }) => ({
   flex: '1 1 auto',
-  minHeight: 0,
+  minHeight: 132,
+  maxHeight: 241,
   overflowY: 'auto',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   backgroundColor: theme.colors['fill-two'],
   border: theme.borders.input,
-  '&:focus-within': {
-    border: theme.borders['outline-focused'],
-  },
+  color: theme.colors['text-light'],
 }))
