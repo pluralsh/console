@@ -42,9 +42,7 @@ export const ColMatchingArg = columnHelper.accessor((row) => row.matchingArgs, {
     const theme = useTheme()
     const matchingArgs = getValue().filter(Boolean)
 
-    if (matchingArgs.length === 0) {
-      return <CaptionP $color="text-xlight">--</CaptionP>
-    }
+    if (matchingArgs.length === 0) return null
 
     return (
       <span
@@ -67,10 +65,8 @@ export const ColUpdated = columnHelper.accessor((row) => row.updatedAt, {
   cell: function Cell({ getValue }) {
     const updatedAt = getValue()
 
-    return (
-      <CaptionP $color="text-xlight">
-        {updatedAt ? fromNow(updatedAt) : '--'}
-      </CaptionP>
-    )
+    if (!updatedAt) return null
+
+    return <CaptionP $color="text-xlight">{fromNow(updatedAt)}</CaptionP>
   },
 })
