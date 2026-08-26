@@ -51,9 +51,13 @@ func (c *ManifestCache) Fetch(svc *console.ServiceDeploymentForAgent) (string, e
 	}
 	if line, ok := c.cache.Get(svc.ID); ok {
 		if line.live() && line.sha == sha {
-			return line.dir, nil
+			if dirExists(line.dir) {
+				return line.dir, nil
+			}
+			log.Info("manifest cache dir missing, refetching", "service", svc.ID, "dir", line.dir)
 		}
 		line.wipe()
+		c.cache.Remove(svc.ID)
 	}
 
 	if svc.Tarball == nil {
@@ -122,6 +126,11 @@ func safePathComponent(name string) error {
 		return fmt.Errorf("invalid cache path component %q", name)
 	}
 	return nil
+}
+
+func dirExists(dir string) bool {
+	info, err := os.Stat(dir)
+	return err == nil && info.IsDir()
 }
 
 func sameDir(a, b string) bool {
