@@ -142,12 +142,17 @@ export function PolicyEvaluations() {
               />
             </Flex>
             <PanelBodySC>
-              <OverlineH1 $color="text-xlight">
+              <OverlineH1
+                $color="text-xlight"
+                css={{ flexShrink: 0 }}
+              >
                 {detailTab === 'input' ? 'Input' : 'Output'}
               </OverlineH1>
               <Code
                 language="json"
                 showHeader={false}
+                height="100%"
+                css={{ flex: 1, minHeight: 0 }}
               >
                 {stringifyEvalMap(
                   (detailTab === 'input'
@@ -197,7 +202,7 @@ function SummaryPanel({
           />
         </Flex>
       </PanelHeaderSC>
-      <PanelBodySC>
+      <PanelBodySC $scroll>
         <Flex
           align="center"
           justify="space-between"
@@ -317,12 +322,12 @@ const PanelHeaderSC = styled.header(({ theme }) => ({
   width: '100%',
 }))
 
-const PanelBodySC = styled.div(({ theme }) => ({
+const PanelBodySC = styled.div<{ $scroll?: boolean }>(({ theme, $scroll }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
   gap: theme.spacing.small,
   minHeight: 0,
-  overflow: 'auto',
+  overflow: $scroll ? 'auto' : 'hidden',
   padding: theme.spacing.medium,
 }))
