@@ -371,6 +371,8 @@ function DefinitionActions({
       </MoreMenu>
       <Confirm
         close={() => setConfirmDelete(false)}
+        confirmationEnabled
+        confirmationText={policy?.name ?? 'delete'}
         destructive
         error={error}
         label="Delete"
