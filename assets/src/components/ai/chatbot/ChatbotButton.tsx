@@ -5,6 +5,7 @@ import {
   ChatOutlineIcon,
 } from '@pluralsh/design-system'
 import { useAIEnabled } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions.ts'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
 import { ComponentPropsWithRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -68,6 +69,7 @@ export function ChatWithAIButton({
     closeChatbot,
   } = useChatbot()
   const aiEnabled = useAIEnabled()
+  const { confirmedNoWorkbenches } = useWorkbenchOptions()
   const bodyText = aiEnabled ? bodyTextProp : 'Enable AI to chat'
 
   const handleClick = () => {
@@ -80,6 +82,7 @@ export function ChatWithAIButton({
     })
   }
 
+  if (!confirmedNoWorkbenches) return null
   if (!alwaysShow && !insightId && !flowId) return null
 
   return (

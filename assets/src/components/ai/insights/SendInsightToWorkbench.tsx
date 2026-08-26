@@ -31,19 +31,16 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body1P } from 'components/utils/typography/Text'
 import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 import {
   AgentRuntimeType,
   AiInsightFragment,
   useCreateWorkbenchJobMutation,
-  useFlowWorkbenchesQuery,
-  useWorkbenchesQuery,
   WorkbenchJobFragment,
   WorkbenchTinyFragment,
 } from 'generated/graphql'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
-import { isNonNullable } from 'utils/isNonNullable'
 import { buildInsightWorkbenchPrompt } from './insightWorkbenchPrompt'
 
 const POPOVER_WIDTH = 568
@@ -306,33 +303,6 @@ export function SendToWorkbenchForm({
       </Button>
     </>
   )
-}
-
-export function useWorkbenchOptions(flowId?: Nullable<string>, enabled = true) {
-  const { data: flowData, loading: flowLoading } = useFlowWorkbenchesQuery({
-    variables: { id: flowId ?? '' },
-    skip: !enabled || !flowId,
-    fetchPolicy: 'cache-first',
-  })
-  const { data: allWorkbenchesData, loading: allWorkbenchesLoading } =
-    useWorkbenchesQuery({
-      skip: !enabled || !!flowId,
-      fetchPolicy: 'cache-first',
-    })
-
-  const workbenches = useMemo(() => {
-    if (flowId) return (flowData?.flow?.workbenches ?? []).filter(isNonNullable)
-
-    return mapExistingNodes(allWorkbenchesData?.workbenches)
-  }, [allWorkbenchesData?.workbenches, flowData?.flow?.workbenches, flowId])
-
-  return {
-    workbenches,
-    hasWorkbenches: workbenches.length > 0,
-    loading: flowId
-      ? flowLoading && !flowData
-      : allWorkbenchesLoading && !allWorkbenchesData,
-  }
 }
 
 function WorkbenchSelector({
