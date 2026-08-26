@@ -360,7 +360,7 @@ function DefinitionActions({
         onSelectionChange={(key) => {
           if (key === 'delete') setConfirmDelete(true)
         }}
-        triggerProps={{ size: 'small' }}
+        triggerProps={{ iconFrameType: 'secondary' }}
       >
         <ListBoxItem
           destructive
