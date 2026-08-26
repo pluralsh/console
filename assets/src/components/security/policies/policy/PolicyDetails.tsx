@@ -146,13 +146,11 @@ export function PolicyDetails() {
             activeFn={(path) => path === getPolicyDetailsAbsPath(id ?? '', tab)}
           />
           <Flex grow={1} />
-          {tab === POLICIES_EVALUATIONS_REL_PATH && (
+          {tab === POLICIES_EVALUATIONS_REL_PATH && evalId && (
             <Button
               small
               as={Link}
-              to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}${
-                evalId ? `?evalId=${evalId}` : ''
-              }`}
+              to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}?evalId=${evalId}`}
               endIcon={<ArrowTopRightIcon />}
             >
               Simulate with evaluation
