@@ -280,7 +280,7 @@ export function PolicyDefinition() {
             language="json"
             showHeader={false}
           >
-            {stringifyEvalMap(output)}
+            {output ? stringifyEvalMap(output) : ''}
           </Code>
         </OutputBodySC>
       </SimulatorColumnSC>
