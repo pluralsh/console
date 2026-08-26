@@ -192,7 +192,7 @@ defmodule Console.Deployments.Policy do
   def evaluate_policy(id, input, %User{} = user, override)
       when is_binary(override) and byte_size(override) > 0 do
     get_policy(id)
-    |> allow(user, :read)
+    |> allow(user, :write)
     |> when_ok(fn policy -> evaluate_policy(%{policy | policy: override}, input) end)
   end
   def evaluate_policy(id, input, %User{} = user, _override) do

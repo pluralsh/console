@@ -301,6 +301,42 @@ defmodule Console.Deployments.PolicyTest do
     end
   end
 
+  describe "evaluate_policy/4" do
+    test "requires write access when evaluating an override" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project, policy: "package plrl.wb.admission\nsample := 0")
+
+      assert {:error, _} = Policy.evaluate_policy(policy.id, %{}, user, """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "buffer"}] if {
+          true
+        }
+      """)
+    end
+
+    test "allows writers to evaluate an override" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project, policy: "package plrl.wb.admission\nsample := 0")
+
+      {:ok, result} = Policy.evaluate_policy(policy.id, %{}, user, """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "buffer"}] if {
+          true
+        }
+      """)
+
+      assert [%{"message" => "buffer"}] = result["deny"]
+    end
+  end
+
   describe "actor/1" do
     test "builds a cleaned actor payload from a user" do
       group = insert(:group, name: "admins")
