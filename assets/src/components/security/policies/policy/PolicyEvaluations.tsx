@@ -8,6 +8,7 @@ import {
   Tab,
   TabList,
 } from '@pluralsh/design-system'
+import { useEnsurePagedItem } from 'components/hooks/useEnsurePagedItem'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -70,20 +71,15 @@ export function PolicyEvaluations() {
     () => mapExistingNodes(data?.policy?.policyEvaluations),
     [data]
   )
-  const selectedEvalFromPath =
-    evals.find((evaluation) => evaluation.id === evalIdFromPath) ?? null
-  const waitingForEval =
-    !!evalIdFromPath &&
-    !selectedEvalFromPath &&
-    (!data || loading || !!pageInfo?.hasNextPage)
+  const { item: selectedEvalFromPath, waiting: waitingForEval } =
+    useEnsurePagedItem(evals, evalIdFromPath, {
+      data,
+      loading,
+      hasNextPage: pageInfo?.hasNextPage,
+      fetchNextPage,
+    })
   const selectedEval =
     selectedEvalFromPath ?? (waitingForEval ? null : (evals[0] ?? null))
-
-  useEffect(() => {
-    if (!waitingForEval || loading) return
-
-    fetchNextPage()
-  }, [fetchNextPage, loading, waitingForEval])
 
   useEffect(() => {
     if (!selectedEval?.id || evalIdFromPath === selectedEval.id) return

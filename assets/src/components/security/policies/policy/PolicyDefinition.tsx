@@ -5,11 +5,13 @@ import {
   CodeEditor,
   Flex,
   FormField,
+  ListBoxFooterPlus,
   ListBoxItem,
   PencilIcon,
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { useEnsurePagedItem } from 'components/hooks/useEnsurePagedItem'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -102,15 +104,15 @@ export function PolicyDefinition() {
       })),
     [evals]
   )
-  const selectedEval =
-    evals.find((evaluation) => evaluation.id === selectedEvalId) ?? null
+  const { item: selectedEval } = useEnsurePagedItem(evals, selectedEvalId, {
+    data,
+    loading,
+    hasNextPage: pageInfo?.hasNextPage,
+    fetchNextPage,
+  })
   const selectedEvalLabel = evalOptions.find(
     (option) => option.id === selectedEval?.id
   )?.label
-  const waitingForEval =
-    !!selectedEvalId &&
-    !selectedEval &&
-    (!data || loading || !!pageInfo?.hasNextPage)
 
   const [
     evaluatePolicy,
@@ -166,12 +168,6 @@ export function PolicyDefinition() {
   )
   const onEdit = useCallback(() => setEditOpen(true), [])
   const onDelete = useCallback(() => setConfirmDelete(true), [])
-
-  useEffect(() => {
-    if (!waitingForEval || loading) return
-
-    fetchNextPage()
-  }, [fetchNextPage, loading, waitingForEval])
 
   useEffect(() => {
     if (!evalIdFromSearch || selectedEvalId === evalIdFromSearch) return
@@ -239,6 +235,13 @@ export function PolicyDefinition() {
                   }
                   onSelectionChange={(id) => onSelectEval(`${id}`)}
                   selectedKey={selectedEval?.id}
+                  dropdownFooterFixed={
+                    pageInfo?.hasNextPage ? (
+                      <ListBoxFooterPlus onClick={() => fetchNextPage()}>
+                        Load more
+                      </ListBoxFooterPlus>
+                    ) : undefined
+                  }
                 >
                   {evalOptions.map(({ id, label }) => (
                     <ListBoxItem
