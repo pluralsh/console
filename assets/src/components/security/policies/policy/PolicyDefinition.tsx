@@ -6,6 +6,7 @@ import {
   Flex,
   FormField,
   ListBoxItem,
+  PencilIcon,
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -16,7 +17,6 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP, OverlineH1 } from 'components/utils/typography/Text'
 import {
-  PolicyFragment,
   useDeletePolicyMutation,
   useEvaluatePolicyLazyQuery,
   usePolicyEvaluationsQuery,
@@ -40,6 +40,7 @@ import styled, { useTheme } from 'styled-components'
 import { isValidJson } from 'utils/isValidJson'
 import { mapExistingNodes } from 'utils/graphql'
 import { PolicyDetailsContext } from './PolicyDetails'
+import { PolicyEditModal } from './PolicyEditModal'
 import {
   formatEvalSelectLabel,
   isPolicyEvalDenied,
@@ -55,6 +56,8 @@ const jsonEditorOptions = {
 }
 
 export function PolicyDefinition() {
+  const theme = useTheme()
+  const navigate = useNavigate()
   const { policy, setHeaderActions } = useOutletContext<PolicyDetailsContext>()
   const [searchParams, setSearchParams] = useSearchParams()
   const evalIdFromSearch = searchParams.get('evalId')
@@ -152,167 +155,207 @@ export function PolicyDefinition() {
     [setSearchParams]
   )
 
+  const [editOpen, setEditOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deletePolicy, { loading: deleting, error: deleteError }] =
+    useDeletePolicyMutation({
+      variables: { id: policy?.id ?? '' },
+      onCompleted: () => navigate(POLICIES_ABS_PATH),
+    })
+
+  const onEdit = useCallback(() => setEditOpen(true), [])
+  const onDelete = useCallback(() => setConfirmDelete(true), [])
+
   useLayoutEffect(() => {
     setHeaderActions(
       <DefinitionActions
         dirty={dirty}
-        saving={saving}
+        onDelete={onDelete}
+        onEdit={onEdit}
         onRevert={onRevert}
         onSave={onSave}
-        policy={policy}
+        saving={saving}
       />
     )
-  }, [dirty, onRevert, onSave, policy, saving, setHeaderActions])
+  }, [dirty, onDelete, onEdit, onRevert, onSave, saving, setHeaderActions])
 
   useEffect(() => () => setHeaderActions(null), [setHeaderActions])
 
   return (
-    <WrapperSC>
-      <EditorColumnSC>
-        <PanelHeaderSC>Editor</PanelHeaderSC>
-        <EditorBodySC>
-          <CaptionP $color="text-xlight">
-            Simulation runs against this buffer, not the saved policy.
-          </CaptionP>
-          {saveError && <GqlError error={saveError} />}
-          <EditorWrapSC>
-            <CodeEditor
-              key={`${policy?.id ?? 'policy'}-${editorEpoch}`}
-              fillLevel={0}
-              height="100%"
-              language="rego"
-              onChange={setBuffer}
-              options={editorOptions}
-              value={editorValue}
-            />
-          </EditorWrapSC>
-        </EditorBodySC>
-      </EditorColumnSC>
-      <SimulatorColumnSC>
-        <SimulatorTopSC>
-          <PanelHeaderSC>Simulator</PanelHeaderSC>
-          <SimulatorBodySC>
-            <FormField label="Past evals">
-              <Select
-                isDisabled={evals.length === 0}
-                label={
-                  selectedEval
-                    ? formatEvalSelectLabel(
-                        selectedEval.id,
-                        selectedEval.input as PolicyEvalMap,
-                        selectedEval.insertedAt
-                      )
-                    : evals.length === 0
-                      ? 'No past evaluations'
-                      : 'Select a past eval'
-                }
-                onSelectionChange={(id) => onSelectEval(`${id}`)}
-                selectedKey={selectedEval?.id}
-              >
-                {evals.length === 0 ? (
-                  <ListBoxItem
-                    key="empty"
-                    label="No past evaluations"
-                    textValue="No past evaluations"
-                  />
-                ) : (
-                  evals.map((evaluation) => (
+    <>
+      <WrapperSC>
+        <EditorColumnSC>
+          <PanelHeaderSC>Editor</PanelHeaderSC>
+          <EditorBodySC>
+            <CaptionP $color="text-xlight">
+              Simulation runs against this buffer, not the saved policy.
+            </CaptionP>
+            {saveError && <GqlError error={saveError} />}
+            <EditorWrapSC>
+              <CodeEditor
+                key={`${policy?.id ?? 'policy'}-${editorEpoch}`}
+                fillLevel={0}
+                height="100%"
+                language="rego"
+                onChange={setBuffer}
+                options={editorOptions}
+                value={editorValue}
+              />
+            </EditorWrapSC>
+          </EditorBodySC>
+        </EditorColumnSC>
+        <SimulatorColumnSC>
+          <SimulatorTopSC>
+            <PanelHeaderSC>Simulator</PanelHeaderSC>
+            <SimulatorBodySC>
+              <FormField label="Past evals">
+                <Select
+                  isDisabled={evals.length === 0}
+                  label={
+                    selectedEval
+                      ? formatEvalSelectLabel(
+                          selectedEval.id,
+                          selectedEval.input as PolicyEvalMap,
+                          selectedEval.insertedAt
+                        )
+                      : evals.length === 0
+                        ? 'No past evaluations'
+                        : 'Select a past eval'
+                  }
+                  onSelectionChange={(id) => onSelectEval(`${id}`)}
+                  selectedKey={selectedEval?.id}
+                >
+                  {evals.length === 0 ? (
                     <ListBoxItem
-                      key={evaluation.id}
-                      label={formatEvalSelectLabel(
-                        evaluation.id,
-                        evaluation.input as PolicyEvalMap,
-                        evaluation.insertedAt
-                      )}
-                      textValue={formatEvalSelectLabel(
-                        evaluation.id,
-                        evaluation.input as PolicyEvalMap,
-                        evaluation.insertedAt
-                      )}
+                      key="empty"
+                      label="No past evaluations"
+                      textValue="No past evaluations"
                     />
-                  ))
-                )}
-              </Select>
-            </FormField>
-            <JsonPanelSC>
-              <OverlineH1 $color="text-xlight">Input</OverlineH1>
-              <EditorWrapSC>
-                <CodeEditor
-                  key={selectedEval?.id ?? 'input'}
-                  height="100%"
-                  language="json"
-                  onChange={setInputJson}
-                  options={jsonEditorOptions}
-                  value={inputJson}
-                />
-              </EditorWrapSC>
-            </JsonPanelSC>
-            {evalError && <GqlError error={evalError} />}
-            <Button
-              css={{ width: '100%' }}
-              disabled={!inputIsValid || !policy?.id}
-              loading={evaluating}
-              onClick={onRun}
-              primary
-              small
+                  ) : (
+                    evals.map((evaluation) => (
+                      <ListBoxItem
+                        key={evaluation.id}
+                        label={formatEvalSelectLabel(
+                          evaluation.id,
+                          evaluation.input as PolicyEvalMap,
+                          evaluation.insertedAt
+                        )}
+                        textValue={formatEvalSelectLabel(
+                          evaluation.id,
+                          evaluation.input as PolicyEvalMap,
+                          evaluation.insertedAt
+                        )}
+                      />
+                    ))
+                  )}
+                </Select>
+              </FormField>
+              <JsonPanelSC>
+                <OverlineH1 $color="text-xlight">Input</OverlineH1>
+                <EditorWrapSC>
+                  <CodeEditor
+                    key={selectedEval?.id ?? 'input'}
+                    height="100%"
+                    language="json"
+                    onChange={setInputJson}
+                    options={jsonEditorOptions}
+                    value={inputJson}
+                  />
+                </EditorWrapSC>
+              </JsonPanelSC>
+              {evalError && <GqlError error={evalError} />}
+              <Button
+                css={{ width: '100%' }}
+                disabled={!inputIsValid || !policy?.id}
+                loading={evaluating}
+                onClick={onRun}
+                primary
+                small
+              >
+                Run simulation
+              </Button>
+            </SimulatorBodySC>
+          </SimulatorTopSC>
+          <OutputBodySC>
+            <Flex
+              align="center"
+              justify="space-between"
             >
-              Run simulation
-            </Button>
-          </SimulatorBodySC>
-        </SimulatorTopSC>
-        <OutputBodySC>
-          <Flex
-            align="center"
-            justify="space-between"
-          >
-            <OverlineH1 $color="text-xlight">Output</OverlineH1>
+              <OverlineH1 $color="text-xlight">Output</OverlineH1>
+              {evaluating ? (
+                <Chip
+                  loading
+                  severity="info"
+                  size="small"
+                >
+                  Running
+                </Chip>
+              ) : (
+                <Chip
+                  severity={
+                    denied == null ? 'neutral' : denied ? 'danger' : 'success'
+                  }
+                  size="small"
+                >
+                  {denied == null ? 'Not run yet' : denied ? 'Deny' : 'Allow'}
+                </Chip>
+              )}
+            </Flex>
             {evaluating ? (
-              <Chip
-                loading
-                severity="info"
-                size="small"
-              >
-                Running
-              </Chip>
+              <OutputSkeletonSC>
+                {Array.from({ length: 5 }, (_, index) => (
+                  <RectangleSkeleton
+                    key={index}
+                    $height={30}
+                    $width="100%"
+                  />
+                ))}
+              </OutputSkeletonSC>
+            ) : output == null ? (
+              <OutputEmptySC>
+                No output yet. Pick a past evaluation or edit the input, then
+                run it against the current buffer.
+              </OutputEmptySC>
             ) : (
-              <Chip
-                severity={
-                  denied == null ? 'neutral' : denied ? 'danger' : 'success'
-                }
-                size="small"
+              <Code
+                css={{ flex: 1, minHeight: 0 }}
+                height="100%"
+                language="json"
+                showHeader={false}
               >
-                {denied == null ? 'Not run yet' : denied ? 'Deny' : 'Allow'}
-              </Chip>
+                {stringifyEvalMap(output)}
+              </Code>
             )}
-          </Flex>
-          {evaluating ? (
-            <OutputSkeletonSC>
-              {Array.from({ length: 5 }, (_, index) => (
-                <RectangleSkeleton
-                  key={index}
-                  $height={30}
-                  $width="100%"
-                />
-              ))}
-            </OutputSkeletonSC>
-          ) : output == null ? (
-            <OutputEmptySC>
-              No output yet. Pick a past evaluation or edit the input, then run
-              it against the current buffer.
-            </OutputEmptySC>
-          ) : (
-            <Code
-              css={{ flex: 1, minHeight: 0 }}
-              height="100%"
-              language="json"
-              showHeader={false}
-            >
-              {stringifyEvalMap(output)}
-            </Code>
-          )}
-        </OutputBodySC>
-      </SimulatorColumnSC>
-    </WrapperSC>
+          </OutputBodySC>
+        </SimulatorColumnSC>
+      </WrapperSC>
+      <PolicyEditModal
+        onClose={() => setEditOpen(false)}
+        open={editOpen}
+        policy={policy}
+      />
+      <Confirm
+        close={() => setConfirmDelete(false)}
+        confirmationEnabled
+        confirmationText={policy?.name ?? 'delete'}
+        destructive
+        error={deleteError}
+        label="Delete"
+        loading={deleting}
+        open={confirmDelete}
+        submit={() => deletePolicy()}
+        text={
+          <>
+            Are you sure you want to delete{' '}
+            <span css={{ color: theme.colors['text-danger'] }}>
+              “{policy?.name}”
+            </span>
+            ?
+          </>
+        }
+        title="Delete policy"
+      />
+    </>
   )
 }
 
@@ -321,21 +364,17 @@ function DefinitionActions({
   saving,
   onRevert,
   onSave,
-  policy,
+  onEdit,
+  onDelete,
 }: {
   dirty: boolean
   saving: boolean
   onRevert: () => void
   onSave: () => void
-  policy: PolicyFragment | null | undefined
+  onEdit: () => void
+  onDelete: () => void
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
-  const [confirmDelete, setConfirmDelete] = useState(false)
-  const [deletePolicy, { loading, error }] = useDeletePolicyMutation({
-    variables: { id: policy?.id ?? '' },
-    onCompleted: () => navigate(POLICIES_ABS_PATH),
-  })
 
   return (
     <>
@@ -358,10 +397,16 @@ function DefinitionActions({
       </Button>
       <MoreMenu
         onSelectionChange={(key) => {
-          if (key === 'delete') setConfirmDelete(true)
+          if (key === 'edit') onEdit()
+          if (key === 'delete') onDelete()
         }}
         triggerProps={{ iconFrameType: 'secondary' }}
       >
+        <ListBoxItem
+          key="edit"
+          label="Edit policy"
+          leftContent={<PencilIcon />}
+        />
         <ListBoxItem
           destructive
           key="delete"
@@ -369,27 +414,6 @@ function DefinitionActions({
           leftContent={<TrashCanIcon color={theme.colors['icon-danger']} />}
         />
       </MoreMenu>
-      <Confirm
-        close={() => setConfirmDelete(false)}
-        confirmationEnabled
-        confirmationText={policy?.name ?? 'delete'}
-        destructive
-        error={error}
-        label="Delete"
-        loading={loading}
-        open={confirmDelete}
-        submit={() => deletePolicy()}
-        text={
-          <>
-            Are you sure you want to delete{' '}
-            <span css={{ color: theme.colors['text-danger'] }}>
-              “{policy?.name}”
-            </span>
-            ?
-          </>
-        }
-        title="Delete policy"
-      />
     </>
   )
 }
