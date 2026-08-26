@@ -7,7 +7,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import { PolicyFragment, usePolicyQuery } from 'generated/graphql'
@@ -98,18 +97,18 @@ export function PolicyDetails() {
 
   if (error) {
     return (
-      <ResponsiveLayoutPage>
+      <PageSC $padded>
         <GqlError
           margin="large"
           error={error}
         />
-      </ResponsiveLayoutPage>
+      </PageSC>
     )
   }
 
   if (!loading && !policy) {
     return (
-      <ResponsiveLayoutPage>
+      <PageSC $padded>
         <EmptyState message="Policy not found">
           <Button
             as={Link}
@@ -119,13 +118,13 @@ export function PolicyDetails() {
             Back to all policies
           </Button>
         </EmptyState>
-      </ResponsiveLayoutPage>
+      </PageSC>
     )
   }
 
   return (
-    <ResponsiveLayoutPage>
-      <WrapperSC>
+    <PageSC>
+      <HeaderSC>
         <StackedText
           loading={loading && !policy}
           first={policy?.name}
@@ -158,33 +157,52 @@ export function PolicyDetails() {
             </Button>
           )}
         </Flex>
-        <ContentSC>
-          <Outlet context={ctx} />
-        </ContentSC>
-      </WrapperSC>
-    </ResponsiveLayoutPage>
+      </HeaderSC>
+      <ContentSC $flush={tab === POLICIES_EVALUATIONS_REL_PATH}>
+        <Outlet context={ctx} />
+      </ContentSC>
+    </PageSC>
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const PageSC = styled.div<{ $padded?: boolean }>(({ theme, $padded }) => ({
   display: 'flex',
   flexDirection: 'column',
-  flex: 1,
-  gap: theme.spacing.large,
-  minHeight: 0,
-  minWidth: 0,
+  flexGrow: 1,
   height: '100%',
   width: '100%',
+  minHeight: 0,
   overflow: 'hidden',
+  ...($padded
+    ? {
+        paddingTop: theme.spacing.large,
+        paddingLeft: theme.spacing.large,
+        paddingRight: theme.spacing.large,
+      }
+    : {}),
 }))
 
-const ContentSC = styled.div({
+const HeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  flexShrink: 0,
+  gap: theme.spacing.large,
+  padding: theme.spacing.large,
+}))
+
+const ContentSC = styled.div<{ $flush?: boolean }>(({ theme, $flush }) => ({
   display: 'flex',
   flexDirection: 'column',
   flex: 1,
   minHeight: 0,
   minWidth: 0,
-})
+  ...($flush
+    ? {}
+    : {
+        paddingLeft: theme.spacing.large,
+        paddingRight: theme.spacing.large,
+      }),
+}))
 
 function TabLabelWithCount({
   label,
