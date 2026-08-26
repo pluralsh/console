@@ -7,6 +7,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import { PolicyFragment, usePolicyQuery } from 'generated/graphql'
@@ -97,65 +98,71 @@ export function PolicyDetails() {
 
   if (error) {
     return (
-      <GqlError
-        margin="large"
-        error={error}
-      />
+      <ResponsiveLayoutPage>
+        <GqlError
+          margin="large"
+          error={error}
+        />
+      </ResponsiveLayoutPage>
     )
   }
 
   if (!loading && !policy) {
     return (
-      <EmptyState message="Policy not found">
-        <Button
-          as={Link}
-          to={POLICIES_ABS_PATH}
-          startIcon={<ReturnIcon />}
-        >
-          Back to all policies
-        </Button>
-      </EmptyState>
+      <ResponsiveLayoutPage>
+        <EmptyState message="Policy not found">
+          <Button
+            as={Link}
+            to={POLICIES_ABS_PATH}
+            startIcon={<ReturnIcon />}
+          >
+            Back to all policies
+          </Button>
+        </EmptyState>
+      </ResponsiveLayoutPage>
     )
   }
 
   return (
-    <WrapperSC>
-      <StackedText
-        loading={loading && !policy}
-        first={policy?.name}
-        firstPartialType="subtitle1"
-        firstColor="text"
-        second={policy?.description}
-        secondPartialType="body2"
-        secondColor="text-xlight"
-        gap="xxsmall"
-      />
-      <Flex
-        align="center"
-        gap="small"
-      >
-        <SubTabs
-          directory={directory}
-          activeFn={(path) => path === getPolicyDetailsAbsPath(id ?? '', tab)}
+    <ResponsiveLayoutPage>
+      <WrapperSC>
+        <StackedText
+          loading={loading && !policy}
+          first={policy?.name}
+          firstPartialType="subtitle1"
+          firstColor="text"
+          second={policy?.description}
+          secondPartialType="body2"
+          secondColor="text-xlight"
+          gap="xxsmall"
         />
-        <Flex grow={1} />
-        {tab === POLICIES_EVALUATIONS_REL_PATH && (
-          <Button
-            small
-            as={Link}
-            to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}${
-              evalId ? `?evalId=${evalId}` : ''
-            }`}
-            endIcon={<ArrowTopRightIcon />}
-          >
-            Simulate with evaluation
-          </Button>
-        )}
-      </Flex>
-      <ContentSC>
-        <Outlet context={ctx} />
-      </ContentSC>
-    </WrapperSC>
+        <Flex
+          align="center"
+          gap="small"
+        >
+          <SubTabs
+            directory={directory}
+            activeFn={(path) => path === getPolicyDetailsAbsPath(id ?? '', tab)}
+          />
+          <Flex grow={1} />
+          {tab === POLICIES_EVALUATIONS_REL_PATH && (
+            <Button
+              small
+              as={Link}
+              to={`${getPolicyDetailsAbsPath(id ?? '', POLICIES_DEFINITION_REL_PATH)}${
+                evalId ? `?evalId=${evalId}` : ''
+              }`}
+              endIcon={<ArrowTopRightIcon />}
+            >
+              Simulate with evaluation
+            </Button>
+          )}
+        </Flex>
+        <ContentSC>
+          <Outlet context={ctx} />
+        </ContentSC>
+      </WrapperSC>
+    </ResponsiveLayoutPage>
   )
 }
 
@@ -167,6 +174,7 @@ const WrapperSC = styled.div(({ theme }) => ({
   minHeight: 0,
   minWidth: 0,
   height: '100%',
+  width: '100%',
   overflow: 'hidden',
 }))
 

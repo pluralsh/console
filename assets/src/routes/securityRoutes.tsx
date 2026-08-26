@@ -23,6 +23,7 @@ import {
   GATEKEEPER_DETAILS_PATH,
   GATEKEEPER_PARAM_ID,
   GATEKEEPER_REL_PATH,
+  POLICIES_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_REL_PATH,
   POLICIES_ATTACHMENTS_REL_PATH,
   POLICIES_CREATE_REL_PATH,
@@ -85,36 +86,6 @@ export const securityRoutes = [
       element={<PolicyCreateOrEdit />}
     />
     <Route
-      path={`${POLICIES_REL_PATH}/:${POLICIES_PARAM_ID}`}
-      element={<PolicyDetails />}
-    >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to={POLICIES_DEFINITION_REL_PATH}
-          />
-        }
-      />
-      <Route
-        path={POLICIES_DEFINITION_REL_PATH}
-        element={<PolicyDefinition />}
-      />
-      <Route
-        path={POLICIES_EVALUATIONS_REL_PATH}
-        element={<PolicyEvaluations />}
-      />
-      <Route
-        path={`${POLICIES_EVALUATIONS_REL_PATH}/:${POLICIES_EVAL_PARAM_ID}`}
-        element={<PolicyEvaluations />}
-      />
-      <Route
-        path={POLICIES_ATTACHMENTS_REL_PATH}
-        element={<PolicyAttachments />}
-      />
-    </Route>
-    <Route
       path={`${POLICIES_REL_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
       element={<AttachmentRuleCreateOrEdit mode="create" />}
     />
@@ -141,6 +112,36 @@ export const securityRoutes = [
         element={<VulnerabilityReports />}
       />
     </Route>
+  </Route>,
+  <Route
+    path={`${POLICIES_ABS_PATH}/:${POLICIES_PARAM_ID}`}
+    element={<PolicyDetails />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={POLICIES_DEFINITION_REL_PATH}
+        />
+      }
+    />
+    <Route
+      path={POLICIES_DEFINITION_REL_PATH}
+      element={<PolicyDefinition />}
+    />
+    <Route
+      path={POLICIES_EVALUATIONS_REL_PATH}
+      element={<PolicyEvaluations />}
+    />
+    <Route
+      path={`${POLICIES_EVALUATIONS_REL_PATH}/:${POLICIES_EVAL_PARAM_ID}`}
+      element={<PolicyEvaluations />}
+    />
+    <Route
+      path={POLICIES_ATTACHMENTS_REL_PATH}
+      element={<PolicyAttachments />}
+    />
   </Route>,
   <Route
     path={`${VULNERABILITY_REPORTS_ABS_PATH}/${KUBERNETES_PARAM_CLUSTER}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
