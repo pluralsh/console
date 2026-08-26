@@ -7,7 +7,7 @@ import {
   FloatingPortal,
   type Placement,
   type UseFloatingReturn,
-} from '@floating-ui/react-dom-interactions'
+} from '@floating-ui/react'
 
 import { ListBoxUnmanaged, type ListBoxUnmanagedProps } from './ListBox'
 import { Popover, type PopoverProps } from './ReactAriaPopover'
@@ -107,7 +107,7 @@ function PopoverListBox({
         $isOpen={isOpen}
         $placement={floating.placement}
         className="popoverWrapper"
-        ref={floating.floating}
+        ref={floating.refs.setFloating}
         style={{
           position: floating.strategy,
           left: floating.x ?? 0,

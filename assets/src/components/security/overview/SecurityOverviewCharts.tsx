@@ -260,14 +260,11 @@ function clustersByVulnCount(vulns: ClusterVulnAggregateFragment[]) {
 
 const ChartRowWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
+  overflowX: 'auto',
   gap: theme.spacing.large,
   minHeight: 'fit-content',
   flexShrink: 0,
-  // overflowX:auto makes overflow-y compute to auto too, which clips soft shadows.
-  flexWrap: 'wrap',
-  ...(theme.mode === 'light'
-    ? { padding: theme.spacing.xsmall }
-    : { overflowX: 'auto' }),
+  ...(theme.mode === 'light' && { padding: theme.spacing.xsmall }),
 }))
 
 const ChartWrapperSC = styled.div(({ theme }) => ({

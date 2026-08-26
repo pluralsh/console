@@ -54,6 +54,15 @@ export function ProfileMenu() {
           ref={menuBtnRef}
           tertiary
           onClick={() => setIsMenuOpen((open) => !open)}
+          css={{
+            borderRadius: '50%',
+            padding: 0,
+            ...(theme.mode === 'light' && {
+              // Tertiary hover uses a light wash — keep the avatar chrome instead
+              '&:hover': { background: 'transparent' },
+              '&:focus-visible': { background: 'transparent' },
+            }),
+          }}
           aria-haspopup="menu"
           aria-expanded={isMenuOpen}
           aria-label={
@@ -67,12 +76,26 @@ export function ProfileMenu() {
             src={me?.profile}
             size={32}
             css={{
+              transition: 'background-color 0.1s ease, filter 0.1s ease',
               ...(me?.profile
-                ? {}
+                ? {
+                    '&:hover, button:hover &': {
+                      filter:
+                        theme.mode === 'light' ? 'brightness(0.92)' : undefined,
+                    },
+                  }
                 : {
                     backgroundColor: theme.colors['fill-three'],
                     border: theme.borders.input,
                     fontSize: 12,
+                    ...(theme.mode === 'light' && {
+                      // Honorable Avatar defaults to white initials (for purple fill);
+                      // on light grey chrome use default dark text.
+                      color: theme.colors.text,
+                    }),
+                    'button:hover &, button:focus-visible &': {
+                      backgroundColor: theme.colors['fill-three-hover'],
+                    },
                   }),
             }}
           />
@@ -150,12 +173,13 @@ export function ProfileMenu() {
   )
 }
 
-const ProfileButtonSC = styled(Button)({
+const ProfileButtonSC = styled(Button)(({ theme }) => ({
   position: 'relative',
-  padding: 0,
   transition: 'filter 0.1s ease',
-  '&:hover': { filter: 'brightness(1.1)' },
-})
+  ...(theme.mode !== 'light' && {
+    '&:hover': { filter: 'brightness(1.1)' },
+  }),
+}))
 
 const ImpersonationIconSC = styled.span(({ theme }) => ({
   alignItems: 'center',

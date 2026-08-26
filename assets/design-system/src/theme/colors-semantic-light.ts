@@ -11,28 +11,33 @@ export const semanticColorsLight = {
 
   // Fill
   //
-  // Pure Light: white surfaces on a soft grey page; hover/selected darken gently
+  // Pure Light: white surfaces on a soft grey page.
+  // `*-raised` = zebra / striped rows — keep nearly white (matches Theme Lab Pure Light).
   // fill-zero
   'fill-zero': '#FFFFFF',
+  'fill-zero-raised': grey[25],
   'fill-zero-hover': grey[40],
   'fill-zero-selected': grey[45],
   // fill-one
   'fill-one': '#FFFFFF',
+  'fill-one-raised': grey[25],
   'fill-one-hover': grey[40],
   'fill-one-selected': grey[45],
   // fill-two
   'fill-two': grey[30],
+  'fill-two-raised': grey[30],
   'fill-two-hover': grey[45],
   'fill-two-selected': grey[50],
   // fill-three
   'fill-three': grey[40],
+  'fill-three-raised': grey[45],
   'fill-three-hover': grey[50],
   'fill-three-selected': grey[50],
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
   // accent — nav / header chrome
-  'fill-accent': '#EEF0F1',
+  'fill-accent': '#FFFFFF',
   // Action
   //
   // primary
@@ -60,10 +65,10 @@ export const semanticColorsLight = {
   // Border
   //
   // Soft hairlines — readable on white / soft grey without hard chrome
-  border: grey[100],
-  'border-fill-one': grey[100],
-  'border-fill-two': grey[125],
-  'border-fill-three': grey[150],
+  border: grey[75],
+  'border-fill-one': grey[75],
+  'border-fill-two': grey[100],
+  'border-fill-three': grey[125],
   'border-selected': grey[800],
   'border-input': grey[100],
   'border-disabled': grey[50],

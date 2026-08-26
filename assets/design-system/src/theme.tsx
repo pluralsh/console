@@ -148,7 +148,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
       Root: [
         {
           backgroundColor: 'action-primary',
-          borderRadius: 4, // TODO 3 or 6
+          borderRadius: '50%',
           fontWeight: 400,
         },
       ],

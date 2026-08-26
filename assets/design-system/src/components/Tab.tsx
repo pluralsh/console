@@ -95,16 +95,24 @@ function Tab({
             : theme.colors['text-xlight']
         }
         backgroundColor={
-          active
-            ? theme.colors['fill-zero-selected']
-            : activeSecondary
-              ? theme.colors['fill-zero-hover']
+          theme.mode === 'light'
+            ? active
+              ? theme.colors['fill-zero-selected']
+              : activeSecondary
+                ? theme.colors['fill-zero-hover']
+                : 'transparent'
+            : !active && activeSecondary
+              ? theme.colors['fill-two']
               : 'transparent'
         }
         {...{
           '&:hover': {
             color: theme.colors.text,
-            backgroundColor: theme.colors['fill-zero-hover'],
+            ...(theme.mode === 'light'
+              ? { backgroundColor: theme.colors['fill-zero-hover'] }
+              : !(!active && activeSecondary)
+                ? { backgroundColor: theme.colors['fill-zero-hover'] }
+                : {}),
           },
         }}
         transition="background-color 150ms ease, border-color 150ms ease, color 150ms ease"

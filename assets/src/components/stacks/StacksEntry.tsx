@@ -67,6 +67,10 @@ const WrapperSC = styled.div<{ $active: boolean; $first: boolean }>(
     padding: theme.spacing.medium,
     borderLeft: theme.borders.default,
     borderRight: theme.borders.default,
+    ...(theme.mode === 'light' && {
+      // White on page-background — never transparent (same as page grey)
+      backgroundColor: theme.colors['fill-zero'],
+    }),
 
     ...($active
       ? {
