@@ -12,6 +12,7 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP, OverlineH1 } from 'components/utils/typography/Text'
 import {
@@ -265,23 +266,50 @@ export function PolicyDefinition() {
             justify="space-between"
           >
             <OverlineH1 $color="text-xlight">Output</OverlineH1>
-            {denied != null && (
+            {evaluating ? (
               <Chip
-                severity={denied ? 'danger' : 'success'}
+                loading
+                severity="info"
                 size="small"
               >
-                {denied ? 'Deny' : 'Allow'}
+                Running
+              </Chip>
+            ) : (
+              <Chip
+                severity={
+                  denied == null ? 'neutral' : denied ? 'danger' : 'success'
+                }
+                size="small"
+              >
+                {denied == null ? 'Not run yet' : denied ? 'Deny' : 'Allow'}
               </Chip>
             )}
           </Flex>
-          <Code
-            css={{ flex: 1, minHeight: 0 }}
-            height="100%"
-            language="json"
-            showHeader={false}
-          >
-            {output ? stringifyEvalMap(output) : ''}
-          </Code>
+          {evaluating ? (
+            <OutputSkeletonSC>
+              {Array.from({ length: 5 }, (_, index) => (
+                <RectangleSkeleton
+                  key={index}
+                  $height={30}
+                  $width="100%"
+                />
+              ))}
+            </OutputSkeletonSC>
+          ) : output == null ? (
+            <OutputEmptySC>
+              No output yet. Pick a past evaluation or edit the input, then run
+              it against the current buffer.
+            </OutputEmptySC>
+          ) : (
+            <Code
+              css={{ flex: 1, minHeight: 0 }}
+              height="100%"
+              language="json"
+              showHeader={false}
+            >
+              {stringifyEvalMap(output)}
+            </Code>
+          )}
         </OutputBodySC>
       </SimulatorColumnSC>
     </WrapperSC>
@@ -445,6 +473,29 @@ const OutputBodySC = styled.div(({ theme }) => ({
   minHeight: 0,
   overflow: 'hidden',
   padding: theme.spacing.medium,
+}))
+
+const OutputSkeletonSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minHeight: 0,
+  width: '100%',
+}))
+
+const OutputEmptySC = styled.div(({ theme }) => ({
+  ...theme.partials.text.code,
+  alignItems: 'center',
+  border: `1px dashed ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.large,
+  color: theme.colors['text-xlight'],
+  display: 'flex',
+  flex: 1,
+  justifyContent: 'center',
+  minHeight: 0,
+  padding: theme.spacing.large,
+  textAlign: 'center',
 }))
 
 const JsonPanelSC = styled.div(({ theme }) => ({
