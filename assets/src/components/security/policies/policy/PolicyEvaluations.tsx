@@ -9,6 +9,7 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackedText } from 'components/utils/table/StackedText'
 import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
 import {
@@ -54,20 +55,34 @@ export function PolicyEvaluations() {
   const [detailTab, setDetailTab] = useState<DetailTab>('input')
   const detailTabsStateRef = useRef<any>(undefined)
 
-  const { data, loading, error } = usePolicyEvaluationsQuery({
-    variables: { id: policyId, first: 100 },
-    skip: !policyId,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: usePolicyEvaluationsQuery,
+        keyPath: ['policy', 'policyEvaluations'],
+        skip: !policyId,
+      },
+      { id: policyId }
+    )
 
   const evals = useMemo(
     () => mapExistingNodes(data?.policy?.policyEvaluations),
     [data]
   )
+  const selectedEvalFromPath =
+    evals.find((evaluation) => evaluation.id === evalIdFromPath) ?? null
+  const waitingForEval =
+    !!evalIdFromPath &&
+    !selectedEvalFromPath &&
+    (!data || loading || !!pageInfo?.hasNextPage)
   const selectedEval =
-    evals.find((evaluation) => evaluation.id === evalIdFromPath) ??
-    evals[0] ??
-    null
+    selectedEvalFromPath ?? (waitingForEval ? null : (evals[0] ?? null))
+
+  useEffect(() => {
+    if (!waitingForEval || loading) return
+
+    fetchNextPage()
+  }, [fetchNextPage, loading, waitingForEval])
 
   useEffect(() => {
     if (!selectedEval?.id || evalIdFromPath === selectedEval.id) return
@@ -86,6 +101,10 @@ export function PolicyEvaluations() {
       <PolicyEvaluationsSidePanel
         evals={evals}
         loading={loading && !data}
+        isLoadingNextPage={!!data && loading}
+        hasNextPage={!!pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        onVirtualSliceChange={setVirtualSlice}
         selectedEvalId={selectedEval?.id}
         onSelectEvalId={(evalId) =>
           navigate(getPolicyEvalAbsPath(policyId, evalId))
@@ -98,7 +117,9 @@ export function PolicyEvaluations() {
           justify="center"
           minHeight={0}
         >
-          <EmptyState message="No evaluations available yet." />
+          {waitingForEval || (loading && !data) ? null : (
+            <EmptyState message="No evaluations available yet." />
+          )}
         </Flex>
       ) : (
         <ColumnsSC>

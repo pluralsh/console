@@ -1,11 +1,12 @@
 import { CheckIcon, Chip, CloseIcon, Flex } from '@pluralsh/design-system'
-import { type ComponentProps, useMemo, useState } from 'react'
+import { type ComponentProps, useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Body2P } from 'components/utils/typography/Text'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { VirtualList } from 'components/utils/VirtualList'
 import { formatDateTime } from 'utils/datetime'
 import { PolicyEvaluationFragment } from 'generated/graphql'
 import { TRUNCATE } from 'components/utils/truncate'
+import type { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import {
   getPolicyEvalToolName,
   isPolicyEvalDenied,
@@ -18,11 +19,19 @@ type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 export function PolicyEvaluationsSidePanel({
   evals,
   loading,
+  isLoadingNextPage,
+  hasNextPage,
+  fetchNextPage,
+  onVirtualSliceChange,
   selectedEvalId,
   onSelectEvalId,
 }: {
   evals: PolicyEvaluationFragment[]
   loading: boolean
+  isLoadingNextPage: boolean
+  hasNextPage: boolean
+  fetchNextPage: () => void
+  onVirtualSliceChange: (slice: VirtualSlice) => void
   selectedEvalId?: string | null
   onSelectEvalId: (evalId: string) => void
 }) {
@@ -64,6 +73,19 @@ export function PolicyEvaluationsSidePanel({
     }
   }, [activeFilter, evals])
 
+  useEffect(() => {
+    if (isLoadingNextPage || !hasNextPage) return
+    if (activeFilter === 'all' || filteredEvals.length > 0) return
+
+    fetchNextPage()
+  }, [
+    activeFilter,
+    fetchNextPage,
+    filteredEvals.length,
+    hasNextPage,
+    isLoadingNextPage,
+  ])
+
   return (
     <Flex
       direction="column"
@@ -90,44 +112,33 @@ export function PolicyEvaluationsSidePanel({
             active={activeFilter === key}
             count={count}
             severity={severity}
+            disabled={count === 0 && !hasNextPage}
             onClick={() => setActiveFilter(key)}
           />
         ))}
       </Flex>
       <Flex
-        direction="column"
-        gap="xsmall"
         flex={1}
         minHeight={0}
-        overflowY="auto"
       >
-        {loading ? (
-          <Flex
-            direction="column"
-            gap="xsmall"
-            padding="small"
-          >
-            {Array.from({ length: 3 }).map((_, index) => (
-              <RectangleSkeleton
-                key={index}
-                $height={52}
-                $width="100%"
-              />
-            ))}
-          </Flex>
-        ) : filteredEvals.length ? (
-          <Flex
-            direction="column"
-            gap="xsmall"
-          >
-            {filteredEvals.map((evaluation) => {
+        {loading || filteredEvals.length ? (
+          <VirtualList
+            data={filteredEvals}
+            loading={loading}
+            itemGap="xsmall"
+            skeletonProps={{ gap: 'xsmall', height: 52, numRows: 3 }}
+            hasNextPage={hasNextPage}
+            isLoadingNextPage={isLoadingNextPage}
+            loadNextPage={() => hasNextPage && fetchNextPage()}
+            onVirtualSliceChange={onVirtualSliceChange}
+            style={{ height: '100%' }}
+            renderer={({ rowData: evaluation }) => {
               const denied = isPolicyEvalDenied(
                 evaluation.output as PolicyEvalMap
               )
 
               return (
                 <EvalLinkSC
-                  key={evaluation.id}
                   $active={selectedEvalId === evaluation.id}
                   onClick={() => onSelectEvalId(evaluation.id)}
                 >
@@ -157,8 +168,8 @@ export function PolicyEvaluationsSidePanel({
                   </Flex>
                 </EvalLinkSC>
               )
-            })}
-          </Flex>
+            }}
+          />
         ) : (
           <Body2P
             $color="text-xlight"
@@ -211,25 +222,26 @@ function EvalFilterChip({
   active,
   count,
   severity,
+  disabled,
   onClick,
 }: {
   filterKey: EvalFilter
   active: boolean
   count: number
   severity: ChipSeverity
+  disabled: boolean
   onClick: () => void
 }) {
   const theme = useTheme()
-  const hasItems = count > 0
 
   return (
     <Chip
       size="small"
       severity={severity}
-      clickable={hasItems}
+      clickable={!disabled}
       $active={active}
-      inactive={!hasItems}
-      onClick={hasItems ? onClick : undefined}
+      inactive={disabled}
+      onClick={disabled ? undefined : onClick}
       css={{
         borderRadius: 12,
         backgroundColor: active ? theme.colors['fill-one-selected'] : undefined,
