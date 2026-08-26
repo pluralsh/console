@@ -25,7 +25,8 @@ defmodule Console.AI.Workbench.Engine do
     Supervisor,
     Heartbeat,
     Canvas,
-    Activity
+    Activity,
+    Tools
   }
   alias Console.AI.Tools.Workbench.{
     Codemode,
@@ -349,7 +350,7 @@ defmodule Console.AI.Workbench.Engine do
   defp type_tools(_), do: [CanvasTool]
 
   defp function_tools(%Environment{job: job, functions: [_ | _] = funcs}),
-    do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
+    do: Tools.function_tools(funcs, job)
   defp function_tools(_), do: []
 
   defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do

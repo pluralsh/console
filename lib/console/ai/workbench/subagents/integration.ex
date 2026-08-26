@@ -1,17 +1,8 @@
 defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
-  alias Console.AI.Tools.Workbench.{Result, Http, Scratchpad}
-  alias Console.AI.Tools.Workbench.Integration.Slack.{CreateChannel, EditMessage, FindChannelByName, InviteToChannel, ListChannels, ListMessages, ListUserGroups, PostMessage, ReactToMessage}
-  alias Console.AI.Tools.Workbench.Integration.Github.Tools, as: GithubTools
-  alias Console.AI.Tools.Workbench.Integration.Gitlab.Tools, as: GitlabTools
-  alias Console.AI.Tools.Workbench.Integration.Bitbucket.Tools, as: BitbucketTools
-  alias Console.AI.Tools.Workbench.Integration.BitbucketDatacenter.Tools, as: BitbucketDatacenterTools
-  alias Console.AI.Tools.Workbench.Integration.AzureDevops.Tools, as: AzureDevopsTools
-  alias Console.AI.Tools.Workbench.Integration.Teams.Tools, as: TeamsTools
-  alias Console.AI.Tools.Workbench.Integration.Pagerduty.Tools, as: PagerdutyTools
-  alias Console.AI.Tools.Workbench.Integration.Docker.Tools, as: DockerTools
-  alias Console.AI.Workbench.{Environment, MCP}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
+  alias Console.AI.Tools.Workbench.{Result, Scratchpad}
+  alias Console.AI.Workbench.{Environment, MCP, Tools}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -25,7 +16,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
         acc: %{},
         tool_search: length(tools) > 10,
         pre_enable: [Result | skill_knowledge_pre_enable()],
-        callback: &callback(activity, &1),
+        callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
       ]
     )
@@ -49,7 +40,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   defp tools(%Environment{skills: skills, tools: tools, job: job}) do
     skills = Environment.subagent_skills(skills, :integration)
 
-    workbench_tools(tools)
+    Tools.integration_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :integration), job))
     |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
@@ -57,57 +48,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     ])
   end
 
-  @allowed_tools ~w(http slack pagerduty github gitlab bitbucket bitbucket_datacenter teams azure_devops docker)a
-
-  def scm_tools(tools) do
-    tools
-    |> tool_values()
-    |> Enum.filter(fn
-      %WorkbenchTool{categories: categories} when is_list(categories) -> :scm in categories
-      _ -> false
-    end)
-    |> expand_workbench_tools()
-  end
-
-  defp workbench_tools(tools) do
-    tools
-    |> tool_values()
-    |> expand_workbench_tools()
-  end
-
-  defp tool_values(tools) when is_map(tools), do: Map.values(tools)
-  defp tool_values(tools) when is_list(tools), do: tools
-
-  defp expand_workbench_tools(tools) do
-    tools
-    |> Enum.filter(fn
-      %WorkbenchTool{tool: t} when t in @allowed_tools -> true
-      _ -> false
-    end)
-    |> Enum.flat_map(fn
-      %WorkbenchTool{tool: :http} = tool -> [%Http{tool: tool}]
-      %WorkbenchTool{tool: :slack} = tool ->
-        [
-          %ListChannels{tool: tool},
-          %ListMessages{tool: tool},
-          %ListUserGroups{tool: tool},
-          %FindChannelByName{tool: tool},
-          %InviteToChannel{tool: tool},
-          %CreateChannel{tool: tool},
-          %PostMessage{tool: tool},
-          %EditMessage{tool: tool},
-          %ReactToMessage{tool: tool}
-        ]
-      %WorkbenchTool{tool: :github} = tool -> GithubTools.expand(tool)
-      %WorkbenchTool{tool: :gitlab} = tool -> GitlabTools.expand(tool)
-      %WorkbenchTool{tool: :bitbucket} = tool -> BitbucketTools.expand(tool)
-      %WorkbenchTool{tool: :bitbucket_datacenter} = tool -> BitbucketDatacenterTools.expand(tool)
-      %WorkbenchTool{tool: :azure_devops} = tool -> AzureDevopsTools.expand(tool)
-      %WorkbenchTool{tool: :teams} = tool -> TeamsTools.expand(tool)
-      %WorkbenchTool{tool: :pagerduty} = tool -> PagerdutyTools.expand(tool)
-      %WorkbenchTool{tool: :docker} = tool -> DockerTools.expand(tool)
-    end)
-  end
+  def scm_tools(tools), do: Tools.scm_tools(tools)
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "integration.md.eex"]), [:assigns])
 end

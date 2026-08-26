@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
   alias Console.AI.{Provider, Tool}
   alias Console.AI.Tools.Workbench.Observability.Metrics
   alias Console.Deployments.Workbenches
+  alias Console.Schema.WorkbenchJobThought
   import ElasticsearchUtils
 
   setup :set_mimic_global
@@ -108,6 +109,20 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       [persisted_log] = updated.result.logs
       assert persisted_log.message == "connection reset"
       assert persisted_log.labels == %{"pod" => "api-1"}
+
+      thoughts =
+        WorkbenchJobThought.for_activity(activity.id)
+        |> WorkbenchJobThought.ordered()
+        |> Repo.all()
+
+      metrics_thought = Enum.find(thoughts, & &1.tool_name == metrics_tool_name)
+      assert metrics_thought
+      assert metrics_thought.tool_id == tool.id
+      assert metrics_thought.tool_args == %{"query" => "up"}
+
+      enable_thought = Enum.find(thoughts, & &1.tool_name == "enable_tools")
+      assert enable_thought
+      refute enable_thought.tool_id
     end
   end
 end

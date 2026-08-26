@@ -4,6 +4,7 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
   alias Console.AI.Workbench.{Subagents, Environment, Engine}
   alias Console.AI.Tools.Workbench.Http
   alias Console.AI.{Provider, Tool}
+  alias Console.Schema.WorkbenchJobThought
   import ElasticsearchUtils
 
   setup :set_mimic_global
@@ -73,6 +74,17 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
 
       assert result[:status] == :successful
       assert result[:result][:output] == "complete"
+
+      thoughts =
+        WorkbenchJobThought.for_activity(activity.id)
+        |> WorkbenchJobThought.ordered()
+        |> Repo.all()
+
+      http_thought = Enum.find(thoughts, & &1.tool_name == "http_integration_example")
+      assert http_thought
+      assert http_thought.tool_id == tool.id
+      assert http_thought.tool_args == %{"input" => %{"hello" => "world"}}
+      assert http_thought.content =~ "http response: world"
     end
 
     # @tag :skip
@@ -149,6 +161,15 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
 
       assert result[:status] == :successful
       assert result[:result][:output] == "complete"
+
+      thoughts =
+        WorkbenchJobThought.for_activity(activity.id)
+        |> WorkbenchJobThought.ordered()
+        |> Repo.all()
+
+      mcp_thought = Enum.find(thoughts, & &1.tool_name == "mcp_example_echo")
+      assert mcp_thought
+      assert mcp_thought.tool_id == tool.id
     end
 
     @tag :skip

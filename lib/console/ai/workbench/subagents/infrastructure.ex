@@ -17,16 +17,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
     Infrastructure.StackInspect,
-    Infrastructure.CloudSchemas,
     Infrastructure.RawCloudQuery,
-    Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
     Infrastructure.Manifests,
     Infrastructure.StateSearch
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
-  alias Console.AI.Workbench.{Environment, FileCache}
+  alias Console.AI.Workbench.{Environment, FileCache, Tools}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -42,7 +40,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
         pre_enable: [Result | skill_knowledge_pre_enable()],
-        callback: &callback(activity, &1)
+        callback: &callback(activity, environment, &1)
       ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
@@ -80,19 +78,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(pod_logs_tools(bench, user))
-    |> Enum.concat(cloud_tools(environment))
+    |> Enum.concat(Tools.cloud_tools(environment.tools))
     |> build_codemode(policies)
-  end
-
-  defp cloud_tools(%Environment{tools: tools}) do
-    Enum.flat_map(tools, fn
-      {_, %WorkbenchTool{tool: :cloud} = tool} -> [
-        %CloudSchemas{tool: tool},
-        %RawCloudQuery{tool: tool},
-        %CloudTables{tool: tool}
-      ]
-      _ -> []
-    end)
   end
 
   defp has_cloud_tools?(tools) do

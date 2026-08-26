@@ -32,7 +32,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
         system_prompt: String.trim(system_prompt(job: target_job)),
         continue_msg: cont_msg(),
         acc: %{},
-        callback: &callback(activity, &1)
+        callback: &callback(activity, environment, &1)
       ]
     )
     |> MemoryEngine.reduce([{:user, String.trim(eval_job_prompt(job: target_job))}, @skill_prompt], &reducer/2)

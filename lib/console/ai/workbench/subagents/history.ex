@@ -13,7 +13,7 @@ defmodule Console.AI.Workbench.Subagents.History do
       engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
-        callback: &callback(activity, &1),
+        callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
       ]
     )

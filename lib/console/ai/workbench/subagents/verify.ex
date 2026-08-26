@@ -21,7 +21,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
       engine_opts(environment) ++ [
         system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
         acc: %{},
-        callback: &callback(activity, &1),
+        callback: &callback(activity, environment, &1),
         pre_enable: [Result | skill_knowledge_pre_enable()],
         continue_msg: cont_msg()
       ]
