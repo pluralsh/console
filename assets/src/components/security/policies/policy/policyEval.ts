@@ -1,3 +1,5 @@
+import { fromNow } from 'utils/datetime'
+
 export type PolicyEvalMap = Record<string, unknown>
 
 export function isPolicyEvalDenied(output?: PolicyEvalMap | null): boolean {
@@ -57,6 +59,20 @@ export function getPolicyEvalReason(output?: PolicyEvalMap | null): string {
 
 export function formatEvalId(id: string): string {
   return `eval ${id.replace(/-/g, '').slice(0, 4)}`
+}
+
+export function formatEvalSelectLabel(
+  id: string,
+  input?: PolicyEvalMap | null,
+  insertedAt?: string | null
+): string {
+  return [
+    formatEvalId(id),
+    getPolicyEvalToolName(input),
+    insertedAt ? fromNow(insertedAt) : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 export function stringifyEvalMap(value?: PolicyEvalMap | null): string {

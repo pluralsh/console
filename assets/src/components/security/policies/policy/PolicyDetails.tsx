@@ -10,7 +10,7 @@ import { GqlError } from 'components/utils/Alert'
 import { SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import { PolicyFragment, usePolicyQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
 import {
   POLICIES_ABS_PATH,
@@ -29,6 +29,7 @@ import styled from 'styled-components'
 export type PolicyDetailsContext = {
   policy: PolicyFragment | null | undefined
   loading: boolean
+  setHeaderActions: (node: ReactNode) => void
 }
 
 export function PolicyDetails() {
@@ -90,8 +91,9 @@ export function PolicyDetails() {
     )
   )
 
+  const [headerActions, setHeaderActions] = useState<ReactNode>(null)
   const ctx: PolicyDetailsContext = useMemo(
-    () => ({ policy, loading }),
+    () => ({ policy, loading, setHeaderActions }),
     [policy, loading]
   )
 
@@ -156,9 +158,15 @@ export function PolicyDetails() {
               Simulate with evaluation
             </Button>
           )}
+          {tab === POLICIES_DEFINITION_REL_PATH && headerActions}
         </Flex>
       </HeaderSC>
-      <ContentSC $flush={tab === POLICIES_EVALUATIONS_REL_PATH}>
+      <ContentSC
+        $flush={
+          tab === POLICIES_EVALUATIONS_REL_PATH ||
+          tab === POLICIES_DEFINITION_REL_PATH
+        }
+      >
         <Outlet context={ctx} />
       </ContentSC>
     </PageSC>
