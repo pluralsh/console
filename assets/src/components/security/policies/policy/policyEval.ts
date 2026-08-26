@@ -1,11 +1,12 @@
+import { compact, get, isArray, isPlainObject, isString } from 'lodash'
 import { fromNow } from 'utils/datetime'
 
 export type PolicyEvalMap = Record<string, unknown>
 
 export function isPolicyEvalDenied(output?: PolicyEvalMap | null): boolean {
-  const deny = asEvalMap(output)?.deny
+  const deny = get(asEvalMap(output), 'deny')
 
-  return Array.isArray(deny) && deny.length > 0
+  return isArray(deny) && deny.length > 0
 }
 
 export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
@@ -14,7 +15,7 @@ export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
 
   return (
     asString(rec?.tool_name) ??
-    asString(asRecord(tool)?.name) ??
+    asString(get(tool, 'name')) ??
     asString(tool) ??
     asString(rec?.run_type) ??
     getPolicyEvalTarget(input) ??
@@ -27,33 +28,31 @@ export function getPolicyEvalTarget(
 ): string | undefined {
   const rec = asEvalMap(input)
   const tool = asRecord(rec?.tool)
-  const args = asRecord(tool?.arguments) ?? tool
+  const args = asRecord(get(tool, 'arguments')) ?? tool
 
   return (
-    asString(asRecord(rec?.workbench)?.name) ??
-    asString(asRecord(rec?.stack)?.name) ??
-    asString(asRecord(rec?.cluster)?.name) ??
-    asString(args?.namespace)
+    asString(get(rec, 'workbench.name')) ??
+    asString(get(rec, 'stack.name')) ??
+    asString(get(rec, 'cluster.name')) ??
+    asString(get(args, 'namespace'))
   )
 }
 
 export function getPolicyEvalReason(output?: PolicyEvalMap | null): string {
-  const deny = asEvalMap(output)?.deny
+  const deny = get(asEvalMap(output), 'deny')
 
-  if (!Array.isArray(deny) || deny.length === 0) {
+  if (!isArray(deny) || deny.length === 0) {
     return 'Allowed by policy.'
   }
 
   return deny
     .map((item) => {
-      if (typeof item === 'string') return item
-
-      const rec = asRecord(item)
+      if (isString(item)) return item
 
       return (
-        asString(rec?.message) ??
-        asString(rec?.reason) ??
-        asString(rec?.msg) ??
+        asString(get(item, 'message')) ??
+        asString(get(item, 'reason')) ??
+        asString(get(item, 'msg')) ??
         JSON.stringify(item)
       )
     })
@@ -69,13 +68,11 @@ export function formatEvalSelectLabel(
   input?: PolicyEvalMap | null,
   insertedAt?: string | null
 ): string {
-  return [
+  return compact([
     formatEvalId(id),
     getPolicyEvalToolName(input),
     insertedAt ? fromNow(insertedAt) : undefined,
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  ]).join(' · ')
 }
 
 export function stringifyEvalMap(value?: PolicyEvalMap | null): string {
@@ -83,7 +80,7 @@ export function stringifyEvalMap(value?: PolicyEvalMap | null): string {
 }
 
 function asEvalMap(value?: unknown): PolicyEvalMap | undefined {
-  if (typeof value === 'string') {
+  if (isString(value)) {
     try {
       return asRecord(JSON.parse(value))
     } catch {
@@ -95,11 +92,9 @@ function asEvalMap(value?: unknown): PolicyEvalMap | undefined {
 }
 
 function asRecord(value: unknown): PolicyEvalMap | undefined {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return value as PolicyEvalMap
-  }
+  return isPlainObject(value) ? (value as PolicyEvalMap) : undefined
 }
 
 function asString(value: unknown): string | undefined {
-  return typeof value === 'string' && value.length > 0 ? value : undefined
+  return isString(value) && value.length > 0 ? value : undefined
 }
