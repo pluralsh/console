@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -501,6 +503,17 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 		return
 	}
 
+	if svc.Helm != nil {
+		valuesFiles, configurationKeys, valuesFileExists := helmRenderInputs(svc, dir)
+		logger.Info("helm render inputs",
+			"service", svc.Name,
+			"manifestDir", dir,
+			"valuesFiles", valuesFiles,
+			"configurationKeys", configurationKeys,
+			"valuesFileExists", valuesFileExists,
+		)
+	}
+
 	manifests, err := template.Render(dir, svc, s.mapper)
 	if err != nil {
 		logger.Error(err, "failed to render manifests", "service", svc.Name)
@@ -593,6 +606,27 @@ func (s *ServiceReconciler) Reconcile(ctx context.Context, id string) (result re
 	)
 
 	return
+}
+
+func helmRenderInputs(svc *console.ServiceDeploymentForAgent, dir string) ([]string, []string, map[string]bool) {
+	valuesFiles := make([]string, 0)
+	valuesFileExists := make(map[string]bool)
+	if svc.Helm != nil {
+		valuesFiles = make([]string, 0, len(svc.Helm.ValuesFiles))
+		for _, file := range svc.Helm.ValuesFiles {
+			name := lo.FromPtr(file)
+			valuesFiles = append(valuesFiles, name)
+			_, err := os.Stat(filepath.Join(dir, name))
+			valuesFileExists[name] = err == nil
+		}
+	}
+
+	configurationKeys := make([]string, 0, len(svc.Configuration))
+	for _, configuration := range svc.Configuration {
+		configurationKeys = append(configurationKeys, configuration.Name)
+	}
+
+	return valuesFiles, configurationKeys, valuesFileExists
 }
 
 func (s *ServiceReconciler) isClusterRestore(ctx context.Context) (bool, error) {
