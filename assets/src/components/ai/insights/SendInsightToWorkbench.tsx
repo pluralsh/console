@@ -15,28 +15,17 @@ import {
   FormField,
   IconFrame,
   InfoOutlineIcon,
-  ListBoxItem,
   Popover,
   PopoverWrapper,
-  Select,
-  SelectButton,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
-import { MetadataIcons } from 'components/utils/MetadataIcons'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { Body1P } from 'components/utils/typography/Text'
+import { WorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
 import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
-import { TRUNCATE } from 'components/utils/truncate'
-import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
-import { WorkbenchToolIcon } from 'components/workbenches/tools/workbenchToolsUtils'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
-import {
-  AgentRuntimeType,
-  AiInsightFragment,
-  WorkbenchTinyFragment,
-} from 'generated/graphql'
+import { AiInsightFragment } from 'generated/graphql'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -45,10 +34,8 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { buildInsightWorkbenchPrompt } from './insightWorkbenchPrompt'
-import { isNonNullable } from 'utils/isNonNullable'
 
 const POPOVER_WIDTH = 568
-const MAX_VISIBLE_TOOLS = 5
 
 export function SendInsightToWorkbenchButton({
   insight,
@@ -230,6 +217,7 @@ export function SendToWorkbenchForm({
             setWorkbenchId={setWorkbenchId}
             workbenches={workbenches}
             loading={loading}
+            width={POPOVER_WIDTH - 32}
           />
         </FillLevelDiv>
       </FormField>
@@ -259,143 +247,6 @@ export function SendToWorkbenchForm({
         {submitLabel}
       </Button>
     </>
-  )
-}
-
-function WorkbenchSelector({
-  workbenchId,
-  setWorkbenchId,
-  workbenches,
-  loading,
-}: {
-  workbenchId: Nullable<string>
-  setWorkbenchId: (id: Nullable<string>) => void
-  workbenches: WorkbenchTinyFragment[]
-  loading: boolean
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-  const selectedWorkbench = workbenches.find(
-    (workbench) => workbench.id === workbenchId
-  )
-
-  return (
-    <Select
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-      width={POPOVER_WIDTH - 32}
-      label="Select workbench"
-      isDisabled={!loading && !workbenches.length}
-      selectedKey={workbenchId ?? ''}
-      onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
-      triggerButton={
-        <SelectButton
-          css={{
-            width: '100%',
-            '.children': { minWidth: 0, overflow: 'hidden' },
-            '.content': { paddingTop: 10, paddingBottom: 10 },
-          }}
-          rightContent={
-            selectedWorkbench ? (
-              <WorkbenchToolIcons workbench={selectedWorkbench} />
-            ) : undefined
-          }
-        >
-          {loading ? (
-            <RectangleSkeleton
-              $bright
-              $width={120}
-            />
-          ) : selectedWorkbench ? (
-            <WorkbenchOptionLabel workbench={selectedWorkbench} />
-          ) : (
-            'Select workbench'
-          )}
-        </SelectButton>
-      }
-    >
-      {workbenches.map((workbench) => {
-        const ProviderIcon =
-          runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
-
-        return (
-          <ListBoxItem
-            key={workbench.id}
-            label={workbench.name}
-            description={workbench.description ?? undefined}
-            descriptionProps={{ style: TRUNCATE }}
-            leftContent={
-              <ProviderIcon
-                fullColor
-                size={16}
-              />
-            }
-            rightContent={<WorkbenchToolIcons workbench={workbench} />}
-          />
-        )
-      })}
-    </Select>
-  )
-}
-
-function WorkbenchOptionLabel({
-  workbench,
-}: {
-  workbench: WorkbenchTinyFragment
-}) {
-  const ProviderIcon =
-    runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
-
-  return (
-    <Flex
-      direction="column"
-      minWidth={0}
-    >
-      <Flex
-        align="center"
-        gap="xsmall"
-        minWidth={0}
-      >
-        <ProviderIcon
-          fullColor
-          size={16}
-        />
-        <Body2P css={{ ...TRUNCATE, minWidth: 0 }}>{workbench.name}</Body2P>
-      </Flex>
-      {workbench.description && (
-        <CaptionP
-          $color="text-xlight"
-          css={{ ...TRUNCATE, minWidth: 0 }}
-        >
-          {workbench.description}
-        </CaptionP>
-      )}
-    </Flex>
-  )
-}
-
-function WorkbenchToolIcons({
-  workbench,
-}: {
-  workbench: WorkbenchTinyFragment
-}) {
-  const tools = workbench.tools?.filter(isNonNullable) ?? []
-  if (!tools.length) return null
-
-  return (
-    <MetadataIcons
-      maxVisibleItems={MAX_VISIBLE_TOOLS}
-      items={tools.map((tool) => ({
-        id: tool.id,
-        label: tool.name,
-        icon: (
-          <WorkbenchToolIcon
-            type={tool.tool}
-            provider={tool.cloudConnection?.provider}
-            size={12}
-          />
-        ),
-      }))}
-    />
   )
 }
 
