@@ -424,7 +424,7 @@ const SimulatorColumnSC = styled.section({
 })
 
 const SimulatorTopSC = styled.div(({ theme }) => ({
-  borderBottom: theme.borders['fill-two'],
+  borderBottom: theme.borders.default,
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
