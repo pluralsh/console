@@ -1,4 +1,5 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { getTabCrumb } from 'components/ai/AI'
 import { SubTabs } from 'components/utils/SubTabs'
 import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
@@ -19,15 +20,16 @@ const directory = [
   { label: 'Attachment rules', path: POLICIES_ATTACHMENT_RULES_REL_PATH },
 ]
 
-const breadcrumbs = [
+export const getPoliciesBreadcrumbs = (tab?: Nullable<string>) => [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
   { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
+  ...getTabCrumb(POLICIES_ABS_PATH, tab),
 ]
 
 export function Policies() {
   const { tab = '' } = useMatch(`${POLICIES_ABS_PATH}/:tab`)?.params ?? {}
 
-  useSetBreadcrumbs(useMemo(() => breadcrumbs, []))
+  useSetBreadcrumbs(useMemo(() => getPoliciesBreadcrumbs(tab), [tab]))
 
   return (
     <WrapperSC>

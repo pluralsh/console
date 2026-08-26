@@ -42,19 +42,16 @@ import { KeyboardEvent, ReactNode, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ATTACHMENT_RULES_PARAM_ID,
-  POLICIES_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_CREATE_ABS_PATH,
   POLICIES_ATTACHMENT_RULES_REL_PATH,
-  POLICIES_REL_PATH,
-  SECURITY_ABS_PATH,
-  SECURITY_REL_PATH,
   getAttachmentRuleEditAbsPath,
 } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { ATTACHMENT_RULES_DESCRIPTION } from './AttachmentRules'
 import { CreateBindingModal } from './CreateBindingModal'
+import { getPoliciesBreadcrumbs } from './Policies'
 
 const DEFAULT_INTERVAL = '1h'
 
@@ -82,12 +79,7 @@ export function AttachmentRuleCreateOrEdit({
   useSetBreadcrumbs(
     useMemo(
       () => [
-        { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
-        { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
-        {
-          label: POLICIES_ATTACHMENT_RULES_REL_PATH,
-          url: POLICIES_ATTACHMENT_RULES_ABS_PATH,
-        },
+        ...getPoliciesBreadcrumbs(POLICIES_ATTACHMENT_RULES_REL_PATH),
         {
           label:
             mode === 'create' ? 'create' : (rule?.policy?.name ?? id ?? 'edit'),
