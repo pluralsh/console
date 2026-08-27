@@ -71,5 +71,34 @@ defmodule Console.AI.Workbench.EnvironmentTest do
       assert policy_id == policy.id
       assert Regex.match?(regex, "protected_tool")
     end
+
+    test "uses the workbench tool model, not the agent runtime model" do
+      deployment_settings(ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{tool_model: "default-tool-model"},
+        price_sheets: [
+          %{provider: :openai, model: "default-tool-model", input_price: 1.0, output_price: 2.0},
+          %{provider: :anthropic, model: "claude-sonnet-4-5", input_price: 3.0, output_price: 15.0}
+        ]
+      })
+
+      runtime = insert(:agent_runtime, model: %{provider: :anthropic, model: "claude-sonnet-4-5"})
+      workbench = insert(:workbench, agent_runtime: runtime)
+      job = insert(:workbench_job,
+        workbench: workbench,
+        modes: %{model: %{provider: :openai, model: "default-tool-model"}}
+      ) |> Repo.preload(workbench: :agent_runtime)
+      run = insert(:agent_run, runtime: runtime) |> Repo.preload(:runtime)
+
+      engine_opts = Environment.engine_opts(job)
+      assert engine_opts[:provider] == :openai
+      assert engine_opts[:model] == "default-tool-model"
+
+      assert Console.AI.ModelSelection.runtime_model(run) == %{
+        provider: :anthropic,
+        model: "claude-sonnet-4-5"
+      }
+    end
   end
 end

@@ -99,7 +99,7 @@ export function FlowWorkbenches() {
           flowId={flow?.id}
           workbenchLoading={workbenchesLoading && !workbenchesData}
           disabled={!workbenches.length}
-          placeholder="Send a job to your flow workbenches. Use / for skills and @ to mention services in this flow"
+          placeholder="Send a job to a workbench. Use / for skills and @ to mention services in this flow"
           wrapperStyles={{ maxWidth: 'none' }}
         />
         <Body2BoldP>Workbench Jobs</Body2BoldP>

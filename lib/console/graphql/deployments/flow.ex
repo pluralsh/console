@@ -13,6 +13,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :metadata,            :json
     field :agent_runtime_id,    :id, description: "the agent runtime for this flow"
     field :repositories,        list_of(:string)
+    field :max_previews,        :integer, description: "the maximum number of preview environments allowed for this flow (1-25, default 10)"
     field :read_bindings,       list_of(:policy_binding_attributes)
     field :write_bindings,      list_of(:policy_binding_attributes)
     field :server_associations, list_of(:mcp_server_association_attributes)
@@ -55,6 +56,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :reference_service_id, non_null(:id), description: "the service that will be cloned to create the preview environment"
     field :template,             non_null(:service_template_attributes), description: "a set of service configuration overrides to use while cloning"
     field :connection_id,        :id, description: "an scm connection id to use for PR preview comment generation"
+    field :preview_ttl,          :string, description: "how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)"
   end
 
   object :flow do
@@ -64,6 +66,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :icon,         :string
     field :metadata,     :map
     field :repositories, list_of(:string), description: "the git https urls of the application code repositories used in this flow"
+    field :max_previews, :integer, description: "the maximum number of preview environments allowed for this flow (1-25, default 10)"
 
     field :agent_runtime, :agent_runtime, resolve: dataloader(Deployments),
       description: "the agent runtime for this flow"
@@ -181,6 +184,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :id,               non_null(:id)
     field :name,             non_null(:string)
     field :comment_template, :string
+    field :preview_ttl,      :integer, description: "how long preview environments should live, in seconds"
 
     field :flow,              :flow,               resolve: dataloader(Deployments)
     field :reference_service, :service_deployment, resolve: dataloader(Deployments)
@@ -192,7 +196,8 @@ defmodule Console.GraphQl.Deployments.Flow do
 
   @desc "An instance of a preview environment template"
   object :preview_environment_instance do
-    field :id,           non_null(:id)
+    field :id,                 non_null(:id)
+    field :preview_expires_at, :datetime, description: "when this preview environment instance expires"
 
     field :service,      :service_deployment,           resolve: dataloader(Deployments)
     field :pull_request, :pull_request,                 resolve: dataloader(Deployments)

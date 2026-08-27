@@ -39,8 +39,15 @@ export function CostManagement() {
 
   return (
     <WrapperSC>
-      <SubTabs directory={directory} />
-      <Outlet context={ctx} />
+      {/*
+        Padding lives on an inner wrapper (not the scrollport). Soft card
+        shadows that paint into padding get clipped when padding is on the
+        same element as overflow:auto — Chrome clips to the content edge.
+      */}
+      <InnerSC>
+        <SubTabs directory={directory} />
+        <Outlet context={ctx} />
+      </InnerSC>
     </WrapperSC>
   )
 }
@@ -53,6 +60,18 @@ const WrapperSC = styled.div(({ theme }) => ({
   width: '100%',
   margin: 'auto',
   maxWidth: theme.breakpoints.desktopLarge,
+}))
+
+const InnerSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
   gap: theme.spacing.medium,
+  // Room for soft shadows outside cards (must not be on the overflow:auto node)
   padding: theme.spacing.large,
+  ...(theme.mode === 'light' && {
+    padding: theme.spacing.large + theme.spacing.small,
+  }),
+  minWidth: 0,
+  boxSizing: 'border-box',
+  width: '100%',
 }))

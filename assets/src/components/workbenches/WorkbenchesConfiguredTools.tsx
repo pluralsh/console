@@ -81,7 +81,6 @@ export function WorkbenchesConfiguredTools() {
                       )}
                       icon={
                         <IconFrame
-                          circle
                           type="secondary"
                           icon={
                             <WorkbenchToolIcon

@@ -11,6 +11,7 @@ metadata:
 spec:
   name: test
   description: "test flow"
+  maxPreviews: 10
   bindings:
     read:
       - userEmail: marcin@plural.sh

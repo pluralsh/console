@@ -117,6 +117,60 @@ type AgentRuntimeSpec struct {
 
 	// ExaConnection enables Exa web search and content retrieval tools on the Plural MCP server.
 	ExaConnection *ExaConnection `json:"exaConnection,omitempty"`
+
+	// MCPServers are additional remote MCP servers made available to coding agents
+	// on this runtime. Servers are expected to already be deployed and reachable
+	// at the given URL. Built-in servers named "plural" and "codebase-memory-mcp"
+	// are reserved and cannot be overridden.
+	// +kubebuilder:validation:Optional
+	// +listType=map
+	// +listMapKey=name
+	MCPServers []MCPServer `json:"mcpServers,omitempty"`
+}
+
+// MCPServer is a remote MCP server exposed to agent runtimes.
+//
+// +kubebuilder:validation:XValidation:rule="self.name != 'plural' && self.name != 'codebase-memory-mcp'",message="mcpServers name cannot collide with built-in servers plural or codebase-memory-mcp"
+type MCPServer struct {
+	// Name is the MCP server identifier used by the coding agent.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
+
+	// URL is the remote streamable HTTP MCP endpoint.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	URL string `json:"url"`
+
+	// AllowedTools is an optional allowlist of tool names from this server.
+	// When omitted or empty, all tools advertised by the server are exposed.
+	// +kubebuilder:validation:Optional
+	AllowedTools []string `json:"allowedTools,omitempty"`
+
+	// Headers are HTTP headers sent with requests to this MCP server.
+	// Each header must set exactly one of value or valueFrom.
+	// +kubebuilder:validation:Optional
+	// +listType=map
+	// +listMapKey=name
+	Headers []MCPServerHeader `json:"headers,omitempty"`
+}
+
+// MCPServerHeader is an HTTP header for a remote MCP server.
+//
+// +kubebuilder:validation:XValidation:rule="has(self.value) != has(self.valueFrom)",message="exactly one of value or valueFrom must be set"
+type MCPServerHeader struct {
+	// Name is the HTTP header name.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	Name string `json:"name"`
+
+	// Value is a literal header value.
+	// +kubebuilder:validation:Optional
+	Value *string `json:"value,omitempty"`
+
+	// ValueFrom sources the header value the same way as a pod env var.
+	// +kubebuilder:validation:Optional
+	ValueFrom *corev1.EnvVarSource `json:"valueFrom,omitempty"`
 }
 
 type ExaConnection struct {
@@ -824,7 +878,7 @@ type AgentRuntimeBindings struct {
 }
 
 func (in *AgentRuntime) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(in.Spec)
+	currentSha, err := hasher(in.Attributes())
 	if err != nil {
 		return false, "", err
 	}
@@ -880,6 +934,9 @@ func (in *AgentRuntime) Attributes() console.AgentRuntimeAttributes {
 	}
 	if in.Spec.ScmConnection != nil && len(*in.Spec.ScmConnection) > 0 {
 		attrs.ScmConnection = in.Spec.ScmConnection
+	}
+	if model := in.modelAttributes(); model != nil {
+		attrs.Model = model
 	}
 
 	return attrs

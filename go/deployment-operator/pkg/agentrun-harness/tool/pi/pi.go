@@ -10,6 +10,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -244,12 +245,38 @@ func (in *Pi) writeConfig() error {
 			},
 		},
 	}
+	if err := addExternalMCPServers(mcp["mcpServers"].(map[string]any)); err != nil {
+		return err
+	}
 	mcpData, err := json.Marshal(mcp)
 	if err != nil {
 		return fmt.Errorf("marshal pi mcp config: %w", err)
 	}
 	if err := helpers.File().Create(in.mcpConfigPath(), string(mcpData), 0644); err != nil {
 		return fmt.Errorf("write pi mcp config: %w", err)
+	}
+	return nil
+}
+
+func addExternalMCPServers(servers map[string]any) error {
+	external, err := mcp.Load()
+	if err != nil {
+		return fmt.Errorf("load external mcp servers: %w", err)
+	}
+	for _, server := range external {
+		entry := map[string]any{
+			"url": server.URL,
+		}
+		if len(server.Headers) > 0 {
+			entry["headers"] = server.Headers
+		}
+		if server.HasAllowedTools() {
+			entry["directTools"] = server.AllowedTools
+			entry["includeTools"] = server.AllowedTools
+		} else {
+			entry["directTools"] = true
+		}
+		servers[server.Name] = entry
 	}
 	return nil
 }

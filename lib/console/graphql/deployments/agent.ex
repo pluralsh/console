@@ -23,6 +23,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :allowed_repositories, list_of(:string), description: "the git repositories allowed to be used with this runtime"
     field :babysit_interval,     :integer, description: "default interval in seconds between babysit checks for runs on this runtime"
     field :scm_connection,       :string, description: "the name of the scm connection to use for this runtime"
+    field :model,                :workbench_job_model_attributes, description: "default model override for runs on this runtime"
   end
 
   input_object :agent_binding_attributes do
@@ -168,6 +169,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :default,              :boolean, description: "whether this is the default runtime for coding agents"
     field :allowed_repositories, list_of(:string), description: "the git repositories allowed to be used with this runtime"
     field :babysit_interval,     :integer, description: "default interval in seconds between babysit checks for runs on this runtime"
+    field :model,                :workbench_job_model, description: "default model override for runs on this runtime"
 
     field :cluster,         :cluster, resolve: dataloader(Deployments), description: "the cluster this runtime is running on"
     field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "the policy for creating runs on this runtime"

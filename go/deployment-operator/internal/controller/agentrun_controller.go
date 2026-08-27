@@ -28,6 +28,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	pluralclient "github.com/pluralsh/console/go/deployment-operator/pkg/client"
 )
 
@@ -78,6 +79,7 @@ const (
 	EnvExaConnection   = "PLRL_EXA_CONNECTION"
 	EnvMcpExcludeTools = "PLRL_EXCLUDE_TOOLS"
 	EnvStreamingProxy  = "PLRL_STREAMING_PROXY"
+	EnvMCPServers      = "PLRL_MCP_SERVERS"
 )
 
 var (
@@ -473,6 +475,11 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 		return nil, fmt.Errorf("failed to resolve git signing key: %w", err)
 	}
 
+	mcpServers, err := r.resolveMCPServers(ctx, run.Namespace, runtime.Spec.MCPServers)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve mcp servers: %w", err)
+	}
+
 	var exaConnection *v1alpha1.ExaConnectionRaw
 	if runtime.Spec.ExaConnection != nil {
 		var err error
@@ -490,7 +497,7 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 
 		secret = &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{Name: run.Name, Namespace: run.Namespace},
-			StringData: r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection),
+			StringData: r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers),
 		}
 
 		logger.V(2).Info("creating secret", "namespace", secret.Namespace, "name", secret.Name)
@@ -503,7 +510,7 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 
 	if !r.hasSecretData(secret.Data, run) {
 		logger.V(2).Info("updating secret", "namespace", secret.Namespace, "name", secret.Name)
-		secret.StringData = r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection)
+		secret.StringData = r.getSecretData(run, config, runtime.Spec.Type, signingKey, exaConnection, mcpServers)
 		if err := r.Update(ctx, secret); err != nil {
 			logger.Error(err, "unable to update secret")
 			return nil, err
@@ -514,11 +521,7 @@ func (r *AgentRunReconciler) reconcilePodSecret(ctx context.Context, run *v1alph
 }
 
 func (r *AgentRunReconciler) getExaConnection(ctx context.Context, namespace string, config v1alpha1.ExaConnection) (*v1alpha1.ExaConnectionRaw, error) {
-	return config.ToExaConnectionRaw(func(selector corev1.SecretKeySelector) (*corev1.Secret, error) {
-		secret := &corev1.Secret{}
-		err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: selector.Name}, secret)
-		return secret, err
-	})
+	return config.ToExaConnectionRaw(secretGetter(ctx, r.configurationFetcher(namespace)))
 }
 
 func (r *AgentRunReconciler) getAgentRuntimeConfig(ctx context.Context, namespace string, config *v1alpha1.AgentRuntimeConfig, aiProxy bool) (*v1alpha1.AgentRuntimeConfigRaw, error) {
@@ -526,11 +529,7 @@ func (r *AgentRunReconciler) getAgentRuntimeConfig(ctx context.Context, namespac
 		return nil, nil
 	}
 
-	return config.ToAgentRuntimeConfigRaw(func(selector corev1.SecretKeySelector) (*corev1.Secret, error) {
-		secret := &corev1.Secret{}
-		err := r.Get(ctx, client.ObjectKey{Namespace: namespace, Name: selector.Name}, secret)
-		return secret, err
-	}, aiProxy)
+	return config.ToAgentRuntimeConfigRaw(secretGetter(ctx, r.configurationFetcher(namespace)), aiProxy)
 }
 
 // resolveSigningKey fetches the signing key value from the secret referenced in runtime.Spec.Git.SigningKeyRef.
@@ -541,25 +540,22 @@ func (r *AgentRunReconciler) resolveSigningKey(ctx context.Context, runtime *v1a
 		return nil, nil
 	}
 
-	ref := runtime.Spec.Git.SigningKeyRef
-	s := &corev1.Secret{}
-	if err := r.Get(ctx, client.ObjectKey{Namespace: runtime.Spec.TargetNamespace, Name: ref.Name}, s); err != nil {
-		return nil, fmt.Errorf("failed to get git signing key secret %q: %w", ref.Name, err)
+	value, err := configurationSecretKey(ctx, r.configurationFetcher(runtime.Spec.TargetNamespace), *runtime.Spec.Git.SigningKeyRef)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve git signing key: %w", err)
 	}
-
-	value, ok := s.Data[ref.Key]
-	if !ok {
-		return nil, fmt.Errorf("key %q not found in secret %q", ref.Key, ref.Name)
-	}
-
-	return value, nil
+	return []byte(value), nil
 }
 
-func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alpha1.AgentRuntimeConfigRaw, runtimeType console.AgentRuntimeType, signingKey []byte, exaConnection *v1alpha1.ExaConnectionRaw) map[string]string {
+func (r *AgentRunReconciler) getSecretData(run *v1alpha1.AgentRun, config *v1alpha1.AgentRuntimeConfigRaw, runtimeType console.AgentRuntimeType, signingKey []byte, exaConnection *v1alpha1.ExaConnectionRaw, mcpServers []mcp.Server) map[string]string {
 	result := map[string]string{
 		EnvConsoleURL:  r.ConsoleURL,
 		EnvDeployToken: r.DeployToken,
 		EnvAgentRunID:  run.Status.GetID(),
+	}
+
+	if payload := mcpServersPayload(mcpServers); payload != "" {
+		result[EnvMCPServers] = payload
 	}
 
 	if len(signingKey) > 0 {

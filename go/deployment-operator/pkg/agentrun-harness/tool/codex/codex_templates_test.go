@@ -77,6 +77,42 @@ func TestBuildCodexConfig_CodebaseMemoryMCPServer(t *testing.T) {
 	}
 }
 
+func TestBuildCodexConfig_ExternalHTTPServer(t *testing.T) {
+	cfg, err := BuildCodexConfig("/repo", []AgentInput{{
+		Name:        autonomousProfile,
+		SandboxMode: sandboxModeHarness,
+		Model:       string(ModelGPT54),
+	}}, []MCPInput{{
+		Name: "linear",
+		URL:  "https://mcp.linear.app/mcp",
+		HTTPHeaders: map[string]string{
+			"Authorization": "Bearer token",
+		},
+		EnabledTools: []string{"list_issues"},
+		TrustPolicy:  "always",
+	}}, nil)
+	if err != nil {
+		t.Fatalf("BuildCodexConfig() failed: %v", err)
+	}
+
+	server := cfg.MCPServers["linear"]
+	if server == nil {
+		t.Fatal("expected linear MCP server")
+	}
+	if server.URL != "https://mcp.linear.app/mcp" {
+		t.Fatalf("url = %q", server.URL)
+	}
+	if server.HTTPHeaders["Authorization"] != "Bearer token" {
+		t.Fatalf("http_headers = %#v", server.HTTPHeaders)
+	}
+	if len(server.EnabledTools) != 1 || server.EnabledTools[0] != "list_issues" {
+		t.Fatalf("enabled_tools = %#v", server.EnabledTools)
+	}
+	if server.TrustPolicy != "always" {
+		t.Fatalf("trust_policy = %q", server.TrustPolicy)
+	}
+}
+
 func TestCodexExecArgs(t *testing.T) {
 	repositoryDir := dind.RepositoryDir()
 	args := codexExecArgs(repositoryDir, autonomousProfile, "run tests", "")

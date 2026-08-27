@@ -25,6 +25,7 @@ const (
 )
 
 func (s *ServiceReconciler) UpdateErrorStatus(ctx context.Context, id string, err error) {
+	cache.ComponentShaCache().Expire(id)
 	if err := s.UpdateErrors(id, errorAttributes("sync", err)); err != nil {
 		log.FromContext(ctx).Error(err, "Failed to update service status, ignoring for now")
 	}

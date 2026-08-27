@@ -9,9 +9,26 @@ import {
 import { type CSSProperties, type ReactNode } from 'react'
 import { to, useTransition } from '@react-spring/web'
 import { FloatingPortal, type UseFloatingReturn } from '@floating-ui/react'
-import { useTheme } from 'styled-components'
+import { type DefaultTheme, useTheme } from 'styled-components'
 import { type WorkbenchPromptModeConfig } from './WorkbenchPromptModeDetails'
 import { type WorkbenchPromptMode } from './workbenchPromptModes'
+
+export function workbenchPromptPanelSurfaces(theme: DefaultTheme) {
+  const isLight = theme.mode === 'light'
+
+  return {
+    panelBackground: isLight
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-two'],
+    detailBackground: isLight
+      ? theme.colors['fill-zero-hover']
+      : theme.colors['fill-two-selected'],
+    modeItemBackground: isLight
+      ? theme.colors['fill-zero-selected']
+      : theme.colors['fill-two-hover'],
+    panelBorder: isLight ? theme.borders.input : theme.borders['fill-two'],
+  }
+}
 
 export const WORKBENCH_PROMPT_MODES: (WorkbenchPromptModeConfig & {
   mode: WorkbenchPromptMode

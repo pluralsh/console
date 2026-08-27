@@ -1,3 +1,9 @@
+import {
+  AI_AGENT_RUN_BACK_LABEL_PARAM,
+  AI_AGENT_RUN_BACK_SOURCE_PARAM,
+  AI_AGENT_RUN_BACK_TO_PARAM,
+} from './aiRoutesConsts'
+
 export const WORKBENCHES_ABS_PATH = '/workbenches'
 
 export const WORKBENCHES_TOOLS_PARAM_ID = 'toolId'
@@ -46,6 +52,33 @@ export const WORKBENCHES_CREATE_ABS_PATH = `${WORKBENCHES_ABS_PATH}/${WORKBENCHE
 
 export const getWorkbenchAbsPath = (workbenchId: Nullable<string>) =>
   `${WORKBENCHES_ABS_PATH}/${workbenchId ?? ''}`
+
+export const WORKBENCH_LAUNCH_BACK_SOURCE = 'send-to-workbench'
+
+export type WorkbenchLaunchRouteState = {
+  prompt?: string
+}
+
+export const getWorkbenchLaunchAbsPath = ({
+  workbenchId,
+  backTo,
+  backLabel,
+}: {
+  workbenchId: string
+  backTo?: string
+  backLabel?: string
+}) => {
+  const path = getWorkbenchAbsPath(workbenchId)
+  if (!backTo) return path
+
+  const params = new URLSearchParams({
+    [AI_AGENT_RUN_BACK_SOURCE_PARAM]: WORKBENCH_LAUNCH_BACK_SOURCE,
+    [AI_AGENT_RUN_BACK_TO_PARAM]: backTo,
+    ...(backLabel ? { [AI_AGENT_RUN_BACK_LABEL_PARAM]: backLabel } : {}),
+  })
+
+  return `${path}?${params}`
+}
 
 export const getWorkbenchCronSchedulesAbsPath = (
   workbenchId: Nullable<string>

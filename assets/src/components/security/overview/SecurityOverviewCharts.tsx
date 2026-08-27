@@ -264,6 +264,7 @@ const ChartRowWrapperSC = styled.div(({ theme }) => ({
   gap: theme.spacing.large,
   minHeight: 'fit-content',
   flexShrink: 0,
+  ...(theme.mode === 'light' && { padding: theme.spacing.xsmall }),
 }))
 
 const ChartWrapperSC = styled.div(({ theme }) => ({

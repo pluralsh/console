@@ -60,6 +60,7 @@ const ListBoxCard = styled(Card)(({ theme }) => ({
   flexShrink: 1,
   overflowX: 'visible',
   overflowY: 'hidden',
+  // White floating panel — match notifications / header menus
   background:
     theme.mode === 'light'
       ? theme.colors['fill-zero']

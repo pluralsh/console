@@ -257,6 +257,9 @@
             "format": "date-time",
             "type": "string"
           },
+          "model": {
+            "$ref": "#/components/schemas/WorkbenchJobModel"
+          },
           "name": {
             "description": "Human-readable name of this runtime",
             "type": "string"

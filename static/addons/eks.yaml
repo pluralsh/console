@@ -1156,8 +1156,18 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.1.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.0.10-eksbuild.3
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1166,6 +1176,7 @@
     - '1.30'
   - version: v1.0.10-eksbuild.2
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1174,6 +1185,7 @@
     - '1.30'
   - version: v1.0.10-eksbuild.1
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1182,6 +1194,7 @@
     - '1.30'
   - version: v1.0.9-eksbuild.1
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1190,6 +1203,7 @@
     - '1.30'
   - version: v1.0.8-eksbuild.1
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1198,6 +1212,7 @@
     - '1.30'
   - version: v1.0.7-eksbuild.1
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1206,6 +1221,7 @@
     - '1.30'
   - version: v1.0.6-eksbuild.3
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1214,6 +1230,7 @@
     - '1.30'
   - version: v1.0.5-eksbuild.5
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1222,6 +1239,7 @@
     - '1.30'
   - version: v1.0.5-eksbuild.4
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1230,6 +1248,7 @@
     - '1.30'
   - version: v1.0.5-eksbuild.3
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1238,6 +1257,7 @@
     - '1.30'
   - version: v1.0.5-eksbuild.2
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -1246,6 +1266,7 @@
     - '1.30'
   - version: v1.0.5-eksbuild.1
     compatibilities:
+    - '1.36'
     - '1.35'
     - '1.34'
     - '1.33'
@@ -2569,6 +2590,12 @@
   publisher: eks
 - name: aws-ec2-local-instance-store-csi-driver
   versions:
+  - version: v1.0.5-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.0.5-eksbuild.1
     compatibilities:
     - '1.36'
@@ -2631,6 +2658,15 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v3.4.2-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.4.1-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4842,10 +4878,34 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v2.0.10000020260823-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   publisher: Chainguard
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
   - version: v4.4.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.4.10002020260825-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.4.10002020260823-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5050,6 +5110,15 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.0.10000020260823-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.0.10000020260728-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5093,6 +5162,11 @@
     - '1.34'
     - '1.33'
   - version: v1.0.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v1.0.10000020260823-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5166,6 +5240,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.10009020260423-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10000020260823-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -7377,6 +7456,15 @@
   publisher: factorhouse
 - name: fluent-bit
   versions:
+  - version: v5.1.1-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v5.1.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -7973,6 +8061,9 @@
   publisher: kong
 - name: kube-proxy
   versions:
+  - version: v1.36.0-eksbuild.17
+    compatibilities:
+    - '1.36'
   - version: v1.36.0-eksbuild.15
     compatibilities:
     - '1.36'
@@ -7994,6 +8085,10 @@
   - version: v1.36.0-eksbuild.2
     compatibilities:
     - '1.36'
+  - version: v1.35.3-eksbuild.21
+    compatibilities:
+    - '1.36'
+    - '1.35'
   - version: v1.35.3-eksbuild.19
     compatibilities:
     - '1.36'
@@ -8034,6 +8129,11 @@
     compatibilities:
     - '1.36'
     - '1.35'
+  - version: v1.34.6-eksbuild.21
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v1.34.6-eksbuild.19
     compatibilities:
     - '1.36'
@@ -8104,6 +8204,12 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v1.33.10-eksbuild.21
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.10-eksbuild.19
     compatibilities:
     - '1.36'
@@ -8200,6 +8306,12 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.13-eksbuild.24
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.13-eksbuild.22
     compatibilities:
     - '1.35'
@@ -8320,6 +8432,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.28
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.26
     compatibilities:
     - '1.34'
@@ -10678,6 +10796,14 @@
   publisher: rafay-systems
 - name: snapshot-controller
   versions:
+  - version: v8.6.0-eksbuild.6
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v8.6.0-eksbuild.5
     compatibilities:
     - '1.36'
@@ -11403,6 +11529,24 @@
   publisher: Splunk
 - name: sriov-network-metrics-exporter
   versions:
+  - version: v1.2.0-eksbuild.11
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v1.2.0-eksbuild.10
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.2.0-eksbuild.9
     compatibilities:
     - '1.36'

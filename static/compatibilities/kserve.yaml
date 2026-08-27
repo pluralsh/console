@@ -5,7 +5,7 @@ helm_repository_url: oci://ghcr.io/kserve/charts/kserve
 chart_name: kserve
 versions:
 - version: 0.20.0
-  kube: ['1.35', '1.34', '1.33', '1.32']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
@@ -44,7 +44,7 @@ versions:
   chart_version: v0.20.0
   images: []
 - version: 0.19.0
-  kube: ['1.35', '1.34', '1.33', '1.32']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
@@ -82,6 +82,20 @@ versions:
         remove/stop managing them and you must install any needed CRDs explicitly.']
   chart_version: v0.19.0
   images: []
+- version: 0.18.1
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [v0.18.1 is a patch release containing a cherry-picked Helm chart
+        fix; no functional application feature changes are called out in the release
+        notes., No chart/values details are provided in the supplied notes; expect
+        minor packaging/templating corrections only.]
+    features: []
+    breaking_changes: []
+  chart_version: v0.18.1
+  images: []
 - version: 0.18.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
@@ -117,6 +131,30 @@ versions:
         you previously managed GIE CRDs separately, since they are now bundled with
         KServe in v0.18.0.']
   chart_version: v0.18.0
+  images: []
+- version: 0.17.1
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- No Helm values changes are called out in the v0.17.1 notes.
+
+      - v0.17.1 is a patch release that primarily *fixes/republishes* Helm chart and
+      installation-script packaging issues from v0.17.0.
+
+      - Action: keep your existing `values.yaml` from 0.17.0, but run a `helm diff
+      upgrade` (or `helm template`) to confirm no rendered-manifest deltas beyond
+      chart packaging fixes.
+
+      '
+    chart_updates: [Includes the missing v0.17.0 installation scripts in the v0.17.1
+        release artifacts (fix/cherry-pick)., Applies a Helm chart fix via cherry-pick
+        (release primarily addresses chart/release packaging)., 'Version bump to v0.17.1;
+        new Helm chart tarballs published for all subcharts (kserve-crd, kserve-resources,
+        runtime-configs, llmisvc-*, localmodel-*).']
+    features: []
+    breaking_changes: []
+  chart_version: v0.17.1
   images: []
 - version: 0.17.0
   kube: ['1.35', '1.34', '1.33', '1.32']
@@ -188,7 +226,7 @@ versions:
   chart_version: v0.17.0
   images: []
 - version: 0.16.0
-  kube: ['1.35', '1.34', '1.33', '1.32']
+  kube: ['1.36', '1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:

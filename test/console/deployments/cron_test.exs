@@ -395,4 +395,18 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
+  describe "#prune_preview_environments/0" do
+    test "it will delete expired preview environment instances" do
+      bot("console")
+      expired = insert(:preview_environment_instance, preview_expires_at: Timex.shift(Timex.now(), hours: -1))
+      keep = insert(:preview_environment_instance, preview_expires_at: Timex.shift(Timex.now(), hours: 1))
+      unexpiring = insert(:preview_environment_instance)
+
+      :ok = Cron.prune_preview_environments()
+
+      assert refetch(expired.service).deleted_at
+      refute refetch(keep.service).deleted_at
+      refute refetch(unexpiring.service).deleted_at
+    end
+  end
 end

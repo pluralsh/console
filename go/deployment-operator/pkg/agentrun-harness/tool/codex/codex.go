@@ -12,6 +12,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/dind"
+	mcpcfg "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -168,6 +169,23 @@ func (in *Codex) writeCodexConfig() error {
 		Env:         map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir},
 		TrustPolicy: "always",
 	}}
+
+	external, err := mcpcfg.Load()
+	if err != nil {
+		return err
+	}
+	for _, server := range external {
+		input := MCPInput{
+			Name:        server.Name,
+			URL:         server.URL,
+			HTTPHeaders: server.Headers,
+			TrustPolicy: "always",
+		}
+		if server.HasAllowedTools() {
+			input.EnabledTools = server.AllowedTools
+		}
+		mcps = append(mcps, input)
+	}
 
 	switch in.Config.Run.Mode {
 	case console.AgentRunModeAnalyze:

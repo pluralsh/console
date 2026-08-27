@@ -159,6 +159,7 @@ func (r *FlowReconciler) Attributes(
 		FlowWorkbenches:    workbenchAssociations,
 		Repositories:       lo.ToSlicePtr(flow.Spec.Repositories),
 		AgentRuntimeID:     agentRuntimeID,
+		MaxPreviews:        flow.Spec.MaxPreviews,
 	}
 
 	if flow.Spec.Metadata != nil && len(flow.Spec.Metadata.Raw) > 0 {

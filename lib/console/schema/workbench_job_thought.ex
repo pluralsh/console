@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobThought do
   use Console.Schema.Base
-  alias Console.Schema.WorkbenchJobActivity
+  alias Console.Schema.{WorkbenchJobActivity, WorkbenchTool}
   alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log, Trace}
 
   schema "workbench_job_thoughts" do
@@ -14,6 +14,7 @@ defmodule Console.Schema.WorkbenchJobThought do
       embeds_many :traces, Trace, on_replace: :delete
     end
 
+    belongs_to :tool,     WorkbenchTool
     belongs_to :activity, WorkbenchJobActivity
 
     timestamps()
@@ -27,7 +28,7 @@ defmodule Console.Schema.WorkbenchJobThought do
     from(t in query, order_by: ^order)
   end
 
-  @valid ~w(content activity_id tool_name tool_args)a
+  @valid ~w(content activity_id tool_id tool_name tool_args)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -35,6 +36,7 @@ defmodule Console.Schema.WorkbenchJobThought do
     |> sanitize_text([:content, :tool_name, :tool_args])
     |> cast_embed(:attributes, with: &attributes_changeset/2)
     |> foreign_key_constraint(:activity_id)
+    |> foreign_key_constraint(:tool_id)
     |> validate_required([:activity_id])
   end
 

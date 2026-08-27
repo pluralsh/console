@@ -127,13 +127,18 @@ export function CostManagementChartView() {
       direction="column"
       gap="large"
       height="100%"
-      overflow="auto"
-      paddingRight={spacing.xxsmall} // gap for scrollbar
+      minWidth={0}
+      width="100%"
+      // Parent CostManagement WrapperSC already scrolls; clipping here
+      // cuts Pure Light card shadows on the chart cards.
+      overflow="visible"
     >
       <TimeSeriesCardSC>
         <Flex
           gap="medium"
           padding="medium"
+          wrap="wrap"
+          minWidth={0}
         >
           <FormField
             label="Project"
@@ -256,12 +261,15 @@ export function CostManagementChartView() {
                 padding: spacing.large,
                 height: CM_TREE_MAP_CARD_HEIGHT,
                 cursor: 'pointer',
+                minWidth: 0,
                 ...(theme.mode === 'light' && {
                   backgroundColor: theme.colors['fill-zero'],
                 }),
               }}
               header={{
-                outerProps: { style: { flex: 1 } },
+                outerProps: {
+                  style: { flex: 1, minWidth: 0, overflow: 'visible' },
+                },
                 headerProps: {
                   style: { backgroundColor: theme.colors['fill-one'] },
                 },
@@ -286,12 +294,15 @@ export function CostManagementChartView() {
                 padding: spacing.large,
                 height: CM_TREE_MAP_CARD_HEIGHT,
                 cursor: 'pointer',
+                minWidth: 0,
                 ...(theme.mode === 'light' && {
                   backgroundColor: theme.colors['fill-zero'],
                 }),
               }}
               header={{
-                outerProps: { style: { flex: 1 } },
+                outerProps: {
+                  style: { flex: 1, minWidth: 0, overflow: 'visible' },
+                },
                 headerProps: {
                   style: { backgroundColor: theme.colors['fill-one'] },
                 },
@@ -318,17 +329,27 @@ export function CostManagementChartView() {
   )
 }
 
-const TimeSeriesCardSC = styled(Card)({
+const TimeSeriesCardSC = styled(Card)(({ theme }) => ({
   flexShrink: 0,
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
-})
+  width: '100%',
+  minWidth: 0,
+  // Keep chart/content clipped without cutting the Pure Light card shadow
+  overflow: 'visible',
+  ...(theme.mode === 'light' && {
+    backgroundColor: theme.colors['fill-zero'],
+  }),
+}))
 
 const TimeSeriesContainerSC = styled.div(({ theme }) => ({
   flex: 1,
   width: '100%',
   minHeight: 260,
-  background: theme.colors['fill-accent'],
+  overflow: 'hidden',
+  background:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-accent'],
   borderTop: theme.borders.default,
 }))
