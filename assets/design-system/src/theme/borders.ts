@@ -15,6 +15,7 @@ export const borderStyles = {
 
 export const borders = {
   default: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars.border}`,
+  hairline: `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-hairline']}`,
   'fill-one': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-one']}`,
   'fill-two': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-two']}`,
   'fill-three': `${borderWidths.default}px ${borderStyles.default} ${semanticColorCssVars['border-fill-three']}`,

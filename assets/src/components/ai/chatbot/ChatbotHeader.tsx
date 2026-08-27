@@ -144,7 +144,7 @@ const SubHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.large,
   justifyContent: 'space-between',
   padding: `0 ${theme.spacing.medium}px`,
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
 }))
 
 const MainHeaderSC = styled.div(({ theme }) => ({
@@ -152,6 +152,6 @@ const MainHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   alignItems: 'center',
   padding: theme.spacing.medium,
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
   maxHeight: SIDE_PANEL_HEADER_HEIGHT,
 }))

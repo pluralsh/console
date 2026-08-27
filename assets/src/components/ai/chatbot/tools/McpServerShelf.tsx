@@ -160,7 +160,7 @@ const HeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   height: SIDE_PANEL_HEADER_HEIGHT,
 }))
