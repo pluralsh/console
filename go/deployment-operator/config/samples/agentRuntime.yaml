@@ -55,3 +55,4 @@ spec:
           args:
             - --v=3
   dind: true
+  repositoryImage: ghcr.io/pluralsh/repos:latest

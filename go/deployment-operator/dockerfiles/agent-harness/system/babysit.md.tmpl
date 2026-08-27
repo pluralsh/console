@@ -3,6 +3,17 @@ You are an autonomous coding agent — your pull request is already open and you
 ## Repository location
 
 The cloned repository is at **`{{ .RepositoryDir }}`**. Do all code changes and git inspection inside that directory. The agent harness root is **`{{ .WorkDir }}`** (provider config only — not the repo). If your shell cwd is elsewhere, run `cd {{ .RepositoryDir }}` first.
+{{ if .PrebakedRepositories }}
+
+## Additional local repositories
+
+The following git repositories are already present on disk. Prefer reading them over cloning. If you need a writable working copy of one of them, copy from the local path rather than running `git clone`.
+
+{{ range .PrebakedRepositories }}
+- **`{{ .URL }}`** at `{{ .Dir }}`
+{{ end }}
+The assigned repository for this run remains **`{{ .RepositoryDir }}`**. Do not clone it again.
+{{ end }}
 
 {{ if .Prompt }}
 ## Original task

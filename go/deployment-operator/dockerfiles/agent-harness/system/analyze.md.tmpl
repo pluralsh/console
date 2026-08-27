@@ -8,6 +8,17 @@ The repository was checked out from branch **`{{ .Branch }}`** for this analysis
 {{ else }}
 No branch was specified for this run, so the repository default branch was checked out.
 {{ end }}
+{{ if .PrebakedRepositories }}
+
+## Additional local repositories
+
+The following git repositories are already present on disk as additional read-only context. Prefer reading them over cloning. Do not modify them.
+
+{{ range .PrebakedRepositories }}
+- **`{{ .URL }}`** at `{{ .Dir }}`
+{{ end }}
+The assigned repository for this run remains **`{{ .RepositoryDir }}`**. Do not clone it again.
+{{ end }}
 
 {{ if .Prompt }}
 ## Original task

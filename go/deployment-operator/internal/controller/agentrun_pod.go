@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -44,6 +45,8 @@ const (
 
 	agentBootstrapContainerName = "agent-bootstrap"
 	mcpServerContainerName      = "mcpserver"
+
+	repositoryPrebakeVolumeName = "repository-prebake"
 
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
@@ -189,6 +192,8 @@ func buildAgentRunPod(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) *c
 	if runtime.Spec.Git != nil && runtime.Spec.Git.SigningKeyRef != nil {
 		enableGitSigningKey(run.Name, pod)
 	}
+
+	enableRepositoryPrebake(runtime, pod)
 
 	return pod
 }
@@ -590,6 +595,65 @@ func ensureMCPServerVolumeMounts(mounts []corev1.VolumeMount, runtime *v1alpha1.
 	}
 
 	return result
+}
+
+func repositoryImage(runtime *v1alpha1.AgentRuntime) string {
+	if runtime != nil && runtime.Spec.RepositoryImage != nil {
+		return strings.TrimSpace(*runtime.Spec.RepositoryImage)
+	}
+	return ""
+}
+
+func repositoryPrebakeVolumeMount() corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      repositoryPrebakeVolumeName,
+		MountPath: common.AgentRunRepositoryPrebakeDir,
+		ReadOnly:  true,
+	}
+}
+
+func upsertVolumeMount(mounts []corev1.VolumeMount, want corev1.VolumeMount) []corev1.VolumeMount {
+	return append(
+		algorithms.Filter(mounts, func(mount corev1.VolumeMount) bool {
+			return mount.Name != want.Name
+		}),
+		want,
+	)
+}
+
+func enableRepositoryPrebake(runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
+	image := repositoryImage(runtime)
+	if image == "" {
+		return
+	}
+
+	pod.Spec.Volumes = append(
+		algorithms.Filter(pod.Spec.Volumes, func(volume corev1.Volume) bool {
+			return volume.Name != repositoryPrebakeVolumeName
+		}),
+		corev1.Volume{
+			Name: repositoryPrebakeVolumeName,
+			VolumeSource: corev1.VolumeSource{
+				Image: &corev1.ImageVolumeSource{
+					Reference:  image,
+					PullPolicy: corev1.PullIfNotPresent,
+				},
+			},
+		},
+	)
+
+	mount := repositoryPrebakeVolumeMount()
+	for i := range pod.Spec.Containers {
+		if pod.Spec.Containers[i].Name == defaultContainer {
+			pod.Spec.Containers[i].VolumeMounts = upsertVolumeMount(pod.Spec.Containers[i].VolumeMounts, mount)
+		}
+	}
+	for i := range pod.Spec.InitContainers {
+		switch pod.Spec.InitContainers[i].Name {
+		case agentBootstrapContainerName, mcpServerContainerName:
+			pod.Spec.InitContainers[i].VolumeMounts = upsertVolumeMount(pod.Spec.InitContainers[i].VolumeMounts, mount)
+		}
+	}
 }
 
 func enableDind(pod *corev1.Pod) {

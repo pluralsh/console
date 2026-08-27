@@ -577,6 +577,11 @@ func (in *AgentRuntimeSpec) DeepCopyInto(out *AgentRuntimeSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.RepositoryImage != nil {
+		in, out := &in.RepositoryImage, &out.RepositoryImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.AllowedRepositories != nil {
 		in, out := &in.AllowedRepositories, &out.AllowedRepositories
 		*out = make([]string, len(*in))

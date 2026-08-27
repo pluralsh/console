@@ -96,6 +96,9 @@ func (in *agentRunController) prepare(ctx context.Context) error {
 	if err := environment.ConfigureGitSafeDirectory(repositoryDir); err != nil {
 		return fmt.Errorf("configure git safe directory: %w", err)
 	}
+	if err := environment.ConfigurePrebakeGitSafeDirectories(); err != nil {
+		return fmt.Errorf("configure prebake git safe directories: %w", err)
+	}
 	if err := in.checkoutFollowupBranch(ctx, repositoryDir); err != nil {
 		return err
 	}

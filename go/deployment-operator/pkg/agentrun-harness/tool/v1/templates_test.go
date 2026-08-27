@@ -176,3 +176,49 @@ func TestSystemPromptTemplate_TemplateFilesExist(t *testing.T) {
 		}
 	}
 }
+
+func TestSystemPromptTemplate_PrebakedRepositories(t *testing.T) {
+	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+	input := &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/shared/repository",
+		PrebakedRepositories: []PrebakedRepository{
+			{URL: "https://github.com/pluralsh/console.git", Dir: "/plural/repos/console"},
+			{URL: "https://github.com/pluralsh/plural.git", Dir: "/plural/repos/plural"},
+		},
+	}
+
+	for _, name := range []string{"analyze.md.tmpl", "write.md.tmpl", "babysit.md.tmpl"} {
+		t.Run(name, func(t *testing.T) {
+			content, err := systemPromptTemplate(filepath.Join(templateDir, name), input)
+			if err != nil {
+				t.Fatalf("systemPromptTemplate() failed: %v", err)
+			}
+			for _, expected := range []string{
+				"## Additional local repositories",
+				"https://github.com/pluralsh/console.git",
+				"/plural/repos/console",
+				"https://github.com/pluralsh/plural.git",
+				"/plural/repos/plural",
+				"Do not clone it again",
+			} {
+				if !strings.Contains(content, expected) {
+					t.Fatalf("expected prebake instructions to contain %q", expected)
+				}
+			}
+		})
+	}
+
+	omitted, err := systemPromptTemplate(filepath.Join(templateDir, "write.md.tmpl"), &SystemPromptTemplateInput{
+		Mode:          console.AgentRunModeWrite,
+		WorkDir:       "/work",
+		RepositoryDir: "/work/shared/repository",
+	})
+	if err != nil {
+		t.Fatalf("systemPromptTemplate() failed: %v", err)
+	}
+	if strings.Contains(omitted, "## Additional local repositories") {
+		t.Fatal("did not expect prebake section when PrebakedRepositories is empty")
+	}
+}

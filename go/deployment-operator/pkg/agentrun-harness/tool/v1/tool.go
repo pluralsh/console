@@ -11,6 +11,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
@@ -107,16 +108,34 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	}
 
 	return &SystemPromptTemplateInput{
-		Mode:           in.Config.Run.Mode,
-		BrowserEnabled: in.Config.Run.BrowserEnabled,
-		DindEnabled:    in.Config.Run.DindEnabled,
-		MemoryEnabled:  in.Config.Run.MemoryEnabled,
-		WorkDir:        in.Config.WorkDir,
-		RepositoryDir:  in.Config.RepositoryDir,
-		Prompt:         in.Config.Run.Prompt,
-		Branch:         branch,
-		Followup:       in.Config.Run.Followup,
+		Mode:                 in.Config.Run.Mode,
+		BrowserEnabled:       in.Config.Run.BrowserEnabled,
+		DindEnabled:          in.Config.Run.DindEnabled,
+		MemoryEnabled:        in.Config.Run.MemoryEnabled,
+		WorkDir:              in.Config.WorkDir,
+		RepositoryDir:        in.Config.RepositoryDir,
+		Prompt:               in.Config.Run.Prompt,
+		Branch:               branch,
+		Followup:             in.Config.Run.Followup,
+		PrebakedRepositories: prebakedRepositories(),
 	}
+}
+
+func prebakedRepositories() []PrebakedRepository {
+	repos, err := prebake.List()
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest")
+		return nil
+	}
+	if len(repos) == 0 {
+		return nil
+	}
+
+	out := make([]PrebakedRepository, 0, len(repos))
+	for _, repo := range repos {
+		out = append(out, PrebakedRepository{URL: repo.URL, Dir: repo.Dir})
+	}
+	return out
 }
 
 func (in DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {

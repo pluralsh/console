@@ -8,6 +8,17 @@ The repository was checked out from branch **`{{ .Branch }}`**. Use this as the 
 {{ else }}
 No branch was specified for this run, so the repository default branch was checked out and should be used as the pull request base.
 {{ end }}
+{{ if .PrebakedRepositories }}
+
+## Additional local repositories
+
+The following git repositories are already present on disk. Prefer reading them over cloning. If you need a writable working copy of one of them, copy from the local path rather than running `git clone`.
+
+{{ range .PrebakedRepositories }}
+- **`{{ .URL }}`** at `{{ .Dir }}`
+{{ end }}
+The assigned repository for this run remains **`{{ .RepositoryDir }}`**. Do not clone it again.
+{{ end }}
 
 {{ if .Prompt }}
 ## Original task

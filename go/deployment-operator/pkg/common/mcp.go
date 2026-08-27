@@ -17,6 +17,10 @@ const (
 
 	AgentRunSharedWorkDir = "/plural/shared"
 
+	// AgentRunRepositoryPrebakeDir is the canonical mount path for a
+	// repository-prebake image (manifest.json plus cloned git repos).
+	AgentRunRepositoryPrebakeDir = "/plural/repos"
+
 	CodebaseMemoryMCPServerName = "codebase-memory-mcp"
 	CodebaseMemoryMCPCommand    = "/usr/local/bin/codebase-memory-mcp"
 	CodebaseMemoryCacheEnv      = "CBM_CACHE_DIR"

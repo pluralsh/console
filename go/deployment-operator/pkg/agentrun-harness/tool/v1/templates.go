@@ -9,15 +9,21 @@ import (
 )
 
 type SystemPromptTemplateInput struct {
-	Mode           console.AgentRunMode
-	BrowserEnabled bool
-	DindEnabled    bool
-	MemoryEnabled  bool
-	WorkDir        string
-	RepositoryDir  string
-	Prompt         string
-	Branch         string
-	Followup       bool
+	Mode                 console.AgentRunMode
+	BrowserEnabled       bool
+	DindEnabled          bool
+	MemoryEnabled        bool
+	WorkDir              string
+	RepositoryDir        string
+	Prompt               string
+	Branch               string
+	Followup             bool
+	PrebakedRepositories []PrebakedRepository
+}
+
+type PrebakedRepository struct {
+	URL string
+	Dir string
 }
 
 func systemPromptTemplate(templateFilePath string, input *SystemPromptTemplateInput) (content string, err error) {
