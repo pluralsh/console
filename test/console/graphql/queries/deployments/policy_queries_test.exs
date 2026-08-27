@@ -633,8 +633,9 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
     test "returns matchCount for bind policies" do
       bind_policy = insert(:policy, type: :binding)
       attached = insert(:policy)
-      insert(:binding_policy, policy: attached, bind_policy: bind_policy, type: :workbench)
-      insert_list(2, :workbench_policy, policy: attached)
+      rule = insert(:binding_policy, policy: attached, bind_policy: bind_policy, type: :workbench)
+      insert_list(2, :workbench_policy, policy: attached, binding_policy: rule)
+      insert(:workbench_policy, policy: attached)
       insert(:workbench_policy)
 
       {:ok, %{data: %{"policy" => found}}} = run_query("""
@@ -644,6 +645,29 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       """, %{"id" => bind_policy.id}, %{current_user: admin_user()})
 
       assert found["matchCount"] == 2
+    end
+
+    test "does not attribute another bind policy's attachments to matchCount" do
+      bind_a = insert(:policy, type: :binding)
+      bind_b = insert(:policy, type: :binding)
+      attached = insert(:policy)
+      rule_a = insert(:binding_policy, policy: attached, bind_policy: bind_a, type: :workbench)
+      rule_b = insert(:binding_policy, policy: attached, bind_policy: bind_b, type: :workbench)
+      insert_list(2, :workbench_policy, policy: attached, binding_policy: rule_a)
+      insert(:workbench_policy, policy: attached, binding_policy: rule_b)
+
+      {:ok, %{data: %{"policies" => found}}} = run_query("""
+        query {
+          policies(first: 10) {
+            edges { node { id matchCount } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      counts = from_connection(found) |> Map.new(& {&1["id"], &1["matchCount"]})
+
+      assert counts[bind_a.id] == 2
+      assert counts[bind_b.id] == 1
     end
 
     test "returns evaluationCount for a policy" do

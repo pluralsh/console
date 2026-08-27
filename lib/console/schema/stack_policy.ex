@@ -1,12 +1,13 @@
 defmodule Console.Schema.StackPolicy do
   use Console.Schema.Base
-  alias Console.Schema.{Policy, Stack}
+  alias Console.Schema.{BindingPolicy, Policy, Stack}
 
   defenum Type, approval: 0, run: 1
 
   schema "stack_policies" do
-    belongs_to :policy, Policy
-    belongs_to :stack, Stack
+    belongs_to :policy,         Policy
+    belongs_to :stack,          Stack
+    belongs_to :binding_policy, BindingPolicy
 
     field :type, Type, default: :approval
 
@@ -32,14 +33,16 @@ defmodule Console.Schema.StackPolicy do
     |> Map.new()
   end
 
-  @valid ~w(policy_id stack_id type)a
+  @valid ~w(policy_id stack_id type binding_policy_id)a
+  @required ~w(policy_id stack_id type)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:policy_id)
     |> foreign_key_constraint(:stack_id)
+    |> foreign_key_constraint(:binding_policy_id)
     |> unique_constraint([:policy_id, :stack_id])
-    |> validate_required(@valid)
+    |> validate_required(@required)
   end
 end

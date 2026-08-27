@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchPolicy do
   use Console.Schema.Base
-  alias Console.Schema.{Policy, Workbench}
+  alias Console.Schema.{BindingPolicy, Policy, Workbench}
 
   schema "workbench_policies" do
     embeds_one :matches, Matches, on_replace: :update do
@@ -9,8 +9,9 @@ defmodule Console.Schema.WorkbenchPolicy do
       field :ignore, {:array, :string}
     end
 
-    belongs_to :policy,    Policy
-    belongs_to :workbench, Workbench
+    belongs_to :policy,          Policy
+    belongs_to :workbench,       Workbench
+    belongs_to :binding_policy,  BindingPolicy
 
     timestamps()
   end
@@ -43,7 +44,7 @@ defmodule Console.Schema.WorkbenchPolicy do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(policy_id workbench_id)a
+  @valid ~w(policy_id workbench_id binding_policy_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -51,6 +52,7 @@ defmodule Console.Schema.WorkbenchPolicy do
     |> cast_embed(:matches, with: &matches_changeset/2)
     |> foreign_key_constraint(:policy_id)
     |> foreign_key_constraint(:workbench_id)
+    |> foreign_key_constraint(:binding_policy_id)
     |> unique_constraint([:policy_id, :workbench_id])
     |> validate_required([:policy_id, :workbench_id])
   end

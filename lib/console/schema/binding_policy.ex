@@ -40,31 +40,24 @@ defmodule Console.Schema.BindingPolicy do
 
   def match_counts_for_bind_policies([]), do: %{}
   def match_counts_for_bind_policies(policy_ids) do
-    workbench_counts =
-      from(wp in WorkbenchPolicy,
-        join: bp in __MODULE__,
-        on: bp.policy_id == wp.policy_id and bp.type == :workbench,
-        where: bp.bind_policy_id in ^policy_ids,
-        group_by: bp.bind_policy_id,
-        select: {bp.bind_policy_id, count(wp.workbench_id, :distinct)}
-      )
-      |> Console.Repo.all()
-      |> Map.new()
-
-    stack_counts =
-      from(sp in StackPolicy,
-        join: bp in __MODULE__,
-        on: bp.policy_id == sp.policy_id and bp.type == :stack,
-        where: bp.bind_policy_id in ^policy_ids,
-        group_by: bp.bind_policy_id,
-        select: {bp.bind_policy_id, count(sp.stack_id, :distinct)}
-      )
-      |> Console.Repo.all()
-      |> Map.new()
+    workbench_counts = attachment_match_counts(WorkbenchPolicy, :workbench_id, policy_ids)
+    stack_counts     = attachment_match_counts(StackPolicy, :stack_id, policy_ids)
 
     Map.new(policy_ids, fn id ->
       {id, Map.get(workbench_counts, id, 0) + Map.get(stack_counts, id, 0)}
     end)
+  end
+
+  defp attachment_match_counts(schema, id_field, policy_ids) do
+    from(a in schema,
+      join: bp in __MODULE__,
+      on: bp.id == a.binding_policy_id,
+      where: bp.bind_policy_id in ^policy_ids,
+      group_by: bp.bind_policy_id,
+      select: {bp.bind_policy_id, count(field(a, ^id_field), :distinct)}
+    )
+    |> Console.Repo.all()
+    |> Map.new()
   end
 
   def for_user(query \\ __MODULE__, user) do

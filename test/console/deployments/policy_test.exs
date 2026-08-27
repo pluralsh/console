@@ -204,7 +204,8 @@ defmodule Console.Deployments.PolicyTest do
       :ok = Policy.reconcile(binding)
       :ok = Policy.reconcile(binding)
 
-      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+      [association] = Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
 
       insert(:workbench_policy, policy: policy, workbench: retained)
 
@@ -243,12 +244,32 @@ defmodule Console.Deployments.PolicyTest do
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 
       :ok = Policy.reconcile(binding)
-      assert 1 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+      [association] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
 
       {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
       :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
 
       assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+    end
+
+    test "does not detach manual attachments when the bind policy stops matching" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      workbench = insert(:workbench, project: project, name: "bound-workbench")
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.workbench.name == \"bound-workbench\"")
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy)
+      insert(:workbench_policy, policy: policy, workbench: workbench)
+
+      :ok = Policy.reconcile(binding)
+
+      {:ok, bind_policy} =
+        Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
+
+      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
     end
   end
 
