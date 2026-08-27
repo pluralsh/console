@@ -315,6 +315,21 @@ defmodule Console.Deployments.PolicyTest do
 
       assert [%{"message" => "buffer"}] = result["deny"]
     end
+
+    test "rejects invalid rego" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, "package test\n\nallow {", %{})
+
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects source over 1MB" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, String.duplicate("a", 1_000_001), %{})
+
+      assert errors_on(changeset).policy == ["should be at most 1000000 character(s)"]
+    end
   end
 
   describe "actor/1" do

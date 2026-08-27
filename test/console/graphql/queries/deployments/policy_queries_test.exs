@@ -485,6 +485,38 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert [%{"message" => "buffer"}] = result["deny"]
     end
 
+    test "rejects invalid unsaved policy source" do
+      policy = insert(:policy)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => "package test\n\nallow {"
+      }, %{current_user: insert(:user)})
+
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects unsaved policy source over 1MB" do
+      policy = insert(:policy)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => String.duplicate("a", 1_000_001)
+      }, %{current_user: insert(:user)})
+
+      assert message =~ "should be at most"
+    end
+
     test "evaluates binding policies with the binding base" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])

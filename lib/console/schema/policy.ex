@@ -43,6 +43,7 @@ defmodule Console.Schema.Policy do
   end
 
   @valid ~w(name type description policy project_id)a
+  @policy_source_max 1_000_000
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -52,8 +53,30 @@ defmodule Console.Schema.Policy do
     |> validate_required([:name, :type, :policy, :project_id])
     |> validate_length(:name, max: 255)
     |> validate_length(:description, max: 1_000)
-    |> validate_length(:policy, max: 1_000_000)
-    |> validate_change(:policy, &validate_rego/2)
+    |> validate_policy_source()
+  end
+
+  def source_changeset(source) do
+    %__MODULE__{}
+    |> cast(%{policy: source}, [:policy])
+    |> validate_required([:policy])
+    |> validate_policy_source()
+  end
+
+  defp validate_policy_source(changeset) do
+    changeset = validate_length(changeset, :policy, max: @policy_source_max)
+    validate_policy_rego(changeset, policy_length_error?(changeset))
+  end
+
+  defp validate_policy_rego(changeset, true), do: changeset
+  defp validate_policy_rego(changeset, false),
+    do: validate_change(changeset, :policy, &validate_rego/2)
+
+  defp policy_length_error?(%Ecto.Changeset{errors: errors}) do
+    Enum.any?(errors, fn
+      {:policy, {_, opts}} -> Keyword.get(opts, :validation) == :length
+      _ -> false
+    end)
   end
 
   defp validate_rego(:policy, policy) when is_binary(policy) do
