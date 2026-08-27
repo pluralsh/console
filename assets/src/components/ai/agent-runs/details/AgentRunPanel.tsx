@@ -551,13 +551,13 @@ const panelTabStyles = ({ theme }: { theme: any; active?: boolean }) => ({
     color: theme.colors.text,
     backgroundColor:
       theme.mode === 'light'
-        ? theme.colors.grey[75]
+        ? theme.colors.grey[50]
         : theme.colors['fill-one-selected'],
     boxShadow: `inset 0 0 0 ${theme.borderWidths.default}px ${theme.colors.border}`,
     '&:hover': {
       backgroundColor:
         theme.mode === 'light'
-          ? theme.colors.grey[75]
+          ? theme.colors.grey[50]
           : theme.colors['fill-one-selected'],
     },
   },

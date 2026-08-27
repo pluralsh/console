@@ -18,6 +18,12 @@ import { DefaultTheme, useTheme } from 'styled-components'
 import { formatTokenCost, formatTokenCount } from '../../common/workbenchUsage'
 import { useMemo } from 'react'
 
+function usageCardBackground(theme: DefaultTheme) {
+  return theme.mode === 'light'
+    ? theme.colors.grey[40]
+    : theme.colors['fill-zero-selected']
+}
+
 export function WorkbenchJobUsage({
   usage,
 }: {
@@ -116,7 +122,7 @@ function TokenBreakdown({
         flexDirection: 'column',
         gap: theme.spacing.xxsmall,
         padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-        backgroundColor: theme.colors['fill-zero-selected'],
+        backgroundColor: usageCardBackground(theme),
       }}
     >
       <Flex
@@ -221,7 +227,7 @@ function CostBreakdown({
         flexDirection: 'column',
         gap: theme.spacing.xsmall,
         padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
-        backgroundColor: theme.colors['fill-zero-selected'],
+        backgroundColor: usageCardBackground(theme),
       }}
     >
       <Body1P>Cost breakdown</Body1P>
@@ -291,7 +297,7 @@ function UsageMetricCard({
         flexDirection: 'column',
         gap: theme.spacing.xxsmall,
         padding: theme.spacing.large,
-        backgroundColor: theme.colors['fill-zero-selected'],
+        backgroundColor: usageCardBackground(theme),
       }}
     >
       <OverlineH1 $color="text-xlight">{label}</OverlineH1>
