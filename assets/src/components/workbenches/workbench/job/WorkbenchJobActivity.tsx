@@ -97,7 +97,12 @@ export function WorkbenchJobActivity({
       </div>
     )
   if (type === WorkbenchJobActivityType.User)
-    return <ExpandableUserPrompt prompt={activity.prompt} />
+    return (
+      <ExpandableUserPrompt
+        prompt={activity.prompt}
+        timestamp={activity.insertedAt}
+      />
+    )
 
   return (
     <AccordionItem
