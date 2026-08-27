@@ -18,8 +18,8 @@ export type PolicyAttachmentRow = {
 const columnHelper = createColumnHelper<PolicyAttachmentRow>()
 
 export const ColWorkbench = columnHelper.accessor((row) => row, {
-  id: 'workbench',
-  header: 'Workbench',
+  id: 'resource',
+  header: 'Resource',
   meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
   cell: function Cell({ getValue }) {
     const row = getValue()

@@ -1,9 +1,11 @@
 import { Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
-  PolicyType,
+  useFetchPaginatedData,
+  type VirtualSlice,
+} from 'components/utils/table/useFetchPaginatedData'
+import {
   usePolicyStackAttachmentsQuery,
   usePolicyWorkbenchAttachmentsQuery,
 } from 'generated/graphql'
@@ -23,18 +25,18 @@ import {
 } from './PolicyAttachmentsColumns'
 import { PolicyDetailsContext } from './PolicyDetails'
 
+const columns = [ColWorkbench, ColMatchingArg, ColUpdated]
+
 export function PolicyAttachments() {
   const navigate = useNavigate()
   const { policy } = useOutletContext<PolicyDetailsContext>()
   const params = useParams()
   const id = policy?.id ?? params[POLICIES_PARAM_ID] ?? ''
-  const type = policy?.type
-  const isStack = type === PolicyType.Stack
   const workbenchQuery = useFetchPaginatedData(
     {
       queryHook: usePolicyWorkbenchAttachmentsQuery,
       keyPath: ['policy', 'workbenchPolicies'],
-      skip: !id || !type || isStack,
+      skip: !id,
     },
     { id }
   )
@@ -42,36 +44,34 @@ export function PolicyAttachments() {
     {
       queryHook: usePolicyStackAttachmentsQuery,
       keyPath: ['policy', 'stackPolicies'],
-      skip: !id || !type || !isStack,
+      skip: !id,
     },
     { id }
   )
-  const { loading, error, pageInfo, fetchNextPage, setVirtualSlice } = isStack
-    ? stackQuery
-    : workbenchQuery
-  const data = isStack ? stackQuery.data : workbenchQuery.data
+  const loading = workbenchQuery.loading || stackQuery.loading
+  const error = workbenchQuery.error || stackQuery.error
+  const data = workbenchQuery.data || stackQuery.data
+  const hasNextPage =
+    workbenchQuery.pageInfo?.hasNextPage || stackQuery.pageInfo?.hasNextPage
+  const fetchNextPage = () => {
+    workbenchQuery.fetchNextPage()
+    stackQuery.fetchNextPage()
+  }
+  const setVirtualSlice = (slice: VirtualSlice) => {
+    workbenchQuery.setVirtualSlice(slice)
+    stackQuery.setVirtualSlice(slice)
+  }
 
-  const rows = useMemo(() => {
-    if (isStack) {
-      return mapExistingNodes(stackQuery.data?.policy?.stackPolicies).map(
-        toStackRow
-      )
-    }
-
-    return mapExistingNodes(workbenchQuery.data?.policy?.workbenchPolicies).map(
-      toWorkbenchRow
-    )
-  }, [isStack, stackQuery.data, workbenchQuery.data])
-  const columns = useMemo(
+  const rows = useMemo(
     () => [
-      {
-        ...ColWorkbench,
-        header: isStack ? 'Stack' : 'Workbench',
-      },
-      ...(isStack ? [] : [ColMatchingArg]),
-      ColUpdated,
+      ...mapExistingNodes(workbenchQuery.data?.policy?.workbenchPolicies).map(
+        toWorkbenchRow
+      ),
+      ...mapExistingNodes(stackQuery.data?.policy?.stackPolicies).map(
+        toStackRow
+      ),
     ],
-    [isStack]
+    [stackQuery.data, workbenchQuery.data]
   )
 
   if (error) return <GqlError error={error} />
@@ -84,7 +84,7 @@ export function PolicyAttachments() {
         data={rows}
         loading={!data && loading}
         columns={columns}
-        hasNextPage={pageInfo?.hasNextPage}
+        hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
