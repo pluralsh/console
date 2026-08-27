@@ -152,7 +152,7 @@ export function PolicyDefinition() {
     evaluatePolicy({
       variables: {
         policyId: policy.id,
-        input: JSON.parse(inputJson),
+        input: inputJson,
         policy: editorValue,
       },
     })
