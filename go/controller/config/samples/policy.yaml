@@ -1,0 +1,45 @@
+---
+# Minimal Policy: a workbench OPA policy with just a name and Rego source.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Policy
+metadata:
+  labels:
+    app.kubernetes.io/name: policy
+    app.kubernetes.io/instance: policy-minimal
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbench-allow-policy
+spec:
+  type: WORKBENCH
+  description: "Denies workbench tools when the prompt contains forbidden SQL keywords."
+  policy: |
+    package plrl.wb.admission
+
+    sample := 0
+
+    deny[{"message": "Prompt contains forbidden SQL keywords"}] if {
+      contains(input.tool.prompt, "drop table")
+    }
+---
+# Binding Policy: used as the bindPolicyRef in a BindingPolicy.
+# Its Rego logic determines which targets are selected/matched.
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Policy
+metadata:
+  labels:
+    app.kubernetes.io/name: policy
+    app.kubernetes.io/instance: policy-binding-selector
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbench-binding-selector
+spec:
+  type: BINDING
+  description: "Selector policy: matches workbenches whose name begins with 'deploy'."
+  policy: |
+    package plrl.binding
+
+    bind := true if {
+      regex.match("^deploy.*", input.workbench.name)
+    }

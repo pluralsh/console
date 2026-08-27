@@ -24,6 +24,65 @@ func (_m *ConsoleClientMock) EXPECT() *ConsoleClientMock_Expecter {
 	return &ConsoleClientMock_Expecter{mock: &_m.Mock}
 }
 
+// CreateBindingPolicy provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateBindingPolicy(ctx context.Context, attributes client.BindingPolicyAttributes) (*client.BindingPolicyFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateBindingPolicy")
+	}
+
+	var r0 *client.BindingPolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.BindingPolicyAttributes) (*client.BindingPolicyFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.BindingPolicyAttributes) *client.BindingPolicyFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.BindingPolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.BindingPolicyAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateBindingPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateBindingPolicy'
+type ConsoleClientMock_CreateBindingPolicy_Call struct {
+	*mock.Call
+}
+
+// CreateBindingPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.BindingPolicyAttributes
+func (_e *ConsoleClientMock_Expecter) CreateBindingPolicy(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateBindingPolicy_Call {
+	return &ConsoleClientMock_CreateBindingPolicy_Call{Call: _e.mock.On("CreateBindingPolicy", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateBindingPolicy_Call) Run(run func(ctx context.Context, attributes client.BindingPolicyAttributes)) *ConsoleClientMock_CreateBindingPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.BindingPolicyAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateBindingPolicy_Call) Return(_a0 *client.BindingPolicyFragment, _a1 error) *ConsoleClientMock_CreateBindingPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateBindingPolicy_Call) RunAndReturn(run func(context.Context, client.BindingPolicyAttributes) (*client.BindingPolicyFragment, error)) *ConsoleClientMock_CreateBindingPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateBootstrapToken provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreateBootstrapToken(ctx context.Context, attributes client.BootstrapTokenAttributes) (*client.BootstrapTokenBase, error) {
 	ret := _m.Called(ctx, attributes)
@@ -786,6 +845,65 @@ func (_c *ConsoleClientMock_CreatePipelineContext_Call) Return(_a0 *client.Creat
 }
 
 func (_c *ConsoleClientMock_CreatePipelineContext_Call) RunAndReturn(run func(context.Context, string, client.PipelineContextAttributes) (*client.CreatePipelineContext, error)) *ConsoleClientMock_CreatePipelineContext_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreatePolicy provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreatePolicy(ctx context.Context, attributes client.PolicyAttributes) (*client.PolicyFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreatePolicy")
+	}
+
+	var r0 *client.PolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.PolicyAttributes) (*client.PolicyFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.PolicyAttributes) *client.PolicyFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.PolicyAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreatePolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreatePolicy'
+type ConsoleClientMock_CreatePolicy_Call struct {
+	*mock.Call
+}
+
+// CreatePolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.PolicyAttributes
+func (_e *ConsoleClientMock_Expecter) CreatePolicy(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreatePolicy_Call {
+	return &ConsoleClientMock_CreatePolicy_Call{Call: _e.mock.On("CreatePolicy", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreatePolicy_Call) Run(run func(ctx context.Context, attributes client.PolicyAttributes)) *ConsoleClientMock_CreatePolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.PolicyAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePolicy_Call) Return(_a0 *client.PolicyFragment, _a1 error) *ConsoleClientMock_CreatePolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreatePolicy_Call) RunAndReturn(run func(context.Context, client.PolicyAttributes) (*client.PolicyFragment, error)) *ConsoleClientMock_CreatePolicy_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1741,6 +1859,53 @@ func (_c *ConsoleClientMock_CreateWorkbenchWebhook_Call) Return(_a0 *client.Work
 }
 
 func (_c *ConsoleClientMock_CreateWorkbenchWebhook_Call) RunAndReturn(run func(context.Context, string, client.WorkbenchWebhookAttributes) (*client.WorkbenchWebhookFragment, error)) *ConsoleClientMock_CreateWorkbenchWebhook_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteBindingPolicy provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteBindingPolicy(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteBindingPolicy")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteBindingPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteBindingPolicy'
+type ConsoleClientMock_DeleteBindingPolicy_Call struct {
+	*mock.Call
+}
+
+// DeleteBindingPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteBindingPolicy(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteBindingPolicy_Call {
+	return &ConsoleClientMock_DeleteBindingPolicy_Call{Call: _e.mock.On("DeleteBindingPolicy", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteBindingPolicy_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteBindingPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteBindingPolicy_Call) Return(_a0 error) *ConsoleClientMock_DeleteBindingPolicy_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteBindingPolicy_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteBindingPolicy_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2715,6 +2880,53 @@ func (_c *ConsoleClientMock_DeletePipeline_Call) Return(_a0 *client.PipelineFrag
 }
 
 func (_c *ConsoleClientMock_DeletePipeline_Call) RunAndReturn(run func(string) (*client.PipelineFragmentID, error)) *ConsoleClientMock_DeletePipeline_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeletePolicy provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeletePolicy(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeletePolicy")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeletePolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeletePolicy'
+type ConsoleClientMock_DeletePolicy_Call struct {
+	*mock.Call
+}
+
+// DeletePolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeletePolicy(ctx interface{}, id interface{}) *ConsoleClientMock_DeletePolicy_Call {
+	return &ConsoleClientMock_DeletePolicy_Call{Call: _e.mock.On("DeletePolicy", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeletePolicy_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeletePolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePolicy_Call) Return(_a0 error) *ConsoleClientMock_DeletePolicy_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeletePolicy_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeletePolicy_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3711,6 +3923,124 @@ func (_c *ConsoleClientMock_GetAgentRuntime_Call) Return(_a0 *client.AgentRuntim
 }
 
 func (_c *ConsoleClientMock_GetAgentRuntime_Call) RunAndReturn(run func(context.Context, string, string) (*client.AgentRuntimeFragment, error)) *ConsoleClientMock_GetAgentRuntime_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetBindingPolicy provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetBindingPolicy(ctx context.Context, id string) (*client.BindingPolicyFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBindingPolicy")
+	}
+
+	var r0 *client.BindingPolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.BindingPolicyFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.BindingPolicyFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.BindingPolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetBindingPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBindingPolicy'
+type ConsoleClientMock_GetBindingPolicy_Call struct {
+	*mock.Call
+}
+
+// GetBindingPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetBindingPolicy(ctx interface{}, id interface{}) *ConsoleClientMock_GetBindingPolicy_Call {
+	return &ConsoleClientMock_GetBindingPolicy_Call{Call: _e.mock.On("GetBindingPolicy", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetBindingPolicy_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetBindingPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetBindingPolicy_Call) Return(_a0 *client.BindingPolicyFragment, _a1 error) *ConsoleClientMock_GetBindingPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetBindingPolicy_Call) RunAndReturn(run func(context.Context, string) (*client.BindingPolicyFragment, error)) *ConsoleClientMock_GetBindingPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetBindingPolicyTiny provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetBindingPolicyTiny(ctx context.Context, id string) (*client.GetBindingPolicyTiny_BindingPolicy, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBindingPolicyTiny")
+	}
+
+	var r0 *client.GetBindingPolicyTiny_BindingPolicy
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.GetBindingPolicyTiny_BindingPolicy, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.GetBindingPolicyTiny_BindingPolicy); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GetBindingPolicyTiny_BindingPolicy)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetBindingPolicyTiny_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBindingPolicyTiny'
+type ConsoleClientMock_GetBindingPolicyTiny_Call struct {
+	*mock.Call
+}
+
+// GetBindingPolicyTiny is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetBindingPolicyTiny(ctx interface{}, id interface{}) *ConsoleClientMock_GetBindingPolicyTiny_Call {
+	return &ConsoleClientMock_GetBindingPolicyTiny_Call{Call: _e.mock.On("GetBindingPolicyTiny", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetBindingPolicyTiny_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetBindingPolicyTiny_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetBindingPolicyTiny_Call) Return(_a0 *client.GetBindingPolicyTiny_BindingPolicy, _a1 error) *ConsoleClientMock_GetBindingPolicyTiny_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetBindingPolicyTiny_Call) RunAndReturn(run func(context.Context, string) (*client.GetBindingPolicyTiny_BindingPolicy, error)) *ConsoleClientMock_GetBindingPolicyTiny_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5654,6 +5984,126 @@ func (_c *ConsoleClientMock_GetPipelineContext_Call) RunAndReturn(run func(conte
 	return _c
 }
 
+// GetPolicy provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetPolicy(ctx context.Context, id *string, name *string) (*client.PolicyFragment, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPolicy")
+	}
+
+	var r0 *client.PolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.PolicyFragment, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.PolicyFragment); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPolicy'
+type ConsoleClientMock_GetPolicy_Call struct {
+	*mock.Call
+}
+
+// GetPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetPolicy(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetPolicy_Call {
+	return &ConsoleClientMock_GetPolicy_Call{Call: _e.mock.On("GetPolicy", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetPolicy_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPolicy_Call) Return(_a0 *client.PolicyFragment, _a1 error) *ConsoleClientMock_GetPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPolicy_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.PolicyFragment, error)) *ConsoleClientMock_GetPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetPolicyTiny provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetPolicyTiny(ctx context.Context, id *string, name *string) (*client.TinyPolicyFragment, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetPolicyTiny")
+	}
+
+	var r0 *client.TinyPolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.TinyPolicyFragment, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.TinyPolicyFragment); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.TinyPolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetPolicyTiny_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetPolicyTiny'
+type ConsoleClientMock_GetPolicyTiny_Call struct {
+	*mock.Call
+}
+
+// GetPolicyTiny is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetPolicyTiny(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetPolicyTiny_Call {
+	return &ConsoleClientMock_GetPolicyTiny_Call{Call: _e.mock.On("GetPolicyTiny", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetPolicyTiny_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetPolicyTiny_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPolicyTiny_Call) Return(_a0 *client.TinyPolicyFragment, _a1 error) *ConsoleClientMock_GetPolicyTiny_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetPolicyTiny_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.TinyPolicyFragment, error)) *ConsoleClientMock_GetPolicyTiny_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetPrAutomation provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetPrAutomation(ctx context.Context, id string) (*client.PrAutomationFragment, error) {
 	ret := _m.Called(ctx, id)
@@ -7419,6 +7869,63 @@ func (_c *ConsoleClientMock_GetWorkbenchWebhook_Call) RunAndReturn(run func(cont
 	return _c
 }
 
+// IsBindingPolicyExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsBindingPolicyExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsBindingPolicyExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsBindingPolicyExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsBindingPolicyExists'
+type ConsoleClientMock_IsBindingPolicyExists_Call struct {
+	*mock.Call
+}
+
+// IsBindingPolicyExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsBindingPolicyExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsBindingPolicyExists_Call {
+	return &ConsoleClientMock_IsBindingPolicyExists_Call{Call: _e.mock.On("IsBindingPolicyExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsBindingPolicyExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsBindingPolicyExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsBindingPolicyExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsBindingPolicyExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsBindingPolicyExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsBindingPolicyExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // IsCatalogExists provides a mock function with given fields: ctx, name
 func (_m *ConsoleClientMock) IsCatalogExists(ctx context.Context, name string) (bool, error) {
 	ret := _m.Called(ctx, name)
@@ -8085,6 +8592,64 @@ func (_c *ConsoleClientMock_IsPipelineExisting_Call) Return(_a0 bool, _a1 error)
 }
 
 func (_c *ConsoleClientMock_IsPipelineExisting_Call) RunAndReturn(run func(string) (bool, error)) *ConsoleClientMock_IsPipelineExisting_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsPolicyExists provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) IsPolicyExists(ctx context.Context, id *string, name *string) (bool, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsPolicyExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (bool, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) bool); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsPolicyExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPolicyExists'
+type ConsoleClientMock_IsPolicyExists_Call struct {
+	*mock.Call
+}
+
+// IsPolicyExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) IsPolicyExists(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_IsPolicyExists_Call {
+	return &ConsoleClientMock_IsPolicyExists_Call{Call: _e.mock.On("IsPolicyExists", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_IsPolicyExists_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_IsPolicyExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPolicyExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsPolicyExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsPolicyExists_Call) RunAndReturn(run func(context.Context, *string, *string) (bool, error)) *ConsoleClientMock_IsPolicyExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -9344,6 +9909,66 @@ func (_c *ConsoleClientMock_SaveServiceContext_Call) RunAndReturn(run func(strin
 	return _c
 }
 
+// UpdateBindingPolicy provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateBindingPolicy(ctx context.Context, id string, attributes client.BindingPolicyUpdateAttributes) (*client.BindingPolicyFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateBindingPolicy")
+	}
+
+	var r0 *client.BindingPolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.BindingPolicyUpdateAttributes) (*client.BindingPolicyFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.BindingPolicyUpdateAttributes) *client.BindingPolicyFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.BindingPolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.BindingPolicyUpdateAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateBindingPolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateBindingPolicy'
+type ConsoleClientMock_UpdateBindingPolicy_Call struct {
+	*mock.Call
+}
+
+// UpdateBindingPolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.BindingPolicyUpdateAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateBindingPolicy(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateBindingPolicy_Call {
+	return &ConsoleClientMock_UpdateBindingPolicy_Call{Call: _e.mock.On("UpdateBindingPolicy", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateBindingPolicy_Call) Run(run func(ctx context.Context, id string, attributes client.BindingPolicyUpdateAttributes)) *ConsoleClientMock_UpdateBindingPolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.BindingPolicyUpdateAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateBindingPolicy_Call) Return(_a0 *client.BindingPolicyFragment, _a1 error) *ConsoleClientMock_UpdateBindingPolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateBindingPolicy_Call) RunAndReturn(run func(context.Context, string, client.BindingPolicyUpdateAttributes) (*client.BindingPolicyFragment, error)) *ConsoleClientMock_UpdateBindingPolicy_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateCloudConnection provides a mock function with given fields: ctx, id, attributes
 func (_m *ConsoleClientMock) UpdateCloudConnection(ctx context.Context, id string, attributes client.CloudConnectionAttributes) (*client.CloudConnectionFragment, error) {
 	ret := _m.Called(ctx, id, attributes)
@@ -9998,6 +10623,66 @@ func (_c *ConsoleClientMock_UpdatePersona_Call) Return(_a0 *client.PersonaFragme
 }
 
 func (_c *ConsoleClientMock_UpdatePersona_Call) RunAndReturn(run func(context.Context, string, client.PersonaAttributes) (*client.PersonaFragment, error)) *ConsoleClientMock_UpdatePersona_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdatePolicy provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdatePolicy(ctx context.Context, id string, attributes client.PolicyAttributes) (*client.PolicyFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdatePolicy")
+	}
+
+	var r0 *client.PolicyFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.PolicyAttributes) (*client.PolicyFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.PolicyAttributes) *client.PolicyFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.PolicyFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.PolicyAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdatePolicy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdatePolicy'
+type ConsoleClientMock_UpdatePolicy_Call struct {
+	*mock.Call
+}
+
+// UpdatePolicy is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.PolicyAttributes
+func (_e *ConsoleClientMock_Expecter) UpdatePolicy(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdatePolicy_Call {
+	return &ConsoleClientMock_UpdatePolicy_Call{Call: _e.mock.On("UpdatePolicy", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdatePolicy_Call) Run(run func(ctx context.Context, id string, attributes client.PolicyAttributes)) *ConsoleClientMock_UpdatePolicy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.PolicyAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdatePolicy_Call) Return(_a0 *client.PolicyFragment, _a1 error) *ConsoleClientMock_UpdatePolicy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdatePolicy_Call) RunAndReturn(run func(context.Context, string, client.PolicyAttributes) (*client.PolicyFragment, error)) *ConsoleClientMock_UpdatePolicy_Call {
 	_c.Call.Return(run)
 	return _c
 }
