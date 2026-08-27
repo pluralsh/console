@@ -54,6 +54,7 @@ defmodule Console.Schema.Policy do
     |> validate_length(:name, max: 255)
     |> validate_length(:description, max: 1_000)
     |> validate_policy_source()
+    |> validate_compatible_type()
   end
 
   def source_changeset(source) do
@@ -87,4 +88,25 @@ defmodule Console.Schema.Policy do
     end
   end
   defp validate_rego(_, _), do: []
+
+  defp validate_compatible_type(changeset) do
+    validate_change(changeset, :type, fn :type, type ->
+      incompatible_type_change(changeset.data, type)
+    end)
+  end
+
+  defp incompatible_type_change(%{id: nil}, _), do: []
+  defp incompatible_type_change(%{type: type}, type), do: []
+  defp incompatible_type_change(%{id: id}, _),
+    do: incompatible_type_change(dependent_attachments?(id))
+
+  defp incompatible_type_change(true),
+    do: [type: "cannot change type while attachments or binding rules exist"]
+  defp incompatible_type_change(false), do: []
+
+  defp dependent_attachments?(id) do
+    Console.Repo.exists?(from wp in WorkbenchPolicy, where: wp.policy_id == ^id) or
+      Console.Repo.exists?(from sp in StackPolicy, where: sp.policy_id == ^id) or
+      Console.Repo.exists?(from bp in BindingPolicy, where: bp.policy_id == ^id or bp.bind_policy_id == ^id)
+  end
 end

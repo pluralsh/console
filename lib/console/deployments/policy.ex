@@ -53,6 +53,7 @@ defmodule Console.Deployments.Policy do
     get_policy!(id)
     |> allow(user, :write)
     |> when_ok(&Console.Schema.Policy.changeset(&1, attrs))
+    |> when_ok(&authorize_project_change(&1, user))
     |> when_ok(:update)
     |> notify(:update)
   end
@@ -325,6 +326,16 @@ defmodule Console.Deployments.Policy do
     do: Workbenches.delete_workbench_policy(id, wb.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
     do: Stacks.delete_stack_policy(id, stack.id, user)
+
+  defp authorize_project_change(%Ecto.Changeset{} = cs, user),
+    do: authorize_project_change(Ecto.Changeset.get_change(cs, :project_id), cs, user)
+
+  defp authorize_project_change(nil, cs, _), do: {:ok, cs}
+  defp authorize_project_change(project_id, cs, user) do
+    Repo.get(Project, project_id)
+    |> allow(user, :write)
+    |> when_ok(fn _ -> cs end)
+  end
 
   defp bot(), do: Users.admin_bot()
 

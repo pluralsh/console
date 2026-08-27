@@ -51,6 +51,41 @@ defmodule Console.Deployments.PolicyTest do
       assert {:error, _} = Policy.update_policy(%{description: "Updated policy"}, policy.id, user)
       assert refetch(policy).description != "Updated policy"
     end
+
+    test "cannot transfer a policy to an inaccessible destination project" do
+      user = insert(:user)
+      source = insert(:project, write_bindings: [%{user_id: user.id}])
+      destination = insert(:project)
+      policy = insert(:policy, project: source)
+
+      assert {:error, _} = Policy.update_policy(%{project_id: destination.id}, policy.id, user)
+      assert refetch(policy).project_id == source.id
+    end
+
+    test "project writers can transfer a policy to another writable project" do
+      user = insert(:user)
+      source = insert(:project, write_bindings: [%{user_id: user.id}])
+      destination = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: source)
+
+      {:ok, updated} = Policy.update_policy(%{project_id: destination.id}, policy.id, user)
+
+      assert updated.project_id == destination.id
+    end
+
+    test "rejects type changes when attachments exist" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      insert(:workbench_policy, policy: policy)
+
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.update_policy(%{type: :stack}, policy.id, user)
+
+      assert errors_on(changeset).type ==
+               ["cannot change type while attachments or binding rules exist"]
+      assert refetch(policy).type == :workbench
+    end
   end
 
   describe "delete_policy/2" do
