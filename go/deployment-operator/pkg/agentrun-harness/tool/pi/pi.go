@@ -298,6 +298,10 @@ func (in *Pi) handleStreamLine(line []byte) {
 	if event.Type == "session" && event.ID != "" {
 		in.sessionID = event.ID
 	}
+	if event.Type == "tool_execution_update" {
+		in.EmitOutput(event.ToolCallID, toolResultText(event.PartialResult))
+		return
+	}
 	message, callID := in.mapStreamEvent(&event)
 	if message != nil && in.onMessage != nil {
 		in.onMessage(message, callID)
@@ -313,7 +317,7 @@ func (in *Pi) mapStreamEvent(event *StreamEvent) (*console.AgentMessageAttribute
 		if event.IsError {
 			state = console.AgentMessageToolStateError
 		}
-		return toolMessage(event.ToolName, state, rawString(event.Args), rawString(event.Result)), event.ToolCallID
+		return toolMessage(event.ToolName, state, rawString(event.Args), toolResultText(event.Result)), event.ToolCallID
 	case "message_end":
 		return in.messageEnd(event.Message), ""
 	case "error":
@@ -381,6 +385,28 @@ func assistantText(content json.RawMessage) string {
 func rawString(value json.RawMessage) string {
 	if len(value) == 0 || string(value) == "null" {
 		return ""
+	}
+	return string(value)
+}
+
+func toolResultText(value json.RawMessage) string {
+	if len(value) == 0 || string(value) == "null" {
+		return ""
+	}
+	if text := assistantText(value); text != "" {
+		return text
+	}
+	var wrapped struct {
+		Content json.RawMessage `json:"content"`
+	}
+	if json.Unmarshal(value, &wrapped) == nil && len(wrapped.Content) > 0 {
+		if text := assistantText(wrapped.Content); text != "" {
+			return text
+		}
+	}
+	var s string
+	if json.Unmarshal(value, &s) == nil {
+		return s
 	}
 	return string(value)
 }

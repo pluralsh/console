@@ -122,6 +122,7 @@ type Client interface {
 	UpdateSentinelRunJobStatus(id string, attr *console.SentinelRunJobUpdateAttributes) error
 	CreateAgentMessage(ctx context.Context, runID string, attrs console.AgentMessageAttributes) (*console.CreateAgentMessage_CreateAgentMessage, error)
 	UpdateAgentMessage(ctx context.Context, id string, attrs console.AgentMessageAttributes) (*console.UpdateAgentMessage_UpdateAgentMessage, error)
+	AgentMessageOutput(ctx context.Context, attrs console.AgentMessageOutputAttributes) error
 	Me() (*console.Me_Me, error)
 	GetClusterByHandle(name string) (*console.TinyClusterFragment, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.CreateCluster, error)

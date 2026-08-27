@@ -151,7 +151,7 @@ export function SimpleToolCall({
               >
                 {command}
               </Code>
-              {isPending ? (
+              {isPending && !result ? (
                 <RunningToolOutputCode />
               ) : result ? (
                 <Code

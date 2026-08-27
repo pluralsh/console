@@ -132,6 +132,11 @@ func (c *client) UpdateAgentMessage(ctx context.Context, id string, attrs consol
 	return response.UpdateAgentMessage, nil
 }
 
+func (c *client) AgentMessageOutput(ctx context.Context, attrs console.AgentMessageOutputAttributes) error {
+	_, err := c.consoleClient.CreateAgentMessageOutput(ctx, attrs)
+	return err
+}
+
 func (c *client) GetAgentRunTodos(ctx context.Context, id string) ([]*console.AgentTodoFragment, error) {
 	response, err := c.consoleClient.GetAgentRunTodos(ctx, id)
 	if err != nil {

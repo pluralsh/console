@@ -84,8 +84,17 @@ export function ToolCallContent({
           {JSON.stringify(attributes.tool.arguments, null, 2)}
         </Code>
       )}
-      {isPending ? (
+      {isPending && !content ? (
         <RunningToolOutputCode fillLevel={2} />
+      ) : isPending ? (
+        <Code
+          fillLevel={2}
+          title="Response"
+          showHeader
+          css={slimCodeCss}
+        >
+          {content}
+        </Code>
       ) : customResultBody ? (
         <>
           <CaptionP $color="text-light">Response</CaptionP>

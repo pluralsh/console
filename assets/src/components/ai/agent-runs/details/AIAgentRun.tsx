@@ -203,7 +203,10 @@ export function AIAgentRun() {
               />
             )}
             {!!run ? (
-              <AIAgentRunMessages run={run} />
+              <AIAgentRunMessages
+                key={run.id}
+                run={run}
+              />
             ) : runLoading ? (
               <RectangleSkeleton
                 $width="100%"
