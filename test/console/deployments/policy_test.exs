@@ -324,6 +324,14 @@ defmodule Console.Deployments.PolicyTest do
       assert message =~ "invalid rego policy"
     end
 
+    test "rejects an empty buffer" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, "", %{})
+
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
     test "rejects source over 1MB" do
       {:error, %Ecto.Changeset{} = changeset} =
         Policy.evaluate_custom_policy(:workbench, String.duplicate("a", 1_000_001), %{})

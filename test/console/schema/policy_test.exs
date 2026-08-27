@@ -44,6 +44,14 @@ defmodule Console.Schema.PolicyTest do
       assert message =~ "invalid rego policy"
     end
 
+    test "rejects an empty buffer at compile time" do
+      changeset = Policy.source_changeset("")
+
+      refute changeset.valid?
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
     test "rejects source over 1MB" do
       changeset = Policy.source_changeset(String.duplicate("a", 1_000_001))
 

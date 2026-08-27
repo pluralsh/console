@@ -58,8 +58,7 @@ defmodule Console.Schema.Policy do
 
   def source_changeset(source) do
     %__MODULE__{}
-    |> cast(%{policy: source}, [:policy])
-    |> validate_required([:policy])
+    |> cast(%{policy: source}, [:policy], empty_values: [])
     |> validate_policy_source()
   end
 

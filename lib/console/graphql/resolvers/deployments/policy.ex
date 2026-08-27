@@ -90,7 +90,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   end
 
   def evaluate_policy(%{policy_id: id, input: input, policy: source}, _)
-      when is_binary(source) and byte_size(source) > 0 do
+      when is_binary(source) do
     with %{type: type} <- Policy.get_policy(id) do
       Policy.evaluate_custom_policy(type, source, input)
     else

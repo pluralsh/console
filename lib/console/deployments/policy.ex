@@ -194,7 +194,7 @@ defmodule Console.Deployments.Policy do
   end
 
   @doc "Compiles unsaved policy source and evaluates it. Does not authorize against a stored policy."
-  def evaluate_custom_policy(type, source, input) when is_binary(source) and byte_size(source) > 0 do
+  def evaluate_custom_policy(type, source, input) when is_binary(source) do
     with {:ok, _} <- Console.Schema.Policy.source_changeset(source) |> Ecto.Changeset.apply_action(:validate),
          {:ok, engine, path} <- compile_policies(type, [%{name: "custom", policy: source}]) do
       eval_policy(engine, input, [], path)

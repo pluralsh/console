@@ -501,6 +501,34 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert message =~ "invalid rego policy"
     end
 
+    test "rejects an empty unsaved policy buffer instead of evaluating the stored policy" do
+      policy = insert(:policy,
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "saved"}] if {
+          true
+        }
+        """
+      )
+
+      {:ok, result} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => ""
+      }, %{current_user: insert(:user)})
+
+      refute get_in(result, [:data, "evaluatePolicy"])
+      assert [%{message: message} | _] = result[:errors]
+      assert message =~ "invalid rego policy"
+    end
+
     test "rejects unsaved policy source over 1MB" do
       policy = insert(:policy)
 
