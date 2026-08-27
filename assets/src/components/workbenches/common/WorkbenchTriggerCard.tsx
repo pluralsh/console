@@ -26,6 +26,7 @@ export const TriggerCardIconWrapperSC = styled.div(({ theme }) => ({
 export const TriggerAccordionSC = styled(Accordion)({
   background: 'none',
   border: 'none',
+  boxShadow: 'none',
   marginTop: 0,
 })
 

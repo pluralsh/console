@@ -54,7 +54,10 @@ export const MdCode = styled.code.withConfig(commonCfg)(({ theme }) => ({
   verticalAlign: 'baseline',
   padding: '0.1em 0.4em',
   margin: '-0.1em 0',
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-two']
+      : theme.colors['fill-one'],
   borderRadius: theme.borderRadiuses.medium,
 }))
 export const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({

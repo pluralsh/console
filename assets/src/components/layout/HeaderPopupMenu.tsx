@@ -2,7 +2,7 @@ import { Card, CardProps } from '@pluralsh/design-system'
 import { useKeyDown } from '@react-hooks-library/core'
 import { animated, useTransition } from '@react-spring/web'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 export function SimplePopupMenu({
   isOpen,
@@ -18,6 +18,7 @@ export function SimplePopupMenu({
   linkStyles?: boolean
   children: ReactNode
 } & CardProps) {
+  const theme = useTheme()
   useKeyDown(['Escape'], () => setIsOpen(false))
 
   const transitions = useTransition(isOpen ? [true] : [], {
@@ -35,7 +36,7 @@ export function SimplePopupMenu({
       style={styles}
     >
       <MenuCardSC
-        fillLevel={2}
+        fillLevel={theme.mode === 'light' ? 1 : 2}
         {...props}
         $linkStyles={linkStyles}
       >
@@ -47,11 +48,17 @@ export function SimplePopupMenu({
 
 const MenuCardSC = styled(Card)<{ $linkStyles?: boolean }>(
   ({ theme, $linkStyles }) => ({
-    width: 230,
-    padding: `${theme.spacing.xsmall}px 0`,
-    borderRadius: theme.borderRadiuses.medium,
-    display: 'flex',
-    flexDirection: 'column',
+    '&&': {
+      width: 230,
+      padding: `${theme.spacing.xsmall}px 0`,
+      borderRadius: theme.borderRadiuses.medium,
+      display: 'flex',
+      flexDirection: 'column',
+      ...(theme.mode === 'light' && {
+        // White floating panel — match notifications popover tone
+        backgroundColor: theme.colors['fill-zero'],
+      }),
+    },
     ...($linkStyles && {
       [`& a, & button`]: {
         ...theme.partials.text.body2,

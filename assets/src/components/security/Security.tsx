@@ -78,4 +78,12 @@ const WrapperSC = styled.div(({ theme }) => ({
   maxWidth: 1280,
   gap: theme.spacing.large,
   padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px ${theme.spacing.medium}px`,
+  // Soft card shadows paint into this padding; keep a little extra in light mode
+  // so the scrollport edge doesn’t shear them off.
+  ...(theme.mode === 'light' && {
+    paddingTop: theme.spacing.large + theme.spacing.xsmall,
+    paddingBottom: theme.spacing.medium + theme.spacing.xsmall,
+    paddingLeft: theme.spacing.xxlarge + theme.spacing.xsmall,
+    paddingRight: theme.spacing.xxlarge + theme.spacing.xsmall,
+  }),
 }))

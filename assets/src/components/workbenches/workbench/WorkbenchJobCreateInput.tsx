@@ -571,7 +571,10 @@ const InputWrapperSC = styled.div({
 })
 
 const SavedPromptTooltipPromptSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-three'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-three'],
   borderRadius: theme.borderRadiuses.medium,
   padding: theme.spacing.small,
   minWidth: 0,

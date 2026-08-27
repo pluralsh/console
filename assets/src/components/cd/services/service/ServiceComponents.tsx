@@ -135,7 +135,7 @@ export function ServiceComponents() {
                   width: '100%',
                   flexWrap: 'nowrap',
                   minWidth: 0,
-                  overflow: 'hidden',
+                  overflow: theme.mode === 'light' ? 'visible' : 'hidden',
                 }}
               >
                 <Input
@@ -207,6 +207,7 @@ function ComponentsListView({
   setComponents: (components: ServiceDeploymentComponentFragment[]) => void
   searchQuery: string
 }) {
+  const theme = useTheme()
   const { serviceId, clusterId, flowIdOrName } = useParams()
   const throttledSearchQuery = useThrottle(searchQuery, 250)
   const [showDeprecations, setShowDeprecations] = useState(false)
@@ -237,7 +238,7 @@ function ComponentsListView({
       <Flex
         direction="column"
         gap="medium"
-        overflow="hidden"
+        overflow={theme.mode === 'light' ? 'visible' : 'hidden'}
       >
         {deprecationCount > 0 && (
           <Callout

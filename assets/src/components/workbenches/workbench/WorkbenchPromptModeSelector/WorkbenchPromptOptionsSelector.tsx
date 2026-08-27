@@ -40,7 +40,10 @@ import {
   WorkbenchCodingSupervisionFields,
   WorkbenchKubernetesMutationFields,
 } from './WorkbenchModeOptionFields'
-import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
+import {
+  WorkbenchPromptPopover,
+  workbenchPromptPanelSurfaces,
+} from './WorkbenchPromptModeSelector'
 import {
   CODING_AGENT_LABEL,
   disableKubernetesModes,
@@ -75,6 +78,7 @@ export function WorkbenchPromptOptionsSelector({
   workbenchModes?: WorkbenchJobModes | null
 }) {
   const theme = useTheme()
+  const { panelBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [sidePanel, setSidePanel] = useState<SidePanel | null>(null)
@@ -160,8 +164,8 @@ export function WorkbenchPromptOptionsSelector({
               flexShrink: 0,
               overflowY: 'auto',
               padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-              backgroundColor: theme.colors['fill-two'],
-              border: 'none',
+              backgroundColor: panelBackground,
+              border: theme.mode === 'light' ? panelBorder : 'none',
               borderRadius: sidePanel
                 ? `${theme.borderRadiuses.large}px 0 0 ${theme.borderRadiuses.large}px`
                 : theme.borderRadiuses.large,
@@ -418,6 +422,7 @@ function PromptOptionRow({
   onOpen: () => void
 }) {
   const theme = useTheme()
+  const { modeItemBackground } = workbenchPromptPanelSurfaces(theme)
 
   return (
     <button
@@ -431,11 +436,11 @@ function PromptOptionRow({
         padding: theme.spacing.xsmall,
         color: theme.colors.text,
         textAlign: 'left',
-        background: active ? theme.colors['fill-two-hover'] : 'transparent',
+        background: active ? modeItemBackground : 'transparent',
         border: 0,
         borderRadius: theme.borderRadiuses.medium,
         cursor: 'pointer',
-        '&:hover': { background: theme.colors['fill-two-hover'] },
+        '&:hover': { background: modeItemBackground },
       }}
     >
       <Flex
@@ -559,6 +564,7 @@ function KubernetesSidePanel({
 
 function SidePanelContainer({ children }: { children: ReactNode }) {
   const theme = useTheme()
+  const { detailBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
 
   return (
     <Flex
@@ -571,8 +577,8 @@ function SidePanelContainer({ children }: { children: ReactNode }) {
         maxHeight: '100%',
         minHeight: 0,
         overflowY: 'auto',
-        background: theme.colors['fill-two-selected'],
-        border: theme.borders['fill-two'],
+        background: detailBackground,
+        border: panelBorder,
         borderRadius: `0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px 0`,
         boxShadow: theme.boxShadows.moderate,
       }}
@@ -653,6 +659,7 @@ function SelectedOptionPill({
 
 function Divider() {
   const theme = useTheme()
+  const { panelBorder } = workbenchPromptPanelSurfaces(theme)
 
-  return <div css={{ borderTop: theme.borders['fill-two'] }} />
+  return <div css={{ borderTop: panelBorder }} />
 }
