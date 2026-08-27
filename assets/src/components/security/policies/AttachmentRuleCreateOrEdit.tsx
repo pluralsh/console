@@ -6,6 +6,7 @@ import {
   Flex,
   FormField,
   Input2,
+  ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
   ReturnIcon,
@@ -16,6 +17,7 @@ import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
   Body2BoldP,
@@ -159,25 +161,12 @@ function AttachmentRuleForm({
     sanitizeForm(rule)
   )
   const [initialForm] = useState(() => sanitizeForm(rule))
-
-  const { data: policiesData } = usePoliciesQuery({
-    fetchPolicy: 'cache-and-network',
-    variables: { first: 200 },
-  })
-  const policies = mapExistingNodes(policiesData?.policies)
-  const attachPolicies = policies.filter(
-    (policy) =>
-      policy.type === PolicyType.Workbench || policy.type === PolicyType.Stack
-  )
-  const bindPolicies = policies.filter(
-    (policy) => policy.type === PolicyType.Binding
-  )
-  const selectedPolicy = attachPolicies.find(
-    (policy) => policy.id === form.policyId
-  )
-  const selectedBindPolicy = bindPolicies.find(
-    (policy) => policy.id === form.bindPolicyId
-  )
+  const [selectedAttachPolicy, setSelectedAttachPolicy] = useState<
+    PolicyTinyFragment | undefined
+  >(rule?.policy ?? undefined)
+  const [selectedBindPolicy, setSelectedBindPolicy] = useState<
+    PolicyTinyFragment | undefined
+  >(rule?.bindPolicy ?? undefined)
   const showToolMatches = form.type === BindingPolicyType.Workbench
 
   const [createBindingPolicy, { loading: createLoading, error: createError }] =
@@ -269,18 +258,17 @@ function AttachmentRuleForm({
             <Body2BoldP>Select a policy to attach</Body2BoldP>
           </FormLabelSC>
           <PolicySelect
-            policies={attachPolicies}
-            selectedPolicy={selectedPolicy}
+            allowedTypes={[PolicyType.Workbench, PolicyType.Stack]}
+            selectedPolicy={selectedAttachPolicy}
             selectedKey={form.policyId}
             placeholder="Select a policy"
             showTypeChip
-            onSelectionChange={(policyId) => {
-              const policy = attachPolicies.find((item) => item.id === policyId)
-
+            onSelectionChange={(policy) => {
+              setSelectedAttachPolicy(policy)
               setForm((prev) => ({
                 ...prev,
-                policyId,
-                type: policyTypeToBindingType(policy?.type),
+                policyId: policy.id,
+                type: policyTypeToBindingType(policy.type),
               }))
             }}
           />
@@ -296,7 +284,7 @@ function AttachmentRuleForm({
             </NewBindingLinkSC>
           </FormLabelSC>
           <PolicySelect
-            policies={bindPolicies}
+            allowedTypes={[PolicyType.Binding]}
             selectedPolicy={selectedBindPolicy}
             selectedKey={form.bindPolicyId}
             placeholder="Select a bind policy"
@@ -313,9 +301,10 @@ function AttachmentRuleForm({
                 New binding
               </ListBoxFooterPlus>
             }
-            onSelectionChange={(bindPolicyId) =>
-              setForm((prev) => ({ ...prev, bindPolicyId }))
-            }
+            onSelectionChange={(policy) => {
+              setSelectedBindPolicy(policy)
+              setForm((prev) => ({ ...prev, bindPolicyId: policy.id }))
+            }}
           />
         </FormRowSC>
       </FormCardSC>
@@ -395,6 +384,7 @@ function AttachmentRuleForm({
         open={bindingModalOpen}
         onClose={() => setBindingModalOpen(false)}
         onCreated={(created) => {
+          setSelectedBindPolicy(created)
           setForm((prev) => ({ ...prev, bindPolicyId: created.id }))
           setBindingModalOpen(false)
         }}
@@ -427,7 +417,7 @@ function AttachmentRuleForm({
 }
 
 function PolicySelect({
-  policies,
+  allowedTypes,
   selectedPolicy,
   selectedKey,
   placeholder,
@@ -438,7 +428,7 @@ function PolicySelect({
   onOpenChange,
   onSelectionChange,
 }: {
-  policies: PolicyTinyFragment[]
+  allowedTypes: PolicyType[]
   selectedPolicy?: PolicyTinyFragment
   selectedKey: string
   placeholder: string
@@ -447,8 +437,20 @@ function PolicySelect({
   dropdownFooterFixed?: ReactNode
   isOpen?: boolean
   onOpenChange?: (isOpen: boolean) => void
-  onSelectionChange: (id: string) => void
+  onSelectionChange: (policy: PolicyTinyFragment) => void
 }) {
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData({
+    queryHook: usePoliciesQuery,
+    keyPath: ['policies'],
+  })
+  const policies = useMemo(() => {
+    const loaded = mapExistingNodes(data?.policies).filter((policy) =>
+      allowedTypes.includes(policy.type)
+    )
+
+    return withSelectedPolicy(loaded, selectedPolicy)
+  }, [allowedTypes, data?.policies, selectedPolicy])
+
   return (
     <SelectWrapSC>
       <Select
@@ -457,30 +459,61 @@ function PolicySelect({
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         rightContent={policyChip(selectedPolicy, showTypeChip, showMatchChip)}
+        dropdownFooter={
+          !data && loading ? (
+            <ListBoxFooter>Loading</ListBoxFooter>
+          ) : pageInfo?.hasNextPage ? (
+            <ListBoxFooterPlus>Load more</ListBoxFooterPlus>
+          ) : undefined
+        }
+        onFooterClick={() => {
+          if (pageInfo?.hasNextPage) fetchNextPage()
+        }}
         dropdownFooterFixed={dropdownFooterFixed}
         onSelectionChange={(key) => {
-          if (key == null) return
-          onSelectionChange(`${key}`)
+          const policy = policies.find((item) => item.id === `${key}`)
+
+          if (!policy) return
+          onSelectionChange(policy)
         }}
       >
-        {policies.map((policy) => (
+        {policies.length === 0 ? (
           <ListBoxItem
-            key={policy.id}
-            textValue={policy.name}
-            label={
-              <StackedText
-                truncate
-                first={policy.name}
-                second={policy.description}
-                firstColor="text"
-              />
-            }
-            rightContent={policyChip(policy, showTypeChip, showMatchChip)}
+            key="empty"
+            label={loading ? 'Loading policies' : 'No policies found'}
+            disabled
+            textValue=""
           />
-        ))}
+        ) : (
+          policies.map((policy) => (
+            <ListBoxItem
+              key={policy.id}
+              textValue={policy.name}
+              label={
+                <StackedText
+                  truncate
+                  first={policy.name}
+                  second={policy.description}
+                  firstColor="text"
+                />
+              }
+              rightContent={policyChip(policy, showTypeChip, showMatchChip)}
+            />
+          ))
+        )}
       </Select>
     </SelectWrapSC>
   )
+}
+
+function withSelectedPolicy(
+  policies: PolicyTinyFragment[],
+  selected?: PolicyTinyFragment
+) {
+  if (!selected?.id) return policies
+  if (policies.some((policy) => policy.id === selected.id)) return policies
+
+  return [selected, ...policies]
 }
 
 function policyChip(
