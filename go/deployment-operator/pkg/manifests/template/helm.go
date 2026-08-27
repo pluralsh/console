@@ -459,13 +459,11 @@ func (h *helm) luaFolder(svc *console.ServiceDeploymentForAgent, folder string) 
 
 func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, error) {
 	currentMap := map[string]any{}
-	root, err := os.OpenRoot(h.dir)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open Helm values root: %w", err)
+	if !filepath.IsLocal(filename) {
+		return nil, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
 	}
-	defer root.Close()
-
-	data, err := root.ReadFile(filename)
+	filename = filepath.Join(h.dir, filename)
+	data, err := os.ReadFile(filename)
 	if os.IsNotExist(err) {
 		return currentMap, nil
 	}
