@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/pluralsh/console/go/deployment-operator/pkg/errors"
@@ -47,7 +46,7 @@ func GetReader(url, token string) (io.ReadCloser, http.Header, error) {
 	req.Header.Add("Authorization", "Token "+token)
 
 	var lastErr error
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		resp, header, retriable, err := doRequest(req)
 		if err != nil {
 			if !retriable {
@@ -111,32 +110,7 @@ func fetch(url, token, sha, dir string) error {
 
 	log.V(1).Info("finished request to", "url", url)
 
-	archive, err := os.CreateTemp("", "manifests-*.tar.gz")
-	if err != nil {
-		return fmt.Errorf("could not create temporary manifest tarball: %w", err)
-	}
-	archivePath := archive.Name()
-
-	written, copyErr := io.Copy(archive, resp)
-	closeErr := archive.Close()
-	if copyErr != nil {
-		_ = os.Remove(archivePath)
-		return fmt.Errorf("could not save manifest tarball: %w", copyErr)
-	}
-	if closeErr != nil {
-		_ = os.Remove(archivePath)
-		return fmt.Errorf("could not close saved manifest tarball: %w", closeErr)
-	}
-
-	log.Info("saved manifest tarball for inspection", "path", archivePath, "bytes", written, "sha", sha)
-
-	archive, err = os.Open(archivePath)
-	if err != nil {
-		return fmt.Errorf("could not open saved manifest tarball %s: %w", archivePath, err)
-	}
-	defer archive.Close()
-
-	return Untar(dir, archive)
+	return Untar(dir, resp)
 }
 
 func sanitizeURL(consoleURL string) (string, error) {
