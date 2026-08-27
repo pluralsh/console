@@ -15,6 +15,7 @@
 
 # Go workspace
 go.work.sum
+.cache/
 
 # Test binary, built with `go test -c`
 *.test

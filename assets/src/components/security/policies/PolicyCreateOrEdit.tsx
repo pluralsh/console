@@ -28,10 +28,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { POLICIES_ABS_PATH } from 'routes/securityRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { POLICIES_DESCRIPTION } from './Policies'
-import {
-  PolicyDescriptionField,
-  PolicyNameField,
-} from './PolicyIdentityFields'
+import { PolicyDescriptionField, PolicyNameField } from './PolicyIdentityFields'
 import { getPoliciesBreadcrumbs } from './policiesBreadcrumbs'
 
 const TYPE_OPTIONS: {

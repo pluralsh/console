@@ -6630,8 +6630,16 @@ type Policy struct {
 	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
 	StackPolicies     *StackPolicyConnection      `json:"stackPolicies,omitempty"`
 	WorkbenchPolicies *WorkbenchPolicyConnection  `json:"workbenchPolicies,omitempty"`
-	InsertedAt        *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
+	// how many workbenches and stacks currently match this bind policy
+	MatchCount *int64 `json:"matchCount,omitempty"`
+	// how many sampled evaluations include this policy
+	EvaluationCount *int64 `json:"evaluationCount,omitempty"`
+	// how many workbenches are currently attached to this policy
+	WorkbenchAttachmentCount *int64 `json:"workbenchAttachmentCount,omitempty"`
+	// how many stacks are currently attached to this policy
+	StackAttachmentCount *int64  `json:"stackAttachmentCount,omitempty"`
+	InsertedAt           *string `json:"insertedAt,omitempty"`
+	UpdatedAt            *string `json:"updatedAt,omitempty"`
 }
 
 // Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy.
@@ -9284,6 +9292,8 @@ type StackRun struct {
 	Approval *bool `json:"approval,omitempty"`
 	// the commit message
 	Message *string `json:"message,omitempty"`
+	// the committer email of the commit that spawned this run
+	Committer *string `json:"committer,omitempty"`
 	// when this run was approved
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the subdirectory you want to run the stack's commands w/in

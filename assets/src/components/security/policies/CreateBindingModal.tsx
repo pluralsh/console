@@ -14,10 +14,7 @@ import {
   useCreatePolicyMutation,
 } from 'generated/graphql'
 import { useEffect, useState } from 'react'
-import {
-  PolicyDescriptionField,
-  PolicyNameField,
-} from './PolicyIdentityFields'
+import { PolicyDescriptionField, PolicyNameField } from './PolicyIdentityFields'
 
 export function CreateBindingModal({
   open,

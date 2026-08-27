@@ -49,6 +49,10 @@ export function PolicyDetails() {
     fetchPolicy: 'cache-and-network',
   })
   const policy = data?.policy
+  const attachmentCount = policy
+    ? (policy.workbenchAttachmentCount ?? 0) +
+      (policy.stackAttachmentCount ?? 0)
+    : undefined
   const directory = useMemo(
     () => [
       {
@@ -68,13 +72,13 @@ export function PolicyDetails() {
         label: (
           <TabLabelWithCount
             label="Attachments"
-            count={policy?.attachmentCount}
+            count={attachmentCount}
           />
         ),
         path: getPolicyDetailsAbsPath(id ?? '', POLICIES_ATTACHMENTS_REL_PATH),
       },
     ],
-    [id, policy?.attachmentCount, policy?.evaluationCount]
+    [id, attachmentCount, policy?.evaluationCount]
   )
 
   useSetBreadcrumbs(

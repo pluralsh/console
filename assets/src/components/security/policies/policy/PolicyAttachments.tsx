@@ -3,10 +3,9 @@ import type { Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
-  BindingPolicyType,
-  PolicyAttachmentFragment,
   PolicyType,
-  usePolicyAttachmentsQuery,
+  usePolicyStackAttachmentsQuery,
+  usePolicyWorkbenchAttachmentsQuery,
 } from 'generated/graphql'
 import { compact, startCase } from 'lodash'
 import { useMemo } from 'react'
@@ -29,30 +28,50 @@ export function PolicyAttachments() {
   const { policy } = useOutletContext<PolicyDetailsContext>()
   const params = useParams()
   const id = policy?.id ?? params[POLICIES_PARAM_ID] ?? ''
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      {
-        queryHook: usePolicyAttachmentsQuery,
-        keyPath: ['policy', 'attachments'],
-        skip: !id,
-      },
-      { id }
-    )
-
-  const rows = useMemo(
-    () => mapExistingNodes(data?.policy?.attachments).map(toAttachmentRow),
-    [data]
+  const type = policy?.type
+  const isStack = type === PolicyType.Stack
+  const workbenchQuery = useFetchPaginatedData(
+    {
+      queryHook: usePolicyWorkbenchAttachmentsQuery,
+      keyPath: ['policy', 'workbenchPolicies'],
+      skip: !id || !type || isStack,
+    },
+    { id }
   )
+  const stackQuery = useFetchPaginatedData(
+    {
+      queryHook: usePolicyStackAttachmentsQuery,
+      keyPath: ['policy', 'stackPolicies'],
+      skip: !id || !type || !isStack,
+    },
+    { id }
+  )
+  const { loading, error, pageInfo, fetchNextPage, setVirtualSlice } = isStack
+    ? stackQuery
+    : workbenchQuery
+  const data = isStack ? stackQuery.data : workbenchQuery.data
+
+  const rows = useMemo(() => {
+    if (isStack) {
+      return mapExistingNodes(stackQuery.data?.policy?.stackPolicies).map(
+        toStackRow
+      )
+    }
+
+    return mapExistingNodes(workbenchQuery.data?.policy?.workbenchPolicies).map(
+      toWorkbenchRow
+    )
+  }, [isStack, stackQuery.data, workbenchQuery.data])
   const columns = useMemo(
     () => [
       {
         ...ColWorkbench,
-        header: policy?.type === PolicyType.Stack ? 'Stack' : 'Workbench',
+        header: isStack ? 'Stack' : 'Workbench',
       },
-      ...(policy?.type === PolicyType.Stack ? [] : [ColMatchingArg]),
+      ...(isStack ? [] : [ColMatchingArg]),
       ColUpdated,
     ],
-    [policy?.type]
+    [isStack]
   )
 
   if (error) return <GqlError error={error} />
@@ -78,25 +97,16 @@ export function PolicyAttachments() {
   )
 }
 
-function toAttachmentRow(
-  attachment: PolicyAttachmentFragment
-): PolicyAttachmentRow {
-  if (attachment.type === BindingPolicyType.Stack) {
-    return {
-      id: attachment.id,
-      kind: 'stack',
-      name: attachment.stack?.name,
-      description: attachment.stack?.type
-        ? startCase(attachment.stack.type.toLowerCase())
-        : 'Stack',
-      matchingArgs: [],
-      updatedAt: attachment.updatedAt,
-      href: attachment.stack?.id
-        ? getStacksAbsPath(attachment.stack.id)
-        : undefined,
-    }
-  }
-
+function toWorkbenchRow(attachment: {
+  id: string
+  matches?: { regexes?: (string | null)[] | null } | null
+  workbench?: {
+    id?: string | null
+    name?: string | null
+    description?: string | null
+  } | null
+  updatedAt?: string | null
+}): PolicyAttachmentRow {
   return {
     id: attachment.id,
     kind: 'workbench',
@@ -106,6 +116,30 @@ function toAttachmentRow(
     updatedAt: attachment.updatedAt,
     href: attachment.workbench?.id
       ? getWorkbenchAbsPath(attachment.workbench.id)
+      : undefined,
+  }
+}
+
+function toStackRow(attachment: {
+  id: string
+  stack?: {
+    id?: string | null
+    name?: string | null
+    type?: string | null
+  } | null
+  updatedAt?: string | null
+}): PolicyAttachmentRow {
+  return {
+    id: attachment.id,
+    kind: 'stack',
+    name: attachment.stack?.name,
+    description: attachment.stack?.type
+      ? startCase(attachment.stack.type.toLowerCase())
+      : 'Stack',
+    matchingArgs: [],
+    updatedAt: attachment.updatedAt,
+    href: attachment.stack?.id
+      ? getStacksAbsPath(attachment.stack.id)
       : undefined,
   }
 }

@@ -15,27 +15,8 @@ fragment Policy on Policy {
   ...PolicyTiny
   policy
   evaluationCount
-  attachmentCount
-}
-
-fragment PolicyAttachment on PolicyAttachment {
-  id
-  type
-  matches {
-    regexes
-  }
-  workbench {
-    id
-    name
-    description
-  }
-  stack {
-    id
-    name
-    type
-  }
-  insertedAt
-  updatedAt
+  workbenchAttachmentCount
+  stackAttachmentCount
 }
 
 query Policies(
@@ -71,16 +52,47 @@ query Policy($id: ID, $name: String) {
   }
 }
 
-query PolicyAttachments($id: ID!, $first: Int, $after: String) {
+query PolicyWorkbenchAttachments($id: ID!, $first: Int, $after: String) {
   policy(id: $id) {
     id
-    attachments(first: $first, after: $after) {
+    workbenchPolicies(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
       }
       edges {
         node {
-          ...PolicyAttachment
+          id
+          matches {
+            regexes
+          }
+          workbench {
+            id
+            name
+            description
+          }
+          updatedAt
+        }
+      }
+    }
+  }
+}
+
+query PolicyStackAttachments($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    stackPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          stack {
+            id
+            name
+            type
+          }
+          updatedAt
         }
       }
     }

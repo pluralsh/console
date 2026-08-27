@@ -600,7 +600,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert found["evaluationCount"] == 3
     end
 
-    test "returns attachmentCount for workbench and stack associations" do
+    test "returns workbench and stack attachment counts" do
       policy = insert(:policy)
       insert_list(2, :workbench_policy, policy: policy)
       insert(:stack_policy, policy: policy)
@@ -608,11 +608,35 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
 
       {:ok, %{data: %{"policy" => found}}} = run_query("""
         query Policy($id: ID!) {
-          policy(id: $id) { id attachmentCount }
+          policy(id: $id) { id workbenchAttachmentCount stackAttachmentCount }
         }
       """, %{"id" => policy.id}, %{current_user: admin_user()})
 
-      assert found["attachmentCount"] == 3
+      assert found["workbenchAttachmentCount"] == 2
+      assert found["stackAttachmentCount"] == 1
+    end
+
+    test "batches workbench and stack attachment counts across policies" do
+      workbench_policy = insert(:policy)
+      stack_policy = insert(:policy)
+      insert_list(2, :workbench_policy, policy: workbench_policy)
+      insert(:stack_policy, policy: stack_policy)
+      insert(:workbench_policy)
+
+      {:ok, %{data: %{"policies" => found}}} = run_query("""
+        query {
+          policies(first: 10) {
+            edges { node { id workbenchAttachmentCount stackAttachmentCount } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      counts =
+        from_connection(found)
+        |> Map.new(& {&1["id"], {&1["workbenchAttachmentCount"], &1["stackAttachmentCount"]}})
+
+      assert counts[workbench_policy.id] == {2, 0}
+      assert counts[stack_policy.id] == {0, 1}
     end
 
     test "lists stack and workbench policy associations" do
@@ -635,74 +659,6 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
 
       assert from_connection(found["stackPolicies"]) |> ids_equal(stack_policies)
       assert from_connection(found["workbenchPolicies"]) |> ids_equal(workbench_policies)
-    end
-
-    test "lists mixed workbench and stack attachments" do
-      policy = insert(:policy)
-      workbench_policy = insert(:workbench_policy, policy: policy)
-      stack_policy = insert(:stack_policy, policy: policy)
-
-      {:ok, %{data: %{"policy" => found}}} = run_query("""
-        query Policy($id: ID!) {
-          policy(id: $id) {
-            attachments(first: 5) {
-              edges {
-                node {
-                  id
-                  type
-                  workbench { id }
-                  stack { id }
-                }
-              }
-            }
-          }
-        }
-      """, %{"id" => policy.id}, %{current_user: admin_user()})
-
-      attachments = from_connection(found["attachments"])
-      by_id = Map.new(attachments, & {&1["id"], &1})
-
-      assert ids_equal(attachments, [workbench_policy, stack_policy])
-      assert by_id[workbench_policy.id]["type"] == "WORKBENCH"
-      assert by_id[workbench_policy.id]["workbench"]["id"] == workbench_policy.workbench_id
-      assert by_id[workbench_policy.id]["stack"] == nil
-      assert by_id[stack_policy.id]["type"] == "STACK"
-      assert by_id[stack_policy.id]["stack"]["id"] == stack_policy.stack_id
-      assert by_id[stack_policy.id]["workbench"] == nil
-    end
-
-    test "paginates mixed workbench and stack attachments" do
-      policy = insert(:policy)
-      insert_list(3, :workbench_policy, policy: policy)
-      insert_list(2, :stack_policy, policy: policy)
-
-      {:ok, %{data: %{"policy" => found}}} = run_query("""
-        query Policy($id: ID!) {
-          policy(id: $id) {
-            attachments(first: 2) {
-              pageInfo { hasNextPage endCursor }
-              edges { node { id } }
-            }
-          }
-        }
-      """, %{"id" => policy.id}, %{current_user: admin_user()})
-
-      assert length(found["attachments"]["edges"]) == 2
-      assert found["attachments"]["pageInfo"]["hasNextPage"]
-
-      {:ok, %{data: %{"policy" => found}}} = run_query("""
-        query Policy($id: ID!, $after: String) {
-          policy(id: $id) {
-            attachments(first: 5, after: $after) {
-              pageInfo { hasNextPage }
-              edges { node { id } }
-            }
-          }
-        }
-      """, %{"id" => policy.id, "after" => found["attachments"]["pageInfo"]["endCursor"]}, %{current_user: admin_user()})
-
-      assert length(found["attachments"]["edges"]) == 3
-      refute found["attachments"]["pageInfo"]["hasNextPage"]
     end
 
     test "blocks sensitive stack data nested under a policy" do
@@ -737,23 +693,6 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       """, %{"id" => policy.id}, %{current_user: admin_user()})
 
       assert message == "workbench runs cannot be fetched through a policy"
-    end
-
-    test "blocks sensitive stack data nested under policy attachments" do
-      policy = insert(:policy)
-      insert(:stack_policy, policy: policy)
-
-      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
-        query Policy($id: ID!) {
-          policy(id: $id) {
-            attachments(first: 5) {
-              edges { node { stack { runs(first: 5) { edges { node { id } } } } } }
-            }
-          }
-        }
-      """, %{"id" => policy.id}, %{current_user: admin_user()})
-
-      assert message == "stack runs cannot be fetched through a policy"
     end
 
     test "permits allowed stack and workbench fields nested under a policy" do

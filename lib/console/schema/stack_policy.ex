@@ -21,6 +21,17 @@ defmodule Console.Schema.StackPolicy do
     from(p in query, where: p.policy_id == ^policy_id)
   end
 
+  def counts_for_policies([]), do: %{}
+  def counts_for_policies(policy_ids) do
+    from(p in __MODULE__,
+      where: p.policy_id in ^policy_ids,
+      group_by: p.policy_id,
+      select: {p.policy_id, count(p.id)}
+    )
+    |> Console.Repo.all()
+    |> Map.new()
+  end
+
   @valid ~w(policy_id stack_id type)a
 
   def changeset(model, attrs \\ %{}) do
