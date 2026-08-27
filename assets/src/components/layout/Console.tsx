@@ -145,6 +145,6 @@ function ConsoleContent() {
 const ConsoleRoutesSC = styled(Flex)(({ theme }) => ({
   backgroundColor:
     theme.mode === 'light'
-      ? theme.colors['fill-two']
+      ? theme.colors['page-background']
       : theme.colors['fill-zero'],
 }))

@@ -121,6 +121,14 @@ spec:
                 description: Icon specifies an optional image icon for the flow to
                   apply branding or improve identification.
                 type: string
+              maxPreviews:
+                description: |-
+                  MaxPreviews is the maximum number of preview environments allowed for this flow.
+                  Must be between 1 and 25. Defaults to 10 if omitted.
+                format: int64
+                maximum: 25
+                minimum: 1
+                type: integer
               metadata:
                 description: |-
                   Metadata contains arbitrary JSON metadata for the flow.

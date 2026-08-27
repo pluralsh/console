@@ -15,6 +15,7 @@ export default function StackRunPlan(): ReactNode {
       flexGrow={1}
       overflowY="auto"
       maxHeight="100%"
+      minHeight={0}
     >
       <CommandLog
         text={value}

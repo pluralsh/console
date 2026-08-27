@@ -1,15 +1,8 @@
-import {
-  AiSparkleFilledIcon,
-  Button,
-  Chip,
-  ChipProps,
-  Flex,
-} from '@pluralsh/design-system'
+import { Chip, ChipProps, Flex } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 
 import { Row } from '@tanstack/react-table'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import {
@@ -20,10 +13,8 @@ import {
 
 export function VulnDetailExpanded({
   row,
-  onFixVulnerability,
 }: {
   row: Row<VulnerabilityFragment>
-  onFixVulnerability: (vuln: VulnerabilityFragment) => void
 }) {
   const { original: v } = row
 
@@ -32,25 +23,14 @@ export function VulnDetailExpanded({
 
   return (
     <VulnerabilityDetailSC>
-      <StretchedFlex gap="xlarge">
-        <StackedText
-          first={v.title}
-          firstPartialType="body2Bold"
-          firstColor="text"
-          second={v.description}
-          secondPartialType="body2"
-          css={{ maxWidth: 900 }}
-        />
-        <Button
-          startIcon={<AiSparkleFilledIcon />}
-          onClick={(e) => {
-            e.stopPropagation()
-            onFixVulnerability(v)
-          }}
-        >
-          Fix vulnerability
-        </Button>
-      </StretchedFlex>
+      <StackedText
+        first={v.title}
+        firstPartialType="body2Bold"
+        firstColor="text"
+        second={v.description}
+        secondPartialType="body2"
+        css={{ maxWidth: 900 }}
+      />
       <CVSSSection
         bundle={v.cvss}
         source={v.cvssSource}

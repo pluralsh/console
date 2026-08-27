@@ -26,13 +26,20 @@ export const Tr = styled.tr<{
     display: 'contents',
     backgroundColor:
       theme.colors[
-        tableCellColor(fillLevel, highlighted, raised, selectable, selected)
+        tableCellColor(
+          fillLevel,
+          highlighted,
+          raised,
+          selectable,
+          selected,
+          theme.mode
+        )
       ],
     '&[data-expander-row]': {
       backgroundColor:
         theme.colors[
           expandedBgColor ??
-            tableCellHoverColor(fillLevel, selectable, selected)
+            tableCellHoverColor(fillLevel, selectable, selected, theme.mode)
         ],
     },
 
@@ -42,7 +49,9 @@ export const Tr = styled.tr<{
       // highlight when hovered, but not when hovering nested actions
       '&:not(:has(button:hover, [data-clickable="true"]:hover)):hover': {
         backgroundColor:
-          theme.colors[tableCellHoverColor(fillLevel, selectable, selected)],
+          theme.colors[
+            tableCellHoverColor(fillLevel, selectable, selected, theme.mode)
+          ],
       },
     }),
   })

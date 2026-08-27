@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
   alias Console.AI.Workbench.Subagents.{Infrastructure, Observability}
   alias Console.Deployments.Sentinels
   alias Console.Schema.{SentinelRun, WorkbenchJob, WorkbenchJobActivity}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Scratchpad}
+  alias Console.AI.Tools.Workbench.{Result, Scratchpad}
   alias Console.AI.Tools.Workbench.Sentinel.{
     FetchSentinelRun,
     FetchSentinelRunJob,
@@ -21,8 +21,8 @@ defmodule Console.AI.Workbench.Subagents.Verify do
       engine_opts(environment) ++ [
         system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
         acc: %{},
-        callback: &callback(activity, &1),
-        pre_enable: [Result, %Skills{} ,%Skill{}],
+        callback: &callback(activity, environment, &1),
+        pre_enable: [Result | skill_knowledge_pre_enable()],
         continue_msg: cont_msg()
       ]
     )
@@ -54,9 +54,7 @@ defmodule Console.AI.Workbench.Subagents.Verify do
     Observability.core_tools(job, environment)
     |> Enum.concat(Infrastructure.core_tools(job, environment))
     |> Enum.concat(sentinel_tools(job))
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       Result
     ])

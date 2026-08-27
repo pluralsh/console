@@ -6,8 +6,30 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
+
+func TestAddExternalMCPServers(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
+
+	servers := map[string]any{}
+	if err := addExternalMCPServers(servers); err != nil {
+		t.Fatalf("addExternalMCPServers() error = %v", err)
+	}
+	linear := servers["linear"].(map[string]any)
+	if linear["url"] != "https://mcp.linear.app/mcp" {
+		t.Fatalf("url = %v", linear["url"])
+	}
+	headers := linear["headers"].(map[string]string)
+	if headers["Authorization"] != "Bearer secret" {
+		t.Fatalf("headers = %#v", headers)
+	}
+	directTools := linear["directTools"].([]string)
+	if len(directTools) != 1 || directTools[0] != "list_issues" {
+		t.Fatalf("directTools = %#v", directTools)
+	}
+}
 
 func TestArgsIncludesJSONModeSessionAndMCPConfig(t *testing.T) {
 	tool := &Pi{

@@ -384,9 +384,9 @@ func enableAgentBootstrap(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime
 		pod.Spec.InitContainers[index].Image = defaultImage
 	}
 
-	pod.Spec.InitContainers[index].SecurityContext = ensureDefaultContainerSecurityContext(pod.Spec.InitContainers[index].SecurityContext)
+	pod.Spec.InitContainers[index].SecurityContext = ensureAgentBootstrapSecurityContext(pod.Spec.InitContainers[index].SecurityContext)
 	pod.Spec.InitContainers[index].EnvFrom = getDefaultContainerEnvFrom(run.Name)
-	pod.Spec.InitContainers[index].Env = ensureMCPServerEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
+	pod.Spec.InitContainers[index].Env = ensureAgentBootstrapEnvVars(pod.Spec.InitContainers[index].Env, run, runtime)
 	pod.Spec.InitContainers[index].VolumeMounts = ensureMCPServerVolumeMounts(pod.Spec.InitContainers[index].VolumeMounts, runtime)
 
 	if len(pod.Spec.InitContainers[index].Command) == 0 {
@@ -401,13 +401,45 @@ func getAgentBootstrapContainer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentR
 	return corev1.Container{
 		Name:            agentBootstrapContainerName,
 		Image:           image,
-		SecurityContext: ensureDefaultContainerSecurityContext(nil),
+		SecurityContext: ensureAgentBootstrapSecurityContext(nil),
 		EnvFrom:         getDefaultContainerEnvFrom(run.Name),
-		Env:             getMCPServerEnvVars(run, runtime),
+		Env:             getAgentBootstrapEnvVars(run, runtime),
 		Command:         []string{"/agent-bootstrap"},
 		Args:            []string{"--working-dir", common.AgentRunSharedWorkDir},
 		VolumeMounts:    ensureMCPServerVolumeMounts(nil, runtime),
 	}
+}
+
+// ensureAgentBootstrapSecurityContext pins a restricted container profile.
+// Bootstrap only writes the clone and git metadata into the shared emptyDir
+// (/plural/shared) and uses the /tmp emptyDir for git's global config, so a
+// read-only root filesystem is safe.
+func ensureAgentBootstrapSecurityContext(sc *corev1.SecurityContext) *corev1.SecurityContext {
+	if sc != nil {
+		return sc
+	}
+
+	sc = ensureDefaultContainerSecurityContext(nil)
+	sc.ReadOnlyRootFilesystem = lo.ToPtr(true)
+	sc.Capabilities = &corev1.Capabilities{
+		Drop: []corev1.Capability{"ALL"},
+	}
+	return sc
+}
+
+func getAgentBootstrapEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	return ensureAgentBootstrapEnvVars(getMCPServerEnvVars(run, runtime), run, runtime)
+}
+
+func ensureAgentBootstrapEnvVars(existing []corev1.EnvVar, run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
+	existing = ensureMCPServerEnvVars(existing, run, runtime)
+	for _, env := range existing {
+		if env.Name == "HOME" {
+			return existing
+		}
+	}
+	// git config --global writes $HOME/.gitconfig; keep that on the writable /tmp volume.
+	return append(existing, corev1.EnvVar{Name: "HOME", Value: defaultTmpVolumePath})
 }
 
 func enableMCPServer(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {

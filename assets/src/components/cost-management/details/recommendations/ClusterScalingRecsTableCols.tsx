@@ -5,7 +5,7 @@ import {
   PrOpenIcon,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { useWorkbenchOptions } from 'components/ai/insights/SendInsightToWorkbench'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import { StackedText } from 'components/utils/table/StackedText'

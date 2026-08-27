@@ -43,6 +43,7 @@ export function Flows() {
 
   const flows = mapExistingNodes(data?.flows)
   const hasActiveSearch = !!debouncedSearchString
+  const isSearchPending = searchString !== debouncedSearchString || loading
 
   if (!data && loading) return <LoadingIndicator />
 
@@ -70,7 +71,9 @@ export function Flows() {
         }
       />
       {error && <GqlError error={error} />}
-      {isEmpty(flows) ? (
+      {isSearchPending ? (
+        <LoadingIndicator />
+      ) : isEmpty(flows) ? (
         hasActiveSearch ? (
           <Card css={{ padding: theme.spacing.large }}>
             <EmptyState message="No flows found" />

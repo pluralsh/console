@@ -41,6 +41,97 @@ defmodule Console.Deployments.PubSub.PreviewTest do
       assert Jason.decode!(svc.helm.values) == %{"image" => %{"tag" => "pr-123"}}
     end
 
+    test "it will set preview_expires_at from the template ttl" do
+      flow = insert(:flow)
+      pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")
+      service = insert(:service, namespace: "test", flow: flow)
+      template = insert(:preview_environment_template,
+        name: "test",
+        flow: flow,
+        preview_ttl: 3600,
+        reference_service: service,
+        template: build(:service_template,
+          namespace: "test-{{ commitSha }}",
+          name: "test-{{ commitSha }}"
+        )
+      )
+
+      event = %PubSub.PullRequestCreated{item: pr}
+      {:ok, inst} = Preview.handle_event(event)
+
+      assert inst.template_id == template.id
+      assert inst.preview_expires_at
+      assert DateTime.diff(inst.preview_expires_at, DateTime.utc_now()) in 3590..3605
+    end
+
+    test "it will not set preview_expires_at when the template ttl is nil" do
+      flow = insert(:flow)
+      pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")
+      service = insert(:service, namespace: "test", flow: flow)
+      template = insert(:preview_environment_template,
+        name: "test",
+        flow: flow,
+        reference_service: service,
+        template: build(:service_template,
+          namespace: "test-{{ commitSha }}",
+          name: "test-{{ commitSha }}"
+        )
+      )
+      {:ok, _} = template |> Ecto.Changeset.change(%{preview_ttl: nil}) |> Repo.update()
+
+      event = %PubSub.PullRequestCreated{item: pr}
+      {:ok, inst} = Preview.handle_event(event)
+
+      refute inst.preview_expires_at
+    end
+
+    test "it will not create a preview instance when the flow is at max previews" do
+      flow = insert(:flow, max_previews: 1)
+      pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")
+      service = insert(:service, namespace: "test", flow: flow)
+      template = insert(:preview_environment_template,
+        name: "test",
+        flow: flow,
+        reference_service: service,
+        template: build(:service_template,
+          namespace: "test-{{ commitSha }}",
+          name: "test-{{ commitSha }}"
+        )
+      )
+      insert(:preview_environment_instance, template: template)
+
+      event = %PubSub.PullRequestCreated{item: pr}
+      {:error, msg} = Preview.handle_event(event)
+
+      assert msg =~ "maximum of 1 preview"
+      refute Repo.get_by(Console.Schema.PreviewEnvironmentInstance, pull_request_id: pr.id)
+    end
+
+    test "it ignores deleted preview services when enforcing max previews" do
+      flow = insert(:flow, max_previews: 1)
+      pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")
+      service = insert(:service, namespace: "test", flow: flow)
+      template = insert(:preview_environment_template,
+        name: "test",
+        flow: flow,
+        reference_service: service,
+        template: build(:service_template,
+          namespace: "test-{{ commitSha }}",
+          name: "test-{{ commitSha }}"
+        )
+      )
+      insert(:preview_environment_instance,
+        template: template,
+        service: insert(:service, deleted_at: Timex.now())
+      )
+
+      event = %PubSub.PullRequestCreated{item: pr}
+      {:ok, inst} = Preview.handle_event(event)
+
+      assert inst.pull_request_id == pr.id
+      assert inst.template_id == template.id
+    end
+
     test "it will can intelligently merge a helm preview instance" do
       flow = insert(:flow)
       pr = insert(:pull_request, status: :open, flow: flow, commit_sha: "pr-123", preview: "test")

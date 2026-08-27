@@ -5,22 +5,30 @@ import { colorsCloudShellDark } from './colors-cloudshell-dark'
 import { colorsCodeBlockDark } from './colors-codeblock-dark'
 
 export const semanticColorsDark = {
+  // App shell canvas (html/body / console chrome) — independent from fill-zero
+  'page-background': '#171a21',
+
   // Fill
   //
+  // `*-raised` = zebra / striped rows (light-mode table stripes; dark mirrors legacy selected step).
   // fill-zero
   'fill-zero': grey[925],
+  'fill-zero-raised': grey[900],
   'fill-zero-hover': grey[875],
   'fill-zero-selected': grey[900],
   // fill-one
   'fill-one': grey[875],
+  'fill-one-raised': grey[850],
   'fill-one-hover': grey[825],
   'fill-one-selected': grey[850],
   // fill-two
   'fill-two': grey[825],
+  'fill-two-raised': grey[800],
   'fill-two-hover': grey[775],
   'fill-two-selected': grey[800],
   // fill-three
   'fill-three': grey[775],
+  'fill-three-raised': grey[750],
   'fill-three-hover': grey[725],
   'fill-three-selected': grey[750],
   // primary

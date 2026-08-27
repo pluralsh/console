@@ -19,6 +19,17 @@ spec:
           args:
             - --v=3
   dind: true
+  mcpServers:
+    - name: linear
+      url: https://mcp.linear.app/mcp
+      allowedTools:
+        - list_issues
+      headers:
+        - name: Authorization
+          valueFrom:
+            secretKeyRef:
+              name: linear-mcp
+              key: token
 ---
 apiVersion: v1
 kind: Namespace

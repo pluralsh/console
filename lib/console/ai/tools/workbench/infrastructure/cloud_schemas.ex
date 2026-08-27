@@ -32,19 +32,24 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudSchemas do
 
   def json_schema(_), do: @json_schema
   def name(%__MODULE__{tool: %{name: name}}), do: "cloud_schemas_#{name}"
+  def name(_), do: "cloud_schemas"
 
   def description(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{provider: provider}}}),
     do: "Shows the schemas for an exact list of tables in a #{provider} cloud account. Use after cloud_tables to inspect only the tables needed for a SQL query."
+  def description(_),
+    do: "Shows the schemas for an exact list of tables in a cloud account. Use after cloud_tables to inspect only the tables needed for a SQL query."
 
   def implement(%__MODULE__{tool: %WorkbenchTool{cloud_connection: %CloudConnection{} = connection}, tables: tables}) do
-    with {:ok, client} <- Client.connect(),
-         input = %SchemasInput{connection: to_pb(connection), tables: tables},
+    with %{} = pb <- to_pb(connection) || {:error, "cloud connection is missing provider credentials"},
+         {:ok, client} <- Client.connect(),
+         input = %SchemasInput{connection: pb, tables: tables},
          {:ok, output} <- Stub.schemas(client, input, Client.cloud_query_rpc_opts()) do
-      format_schema(results: output.result)
+      format_schema(results: output.result || [])
       |> String.trim()
       |> then(& {:ok, &1})
     end
   end
+  def implement(_), do: {:error, "cloud schemas tool is missing a cloud connection"}
 
   EEx.function_from_file(
     :defp,

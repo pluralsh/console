@@ -158,7 +158,7 @@ function AnnouncementBanner() {
   )
   if (dismissed) return null
   return (
-    <BannerSC fillLevel={2}>
+    <BannerSC fillLevel={0}>
       <Body2P>
         Introducing workbenches- build your own agents for DevOps.{' '}
         <BannerLinkSC

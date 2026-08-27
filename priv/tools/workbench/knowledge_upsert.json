@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique name for this knowledge entry on the workbench. If an entry with this name already exists it will be updated; otherwise a new entry is created."
+    },
+    "description": {
+      "type": "string",
+      "description": "Short summary of what this knowledge captures and when to use it."
+    },
+    "knowledge": {
+      "type": "string",
+      "description": "The full knowledge body to persist (facts, runbooks, durable notes)."
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional labels to categorize this knowledge entry."
+    }
+  },
+  "required": ["name", "knowledge"]
+}

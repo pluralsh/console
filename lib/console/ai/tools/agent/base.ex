@@ -61,31 +61,31 @@ defmodule Console.AI.Tools.Agent.Base do
   defp maybe_preload(session, true), do: Repo.preload(session, @preloads, force: true)
   defp maybe_preload(session, _), do: session
 
-  def to_pb(%CloudConnection{provider: :aws} = connection) do
+  def to_pb(%CloudConnection{provider: :aws, configuration: %{aws: %{} = aws}} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: {:aws, to_pb(connection.configuration.aws)},
+      credentials: {:aws, to_pb(aws)},
     }
   end
 
-  def to_pb(%CloudConnection{provider: :gcp} = connection) do
+  def to_pb(%CloudConnection{provider: :gcp, configuration: %{gcp: %{} = gcp}} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: {:gcp, to_pb(connection.configuration.gcp)},
+      credentials: {:gcp, to_pb(gcp)},
     }
   end
 
-  def to_pb(%CloudConnection{provider: :azure} = connection) do
+  def to_pb(%CloudConnection{provider: :azure, configuration: %{azure: %{} = azure}} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: {:azure, to_pb(connection.configuration.azure)},
+      credentials: {:azure, to_pb(azure)},
     }
   end
 
-  def to_pb(%CloudConnection{provider: :vsphere} = connection) do
+  def to_pb(%CloudConnection{provider: :vsphere, configuration: %{vsphere: %{} = vsphere}} = connection) do
     %Connection{
       provider:    "#{connection.provider}",
-      credentials: {:vsphere, to_pb(connection.configuration.vsphere)},
+      credentials: {:vsphere, to_pb(vsphere)},
     }
   end
 

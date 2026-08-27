@@ -1762,6 +1762,111 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
+  - version: 3.31.1
+    kube: ['1.35']
+    requirements:
+    - name: Alloy
+      version: 4.3.2-bb.0
+    - name: Anchore Enterprise
+      version: 3.25.1-bb.1
+    - name: Argocd
+      version: 10.2.1-bb.0
+    - name: Authservice
+      version: 1.1.5-bb.7
+    - name: Bbctl
+      version: 3.0.1-bb.3
+    - name: Eck Operator
+      version: 3.4.1-bb.1
+    - name: Elasticsearch Kibana
+      version: 1.41.0-bb.0
+    - name: External Secrets Operator
+      version: 2.8.0-bb.0
+    - name: Fluentbit
+      version: 0.57.9-bb.0
+    - name: Fortify
+      version: 26.2.0-bb.2
+    - name: Gatekeeper
+      version: 3.23.0-bb.0
+    - name: Gateway Api
+      version: 1.6.1-bb.0
+    - name: Gitlab
+      version: 10.2.4-bb.0
+    - name: Gitlab Runner
+      version: 0.88.3-bb.2
+    - name: Grafana
+      version: 10.5.15-bb.6
+    - name: Harbor
+      version: 1.19.2-bb.0
+    - name: Headlamp
+      version: 0.44.0-bb.0
+    - name: Istio Cni
+      version: 1.30.3-bb.0
+    - name: Istio Crds
+      version: 1.30.3-bb.0
+    - name: Istio Gateway
+      version: 1.30.3-bb.0
+    - name: Istiod
+      version: 1.30.3-bb.0
+    - name: Keycloak
+      version: 7.3.0-bb.0
+    - name: Kiali
+      version: 2.30.0-bb.0
+    - name: Kyverno
+      version: 3.8.2-bb.2
+    - name: Kyverno Policies
+      version: 3.3.4-bb.87
+    - name: Kyverno Reporter
+      version: 3.9.0-bb.1
+    - name: Loki
+      version: 6.55.0-bb.2
+    - name: Mattermost
+      version: 11.10.0-bb.0
+    - name: Mattermost Operator
+      version: 1.25.7-bb.3
+    - name: Metrics Server
+      version: 3.13.1-bb.1
+    - name: Mimir
+      version: 6.1.0-bb.1
+    - name: Minio
+      version: 7.1.1-bb.23
+    - name: Minio Operator
+      version: 7.1.1-bb.9
+    - name: Monitoring
+      version: 88.3.0-bb.0
+    - name: Neuvector
+      version: 2.11.0-bb.2
+    - name: Prometheus Operator Crds
+      version: 31.0.1-bb.0
+    - name: Renovate
+      version: 46.251.0-bb.0
+    - name: Sonarqube
+      version: 2026.4.0-bb.0
+    - name: Tempo
+      version: 2.1.0-bb.2
+    - name: Thanos
+      version: 17.4.0-bb.3
+    - name: Twistlock
+      version: 0.28.0-bb.3
+    - name: Vault
+      version: 0.34.0-bb.0
+    - name: Velero
+      version: 12.1.0-bb.3
+    - name: Wrapper
+      version: 0.4.15
+    - name: Ztunnel
+      version: 1.30.3-bb.0
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ["Big Bang 3.31.0 \u2192 3.31.1 upgrades the bundled Keycloak\
+          \ chart from 7.2.2-bb.1 to 7.3.0-bb.0."]
+      features: [Keycloak bumped to 7.3.0-bb.0 (may include upstream Keycloak chart/app
+          improvements).]
+      breaking_changes: ["Potential breaking changes may exist within the Keycloak\
+          \ 7.2.2-bb.1 \u2192 7.3.0-bb.0 upgrade; review the Keycloak package/changelog\
+          \ for this version jump before upgrading."]
+    chart_version: 3.31.1
+    images: []
   - version: 3.31.0
     kube: ['1.35']
     requirements:
@@ -23409,19 +23514,19 @@ addons:
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2026-02-01'
+    eolAt: '2026-09-07'
   - version: 2.11.10
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2026-02-01'
+    eolAt: '2026-09-07'
   - version: 2.11.4
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2026-02-01'
+    eolAt: '2026-09-07'
   - version: 2.10.3
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -26023,6 +26128,23 @@ addons:
   release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
   helm_repository_url: https://helm.vector.dev/
   versions:
+  - version: 0.58.0
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Vector 0.58.0 is a new upstream release (published 2026-08-26) following
+          0.57.0 (published 2026-07-14)., No concrete feature details are present
+          in the provided notes beyond links to full release notes.]
+      breaking_changes: ['0.57.0 is described as a security-focused release that includes
+          breaking changes, with options to restore previous behavior (details not
+          included in the excerpt).', No breaking-change details for 0.58.0 are included
+          in the provided excerpt; verify via the linked 0.58.0 release notes before
+          upgrading.]
+    chart_version: 0.58.0
+    images: ['docker.io/timberio/vector:0.58.0-distroless-libc']
   - version: 0.57.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []

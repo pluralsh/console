@@ -240,7 +240,10 @@ const MdTh = styled.th(({ theme }) => ({
 }))
 
 const MdTd = styled.td(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero-selected'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-one']
+      : theme.colors['fill-zero-selected'],
   padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   color: theme.colors['text-light'],
   height: 40,

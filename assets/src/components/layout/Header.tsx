@@ -9,6 +9,7 @@ import NotificationsLauncher from '../notifications/NotificationsLauncher'
 import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
 import { HeaderProjectSelect } from './HeaderProjectSelect'
+import { HeaderWorkbenchSelect } from './HeaderWorkbenchSelect'
 import { ProfileMenu } from './ProfileMenu'
 
 const HeaderSC = styled.div(({ theme }) => ({
@@ -33,6 +34,7 @@ export default function Header() {
         <BillingLegacyUserMessage />
         <AwaitingReviewLauncher />
         <NotificationsLauncher />
+        <HeaderWorkbenchSelect />
         <ChatbotLauncher />
         <ProfileMenu />
       </HeaderContentSC>

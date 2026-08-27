@@ -8,11 +8,13 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
           upsertFlow(attributes: $attrs) {
             id
             name
+            maxPreviews
           }
         }
-      """, %{"attrs" => %{"name" => "test"}}, %{current_user: admin_user()})
+      """, %{"attrs" => %{"name" => "test", "maxPreviews" => 5}}, %{current_user: admin_user()})
 
       assert flow["name"] == "test"
+      assert flow["maxPreviews"] == 5
     end
 
     test "upsertFlow can set workbenches on create" do
@@ -129,6 +131,7 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
           upsertPreviewEnvironmentTemplate(attributes: $attrs) {
             id
             name
+            previewTtl
           }
         }
         """, %{
@@ -136,12 +139,14 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
             "name" => "test",
             "flow_id" => flow.id,
             "template" => %{"namespace" => "test"},
-            "reference_service_id" => svc.id
+            "reference_service_id" => svc.id,
+            "previewTtl" => "1d"
           }
         }, %{current_user: user})
 
       assert template["id"]
       assert template["name"] == "test"
+      assert template["previewTtl"] == 86_400
     end
   end
 

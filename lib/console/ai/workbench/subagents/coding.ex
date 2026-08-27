@@ -7,9 +7,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     AIUsage
   }
   alias Console.AI.Tools.Workbench.{
-    Skills,
     History,
-    Skill,
     Scratchpad,
     CodingAgent,
     Result,
@@ -27,7 +25,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       engine_opts(environment) ++ [
         system_prompt: String.trim(system_prompt(prompt: WorkbenchJob.objective(job))),
         acc: %{},
-        callback: &callback(activity, &1),
+        callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
       ]
     )
@@ -84,11 +82,12 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     end
   end
 
-  defp preload_run({result, %AgentRun{} = run}), do: {result, Repo.preload(run, [:pull_requests])}
+  defp preload_run({result, %AgentRun{} = run}),
+    do: {result, Repo.preload(run, [:pull_requests, :runtime])}
 
-  defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage}} = pass, job) when result in [:failed, :success] do
-    callback  = Environment.engine_opts(job) |> Keyword.fetch!(:usage_callback)
-    callback.(AIUsage.to_map(usage))
+  defp record_usage({result, %AgentRun{usage: %AIUsage{} = usage} = run} = pass, job)
+       when result in [:failed, :success] do
+    Environment.runtime_usage_callback(job, run, AIUsage.to_map(usage))
     pass
   end
   defp record_usage(result, _), do: result
@@ -102,8 +101,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     [
       %CodingAgent{activity: activity, workbench: job.workbench, job: job, skills: skills},
       %PullRequests{job: job},
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    ] ++ skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %History{job: job, activities: activities},
       Result
