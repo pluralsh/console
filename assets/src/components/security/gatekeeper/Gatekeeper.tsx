@@ -1,8 +1,4 @@
-import {
-  ArrowScroll,
-  SearchIcon,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -21,7 +17,6 @@ import {
 import styled from 'styled-components'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
-import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
 import GatekeeperFilter from './GatekeeperFilter'
 import { GatekeeperTable } from './GatekeeperTable'
 
@@ -86,22 +81,13 @@ export function Gatekeeper() {
 
   const header = useMemo(
     () => (
-      <ArrowScroll>
-        <FiltersWrapperSC>
-          <IconExpander
-            tooltip="Search policies"
-            icon={<SearchIcon />}
-            active={!!searchString}
-            onClear={() => setSearchString('')}
-          >
-            <ExpandedInput
-              inputValue={searchString}
-              onChange={setSearchString}
-              placeholder="Search policies"
-            />
-          </IconExpander>
-        </FiltersWrapperSC>
-      </ArrowScroll>
+      <Input
+        startIcon={<SearchIcon />}
+        placeholder="Search policies"
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+        css={{ width: '100%' }}
+      />
     ),
     [searchString]
   )
@@ -142,12 +128,6 @@ export function Gatekeeper() {
     </GatekeeperContainerSC>
   )
 }
-
-const FiltersWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-  overflow: 'auto',
-}))
 
 const GatekeeperContainerSC = styled.div(({ theme }) => ({
   display: 'grid',
