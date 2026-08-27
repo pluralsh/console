@@ -452,7 +452,9 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
 
     test "evaluates unsaved policy source when provided" do
       user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
       policy = insert(:policy,
+        project: project,
         policy: """
         package plrl.wb.admission
 
@@ -486,7 +488,9 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
     end
 
     test "rejects invalid unsaved policy source" do
-      policy = insert(:policy)
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
 
       {:ok, %{errors: [%{message: message} | _]}} = run_query("""
         query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
@@ -496,13 +500,16 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
         "policyId" => policy.id,
         "input" => Jason.encode!(%{}),
         "policy" => "package test\n\nallow {"
-      }, %{current_user: insert(:user)})
+      }, %{current_user: user})
 
       assert message =~ "invalid rego policy"
     end
 
     test "rejects an empty unsaved policy buffer instead of evaluating the stored policy" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
       policy = insert(:policy,
+        project: project,
         policy: """
         package plrl.wb.admission
 
@@ -522,7 +529,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
         "policyId" => policy.id,
         "input" => Jason.encode!(%{}),
         "policy" => ""
-      }, %{current_user: insert(:user)})
+      }, %{current_user: user})
 
       refute get_in(result, [:data, "evaluatePolicy"])
       assert [%{message: message} | _] = result[:errors]
@@ -530,7 +537,9 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
     end
 
     test "rejects unsaved policy source over 1MB" do
-      policy = insert(:policy)
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
 
       {:ok, %{errors: [%{message: message} | _]}} = run_query("""
         query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
@@ -540,9 +549,29 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
         "policyId" => policy.id,
         "input" => Jason.encode!(%{}),
         "policy" => String.duplicate("a", 1_000_001)
-      }, %{current_user: insert(:user)})
+      }, %{current_user: user})
 
       assert message =~ "should be at most"
+    end
+
+    test "does not evaluate unsaved source for a policy in another project" do
+      user = insert(:user)
+      insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, type: :binding, policy: "package plrl.binding\nbind := true")
+
+      {:ok, result} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => "package plrl.binding\nbind := true"
+      }, %{current_user: user})
+
+      refute get_in(result, [:data, "evaluatePolicy"])
+      assert [%{message: message} | _] = result[:errors]
+      assert message =~ "forbidden"
     end
 
     test "evaluates binding policies with the binding base" do
