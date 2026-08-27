@@ -530,27 +530,37 @@ const TabSkeletonSC = styled(RectangleSkeleton).attrs({ $height: 16 })(
   })
 )
 
-const panelTabStyles = ({
-  theme,
-  active,
-}: {
-  theme: any
-  active?: boolean
-}) => ({
+const panelTabStyles = ({ theme }: { theme: any; active?: boolean }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
   flexShrink: 0,
   minWidth: 'max-content',
-  outline: active ? theme.borders.default : 'none',
+  outline: 'none',
+  boxShadow: 'none',
   borderRadius: 20,
-  background: active ? theme.colors['fill-one'] : 'transparent',
+  backgroundColor: 'transparent',
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing.small,
-  '&:hover': { background: active ? undefined : theme.colors['fill-zero'] },
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
+  '&:hover': {
+    backgroundColor: theme.colors['fill-zero-hover'],
+  },
+  '&[aria-selected="true"]': {
+    color: theme.colors.text,
+    backgroundColor:
+      theme.mode === 'light'
+        ? theme.colors.grey[75]
+        : theme.colors['fill-one-selected'],
+    boxShadow: `inset 0 0 0 ${theme.borderWidths.default}px ${theme.colors.border}`,
+    '&:hover': {
+      backgroundColor:
+        theme.mode === 'light'
+          ? theme.colors.grey[75]
+          : theme.colors['fill-one-selected'],
+    },
+  },
 })
 
 const PanelSubTabSC = styled(SubTab)(panelTabStyles)

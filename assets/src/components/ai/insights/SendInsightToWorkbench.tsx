@@ -217,7 +217,7 @@ export function SendToWorkbenchForm({
             setWorkbenchId={setWorkbenchId}
             workbenches={workbenches}
             loading={loading}
-            width={POPOVER_WIDTH - 32}
+            placement="left"
           />
         </FillLevelDiv>
       </FormField>
