@@ -153,6 +153,31 @@ var _ = Describe("PreviewEnvironmentTemplate Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
+		It("should include previewTtl in preview environment template attributes", func() {
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.PreviewEnvironmentTemplate{
+				ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: namespace},
+			}, func(p *v1alpha1.PreviewEnvironmentTemplate) {
+				p.Spec.PreviewTTL = lo.ToPtr("1d")
+			})).To(Succeed())
+
+			fragment := &gqlclient.PreviewEnvironmentTemplateFragment{ID: id}
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.
+				On("UpsertPreviewEnvironmentTemplate", mock.Anything, mock.MatchedBy(func(attrs gqlclient.PreviewEnvironmentTemplateAttributes) bool {
+					return attrs.PreviewTTL != nil && *attrs.PreviewTTL == "1d"
+				})).
+				Return(fragment, nil)
+
+			reconciler := &controller.PreviewEnvironmentTemplateReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should successfully reconcile the resource", func() {
 			By("Delete resource")
 			Expect(common.MaybePatch(k8sClient, &v1alpha1.PreviewEnvironmentTemplate{

@@ -81,6 +81,11 @@ const columns = [
       )
     },
   }),
+  columnHelper.accessor((runtime) => runtime.model?.model, {
+    id: 'model',
+    header: 'Model',
+    cell: ({ getValue }) => getValue() || '—',
+  }),
   columnHelper.accessor((runtime) => runtime.aiProxy, {
     id: 'aiProxy',
     header: 'AI Proxy',

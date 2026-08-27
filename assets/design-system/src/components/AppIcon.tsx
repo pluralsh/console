@@ -19,6 +19,7 @@ type AppIconProps = {
   spacing?: AppIconSpacing
   hue?: AppIconHue
   clickable?: boolean
+  rounded?: boolean
   url?: Nullable<string>
   icon?: ReactElement<any>
   alt?: Nullable<string>
@@ -97,22 +98,33 @@ const AppIconSC = styled.div<{
   $hasBorder?: boolean
   $boxSize?: number
   $clickable?: boolean
-}>(({ theme, $color, $borderColor, $hasBorder, $boxSize, $clickable }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: $color ? theme.colors[$color] : undefined,
-  borderRadius: theme.borderRadiuses.medium,
-  border: $hasBorder ? theme.borders.default : 'none',
-  borderColor: $borderColor ? theme.colors[$borderColor] : undefined,
-  width: $boxSize,
-  height: $boxSize,
-  minWidth: $boxSize,
-  minHeight: $boxSize,
-  cursor: $clickable ? 'pointer' : 'auto',
-  overflow: 'hidden',
-  _hover: $clickable ? { backgroundColor: $borderColor } : undefined,
-}))
+  $rounded?: boolean
+}>(
+  ({
+    theme,
+    $color,
+    $borderColor,
+    $hasBorder,
+    $boxSize,
+    $clickable,
+    $rounded,
+  }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: $color ? theme.colors[$color] : undefined,
+    borderRadius: $rounded ? '50%' : theme.borderRadiuses.medium,
+    border: $hasBorder ? theme.borders.default : 'none',
+    borderColor: $borderColor ? theme.colors[$borderColor] : undefined,
+    width: $boxSize,
+    height: $boxSize,
+    minWidth: $boxSize,
+    minHeight: $boxSize,
+    cursor: $clickable ? 'pointer' : 'auto',
+    overflow: 'hidden',
+    _hover: $clickable ? { backgroundColor: $borderColor } : undefined,
+  })
+)
 
 const InitialsSC = styled.div<{
   $size: AppIconSize
@@ -140,6 +152,7 @@ function AppIcon({
   spacing = 'padding',
   hue,
   clickable = false,
+  rounded = false,
   url,
   icon,
   alt,
@@ -175,6 +188,7 @@ function AppIcon({
       $hasBorder={hasBorder}
       $boxSize={boxSize}
       $clickable={clickable}
+      $rounded={rounded}
       onClick={clickable ? onClose : undefined}
       {...props}
     >

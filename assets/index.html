@@ -151,14 +151,16 @@
     }
   </style>
   <style>
+    /* App shell canvas — independent from design-system fill-zero.
+       Fallbacks match the historical hardcoded values before React boots. */
     html,
     body {
-      background-color: #171a21;
+      background-color: var(--color-page-background, #171a21);
     }
 
     html[data-theme-mode='light'],
     html[data-theme-mode='light'] body {
-      background-color: #F9FAFA;
+      background-color: var(--color-page-background, #F9FAFA);
     }
   </style>
   <!--

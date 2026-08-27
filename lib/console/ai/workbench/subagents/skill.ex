@@ -3,8 +3,6 @@ defmodule Console.AI.Workbench.Subagents.Skill do
   alias Console.Schema.{WorkbenchJob, WorkbenchSkill, WorkbenchJobActivity, PullRequest}
   alias Console.AI.Workbench.Environment
   alias Console.AI.Tools.Workbench.{
-    Skills,
-    Skill,
     SkillUpdate,
     SkillCreate,
     SkillIgnore,
@@ -34,7 +32,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
         system_prompt: String.trim(system_prompt(job: target_job)),
         continue_msg: cont_msg(),
         acc: %{},
-        callback: &callback(activity, &1)
+        callback: &callback(activity, environment, &1)
       ]
     )
     |> MemoryEngine.reduce([{:user, String.trim(eval_job_prompt(job: target_job))}, @skill_prompt], &reducer/2)
@@ -68,9 +66,7 @@ defmodule Console.AI.Workbench.Subagents.Skill do
   defp target_job(job), do: job
 
   defp tools(target_job, %Environment{skills: skills}) do
-    [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    skill_knowledge_tools(target_job, skills) ++ [
       Scratchpad,
       %SkillUpdate{skills: skills, job: target_job},
       %SkillCreate{job: target_job},

@@ -63,7 +63,7 @@ This stack has the following state resources:
 The stack status is **failed**. This section summarizes the most recent **failed** stack run including log output
 
 Run id: `<%= @failed_run.run_id %>`
-Failed command: `<%= @failed_run.failing_step.cmd %> <%= Enum.join(@failed_run.failing_step.args, " ") %>`
+Failed command: `<%= @failed_run.failing_step.cmd %> <%= Enum.join(@failed_run.failing_step.args || [], " ") %>`
 <%= if !Enum.empty?(@failed_run.run_errors) do %>
 ## Run-level errors
 <%= for error <- @failed_run.run_errors do %>

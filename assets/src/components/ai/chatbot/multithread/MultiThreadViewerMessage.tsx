@@ -460,6 +460,7 @@ export function SimpleAccordion({
       css={{
         background: 'none',
         border: 'none',
+        boxShadow: 'none',
         width: '100%',
         ...accordionStyles,
       }}
@@ -583,7 +584,10 @@ const ThSC = styled.th(({ theme }) => ({
 }))
 
 const TdSC = styled.td(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero-selected'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-one']
+      : theme.colors['fill-zero-selected'],
   padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   color: theme.colors['text-light'],
   height: 40,

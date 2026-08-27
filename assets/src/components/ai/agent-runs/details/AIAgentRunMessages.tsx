@@ -23,7 +23,7 @@ import { AILoadingText } from 'components/utils/AILoadingText'
 import { duration } from 'utils/datetime'
 
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
-  const { spacing, colors } = useTheme()
+  const { spacing, colors, mode, borders, boxShadows } = useTheme()
 
   const [subscribedMessages, setSubscribedMessages] = useState<
     AgentMessageFragment[]
@@ -134,8 +134,15 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
               {...chatMessagePropsShared}
               {...getToolMessageProps(rowData.id)}
               userMsgWrapperStyle={{
-                background: colors['fill-one'],
-                borderColor: colors['border-fill-one'],
+                backgroundColor:
+                  mode === 'light' ? colors['fill-two'] : colors['fill-one'],
+                ...(mode === 'light'
+                  ? {
+                      border: borders.input,
+                      borderColor: colors['border-input'],
+                      boxShadow: boxShadows.slight,
+                    }
+                  : { borderColor: colors['border-fill-one'] }),
                 '& *': { color: colors.text },
               }}
             />
@@ -161,7 +168,7 @@ const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
 const chatMessagePropsShared = {
   disableActions: 'no-spacing' as const,
   toolDisplayType: 'simple' as const,
-  style: { padding: 0 },
+  style: { padding: 0, overflow: 'visible' },
 }
 
 const isHiddenAgentMessage = (msg: AgentMessageFragment) =>

@@ -26,6 +26,11 @@ export const grey = {
   100: '#E3E4E7',
   75: '#EBEDEE',
   50: '#EEF0F1',
+  // Soft steps between page canvas (25) and 50 — Pure Light hover / raised ladder
+  45: '#F0F2F3',
+  40: '#F2F4F5',
+  35: '#F5F6F6',
+  30: '#F7F8F8',
   25: '#F9FAFA',
 } as const satisfies Record<number, CSSProperties['color']>
 

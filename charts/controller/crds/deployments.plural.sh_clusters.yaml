@@ -206,6 +206,13 @@ spec:
                   This has to be specified to adopt the existing cluster.
                 example: myclusterhandle
                 type: string
+              mergeTags:
+                description: |-
+                  MergeTags, when true, merges tags specified on this resource with the existing
+                  tags on the tracked Console cluster instead of replacing them. Spec tags overlay
+                  existing tags (the CR wins on key conflicts). Only applies when this Cluster is
+                  tracking an existing Console cluster (read-only mode). Defaults to false.
+                type: boolean
               metadata:
                 description: |-
                   Metadata contains arbitrary JSON metadata for storing cluster-specific configuration.

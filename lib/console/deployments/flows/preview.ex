@@ -4,6 +4,7 @@ defmodule Console.Deployments.Flows.Preview do
   alias Console.Deployments.{Services, Git, Pr}
   alias Console.Services.Users
   alias Console.Schema.{
+    Flow,
     PreviewEnvironmentInstance,
     PreviewEnvironmentTemplate,
     PullRequest,
@@ -96,10 +97,12 @@ defmodule Console.Deployments.Flows.Preview do
     end
   end
 
+  def delete_instance(%PreviewEnvironmentInstance{service_id: id}) when is_binary(id),
+    do: Services.delete_service(id, bot())
   def delete_instance(%PullRequest{preview: p, flow_id: fid} = pr) when is_binary(p) and is_binary(fid) do
     with %PreviewEnvironmentTemplate{} = template <- get_template(fid, p),
          %PreviewEnvironmentInstance{} = inst <- get_instance(template.id, pr.id) do
-      Services.delete_service(inst.service_id, bot())
+      delete_instance(inst)
     end
   end
   def delete_instance(_), do: :ok
@@ -108,19 +111,43 @@ defmodule Console.Deployments.Flows.Preview do
     %PreviewEnvironmentTemplate{reference_service: %Service{} = ref} = template,
     %PullRequest{} = pr
   ) do
-    with {:ok, attrs} <- build_attributes(pr, template),
-         {:ok, svc} <- Services.clone_service(attrs, ref.id, ref.cluster_id, bot()) do
+    start_transaction()
+    |> add_operation(:limit, fn _ -> enforce_max_previews(template) end)
+    |> add_operation(:attrs, fn _ -> build_attributes(pr, template) end)
+    |> add_operation(:svc, fn %{attrs: attrs} ->
+      Services.clone_service(attrs, ref.id, ref.cluster_id, bot())
+    end)
+    |> add_operation(:inst, fn %{svc: svc} ->
       %PreviewEnvironmentInstance{}
       |> PreviewEnvironmentInstance.changeset(%{
-        service_id:      svc.id,
-        pull_request_id: pr.id,
-        template_id:     template.id
+        service_id:         svc.id,
+        pull_request_id:    pr.id,
+        template_id:        template.id,
+        preview_expires_at: expiry(template)
       })
       |> Repo.insert()
-      |> notify(:create)
-    end
+    end)
+    |> execute(extract: :inst)
+    |> notify(:create)
   end
   defp create_instance(_, _), do: :ok
+
+  defp enforce_max_previews(%PreviewEnvironmentTemplate{} = template) do
+    %{flow: %Flow{max_previews: max, id: flow_id}} = Repo.preload(template, :flow)
+
+    PreviewEnvironmentInstance.for_flow(flow_id)
+    |> PreviewEnvironmentInstance.active()
+    |> Repo.aggregate(:count, :id)
+    |> case do
+      count when is_integer(max) and count >= max ->
+        {:error, "this flow has reached its maximum of #{max} preview environments"}
+      count -> {:ok, count}
+    end
+  end
+
+  defp expiry(%PreviewEnvironmentTemplate{preview_ttl: ttl}) when is_integer(ttl) and ttl > 0,
+    do: Timex.shift(Timex.now(), seconds: ttl)
+  defp expiry(_), do: nil
 
   def update_instance(
     %PreviewEnvironmentInstance{template: %PreviewEnvironmentTemplate{} = tpl, service: %Service{} = svc} = inst,

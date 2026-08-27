@@ -106,6 +106,8 @@ const ChipCardSC = styled(Card)<{
       display: 'inline-flex',
       textDecoration: 'none',
       gap: $condensed ? 6 : theme.spacing.xsmall,
+      // Chips are dense inline labels — hairline only, no Card elevation shadow
+      ...(theme.mode === 'light' && { boxShadow: 'none' }),
     },
     '.children': {
       display: 'flex',
@@ -231,7 +233,7 @@ function Chip({
           {...{
             [CHIP_CLOSE_ATTR_KEY]: '',
           }}
-          as={clickable ? 'div' : 'button'}
+          {...(clickable ? { as: 'div' } : {})}
           {...(closeButtonProps || {})}
         >
           <CloseIcon

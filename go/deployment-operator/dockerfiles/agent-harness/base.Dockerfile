@@ -79,14 +79,30 @@ ARG CODEBASE_MEMORY_MCP_VERSION=0.8.1
 ARG DOCKER_COMPOSE_VERSION=5.5.0-1~debian.13~trixie
 ARG PODMAN_STATIC_CONFIG_REVISION=a14f4b3ee9751ea232ef10b72e4923869ea8c3d7
 
-RUN apt update && apt install -y \
-    ca-certificates \
-    curl \
-    gnupg \
-    git \
-    jq \
-    make \
-    tar
+# DHI's apt index is occasionally truncated (a few KB instead of several MB).
+# Apt then selects Debian git, which cannot install against DHI's rebuilt perl-base.
+RUN set -eux; \
+    export DEBIAN_FRONTEND=noninteractive; \
+    for attempt in 1 2 3 4 5; do \
+      rm -rf /var/lib/apt/lists/*; \
+      if apt-get update && apt-get install -y --no-install-recommends \
+           ca-certificates \
+           curl \
+           gnupg \
+           git \
+           jq \
+           make \
+           tar; then \
+        break; \
+      fi; \
+      if [ "${attempt}" -eq 5 ]; then \
+        echo "apt-get install failed after ${attempt} attempts" >&2; \
+        exit 1; \
+      fi; \
+      sleep "${attempt}"; \
+    done; \
+    command -v git >/dev/null; \
+    rm -rf /var/lib/apt/lists/*
 
 RUN set -eux; \
     portable=""; \
@@ -113,14 +129,24 @@ RUN install -m 0755 -d /etc/apt/keyrings && \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
       https://download.docker.com/linux/debian trixie stable" | \
       tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-    apt update && \
-    apt install -y docker-ce-cli "docker-compose-plugin=${DOCKER_COMPOSE_VERSION}" ripgrep && \
+    for attempt in 1 2 3 4 5; do \
+      if apt-get update && apt-get install -y --no-install-recommends \
+           docker-ce-cli "docker-compose-plugin=${DOCKER_COMPOSE_VERSION}" ripgrep; then \
+        break; \
+      fi; \
+      if [ "${attempt}" -eq 5 ]; then \
+        echo "apt-get install docker-ce-cli failed after ${attempt} attempts" >&2; \
+        exit 1; \
+      fi; \
+      rm -rf /var/lib/apt/lists/*; \
+      sleep "${attempt}"; \
+    done; \
     ln -s /usr/libexec/docker/cli-plugins/docker-compose /usr/bin/docker-compose && \
     rm -rf /var/lib/apt/lists/*
 
 # Install the Nix binary-cache Podman engine and rootless user mapping helpers
 RUN set -eux; \
-    for attempt in 1 2 3; do \
+    for attempt in 1 2 3 4 5; do \
       if apt-get update && apt-get install -y --no-install-recommends uidmap; then \
         break; \
       fi; \

@@ -32,7 +32,10 @@ import {
   WorkbenchKubernetesMutationFields,
   WorkbenchVerificationLoopControl,
 } from './WorkbenchModeOptionFields'
-import { WorkbenchPromptPopover } from './WorkbenchPromptModeSelector'
+import {
+  WorkbenchPromptPopover,
+  workbenchPromptPanelSurfaces,
+} from './WorkbenchPromptModeSelector'
 import {
   attributesForPromptMode,
   CODING_AGENT_LABEL,
@@ -59,6 +62,7 @@ export function WorkbenchModesForm({
   disabled?: boolean
 }) {
   const theme = useTheme()
+  const { panelBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
   const selectedMode = value?.plan ? 'plan' : 'agent'
   const coding = value?.coding
   const kubernetes = value?.kubernetes
@@ -161,8 +165,8 @@ export function WorkbenchModesForm({
             flexDirection: 'column',
             gap: theme.spacing.large,
             padding: theme.spacing.large,
-            background: theme.colors['fill-two'],
-            border: theme.borders['fill-two'],
+            background: panelBackground,
+            border: panelBorder,
           }}
         >
           <Select
@@ -457,6 +461,7 @@ function ModeActionRow({
 }) {
   const theme = useTheme()
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const { detailBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
   const { floating, triggerRef: mergedTriggerRef } = useFloatingDropdown({
     triggerRef,
     width: 360,
@@ -549,8 +554,8 @@ function ModeActionRow({
               gap: theme.spacing.small,
               width: 360,
               padding: theme.spacing.medium,
-              background: theme.colors['fill-two-selected'],
-              border: theme.borders['fill-two'],
+              background: detailBackground,
+              border: panelBorder,
               boxShadow: theme.boxShadows.moderate,
             }}
           >
@@ -578,6 +583,7 @@ function ModeCard({
   onClick: () => void
 }) {
   const theme = useTheme()
+  const { panelBackground } = workbenchPromptPanelSurfaces(theme)
 
   return (
     <button
@@ -607,9 +613,7 @@ function ModeCard({
           marginTop: 2,
           borderRadius: '50%',
           border: `1px solid ${active ? theme.colors['border-selected'] : theme.colors['border-input']}`,
-          boxShadow: active
-            ? `inset 0 0 0 3px ${theme.colors['fill-two']}`
-            : undefined,
+          boxShadow: active ? `inset 0 0 0 3px ${panelBackground}` : undefined,
           background: active ? theme.colors['action-primary'] : 'transparent',
           flexShrink: 0,
         }}

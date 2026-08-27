@@ -171,12 +171,7 @@ export function VulnerabilityReportDetails() {
           columns={columns}
           loading={loading && !data}
           getRowCanExpand={() => true}
-          renderExpanded={({ row }) => (
-            <VulnDetailExpanded
-              row={row}
-              onFixVulnerability={(vuln) => openFix([vuln])}
-            />
-          )}
+          renderExpanded={({ row }) => <VulnDetailExpanded row={row} />}
           onRowClick={(_, row) => row.getToggleExpandedHandler()()}
           emptyStateProps={{ message: 'No vulnerabilities found.' }}
           expandedBgColor="fill-zero"

@@ -7,6 +7,7 @@ import {
 import styled, { DefaultTheme } from 'styled-components'
 
 import { type SemanticColorKey } from '../theme/colors'
+import { lightElevatedSurface } from '../theme/lightElevatedSurface'
 
 import { type PolymorphicComponentProps } from '../types'
 
@@ -21,7 +22,7 @@ function typeToBG(theme: DefaultTheme): Record<Type, string | undefined> {
     tertiary: 'transparent',
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three']
+        ? theme.colors['fill-zero']
         : theme.colors['fill-two'],
   }
 }
@@ -32,7 +33,7 @@ function typeToHoverBG(theme: DefaultTheme): Record<Type, string | undefined> {
     tertiary: theme.colors['action-input-hover'],
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three-hover']
+        ? theme.colors['fill-zero-hover']
         : theme.colors['fill-two-hover'],
   }
 }
@@ -45,7 +46,7 @@ function typeToSelectedBG(
     tertiary: undefined,
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three-selected']
+        ? theme.colors['fill-zero-selected']
         : theme.colors['fill-two-selected'],
   }
 }
@@ -56,7 +57,7 @@ function typeToFocusBG(theme: DefaultTheme): Record<Type, string | undefined> {
     tertiary: undefined,
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three-selected']
+        ? theme.colors['fill-zero-selected']
         : theme.colors['fill-two-selected'],
   }
 }
@@ -67,7 +68,7 @@ function typeToBorder(theme: DefaultTheme): Record<Type, string> {
       theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
     tertiary: '1px solid transparent',
     floating:
-      theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
+      theme.mode === 'light' ? '1px solid transparent' : theme.borders.input,
   }
 }
 
@@ -157,7 +158,9 @@ const IconFrameSC = styled.div<{
         },
       }
     : {}),
-  ...($type === 'floating' ? { boxShadow: theme.boxShadows.slight } : {}),
+  ...($type === 'floating' && lightElevatedSurface(theme)),
+  ...($type === 'floating' &&
+    theme.mode !== 'light' && { boxShadow: theme.boxShadows.slight }),
 }))
 
 function IconFrame<E extends ElementType = 'div'>({

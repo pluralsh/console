@@ -1,10 +1,12 @@
 import {
+  Button,
   CheckIcon,
   Flex,
   GearTrainIcon,
   GitCommitIcon,
   GitPullIcon,
   Modal,
+  ReturnIcon,
   Stepper,
   StepperSteps,
   WorkbenchIcon,
@@ -14,16 +16,12 @@ import { ComponentProps, useState } from 'react'
 import {
   ClusterScalingRecommendationFragment,
   PrAutomationFragment,
-  WorkbenchJobFragment,
   useApplyScalingRecommendationMutation,
 } from 'generated/graphql'
 
-import {
-  SendToWorkbenchForm,
-  useWorkbenchOptions,
-} from 'components/ai/insights/SendInsightToWorkbench'
+import { SendToWorkbenchForm } from 'components/ai/insights/SendInsightToWorkbench'
 import { GqlError } from 'components/utils/Alert'
-import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
+import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 
 import { PrStepKey } from 'components/self-service/pr/automations/CreatePrModal'
 import { usePrAutomationForm } from 'components/self-service/pr/automations/prConfigurationUtils'
@@ -107,11 +105,9 @@ function CreateRecommendationPrModalBase({
   const [currentStep, setCurrentStep] = useState<RecommendationStepKey>(
     startWithWorkbench ? 'workbench' : 'selectType'
   )
-  const [workbenchJob, setWorkbenchJob] = useState<WorkbenchJobFragment | null>(
-    null
-  )
-  const [workbenchPrompt, setWorkbenchPrompt] = useState(() =>
-    buildScalingRecommendationWorkbenchPrompt(cluster, recommendation)
+  const workbenchPrompt = buildScalingRecommendationWorkbenchPrompt(
+    cluster,
+    recommendation
   )
   const { hasWorkbenches } = useWorkbenchOptions()
 
@@ -194,21 +190,34 @@ function CreateRecommendationPrModalBase({
               : `Pull request configuration for ${selectedPrAutomation?.name}`
       }
       actions={
-        currentStep !== 'workbench' && (
-          <CreatePrActions
-            {...{
-              currentStep,
-              setCurrentStep: setCurrentStep as (step: PrStepKey) => void,
-              allowSubmit,
-              successPr,
-              loading: createPrLoading,
-              onClose,
-              hasConfiguration,
-              configIsValid,
-              isScalingRec: true,
-              pageData,
+        currentStep === 'workbench' && !startWithWorkbench ? (
+          <Button
+            secondary
+            startIcon={<ReturnIcon />}
+            onClick={() => {
+              setType('pra')
+              setCurrentStep('selectType')
             }}
-          />
+          >
+            Back
+          </Button>
+        ) : (
+          currentStep !== 'workbench' && (
+            <CreatePrActions
+              {...{
+                currentStep,
+                setCurrentStep: setCurrentStep as (step: PrStepKey) => void,
+                allowSubmit,
+                successPr,
+                loading: createPrLoading,
+                onClose,
+                hasConfiguration,
+                configIsValid,
+                isScalingRec: true,
+                pageData,
+              }}
+            />
+          )
         )
       }
     >
@@ -216,7 +225,7 @@ function CreateRecommendationPrModalBase({
         direction="column"
         gap="large"
         overflow="hidden"
-        maxHeight={400}
+        maxHeight={currentStep === 'workbench' ? 560 : 400}
       >
         {currentStep !== 'success' && currentStep !== 'workbench' && (
           <Flex>
@@ -268,21 +277,12 @@ function CreateRecommendationPrModalBase({
         {currentStep === 'preview' && (
           <PreviewPrStep scalingRecId={scalingRecId} />
         )}
-        {currentStep === 'workbench' &&
-          (workbenchJob ? (
-            <WorkbenchStartedJobPanel
-              initialJob={workbenchJob}
-              jobId={workbenchJob.id}
-              workbenchId={workbenchJob.workbench?.id ?? ''}
-            />
-          ) : (
-            <SendToWorkbenchForm
-              prompt={workbenchPrompt}
-              promptKey={0}
-              setPrompt={setWorkbenchPrompt}
-              setWorkbenchJob={setWorkbenchJob}
-            />
-          ))}
+        {currentStep === 'workbench' && (
+          <SendToWorkbenchForm
+            prompt={workbenchPrompt}
+            backLabel="Cost optimization"
+          />
+        )}
         {createPrError && <GqlError error={createPrError} />}
       </Flex>
     </Modal>

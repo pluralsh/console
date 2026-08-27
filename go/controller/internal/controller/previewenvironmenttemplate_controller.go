@@ -153,6 +153,7 @@ func getAttributes(ctx context.Context, kubeClient client.Client, template v1alp
 	attr := &console.PreviewEnvironmentTemplateAttributes{
 		Name:            template.ConsoleName(),
 		CommentTemplate: template.Spec.CommentTemplate,
+		PreviewTTL:      template.Spec.PreviewTTL,
 	}
 	sta, err := common.ServiceTemplateAttributes(ctx, kubeClient, template.Namespace, &template.Spec.Template, nil)
 	if err != nil {

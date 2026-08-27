@@ -135,6 +135,19 @@ fragment Workbench on Workbench {
       }
     }
   }
+  workbenchKnowledge(first: 50) {
+    edges {
+      node {
+        id
+        name
+        description
+        knowledge
+        labels
+        usages
+        lastUsedAt
+      }
+    }
+  }
   tools {
     ...WorkbenchTool
   }
@@ -1466,6 +1479,27 @@ mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
 mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
   updateWorkbench(id: $id, attributes: $attributes) {
     ...Workbench
+  }
+}
+
+mutation UpdateWorkbenchKnowledge(
+  $id: ID!
+  $attributes: WorkbenchKnowledgeAttributes!
+) {
+  updateWorkbenchKnowledge(id: $id, attributes: $attributes) {
+    id
+    name
+    description
+    knowledge
+    labels
+    usages
+    lastUsedAt
+  }
+}
+
+mutation DeleteWorkbenchKnowledge($id: ID!) {
+  deleteWorkbenchKnowledge(id: $id) {
+    id
   }
 }
 

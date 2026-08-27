@@ -46,7 +46,11 @@ export default function MyProfile() {
       >
         <PageCard
           heading={me.name}
-          icon={{ name: me.name, url: me.profile, spacing: 'none' }}
+          icon={{
+            name: me.name,
+            url: me.profile,
+            spacing: 'none',
+          }}
           subheading={me?.email}
         />
         <TabList

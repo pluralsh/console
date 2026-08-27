@@ -12,6 +12,11 @@ const SidecarSC = styled(Section)(({ theme }) => ({
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.medium,
   padding: theme.spacing.medium,
+  // Light: white metadata panel on the page canvas; dark: raised nested surface
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-two'],
 }))
 const SidecarHeadingSC = styled.h1(({ theme }) => ({
   ...theme.partials.text.overline,

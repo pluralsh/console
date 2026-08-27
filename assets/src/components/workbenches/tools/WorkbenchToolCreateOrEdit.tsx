@@ -190,7 +190,6 @@ export function WorkbenchToolCreateOrEdit({
           align="center"
         >
           <IconFrame
-            circle
             type="secondary"
             icon={
               <WorkbenchToolIcon

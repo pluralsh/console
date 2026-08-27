@@ -3028,6 +3028,11 @@ func (in *FlowSpec) DeepCopyInto(out *FlowSpec) {
 		*out = new(AgentRuntimeRef)
 		**out = **in
 	}
+	if in.MaxPreviews != nil {
+		in, out := &in.MaxPreviews, &out.MaxPreviews
+		*out = new(int64)
+		**out = **in
+	}
 	if in.Reconciliation != nil {
 		in, out := &in.Reconciliation, &out.Reconciliation
 		*out = new(Reconciliation)
@@ -7782,6 +7787,11 @@ func (in *PreviewEnvironmentTemplateSpec) DeepCopyInto(out *PreviewEnvironmentTe
 	}
 	if in.CommentTemplate != nil {
 		in, out := &in.CommentTemplate, &out.CommentTemplate
+		*out = new(string)
+		**out = **in
+	}
+	if in.PreviewTTL != nil {
+		in, out := &in.PreviewTTL, &out.PreviewTTL
 		*out = new(string)
 		**out = **in
 	}

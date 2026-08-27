@@ -1,12 +1,12 @@
 import { usePrevious } from '@pluralsh/design-system'
 
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { isEmpty } from 'lodash'
 import { useEffect, useMemo } from 'react'
 import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
 import { AIViewTypes, useChatbot, useChatbotContext } from '../AIContext.tsx'
+import { useLegacyAiChatEnabled } from '../useLegacyAiChatEnabled.ts'
 
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
 import { MainChatbotButton } from './ChatbotButton.tsx'
@@ -18,9 +18,9 @@ import { McpServerShelf } from './tools/McpServerShelf.tsx'
 
 export function ChatbotLauncher() {
   const { open, setOpen } = useChatbotContext()
-  const settings = useDeploymentSettings()
+  const legacyChatEnabled = useLegacyAiChatEnabled()
 
-  if (!settings.ai?.enabled || open) return null
+  if (!legacyChatEnabled || open) return null
 
   return <MainChatbotButton onClick={() => setOpen(true)} />
 }
