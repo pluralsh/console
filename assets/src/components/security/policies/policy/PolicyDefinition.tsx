@@ -47,7 +47,7 @@ import { PolicyEditModal } from './PolicyEditModal'
 import { PolicyPanelHeader } from './PolicyPanelHeader'
 import {
   formatEvalSelectLabel,
-  isPolicyEvalDenied,
+  getPolicyEvalDecision,
   PolicyEvalMap,
   stringifyEvalMap,
 } from './policyEval'
@@ -131,7 +131,9 @@ export function PolicyDefinition() {
     })
 
   const output = evalResult?.evaluatePolicy as PolicyEvalMap | undefined
-  const denied = output ? isPolicyEvalDenied(output) : undefined
+  const decision = output
+    ? getPolicyEvalDecision(output, policy?.type)
+    : undefined
 
   const onRevert = useCallback(() => {
     setBuffer(savedPolicy)
@@ -294,12 +296,10 @@ export function PolicyDefinition() {
                 </Chip>
               ) : (
                 <Chip
-                  severity={
-                    denied == null ? 'neutral' : denied ? 'danger' : 'success'
-                  }
+                  severity={decision?.severity ?? 'neutral'}
                   size="small"
                 >
-                  {denied == null ? 'Not run yet' : denied ? 'Deny' : 'Allow'}
+                  {decision?.label ?? 'Not run yet'}
                 </Chip>
               )}
             </Flex>

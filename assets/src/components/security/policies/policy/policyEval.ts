@@ -1,12 +1,69 @@
 import { compact, find, get, isArray, isPlainObject, isString } from 'lodash'
+import { PolicyType } from 'generated/graphql'
 import { fromNow } from 'utils/datetime'
 
 export type PolicyEvalMap = Record<string, unknown>
+export type PolicyEvalDecisionFilter = 'allow' | 'deny' | 'match' | 'no-match'
+export type PolicyEvalDecision = {
+  filterKey: PolicyEvalDecisionFilter
+  label: string
+  severity: 'success' | 'danger' | 'neutral'
+  positive: boolean
+  reason: string
+}
 
 export function isPolicyEvalDenied(output?: PolicyEvalMap | null): boolean {
   const deny = get(asEvalMap(output), 'deny')
 
   return isArray(deny) && deny.length > 0
+}
+
+export function isBindingPolicyEval(
+  output?: PolicyEvalMap | null,
+  type?: PolicyType | null
+): boolean {
+  if (type === PolicyType.Binding) return true
+
+  return typeof get(asEvalMap(output), 'bind') === 'boolean'
+}
+
+export function getPolicyEvalDecision(
+  output?: PolicyEvalMap | null,
+  type?: PolicyType | null
+): PolicyEvalDecision {
+  if (isBindingPolicyEval(output, type)) {
+    return get(asEvalMap(output), 'bind') === true
+      ? {
+          filterKey: 'match',
+          label: 'Match',
+          severity: 'success',
+          positive: true,
+          reason: 'Matched by policy.',
+        }
+      : {
+          filterKey: 'no-match',
+          label: 'No match',
+          severity: 'neutral',
+          positive: false,
+          reason: 'Did not match this binding policy.',
+        }
+  }
+
+  return isPolicyEvalDenied(output)
+    ? {
+        filterKey: 'deny',
+        label: 'Deny',
+        severity: 'danger',
+        positive: false,
+        reason: denyReason(output),
+      }
+    : {
+        filterKey: 'allow',
+        label: 'Allow',
+        severity: 'success',
+        positive: true,
+        reason: 'Allowed by policy.',
+      }
 }
 
 export function getPolicyEvalToolName(input?: PolicyEvalMap | null): string {
@@ -39,26 +96,11 @@ export function getPolicyEvalTarget(
   ])
 }
 
-export function getPolicyEvalReason(output?: PolicyEvalMap | null): string {
-  const deny = get(asEvalMap(output), 'deny')
-
-  if (!isArray(deny) || deny.length === 0) {
-    return 'Allowed by policy.'
-  }
-
-  return deny
-    .map((item) => {
-      if (isString(item)) return item
-
-      return (
-        find([
-          asString(get(item, 'message')),
-          asString(get(item, 'reason')),
-          asString(get(item, 'msg')),
-        ]) ?? JSON.stringify(item)
-      )
-    })
-    .join('; ')
+export function getPolicyEvalReason(
+  output?: PolicyEvalMap | null,
+  type?: PolicyType | null
+): string {
+  return getPolicyEvalDecision(output, type).reason
 }
 
 export function formatEvalId(id: string): string {
@@ -79,6 +121,26 @@ export function formatEvalSelectLabel(
 
 export function stringifyEvalMap(value?: PolicyEvalMap | null): string {
   return JSON.stringify(asEvalMap(value) ?? {}, null, 2)
+}
+
+function denyReason(output?: PolicyEvalMap | null): string {
+  const deny = get(asEvalMap(output), 'deny')
+
+  if (!isArray(deny) || deny.length === 0) return 'Allowed by policy.'
+
+  return deny
+    .map((item) => {
+      if (isString(item)) return item
+
+      return (
+        find([
+          asString(get(item, 'message')),
+          asString(get(item, 'reason')),
+          asString(get(item, 'msg')),
+        ]) ?? JSON.stringify(item)
+      )
+    })
+    .join('; ')
 }
 
 function asEvalMap(value?: unknown): PolicyEvalMap | undefined {

@@ -15,6 +15,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
 import {
   PolicyEvaluationFragment,
+  PolicyType,
   usePolicyEvaluationsQuery,
 } from 'generated/graphql'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -32,10 +33,9 @@ import { PolicyEvaluationsSidePanel } from './PolicyEvaluationsSidePanel'
 import { PolicyPanelHeader } from './PolicyPanelHeader'
 import {
   formatEvalId,
-  getPolicyEvalReason,
+  getPolicyEvalDecision,
   getPolicyEvalTarget,
   getPolicyEvalToolName,
-  isPolicyEvalDenied,
   PolicyEvalMap,
   stringifyEvalMap,
 } from './policyEval'
@@ -97,6 +97,7 @@ export function PolicyEvaluations() {
     <WrapperSC>
       <PolicyEvaluationsSidePanel
         evals={evals}
+        policyType={policy?.type}
         loading={loading && !data}
         isLoadingNextPage={!!data && loading}
         hasNextPage={!!pageInfo?.hasNextPage}
@@ -124,6 +125,7 @@ export function PolicyEvaluations() {
             evaluation={selectedEval}
             policyId={policyId}
             policyName={policy?.name}
+            policyType={policy?.type}
           />
           <PanelSC $trimRightBorder>
             <Flex
@@ -190,13 +192,18 @@ function SummaryPanel({
   evaluation,
   policyId,
   policyName,
+  policyType,
 }: {
   evaluation: PolicyEvaluationFragment
   policyId: string
   policyName?: string | null
+  policyType?: PolicyType | null
 }) {
   const theme = useTheme()
-  const denied = isPolicyEvalDenied(evaluation.output as PolicyEvalMap)
+  const decision = getPolicyEvalDecision(
+    evaluation.output as PolicyEvalMap,
+    policyType
+  )
   const toolName = getPolicyEvalToolName(evaluation.input as PolicyEvalMap)
   const target = getPolicyEvalTarget(evaluation.input as PolicyEvalMap)
   const policyIds = (evaluation.policyIds ?? []).map((id) =>
@@ -229,9 +236,7 @@ function SummaryPanel({
           <span css={{ ...theme.partials.text.subtitle2 }}>
             {formatEvalId(evaluation.id)}
           </span>
-          <Chip severity={denied ? 'danger' : 'success'}>
-            {denied ? 'Deny' : 'Allow'}
-          </Chip>
+          <Chip severity={decision.severity}>{decision.label}</Chip>
         </Flex>
         <span
           css={{
@@ -252,7 +257,7 @@ function SummaryPanel({
             color: theme.colors['text-long-form'],
           }}
         >
-          {getPolicyEvalReason(evaluation.output as PolicyEvalMap)}
+          {decision.reason}
         </span>
         <Flex
           direction="column"

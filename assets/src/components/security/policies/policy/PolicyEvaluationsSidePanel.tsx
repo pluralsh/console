@@ -3,26 +3,38 @@ import { TRUNCATE } from 'components/utils/truncate'
 import type { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P } from 'components/utils/typography/Text'
 import { VirtualList } from 'components/utils/VirtualList'
-import { PolicyEvaluationFragment } from 'generated/graphql'
+import { PolicyEvaluationFragment, PolicyType } from 'generated/graphql'
 import { partition } from 'lodash'
 import { type ComponentProps, useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import {
+  getPolicyEvalDecision,
   getPolicyEvalToolName,
-  isPolicyEvalDenied,
+  isBindingPolicyEval,
+  PolicyEvalDecision,
+  PolicyEvalDecisionFilter,
   PolicyEvalMap,
 } from './policyEval'
 
-type EvalFilter = 'all' | 'deny' | 'allow'
+type EvalFilter = 'all' | PolicyEvalDecisionFilter
 type ChipSeverity = NonNullable<ComponentProps<typeof Chip>['severity']>
 type AnnotatedEval = {
   evaluation: PolicyEvaluationFragment
-  denied: boolean
+  decision: PolicyEvalDecision
+}
+
+const FILTER_LABELS: Record<EvalFilter, string> = {
+  all: 'All',
+  deny: 'Deny',
+  allow: 'Allow',
+  match: 'Match',
+  'no-match': 'No match',
 }
 
 export function PolicyEvaluationsSidePanel({
   evals,
+  policyType,
   loading,
   isLoadingNextPage,
   hasNextPage,
@@ -32,6 +44,7 @@ export function PolicyEvaluationsSidePanel({
   onSelectEvalId,
 }: {
   evals: PolicyEvaluationFragment[]
+  policyType?: PolicyType | null
   loading: boolean
   isLoadingNextPage: boolean
   hasNextPage: boolean
@@ -42,26 +55,35 @@ export function PolicyEvaluationsSidePanel({
 }) {
   const theme = useTheme()
   const [activeFilter, setActiveFilter] = useState<EvalFilter>('all')
+  const binding = isBindingPolicyEval(undefined, policyType)
+  const negativeKey: PolicyEvalDecisionFilter = binding ? 'no-match' : 'deny'
+  const positiveKey: PolicyEvalDecisionFilter = binding ? 'match' : 'allow'
 
   const annotatedEvals = useMemo<AnnotatedEval[]>(
     () =>
       evals.map((evaluation) => ({
         evaluation,
-        denied: isPolicyEvalDenied(evaluation.output as PolicyEvalMap),
+        decision: getPolicyEvalDecision(
+          evaluation.output as PolicyEvalMap,
+          policyType
+        ),
       })),
-    [evals]
+    [evals, policyType]
   )
 
   const { filteredEvals, filterOptions } = useMemo(() => {
-    const [denied, allowed] = partition(annotatedEvals, 'denied')
+    const [negative, positive] = partition(
+      annotatedEvals,
+      ({ decision }) => decision.filterKey === negativeKey
+    )
 
     return {
       filteredEvals:
         activeFilter === 'all'
           ? annotatedEvals
-          : activeFilter === 'deny'
-            ? denied
-            : allowed,
+          : activeFilter === negativeKey
+            ? negative
+            : positive,
       filterOptions: [
         {
           key: 'all' as const,
@@ -69,18 +91,22 @@ export function PolicyEvaluationsSidePanel({
           severity: 'neutral' as ChipSeverity,
         },
         {
-          key: 'deny' as const,
-          count: denied.length,
-          severity: 'danger' as ChipSeverity,
+          key: negativeKey,
+          count: negative.length,
+          severity: (binding ? 'neutral' : 'danger') as ChipSeverity,
         },
         {
-          key: 'allow' as const,
-          count: allowed.length,
+          key: positiveKey,
+          count: positive.length,
           severity: 'success' as ChipSeverity,
         },
       ],
     }
-  }, [activeFilter, annotatedEvals])
+  }, [activeFilter, annotatedEvals, binding, negativeKey, positiveKey])
+
+  useEffect(() => {
+    setActiveFilter('all')
+  }, [binding])
 
   useEffect(() => {
     if (isLoadingNextPage || !hasNextPage) return
@@ -142,12 +168,12 @@ export function PolicyEvaluationsSidePanel({
             onVirtualSliceChange={onVirtualSliceChange}
             getRowId={({ evaluation }) => evaluation.id}
             style={{ height: '100%' }}
-            renderer={({ rowData: { evaluation, denied } }) => (
+            renderer={({ rowData: { evaluation, decision } }) => (
               <EvalLinkSC
                 $active={selectedEvalId === evaluation.id}
                 onClick={() => onSelectEvalId(evaluation.id)}
               >
-                <DecisionBadge denied={denied} />
+                <DecisionBadge decision={decision} />
                 <Flex
                   direction="column"
                   gap="xxsmall"
@@ -189,7 +215,7 @@ export function PolicyEvaluationsSidePanel({
   )
 }
 
-function DecisionBadge({ denied }: { denied: boolean }) {
+function DecisionBadge({ decision }: { decision: PolicyEvalDecision }) {
   const theme = useTheme()
 
   return (
@@ -206,14 +232,14 @@ function DecisionBadge({ denied }: { denied: boolean }) {
         width: 32,
       }}
     >
-      {denied ? (
-        <CloseIcon
-          color="icon-danger"
+      {decision.positive ? (
+        <CheckIcon
+          color="icon-success"
           size={12}
         />
       ) : (
-        <CheckIcon
-          color="icon-success"
+        <CloseIcon
+          color={decision.filterKey === 'deny' ? 'icon-danger' : 'icon-xlight'}
           size={12}
         />
       )}
@@ -252,9 +278,7 @@ function EvalFilterChip({
         height: 'fit-content',
       }}
     >
-      <span css={{ textTransform: 'capitalize' }}>
-        {filterKey} ({count})
-      </span>
+      {FILTER_LABELS[filterKey]} ({count})
     </Chip>
   )
 }
