@@ -389,14 +389,14 @@ func (h *helm) pythonFolder(folder string) (string, error) {
 }
 
 func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues []*string) (map[string]any, error) {
-	currentMap, err := h.valuesFile(svc, "values.yaml.liquid")
+	currentMap, err := h.valuesFile(svc, "values.yaml.liquid", false)
 	if err != nil {
 		return currentMap, err
 	}
 	if svc.Helm != nil {
 		allValues := slices.Concat(svc.Helm.ValuesFiles, additionalValues)
 		for _, f := range allValues {
-			nextMap, err := h.valuesFile(svc, lo.FromPtr(f))
+			nextMap, err := h.valuesFile(svc, lo.FromPtr(f), true)
 			if err != nil {
 				return currentMap, err
 			}
@@ -412,7 +412,7 @@ func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues [
 		}
 	}
 
-	overrides, err := h.valuesFile(svc, "values.yaml.static")
+	overrides, err := h.valuesFile(svc, "values.yaml.static", false)
 	if err != nil {
 		return currentMap, nil
 	}
@@ -457,18 +457,38 @@ func (h *helm) luaFolder(svc *console.ServiceDeploymentForAgent, folder string) 
 	return strings.Join(luaFileContents, "\n\n"), nil
 }
 
-func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, error) {
+func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string, required bool) (map[string]any, error) {
 	currentMap := map[string]any{}
 	if !filepath.IsLocal(filename) {
 		return nil, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
 	}
-	filename = filepath.Join(h.dir, filename)
-	data, err := os.ReadFile(filename)
+	path := filepath.Join(h.dir, filename)
+	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
-		return currentMap, nil
+		if !required {
+			return currentMap, nil
+		}
+
+		candidates, findErr := h.findValuesFileCandidates(filename)
+		if findErr != nil {
+			return nil, fmt.Errorf("helm values file %q is missing and searching the manifest directory failed: %w", filename, findErr)
+		}
+		err = fmt.Errorf("explicit helm values file %q not found in manifest directory", filename)
+		klog.ErrorS(err, "explicit Helm values file missing",
+			"file", filename,
+			"manifestDir", h.dir,
+			"candidates", candidates,
+		)
+		if len(candidates) > 0 {
+			return nil, fmt.Errorf("%w; matching files found at %s", err, strings.Join(candidates, ", "))
+		}
+		return nil, err
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to read Helm values file %s: %w", filename, err)
+		return nil, fmt.Errorf("failed to read helm values file %s: %w", filename, err)
+	}
+	if required {
+		klog.InfoS("explicit Helm values file found", "file", filename, "path", path)
 	}
 
 	if strings.HasSuffix(filename, ".liquid") {
@@ -490,6 +510,27 @@ func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename strin
 	}
 
 	return currentMap, nil
+}
+
+func (h *helm) findValuesFileCandidates(filename string) ([]string, error) {
+	basename := filepath.Base(filename)
+	candidates := make([]string, 0)
+	err := filepath.WalkDir(h.dir, func(path string, entry iofs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || entry.Name() != basename {
+			return nil
+		}
+		relative, err := filepath.Rel(h.dir, path)
+		if err != nil {
+			return err
+		}
+		candidates = append(candidates, relative)
+		return nil
+	})
+	slices.Sort(candidates)
+	return candidates, err
 }
 
 func (h *helm) templateHelm(conf *action.Configuration, release, namespace string, values map[string]any, includeCRDs bool) (*release.Release, error) {
