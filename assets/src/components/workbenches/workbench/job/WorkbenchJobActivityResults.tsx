@@ -149,28 +149,30 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      {timestamp && (
-        <CaptionP $color="text-long-form">
-          {formatDateTime(timestamp, 'h:mmA')}
-        </CaptionP>
-      )}
-      <IconFrame
-        clickable
-        as="div"
-        tooltip="Copy to clipboard"
-        type="tertiary"
-        onClick={(e) => {
-          e.stopPropagation()
-          handleCopy()
-        }}
-        icon={
-          copied ? (
-            <CheckIcon color="icon-success" />
-          ) : (
-            <CopyIcon color="icon-xlight" />
-          )
-        }
-      />
+      <div>
+        {timestamp && (
+          <CaptionP $color="text-long-form">
+            {formatDateTime(timestamp, 'h:mmA')}
+          </CaptionP>
+        )}
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Copy to clipboard"
+          type="tertiary"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCopy()
+          }}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
+          }
+        />
+      </div>
     </PromptActionsSC>
   )
 }
@@ -590,16 +592,22 @@ const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
 )
 
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: theme.spacing.xxsmall,
-  paddingTop: 6,
+  display: 'grid',
+  gridTemplateRows: $show ? '1fr' : '0fr',
+  justifyItems: 'end',
   width: '100%',
   opacity: $show ? 1 : 0,
-  transition: '0.3s opacity ease',
-  pointerEvents: 'none',
-  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
+  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
+  pointerEvents: $show ? 'auto' : 'none',
+  '> div': {
+    overflow: 'hidden',
+    minHeight: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: theme.spacing.xxsmall,
+    paddingTop: 6,
+  },
 }))
 
 const PromptCardSC = styled(Card)<{
