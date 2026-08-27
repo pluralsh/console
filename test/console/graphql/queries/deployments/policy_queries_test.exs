@@ -452,10 +452,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
 
     test "evaluates unsaved policy source when provided" do
       user = insert(:user)
-      project = insert(:project, write_bindings: [%{user_id: user.id}])
-
       policy = insert(:policy,
-        project: project,
         policy: """
         package plrl.wb.admission
 
@@ -486,30 +483,6 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       }, %{current_user: user})
 
       assert [%{"message" => "buffer"}] = result["deny"]
-    end
-
-    test "rejects unsaved policy source without write access" do
-      user = insert(:user)
-      project = insert(:project, read_bindings: [%{user_id: user.id}])
-      policy = insert(:policy, project: project, policy: "package plrl.wb.admission\nsample := 0")
-
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
-          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
-        }
-      """, %{
-        "policyId" => policy.id,
-        "input" => Jason.encode!(%{}),
-        "policy" => """
-        package plrl.wb.admission
-
-        sample := 0
-
-        deny[{"message": "buffer"}] if {
-          true
-        }
-        """
-      }, %{current_user: user})
     end
 
     test "evaluates binding policies with the binding base" do

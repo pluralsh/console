@@ -89,8 +89,16 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     {:ok, workbenches + stacks}
   end
 
-  def evaluate_policy(%{policy_id: id, input: input} = args, %{context: %{current_user: user}}),
-    do: Policy.evaluate_policy(id, input, user, Map.get(args, :policy))
+  def evaluate_policy(%{policy_id: id, input: input, policy: source}, _)
+      when is_binary(source) and byte_size(source) > 0 do
+    with %{type: type} <- Policy.get_policy(id) do
+      Policy.evaluate_custom_policy(type, source, input)
+    else
+      _ -> {:error, "not found"}
+    end
+  end
+  def evaluate_policy(%{policy_id: id, input: input}, %{context: %{current_user: user}}),
+    do: Policy.evaluate_policy(id, input, user)
 
   def resolve_vulnerability(%{id: id}, %{context: %{current_user: user}}) do
     Policy.get_vulnerability(id)

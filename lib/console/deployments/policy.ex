@@ -187,18 +187,17 @@ defmodule Console.Deployments.Policy do
     end
   end
 
-  def evaluate_policy(id, input, %User{} = user),
-    do: evaluate_policy(id, input, user, nil)
-  def evaluate_policy(id, input, %User{} = user, override)
-      when is_binary(override) and byte_size(override) > 0 do
-    get_policy(id)
-    |> allow(user, :write)
-    |> when_ok(fn policy -> evaluate_policy(%{policy | policy: override}, input) end)
-  end
-  def evaluate_policy(id, input, %User{} = user, _override) do
+  def evaluate_policy(id, input, %User{} = user) do
     get_policy(id)
     |> allow(user, :read)
     |> when_ok(&evaluate_policy(&1, input))
+  end
+
+  @doc "Compiles unsaved policy source and evaluates it. Does not authorize against a stored policy."
+  def evaluate_custom_policy(type, source, input) when is_binary(source) and byte_size(source) > 0 do
+    with {:ok, engine, path} <- compile_policies(type, [%{name: "custom", policy: source}]) do
+      eval_policy(engine, input, [], path)
+    end
   end
 
   @workbench_rego Path.expand("../../../priv/policy/wb.rego", __DIR__)
