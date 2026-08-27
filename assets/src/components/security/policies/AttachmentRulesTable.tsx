@@ -2,32 +2,31 @@ import { Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import {
+  BindingPoliciesQuery,
+  BindingPolicyTinyFragment,
   PageInfoFragment,
-  PoliciesQuery,
-  PolicyTinyFragment,
 } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
-import { getPolicyDetailsAbsPath } from 'routes/securityRoutesConsts'
+import { getAttachmentRuleEditAbsPath } from 'routes/securityRoutesConsts'
 import styled from 'styled-components'
 import { Edge } from 'utils/graphql'
 import {
   ColActions,
-  ColName,
-  ColProject,
-  ColType,
-  ColUpdated,
-} from './PoliciesColumns'
+  ColBindPolicy,
+  ColRules,
+  ColTarget,
+} from './AttachmentRulesColumns'
 
-const columns = [ColName, ColProject, ColUpdated, ColType, ColActions]
+const columns = [ColRules, ColBindPolicy, ColTarget, ColActions]
 
-export function PoliciesTable({
+export function AttachmentRulesTable({
   data,
   loading,
   pageInfo,
   fetchNextPage,
   setVirtualSlice,
 }: {
-  data?: PoliciesQuery
+  data?: BindingPoliciesQuery
   loading: boolean
   pageInfo?: PageInfoFragment
   fetchNextPage: () => void
@@ -40,18 +39,21 @@ export function PoliciesTable({
       <Table
         fullHeightWrap
         virtualizeRows
-        data={data?.policies?.edges || []}
+        data={data?.bindingPolicies?.edges || []}
         loading={!data && loading}
         columns={columns}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        onRowClick={(_e, { original }: Row<Edge<PolicyTinyFragment>>) => {
+        onRowClick={(
+          _e,
+          { original }: Row<Edge<BindingPolicyTinyFragment>>
+        ) => {
           if (original.node?.id)
-            navigate(getPolicyDetailsAbsPath(original.node.id))
+            navigate(getAttachmentRuleEditAbsPath(original.node.id))
         }}
-        emptyStateProps={{ message: 'No policies found.' }}
+        emptyStateProps={{ message: 'No attachment rules found.' }}
       />
     </WrapperSC>
   )

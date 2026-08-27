@@ -405,6 +405,9 @@ type RootQueryType {
 
     "JSON-encoded tool input to evaluate"
     input: Json!
+
+    "optional unsaved policy source to evaluate instead of the stored policy"
+    policy: String
   ): Map
 
   policyConstraints(
@@ -9526,6 +9529,18 @@ type Policy {
   stackPolicies(after: String, first: Int, before: String, last: Int): StackPolicyConnection
 
   workbenchPolicies(after: String, first: Int, before: String, last: Int): WorkbenchPolicyConnection
+
+  "how many workbenches and stacks currently match this bind policy"
+  matchCount: Int
+
+  "how many sampled evaluations include this policy"
+  evaluationCount: Int
+
+  "how many workbenches are currently attached to this policy"
+  workbenchAttachmentCount: Int
+
+  "how many stacks are currently attached to this policy"
+  stackAttachmentCount: Int
 
   insertedAt: DateTime
 

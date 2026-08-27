@@ -16,27 +16,27 @@ import { useTheme } from 'styled-components'
 
 import { useMemo } from 'react'
 import {
-  POLICIES_ABS_PATH,
-  POLICIES_DETAILS_PATH,
-  POLICIES_REL_PATH,
+  GATEKEEPER_ABS_PATH,
+  GATEKEEPER_DETAILS_PATH,
+  GATEKEEPER_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
 } from 'routes/securityRoutesConsts'
 import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
-import { PolicyContextType } from '../Policy'
+import { ConstraintContextType } from '../Constraint'
 
-function PolicyDetails() {
+function ConstraintDetails() {
   const theme = useTheme()
 
-  const { policy } = useOutletContext<PolicyContextType>()
+  const { policy } = useOutletContext<ConstraintContextType>()
 
   useSetBreadcrumbs(
     useMemo(
       () => [
         { label: `${SECURITY_REL_PATH}`, url: `${SECURITY_ABS_PATH}}` },
-        { label: POLICIES_REL_PATH, url: `${POLICIES_ABS_PATH}` },
+        { label: GATEKEEPER_REL_PATH, url: `${GATEKEEPER_ABS_PATH}` },
         { label: policy?.name || '' },
-        { label: POLICIES_DETAILS_PATH },
+        { label: GATEKEEPER_DETAILS_PATH },
       ],
       [policy?.name]
     )
@@ -117,4 +117,4 @@ function PolicyDetails() {
   )
 }
 
-export default PolicyDetails
+export default ConstraintDetails

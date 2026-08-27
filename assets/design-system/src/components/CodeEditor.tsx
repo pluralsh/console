@@ -11,6 +11,7 @@ import { editorThemeLight } from '../theme/editorThemeLight'
 import Card, { type CardProps } from './Card'
 import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
 import Button from './Button'
+import { registerRegoLanguage } from './registerRegoLanguage'
 
 type CodeEditorProps = Omit<CardProps, 'children'> & {
   value?: string
@@ -76,9 +77,12 @@ export default function CodeEditor({
   }, [copied])
 
   useEffect(() => {
-    monaco?.editor?.defineTheme('plural-dark', editorThemeDark)
-    monaco?.editor?.defineTheme('plural-light', editorThemeLight)
-    monaco?.editor.setTheme(
+    if (!monaco) return
+
+    registerRegoLanguage(monaco)
+    monaco.editor.defineTheme('plural-dark', editorThemeDark)
+    monaco.editor.defineTheme('plural-light', editorThemeLight)
+    monaco.editor.setTheme(
       theme.mode === 'light' ? 'plural-light' : 'plural-dark'
     )
   }, [monaco, theme.mode])

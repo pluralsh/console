@@ -1587,6 +1587,76 @@
          "name": "ComplianceReports",
          "body": "query ComplianceReports($id: ID, $name: String, $after: String, $before: String, $first: Int, $last: Int) {\n  complianceReportGenerator(id: $id, name: $name) {\n    complianceReports(after: $after, before: $before, first: $first, last: $last) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...ComplianceReport\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment ComplianceReport on ComplianceReports {\n  insertedAt\n  id\n  name\n  sha256\n  __typename\n}"
       },
+      "sha256:cb27b587d0c6659394d37dee1cff446a4bd764d654c001795f5b0098a2895a6d": {
+         "type": "query",
+         "name": "Policies",
+         "body": "query Policies($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {\n  policies(\n    after: $after\n    first: $first\n    before: $before\n    last: $last\n    projectId: $projectId\n    q: $q\n  ) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...PolicyTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:d9163f558d6b4ffca5259f8731707a91235c686335794c5971d9452831ffc190": {
+         "type": "query",
+         "name": "Policy",
+         "body": "query Policy($id: ID, $name: String) {\n  policy(id: $id, name: $name) {\n    ...Policy\n    __typename\n  }\n}\n\nfragment Policy on Policy {\n  ...PolicyTiny\n  policy\n  evaluationCount\n  workbenchAttachmentCount\n  stackAttachmentCount\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:2b9538a490fe5c5efa341f20d95d70d9f453cf3ce26922dc2d786b79ff2f9486": {
+         "type": "query",
+         "name": "PolicyWorkbenchAttachments",
+         "body": "query PolicyWorkbenchAttachments($id: ID!, $first: Int, $after: String) {\n  policy(id: $id) {\n    id\n    workbenchPolicies(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          id\n          matches {\n            regexes\n            __typename\n          }\n          workbench {\n            id\n            name\n            description\n            __typename\n          }\n          updatedAt\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}"
+      },
+      "sha256:6bc5dcc71637207530150af58e7cd00b19792a8311277bb93a6ddd8eea0c0c88": {
+         "type": "query",
+         "name": "PolicyStackAttachments",
+         "body": "query PolicyStackAttachments($id: ID!, $first: Int, $after: String) {\n  policy(id: $id) {\n    id\n    stackPolicies(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          id\n          stack {\n            id\n            name\n            type\n            __typename\n          }\n          updatedAt\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}"
+      },
+      "sha256:808e26af35fc1b9283a51318dc44beac986e8d8fc7b000eb1329836a0e8941e3": {
+         "type": "query",
+         "name": "PolicyEvaluations",
+         "body": "query PolicyEvaluations($id: ID!, $first: Int, $after: String) {\n  policy(id: $id) {\n    id\n    policyEvaluations(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...PolicyEvaluation\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment PolicyEvaluation on PolicyEvaluation {\n  id\n  policyIds\n  input\n  output\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
+      "sha256:0422f5a2aec92c45ccb16db0cd9897fd06d29227bdf3b5ad693d57109581b1d7": {
+         "type": "mutation",
+         "name": "CreatePolicy",
+         "body": "mutation CreatePolicy($attributes: PolicyAttributes!) {\n  createPolicy(attributes: $attributes) {\n    ...PolicyTiny\n    __typename\n  }\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:7c00ff9fce31de0adc42cb6765fb9f34733722c9fffe2555fe12ec4da986158f": {
+         "type": "mutation",
+         "name": "UpdatePolicy",
+         "body": "mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {\n  updatePolicy(id: $id, attributes: $attributes) {\n    ...Policy\n    __typename\n  }\n}\n\nfragment Policy on Policy {\n  ...PolicyTiny\n  policy\n  evaluationCount\n  workbenchAttachmentCount\n  stackAttachmentCount\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:605cf7f5d80378bba38a5ae5dc42f2334afcec552bafeb91e720743e263e01d7": {
+         "type": "query",
+         "name": "EvaluatePolicy",
+         "body": "query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {\n  evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)\n}"
+      },
+      "sha256:ef553f0836479413a9f0222659668a56d0813bee7a5ca7f7bbc3f59160141a22": {
+         "type": "mutation",
+         "name": "DeletePolicy",
+         "body": "mutation DeletePolicy($id: ID!) {\n  deletePolicy(id: $id) {\n    ...PolicyTiny\n    __typename\n  }\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:2add493a7661cb6c18969020a59b405c9a617458d58d502c72138a514cc9c9fe": {
+         "type": "query",
+         "name": "BindingPolicies",
+         "body": "query BindingPolicies($after: String, $first: Int, $before: String, $last: Int) {\n  bindingPolicies(after: $after, first: $first, before: $before, last: $last) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...BindingPolicyTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:370587353f8ab5850405ac7402aa7c04d505ab422eec05769927aaf6d94f6acf": {
+         "type": "mutation",
+         "name": "DeleteBindingPolicy",
+         "body": "mutation DeleteBindingPolicy($id: ID!) {\n  deleteBindingPolicy(id: $id) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:d94f1ff9f6deacad5a5acf7037aa8ff5c127c07f3e71eb8ea5a2ba26ba34de17": {
+         "type": "query",
+         "name": "BindingPolicy",
+         "body": "query BindingPolicy($id: ID!) {\n  bindingPolicy(id: $id) {\n    ...BindingPolicy\n    __typename\n  }\n}\n\nfragment BindingPolicy on BindingPolicy {\n  ...BindingPolicyTiny\n  interval\n  matches {\n    workbench {\n      regexes\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:5de1bb7ebe7136785f1cf1717fb1f6b0168e7d474fd6df0c4466eafcaa368140": {
+         "type": "mutation",
+         "name": "CreateBindingPolicy",
+         "body": "mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {\n  createBindingPolicy(attributes: $attributes) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
+      "sha256:8c2b28257917d550ede208b7565a88d8d00e482cfa9af2072fe881367e7b6b6f": {
+         "type": "mutation",
+         "name": "UpdateBindingPolicy",
+         "body": "mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {\n  updateBindingPolicy(id: $id, attributes: $attributes) {\n    ...BindingPolicyTiny\n    __typename\n  }\n}\n\nfragment BindingPolicyTiny on BindingPolicy {\n  id\n  type\n  insertedAt\n  updatedAt\n  policy {\n    ...PolicyTiny\n    __typename\n  }\n  bindPolicy {\n    ...PolicyTiny\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyTiny on Policy {\n  id\n  name\n  type\n  description\n  matchCount\n  project {\n    ...ProjectTiny\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ProjectTiny on Project {\n  id\n  name\n  default\n  description\n  __typename\n}"
+      },
       "sha256:0468fee7007cd42f554905a16c0d76a3687919152ff4153e640562564e003ac7": {
          "type": "query",
          "name": "Projects",
