@@ -120,6 +120,8 @@ export function Gatekeeper() {
         fetchNextPage={fetchNextPage}
         setVirtualSlice={setVirtualSlice}
         resetFilters={() => {
+          setSearchString('')
+          setViolationFilter(ViolationFilter.All)
           setSelectedKinds([])
           setSelectedNamespaces([])
           setSelectedClusters([])
