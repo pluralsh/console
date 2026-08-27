@@ -581,20 +581,18 @@ const PromptWrapperSC = styled.div(({ theme }) => ({
   marginBottom: theme.spacing.small,
 }))
 
-const PromptActionsSC = styled.div<{ $show: boolean }>(
-  ({ theme, $show }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: theme.spacing.xxsmall,
-    paddingTop: 6,
-    width: '100%',
-    opacity: $show ? 1 : 0,
-    transition: '0.3s opacity ease',
-    pointerEvents: 'none',
-    '& > *': { pointerEvents: $show ? 'auto' : 'none' },
-  })
-)
+const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xxsmall,
+  paddingTop: 6,
+  width: '100%',
+  opacity: $show ? 1 : 0,
+  transition: '0.3s opacity ease',
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
+}))
 
 const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
   ({ theme, $isExpanded }) => ({
