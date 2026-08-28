@@ -55,7 +55,8 @@ spec:
                   Set to "0s" to disable compatibility uploads.
                 type: string
               componentShaCacheTTL:
-                description: ComponentShaCacheTTL specifies how long component SHA cache entries remain valid.
+                description: ComponentShaCacheTTL specifies how long duplicate component
+                  updates are cached.
                 type: string
               disableWebsocket:
                 description: |-

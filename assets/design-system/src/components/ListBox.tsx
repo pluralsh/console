@@ -44,7 +44,7 @@ type ListBoxProps = Omit<
   ListBoxUnmanagedProps,
   'state' | 'nextFocusedKeyRef' | 'onSelectionChange'
 > & {
-  selectedKey: Key
+  selectedKey?: Key | null
   onSelectionChange: (key: Key) => unknown
   onHeaderClick?: () => unknown
   onFooterClick?: () => unknown
@@ -60,6 +60,7 @@ const ListBoxCard = styled(Card)(({ theme }) => ({
   flexShrink: 1,
   overflowX: 'visible',
   overflowY: 'hidden',
+  // White floating panel — match notifications / header menus
   background:
     theme.mode === 'light'
       ? theme.colors['fill-zero']
@@ -109,7 +110,8 @@ function propsToTextValue(props: Record<string, unknown> | null | undefined) {
 }
 
 function useItemWrappedChildren(
-  children: ReactElement<any> | (ReactElement<any> | false)[],
+  children?:
+    ReactElement<any> | (ReactElement<any> | false | null | undefined)[] | null,
   header?: ReactElement<any>,
   footer?: ReactElement<any>
 ) {
@@ -238,11 +240,8 @@ function ListBoxUnmanaged({
   const theme = useTheme()
 
   // Get props for the listbox element
-  let ref = useRef(undefined)
-
-  if (listBoxRef) {
-    ref = listBoxRef
-  }
+  const fallbackRef = useRef<HTMLElement | null>(null)
+  const ref = listBoxRef ?? fallbackRef
   const { listBoxProps } = useListBox(props, state, ref)
 
   return (
@@ -253,7 +252,7 @@ function ListBoxUnmanaged({
     >
       {headerFixed && <div className="headerFixed">{headerFixed}</div>}
       <ScrollContainer
-        ref={ref}
+        ref={ref as RefObject<HTMLDivElement | null>}
         extendStyle={{
           paddingTop: headerFixed ? 0 : theme.spacing.xxxsmall,
           paddingBottom: footerFixed ? 0 : theme.spacing.xxxsmall,
@@ -275,7 +274,7 @@ function ListBoxUnmanaged({
 
 function Option({ item, state }: { item: any; state: ListState<object> }) {
   // Get props for the option element
-  const ref = useRef(undefined)
+  const ref = useRef(null)
   const {
     optionProps,
     isSelected,

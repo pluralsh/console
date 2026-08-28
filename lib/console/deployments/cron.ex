@@ -25,9 +25,11 @@ defmodule Console.Deployments.Cron do
     ClusterInsightComponent,
     ClusterUpgrade,
     WorkbenchJob,
-    PolicyEvaluation
+    PolicyEvaluation,
+    PreviewEnvironmentInstance
   }
   alias Console.Deployments.Pipelines.Discovery
+  alias Console.Deployments.Flows.Preview
 
   require Logger
 
@@ -70,6 +72,20 @@ defmodule Console.Deployments.Cron do
     Logger.info "pruning all expired alerts"
     Alert.expired()
     |> Repo.delete_all(timeout: 300_000)
+  end
+
+  def prune_preview_environments() do
+    Logger.info "pruning expired preview environments"
+    PreviewEnvironmentInstance.expired()
+    |> PreviewEnvironmentInstance.active()
+    |> PreviewEnvironmentInstance.stream()
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: :timer.seconds(1))
+    |> Stream.each(fn inst ->
+      Logger.info "pruning preview environment instance #{inst.id}"
+      Preview.delete_instance(inst)
+    end)
+    |> Stream.run()
   end
 
   def cache_warm(), do: Git.warm_helm_cache()

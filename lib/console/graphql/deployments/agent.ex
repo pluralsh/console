@@ -23,6 +23,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :allowed_repositories, list_of(:string), description: "the git repositories allowed to be used with this runtime"
     field :babysit_interval,     :integer, description: "default interval in seconds between babysit checks for runs on this runtime"
     field :scm_connection,       :string, description: "the name of the scm connection to use for this runtime"
+    field :model,                :workbench_job_model_attributes, description: "default model override for runs on this runtime"
   end
 
   input_object :agent_binding_attributes do
@@ -54,6 +55,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approval,         :boolean, description: "whether this run requires approval before continuing"
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
+    field :followup_pr_url,  :string, description: "the pull request URL this follow-up run is targeting"
     field :skills,           list_of(:agent_skill_attributes), description: "the skills available to this agent run"
     field :usage,            :ai_usage_attributes, description: "token and cost usage for this agent run"
   end
@@ -167,6 +169,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :default,              :boolean, description: "whether this is the default runtime for coding agents"
     field :allowed_repositories, list_of(:string), description: "the git repositories allowed to be used with this runtime"
     field :babysit_interval,     :integer, description: "default interval in seconds between babysit checks for runs on this runtime"
+    field :model,                :workbench_job_model, description: "default model override for runs on this runtime"
 
     field :cluster,         :cluster, resolve: dataloader(Deployments), description: "the cluster this runtime is running on"
     field :create_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "the policy for creating runs on this runtime"
@@ -198,6 +201,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :approved_at,      :datetime, description: "when this run was approved"
     field :consumed,         :id, description: "the agent run this run consumed"
     field :followup,         :boolean, description: "whether this run is a follow-up to a pull request"
+    field :followup_pr_url,  :string, description: "the pull request URL this follow-up run is targeting"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
     field :usage,            :agent_run_usage, description: "token and cost usage for this agent run"

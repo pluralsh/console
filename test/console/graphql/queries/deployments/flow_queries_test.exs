@@ -218,30 +218,33 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
     test "it can fetch preview environment templates within a flow" do
       user = insert(:user)
       flow = insert(:flow, read_bindings: [%{user_id: user.id}])
-      templates = insert_list(3, :preview_environment_template, flow: flow)
+      templates = insert_list(3, :preview_environment_template, flow: flow, preview_ttl: 86_400)
       insert_list(3, :preview_environment_template)
 
       {:ok, %{data: %{"flow" => found}}} = run_query("""
         query flow($id: ID!) {
           flow(id: $id) {
             id
+            maxPreviews
             previewEnvironmentTemplates(first: 5) {
-              edges { node { id } }
+              edges { node { id previewTtl } }
             }
           }
         }
       """, %{"id" => flow.id}, %{current_user: user})
 
       assert found["id"] == flow.id
+      assert found["maxPreviews"] == 10
       assert from_connection(found["previewEnvironmentTemplates"])
              |> ids_equal(templates)
+      assert Enum.all?(found["previewEnvironmentTemplates"]["edges"], & &1["node"]["previewTtl"] == 86_400)
     end
 
     test "it can fetch preview environment instances within a flow" do
       user      = insert(:user)
       flow      = insert(:flow, read_bindings: [%{user_id: user.id}])
       template  = insert(:preview_environment_template, flow: flow)
-      instances = insert_list(3, :preview_environment_instance, template: template)
+      instances = insert_list(3, :preview_environment_instance, template: template, preview_expires_at: ~U[2026-09-01 00:00:00.000000Z])
       insert_list(3, :preview_environment_instance)
 
       {:ok, %{data: %{"flow" => found}}} = run_query("""
@@ -249,7 +252,7 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
           flow(id: $id) {
             id
             previewEnvironmentInstances(first: 5) {
-              edges { node { id } }
+              edges { node { id previewExpiresAt } }
             }
           }
         }
@@ -258,6 +261,7 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert found["id"] == flow.id
       assert from_connection(found["previewEnvironmentInstances"])
              |> ids_equal(instances)
+      assert Enum.all?(found["previewEnvironmentInstances"]["edges"], & &1["node"]["previewExpiresAt"])
     end
 
     test "it can fetch workbenches within a flow" do

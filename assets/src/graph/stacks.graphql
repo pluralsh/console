@@ -140,6 +140,7 @@ fragment StackRun on StackRun {
     ref
   }
   message
+  committer
   status
   approval
   approvedAt
@@ -170,6 +171,7 @@ fragment StackRunDetails on StackRun {
   insertedAt
   type
   message
+  committer
   approval
   approvedAt
   approver {
@@ -307,6 +309,7 @@ fragment StackStateResource on StackStateResource {
 fragment StackState on StackState {
   id
   plan
+  planJson
   state {
     ...StackStateResource
   }

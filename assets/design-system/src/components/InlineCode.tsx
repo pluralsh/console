@@ -52,7 +52,10 @@ const CodeElt = styled.code<{ $parentFillLevel: FillLevel }>(
     borderColor: (theme.colors as any)[
       parentFillLevelToBorderColor[parentFillLevel]
     ],
-    backgroundColor: theme.colors['fill-one'],
+    backgroundColor:
+      theme.mode === 'light'
+        ? theme.colors['fill-two']
+        : theme.colors['fill-one'],
     'a:any-link &': {
       color: theme.colors['action-link-inline'],
     },

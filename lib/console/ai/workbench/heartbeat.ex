@@ -5,6 +5,8 @@ defmodule Console.AI.Workbench.Heartbeat do
   alias Console.Deployments.Workbenches
   alias Console.AI.{Agents, ModelSelection}
 
+  require Logger
+
   @poll :timer.minutes(1)
   @timeout :timer.hours(4)
 
@@ -13,7 +15,11 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def start_link(%WorkbenchJob{} = job) do
-    GenServer.start_link(__MODULE__, job, name: via(job))
+    case GenServer.start_link(__MODULE__, job, name: via(job)) do
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, pid}} -> {:ok, pid}
+      err -> err
+    end
   end
 
   def kill(%WorkbenchJob{} = job), do: GenServer.cast(via(job), :cancel)
@@ -38,7 +44,7 @@ defmodule Console.AI.Workbench.Heartbeat do
     |> enforce_budget(state)
   end
   def handle_cast(:cancel, %State{job: job, booted: booted} = state),
-    do: {:stop, :normal, %{state | job: job, booted: booted}}
+    do: {:stop, {:shutdown, :cancel}, %{state | job: job, booted: booted}}
   def handle_cast(_, state), do: {:noreply, state}
 
   defp merge_usage(new_usage, usage) do
@@ -57,22 +63,24 @@ defmodule Console.AI.Workbench.Heartbeat do
 
   def handle_info(:heartbeat, %State{job: job, booted: booted} = state) do
     case Workbenches.heartbeat(job, booted) do
-      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :normal, %{state | job: job, booted: false}}
+      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, {:shutdown, :cancel}, %{state | job: job, booted: false}}
       {:ok, %WorkbenchJob{} = job} -> {:noreply, %{state | job: job, booted: false}}
       _ -> {:noreply, %{state | job: job, booted: false}}
     end
   end
 
-  def terminate(:cancel, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
+  def terminate({:shutdown, :cancel}, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:normal, %State{job: job, usage: usage}), do: Workbenches.save_usage(job, usage)
   def terminate(:shutdown, %State{job: job, usage: usage}), do: Workbenches.pause_job(job, usage)
   def terminate(:timeout, %State{job: job, usage: usage}),
     do: Workbenches.fail_job("Workbench timed out after 4 hours", job, usage)
   def terminate({:shutdown, {:budget, dim, val}}, %State{job: job, usage: usage}),
     do: Workbenches.fail_job("Budget exceeded, #{dim} consumption of #{val} exceeded limit", job, usage)
-  def terminate(_, %State{job: job, usage: usage}) do
+  def terminate(reason, %State{job: job, usage: usage}) do
     case Workbenches.get_workbench_job(job.id) do
-      %WorkbenchJob{status: :running} = job -> Workbenches.fail_job("job crashed prematurely", job, usage)
+      %WorkbenchJob{status: :running} = job ->
+        Logger.error("Job crashed prematurely: #{inspect(reason)}")
+        Workbenches.fail_job("job crashed prematurely", job, usage)
       _ -> Workbenches.save_usage(job, usage)
     end
   end

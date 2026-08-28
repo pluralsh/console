@@ -37,7 +37,16 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeExec do
     """
   end
 
-  def implement(%__MODULE__{cluster: handle, namespace: ns, pod: p, container: ct, command: command, explanation: explanation}) do
+  def implement(
+        %__MODULE__{
+          cluster: handle,
+          namespace: ns,
+          pod: p,
+          container: ct,
+          command: command,
+          explanation: explanation
+        } = comp
+      ) do
     case Clusters.get_cluster_by_handle(handle) do
       %Cluster{} ->
         KubeShell.new(
@@ -46,7 +55,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeExec do
           pod: p,
           container: ct,
           command: command,
-          explanation: explanation
+          explanation: explanation,
+          approval: comp.approval
         )
       nil -> {:ok, "No cluster found matching handle=#{handle}"}
     end

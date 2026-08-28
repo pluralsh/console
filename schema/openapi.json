@@ -94,6 +94,14 @@
             "description": "ID of the flow this agent run is associated with, if any",
             "type": "string"
           },
+          "followup": {
+            "description": "Whether this agent run is a follow-up to a pull request",
+            "type": "boolean"
+          },
+          "followup_pr_url": {
+            "description": "The pull request URL this follow-up run is targeting",
+            "type": "string"
+          },
           "id": {
             "description": "Unique identifier for the agent run",
             "type": "string"
@@ -248,6 +256,9 @@
           "inserted_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/WorkbenchJobModel"
           },
           "name": {
             "description": "Human-readable name of this runtime",

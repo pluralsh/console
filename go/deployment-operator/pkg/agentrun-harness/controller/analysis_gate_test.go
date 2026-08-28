@@ -321,9 +321,6 @@ func TestBuildBabysitContextBaselinesAndSkipsUnchanged(t *testing.T) {
 
 	prURL := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{dir: t.TempDir()}
-	agentRun := &gqlclient.AgentRunFragment{
-		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
-	}
 	client := &fakeBabysitGRPCClient{
 		details: map[string]*scm.PRDetails{
 			prURL: {
@@ -341,9 +338,9 @@ func TestBuildBabysitContextBaselinesAndSkipsUnchanged(t *testing.T) {
 		},
 	}
 
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 	require.NotEmpty(t, in.lastPRSHA)
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 }
 
 func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
@@ -351,9 +348,6 @@ func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
 
 	prURL := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{dir: t.TempDir()}
-	agentRun := &gqlclient.AgentRunFragment{
-		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
-	}
 	client := &fakeBabysitGRPCClient{
 		details: map[string]*scm.PRDetails{
 			prURL: {
@@ -371,7 +365,7 @@ func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
 		},
 	}
 
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 	createdBeforeBaseline := in.lastPRCheckAt.Add(-time.Hour)
 
 	client.details[prURL] = &scm.PRDetails{
@@ -396,7 +390,7 @@ func TestBuildBabysitContextIncludesDelayedNewComments(t *testing.T) {
 		},
 	}
 
-	bCtx := in.buildBabysitContext(context.Background(), agentRun, client)
+	bCtx := in.buildBabysitContext(context.Background(), []string{prURL}, client)
 	require.NotNil(t, bCtx)
 	require.Len(t, bCtx.PRs, 1)
 	require.Len(t, bCtx.PRs[0].NewComments, 1)
@@ -410,9 +404,6 @@ func TestBuildBabysitContextSkipsStateChangesWithoutCommentsOrFailingCI(t *testi
 
 	prURL := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{dir: t.TempDir()}
-	agentRun := &gqlclient.AgentRunFragment{
-		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
-	}
 	client := &fakeBabysitGRPCClient{
 		details: map[string]*scm.PRDetails{
 			prURL: {
@@ -428,7 +419,7 @@ func TestBuildBabysitContextSkipsStateChangesWithoutCommentsOrFailingCI(t *testi
 		},
 	}
 
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 	baselineSHA := in.lastPRSHA
 
 	client.details[prURL] = &scm.PRDetails{
@@ -441,7 +432,7 @@ func TestBuildBabysitContextSkipsStateChangesWithoutCommentsOrFailingCI(t *testi
 		}},
 	}
 
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 	require.NotEqual(t, baselineSHA, in.lastPRSHA)
 }
 
@@ -450,9 +441,6 @@ func TestBuildBabysitContextIncludesFailingCIWithoutComments(t *testing.T) {
 
 	prURL := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{dir: t.TempDir()}
-	agentRun := &gqlclient.AgentRunFragment{
-		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
-	}
 	client := &fakeBabysitGRPCClient{
 		details: map[string]*scm.PRDetails{
 			prURL: {
@@ -468,7 +456,7 @@ func TestBuildBabysitContextIncludesFailingCIWithoutComments(t *testing.T) {
 		},
 	}
 
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 
 	client.details[prURL] = &scm.PRDetails{
 		Title:   "Fix babysit",
@@ -481,7 +469,7 @@ func TestBuildBabysitContextIncludesFailingCIWithoutComments(t *testing.T) {
 		}},
 	}
 
-	bCtx := in.buildBabysitContext(context.Background(), agentRun, client)
+	bCtx := in.buildBabysitContext(context.Background(), []string{prURL}, client)
 	require.NotNil(t, bCtx)
 	require.Contains(t, bCtx.Prompt, "Failing CI checks")
 	require.Contains(t, bCtx.Prompt, "test")
@@ -492,9 +480,6 @@ func TestBuildBabysitContextIncludesReviewSummariesAsNonReactable(t *testing.T) 
 
 	prURL := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{dir: t.TempDir()}
-	agentRun := &gqlclient.AgentRunFragment{
-		PullRequests: []*gqlclient.PullRequestFragment{{URL: prURL}},
-	}
 	client := &fakeBabysitGRPCClient{
 		details: map[string]*scm.PRDetails{
 			prURL: {
@@ -505,7 +490,7 @@ func TestBuildBabysitContextIncludesReviewSummariesAsNonReactable(t *testing.T) 
 		},
 	}
 
-	require.Nil(t, in.buildBabysitContext(context.Background(), agentRun, client))
+	require.Nil(t, in.buildBabysitContext(context.Background(), []string{prURL}, client))
 
 	client.details[prURL] = &scm.PRDetails{
 		Title:   "Fix babysit",
@@ -520,7 +505,7 @@ func TestBuildBabysitContextIncludesReviewSummariesAsNonReactable(t *testing.T) 
 		}},
 	}
 
-	bCtx := in.buildBabysitContext(context.Background(), agentRun, client)
+	bCtx := in.buildBabysitContext(context.Background(), []string{prURL}, client)
 	require.NotNil(t, bCtx)
 	require.Len(t, bCtx.PRs[0].NewComments, 1)
 	require.Equal(t, scm.PRCommentTypeReviewSummary, bCtx.PRs[0].NewComments[0].Type)

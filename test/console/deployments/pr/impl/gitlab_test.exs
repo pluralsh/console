@@ -74,11 +74,11 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
         identifier: @nested_project
       }
 
-      expect(HTTPoison, :post, fn url, body, headers ->
+      expect(Req, :post, fn url, opts ->
         assert url ==
                  "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/merge_requests"
 
-        assert Jason.decode!(body) == %{
+        assert Jason.decode!(opts[:body]) == %{
                  "allow_collaboration" => true,
                  "description" => "body",
                  "source_branch" => "feature/agent",
@@ -86,11 +86,11 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
                  "title" => "Agent PR"
                }
 
-        assert {"PRIVATE-TOKEN", "token"} in headers
+        assert {"PRIVATE-TOKEN", "token"} in opts[:headers]
 
         {:ok,
-         %HTTPoison.Response{
-           status_code: 201,
+         %Req.Response{
+           status: 201,
            body:
              Jason.encode!(%{
                "web_url" => @nested_mr,
@@ -110,13 +110,13 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
     test "get_mr_info requests use encoded project paths for simple repos" do
       {:ok, gl_conn} = Gitlab.Connection.new("https://gitlab.com", "token")
 
-      expect(HTTPoison, :get, fn url, _headers ->
+      expect(Req, :get, fn url, _opts ->
         assert url ==
                  "https://gitlab.com/api/v4/projects/#{@simple_api_project}/merge_requests/1/changes"
 
         {:ok,
-         %HTTPoison.Response{
-           status_code: 200,
+         %Req.Response{
+           status: 200,
            body: Jason.encode!(%{"changes" => [], "sha" => "abc"})
          }}
       end)
@@ -128,15 +128,15 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
       conn = %ScmConnection{type: :gitlab, api_url: "https://gitlab.acme.corp", token: "token"}
       mr_url = @nested_mr
 
-      expect(HTTPoison, :get, 2, fn url, _headers ->
+      expect(Req, :get, 2, fn url, _opts ->
         cond do
           String.contains?(url, "/merge_requests/42/changes") ->
             assert url ==
                      "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/merge_requests/42/changes"
 
             {:ok,
-             %HTTPoison.Response{
-               status_code: 200,
+             %Req.Response{
+               status: 200,
                body:
                  Jason.encode!(%{
                    "sha" => "abc123",
@@ -157,8 +157,8 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
                      "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/repository/files/README.md?ref=abc123"
 
             {:ok,
-             %HTTPoison.Response{
-               status_code: 200,
+             %Req.Response{
+               status: 200,
                body: Jason.encode!(%{"content" => Base.encode64("hello")})
              }}
 
@@ -176,12 +176,12 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
       conn = %ScmConnection{type: :gitlab, api_url: "https://gitlab.acme.corp", token: "token"}
       pr = %Console.Schema.PullRequest{url: @nested_mr}
 
-      expect(HTTPoison, :post, fn url, body, _headers ->
+      expect(Req, :post, fn url, opts ->
         assert url ==
                  "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/merge_requests/42/notes"
 
-        assert Jason.decode!(body) == %{"body" => "looks good"}
-        {:ok, %HTTPoison.Response{status_code: 201, body: Jason.encode!(%{"id" => 99})}}
+        assert Jason.decode!(opts[:body]) == %{"body" => "looks good"}
+        {:ok, %Req.Response{status: 201, body: Jason.encode!(%{"id" => 99})}}
       end)
 
       assert {:ok, "99"} = Gitlab.review(conn, pr, "looks good")
@@ -203,13 +203,13 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
         identifier: @nested_project
       }
 
-      expect(HTTPoison, :post, fn url, _body, _headers ->
+      expect(Req, :post, fn url, _opts ->
         assert url ==
                  "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/merge_requests"
 
         {:ok,
-         %HTTPoison.Response{
-           status_code: 201,
+         %Req.Response{
+           status: 201,
            body:
              Jason.encode!(%{
                "web_url" => @nested_mr,
@@ -231,13 +231,13 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
         token: "token"
       }
 
-      expect(HTTPoison, :post, fn url, _body, _headers ->
+      expect(Req, :post, fn url, _opts ->
         assert url ==
                  "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/merge_requests"
 
         {:ok,
-         %HTTPoison.Response{
-           status_code: 201,
+         %Req.Response{
+           status: 201,
            body:
              Jason.encode!(%{
                "web_url" => @nested_mr,

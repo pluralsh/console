@@ -72,7 +72,7 @@ export function useBreadcrumbs() {
 
 export function useSetBreadcrumbs(breadcrumbs?: Breadcrumb[]) {
   const ctx = useContext(BreadcrumbsContext)
-  const { setBreadcrumbs } = ctx
+  const setBreadcrumbs = ctx?.setBreadcrumbs
 
   useEffect(() => {
     if (setBreadcrumbs && Array.isArray(breadcrumbs)) {

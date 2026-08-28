@@ -1,11 +1,9 @@
 defmodule Console.AI.Workbench.Subagents.Infrastructure do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchTool, WorkbenchJobActivity, Workbench, User}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, Workbench, User}
   alias Console.AI.Tools.Workbench.{
     SummarizeComponent,
     Result,
-    Skills,
-    Skill,
     Scratchpad,
     History,
     Codemode,
@@ -20,16 +18,14 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.ServiceInspect,
     Infrastructure.StackList,
     Infrastructure.StackInspect,
-    Infrastructure.CloudSchemas,
     Infrastructure.RawCloudQuery,
-    Infrastructure.CloudTables,
     Infrastructure.PodLogs,
     Infrastructure.Vulns,
     Infrastructure.Manifests,
     Infrastructure.StateSearch
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
-  alias Console.AI.Workbench.{Environment, FileCache}
+  alias Console.AI.Workbench.{Environment, FileCache, Tools}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -40,12 +36,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
 
     MemoryEngine.new(tools, 50,
       engine_opts(environment) ++ [
-        system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment.tools), engine: &1)),
+        system_prompt: &String.trim(system_prompt(prompt: objective, cloud_tools: has_cloud_tools?(environment), engine: &1)),
         acc: %{},
         continue_msg: cont_msg(),
         tool_search: length(tools) > 10,
-        pre_enable: [Result, %Skills{} ,%Skill{}],
-        callback: &callback(activity, &1)
+        pre_enable: [Result | skill_knowledge_pre_enable()],
+        callback: &callback(activity, environment, &1)
       ]
     )
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
@@ -71,9 +67,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     core_tools(job, environment)
     |> Enum.concat(vuln_tools(bench, user))
     |> Enum.concat(manifests_tools(bench, job, user, cache))
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %History{job: job, activities: activities},
       Result
@@ -85,27 +79,12 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat(pod_logs_tools(bench, user))
-    |> Enum.concat(cloud_tools(environment))
+    |> Enum.concat(Tools.cloud_tools(environment.tools))
     |> build_codemode(policies)
   end
 
-  defp cloud_tools(%Environment{tools: tools}) do
-    Enum.flat_map(tools, fn
-      {_, %WorkbenchTool{tool: :cloud} = tool} -> [
-        %CloudSchemas{tool: tool},
-        %RawCloudQuery{tool: tool},
-        %CloudTables{tool: tool}
-      ]
-      _ -> []
-    end)
-  end
-
-  defp has_cloud_tools?(tools) do
-    Enum.any?(tools, fn
-      {_, %WorkbenchTool{tool: :cloud}} -> true
-      _ -> false
-    end)
-  end
+  defp has_cloud_tools?(%Environment{tools: tools}), do: Tools.cloud_tools(tools) != []
+  defp has_cloud_tools?(tools), do: Tools.cloud_tools(tools) != []
 
   defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, %WorkbenchJob{} = job, user) do
     if_vector_store_enabled(ServiceComponent) ++ [

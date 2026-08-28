@@ -1,11 +1,15 @@
 import { Div } from 'honorable'
 
 import CatalogCard from '../components/CatalogCard'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'CatalogCard',
   component: CatalogCard,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -43,22 +47,23 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  name: 'Base catalog',
-  author: 'Plural',
-  category: 'Messaging',
-  description:
-    'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-  tags: [
-    'Devops',
-    'Deployment',
-    'Fun',
-    'Turkey',
-    'Chickens',
-    'Handball',
-    'Cricket',
-    'Support',
-  ],
+export const Default: Story = {
+  render: Template,
+  args: {
+    name: 'Base catalog',
+    author: 'Plural',
+    category: 'Messaging',
+    description:
+      'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+    tags: [
+      'Devops',
+      'Deployment',
+      'Fun',
+      'Turkey',
+      'Chickens',
+      'Handball',
+      'Cricket',
+      'Support',
+    ],
+  },
 }

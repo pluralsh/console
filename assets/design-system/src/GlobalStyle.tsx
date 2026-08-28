@@ -22,6 +22,10 @@ const {
 
 export const colorsToCSSVars: (colors: unknown) => any = (colors) => {
   function inner(colors: unknown, prefix = '') {
+    if (!colors || typeof colors !== 'object') {
+      return
+    }
+
     Object.entries(colors).forEach(([key, value]) => {
       if (typeof value === 'string') {
         ;(cssVars as any)[`--color-${prefix}${key}`] = value
@@ -127,6 +131,11 @@ const GlobalStyle = createGlobalStyle(({ theme }) => ({
   },
   [lightModeSelectors]: {
     ...getSemanticColorCSSVars({ mode: 'light' }),
+  },
+  // Keep html/body on the app-shell token (index.html reads --color-page-background).
+  // This is intentionally NOT fill-zero.
+  'html, body': {
+    backgroundColor: theme.colors['page-background'],
   },
   '*': theme.partials.scrollBar({ fillLevel: 0 }),
 }))

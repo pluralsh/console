@@ -10,7 +10,7 @@ defmodule Console.Deployments.Stacks.RunnerTest do
       bot("console")
       run = insert(:stack_run)
       insert(:observable_metric, stack: run.stack)
-      expect(HTTPoison, :get, fn _, _ -> {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!([
+      expect(Req, :get, fn _, _ -> {:ok, %Req.Response{status: 200, body: Poison.encode!([
         %{overall_state: "Alert", message: "this is super bad"}
       ])}} end)
 

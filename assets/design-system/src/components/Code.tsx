@@ -36,9 +36,9 @@ import {
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
+import { getCodeLanguageIcon } from './codeLanguageIcons'
 import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
-import FileIcon from './icons/FileIcon'
 import CaretDownIcon from './icons/CaretDownIcon'
 
 type CodeProps = Omit<CardProps, 'children'> & {
@@ -58,7 +58,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
 type TabInterfaceT = 'tabs' | 'dropdown'
 
 type TabsContext = {
-  tabInterface: TabInterfaceT
+  tabInterface?: TabInterfaceT
   setTabInterface: (arg: TabInterfaceT) => void
   tabStateRef?: RefObject<any>
   selectedKey?: string
@@ -83,16 +83,20 @@ function CodeHeaderUnstyled({
 
 const CodeHeader = styled(CodeHeaderUnstyled)<{ $visuallyHidden?: boolean }>(
   ({ $visuallyHidden = false, fillLevel, theme }) => ({
-    minHeight: theme.spacing.xlarge + theme.spacing.xsmall * 2,
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+    minHeight: theme.spacing.large,
+    padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
     borderBottom:
       fillLevel >= 1 ? theme.borders['fill-three'] : theme.borders['fill-two'],
     backgroundColor:
-      fillLevel >= 1 ? theme.colors['fill-three'] : theme.colors['fill-two'],
+      theme.mode === 'light'
+        ? theme.colors['fill-one']
+        : fillLevel >= 1
+          ? theme.colors['fill-three']
+          : theme.colors['fill-two'],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: theme.spacing.medium,
+    gap: theme.spacing.xsmall,
     borderTopLeftRadius: theme.borderRadiuses.medium + 2,
     borderTopRightRadius: theme.borderRadiuses.medium + 2,
     ...($visuallyHidden
@@ -153,10 +157,11 @@ type CodeTabData = {
 const TitleArea = styled.div<{ $shrinkable: boolean; $preserveCase?: boolean }>(
   ({ $shrinkable, $preserveCase = false, theme }) => ({
     display: 'flex',
+    alignItems: 'center',
     flexShrink: $shrinkable ? 1 : 0,
     flexGrow: 1,
-    gap: theme.spacing.xsmall,
-    ...theme.partials.text.overline,
+    gap: theme.spacing.xxsmall,
+    ...theme.partials.text.caption,
     color: 'text-light',
     ...($preserveCase ? { textTransform: 'none' } : {}),
   })
@@ -206,12 +211,13 @@ function CodeTabs() {
     setTabInterface,
 
     tabStateRef,
-    tabs,
+    tabs: tabsProp,
     selectedKey,
     onSelectionChange,
   } = useContext(TabsContext)
-  const tabsRef = useRef<HTMLDivElement>(undefined)
-  const tabsWrapRef = useRef<HTMLDivElement>(undefined)
+  const tabs = tabsProp ?? []
+  const tabsRef = useRef<HTMLDivElement>(null)
+  const tabsWrapRef = useRef<HTMLDivElement>(null)
   const tabListStateProps: TabListStateProps = {
     keyboardActivation: 'manual',
     orientation: 'horizontal',
@@ -236,10 +242,12 @@ function CodeTabs() {
     }, [setTabInterface])
   )
 
+  if (!tabStateRef) return null
+
   return (
     <TabsWrap
       ref={tabsWrapRef}
-      $isDisabled={tabListStateProps.isDisabled}
+      $isDisabled={!!tabListStateProps.isDisabled}
     >
       <TabList
         className="my-tab-list"
@@ -271,7 +279,12 @@ function CodeTabs() {
 }
 
 function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
-  const { tabs, selectedKey, onSelectionChange } = useContext(TabsContext)
+  const {
+    tabs: tabsProp,
+    selectedKey,
+    onSelectionChange,
+  } = useContext(TabsContext)
+  const tabs = tabsProp ?? []
 
   const selectedTab = tabs.find((tab) => tab.key === selectedKey) || tabs[0]
 
@@ -283,7 +296,7 @@ function CodeSelectUnstyled({ className }: ComponentProps<'div'>) {
         width="max-content"
         placement="right"
         triggerButton={
-          <TabsDropdownButton>{selectedTab.label} </TabsDropdownButton>
+          <TabsDropdownButton>{selectedTab?.label} </TabsDropdownButton>
         }
       >
         {tabs.map((tab) => (
@@ -376,8 +389,8 @@ const CodeContentSC = styled.div<{
   height: '100%',
   overflow: 'auto',
   alignItems: 'center',
-  padding: `${$multiLine ? theme.spacing.medium : theme.spacing.small}px ${
-    theme.spacing.medium
+  padding: `${$multiLine ? theme.spacing.small : theme.spacing.xsmall}px ${
+    theme.spacing.small
   }px`,
   borderBottomLeftRadius: theme.borderRadiuses.large,
   borderBottomRightRadius: theme.borderRadiuses.large,
@@ -409,12 +422,12 @@ function CodeUnstyled({
 }: CodeProps) {
   const parentFillLevel = useFillLevel()
   const inferredFillLevel = fillLevelProp ?? parentFillLevel
-  const tabStateRef = useRef(undefined)
+  const tabStateRef = useRef<any>(null)
   const [selectedTabKey, setSelectedTabKey] = useState<string>(
     tabs?.[0]?.key || ''
   )
   const theme = useTheme()
-  const [tabInterface, setTabInterface] = useState<TabInterfaceT>()
+  const [tabInterface, setTabInterface] = useState<TabInterfaceT | undefined>()
 
   props.height = props.height || undefined
   const hasSetHeight = !!props.height || !!props.minHeight
@@ -436,13 +449,17 @@ function CodeUnstyled({
     [onSelectedTabChange, selectedTabKey, tabInterface, setTabInterface, tabs]
   )
 
+  const selectedTabLanguage = tabs?.find(
+    (tab) => tab.key === selectedTabKey
+  )?.language
+
   const titleArea =
     (tabs && title) || !tabs ? (
       <TitleArea
         $shrinkable={tabInterface === 'dropdown' || !tabs}
         $preserveCase={preserveTitleCase}
       >
-        <FileIcon />
+        {getCodeLanguageIcon(language || selectedTabLanguage)}
         {(title || language) && <div>{title || language}</div>}
       </TitleArea>
     ) : undefined
@@ -450,7 +467,11 @@ function CodeUnstyled({
   const content = (
     <Card
       ref={ref}
-      fillLevel={toFillLevel(Math.min(inferredFillLevel + 1, 2))}
+      fillLevel={
+        theme.mode === 'light'
+          ? 1
+          : toFillLevel(Math.min(inferredFillLevel + 1, 2))
+      }
       borderColor={
         inferredFillLevel >= 1
           ? theme.colors['border-fill-three']
@@ -508,7 +529,7 @@ function CodeUnstyled({
             isStreaming={isStreaming}
             setMermaidError={setMermaidError}
           >
-            {children}
+            {children ?? ''}
           </CodeContent>
         )}
       </Flex>

@@ -1,9 +1,13 @@
 import { A, Flex } from 'honorable'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'A',
   component: A,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -29,8 +33,9 @@ function Template(args: any) {
   )
 }
 
-export const Primary = Template.bind({})
-
-Primary.args = {
-  children: 'Click me',
+export const Primary: Story = {
+  render: Template,
+  args: {
+    children: 'Click me',
+  },
 }

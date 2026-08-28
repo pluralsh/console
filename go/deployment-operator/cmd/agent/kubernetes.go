@@ -131,6 +131,7 @@ func registerKubeReconcilersOrDie(
 	discoveryCache discoverycache.Cache,
 	enableKubecostProxy bool,
 	consoleURL, deployToken string,
+	userGroupCache cache.UserGroupCache,
 ) {
 	rolloutsClient, dynamicClient, kubeClient := initKubeClientsOrDie(config)
 
@@ -251,6 +252,7 @@ func registerKubeReconcilersOrDie(
 		Scheme:           manager.GetScheme(),
 		ExtConsoleClient: extConsoleClient,
 		ConsoleUrl:       rawConsoleUrl,
+		UserGroupCache:   userGroupCache,
 	}).SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "VirtualCluster")
 	}
@@ -330,9 +332,10 @@ func registerKubeReconcilersOrDie(
 		setupLog.Error(err, "unable to create controller", "controller", "AgentRun")
 	}
 	if err := (&controller.PluralCAPIClusterController{
-		Client:     manager.GetClient(),
-		Scheme:     manager.GetScheme(),
-		ConsoleUrl: consoleURL,
+		Client:         manager.GetClient(),
+		Scheme:         manager.GetScheme(),
+		ConsoleUrl:     consoleURL,
+		UserGroupCache: userGroupCache,
 	}).SetupWithManager(manager); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PluralCAPIClusterController")
 	}

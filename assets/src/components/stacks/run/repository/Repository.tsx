@@ -31,6 +31,14 @@ export default function StackRunRepository(): ReactNode {
       >
         {stackRun.git.ref}
       </Prop>
+      {stackRun.committer && (
+        <Prop
+          title="Committer"
+          margin={0}
+        >
+          {stackRun.committer}
+        </Prop>
+      )}
       <Prop
         title="Folder"
         margin={0}

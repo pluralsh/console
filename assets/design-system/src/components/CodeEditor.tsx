@@ -11,6 +11,7 @@ import { editorThemeLight } from '../theme/editorThemeLight'
 import Card, { type CardProps } from './Card'
 import { toFillLevel, useFillLevel } from './contexts/FillLevelContext'
 import Button from './Button'
+import { registerRegoLanguage } from './registerRegoLanguage'
 
 type CodeEditorProps = Omit<CardProps, 'children'> & {
   value?: string
@@ -49,9 +50,9 @@ export default function CodeEditor({
   const parentFillLevel = useFillLevel()
   const theme = useTheme()
   const monaco = useMonaco()
-  const [current, setCurrent] = useState<string>(value)
+  const [current, setCurrent] = useState<string>(value ?? '')
   const [copied, setCopied] = useState<boolean>(false)
-  const changed = current !== value
+  const changed = current !== (value ?? '')
 
   const onEditorMount = useCallback(
     (editor: any) => {
@@ -76,9 +77,12 @@ export default function CodeEditor({
   }, [copied])
 
   useEffect(() => {
-    monaco?.editor?.defineTheme('plural-dark', editorThemeDark)
-    monaco?.editor?.defineTheme('plural-light', editorThemeLight)
-    monaco?.editor.setTheme(
+    if (!monaco) return
+
+    registerRegoLanguage(monaco)
+    monaco.editor.defineTheme('plural-dark', editorThemeDark)
+    monaco.editor.defineTheme('plural-light', editorThemeLight)
+    monaco.editor.setTheme(
       theme.mode === 'light' ? 'plural-light' : 'plural-dark'
     )
   }, [monaco, theme.mode])
@@ -115,8 +119,8 @@ export default function CodeEditor({
           language={language}
           value={value}
           onChange={(v) => {
-            setCurrent(v)
-            if (onChange) onChange(v)
+            setCurrent(v ?? '')
+            if (onChange) onChange(v ?? '')
           }}
           options={mergedOptions}
           theme={theme.mode === 'light' ? 'plural-light' : 'plural-dark'}

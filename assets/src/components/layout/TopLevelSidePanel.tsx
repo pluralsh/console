@@ -3,6 +3,7 @@ import { AIContextProvider } from 'components/ai/AIContext'
 import { ChatbotPanelContent } from 'components/ai/chatbot/Chatbot'
 import { DragHandleSC } from 'components/ai/chatbot/SidePanelShared'
 import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
+import { useLegacyAiChatEnabled } from 'components/ai/useLegacyAiChatEnabled'
 import {
   AgentRunPanelContent,
   AgentRunPanelProvider,
@@ -203,16 +204,30 @@ function TopLevelSidePanelProvider({ children }: { children: ReactNode }) {
   const [widthOverride, setWidthOverride] =
     useState<SidePanelWidthOverride | null>(null)
   const { pathname } = useLocation()
+  const legacyChatEnabled = useLegacyAiChatEnabled()
 
   const sidePanel: SidePanel | null = useMemo(() => {
-    if (!requested || requested === 'ai-chat') return requested
+    if (!requested) return null
+    if (requested === 'ai-chat') return legacyChatEnabled ? requested : null
 
     return ALLOWED_ROUTES[requested]?.some((pattern) =>
       matchPath(pattern, pathname)
     )
       ? requested
       : null
-  }, [requested, pathname])
+  }, [requested, pathname, legacyChatEnabled])
+
+  useEffect(() => {
+    if (requested === 'ai-chat' && !legacyChatEnabled) {
+      setRequested(null)
+      return
+    }
+    if (!requested || requested === 'ai-chat') return
+    const allowed = ALLOWED_ROUTES[requested]?.some((pattern) =>
+      matchPath(pattern, pathname)
+    )
+    if (!allowed) setRequested(null)
+  }, [requested, pathname, legacyChatEnabled])
 
   const ctx = useMemo(
     () => ({

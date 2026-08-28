@@ -291,9 +291,9 @@ defmodule Console.Deployments.CronTest do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/1", governance: governance)
 
-      expect(HTTPoison, :post, fn "https://webhook.url/v1/confirm", _, _ ->
+      expect(Req, :post, fn "https://webhook.url/v1/confirm", _ ->
         body = Jason.encode!(%{state: %{service_now_id: "1234567890"}})
-        {:ok, %HTTPoison.Response{status_code: 200, body: body}}
+        {:ok, %Req.Response{status: 200, body: body}}
       end)
 
       expect(Tentacat.Pulls.Reviews, :create, fn _, "pluralsh", "console", "1", _ ->
@@ -395,4 +395,18 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
+  describe "#prune_preview_environments/0" do
+    test "it will delete expired preview environment instances" do
+      bot("console")
+      expired = insert(:preview_environment_instance, preview_expires_at: Timex.shift(Timex.now(), hours: -1))
+      keep = insert(:preview_environment_instance, preview_expires_at: Timex.shift(Timex.now(), hours: 1))
+      unexpiring = insert(:preview_environment_instance)
+
+      :ok = Cron.prune_preview_environments()
+
+      assert refetch(expired.service).deleted_at
+      refute refetch(keep.service).deleted_at
+      refute refetch(unexpiring.service).deleted_at
+    end
+  end
 end

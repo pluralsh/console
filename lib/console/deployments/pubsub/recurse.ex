@@ -200,7 +200,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   end
 
   def process(%@for{item: %StackRun{status: :pending_approval} = run}),
-    do: Stacks.ai_stack_run_approval(run)
+    do: Stacks.stack_run_approval(run)
 
   def process(%@for{item: %StackRun{pull_request_id: id, status: status} = run})
     when is_binary(id) and status != :queued do
@@ -298,6 +298,12 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunCreated do
   def process(%@for{item: run}), do: Console.Pipelines.SentinelRun.Producer.kick(run)
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunJobUpdated do
+  alias Console.Deployments.Sentinel.Impl.Job
+
+  def process(%@for{item: job}), do: Job.publish(job)
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do

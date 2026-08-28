@@ -35,10 +35,10 @@ type VirtualClusterController struct {
 	Scheme           *runtime.Scheme
 	ExtConsoleClient client.Client
 	ConsoleUrl       string
+	UserGroupCache   cache.UserGroupCache
 
-	userGroupCache cache.UserGroupCache
-	consoleClient  client.Client
-	myCluster      *console.MyCluster_MyCluster_
+	consoleClient client.Client
+	myCluster     *console.MyCluster_MyCluster_
 }
 
 func (in *VirtualClusterController) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
@@ -245,14 +245,14 @@ func (in *VirtualClusterController) ensureCluster(cluster *v1alpha1.VirtualClust
 		return nil
 	}
 
-	bindings, req, err := ensureBindings(cluster.Spec.Cluster.Bindings.Read, in.userGroupCache)
+	bindings, req, err := ensureBindings(cluster.Spec.Cluster.Bindings.Read, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 
 	cluster.Spec.Cluster.Bindings.Read = bindings
 
-	bindings, req2, err := ensureBindings(cluster.Spec.Cluster.Bindings.Write, in.userGroupCache)
+	bindings, req2, err := ensureBindings(cluster.Spec.Cluster.Bindings.Write, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
@@ -277,7 +277,9 @@ func (in *VirtualClusterController) initConsoleClient(ctx context.Context, vClus
 	}
 
 	in.consoleClient = client.New(fmt.Sprintf("%s/gql", in.ConsoleUrl), token)
-	in.userGroupCache = cache.NewUserGroupCache(in.consoleClient)
+	if in.UserGroupCache == nil {
+		in.UserGroupCache = cache.NewUserGroupCache(in.consoleClient)
+	}
 
 	return nil
 }

@@ -115,6 +115,7 @@ defmodule Console.PubSub.SentinelRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunJobCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.SentinelRunJobUpdated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.WorkbenchCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchUpdated, do: use Piazza.PubSub.Event
@@ -137,6 +138,9 @@ defmodule Console.PubSub.WorkbenchQueuedPromptCreated, do: use Piazza.PubSub.Eve
 defmodule Console.PubSub.WorkbenchSkillCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchSkillDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchKnowledgeCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchKnowledgeUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchKnowledgeDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchEvalCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchEvalUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchEvalDeleted, do: use Piazza.PubSub.Event

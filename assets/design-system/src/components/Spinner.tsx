@@ -40,7 +40,7 @@ const SpinnerSC = styled(
 `
 
 export function Spinner({
-  color,
+  color = '',
   size = 16,
   ...props
 }: { color?: string; size?: number } & ComponentPropsWithRef<'div'>) {
@@ -88,7 +88,7 @@ export function SpinnerAlt({
         cx={size / 2}
         cy={size / 2}
         r={radius}
-        stroke={colors[color] ?? colors['icon-info']}
+        stroke={(color ? colors[color] : undefined) ?? colors['icon-info']}
         strokeWidth={strokeWidth}
         fill="none"
         strokeDasharray={`${circumference * 0.33} ${circumference * 0.8}`}

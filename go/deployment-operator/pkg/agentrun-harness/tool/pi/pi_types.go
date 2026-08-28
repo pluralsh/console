@@ -9,8 +9,13 @@ import (
 )
 
 const (
-	defaultModel       = "gpt-5.4"
-	openAIProvider     = "openai"
+	defaultModel   = "gpt-5.4"
+	openAIProvider = "openai"
+	// proxyProviderKey is the models.json provider block name used when aiProxy is enabled.
+	// Using a non-"openai" name prevents the Pi CLI from stripping the "openai/" prefix
+	// from model IDs (e.g. "openai/gpt-5.4"), ensuring the full provider/model format
+	// reaches the Plural AI proxy at /ext/ai/v1.
+	proxyProviderKey   = "plural"
 	pluralAPIKeyEnv    = "PLRL_CONSOLE_TOKEN"
 	openAIAPIKeyEnv    = "OPENAI_API_KEY"
 	piMCPExtensionPath = "/opt/pi-mcp-adapter/node_modules/pi-mcp-adapter/index.ts"

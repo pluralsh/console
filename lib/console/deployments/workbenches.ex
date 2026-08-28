@@ -16,6 +16,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
+    WorkbenchKnowledge,
     WorkbenchEval,
     WorkbenchEvalResult,
     WorkbenchWebhook,
@@ -50,6 +51,7 @@ defmodule Console.Deployments.Workbenches do
   @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
   @type queued_prompt_resp :: {:ok, QueuedPrompt.t()} | error
   @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
+  @type knowledge_resp :: {:ok, WorkbenchKnowledge.t()} | error
   @type eval_resp :: {:ok, WorkbenchEval.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
   @type chatbot_resp :: {:ok, WorkbenchChatbot.t()} | error
@@ -57,6 +59,7 @@ defmodule Console.Deployments.Workbenches do
 
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.hours(6)
+  @max_knowledge 10
 
   def get_workbench!(id), do: Repo.get!(Workbench, id)
   def get_workbench_with_lock!(id), do: Repo.get!(Workbench.with_lock(), id)
@@ -84,6 +87,10 @@ defmodule Console.Deployments.Workbenches do
   def get_queued_prompt(id), do: Repo.get(QueuedPrompt, id)
   def get_workbench_skill!(id), do: Repo.get!(WorkbenchSkill, id)
   def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
+  def get_workbench_knowledge!(id), do: Repo.get!(WorkbenchKnowledge, id)
+  def get_workbench_knowledge(id), do: Repo.get(WorkbenchKnowledge, id)
+  def get_workbench_knowledge(workbench_id, name),
+    do: Repo.get_by(WorkbenchKnowledge, workbench_id: workbench_id, name: name)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
 
@@ -436,6 +443,129 @@ defmodule Console.Deployments.Workbenches do
     |> when_ok(:delete)
     |> notify(:delete, user)
   end
+
+  @doc """
+  Creates saved workbench knowledge. Requires write access to the workbench.
+  """
+  @spec create_workbench_knowledge(map, binary, User.t()) :: knowledge_resp
+  def create_workbench_knowledge(attrs, workbench_id, %User{} = user) do
+    %WorkbenchKnowledge{workbench_id: workbench_id}
+    |> WorkbenchKnowledge.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates saved workbench knowledge. Requires write access to the workbench.
+  """
+  @spec update_workbench_knowledge(map, binary, User.t()) :: knowledge_resp
+  def update_workbench_knowledge(attrs, id, %User{} = user) do
+    get_workbench_knowledge!(id)
+    |> WorkbenchKnowledge.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes saved workbench knowledge. The user variant requires write access.
+  The tool variant scopes deletion to a workbench id or job (no authz).
+  """
+  @spec delete_workbench_knowledge(binary, User.t()) :: knowledge_resp
+  @spec delete_workbench_knowledge(binary, binary | WorkbenchJob.t()) :: knowledge_resp
+  def delete_workbench_knowledge(id, %User{} = user) do
+    get_workbench_knowledge!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+  def delete_workbench_knowledge(id, %WorkbenchJob{workbench_id: workbench_id}),
+    do: delete_workbench_knowledge(id, workbench_id)
+  def delete_workbench_knowledge(id, workbench_id) when is_binary(id) and is_binary(workbench_id) do
+    case get_workbench_knowledge(id) do
+      %WorkbenchKnowledge{workbench_id: ^workbench_id} = knowledge -> Repo.delete(knowledge)
+      _ -> {:error, "knowledge not found"}
+    end
+  end
+
+  @doc """
+  Lists knowledge entries for a workbench. Intended for tool use (no authz).
+  """
+  @spec list_workbench_knowledge(binary) :: [WorkbenchKnowledge.t]
+  def list_workbench_knowledge(workbench_id) do
+    WorkbenchKnowledge.for_workbench(workbench_id)
+    |> WorkbenchKnowledge.ordered()
+    |> Repo.all()
+  end
+
+  @doc """
+  Creates or updates workbench knowledge by name. Creating fails if the workbench
+  already has #{@max_knowledge} entries. Intended for tool use (no authz).
+  """
+  @spec upsert_workbench_knowledge(map, binary) :: knowledge_resp
+  def upsert_workbench_knowledge(attrs, workbench_id) do
+    start_transaction()
+    |> add_operation(:lock, fn _ ->
+      {:ok, get_workbench_with_lock!(workbench_id)}
+    end)
+    |> add_operation(:knowledge, fn _ ->
+      name = knowledge_name(attrs)
+      case get_workbench_knowledge(workbench_id, name) do
+        %WorkbenchKnowledge{} = existing ->
+          existing
+          |> WorkbenchKnowledge.changeset(attrs)
+          |> Repo.update()
+        _ ->
+          insert_workbench_knowledge(attrs, workbench_id)
+      end
+    end)
+    |> execute(extract: :knowledge)
+  end
+
+  @doc """
+  Increments usages and stamps last_used_at for a knowledge entry.
+  Accepts a knowledge id, a knowledge struct, or a workbench id + name.
+  """
+  @spec knowledge_used(binary | WorkbenchKnowledge.t) :: knowledge_resp
+  def knowledge_used(%WorkbenchKnowledge{id: id}), do: knowledge_used(id)
+  def knowledge_used(id) when is_binary(id) do
+    case get_workbench_knowledge(id) do
+      %WorkbenchKnowledge{} = knowledge -> bump_knowledge_usage(knowledge)
+      _ -> {:error, "knowledge not found"}
+    end
+  end
+
+  @spec knowledge_used(binary, binary) :: knowledge_resp
+  def knowledge_used(workbench_id, name) when is_binary(workbench_id) and is_binary(name) do
+    case get_workbench_knowledge(workbench_id, name) do
+      %WorkbenchKnowledge{} = knowledge -> bump_knowledge_usage(knowledge)
+      _ -> {:error, "knowledge not found"}
+    end
+  end
+
+  defp insert_workbench_knowledge(attrs, workbench_id) do
+    count = WorkbenchKnowledge.for_workbench(workbench_id) |> Repo.aggregate(:count, :id)
+    if count >= @max_knowledge do
+      {:error, "workbench already has #{@max_knowledge} knowledge entries, delete a less-used entry before creating another"}
+    else
+      %WorkbenchKnowledge{workbench_id: workbench_id}
+      |> WorkbenchKnowledge.changeset(attrs)
+      |> Repo.insert()
+    end
+  end
+
+  defp bump_knowledge_usage(%WorkbenchKnowledge{} = knowledge) do
+    knowledge
+    |> WorkbenchKnowledge.changeset(%{
+      usages: (knowledge.usages || 0) + 1,
+      last_used_at: DateTime.utc_now() |> DateTime.truncate(:second)
+    })
+    |> Repo.update()
+  end
+
+  defp knowledge_name(attrs) when is_map(attrs),
+    do: Map.get(attrs, :name) || Map.get(attrs, "name")
 
   @doc """
   Creates a workbench eval configuration for a workbench. Requires write access to the workbench.
@@ -1438,6 +1568,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchSkillUpdated, skill, actor: user)
   defp notify({:ok, %WorkbenchSkill{} = skill}, :delete, user),
     do: handle_notify(PubSub.WorkbenchSkillDeleted, skill, actor: user)
+  defp notify({:ok, %WorkbenchKnowledge{} = knowledge}, :create, user),
+    do: handle_notify(PubSub.WorkbenchKnowledgeCreated, knowledge, actor: user)
+  defp notify({:ok, %WorkbenchKnowledge{} = knowledge}, :update, user),
+    do: handle_notify(PubSub.WorkbenchKnowledgeUpdated, knowledge, actor: user)
+  defp notify({:ok, %WorkbenchKnowledge{} = knowledge}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchKnowledgeDeleted, knowledge, actor: user)
   defp notify({:ok, %WorkbenchEval{} = eval}, :create, user),
     do: handle_notify(PubSub.WorkbenchEvalCreated, eval, actor: user)
   defp notify({:ok, %WorkbenchEval{} = eval}, :update, user),

@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/cache/persist"
 	"k8s.io/klog/v2/textlogger"
 )
 
@@ -28,14 +31,16 @@ type ManifestCache struct {
 	token      string
 	consoleURL string
 	expiry     time.Duration
+	cacheDir   string
 }
 
-func NewCache(expiry time.Duration, token, consoleURL string) *ManifestCache {
+func NewCache(expiry time.Duration, token, consoleURL, cacheDir string) *ManifestCache {
 	return &ManifestCache{
 		cache:      cmap.New[*cacheLine](),
 		token:      token,
 		expiry:     expiry,
 		consoleURL: consoleURL,
+		cacheDir:   cacheDir,
 	}
 }
 
@@ -46,9 +51,13 @@ func (c *ManifestCache) Fetch(svc *console.ServiceDeploymentForAgent) (string, e
 	}
 	if line, ok := c.cache.Get(svc.ID); ok {
 		if line.live() && line.sha == sha {
-			return line.dir, nil
+			if dirExists(line.dir) {
+				return line.dir, nil
+			}
+			log.Info("manifest cache dir missing, refetching", "service", svc.ID, "dir", line.dir)
 		}
 		line.wipe()
+		c.cache.Remove(svc.ID)
 	}
 
 	if svc.Tarball == nil {
@@ -62,15 +71,78 @@ func (c *ManifestCache) Fetch(svc *console.ServiceDeploymentForAgent) (string, e
 		return "", err
 	}
 
-	log.V(2).Info("fetching fresh tarball", "url", tarballURL.String(), "sha", sha)
-	dir, err := fetch(tarballURL.String(), c.token, sha)
+	dir, err := c.prepareDir(svc.ID, sha)
 	if err != nil {
+		return "", err
+	}
+
+	log.V(2).Info("fetching fresh tarball", "url", tarballURL.String(), "sha", sha)
+	if err := fetch(tarballURL.String(), c.token, sha, dir); err != nil {
+		os.RemoveAll(dir)
 		return "", err
 	}
 	log.V(2).Info("using cache dir", "dir", dir)
 
 	c.cache.Set(svc.ID, &cacheLine{dir: dir, sha: sha, created: time.Now(), expiry: c.ExpiryWithJitter()})
 	return dir, nil
+}
+
+func (c *ManifestCache) prepareDir(id, sha string) (string, error) {
+	if c.cacheDir == "" {
+		return os.MkdirTemp("", "manifests")
+	}
+
+	dir, err := c.manifestDir(id, sha)
+	if err != nil {
+		return "", err
+	}
+	if err := os.RemoveAll(dir); err != nil {
+		return "", err
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
+func (c *ManifestCache) manifestDir(id, sha string) (string, error) {
+	if err := safePathComponent(id); err != nil {
+		return "", err
+	}
+	if err := safePathComponent(sha); err != nil {
+		return "", err
+	}
+	return filepath.Join(c.cacheDir, persist.ManifestsDir, id, sha), nil
+}
+
+func safePathComponent(name string) error {
+	if name == "" || name == "." || name == ".." {
+		return fmt.Errorf("invalid cache path component %q", name)
+	}
+	if strings.ContainsRune(name, '/') || strings.ContainsRune(name, '\\') || strings.ContainsRune(name, filepath.Separator) {
+		return fmt.Errorf("invalid cache path component %q", name)
+	}
+	if strings.ContainsRune(name, 0) {
+		return fmt.Errorf("invalid cache path component %q", name)
+	}
+	return nil
+}
+
+func dirExists(dir string) bool {
+	info, err := os.Stat(dir)
+	return err == nil && info.IsDir()
+}
+
+func sameDir(a, b string) bool {
+	absA, err := filepath.Abs(a)
+	if err != nil {
+		return false
+	}
+	absB, err := filepath.Abs(b)
+	if err != nil {
+		return false
+	}
+	return absA == absB
 }
 
 func buildTarballURL(tarball, sha string) (*url.URL, error) {
@@ -96,7 +168,6 @@ func (c *ManifestCache) Wipe() {
 }
 
 func (c *ManifestCache) Expire(id string) {
-	// cleanup manifests dir
 	if line, ok := c.cache.Get(id); ok {
 		line.wipe()
 	}
@@ -105,6 +176,62 @@ func (c *ManifestCache) Expire(id string) {
 
 func (c *ManifestCache) ExpiryWithJitter() time.Duration {
 	return utils.WithJitterFactor(c.expiry, 0.5)
+}
+
+func (c *ManifestCache) Export() map[string]persist.ManifestRecord {
+	items := make(map[string]persist.ManifestRecord)
+	for id, line := range c.cache.Items() {
+		if line == nil || !line.live() {
+			continue
+		}
+		items[id] = persist.ManifestRecord{
+			Dir:     line.dir,
+			SHA:     line.sha,
+			Created: line.created,
+			Expiry:  line.expiry,
+		}
+	}
+	log.V(1).Info("exported manifest cache", "count", len(items))
+	return items
+}
+
+func (c *ManifestCache) Import(items map[string]persist.ManifestRecord) {
+	if c.cacheDir == "" {
+		log.V(1).Info("skipped manifest cache import, cache dir not set")
+		return
+	}
+
+	imported, skippedPath, skippedExpired, skippedMissing := 0, 0, 0, 0
+	for id, rec := range items {
+		expected, err := c.manifestDir(id, rec.SHA)
+		if err != nil || !sameDir(expected, rec.Dir) {
+			skippedPath++
+			continue
+		}
+		line := &cacheLine{
+			dir:     expected,
+			sha:     rec.SHA,
+			created: rec.Created,
+			expiry:  rec.Expiry,
+		}
+		if !line.live() {
+			skippedExpired++
+			continue
+		}
+		if _, err := os.Stat(expected); err != nil {
+			skippedMissing++
+			continue
+		}
+		c.cache.Set(id, line)
+		imported++
+	}
+	log.Info("imported manifest cache",
+		"imported", imported,
+		"skippedPath", skippedPath,
+		"skippedExpired", skippedExpired,
+		"skippedMissing", skippedMissing,
+		"source", len(items),
+	)
 }
 
 func (l *cacheLine) live() bool {

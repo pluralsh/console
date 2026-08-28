@@ -1,10 +1,14 @@
 import RepositoryChip from '../components/RepositoryChip'
 import StackIcon from '../components/icons/StackIcon'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'RepositoryChip',
   component: RepositoryChip,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template(args: any) {
   return (
@@ -19,24 +23,27 @@ function Template(args: any) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  imageUrl: '/logos/airbyte-logo.svg',
-  label: 'Airbyte',
+export const Default: Story = {
+  render: Template,
+  args: {
+    imageUrl: '/logos/airbyte-logo.svg',
+    label: 'Airbyte',
+  },
 }
 
-export const Icon = Template.bind({})
-
-Icon.args = {
-  icon: <StackIcon />,
-  label: 'DevOps',
+export const Icon: Story = {
+  render: Template,
+  args: {
+    icon: <StackIcon />,
+    label: 'DevOps',
+  },
 }
 
-export const Small = Template.bind({})
-
-Small.args = {
-  imageUrl: '/logos/airbyte-logo.svg',
-  label: 'Really long application name',
-  width: '200px',
+export const Small: Story = {
+  render: Template,
+  args: {
+    imageUrl: '/logos/airbyte-logo.svg',
+    label: 'Really long application name',
+    width: '200px',
+  },
 }

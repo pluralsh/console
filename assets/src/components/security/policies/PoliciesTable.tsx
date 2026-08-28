@@ -1,105 +1,68 @@
-import { ComponentProps, useEffect, useMemo } from 'react'
-import { Button, Table, TableProps } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router'
-import { useTheme } from 'styled-components'
+import { Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
+import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import {
-  PolicyConstraintFragment,
-  PolicyConstraintsQuery,
+  PageInfoFragment,
+  PoliciesQuery,
+  PolicyTinyFragment,
 } from 'generated/graphql'
+import { useNavigate } from 'react-router-dom'
+import { getPolicyDetailsAbsPath } from 'routes/securityRoutesConsts'
+import styled from 'styled-components'
 import { Edge } from 'utils/graphql'
-
-import { getPolicyPath } from 'routes/securityRoutesConsts'
-
 import {
-  ColCluster,
-  ColDescription,
-  ColPolicyName,
-  ColViolations,
   ColActions,
+  ColName,
+  ColProject,
+  ColType,
+  ColUpdated,
 } from './PoliciesColumns'
 
-const columns = [ColPolicyName, ColCluster, ColViolations, ColDescription]
-const columnsWithActions = [
-  ColPolicyName,
-  ColCluster,
-  ColViolations,
-  ColDescription,
-  ColActions,
-]
-
-type PoliciesTableProps = {
-  caret?: boolean
-  setRefetch?: (refetch: () => () => void) => void
-  refetch: () => void
-  data?: PolicyConstraintsQuery
-  loading: boolean
-  setVirtualSlice: any
-  resetFilters?: () => void
-}
+const columns = [ColName, ColProject, ColUpdated, ColType, ColActions]
 
 export function PoliciesTable({
-  caret = false,
-  setRefetch,
-  refetch,
   data,
   loading,
+  pageInfo,
+  fetchNextPage,
   setVirtualSlice,
-  resetFilters,
-  ...props
-}: PoliciesTableProps &
-  Omit<TableProps, keyof PoliciesTableProps | 'data' | 'columns'>) {
-  const theme = useTheme()
+}: {
+  data?: PoliciesQuery
+  loading: boolean
+  pageInfo?: PageInfoFragment
+  fetchNextPage: () => void
+  setVirtualSlice: (slice: VirtualSlice) => void
+}) {
   const navigate = useNavigate()
 
-  useEffect(() => {
-    setRefetch?.(() => refetch)
-  }, [refetch, setRefetch])
-
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(() => ({ meta: { refetch } }), [refetch])
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-        width: '100%',
-        overflow: 'hidden',
-      }}
-    >
+    <WrapperSC>
       <Table
         fullHeightWrap
         virtualizeRows
-        data={data?.policyConstraints?.edges || []}
+        data={data?.policies?.edges || []}
         loading={!data && loading}
-        columns={caret ? columnsWithActions : columns}
-        onRowClick={(_e, { original }: Row<Edge<PolicyConstraintFragment>>) =>
-          navigate(
-            getPolicyPath({
-              policyId: original.node?.id,
-            })
-          )
-        }
-        hasNextPage={data?.policyConstraints?.pageInfo?.hasNextPage}
+        columns={columns}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
-        reactTableOptions={reactTableOptions}
         onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{
-          message: 'No policies found.',
-          children: (
-            <Button
-              css={{ margin: 'auto' }}
-              onClick={resetFilters}
-            >
-              Reset Filters
-            </Button>
-          ),
+        onRowClick={(_e, { original }: Row<Edge<PolicyTinyFragment>>) => {
+          if (original.node?.id)
+            navigate(getPolicyDetailsAbsPath(original.node.id))
         }}
-        {...props}
+        emptyStateProps={{ message: 'No policies found.' }}
       />
-    </div>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  height: '100%',
+  overflow: 'hidden',
+})

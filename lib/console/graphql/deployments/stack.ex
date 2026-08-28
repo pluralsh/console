@@ -168,8 +168,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :stack_state_attributes do
-    field :plan,  :string
-    field :state, list_of(:stack_state_resource_attributes)
+    field :plan,      :string
+    field :plan_json, :json, description: "structured plan payload from the stack tool, e.g. terraform show -json"
+    field :state,     list_of(:stack_state_resource_attributes)
   end
 
   input_object :stack_state_resource_attributes do
@@ -463,10 +464,11 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :approval,            :boolean, description: "whether to require approval"
     field :message,             :string, description: "the commit message"
+    field :committer,           :string, description: "the committer email of the commit that spawned this run"
     field :approved_at,         :datetime, description: "when this run was approved"
     field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"
-    field :approval_result,     :stack_run_approval_result, description: "the result of the approval decision by the ai"
+    field :approval_result,     :stack_run_approval_result, description: "the result of the approval decision by stack policy or ai"
     field :variables,           :map, description: "Arbitrary variables to add to a stack run", resolve: fn
       parent, _, context -> Deployments.safe_field(parent, :variables, context)
     end
@@ -591,9 +593,10 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_state do
-    field :id,    non_null(:id)
-    field :plan,  :string
-    field :state, list_of(:stack_state_resource)
+    field :id,        non_null(:id)
+    field :plan,      :string
+    field :plan_json, :map, description: "structured plan payload from the stack tool, e.g. terraform show -json"
+    field :state,     list_of(:stack_state_resource)
 
     field :insight, :ai_insight, resolve: dataloader(Deployments),
       description: "an insight explaining the state of this stack state, eg the terraform plan it represents"
@@ -644,8 +647,8 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :stack_run_approval_result do
-    field :reason, :string, description: "the reason for the approval decision by the ai"
-    field :result, :approval_result, description: "the result of the approval decision by the ai"
+    field :reason, :string, description: "the reason for the approval decision by stack policy or ai"
+    field :result, :approval_result, description: "the result of the approval decision by stack policy or ai"
   end
 
   object :custom_run_step do

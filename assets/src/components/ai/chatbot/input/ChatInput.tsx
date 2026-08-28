@@ -158,7 +158,7 @@ export function ChatInputSimple({
   allowSubmit = true,
   loading = false,
   disabled = false,
-  bgColor = 'fill-zero-selected',
+  bgColor,
   options,
   wrapperStyles,
   enableAutoComplete = false,
@@ -188,7 +188,9 @@ export function ChatInputSimple({
   showSubmitButton?: boolean
   submitButton?: ReactNode
 } & Omit<ComponentPropsWithoutRef<typeof EditableDiv>, 'onEnter'>) {
-  const { spacing } = useTheme()
+  const { mode, spacing } = useTheme()
+  const resolvedBgColor =
+    bgColor ?? (mode === 'light' ? 'fill-zero' : 'fill-zero-selected')
   const divRef = useRef<HTMLDivElement>(null)
   const handleSubmit = () => allowSubmit && onSubmit()
 
@@ -222,7 +224,7 @@ export function ChatInputSimple({
 
   return (
     <EditableContentWrapperSC
-      $bgColor={bgColor}
+      $bgColor={resolvedBgColor}
       css={{ position: 'relative', minHeight: 130, ...wrapperStyles }}
     >
       <EditableDiv
@@ -347,7 +349,7 @@ const EditableContentWrapperSC = styled.div<{
   outline: '1px solid transparent',
 
   '&:has(div:focus)': {
-    backgroundColor: theme.colors['fill-zero-selected'],
+    backgroundColor: theme.colors[$bgColor],
     transition: 'box-shadow 0.16s ease-in-out, border 0.16s ease-in-out',
     border: theme.borders['outline-focused'],
   },

@@ -1,11 +1,15 @@
 import { A, Div } from 'honorable'
 
 import { Sidecar, SidecarItem, type SidecarProps } from '../index'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Sidecar',
   component: Sidecar,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 const wordWrapOnSlashes = (url: string) =>
   url
@@ -52,8 +56,9 @@ function Template({ heading, ...props }: SidecarProps) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  heading: 'Sidecar Title',
+export const Default: Story = {
+  render: Template,
+  args: {
+    heading: 'Sidecar Title',
+  },
 }

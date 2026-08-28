@@ -51,6 +51,41 @@ defmodule Console.Deployments.PolicyTest do
       assert {:error, _} = Policy.update_policy(%{description: "Updated policy"}, policy.id, user)
       assert refetch(policy).description != "Updated policy"
     end
+
+    test "cannot transfer a policy to an inaccessible destination project" do
+      user = insert(:user)
+      source = insert(:project, write_bindings: [%{user_id: user.id}])
+      destination = insert(:project)
+      policy = insert(:policy, project: source)
+
+      assert {:error, _} = Policy.update_policy(%{project_id: destination.id}, policy.id, user)
+      assert refetch(policy).project_id == source.id
+    end
+
+    test "project writers can transfer a policy to another writable project" do
+      user = insert(:user)
+      source = insert(:project, write_bindings: [%{user_id: user.id}])
+      destination = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: source)
+
+      {:ok, updated} = Policy.update_policy(%{project_id: destination.id}, policy.id, user)
+
+      assert updated.project_id == destination.id
+    end
+
+    test "rejects type changes when attachments exist" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      insert(:workbench_policy, policy: policy)
+
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.update_policy(%{type: :stack}, policy.id, user)
+
+      assert errors_on(changeset).type ==
+               ["cannot change type while attachments or binding rules exist"]
+      assert refetch(policy).type == :workbench
+    end
   end
 
   describe "delete_policy/2" do
@@ -151,6 +186,26 @@ defmodule Console.Deployments.PolicyTest do
       assert [interval: _] = Keyword.take(changeset.errors, [:interval])
     end
 
+    test "accepts intervals of at least thirty minutes" do
+      for interval <- ["30m", "6h"] do
+        changeset =
+          BindingPolicy.changeset(
+            %BindingPolicy{},
+            %{policy_id: Ecto.UUID.generate(), bind_policy_id: Ecto.UUID.generate(), type: :workbench, interval: interval}
+          )
+
+        assert changeset.valid?
+      end
+    end
+
+    test "schedules the next poll using the configured interval" do
+      now = DateTime.utc_now()
+      changeset = BindingPolicy.next_poll_changeset(%BindingPolicy{}, "6h")
+      next_poll_at = Ecto.Changeset.get_change(changeset, :next_poll_at)
+
+      assert DateTime.diff(next_poll_at, now, :second) in (3 * 60 * 60)..(9 * 60 * 60)
+    end
+
     test "only considers due bindings pollable" do
       due = insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), -1, :hour))
       insert(:binding_policy, next_poll_at: DateTime.add(DateTime.utc_now(), 1, :hour))
@@ -178,19 +233,20 @@ defmodule Console.Deployments.PolicyTest do
       workbench = insert(:workbench, project: project, name: "bound-workbench")
       retained = insert(:workbench, project: project, name: "retained-workbench")
       policy = insert(:policy, project: project)
-      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.name == \"bound-workbench\"")
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.workbench.name == \"bound-workbench\"")
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, matches: %{workbench: %{regexes: [".*"]}})
 
       :ok = Policy.reconcile(binding)
       :ok = Policy.reconcile(binding)
 
-      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+      [association] = Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
 
       insert(:workbench_policy, policy: policy, workbench: retained)
 
       {:ok, bind_policy} =
         Policy.update_policy(
-          %{policy: "package plrl.binding\nbind := true if input.name == \"retained-workbench\""},
+          %{policy: "package plrl.binding\nbind := true if input.workbench.name == \"retained-workbench\""},
           bind_policy.id,
           admin_user()
         )
@@ -212,18 +268,211 @@ defmodule Console.Deployments.PolicyTest do
     test "adds and removes stack policy bindings" do
       insert(:user, bot_name: "console")
       project = insert(:project)
-      stack = insert(:stack, project: project)
+      stack = insert(:stack, project: project, name: "bound-stack")
       policy = insert(:policy, project: project, type: :stack)
-      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true")
+      bind_policy =
+        insert(:policy,
+          project: project,
+          type: :binding,
+          policy: "package plrl.binding\nbind := true if input.stack.name == \"bound-stack\""
+        )
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 
       :ok = Policy.reconcile(binding)
-      assert 1 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+      [association] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
 
       {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
       :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
 
       assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+    end
+
+    test "does not detach manual attachments when the bind policy stops matching" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      workbench = insert(:workbench, project: project, name: "bound-workbench")
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.workbench.name == \"bound-workbench\"")
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy)
+      insert(:workbench_policy, policy: policy, workbench: workbench)
+
+      :ok = Policy.reconcile(binding)
+
+      {:ok, bind_policy} =
+        Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
+
+      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+    end
+  end
+
+  describe "evaluate_policy/2" do
+    test "evaluates stack approval policies with deny, defer, and approve" do
+      policy = insert(:policy,
+        type: :stack,
+        policy: """
+        package plrl.stack
+
+        sample := 0
+
+        deny[{"message": "blocked"}] if {
+          input.action == "destroy"
+        }
+
+        defer if input.action == "wait"
+
+        approve[{"reason": "safe"}] if {
+          input.action == "apply"
+        }
+        """
+      )
+
+      {:ok, denied} = Policy.evaluate_policy(policy, %{"action" => "destroy"})
+      assert [%{"message" => "blocked"}] = denied["deny"]
+      refute denied["defer"]
+      assert denied["approve"] == []
+
+      {:ok, deferred} = Policy.evaluate_policy(policy, %{"action" => "wait"})
+      assert deferred["deny"] == []
+      assert deferred["defer"]
+      assert deferred["approve"] == []
+
+      {:ok, approved} = Policy.evaluate_policy(policy, %{"action" => "apply"})
+      assert approved["deny"] == []
+      refute approved["defer"]
+      assert [%{"reason" => "safe"}] = approved["approve"]
+    end
+
+    test "returns empty deny/approve and false defer for a default stack policy" do
+      policy = insert(:policy, type: :stack, policy: "package plrl.stack\nsample := 0")
+
+      {:ok, result} = Policy.evaluate_policy(policy, %{})
+
+      assert result["deny"] == []
+      refute result["defer"]
+      assert result["approve"] == []
+      assert result["sample"] == 0
+    end
+  end
+
+  describe "evaluate_custom_policy/3" do
+    test "evaluates unsaved source without a stored policy" do
+      {:ok, result} = Policy.evaluate_custom_policy(:workbench, """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "buffer"}] if {
+          true
+        }
+      """, %{})
+
+      assert [%{"message" => "buffer"}] = result["deny"]
+    end
+
+    test "rejects invalid rego" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, "package test\n\nallow {", %{})
+
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects an empty buffer" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, "", %{})
+
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects source over 1MB" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, String.duplicate("a", 1_000_001), %{})
+
+      assert errors_on(changeset).policy == ["should be at most 1000000 character(s)"]
+    end
+  end
+
+  describe "actor/1" do
+    test "builds a cleaned actor payload from a user" do
+      group = insert(:group, name: "admins")
+      user = insert(:user, name: "Pat", email: "pat@example.com")
+      insert(:group_member, group: group, user: user)
+      user = Repo.preload(user, :groups)
+
+      assert Policy.actor(user) == %{
+        "id" => user.id,
+        "name" => "Pat",
+        "email" => "pat@example.com",
+        "groups" => ["admins"]
+      }
+    end
+
+    test "returns an empty map when no user is present" do
+      assert Policy.actor(nil) == %{}
+    end
+  end
+
+  describe "stack/1" do
+    test "builds a cleaned stack payload with project and git information" do
+      project = insert(:project, name: "infra")
+      repo = insert(:git_repository, url: "https://github.com/acme/infra.git")
+      stack = insert(:stack,
+        name: "prod-network",
+        project: project,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"},
+        sha: "abc123"
+      )
+
+      assert Policy.stack(stack) == %{
+        "name" => "prod-network",
+        "project" => %{"id" => project.id, "name" => "infra"},
+        "git" => %{
+          "ref" => "main",
+          "folder" => "terraform",
+          "sha" => "abc123",
+          "url" => "https://github.com/acme/infra.git"
+        }
+      }
+    end
+
+    test "returns an empty map when no stack is present" do
+      assert Policy.stack(nil) == %{}
+    end
+  end
+
+  describe "commit/1" do
+    test "builds a cleaned commit payload from a stack run" do
+      run = insert(:stack_run,
+        git: %{ref: "abc123", folder: "terraform"},
+        message: "add web instance",
+        committer: "alice@example.com"
+      )
+
+      assert Policy.commit(run) == %{
+        "sha" => "abc123",
+        "message" => "add web instance",
+        "committer" => "alice@example.com"
+      }
+    end
+
+    test "returns an empty map when no run is present" do
+      assert Policy.commit(nil) == %{}
+    end
+  end
+
+  describe "policy_reason/2" do
+    test "joins message and reason fields" do
+      assert Policy.policy_reason([%{"message" => "blocked"}, %{"reason" => "safe"}]) ==
+               "blocked; safe"
+    end
+
+    test "uses the fallback when there are no reasons" do
+      assert Policy.policy_reason([], "denied by stack policy") == "denied by stack policy"
     end
   end
 

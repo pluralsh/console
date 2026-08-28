@@ -1,3 +1,4 @@
+import { type ColorMode } from '../../theme'
 import { type SemanticBorderKey } from '../../theme/borders'
 import { TableFillLevel } from './tableUtils'
 
@@ -31,17 +32,33 @@ const tableFillLevelToCellBg = {
   2: 'fill-two',
 } as const satisfies Record<TableFillLevel, string>
 
+/** Light: dedicated zebra tokens. Dark: legacy mapping (unchanged live behavior). */
 const tableFillLevelToRaisedCellBg = {
-  0: 'fill-zero-selected',
-  1: 'fill-one-selected',
-  2: 'fill-two-selected',
-} as const satisfies Record<TableFillLevel, string>
+  light: {
+    0: 'fill-zero-raised',
+    1: 'fill-one-raised',
+    2: 'fill-two-raised',
+  },
+  dark: {
+    0: 'fill-zero-selected',
+    1: 'fill-one-selected',
+    2: 'fill-two-selected',
+  },
+} as const satisfies Record<ColorMode, Record<TableFillLevel, string>>
 
+/** Light: true selection. Dark: legacy mapping used hover tokens for selected rows. */
 const tableFillLevelToSelectedCellBg = {
-  0: 'fill-zero-hover',
-  1: 'fill-one-hover',
-  2: 'fill-two-hover',
-} as const satisfies Record<TableFillLevel, string>
+  light: {
+    0: 'fill-zero-selected',
+    1: 'fill-one-selected',
+    2: 'fill-two-selected',
+  },
+  dark: {
+    0: 'fill-zero-hover',
+    1: 'fill-one-hover',
+    2: 'fill-two-hover',
+  },
+} as const satisfies Record<ColorMode, Record<TableFillLevel, string>>
 
 export const tableFillLevelToHighlightedCellBg = {
   0: 'fill-two',
@@ -54,6 +71,12 @@ const tableFillLevelToHoverCellBg = {
   1: 'fill-one-hover',
   2: 'fill-two-hover',
 } as const satisfies Record<TableFillLevel, string>
+
+const raisedCellBg = (fillLevel: TableFillLevel, mode: ColorMode) =>
+  tableFillLevelToRaisedCellBg[mode][fillLevel]
+
+const selectedCellBg = (fillLevel: TableFillLevel, mode: ColorMode) =>
+  tableFillLevelToSelectedCellBg[mode][fillLevel]
 
 export const tableHeaderColor = (
   fillLevel: TableFillLevel,
@@ -68,23 +91,32 @@ export const tableCellColor = (
   highlighted: boolean,
   raised: boolean,
   selectable: boolean,
-  selected: boolean
+  selected: boolean,
+  mode: ColorMode
 ) =>
   highlighted
     ? tableFillLevelToHighlightedCellBg[fillLevel]
     : selected
-      ? tableFillLevelToSelectedCellBg[fillLevel]
+      ? selectedCellBg(fillLevel, mode)
       : raised || (selectable && !selected)
-        ? tableFillLevelToRaisedCellBg[fillLevel]
+        ? raisedCellBg(fillLevel, mode)
         : tableFillLevelToCellBg[fillLevel]
 
 export const tableCellHoverColor = (
   fillLevel: TableFillLevel,
   selectable: boolean,
-  selected: boolean
-) =>
-  selectable
+  selected: boolean,
+  mode: ColorMode
+) => {
+  if (mode === 'light') {
+    return selected
+      ? selectedCellBg(fillLevel, mode)
+      : tableFillLevelToHoverCellBg[fillLevel]
+  }
+
+  return selectable
     ? selected
-      ? tableFillLevelToSelectedCellBg[fillLevel]
-      : tableFillLevelToRaisedCellBg[fillLevel]
+      ? selectedCellBg(fillLevel, mode)
+      : raisedCellBg(fillLevel, mode)
     : tableFillLevelToHoverCellBg[fillLevel]
+}

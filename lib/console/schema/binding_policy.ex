@@ -1,6 +1,6 @@
 defmodule Console.Schema.BindingPolicy do
   use Console.Schema.Base
-  alias Console.Schema.{Policy, WorkbenchPolicy}
+  alias Console.Schema.{Policy, WorkbenchPolicy, StackPolicy}
 
   defenum Type, workbench: 0, stack: 1
 
@@ -11,6 +11,10 @@ defmodule Console.Schema.BindingPolicy do
 
     embeds_one :matches, Spec, on_replace: :update do
       embeds_one :workbench, WorkbenchPolicy.Matches, on_replace: :update
+
+      embeds_one :stack, StackSpec, on_replace: :update do
+        field :type, StackPolicy.Type, default: :approval
+      end
     end
 
     belongs_to :policy, Policy
@@ -32,6 +36,28 @@ defmodule Console.Schema.BindingPolicy do
 
   def for_type(query \\ __MODULE__, type) do
     from(p in query, where: p.type == ^type)
+  end
+
+  def match_counts_for_bind_policies([]), do: %{}
+  def match_counts_for_bind_policies(policy_ids) do
+    workbench_counts = attachment_match_counts(WorkbenchPolicy, :workbench_id, policy_ids)
+    stack_counts     = attachment_match_counts(StackPolicy, :stack_id, policy_ids)
+
+    Map.new(policy_ids, fn id ->
+      {id, Map.get(workbench_counts, id, 0) + Map.get(stack_counts, id, 0)}
+    end)
+  end
+
+  defp attachment_match_counts(schema, id_field, policy_ids) do
+    from(a in schema,
+      join: bp in __MODULE__,
+      on: bp.id == a.binding_policy_id,
+      where: bp.bind_policy_id in ^policy_ids,
+      group_by: bp.bind_policy_id,
+      select: {bp.bind_policy_id, count(field(a, ^id_field), :distinct)}
+    )
+    |> Console.Repo.all()
+    |> Map.new()
   end
 
   def for_user(query \\ __MODULE__, user) do
@@ -89,13 +115,19 @@ defmodule Console.Schema.BindingPolicy do
     model
     |> cast(attrs, [])
     |> cast_embed(:workbench, with: &WorkbenchPolicy.matches_changeset/2)
+    |> cast_embed(:stack, with: &stack_changeset/2)
     |> validate_required([])
+  end
+
+  defp stack_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:type ])
   end
 
   defp validate_interval(changeset) do
     validate_change(changeset, :interval, fn :interval, interval ->
       with {:ok, duration} <- parse_duration(interval),
-           true <- seconds(duration) >= :timer.minutes(30) do
+           true <- seconds(duration) >= 30 * 60 do
         []
       else
         _ -> [interval: "must be at least 30m"]

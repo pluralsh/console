@@ -63,17 +63,10 @@ func (c *Cluster) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&c.Status.Conditions, condition)
 }
 
-func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
-	var tags []*console.TagAttributes
-	if len(c.Spec.Tags) > 0 {
-		for k, v := range c.Spec.Tags {
-			tags = append(tags, &console.TagAttributes{
-				Name:  k,
-				Value: v,
-			})
-		}
-		slices.SortFunc(tags, func(a, b *console.TagAttributes) int { return strings.Compare(a.Name, b.Name) })
-	}
+// TagUpdateAttributes builds cluster update attributes from this resource.
+// When MergeTags is true, existing Console tags are retained and overlaid with
+// tags specified on the CR. Otherwise the CR tags replace the existing set.
+func (c *Cluster) TagUpdateAttributes(existing []*console.ClusterTags) console.ClusterUpdateAttributes {
 	var metadata *string
 	if c.Spec.Metadata != nil {
 		metadata = lo.ToPtr(string(c.Spec.Metadata.Raw))
@@ -81,9 +74,41 @@ func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
 
 	return console.ClusterUpdateAttributes{
 		Handle:   c.Spec.Handle,
-		Tags:     tags,
+		Tags:     mergeClusterTags(existing, c.Spec.Tags, c.Spec.MergeTags),
 		Metadata: metadata,
 	}
+}
+
+// mergeClusterTags converts spec tags to GraphQL tag attributes.
+// When merge is true, existing tags are used as the base and spec tags overlay them
+// (spec wins on key conflicts). When merge is false, only spec tags are used.
+func mergeClusterTags(existing []*console.ClusterTags, specTags map[string]string, merge bool) []*console.TagAttributes {
+	tagMap := make(map[string]string)
+	if merge {
+		for _, tag := range existing {
+			if tag == nil {
+				continue
+			}
+			tagMap[tag.Name] = tag.Value
+		}
+	}
+	for k, v := range specTags {
+		tagMap[k] = v
+	}
+
+	if len(tagMap) == 0 {
+		return nil
+	}
+
+	tags := make([]*console.TagAttributes, 0, len(tagMap))
+	for k, v := range tagMap {
+		tags = append(tags, &console.TagAttributes{
+			Name:  k,
+			Value: v,
+		})
+	}
+	slices.SortFunc(tags, func(a, b *console.TagAttributes) int { return strings.Compare(a.Name, b.Name) })
+	return tags
 }
 
 // ClusterSpec defines the desired state of a Cluster.
@@ -145,6 +170,13 @@ type ClusterSpec struct {
 	// Used for organizing clusters by environment, team, or other operational criteria.
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
+
+	// MergeTags, when true, merges tags specified on this resource with the existing
+	// tags on the tracked Console cluster instead of replacing them. Spec tags overlay
+	// existing tags (the CR wins on key conflicts). Only applies when this Cluster is
+	// tracking an existing Console cluster (read-only mode). Defaults to false.
+	// +kubebuilder:validation:Optional
+	MergeTags bool `json:"mergeTags,omitempty"`
 
 	// Metadata contains arbitrary JSON metadata for storing cluster-specific configuration.
 	// Used for custom cluster properties and integration with external systems.

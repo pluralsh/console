@@ -49,7 +49,8 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeDelete do
         method: "delete",
         path: path,
         content_type: "application/json",
-        explanation: explanation
+        explanation: explanation,
+        approval: comp.approval
       )
     else
       {:kind, _} -> {:ok, "I cannot delete custom resource definitions for you"}

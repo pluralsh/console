@@ -300,13 +300,13 @@ func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ct
 		return false
 	}
 
-	// Exit if all PRs are terminal or if there are no PRs to babysit, using live SCM data.
-	if len(agentRun.PullRequests) == 0 {
+	urls := in.resolveBabysitPRURLs(agentRun)
+	if len(urls) == 0 {
 		klog.V(log.LogLevelInfo).InfoS("no pull requests to babysit, stopping babysit loop")
 		return true
 	}
 
-	babysitClient, err := scm.NewGRPCClient(common.AgentMCPGRPCAddress)
+	babysitClient, err := in.babysitSCMClient()
 	if err != nil {
 		klog.ErrorS(err, "failed to initialize babysit grpc client")
 		return false
@@ -315,18 +315,14 @@ func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ct
 	defer func() { _ = babysitClient.Close() }()
 
 	allDone := true
-	for _, pr := range agentRun.PullRequests {
-		// Skip if PR URL is empty
-		if pr.URL == "" {
-			continue
-		}
-		details, err := babysitClient.GetPRDetails(ctx, pr.URL)
+	for _, prURL := range urls {
+		details, err := babysitClient.GetPRSummary(ctx, prURL)
 		if err != nil {
-			klog.ErrorS(err, "failed to fetch PR details via mcp sidecar", "url", pr.URL)
+			klog.ErrorS(err, "failed to fetch PR summary via mcp sidecar", "url", prURL)
 			allDone = false // If we can't check, don't exit babysit
 			break
 		}
-		if details.State == scm.PRStateOpen {
+		if details.Pollable() {
 			allDone = false
 			break
 		}
@@ -337,7 +333,7 @@ func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ct
 		return true
 	}
 
-	bCtx := in.buildBabysitContext(ctx, agentRun, babysitClient)
+	bCtx := in.buildBabysitContext(ctx, urls, babysitClient)
 	if bCtx == nil {
 		return false
 	}
@@ -352,33 +348,88 @@ func (in *agentRunController) runBabysitPR(ctx context.Context, callback func(ct
 	return stop
 }
 
+func (in *agentRunController) babysitSCMClient() (scm.GRPCClient, error) {
+	if in.newBabysitClient != nil {
+		return in.newBabysitClient()
+	}
+	return scm.NewGRPCClient(common.AgentMCPGRPCAddress)
+}
+
+// resolveBabysitPRURLs returns the PR URLs the babysit loop should poll via SCM.
+// Created PR URLs take precedence; followupPrUrl is used when the run has no
+// associated PRs (the follow-up path).
+func (in *agentRunController) resolveBabysitPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
+	if urls := createdPRURLs(agentRun); len(urls) > 0 {
+		in.babysitPRURLs = urls
+		return urls
+	}
+	if url := followupPRURL(agentRun, in.agentRun); url != "" {
+		in.babysitPRURLs = []string{url}
+		return in.babysitPRURLs
+	}
+	return in.babysitPRURLs
+}
+
+func createdPRURLs(agentRun *gqlclient.AgentRunFragment) []string {
+	if agentRun == nil {
+		return nil
+	}
+	var urls []string
+	seen := map[string]struct{}{}
+	for _, pr := range agentRun.PullRequests {
+		if pr == nil {
+			continue
+		}
+		u := strings.TrimSpace(pr.URL)
+		if u == "" {
+			continue
+		}
+		if _, ok := seen[u]; ok {
+			continue
+		}
+		seen[u] = struct{}{}
+		urls = append(urls, u)
+	}
+	return urls
+}
+
+func followupPRURL(agentRun *gqlclient.AgentRunFragment, harnessRun *agentrunv1.AgentRun) string {
+	if agentRun != nil && agentRun.FollowupPrURL != nil {
+		if u := strings.TrimSpace(*agentRun.FollowupPrURL); u != "" {
+			return u
+		}
+	}
+	if harnessRun != nil {
+		return strings.TrimSpace(harnessRun.FollowupPrURL)
+	}
+	return ""
+}
+
 // buildBabysitContext fetches live PR data from the SCM provider, computes a
 // dedup SHA, and returns a populated BabysitContext if the state has changed
 // since the last check. Returns nil when nothing has changed (no reprompt needed).
-func (in *agentRunController) buildBabysitContext(ctx context.Context, agentRun *gqlclient.AgentRunFragment, babysitClient scm.GRPCClient) *toolv1.BabysitContext {
+func (in *agentRunController) buildBabysitContext(ctx context.Context, prURLs []string, babysitClient scm.GRPCClient) *toolv1.BabysitContext {
 	var enriched []toolv1.EnrichedPR
 	var details []*scm.PRDetails
-	for _, pr := range agentRun.PullRequests {
-		// Skip terminal PRs
-		if pr.Status != nil && (*pr.Status == gqlclient.PrStatusMerged || *pr.Status == gqlclient.PrStatusClosed) {
+	for _, prURL := range prURLs {
+		if prURL == "" {
 			continue
 		}
 
-		d, err := babysitClient.GetPRDetails(ctx, pr.URL)
+		d, err := babysitClient.GetPRDetails(ctx, prURL)
 		if err != nil {
-			klog.ErrorS(err, "failed to fetch PR details via mcp sidecar", "url", pr.URL)
+			klog.ErrorS(err, "failed to fetch PR details via mcp sidecar", "url", prURL)
+			continue
+		}
+		if !d.Pollable() {
 			continue
 		}
 
-		title := ""
-		if pr.Title != nil {
-			title = *pr.Title
-		}
 		enriched = append(enriched, toolv1.EnrichedPR{
-			URL:         pr.URL,
-			Title:       title,
+			URL:         prURL,
+			Title:       d.Title,
 			Details:     d,
-			NewComments: in.newOrUpdatedPRComments(pr.URL, d.Comments),
+			NewComments: in.newOrUpdatedPRComments(prURL, d.Comments),
 		})
 		details = append(details, d)
 	}
@@ -499,7 +550,10 @@ func buildBabysitPrompt(branch, _ string, prs []toolv1.EnrichedPR, lastChecked t
 			}
 		}
 		if len(failing) > 0 {
-			sb.WriteString("### Failing CI checks — you MUST fix these\n\n")
+			sb.WriteString("### Failing CI checks — diagnose before changing code\n\n")
+			sb.WriteString("Fetch logs with plural MCP `getCILogs` and classify each failure.\n")
+			sb.WriteString("- **Fix and push** only when the logs show a defect caused by this PR's code, tests, or config.\n")
+			sb.WriteString("- **Do not commit or push** if it is a CI flake: transient network/DNS errors, third-party registry or API outages, rate limits, runner eviction, cancelled jobs, or similar infrastructure issues not caused by this PR. Report the flake and stop; do not push a no-op or retry commit.\n\n")
 			for _, ci := range failing {
 				_, _ = fmt.Fprintf(&sb, "- **%s**: %s (%s)\n", ci.Name, ci.Status, ci.Conclusion)
 			}

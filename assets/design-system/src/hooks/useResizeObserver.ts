@@ -26,8 +26,8 @@ const useResizeObserver = (
       return
     }
 
-    let RO = new ResizeObserver((entries: ResizeObserverEntry[]) =>
-      handleResize(entries)
+    let RO: ResizeObserver | null = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => handleResize(entries)
     )
 
     RO.observe(ref.current)

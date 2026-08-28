@@ -418,6 +418,8 @@ type AgentRun struct {
 	Consumed *string `json:"consumed,omitempty"`
 	// whether this run is a follow-up to a pull request
 	Followup *bool `json:"followup,omitempty"`
+	// the pull request URL this follow-up run is targeting
+	FollowupPrURL *string `json:"followupPrUrl,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -534,6 +536,8 @@ type AgentRunStatusAttributes struct {
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the agent run this run consumed
 	Consumed *string `json:"consumed,omitempty"`
+	// the pull request URL this follow-up run is targeting
+	FollowupPrURL *string `json:"followupPrUrl,omitempty"`
 	// the skills available to this agent run
 	Skills []*AgentSkillAttributes `json:"skills,omitempty"`
 	// token and cost usage for this agent run
@@ -596,6 +600,8 @@ type AgentRuntime struct {
 	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
 	// default interval in seconds between babysit checks for runs on this runtime
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
+	// default model override for runs on this runtime
+	Model *WorkbenchJobModel `json:"model,omitempty"`
 	// the cluster this runtime is running on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the policy for creating runs on this runtime
@@ -624,6 +630,8 @@ type AgentRuntimeAttributes struct {
 	BabysitInterval *int64 `json:"babysitInterval,omitempty"`
 	// the name of the scm connection to use for this runtime
 	ScmConnection *string `json:"scmConnection,omitempty"`
+	// default model override for runs on this runtime
+	Model *WorkbenchJobModelAttributes `json:"model,omitempty"`
 }
 
 type AgentRuntimeConnection struct {
@@ -3628,6 +3636,8 @@ type Flow struct {
 	Metadata    map[string]any `json:"metadata,omitempty"`
 	// the git https urls of the application code repositories used in this flow
 	Repositories []*string `json:"repositories,omitempty"`
+	// the maximum number of preview environments allowed for this flow (1-25, default 10)
+	MaxPreviews *int64 `json:"maxPreviews,omitempty"`
 	// the agent runtime for this flow
 	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
 	// servers that are bound to this flow
@@ -3660,8 +3670,10 @@ type FlowAttributes struct {
 	ProjectID   *string `json:"projectId,omitempty"`
 	Metadata    *string `json:"metadata,omitempty"`
 	// the agent runtime for this flow
-	AgentRuntimeID     *string                           `json:"agentRuntimeId,omitempty"`
-	Repositories       []*string                         `json:"repositories,omitempty"`
+	AgentRuntimeID *string   `json:"agentRuntimeId,omitempty"`
+	Repositories   []*string `json:"repositories,omitempty"`
+	// the maximum number of preview environments allowed for this flow (1-25, default 10)
+	MaxPreviews        *int64                            `json:"maxPreviews,omitempty"`
 	ReadBindings       []*PolicyBindingAttributes        `json:"readBindings,omitempty"`
 	WriteBindings      []*PolicyBindingAttributes        `json:"writeBindings,omitempty"`
 	ServerAssociations []*McpServerAssociationAttributes `json:"serverAssociations,omitempty"`
@@ -6626,8 +6638,16 @@ type Policy struct {
 	PolicyEvaluations *PolicyEvaluationConnection `json:"policyEvaluations,omitempty"`
 	StackPolicies     *StackPolicyConnection      `json:"stackPolicies,omitempty"`
 	WorkbenchPolicies *WorkbenchPolicyConnection  `json:"workbenchPolicies,omitempty"`
-	InsertedAt        *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt         *string                     `json:"updatedAt,omitempty"`
+	// how many workbenches and stacks currently match this bind policy
+	MatchCount *int64 `json:"matchCount,omitempty"`
+	// how many sampled evaluations include this policy
+	EvaluationCount *int64 `json:"evaluationCount,omitempty"`
+	// how many workbenches are currently attached to this policy
+	WorkbenchAttachmentCount *int64 `json:"workbenchAttachmentCount,omitempty"`
+	// how many stacks are currently attached to this policy
+	StackAttachmentCount *int64  `json:"stackAttachmentCount,omitempty"`
+	InsertedAt           *string `json:"insertedAt,omitempty"`
+	UpdatedAt            *string `json:"updatedAt,omitempty"`
 }
 
 // Attributes for creating or updating a project-scoped policy. Name and policy source are required when creating a policy.
@@ -7192,12 +7212,14 @@ type PrVendorSpecAttributes struct {
 
 // An instance of a preview environment template
 type PreviewEnvironmentInstance struct {
-	ID          string                      `json:"id"`
-	Service     *ServiceDeployment          `json:"service,omitempty"`
-	PullRequest *PullRequest                `json:"pullRequest,omitempty"`
-	Template    *PreviewEnvironmentTemplate `json:"template,omitempty"`
-	InsertedAt  *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt   *string                     `json:"updatedAt,omitempty"`
+	ID string `json:"id"`
+	// when this preview environment instance expires
+	PreviewExpiresAt *string                     `json:"previewExpiresAt,omitempty"`
+	Service          *ServiceDeployment          `json:"service,omitempty"`
+	PullRequest      *PullRequest                `json:"pullRequest,omitempty"`
+	Template         *PreviewEnvironmentTemplate `json:"template,omitempty"`
+	InsertedAt       *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt        *string                     `json:"updatedAt,omitempty"`
 }
 
 type PreviewEnvironmentInstanceConnection struct {
@@ -7212,9 +7234,11 @@ type PreviewEnvironmentInstanceEdge struct {
 
 // A template for generating preview environments
 type PreviewEnvironmentTemplate struct {
-	ID               string             `json:"id"`
-	Name             string             `json:"name"`
-	CommentTemplate  *string            `json:"commentTemplate,omitempty"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	CommentTemplate *string `json:"commentTemplate,omitempty"`
+	// how long preview environments should live, in seconds
+	PreviewTTL       *int64             `json:"previewTtl,omitempty"`
 	Flow             *Flow              `json:"flow,omitempty"`
 	ReferenceService *ServiceDeployment `json:"referenceService,omitempty"`
 	Template         *ServiceTemplate   `json:"template,omitempty"`
@@ -7236,6 +7260,8 @@ type PreviewEnvironmentTemplateAttributes struct {
 	Template ServiceTemplateAttributes `json:"template"`
 	// an scm connection id to use for PR preview comment generation
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// how long preview environments should live, as a kubernetes duration (e.g. 1d, 5s)
+	PreviewTTL *string `json:"previewTtl,omitempty"`
 }
 
 type PreviewEnvironmentTemplateConnection struct {
@@ -9280,13 +9306,15 @@ type StackRun struct {
 	Approval *bool `json:"approval,omitempty"`
 	// the commit message
 	Message *string `json:"message,omitempty"`
+	// the committer email of the commit that spawned this run
+	Committer *string `json:"committer,omitempty"`
 	// when this run was approved
 	ApprovedAt *string `json:"approvedAt,omitempty"`
 	// the subdirectory you want to run the stack's commands w/in
 	Workdir *string `json:"workdir,omitempty"`
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
-	// the result of the approval decision by the ai
+	// the result of the approval decision by stack policy or ai
 	ApprovalResult *StackRunApprovalResult `json:"approvalResult,omitempty"`
 	// Arbitrary variables to add to a stack run
 	Variables map[string]any `json:"variables,omitempty"`
@@ -9334,9 +9362,9 @@ type StackRun struct {
 }
 
 type StackRunApprovalResult struct {
-	// the reason for the approval decision by the ai
+	// the reason for the approval decision by stack policy or ai
 	Reason *string `json:"reason,omitempty"`
-	// the result of the approval decision by the ai
+	// the result of the approval decision by stack policy or ai
 	Result *ApprovalResult `json:"result,omitempty"`
 }
 
@@ -9380,9 +9408,11 @@ type StackSettingsAttributes struct {
 }
 
 type StackState struct {
-	ID    string                `json:"id"`
-	Plan  *string               `json:"plan,omitempty"`
-	State []*StackStateResource `json:"state,omitempty"`
+	ID   string  `json:"id"`
+	Plan *string `json:"plan,omitempty"`
+	// structured plan payload from the stack tool, e.g. terraform show -json
+	PlanJSON map[string]any        `json:"planJson,omitempty"`
+	State    []*StackStateResource `json:"state,omitempty"`
 	// an insight explaining the state of this stack state, eg the terraform plan it represents
 	Insight    *AiInsight `json:"insight,omitempty"`
 	InsertedAt *string    `json:"insertedAt,omitempty"`
@@ -9390,8 +9420,10 @@ type StackState struct {
 }
 
 type StackStateAttributes struct {
-	Plan  *string                         `json:"plan,omitempty"`
-	State []*StackStateResourceAttributes `json:"state,omitempty"`
+	Plan *string `json:"plan,omitempty"`
+	// structured plan payload from the stack tool, e.g. terraform show -json
+	PlanJSON *string                         `json:"planJson,omitempty"`
+	State    []*StackStateResourceAttributes `json:"state,omitempty"`
 }
 
 type StackStateResource struct {
@@ -10220,12 +10252,13 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings     []*PolicyBinding           `json:"writeBindings,omitempty"`
-	WorkbenchPolicies *WorkbenchPolicyConnection `json:"workbenchPolicies,omitempty"`
-	Runs              *WorkbenchJobConnection    `json:"runs,omitempty"`
-	Crons             *WorkbenchCronConnection   `json:"crons,omitempty"`
-	Prompts           *WorkbenchPromptConnection `json:"prompts,omitempty"`
-	WorkbenchSkills   *WorkbenchSkillConnection  `json:"workbenchSkills,omitempty"`
+	WriteBindings      []*PolicyBinding              `json:"writeBindings,omitempty"`
+	WorkbenchPolicies  *WorkbenchPolicyConnection    `json:"workbenchPolicies,omitempty"`
+	Runs               *WorkbenchJobConnection       `json:"runs,omitempty"`
+	Crons              *WorkbenchCronConnection      `json:"crons,omitempty"`
+	Prompts            *WorkbenchPromptConnection    `json:"prompts,omitempty"`
+	WorkbenchSkills    *WorkbenchSkillConnection     `json:"workbenchSkills,omitempty"`
+	WorkbenchKnowledge *WorkbenchKnowledgeConnection `json:"workbenchKnowledge,omitempty"`
 	// eval configuration for this workbench (at most one; null if none configured)
 	Eval        *WorkbenchEval                 `json:"eval,omitempty"`
 	EvalResults *WorkbenchEvalResultConnection `json:"evalResults,omitempty"`
@@ -11036,6 +11069,48 @@ type WorkbenchJobUsage struct {
 	OutputCost *float64 `json:"outputCost,omitempty"`
 	// total token cost for this job
 	TotalCost *float64 `json:"totalCost,omitempty"`
+}
+
+type WorkbenchKnowledge struct {
+	// the id of the saved knowledge
+	ID string `json:"id"`
+	// the saved knowledge name
+	Name *string `json:"name,omitempty"`
+	// the saved knowledge description
+	Description *string `json:"description,omitempty"`
+	// the saved knowledge contents
+	Knowledge *string `json:"knowledge,omitempty"`
+	// labels associated with this knowledge
+	Labels []*string `json:"labels,omitempty"`
+	// how many times this knowledge has been used
+	Usages *int64 `json:"usages,omitempty"`
+	// when this knowledge was last used
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
+	// the workbench this knowledge belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchKnowledgeAttributes struct {
+	// the saved knowledge name
+	Name string `json:"name"`
+	// the saved knowledge description
+	Description *string `json:"description,omitempty"`
+	// the saved knowledge contents
+	Knowledge string `json:"knowledge"`
+	// labels associated with this knowledge
+	Labels []*string `json:"labels,omitempty"`
+}
+
+type WorkbenchKnowledgeConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*WorkbenchKnowledgeEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchKnowledgeEdge struct {
+	Node   *WorkbenchKnowledge `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
 }
 
 type WorkbenchMessageAttributes struct {

@@ -103,14 +103,14 @@ func (in *PersistentVolumeClaim) Create(t *testing.T) error {
 	)
 }
 
-func (in *PersistentVolumeClaim) Delete(t *testing.T) error {
-	clientset, err := in.clientset(t)
+func (in *PersistentVolumeClaim) Delete(ctx context.Context, t *testing.T) error {
+	clientset, err := in.clientset(ctx, t)
 	if err != nil {
 		return err
 	}
 
 	return runtimerrors.IgnoreNotFound(
-		clientset.CoreV1().PersistentVolumeClaims(in.Namespace()).Delete(context.Background(), in.Name(), metav1.DeleteOptions{}),
+		clientset.CoreV1().PersistentVolumeClaims(in.Namespace()).Delete(ctx, in.Name(), metav1.DeleteOptions{}),
 	)
 }
 
@@ -118,13 +118,13 @@ func (in *PersistentVolumeClaim) Get(t *testing.T) (*corev1.PersistentVolumeClai
 	return k8s.GetPersistentVolumeClaimContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
-func (in *PersistentVolumeClaim) Exists(t *testing.T) (bool, error) {
-	clientset, err := in.clientset(t)
+func (in *PersistentVolumeClaim) Exists(ctx context.Context, t *testing.T) (bool, error) {
+	clientset, err := in.clientset(ctx, t)
 	if err != nil {
 		return false, err
 	}
 
-	_, err = clientset.CoreV1().PersistentVolumeClaims(in.Namespace()).Get(context.Background(), in.Name(), metav1.GetOptions{})
+	_, err = clientset.CoreV1().PersistentVolumeClaims(in.Namespace()).Get(ctx, in.Name(), metav1.GetOptions{})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			return false, nil

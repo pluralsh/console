@@ -9,6 +9,7 @@ import (
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scm"
 )
 
 type Controller interface {
@@ -67,6 +68,14 @@ type agentRunController struct {
 	// lastBabysitPRPollAt is when PR/SCM babysit work last ran. Queued user
 	// prompts are polled more frequently via promptPollInterval.
 	lastBabysitPRPollAt time.Time
+
+	// babysitPRURLs are the PR URLs polled via SCM for mergeability. Created
+	// PR URLs take precedence over followupPrUrl.
+	babysitPRURLs []string
+
+	// newBabysitClient, if set, constructs the SCM client used by the babysit
+	// loop. Tests inject a fake; production leaves this nil and dials the sidecar.
+	newBabysitClient func() (scm.GRPCClient, error)
 
 	// approvalPromptSent ensures the approval-unblocked prompt is only sent once.
 	approvalPromptSent bool

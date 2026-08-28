@@ -19,6 +19,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchPrompt,
     QueuedPrompt,
     WorkbenchSkill,
+    WorkbenchKnowledge,
     WorkbenchEvalResult,
     WorkbenchWebhook,
     WorkbenchChatbot,
@@ -120,6 +121,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_skills(workbench, args, _) do
     WorkbenchSkill.for_workbench(workbench.id)
     |> WorkbenchSkill.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_knowledge(workbench, args, _) do
+    WorkbenchKnowledge.for_workbench(workbench.id)
+    |> WorkbenchKnowledge.ordered()
     |> paginate(args)
   end
 
@@ -422,6 +429,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_skill(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_skill(id, user)
+
+  def update_workbench_knowledge(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_knowledge(attrs, id, user)
+
+  def delete_workbench_knowledge(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_knowledge(id, user)
 
   def create_workbench_eval(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_eval(attrs, workbench_id, user)

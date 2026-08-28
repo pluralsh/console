@@ -217,6 +217,33 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
+		It("should include maxPreviews in flow attributes", func() {
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Flow{
+				ObjectMeta: metav1.ObjectMeta{Name: flowName, Namespace: namespace},
+			}, func(p *v1alpha1.Flow) {
+				p.Spec.MaxPreviews = lo.ToPtr(int64(5))
+			})).To(Succeed())
+
+			flowFragment := &gqlclient.FlowFragment{ID: id}
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.
+				On("UpsertFlow", mock.Anything, mock.MatchedBy(func(attrs gqlclient.FlowAttributes) bool {
+					return attrs.MaxPreviews != nil && *attrs.MaxPreviews == 5
+				})).
+				Return(flowFragment, nil)
+
+			reconciler := &controller.FlowReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Process(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should successfully reconcile the resource", func() {
 			By("Delete resource")
 			Expect(common.MaybePatch(k8sClient, &v1alpha1.Flow{

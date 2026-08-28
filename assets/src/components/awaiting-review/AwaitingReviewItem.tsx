@@ -65,16 +65,23 @@ export function AwaitingReviewItem({
         />
       </Flex>
 
-      {configuration?.aiApproval?.enabled && approvalResult?.result && (
+      {approvalResult?.result && (
         <Flex
           direction="column"
           gap="xsmall"
           padding="small"
           css={{
-            backgroundImage: `linear-gradient(${theme.colors['fill-one']}, ${theme.colors['fill-one']}), linear-gradient(316deg, #E3A966 0%, #8961F4 32%, #747AF6 71%, #6D94F9 100%)`,
-            backgroundClip: 'padding-box, border-box',
-            backgroundOrigin: 'border-box',
-            border: '1px solid transparent',
+            ...(configuration?.aiApproval?.enabled
+              ? {
+                  backgroundImage: `linear-gradient(${theme.colors['fill-one']}, ${theme.colors['fill-one']}), linear-gradient(316deg, #E3A966 0%, #8961F4 32%, #747AF6 71%, #6D94F9 100%)`,
+                  backgroundClip: 'padding-box, border-box',
+                  backgroundOrigin: 'border-box',
+                  border: '1px solid transparent',
+                }
+              : {
+                  backgroundColor: theme.colors['fill-one'],
+                  border: theme.borders.default,
+                }),
             borderRadius: theme.borderRadiuses.large,
           }}
         >
@@ -85,10 +92,12 @@ export function AwaitingReviewItem({
             }}
           >
             <CaptionP $color="text-xlight">Approval decision</CaptionP>
-            <AiSparkleFilledIcon
-              color="icon-info"
-              size={13}
-            />
+            {configuration?.aiApproval?.enabled && (
+              <AiSparkleFilledIcon
+                color="icon-info"
+                size={13}
+              />
+            )}
           </StretchedFlex>
           <StackAIApprovalChip
             approvalResult={approvalResult?.result}

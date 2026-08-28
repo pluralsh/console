@@ -83,6 +83,7 @@ import {
 } from '../../tools/workbenchToolsUtils'
 import { WorkbenchesConfiguredToolMetadata } from '../../WorkbenchesConfiguredToolMetadata'
 import { WorkbenchModesForm } from '../WorkbenchPromptModeSelector/WorkbenchModesForm'
+import { KnowledgeSubStep } from './KnowledgeSubStep'
 import { PluralSkillsSubStep } from './PluralSkillsSubStep'
 import {
   useWorkbenchFormCardTabs,
@@ -294,9 +295,9 @@ export function WorkbenchSkillsConfigStep({
   setFormState,
 }: WorkbenchFormStepProps) {
   const { setTabs } = useWorkbenchFormCardTabs()
-  const [subTab, setSubTab] = useState<'git-skills' | 'plural-skills'>(
-    'plural-skills'
-  )
+  const [subTab, setSubTab] = useState<
+    'git-skills' | 'plural-skills' | 'knowledge'
+  >('plural-skills')
 
   useEffect(() => {
     setTabs(
@@ -313,17 +314,36 @@ export function WorkbenchSkillsConfigStep({
         >
           Git skills
         </CardTab>
+        <CardTab
+          active={subTab === 'knowledge'}
+          onClick={() => setSubTab('knowledge')}
+        >
+          Knowledge
+        </CardTab>
       </CardTabs>
     )
     return () => setTabs(null)
   }, [setTabs, subTab])
 
-  return subTab === 'git-skills' ? (
-    <GitSkillsSubStep
-      formState={formState}
-      setFormState={setFormState}
-    />
-  ) : (
+  if (subTab === 'git-skills') {
+    return (
+      <GitSkillsSubStep
+        formState={formState}
+        setFormState={setFormState}
+      />
+    )
+  }
+
+  if (subTab === 'knowledge') {
+    return (
+      <KnowledgeSubStep
+        formState={formState}
+        setFormState={setFormState}
+      />
+    )
+  }
+
+  return (
     <PluralSkillsSubStep
       formState={formState}
       setFormState={setFormState}
@@ -926,7 +946,6 @@ export function WorkbenchAttachToolsStep({
                       css={{ minWidth: 0, flex: 1 }}
                     >
                       <IconFrame
-                        circle
                         type="secondary"
                         icon={
                           <WorkbenchToolIcon
@@ -1008,7 +1027,7 @@ export const createFormUpdater =
 
 export const WORKBENCH_STEP_LABELS = [
   'Workbench setup',
-  'Skills configuration',
+  'Skills and knowledge',
   'Coding agent',
   'Modes & token limit',
   'Access policy',
@@ -1021,7 +1040,7 @@ type WorkbenchFormStep = {
 }
 export const workbenchFormSteps: WorkbenchFormStep[] = [
   { label: 'Workbench setup', component: WorkbenchSetupStep },
-  { label: 'Skills configuration', component: WorkbenchSkillsConfigStep },
+  { label: 'Skills and knowledge', component: WorkbenchSkillsConfigStep },
   { label: 'Coding agent', component: WorkbenchCodingAgentStep },
   {
     label: 'Modes & token limit',

@@ -5,9 +5,9 @@ defmodule Console.GraphQl.OAuthQueriesTest do
   describe "oidcLogin" do
     test "it can fetch an oauth login's details" do
       provider = insert(:oidc_provider)
-      expect(HTTPoison, :get, fn _, _ ->
+      expect(Req, :get, fn _, _ ->
         body = Jason.encode!(%{client: %{client_id: provider.client_id}, requested_scope: ["openid"]})
-        {:ok, %{status_code: 200, body: body}}
+        {:ok, %{status: 200, body: body}}
       end)
 
       {:ok, %{data: %{"oidcLogin" => result}}} = run_query("""
@@ -25,9 +25,9 @@ defmodule Console.GraphQl.OAuthQueriesTest do
   describe "oidcConsent" do
     test "it can fetch an oauth login's details" do
       provider = insert(:oidc_provider)
-      expect(HTTPoison, :get, fn _, _ ->
+      expect(Req, :get, fn _, _ ->
         body = Jason.encode!(%{client: %{client_id: provider.client_id}, requested_scope: ["openid"]})
-        {:ok, %{status_code: 200, body: body}}
+        {:ok, %{status: 200, body: body}}
       end)
 
       {:ok, %{data: %{"oidcConsent" => result}}} = run_query("""

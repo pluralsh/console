@@ -1,6 +1,11 @@
 package claude
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
+)
 
 const (
 	mcpUpdateAnalysis    = "mcp__plural__updateAgentRunAnalysis"
@@ -59,6 +64,40 @@ func appendTools(base, extra []string) []string {
 	return append(append([]string(nil), base...), extra...)
 }
 
+func externalMCPAllowTools(servers []mcp.Server) []string {
+	var tools []string
+	for _, server := range servers {
+		if server.HasAllowedTools() {
+			for _, tool := range server.AllowedTools {
+				tools = append(tools, fmt.Sprintf("mcp__%s__%s", server.Name, tool))
+			}
+			continue
+		}
+		tools = append(tools, fmt.Sprintf("mcp__%s__*", server.Name))
+	}
+	return tools
+}
+
+func agentWithMCPTools(agentJSON string, extra []string) string {
+	if len(extra) == 0 {
+		return agentJSON
+	}
+
+	payload := map[string]agentDef{}
+	if err := json.Unmarshal([]byte(agentJSON), &payload); err != nil {
+		return agentJSON
+	}
+	for name, def := range payload {
+		def.Tools = appendTools(def.Tools, extra)
+		payload[name] = def
+	}
+	out, err := json.Marshal(payload)
+	if err != nil {
+		return agentJSON
+	}
+	return string(out)
+}
+
 var (
 	analysisAgent = agentJSON("analysis", agentDef{
 		Description: "Analyze code for potential issues, vulnerabilities and improvements. Use PROACTIVELY.",
@@ -75,7 +114,7 @@ var (
 	})
 	babysitAgent = agentJSON("babysit", agentDef{
 		Description: "Autonomous agent responding to pull request feedback. Commits to the existing PR branch. Does NOT create new PRs. Use PROACTIVELY.",
-		Prompt:      "You are an autonomous coding agent. Your pull request is already open. Treat every human-authored PR comment as actionable unless it is clearly informational, and prioritize it over resuming the original task. Consider bot feedback and CI failures too, then commit scoped fixes to the existing branch.",
+		Prompt:      "You are an autonomous coding agent. Your pull request is already open. Treat every human-authored PR comment as actionable unless it is clearly informational, and prioritize it over resuming the original task. Consider bot feedback and CI failures too, then commit scoped fixes to the existing branch. Push a CI fix only when logs show a defect in this PR; do not push commits for flakes such as transient network errors, third-party outages, rate limits, or runner issues.",
 		Tools: appendTools(
 			[]string{"Read", "Write", "Edit", "MultiEdit", "Bash", "Grep", "Glob", "WebFetch"},
 			appendTools(babysitPluralMCPTools, codebaseMemoryMCPTools),

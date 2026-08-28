@@ -25,7 +25,7 @@ type MarkdownProps = {
 export const markdownSanitizeSchema: SanitizeOptions = { ...defaultSchema }
 
 export function getLastStringChild(children: any, depth = 0): any {
-  let lastChild = null
+  let lastChild: string | null = null
 
   Children.forEach(children, (child) => {
     if (typeof child === 'string') {
@@ -240,7 +240,10 @@ const MdTh = styled.th(({ theme }) => ({
 }))
 
 const MdTd = styled.td(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero-selected'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-one']
+      : theme.colors['fill-zero-selected'],
   padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   color: theme.colors['text-light'],
   height: 40,
@@ -300,8 +303,8 @@ function MarkdownLink({
   ...props
 }: {
   href?: string
-  gitUrl: string
-  mainBranch: string
+  gitUrl?: string
+  mainBranch?: string
 }) {
   // Convert local readme hrefs to full path on github
   if (gitUrl && href && !isExternalUrl(href)) {

@@ -7,6 +7,7 @@ import {
 import styled, { DefaultTheme } from 'styled-components'
 
 import { type SemanticColorKey } from '../theme/colors'
+import { lightElevatedSurface } from '../theme/lightElevatedSurface'
 
 import { type PolymorphicComponentProps } from '../types'
 
@@ -15,46 +16,48 @@ import Tooltip, { type TooltipProps } from './Tooltip'
 type Size = 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge'
 type Type = 'secondary' | 'tertiary' | 'floating'
 
-function typeToBG(theme: DefaultTheme): Record<Type, string> {
+function typeToBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: 'transparent',
     tertiary: 'transparent',
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three']
+        ? theme.colors['fill-zero']
         : theme.colors['fill-two'],
   }
 }
 
-function typeToHoverBG(theme: DefaultTheme): Record<Type, string> {
+function typeToHoverBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: theme.colors['action-input-hover'],
     tertiary: theme.colors['action-input-hover'],
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three-hover']
+        ? theme.colors['fill-zero-hover']
         : theme.colors['fill-two-hover'],
   }
 }
 
-function typeToSelectedBG(theme: DefaultTheme): Record<Type, string> {
+function typeToSelectedBG(
+  theme: DefaultTheme
+): Record<Type, string | undefined> {
   return {
     secondary: undefined,
     tertiary: undefined,
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three-selected']
+        ? theme.colors['fill-zero-selected']
         : theme.colors['fill-two-selected'],
   }
 }
 
-function typeToFocusBG(theme: DefaultTheme): Record<Type, string> {
+function typeToFocusBG(theme: DefaultTheme): Record<Type, string | undefined> {
   return {
     secondary: undefined,
     tertiary: undefined,
     floating:
       theme.mode === 'light'
-        ? theme.colors['fill-three-selected']
+        ? theme.colors['fill-zero-selected']
         : theme.colors['fill-two-selected'],
   }
 }
@@ -65,7 +68,7 @@ function typeToBorder(theme: DefaultTheme): Record<Type, string> {
       theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
     tertiary: '1px solid transparent',
     floating:
-      theme.mode === 'light' ? theme.borders['fill-two'] : theme.borders.input,
+      theme.mode === 'light' ? '1px solid transparent' : theme.borders.input,
   }
 }
 
@@ -155,7 +158,9 @@ const IconFrameSC = styled.div<{
         },
       }
     : {}),
-  ...($type === 'floating' ? { boxShadow: theme.boxShadows.slight } : {}),
+  ...($type === 'floating' && lightElevatedSurface(theme)),
+  ...($type === 'floating' &&
+    theme.mode !== 'light' && { boxShadow: theme.boxShadows.slight }),
 }))
 
 function IconFrame<E extends ElementType = 'div'>({

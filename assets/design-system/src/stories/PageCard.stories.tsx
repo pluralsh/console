@@ -3,11 +3,15 @@ import { A, Flex } from 'honorable'
 import CheckedShieldIcon from '../components/icons/CheckedShieldIcon'
 
 import { PageCard } from '../index'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Page Card',
   component: PageCard,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template() {
   return (
@@ -69,5 +73,7 @@ function Template() {
   )
 }
 
-export const Default = Template.bind({})
-Default.args = {}
+export const Default: Story = {
+  render: Template,
+  args: {},
+}

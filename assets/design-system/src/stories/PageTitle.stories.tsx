@@ -1,11 +1,15 @@
 import { Button, Div, Flex, P } from 'honorable'
 
 import PageTitle, { type PageTitleProps } from '../components/PageTitle'
+import type { Meta, StoryObj } from '@storybook/react'
 
-export default {
+const meta = {
   title: 'Page Title',
   component: PageTitle,
-}
+} satisfies Meta<any>
+
+export default meta
+type Story = StoryObj<any>
 
 function Template({ heading, ...props }: PageTitleProps) {
   return (
@@ -24,31 +28,34 @@ function Template({ heading, ...props }: PageTitleProps) {
   )
 }
 
-export const Default = Template.bind({})
-
-Default.args = {
-  heading: 'Page Title',
+export const Default: Story = {
+  render: Template,
+  args: {
+    heading: 'Page Title',
+  },
 }
 
-export const WithContent = Template.bind({})
-WithContent.args = {
-  heading: (
-    <Div>
-      <strong>Customized</strong> <em>page</em> title
-    </Div>
-  ),
-  children: (
-    <Flex justifyContent="flex-end">
-      <Flex
-        marginRight="medium"
-        alignItems="center"
-        textAlign="right"
-        body2
-        color="text-xlight"
-      >
-        Unsaved changes
+export const WithContent: Story = {
+  render: Template,
+  args: {
+    heading: (
+      <Div>
+        <strong>Customized</strong> <em>page</em> title
+      </Div>
+    ),
+    children: (
+      <Flex justifyContent="flex-end">
+        <Flex
+          marginRight="medium"
+          alignItems="center"
+          textAlign="right"
+          body2
+          color="text-xlight"
+        >
+          Unsaved changes
+        </Flex>
+        <Button>Save</Button>
       </Flex>
-      <Button>Save</Button>
-    </Flex>
-  ),
+    ),
+  },
 }

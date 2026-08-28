@@ -4,8 +4,8 @@ defmodule Console.AI.Tools.Workbench.Integration.HttpTest do
   alias Console.AI.Tools.Workbench.Integration.Http
 
   describe "error/2" do
-    test "formats TLS alert errors without leaking HTTPoison structs downstream" do
-      reason = %HTTPoison.Error{
+    test "formats TLS alert errors without leaking Req structs downstream" do
+      reason = %Req.TransportError{
         reason:
           {:tls_alert,
            {:unknown_ca,
@@ -15,11 +15,11 @@ defmodule Console.AI.Tools.Workbench.Integration.HttpTest do
       assert {:error, message} = Http.error("GitLab", reason)
       assert message =~ "GitLab request failed: TLS unknown_ca:"
       assert message =~ "certificate verify failed"
-      refute message =~ "%HTTPoison.Error"
+      refute message =~ "%Req.TransportError"
     end
 
     test "formats ordinary transport errors" do
-      assert Http.error("GitHub", %HTTPoison.Error{reason: :econnrefused}) ==
+      assert Http.error("GitHub", %Req.TransportError{reason: :econnrefused}) ==
                {:error, "GitHub request failed: econnrefused"}
     end
   end

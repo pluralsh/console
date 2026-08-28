@@ -256,7 +256,6 @@ export function WorkbenchToolsEditModal({
                             css={{ minWidth: 0, flex: 1 }}
                           >
                             <IconFrame
-                              circle
                               type="secondary"
                               icon={
                                 <WorkbenchToolIcon

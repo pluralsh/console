@@ -19,7 +19,7 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P, InlineA, Subtitle1H1 } from 'components/utils/typography/Text'
 import { useFlowsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -31,7 +31,8 @@ export const FLOW_DOCS_URL = 'https://docs.plural.sh/plural-features/flows'
 export function Flows() {
   useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
-  const [searchString, setSearchString] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchString = searchParams.get('q') ?? ''
   const debouncedSearchString = useThrottle(searchString, 200)
 
   const { data, error, loading, pageInfo, refetch, fetchNextPage } =
@@ -42,6 +43,7 @@ export function Flows() {
 
   const flows = mapExistingNodes(data?.flows)
   const hasActiveSearch = !!debouncedSearchString
+  const isSearchPending = searchString !== debouncedSearchString || loading
 
   if (!data && loading) return <LoadingIndicator />
 
@@ -61,10 +63,17 @@ export function Flows() {
         placeholder="Search flows"
         startIcon={<SearchIcon />}
         value={searchString}
-        onChange={(e) => setSearchString(e.currentTarget.value)}
+        onChange={(e) =>
+          setSearchParams(
+            { ...(e.currentTarget.value && { q: e.currentTarget.value }) },
+            { replace: true }
+          )
+        }
       />
       {error && <GqlError error={error} />}
-      {isEmpty(flows) ? (
+      {isSearchPending ? (
+        <LoadingIndicator />
+      ) : isEmpty(flows) ? (
         hasActiveSearch ? (
           <Card css={{ padding: theme.spacing.large }}>
             <EmptyState message="No flows found" />

@@ -58,6 +58,24 @@ export function getKubernetesAbsPath(clusterId: string | null | undefined) {
   return `/${KUBERNETES_ROOT_PATH}/${clusterId}`
 }
 
+export function replaceKubernetesClusterId(
+  pathname: string,
+  oldClusterId: string,
+  newClusterId: string
+): string {
+  if (!oldClusterId || !newClusterId || oldClusterId === newClusterId) {
+    return pathname
+  }
+
+  const currentBase = getKubernetesAbsPath(oldClusterId)
+
+  if (pathname === currentBase || pathname.startsWith(`${currentBase}/`)) {
+    return `${getKubernetesAbsPath(newClusterId)}${pathname.slice(currentBase.length)}`
+  }
+
+  return pathname
+}
+
 export function getWorkloadsAbsPath(clusterId: string | null | undefined) {
   return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${WORKLOADS_REL_PATH}`
 }

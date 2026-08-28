@@ -21,6 +21,7 @@ type Reconciler string
 // Note: If you add a new reconciler, please also register it in the cmd/register.go file
 const (
 	AgentRuntimePolicyReconciler         Reconciler = "agentruntimepolicy"
+	BindingPolicyReconciler              Reconciler = "bindingpolicy"
 	BootstrapTokenReconciler             Reconciler = "bootstraptoken"
 	CatalogReconciler                    Reconciler = "catalog"
 	CloudConnectionReconciler            Reconciler = "cloudconnection"
@@ -48,6 +49,7 @@ const (
 	PersonaReconciler                    Reconciler = "persona"
 	PipelineContextReconciler            Reconciler = "pipelinecontext"
 	PipelineReconciler                   Reconciler = "pipeline"
+	PolicyReconciler                     Reconciler = "policy"
 	PrAutomationReconciler               Reconciler = "prautomation"
 	PrAutomationTriggerReconciler        Reconciler = "prautomationtrigger"
 	PreviewEnvironmentTemplateReconciler Reconciler = "previewenvironmenttemplate"

@@ -1,10 +1,9 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, User}
-  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill, Codemode, Python, History, Infrastructure.PodLogs, Scratchpad}
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, MetricsLabelSearch, Logs, Traces, Plrl}
-  alias Console.AI.Tools.Workbench.Integration.Sentry.Tools, as: SentryTools
-  alias Console.AI.Workbench.{Environment, MCP}
+  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, User}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Codemode, History, Infrastructure.PodLogs, Scratchpad}
+  alias Console.AI.Tools.Workbench.Observability.Plrl
+  alias Console.AI.Workbench.{Environment, MCP, Tools}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
   require EEx
@@ -16,9 +15,9 @@ defmodule Console.AI.Workbench.Subagents.Observability do
       engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
-        callback: &callback(activity, &1),
+        callback: &callback(activity, environment, &1),
         tool_search: length(tools) > 10,
-        pre_enable: [ObservabilityResult, %Skills{} ,%Skill{}],
+        pre_enable: [ObservabilityResult | skill_knowledge_pre_enable()],
         continue_msg: "looks like we aren't done, let's continue and if you're done just call observability_result to wrap up"
       ]
     )
@@ -46,9 +45,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     core_tools(job, environment, user)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat(pod_logs_tools(job, user))
-    |> Enum.concat([
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    |> Enum.concat(skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       ObservabilityResult,
       %Codemode{tools: []},
@@ -59,7 +56,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   def core_tools(%WorkbenchJob{user: user} = job, %Environment{tools: tools}), do: core_tools(job, tools, user)
   def core_tools(%WorkbenchJob{} = job, %Environment{tools: tools}, user), do: core_tools(job, tools, user)
   def core_tools(%WorkbenchJob{} = job, tools, user) when is_list(tools) or is_map(tools) do
-    obs_tools(tools)
+    Tools.obs_tools(tools)
     |> Enum.concat(plrl_log_tools(job, user))
     |> Enum.concat(plrl_metric_tools(job))
   end
@@ -80,28 +77,6 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{metrics: true}}}}),
     do: [Plrl.Metrics, Plrl.MetricsSearch, Plrl.MetricsLabelSearch]
   defp plrl_metric_tools(_), do: []
-
-  @allowed_tools MapSet.new(~w(metrics logs traces error_tracking)a)
-
-  defp obs_tools(tools) do
-    Enum.map(tools, &elem(&1, 1))
-    |> Enum.filter(fn
-      %WorkbenchTool{tool: t, categories: [_ | _] = categories} when t != :mcp ->
-        MapSet.subset?(MapSet.new(categories), @allowed_tools)
-      _ -> false
-    end)
-    |> Enum.flat_map(fn
-      %WorkbenchTool{tool: :sentry} = tool -> SentryTools.expand(tool)
-      %WorkbenchTool{categories: [_ | _] = categories} = tool ->
-        Enum.flat_map(categories, fn c -> to_tool(tool, c) end)
-      _ -> []
-    end)
-  end
-
-  defp to_tool(%WorkbenchTool{} = tool, :metrics), do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}, %MetricsLabelSearch{tool: tool}]
-  defp to_tool(%WorkbenchTool{} = tool, :logs), do: [%Logs{tool: tool}]
-  defp to_tool(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
-  defp to_tool(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns])
 end

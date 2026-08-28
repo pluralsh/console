@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Environment do
   alias Console.{AI.ModelSelection, Deployments.Settings}
   alias Console.AI.Tool
   alias Console.Deployments.Workbenches
-  alias Console.AI.Workbench.{Skill, Skills.Builtins, Heartbeat}
+  alias Console.AI.Workbench.{Tools, Skill, Skills.Builtins, Heartbeat}
 
   @type t :: %__MODULE__{
     user: User.t,
@@ -18,14 +18,15 @@ defmodule Console.AI.Workbench.Environment do
     functions: [WorkbenchTool.t],
     skills: %{binary => Skill.t},
     activities: [WorkbenchJobActivity.t],
-    policies: [Tool.Policy.t]
+    policies: [Tool.Policy.t],
+    tool_index: %{binary => {struct, WorkbenchTool.t}}
   }
 
   defmodule Actions, do: defstruct [:functions, :kubernetes]
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :user, functions: [], activities: [], policies: [], verifiable: false]
+  defstruct [:job, :tools, :skills, :user, functions: [], activities: [], policies: [], verifiable: false, tool_index: %{}]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     {functions, tools} = Enum.split_with(to_l(tools), fn
@@ -34,7 +35,7 @@ defmodule Console.AI.Workbench.Environment do
       _ -> false
     end)
 
-    %__MODULE__{
+    env = %__MODULE__{
       user: job.user,
       job: job,
       tools: to_map(tools),
@@ -42,48 +43,43 @@ defmodule Console.AI.Workbench.Environment do
       skills: to_map(skills),
       policies: policies(job)
     }
-    |> save()
+
+    index = Tools.index(env)
+    save(%{env | tool_index: index})
   end
 
-  def engine_opts(%__MODULE__{job: job, policies: policies}) do
-    settings = Settings.cached()
-
-    case ModelSelection.tool_model(job, settings) do
-      %{model: model, provider: provider} ->
-        price_sheet = ModelSelection.price_sheet(settings, provider, model)
-
-        [
-          model: model,
-          provider: provider,
-          policies: policies,
-          usage_callback: &Heartbeat.usage_callback(job, provider, model, price_sheet, &1)
-        ]
-
-      _ ->
-        [
-          policies: policies,
-          usage_callback: &Heartbeat.usage_callback(job, &1)
-        ]
-    end
-  end
+  def engine_opts(%__MODULE__{job: job, policies: policies}),
+    do: Keyword.merge(engine_opts(job), [policies: policies])
 
   def engine_opts(%WorkbenchJob{} = job) do
-    settings = Settings.cached()
-
-    case ModelSelection.tool_model(job, settings) do
-      %{model: model, provider: provider} ->
-        price_sheet = ModelSelection.price_sheet(settings, provider, model)
-
-        [
-          model: model,
-          provider: provider,
-          usage_callback: &Heartbeat.usage_callback(job, provider, model, price_sheet, &1)
-        ]
-
-      _ ->
-        [usage_callback: &Heartbeat.usage_callback(job, &1)]
-    end
+    model_opts(job, ModelSelection.tool_model(job, Settings.cached()))
   end
+
+  @doc """
+  Records tokens reported by a coding-agent run against this workbench job.
+
+  Prices against the agent runtime model when it is known, otherwise records
+  the raw token counts without cost backfill.
+  """
+  def runtime_usage_callback(%WorkbenchJob{} = job, run, usage) do
+    usage_callback(job, ModelSelection.runtime_model(run) || ModelSelection.runtime_model(job), usage)
+  end
+
+  def usage_callback(%WorkbenchJob{} = job, %{model: model, provider: provider}, usage) do
+    price_sheet = ModelSelection.price_sheet(Settings.cached(), provider, model)
+    Heartbeat.usage_callback(job, provider, model, price_sheet, usage)
+  end
+  def usage_callback(%WorkbenchJob{} = job, _, usage),
+    do: Heartbeat.usage_callback(job, usage)
+
+  defp model_opts(job, %{model: model, provider: provider} = info) do
+    [
+      model: model,
+      provider: provider,
+      usage_callback: &usage_callback(job, info, &1)
+    ]
+  end
+  defp model_opts(job, _), do: [usage_callback: &usage_callback(job, nil, &1)]
 
   defp policies(%WorkbenchJob{workbench_id: id}) when is_binary(id) do
     Workbenches.get_workbench_policies(id)

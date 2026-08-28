@@ -126,14 +126,14 @@ func (in *Pod) Create(t *testing.T) error {
 	)
 }
 
-func (in *Pod) Delete(t *testing.T) error {
-	clientset, err := in.clientset(t)
+func (in *Pod) Delete(ctx context.Context, t *testing.T) error {
+	clientset, err := in.clientset(ctx, t)
 	if err != nil {
 		return err
 	}
 
 	return runtimerrors.IgnoreNotFound(
-		clientset.CoreV1().Pods(in.Namespace()).Delete(context.Background(), in.Name(), metav1.DeleteOptions{}),
+		clientset.CoreV1().Pods(in.Namespace()).Delete(ctx, in.Name(), metav1.DeleteOptions{}),
 	)
 }
 
@@ -141,8 +141,8 @@ func (in *Pod) Get(t *testing.T) (*corev1.Pod, error) {
 	return k8s.GetPodContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
 }
 
-func (in *Pod) Exists(t *testing.T) (bool, error) {
-	_, err := k8s.GetPodContextE(t, t.Context(), in.toKubectlOptions(), in.Name())
+func (in *Pod) Exists(ctx context.Context, t *testing.T) (bool, error) {
+	_, err := k8s.GetPodContextE(t, ctx, in.toKubectlOptions(), in.Name())
 	if err != nil {
 		return false, runtimerrors.IgnoreNotFound(err)
 	}

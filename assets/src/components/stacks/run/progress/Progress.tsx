@@ -42,6 +42,7 @@ export default function StackRunProgress(): ReactNode {
         flexGrow={1}
         overflowY="auto"
         maxHeight="100%"
+        minHeight={0}
       >
         {sorted?.map((s) => (
           <Step

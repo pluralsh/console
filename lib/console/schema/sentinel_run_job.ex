@@ -11,6 +11,8 @@ defmodule Console.Schema.SentinelRunJob do
   defenum Status, pending: 0, running: 1, success: 2, failed: 3
   defenum Format, plaintext: 0, junit: 1
 
+  defguard is_terminal(status) when status in ~w(success failed)a
+
   schema "sentinel_run_jobs" do
     field :check,  :string
     field :status, Status, default: :pending

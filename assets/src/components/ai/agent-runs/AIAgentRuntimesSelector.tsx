@@ -1,4 +1,5 @@
 import {
+  Chip,
   CloseIcon,
   ListBoxFooterPlus,
   ListBoxItem,
@@ -56,16 +57,21 @@ export function AIAgentRuntimesSelector({
     if (data && !selectedRuntimeId) setRuntimeToDefault()
   }, [data, selectedRuntimeId])
   return (
-    <div css={{ width: type === 'standard' ? 240 : undefined, ...outerStyles }}>
+    <div css={{ width: type === 'standard' ? 280 : undefined, ...outerStyles }}>
       <Select
         transparent
         isOpen={isOpen}
         onOpenChange={setIsOpen}
-        width={type === 'standard' ? 240 : 180}
+        width={type === 'standard' ? 280 : 240}
         placement="left"
         label={isLoading ? <RectangleSkeleton /> : placeholder}
         leftContent={
           isLoading || !selectedRuntime ? undefined : <SelectedIcon fullColor />
+        }
+        rightContent={
+          type === 'standard' ? (
+            <AgentRuntimeModelChip model={selectedRuntime?.model?.model} />
+          ) : undefined
         }
         selectedKey={selectedRuntimeId ?? ''}
         onSelectionChange={(key) => setSelectedRuntimeId(key ? `${key}` : null)}
@@ -116,17 +122,33 @@ export function AIAgentRuntimesSelector({
         }
         {...props}
       >
-        {runtimes.map(({ id, name, type }) => {
-          const Icon = runtimeToIcon[type]
+        {runtimes.map((runtime) => {
+          const Icon = runtimeToIcon[runtime.type]
           return (
             <ListBoxItem
-              key={id}
-              label={name}
+              key={runtime.id}
+              label={runtime.name}
               leftContent={<Icon fullColor />}
+              rightContent={
+                <AgentRuntimeModelChip model={runtime.model?.model} />
+              }
             />
           )
         })}
       </Select>
     </div>
+  )
+}
+
+function AgentRuntimeModelChip({ model }: { model?: Nullable<string> }) {
+  if (!model) return null
+
+  return (
+    <Chip
+      size="small"
+      severity="neutral"
+    >
+      {model}
+    </Chip>
   )
 }

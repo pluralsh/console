@@ -193,16 +193,18 @@ type Project struct {
 }
 
 type MCPInput struct {
-	Name          string
-	Type          string // Transport type: "stdio", "sse" or "http"
-	URL           string
-	Command       string
-	Args          []string
-	Env           map[string]string
-	Headers       map[string]string // HTTP request headers, used for "http" transport
-	EnabledTools  []string
-	DisabledTools []string
-	TrustPolicy   string // e.g. "always" to auto-approve tool calls in exec mode
+	Name           string
+	Type           string // Transport type: "stdio", "sse" or "http"
+	URL            string
+	Command        string
+	Args           []string
+	Env            map[string]string
+	Headers        map[string]string // HTTP request headers, used for "http" transport
+	HTTPHeaders    map[string]string // Codex streamable HTTP headers (`http_headers`)
+	EnvHTTPHeaders map[string]string // Header name -> env var name (`env_http_headers`)
+	EnabledTools   []string
+	DisabledTools  []string
+	TrustPolicy    string // e.g. "always" to auto-approve tool calls in exec mode
 }
 
 // ModelProviderInput is the user-facing input for registering a custom model provider.
@@ -254,15 +256,17 @@ type Profile struct {
 }
 
 type MCPServer struct {
-	Type          string            `toml:"type,omitempty"`    // Transport type: "stdio", "sse" or "http"
-	URL           string            `toml:"url,omitempty"`     // For remote MCP (sse/http)
-	Command       string            `toml:"command,omitempty"` // For local MCP (stdio)
-	Args          []string          `toml:"args,omitempty"`
-	Env           map[string]string `toml:"env,omitempty"`
-	Headers       map[string]string `toml:"headers,omitempty"` // HTTP request headers for "http" transport
-	EnabledTools  []string          `toml:"enabled_tools,omitempty"`
-	DisabledTools []string          `toml:"disabled_tools,omitempty"`
-	TrustPolicy   string            `toml:"trust_policy,omitempty"` // e.g. "always" to auto-approve tool calls in exec mode
+	Type           string            `toml:"type,omitempty"`    // Transport type: "stdio", "sse" or "http"
+	URL            string            `toml:"url,omitempty"`     // For remote MCP (sse/http)
+	Command        string            `toml:"command,omitempty"` // For local MCP (stdio)
+	Args           []string          `toml:"args,omitempty"`
+	Env            map[string]string `toml:"env,omitempty"`
+	Headers        map[string]string `toml:"headers,omitempty"`          // HTTP request headers for "http" transport
+	HTTPHeaders    map[string]string `toml:"http_headers,omitempty"`     // Codex streamable HTTP headers
+	EnvHTTPHeaders map[string]string `toml:"env_http_headers,omitempty"` // Header values read from the process environment
+	EnabledTools   []string          `toml:"enabled_tools,omitempty"`
+	DisabledTools  []string          `toml:"disabled_tools,omitempty"`
+	TrustPolicy    string            `toml:"trust_policy,omitempty"` // e.g. "always" to auto-approve tool calls in exec mode
 }
 
 type CodexConfig struct {

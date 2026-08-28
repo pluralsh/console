@@ -124,8 +124,17 @@ defmodule Console.Deployments.Git.Cmd do
   end
   defp coerce_head(_), do: []
 
-  def msg(%GitRepository{} = repo), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B"])
-  def msg(%GitRepository{} = repo, sha), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B", "#{sha}"])
+  def msg(%GitRepository{} = repo), do: commit_info(repo, [])
+  def msg(%GitRepository{} = repo, sha), do: commit_info(repo, ["#{sha}"])
+
+  defp commit_info(repo, extra) do
+    case git(repo, "--no-pager", ["log", "-n", "1", "--format=%B%x00%ce" | extra]) do
+      {:ok, res} ->
+        [message, email] = String.split(res, <<0>>, parts: 2)
+        {:ok, String.trim(message), String.trim(email)}
+      err -> err
+    end
+  end
 
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
     with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),

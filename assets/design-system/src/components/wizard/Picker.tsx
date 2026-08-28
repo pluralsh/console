@@ -57,10 +57,10 @@ type PickerProps = {
 }
 
 function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
-  const { limit } = useContext(WizardContext)
+  const { limit } = useContext(WizardContext)!
   const size = useWindowSize()
   const { onSelect, selected, selectedCount } = usePicker()
-  const [search, setSearch] = useState<string>(undefined)
+  const [search, setSearch] = useState<string | undefined>(undefined)
   const [scrollable, setScrollable] = useState(false)
   const scrollRef = createRef<HTMLDivElement>()
   const isScrollbarVisible = (el: HTMLDivElement) =>
@@ -68,7 +68,7 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
   const filtered = useMemo(
     () =>
       items.filter((item) =>
-        search ? item.label.toLowerCase().includes(search) : true
+        search ? item.label?.toLowerCase().includes(search) : true
       ),
     [items, search]
   )
@@ -130,7 +130,7 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
           {filtered.map((item) => (
             <RepositoryChip
               key={item.key}
-              label={item.label}
+              label={item.label ?? ''}
               imageUrl={item.imageUrl}
               icon={item.Icon && <item.Icon />}
               onClick={() => select(item)}
@@ -145,7 +145,7 @@ function PickerUnstyled({ items, ...props }: PickerProps): JSX.Element {
           ))}
         </div>
       )}
-      {filtered.length === 0 && search?.length > 0 && (
+      {filtered.length === 0 && (search?.length ?? 0) > 0 && (
         <div className="empty">
           <span className="empty-message">
             No applications found for &quot;{search}&quot;.

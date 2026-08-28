@@ -2,7 +2,9 @@ import { ResponsiveLine, ResponsiveLineCanvas } from '@nivo/line'
 import {
   Button,
   Card,
+  CheckIcon,
   Code,
+  CopyIcon,
   DiffMethod,
   DiffViewer,
   Flex,
@@ -11,6 +13,7 @@ import {
   IconProps,
   Modal,
   NotebookIcon,
+  useCopyText,
   WrapWithIf,
 } from '@pluralsh/design-system'
 import {
@@ -27,7 +30,7 @@ import {
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobLogsToolQuery,
   useWorkbenchJobMetricsToolQuery,
@@ -46,7 +49,7 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
-import { toDateOrUndef } from 'utils/datetime'
+import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
 
@@ -80,34 +83,89 @@ export function MemoActivityIcon({
 const EXPANDABLE_PROMPT_LENGTH = 400
 export function ExpandableUserPrompt({
   prompt,
+  timestamp,
   ...props
-}: { prompt: Nullable<string> } & ComponentPropsWithRef<typeof PromptCardSC>) {
+}: {
+  prompt: Nullable<string>
+  timestamp?: Nullable<string>
+} & ComponentPropsWithRef<typeof PromptWrapperSC>) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showActions, setShowActions] = useState(false)
   if (!prompt) return null
   const isExpandable = prompt.length > EXPANDABLE_PROMPT_LENGTH
 
   return (
-    <PromptCardSC
-      $isExpanded={isExpandable && isExpanded}
+    <PromptWrapperSC
       {...props}
+      onMouseEnter={() => setShowActions(true)}
+      onMouseLeave={() => setShowActions(false)}
     >
-      <SimplifiedMarkdown
-        text={
-          !isExpandable || isExpanded
-            ? prompt
-            : truncateKeepingChips(prompt, EXPANDABLE_PROMPT_LENGTH)
+      <PromptCardSC $isExpanded={isExpandable && isExpanded}>
+        <SimplifiedMarkdown
+          text={
+            !isExpandable || isExpanded
+              ? prompt
+              : truncateKeepingChips(prompt, EXPANDABLE_PROMPT_LENGTH)
+          }
+        />
+        {isExpandable && (
+          <BasicTextButton
+            type="button"
+            onClick={() => setIsExpanded((v) => !v)}
+            css={{ width: '100%', textAlign: 'right' }}
+          >
+            {isExpanded ? 'view less' : 'view more'}
+          </BasicTextButton>
+        )}
+      </PromptCardSC>
+      <UserPromptActions
+        content={prompt}
+        timestamp={timestamp}
+        show={showActions}
+      />
+    </PromptWrapperSC>
+  )
+}
+
+function UserPromptActions({
+  content,
+  timestamp,
+  show,
+}: {
+  content: string
+  timestamp?: Nullable<string>
+  show: boolean
+}) {
+  const { copied, handleCopy } = useCopyText(content, 2000)
+
+  return (
+    <PromptActionsSC
+      onClick={(e) => e.stopPropagation()}
+      $show={show}
+    >
+      {timestamp && (
+        <CaptionP $color="text-long-form">
+          {formatDateTime(timestamp, 'h:mmA')}
+        </CaptionP>
+      )}
+      <IconFrame
+        clickable
+        as="div"
+        tooltip="Copy to clipboard"
+        type="tertiary"
+        onClick={(e) => {
+          e.stopPropagation()
+          handleCopy()
+        }}
+        icon={
+          copied ? (
+            <CheckIcon color="icon-success" />
+          ) : (
+            <CopyIcon color="icon-xlight" />
+          )
         }
       />
-      {isExpandable && (
-        <BasicTextButton
-          type="button"
-          onClick={() => setIsExpanded((v) => !v)}
-          css={{ width: '100%', textAlign: 'right' }}
-        >
-          {isExpanded ? 'view less' : 'view more'}
-        </BasicTextButton>
-      )}
-    </PromptCardSC>
+    </PromptActionsSC>
   )
 }
 
@@ -514,6 +572,28 @@ const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
   background: $color,
 }))
 
+const PromptWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-end',
+  width: '100%',
+  marginTop: theme.spacing.small,
+  marginBottom: theme.spacing.small,
+}))
+
+const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.xxsmall,
+  paddingTop: 6,
+  width: '100%',
+  opacity: $show ? 1 : 0,
+  transition: '0.3s opacity ease',
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
+}))
+
 const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
   ({ theme, $isExpanded }) => ({
     padding: theme.spacing.medium,
@@ -521,9 +601,6 @@ const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
     maxWidth: '100%',
     overflow: 'auto',
     wordBreak: 'break-word',
-    marginLeft: 'auto',
-    marginTop: theme.spacing.small,
-    marginBottom: theme.spacing.small,
     border: $isExpanded ? 'none' : undefined,
     [`& ${Code}`]: {
       backgroundColor: theme.colors['fill-two'],

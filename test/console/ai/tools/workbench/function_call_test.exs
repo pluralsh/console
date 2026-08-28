@@ -3,6 +3,7 @@ defmodule Console.AI.Tools.Workbench.FunctionCallTest do
   use Mimic
 
   alias CloudQuery.Client
+  alias Console.AI.Tool
   alias Console.AI.Tools.Workbench.FunctionCall
   alias Console.Schema.WorkbenchJobActivity
   alias Toolquery.{InvokeLambdaInput, InvokeLambdaOutput}
@@ -60,6 +61,26 @@ defmodule Console.AI.Tools.Workbench.FunctionCallTest do
       assert activity.result.function_call.input == input
     end
 
+    test "propagates policy approval to the function activity" do
+      reject(&Client.connect/0)
+      reject(&Stub.invoke_lambda/3)
+
+      %{job: job, tool: tool} = function_fixture(approval: true)
+      approval = %Tool.Approval{reason: "approved by policy"}
+
+      assert {:ok, %WorkbenchJobActivity{status: :needs_approval, type: :function} = activity} =
+               FunctionCall.invoke(%FunctionCall{
+                 tool: tool,
+                 job: job,
+                 input: %{"deployment" => "api"},
+                 explanation: "Scale the api deployment.",
+                 approval: approval
+               })
+
+      assert activity.result.auto_approve
+      assert activity.result.approval_reason == "approved by policy"
+    end
+
     test "invokes grpc immediately when approval is not required" do
       %{job: job, tool: tool} = function_fixture()
       input = %{"deployment" => "api"}
@@ -111,6 +132,12 @@ defmodule Console.AI.Tools.Workbench.FunctionCallTest do
             }
           }
         )
+
+      expect(Req, :request, fn opts ->
+        assert opts[:method] == :get
+        assert opts[:url] == "https://example.com"
+        {:ok, %Req.Response{status: 200, body: "<!doctype html><html><body><h1>Example Domain</h1></body></html>"}}
+      end)
 
       assert {:ok, %WorkbenchJobActivity{status: :successful, type: :function} = activity} =
                FunctionCall.invoke(%FunctionCall{

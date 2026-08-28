@@ -45,7 +45,7 @@ export function PanZoomWrapper({
         Math.max(scale - e.deltaY * zoomSpeed, minZoom),
         maxZoom
       )
-      const { left, top } = containerRef.current.getBoundingClientRect()
+      const { left, top } = container.getBoundingClientRect()
       const mouseX = e.clientX - left
       const mouseY = e.clientY - top
       const scaleChange = newScale / scale

@@ -1,0 +1,215 @@
+fragment PolicyTiny on Policy {
+  id
+  name
+  type
+  description
+  matchCount
+  project {
+    ...ProjectTiny
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment Policy on Policy {
+  ...PolicyTiny
+  policy
+  evaluationCount
+  workbenchAttachmentCount
+  stackAttachmentCount
+}
+
+query Policies(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+  $projectId: ID
+  $q: String
+) {
+  policies(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    projectId: $projectId
+    q: $q
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PolicyTiny
+      }
+    }
+  }
+}
+
+query Policy($id: ID, $name: String) {
+  policy(id: $id, name: $name) {
+    ...Policy
+  }
+}
+
+query PolicyWorkbenchAttachments($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    workbenchPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          matches {
+            regexes
+          }
+          workbench {
+            id
+            name
+            description
+          }
+          updatedAt
+        }
+      }
+    }
+  }
+}
+
+query PolicyStackAttachments($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    stackPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          stack {
+            id
+            name
+            type
+          }
+          updatedAt
+        }
+      }
+    }
+  }
+}
+
+fragment PolicyEvaluation on PolicyEvaluation {
+  id
+  policyIds
+  input
+  output
+  insertedAt
+  updatedAt
+}
+
+query PolicyEvaluations($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    policyEvaluations(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyEvaluation
+        }
+      }
+    }
+  }
+}
+
+mutation CreatePolicy($attributes: PolicyAttributes!) {
+  createPolicy(attributes: $attributes) {
+    ...PolicyTiny
+  }
+}
+
+mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
+  updatePolicy(id: $id, attributes: $attributes) {
+    ...Policy
+  }
+}
+
+query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+  evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+}
+
+mutation DeletePolicy($id: ID!) {
+  deletePolicy(id: $id) {
+    ...PolicyTiny
+  }
+}
+
+fragment BindingPolicyTiny on BindingPolicy {
+  id
+  type
+  insertedAt
+  updatedAt
+  policy {
+    ...PolicyTiny
+  }
+  bindPolicy {
+    ...PolicyTiny
+  }
+}
+
+query BindingPolicies(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  bindingPolicies(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...BindingPolicyTiny
+      }
+    }
+  }
+}
+
+mutation DeleteBindingPolicy($id: ID!) {
+  deleteBindingPolicy(id: $id) {
+    ...BindingPolicyTiny
+  }
+}
+
+fragment BindingPolicy on BindingPolicy {
+  ...BindingPolicyTiny
+  interval
+  matches {
+    workbench {
+      regexes
+    }
+  }
+}
+
+query BindingPolicy($id: ID!) {
+  bindingPolicy(id: $id) {
+    ...BindingPolicy
+  }
+}
+
+mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
+  createBindingPolicy(attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}
+
+mutation UpdateBindingPolicy(
+  $id: ID!
+  $attributes: BindingPolicyUpdateAttributes!
+) {
+  updateBindingPolicy(id: $id, attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}

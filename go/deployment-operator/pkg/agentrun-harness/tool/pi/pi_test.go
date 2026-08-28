@@ -6,8 +6,30 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
+
+func TestAddExternalMCPServers(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
+
+	servers := map[string]any{}
+	if err := addExternalMCPServers(servers); err != nil {
+		t.Fatalf("addExternalMCPServers() error = %v", err)
+	}
+	linear := servers["linear"].(map[string]any)
+	if linear["url"] != "https://mcp.linear.app/mcp" {
+		t.Fatalf("url = %v", linear["url"])
+	}
+	headers := linear["headers"].(map[string]string)
+	if headers["Authorization"] != "Bearer secret" {
+		t.Fatalf("headers = %#v", headers)
+	}
+	directTools := linear["directTools"].([]string)
+	if len(directTools) != 1 || directTools[0] != "list_issues" {
+		t.Fatalf("directTools = %#v", directTools)
+	}
+}
 
 func TestArgsIncludesJSONModeSessionAndMCPConfig(t *testing.T) {
 	tool := &Pi{
@@ -27,6 +49,27 @@ func TestArgsIncludesJSONModeSessionAndMCPConfig(t *testing.T) {
 		"write a test",
 	}
 	if got := tool.args("write a test", "session-1"); !reflect.DeepEqual(got, want) {
+		t.Fatalf("args = %#v, want %#v", got, want)
+	}
+}
+
+func TestArgsWithProxyUsesPluralProvider(t *testing.T) {
+	tool := &Pi{
+		DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{WorkDir: "/work"}},
+		model:       "openai/gpt-5.4",
+		provider:    proxyProviderKey,
+	}
+	want := []string{
+		"--mode", "json",
+		"--approve",
+		"--provider", proxyProviderKey,
+		"--model", "openai/gpt-5.4",
+		"--session-dir", "/work/.pi/agent/sessions",
+		"--extension", piMCPExtensionPath,
+		"--mcp-config", "/work/.pi/agent/mcp.json",
+		"write a task",
+	}
+	if got := tool.args("write a task", ""); !reflect.DeepEqual(got, want) {
 		t.Fatalf("args = %#v, want %#v", got, want)
 	}
 }

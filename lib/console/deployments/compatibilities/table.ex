@@ -90,7 +90,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   end
 
   defp fetch_addons(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url, [], proxy_config()),
+    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(url, [decode_body: false, retry: false] ++ Console.Utils.HTTP.req_options(proxy_config())),
          {:ok, %{"addons" => addons}} <- YamlElixir.read_from_string(body),
       do: addons
   end

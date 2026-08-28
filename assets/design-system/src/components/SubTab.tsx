@@ -91,8 +91,8 @@ function SubTab({
     <SubTabBase
       ref={ref}
       $parentFillLevel={parentFillLevel}
-      $active={active}
-      $disabled={disabled}
+      $active={!!active}
+      $disabled={!!disabled}
       $size={size}
       {...props}
     >

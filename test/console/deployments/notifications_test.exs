@@ -118,7 +118,7 @@ defmodule Console.Deployments.NotificationsTest do
     test "it can deliver a service.update event" do
       service = insert(:service)
       sink = insert(:notification_sink, type: :slack)
-      expect(HTTPoison, :post, fn "https://example.com", res, _ -> {:ok, res} end)
+      expect(Req, :post, fn "https://example.com", opts -> {:ok, opts[:body]} end)
 
       {:ok, res} = Notifications.deliver(
         "service.update",

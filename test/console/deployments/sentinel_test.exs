@@ -99,6 +99,7 @@ defmodule Console.Deployments.SentinelTest do
       assert length(run.checks) == 1
 
       assert refetch(sentinel).last_run_at
+      assert_receive {:event, %PubSub.SentinelRunCreated{item: ^run}}
     end
 
     test "it can run a sentinel with a crontab" do
@@ -204,6 +205,8 @@ defmodule Console.Deployments.SentinelTest do
 
       assert updated.status == :success
       assert updated.id == job.id
+
+      assert_receive {:event, %PubSub.SentinelRunJobUpdated{item: ^updated}}
 
       {:error, _} = Sentinels.update_sentinel_job(%{status: :success}, job.id, insert(:cluster))
     end

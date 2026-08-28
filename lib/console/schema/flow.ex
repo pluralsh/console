@@ -16,6 +16,8 @@ defmodule Console.Schema.Flow do
     field :icon,         :string
     field :repositories, {:array, :string}
     field :metadata,     :map
+    field :max_previews, :integer, default: 10
+
 
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
@@ -70,7 +72,7 @@ defmodule Console.Schema.Flow do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name description icon repositories project_id agent_runtime_id metadata)a)
+    |> cast(attrs, ~w(name description icon repositories project_id agent_runtime_id metadata max_previews)a)
     |> validate_length(:name, max: 255)
     |> cast_assoc(:server_associations)
     |> cast_assoc(:read_bindings)
@@ -83,6 +85,7 @@ defmodule Console.Schema.Flow do
     |> foreign_key_constraint(:preview_environment_instances, name: :preview_environment, match: :prefix, message: "Cannot delete as there are preview environments using this flow still deployed")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
+    |> validate_number(:max_previews, greater_than: 0, less_than_or_equal_to: 25)
     |> validate_required([:name, :project_id])
   end
 

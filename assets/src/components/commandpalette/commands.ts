@@ -454,9 +454,11 @@ export function useCommands({
 export function useHistory({
   filter,
   component,
+  skip,
 }: {
   filter: string
   component?: (thread: ChatThreadTinyFragment) => ReactElement
+  skip?: boolean
 }): {
   loading: boolean
   history: Command[]
@@ -472,6 +474,7 @@ export function useHistory({
       queryHook: useChatThreadsQuery,
       keyPath: ['chatThreads'],
       pageSize: 50,
+      skip,
     },
     { q: isEmpty(throttledFilter) ? undefined : throttledFilter }
   )

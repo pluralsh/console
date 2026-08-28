@@ -19,6 +19,7 @@ type AppIconProps = {
   spacing?: AppIconSpacing
   hue?: AppIconHue
   clickable?: boolean
+  rounded?: boolean
   url?: Nullable<string>
   icon?: ReactElement<any>
   alt?: Nullable<string>
@@ -85,7 +86,7 @@ export function toInitials(name: string) {
     .map((n) => n.charAt(0).toUpperCase())
 
   if (initials.length > 2) {
-    initials = [initials[0], last(initials)]
+    initials = [initials[0], last(initials) ?? '']
   }
 
   return initials.join('')
@@ -97,22 +98,33 @@ const AppIconSC = styled.div<{
   $hasBorder?: boolean
   $boxSize?: number
   $clickable?: boolean
-}>(({ theme, $color, $borderColor, $hasBorder, $boxSize, $clickable }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: theme.colors[$color],
-  borderRadius: theme.borderRadiuses.medium,
-  border: $hasBorder ? theme.borders.default : 'none',
-  borderColor: theme.colors[$borderColor],
-  width: $boxSize,
-  height: $boxSize,
-  minWidth: $boxSize,
-  minHeight: $boxSize,
-  cursor: $clickable ? 'pointer' : 'auto',
-  overflow: 'hidden',
-  _hover: $clickable ? { backgroundColor: $borderColor } : null,
-}))
+  $rounded?: boolean
+}>(
+  ({
+    theme,
+    $color,
+    $borderColor,
+    $hasBorder,
+    $boxSize,
+    $clickable,
+    $rounded,
+  }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: $color ? theme.colors[$color] : undefined,
+    borderRadius: $rounded ? '50%' : theme.borderRadiuses.medium,
+    border: $hasBorder ? theme.borders.default : 'none',
+    borderColor: $borderColor ? theme.colors[$borderColor] : undefined,
+    width: $boxSize,
+    height: $boxSize,
+    minWidth: $boxSize,
+    minHeight: $boxSize,
+    cursor: $clickable ? 'pointer' : 'auto',
+    overflow: 'hidden',
+    _hover: $clickable ? { backgroundColor: $borderColor } : undefined,
+  })
+)
 
 const InitialsSC = styled.div<{
   $size: AppIconSize
@@ -140,8 +152,9 @@ function AppIcon({
   spacing = 'padding',
   hue,
   clickable = false,
+  rounded = false,
   url,
-  icon = null,
+  icon,
   alt,
   name,
   initials,
@@ -175,13 +188,14 @@ function AppIcon({
       $hasBorder={hasBorder}
       $boxSize={boxSize}
       $clickable={clickable}
-      onClick={clickable ? onClose : null}
+      $rounded={rounded}
+      onClick={clickable ? onClose : undefined}
       {...props}
     >
       {url ? (
         <ImgSC
           src={url}
-          alt={alt}
+          alt={alt ?? undefined}
           $iconWidth={iconWidth}
         />
       ) : (

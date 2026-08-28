@@ -1,5 +1,12 @@
 import { expect } from 'vitest'
-import { parseJunit, TestSuites, TestCase, TestSuite } from './junitParse'
+import {
+  getTestStats,
+  getTestcaseOutcome,
+  parseJunit,
+  TestSuites,
+  TestCase,
+  TestSuite,
+} from './junitParse'
 
 // Helper to access testcases with empty array fallback
 const getTestCases = (suite: TestSuite): TestCase[] => suite.testcase ?? []
@@ -578,6 +585,116 @@ describe('junitParse', () => {
         expect(propsTest.properties).toHaveLength(2)
         expect(propsTest.properties![0].name).toBe('priority')
         expect(propsTest.properties![0].value).toBe('high')
+      })
+    })
+
+    describe('gotestsum package-level failures', () => {
+      // gotestsum writes compile/import/TestMain failures as a synthetic TestMain
+      // testcase while leaving the suite attributes at tests="0" failures="0".
+      // See gotest.tools/gotestsum internal/junitxml/report.go packageTestCases.
+      const gotestsumXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <testsuites name="sentinel" tests="2" failures="1" errors="0" time="1.5">
+          <testsuite tests="0" failures="0" time="0.001000" name="github.com/example/user-tests" timestamp="2026-08-20T00:00:00Z">
+            <properties>
+              <property name="go.version" value="go1.25.5"></property>
+            </properties>
+            <testcase classname="" name="TestMain" time="0.000000">
+              <failure message="Failed" type="">user-tests/foo_test.go:3:8: no required module provides package github.com/missing/dep
+FAIL&#x9;github.com/example/user-tests [setup failed]
+</failure>
+            </testcase>
+          </testsuite>
+          <testsuite tests="2" failures="0" time="1.200000" name="github.com/example/terratest">
+            <testcase classname="terratest" name="TestHealthy" time="0.800000" />
+            <testcase classname="terratest" name="TestReady" time="0.400000" />
+          </testsuite>
+        </testsuites>`
+
+      it('should roll up a TestMain compile failure that suite attributes omit', () => {
+        const result = parseJunit(gotestsumXml) as TestSuites
+        const stats = getTestStats(result)
+
+        expect(stats.tests).toBe(3)
+        expect(stats.failures).toBe(1)
+        expect(stats.errors).toBe(0)
+        expect(stats.skipped).toBe(0)
+
+        expect(result.tests).toBe(3)
+        expect(result.failures).toBe(1)
+
+        const failedSuite = getTestSuites(result).find(
+          (suite) => suite.name === 'github.com/example/user-tests'
+        )
+        expect(failedSuite).toBeDefined()
+        expect(failedSuite!.tests).toBe(1)
+        expect(failedSuite!.failures).toBe(1)
+        expect(failedSuite!.testcase).toHaveLength(1)
+        expect(failedSuite!.testcase![0].name).toBe('TestMain')
+        expect(getTestcaseOutcome(failedSuite!.testcase![0])).toBe('failed')
+      })
+
+      it('should keep passing suites intact alongside the compile failure', () => {
+        const result = parseJunit(gotestsumXml) as TestSuites
+        const passing = getTestSuites(result).find(
+          (suite) => suite.name === 'github.com/example/terratest'
+        )
+
+        expect(passing!.tests).toBe(2)
+        expect(passing!.failures).toBe(0)
+        expect(
+          getTestCases(passing!).every(
+            (tc) => getTestcaseOutcome(tc) === 'passed'
+          )
+        ).toBe(true)
+      })
+    })
+
+    describe('nested testsuites', () => {
+      it('should flatten nested testsuites and count failed children', () => {
+        const xml = `
+          <testsuites name="All" tests="0" failures="0">
+            <testsuite name="parent" tests="0" failures="0">
+              <testsuite name="child" tests="0" failures="0">
+                <testcase name="ok" />
+                <testcase name="boom">
+                  <failure message="nope">stack</failure>
+                </testcase>
+              </testsuite>
+            </testsuite>
+          </testsuites>
+        `
+
+        const result = parseJunit(xml) as TestSuites
+        const suites = getTestSuites(result)
+
+        expect(suites).toHaveLength(1)
+        expect(suites[0].name).toBe('child')
+        expect(suites[0].tests).toBe(2)
+        expect(suites[0].failures).toBe(1)
+        expect(result.tests).toBe(2)
+        expect(result.failures).toBe(1)
+      })
+    })
+
+    describe('getTestStats', () => {
+      it('should count failed testcases even when suite attributes say zero', () => {
+        const stats = getTestStats({
+          tests: 0,
+          failures: 0,
+          errors: 0,
+          skipped: 0,
+          testcase: [
+            { name: 'TestMain', failure: [{ message: 'Failed' }] },
+            { name: 'TestPass' },
+          ],
+        })
+
+        expect(stats).toEqual({
+          tests: 2,
+          failures: 1,
+          errors: 0,
+          skipped: 0,
+        })
       })
     })
   })

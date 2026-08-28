@@ -11,6 +11,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
   embedded_schema do
     field :user,            :map, virtual: true
     field :job,             :map, virtual: true
+    field :approval,        :map, virtual: true
     field :operation,       Operation, default: :replace
     field :cluster,         :string
     field :group,           :string
@@ -72,11 +73,22 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
     """
   end
 
-  def implement(%__MODULE__{operation: op, cluster: handle, group: g, version: v, kind: k, json: json, explanation: explanation} = comp) do
+  def implement(
+        %__MODULE__{
+          operation: op,
+          cluster: handle,
+          group: g,
+          version: v,
+          kind: k,
+          json: json,
+          explanation: explanation,
+          approval: approval
+        } = comp
+      ) do
     with {:cluster, %Cluster{} = cluster} <- {:cluster, Clusters.get_cluster_by_handle(handle)},
          {:kind, kind} <- {:kind, get_kind(cluster, g, v, k)},
          path <- Kube.Client.Base.path(g, v, kind, comp.namespace, comp.name) do
-      build_request(op, handle, path, json, explanation)
+      build_request(op, handle, path, json, explanation, approval)
     else
       {:kind, _} -> {:ok, "I cannot fetch the details of secrets for you"}
       {:cluster, _} -> {:ok, "No cluster found matching handle=#{handle}"}
@@ -84,7 +96,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
     end
   end
 
-  defp build_request(:apply, handle, path, json, explanation) do
+  defp build_request(:apply, handle, path, json, explanation, approval) do
     KubeRequest.new(
       handle: handle,
       method: "patch",
@@ -92,18 +104,20 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeUpdate do
       content_type: "application/apply-patch+yaml",
       query_params: %{"fieldManager" => "plural", "force" => "true"},
       body: json,
-      explanation: explanation
+      explanation: explanation,
+      approval: approval
     )
   end
 
-  defp build_request(_, handle, path, json, explanation) do
+  defp build_request(_, handle, path, json, explanation, approval) do
     KubeRequest.new(
       handle: handle,
       method: "put",
       path: path,
       content_type: "application/json",
       body: json,
-      explanation: explanation
+      explanation: explanation,
+      approval: approval
     )
   end
 end

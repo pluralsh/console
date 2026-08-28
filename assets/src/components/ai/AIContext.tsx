@@ -31,6 +31,7 @@ import {
 } from 'react'
 import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
+import { useLegacyAiChatEnabled } from './useLegacyAiChatEnabled.ts'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -105,7 +106,13 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const { setIsExpanded: setSidebarExpanded } = use(SidebarContext)
   const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+  const legacyChatEnabled = useLegacyAiChatEnabled()
   const open = sidePanel === SIDE_PANEL_TYPE
+
+  useEffect(() => {
+    if (!legacyChatEnabled && open) setSidePanel(null)
+  }, [legacyChatEnabled, open, setSidePanel])
+
   const [viewType, setViewType] = usePersistedState<AIViewTypes>(
     'plural-ai-view-type',
     AIViewTypes.ChatThread
@@ -175,6 +182,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         open,
         setOpen: (open) => {
           if (open) {
+            if (!legacyChatEnabled) return
             setSidePanel(SIDE_PANEL_TYPE)
             setSidebarExpanded(false)
           } else setSidePanel(null)

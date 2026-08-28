@@ -163,6 +163,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :subagents,   list_of(:workbench_skill_subagent), description: "subagent roles this skill applies to"
   end
 
+  input_object :workbench_knowledge_attributes do
+    field :name,        non_null(:string), description: "the saved knowledge name"
+    field :description, :string, description: "the saved knowledge description"
+    field :knowledge,   non_null(:string), description: "the saved knowledge contents"
+    field :labels,      list_of(:string), description: "labels associated with this knowledge"
+  end
+
   input_object :workbench_eval_attributes do
     field :conclusion_rules, :string, description: "rules for evaluating job conclusions"
     field :prompt_rules,     :string, description: "rules for evaluating job prompts"
@@ -512,6 +519,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     connection field :workbench_skills, node_type: :workbench_skill do
       middleware Nested, check: true, msg: "workbench skills cannot be fetched through a policy"
       resolve &Deployments.list_workbench_skills/3
+    end
+
+    connection field :workbench_knowledge, node_type: :workbench_knowledge do
+      middleware Nested, check: true, msg: "workbench knowledge cannot be fetched through a policy"
+      resolve &Deployments.list_workbench_knowledge/3
     end
 
     field :eval, :workbench_eval, description: "eval configuration for this workbench (at most one; null if none configured)" do
@@ -989,6 +1001,20 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_knowledge do
+    field :id,           non_null(:string), description: "the id of the saved knowledge"
+    field :name,         :string, description: "the saved knowledge name"
+    field :description,  :string, description: "the saved knowledge description"
+    field :knowledge,    :string, description: "the saved knowledge contents"
+    field :labels,       list_of(:string), description: "labels associated with this knowledge"
+    field :usages,       :integer, description: "how many times this knowledge has been used"
+    field :last_used_at, :datetime, description: "when this knowledge was last used"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this knowledge belongs to"
+
+    timestamps()
+  end
+
   @desc "A representation of a skill sourced from either the API or git"
   object :unified_workbench_skill do
     field :id,          :string, description: "the id of the saved skill (if it's API-derived, otherwise null)"
@@ -1393,6 +1419,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_cron
   connection node_type: :workbench_prompt
   connection node_type: :workbench_skill
+  connection node_type: :workbench_knowledge
   connection node_type: :workbench_eval_result
   connection node_type: :workbench_webhook
   connection node_type: :workbench_chatbot
@@ -1818,6 +1845,29 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_skill/2
+    end
+
+    @desc "Updates saved workbench knowledge. Requires write access to the workbench."
+    field :update_workbench_knowledge, :workbench_knowledge do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_knowledge_attributes)
+
+      resolve &Deployments.update_workbench_knowledge/2
+    end
+
+    @desc "Deletes saved workbench knowledge. Requires write access to the workbench."
+    field :delete_workbench_knowledge, :workbench_knowledge do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_knowledge/2
     end
 
     @desc "Creates the eval configuration for a workbench (at most one per workbench). Requires write access to the workbench."

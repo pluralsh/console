@@ -5,7 +5,6 @@ import {
   type ReactElement,
   type Ref,
   type RefObject,
-  useCallback,
   useContext,
   useEffect,
   useImperativeHandle,
@@ -100,12 +99,12 @@ function WizardUnstyled({
   children,
   ...props
 }: WizardProps): ReactElement<WizardProps> {
-  const { steps, setSteps, completed } = useContext(WizardContext)
+  const { steps, setSteps, completed } = useContext(WizardContext)!
   const { active } = useActive()
   const { isFirst, onReset } = useNavigation()
   const { selected } = usePicker()
-  const { stepper, navigation } = children
-  const hasHeader = useCallback(() => stepper || onClose, [stepper, onClose])
+  const { stepper, navigation } = children ?? {}
+  const hasHeader = !!(stepper || onClose)
 
   useImperativeHandle(onResetRef, () => ({ onReset: () => onReset() }), [
     onReset,
@@ -133,7 +132,7 @@ function WizardUnstyled({
 
       const arr = steps.filter((step) => !step.isDependency)
 
-      arr.splice(1, 0, ...dependencySteps)
+      arr.splice(1, 0, ...(dependencySteps ?? []))
 
       return arr
     })

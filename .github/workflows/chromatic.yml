@@ -1,0 +1,52 @@
+name: Design system / Chromatic
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "assets/design-system/**"
+      - ".github/workflows/chromatic.yml"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "assets/design-system/**"
+      - ".github/workflows/chromatic.yml"
+
+jobs:
+  chromatic:
+    name: Publish Storybook
+    if: ${{ github.actor != 'renovate[bot]' && github.actor != 'dependabot[bot]' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: assets
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: assets/yarn.lock
+      - run: yarn --immutable
+      - run: yarn workspace @pluralsh/design-system build:storybook
+      - uses: chromaui/action@534eebfc19023579541d106f7b61d5ad70ed65c7 # v18.5.0
+        id: chromatic
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: assets/design-system
+          storybookBuildDir: storybook-static
+          exitOnceUploaded: true
+      - if: ${{ github.event_name == 'pull_request' && steps.chromatic.outcome == 'success' }}
+        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        with:
+          header: storybook
+          message: |
+            **Storybook preview:** ${{ steps.chromatic.outputs.storybookUrl }}
