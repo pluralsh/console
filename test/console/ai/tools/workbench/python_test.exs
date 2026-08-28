@@ -10,7 +10,7 @@ defmodule Console.AI.Tools.Workbench.PythonTest do
   setup :set_mimic_global
 
   test "exposes the Python tool contract" do
-    assert Python.name() == "workbench_python"
+    assert Python.name() == "python_sandbox"
     assert %{"input" => %{"type" => "object"}} = Python.json_schema()["properties"]
     assert Python.json_schema()["required"] == ["code", "explanation"]
   end
