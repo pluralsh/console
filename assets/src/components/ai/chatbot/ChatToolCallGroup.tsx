@@ -1,30 +1,13 @@
 import { Flex } from '@pluralsh/design-system'
 import { EaseIn } from 'components/utils/EaseIn'
 import { ChatFragment, ChatType } from 'generated/graphql'
-import { countBy, sumBy } from 'lodash'
-import pluralize from 'pluralize'
 import { ComponentProps, CSSProperties, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { ChatMessage } from './ChatMessage'
 import { SimpleAccordion } from './multithread/MultiThreadViewerMessage'
-import {
-  resolveToolCallKind,
-  toolCallBatchKey,
-  toolCallBatchLabelFromKey,
-} from './toolCallDisplay'
+import { toolCallGroupHeader } from './toolCallDisplay'
 
 export type ChatDisplayItem = ChatFragment | ChatFragment[]
-
-const BATCHED_TOOL_KEYS = [
-  'bash',
-  'read',
-  'grep',
-  'edit',
-  'command',
-  'mcp',
-  'files',
-  'search',
-] as const
 
 export function ChatToolCallGroup({
   messages,
@@ -103,23 +86,10 @@ export function groupConsecutiveToolMessages(
 }
 
 function getToolCallGroupHeader(messages: ChatFragment[]): string {
-  const counts = countBy(messages, (m) =>
-    toolCallBatchKey(
-      resolveToolCallKind(
-        m.attributes?.tool?.name ?? '',
-        m.attributes?.tool?.arguments
-      )
-    )
+  return toolCallGroupHeader(
+    messages.map((message) => ({
+      name: message.attributes?.tool?.name,
+      arguments: message.attributes?.tool?.arguments,
+    }))
   )
-  const batched = sumBy(BATCHED_TOOL_KEYS, (t) => counts[t] ?? 0)
-  const other = messages.length - batched
-
-  return [
-    other > 0 && `${other} tool ${pluralize('call', other)}`,
-    ...BATCHED_TOOL_KEYS.filter((t) => counts[t]).map((t) =>
-      toolCallBatchLabelFromKey(t, counts[t] ?? 0)
-    ),
-  ]
-    .filter(Boolean)
-    .join(', ')
 }

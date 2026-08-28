@@ -27,11 +27,10 @@ import {
   getCommand,
   getPython,
   getSearchQuery,
-  isStyledToolCall,
+  getSubagentPrompt,
   resolveToolCallKind,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
-  toolCallModalHeader,
 } from '../toolCallDisplay'
 
 import {
@@ -91,99 +90,124 @@ export function SimpleToolCall({
   customResultBody?: ReactNode
   customLabel?: ReactNode
 }) {
-  const { colors, spacing } = useTheme()
+  const { spacing } = useTheme()
   const slimCodeCss = useSlimToolCodeCss()
-  const [isOpen, setIsOpen] = useState(false)
-  const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
+  const title = toolCallDisplayTitle(kind, toolName, args)
+  const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
+  const label = customLabel ?? (
+    <ToolCallLineLabel
+      title={title}
+      subtitle={subtitle}
+      runtime={toolRuntime}
+      isPending={isPending}
+    />
+  )
+  const accordionProps = {
+    label,
+    caret: 'right-quarter-mirror' as const,
+    triggerWrapperStyles: {
+      justifyContent: 'flex-start',
+      '.icon': { width: 10 },
+    },
+  }
 
-  if (!customLabel && isStyledToolCall(toolName, attributes)) {
-    const title = toolCallDisplayTitle(kind, toolName, args)
-    const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
-
-    const label = (
-      <CaptionP
-        as="span"
-        $color="text"
-        $shimmer={isPending}
-      >
-        {title}{' '}
-        {subtitle && (
-          <CaptionP
-            as="span"
-            $color="text-xlight"
+  switch (kind) {
+    case 'bash':
+    case 'command_execution': {
+      const command = getCommand(toolName, args)
+      const result = content || undefined
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="small"
+            minWidth={0}
+            width="100%"
+            marginTop={spacing.xsmall}
           >
-            {subtitle}
-          </CaptionP>
-        )}
-        {toolRuntime && (
-          <CaptionP
-            as="span"
-            $color="text-xlight"
-          >
-            {' '}
-            · {toolRuntime}
-          </CaptionP>
-        )}
-      </CaptionP>
-    )
-
-    switch (kind) {
-      case 'bash':
-      case 'command_execution': {
-        const command = getCommand(toolName, args)
-        const result = content || undefined
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="small"
-              minWidth={0}
-              width="100%"
-              marginTop={spacing.xsmall}
+            <Code
+              language="bash"
+              title="Command"
+              css={slimCodeCss}
             >
+              {command}
+            </Code>
+            {isPending ? (
+              <RunningToolOutputCode />
+            ) : result ? (
               <Code
-                language="bash"
-                title="Command"
+                title="Response"
+                showHeader
                 css={slimCodeCss}
               >
-                {command}
+                {result}
               </Code>
-              {isPending ? (
-                <RunningToolOutputCode />
-              ) : result ? (
-                <Code
-                  title="Response"
-                  showHeader
-                  css={slimCodeCss}
-                >
-                  {result}
-                </Code>
-              ) : null}
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'python_sandbox': {
-        const python = getPython(args)
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="small"
-              minWidth={0}
-              width="100%"
-              marginTop={spacing.xsmall}
+            ) : null}
+          </Flex>
+        </SimpleAccordion>
+      )
+    }
+    case 'python_sandbox': {
+      const python = getPython(args)
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="small"
+            minWidth={0}
+            width="100%"
+            marginTop={spacing.xsmall}
+          >
+            <Code
+              language="python"
+              title="Python"
+              css={slimCodeCss}
             >
-              <Code
-                language="python"
-                title="Python"
-                css={slimCodeCss}
-              >
-                {python}
-              </Code>
+              {python}
+            </Code>
+            <ToolCallContent
+              content={content ?? ''}
+              attributes={attributes}
+              customResultBody={customResultBody}
+              hideArguments
+              isPending={isPending}
+            />
+          </Flex>
+        </SimpleAccordion>
+      )
+    }
+    case 'web_search': {
+      const query = getSearchQuery(args)
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="xsmall"
+            minWidth={0}
+            width="100%"
+          >
+            <Code showHeader={false}>{query}</Code>
+            {content ? <Code showHeader={false}>{content}</Code> : null}
+          </Flex>
+        </SimpleAccordion>
+      )
+    }
+    case 'subagent': {
+      const prompt = getSubagentPrompt(args)
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="small"
+            minWidth={0}
+            width="100%"
+            marginTop={spacing.xsmall}
+          >
+            {prompt && <SimplifiedMarkdown text={prompt} />}
+            {(content || isPending || customResultBody) && (
               <ToolCallContent
                 content={content ?? ''}
                 attributes={attributes}
@@ -191,121 +215,48 @@ export function SimpleToolCall({
                 hideArguments
                 isPending={isPending}
               />
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'web_search': {
-        const query = getSearchQuery(args)
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="xsmall"
-              minWidth={0}
-              width="100%"
-            >
-              <Code showHeader={false}>{query}</Code>
-              {content ? <Code showHeader={false}>{content}</Code> : null}
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'mcp_tool_call':
-        return (
-          <SimpleAccordion label={label}>
-            <ToolCallContent
-              content={content ?? ''}
-              attributes={attributes}
-              customResultBody={customResultBody}
-              isPending={isPending}
-            />
-          </SimpleAccordion>
-        )
-      case 'file_change':
-      case 'edit': {
-        const summary = formatFileChangeSummary(args, content)
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="xsmall"
-              minWidth={0}
-              width="100%"
-            >
-              {Array.isArray(args) ? (
-                <Code
-                  language="json"
-                  showHeader={false}
-                >
-                  {JSON.stringify(args, null, 2)}
-                </Code>
-              ) : (
-                <Code showHeader={false}>{summary}</Code>
-              )}
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'read':
-      case 'grep':
-      case 'generic':
-      default:
-        return (
-          <SimpleAccordion label={label}>
-            <ToolCallContent
-              content={content ?? ''}
-              attributes={attributes}
-              customResultBody={customResultBody}
-              isPending={isPending}
-            />
-          </SimpleAccordion>
-        )
+            )}
+          </Flex>
+        </SimpleAccordion>
+      )
     }
-  }
-
-  return (
-    <>
-      <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        {customLabel || (
-          <CaptionP
-            $shimmer={isPending}
-            $color="text-xlight"
+    case 'file_change':
+    case 'edit': {
+      const summary = formatFileChangeSummary(args, content)
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="xsmall"
+            minWidth={0}
+            width="100%"
           >
-            {isPending ? 'Calling' : 'Called'} tool{' '}
-            <span css={{ color: colors['text-light'] }}>{toolName}</span>
-            {toolRuntime ? ` · ${toolRuntime}` : ''}
-          </CaptionP>
-        )}
-      </ClickableLabelSC>
-      <Modal
-        open={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-          setFinishedAnimating(false)
-        }}
-        onAnimationEnd={() => setFinishedAnimating(true)}
-        header={toolCallModalHeader(kind, toolName, args)}
-        size="large"
-      >
-        <ToolCallContent
-          content={content ?? ''}
-          attributes={attributes}
-          isPending={isPending}
-          customResultBody={
-            finishedAnimating ? (
-              customResultBody
+            {Array.isArray(args) ? (
+              <Code
+                language="json"
+                showHeader={false}
+              >
+                {JSON.stringify(args, null, 2)}
+              </Code>
             ) : (
-              <RectangleSkeleton
-                $height={160}
-                $width="100%"
-              />
-            )
-          }
-        />
-      </Modal>
-    </>
-  )
+              <Code showHeader={false}>{summary}</Code>
+            )}
+          </Flex>
+        </SimpleAccordion>
+      )
+    }
+    default:
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <ToolCallContent
+            content={content ?? ''}
+            attributes={attributes}
+            customResultBody={customResultBody}
+            isPending={isPending}
+          />
+        </SimpleAccordion>
+      )
+  }
 }
 
 function CodeBlockLabel({
@@ -432,6 +383,51 @@ export function SimplifiedMarkdown({
   )
 }
 
+function ToolCallLineLabel({
+  title,
+  subtitle,
+  runtime,
+  isPending,
+}: {
+  title: string
+  subtitle?: string
+  runtime?: string
+  isPending?: boolean
+}) {
+  return (
+    <ToolCallLineSC>
+      <CaptionP
+        as="span"
+        className="title"
+        $color="text"
+        $shimmer={isPending}
+      >
+        {title}
+      </CaptionP>
+      {subtitle && (
+        <CaptionP
+          as="span"
+          className="subtitle"
+          $color="text-xlight"
+          $shimmer={isPending}
+        >
+          {subtitle}
+        </CaptionP>
+      )}
+      {runtime && (
+        <CaptionP
+          as="span"
+          className="runtime"
+          $color="text-xlight"
+          $shimmer={isPending}
+        >
+          · {runtime}
+        </CaptionP>
+      )}
+    </ToolCallLineSC>
+  )
+}
+
 const ARBITRARY_VALUE_NAME = 'value'
 export function SimpleAccordion({
   label,
@@ -491,7 +487,29 @@ const AccordionLabelSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   flex: 1,
   minWidth: 0,
+  overflow: 'hidden',
   textAlign: 'left',
+}))
+
+const ToolCallLineSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  '.title': {
+    flexShrink: 0,
+  },
+  '.subtitle': {
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  '.runtime': {
+    flexShrink: 0,
+  },
 }))
 
 export const ClickableLabelSC = styled.button(({ theme }) => ({

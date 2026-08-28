@@ -20,6 +20,7 @@ import {
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import { toolCallGroupHeader } from 'components/ai/chatbot/toolCallDisplay'
 import pluralize from 'pluralize'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
@@ -38,7 +39,7 @@ import {
   WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
+import { isEmpty, startCase } from 'lodash'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
@@ -124,9 +125,8 @@ export function WorkbenchJobActivity({
           <Body2P
             $color="text-long-form"
             $shimmer={isRunning}
-            css={{ textTransform: 'capitalize' }}
           >
-            {type?.toLowerCase() ?? 'activity'}
+            {workbenchActivityTitle(type)}
           </Body2P>
           {result?.jobUpdate && (
             <MemoActivityIcon jobUpdate={result.jobUpdate} />
@@ -497,15 +497,33 @@ function WorkbenchJobActivityThoughts({
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
     let [numWithLogs, numWithMetrics] = [0, 0]
-    thoughts.forEach(({ attributes }) => {
-      numWithLogs += isEmpty(attributes?.logs) ? 0 : 1
-      numWithMetrics += isEmpty(attributes?.metrics) ? 0 : 1
+    const otherThoughts: Array<{
+      name?: string | null
+      arguments?: WorkbenchJobThoughtFragment['toolArgs']
+    }> = []
+    thoughts.forEach((thought) => {
+      if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
+      else if (!isEmpty(thought.attributes?.metrics)) numWithMetrics += 1
+      else
+        otherThoughts.push({
+          name: thought.toolName,
+          arguments: thought.toolArgs,
+        })
     })
-    const numOtherToolCalls = thoughts.length - numWithLogs - numWithMetrics
-    let header = `${numOtherToolCalls} tool ${pluralize('call', numOtherToolCalls)}`
-    if (numWithLogs > 0) header += `, ${numWithLogs} fetched logs`
-    if (numWithMetrics > 0) header += `, ${numWithMetrics} fetched metrics`
-    return { thoughts, lastThought: thoughts.at(-1), header }
+    const parts = [
+      toolCallGroupHeader(otherThoughts),
+      numWithLogs > 0 &&
+        `${numWithLogs} fetched ${pluralize('log', numWithLogs)}`,
+      numWithMetrics > 0 &&
+        `${numWithMetrics} fetched ${pluralize('metric', numWithMetrics)}`,
+    ].filter(Boolean)
+    return {
+      thoughts,
+      lastThought: thoughts.at(-1),
+      header:
+        parts.join(', ') ||
+        `${thoughts.length} tool ${pluralize('call', thoughts.length)}`,
+    }
   }, [activity?.thoughts])
 
   if (isEmpty(thoughts) && !isLoading) return null
@@ -635,7 +653,7 @@ export function WorkbenchJobJobLevelThinking({
       <SimpleAccordion
         label={
           <>
-            thinking
+            Thinking
             <span
               style={{
                 display: 'inline-block',
@@ -700,3 +718,40 @@ export const isJobRunning = (
     WorkbenchJobActivityStatus | WorkbenchJobStatus | AgentRunStatus
   >
 ) => status === 'PENDING' || status === 'RUNNING'
+
+const SUBAGENT_ACTIVITY_TYPES = new Set([
+  WorkbenchJobActivityType.Coding,
+  WorkbenchJobActivityType.Infrastructure,
+  WorkbenchJobActivityType.Observability,
+  WorkbenchJobActivityType.Integration,
+  WorkbenchJobActivityType.Skill,
+  WorkbenchJobActivityType.History,
+  WorkbenchJobActivityType.Search,
+  WorkbenchJobActivityType.Verify,
+  WorkbenchJobActivityType.Memory,
+  WorkbenchJobActivityType.Canvas,
+  WorkbenchJobActivityType.Plan,
+])
+
+function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
+  switch (type) {
+    case WorkbenchJobActivityType.User:
+      return 'You'
+    case WorkbenchJobActivityType.Memo:
+      return 'Notes'
+    case WorkbenchJobActivityType.Conclusion:
+      return 'Conclusion'
+    case WorkbenchJobActivityType.Function:
+      return 'Function'
+    case WorkbenchJobActivityType.Kubernetes:
+      return 'Kubernetes'
+    case WorkbenchJobActivityType.Exec:
+      return 'Command'
+    default: {
+      const name = startCase((type ?? 'activity').toLowerCase())
+      return SUBAGENT_ACTIVITY_TYPES.has(type as WorkbenchJobActivityType)
+        ? `${name} subagent`
+        : name
+    }
+  }
+}
