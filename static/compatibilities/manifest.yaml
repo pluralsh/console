@@ -27,6 +27,7 @@ names:
 - linkerd
 - longhorn
 - metrics-server
+- nginx-gateway-fabric
 - opentelemetry-operator
 - rook
 - strimzi-kafka
