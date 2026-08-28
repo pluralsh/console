@@ -99,10 +99,7 @@ func formatValue(value any) string {
 func normalizeUsage(providerUsage *acpsdk.Usage) (input, output, total, cached, thought int64) {
 	input = int64(max(providerUsage.InputTokens, 0))
 	output = int64(max(providerUsage.OutputTokens, 0))
-	total = int64(max(providerUsage.TotalTokens, 0))
-	if total < input+output {
-		total = input + output
-	}
+	total = max(int64(max(providerUsage.TotalTokens, 0)), input+output)
 	if providerUsage.CachedReadTokens != nil {
 		cached += int64(max(*providerUsage.CachedReadTokens, 0))
 	}

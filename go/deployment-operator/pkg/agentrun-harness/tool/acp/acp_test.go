@@ -330,6 +330,67 @@ func TestToolOutputThresholdAndTerminalFlush(t *testing.T) {
 	}
 }
 
+func TestToolOutputPrefersContentOverRawOutput(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var outputs []string
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		if callID != "call-1" || message.Metadata == nil || message.Metadata.Tool == nil || message.Metadata.Tool.Output == nil {
+			return
+		}
+		outputs = append(outputs, *message.Metadata.Tool.Output)
+	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall("call-1", "shell", acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress))
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
+		t.Fatal(err)
+	}
+	update := acpsdk.UpdateToolCall(
+		"call-1",
+		acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusCompleted),
+		acpsdk.WithUpdateContent([]acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("display output"))}),
+		acpsdk.WithUpdateRawOutput(map[string]any{"result": "structured output"}),
+	)
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: update}); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(outputs) != 2 || outputs[1] != "display output" {
+		t.Fatalf("outputs = %v, want initial and display output", outputs)
+	}
+}
+
+func TestToolOutputFallsBackToRawOutputWithoutContent(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var outputs []string
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		if callID != "call-1" || message.Metadata == nil || message.Metadata.Tool == nil || message.Metadata.Tool.Output == nil {
+			return
+		}
+		outputs = append(outputs, *message.Metadata.Tool.Output)
+	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall("call-1", "shell", acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress))
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
+		t.Fatal(err)
+	}
+	update := acpsdk.UpdateToolCall(
+		"call-1",
+		acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusCompleted),
+		acpsdk.WithUpdateRawOutput(map[string]any{"result": "structured output"}),
+	)
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: update}); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(outputs) != 2 || outputs[1] != `{"result":"structured output"}` {
+		t.Fatalf("outputs = %v, want initial and structured JSON output", outputs)
+	}
+}
+
 func TestPromptStopReasonIsFailure(t *testing.T) {
 	state := &scriptedState{stopReason: acpsdk.StopReasonRefusal}
 	tool := testTool(t, state)

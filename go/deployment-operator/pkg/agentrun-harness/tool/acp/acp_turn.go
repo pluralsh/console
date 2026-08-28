@@ -197,11 +197,12 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 	if update.RawInput != nil {
 		call.input = formatValue(update.RawInput)
 	}
-	if output := contentOutput(update.Content); output != "" {
-		call.addOutput(output)
+	output := contentOutput(update.Content)
+	if output == "" && update.RawOutput != nil {
+		output = formatValue(update.RawOutput)
 	}
-	if update.RawOutput != nil {
-		call.addOutput(formatValue(update.RawOutput))
+	if output != "" {
+		call.addOutput(output)
 	}
 	terminal := false
 	if update.Status != nil {
