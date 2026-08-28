@@ -1,9 +1,10 @@
 # Repository prebake images
 
-Build a data-only container image that holds full git clones plus a `manifest.json`.
-Set it on `AgentRuntime.spec.repositoryImage` so agent-run pods mount it at
-`/plural/repos`. Bootstrap copies a matching repo locally instead of cloning
-over the network, and agents can read the other prebaked repos as extra context.
+Build a container image that holds full git clones plus a `manifest.json`.
+Set it on `AgentRuntime.spec.repositoryImage` so agent-run pods copy it into
+`/plural/shared/repos` before bootstrap. Bootstrap then copies a matching repo
+into `/plural/shared/repository` instead of cloning over the network, and
+agents can read the other prebaked repos as extra context.
 
 ```yaml
 apiVersion: deployments.plural.sh/v1alpha1
@@ -16,18 +17,29 @@ spec:
   repositoryImage: ghcr.io/pluralsh/repos:latest
 ```
 
-The operator mounts it read-only on `default`, `agent-bootstrap`, and
-`mcpserver` via a Kubernetes image volume (1.33+). Use
-`spec.template.spec.imagePullSecrets` if the image is private.
+The operator starts a `repository-prebake` init container from that image. It
+copies `/data/.` into the existing `shared-context` emptyDir at
+`/plural/shared/repos`, then `agent-bootstrap` runs. No extra volume and no
+Kubernetes image-volume feature gate. Use `spec.template.spec.imagePullSecrets`
+if the image is private.
+
+Rebuild prebake images after this layout change. Scratch images with files at
+`/` cannot copy themselves; the image must include `/bin/sh` and `cp`, with
+repos under `/data`.
 
 ## Image layout
 
-The image root is the volume root. After Kubernetes mounts the image at
-`/plural/repos` the harness sees:
+```
+/data/manifest.json
+/data/<path>/          # full git clone, including .git
+```
+
+After the init container copies that tree, the harness sees:
 
 ```
-/plural/repos/manifest.json
-/plural/repos/<path>/          # full git clone, including .git
+/plural/shared/repos/manifest.json
+/plural/shared/repos/<path>/
+/plural/shared/repository/     # working copy of the run's repo
 ```
 
 `manifest.json`:
@@ -45,22 +57,21 @@ The image root is the volume root. After Kubernetes mounts the image at
 }
 ```
 
-`path` is relative to the image root and must not contain `.` or `..` components.
+`path` is relative to `/data` and must not contain `.` or `..` components.
 
 Files are owned by uid `65532` (nonroot) so agent-run pods can read them.
 
-When `/plural/repos/manifest.json` is present, agent-bootstrap matches the run
-repository URL (https and ssh forms of the same repo are equivalent) and copies
-that tree into `/plural/shared/repository`. Fetch of the requested branch is
-best-effort; an airgapped or stale remote keeps the prebaked copy. Other
-prebaked repos stay at `/plural/repos/<path>` and are listed in the agent
-system prompt.
+When `/plural/shared/repos/manifest.json` is present, agent-bootstrap matches
+the run repository URL (https and ssh forms of the same repo are equivalent)
+and copies that tree into `/plural/shared/repository`. Fetch of the requested
+branch is best-effort; an airgapped or stale remote keeps the prebaked copy.
+Other prebaked repos stay at `/plural/shared/repos/<path>` and are listed in
+the agent system prompt.
 
 ## Build
 
 The script clones on the host using your existing git credentials (`ssh-agent`,
-`GIT_ASKPASS`, `~/.git-credentials`, and so on), then `docker build`s a
-`scratch` image.
+`GIT_ASKPASS`, `~/.git-credentials`, and so on), then `docker build`s the image.
 
 ```bash
 ./prebake.sh \
@@ -107,6 +118,6 @@ and `origin` remote **without** userinfo.
 
 ```bash
 cid="$(docker create ghcr.io/pluralsh/repos:latest unused)"
-docker cp "$cid:/manifest.json" -
+docker cp "$cid:/data/manifest.json" -
 docker rm "$cid"
 ```

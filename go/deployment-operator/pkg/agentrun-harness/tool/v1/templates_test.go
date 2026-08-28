@@ -184,8 +184,8 @@ func TestSystemPromptTemplate_PrebakedRepositories(t *testing.T) {
 		WorkDir:       "/work",
 		RepositoryDir: "/work/shared/repository",
 		PrebakedRepositories: []PrebakedRepository{
-			{URL: "https://github.com/pluralsh/console.git", Dir: "/plural/repos/console"},
-			{URL: "https://github.com/pluralsh/plural.git", Dir: "/plural/repos/plural"},
+			{URL: "https://github.com/pluralsh/console.git", Dir: "/plural/shared/repos/console"},
+			{URL: "https://github.com/pluralsh/plural.git", Dir: "/plural/shared/repos/plural"},
 		},
 	}
 
@@ -198,9 +198,9 @@ func TestSystemPromptTemplate_PrebakedRepositories(t *testing.T) {
 			for _, expected := range []string{
 				"## Additional local repositories",
 				"https://github.com/pluralsh/console.git",
-				"/plural/repos/console",
+				"/plural/shared/repos/console",
 				"https://github.com/pluralsh/plural.git",
-				"/plural/repos/plural",
+				"/plural/shared/repos/plural",
 				"Do not clone it again",
 			} {
 				if !strings.Contains(content, expected) {

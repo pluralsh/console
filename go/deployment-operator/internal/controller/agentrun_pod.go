@@ -43,10 +43,10 @@ const (
 	gitSigningKeyVolumeName = "git-signing-key"
 	gitSigningKeySecretKey  = "git-signing.key"
 
-	agentBootstrapContainerName = "agent-bootstrap"
-	mcpServerContainerName      = "mcpserver"
-
-	repositoryPrebakeVolumeName = "repository-prebake"
+	agentBootstrapContainerName    = "agent-bootstrap"
+	mcpServerContainerName         = "mcpserver"
+	repositoryPrebakeContainerName = "repository-prebake"
+	repositoryPrebakeImageDataDir  = "/data"
 
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
@@ -604,21 +604,26 @@ func repositoryImage(runtime *v1alpha1.AgentRuntime) string {
 	return ""
 }
 
-func repositoryPrebakeVolumeMount() corev1.VolumeMount {
-	return corev1.VolumeMount{
-		Name:      repositoryPrebakeVolumeName,
-		MountPath: common.AgentRunRepositoryPrebakeDir,
-		ReadOnly:  true,
+func getRepositoryPrebakeContainer(image string) corev1.Container {
+	sc := ensureDefaultContainerSecurityContext(nil)
+	sc.ReadOnlyRootFilesystem = lo.ToPtr(true)
+	sc.Capabilities = &corev1.Capabilities{
+		Drop: []corev1.Capability{"ALL"},
 	}
-}
-
-func upsertVolumeMount(mounts []corev1.VolumeMount, want corev1.VolumeMount) []corev1.VolumeMount {
-	return append(
-		algorithms.Filter(mounts, func(mount corev1.VolumeMount) bool {
-			return mount.Name != want.Name
-		}),
-		want,
-	)
+	return corev1.Container{
+		Name:            repositoryPrebakeContainerName,
+		Image:           image,
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Command:         []string{"/bin/sh", "-c"},
+		Args: []string{
+			"mkdir -p " + common.AgentRunRepositoryPrebakeDir + " && cp -a " + repositoryPrebakeImageDataDir + "/. " + common.AgentRunRepositoryPrebakeDir + "/",
+		},
+		SecurityContext: sc,
+		VolumeMounts: []corev1.VolumeMount{{
+			Name:      sharedContextVolumeName,
+			MountPath: sharedContextVolumePath,
+		}},
+	}
 }
 
 func enableRepositoryPrebake(runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
@@ -627,33 +632,13 @@ func enableRepositoryPrebake(runtime *v1alpha1.AgentRuntime, pod *corev1.Pod) {
 		return
 	}
 
-	pod.Spec.Volumes = append(
-		algorithms.Filter(pod.Spec.Volumes, func(volume corev1.Volume) bool {
-			return volume.Name != repositoryPrebakeVolumeName
-		}),
-		corev1.Volume{
-			Name: repositoryPrebakeVolumeName,
-			VolumeSource: corev1.VolumeSource{
-				Image: &corev1.ImageVolumeSource{
-					Reference:  image,
-					PullPolicy: corev1.PullIfNotPresent,
-				},
-			},
-		},
+	copyContainer := getRepositoryPrebakeContainer(image)
+	pod.Spec.InitContainers = append(
+		[]corev1.Container{copyContainer},
+		algorithms.Filter(pod.Spec.InitContainers, func(container corev1.Container) bool {
+			return container.Name != repositoryPrebakeContainerName
+		})...,
 	)
-
-	mount := repositoryPrebakeVolumeMount()
-	for i := range pod.Spec.Containers {
-		if pod.Spec.Containers[i].Name == defaultContainer {
-			pod.Spec.Containers[i].VolumeMounts = upsertVolumeMount(pod.Spec.Containers[i].VolumeMounts, mount)
-		}
-	}
-	for i := range pod.Spec.InitContainers {
-		switch pod.Spec.InitContainers[i].Name {
-		case agentBootstrapContainerName, mcpServerContainerName:
-			pod.Spec.InitContainers[i].VolumeMounts = upsertVolumeMount(pod.Spec.InitContainers[i].VolumeMounts, mount)
-		}
-	}
 }
 
 func enableDind(pod *corev1.Pod) {

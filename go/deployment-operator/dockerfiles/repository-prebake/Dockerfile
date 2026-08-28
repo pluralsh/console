@@ -1,8 +1,8 @@
-# Data-only image of precloned git repositories.
-# The image root is the volume root: when Kubernetes mounts this image at
-# /plural/repos the harness sees /plural/repos/manifest.json plus one directory
-# per repository.
+# Precloned git repositories plus a tiny userspace so the agent-run
+# init container can copy them into /plural/shared/repos.
 #
-# Files are owned by uid 65532 (nonroot) so agent-run pods can read them.
-FROM scratch
-COPY --chown=65532:65532 . /
+# Image layout:
+#   /data/manifest.json
+#   /data/<path>/          # full git clone, including .git
+FROM busybox:1.37
+COPY --chown=65532:65532 . /data

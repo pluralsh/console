@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Build a data-only OCI image containing precloned git repositories and a
-# manifest.json. Uses the caller's git credentials (ssh-agent, GIT_ASKPASS,
-# credential helpers). See README.md in this directory.
+# Build an OCI image containing precloned git repositories, manifest.json, and
+# a tiny userspace so an init container can copy them into /plural/shared/repos.
+# Uses the caller's git credentials (ssh-agent, GIT_ASKPASS, credential helpers).
+# See README.md in this directory.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -22,7 +23,7 @@ usage() {
 Usage: prebake.sh --config repos.yaml --image name:tag [options]
 
 Clone the repositories listed in a YAML config into a staging directory, write
-manifest.json, and build a data-only image for mounting at /plural/repos on AgentRuntime pods.
+manifest.json, and build an image that an init container copies into /plural/shared/repos.
 
 Options:
   --config PATH            YAML file listing repositories (required)
@@ -42,7 +43,7 @@ Config format:
       path: repo                 # optional, defaults to the repo name
       branch: main               # optional, defaults to the remote default branch
 
-The resulting image root contains manifest.json and one directory per repository.
+The resulting image has manifest.json and one directory per repository under /data.
 EOF
 }
 

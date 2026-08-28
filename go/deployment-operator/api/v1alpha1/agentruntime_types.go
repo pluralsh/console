@@ -85,8 +85,8 @@ type AgentRuntimeSpec struct {
 	Memory *bool `json:"memory,omitempty"`
 
 	// RepositoryImage is an OCI image of precloned git repositories plus manifest.json.
-	// When set, agent-run pods mount it read-only at /plural/repos via a Kubernetes
-	// image volume so bootstrap can copy a matching repo locally instead of git clone.
+	// When set, an init container copies it into /plural/shared/repos before bootstrap
+	// so a matching repo can be copied locally instead of git clone.
 	// +kubebuilder:validation:Optional
 	RepositoryImage *string `json:"repositoryImage,omitempty"`
 

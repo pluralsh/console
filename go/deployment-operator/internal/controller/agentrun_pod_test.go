@@ -492,16 +492,21 @@ func TestBuildAgentRunPod_RepositoryImage(t *testing.T) {
 	}
 
 	pod := buildAgentRunPod(run, runtime)
-	volume := requireVolume(t, pod.Spec.Volumes, repositoryPrebakeVolumeName)
-	if assert.NotNil(t, volume.Image) {
-		assert.Equal(t, image, volume.Image.Reference)
-		assert.Equal(t, corev1.PullIfNotPresent, volume.Image.PullPolicy)
+	for _, volume := range pod.Spec.Volumes {
+		assert.Nil(t, volume.Image, "prebake must not add an image volume")
 	}
 
-	mount := repositoryPrebakeVolumeMount()
-	assert.Contains(t, requireContainer(t, pod.Spec.Containers, defaultContainer).VolumeMounts, mount)
-	assert.Contains(t, requireContainer(t, pod.Spec.InitContainers, agentBootstrapContainerName).VolumeMounts, mount)
-	assert.Contains(t, requireContainer(t, pod.Spec.InitContainers, mcpServerContainerName).VolumeMounts, mount)
+	prebake := requireContainer(t, pod.Spec.InitContainers, repositoryPrebakeContainerName)
+	assert.Equal(t, image, prebake.Image)
+	assert.Equal(t, []string{"/bin/sh", "-c"}, prebake.Command)
+	assert.Contains(t, prebake.VolumeMounts, corev1.VolumeMount{
+		Name:      sharedContextVolumeName,
+		MountPath: sharedContextVolumePath,
+	})
+	if assert.GreaterOrEqual(t, len(pod.Spec.InitContainers), 2) {
+		assert.Equal(t, repositoryPrebakeContainerName, pod.Spec.InitContainers[0].Name)
+		assert.Equal(t, agentBootstrapContainerName, pod.Spec.InitContainers[1].Name)
+	}
 }
 
 func TestBuildAgentRunPod_OmitsRepositoryImageWhenUnset(t *testing.T) {
@@ -526,8 +531,8 @@ func TestBuildAgentRunPod_OmitsRepositoryImageWhenUnset(t *testing.T) {
 	}
 
 	pod := buildAgentRunPod(run, runtime)
-	for _, volume := range pod.Spec.Volumes {
-		assert.NotEqual(t, repositoryPrebakeVolumeName, volume.Name)
+	for _, container := range pod.Spec.InitContainers {
+		assert.NotEqual(t, repositoryPrebakeContainerName, container.Name)
 	}
 }
 
