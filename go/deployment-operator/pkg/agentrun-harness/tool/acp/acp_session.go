@@ -40,100 +40,137 @@ func (tool *Tool) runAttempt(ctx context.Context, prompt string, options []exec.
 	if err != nil {
 		return fmt.Errorf("resolve ACP repository directory: %w", err)
 	}
+	attempt, err := tool.startAttempt(ctx, options)
+	if err != nil {
+		return err
+	}
+	defer attempt.close()
+	defer attempt.turn.stopFlusher()
+	return attempt.run(cwd, prompt)
+}
+
+type sessionAttempt struct {
+	tool           *Tool
+	ctx            context.Context
+	process        *exec.StdioProcess
+	connection     *acpsdk.ClientSideConnection
+	turn           *turnState
+	priorSessionID string
+}
+
+type sessionDetails struct {
+	sessionID     string
+	modes         *acpsdk.SessionModeState
+	configOptions []acpsdk.SessionConfigOption
+}
+
+func (tool *Tool) startAttempt(ctx context.Context, options []exec.Option) (*sessionAttempt, error) {
 	tool.mu.RLock()
 	launch := tool.launch
 	priorSessionID := tool.sessionID
 	tool.mu.RUnlock()
 	if launch == nil {
-		return errors.New("ACP launcher is not set")
+		return nil, errors.New("acp launcher is not set")
 	}
 
 	process, err := launch(ctx, options)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if process == nil || process.Stdin == nil || process.Stdout == nil {
-		if process != nil {
-			_ = process.Stop()
-			_ = process.Wait()
-		}
-		return errors.New("ACP launcher returned an incomplete stdio process")
+		return nil, rejectProcess(process)
 	}
-	defer func() {
-		// The process is stopped explicitly below. This is a final guard for
-		// setup failures and keeps test launchers from leaking children.
-		_ = process.Close()
-	}()
+	return newSessionAttempt(tool, ctx, process, priorSessionID), nil
+}
 
-	if process.Stderr != nil {
-		go func() {
-			if _, copyErr := io.Copy(io.Discard, process.Stderr); copyErr != nil && !errors.Is(copyErr, io.ErrClosedPipe) {
-				klog.V(log.LogLevelDebug).InfoS("ACP stderr drain ended", "error", copyErr)
-			}
-		}()
+func rejectProcess(process *exec.StdioProcess) error {
+	if process != nil {
+		_ = process.Stop()
+		_ = process.Wait()
 	}
+	return errors.New("acp launcher returned an incomplete stdio process")
+}
 
+func newSessionAttempt(tool *Tool, ctx context.Context, process *exec.StdioProcess, priorSessionID string) *sessionAttempt {
 	turn := newTurn(tool, priorSessionID)
-	defer turn.stopFlusher()
-	client := &client{turn: turn}
-	connection := acpsdk.NewClientSideConnection(client, process.Stdin, process.Stdout)
-	connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
-	turn.startFlusher(ctx)
+	attempt := &sessionAttempt{
+		tool:           tool,
+		ctx:            ctx,
+		process:        process,
+		connection:     acpsdk.NewClientSideConnection(&client{turn: turn}, process.Stdin, process.Stdout),
+		turn:           turn,
+		priorSessionID: priorSessionID,
+	}
+	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
+	attempt.drainStderr()
+	attempt.turn.startFlusher(ctx)
+	return attempt
+}
 
-	waitForExit := func() error {
-		waitCh := make(chan error, 1)
-		go func() { waitCh <- process.Wait() }()
-		timer := time.NewTimer(tool.stopTimeout)
-		defer timer.Stop()
-		select {
-		case waitErr := <-waitCh:
-			return waitErr
-		case <-timer.C:
-			if killErr := process.Kill(); killErr != nil && !errors.Is(killErr, os.ErrProcessDone) {
-				klog.V(log.LogLevelDebug).InfoS("ACP process kill failed", "error", killErr)
-			}
-			return <-waitCh
+func (attempt *sessionAttempt) drainStderr() {
+	if attempt.process.Stderr == nil {
+		return
+	}
+	go func() {
+		if _, err := io.Copy(io.Discard, attempt.process.Stderr); err != nil && !errors.Is(err, io.ErrClosedPipe) {
+			klog.V(log.LogLevelDebug).InfoS("ACP stderr drain ended", "error", err)
 		}
+	}()
+}
+
+func (attempt *sessionAttempt) close() {
+	// The process is stopped explicitly during the run. This final guard
+	// handles setup failures and keeps test launchers from leaking children.
+	_ = attempt.process.Close()
+}
+
+func (attempt *sessionAttempt) run(cwd, prompt string) error {
+	initialize, err := attempt.initialize()
+	if err != nil {
+		return attempt.fail(fmt.Errorf("acp initialize: %w", err), attempt.cancelled())
+	}
+	if initialize.ProtocolVersion != acpsdk.ProtocolVersionNumber {
+		return attempt.fail(fmt.Errorf("acp protocol version %d is unsupported", initialize.ProtocolVersion), false)
 	}
 
-	stop := func(cancel bool) error {
-		if cancel {
-			cancelCtx, cancelFunc := context.WithTimeout(context.Background(), tool.stopTimeout)
-			sessionID := turn.sessionID()
-			var cancelErr error
-			if sessionID != "" {
-				cancelErr = connection.Cancel(cancelCtx, acpsdk.CancelNotification{SessionId: acpsdk.SessionId(sessionID)})
-			}
-			cancelFunc()
-			if cancelErr != nil {
-				klog.V(log.LogLevelDebug).InfoS("ACP session cancellation failed", "error", cancelErr)
-			}
-			waitCh := make(chan error, 1)
-			go func() { waitCh <- process.Wait() }()
-			// Closing stdin lets a cooperative ACP process finish after it has
-			// acknowledged cancellation. If it does not, kill it below.
-			_ = process.Stdin.Close()
-			timer := time.NewTimer(tool.stopTimeout)
-			defer timer.Stop()
-			select {
-			case waitErr := <-waitCh:
-				return waitErr
-			case <-timer.C:
-				if killErr := process.Kill(); killErr != nil && !errors.Is(killErr, os.ErrProcessDone) {
-					klog.V(log.LogLevelDebug).InfoS("ACP process kill failed", "error", killErr)
-				}
-				return <-waitCh
-			}
-		}
-		// ACP agents terminate cleanly when stdin reaches EOF. Give that
-		// path a bounded opportunity before using a hard kill.
-		if err := process.Stdin.Close(); err != nil && !errors.Is(err, os.ErrClosed) {
-			klog.V(log.LogLevelDebug).InfoS("ACP stdin close failed", "error", err)
-		}
-		return waitForExit()
+	details, err := attempt.openSession(cwd)
+	if err != nil {
+		return attempt.fail(err, attempt.cancelled())
+	}
+	if err := attempt.configureSession(details); err != nil {
+		return attempt.fail(err, attempt.cancelled())
+	}
+	if err := attempt.stopIfCancelled(); err != nil {
+		return err
 	}
 
-	initialize, err := connection.Initialize(ctx, acpsdk.InitializeRequest{
+	response, err := attempt.prompt(prompt, details.sessionID)
+	if err != nil {
+		return attempt.promptFailure(err)
+	}
+	attempt.finishTurn(response.Usage)
+	if err := attempt.turn.err(); err != nil {
+		return attempt.fail(err, attempt.cancelled())
+	}
+	if err := attempt.stopIfCancelled(); err != nil {
+		return err
+	}
+	if err := attempt.stop(false); err != nil {
+		return fmt.Errorf("stop acp process: %w", err)
+	}
+	return promptResult(response.StopReason)
+}
+
+func (attempt *sessionAttempt) configureSession(details sessionDetails) error {
+	err := attempt.tool.setSessionConfig(attempt.ctx, attempt.connection, details.sessionID, details.modes, details.configOptions)
+	if err != nil && attempt.priorSessionID == "" {
+		attempt.tool.setSessionID("")
+	}
+	return err
+}
+
+func (attempt *sessionAttempt) initialize() (acpsdk.InitializeResponse, error) {
+	return attempt.connection.Initialize(attempt.ctx, acpsdk.InitializeRequest{
 		ProtocolVersion: acpsdk.ProtocolVersionNumber,
 		ClientInfo: &acpsdk.Implementation{
 			Name:    "plural-agent-harness",
@@ -148,103 +185,161 @@ func (tool *Tool) runAttempt(ctx context.Context, prompt string, options []exec.
 			Auth:     acpsdk.AuthCapabilities{},
 		},
 	})
-	if err != nil {
-		_ = stop(ctx.Err() != nil)
-		return fmt.Errorf("ACP initialize: %w", err)
-	}
-	if initialize.ProtocolVersion != acpsdk.ProtocolVersionNumber {
-		_ = stop(false)
-		return fmt.Errorf("ACP protocol version %d is unsupported", initialize.ProtocolVersion)
-	}
+}
 
-	tool.mu.RLock()
-	existingSession := tool.sessionID
-	tool.mu.RUnlock()
-	var modes *acpsdk.SessionModeState
-	var configOptions []acpsdk.SessionConfigOption
+func (attempt *sessionAttempt) openSession(cwd string) (sessionDetails, error) {
+	existingSession := attempt.tool.sessionIDValue()
 	if existingSession == "" {
-		created, createErr := connection.NewSession(ctx, acpsdk.NewSessionRequest{
-			Cwd:        cwd,
-			McpServers: []acpsdk.McpServer{},
-		})
-		if createErr != nil {
-			_ = stop(ctx.Err() != nil)
-			return fmt.Errorf("ACP session/new: %w", createErr)
-		}
-		if created.SessionId == "" {
-			_ = stop(ctx.Err() != nil)
-			return errors.New("ACP session/new returned an empty session id")
-		}
-		tool.setSessionID(string(created.SessionId))
-		turn.setSessionID(string(created.SessionId))
-		modes = created.Modes
-		configOptions = created.ConfigOptions
-	} else {
-		resumed, resumeErr := connection.ResumeSession(ctx, acpsdk.ResumeSessionRequest{
-			Cwd:        cwd,
-			McpServers: []acpsdk.McpServer{},
-			SessionId:  acpsdk.SessionId(existingSession),
-		})
-		if resumeErr != nil {
-			_ = stop(ctx.Err() != nil)
-			return fmt.Errorf("ACP session/resume: %w", resumeErr)
-		}
-		modes = resumed.Modes
-		configOptions = resumed.ConfigOptions
-		turn.setSessionID(existingSession)
+		return attempt.createSession(cwd)
 	}
+	return attempt.resumeSession(cwd, existingSession)
+}
 
-	if err := tool.setSessionConfig(ctx, connection, turn.sessionID(), modes, configOptions); err != nil {
-		_ = stop(ctx.Err() != nil)
-		if priorSessionID == "" {
-			tool.setSessionID("")
-		}
-		return err
+func (attempt *sessionAttempt) createSession(cwd string) (sessionDetails, error) {
+	created, err := attempt.connection.NewSession(attempt.ctx, acpsdk.NewSessionRequest{
+		Cwd:        cwd,
+		McpServers: []acpsdk.McpServer{},
+	})
+	if err != nil {
+		return sessionDetails{}, fmt.Errorf("acp session/new: %w", err)
 	}
+	if created.SessionId == "" {
+		return sessionDetails{}, errors.New("acp session/new returned an empty session id")
+	}
+	sessionID := string(created.SessionId)
+	attempt.tool.setSessionID(sessionID)
+	attempt.turn.setSessionID(sessionID)
+	return sessionDetails{
+		sessionID:     sessionID,
+		modes:         created.Modes,
+		configOptions: created.ConfigOptions,
+	}, nil
+}
 
-	if ctx.Err() != nil {
-		_ = stop(true)
-		return context.Cause(ctx)
+func (attempt *sessionAttempt) resumeSession(cwd, sessionID string) (sessionDetails, error) {
+	resumed, err := attempt.connection.ResumeSession(attempt.ctx, acpsdk.ResumeSessionRequest{
+		Cwd:        cwd,
+		McpServers: []acpsdk.McpServer{},
+		SessionId:  acpsdk.SessionId(sessionID),
+	})
+	if err != nil {
+		return sessionDetails{}, fmt.Errorf("acp session/resume: %w", err)
 	}
-	response, promptErr := connection.Prompt(ctx, acpsdk.PromptRequest{
-		SessionId: acpsdk.SessionId(turn.sessionID()),
+	attempt.turn.setSessionID(sessionID)
+	return sessionDetails{
+		sessionID:     sessionID,
+		modes:         resumed.Modes,
+		configOptions: resumed.ConfigOptions,
+	}, nil
+}
+
+func (attempt *sessionAttempt) prompt(prompt, sessionID string) (acpsdk.PromptResponse, error) {
+	return attempt.connection.Prompt(attempt.ctx, acpsdk.PromptRequest{
+		SessionId: acpsdk.SessionId(sessionID),
 		Prompt:    []acpsdk.ContentBlock{acpsdk.TextBlock(prompt)},
 	})
-	if promptErr != nil {
-		cancelled := ctx.Err() != nil
-		_ = stop(cancelled)
-		if cancelled {
-			return context.Cause(ctx)
-		}
-		// Prompt has crossed the dispatch boundary. Its result is never
-		// replayed because the agent may have received it.
-		return fmt.Errorf("ACP session/prompt: %w", promptErr)
-	}
+}
 
-	turn.stopFlusher()
-	turn.flushTools(true)
-	turn.emitAssistant(response.Usage)
-	if turn.err() != nil {
-		_ = stop(ctx.Err() != nil)
-		return turn.err()
+func (attempt *sessionAttempt) finishTurn(usage *acpsdk.Usage) {
+	attempt.turn.stopFlusher()
+	attempt.turn.flushTools(true)
+	attempt.turn.emitAssistant(usage)
+}
+
+func (attempt *sessionAttempt) promptFailure(err error) error {
+	cancelled := attempt.cancelled()
+	_ = attempt.stop(cancelled)
+	if cancelled {
+		return context.Cause(attempt.ctx)
 	}
-	if ctx.Err() != nil {
-		_ = stop(true)
-		return context.Cause(ctx)
+	// Prompt has crossed the dispatch boundary. Its result is never replayed
+	// because the agent may have received it.
+	return fmt.Errorf("acp session/prompt: %w", err)
+}
+
+func (attempt *sessionAttempt) fail(err error, cancel bool) error {
+	_ = attempt.stop(cancel)
+	return err
+}
+
+func (attempt *sessionAttempt) cancelled() bool {
+	return attempt.ctx.Err() != nil
+}
+
+func (attempt *sessionAttempt) stopIfCancelled() error {
+	if !attempt.cancelled() {
+		return nil
 	}
-	if err := stop(false); err != nil {
-		return fmt.Errorf("stop ACP process: %w", err)
+	_ = attempt.stop(true)
+	return context.Cause(attempt.ctx)
+}
+
+func (attempt *sessionAttempt) stop(cancel bool) error {
+	if cancel {
+		attempt.cancelSession()
+		// Closing stdin lets a cooperative ACP process finish after it has
+		// acknowledged cancellation. If it does not, kill it below.
+		_ = attempt.process.Stdin.Close()
+		return attempt.waitForExit()
 	}
-	switch response.StopReason {
+	// ACP agents terminate cleanly when stdin reaches EOF. Give that path a
+	// bounded opportunity before using a hard kill.
+	if err := attempt.process.Stdin.Close(); err != nil && !errors.Is(err, os.ErrClosed) {
+		klog.V(log.LogLevelDebug).InfoS("ACP stdin close failed", "error", err)
+	}
+	return attempt.waitForExit()
+}
+
+func (attempt *sessionAttempt) cancelSession() {
+	sessionID := attempt.turn.sessionID()
+	if sessionID == "" {
+		return
+	}
+	cancelCtx, cancel := context.WithTimeout(context.Background(), attempt.tool.stopTimeout)
+	err := attempt.connection.Cancel(cancelCtx, acpsdk.CancelNotification{SessionId: acpsdk.SessionId(sessionID)})
+	cancel()
+	if err != nil {
+		klog.V(log.LogLevelDebug).InfoS("ACP session cancellation failed", "error", err)
+	}
+}
+
+func (attempt *sessionAttempt) waitForExit() error {
+	waitCh := make(chan error, 1)
+	go func() { waitCh <- attempt.process.Wait() }()
+	timer := time.NewTimer(attempt.tool.stopTimeout)
+	defer timer.Stop()
+	select {
+	case waitErr := <-waitCh:
+		return waitErr
+	case <-timer.C:
+		return attempt.killAndWait(waitCh)
+	}
+}
+
+func (attempt *sessionAttempt) killAndWait(waitCh <-chan error) error {
+	if err := attempt.process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+		klog.V(log.LogLevelDebug).InfoS("ACP process kill failed", "error", err)
+	}
+	return <-waitCh
+}
+
+func (tool *Tool) sessionIDValue() string {
+	tool.mu.RLock()
+	defer tool.mu.RUnlock()
+	return tool.sessionID
+}
+
+func promptResult(reason acpsdk.StopReason) error {
+	switch reason {
 	case acpsdk.StopReasonEndTurn:
 		return nil
 	case acpsdk.StopReasonMaxTokens,
 		acpsdk.StopReasonMaxTurnRequests,
 		acpsdk.StopReasonRefusal,
 		acpsdk.StopReasonCancelled:
-		return fmt.Errorf("ACP prompt stopped with reason %q", response.StopReason)
+		return fmt.Errorf("acp prompt stopped with reason %q", reason)
 	default:
-		return fmt.Errorf("ACP prompt returned unexpected stop reason %q", response.StopReason)
+		return fmt.Errorf("acp prompt returned unexpected stop reason %q", reason)
 	}
 }
 
@@ -254,29 +349,38 @@ func (tool *Tool) setSessionConfig(ctx context.Context, connection *acpsdk.Clien
 	model := tool.model
 	tool.mu.RUnlock()
 
-	if model != "" {
-		if found, err := setConfigOption(ctx, connection, sessionID, options, "model", model); err != nil {
-			return err
-		} else if !found {
-			klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a model config option")
-		}
+	if err := setModelConfig(ctx, connection, sessionID, options, model); err != nil {
+		return err
 	}
+	return setModeConfig(ctx, connection, sessionID, modes, options, mode)
+}
 
+func setModelConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, model string) error {
+	if model == "" {
+		return nil
+	}
+	found, err := setConfigOption(ctx, connection, sessionID, options, "model", model)
+	if err != nil {
+		return err
+	}
+	if !found {
+		klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a model config option")
+	}
+	return nil
+}
+
+func setModeConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, modes *acpsdk.SessionModeState, options []acpsdk.SessionConfigOption, mode string) error {
 	if mode == "" {
 		return nil
 	}
-	if modes != nil {
-		for _, available := range modes.AvailableModes {
-			if string(available.Id) == mode {
-				if _, err := connection.SetSessionMode(ctx, acpsdk.SetSessionModeRequest{
-					SessionId: acpsdk.SessionId(sessionID),
-					ModeId:    acpsdk.SessionModeId(mode),
-				}); err != nil {
-					return fmt.Errorf("ACP session/set_mode: %w", err)
-				}
-				return nil
-			}
+	if modeAvailable(modes, mode) {
+		if _, err := connection.SetSessionMode(ctx, acpsdk.SetSessionModeRequest{
+			SessionId: acpsdk.SessionId(sessionID),
+			ModeId:    acpsdk.SessionModeId(mode),
+		}); err != nil {
+			return fmt.Errorf("acp session/set_mode: %w", err)
 		}
+		return nil
 	}
 	if found, err := setConfigOption(ctx, connection, sessionID, options, "mode", mode); err != nil {
 		return err
@@ -285,6 +389,18 @@ func (tool *Tool) setSessionConfig(ctx context.Context, connection *acpsdk.Clien
 	}
 	klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a mode config option", "mode", mode)
 	return nil
+}
+
+func modeAvailable(modes *acpsdk.SessionModeState, mode string) bool {
+	if modes == nil {
+		return false
+	}
+	for _, available := range modes.AvailableModes {
+		if string(available.Id) == mode {
+			return true
+		}
+	}
+	return false
 }
 
 func setConfigOption(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, configID, value string) (bool, error) {
@@ -297,7 +413,7 @@ func setConfigOption(ctx context.Context, connection *acpsdk.ClientSideConnectio
 			return true, nil
 		}
 		if !configOptionContains(option.Select.Options, wanted) {
-			return true, fmt.Errorf("ACP %s %q is not advertised", configID, value)
+			return true, fmt.Errorf("acp %s %q is not advertised", configID, value)
 		}
 		if _, err := connection.SetSessionConfigOption(ctx, acpsdk.SetSessionConfigOptionRequest{
 			ValueId: &acpsdk.SetSessionConfigOptionValueId{
@@ -306,7 +422,7 @@ func setConfigOption(ctx context.Context, connection *acpsdk.ClientSideConnectio
 				Value:     wanted,
 			},
 		}); err != nil {
-			return true, fmt.Errorf("ACP session/set_config_option %s: %w", configID, err)
+			return true, fmt.Errorf("acp session/set_config_option %s: %w", configID, err)
 		}
 		return true, nil
 	}
