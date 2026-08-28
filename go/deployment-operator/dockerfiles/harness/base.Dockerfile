@@ -29,7 +29,7 @@ RUN CGO_ENABLED=0 \
   go build \
   -tags musl \
   -trimpath \
-  -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/pkg/harness/environment.Version=${VERSION}" \
+  -ldflags="-s -w -X github.com/pluralsh/deployment-operator/pkg/harness/environment.Version=${VERSION}" \
   -o /plural/harness \
   cmd/harness/main.go
 
