@@ -50,6 +50,7 @@ defmodule Console.Application do
       Console.Features,
       Console.Cron.Scheduler,
       Console.Buffers.ClusterAudit,
+      Console.Buffers.PolicyEvaluation,
       Console.Prom.Meter,
       Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,

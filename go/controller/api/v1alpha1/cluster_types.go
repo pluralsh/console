@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	"maps"
 	"slices"
 	"strings"
 
@@ -65,7 +66,9 @@ func (c *Cluster) SetCondition(condition metav1.Condition) {
 
 // TagUpdateAttributes builds cluster update attributes from this resource.
 // When MergeTags is true, existing Console tags are retained and overlaid with
-// tags specified on the CR. Otherwise the CR tags replace the existing set.
+// tags specified on the CR. Tags recorded in Status.PrevTags that are no longer
+// in spec are removed so the CR can drop its own tags without affecting
+// externally managed ones. Otherwise the CR tags replace the existing set.
 func (c *Cluster) TagUpdateAttributes(existing []*console.ClusterTags) console.ClusterUpdateAttributes {
 	var metadata *string
 	if c.Spec.Metadata != nil {
@@ -74,15 +77,22 @@ func (c *Cluster) TagUpdateAttributes(existing []*console.ClusterTags) console.C
 
 	return console.ClusterUpdateAttributes{
 		Handle:   c.Spec.Handle,
-		Tags:     mergeClusterTags(existing, c.Spec.Tags, c.Spec.MergeTags),
+		Tags:     mergeClusterTags(existing, c.Spec.Tags, c.Status.PrevTags, c.Spec.MergeTags),
 		Metadata: metadata,
 	}
 }
 
+// SyncPrevTags records the spec tags that were just reconciled so later
+// reconciles can detect tags the CR has dropped.
+func (c *Cluster) SyncPrevTags() {
+	c.Status.PrevTags = maps.Clone(c.Spec.Tags)
+}
+
 // mergeClusterTags converts spec tags to GraphQL tag attributes.
 // When merge is true, existing tags are used as the base and spec tags overlay them
-// (spec wins on key conflicts). When merge is false, only spec tags are used.
-func mergeClusterTags(existing []*console.ClusterTags, specTags map[string]string, merge bool) []*console.TagAttributes {
+// (spec wins on key conflicts). Tags present in prevTags but absent from spec are
+// treated as CR-owned and removed. When merge is false, only spec tags are used.
+func mergeClusterTags(existing []*console.ClusterTags, specTags, prevTags map[string]string, merge bool) []*console.TagAttributes {
 	tagMap := make(map[string]string)
 	if merge {
 		for _, tag := range existing {
@@ -90,6 +100,11 @@ func mergeClusterTags(existing []*console.ClusterTags, specTags map[string]strin
 				continue
 			}
 			tagMap[tag.Name] = tag.Value
+		}
+		for k := range prevTags {
+			if _, stillSpecified := specTags[k]; !stillSpecified {
+				delete(tagMap, k)
+			}
 		}
 	}
 	for k, v := range specTags {
@@ -173,8 +188,10 @@ type ClusterSpec struct {
 
 	// MergeTags, when true, merges tags specified on this resource with the existing
 	// tags on the tracked Console cluster instead of replacing them. Spec tags overlay
-	// existing tags (the CR wins on key conflicts). Only applies when this Cluster is
-	// tracking an existing Console cluster (read-only mode). Defaults to false.
+	// existing tags (the CR wins on key conflicts). Tags previously applied by this
+	// CR and later removed from spec are dropped; tags that were never managed by
+	// this CR are left intact. Only applies when this Cluster is tracking an existing
+	// Console cluster (read-only mode). Defaults to false.
 	// +kubebuilder:validation:Optional
 	MergeTags bool `json:"mergeTags,omitempty"`
 
@@ -354,4 +371,10 @@ type ClusterStatus struct {
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	PingedAt *string `json:"pingedAt,omitempty"`
+
+	// PrevTags is the set of spec tags last applied by this resource.
+	// Used with MergeTags to drop tags the CR previously owned but no longer specifies,
+	// without removing tags that were set outside this resource.
+	// +kubebuilder:validation:Optional
+	PrevTags map[string]string `json:"prevTags,omitempty"`
 }

@@ -210,8 +210,10 @@ spec:
                 description: |-
                   MergeTags, when true, merges tags specified on this resource with the existing
                   tags on the tracked Console cluster instead of replacing them. Spec tags overlay
-                  existing tags (the CR wins on key conflicts). Only applies when this Cluster is
-                  tracking an existing Console cluster (read-only mode). Defaults to false.
+                  existing tags (the CR wins on key conflicts). Tags previously applied by this
+                  CR and later removed from spec are dropped; tags that were never managed by
+                  this CR are left intact. Only applies when this Cluster is tracking an existing
+                  Console cluster (read-only mode). Defaults to false.
                 type: boolean
               metadata:
                 description: |-
@@ -522,6 +524,14 @@ spec:
                 description: PingedAt contains the timestamp of the last successful
                   cluster health check.
                 type: string
+              prevTags:
+                additionalProperties:
+                  type: string
+                description: |-
+                  PrevTags is the set of spec tags last applied by this resource.
+                  Used with MergeTags to drop tags the CR previously owned but no longer specifies,
+                  without removing tags that were set outside this resource.
+                type: object
               readonly:
                 default: false
                 description: ReadOnly indicates whether the resource is read-only.

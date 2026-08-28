@@ -2,7 +2,6 @@ import { Card, Flex, Table } from '@pluralsh/design-system'
 
 import { useScmConnectionsQuery, useScmWebhooksQuery } from 'generated/graphql'
 
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -14,9 +13,6 @@ import { CreateScmConnection } from './CreateScmConnection'
 import { CreateScmWebhook } from './CreateScmWebhook'
 import { columns as connectionsColumns } from './PrScmConnectionsColumns'
 import { columns as webhooksColumns } from './ScmWebhooksColumns'
-import { SetupDependencyAutomation } from './SetupDependencyAutomation'
-
-export const PR_QUERY_PAGE_SIZE = 100
 
 export function ScmManagement() {
   const connectionsQ = useFetchPaginatedData({
@@ -28,10 +24,6 @@ export function ScmManagement() {
     queryHook: useScmWebhooksQuery,
     keyPath: ['scmWebhooks'],
   })
-
-  useSetPageHeaderContent(
-    <SetupDependencyAutomation refetch={connectionsQ.refetch} />
-  )
 
   return (
     <Flex

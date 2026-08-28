@@ -1,41 +1,29 @@
 import {
-  autoUpdate,
-  flip,
-  FloatingPortal,
-  offset,
-  shift,
-  useFloating,
-} from '@floating-ui/react'
-import {
   Button,
   ButtonProps,
   Card,
-  CloseIcon,
   Flex,
   FormField,
   IconFrame,
   InfoOutlineIcon,
-  Popover,
-  PopoverWrapper,
+  Modal,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body1P } from 'components/utils/typography/Text'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { WorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
 import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
 import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
+import { WorkbenchPromptRichInput } from 'components/workbenches/workbench/WorkbenchPromptRichInput'
 import { AiInsightFragment } from 'generated/graphql'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchLaunchAbsPath,
   WorkbenchLaunchRouteState,
 } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { buildInsightWorkbenchPrompt } from './insightWorkbenchPrompt'
-
-const POPOVER_WIDTH = 568
 
 export function SendInsightToWorkbenchButton({
   insight,
@@ -63,48 +51,28 @@ export function SendToWorkbenchButton({
   initialPrompt,
   popoverTitle = 'Send to workbench',
   backLabel,
+  submitLabel = 'Send to workbench',
+  editable = false,
+  selectText,
   ...props
 }: {
   flowId?: Nullable<string>
   initialPrompt: string
   popoverTitle?: string
   backLabel?: string
+  submitLabel?: string
+  editable?: boolean
+  selectText?: string
 } & ButtonProps) {
   const { hasWorkbenches, loading: workbenchesLoading } =
     useWorkbenchOptions(flowId)
-  const theme = useTheme()
   const [open, setOpen] = useState(false)
-
-  const {
-    refs: { setReference, setFloating },
-    placement,
-    strategy,
-    x,
-    y,
-  } = useFloating({
-    placement: 'bottom-end',
-    strategy: 'fixed',
-    middleware: [
-      offset(theme.spacing.small),
-      flip({ padding: theme.spacing.small }),
-      shift({ padding: theme.spacing.small }),
-    ],
-    whileElementsMounted: autoUpdate,
-  })
-
-  const close = () => setOpen(false)
-
-  const popoverMaxHeight =
-    y == null
-      ? `calc(100vh - ${theme.spacing.medium * 2}px)`
-      : `calc(100vh - ${Math.max(y, 0) + theme.spacing.small}px)`
 
   if (workbenchesLoading || !hasWorkbenches) return null
 
   return (
     <>
       <Button
-        ref={setReference}
         aria-haspopup="dialog"
         aria-expanded={open}
         startIcon={<WorkbenchIcon />}
@@ -112,60 +80,34 @@ export function SendToWorkbenchButton({
         floating={!hasWorkbenches}
         onClick={() => setOpen((value) => !value)}
       >
-        Send to workbench
+        {submitLabel}
       </Button>
-      {open && (
-        <FloatingPortal id={theme.portals.default.id}>
-          <PopoverWrapper
-            $isOpen={open}
-            $placement={placement}
-            ref={setFloating}
-            style={{
-              position: strategy,
-              left: x ?? 0,
-              top: y ?? 0,
-              width: POPOVER_WIDTH,
-              height: 'auto',
-              maxHeight: popoverMaxHeight,
-              zIndex: theme.zIndexes.modal,
-            }}
+      <ModalMountTransition open={open}>
+        <Modal
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          size="auto"
+          css={{ maxWidth: 1024, minWidth: 608 }}
+          open={open}
+          onClose={() => setOpen(false)}
+          header={popoverTitle}
+        >
+          <Flex
+            direction="column"
+            gap="large"
+            overflow="hidden"
+            maxHeight={560}
           >
-            <Popover
-              isOpen={open}
-              onClose={close}
-            >
-              <PopoverSC style={{ maxHeight: popoverMaxHeight }}>
-                <StretchedFlex>
-                  <Flex
-                    align="center"
-                    gap="xsmall"
-                  >
-                    <IconFrame
-                      size="small"
-                      type="tertiary"
-                      icon={<WorkbenchIcon />}
-                    />
-                    <Body1P $color="text-light">{popoverTitle}</Body1P>
-                  </Flex>
-                  <IconFrame
-                    clickable
-                    size="small"
-                    type="tertiary"
-                    tooltip="Close"
-                    icon={<CloseIcon color={theme.colors['icon-light']} />}
-                    onClick={close}
-                  />
-                </StretchedFlex>
-                <SendToWorkbenchForm
-                  flowId={flowId}
-                  prompt={initialPrompt}
-                  backLabel={backLabel}
-                />
-              </PopoverSC>
-            </Popover>
-          </PopoverWrapper>
-        </FloatingPortal>
-      )}
+            <SendToWorkbenchForm
+              flowId={flowId}
+              prompt={initialPrompt}
+              backLabel={backLabel}
+              submitLabel={submitLabel}
+              editable={editable}
+              selectText={selectText}
+            />
+          </Flex>
+        </Modal>
+      </ModalMountTransition>
     </>
   )
 }
@@ -175,15 +117,22 @@ export function SendToWorkbenchForm({
   prompt,
   backLabel,
   submitLabel = 'Send to workbench',
+  editable = false,
+  selectText,
 }: {
   flowId?: Nullable<string>
   prompt: string
   backLabel?: string
   submitLabel?: string
+  editable?: boolean
+  selectText?: string
 }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [workbenchId, setWorkbenchId] = useState<Nullable<string>>(null)
+  const [sourcePrompt, setSourcePrompt] = useState(prompt)
+  const [draft, setDraft] = useState(prompt)
+  const editorRef = useRef<HTMLDivElement>(null)
   const { workbenches, loading } = useWorkbenchOptions(flowId)
   const selectedWorkbenchId =
     (workbenchId &&
@@ -191,7 +140,25 @@ export function SendToWorkbenchForm({
       ? workbenchId
       : workbenches[0]?.id) ?? null
 
-  const canSubmit = !!selectedWorkbenchId && !!prompt.trim() && !loading
+  if (prompt !== sourcePrompt) {
+    setSourcePrompt(prompt)
+    setDraft(prompt)
+  }
+
+  const effectivePrompt = editable ? draft : prompt
+
+  useEffect(() => {
+    if (!editable || !selectText) return
+
+    const id = window.requestAnimationFrame(() => {
+      const root = editorRef.current?.querySelector('[contenteditable="true"]')
+      if (root instanceof HTMLElement) selectPlainText(root, selectText)
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [editable, prompt, selectText])
+
+  const canSubmit =
+    !!selectedWorkbenchId && !!effectivePrompt.trim() && !loading
 
   return (
     <>
@@ -217,16 +184,42 @@ export function SendToWorkbenchForm({
             setWorkbenchId={setWorkbenchId}
             workbenches={workbenches}
             loading={loading}
-            width={POPOVER_WIDTH - 32}
+            placement="left"
           />
         </FillLevelDiv>
       </FormField>
-      <PromptPreviewBoxSC>
-        <WorkbenchStoredPromptMarkdown
-          text={prompt}
-          promptColor="text-light"
-        />
-      </PromptPreviewBoxSC>
+      {editable ? (
+        <FormField
+          label="Prompt"
+          hint={
+            selectText
+              ? 'Replace the placeholder with the change you want applied.'
+              : undefined
+          }
+        >
+          <div ref={editorRef}>
+            <WorkbenchPromptRichInput
+              syncKey={prompt}
+              workbenchId={selectedWorkbenchId}
+              prompt={prompt}
+              onPromptChange={setDraft}
+              deserializePlrlInitialValue={false}
+              wrapperStyles={{
+                minHeight: 132,
+                maxHeight: 241,
+                overflow: 'auto',
+              }}
+            />
+          </div>
+        </FormField>
+      ) : (
+        <PromptPreviewBoxSC>
+          <WorkbenchStoredPromptMarkdown
+            text={prompt}
+            promptColor="text-light"
+          />
+        </PromptPreviewBoxSC>
+      )}
       <Button
         disabled={!canSubmit}
         alignSelf="end"
@@ -239,7 +232,9 @@ export function SendToWorkbenchForm({
               backLabel,
             }),
             {
-              state: { prompt } satisfies WorkbenchLaunchRouteState,
+              state: {
+                prompt: effectivePrompt,
+              } satisfies WorkbenchLaunchRouteState,
             }
           )
         }}
@@ -249,20 +244,6 @@ export function SendToWorkbenchForm({
     </>
   )
 }
-
-const PopoverSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.large,
-  width: '100%',
-  minHeight: 0,
-  overflow: 'hidden',
-  padding: theme.spacing.medium,
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.default,
-  backgroundColor: theme.colors['fill-one'],
-  boxShadow: theme.boxShadows.moderate,
-}))
 
 const PromptPreviewBoxSC = styled(Card)(({ theme }) => ({
   flex: '1 1 auto',
@@ -274,3 +255,21 @@ const PromptPreviewBoxSC = styled(Card)(({ theme }) => ({
   border: theme.borders.input,
   color: theme.colors['text-light'],
 }))
+
+function selectPlainText(root: HTMLElement, text: string) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let node: Node | null
+  while ((node = walker.nextNode())) {
+    const value = node.textContent ?? ''
+    const index = value.indexOf(text)
+    if (index === -1) continue
+
+    const range = document.createRange()
+    range.setStart(node, index)
+    range.setEnd(node, index + text.length)
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+    return
+  }
+}

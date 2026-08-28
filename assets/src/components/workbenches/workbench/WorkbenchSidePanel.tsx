@@ -282,7 +282,7 @@ export function WorkbenchSidePanel({
 const WrapperSC = styled.div(({ theme }) => ({
   alignSelf: 'stretch',
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders['fill-one'],
+  borderRight: theme.borders.hairline,
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 0,
@@ -308,7 +308,7 @@ const SectionSC = styled.div<{ $first?: boolean }>(({ theme, $first }) => ({
   gap: theme.spacing.small,
 
   ...(!$first && {
-    borderTop: theme.borders['fill-one'],
+    borderTop: theme.borders.hairline,
     paddingTop: theme.spacing.medium,
   }),
 }))

@@ -11,6 +11,7 @@ import {
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { SendToWorkbenchButton } from 'components/ai/insights/SendInsightToWorkbench'
 import { useEnsurePagedItem } from 'components/hooks/useEnsurePagedItem'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
@@ -51,13 +52,14 @@ import {
   PolicyEvalMap,
   stringifyEvalMap,
 } from './policyEval'
+import {
+  buildPolicyWorkbenchPrompt,
+  POLICY_UPDATE_PLACEHOLDER,
+} from './policyWorkbenchPrompt'
 
 const EMPTY_JSON = '{}'
+const INPUT_JSON_MAX_HEIGHT = 160
 const editorOptions = { minimap: { enabled: false }, wordWrap: 'on' as const }
-const jsonEditorOptions = {
-  ...editorOptions,
-  lineNumbers: 'off' as const,
-}
 
 export function PolicyDefinition() {
   const theme = useTheme()
@@ -184,18 +186,40 @@ export function PolicyDefinition() {
     setInputJson(stringifyEvalMap(selectedEval.input as PolicyEvalMap))
   }, [selectedEval])
 
+  const workbenchPrompt = useMemo(
+    () =>
+      buildPolicyWorkbenchPrompt({
+        name: policy?.name,
+        policy: editorValue,
+        input: inputJson,
+      }),
+    [editorValue, inputJson, policy?.name]
+  )
+
   useLayoutEffect(() => {
     setHeaderActions(
       <DefinitionActions
+        backLabel={policy?.name ?? 'Policy'}
         dirty={dirty}
         onDelete={onDelete}
         onEdit={onEdit}
         onRevert={onRevert}
         onSave={onSave}
         saving={saving}
+        workbenchPrompt={workbenchPrompt}
       />
     )
-  }, [dirty, onDelete, onEdit, onRevert, onSave, saving, setHeaderActions])
+  }, [
+    dirty,
+    onDelete,
+    onEdit,
+    onRevert,
+    onSave,
+    policy?.name,
+    saving,
+    setHeaderActions,
+    workbenchPrompt,
+  ])
 
   useEffect(() => () => setHeaderActions(null), [setHeaderActions])
 
@@ -223,112 +247,113 @@ export function PolicyDefinition() {
           </EditorBodySC>
         </EditorColumnSC>
         <SimulatorColumnSC>
-          <SimulatorTopSC>
-            <PolicyPanelHeader>Simulator</PolicyPanelHeader>
-            <SimulatorBodySC>
-              <FormField label="Past evals">
-                <Select
-                  isDisabled={evalOptions.length === 0}
-                  label={
-                    selectedEvalLabel ??
-                    (evalOptions.length === 0
-                      ? 'No past evaluations'
-                      : 'Select a past eval')
-                  }
-                  onSelectionChange={(id) => onSelectEval(`${id}`)}
-                  selectedKey={selectedEval?.id}
-                  dropdownFooterFixed={
-                    pageInfo?.hasNextPage ? (
-                      <ListBoxFooterPlus onClick={() => fetchNextPage()}>
-                        Load more
-                      </ListBoxFooterPlus>
-                    ) : undefined
-                  }
+          <PolicyPanelHeader>Simulator</PolicyPanelHeader>
+          <SimulatorBodySC>
+            <FormField label="Past evals">
+              <SelectRowSC>
+                <SelectGrowSC>
+                  <Select
+                    isDisabled={evalOptions.length === 0}
+                    label={
+                      selectedEvalLabel ??
+                      (evalOptions.length === 0
+                        ? 'No past evaluations'
+                        : 'Select a past eval')
+                    }
+                    onSelectionChange={(id) => onSelectEval(`${id}`)}
+                    selectedKey={selectedEval?.id}
+                    dropdownFooterFixed={
+                      pageInfo?.hasNextPage ? (
+                        <ListBoxFooterPlus onClick={() => fetchNextPage()}>
+                          Load more
+                        </ListBoxFooterPlus>
+                      ) : undefined
+                    }
+                  >
+                    {evalOptions.map(({ id, label }) => (
+                      <ListBoxItem
+                        key={id}
+                        label={label}
+                        textValue={label}
+                      />
+                    ))}
+                  </Select>
+                </SelectGrowSC>
+                <Button
+                  css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+                  disabled={!inputIsValid || !policy?.id}
+                  loading={evaluating}
+                  onClick={onRun}
+                  primary
                 >
-                  {evalOptions.map(({ id, label }) => (
-                    <ListBoxItem
-                      key={id}
-                      label={label}
-                      textValue={label}
+                  Run simulation
+                </Button>
+              </SelectRowSC>
+            </FormField>
+            <JsonPanelSC>
+              <OverlineH1 $color="text-xlight">Input</OverlineH1>
+              <JsonBlockSC>
+                <Code
+                  css={{ flex: 1, minHeight: 0 }}
+                  height="100%"
+                  language="json"
+                  showHeader={false}
+                >
+                  {inputJson}
+                </Code>
+              </JsonBlockSC>
+            </JsonPanelSC>
+            {evalError && <GqlError error={evalError} />}
+            <OutputBodySC>
+              <Flex
+                align="center"
+                justify="space-between"
+              >
+                <OverlineH1 $color="text-xlight">Output</OverlineH1>
+                {evaluating ? (
+                  <Chip
+                    loading
+                    severity="info"
+                    size="small"
+                  >
+                    Running
+                  </Chip>
+                ) : (
+                  <Chip
+                    severity={decision?.severity ?? 'neutral'}
+                    size="small"
+                  >
+                    {decision?.label ?? 'Not run yet'}
+                  </Chip>
+                )}
+              </Flex>
+              {evaluating ? (
+                <OutputSkeletonSC>
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <RectangleSkeleton
+                      key={index}
+                      $height={30}
+                      $width="100%"
                     />
                   ))}
-                </Select>
-              </FormField>
-              <JsonPanelSC>
-                <OverlineH1 $color="text-xlight">Input</OverlineH1>
-                <EditorWrapSC>
-                  <CodeEditor
-                    key={selectedEval?.id ?? 'input'}
-                    height="100%"
-                    language="json"
-                    onChange={setInputJson}
-                    options={jsonEditorOptions}
-                    value={inputJson}
-                  />
-                </EditorWrapSC>
-              </JsonPanelSC>
-              {evalError && <GqlError error={evalError} />}
-              <Button
-                css={{ width: '100%' }}
-                disabled={!inputIsValid || !policy?.id}
-                loading={evaluating}
-                onClick={onRun}
-                primary
-                small
-              >
-                Run simulation
-              </Button>
-            </SimulatorBodySC>
-          </SimulatorTopSC>
-          <OutputBodySC>
-            <Flex
-              align="center"
-              justify="space-between"
-            >
-              <OverlineH1 $color="text-xlight">Output</OverlineH1>
-              {evaluating ? (
-                <Chip
-                  loading
-                  severity="info"
-                  size="small"
-                >
-                  Running
-                </Chip>
+                </OutputSkeletonSC>
+              ) : output == null ? (
+                <OutputEmptySC>
+                  No output yet. Pick a past evaluation, then run it against the
+                  current buffer.
+                </OutputEmptySC>
               ) : (
-                <Chip
-                  severity={decision?.severity ?? 'neutral'}
-                  size="small"
+                <Code
+                  css={{ flex: 1, minHeight: 0 }}
+                  height="100%"
+                  language="json"
+                  showHeader={false}
                 >
-                  {decision?.label ?? 'Not run yet'}
-                </Chip>
+                  {stringifyEvalMap(output)}
+                </Code>
               )}
-            </Flex>
-            {evaluating ? (
-              <OutputSkeletonSC>
-                {Array.from({ length: 5 }, (_, index) => (
-                  <RectangleSkeleton
-                    key={index}
-                    $height={30}
-                    $width="100%"
-                  />
-                ))}
-              </OutputSkeletonSC>
-            ) : output == null ? (
-              <OutputEmptySC>
-                No output yet. Pick a past evaluation or edit the input, then
-                run it against the current buffer.
-              </OutputEmptySC>
-            ) : (
-              <Code
-                css={{ flex: 1, minHeight: 0 }}
-                height="100%"
-                language="json"
-                showHeader={false}
-              >
-                {stringifyEvalMap(output)}
-              </Code>
-            )}
-          </OutputBodySC>
+            </OutputBodySC>
+          </SimulatorBodySC>
         </SimulatorColumnSC>
       </WrapperSC>
       <PolicyEditModal
@@ -362,15 +387,19 @@ export function PolicyDefinition() {
 }
 
 function DefinitionActions({
+  backLabel,
   dirty,
   saving,
+  workbenchPrompt,
   onRevert,
   onSave,
   onEdit,
   onDelete,
 }: {
+  backLabel: string
   dirty: boolean
   saving: boolean
+  workbenchPrompt: string
   onRevert: () => void
   onSave: () => void
   onEdit: () => void
@@ -380,6 +409,16 @@ function DefinitionActions({
 
   return (
     <>
+      <SendToWorkbenchButton
+        backLabel={backLabel}
+        editable
+        initialPrompt={workbenchPrompt}
+        popoverTitle="Send policy to workbench"
+        selectText={POLICY_UPDATE_PLACEHOLDER}
+        submitLabel="Update with workbench"
+        secondary
+        small
+      />
       <Button
         disabled={!dirty}
         onClick={onRevert}
@@ -449,15 +488,6 @@ const SimulatorColumnSC = styled.section({
   overflow: 'hidden',
 })
 
-const SimulatorTopSC = styled.div(({ theme }) => ({
-  borderBottom: theme.borders.default,
-  display: 'flex',
-  flex: 1,
-  flexDirection: 'column',
-  minHeight: 0,
-  overflow: 'hidden',
-}))
-
 const EditorBodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
@@ -474,7 +504,7 @@ const SimulatorBodySC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
   minHeight: 0,
-  overflow: 'hidden',
+  overflow: 'auto',
   padding: theme.spacing.medium,
 }))
 
@@ -483,9 +513,8 @@ const OutputBodySC = styled.div(({ theme }) => ({
   flex: 1,
   flexDirection: 'column',
   gap: theme.spacing.small,
-  minHeight: 0,
+  minHeight: 140,
   overflow: 'hidden',
-  padding: theme.spacing.medium,
 }))
 
 const OutputSkeletonSC = styled.div(({ theme }) => ({
@@ -511,13 +540,41 @@ const OutputEmptySC = styled.div(({ theme }) => ({
   textAlign: 'center',
 }))
 
+const SelectRowSC = styled.div(({ theme }) => ({
+  alignItems: 'stretch',
+  display: 'flex',
+  gap: theme.spacing.small,
+  minWidth: 0,
+  width: '100%',
+}))
+
+const SelectGrowSC = styled.div({
+  flex: 1,
+  minWidth: 0,
+  '& > .selectInner': {
+    width: '100%',
+  },
+})
+
 const JsonPanelSC = styled.div(({ theme }) => ({
   display: 'flex',
-  flex: 1,
   flexDirection: 'column',
+  flexShrink: 0,
   gap: theme.spacing.small,
-  minHeight: 0,
+  minWidth: 0,
 }))
+
+const JsonBlockSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
+  flexShrink: 0,
+  height: INPUT_JSON_MAX_HEIGHT,
+  maxHeight: INPUT_JSON_MAX_HEIGHT,
+  minHeight: 0,
+  minWidth: 0,
+  overflow: 'hidden',
+  width: '100%',
+})
 
 const EditorWrapSC = styled.div({
   display: 'flex',

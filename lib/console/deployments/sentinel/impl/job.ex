@@ -35,6 +35,7 @@ defmodule Console.Deployments.Sentinel.Impl.Job do
   def handle_continue(:setup, {run, check, pid}) do
     {:ok, count} = Sentinels.spawn_jobs(run, check.name)
     Logger.info "Spawned #{count} sentinel jobs for #{check.name}"
+    send(self(), :poll)
     {:noreply, {run, check, pid}}
   end
 

@@ -51,15 +51,19 @@ const ScrollablePageContent = styled.div<{
 )
 
 const ScrollShadow = styled.div(({ theme }) => ({
-  content: '""',
-  backgroundColor: 'blue',
   position: 'absolute',
   top: '100%',
   left: 0,
   right: 0,
   height: theme.spacing.medium,
   zIndex: theme.zIndexes.base + 10,
-  background: `linear-gradient(0deg, transparent 0%, ${theme.colors['fill-zero']} 90%)`,
+  // Match the app canvas so the fade is invisible until content scrolls under it.
+  // Light uses page-background; dark still paints the route shell with fill-zero.
+  background: `linear-gradient(0deg, transparent 0%, ${
+    theme.mode === 'light'
+      ? theme.colors['page-background']
+      : theme.colors['fill-zero']
+  } 90%)`,
 }))
 
 export function ScrollablePage({

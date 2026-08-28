@@ -124,7 +124,8 @@ export function WorkbenchJobActivities({
                 <ExpandableUserPrompt
                   prompt={job?.prompt}
                   timestamp={job?.insertedAt}
-                  css={{ width: '100%', marginTop: 0 }}
+                  fullWidth
+                  css={{ marginTop: 0 }}
                 />
               )
             }

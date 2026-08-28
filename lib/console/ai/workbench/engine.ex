@@ -61,10 +61,13 @@ defmodule Console.AI.Workbench.Engine do
     %{user: user, workbench: workbench} = job = preload_job(job)
 
     user = Console.Services.Rbac.preload(user)
+    tools = backfill_chat(workbench.tools, job)
+
+    # MCP clients must be up before Environment.new/3 indexes tools via tools/list.
     with {:ok, _} <- Heartbeat.start_link(job),
-         {:ok, skills} <- SkillsUtil.skills(workbench),
-         env = Environment.new(job, backfill_chat(workbench.tools, job), skills),
-         {:ok, _} <- Supervisor.start_link(env) do
+         {:ok, _} <- Supervisor.start_link(tools, job),
+         {:ok, skills} <- SkillsUtil.skills(workbench) do
+      env = Environment.new(job, tools, skills)
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
     else

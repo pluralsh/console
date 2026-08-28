@@ -14,7 +14,7 @@ import { ProfileMenu } from './ProfileMenu'
 
 const HeaderSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-accent'],
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
 }))
 
 const HeaderContentSC = styled.div(({ theme }) => ({

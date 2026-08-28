@@ -4,12 +4,12 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.GitRepositoryCreated do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.PolicySampled do
-  alias Console.Schema.PolicyEvaluation
-
   def process(%@for{ids: ids, input: input, result: {:ok, output}}) do
-    %PolicyEvaluation{}
-    |> PolicyEvaluation.changeset(%{policy_ids: ids, input: input, output: output})
-    |> Console.Repo.insert()
+    Console.Buffers.PolicyEvaluation.submit(%{
+      policy_ids: ids,
+      input: input,
+      output: output
+    })
   end
 
   def process(_), do: :ok

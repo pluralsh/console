@@ -5,7 +5,9 @@ import isJson from 'is-json'
 import { ReactNode, useEffect, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-export function useSlimToolCodeCss() {
+export function useSlimToolCodeCss({
+  showLanguageIcon = false,
+}: { showLanguageIcon?: boolean } = {}) {
   const { colors } = useTheme()
   return {
     overflow: 'auto',
@@ -15,9 +17,11 @@ export function useSlimToolCodeCss() {
       padding: 8,
       color: colors['text-light'],
     },
-    '& > div > div:first-child svg': {
-      display: 'none',
-    },
+    ...(!showLanguageIcon && {
+      '& > div > div:first-child svg': {
+        display: 'none',
+      },
+    }),
   } as const
 }
 

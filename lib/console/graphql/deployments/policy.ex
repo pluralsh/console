@@ -190,16 +190,28 @@ defmodule Console.GraphQl.Deployments.Policy do
     end
 
     @desc "how many workbenches and stacks currently match this bind policy"
-    field :match_count, :integer, resolve: &Deployments.policy_match_count/3
+    field :match_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :match, id)
+    end
 
     @desc "how many sampled evaluations include this policy"
-    field :evaluation_count, :integer, resolve: &Deployments.policy_evaluation_count/3
+    field :evaluation_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :evaluation, id)
+    end
 
     @desc "how many workbenches are currently attached to this policy"
-    field :workbench_attachment_count, :integer, resolve: &Deployments.workbench_attachment_count/3
+    field :workbench_attachment_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :workbench_attachment, id)
+    end
 
     @desc "how many stacks are currently attached to this policy"
-    field :stack_attachment_count, :integer, resolve: &Deployments.stack_attachment_count/3
+    field :stack_attachment_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :stack_attachment, id)
+    end
 
     timestamps()
   end

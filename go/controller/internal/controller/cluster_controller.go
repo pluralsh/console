@@ -153,6 +153,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
+	cluster.SyncPrevTags()
 
 	if apiCluster.Status != nil {
 		for _, condition := range apiCluster.Status.Conditions {

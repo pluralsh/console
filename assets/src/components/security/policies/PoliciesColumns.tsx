@@ -5,7 +5,6 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { PolicyTinyFragment } from 'generated/graphql'
 import { startCase } from 'lodash'
-import { useTheme } from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { Edge } from 'utils/graphql'
 
@@ -67,26 +66,11 @@ export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   header: 'Type',
   meta: { gridTemplate: 'auto' },
   cell: function Cell({ getValue }) {
-    const theme = useTheme()
     const type = getValue()
 
     if (!type) return null
 
-    return (
-      <Chip
-        size="small"
-        fillLevel={1}
-        css={{
-          borderRadius: 20,
-          minWidth: 80,
-          justifyContent: 'center',
-        }}
-      >
-        <span css={{ color: theme.colors['text-xlight'] }}>
-          {startCase(type.toLowerCase())}
-        </span>
-      </Chip>
-    )
+    return <Chip>{startCase(type.toLowerCase())}</Chip>
   },
 })
 

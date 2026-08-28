@@ -8,6 +8,11 @@ defmodule Console.AI.Workbench.Supervisor do
     Supervisor.start_link(__MODULE__, env)
   end
 
+  def start_link(tools, %WorkbenchJob{} = job) when is_list(tools) or is_map(tools) do
+    tools = if is_map(tools), do: tools, else: Map.new(tools, & {&1.name, &1})
+    start_link(%Environment{job: job, tools: tools})
+  end
+
   @impl true
   def init(%Environment{} = env) do
     Map.values(env.tools)

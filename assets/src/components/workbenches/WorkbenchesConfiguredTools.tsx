@@ -70,29 +70,35 @@ export function WorkbenchesConfiguredTools() {
               ({ id, name, tool: type, categories, cloudConnection }) => (
                 <ToolCardSC key={id}>
                   <WorkbenchToolCardBody>
-                    <StackedText
-                      truncate
-                      first={name}
-                      firstPartialType="body2Bold"
-                      firstColor="text"
-                      second={getWorkbenchToolLabel(
-                        type,
-                        cloudConnection?.provider
-                      )}
-                      icon={
-                        <IconFrame
-                          type="secondary"
-                          icon={
-                            <WorkbenchToolIcon
-                              size={20}
-                              type={type}
-                              provider={cloudConnection?.provider}
-                            />
-                          }
-                        />
-                      }
-                      css={{ minWidth: 0, flex: 1, width: '100%' }}
-                    />
+                    <Flex
+                      align="center"
+                      gap="small"
+                      width="100%"
+                      minWidth={0}
+                    >
+                      <IconFrame
+                        type="secondary"
+                        css={{ flexShrink: 0 }}
+                        icon={
+                          <WorkbenchToolIcon
+                            size={20}
+                            type={type}
+                            provider={cloudConnection?.provider}
+                          />
+                        }
+                      />
+                      <StackedText
+                        truncate
+                        first={name}
+                        firstPartialType="body2Bold"
+                        firstColor="text"
+                        second={getWorkbenchToolLabel(
+                          type,
+                          cloudConnection?.provider
+                        )}
+                        css={{ minWidth: 0, flex: 1 }}
+                      />
+                    </Flex>
                     <WorkbenchesConfiguredToolMetadata
                       toolId={id}
                       toolType={type}
@@ -100,6 +106,7 @@ export function WorkbenchesConfiguredTools() {
                     <Flex
                       gap="xsmall"
                       wrap="wrap"
+                      css={{ marginTop: 'auto' }}
                     >
                       {categories?.filter(isNonNullable).map((cat, i) => (
                         <Chip
