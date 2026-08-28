@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/samber/lo"
@@ -13,9 +12,6 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-
-	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -26,47 +22,7 @@ func (in *Opencode) Run(ctx context.Context, options ...exec.Option) {
 }
 
 func (in *Opencode) Configure(consoleURL, consoleToken string) error {
-	if err := in.ConfigureSystemPrompt(console.AgentRuntimeTypeOpencode); err != nil {
-		return err
-	}
-	if err := in.ConfigureSkills(in.skillsPath()); err != nil {
-		return err
-	}
-
-	input := &ConfigTemplateInput{
-		ConsoleURL:            consoleURL,
-		ConsoleToken:          consoleToken,
-		AgentRunID:            in.Config.Run.ID,
-		Provider:              in.provider,
-		OpenAICompatible:      in.openaiCompatible,
-		Endpoint:              in.Config.Run.Runtime.Config.OpenCode.Endpoint,
-		Model:                 in.model,
-		Token:                 in.Config.Run.Runtime.Config.OpenCode.Token,
-		Mode:                  in.Config.Run.Mode,
-		DindEnabled:           in.Config.Run.DindEnabled,
-		StreamingProxy:        in.Config.Run.IsStreamingProxyEnabled(),
-		StreamingProxyBaseURL: common.AgentOpenAIBaseURL,
-	}
-
-	_, content, err := configTemplate(input)
-	if err != nil {
-		return err
-	}
-
-	if err = helpers.File().Create(in.configFilePath(), content, 0644); err != nil {
-		return fmt.Errorf("failed configuring opencode config file %q: %w", ConfigFileName, err)
-	}
-
-	klog.V(log.LogLevelExtended).InfoS(
-		"opencode configured",
-		"configFile", in.configFilePath(),
-		"provider", in.provider,
-		"model", in.model,
-		"endpoint", in.Config.Run.Runtime.Config.OpenCode.Endpoint,
-		"mode", in.Config.Run.Mode,
-	)
-
-	return nil
+	return Configure(in.Config, consoleURL, consoleToken, in.provider, in.model, in.openaiCompatible)
 }
 
 func (in *Opencode) OnMessage(f v1.MessageCallback) {
@@ -297,15 +253,15 @@ func (in *Opencode) agent() string {
 }
 
 func (in *Opencode) configFilePath() string {
-	return path.Join(in.providerPath(), ConfigFileName)
+	return opencodeConfigFilePath(in.Config)
 }
 
 func (in *Opencode) skillsPath() string {
-	return path.Join(in.providerPath(), "skills")
+	return opencodeSkillsPath(in.Config)
 }
 
 func (in *Opencode) providerPath() string {
-	return filepath.Join(in.Config.WorkDir, ".opencode")
+	return opencodeProviderPath(in.Config)
 }
 
 func truncateForLog(value string, limit int) string {
@@ -439,23 +395,19 @@ func (in *Opencode) ConfigureBabysitRun() error {
 }
 
 func (in *Opencode) env(configFilePath string) []string {
-	return []string{
-		fmt.Sprintf("OPENCODE_CONFIG=%s", configFilePath),
-		fmt.Sprintf("XDG_CONFIG_HOME=%s", in.configHome()),
-		fmt.Sprintf("XDG_DATA_HOME=%s", in.dataHome()),
-	}
+	return opencodeEnv(in.Config, configFilePath)
 }
 
 func (in *Opencode) configHome() string {
-	return filepath.Join(in.Config.WorkDir, ".config")
+	return opencodeConfigHome(in.Config)
 }
 
 func (in *Opencode) dataPath() string {
-	return filepath.Join(in.dataHome(), "opencode")
+	return filepath.Join(opencodeDataHome(in.Config), "opencode")
 }
 
 func (in *Opencode) dataHome() string {
-	return filepath.Join(in.Config.WorkDir, ".local", "share")
+	return opencodeDataHome(in.Config)
 }
 
 func (in *Opencode) recordSessionID(sessionID string) {

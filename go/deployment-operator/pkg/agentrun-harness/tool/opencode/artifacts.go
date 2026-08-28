@@ -1,11 +1,9 @@
 package opencode
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
-	stdexec "os/exec"
 	"path/filepath"
 
 	"k8s.io/klog/v2"
@@ -48,27 +46,5 @@ func (in *Opencode) exportSession(ctx context.Context, path string) error {
 		return fmt.Errorf("opencode session id is not set")
 	}
 
-	configFilePath, err := filepath.Abs(in.configFilePath())
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("create opencode session export %q: %w", path, err)
-	}
-	defer file.Close()
-
-	var stderr bytes.Buffer
-	cmd := stdexec.CommandContext(ctx, "opencode", "export", in.sessionID)
-	cmd.Env = append(os.Environ(), in.env(configFilePath)...)
-	cmd.Dir = in.Config.RepositoryDir
-	cmd.Stdout = file
-	cmd.Stderr = &stderr
-
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("opencode export session %q: %w: %s", in.sessionID, err, stderr.String())
-	}
-
-	return nil
+	return ExportSession(ctx, in.Config, in.sessionID, path)
 }

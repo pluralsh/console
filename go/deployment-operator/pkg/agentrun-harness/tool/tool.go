@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/acp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/claude"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/codex"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/opencode"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/pi"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -21,7 +21,7 @@ func New(runtimeType console.AgentRuntimeType, config v1.Config) (v1.Tool, error
 
 	switch runtimeType {
 	case console.AgentRuntimeTypeOpencode:
-		return opencode.New(config), nil
+		return acp.NewOpenCode(config), nil
 	case console.AgentRuntimeTypeClaude:
 		return claude.New(config), nil
 	case console.AgentRuntimeTypeGemini:
