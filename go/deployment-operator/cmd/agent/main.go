@@ -6,13 +6,6 @@ import (
 	"os"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
-	appsv1 "k8s.io/api/apps/v1"
-	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
-
 	kubernetestrace "github.com/DataDog/dd-trace-go/contrib/k8s.io/client-go/v2/kubernetes"
 	datadogtracer "github.com/DataDog/dd-trace-go/v2/ddtrace/tracer"
 	datadogprofiler "github.com/DataDog/dd-trace-go/v2/profiler"
@@ -23,37 +16,43 @@ import (
 	templatesv1 "github.com/open-policy-agent/frameworks/constraint/pkg/apis/templates/v1"
 	constraintstatusv1beta1 "github.com/open-policy-agent/gatekeeper/v3/apis/status/v1beta1"
 	openshift "github.com/openshift/api/config/v1"
-	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
-	pollycache "github.com/pluralsh/console/go/polly/cache"
 	velerov1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
+	appsv1 "k8s.io/api/apps/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 	clusterv1 "sigs.k8s.io/cluster-api/api/core/v1beta2"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
+	console "github.com/pluralsh/console/go/client"
+	deploymentsv1alpha1 "github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
+	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
+	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/internal/utils"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/cache/persist"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/ping"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/scraper"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
-	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
-
-	deploymentsv1alpha1 "github.com/pluralsh/console/go/deployment-operator/api/v1alpha1"
-	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	consolectrl "github.com/pluralsh/console/go/deployment-operator/pkg/controller"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/namespaces"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/controller/service"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/ping"
+	pythonruntime "github.com/pluralsh/console/go/deployment-operator/pkg/python"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/scraper"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/streamline/store"
+	pollycache "github.com/pluralsh/console/go/polly/cache"
 )
 
 var (
@@ -80,6 +79,7 @@ func init() {
 const (
 	httpClientTimout                      = time.Second * 5
 	existingOperatorInitialPollDeferAfter = time.Hour
+	consoleManagerShutdownTimeout         = 30 * time.Second
 )
 
 func main() {
@@ -130,6 +130,9 @@ func main() {
 	// Apply AgentConfiguration before initializing caches. Direct apiserver load is
 	// sufficient for startup; the kube reconciler continues to own live updates afterward.
 	loadAgentConfigurationOrDie(ctx, kubeManager.GetAPIReader())
+
+	pythonRuntimeCleanup := initPythonRuntimeOrDie()
+	defer pythonRuntimeCleanup()
 	if err := deferPollOnInstall(ctx, kubeManager.GetAPIReader(), args.DeferPollOnInstall(), time.Now()); err != nil {
 		setupLog.Error(err, "unable to determine deployment operator age for initial poll")
 	}
@@ -226,10 +229,38 @@ func main() {
 	// Block the main thread until context cancel.
 	<-ctx.Done()
 	setupLog.Info("shutting down")
+	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), consoleManagerShutdownTimeout)
+	if err := consoleManager.Wait(shutdownCtx); err != nil {
+		setupLog.Error(err, "unable to wait for console controller manager shutdown")
+	}
+	cancelShutdown()
 	cacheStore.WaitPeriodic()
 	setupLog.Info("exporting durable cache snapshot")
 	if err := saveCaches(); err != nil {
 		setupLog.Error(err, "unable to persist cache snapshot")
+	}
+}
+
+// initPythonRuntimeOrDie initializes the process-wide Python pool and returns
+// the cleanup function that unregisters and closes it during shutdown.
+func initPythonRuntimeOrDie() func() {
+	maxConcurrentReconciles := args.MaxConcurrentReconciles()
+	if configured := common.GetConfigurationManager().GetMaxConcurrentReconciles(); configured != nil && *configured > 0 {
+		maxConcurrentReconciles = *configured
+	}
+
+	pythonPool, err := pythonruntime.NewPool(maxConcurrentReconciles)
+	if err != nil {
+		setupLog.Error(err, "unable to initialize Python runtime")
+		os.Exit(1)
+	}
+
+	pythonruntime.SetDefaultPool(pythonPool)
+	return func() {
+		pythonruntime.SetDefaultPool(nil)
+		if err := pythonPool.Close(); err != nil {
+			setupLog.Error(err, "unable to shutdown Python runtime")
+		}
 	}
 }
 

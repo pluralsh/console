@@ -8097,6 +8097,9 @@ type ServiceDeploymentForAgent_Helm struct {
 	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	PythonFile          *string   "json:\"pythonFile,omitempty\" graphql:\"pythonFile\""
+	PythonFolder        *string   "json:\"pythonFolder,omitempty\" graphql:\"pythonFolder\""
+	PythonScript        *string   "json:\"pythonScript,omitempty\" graphql:\"pythonScript\""
 	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
 	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
 	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
@@ -8137,6 +8140,24 @@ func (t *ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaScript
+}
+func (t *ServiceDeploymentForAgent_Helm) GetPythonFile() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFile
+}
+func (t *ServiceDeploymentForAgent_Helm) GetPythonFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFolder
+}
+func (t *ServiceDeploymentForAgent_Helm) GetPythonScript() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonScript
 }
 func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
 	if t == nil {
@@ -9408,6 +9429,9 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm s
 	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	PythonFile          *string   "json:\"pythonFile,omitempty\" graphql:\"pythonFile\""
+	PythonFolder        *string   "json:\"pythonFolder,omitempty\" graphql:\"pythonFolder\""
+	PythonScript        *string   "json:\"pythonScript,omitempty\" graphql:\"pythonScript\""
 	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
 	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
 	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
@@ -9448,6 +9472,24 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaScript
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetPythonFile() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFile
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetPythonFolder() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFolder
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetPythonScript() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonScript
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
 	if t == nil {
@@ -23191,6 +23233,9 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_He
 	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	PythonFile          *string   "json:\"pythonFile,omitempty\" graphql:\"pythonFile\""
+	PythonFolder        *string   "json:\"pythonFolder,omitempty\" graphql:\"pythonFolder\""
+	PythonScript        *string   "json:\"pythonScript,omitempty\" graphql:\"pythonScript\""
 	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
 	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
 	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
@@ -23231,6 +23276,24 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaScript
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetPythonFile() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFile
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetPythonFolder() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFolder
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetPythonScript() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonScript
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
 	if t == nil {
@@ -23765,6 +23828,9 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
 	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	PythonFile          *string   "json:\"pythonFile,omitempty\" graphql:\"pythonFile\""
+	PythonFolder        *string   "json:\"pythonFolder,omitempty\" graphql:\"pythonFolder\""
+	PythonScript        *string   "json:\"pythonScript,omitempty\" graphql:\"pythonScript\""
 	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
 	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
 	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
@@ -23805,6 +23871,24 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaScript
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetPythonFile() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFile
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetPythonFolder() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonFolder
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetPythonScript() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.PythonScript
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
 	if t == nil {
@@ -56073,6 +56157,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		luaScript
 		luaFile
 		luaFolder
+		pythonScript
+		pythonFile
+		pythonFolder
 		kustomizePostrender
 	}
 	configuration {
@@ -56638,6 +56725,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		luaScript
 		luaFile
 		luaFolder
+		pythonScript
+		pythonFile
+		pythonFolder
 		kustomizePostrender
 	}
 	configuration {

@@ -31,6 +31,9 @@ func serviceConfiguration(svc *console.ServiceDeploymentForAgent) map[string]int
 			"LuaScript":           svc.Helm.LuaScript,
 			"LuaFile":             svc.Helm.LuaFile,
 			"LuaFolder":           svc.Helm.LuaFolder,
+			"PythonScript":        svc.Helm.PythonScript,
+			"PythonFile":          svc.Helm.PythonFile,
+			"PythonFolder":        svc.Helm.PythonFolder,
 			"KustomizePostrender": svc.Helm.KustomizePostrender,
 		}
 
@@ -43,7 +46,11 @@ func serviceConfiguration(svc *console.ServiceDeploymentForAgent) map[string]int
 	return res
 }
 
-func clusterConfiguration(cluster *console.ServiceDeploymentForAgent_Cluster) map[string]interface{} {
+func clusterConfiguration(cluster *console.ServiceDeploymentForAgent_Cluster) map[string]any {
+	if cluster == nil {
+		cluster = &console.ServiceDeploymentForAgent_Cluster{}
+	}
+
 	res := map[string]interface{}{
 		"ID":             cluster.ID,
 		"Self":           cluster.Self,
