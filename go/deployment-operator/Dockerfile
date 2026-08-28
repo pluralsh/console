@@ -1,4 +1,4 @@
-FROM golang:1.26.5-alpine3.23 AS builder
+FROM golang:1.26.6-alpine3.23 AS builder
 
 ARG HELM_VERSION=v3.21.2
 ARG TARGETARCH

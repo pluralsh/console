@@ -1247,6 +1247,7 @@ query WorkbenchJobActivities($id: ID!) {
     id
     status
     prompt
+    insertedAt
     modes {
       ...WorkbenchJobModesFields
     }

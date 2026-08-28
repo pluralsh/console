@@ -1,26 +1,46 @@
 import { Navigate, Route } from 'react-router-dom'
 
+import { Gatekeeper } from 'components/security/gatekeeper/Gatekeeper'
+import Constraint from 'components/security/gatekeeper/constraint/Constraint'
+import { AttachmentRuleCreateOrEdit } from 'components/security/policies/AttachmentRuleCreateOrEdit'
+import { AttachmentRules } from 'components/security/policies/AttachmentRules'
 import { Policies } from 'components/security/policies/Policies'
-import Policy from 'components/security/policies/policy/Policy'
+import { PoliciesList } from 'components/security/policies/PoliciesList'
+import { PolicyAttachments } from 'components/security/policies/policy/PolicyAttachments'
+import { PolicyCreateOrEdit } from 'components/security/policies/PolicyCreateOrEdit'
+import { PolicyDefinition } from 'components/security/policies/policy/PolicyDefinition'
+import { PolicyDetails } from 'components/security/policies/policy/PolicyDetails'
+import { PolicyEvaluations } from 'components/security/policies/policy/PolicyEvaluations'
 import { Security } from 'components/security/Security'
 import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnReports'
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
 
 import {
+  ATTACHMENT_RULES_PARAM_ID,
   COMPLIANCE_REPORTS_ABS_PATH,
+  GATEKEEPER_ABS_PATH,
+  GATEKEEPER_AFFECTED_RESOURCES_PATH,
+  GATEKEEPER_DETAILS_PATH,
+  GATEKEEPER_PARAM_ID,
+  GATEKEEPER_REL_PATH,
   POLICIES_ABS_PATH,
-  POLICIES_AFFECTED_RESOURCES_PATH,
-  POLICIES_DETAILS_PATH,
+  POLICIES_ATTACHMENT_RULES_REL_PATH,
+  POLICIES_ATTACHMENTS_REL_PATH,
+  POLICIES_CREATE_REL_PATH,
+  POLICIES_DEFINITION_REL_PATH,
+  POLICIES_EDIT_REL_PATH,
+  POLICIES_EVALUATIONS_REL_PATH,
+  POLICIES_EVAL_PARAM_ID,
+  POLICIES_PARAM_ID,
   POLICIES_REL_PATH,
-  POLICY_PARAM_ID,
   SECURITY_OVERVIEW_ABS_PATH,
   SECURITY_REL_PATH,
   VULNERABILITY_REPORT_PARAM_ID,
   VULNERABILITY_REPORTS_ABS_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
 } from './securityRoutesConsts'
-import PolicyDetails from 'components/security/policies/policy/details/PolicyDetails'
-import PolicyAffectedResources from 'components/security/policies/policy/affectedResources/PolicyAffectedResources'
+import ConstraintDetails from 'components/security/gatekeeper/constraint/details/ConstraintDetails'
+import ConstraintAffectedResources from 'components/security/gatekeeper/constraint/affectedResources/ConstraintAffectedResources'
 import { KUBERNETES_PARAM_CLUSTER } from './kubernetesRoutesConsts'
 import Cluster from 'components/kubernetes/Cluster'
 import { SecurityOverview } from 'components/security/overview/SecurityOverview'
@@ -51,6 +71,31 @@ export const securityRoutes = [
     <Route
       path={POLICIES_REL_PATH}
       element={<Policies />}
+    >
+      <Route
+        index
+        element={<PoliciesList />}
+      />
+      <Route
+        path={POLICIES_ATTACHMENT_RULES_REL_PATH}
+        element={<AttachmentRules />}
+      />
+    </Route>
+    <Route
+      path={`${POLICIES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
+      element={<PolicyCreateOrEdit />}
+    />
+    <Route
+      path={`${POLICIES_REL_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}/${POLICIES_CREATE_REL_PATH}`}
+      element={<AttachmentRuleCreateOrEdit mode="create" />}
+    />
+    <Route
+      path={`${POLICIES_REL_PATH}/${POLICIES_ATTACHMENT_RULES_REL_PATH}/:${ATTACHMENT_RULES_PARAM_ID}/${POLICIES_EDIT_REL_PATH}`}
+      element={<AttachmentRuleCreateOrEdit mode="edit" />}
+    />
+    <Route
+      path={GATEKEEPER_REL_PATH}
+      element={<Gatekeeper />}
     />
     <Route
       path={VULNERABILITY_REPORTS_REL_PATH}
@@ -69,29 +114,59 @@ export const securityRoutes = [
     </Route>
   </Route>,
   <Route
-    path={`${VULNERABILITY_REPORTS_ABS_PATH}/${KUBERNETES_PARAM_CLUSTER}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
-    element={<VulnerabilityReportDetails />}
-  />,
-  <Route
-    path={`${POLICIES_ABS_PATH}/:${POLICY_PARAM_ID}`}
-    element={<Policy />}
+    path={`${POLICIES_ABS_PATH}/:${POLICIES_PARAM_ID}`}
+    element={<PolicyDetails />}
   >
     <Route
       index
       element={
         <Navigate
           replace
-          to={`${POLICIES_DETAILS_PATH}`}
+          to={POLICIES_DEFINITION_REL_PATH}
         />
       }
     />
     <Route
-      path={`${POLICIES_DETAILS_PATH}`}
-      element={<PolicyDetails />}
+      path={POLICIES_DEFINITION_REL_PATH}
+      element={<PolicyDefinition />}
     />
     <Route
-      path={`${POLICIES_AFFECTED_RESOURCES_PATH}`}
-      element={<PolicyAffectedResources />}
+      path={POLICIES_EVALUATIONS_REL_PATH}
+      element={<PolicyEvaluations />}
+    />
+    <Route
+      path={`${POLICIES_EVALUATIONS_REL_PATH}/:${POLICIES_EVAL_PARAM_ID}`}
+      element={<PolicyEvaluations />}
+    />
+    <Route
+      path={POLICIES_ATTACHMENTS_REL_PATH}
+      element={<PolicyAttachments />}
+    />
+  </Route>,
+  <Route
+    path={`${VULNERABILITY_REPORTS_ABS_PATH}/${KUBERNETES_PARAM_CLUSTER}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
+    element={<VulnerabilityReportDetails />}
+  />,
+  <Route
+    path={`${GATEKEEPER_ABS_PATH}/:${GATEKEEPER_PARAM_ID}`}
+    element={<Constraint />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={`${GATEKEEPER_DETAILS_PATH}`}
+        />
+      }
+    />
+    <Route
+      path={`${GATEKEEPER_DETAILS_PATH}`}
+      element={<ConstraintDetails />}
+    />
+    <Route
+      path={`${GATEKEEPER_AFFECTED_RESOURCES_PATH}`}
+      element={<ConstraintAffectedResources />}
     />
   </Route>,
 ]
