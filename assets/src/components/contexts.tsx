@@ -1,6 +1,7 @@
 import {
   fetchRefreshToken,
   fetchToken,
+  setRefreshToken,
   setToken,
   wipeRefreshToken,
   wipeToken,
@@ -96,6 +97,9 @@ export function LoginContextProvider({
   const [refreshQuery, { loading: refreshLoading }] = useRefreshLazyQuery({
     onCompleted: (res) => {
       setToken(res.refresh?.jwt)
+      if (res.refresh?.refreshToken?.token) {
+        setRefreshToken(res.refresh.refreshToken.token)
+      }
       if (!res.refresh?.jwt) {
         logout()
       }

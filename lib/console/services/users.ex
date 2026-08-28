@@ -259,12 +259,17 @@ defmodule Console.Services.Users do
   """
   @spec authorize_refresh(binary) :: user_resp
   def authorize_refresh(token) when is_binary(token) do
-    get_refresh_token(token)
-    |> Repo.preload([:user])
-    |> case do
-      %RefreshToken{user: user} -> {:ok, user}
-      _ -> {:error, "could not fetch refresh token"}
-    end
+    start_transaction()
+    |> add_operation(:token, fn _ ->
+      case Repo.preload(get_refresh_token(token), [:user]) do
+        %RefreshToken{user: %User{}} = rt -> {:ok, rt}
+        _ -> {:error, "could not fetch refresh token"}
+      end
+    end)
+    |> add_operation(:user, fn %{token: token} -> {:ok, token.user} end)
+    |> add_refresh_token()
+    |> add_operation(:clean, fn %{token: token} -> Repo.delete(token) end)
+    |> execute(extract: :hydrated)
   end
   def authorize_refresh(_), do: {:error, "no refresh token provided"}
 
