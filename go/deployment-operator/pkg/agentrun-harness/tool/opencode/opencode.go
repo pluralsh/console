@@ -246,10 +246,10 @@ func (in *Opencode) args(prompt string, resume bool) []string {
 
 func (in *Opencode) agent() string {
 	if in.Config.Run.Mode == console.AgentRunModeAnalyze {
-		return defaultAnalysisAgent
+		return DefaultAnalysisAgent
 	}
 
-	return defaultWriteAgent
+	return DefaultWriteAgent
 }
 
 func (in *Opencode) configFilePath() string {

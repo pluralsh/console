@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/samber/lo"
+
 	console "github.com/pluralsh/console/go/client"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
-	"github.com/samber/lo"
 
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
 
 const (
-	defaultAnalysisAgent = "analysis"
-	defaultWriteAgent    = "autonomous"
+	DefaultAnalysisAgent = "analysis"
+	DefaultWriteAgent    = "autonomous"
 )
 
 // Provider is an OpenCode provider id (https://models.dev).

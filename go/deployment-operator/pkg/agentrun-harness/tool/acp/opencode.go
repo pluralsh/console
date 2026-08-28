@@ -20,9 +20,9 @@ func NewOpenCode(config toolv1.Config) toolv1.Tool {
 	if absolute, err := filepath.Abs(repositoryDir); err == nil {
 		repositoryDir = absolute
 	}
-	mode := "build"
+	mode := opencode.DefaultWriteAgent
 	if config.Run.Mode == console.AgentRunModeAnalyze {
-		mode = "plan"
+		mode = opencode.DefaultAnalysisAgent
 	}
 
 	return New(config,

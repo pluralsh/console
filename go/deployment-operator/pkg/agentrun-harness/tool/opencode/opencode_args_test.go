@@ -21,7 +21,7 @@ func TestOpencodeArgs(t *testing.T) {
 	want := []string{
 		"run",
 		"--format", "json",
-		"--agent", defaultWriteAgent,
+		"--agent", DefaultWriteAgent,
 		"--model", "anthropic/claude-sonnet-4-6",
 		"fix bug",
 	}
@@ -43,7 +43,7 @@ func TestOpencodeArgsResume(t *testing.T) {
 	want := []string{
 		"run",
 		"--format", "json",
-		"--agent", defaultAnalysisAgent,
+		"--agent", DefaultAnalysisAgent,
 		"--model", "anthropic/claude-sonnet-4-6",
 		"--session", sessionID,
 		"continue analysis",
