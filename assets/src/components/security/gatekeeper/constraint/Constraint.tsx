@@ -6,35 +6,34 @@ import {
 import { useMemo } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import {
-  POLICIES_AFFECTED_RESOURCES_PATH,
-  POLICIES_DETAILS_PATH,
+  GATEKEEPER_AFFECTED_RESOURCES_PATH,
+  GATEKEEPER_DETAILS_PATH,
 } from 'routes/securityRoutesConsts'
 
 import { ResponsiveLayoutSidenavContainer } from '../../../utils/layout/ResponsiveLayoutSidenavContainer'
 
 import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage'
 
-export type PolicyContextType = {
+export type ConstraintContextType = {
   policy: PolicyConstraintQuery['policyConstraint']
   loading: boolean
 }
 
-function Policy() {
+function Constraint() {
   const params = useParams()
   const navigate = useNavigate()
-
-  const { policyId } = params
+  const { constraintId } = params
 
   const route = params['*']
   const { data, loading } = usePolicyConstraintQuery({
     variables: {
-      id: policyId || '',
+      id: constraintId || '',
     },
   })
 
   const policy = data?.policyConstraint
 
-  const ctx: PolicyContextType = useMemo(
+  const ctx: ConstraintContextType = useMemo(
     () => ({
       policy,
       loading,
@@ -47,24 +46,24 @@ function Policy() {
       <ResponsiveLayoutSidenavContainer css={{ paddingTop: '57px' }}>
         <TreeNav>
           <TreeNavEntry
-            key={POLICIES_DETAILS_PATH}
+            key={GATEKEEPER_DETAILS_PATH}
             label="Details"
             onClick={() => {
-              if (!route?.includes(POLICIES_DETAILS_PATH)) {
-                navigate(POLICIES_DETAILS_PATH)
+              if (!route?.includes(GATEKEEPER_DETAILS_PATH)) {
+                navigate(GATEKEEPER_DETAILS_PATH)
               }
             }}
-            active={route?.includes(POLICIES_DETAILS_PATH)}
+            active={route?.includes(GATEKEEPER_DETAILS_PATH)}
           />
           <TreeNavEntry
-            key={POLICIES_AFFECTED_RESOURCES_PATH}
+            key={GATEKEEPER_AFFECTED_RESOURCES_PATH}
             label="Affected Resources"
             onClick={() => {
-              if (!route?.includes(POLICIES_AFFECTED_RESOURCES_PATH)) {
-                navigate(POLICIES_AFFECTED_RESOURCES_PATH)
+              if (!route?.includes(GATEKEEPER_AFFECTED_RESOURCES_PATH)) {
+                navigate(GATEKEEPER_AFFECTED_RESOURCES_PATH)
               }
             }}
-            active={route?.includes(POLICIES_AFFECTED_RESOURCES_PATH)}
+            active={route?.includes(GATEKEEPER_AFFECTED_RESOURCES_PATH)}
           />
         </TreeNav>
       </ResponsiveLayoutSidenavContainer>
@@ -73,4 +72,4 @@ function Policy() {
   )
 }
 
-export default Policy
+export default Constraint

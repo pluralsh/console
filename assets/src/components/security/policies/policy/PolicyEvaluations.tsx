@@ -1,0 +1,341 @@
+import {
+  Chip,
+  Code,
+  EmptyState,
+  Flex,
+  IconFrame,
+  InfoOutlineIcon,
+  Tab,
+  TabList,
+} from '@pluralsh/design-system'
+import { useEnsurePagedItem } from 'components/hooks/useEnsurePagedItem'
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { StackedText } from 'components/utils/table/StackedText'
+import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
+import {
+  PolicyEvaluationFragment,
+  PolicyType,
+  usePolicyEvaluationsQuery,
+} from 'generated/graphql'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
+import {
+  POLICIES_EVAL_PARAM_ID,
+  POLICIES_PARAM_ID,
+  getPolicyEvalAbsPath,
+} from 'routes/securityRoutesConsts'
+import styled, { useTheme } from 'styled-components'
+import { formatDateTime, fromNow } from 'utils/datetime'
+import { mapExistingNodes } from 'utils/graphql'
+import { PolicyDetailsContext } from './PolicyDetails'
+import { PolicyEvaluationsSidePanel } from './PolicyEvaluationsSidePanel'
+import { PolicyPanelHeader } from './PolicyPanelHeader'
+import {
+  formatEvalId,
+  getPolicyEvalDecision,
+  getPolicyEvalTarget,
+  getPolicyEvalToolName,
+  PolicyEvalMap,
+  stringifyEvalMap,
+} from './policyEval'
+
+type DetailTab = 'input' | 'output'
+
+const detailTabs: { key: DetailTab; label: string }[] = [
+  { key: 'input', label: 'Input' },
+  { key: 'output', label: 'Output' },
+]
+
+export function PolicyEvaluations() {
+  const theme = useTheme()
+  const navigate = useNavigate()
+  const { policy } = useOutletContext<PolicyDetailsContext>()
+  const params = useParams()
+  const policyId = policy?.id ?? params[POLICIES_PARAM_ID] ?? ''
+  const evalIdFromPath = params[POLICIES_EVAL_PARAM_ID]
+  const [detailTab, setDetailTab] = useState<DetailTab>('input')
+  const detailTabsStateRef = useRef<any>(undefined)
+
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: usePolicyEvaluationsQuery,
+        keyPath: ['policy', 'policyEvaluations'],
+        skip: !policyId,
+      },
+      { id: policyId }
+    )
+
+  const evals = useMemo(
+    () => mapExistingNodes(data?.policy?.policyEvaluations),
+    [data]
+  )
+  const { item: selectedEvalFromPath, waiting: waitingForEval } =
+    useEnsurePagedItem(evals, evalIdFromPath, {
+      data,
+      loading,
+      hasNextPage: pageInfo?.hasNextPage,
+      fetchNextPage,
+    })
+  const selectedEval =
+    selectedEvalFromPath ?? (waitingForEval ? null : (evals[0] ?? null))
+
+  useEffect(() => {
+    if (!selectedEval?.id || evalIdFromPath === selectedEval.id) return
+
+    navigate(getPolicyEvalAbsPath(policyId, selectedEval.id), { replace: true })
+  }, [evalIdFromPath, navigate, policyId, selectedEval?.id])
+
+  useEffect(() => {
+    setDetailTab('input')
+  }, [selectedEval?.id])
+
+  if (error) return <GqlError error={error} />
+
+  return (
+    <WrapperSC>
+      <PolicyEvaluationsSidePanel
+        evals={evals}
+        policyType={policy?.type}
+        loading={loading && !data}
+        isLoadingNextPage={!!data && loading}
+        hasNextPage={!!pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        onVirtualSliceChange={setVirtualSlice}
+        selectedEvalId={selectedEval?.id}
+        onSelectEvalId={(evalId) =>
+          navigate(getPolicyEvalAbsPath(policyId, evalId))
+        }
+      />
+      {!selectedEval ? (
+        <Flex
+          align="center"
+          flex={1}
+          justify="center"
+          minHeight={0}
+        >
+          {waitingForEval || (loading && !data) ? null : (
+            <EmptyState message="No evaluations available yet." />
+          )}
+        </Flex>
+      ) : (
+        <ColumnsSC>
+          <SummaryPanel
+            evaluation={selectedEval}
+            policyId={policyId}
+            policyName={policy?.name}
+            policyType={policy?.type}
+          />
+          <PanelSC $trimRightBorder>
+            <Flex
+              css={{
+                backgroundColor: theme.colors['fill-one'],
+                width: '100%',
+              }}
+            >
+              <TabList
+                stateRef={detailTabsStateRef}
+                stateProps={{
+                  orientation: 'horizontal',
+                  selectedKey: detailTab,
+                  onSelectionChange: (key) => setDetailTab(key as DetailTab),
+                }}
+                flexShrink={0}
+              >
+                {detailTabs.map((tab) => (
+                  <Tab
+                    key={tab.key}
+                    textValue={tab.label}
+                  >
+                    {tab.label}
+                  </Tab>
+                ))}
+              </TabList>
+              <Flex
+                flex={1}
+                minWidth={0}
+                css={{
+                  alignSelf: 'stretch',
+                  borderBottom: theme.borders.default,
+                }}
+              />
+            </Flex>
+            <PanelBodySC>
+              <OverlineH1
+                $color="text-xlight"
+                css={{ flexShrink: 0 }}
+              >
+                {detailTab === 'input' ? 'Input' : 'Output'}
+              </OverlineH1>
+              <Code
+                language="json"
+                showHeader={false}
+                height="100%"
+                css={{ flex: 1, minHeight: 0 }}
+              >
+                {stringifyEvalMap(
+                  (detailTab === 'input'
+                    ? selectedEval.input
+                    : selectedEval.output) as PolicyEvalMap
+                )}
+              </Code>
+            </PanelBodySC>
+          </PanelSC>
+        </ColumnsSC>
+      )}
+    </WrapperSC>
+  )
+}
+
+function SummaryPanel({
+  evaluation,
+  policyId,
+  policyName,
+  policyType,
+}: {
+  evaluation: PolicyEvaluationFragment
+  policyId: string
+  policyName?: string | null
+  policyType?: PolicyType | null
+}) {
+  const theme = useTheme()
+  const decision = getPolicyEvalDecision(
+    evaluation.output as PolicyEvalMap,
+    policyType
+  )
+  const toolName = getPolicyEvalToolName(evaluation.input as PolicyEvalMap)
+  const target = getPolicyEvalTarget(evaluation.input as PolicyEvalMap)
+  const policyIds = (evaluation.policyIds ?? []).map((id) =>
+    id === policyId && policyName ? policyName : id
+  )
+
+  return (
+    <PanelSC>
+      <PolicyPanelHeader>
+        <Flex
+          align="center"
+          justify="space-between"
+          width="100%"
+        >
+          <span>Summary</span>
+          <IconFrame
+            size="small"
+            type="tertiary"
+            tooltip="A sampled policy decision for a tool invocation."
+            icon={<InfoOutlineIcon />}
+          />
+        </Flex>
+      </PolicyPanelHeader>
+      <PanelBodySC $scroll>
+        <Flex
+          align="center"
+          justify="space-between"
+          gap="small"
+        >
+          <span css={{ ...theme.partials.text.subtitle2 }}>
+            {formatEvalId(evaluation.id)}
+          </span>
+          <Chip severity={decision.severity}>{decision.label}</Chip>
+        </Flex>
+        <span
+          css={{
+            ...theme.partials.text.body1,
+            color: theme.colors['text-long-form'],
+          }}
+        >
+          {toolName}
+          {target && target !== toolName ? ` on ${target}` : ''}
+          {evaluation.insertedAt ? ` · ${fromNow(evaluation.insertedAt)}` : ''}
+        </span>
+        <Subtitle1H1 css={{ marginTop: theme.spacing.large }}>
+          Summary
+        </Subtitle1H1>
+        <span
+          css={{
+            ...theme.partials.text.body1,
+            color: theme.colors['text-long-form'],
+          }}
+        >
+          {decision.reason}
+        </span>
+        <Flex
+          direction="column"
+          gap="medium"
+          css={{ marginTop: theme.spacing.large }}
+        >
+          <StackedText
+            first="policy Ids"
+            firstPartialType="caption"
+            firstColor="text-xlight"
+            second={policyIds.join(', ')}
+            secondPartialType="body2"
+            secondColor="text"
+            gap="xxsmall"
+          />
+          <StackedText
+            first="Ids"
+            firstPartialType="caption"
+            firstColor="text-xlight"
+            second={evaluation.id}
+            secondPartialType="body2"
+            secondColor="text"
+            gap="xxsmall"
+          />
+          <StackedText
+            first="Updated at"
+            firstPartialType="caption"
+            firstColor="text-xlight"
+            second={
+              evaluation.updatedAt
+                ? formatDateTime(evaluation.updatedAt, 'MMMM D, YYYY')
+                : undefined
+            }
+            secondPartialType="body2"
+            secondColor="text"
+            gap="xxsmall"
+          />
+        </Flex>
+      </PanelBodySC>
+    </PanelSC>
+  )
+}
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  minHeight: 0,
+  minWidth: 0,
+  height: '100%',
+  overflow: 'hidden',
+  borderTop: theme.borders.default,
+}))
+
+const ColumnsSC = styled.div({
+  display: 'grid',
+  flex: 1,
+  gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+  gridTemplateRows: 'minmax(0, 1fr)',
+  minHeight: 0,
+  minWidth: 0,
+})
+
+const PanelSC = styled.section<{ $trimRightBorder?: boolean }>(
+  ({ theme, $trimRightBorder }) => ({
+    borderRight: $trimRightBorder ? undefined : theme.borders['fill-one'],
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+    overflow: 'hidden',
+  })
+)
+
+const PanelBodySC = styled.div<{ $scroll?: boolean }>(({ theme, $scroll }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  minHeight: 0,
+  overflow: $scroll ? 'auto' : 'hidden',
+  padding: theme.spacing.medium,
+}))

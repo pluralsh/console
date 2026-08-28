@@ -40,6 +40,15 @@ func init() {
 		}
 	})
 
+	types.RegisterController(types.BindingPolicyReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.BindingPolicyReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
+
 	types.RegisterController(types.BootstrapTokenReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
 		return &controller.BootstrapTokenReconciler{
@@ -297,6 +306,15 @@ func init() {
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
 			PipelineQueue:    workqueue.NewTypedRateLimitingQueue(newQueueRateLimiter()),
+		}
+	})
+
+	types.RegisterController(types.PolicyReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.PolicyReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
 		}
 	})
 

@@ -15,11 +15,11 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from '../../../utils/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
-import { ViolationFilter } from './Policies.tsx'
+import { ViolationFilter } from './Gatekeeper.tsx'
 
 const FETCH_MARGIN = 30
 
-function PoliciesFilter({
+function GatekeeperFilter({
   violationsFilter,
   setViolationsFilter,
   selectedKinds,
@@ -269,7 +269,7 @@ function PoliciesFilter({
   )
 }
 
-export default PoliciesFilter
+export default GatekeeperFilter
 
 const CheckboxWrapperSC = styled.div({
   display: 'flex',

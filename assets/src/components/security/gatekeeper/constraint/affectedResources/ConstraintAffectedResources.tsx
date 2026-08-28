@@ -13,13 +13,13 @@ import { getKubernetesResourcePath } from '../../../../../routes/kubernetesRoute
 
 import { useMemo } from 'react'
 import {
-  POLICIES_ABS_PATH,
-  POLICIES_AFFECTED_RESOURCES_PATH,
-  POLICIES_REL_PATH,
+  GATEKEEPER_ABS_PATH,
+  GATEKEEPER_AFFECTED_RESOURCES_PATH,
+  GATEKEEPER_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_REL_PATH,
 } from 'routes/securityRoutesConsts'
-import { PolicyContextType } from '../Policy'
+import { ConstraintContextType } from '../Constraint'
 import {
   ColErrorMessage,
   ColKind,
@@ -29,9 +29,9 @@ import {
 
 const columns = [ColResourceName, ColNamespace, ColKind, ColErrorMessage]
 
-export default function PolicyAffectedResources() {
+export default function ConstraintAffectedResources() {
   const navigate = useNavigate()
-  const { policy, loading } = useOutletContext<PolicyContextType>()
+  const { policy, loading } = useOutletContext<ConstraintContextType>()
   const policyName = policy?.name
   const clusterId = policy?.cluster?.id
   const violations = policy?.violations
@@ -40,9 +40,9 @@ export default function PolicyAffectedResources() {
     useMemo(
       () => [
         { label: `${SECURITY_REL_PATH}`, url: `${SECURITY_ABS_PATH}}` },
-        { label: POLICIES_REL_PATH, url: `${POLICIES_ABS_PATH}` },
+        { label: GATEKEEPER_REL_PATH, url: `${GATEKEEPER_ABS_PATH}` },
         { label: policy?.name || '' },
-        { label: POLICIES_AFFECTED_RESOURCES_PATH },
+        { label: GATEKEEPER_AFFECTED_RESOURCES_PATH },
       ],
       [policy?.name]
     )

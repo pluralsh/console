@@ -10,6 +10,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 
 ### Resource Types
 - [AgentRuntimePolicy](#agentruntimepolicy)
+- [BindingPolicy](#bindingpolicy)
 - [BootstrapToken](#bootstraptoken)
 - [Catalog](#catalog)
 - [CloudConnection](#cloudconnection)
@@ -40,6 +41,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Persona](#persona)
 - [Pipeline](#pipeline)
 - [PipelineContext](#pipelinecontext)
+- [Policy](#policy)
 - [PrAutomation](#prautomation)
 - [PrAutomationTrigger](#prautomationtrigger)
 - [PrGovernance](#prgovernance)
@@ -421,6 +423,65 @@ _Appears in:_
 | `userEmail` _string_ |  |  | Optional: \{\} <br /> |
 | `groupID` _string_ |  |  | Optional: \{\} <br /> |
 | `groupName` _string_ |  |  | Optional: \{\} <br /> |
+
+
+#### BindingPolicy
+
+
+
+BindingPolicy automatically attaches a Policy to all resources that match
+the configured criteria. It references two Policy CRDs: policyRef (the policy
+to enforce) and bindPolicyRef (the selector policy that determines which
+resources are targeted). The controller polls at the configured interval and
+applies the policy to any newly matching targets.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `BindingPolicy` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[BindingPolicySpec](#bindingpolicyspec)_ | Spec reflects a Console API binding policy spec. |  | Required: \{\} <br /> |
+
+
+#### BindingPolicyMatches
+
+
+
+BindingPolicyMatches defines the criteria used to select targets for a BindingPolicy.
+
+
+
+_Appears in:_
+- [BindingPolicySpec](#bindingpolicyspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `workbench` _[WorkbenchBindingPolicyMatches](#workbenchbindingpolicymatches)_ | Workbench defines match criteria for workbench-type binding policies. |  | Optional: \{\} <br /> |
+
+
+#### BindingPolicySpec
+
+
+
+BindingPolicySpec defines the desired state of a BindingPolicy.
+
+
+
+_Appears in:_
+- [BindingPolicy](#bindingpolicy)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[BindingPolicyType](#bindingpolicytype)_ | Type specifies the resource type this binding policy applies to.<br />Valid values: WORKBENCH, STACK. |  | Required: \{\} <br /> |
+| `interval` _string_ | Interval controls how often this binding policy is evaluated.<br />Defaults to 1h; cannot be shorter than 30m. Format: duration string e.g. "1h", "30m". |  | Optional: \{\} <br /> |
+| `policyRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PolicyRef references the Policy CRD whose policy will be enforced on matching targets. |  | Required: \{\} <br /> |
+| `bindPolicyRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | BindPolicyRef references the Policy CRD whose policy determines which targets to bind. |  | Required: \{\} <br /> |
+| `matches` _[BindingPolicyMatches](#bindingpolicymatches)_ | Matches defines criteria that determine when this binding policy applies. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### Bindings
@@ -3604,6 +3665,26 @@ _Appears in:_
 | `urgent` _boolean_ | Urgent controls whether notifications should be immediately delivered via email.<br />When true, notifications sent to this sink will trigger immediate SMTP delivery<br />in addition to appearing in the Console UI, useful for critical alerts. |  | Optional: \{\} <br /> |
 
 
+#### Policy
+
+
+
+Policy defines a reusable OPA policy that can be attached to resources via BindingPolicy.
+Policies contain the actual policy source text (Rego) along with metadata describing
+what type of resources they apply to (workbench, stack, or binding).
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Policy` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[PolicySpec](#policyspec)_ | Spec reflects a Console API policy spec. |  | Required: \{\} <br /> |
+
+
 #### PolicyEngine
 
 
@@ -3622,6 +3703,27 @@ _Appears in:_
 | `maxSeverity` _[VulnSeverity](#vulnseverity)_ | MaxSeverity is the maximum allowed severity without failing the stack run.<br />One of UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL, NONE. |  | Enum: [UNKNOWN LOW MEDIUM HIGH CRITICAL NONE] <br />Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a GitRepository for policy configuration.<br />Leave unset when policies live in the stack repository, or use git.url instead of this ref. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git is the ref and folder (within the policy repository or stack repository) for policy files.<br />If git.url is set, it resolves the repository in Console (same as the stack-level git field); ref and folder are still used for the API. |  | Optional: \{\} <br /> |
+
+
+#### PolicySpec
+
+
+
+PolicySpec defines the desired state of a Policy.
+
+
+
+_Appears in:_
+- [Policy](#policy)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the unique policy name in the Console API.<br />Defaults to metadata.name if not specified. |  | Optional: \{\} <br /> |
+| `description` _string_ | Description provides a human-readable explanation of this policy's purpose. |  | Optional: \{\} <br /> |
+| `type` _[PolicyType](#policytype)_ | Type specifies what kind of resource this policy applies to.<br />Valid values: WORKBENCH, STACK, BINDING. |  | Optional: \{\} <br /> |
+| `policy` _string_ | Policy contains the actual policy source text (e.g. Rego for OPA policies). |  | Optional: \{\} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef links this policy to a specific project.<br />When set, the policy is scoped to that project. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### PrAutomation
@@ -4255,6 +4357,7 @@ Reconciliation parameters for a specific resource.
 
 _Appears in:_
 - [AgentRuntimePolicySpec](#agentruntimepolicyspec)
+- [BindingPolicySpec](#bindingpolicyspec)
 - [BootstrapTokenSpec](#bootstraptokenspec)
 - [CatalogSpec](#catalogspec)
 - [CloudConnectionSpec](#cloudconnectionspec)
@@ -4284,6 +4387,7 @@ _Appears in:_
 - [PersonaSpec](#personaspec)
 - [PipelineContextSpec](#pipelinecontextspec)
 - [PipelineSpec](#pipelinespec)
+- [PolicySpec](#policyspec)
 - [PrAutomationSpec](#prautomationspec)
 - [PrAutomationTriggerSpec](#prautomationtriggerspec)
 - [PrGovernanceSpec](#prgovernancespec)
@@ -5591,6 +5695,22 @@ Git repository, and agent runtime.
 | `kind` _string_ | `Workbench` | | |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[WorkbenchSpec](#workbenchspec)_ | Spec defines the desired state of the Workbench. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchBindingPolicyMatches
+
+
+
+WorkbenchBindingPolicyMatches defines regex-based selection criteria for workbench targets.
+
+
+
+_Appears in:_
+- [BindingPolicyMatches](#bindingpolicymatches)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regexes` _string array_ | Regexes is a list of regular expressions that select workbench inputs for this policy. |  | Optional: \{\} <br /> |
 
 
 #### WorkbenchCodingConfig

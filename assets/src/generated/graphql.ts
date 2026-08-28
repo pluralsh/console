@@ -8002,9 +8002,13 @@ export type Policy = {
   __typename?: 'Policy';
   /** human-readable policy description */
   description?: Maybe<Scalars['String']['output']>;
+  /** how many sampled evaluations include this policy */
+  evaluationCount?: Maybe<Scalars['Int']['output']>;
   /** unique policy identifier */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** how many workbenches and stacks currently match this bind policy */
+  matchCount?: Maybe<Scalars['Int']['output']>;
   /** unique policy name */
   name: Scalars['String']['output'];
   /** policy source text */
@@ -8013,10 +8017,14 @@ export type Policy = {
   policyEvaluations?: Maybe<PolicyEvaluationConnection>;
   /** project that owns this policy */
   project?: Maybe<Project>;
+  /** how many stacks are currently attached to this policy */
+  stackAttachmentCount?: Maybe<Scalars['Int']['output']>;
   stackPolicies?: Maybe<StackPolicyConnection>;
   /** policy implementation type */
   type: PolicyType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** how many workbenches are currently attached to this policy */
+  workbenchAttachmentCount?: Maybe<Scalars['Int']['output']>;
   workbenchPolicies?: Maybe<WorkbenchPolicyConnection>;
 };
 
@@ -12041,6 +12049,7 @@ export type RootQueryTypeDeploymentArgs = {
 
 export type RootQueryTypeEvaluatePolicyArgs = {
   input: Scalars['Json']['input'];
+  policy?: InputMaybe<Scalars['String']['input']>;
   policyId: Scalars['ID']['input'];
 };
 
@@ -21422,6 +21431,133 @@ export type ComplianceReportsQueryVariables = Exact<{
 
 export type ComplianceReportsQuery = { __typename?: 'RootQueryType', complianceReportGenerator?: { __typename?: 'ComplianceReportGenerator', complianceReports?: { __typename?: 'ComplianceReportsConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ComplianceReportsEdge', node?: { __typename?: 'ComplianceReports', insertedAt?: string | null, id: string, name: string, sha256?: string | null } | null } | null> | null } | null } | null };
 
+export type PolicyTinyFragment = { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type PolicyFragment = { __typename?: 'Policy', policy: string, evaluationCount?: number | null, workbenchAttachmentCount?: number | null, stackAttachmentCount?: number | null, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type PoliciesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PoliciesQuery = { __typename?: 'RootQueryType', policies?: { __typename?: 'PolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyEdge', node?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null> | null } | null };
+
+export type PolicyQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', policy: string, evaluationCount?: number | null, workbenchAttachmentCount?: number | null, stackAttachmentCount?: number | null, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type PolicyWorkbenchAttachmentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyWorkbenchAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, workbenchPolicies?: { __typename?: 'WorkbenchPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchPolicyEdge', node?: { __typename?: 'WorkbenchPolicy', id: string, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null, workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null } | null } | null } | null> | null } | null } | null };
+
+export type PolicyStackAttachmentsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyStackAttachmentsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, stackPolicies?: { __typename?: 'StackPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackPolicyEdge', node?: { __typename?: 'StackPolicy', id: string, updatedAt?: string | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null } | null } | null> | null } | null } | null };
+
+export type PolicyEvaluationFragment = { __typename?: 'PolicyEvaluation', id: string, policyIds: Array<string>, input: Record<string, unknown>, output: Record<string, unknown>, insertedAt?: string | null, updatedAt?: string | null };
+
+export type PolicyEvaluationsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyEvaluationsQuery = { __typename?: 'RootQueryType', policy?: { __typename?: 'Policy', id: string, policyEvaluations?: { __typename?: 'PolicyEvaluationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PolicyEvaluationEdge', node?: { __typename?: 'PolicyEvaluation', id: string, policyIds: Array<string>, input: Record<string, unknown>, output: Record<string, unknown>, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+
+export type CreatePolicyMutationVariables = Exact<{
+  attributes: PolicyAttributes;
+}>;
+
+
+export type CreatePolicyMutation = { __typename?: 'RootMutationType', createPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type UpdatePolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: PolicyAttributes;
+}>;
+
+
+export type UpdatePolicyMutation = { __typename?: 'RootMutationType', updatePolicy?: { __typename?: 'Policy', policy: string, evaluationCount?: number | null, workbenchAttachmentCount?: number | null, stackAttachmentCount?: number | null, id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type EvaluatePolicyQueryVariables = Exact<{
+  policyId: Scalars['ID']['input'];
+  input: Scalars['Json']['input'];
+  policy?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type EvaluatePolicyQuery = { __typename?: 'RootQueryType', evaluatePolicy?: Record<string, unknown> | null };
+
+export type DeletePolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePolicyMutation = { __typename?: 'RootMutationType', deletePolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type BindingPolicyTinyFragment = { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type BindingPoliciesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type BindingPoliciesQuery = { __typename?: 'RootQueryType', bindingPolicies?: { __typename?: 'BindingPolicyConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'BindingPolicyEdge', node?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null } | null> | null } | null };
+
+export type DeleteBindingPolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteBindingPolicyMutation = { __typename?: 'RootMutationType', deleteBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
+export type BindingPolicyFragment = { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null };
+
+export type BindingPolicyQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type BindingPolicyQuery = { __typename?: 'RootQueryType', bindingPolicy?: { __typename?: 'BindingPolicy', interval: string, id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'BindingPolicyMatches', workbench?: { __typename?: 'WorkbenchPolicyMatches', regexes?: Array<string | null> | null } | null } | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
+export type CreateBindingPolicyMutationVariables = Exact<{
+  attributes: BindingPolicyAttributes;
+}>;
+
+
+export type CreateBindingPolicyMutation = { __typename?: 'RootMutationType', createBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
+export type UpdateBindingPolicyMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: BindingPolicyUpdateAttributes;
+}>;
+
+
+export type UpdateBindingPolicyMutation = { __typename?: 'RootMutationType', updateBindingPolicy?: { __typename?: 'BindingPolicy', id: string, type: BindingPolicyType, insertedAt?: string | null, updatedAt?: string | null, policy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null, bindPolicy?: { __typename?: 'Policy', id: string, name: string, type: PolicyType, description?: string | null, matchCount?: number | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null } | null };
+
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, disableInsights?: boolean | null };
 
 export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null };
@@ -22299,7 +22435,7 @@ export type WorkbenchJobActivitiesQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, workbench?: { __typename?: 'Workbench', id: string, agentRuntime?: { __typename?: 'AgentRuntime', allowedRepositories?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null } | null } | null, referencedJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null } | null> | null } | null, queuedPrompts?: { __typename?: 'QueuedPromptConnection', edges?: Array<{ __typename?: 'QueuedPromptEdge', node?: { __typename?: 'QueuedPrompt', id: string, prompt?: string | null, dequeableAt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string } | null } | null } | null> | null } | null } | null };
+export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null, modes?: { __typename?: 'WorkbenchJobModes', plan?: boolean | null, verification?: boolean | null, model?: { __typename?: 'WorkbenchJobModel', provider?: AiProvider | null, model?: string | null } | null, coding?: { __typename?: 'WorkbenchJobCodingModes', approval?: boolean | null, babysit?: boolean | null } | null, budget?: { __typename?: 'WorkbenchJobBudget', cost?: number | null, tokens?: number | null } | null, kubernetes?: { __typename?: 'WorkbenchJobKubernetesModes', update?: boolean | null, delete?: boolean | null, exec?: boolean | null, excludeNamespaces?: Array<string | null> | null, requireNamespaces?: Array<string | null> | null } | null } | null, workbench?: { __typename?: 'Workbench', id: string, agentRuntime?: { __typename?: 'AgentRuntime', allowedRepositories?: Array<string | null> | null } | null, configuration?: { __typename?: 'WorkbenchConfiguration', coding?: { __typename?: 'WorkbenchCoding', repositories?: Array<string | null> | null } | null } | null } | null, referencedJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null, evalResult?: { __typename?: 'WorkbenchEvalResult', id: string, grade?: number | null } | null } | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', name: string, email: string, profile?: string | null } | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, explanation?: string | null, functionCall?: { __typename?: 'WorkbenchJobActivityFunctionCall', name?: string | null, input?: Record<string, unknown> | null, toolId?: string | null, tool?: { __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, configuration?: { __typename?: 'WorkbenchToolConfiguration', lambda?: { __typename?: 'WorkbenchToolLambdaConnection', description?: string | null } | null, cloudRun?: { __typename?: 'WorkbenchToolCloudRunConnection', description?: string | null } | null, azureFunction?: { __typename?: 'WorkbenchToolAzureFunctionConnection', description?: string | null } | null } | null } | null } | null, kubeRequest?: { __typename?: 'WorkbenchJobActivityKubeRequest', handle?: string | null, method?: string | null, path?: string | null, queryParams?: Record<string, unknown> | null, contentType?: string | null } | null, kubeExec?: { __typename?: 'WorkbenchJobActivityKubeExec', handle?: string | null, command?: string | null, namespace?: string | null, pod?: string | null, container?: string | null, explanation?: string | null } | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, criticism?: string | null, conclusion?: string | null } | null, metricsQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, traces?: Array<{ __typename?: 'WorkbenchJobActivityTrace', traceId?: string | null, spanId?: string | null, parentId?: string | null, name?: string | null, service?: string | null, start?: string | null, end?: string | null, tags?: Record<string, unknown> | null } | null> | null, tracesQuery?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null, canvas?: Array<{ __typename?: 'WorkbenchCanvasBlock', identifier?: string | null, type?: WorkbenchCanvasBlockType | null, layout?: { __typename?: 'WorkbenchCanvasBlockLayout', x?: number | null, y?: number | null, w?: number | null, h?: number | null } | null, content?: { __typename?: 'WorkbenchCanvasBlockContent', markdown?: string | null, metrics?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, logs?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, traces?: { __typename?: 'WorkbenchCanvasToolGraph', title?: string | null, summary?: string | null, query?: { __typename?: 'WorkbenchToolQueryData', toolName?: string | null, toolArgs?: Record<string, unknown> | null, summary?: string | null } | null } | null, pie?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null, bar?: { __typename?: 'WorkbenchCanvasBlockGraph', title?: string | null, data?: Array<{ __typename?: 'WorkbenchCanvasDataPoint', label?: string | null, value?: number | null } | null> | null } | null } | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null, agentRuns?: Array<{ __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, babysit?: boolean | null, approval?: boolean | null, approvedAt?: string | null, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, headBranch?: string | null, insertedAt?: string | null, updatedAt?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, usage?: { __typename?: 'AgentRunUsage', totalCost?: number | null, totalTokens?: number | null } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, workbench?: { __typename?: 'Workbench', id: string, name: string } | null } | null, upload?: { __typename?: 'AgentRunUpload', id: string, session?: string | null, patch?: string | null } | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null } | null> | null } | null } | null> | null } | null, queuedPrompts?: { __typename?: 'QueuedPromptConnection', edges?: Array<{ __typename?: 'QueuedPromptEdge', node?: { __typename?: 'QueuedPrompt', id: string, prompt?: string | null, dequeableAt?: string | null, insertedAt?: string | null, user?: { __typename?: 'User', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobActionSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -27127,6 +27263,64 @@ export const ComplianceReportFragmentDoc = gql`
   sha256
 }
     `;
+export const PolicyTinyFragmentDoc = gql`
+    fragment PolicyTiny on Policy {
+  id
+  name
+  type
+  description
+  matchCount
+  project {
+    ...ProjectTiny
+  }
+  insertedAt
+  updatedAt
+}
+    ${ProjectTinyFragmentDoc}`;
+export const PolicyFragmentDoc = gql`
+    fragment Policy on Policy {
+  ...PolicyTiny
+  policy
+  evaluationCount
+  workbenchAttachmentCount
+  stackAttachmentCount
+}
+    ${PolicyTinyFragmentDoc}`;
+export const PolicyEvaluationFragmentDoc = gql`
+    fragment PolicyEvaluation on PolicyEvaluation {
+  id
+  policyIds
+  input
+  output
+  insertedAt
+  updatedAt
+}
+    `;
+export const BindingPolicyTinyFragmentDoc = gql`
+    fragment BindingPolicyTiny on BindingPolicy {
+  id
+  type
+  insertedAt
+  updatedAt
+  policy {
+    ...PolicyTiny
+  }
+  bindPolicy {
+    ...PolicyTiny
+  }
+}
+    ${PolicyTinyFragmentDoc}`;
+export const BindingPolicyFragmentDoc = gql`
+    fragment BindingPolicy on BindingPolicy {
+  ...BindingPolicyTiny
+  interval
+  matches {
+    workbench {
+      regexes
+    }
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
 export const ProjectFragmentDoc = gql`
     fragment Project on Project {
   id
@@ -42460,6 +42654,634 @@ export type ComplianceReportsQueryHookResult = ReturnType<typeof useComplianceRe
 export type ComplianceReportsLazyQueryHookResult = ReturnType<typeof useComplianceReportsLazyQuery>;
 export type ComplianceReportsSuspenseQueryHookResult = ReturnType<typeof useComplianceReportsSuspenseQuery>;
 export type ComplianceReportsQueryResult = Apollo.QueryResult<ComplianceReportsQuery, ComplianceReportsQueryVariables>;
+export const PoliciesDocument = gql`
+    query Policies($after: String, $first: Int, $before: String, $last: Int, $projectId: ID, $q: String) {
+  policies(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    projectId: $projectId
+    q: $q
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PolicyTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PolicyTinyFragmentDoc}`;
+
+/**
+ * __usePoliciesQuery__
+ *
+ * To run a query within a React component, call `usePoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePoliciesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      projectId: // value for 'projectId'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function usePoliciesQuery(baseOptions?: Apollo.QueryHookOptions<PoliciesQuery, PoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PoliciesQuery, PoliciesQueryVariables>(PoliciesDocument, options);
+      }
+export function usePoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PoliciesQuery, PoliciesQueryVariables>(PoliciesDocument, options);
+        }
+// @ts-ignore
+export function usePoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<PoliciesQuery, PoliciesQueryVariables>;
+export function usePoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<PoliciesQuery | undefined, PoliciesQueryVariables>;
+export function usePoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PoliciesQuery, PoliciesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PoliciesQuery, PoliciesQueryVariables>(PoliciesDocument, options);
+        }
+export type PoliciesQueryHookResult = ReturnType<typeof usePoliciesQuery>;
+export type PoliciesLazyQueryHookResult = ReturnType<typeof usePoliciesLazyQuery>;
+export type PoliciesSuspenseQueryHookResult = ReturnType<typeof usePoliciesSuspenseQuery>;
+export type PoliciesQueryResult = Apollo.QueryResult<PoliciesQuery, PoliciesQueryVariables>;
+export const PolicyDocument = gql`
+    query Policy($id: ID, $name: String) {
+  policy(id: $id, name: $name) {
+    ...Policy
+  }
+}
+    ${PolicyFragmentDoc}`;
+
+/**
+ * __usePolicyQuery__
+ *
+ * To run a query within a React component, call `usePolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function usePolicyQuery(baseOptions?: Apollo.QueryHookOptions<PolicyQuery, PolicyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyQuery, PolicyQueryVariables>(PolicyDocument, options);
+      }
+export function usePolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyQuery, PolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyQuery, PolicyQueryVariables>(PolicyDocument, options);
+        }
+// @ts-ignore
+export function usePolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyQuery, PolicyQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyQuery, PolicyQueryVariables>;
+export function usePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyQuery, PolicyQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyQuery | undefined, PolicyQueryVariables>;
+export function usePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyQuery, PolicyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyQuery, PolicyQueryVariables>(PolicyDocument, options);
+        }
+export type PolicyQueryHookResult = ReturnType<typeof usePolicyQuery>;
+export type PolicyLazyQueryHookResult = ReturnType<typeof usePolicyLazyQuery>;
+export type PolicySuspenseQueryHookResult = ReturnType<typeof usePolicySuspenseQuery>;
+export type PolicyQueryResult = Apollo.QueryResult<PolicyQuery, PolicyQueryVariables>;
+export const PolicyWorkbenchAttachmentsDocument = gql`
+    query PolicyWorkbenchAttachments($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    workbenchPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          matches {
+            regexes
+          }
+          workbench {
+            id
+            name
+            description
+          }
+          updatedAt
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __usePolicyWorkbenchAttachmentsQuery__
+ *
+ * To run a query within a React component, call `usePolicyWorkbenchAttachmentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyWorkbenchAttachmentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyWorkbenchAttachmentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function usePolicyWorkbenchAttachmentsQuery(baseOptions: Apollo.QueryHookOptions<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables> & ({ variables: PolicyWorkbenchAttachmentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>(PolicyWorkbenchAttachmentsDocument, options);
+      }
+export function usePolicyWorkbenchAttachmentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>(PolicyWorkbenchAttachmentsDocument, options);
+        }
+// @ts-ignore
+export function usePolicyWorkbenchAttachmentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>;
+export function usePolicyWorkbenchAttachmentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyWorkbenchAttachmentsQuery | undefined, PolicyWorkbenchAttachmentsQueryVariables>;
+export function usePolicyWorkbenchAttachmentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>(PolicyWorkbenchAttachmentsDocument, options);
+        }
+export type PolicyWorkbenchAttachmentsQueryHookResult = ReturnType<typeof usePolicyWorkbenchAttachmentsQuery>;
+export type PolicyWorkbenchAttachmentsLazyQueryHookResult = ReturnType<typeof usePolicyWorkbenchAttachmentsLazyQuery>;
+export type PolicyWorkbenchAttachmentsSuspenseQueryHookResult = ReturnType<typeof usePolicyWorkbenchAttachmentsSuspenseQuery>;
+export type PolicyWorkbenchAttachmentsQueryResult = Apollo.QueryResult<PolicyWorkbenchAttachmentsQuery, PolicyWorkbenchAttachmentsQueryVariables>;
+export const PolicyStackAttachmentsDocument = gql`
+    query PolicyStackAttachments($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    stackPolicies(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          id
+          stack {
+            id
+            name
+            type
+          }
+          updatedAt
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __usePolicyStackAttachmentsQuery__
+ *
+ * To run a query within a React component, call `usePolicyStackAttachmentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyStackAttachmentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyStackAttachmentsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function usePolicyStackAttachmentsQuery(baseOptions: Apollo.QueryHookOptions<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables> & ({ variables: PolicyStackAttachmentsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>(PolicyStackAttachmentsDocument, options);
+      }
+export function usePolicyStackAttachmentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>(PolicyStackAttachmentsDocument, options);
+        }
+// @ts-ignore
+export function usePolicyStackAttachmentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>;
+export function usePolicyStackAttachmentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyStackAttachmentsQuery | undefined, PolicyStackAttachmentsQueryVariables>;
+export function usePolicyStackAttachmentsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>(PolicyStackAttachmentsDocument, options);
+        }
+export type PolicyStackAttachmentsQueryHookResult = ReturnType<typeof usePolicyStackAttachmentsQuery>;
+export type PolicyStackAttachmentsLazyQueryHookResult = ReturnType<typeof usePolicyStackAttachmentsLazyQuery>;
+export type PolicyStackAttachmentsSuspenseQueryHookResult = ReturnType<typeof usePolicyStackAttachmentsSuspenseQuery>;
+export type PolicyStackAttachmentsQueryResult = Apollo.QueryResult<PolicyStackAttachmentsQuery, PolicyStackAttachmentsQueryVariables>;
+export const PolicyEvaluationsDocument = gql`
+    query PolicyEvaluations($id: ID!, $first: Int, $after: String) {
+  policy(id: $id) {
+    id
+    policyEvaluations(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PolicyEvaluation
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PolicyEvaluationFragmentDoc}`;
+
+/**
+ * __usePolicyEvaluationsQuery__
+ *
+ * To run a query within a React component, call `usePolicyEvaluationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyEvaluationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyEvaluationsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function usePolicyEvaluationsQuery(baseOptions: Apollo.QueryHookOptions<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables> & ({ variables: PolicyEvaluationsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>(PolicyEvaluationsDocument, options);
+      }
+export function usePolicyEvaluationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>(PolicyEvaluationsDocument, options);
+        }
+// @ts-ignore
+export function usePolicyEvaluationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>;
+export function usePolicyEvaluationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>): Apollo.UseSuspenseQueryResult<PolicyEvaluationsQuery | undefined, PolicyEvaluationsQueryVariables>;
+export function usePolicyEvaluationsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>(PolicyEvaluationsDocument, options);
+        }
+export type PolicyEvaluationsQueryHookResult = ReturnType<typeof usePolicyEvaluationsQuery>;
+export type PolicyEvaluationsLazyQueryHookResult = ReturnType<typeof usePolicyEvaluationsLazyQuery>;
+export type PolicyEvaluationsSuspenseQueryHookResult = ReturnType<typeof usePolicyEvaluationsSuspenseQuery>;
+export type PolicyEvaluationsQueryResult = Apollo.QueryResult<PolicyEvaluationsQuery, PolicyEvaluationsQueryVariables>;
+export const CreatePolicyDocument = gql`
+    mutation CreatePolicy($attributes: PolicyAttributes!) {
+  createPolicy(attributes: $attributes) {
+    ...PolicyTiny
+  }
+}
+    ${PolicyTinyFragmentDoc}`;
+export type CreatePolicyMutationFn = Apollo.MutationFunction<CreatePolicyMutation, CreatePolicyMutationVariables>;
+
+/**
+ * __useCreatePolicyMutation__
+ *
+ * To run a mutation, you first call `useCreatePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreatePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createPolicyMutation, { data, loading, error }] = useCreatePolicyMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreatePolicyMutation(baseOptions?: Apollo.MutationHookOptions<CreatePolicyMutation, CreatePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreatePolicyMutation, CreatePolicyMutationVariables>(CreatePolicyDocument, options);
+      }
+export type CreatePolicyMutationHookResult = ReturnType<typeof useCreatePolicyMutation>;
+export type CreatePolicyMutationResult = Apollo.MutationResult<CreatePolicyMutation>;
+export type CreatePolicyMutationOptions = Apollo.BaseMutationOptions<CreatePolicyMutation, CreatePolicyMutationVariables>;
+export const UpdatePolicyDocument = gql`
+    mutation UpdatePolicy($id: ID!, $attributes: PolicyAttributes!) {
+  updatePolicy(id: $id, attributes: $attributes) {
+    ...Policy
+  }
+}
+    ${PolicyFragmentDoc}`;
+export type UpdatePolicyMutationFn = Apollo.MutationFunction<UpdatePolicyMutation, UpdatePolicyMutationVariables>;
+
+/**
+ * __useUpdatePolicyMutation__
+ *
+ * To run a mutation, you first call `useUpdatePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePolicyMutation, { data, loading, error }] = useUpdatePolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdatePolicyMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePolicyMutation, UpdatePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePolicyMutation, UpdatePolicyMutationVariables>(UpdatePolicyDocument, options);
+      }
+export type UpdatePolicyMutationHookResult = ReturnType<typeof useUpdatePolicyMutation>;
+export type UpdatePolicyMutationResult = Apollo.MutationResult<UpdatePolicyMutation>;
+export type UpdatePolicyMutationOptions = Apollo.BaseMutationOptions<UpdatePolicyMutation, UpdatePolicyMutationVariables>;
+export const EvaluatePolicyDocument = gql`
+    query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+  evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+}
+    `;
+
+/**
+ * __useEvaluatePolicyQuery__
+ *
+ * To run a query within a React component, call `useEvaluatePolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEvaluatePolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useEvaluatePolicyQuery({
+ *   variables: {
+ *      policyId: // value for 'policyId'
+ *      input: // value for 'input'
+ *      policy: // value for 'policy'
+ *   },
+ * });
+ */
+export function useEvaluatePolicyQuery(baseOptions: Apollo.QueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables> & ({ variables: EvaluatePolicyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>(EvaluatePolicyDocument, options);
+      }
+export function useEvaluatePolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>(EvaluatePolicyDocument, options);
+        }
+// @ts-ignore
+export function useEvaluatePolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>): Apollo.UseSuspenseQueryResult<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>;
+export function useEvaluatePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>): Apollo.UseSuspenseQueryResult<EvaluatePolicyQuery | undefined, EvaluatePolicyQueryVariables>;
+export function useEvaluatePolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>(EvaluatePolicyDocument, options);
+        }
+export type EvaluatePolicyQueryHookResult = ReturnType<typeof useEvaluatePolicyQuery>;
+export type EvaluatePolicyLazyQueryHookResult = ReturnType<typeof useEvaluatePolicyLazyQuery>;
+export type EvaluatePolicySuspenseQueryHookResult = ReturnType<typeof useEvaluatePolicySuspenseQuery>;
+export type EvaluatePolicyQueryResult = Apollo.QueryResult<EvaluatePolicyQuery, EvaluatePolicyQueryVariables>;
+export const DeletePolicyDocument = gql`
+    mutation DeletePolicy($id: ID!) {
+  deletePolicy(id: $id) {
+    ...PolicyTiny
+  }
+}
+    ${PolicyTinyFragmentDoc}`;
+export type DeletePolicyMutationFn = Apollo.MutationFunction<DeletePolicyMutation, DeletePolicyMutationVariables>;
+
+/**
+ * __useDeletePolicyMutation__
+ *
+ * To run a mutation, you first call `useDeletePolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePolicyMutation, { data, loading, error }] = useDeletePolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePolicyMutation(baseOptions?: Apollo.MutationHookOptions<DeletePolicyMutation, DeletePolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePolicyMutation, DeletePolicyMutationVariables>(DeletePolicyDocument, options);
+      }
+export type DeletePolicyMutationHookResult = ReturnType<typeof useDeletePolicyMutation>;
+export type DeletePolicyMutationResult = Apollo.MutationResult<DeletePolicyMutation>;
+export type DeletePolicyMutationOptions = Apollo.BaseMutationOptions<DeletePolicyMutation, DeletePolicyMutationVariables>;
+export const BindingPoliciesDocument = gql`
+    query BindingPolicies($after: String, $first: Int, $before: String, $last: Int) {
+  bindingPolicies(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...BindingPolicyTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${BindingPolicyTinyFragmentDoc}`;
+
+/**
+ * __useBindingPoliciesQuery__
+ *
+ * To run a query within a React component, call `useBindingPoliciesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBindingPoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBindingPoliciesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useBindingPoliciesQuery(baseOptions?: Apollo.QueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BindingPoliciesQuery, BindingPoliciesQueryVariables>(BindingPoliciesDocument, options);
+      }
+export function useBindingPoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BindingPoliciesQuery, BindingPoliciesQueryVariables>(BindingPoliciesDocument, options);
+        }
+// @ts-ignore
+export function useBindingPoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPoliciesQuery, BindingPoliciesQueryVariables>;
+export function useBindingPoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPoliciesQuery | undefined, BindingPoliciesQueryVariables>;
+export function useBindingPoliciesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPoliciesQuery, BindingPoliciesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BindingPoliciesQuery, BindingPoliciesQueryVariables>(BindingPoliciesDocument, options);
+        }
+export type BindingPoliciesQueryHookResult = ReturnType<typeof useBindingPoliciesQuery>;
+export type BindingPoliciesLazyQueryHookResult = ReturnType<typeof useBindingPoliciesLazyQuery>;
+export type BindingPoliciesSuspenseQueryHookResult = ReturnType<typeof useBindingPoliciesSuspenseQuery>;
+export type BindingPoliciesQueryResult = Apollo.QueryResult<BindingPoliciesQuery, BindingPoliciesQueryVariables>;
+export const DeleteBindingPolicyDocument = gql`
+    mutation DeleteBindingPolicy($id: ID!) {
+  deleteBindingPolicy(id: $id) {
+    ...BindingPolicyTiny
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
+export type DeleteBindingPolicyMutationFn = Apollo.MutationFunction<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>;
+
+/**
+ * __useDeleteBindingPolicyMutation__
+ *
+ * To run a mutation, you first call `useDeleteBindingPolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteBindingPolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteBindingPolicyMutation, { data, loading, error }] = useDeleteBindingPolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteBindingPolicyMutation(baseOptions?: Apollo.MutationHookOptions<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>(DeleteBindingPolicyDocument, options);
+      }
+export type DeleteBindingPolicyMutationHookResult = ReturnType<typeof useDeleteBindingPolicyMutation>;
+export type DeleteBindingPolicyMutationResult = Apollo.MutationResult<DeleteBindingPolicyMutation>;
+export type DeleteBindingPolicyMutationOptions = Apollo.BaseMutationOptions<DeleteBindingPolicyMutation, DeleteBindingPolicyMutationVariables>;
+export const BindingPolicyDocument = gql`
+    query BindingPolicy($id: ID!) {
+  bindingPolicy(id: $id) {
+    ...BindingPolicy
+  }
+}
+    ${BindingPolicyFragmentDoc}`;
+
+/**
+ * __useBindingPolicyQuery__
+ *
+ * To run a query within a React component, call `useBindingPolicyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useBindingPolicyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useBindingPolicyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useBindingPolicyQuery(baseOptions: Apollo.QueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables> & ({ variables: BindingPolicyQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<BindingPolicyQuery, BindingPolicyQueryVariables>(BindingPolicyDocument, options);
+      }
+export function useBindingPolicyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<BindingPolicyQuery, BindingPolicyQueryVariables>(BindingPolicyDocument, options);
+        }
+// @ts-ignore
+export function useBindingPolicySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPolicyQuery, BindingPolicyQueryVariables>;
+export function useBindingPolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>): Apollo.UseSuspenseQueryResult<BindingPolicyQuery | undefined, BindingPolicyQueryVariables>;
+export function useBindingPolicySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<BindingPolicyQuery, BindingPolicyQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<BindingPolicyQuery, BindingPolicyQueryVariables>(BindingPolicyDocument, options);
+        }
+export type BindingPolicyQueryHookResult = ReturnType<typeof useBindingPolicyQuery>;
+export type BindingPolicyLazyQueryHookResult = ReturnType<typeof useBindingPolicyLazyQuery>;
+export type BindingPolicySuspenseQueryHookResult = ReturnType<typeof useBindingPolicySuspenseQuery>;
+export type BindingPolicyQueryResult = Apollo.QueryResult<BindingPolicyQuery, BindingPolicyQueryVariables>;
+export const CreateBindingPolicyDocument = gql`
+    mutation CreateBindingPolicy($attributes: BindingPolicyAttributes!) {
+  createBindingPolicy(attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
+export type CreateBindingPolicyMutationFn = Apollo.MutationFunction<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>;
+
+/**
+ * __useCreateBindingPolicyMutation__
+ *
+ * To run a mutation, you first call `useCreateBindingPolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateBindingPolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createBindingPolicyMutation, { data, loading, error }] = useCreateBindingPolicyMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateBindingPolicyMutation(baseOptions?: Apollo.MutationHookOptions<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>(CreateBindingPolicyDocument, options);
+      }
+export type CreateBindingPolicyMutationHookResult = ReturnType<typeof useCreateBindingPolicyMutation>;
+export type CreateBindingPolicyMutationResult = Apollo.MutationResult<CreateBindingPolicyMutation>;
+export type CreateBindingPolicyMutationOptions = Apollo.BaseMutationOptions<CreateBindingPolicyMutation, CreateBindingPolicyMutationVariables>;
+export const UpdateBindingPolicyDocument = gql`
+    mutation UpdateBindingPolicy($id: ID!, $attributes: BindingPolicyUpdateAttributes!) {
+  updateBindingPolicy(id: $id, attributes: $attributes) {
+    ...BindingPolicyTiny
+  }
+}
+    ${BindingPolicyTinyFragmentDoc}`;
+export type UpdateBindingPolicyMutationFn = Apollo.MutationFunction<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>;
+
+/**
+ * __useUpdateBindingPolicyMutation__
+ *
+ * To run a mutation, you first call `useUpdateBindingPolicyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateBindingPolicyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateBindingPolicyMutation, { data, loading, error }] = useUpdateBindingPolicyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateBindingPolicyMutation(baseOptions?: Apollo.MutationHookOptions<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>(UpdateBindingPolicyDocument, options);
+      }
+export type UpdateBindingPolicyMutationHookResult = ReturnType<typeof useUpdateBindingPolicyMutation>;
+export type UpdateBindingPolicyMutationResult = Apollo.MutationResult<UpdateBindingPolicyMutation>;
+export type UpdateBindingPolicyMutationOptions = Apollo.BaseMutationOptions<UpdateBindingPolicyMutation, UpdateBindingPolicyMutationVariables>;
 export const ProjectsDocument = gql`
     query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
@@ -46504,6 +47326,7 @@ export const WorkbenchJobActivitiesDocument = gql`
     id
     status
     prompt
+    insertedAt
     modes {
       ...WorkbenchJobModesFields
     }
@@ -48737,6 +49560,14 @@ export const namedOperations = {
     ComplianceReportGenerators: 'ComplianceReportGenerators',
     ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReports: 'ComplianceReports',
+    Policies: 'Policies',
+    Policy: 'Policy',
+    PolicyWorkbenchAttachments: 'PolicyWorkbenchAttachments',
+    PolicyStackAttachments: 'PolicyStackAttachments',
+    PolicyEvaluations: 'PolicyEvaluations',
+    EvaluatePolicy: 'EvaluatePolicy',
+    BindingPolicies: 'BindingPolicies',
+    BindingPolicy: 'BindingPolicy',
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
@@ -48935,6 +49766,12 @@ export const namedOperations = {
     DeletePersona: 'DeletePersona',
     UpsertComplianceReportGenerator: 'UpsertComplianceReportGenerator',
     DeleteComplianceReport: 'DeleteComplianceReport',
+    CreatePolicy: 'CreatePolicy',
+    UpdatePolicy: 'UpdatePolicy',
+    DeletePolicy: 'DeletePolicy',
+    DeleteBindingPolicy: 'DeleteBindingPolicy',
+    CreateBindingPolicy: 'CreateBindingPolicy',
+    UpdateBindingPolicy: 'UpdateBindingPolicy',
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
@@ -49266,6 +50103,11 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     ComplianceReportGenerator: 'ComplianceReportGenerator',
     ComplianceReport: 'ComplianceReport',
+    PolicyTiny: 'PolicyTiny',
+    Policy: 'Policy',
+    PolicyEvaluation: 'PolicyEvaluation',
+    BindingPolicyTiny: 'BindingPolicyTiny',
+    BindingPolicy: 'BindingPolicy',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
     ProjectBindings: 'ProjectBindings',

@@ -28,6 +28,7 @@ rules:
   - deployments.plural.sh
   resources:
   - agentruntimepolicies
+  - bindingpolicies
   - bootstraptokens
   - catalogs
   - cloudconnections
@@ -58,6 +59,7 @@ rules:
   - personas
   - pipelinecontexts
   - pipelines
+  - policies
   - prautomations
   - prautomationtriggers
   - previewenvironmenttemplates
@@ -88,6 +90,7 @@ rules:
   - deployments.plural.sh
   resources:
   - agentruntimepolicies/finalizers
+  - bindingpolicies/finalizers
   - bootstraptokens/finalizers
   - catalogs/finalizers
   - cloudconnections/finalizers
@@ -118,6 +121,7 @@ rules:
   - personas/finalizers
   - pipelinecontexts/finalizers
   - pipelines/finalizers
+  - policies/finalizers
   - prautomations/finalizers
   - prautomationtriggers/finalizers
   - previewenvironmenttemplates/finalizers
@@ -142,6 +146,7 @@ rules:
   - deployments.plural.sh
   resources:
   - agentruntimepolicies/status
+  - bindingpolicies/status
   - bootstraptokens/status
   - catalogs/status
   - cloudconnections/status
@@ -172,6 +177,7 @@ rules:
   - personas/status
   - pipelinecontexts/status
   - pipelines/status
+  - policies/status
   - prautomations/status
   - prautomationtriggers/status
   - previewenvironmenttemplates/status
