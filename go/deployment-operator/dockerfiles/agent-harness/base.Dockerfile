@@ -26,7 +26,6 @@ RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
-    -tags musl \
     -trimpath \
     -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment.Version=${VERSION}" \
     -o /agent-harness \
@@ -37,7 +36,6 @@ RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
-    -tags musl \
     -trimpath \
     -ldflags="-s -w -X github.com/pluralsh/console/go/deployment-operator/cmd/mcpserver/agent.Version=${VERSION}" \
     -o /agent-mcpserver \
@@ -48,7 +46,6 @@ RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
-    -tags musl \
     -trimpath \
     -ldflags="-s -w" \
     -o /agent-bootstrap \
