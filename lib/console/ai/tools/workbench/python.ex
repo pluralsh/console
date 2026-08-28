@@ -13,7 +13,7 @@ defmodule Console.AI.Tools.Workbench.Python do
 
   @json_schema Console.priv_file!("tools/workbench/python.json") |> Jason.decode!()
 
-  def name(), do: "workbench_python"
+  def name(), do: "python_sandbox"
 
   def description(),
     do:

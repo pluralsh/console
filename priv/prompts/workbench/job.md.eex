@@ -155,7 +155,7 @@ do not run them simultaneously, since they won't be able to communicate with eac
 
 In general, you can call any of the subagents and tools as many times as you need to accomplish your task.
 
-For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When you need an exact, deterministic computation, always use either the `workbench_lua` or `workbench_python` tool with an appropriate supported script to get the result for you.
+For any tool you delegate to, you should have them give as close to exact raw data as possible, rather than computing on it.  When you need an exact, deterministic computation, always use `python_sandbox` tool with an appropriate supported script to get the result for you.
 
 For instance,
 
