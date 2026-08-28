@@ -2,6 +2,7 @@ package acp
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -87,5 +88,32 @@ func TestWriteTextFileCreatesEmptyFile(t *testing.T) {
 	}
 	if info.Size() != 0 {
 		t.Fatalf("empty file size = %d, want 0", info.Size())
+	}
+}
+
+func TestReadTextFileRejectsCanceledAndOversizedReads(t *testing.T) {
+	client, cwd := testACPClient(t)
+	path := filepath.Join(cwd, "large.txt")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Truncate(maxTextFileBytes + 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	request := acpsdk.ReadTextFileRequest{SessionId: "session-1", Path: path}
+	if _, err := client.ReadTextFile(context.Background(), request); err == nil {
+		t.Fatal("oversized read unexpectedly succeeded")
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	request.Path = filepath.Join(cwd, "missing.txt")
+	if _, err := client.ReadTextFile(ctx, request); !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled read error = %v, want context.Canceled", err)
 	}
 }

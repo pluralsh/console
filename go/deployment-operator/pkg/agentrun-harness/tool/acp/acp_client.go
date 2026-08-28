@@ -13,12 +13,17 @@ import (
 	acpsdk "github.com/coder/acp-go-sdk"
 )
 
+const maxTextFileBytes = 16 << 20
+
 type client struct {
 	turn *turnState
 }
 
-func (client *client) ReadTextFile(_ context.Context, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
+func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextFileRequest) (acpsdk.ReadTextFileResponse, error) {
 	if err := client.validateSession(request.SessionId); err != nil {
+		return acpsdk.ReadTextFileResponse{}, err
+	}
+	if err := ctx.Err(); err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
 	if !filepath.IsAbs(request.Path) {
@@ -29,8 +34,18 @@ func (client *client) ReadTextFile(_ context.Context, request acpsdk.ReadTextFil
 		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("read %s: %w", request.Path, err)
 	}
 	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("stat %s: %w", request.Path, err)
+	}
+	if !info.Mode().IsRegular() {
+		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem path is not a regular file: %q", request.Path)
+	}
+	if info.Size() > maxTextFileBytes {
+		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem file exceeds %d-byte read limit: %q", maxTextFileBytes, request.Path)
+	}
 
-	reader := bufio.NewReader(file)
+	reader := bufio.NewReader(io.LimitReader(&contextReader{ctx: ctx, reader: file}, maxTextFileBytes+1))
 	if request.Line != nil {
 		for line := 1; line < max(*request.Line, 1); line++ {
 			if _, readErr := reader.ReadString('\n'); readErr != nil {
@@ -45,6 +60,9 @@ func (client *client) ReadTextFile(_ context.Context, request acpsdk.ReadTextFil
 		content, readErr := io.ReadAll(reader)
 		if readErr != nil {
 			return acpsdk.ReadTextFileResponse{}, fmt.Errorf("read %s: %w", request.Path, readErr)
+		}
+		if len(content) > maxTextFileBytes {
+			return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem file exceeds %d-byte read limit: %q", maxTextFileBytes, request.Path)
 		}
 		return acpsdk.ReadTextFileResponse{Content: string(content)}, nil
 	}
@@ -61,6 +79,18 @@ func (client *client) ReadTextFile(_ context.Context, request acpsdk.ReadTextFil
 		}
 	}
 	return acpsdk.ReadTextFileResponse{Content: strings.Join(lines, "\n")}, nil
+}
+
+type contextReader struct {
+	ctx    context.Context
+	reader io.Reader
+}
+
+func (reader *contextReader) Read(buffer []byte) (int, error) {
+	if err := reader.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return reader.reader.Read(buffer)
 }
 
 func (client *client) WriteTextFile(_ context.Context, request acpsdk.WriteTextFileRequest) (acpsdk.WriteTextFileResponse, error) {
