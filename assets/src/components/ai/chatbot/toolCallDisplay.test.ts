@@ -15,12 +15,12 @@ describe('resolveToolCallKind', () => {
         prompt: 'inspect pods',
       })
     ).toBe('subagent')
-    expect(
-      resolveToolCallKind('subagent_result', { output: 'done' })
-    ).toBe('subagent_result')
-    expect(
-      resolveToolCallKind('enable_tools', { tools: ['plrl_logs'] })
-    ).toBe('enable_tools')
+    expect(resolveToolCallKind('subagent_result', { output: 'done' })).toBe(
+      'subagent_result'
+    )
+    expect(resolveToolCallKind('enable_tools', { tools: ['plrl_logs'] })).toBe(
+      'enable_tools'
+    )
   })
 })
 
@@ -68,7 +68,9 @@ describe('toolCallDisplaySubtitle', () => {
 describe('humanizeToolName', () => {
   it('strips workbench prefixes', () => {
     expect(humanizeToolName('workbench_subagent')).toBe('Subagent')
-    expect(humanizeToolName('workbench_activity_search')).toBe('Activity Search')
+    expect(humanizeToolName('workbench_activity_search')).toBe(
+      'Activity Search'
+    )
   })
 })
 

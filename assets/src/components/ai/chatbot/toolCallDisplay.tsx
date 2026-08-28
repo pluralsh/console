@@ -240,7 +240,9 @@ export function toolCallDisplaySubtitle(
         return getMcpLabel(toolName, args)
       case 'file_change':
       case 'edit':
-        return formatFileChangeSummary(args, content) || getPrimaryArgPreview(args)
+        return (
+          formatFileChangeSummary(args, content) || getPrimaryArgPreview(args)
+        )
       case 'read':
         return getPath(args) || getPrimaryArgPreview(args)
       case 'grep':
