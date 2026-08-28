@@ -6,7 +6,7 @@ helm_values: wizApiToken.secret.create=false,imagePullSecret.username=dummy,imag
 chart_name: wiz-sensor
 versions:
 - version: 1.0.11966
-  kube: ['1.36', '1.35', '1.34', '1.33']
+  kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary:
@@ -18,7 +18,7 @@ versions:
   chart_version: 1.0.11966
   images: ['wizio.azurecr.io/sensor:v1']
 - version: 1.0.3999
-  kube: ['1.36', '1.35', '1.34', '1.33']
+  kube: ['1.37', '1.36', '1.35', '1.34']
   requirements: []
   incompatibilities: []
   summary: null
