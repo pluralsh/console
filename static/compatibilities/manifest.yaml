@@ -38,6 +38,7 @@ names:
 - argo-cd
 - argo-workflows
 - vector
+- volcano
 - victoria-metrics-operator
 - gpu-operator
 - harbor

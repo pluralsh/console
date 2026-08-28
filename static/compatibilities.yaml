@@ -26895,6 +26895,55 @@ addons:
     chart_version: 0.1.0-alpha.4
     images: ['timberio/vector:0.16.1-distroless-libc']
   name: vector
+- icon: https://raw.githubusercontent.com/volcano-sh/charts/master/docs/images/volcano-logo.png
+  git_url: https://github.com/volcano-sh/volcano
+  release_url: https://github.com/volcano-sh/volcano/releases/tag/v{vsn}
+  helm_repository_url: https://volcano-sh.github.io/helm-charts
+  readme_url: https://github.com/volcano-sh/volcano#kubernetes-compatibility
+  versions:
+  - version: 1.15.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.15.0
+  - version: 1.14.3
+    kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+      '1.25', '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.14.3
+  - version: 1.13.3
+    kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
+      '1.24', '1.23']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.13.3
+  - version: 1.12.4
+    kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
+      '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.12.4
+  - version: 1.11.2
+    kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23',
+      '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.11.2
+  - version: 1.10.2
+    kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+      '1.21']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 1.10.2
+  name: volcano
 - git_url: https://github.com/VictoriaMetrics/operator
   release_url: https://github.com/VictoriaMetrics/operator/releases/tag/v{vsn}
   helm_repository_url: https://victoriametrics.github.io/helm-charts
