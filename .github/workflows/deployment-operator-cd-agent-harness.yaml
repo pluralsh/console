@@ -183,7 +183,7 @@ jobs:
           - name: gemini
             version: 0.44.1
           - name: opencode
-            version: 1.17.3
+            version: 1.18.23
           - name: codex
             version: 0.104.0
           - name: pi
