@@ -45,7 +45,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
