@@ -784,7 +784,7 @@ function workbenchActivityTaskSummary({
     .find(Boolean)
   if (!raw) return ''
 
-  let text = stripEmoji(prettifyPrompt(raw))
+  const text = stripEmoji(prettifyPrompt(raw))
 
   const line =
     text
