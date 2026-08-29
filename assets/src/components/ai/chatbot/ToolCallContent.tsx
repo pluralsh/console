@@ -88,13 +88,23 @@ export function ToolCallContent({
   const [tab, setTab] = useState<ToolCallTab>(() =>
     hasResponse ? ToolCallTab.Response : ToolCallTab.Arguments
   )
+  const prevHasResponseRef = useRef(hasResponse)
 
   useEffect(() => {
+    const responseJustArrived = hasResponse && !prevHasResponseRef.current
+    prevHasResponseRef.current = hasResponse
+
     if (!showTabs) return
     if (!hasResponse && tab === ToolCallTab.Response) {
       setTab(ToolCallTab.Arguments)
+      return
     }
     if (!showArguments && tab === ToolCallTab.Arguments) {
+      setTab(ToolCallTab.Response)
+      return
+    }
+    // Polled/live completion: surface Response when output first arrives.
+    if (responseJustArrived && tab === ToolCallTab.Arguments) {
       setTab(ToolCallTab.Response)
     }
   }, [hasResponse, showArguments, showTabs, tab])

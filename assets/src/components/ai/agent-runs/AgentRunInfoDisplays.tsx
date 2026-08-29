@@ -81,20 +81,29 @@ export function AgentRunInfoCard({
         }
       : {}),
   })
-  const isRunning =
+  // Keep polling while the parent prop still looks active; presentation uses
+  // the freshest polled status so the card doesn't disagree with itself.
+  const shouldPoll =
     status === AgentRunStatus.Running || status === AgentRunStatus.Pending
   const { data } = useAgentRunTinyQuery({
     variables: { id },
-    skip: !isRunning,
+    skip: !shouldPoll,
     fetchPolicy: 'cache-and-network',
     pollInterval: 5000,
   })
-  const resolvedStatus = data?.agentRun?.status ?? status
+  const polled = data?.agentRun
+  const resolvedStatus = polled?.status ?? status
+  const resolvedUpdatedAt = polled?.updatedAt ?? updatedAt
+  const isRunning =
+    resolvedStatus === AgentRunStatus.Running ||
+    resolvedStatus === AgentRunStatus.Pending
 
   if (!agentRun) return null
 
   const title =
-    status === AgentRunStatus.Successful ? 'Run complete' : 'Started agent run'
+    resolvedStatus === AgentRunStatus.Successful
+      ? 'Run complete'
+      : 'Started agent run'
 
   return (
     <AgentRunStatusBoxSC {...props}>
@@ -170,7 +179,7 @@ export function AgentRunInfoCard({
           <Body2P $color="text-xlight">
             End time{' '}
             <span css={{ color: colors['text-light'] }}>
-              {formatDateTime(updatedAt)}
+              {formatDateTime(resolvedUpdatedAt)}
             </span>
           </Body2P>
         )}
