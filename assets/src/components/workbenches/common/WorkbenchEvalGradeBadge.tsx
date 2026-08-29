@@ -46,7 +46,7 @@ export function WorkbenchEvalGradeBadge({
           border: colorBorder
             ? `1px solid ${color}`
             : theme.borders['fill-two'],
-          borderRadius: theme.borderRadiuses.medium,
+          borderRadius: '50%',
           color,
           cursor: !!onClick ? 'pointer' : 'default',
           display: 'flex',
