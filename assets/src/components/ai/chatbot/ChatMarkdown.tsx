@@ -84,13 +84,13 @@ const ChatH4 = styled.h4(({ theme }) => ({
   paddingTop: theme.spacing.xsmall,
 }))
 
-/** Major prose: body2; brightest fill (`text`) for findings. */
+/** Major prose: body2 loose line-height for readable findings. */
 const ChatP = styled.p(({ theme }) => ({
   margin: 0,
   padding: 0,
   paddingTop: theme.spacing.xsmall,
   marginBottom: 0,
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors.text,
   '&:first-child': { paddingTop: 0 },
   'h1 + &, h2 + &, h3 + &, h4 + &, h5 + &, h6 + &': {
@@ -102,7 +102,7 @@ const ChatLi = styled.li(({ theme }) => ({
   margin: 0,
   marginBottom: theme.spacing.xxsmall,
   padding: 0,
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2LooseLineHeight,
   color: theme.colors.text,
   '&:last-child': { marginBottom: 0 },
 }))

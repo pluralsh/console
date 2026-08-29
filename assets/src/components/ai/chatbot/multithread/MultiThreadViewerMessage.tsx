@@ -680,7 +680,9 @@ const SimpleMarkdownSC = styled.div<{
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
-    : theme.partials.text.body2),
+    : $tone === 'major'
+      ? theme.partials.text.body2LooseLineHeight
+      : theme.partials.text.body2),
   color:
     theme.colors[
       $tone === 'major'
@@ -703,7 +705,9 @@ const SimpleMarkdownBlockSC = styled.div<{
 }>(({ theme, $size = 'body2', $tone }) => ({
   ...($size === 'body1'
     ? theme.partials.text.body1
-    : theme.partials.text.body2),
+    : $tone === 'major'
+      ? theme.partials.text.body2LooseLineHeight
+      : theme.partials.text.body2),
   color:
     theme.colors[
       $tone === 'major'
