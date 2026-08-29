@@ -9,7 +9,7 @@ const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   backgroundColor: theme.colors['fill-accent'],
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
   minHeight: 48,
   paddingLeft: theme.spacing.medium,
   paddingRight: theme.spacing.medium,

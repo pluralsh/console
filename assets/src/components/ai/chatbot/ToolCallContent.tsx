@@ -17,7 +17,9 @@ enum ToolCallTab {
   Response = 'response',
 }
 
-export function useSlimToolCodeCss() {
+export function useSlimToolCodeCss({
+  showLanguageIcon = false,
+}: { showLanguageIcon?: boolean } = {}) {
   const { colors } = useTheme()
   return {
     overflow: 'auto',
@@ -27,6 +29,11 @@ export function useSlimToolCodeCss() {
       padding: 8,
       color: colors['text-light'],
     },
+    ...(!showLanguageIcon && {
+      '& > div > div:first-child svg': {
+        display: 'none',
+      },
+    }),
   } as const
 }
 

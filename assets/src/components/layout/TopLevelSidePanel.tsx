@@ -153,6 +153,7 @@ export function TopLevelSidePanel() {
           {!fullWidth && (
             <DragHandleSC
               tabIndex={0}
+              $isDragging={isDragging}
               {...dragHandleProps}
             />
           )}

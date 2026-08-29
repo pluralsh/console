@@ -25,6 +25,7 @@ export function WorkbenchGraphCard({
   return (
     <Card
       css={{
+        border: theme.borders.default,
         backgroundColor: theme.colors['fill-zero'],
         display: 'flex',
         flexDirection: 'column',

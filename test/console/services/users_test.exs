@@ -31,6 +31,45 @@ defmodule Console.Services.UsersTest do
     end
   end
 
+  describe "#authorize_refresh/1" do
+    test "it rotates the refresh token and returns the user with a new one" do
+      user = insert(:user)
+      old = insert(:refresh_token, user: user)
+      keep = insert(:refresh_token, user: user)
+
+      {:ok, hydrated} = Users.authorize_refresh(old.token)
+
+      assert hydrated.id == user.id
+      assert hydrated.refresh_token.user_id == user.id
+      assert hydrated.refresh_token.token
+      refute hydrated.refresh_token.token == old.token
+
+      refute Users.get_refresh_token(old.token)
+      assert Users.get_refresh_token(hydrated.refresh_token.token)
+      assert refetch(keep)
+    end
+
+    test "it cannot reuse a rotated refresh token" do
+      user = insert(:user)
+      old = insert(:refresh_token, user: user)
+
+      {:ok, hydrated} = Users.authorize_refresh(old.token)
+      {:error, _} = Users.authorize_refresh(old.token)
+      {:ok, again} = Users.authorize_refresh(hydrated.refresh_token.token)
+
+      assert again.refresh_token.token != hydrated.refresh_token.token
+      refute Users.get_refresh_token(hydrated.refresh_token.token)
+    end
+
+    test "it fails if the token does not exist" do
+      {:error, "could not fetch refresh token"} = Users.authorize_refresh("not-a-token")
+    end
+
+    test "it fails if no token is provided" do
+      {:error, "no refresh token provided"} = Users.authorize_refresh(nil)
+    end
+  end
+
   describe "create_invite/1" do
     test "it can create an invite link" do
       {:ok, invite} = Users.create_invite(%{email: "someone@example.com"})

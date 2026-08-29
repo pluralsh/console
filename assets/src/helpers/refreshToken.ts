@@ -5,6 +5,7 @@ import { RefreshDocument, RefreshQuery } from 'generated/graphql'
 
 import {
   fetchRefreshToken,
+  setRefreshToken,
   setToken,
   wipeRefreshToken,
   wipeToken,
@@ -26,7 +27,12 @@ export const getRefreshedToken = async () => {
     fetchPolicy: 'no-cache',
   })
 
-  return refreshResolverResponse?.data?.refresh?.jwt
+  const user = refreshResolverResponse?.data?.refresh
+  if (user?.refreshToken?.token) {
+    setRefreshToken(user.refreshToken.token)
+  }
+
+  return user?.jwt
 }
 
 export const onErrorHandler: ErrorHandler = ({

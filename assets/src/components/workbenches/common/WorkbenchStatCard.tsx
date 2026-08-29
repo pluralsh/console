@@ -22,7 +22,7 @@ export function WorkbenchStatCard({
   return (
     <Card
       css={{
-        border: 'none',
+        border: theme.borders.default,
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,

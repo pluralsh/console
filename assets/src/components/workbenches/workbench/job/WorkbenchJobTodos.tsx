@@ -22,7 +22,7 @@ export function WorkbenchJobTodos({
 
   return (
     <AgentTodosTimeline
-      title="Agent todos"
+      title="Implementation Plan"
       todos={todos}
     />
   )

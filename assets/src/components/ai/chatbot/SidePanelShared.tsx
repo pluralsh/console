@@ -27,7 +27,7 @@ const SidePanelWrapperSC = styled.div<{ $hideResizeChrome?: boolean }>(
     flexDirection: 'column',
     height: '100%',
     width: 'var(--side-panel-width)',
-    borderLeft: $hideResizeChrome ? 'none' : theme.borders.default,
+    borderLeft: $hideResizeChrome ? 'none' : theme.borders.hairline,
     background: theme.colors['fill-accent'],
   })
 )
@@ -39,12 +39,12 @@ export const PanelHeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   minHeight: SIDE_PANEL_HEADER_HEIGHT,
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  borderBottom: theme.borders.default,
+  borderBottom: theme.borders.hairline,
   flexShrink: 0,
 }))
 
 export const ResizeGripSC = styled.div(({ theme }) => ({
-  borderLeft: theme.borders.default,
+  borderLeft: theme.borders.hairline,
   height: 40,
   left: 2,
   position: 'absolute',
@@ -52,7 +52,7 @@ export const ResizeGripSC = styled.div(({ theme }) => ({
   width: 5,
 
   '&:after': {
-    borderLeft: theme.borders.default,
+    borderLeft: theme.borders.hairline,
     content: '""',
     height: 30,
     left: 2,
@@ -62,24 +62,25 @@ export const ResizeGripSC = styled.div(({ theme }) => ({
   },
 }))
 
-export const DragHandleSC = styled.div(({ theme }) => ({
-  position: 'absolute',
-  zIndex: theme.zIndexes.modal,
-  left: -HANDLE_THICKNESS / 2,
-  top: 0,
-  width: HANDLE_THICKNESS,
-  height: '100%',
-  cursor: 'ew-resize',
-  background: 'transparent',
-  display: 'flex',
-  justifyContent: 'center',
-  '&:focus-visible': { outline: theme.borders['outline-focused'] },
-  '&::before': {
-    content: '""',
-    pointerEvents: 'none',
-    width: HANDLE_THICKNESS / 4,
-    background: theme.colors['icon-primary'],
-    opacity: 'var(--is-dragging)',
-    transition: 'opacity 0.2s ease-in-out',
-  },
-}))
+export const DragHandleSC = styled.div<{ $isDragging?: boolean }>(
+  ({ theme, $isDragging }) => ({
+    position: 'absolute',
+    zIndex: theme.zIndexes.modal,
+    left: -HANDLE_THICKNESS / 2,
+    top: 0,
+    width: HANDLE_THICKNESS,
+    height: '100%',
+    cursor: 'ew-resize',
+    background: 'transparent',
+    display: 'flex',
+    justifyContent: 'center',
+    '&:focus-visible': { outline: theme.borders['outline-focused'] },
+    '&::before': {
+      content: $isDragging ? '""' : 'none',
+      pointerEvents: 'none',
+      width: HANDLE_THICKNESS / 4,
+      height: '100%',
+      background: theme.colors['icon-primary'],
+    },
+  })
+)

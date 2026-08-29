@@ -83,7 +83,7 @@ export function WorkbenchEvalsSidePanel({
       height="100%"
       css={{
         backgroundColor: theme.colors['fill-accent'],
-        borderRight: theme.borders['fill-one'],
+        borderRight: theme.borders.hairline,
         minWidth: 350,
         maxWidth: 350,
       }}
@@ -94,7 +94,7 @@ export function WorkbenchEvalsSidePanel({
         height={73}
         padding="medium"
         wrap="wrap"
-        css={{ borderBottom: theme.borders['fill-one'] }}
+        css={{ borderBottom: theme.borders.hairline }}
       >
         {filterOptions.map(({ key, count, severity }) => (
           <EvalFilterChip
