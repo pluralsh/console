@@ -16,20 +16,16 @@ import {
   useCopyText,
   WrapWithIf,
 } from '@pluralsh/design-system'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import {
-  SimpleAccordion,
-  SimplifiedMarkdown,
-} from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+  PreviewablePanel,
+  ShowMoreSC,
+} from 'components/ai/chatbot/ToolCallContent'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
-import {
-  prettifyPrompt,
-  truncateKeepingChips,
-} from 'components/utils/contentEditableChips'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobLogsToolQuery,
@@ -39,12 +35,14 @@ import {
   WorkbenchJobActivityResultFragment,
   WorkbenchToolQueryData,
 } from 'generated/graphql'
-import { groupBy, isEmpty, isNil, truncate } from 'lodash'
+import { groupBy, isEmpty, isNil } from 'lodash'
 import {
   ComponentPropsWithRef,
   ComponentType,
   ReactNode,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
@@ -80,7 +78,6 @@ export function MemoActivityIcon({
   )
 }
 
-const EXPANDABLE_PROMPT_LENGTH = 400
 export function ExpandableUserPrompt({
   prompt,
   timestamp,
@@ -91,8 +88,31 @@ export function ExpandableUserPrompt({
 } & ComponentPropsWithRef<typeof PromptWrapperSC>) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showActions, setShowActions] = useState(false)
+  const [canExpand, setCanExpand] = useState(false)
+  const bodyRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const element = bodyRef.current
+    if (!element) return
+
+    const updateCanExpand = () => {
+      const nextCanExpand = element.scrollHeight > element.clientHeight + 1
+      setCanExpand((prev) => {
+        const next = isExpanded ? prev || nextCanExpand : nextCanExpand
+        return prev === next ? prev : next
+      })
+    }
+
+    updateCanExpand()
+    const resizeObserver = new ResizeObserver(updateCanExpand)
+    resizeObserver.observe(element)
+    return () => resizeObserver.disconnect()
+  }, [prompt, isExpanded])
+
   if (!prompt) return null
-  const isExpandable = prompt.length > EXPANDABLE_PROMPT_LENGTH
+
+  const isExpandable = canExpand || isExpanded
+  const showFade = !isExpanded && canExpand
 
   return (
     <PromptWrapperSC
@@ -101,21 +121,25 @@ export function ExpandableUserPrompt({
       onMouseLeave={() => setShowActions(false)}
     >
       <PromptCardSC $isExpanded={isExpandable && isExpanded}>
-        <SimplifiedMarkdown
-          text={
-            !isExpandable || isExpanded
-              ? prompt
-              : truncateKeepingChips(prompt, EXPANDABLE_PROMPT_LENGTH)
-          }
-        />
+        <PromptBodySC
+          ref={bodyRef}
+          $expanded={isExpanded}
+          $fade={showFade}
+        >
+          <SimplifiedMarkdown
+            text={prompt}
+            tone="thought"
+          />
+        </PromptBodySC>
         {isExpandable && (
-          <BasicTextButton
+          <ShowMoreSC
             type="button"
+            aria-expanded={isExpanded}
             onClick={() => setIsExpanded((v) => !v)}
-            css={{ width: '100%', textAlign: 'right' }}
+            css={{ paddingLeft: 0, paddingRight: 0, paddingBottom: 0 }}
           >
-            {isExpanded ? 'view less' : 'view more'}
-          </BasicTextButton>
+            {isExpanded ? 'Show less' : 'Show more'}
+          </ShowMoreSC>
         )}
       </PromptCardSC>
       <UserPromptActions
@@ -473,21 +497,17 @@ export function WorkbenchJobMetricsLegend({
 }
 
 export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
-  const { spacing } = useTheme()
   if (!prompt) return null
   return (
-    <SimpleAccordion
-      label={
-        <span>
-          <strong>Prompt: </strong>
-          {truncate(prettifyPrompt(prompt), { length: 40 })}
-        </span>
-      }
+    <PreviewablePanel
+      header="Prompt"
+      contentKey={`prompt:${prompt.length}`}
     >
-      <Card css={{ padding: spacing.medium, background: 'none' }}>
-        <SimplifiedMarkdown text={prompt} />
-      </Card>
-    </SimpleAccordion>
+      <SimplifiedMarkdown
+        text={prompt}
+        tone="thought"
+      />
+    </PreviewablePanel>
   )
 }
 
@@ -578,7 +598,7 @@ const PromptWrapperSC = styled.div(({ theme }) => ({
   alignItems: 'flex-end',
   width: '100%',
   marginTop: theme.spacing.small,
-  marginBottom: theme.spacing.small,
+  marginBottom: theme.spacing.xsmall,
 }))
 
 const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
@@ -596,10 +616,12 @@ const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
 
 const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
   ({ theme, $isExpanded }) => ({
+    display: 'flex',
+    flexDirection: 'column',
     padding: theme.spacing.medium,
     width: 'fit-content',
     maxWidth: '100%',
-    overflow: 'auto',
+    overflow: 'hidden',
     wordBreak: 'break-word',
     border: $isExpanded ? 'none' : undefined,
     [`& ${Code}`]: {
@@ -608,3 +630,18 @@ const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
     },
   })
 )
+
+const PromptBodySC = styled.div<{
+  $expanded: boolean
+  $fade?: boolean
+}>(({ $expanded, $fade }) => ({
+  minWidth: 0,
+  minHeight: 0,
+  maxHeight: $expanded ? 'none' : '4lh',
+  overflow: $expanded ? 'visible' : 'hidden',
+  lineHeight: 1.45,
+  ...($fade && {
+    maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+    WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+  }),
+}))

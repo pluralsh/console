@@ -1,11 +1,11 @@
 import {
   AccordionItem,
   Card,
+  DiffMethod,
+  DiffViewer,
   FailedFilledIcon,
   Flex,
   IconFrame,
-  Markdown,
-  Modal,
   TimeSeriesIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
@@ -14,8 +14,9 @@ import {
   AgentRunInfoCard,
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
+import { stripEmoji } from 'components/ai/stripEmoji'
 import {
-  ClickableLabelSC,
   SimpleAccordion,
   SimpleToolCall,
   SimplifiedMarkdown,
@@ -25,10 +26,10 @@ import pluralize from 'pluralize'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
+import { Body2P, SpanSC } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -46,6 +47,7 @@ import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { getOldContentFromTextDiff } from 'utils/textDiff'
 import {
   ActivityModalIcon,
   hasWorkbenchMetricsToolQuery,
@@ -88,7 +90,11 @@ export function WorkbenchJobActivity({
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
-      <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
+      <div
+        css={{
+          padding: `${spacing.small}px ${spacing.medium}px 0 0`,
+        }}
+      >
         <WorkbenchJobActivityResult
           activity={activity}
           jobId={jobId}
@@ -105,6 +111,101 @@ export function WorkbenchJobActivity({
       />
     )
 
+  const titleColor = 'text-xlight'
+  const typeLabel = workbenchActivityTitle(type)
+  const taskSummary = workbenchActivityTaskSummary({
+    prompt,
+    output: result?.output,
+    textStream,
+  })
+  const titleNode = (
+    <ActivityTitleSC>
+      <Body2P
+        as="span"
+        className="type"
+        $color={titleColor}
+        $shimmer={isRunning}
+      >
+        {typeLabel}
+      </Body2P>
+      {taskSummary && (
+        <Body2P
+          as="span"
+          className="task"
+          $color="text-disabled"
+          $shimmer={isRunning}
+        >
+          {taskSummary}
+        </Body2P>
+      )}
+    </ActivityTitleSC>
+  )
+  const trailingIcons = (
+    <>
+      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
+      {!isEmpty(result?.logs) && (
+        <ActivityModalIcon
+          icon={VisualInspectionIcon}
+          tooltip="View logs"
+          modalHeader="Logs"
+          modalContent={
+            <JobActivityLogs
+              cardWrapper
+              logs={result?.logs?.filter(isNonNullable) ?? []}
+            />
+          }
+        />
+      )}
+      {hasWorkbenchMetricsToolQuery(result?.metricsQuery) && (
+        <ActivityModalIcon
+          icon={TimeSeriesIcon}
+          tooltip="View metrics"
+          modalHeader="Metrics"
+          modalContent={
+            <JobActivityMetrics
+              jobId={jobId}
+              metricsQuery={result?.metricsQuery}
+              skeletonHeight={320}
+            />
+          }
+        />
+      )}
+      {agentRun && (
+        <IconFrame
+          clickable
+          as={Link}
+          size="small"
+          to={getAgentRunAbsPath({
+            agentRunId: agentRun.id,
+            ...(workbenchId
+              ? {
+                  backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+                  backLabel: workbenchName,
+                }
+              : {}),
+          })}
+          target="_blank"
+          rel="noopener noreferrer"
+          icon={
+            <AgentRunIcon
+              runtime={agentRun.runtime}
+              size={14}
+              fullColor={false}
+              color="icon-light"
+            />
+          }
+          tooltip="Go to agent run details"
+        />
+      )}
+      {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
+        <FailedFilledIcon
+          size={12}
+          color="icon-danger"
+        />
+      )}
+    </>
+  )
+
   return (
     <AccordionItem
       key={id}
@@ -114,89 +215,26 @@ export function WorkbenchJobActivity({
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
         gap: 10,
-        padding: `${spacing.xsmall}px 0`,
-        '.icon': { width: 10 },
+        padding: `${spacing.xxsmall}px 0`,
+        width: 'fit-content',
+        maxWidth: '100%',
       }}
       trigger={
         <Flex
           gap="xsmall"
           alignItems="center"
+          minWidth={0}
+          css={{ maxWidth: '100%' }}
         >
-          <Body2P
-            $color="text-long-form"
-            $shimmer={isRunning}
-          >
-            {workbenchActivityTitle(type)}
-          </Body2P>
-          {result?.jobUpdate && (
-            <MemoActivityIcon jobUpdate={result.jobUpdate} />
-          )}
-          {!isEmpty(result?.logs) && (
-            <ActivityModalIcon
-              icon={VisualInspectionIcon}
-              tooltip="View logs"
-              modalHeader="Logs"
-              modalContent={
-                <JobActivityLogs
-                  cardWrapper
-                  logs={result?.logs?.filter(isNonNullable) ?? []}
-                />
-              }
-            />
-          )}
-          {hasWorkbenchMetricsToolQuery(result?.metricsQuery) && (
-            <ActivityModalIcon
-              icon={TimeSeriesIcon}
-              tooltip="View metrics"
-              modalHeader="Metrics"
-              modalContent={
-                <JobActivityMetrics
-                  jobId={jobId}
-                  metricsQuery={result?.metricsQuery}
-                  skeletonHeight={320}
-                />
-              }
-            />
-          )}
-          {agentRun && (
-            <IconFrame
-              clickable
-              as={Link}
-              size="small"
-              to={getAgentRunAbsPath({
-                agentRunId: agentRun.id,
-                ...(workbenchId
-                  ? {
-                      backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
-                      backLabel: workbenchName,
-                    }
-                  : {}),
-              })}
-              target="_blank"
-              rel="noopener noreferrer"
-              icon={
-                <AgentRunIcon
-                  runtime={agentRun.runtime}
-                  size={14}
-                />
-              }
-              tooltip="Go to agent run details"
-            />
-          )}
-          {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
-            <FailedFilledIcon
-              size={12}
-              color="icon-danger"
-            />
-          )}
+          {titleNode}
+          {trailingIcons}
         </Flex>
       }
     >
       <Flex
         direction="column"
-        gap="xsmall"
+        gap="small"
         overflow="auto"
-        css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
         {prompt && <JobActivityPrompt prompt={prompt} />}
         <WorkbenchJobActivityThoughts
@@ -209,7 +247,10 @@ export function WorkbenchJobActivity({
             maxHeight={120}
             overflow="auto"
           >
-            <SimplifiedMarkdown text={textStream} />
+            <SimplifiedMarkdown
+              text={textStream}
+              tone="thought"
+            />
           </Flex>
         )}
         <WorkbenchJobActivityResult
@@ -217,12 +258,7 @@ export function WorkbenchJobActivity({
           jobId={jobId}
           metricsFetchEnabled={isOpen}
         />
-        {isRunning && (
-          <AILoadingText
-            activityId={id}
-            size="small"
-          />
-        )}
+        {isRunning && <AILoadingText activityId={id} />}
       </Flex>
     </AccordionItem>
   )
@@ -264,12 +300,7 @@ export function WorkbenchJobMemoGroup({
         label={`${activities.length} memos`}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          gap: spacing.xsmall,
-          '.icon': { width: 10 },
-        }}
+        hoverCaret
       >
         <Flex
           direction="column"
@@ -304,12 +335,12 @@ function WorkbenchJobMemo({
   activity: WorkbenchJobActivityFragment
   textStream: string
 }) {
-  const { prompt, result, status } = activity
-  const [isOpen, setIsOpen] = useState(false)
-  const [finishedAnimating, setFinishedAnimating] = useState(false)
-  const isRunning = isJobRunning(status)
-  const isFailed = status === WorkbenchJobActivityStatus.Failed
-  const isRejected = status === WorkbenchJobActivityStatus.Rejected
+  const { spacing } = useTheme()
+  const [isExpanded, setIsExpanded] = useState(false)
+  const isRunning = isJobRunning(activity.status)
+  const isFailed = activity.status === WorkbenchJobActivityStatus.Failed
+  const isRejected = activity.status === WorkbenchJobActivityStatus.Rejected
+  const { prompt, result } = activity
   const summary = textStream || result?.output || prompt || ''
   const workingTheory =
     result?.jobUpdate?.workingTheory?.trim() ||
@@ -324,49 +355,67 @@ function WorkbenchJobMemo({
     (isRejected ? 'Rejected workbench notes update' : null) ||
     (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
 
+  const jobUpdate = result?.jobUpdate
+  const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''
+  const oldValue = useMemo(
+    () => getOldContentFromTextDiff(newValue, jobUpdate?.diff),
+    [newValue, jobUpdate?.diff]
+  )
+  const hasDiff = !!jobUpdate?.diff
+
   return (
-    <MemoRowSC>
-      <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <MemoLabelSC $shimmer={isRunning}>{label}</MemoLabelSC>
-      </ClickableLabelSC>
-      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
-      {(isFailed || isRejected) && (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )}
-      <Modal
-        open={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-          setFinishedAnimating(false)
-        }}
-        onAnimationEnd={() => setFinishedAnimating(true)}
-        header={workingTheory ? 'Working theory' : 'Memo'}
-        size="large"
+    <SimpleAccordion
+      hoverCaret
+      isOpen={isExpanded}
+      setIsOpen={setIsExpanded}
+      triggerWrapperStyles={{
+        justifyContent: 'flex-start',
+        width: 'fit-content',
+        maxWidth: '100%',
+      }}
+      label={
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+          minWidth={0}
+        >
+          <MemoLabelSC $shimmer={isRunning}>{label}</MemoLabelSC>
+          {(isFailed || isRejected) && (
+            <FailedFilledIcon
+              size={12}
+              color="icon-danger"
+            />
+          )}
+        </Flex>
+      }
+    >
+      <Flex
+        direction="column"
+        gap="small"
+        marginTop={spacing.xsmall}
+        minWidth={0}
       >
-        {finishedAnimating ? (
-          <Flex
-            direction="column"
-            gap="small"
-          >
-            {result?.error && (
-              <GqlError
-                error={result.error}
-                css={{ wordBreak: 'break-word' }}
-              />
-            )}
-            {fullText && <SimplifiedMarkdown text={fullText} />}
-          </Flex>
-        ) : (
-          <RectangleSkeleton
-            $height={160}
-            $width="100%"
+        {result?.error && (
+          <GqlError
+            error={result.error}
+            css={{ wordBreak: 'break-word' }}
           />
         )}
-      </Modal>
-    </MemoRowSC>
+        {fullText && (
+          <SimplifiedMarkdown
+            text={fullText}
+            tone="thought"
+          />
+        )}
+        {hasDiff && (
+          <DiffViewer
+            compareMethod={DiffMethod.WORDS}
+            oldValue={oldValue}
+            newValue={newValue}
+          />
+        )}
+      </Flex>
+    </SimpleAccordion>
   )
 }
 
@@ -392,7 +441,7 @@ function WorkbenchJobActivityResult({
   return (
     <Flex
       direction="column"
-      gap="medium"
+      gap="small"
     >
       {result?.error && (
         <GqlError
@@ -403,9 +452,12 @@ function WorkbenchJobActivityResult({
       {!hasCanvasBlocks && (
         <div>
           {markdownType === 'simplified' ? (
-            <SimplifiedMarkdown text={result?.output ?? ''} />
+            <SimplifiedMarkdown
+              text={result?.output ?? ''}
+              tone="major"
+            />
           ) : (
-            <Markdown text={result?.output ?? ''} />
+            <ChatMarkdown text={result?.output ?? ''} />
           )}
         </div>
       )}
@@ -452,24 +504,11 @@ const MemoGroupSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
 }))
 
-const MemoRowSC = styled.div(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-  minWidth: 0,
-  width: '100%',
-  '& > button': {
-    flex: 1,
-    minWidth: 0,
-    overflow: 'hidden',
-  },
-}))
-
-const MemoLabelSC = styled(CaptionP)(({ theme }) => ({
+const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   color: theme.colors['text-xlight'],
   display: 'block',
   minWidth: 0,
-  width: '100%',
+  maxWidth: '100%',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -544,11 +583,7 @@ function WorkbenchJobActivityThoughts({
         loading={isLoading}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          '.icon': { width: 10 },
-        }}
+        hoverCaret
       >
         <Flex
           direction="column"
@@ -586,9 +621,9 @@ function WorkbenchJobActivityThought({
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
       {...(!isEmpty(metrics) && {
         customLabel: (
-          <CaptionP $color="text">
+          <Body2P $color="text-xlight">
             Fetched metrics <SpanSC $color="text-xlight">{toolName}</SpanSC>
-          </CaptionP>
+          </Body2P>
         ),
         customResultBody: (
           <Card>
@@ -603,9 +638,9 @@ function WorkbenchJobActivityThought({
       })}
       {...(!isEmpty(logs) && {
         customLabel: (
-          <CaptionP $color="text">
+          <Body2P $color="text-xlight">
             Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
-          </CaptionP>
+          </Body2P>
         ),
         customResultBody: (
           <JobActivityLogs
@@ -668,11 +703,7 @@ export function WorkbenchJobJobLevelThinking({
         loading={false}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          '.icon': { width: 10 },
-        }}
+        hoverCaret
       >
         <Flex
           direction="column"
@@ -719,20 +750,6 @@ export const isJobRunning = (
   >
 ) => status === 'PENDING' || status === 'RUNNING'
 
-const SUBAGENT_ACTIVITY_TYPES = new Set([
-  WorkbenchJobActivityType.Coding,
-  WorkbenchJobActivityType.Infrastructure,
-  WorkbenchJobActivityType.Observability,
-  WorkbenchJobActivityType.Integration,
-  WorkbenchJobActivityType.Skill,
-  WorkbenchJobActivityType.History,
-  WorkbenchJobActivityType.Search,
-  WorkbenchJobActivityType.Verify,
-  WorkbenchJobActivityType.Memory,
-  WorkbenchJobActivityType.Canvas,
-  WorkbenchJobActivityType.Plan,
-])
-
 function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
   switch (type) {
     case WorkbenchJobActivityType.User:
@@ -747,11 +764,60 @@ function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
       return 'Kubernetes'
     case WorkbenchJobActivityType.Exec:
       return 'Command'
-    default: {
-      const name = startCase((type ?? 'activity').toLowerCase())
-      return SUBAGENT_ACTIVITY_TYPES.has(type as WorkbenchJobActivityType)
-        ? `${name} subagent`
-        : name
-    }
+    default:
+      return startCase((type ?? 'activity').toLowerCase())
   }
 }
+
+/** Prefer completed output, then stream, then prompt — first clean line. */
+function workbenchActivityTaskSummary({
+  prompt,
+  output,
+  textStream,
+}: {
+  prompt?: Nullable<string>
+  output?: Nullable<string>
+  textStream?: Nullable<string>
+}): string {
+  const raw = [output, textStream, prompt]
+    .map((value) => value?.trim())
+    .find(Boolean)
+  if (!raw) return ''
+
+  let text = stripEmoji(prettifyPrompt(raw))
+
+  const line =
+    text
+      .split('\n')
+      .map((part) =>
+        part
+          .replace(/^#{1,6}\s+/, '')
+          .replace(/^[-*+]\s+/, '')
+          .replace(/^\d+\.\s+/, '')
+          .replace(/^>\s+/, '')
+          .trim()
+      )
+      .find(Boolean) ?? ''
+
+  return line.replace(/\s+/g, ' ').trim()
+}
+
+const ActivityTitleSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  '.type': {
+    flexShrink: 0,
+  },
+  '.task': {
+    minWidth: 0,
+    // Cap so the caret stays after the label; long tasks ellipsize.
+    maxWidth: '52ch',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+}))

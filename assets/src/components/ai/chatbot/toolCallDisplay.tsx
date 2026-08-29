@@ -406,6 +406,70 @@ export function toolCallModalHeader(
   return subtitle ? `${title}: ${subtitle}` : `${title}: ${toolName}`
 }
 
+/**
+ * Cursor-style: structured / inspectable payloads open in a modal.
+ * Transcript-native tools (bash, edits, search, long plain text) stay inline.
+ */
+export function toolCallOpensInModal(
+  kind: ToolCallKind,
+  content?: string | null
+): boolean {
+  switch (kind) {
+    case 'mcp_tool_call':
+    case 'enable_tools':
+    case 'subagent_result':
+      return true
+    case 'read':
+    case 'grep':
+    case 'generic': {
+      const trimmed = content?.trim() ?? ''
+      // Args-only generic → modal. JSON blobs (e.g. API read results) → modal.
+      // Plain text transcripts stay inline under the accordion.
+      if (kind === 'generic' && !trimmed) return true
+      return extractJsonPayload(trimmed) != null
+    }
+    default:
+      // Any tool whose result is a JSON blob should open in a modal.
+      return extractJsonPayload(content) != null
+  }
+}
+
+/** Pull a parseable JSON object/array out of tool output (raw or fenced). */
+export function extractJsonPayload(text?: string | null): string | null {
+  if (!text) return null
+  const trimmed = text.trim()
+  if (!trimmed) return null
+
+  const fenced = trimmed.match(/^```(?:json)?\s*([\s\S]*?)```$/i)
+  const candidate = (fenced?.[1] ?? trimmed).trim()
+  // Require the whole payload (after optional fence) to be JSON — don't mine
+  // braces out of source code like `function foo() {}`.
+  return tryParseJson(candidate) ? candidate : null
+}
+
+export function looksLikeJsonPayload(text: string): boolean {
+  return extractJsonPayload(text) != null
+}
+
+function tryParseJson(text: string): boolean {
+  if (!(text.startsWith('{') || text.startsWith('['))) return false
+  try {
+    JSON.parse(text)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function prettifyToolJson(text: string): string {
+  const payload = extractJsonPayload(text) ?? text
+  try {
+    return JSON.stringify(JSON.parse(payload), null, 2)
+  } catch {
+    return text
+  }
+}
+
 export function styledToolCallKinds(): ToolCallKind[] {
   return [
     'bash',

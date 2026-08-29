@@ -15,12 +15,11 @@ import {
   Tooltip,
   WarningIcon,
 } from '@pluralsh/design-system'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   AgentRunTinyFragment,
@@ -90,22 +89,28 @@ export function AgentRunInfoCard({
     fetchPolicy: 'cache-and-network',
     pollInterval: 5000,
   })
+  const resolvedStatus = data?.agentRun?.status ?? status
 
   if (!agentRun) return null
 
+  const title =
+    status === AgentRunStatus.Successful ? 'Run complete' : 'Started agent run'
+
   return (
     <AgentRunStatusBoxSC {...props}>
-      <Flex gap="small">
+      <Flex
+        gap="small"
+        alignItems="center"
+      >
         <StackedText
           first={
-            <Body2BoldP
+            <Body2P
+              $color="text-light"
               $shimmer={isRunning}
               css={{ whiteSpace: 'nowrap' }}
             >
-              {status === AgentRunStatus.Successful
-                ? 'Run complete'
-                : 'Started agent run'}
-            </Body2BoldP>
+              {title}
+            </Body2P>
           }
           icon={
             <IconFrame
@@ -121,14 +126,25 @@ export function AgentRunInfoCard({
             />
           }
         />
-        <RunStatusChip
-          status={data?.agentRun?.status ?? status}
-          fillLevel={2}
-          css={{ marginLeft: 'auto' }}
-        />
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+          css={{ marginLeft: 'auto', flexShrink: 0 }}
+        >
+          <RunStatusIcon
+            size="small"
+            status={resolvedStatus}
+            fullColor
+          />
+          <Body2P $color="text-xlight">
+            {capitalize(resolvedStatus ?? '')}
+          </Body2P>
+        </Flex>
         {showLinkButton && (
           <Button
             small
+            tertiary
+            padding="none"
             as={Link}
             to={detailsPath}
             endIcon={<ArrowTopRightIcon size={12} />}
@@ -137,26 +153,26 @@ export function AgentRunInfoCard({
           </Button>
         )}
       </Flex>
-      <CaptionP
+      <Body2P
         $color="text-xlight"
         css={TRUNCATE}
       >
         {prompt}
-      </CaptionP>
+      </Body2P>
       <StretchedFlex>
-        <CaptionP $color="text-xlight">
+        <Body2P $color="text-xlight">
           Start time{' '}
           <span css={{ color: colors['text-light'] }}>
             {formatDateTime(insertedAt)}
           </span>
-        </CaptionP>
+        </Body2P>
         {!isRunning && (
-          <CaptionP $color="text-xlight">
+          <Body2P $color="text-xlight">
             End time{' '}
             <span css={{ color: colors['text-light'] }}>
               {formatDateTime(updatedAt)}
             </span>
-          </CaptionP>
+          </Body2P>
         )}
       </StretchedFlex>
     </AgentRunStatusBoxSC>
@@ -176,12 +192,12 @@ export function AgentRunInfoSimple({
       gap="xsmall"
       {...props}
     >
-      <CaptionP
+      <Body2P
         $color="text-xlight"
         css={TRUNCATE}
       >
         {prompt}
-      </CaptionP>
+      </Body2P>
       <IconFrame
         clickable
         as={Link}
@@ -275,7 +291,7 @@ export function RunStatusIcon({
 const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
+  gap: theme.spacing.small,
   justifyContent: 'space-between',
   padding: theme.spacing.medium,
   width: '100%',

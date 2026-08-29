@@ -45,12 +45,8 @@ export function ChatToolCallGroup({
         loading={false}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
+        hoverCaret
         accordionStyles={accordionStyles}
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          '.icon': { width: 10 },
-        }}
       >
         <Flex
           direction="column"

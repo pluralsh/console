@@ -3,17 +3,12 @@ import {
   Card,
   CaretRightIcon,
   CloseIcon,
-  CommandIcon,
-  ContainerRuntimeIcon,
   DiscoverIcon,
   Flex,
   KubernetesIcon,
   ListIcon,
   Switch,
-  TrashCanIcon,
-  UpdatesIcon,
   useFloatingDropdown,
-  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
@@ -322,22 +317,6 @@ export function WorkbenchPromptOptionPills({
         <SelectedOptionPill
           label="Coding"
           icon={<DiscoverIcon size={12} />}
-          optionIcons={
-            <>
-              {value?.coding?.approval && (
-                <WarningShieldIcon
-                  size={12}
-                  color="icon-light"
-                />
-              )}
-              {value?.coding?.babysit && (
-                <ContainerRuntimeIcon
-                  size={12}
-                  color="icon-light"
-                />
-              )}
-            </>
-          }
           onClear={() =>
             onChange({
               ...value,
@@ -350,13 +329,6 @@ export function WorkbenchPromptOptionPills({
         <SelectedOptionPill
           label="Kubernetes"
           icon={<KubernetesIcon size={12} />}
-          optionIcons={
-            <>
-              {value?.kubernetes?.update && <UpdatesIcon size={12} />}
-              {value?.kubernetes?.delete && <TrashCanIcon size={12} />}
-              {value?.kubernetes?.exec && <CommandIcon size={12} />}
-            </>
-          }
           onClear={() =>
             onChange({
               ...value,
@@ -617,23 +589,23 @@ function SelectedOptionPill({
   label,
   clearLabel,
   icon,
-  optionIcons,
   onClear,
 }: {
   label: ReactNode
   clearLabel?: string
   icon?: ReactNode
-  optionIcons?: ReactNode
   onClear: () => void
 }) {
   return (
     <ChatOptionPill
       showArrow={false}
-      css={{ height: 32 }}
+      css={{
+        height: 28,
+        gap: 8,
+      }}
     >
       {icon}
       <span>{label}</span>
-      {optionIcons}
       <span
         role="button"
         tabIndex={0}

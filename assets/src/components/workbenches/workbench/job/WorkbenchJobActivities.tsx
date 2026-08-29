@@ -6,7 +6,10 @@ import {
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 
-import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import {
+  hoverCaretAccordionCss,
+  SimplifiedMarkdown,
+} from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -28,7 +31,8 @@ import {
   isActivityTerminal,
 } from './workbenchJobActivityCollapse'
 
-export const ACTIVITY_GAP = 'medium' as const
+/** Cursor-like proximity between top-level activities (~12px). */
+export const ACTIVITY_GAP = 'small' as const
 
 export function WorkbenchJobActivities({
   jobId,
@@ -109,8 +113,9 @@ export function WorkbenchJobActivities({
           <VirtualList
             isReversed
             data={activityGroups}
+            itemGap={ACTIVITY_GAP}
             style={{
-              padding: `${spacing.xlarge}px ${spacing.large}px ${spacing.medium}px`,
+              padding: `${spacing.large}px ${spacing.large}px ${spacing.medium}px`,
             }}
             keepMounted={userPromptIndices}
             topContent={
@@ -137,7 +142,10 @@ export function WorkbenchJobActivities({
                   />
                 )}
                 {textStreamMap['none'] && (
-                  <SimplifiedMarkdown text={textStreamMap['none']} />
+                  <SimplifiedMarkdown
+                    text={textStreamMap['none']}
+                    tone="thought"
+                  />
                 )}
                 {isJobRunning(job?.status) &&
                   activities.every(({ status }) =>
@@ -212,6 +220,7 @@ const ActivitiesAccordionSC = styled(Accordion)({
   border: 'none',
   background: 'none',
   height: '100%',
+  ...hoverCaretAccordionCss,
 })
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
