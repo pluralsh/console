@@ -55,8 +55,35 @@ func TestFromAgentRunFragmentCopiesSkills(t *testing.T) {
 	if !run.Followup {
 		t.Fatal("expected followup to be copied")
 	}
-	if run.FollowupPrURL != followupPrURL {
-		t.Fatalf("expected followup PR URL copied, got %q", run.FollowupPrURL)
+	if run.PRURL != followupPrURL {
+		t.Fatalf("expected PR URL copied, got %q", run.PRURL)
+	}
+}
+
+func TestFromAgentRunFragmentCopiesReviewDepth(t *testing.T) {
+	depth := console.AgentReviewDepthHigh
+	run := new(AgentRun).FromAgentRunFragment(&console.AgentRunFragment{
+		ID:          "run-123",
+		Prompt:      "review the pull request",
+		Repository:  "https://github.com/pluralsh/console.git",
+		Mode:        console.AgentRunModeReview,
+		ReviewDepth: &depth,
+		Status:      console.AgentRunStatusPending,
+	})
+
+	if run.ReviewDepth != console.AgentReviewDepthHigh {
+		t.Fatalf("expected high review depth, got %q", run.ReviewDepth)
+	}
+
+	defaulted := new(AgentRun).FromAgentRunFragment(&console.AgentRunFragment{
+		ID:         "run-124",
+		Prompt:     "review the pull request",
+		Repository: "https://github.com/pluralsh/console.git",
+		Mode:       console.AgentRunModeReview,
+		Status:     console.AgentRunStatusPending,
+	})
+	if defaulted.ReviewDepth != console.AgentReviewDepthMedium {
+		t.Fatalf("expected medium default review depth, got %q", defaulted.ReviewDepth)
 	}
 }
 

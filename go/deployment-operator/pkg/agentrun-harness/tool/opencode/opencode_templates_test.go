@@ -102,6 +102,24 @@ func TestConfigTemplate_ExternalMCPServer(t *testing.T) {
 	if tools["linear_list_issues"] != true {
 		t.Fatalf("analysis tools = %#v", tools)
 	}
+	reviewTools := out["agent"].(map[string]any)["review"].(map[string]any)["tools"].(map[string]any)
+	if reviewTools["linear_list_issues"] != true {
+		t.Fatalf("review tools = %#v", reviewTools)
+	}
+}
+
+func TestConfigTemplate_ReviewAgentIsReadOnly(t *testing.T) {
+	out := renderJSON(t, baseInput(console.AgentRunModeReview))
+	review := out["agent"].(map[string]any)["review"].(map[string]any)
+	permission := review["permission"].(map[string]any)
+
+	if permission["edit"] != "deny" {
+		t.Fatalf("expected review edit permission to be denied, got %v", permission["edit"])
+	}
+	tools := review["tools"].(map[string]any)
+	if tools["plural*"] != true {
+		t.Fatalf("expected review agent to enable plural MCP tools, got %#v", tools)
+	}
 }
 
 func TestConfigTemplate_ExternalMCPServerAllTools(t *testing.T) {

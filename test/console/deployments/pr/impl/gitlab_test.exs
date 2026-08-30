@@ -4,6 +4,7 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
 
   alias Console.Deployments.Pr.Dispatcher
   alias Console.Deployments.Pr.Impl.Gitlab
+  alias Console.Deployments.Pr.Review
   alias Console.Schema.{PrAutomation, ScmConnection}
 
   @nested_repo "https://gitlab.acme.corp/itsystems/kubernetes/plural-mgmt.git"
@@ -185,6 +186,75 @@ defmodule Console.Deployments.Pr.Impl.GitlabTest do
       end)
 
       assert {:ok, "99"} = Gitlab.review(conn, pr, "looks good")
+    end
+
+    test "publishes inline comments as one review" do
+      conn = %ScmConnection{type: :gitlab, api_url: "https://gitlab.acme.corp", token: "token"}
+      pr = %Console.Schema.PullRequest{url: @nested_mr}
+
+      review =
+        Review.new(%{
+          url: @nested_mr,
+          confidence: :b,
+          summary: "Safe refactor",
+          confidence_comment: "Two findings need attention.",
+          comments: [
+            %{
+              filename: "lib/a.ex",
+              line: 10,
+              title: "First issue",
+              body: "First finding.",
+              priority: :p1
+            },
+            %{
+              filename: "lib/b.ex",
+              line: 20,
+              title: "Second issue",
+              body: "Second finding.",
+              priority: :p2
+            }
+          ]
+        })
+
+      expect(Req, :get, fn url, _opts ->
+        assert url ==
+                 "https://gitlab.acme.corp/api/v4/projects/#{@nested_api_project}/merge_requests/42/versions"
+
+        {:ok,
+         %Req.Response{
+           status: 200,
+           body:
+             Jason.encode!([
+               %{
+                 "base_commit_sha" => "base",
+                 "start_commit_sha" => "start",
+                 "head_commit_sha" => "head"
+               }
+             ])
+         }}
+      end)
+
+      expect(Req, :post, 4, fn url, opts ->
+        cond do
+          String.ends_with?(url, "/notes") ->
+            {:ok, %Req.Response{status: 201, body: Jason.encode!(%{"id" => 99})}}
+
+          String.ends_with?(url, "/draft_notes") ->
+            body = Jason.decode!(opts[:body])
+            assert body["note"] in [
+                     ~s(<img src="#{Console.url("/review-priority-p1.svg")}" alt="P1" width="26" height="20" align="absmiddle"> **First issue**\n\nFirst finding.),
+                     ~s(<img src="#{Console.url("/review-priority-p2.svg")}" alt="P2" width="26" height="20" align="absmiddle"> **Second issue**\n\nSecond finding.)
+                   ]
+
+            assert body["position"]["old_path"] in ["lib/a.ex", "lib/b.ex"]
+            {:ok, %Req.Response{status: 201, body: Jason.encode!(%{"id" => 100})}}
+
+          String.ends_with?(url, "/draft_notes/bulk_publish") ->
+            {:ok, %Req.Response{status: 204, body: ""}}
+        end
+      end)
+
+      assert {:ok, "99"} = Gitlab.agent_review(conn, pr, review)
     end
 
     test "create tolerates scm api_url values that already include /api/v4" do

@@ -31,6 +31,7 @@ type GraphPoint = {
 type GraphSeries = {
   id: string
   data: GraphPoint[]
+  dashed?: boolean
 }
 
 function isNumber(value?: number): value is number {
@@ -124,6 +125,7 @@ function toResourceSeries(
   return {
     id,
     data: points.map(({ x }) => ({ x, y: value })),
+    dashed: true,
   }
 }
 

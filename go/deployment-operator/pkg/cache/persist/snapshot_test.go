@@ -53,6 +53,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	loaded, err := store.Load()
 	require.NoError(t, err)
 	require.Equal(t, SnapshotVersion, loaded.Version)
+	require.WithinDuration(t, time.Now(), loaded.WrittenAt, time.Second)
 	require.Equal(t, snap.Manifests["svc-1"].SHA, loaded.Manifests["svc-1"].SHA)
 	require.Equal(t, snap.ComponentSHAs["svc-1"].Value, loaded.ComponentSHAs["svc-1"].Value)
 	require.Equal(t, snap.StatusSHAs["svc-1"].Value, loaded.StatusSHAs["svc-1"].Value)
@@ -66,6 +67,32 @@ func TestLoadMissingFileReturnsEmptySnapshot(t *testing.T) {
 	store, err := Open(dir)
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = store.Close() })
+
+	loaded, err := store.Load()
+	require.NoError(t, err)
+	require.Equal(t, SnapshotVersion, loaded.Version)
+	require.Empty(t, loaded.Manifests)
+}
+
+func TestLoadStaleSnapshotReturnsEmptySnapshot(t *testing.T) {
+	dir := t.TempDir()
+	store, err := Open(dir)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = store.Close() })
+
+	require.NoError(t, store.Save(Snapshot{
+		Manifests: map[string]ManifestRecord{"stale": {SHA: "old"}},
+	}))
+
+	statePath := filepath.Join(dir, stateFileName)
+	data, err := os.ReadFile(statePath)
+	require.NoError(t, err)
+	var snap Snapshot
+	require.NoError(t, json.Unmarshal(data, &snap))
+	snap.WrittenAt = time.Now().Add(-snapshotMaxAge - time.Minute)
+	data, err = json.Marshal(snap)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(statePath, data, 0o600))
 
 	loaded, err := store.Load()
 	require.NoError(t, err)

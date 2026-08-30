@@ -170,7 +170,8 @@ _Appears in:_
 | `prompt` _string_ | Prompt is the task/prompt given to the agent |  | Required: \{\} <br /> |
 | `repository` _string_ | Repository is the git repository the agent will work with |  | Required: \{\} <br /> |
 | `branch` _string_ | Branch is the repository branch the agent should operate on. If omitted, the repository default branch is used. |  | Optional: \{\} <br /> |
-| `mode` _[AgentRunMode](#agentrunmode)_ | Mode defines how the agent should run (ANALYZE, WRITE) |  | Required: \{\} <br /> |
+| `mode` _[AgentRunMode](#agentrunmode)_ | Mode defines how the agent should run (ANALYZE, WRITE, REVIEW) |  | Required: \{\} <br /> |
+| `reviewDepth` _[AgentReviewDepth](#agentreviewdepth)_ | ReviewDepth controls how far a review run explores code adjacent to the pull request changes. |  | Optional: \{\} <br /> |
 | `flowId` _string_ | FlowID is the flow this agent run is associated with (optional) |  | Optional: \{\} <br /> |
 | `language` _[AgentRunLanguage](#agentrunlanguage)_ | Language is the programming language used in the agent run.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |
 | `languageVersion` _string_ | LanguageVersion is the version of the language to use, if you wish to specify.<br />Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead. |  | Optional: \{\} <br /> |

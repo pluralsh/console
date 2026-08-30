@@ -1,0 +1,3 @@
+<img src="<%= Console.url("/review-priority-#{@comment.priority}.svg") %>" alt="<%= @comment.priority |> to_string() |> String.upcase() %>" width="26" height="20" align="absmiddle"> **<%= @comment.title %>**
+
+<%= @comment.body %>

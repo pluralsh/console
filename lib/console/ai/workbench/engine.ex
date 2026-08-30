@@ -66,7 +66,7 @@ defmodule Console.AI.Workbench.Engine do
     # MCP clients must be up before Environment.new/3 indexes tools via tools/list.
     with {:ok, _} <- Heartbeat.start_link(job),
          {:ok, _} <- Supervisor.start_link(tools, job),
-         {:ok, skills} <- SkillsUtil.skills(workbench) do
+         {:ok, skills} <- load_skills(workbench) do
       env = Environment.new(job, tools, skills)
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
@@ -77,6 +77,17 @@ defmodule Console.AI.Workbench.Engine do
         Workbenches.fail_job("Error loading workbench environment: #{inspect(err)}", job)
         err
     end
+  end
+
+  defp load_skills(workbench) do
+    Console.Retrier.retry(
+      fn -> SkillsUtil.skills(workbench) end,
+      max: 6,
+      pause: :timer.seconds(1),
+      backoff: 2,
+      max_pause: :timer.seconds(10),
+      retry_if: &match?({:error, :rate_limited}, &1)
+    )
   end
 
   def run(%__MODULE__{job: job} = engine) do

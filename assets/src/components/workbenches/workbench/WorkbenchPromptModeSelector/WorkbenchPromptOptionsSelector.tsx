@@ -1,6 +1,7 @@
 import {
   AddIcon,
   Card,
+  CaretLeftIcon,
   CaretRightIcon,
   CloseIcon,
   CommandIcon,
@@ -16,7 +17,7 @@ import {
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { ChatOptionPill } from 'components/ai/chatbot/input/ChatInput'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import type {
   WorkbenchJobKubernetesModes,
   WorkbenchJobModes,
@@ -60,7 +61,6 @@ import {
 } from './workbenchPromptModes'
 
 const PANEL_WIDTH = 373
-const SIDE_PANEL_WIDTH = 394
 const PANEL_MAX_HEIGHT = 600
 type SidePanel = 'coding' | 'kubernetes'
 
@@ -82,14 +82,15 @@ export function WorkbenchPromptOptionsSelector({
   const triggerRef = useRef<HTMLButtonElement>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [sidePanel, setSidePanel] = useState<SidePanel | null>(null)
+  const [displayedSidePanel, setDisplayedSidePanel] =
+    useState<SidePanel>('coding')
   const readMode = !!value?.plan
   const tokenLimitEnabled =
     value?.budget?.tokens != null || value?.budget?.cost != null
-  const contentWidth = PANEL_WIDTH + (sidePanel ? SIDE_PANEL_WIDTH : 0)
   const { floating, triggerRef: mergedTriggerRef } = useFloatingDropdown({
     triggerRef,
-    width: contentWidth,
-    minWidth: contentWidth,
+    width: PANEL_WIDTH,
+    minWidth: PANEL_WIDTH,
     maxHeight: PANEL_MAX_HEIGHT,
     minHeight: 0,
     placement: 'left',
@@ -107,7 +108,12 @@ export function WorkbenchPromptOptionsSelector({
   useLayoutEffect(() => {
     if (!isOpen) return
     void floating.update()
-  }, [contentWidth, isOpen, floating, tokenLimitEnabled, sidePanel])
+  }, [isOpen, floating, tokenLimitEnabled, sidePanel])
+
+  const openSidePanel = (panel: SidePanel) => {
+    setDisplayedSidePanel(panel)
+    setSidePanel(panel)
+  }
 
   const trigger = (
     <ChatOptionPill
@@ -143,146 +149,160 @@ export function WorkbenchPromptOptionsSelector({
         }}
         floating={floating}
         style={{
-          width: contentWidth,
-          minWidth: contentWidth,
-          maxWidth: contentWidth,
+          width: PANEL_WIDTH,
+          minWidth: PANEL_WIDTH,
+          maxWidth: PANEL_WIDTH,
           clipPath: 'none',
         }}
       >
-        <Flex
-          align="flex-start"
-          css={{ maxHeight: '100%', minHeight: 0 }}
+        <Card
+          css={{
+            width: PANEL_WIDTH,
+            maxHeight: '100%',
+            minHeight: 0,
+            overflow: 'hidden',
+            padding: 0,
+            backgroundColor: panelBackground,
+            border: theme.mode === 'light' ? panelBorder : 'none',
+            borderRadius: theme.borderRadiuses.large,
+            boxShadow: theme.boxShadows.moderate,
+          }}
         >
-          <Card
+          <div
             css={{
               display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.small,
-              width: PANEL_WIDTH,
+              alignItems: 'stretch',
+              width: PANEL_WIDTH * 2,
               maxHeight: '100%',
               minHeight: 0,
-              flexShrink: 0,
-              overflowY: 'auto',
-              padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-              backgroundColor: panelBackground,
-              border: theme.mode === 'light' ? panelBorder : 'none',
-              borderRadius: sidePanel
-                ? `${theme.borderRadiuses.large}px 0 0 ${theme.borderRadiuses.large}px`
-                : theme.borderRadiuses.large,
-              boxShadow: theme.boxShadows.moderate,
+              transform: `translateX(${sidePanel ? -PANEL_WIDTH : 0}px)`,
+              transition: 'transform 240ms ease-in-out',
+              willChange: 'transform',
+              '@media (prefers-reduced-motion: reduce)': {
+                transition: 'none',
+              },
             }}
           >
-            <PromptOptionSwitch
-              label={readMode ? READ_MODE_LABEL : WRITE_MODE_LABEL}
-              hint={
-                readMode
-                  ? 'Agents explore and report, no PRs are created.'
-                  : WRITE_MODE_HINT
-              }
-              checked={!readMode}
-              onChange={(checked) => {
-                const nextReadMode = !checked
-                if (nextReadMode) setSidePanel(null)
-                onChange(
-                  nextReadMode
-                    ? {
-                        ...value,
-                        plan: true,
-                        coding: undefined,
-                        kubernetes: disableKubernetesModes(value?.kubernetes),
-                      }
-                    : { ...value, plan: false }
-                )
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.small,
+                width: PANEL_WIDTH,
+                flexShrink: 0,
+                maxHeight: PANEL_MAX_HEIGHT,
+                minHeight: 0,
+                overflowY: 'auto',
+                padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+                pointerEvents: sidePanel ? 'none' : undefined,
               }}
-            />
-
-            {!readMode && (
-              <Flex
-                direction="column"
-                gap="xsmall"
-              >
-                <PromptOptionRow
-                  label={CODING_AGENT_LABEL}
-                  hint="Edits code and opens PRs"
-                  icon={<DiscoverIcon size={12} />}
-                  active={sidePanel === 'coding'}
-                  onOpen={() => {
-                    if (sidePanel === 'coding') {
-                      setSidePanel(null)
-                      return
-                    }
-                    setSidePanel('coding')
-                  }}
-                />
-                <PromptOptionRow
-                  label={KUBERNETES_ACTIONS_LABEL}
-                  hint="Applies changes to live clusters"
-                  icon={<KubernetesIcon size={12} />}
-                  active={sidePanel === 'kubernetes'}
-                  onOpen={() => {
-                    if (sidePanel === 'kubernetes') {
-                      setSidePanel(null)
-                      return
-                    }
-                    setSidePanel('kubernetes')
-                  }}
-                />
-              </Flex>
-            )}
-
-            <Divider />
-            <PromptOptionSwitch
-              label={VERIFICATION_LOOP_LABEL}
-              hint={VERIFICATION_LOOP_HINT}
-              checked={value?.verification ?? false}
-              onChange={(verification) => onChange({ ...value, verification })}
-            />
-            <Divider />
-            <PromptOptionSwitch
-              label={TOKEN_LIMIT_LABEL}
-              hint={TOKEN_LIMIT_HINT}
-              checked={tokenLimitEnabled}
-              onChange={(checked) =>
-                onChange(
-                  updateBudgetModes(
-                    value,
-                    checked ? { tokens: 0, cost: null } : undefined
+              aria-hidden={!!sidePanel}
+              inert={!!sidePanel}
+            >
+              <PromptOptionSwitch
+                label={readMode ? READ_MODE_LABEL : WRITE_MODE_LABEL}
+                hint={
+                  readMode
+                    ? 'Agents explore and report, no PRs are created.'
+                    : WRITE_MODE_HINT
+                }
+                checked={!readMode}
+                onChange={(checked) => {
+                  const nextReadMode = !checked
+                  if (nextReadMode) setSidePanel(null)
+                  onChange(
+                    nextReadMode
+                      ? {
+                          ...value,
+                          plan: true,
+                          coding: undefined,
+                          kubernetes: disableKubernetesModes(value?.kubernetes),
+                        }
+                      : { ...value, plan: false }
                   )
-                )
-              }
-            />
-            {tokenLimitEnabled && (
-              <>
-                <WorkbenchBudgetAmountControl
-                  value={value?.budget}
-                  onChange={(budget) =>
-                    onChange(updateBudgetModes(value, budget))
-                  }
-                  disabled={disabled}
-                  stacked
+                }}
+              />
+
+              {!readMode && (
+                <Flex
+                  direction="column"
+                  gap="xsmall"
+                >
+                  <PromptOptionRow
+                    label={CODING_AGENT_LABEL}
+                    hint="Edits code and opens PRs"
+                    icon={<DiscoverIcon size={12} />}
+                    onOpen={() => openSidePanel('coding')}
+                  />
+                  <PromptOptionRow
+                    label={KUBERNETES_ACTIONS_LABEL}
+                    hint="Applies changes to live clusters"
+                    icon={<KubernetesIcon size={12} />}
+                    onOpen={() => openSidePanel('kubernetes')}
+                  />
+                </Flex>
+              )}
+
+              <Divider />
+              <PromptOptionSwitch
+                label={VERIFICATION_LOOP_LABEL}
+                hint={VERIFICATION_LOOP_HINT}
+                checked={value?.verification ?? false}
+                onChange={(verification) =>
+                  onChange({ ...value, verification })
+                }
+              />
+              <Divider />
+              <PromptOptionSwitch
+                label={TOKEN_LIMIT_LABEL}
+                hint={TOKEN_LIMIT_HINT}
+                checked={tokenLimitEnabled}
+                onChange={(checked) =>
+                  onChange(
+                    updateBudgetModes(
+                      value,
+                      checked ? { tokens: 0, cost: null } : undefined
+                    )
+                  )
+                }
+              />
+              {tokenLimitEnabled && (
+                <>
+                  <WorkbenchBudgetAmountControl
+                    value={value?.budget}
+                    onChange={(budget) =>
+                      onChange(updateBudgetModes(value, budget))
+                    }
+                    disabled={disabled}
+                    stacked
+                  />
+                  <WorkbenchBudgetSpendCapWarning
+                    workbenchId={workbenchId}
+                    budget={value?.budget}
+                  />
+                </>
+              )}
+            </div>
+            <SidePanelContainer
+              onBack={() => setSidePanel(null)}
+              hidden={!sidePanel}
+            >
+              {displayedSidePanel === 'coding' ? (
+                <CodingSidePanel
+                  value={value}
+                  onChange={onChange}
                 />
-                <WorkbenchBudgetSpendCapWarning
-                  workbenchId={workbenchId}
-                  budget={value?.budget}
+              ) : (
+                <KubernetesSidePanel
+                  value={value}
+                  onChange={onChange}
+                  onEmpty={() => setSidePanel(null)}
+                  kubernetesModes={workbenchModes?.kubernetes}
                 />
-              </>
-            )}
-          </Card>
-          {sidePanel === 'coding' && (
-            <CodingSidePanel
-              value={value}
-              onChange={onChange}
-            />
-          )}
-          {sidePanel === 'kubernetes' && (
-            <KubernetesSidePanel
-              value={value}
-              onChange={onChange}
-              onEmpty={() => setSidePanel(null)}
-              kubernetesModes={workbenchModes?.kubernetes}
-            />
-          )}
-        </Flex>
+              )}
+            </SidePanelContainer>
+          </div>
+        </Card>
       </WorkbenchPromptPopover>
     </>
   )
@@ -412,13 +432,11 @@ function PromptOptionRow({
   label,
   hint,
   icon,
-  active,
   onOpen,
 }: {
   label: string
   hint: string
   icon: ReactNode
-  active: boolean
   onOpen: () => void
 }) {
   const theme = useTheme()
@@ -436,7 +454,7 @@ function PromptOptionRow({
         padding: theme.spacing.xsmall,
         color: theme.colors.text,
         textAlign: 'left',
-        background: active ? modeItemBackground : 'transparent',
+        background: 'transparent',
         border: 0,
         borderRadius: theme.borderRadiuses.medium,
         cursor: 'pointer',
@@ -459,7 +477,7 @@ function PromptOptionRow({
       </Flex>
       <CaretRightIcon
         size={12}
-        color={active ? 'icon-default' : 'icon-light'}
+        color="icon-light"
         css={{ alignSelf: 'center', flexShrink: 0 }}
       />
     </button>
@@ -474,18 +492,22 @@ function CodingSidePanel({
   onChange: (value: WorkbenchJobModesAttributes | null) => void
 }) {
   return (
-    <SidePanelContainer>
+    <>
       <WorkbenchCodingSupervisionFields
         approval={!!value?.coding?.approval}
         babysit={!!value?.coding?.babysit}
+        review={!!value?.coding?.review}
         onApprovalChange={(approval) =>
           onChange(updateCodingModes(value, { approval }))
         }
         onBabysitChange={(babysit) =>
           onChange(updateCodingModes(value, { babysit }))
         }
+        onReviewChange={(review) =>
+          onChange(updateCodingModes(value, { review }))
+        }
       />
-    </SidePanelContainer>
+    </>
   )
 }
 
@@ -501,7 +523,7 @@ function KubernetesSidePanel({
   kubernetesModes?: WorkbenchJobKubernetesModes | null
 }) {
   return (
-    <SidePanelContainer>
+    <>
       <WorkbenchKubernetesMutationFields
         allowUpdates={!!value?.kubernetes?.update}
         allowDeletes={!!value?.kubernetes?.delete}
@@ -558,33 +580,70 @@ function KubernetesSidePanel({
             onEmpty()
         }}
       />
-    </SidePanelContainer>
+    </>
   )
 }
 
-function SidePanelContainer({ children }: { children: ReactNode }) {
+function SidePanelContainer({
+  children,
+  hidden,
+  onBack,
+}: {
+  children: ReactNode
+  hidden: boolean
+  onBack: () => void
+}) {
   const theme = useTheme()
-  const { detailBackground, panelBorder } = workbenchPromptPanelSurfaces(theme)
+  const { modeItemBackground, panelBorder } =
+    workbenchPromptPanelSurfaces(theme)
 
   return (
-    <Flex
-      direction="column"
-      gap="small"
-      width={SIDE_PANEL_WIDTH}
-      padding="medium"
+    <div
       css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+        width: PANEL_WIDTH,
         flexShrink: 0,
-        maxHeight: '100%',
+        maxHeight: PANEL_MAX_HEIGHT,
         minHeight: 0,
         overflowY: 'auto',
-        background: detailBackground,
-        border: panelBorder,
-        borderRadius: `0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px 0`,
-        boxShadow: theme.boxShadows.moderate,
+        padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+        pointerEvents: hidden ? 'none' : undefined,
       }}
+      aria-hidden={hidden}
+      inert={hidden}
     >
       {children}
-    </Flex>
+      <div
+        css={{
+          margin: `auto -${theme.spacing.medium}px -${theme.spacing.small}px`,
+          borderTop: panelBorder,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onBack}
+          css={{
+            ...theme.partials.reset.button,
+            display: 'flex',
+            alignItems: 'center',
+            gap: theme.spacing.xsmall,
+            width: '100%',
+            padding: `${theme.spacing.xsmall + theme.spacing.small / 2}px ${theme.spacing.medium}px`,
+            color: theme.colors.text,
+            cursor: 'pointer',
+            '&:hover': { background: modeItemBackground },
+          }}
+        >
+          <CaretLeftIcon
+            size={12}
+            color="icon-light"
+          />
+          <Body2P>Return to Menu</Body2P>
+        </button>
+      </div>
+    </div>
   )
 }
 

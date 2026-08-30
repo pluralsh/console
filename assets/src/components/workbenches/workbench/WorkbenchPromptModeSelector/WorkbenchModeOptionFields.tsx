@@ -3,6 +3,7 @@ import {
   ContainerRuntimeIcon,
   Flex,
   InfoOutlineIcon,
+  PrOpenIcon,
   Switch,
   Tooltip,
   WarningShieldIcon,
@@ -51,17 +52,33 @@ export function WorkbenchVerificationLoopControl({
 export function WorkbenchCodingSupervisionFields({
   approval,
   babysit,
+  review,
   onApprovalChange,
   onBabysitChange,
+  onReviewChange,
 }: {
   approval: boolean
   babysit: boolean
+  review: boolean
   onApprovalChange: (approval: boolean) => void
   onBabysitChange: (babysit: boolean) => void
+  onReviewChange: (review: boolean) => void
 }) {
   return (
     <>
       <Overline>Supervision</Overline>
+      <WorkbenchPromptSupervisionOption
+        icon={
+          <PrOpenIcon
+            size={16}
+            color="icon-light"
+          />
+        }
+        label="PR review"
+        hint="Allows coding agents to check out an existing pull request branch and publish a structured review."
+        checked={review}
+        onChange={onReviewChange}
+      />
       <WorkbenchPromptSupervisionOption
         icon={
           <WarningShieldIcon

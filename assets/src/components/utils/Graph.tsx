@@ -1,4 +1,4 @@
-import { ResponsiveLine } from '@nivo/line'
+import { ResponsiveLine, type LineCustomSvgLayerProps } from '@nivo/line'
 import { type PartialTheme as NivoThemeType } from '@nivo/theming'
 import dayjs from 'dayjs'
 import { last } from 'lodash'
@@ -7,6 +7,56 @@ import { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { SliceTooltip } from './ChartTooltip'
 import { CaptionP } from './typography/Text'
+
+type GraphSeries = {
+  id: string
+  data: { x: Date; y: number }[]
+  dashed?: boolean
+}
+
+function AreasWithoutDashedSeries({
+  areaBlendMode,
+  areaGenerator,
+  areaOpacity,
+  series,
+}: LineCustomSvgLayerProps<GraphSeries>) {
+  return (
+    <g>
+      {series
+        .filter(({ dashed }) => !dashed)
+        .map(({ color, data, id }) => (
+          <path
+            key={id}
+            d={areaGenerator(data.map(({ position }) => position)) ?? undefined}
+            fill={color}
+            fillOpacity={areaOpacity}
+            style={{ mixBlendMode: areaBlendMode }}
+          />
+        ))}
+    </g>
+  )
+}
+
+function StyledLines({
+  lineGenerator,
+  lineWidth,
+  series,
+}: LineCustomSvgLayerProps<GraphSeries>) {
+  return (
+    <g>
+      {series.map(({ color, dashed, data, id }) => (
+        <path
+          key={id}
+          d={lineGenerator(data.map(({ position }) => position)) ?? undefined}
+          fill="none"
+          stroke={color}
+          strokeDasharray={dashed ? '6 4' : undefined}
+          strokeWidth={lineWidth}
+        />
+      ))}
+    </g>
+  )
+}
 
 export function dateFormat(date) {
   return dayjs(date).format('MM/DD h:mm:ss a')
@@ -43,7 +93,7 @@ export function Graph({
   tickRotation,
   wrapLegend,
 }: {
-  data: any
+  data: GraphSeries[]
   yFormat: any
   tickRotation?: number
   wrapLegend?: boolean
@@ -69,6 +119,7 @@ export function Graph({
       )}`
     : null
   const toggleSelected = (id: Key) => setSelected(selected ? null : id)
+  const hasDashedSeries = graph.some(({ dashed }) => dashed)
   const line = (
     <ResponsiveLine
       data={graph}
@@ -96,6 +147,22 @@ export function Graph({
       yFormat={yFormat}
       xFormat={dateFormat}
       tooltip={SliceTooltip}
+      layers={
+        hasDashedSeries
+          ? [
+              'grid',
+              'markers',
+              'axes',
+              AreasWithoutDashedSeries,
+              'crosshair',
+              StyledLines,
+              'points',
+              'slices',
+              'mesh',
+              'legends',
+            ]
+          : undefined
+      }
       axisLeft={{
         tickSize: 0,
         format: yFormat,
@@ -183,7 +250,7 @@ export function Graph({
           right: 20,
         }}
       >
-        {data.map(({ id }, index) => {
+        {data.map(({ dashed, id }, index) => {
           const isSelected = selected === id
 
           return (
@@ -210,17 +277,24 @@ export function Graph({
                 },
               }}
             >
-              <span
-                css={{
-                  background: isSelected
-                    ? COLORS[0]
-                    : COLORS[index % COLORS.length],
-                  borderRadius: '50%',
-                  flex: '0 0 12px',
-                  height: 12,
-                  width: 12,
-                }}
-              />
+              <svg
+                aria-hidden
+                height={12}
+                width={12}
+                css={{ flex: '0 0 12px' }}
+              >
+                <line
+                  x1={0}
+                  x2={12}
+                  y1={6}
+                  y2={6}
+                  stroke={
+                    isSelected ? COLORS[0] : COLORS[index % COLORS.length]
+                  }
+                  strokeDasharray={dashed ? '4 3' : undefined}
+                  strokeWidth={2}
+                />
+              </svg>
               <span css={{ minWidth: 0, overflowWrap: 'anywhere' }}>{id}</span>
             </button>
           )
