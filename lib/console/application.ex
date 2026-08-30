@@ -66,7 +66,6 @@ defmodule Console.Application do
       Console.AI.GothManager,
       Console.PromEx,
       Console.Chat.Supervisor,
-      {GRPC.Client.Supervisor, []}
     ] ++ consumers()
       ++ oidc_providers()
       ++ [Piazza.GracefulShutdown]
