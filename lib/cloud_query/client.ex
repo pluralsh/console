@@ -6,20 +6,16 @@ defmodule CloudQuery.Client do
   @logs_timeout :timer.minutes(2)
   @lambda_timeout :timer.minutes(5)
 
-  def child_spec(_opts) do
-    GRPC.Client.Connection.child_spec(
-      name: __MODULE__,
-      target: host(),
-      adapter: GRPC.Client.Adapters.Mint
-    )
+  def connect() do
+    with {:ok, channel} <- GRPC.Client.Connection.get_channel(__MODULE__),
+         :ok <- GRPC.Client.Connection.await_ready(channel) do
+      {:ok, channel}
+    end
   end
-
-  def connect(), do: GRPC.Client.Connection.get_channel(__MODULE__)
 
   def metrics_rpc_opts, do: [timeout: @metrics_timeout]
   def cloud_query_rpc_opts, do: [timeout: @cloud_query_timeout]
   def logs_rpc_opts, do: [timeout: @logs_timeout]
   def lambda_rpc_opts, do: [timeout: @lambda_timeout]
 
-  defp host(), do: Console.conf(:cloudquery_host)
 end

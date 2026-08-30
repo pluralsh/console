@@ -41,7 +41,11 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
-      CloudQuery.Client,
+      {GRPC.Client.Connection,
+        name: CloudQuery.Client,
+        target: Console.conf(:cloudquery_host),
+        adapter: GRPC.Client.Adapters.Mint
+      },
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,

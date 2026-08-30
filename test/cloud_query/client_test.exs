@@ -1,21 +1,15 @@
 defmodule CloudQuery.ClientTest do
   use ExUnit.Case, async: false
+  use Mimic
 
   alias CloudQuery.Client
 
-  setup do
-    {:ok, _} = Application.ensure_all_started(:grpc)
+  test "waits for the supervised gRPC connection to be ready" do
+    channel = %GRPC.Channel{}
 
-    case Client.connect() do
-      {:ok, _channel} -> :ok
-      {:error, :not_started} -> start_supervised!(Client)
-    end
+    expect(GRPC.Client.Connection, :get_channel, fn Client -> {:ok, channel} end)
+    expect(GRPC.Client.Connection, :await_ready, fn ^channel -> :ok end)
 
-    :ok
-  end
-
-  test "uses a supervised named gRPC connection" do
-    assert %{id: {GRPC.Client.Connection, Client}, restart: :transient} = Client.child_spec([])
-    assert {:ok, %GRPC.Channel{}} = Client.connect()
+    assert {:ok, ^channel} = Client.connect()
   end
 end
