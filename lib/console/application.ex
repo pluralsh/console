@@ -41,6 +41,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
+      CloudQuery.Client,
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,
