@@ -345,7 +345,7 @@ defmodule Console.AI.Workbench.Engine do
     skill_knowledge_tools(job, skills) ++ [
       %KnowledgeUpsert{job: job},
       %KnowledgeDelete{job: job},
-      %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
+      %Subagents{bench: job.workbench, job: job, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       %Codemode{tools: []},
@@ -384,7 +384,8 @@ defmodule Console.AI.Workbench.Engine do
       job: job,
       prompt: objective,
       engine: engine,
-      actions: Environment.actions(environment)
+      actions: Environment.actions(environment),
+      review: WorkbenchJob.coding_review?(job)
     ))
   end
 

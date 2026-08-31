@@ -9,6 +9,8 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
     test "only exposes review mode when enabled for the job" do
       disabled = %CodingAgent{job: %WorkbenchJob{}}
       assert get_in(CodingAgent.json_schema(disabled), ["properties", "mode", "enum"]) == ~w(analyze write)
+      refute get_in(CodingAgent.json_schema(disabled), ["properties", "mode", "description"]) =~ "review"
+      refute CodingAgent.description(disabled) =~ "review"
 
       enabled = %CodingAgent{
         job: %WorkbenchJob{
@@ -17,7 +19,13 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
           }
         }
       }
-      assert get_in(CodingAgent.json_schema(enabled), ["properties", "mode", "enum"]) == ~w(analyze write review)
+      schema = CodingAgent.json_schema(enabled)
+      assert get_in(schema, ["properties", "mode", "enum"]) == ~w(analyze write review)
+      assert get_in(schema, ["properties", "mode", "description"]) =~ "Review mode is enabled"
+      assert get_in(schema, ["properties", "base_branch", "description"]) =~ "head branch"
+      assert get_in(schema, ["properties", "pr_url", "description"]) =~ "Required for review mode"
+      assert CodingAgent.description(enabled) =~ "Review mode is enabled for this job"
+      assert CodingAgent.description(enabled) =~ "mode=review"
     end
 
     test "review mode must be enabled and requires a branch" do
@@ -147,6 +155,21 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
                  "prompt" => "investigate the issue"
                })
                |> Ecto.Changeset.apply_action(:update)
+    end
+  end
+
+  describe "coding subagent prompt" do
+    test "explains review only when enabled" do
+      path = Console.priv_filename(["prompts", "workbench", "coding.md.eex"])
+
+      enabled = EEx.eval_file(path, assigns: [prompt: "review the pr", review: true])
+      assert enabled =~ "Review mode is enabled for this job"
+      assert enabled =~ "mode=review"
+      assert enabled =~ "head"
+
+      disabled = EEx.eval_file(path, assigns: [prompt: "update the readme", review: false])
+      refute disabled =~ "Review mode is enabled"
+      refute disabled =~ "mode=review"
     end
   end
 

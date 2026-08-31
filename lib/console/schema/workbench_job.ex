@@ -279,6 +279,9 @@ defmodule Console.Schema.WorkbenchJob do
     do: objective
   def objective(%__MODULE__{prompt: prompt}), do: prompt
 
+  def coding_review?(%__MODULE__{modes: %{coding: %{review: true}}}), do: true
+  def coding_review?(_), do: false
+
   def update_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [])

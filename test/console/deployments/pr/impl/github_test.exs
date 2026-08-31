@@ -46,7 +46,8 @@ defmodule Console.Deployments.Pr.Impl.GithubTest do
       })
 
     expect(Tentacat, :post, fn "repos/pluralsh/console/issues/42/comments", _, body ->
-      assert body.body =~ "### Confidence: B"
+      assert body.body =~ "### Plural Summary"
+      assert body.body =~ "### Grade: B"
       {201, %{"id" => 10}, nil}
     end)
 
