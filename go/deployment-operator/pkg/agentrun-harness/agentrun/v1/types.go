@@ -29,15 +29,16 @@ const (
 )
 
 type AgentRun struct {
-	ID         string                 `json:"id"`
-	Prompt     string                 `json:"prompt"`
-	Repository string                 `json:"repository"`
-	Branch     *string                `json:"branch,omitempty"`
-	HeadBranch *string                `json:"headBranch,omitempty"`
-	Mode       console.AgentRunMode   `json:"mode"`
-	Status     console.AgentRunStatus `json:"status"`
-	FlowID     *string                `json:"flowId,omitempty"`
-	User       *AgentUser             `json:"user,omitempty"`
+	ID          string                   `json:"id"`
+	Prompt      string                   `json:"prompt"`
+	Repository  string                   `json:"repository"`
+	Branch      *string                  `json:"branch,omitempty"`
+	HeadBranch  *string                  `json:"headBranch,omitempty"`
+	Mode        console.AgentRunMode     `json:"mode"`
+	ReviewDepth console.AgentReviewDepth `json:"reviewDepth"`
+	Status      console.AgentRunStatus   `json:"status"`
+	FlowID      *string                  `json:"flowId,omitempty"`
+	User        *AgentUser               `json:"user,omitempty"`
 
 	// Credentials for SCM and Plural Console
 	ScmCreds    *console.ScmCredentialFragment `json:"scmCreds,omitempty"`
@@ -58,7 +59,7 @@ type AgentRun struct {
 	Approval        bool
 	ApprovedAt      *string
 	Followup        bool
-	FollowupPrURL   string
+	PRURL           string
 }
 
 // AgentUser is the Console user who initiated the agent run. Git commits
@@ -145,6 +146,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		Branch:      fragment.Branch,
 		HeadBranch:  fragment.HeadBranch,
 		Mode:        fragment.Mode,
+		ReviewDepth: console.AgentReviewDepthMedium,
 		Status:      fragment.Status,
 		ScmCreds:    fragment.ScmCreds,
 		PluralCreds: fragment.PluralCreds,
@@ -160,6 +162,9 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 					Contents:    skill.Contents,
 				}
 			}),
+	}
+	if fragment.ReviewDepth != nil {
+		run.ReviewDepth = *fragment.ReviewDepth
 	}
 
 	if fragment.User != nil {
@@ -202,7 +207,7 @@ func (ar *AgentRun) FromAgentRunFragment(fragment *console.AgentRunFragment) *Ag
 		run.Followup = *fragment.Followup
 	}
 	if fragment.FollowupPrURL != nil {
-		run.FollowupPrURL = *fragment.FollowupPrURL
+		run.PRURL = *fragment.FollowupPrURL
 	}
 
 	return run

@@ -5,7 +5,6 @@ import {
   Chip,
   Divider,
   Flex,
-  IconFrame,
   ToolsIcon,
 } from '@pluralsh/design-system'
 import {
@@ -26,7 +25,7 @@ import {
   categoryToLabel,
   getWorkbenchToolLabel,
   WorkbenchToolCardBody,
-  WorkbenchToolIcon,
+  WorkbenchToolCardIcon,
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
 import { useNavigate } from 'react-router-dom'
@@ -76,16 +75,9 @@ export function WorkbenchesConfiguredTools() {
                       width="100%"
                       minWidth={0}
                     >
-                      <IconFrame
-                        type="secondary"
-                        css={{ flexShrink: 0 }}
-                        icon={
-                          <WorkbenchToolIcon
-                            size={20}
-                            type={type}
-                            provider={cloudConnection?.provider}
-                          />
-                        }
+                      <WorkbenchToolCardIcon
+                        type={type}
+                        provider={cloudConnection?.provider}
                       />
                       <StackedText
                         truncate

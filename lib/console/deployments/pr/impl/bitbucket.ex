@@ -1,7 +1,7 @@
 defmodule Console.Deployments.Pr.Impl.BitBucket do
   import Console.Deployments.Pr.Utils
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Pr.File
+  alias Console.Deployments.Pr.{File, Review}
   alias Console.Schema.{PullRequest}
   require Logger
 
@@ -82,6 +82,15 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
+  def agent_review(conn, %PullRequest{url: url} = pr, %Review{} = review) do
+    with {:ok, id} <- review(conn, pr, Review.summary(review)),
+         {:ok, org, repo, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         :ok <- add_inline_comments(conn, org, repo, number, review.comments) do
+      {:ok, id}
+    end
+  end
+
   def files(scm_conn, url) do
     with {:ok, workspace, repo, pr_id} <- get_pull_id(url),
          {:ok, conn} <- connection(scm_conn),
@@ -127,6 +136,15 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
   def pr_info(url) do
     with {:ok, workspace, repo, number} <- get_pull_id(url) do
       {:ok, %{workspace: workspace, repo: repo, number: number}}
+    end
+  end
+
+  def pr_details(scm_conn, url) do
+    with {:ok, workspace, repo, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn),
+         {:ok, %{"title" => title} = pr} <-
+           get(conn, "/repositories/#{workspace}/#{repo}/pullrequests/#{number}") do
+      {:ok, %{title: title, body: get_in(pr, ["summary", "raw"]) || pr["description"] || ""}}
     end
   end
 
@@ -257,4 +275,26 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     |> ok()
   end
   defp parse_diff_to_map(err), do: err
+
+  defp add_inline_comments(conn, org, repo, number, comments) do
+    path = Path.join([
+      "/repositories",
+      URI.encode("#{org}/#{repo}"),
+      "pullrequests",
+      number,
+      "comments"
+    ])
+
+    Enum.reduce_while(comments, :ok, fn %Review.Comment{} = comment, :ok ->
+      body = %{
+        content: %{raw: Review.inline_body(comment), markup: "markdown"},
+        inline: %{path: comment.filename, to: comment.line}
+      }
+
+      case post(conn, path, body) do
+        {:ok, %{"id" => _}} -> {:cont, :ok}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
 end

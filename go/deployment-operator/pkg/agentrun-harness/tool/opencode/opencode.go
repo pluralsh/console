@@ -289,8 +289,11 @@ func (in *Opencode) args(prompt string, resume bool) []string {
 }
 
 func (in *Opencode) agent() string {
-	if in.Config.Run.Mode == console.AgentRunModeAnalyze {
+	switch in.Config.Run.Mode {
+	case console.AgentRunModeAnalyze:
 		return defaultAnalysisAgent
+	case console.AgentRunModeReview:
+		return defaultReviewAgent
 	}
 
 	return defaultWriteAgent

@@ -28,11 +28,25 @@ const (
 	gitAskpassPath    = "/plural/.git-askpass"
 	gitSigningKeyPath = common.GitSigningKeyMountPath
 	autonomousProfile = "autonomous"
+	reviewProfile     = "review"
 	openAIProvider    = "openai-api"
 	openAIBaseURL     = "https://api.openai.com/v1"
 	// sandboxModeHarness disables Codex OS sandboxing; the agent-run pod is the isolation boundary.
 	sandboxModeHarness = "danger-full-access"
 )
+
+func profileForMode(mode console.AgentRunMode) (string, bool) {
+	switch mode {
+	case console.AgentRunModeAnalyze:
+		return "analysis", true
+	case console.AgentRunModeWrite:
+		return autonomousProfile, true
+	case console.AgentRunModeReview:
+		return reviewProfile, true
+	default:
+		return "", false
+	}
+}
 
 func New(config v1.Config) v1.Tool {
 	result := &Codex{
@@ -187,35 +201,21 @@ func (in *Codex) writeCodexConfig() error {
 		mcps = append(mcps, input)
 	}
 
-	switch in.Config.Run.Mode {
-	case console.AgentRunModeAnalyze:
-		agents = []AgentInput{{
-			Name:                  "analysis",
-			SandboxMode:           sandboxModeHarness,
-			Model:                 baseAgent.Model,
-			ApprovalPolicy:        baseAgent.ApprovalPolicy,
-			ModelReasoningEffort:  baseAgent.ModelReasoningEffort,
-			AllowedEnvVars:        baseAgent.AllowedEnvVars,
-			ModelProvider:         modelProvider,
-			ModelInstructionsFile: modelInstructionsFile,
-			DindEnabled:           dindEnabled,
-		}}
-
-	case console.AgentRunModeWrite:
-		agents = []AgentInput{{
-			Name:                  autonomousProfile,
-			SandboxMode:           sandboxModeHarness,
-			Model:                 baseAgent.Model,
-			ApprovalPolicy:        baseAgent.ApprovalPolicy,
-			ModelReasoningEffort:  baseAgent.ModelReasoningEffort,
-			AllowedEnvVars:        baseAgent.AllowedEnvVars,
-			ModelProvider:         modelProvider,
-			ModelInstructionsFile: modelInstructionsFile,
-			DindEnabled:           dindEnabled,
-		}}
-	default:
+	profile, ok := profileForMode(in.Config.Run.Mode)
+	if !ok {
 		return fmt.Errorf("unsupported agent run mode %q for codex", in.Config.Run.Mode)
 	}
+	agents = []AgentInput{{
+		Name:                  profile,
+		SandboxMode:           sandboxModeHarness,
+		Model:                 baseAgent.Model,
+		ApprovalPolicy:        baseAgent.ApprovalPolicy,
+		ModelReasoningEffort:  baseAgent.ModelReasoningEffort,
+		AllowedEnvVars:        baseAgent.AllowedEnvVars,
+		ModelProvider:         modelProvider,
+		ModelInstructionsFile: modelInstructionsFile,
+		DindEnabled:           dindEnabled,
+	}}
 
 	cfg, err := BuildCodexConfig(in.Config.RepositoryDir, agents, mcps, providers)
 	if err != nil {
@@ -277,10 +277,7 @@ func (in *Codex) FollowUpRun(ctx context.Context, followUpPrompt string) error {
 		"sessionID", in.threadID,
 	)
 
-	profile := "analysis"
-	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		profile = autonomousProfile
-	}
+	profile, _ := profileForMode(in.Config.Run.Mode)
 	args := codexExecArgs(in.Config.RepositoryDir, profile, followUpPrompt, in.threadID)
 
 	in.executable = exec.NewExecutable(
@@ -319,10 +316,7 @@ func (in *Codex) start(ctx context.Context, options ...exec.Option) {
 		}
 	}
 
-	agent := "analysis"
-	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		agent = autonomousProfile
-	}
+	agent, _ := profileForMode(in.Config.Run.Mode)
 
 	args := codexExecArgs(in.Config.RepositoryDir, agent, in.Config.Run.Prompt, "")
 

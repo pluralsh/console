@@ -76,6 +76,7 @@ export function WorkbenchModesForm({
   const codingSummary = [
     coding?.approval ? 'Require approval' : null,
     coding?.babysit ? 'Babysit' : null,
+    coding?.review ? 'PR review' : null,
   ]
     .filter(Boolean)
     .join(', ')
@@ -220,11 +221,15 @@ export function WorkbenchModesForm({
               <WorkbenchCodingSupervisionFields
                 approval={!!coding?.approval}
                 babysit={!!coding?.babysit}
+                review={!!coding?.review}
                 onApprovalChange={(approval) =>
                   onChange(updateCodingModes(value, { approval }))
                 }
                 onBabysitChange={(babysit) =>
                   onChange(updateCodingModes(value, { babysit }))
+                }
+                onReviewChange={(review) =>
+                  onChange(updateCodingModes(value, { review }))
                 }
               />
             </ModeActionRow>

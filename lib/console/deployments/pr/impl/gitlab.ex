@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Gitlab do
   import Console.Deployments.Pr.Utils
-  alias Console.Deployments.Pr.File
+  alias Console.Deployments.Pr.{File, Review}
   alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   require Logger
 
@@ -87,6 +87,15 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
+  def agent_review(conn, %PullRequest{url: url} = pr, %Review{} = review) do
+    with {:ok, id} <- review(conn, pr, Review.summary(review)),
+         {:ok, project, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         :ok <- add_inline_comments(conn, project, number, review.comments) do
+      {:ok, id}
+    end
+  end
+
   def files(conn, url) do
     with {:ok, project, number} <- get_pull_id(url),
          {:ok, pr_conn} <- connection(conn),
@@ -143,6 +152,15 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
+  def pr_details(conn, url) do
+    with {:ok, project, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, %{"title" => title} = pr} <-
+           get(conn, "/api/v4/projects/#{uri_encode(project)}/merge_requests/#{number}") do
+      {:ok, %{title: title, body: pr["description"] || ""}}
+    end
+  end
+
   def slug(url), do: project_path(url)
 
   def merge(conn, %PullRequest{url: url}) do
@@ -181,6 +199,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     |> handle_response()
   end
 
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
+    when code >= 200 and code < 300 and body in ["", nil], do: {:ok, %{}}
   defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
   defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, "gitlab request failed: #{body}"}
@@ -261,5 +281,48 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp api_url(%Connection{host: host}, url) do
     String.trim_trailing(host, "/api/v4")
     |> Path.join(url)
+  end
+
+  defp add_inline_comments(_, _, _, []), do: :ok
+
+  defp add_inline_comments(conn, project, number, comments) do
+    encoded = uri_encode(project)
+
+    with {:ok, [version | _]} <-
+           get(conn, "/api/v4/projects/#{encoded}/merge_requests/#{number}/versions"),
+         :ok <- create_draft_notes(conn, encoded, number, version, comments),
+         {:ok, _} <-
+           post(
+             conn,
+             "/api/v4/projects/#{encoded}/merge_requests/#{number}/draft_notes/bulk_publish",
+             %{}
+           ) do
+      :ok
+    else
+      {:ok, []} -> {:error, "could not find merge request diff version"}
+      error -> error
+    end
+  end
+
+  defp create_draft_notes(conn, project, number, version, comments) do
+    Enum.reduce_while(comments, :ok, fn %Review.Comment{} = comment, :ok ->
+      body = %{
+        note: Review.inline_body(comment),
+        position: %{
+          position_type: "text",
+          base_sha: version["base_commit_sha"],
+          start_sha: version["start_commit_sha"],
+          head_sha: version["head_commit_sha"],
+          old_path: comment.filename,
+          new_path: comment.filename,
+          new_line: comment.line
+        }
+      }
+
+      case post(conn, "/api/v4/projects/#{project}/merge_requests/#{number}/draft_notes", body) do
+        {:ok, %{"id" => _}} -> {:cont, :ok}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
   end
 end

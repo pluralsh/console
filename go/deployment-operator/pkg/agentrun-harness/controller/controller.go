@@ -229,8 +229,9 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.runDone:
 		klog.Info("initial agent run completed, evaluating post-run work")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
-		if in.agentRun.Mode == gqlclient.AgentRunModeAnalyze {
-			klog.V(log.LogLevelInfo).InfoS("analyze mode complete, skipping babysit loop")
+		if in.agentRun.Mode == gqlclient.AgentRunModeAnalyze ||
+			in.agentRun.Mode == gqlclient.AgentRunModeReview {
+			klog.V(log.LogLevelInfo).InfoS("read-only mode complete, skipping babysit loop", "mode", in.agentRun.Mode)
 			return
 		}
 		in.runPostRunPollLoop(ctx)
@@ -405,7 +406,7 @@ func followupPRURL(agentRun *gqlclient.AgentRunFragment, harnessRun *agentrunv1.
 		}
 	}
 	if harnessRun != nil {
-		return strings.TrimSpace(harnessRun.FollowupPrURL)
+		return strings.TrimSpace(harnessRun.PRURL)
 	}
 	return ""
 }

@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Github do
   import Console.Deployments.Pr.Utils
-  alias Console.Deployments.Pr.File
+  alias Console.Deployments.Pr.{File, Review}
   alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   alias Console.Jwt.Github
   require Logger
@@ -92,6 +92,15 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
+  def agent_review(conn, %PullRequest{url: url} = pr, %Review{} = review) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, client} <- client(conn),
+         {:ok, id} <- upsert_summary(client, owner, repo, number, pr.comment_id, review),
+         :ok <- add_inline_comments(client, owner, repo, number, review.comments) do
+      {:ok, id}
+    end
+  end
+
   def approve(conn, %PullRequest{url: url}, body) do
     with {:ok, owner, repo, number} <- get_pull_id(url),
          {:ok, client} <- client(conn),
@@ -119,6 +128,17 @@ defmodule Console.Deployments.Pr.Impl.Github do
   def pr_info(url) do
     with {:ok, owner, repo, number} <- get_pull_id(url) do
       {:ok, %{owner: owner, repo: repo, number: number}}
+    end
+  end
+
+  def pr_details(conn, url) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, client} <- client(conn),
+         {_, %{"title" => title} = pr, _} <- Tentacat.Pulls.find(client, owner, repo, number) do
+      {:ok, %{title: title, body: pr["body"] || ""}}
+    else
+      {_, body, _} -> {:error, "failed to fetch pull request: #{Jason.encode!(body)}"}
+      err -> err
     end
   end
 
@@ -256,4 +276,49 @@ defmodule Console.Deployments.Pr.Impl.Github do
       _ -> {:error, "could not parse github url"}
     end
   end
+
+  defp add_inline_comments(_, _, _, _, []), do: :ok
+
+  defp add_inline_comments(client, owner, repo, number, comments) do
+    body = %{
+      "event" => "COMMENT",
+      "comments" => Enum.map(comments, &inline_comment/1)
+    }
+
+    case Tentacat.Pulls.Reviews.create(client, owner, repo, number, body) do
+      {_, %{"id" => _}, _} -> :ok
+      {_, response, _} -> {:error, "failed to create inline review: #{Jason.encode!(response)}"}
+    end
+  end
+
+  defp inline_comment(%Review.Comment{} = comment) do
+    %{
+      body: Review.inline_body(comment),
+      path: comment.filename,
+      line: comment.end_line || comment.line,
+      side: "RIGHT"
+    }
+    |> maybe_start_line(comment)
+  end
+
+  defp upsert_summary(client, owner, repo, number, id, review) do
+    body = %{body: Review.summary(review)}
+
+    case id do
+      id when is_binary(id) ->
+        Tentacat.patch("repos/#{owner}/#{repo}/issues/comments/#{id}", client, body)
+
+      _ ->
+        Tentacat.post("repos/#{owner}/#{repo}/issues/#{number}/comments", client, body)
+    end
+    |> case do
+      {_, %{"id" => id}, _} -> {:ok, "#{id}"}
+      {_, response, _} -> {:error, "failed to upsert review summary: #{Jason.encode!(response)}"}
+    end
+  end
+
+  defp maybe_start_line(body, %Review.Comment{line: start, end_line: finish})
+       when is_integer(finish) and start < finish,
+       do: Map.merge(body, %{start_line: start, start_side: "RIGHT"})
+  defp maybe_start_line(body, _), do: body
 end

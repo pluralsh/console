@@ -12,6 +12,7 @@ import {
   GitLabLogoIcon,
   GoogleCloudLogoIcon,
   GoogleCloudRunIcon,
+  IconFrame,
   IconProps,
   LambdaIcon,
   LinearLogoIcon,
@@ -446,6 +447,36 @@ export function WorkbenchToolIcon({
     <Icon
       fullColor={fullColor}
       {...props}
+    />
+  )
+}
+
+const WORKBENCH_TOOL_CARD_ICON_SIZE = 20
+
+export function WorkbenchToolCardIcon({
+  type,
+  provider,
+}: {
+  type: Nullable<string>
+  provider?: Nullable<Provider>
+}) {
+  return (
+    <IconFrame
+      type="secondary"
+      css={{
+        flexShrink: 0,
+        '& svg': {
+          width: WORKBENCH_TOOL_CARD_ICON_SIZE,
+          height: WORKBENCH_TOOL_CARD_ICON_SIZE,
+        },
+      }}
+      icon={
+        <WorkbenchToolIcon
+          type={type}
+          provider={provider}
+          fullColor
+        />
+      }
     />
   )
 }

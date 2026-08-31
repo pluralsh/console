@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_job_coding_modes_attributes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+    field :review,   :boolean, description: "whether pull request review mode is enabled for coding agent runs"
   end
 
   input_object :workbench_job_budget_attributes do
@@ -678,6 +679,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_coding_modes do
     field :babysit,  :boolean, description: "whether babysit mode is enabled for coding agent runs"
     field :approval, :boolean, description: "whether coding agent runs require approval before continuing"
+    field :review,   :boolean, description: "whether pull request review mode is enabled for coding agent runs"
   end
 
   object :workbench_job_budget do

@@ -65,7 +65,8 @@ spec:
                   Deprecated: No longer used for image selection. Enable dind on the AgentRuntime instead.
                 type: string
               mode:
-                description: Mode defines how the agent should run (ANALYZE, WRITE)
+                description: Mode defines how the agent should run (ANALYZE, WRITE,
+                  REVIEW)
                 type: string
               prompt:
                 description: Prompt is the task/prompt given to the agent
@@ -73,6 +74,10 @@ spec:
               repository:
                 description: Repository is the git repository the agent will work
                   with
+                type: string
+              reviewDepth:
+                description: ReviewDepth controls how far a review run explores code
+                  adjacent to the pull request changes.
                 type: string
               runtimeRef:
                 properties:

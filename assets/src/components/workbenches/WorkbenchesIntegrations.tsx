@@ -10,7 +10,6 @@ import {
   EmptyState,
   FiltersIcon,
   Flex,
-  IconFrame,
   Input,
   MagnifyingGlassIcon,
 } from '@pluralsh/design-system'
@@ -32,7 +31,7 @@ import type { WorkbenchToolCard } from './tools/workbenchToolsUtils'
 import {
   WORKBENCH_TOOL_CARDS,
   WorkbenchToolCardBody,
-  WorkbenchToolIcon,
+  WorkbenchToolCardIcon,
   workbenchToolCardGridStyles,
 } from './tools/workbenchToolsUtils'
 
@@ -213,16 +212,9 @@ export function WorkbenchesIntegrations() {
                               align="center"
                               gap="medium"
                             >
-                              <IconFrame
-                                type="secondary"
-                                icon={
-                                  <WorkbenchToolIcon
-                                    size={20}
-                                    type={type}
-                                    provider={provider}
-                                    fullColor
-                                  />
-                                }
+                              <WorkbenchToolCardIcon
+                                type={type}
+                                provider={provider}
                               />
                               {label}
                             </Flex>

@@ -27,15 +27,19 @@ export function WorkbenchPromptModeDetails({
   mode,
   approval,
   babysit,
+  review,
   onApprovalChange,
   onBabysitChange,
+  onReviewChange,
 }: {
   config: WorkbenchPromptModeConfig
   mode: WorkbenchPromptMode
   approval: boolean
   babysit: boolean
+  review: boolean
   onApprovalChange: (approval: boolean) => void
   onBabysitChange: (babysit: boolean) => void
+  onReviewChange: (review: boolean) => void
 }) {
   return (
     <Flex
@@ -48,8 +52,10 @@ export function WorkbenchPromptModeDetails({
         <WorkbenchCodingSupervisionFields
           approval={approval}
           babysit={babysit}
+          review={review}
           onApprovalChange={onApprovalChange}
           onBabysitChange={onBabysitChange}
+          onReviewChange={onReviewChange}
         />
       )}
     </Flex>

@@ -74,7 +74,8 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     |> case do
       {:timeout, _} -> {:user, "agent run #{id} timed out"}
       {:failed, %AgentRun{error: error}} -> tool_msg("Agent run failed: #{error}", tool)
-      {:success, %AgentRun{mode: :write, pull_requests: prs, analysis: analysis}} when is_list(prs) ->
+      {:success, %AgentRun{mode: mode, pull_requests: prs, analysis: analysis}}
+        when mode in [:write, :review] and is_list(prs) ->
         tool_msg(String.trim(analysis_prompt(analysis: analysis, pull_requests: prs)), tool)
       {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
         tool_msg(String.trim(analysis_prompt(pull_requests: nil, analysis: analysis)), tool)

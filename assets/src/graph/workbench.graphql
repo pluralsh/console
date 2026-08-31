@@ -29,6 +29,7 @@ fragment WorkbenchJobModesFields on WorkbenchJobModes {
   coding {
     approval
     babysit
+    review
   }
   budget {
     cost
