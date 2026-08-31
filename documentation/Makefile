@@ -12,13 +12,7 @@ web: ## runs the docs site locally
 routes:
 	yarn generate:route-index
 
-sync-docs: sync-console-crd-docs sync-operator-crd-docs sync-liquid-docs
-
-sync-console-crd-docs:
+sync:
 	cp ../go/controller/docs/api.md pages/api-reference/kubernetes/management-api-reference.md
-
-sync-operator-crd-docs:
 	cp ../go/deployment-operator/docs/api.md pages/api-reference/kubernetes/agent-api-reference.md
-
-sync-liquid-docs:
 	cp ../go/polly/docs/liquid-filters.md pages/plural-features/service-templating/supporting-liquid-filters.md

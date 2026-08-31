@@ -30,11 +30,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Sync docs
-        run: make sync-docs
+        run: make sync
       - name: Verify changed files
         run: |
           git diff --exit-code -- pages || {
-            echo "::error Documentation pages are out of sync. Please run 'make sync-docs' from documentation/ and commit the changes."
+            echo "::error Documentation pages are out of sync. Please run 'make sync' from documentation/ and commit the changes."
             exit 1
           }
   lint:
