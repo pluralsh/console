@@ -132,6 +132,12 @@ mutation CreateAgentPullRequest($runId: ID!, $attributes: AgentPullRequestAttrib
     }
 }
 
+mutation AgentPrReview($runId: ID!, $attributes: AgentPrReviewAttributes!) {
+    agentPrReview(runId: $runId, attributes: $attributes) {
+        ...PullRequestFragment
+    }
+}
+
 mutation CreateAgentMessage($runId: ID!, $attributes: AgentMessageAttributes!) {
   createAgentMessage(runId: $runId, attributes: $attributes) {
     id
@@ -143,6 +149,15 @@ mutation UpdateAgentMessage($id: ID!, $attributes: AgentMessageAttributes!) {
   updateAgentMessage(id: $id, attributes: $attributes) {
     id
     message
+  }
+}
+
+mutation CreateAgentMessageOutput($attributes: AgentMessageOutputAttributes!) {
+  agentMessageOutput(attributes: $attributes) {
+    messageId
+    agentRunId
+    stdout
+    stderr
   }
 }
 
@@ -237,6 +252,7 @@ fragment AgentRunFragment on AgentRun {
     branch
     headBranch
     mode
+    reviewDepth
     language
     languageVersion
     todos {

@@ -116,12 +116,14 @@ type Client interface {
 	UpdateAgentRunAnalysis(ctx context.Context, runtimeID string, attrs console.AgentAnalysisAttributes) (*console.AgentRunBaseFragment, error)
 	UpdateAgentRunTodos(ctx context.Context, id string, attrs []*console.AgentTodoAttributes) (*console.AgentRunBaseFragment, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attrs console.AgentPullRequestAttributes) (*console.PullRequestFragment, error)
+	AgentPrReview(ctx context.Context, runID string, attrs console.AgentPrReviewAttributes) (*console.PullRequestFragment, error)
 	CreateAgentRunUpload(ctx context.Context, runID string, attrs console.AgentRunUploadAttributes) (*console.AgentRunUploadFragment, error)
 	GetSentinelRunJob(id string) (*console.SentinelRunJobFragment, error)
 	ListClusterSentinelRunJobs(after *string, first *int64) (*console.ListClusterSentinelRunJobs_ClusterSentinelRunJobs, error)
 	UpdateSentinelRunJobStatus(id string, attr *console.SentinelRunJobUpdateAttributes) error
 	CreateAgentMessage(ctx context.Context, runID string, attrs console.AgentMessageAttributes) (*console.CreateAgentMessage_CreateAgentMessage, error)
 	UpdateAgentMessage(ctx context.Context, id string, attrs console.AgentMessageAttributes) (*console.UpdateAgentMessage_UpdateAgentMessage, error)
+	AgentMessageOutput(ctx context.Context, attrs console.AgentMessageOutputAttributes) error
 	Me() (*console.Me_Me, error)
 	GetClusterByHandle(name string) (*console.TinyClusterFragment, error)
 	CreateCluster(attrs console.ClusterAttributes) (*console.CreateCluster, error)

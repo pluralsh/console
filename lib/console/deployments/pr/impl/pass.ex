@@ -9,9 +9,13 @@ defmodule Console.Deployments.Pr.Impl.Pass do
 
   def review(_, _, _), do: {:ok, ""}
 
+  def agent_review(_, _, _), do: {:ok, ""}
+
   def files(_, _), do: {:ok, []}
 
   def pr_info(_), do: {:ok, %{}}
+
+  def pr_details(_, _), do: {:error, "not implemented"}
 
   def approve(_, _, _), do: {:ok, ""}
 

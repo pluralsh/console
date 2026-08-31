@@ -169,12 +169,29 @@ export function ToolCallContent({
           )}
         </Code>
       )}
-
-      {showingResponse && (
-        <Flex
-          direction="column"
-          minWidth={0}
-          width="100%"
+      {isPending && !content ? (
+        <RunningToolOutputCode fillLevel={2} />
+      ) : isPending ? (
+        <Code
+          fillLevel={2}
+          title="Response"
+          showHeader
+          css={slimCodeCss}
+        >
+          {content}
+        </Code>
+      ) : customResultBody ? (
+        <>
+          <CaptionP $color="text-light">Response</CaptionP>
+          {customResultBody}
+        </>
+      ) : isJson(content) ? (
+        <Code
+          fillLevel={2}
+          language={content.length < 25_000 ? 'json' : undefined}
+          title="Response"
+          showHeader
+          css={slimCodeCss}
         >
           {isPending ? (
             <RunningToolOutputCode

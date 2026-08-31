@@ -27,8 +27,10 @@ type ConsoleClient interface {
 	UpdateAgentRunAnalysis(ctx context.Context, id string, attributes AgentAnalysisAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunAnalysis, error)
 	UpdateAgentRunTodos(ctx context.Context, id string, todos []*AgentTodoAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentRunTodos, error)
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
+	AgentPrReview(ctx context.Context, runID string, attributes AgentPrReviewAttributes, interceptors ...clientv2.RequestInterceptor) (*AgentPrReview, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
 	UpdateAgentMessage(ctx context.Context, id string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentMessage, error)
+	CreateAgentMessageOutput(ctx context.Context, attributes AgentMessageOutputAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessageOutput, error)
 	CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
 	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
@@ -660,6 +662,7 @@ type AgentRunFragment struct {
 	Branch          *string                    "json:\"branch,omitempty\" graphql:\"branch\""
 	HeadBranch      *string                    "json:\"headBranch,omitempty\" graphql:\"headBranch\""
 	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
+	ReviewDepth     *AgentReviewDepth          "json:\"reviewDepth,omitempty\" graphql:\"reviewDepth\""
 	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
 	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
 	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
@@ -720,6 +723,12 @@ func (t *AgentRunFragment) GetMode() *AgentRunMode {
 		t = &AgentRunFragment{}
 	}
 	return &t.Mode
+}
+func (t *AgentRunFragment) GetReviewDepth() *AgentReviewDepth {
+	if t == nil {
+		t = &AgentRunFragment{}
+	}
+	return t.ReviewDepth
 }
 func (t *AgentRunFragment) GetLanguage() *AgentRunLanguage {
 	if t == nil {
@@ -17507,6 +17516,38 @@ func (t *UpdateAgentMessage_UpdateAgentMessage) GetMessage() string {
 		t = &UpdateAgentMessage_UpdateAgentMessage{}
 	}
 	return t.Message
+}
+
+type CreateAgentMessageOutput_AgentMessageOutput struct {
+	AgentRunID string  "json:\"agentRunId\" graphql:\"agentRunId\""
+	MessageID  string  "json:\"messageId\" graphql:\"messageId\""
+	Stderr     *string "json:\"stderr,omitempty\" graphql:\"stderr\""
+	Stdout     *string "json:\"stdout,omitempty\" graphql:\"stdout\""
+}
+
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetAgentRunID() string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.AgentRunID
+}
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetMessageID() string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.MessageID
+}
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetStderr() *string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.Stderr
+}
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetStdout() *string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.Stdout
 }
 
 type ListScmWebhooks_ScmWebhooks_Edges struct {
@@ -44244,6 +44285,17 @@ func (t *CreateAgentPullRequest) GetAgentPullRequest() *PullRequestFragment {
 	return t.AgentPullRequest
 }
 
+type AgentPrReview struct {
+	AgentPrReview *PullRequestFragment "json:\"agentPrReview,omitempty\" graphql:\"agentPrReview\""
+}
+
+func (t *AgentPrReview) GetAgentPrReview() *PullRequestFragment {
+	if t == nil {
+		t = &AgentPrReview{}
+	}
+	return t.AgentPrReview
+}
+
 type CreateAgentMessage struct {
 	CreateAgentMessage *CreateAgentMessage_CreateAgentMessage "json:\"createAgentMessage,omitempty\" graphql:\"createAgentMessage\""
 }
@@ -44264,6 +44316,17 @@ func (t *UpdateAgentMessage) GetUpdateAgentMessage() *UpdateAgentMessage_UpdateA
 		t = &UpdateAgentMessage{}
 	}
 	return t.UpdateAgentMessage
+}
+
+type CreateAgentMessageOutput struct {
+	AgentMessageOutput *CreateAgentMessageOutput_AgentMessageOutput "json:\"agentMessageOutput,omitempty\" graphql:\"agentMessageOutput\""
+}
+
+func (t *CreateAgentMessageOutput) GetAgentMessageOutput() *CreateAgentMessageOutput_AgentMessageOutput {
+	if t == nil {
+		t = &CreateAgentMessageOutput{}
+	}
+	return t.AgentMessageOutput
 }
 
 type CreateAgentRunUpload struct {
@@ -48068,6 +48131,7 @@ fragment AgentRunFragment on AgentRun {
 	branch
 	headBranch
 	mode
+	reviewDepth
 	language
 	languageVersion
 	todos {
@@ -48303,6 +48367,7 @@ fragment AgentRunFragment on AgentRun {
 	branch
 	headBranch
 	mode
+	reviewDepth
 	language
 	languageVersion
 	todos {
@@ -48561,6 +48626,7 @@ fragment AgentRunFragment on AgentRun {
 	branch
 	headBranch
 	mode
+	reviewDepth
 	language
 	languageVersion
 	todos {
@@ -48806,6 +48872,7 @@ fragment AgentRunFragment on AgentRun {
 	branch
 	headBranch
 	mode
+	reviewDepth
 	language
 	languageVersion
 	todos {
@@ -48989,6 +49056,7 @@ fragment AgentRunFragment on AgentRun {
 	branch
 	headBranch
 	mode
+	reviewDepth
 	language
 	languageVersion
 	todos {
@@ -49275,6 +49343,39 @@ func (c *Client) CreateAgentPullRequest(ctx context.Context, runID string, attri
 	return &res, nil
 }
 
+const AgentPrReviewDocument = `mutation AgentPrReview ($runId: ID!, $attributes: AgentPrReviewAttributes!) {
+	agentPrReview(runId: $runId, attributes: $attributes) {
+		... PullRequestFragment
+	}
+}
+fragment PullRequestFragment on PullRequest {
+	id
+	status
+	url
+	title
+	creator
+	ref
+}
+`
+
+func (c *Client) AgentPrReview(ctx context.Context, runID string, attributes AgentPrReviewAttributes, interceptors ...clientv2.RequestInterceptor) (*AgentPrReview, error) {
+	vars := map[string]any{
+		"runId":      runID,
+		"attributes": attributes,
+	}
+
+	var res AgentPrReview
+	if err := c.Client.Post(ctx, "AgentPrReview", AgentPrReviewDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CreateAgentMessageDocument = `mutation CreateAgentMessage ($runId: ID!, $attributes: AgentMessageAttributes!) {
 	createAgentMessage(runId: $runId, attributes: $attributes) {
 		id
@@ -49317,6 +49418,33 @@ func (c *Client) UpdateAgentMessage(ctx context.Context, id string, attributes A
 
 	var res UpdateAgentMessage
 	if err := c.Client.Post(ctx, "UpdateAgentMessage", UpdateAgentMessageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentMessageOutputDocument = `mutation CreateAgentMessageOutput ($attributes: AgentMessageOutputAttributes!) {
+	agentMessageOutput(attributes: $attributes) {
+		messageId
+		agentRunId
+		stdout
+		stderr
+	}
+}
+`
+
+func (c *Client) CreateAgentMessageOutput(ctx context.Context, attributes AgentMessageOutputAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessageOutput, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateAgentMessageOutput
+	if err := c.Client.Post(ctx, "CreateAgentMessageOutput", CreateAgentMessageOutputDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -73504,8 +73632,10 @@ var DocumentOperationNames = map[string]string{
 	UpdateAgentRunAnalysisDocument:                    "UpdateAgentRunAnalysis",
 	UpdateAgentRunTodosDocument:                       "UpdateAgentRunTodos",
 	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
+	AgentPrReviewDocument:                             "AgentPrReview",
 	CreateAgentMessageDocument:                        "CreateAgentMessage",
 	UpdateAgentMessageDocument:                        "UpdateAgentMessage",
+	CreateAgentMessageOutputDocument:                  "CreateAgentMessageOutput",
 	CreateAgentRunUploadDocument:                      "CreateAgentRunUpload",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",

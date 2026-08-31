@@ -21,6 +21,8 @@ func ToID(id string) (ID, error) {
 		return CreateBranchTool, nil
 	case string(CreatePullRequestTool):
 		return CreatePullRequestTool, nil
+	case string(AgentPrReviewTool):
+		return AgentPrReviewTool, nil
 	case string(FetchTodosTool):
 		return FetchTodosTool, nil
 	case string(UpdateAnalysisTool):
@@ -50,6 +52,7 @@ const (
 	CreateBranchTool      ID = "createBranch"
 	CreateCommitTool      ID = "createCommit"
 	CreatePullRequestTool ID = "agentPullRequest"
+	AgentPrReviewTool     ID = "agentPrReview"
 	FetchTodosTool        ID = "fetchAgentRunTodos"
 	UpdateAnalysisTool    ID = "updateAgentRunAnalysis"
 	UpdateTodosTool       ID = "updateAgentRunTodos"
@@ -90,6 +93,11 @@ func (t *ConsoleTool) ID() ID {
 
 // CreatePullRequest is an MCP tool that creates a pull request for a given agent run
 type CreatePullRequest struct {
+	ConsoleTool
+}
+
+// AgentPrReview is an MCP tool that publishes a normalized pull request review.
+type AgentPrReview struct {
 	ConsoleTool
 }
 

@@ -16,6 +16,7 @@ import (
 
 const (
 	SnapshotVersion = 1
+	snapshotMaxAge  = time.Hour
 
 	stateFileName   = "state.json"
 	stateTmpPattern = "state.json.*.tmp"
@@ -46,6 +47,7 @@ type PollyRecord[T any] struct {
 
 type Snapshot struct {
 	Version           int                                                      `json:"version"`
+	WrittenAt         time.Time                                                `json:"writtenAt"`
 	Manifests         map[string]ManifestRecord                                `json:"manifests"`
 	ComponentSHAs     map[string]SHARecord                                     `json:"componentShas"`
 	StatusSHAs        map[string]SHARecord                                     `json:"statusShas"`
@@ -145,6 +147,7 @@ func (s *Store) Save(snap Snapshot) error {
 	defer s.mu.Unlock()
 
 	snap.Version = SnapshotVersion
+	snap.WrittenAt = time.Now().UTC()
 	if snap.Manifests == nil {
 		snap.Manifests = map[string]ManifestRecord{}
 	}
@@ -233,6 +236,14 @@ func (s *Store) Load() (Snapshot, error) {
 	}
 	if snap.Version != SnapshotVersion {
 		return Snapshot{}, fmt.Errorf("unsupported snapshot version %d", snap.Version)
+	}
+	if time.Now().After(snap.WrittenAt.Add(snapshotMaxAge)) {
+		klog.InfoS("durable cache snapshot is stale, starting empty",
+			"dir", s.dir,
+			"writtenAt", snap.WrittenAt,
+			"maxAge", snapshotMaxAge,
+		)
+		return Snapshot{Version: SnapshotVersion}, nil
 	}
 	klog.InfoS("loaded durable cache snapshot",
 		"dir", s.dir,

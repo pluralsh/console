@@ -43,6 +43,7 @@ defmodule Console.Schema.WorkbenchJob do
       embeds_one :coding, Coding, on_replace: :update do
         field :babysit,  :boolean
         field :approval, :boolean
+        field :review,   :boolean
       end
 
       embeds_one :budget, Budget, on_replace: :update do
@@ -68,7 +69,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     defp coding_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(babysit approval)a)
+      |> cast(attrs, ~w(babysit approval review)a)
     end
 
     defp budget_changeset(model, attrs) do

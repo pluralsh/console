@@ -48,7 +48,9 @@ const (
 	// Keep this above mcpserver's internal 10s graceful shutdown timeout.
 	defaultPodTerminationGracePeriodSeconds = int64(30)
 
-	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getCILogs,reactToComment,downloadServiceManifests"
+	analyzeModeExcludedTools = "createBranch,createCommit,agentPullRequest,agentPrReview,fetchAgentRunTodos,updateAgentRunTodos,getCILogs,reactToComment,downloadServiceManifests"
+	writeModeExcludedTools   = "agentPrReview"
+	reviewModeExcludedTools  = "createBranch,createCommit,agentPullRequest,fetchAgentRunTodos,updateAgentRunTodos,getCILogs,reactToComment,downloadServiceManifests"
 )
 
 var dindClientEnvs = []corev1.EnvVar{
@@ -529,8 +531,13 @@ func getMCPServerStartupProbe() *corev1.Probe {
 func getMCPServerEnvVars(run *v1alpha1.AgentRun, runtime *v1alpha1.AgentRuntime) []corev1.EnvVar {
 	result := make([]corev1.EnvVar, 0, 3)
 
-	if run.Spec.Mode == console.AgentRunModeAnalyze {
+	switch run.Spec.Mode {
+	case console.AgentRunModeAnalyze:
 		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: analyzeModeExcludedTools})
+	case console.AgentRunModeWrite:
+		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: writeModeExcludedTools})
+	case console.AgentRunModeReview:
+		result = append(result, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: reviewModeExcludedTools})
 	}
 
 	if runtime.Spec.Git != nil && runtime.Spec.Git.Proxy != nil {

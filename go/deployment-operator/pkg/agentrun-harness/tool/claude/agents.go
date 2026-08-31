@@ -10,6 +10,7 @@ import (
 const (
 	mcpUpdateAnalysis    = "mcp__plural__updateAgentRunAnalysis"
 	mcpAgentPullRequest  = "mcp__plural__agentPullRequest"
+	mcpAgentPrReview     = "mcp__plural__agentPrReview"
 	mcpCreateBranch      = "mcp__plural__createBranch"
 	mcpFetchTodos        = "mcp__plural__fetchAgentRunTodos"
 	mcpUpdateTodos       = "mcp__plural__updateAgentRunTodos"
@@ -22,6 +23,7 @@ const (
 
 var (
 	analyzePluralMCPTools  = []string{mcpGetPRState, mcpUpdateAnalysis}
+	reviewPluralMCPTools   = []string{mcpGetPRState, mcpUpdateAnalysis, mcpAgentPrReview}
 	codebaseMemoryMCPTools = []string{CodebaseMemoryMCPToolsWildcard}
 	writePluralMCPTools    = []string{
 		mcpAgentPullRequest,
@@ -103,6 +105,11 @@ var (
 		Description: "Analyze code for potential issues, vulnerabilities and improvements. Use PROACTIVELY.",
 		Prompt:      "You are a read-only autonomous analysis agent.",
 		Tools:       appendTools(appendTools([]string{"Read", "Grep", "Glob", "Bash"}, analyzePluralMCPTools), codebaseMemoryMCPTools),
+	})
+	reviewAgent = agentJSON("review", agentDef{
+		Description: "Review pull request changes without modifying the repository. Use PROACTIVELY.",
+		Prompt:      "You are a read-only autonomous pull request review agent.",
+		Tools:       appendTools(appendTools([]string{"Read", "Grep", "Glob", "Bash"}, reviewPluralMCPTools), codebaseMemoryMCPTools),
 	})
 	autonomousAgent = agentJSON("autonomous", agentDef{
 		Description: "Autonomous agent for making code changes and creating pull requests. Use PROACTIVELY.",

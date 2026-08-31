@@ -183,6 +183,24 @@ addons:
   release_url: https://github.com/kubernetes-sigs/aws-ebs-csi-driver/releases/tag/v{vsn}
   helm_repository_url: https://kubernetes-sigs.github.io/aws-ebs-csi-driver
   versions:
+  - version: 1.65.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No specific features are listed in the provided v1.65.0 release notes
+          snippet; it only links to the upstream CHANGELOG for details.]
+      breaking_changes: [No breaking changes are listed in the provided v1.65.0 release
+          notes snippet; you need to review the upstream CHANGELOG for any behavior/config
+          changes between v1.64.0 and v1.65.0.]
+    chart_version: 2.65.0
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.6', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.6',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.4',
+      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.6', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.65.0',
+      'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260817-81577dc432-master']
   - version: 1.64.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
@@ -11360,20 +11378,18 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.32.1
+  - version: 3.32.2
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ['Bumped Calico/tigera-operator Helm chart artifact from v3.32.0
-          to v3.32.1 (tgz published and hosted at oci://quay.io/calico/charts/tigera-operator).',
-        'CRD charts published for v3.32.1: crd.projectcalico.org/v1 and projectcalico.org/v3
-          (tech-preview).']
-      features: []
+      chart_updates: []
+      features: ['Release artifacts updated to v3.32.2 (container images/binaries/manifests,
+          Windows bundle, tigera-operator Helm chart, and CRD charts).']
       breaking_changes: []
-    chart_version: 3.32.1
-    images: ['quay.io/tigera/operator:v1.42.3']
+    chart_version: 3.32.2
+    images: ['quay.io/tigera/operator:v1.42.6']
   - version: 3.32.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -16816,6 +16832,26 @@ addons:
   release_url: https://github.com/external-secrets/external-secrets/releases/tag/v{vsn}
   helm_repository_url: https://charts.external-secrets.io
   versions:
+  - version: 2.10.0
+    kube: ['1.36']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm chart was released for external-secrets app v2.9.0 (chart
+          packaging update only; no chart-specific value changes were called out in
+          the provided notes)., Deployment now applies a TLS security profile (may
+          introduce/enable stricter TLS settings depending on cluster defaults and
+          chart configuration).]
+      features: ['Conjur: added PushSecret support.', 'OpenBao: added `auth.kubernetes`
+          authentication method support.', 'Passbolt: added support for custom fields
+          and surfaced custom field functions in the SDK.', 'Providers: added Nebius
+          MysteryBox service-account token federation auth option.', 'GitHub provider:
+          added support for Dependabot secrets.', "Core: reconcile now reports \u201C\
+          safe\u201D reconcile errors via status conditions (improves observability)."]
+      breaking_changes: []
+    chart_version: 2.10.0
+    images: ['ghcr.io/external-secrets/external-secrets:v2.10.0']
   - version: 2.9.0
     kube: ['1.36']
     requirements: []
@@ -19206,6 +19242,24 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 88.6.1
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['kube-prometheus-stack: update chart dependencies (non-major)
+          via renovate (PR #7223).']
+      features: ['HTTPRoute timeout support was added in 88.6.0 (PR #7221).', 88.6.1
+          primarily bumps dependency versions (non-major) and does not introduce new
+          user-facing features beyond what those dependency patch/minor updates bring.]
+      breaking_changes: []
+    chart_version: 88.6.1
+    images: ['docker.io/grafana/grafana:13.2.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 88.6.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
@@ -25135,19 +25189,13 @@ addons:
   chart_name: tigera-operator
   eolApiSlug: calico
   versions:
-  - version: 3.32.1
+  - version: 3.32.2
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: [Provides a patch release of Calico/tigera-operator artifacts from
-          v3.32.0 to v3.32.1 (new container images/binaries/manifests and updated
-          Helm chart tarball).]
-      breaking_changes: []
-    chart_version: 3.32.1
-    images: ['quay.io/tigera/operator:v1.42.3']
+    summary: null
+    chart_version: 3.32.2
+    images: ['quay.io/tigera/operator:v1.42.6']
   - version: 3.32.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -25321,6 +25369,25 @@ addons:
   helm_repository_url: https://argoproj.github.io/argo-helm
   eolApiSlug: argocd
   versions:
+  - version: 3.5.2
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['ApplicationSet: restores `ignoreApplicationDifferences` behavior
+          after normalization, which improves diff/sync accuracy when using AppSet-generated
+          apps.', 'Repository/Helm sources: fixes handling of an untyped Helm source
+          in `UpdateRevisionForPaths`, reducing errors when path-based revision updates
+          run against Helm repos.', 'UI: applications and appset pages receive small
+          improvements (operation state visible in app list; remove kind filter on
+          appset page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug
+          fixes from Dex).']
+      breaking_changes: []
+    chart_version: 10.4.2
+    images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
+      'quay.io/argoproj/argocd:v3.5.2']
   - version: 3.5.1
     kube: ['1.37', '1.36', '1.35']
     requirements: []
@@ -30561,7 +30628,7 @@ addons:
   chart_name: wiz-admission-controller
   versions:
   - version: 2.12.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
+    kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
@@ -30575,25 +30642,11 @@ addons:
     chart_version: 3.12.10-preview
     images: []
   - version: 2.11.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.12.0-preview.2
-    images: []
-  - version: 2.11.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.12.0-preview.2
-    images: []
-  - version: 2.10.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.11.0-preview
     images: []
   - version: 2.10.0
     kube: ['1.37', '1.36', '1.35', '1.34']
@@ -30603,25 +30656,11 @@ addons:
     chart_version: 3.11.0-preview
     images: []
   - version: 2.9.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.9.4
-    images: []
-  - version: 2.9.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.9.4
-    images: []
-  - version: 2.8.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.8.0-preview
     images: []
   - version: 2.8.0
     kube: ['1.37', '1.36', '1.35', '1.34']
@@ -30631,26 +30670,12 @@ addons:
     chart_version: 3.8.0-preview
     images: []
   - version: 2.7.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.7.0-preview
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.7']
-  - version: 2.7.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.7.0-preview
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.7']
-  - version: 2.6.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.6.0-preview
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.6']
   - version: 2.6.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
@@ -30659,26 +30684,12 @@ addons:
     chart_version: 3.6.0-preview
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.6']
   - version: 2.5.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.5.0-alpha
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.5']
-  - version: 2.5.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.5.0-alpha
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.5']
-  - version: 2.4.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.4.0-alpha
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.4']
   - version: 2.4.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
@@ -30687,26 +30698,12 @@ addons:
     chart_version: 3.4.0-alpha
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.4']
   - version: 2.3.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.1.3
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.3']
-  - version: 2.3.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 3.1.3
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.3']
-  - version: 2.2.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 3.1.0-alpha
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.2']
   - version: 2.2.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
@@ -30715,33 +30712,12 @@ addons:
     chart_version: 3.1.0-alpha
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.2']
   - version: 2.1.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 2.3.0-alpha
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.1']
-  - version: 2.1.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.3.0-alpha
     images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.1']
-  - version: 2.0.162274
-    kube: ['1.37', '1.36', '1.35', '1.34']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 2.0.0
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2.0.162274']
-  - version: 2.0.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
-    requirements: []
-    incompatibilities: []
-    summary: null
-    chart_version: 2.2.0
-    images: ['wiziopublic.azurecr.io/wiz-app/wiz-admission-controller:2']
   - version: 2.0.0
     kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
@@ -30779,7 +30755,7 @@ addons:
   chart_name: wiz-network-analyzer
   versions:
   - version: 0.1.0
-    kube: ['1.36', '1.35', '1.34', '1.33']
+    kube: ['1.37', '1.36', '1.35', '1.34']
     requirements: []
     incompatibilities: []
     summary: null

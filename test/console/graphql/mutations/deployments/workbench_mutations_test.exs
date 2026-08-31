@@ -563,7 +563,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"workbenchId" => workbench.id}, %{current_user: user})
     end
 
-    test "it persists coding approval mode on job creation" do
+    test "it persists coding modes on job creation" do
       workbench = insert(:workbench)
 
       {:ok, %{data: %{"createWorkbenchJob" => job}}} = run_query("""
@@ -574,6 +574,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
               coding {
                 approval
                 babysit
+                review
               }
             }
           }
@@ -582,14 +583,16 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         "workbenchId" => workbench.id,
         "attributes" => %{
           "prompt" => "fix the bug",
-          "modes" => %{"coding" => %{"approval" => true}}
+          "modes" => %{"coding" => %{"approval" => true, "review" => true}}
         }
       }, %{current_user: admin_user()})
 
       assert job["modes"]["coding"]["approval"] == true
+      assert job["modes"]["coding"]["review"] == true
 
       db_job = Console.Repo.get!(Console.Schema.WorkbenchJob, job["id"])
       assert db_job.modes.coding.approval == true
+      assert db_job.modes.coding.review == true
     end
   end
 

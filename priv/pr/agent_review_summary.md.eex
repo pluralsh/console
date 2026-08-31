@@ -1,0 +1,15 @@
+## Plural AI review
+
+<%= @review.summary %>
+
+### Confidence: <%= @review.confidence |> to_string() |> String.upcase() %>
+
+<%= @review.confidence_comment %>
+<%= if Enum.any?(@review.files) do %>
+
+### Files changed
+
+<%= for file <- @review.files do %>
+- `<%= file.filename %>` — <%= file.summary %>
+<% end %>
+<% end %>

@@ -42,6 +42,40 @@
         }
       }
     },
+    "review": {
+      "description": "Review pull request changes without modifying the repository",
+      "prompt": "{file:./prompts/AGENTS.md}",
+      "mode": "primary",
+      "temperature": 0.1,
+      "tools": {
+        "plural*": true,
+        "codebase-memory-mcp*": true
+      },
+      "permission": {
+        {{- if .DindEnabled }}
+        "bash": "allow",
+        {{- else }}
+        "bash": {
+          "ls": "allow",
+          "cd": "allow",
+          "pwd": "allow",
+          "git": "allow",
+          "head": "allow",
+          "tail": "allow",
+          "cat": "allow",
+          "grep": "allow",
+          "rg": "allow",
+          "find": "allow",
+          "*": "deny"
+        },
+        {{- end }}
+        "edit": "deny",
+        "webfetch": "allow",
+        "skill": {
+          "*": "allow"
+        }
+      }
+    },
     "autonomous": {
       "description": "Autonomous agent for making code changes and creating pull requests",
       "prompt": "{file:./prompts/AGENTS.md}",

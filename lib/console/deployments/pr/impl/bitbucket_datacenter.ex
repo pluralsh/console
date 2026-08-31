@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   import Console.Deployments.Pr.Utils
   import Console.Deployments.Pr.Git, only: [sha: 2]
+  alias Console.Deployments.Pr.Review
   alias Console.Schema.{PullRequest, ScmConnection, PrAutomation}
   require Logger
 
@@ -115,9 +116,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
          {:ok, conn} <- connection(conn) do
       case pr do
         %PullRequest{comment_id: id} when is_binary(id) ->
-          put(conn, Path.join(["/projects", project, "repos", slug, "pull-requests", number, "comments", id]), %{
-            text: filter_ansi(body),
-          })
+          update_comment(conn, project, slug, number, id, body)
+
         _ ->
           post(conn, Path.join(["/projects", project, "repos", slug, "pull-requests", number, "comments"]), %{
             severity: "NORMAL",
@@ -129,6 +129,15 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
         err -> err
       end
+    end
+  end
+
+  def agent_review(conn, %PullRequest{url: url} = pr, %Review{} = review) do
+    with {:ok, id} <- review(conn, pr, Review.summary(review)),
+         {:ok, project, slug, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         :ok <- add_inline_comments(conn, project, slug, number, review.comments) do
+      {:ok, id}
     end
   end
 
@@ -175,6 +184,15 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
       do: {:ok, %{project: project, repo: repo, number: number}}
   end
 
+  def pr_details(scm_conn, url) do
+    with {:ok, project, repo, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn),
+         {:ok, %{"title" => title} = pr} <-
+           get(conn, "/projects/#{project}/repos/#{repo}/pull-requests/#{number}") do
+      {:ok, %{title: title, body: pr["description"] || ""}}
+    end
+  end
+
   defp post(conn, path, body) do
     url(conn, path)
     |> Req.post(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
@@ -184,6 +202,12 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   defp put(conn, path, body) do
     url(conn, path)
     |> Req.put(headers: Connection.headers(conn), body: Jason.encode!(body), decode_body: false, retry: false)
+    |> handle_response()
+  end
+
+  defp get(conn, path) do
+    url(conn, path)
+    |> Req.get(headers: Connection.headers(conn), decode_body: false, retry: false)
     |> handle_response()
   end
 
@@ -223,8 +247,17 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp get_pull_id(url) do
     with %URI{path: "/" <> path} <- URI.parse(url),
-         [workspace, repo, "pull-requests", pr_id] <- String.split(path, "/") do
-      {:ok, workspace, repo, pr_id}
+         parts <- String.split(path, "/", trim: true) do
+      case parts do
+        ["projects", project, "repos", repo, "pull-requests", pr_id] ->
+          {:ok, project, repo, pr_id}
+
+        [project, repo, "pull-requests", pr_id] ->
+          {:ok, project, repo, pr_id}
+
+        _ ->
+          {:error, "could not parse bitbucket url"}
+      end
     else
       _ -> {:error, "could not parse bitbucket url"}
     end
@@ -238,4 +271,54 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   defp user_slug(%ScmConnection{bitbucket_datacenter: %{user_slug: user_slug}})
     when is_binary(user_slug), do: {:ok, user_slug}
   defp user_slug(_), do: {:error, "could not determine user slug"}
+
+  defp add_inline_comments(conn, project, slug, number, comments) do
+    path = Path.join([
+      "/projects",
+      project,
+      "repos",
+      slug,
+      "pull-requests",
+      number,
+      "comments"
+    ])
+
+    Enum.reduce_while(comments, :ok, fn %Review.Comment{} = comment, :ok ->
+      body = %{
+        severity: "NORMAL",
+        state: "OPEN",
+        text: Review.inline_body(comment),
+        anchor: %{
+          diffType: "EFFECTIVE",
+          path: comment.filename,
+          line: comment.line,
+          lineType: "ADDED",
+          fileType: "TO"
+        }
+      }
+
+      case post(conn, path, body) do
+        {:ok, %{"id" => _}} -> {:cont, :ok}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
+
+  defp update_comment(conn, project, slug, number, id, body) do
+    path =
+      Path.join([
+        "/projects",
+        project,
+        "repos",
+        slug,
+        "pull-requests",
+        number,
+        "comments",
+        id
+      ])
+
+    with {:ok, %{"version" => version}} <- get(conn, path) do
+      put(conn, path, %{text: filter_ansi(body), version: version})
+    end
+  end
 end

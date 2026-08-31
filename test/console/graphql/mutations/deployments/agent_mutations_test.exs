@@ -391,6 +391,70 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
     end
   end
 
+  describe "agentPrReview" do
+    test "converts the review input to typed structs" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, mode: :review)
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/42")
+      insert(:scm_connection, default: true)
+
+      expect(Console.Deployments.Pr.Dispatcher, :agent_review, fn _, found, review ->
+        assert found.id == pr.id
+        assert %Console.Deployments.Pr.Review{} = review
+        assert [%Console.Deployments.Pr.Review.FileSummary{filename: "lib/example.ex"}] =
+                 review.files
+
+        assert [
+                 %Console.Deployments.Pr.Review.Comment{
+                   priority: :p1,
+                   line: 12,
+                   title: "Unhandled error"
+                 }
+               ] =
+                 review.comments
+
+        {:ok, "review-42"}
+      end)
+
+      assert {:ok, %{data: %{"agentPrReview" => result}}} =
+               run_query(
+                 """
+                 mutation AgentPrReview($runId: ID!, $attrs: AgentPrReviewAttributes!) {
+                   agentPrReview(runId: $runId, attributes: $attrs) {
+                     id
+                     title
+                   }
+                 }
+                 """,
+                 %{
+                   "runId" => run.id,
+                   "attrs" => %{
+                     "url" => pr.url,
+                     "confidence" => "B",
+                     "summary" => "Safe refactor",
+                     "confidenceComment" => "The behavior is covered by tests.",
+                     "files" => [
+                       %{"filename" => "lib/example.ex", "summary" => "Extracts a helper."}
+                     ],
+                     "comments" => [
+                       %{
+                         "filename" => "lib/example.ex",
+                         "line" => 12,
+                         "title" => "Unhandled error",
+                         "body" => "Handle this error.",
+                         "priority" => "P1"
+                       }
+                     ]
+                   }
+                 },
+                 %{current_user: user}
+               )
+
+      assert result["id"] == pr.id
+      assert refetch(pr).review_comment_id == "review-42"
+    end
+  end
+
   describe "updateAgentRunAnalysis" do
     test "a user can update an agent run analysis" do
       user = insert(:user)

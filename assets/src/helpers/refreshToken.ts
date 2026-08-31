@@ -19,7 +19,9 @@ import { authlessClient } from './client'
 
 const RETURN_TO_KEY = 'plural-return-to'
 
-export const getRefreshedToken = async () => {
+let refreshInFlight: Promise<string | undefined> | undefined
+
+const performTokenRefresh = async () => {
   const refreshToken = fetchRefreshToken()
   const refreshResolverResponse = await authlessClient.query<RefreshQuery>({
     query: RefreshDocument,
@@ -32,7 +34,17 @@ export const getRefreshedToken = async () => {
     setRefreshToken(user.refreshToken.token)
   }
 
-  return user?.jwt
+  return user?.jwt ?? undefined
+}
+
+export const getRefreshedToken = () => {
+  if (!refreshInFlight) {
+    refreshInFlight = performTokenRefresh().finally(() => {
+      refreshInFlight = undefined
+    })
+  }
+
+  return refreshInFlight
 }
 
 export const onErrorHandler: ErrorHandler = ({

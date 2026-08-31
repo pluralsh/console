@@ -129,22 +129,52 @@ export function SimpleToolCall({
     )
   }
 
-  switch (kind) {
-    case 'bash':
-    case 'command_execution': {
-      const command = getCommand(toolName, args)
-      const result = content || undefined
-      return (
-        <SimpleAccordion {...accordionProps}>
-          <Flex
-            direction="column"
-            gap="xsmall"
-            minWidth={0}
-            width="100%"
-            marginTop={spacing.xsmall}
-          >
-            <PreviewablePanel
-              contentKey={`cmd:${command}:${result ?? ''}:${isPending}`}
+    switch (kind) {
+      case 'bash':
+      case 'command_execution': {
+        const command = getCommand(toolName, args)
+        const result = content || undefined
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="small"
+              minWidth={0}
+              width="100%"
+              marginTop={spacing.xsmall}
+            >
+              <Code
+                language="bash"
+                title="Command"
+                css={slimCodeCss}
+              >
+                {command}
+              </Code>
+              {isPending && !result ? (
+                <RunningToolOutputCode />
+              ) : result ? (
+                <Code
+                  title="Response"
+                  showHeader
+                  css={slimCodeCss}
+                >
+                  {result}
+                </Code>
+              ) : null}
+            </Flex>
+          </SimpleAccordion>
+        )
+      }
+      case 'python_sandbox': {
+        const python = getPython(args)
+        return (
+          <SimpleAccordion label={label}>
+            <Flex
+              direction="column"
+              gap="small"
+              minWidth={0}
+              width="100%"
+              marginTop={spacing.xsmall}
             >
               <ToolPreviewPreSC>
                 {`$ ${command}`}

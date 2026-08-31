@@ -93,6 +93,19 @@ func (c *client) CreateAgentPullRequest(ctx context.Context, runID string, attrs
 	return response.AgentPullRequest, nil
 }
 
+func (c *client) AgentPrReview(ctx context.Context, runID string, attrs console.AgentPrReviewAttributes) (*console.PullRequestFragment, error) {
+	response, err := c.consoleClient.AgentPrReview(ctx, runID, attrs)
+	if err != nil {
+		return nil, err
+	}
+
+	if response == nil || response.AgentPrReview == nil {
+		return nil, nil
+	}
+
+	return response.AgentPrReview, nil
+}
+
 func (c *client) CreateAgentRunUpload(ctx context.Context, runID string, attrs console.AgentRunUploadAttributes) (*console.AgentRunUploadFragment, error) {
 	response, err := c.consoleClient.CreateAgentRunUpload(ctx, runID, attrs.Session, attrs.ScreenRecording, attrs.Patch)
 	if err != nil {
@@ -130,6 +143,11 @@ func (c *client) UpdateAgentMessage(ctx context.Context, id string, attrs consol
 	}
 
 	return response.UpdateAgentMessage, nil
+}
+
+func (c *client) AgentMessageOutput(ctx context.Context, attrs console.AgentMessageOutputAttributes) error {
+	_, err := c.consoleClient.CreateAgentMessageOutput(ctx, attrs)
+	return err
 }
 
 func (c *client) GetAgentRunTodos(ctx context.Context, id string) ([]*console.AgentTodoFragment, error) {

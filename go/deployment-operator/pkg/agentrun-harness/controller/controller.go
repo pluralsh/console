@@ -13,6 +13,7 @@ import (
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/output"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
@@ -54,8 +55,12 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 	}
 
 	in.ensureToolCallMessageIDs()
+	in.output = output.New(ctx, in.consoleClient)
 	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes, callID string) {
 		in.handleAgentMessage(ctx, message, callID)
+	})
+	in.tool.OnOutput(func(callID, stdout string) {
+		in.handleToolOutput(callID, stdout)
 	})
 
 	in.tool.Run(
@@ -224,8 +229,9 @@ func (in *agentRunController) babysitLoop(ctx context.Context, callback func(ctx
 	case <-in.runDone:
 		klog.Info("initial agent run completed, evaluating post-run work")
 		in.ensureAnalysisPersistedAfterInitialRun(ctx)
-		if in.agentRun.Mode == gqlclient.AgentRunModeAnalyze {
-			klog.V(log.LogLevelInfo).InfoS("analyze mode complete, skipping babysit loop")
+		if in.agentRun.Mode == gqlclient.AgentRunModeAnalyze ||
+			in.agentRun.Mode == gqlclient.AgentRunModeReview {
+			klog.V(log.LogLevelInfo).InfoS("read-only mode complete, skipping babysit loop", "mode", in.agentRun.Mode)
 			return
 		}
 		in.runPostRunPollLoop(ctx)
@@ -400,7 +406,7 @@ func followupPRURL(agentRun *gqlclient.AgentRunFragment, harnessRun *agentrunv1.
 		}
 	}
 	if harnessRun != nil {
-		return strings.TrimSpace(harnessRun.FollowupPrURL)
+		return strings.TrimSpace(harnessRun.PRURL)
 	}
 	return ""
 }
