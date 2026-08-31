@@ -1,21 +1,25 @@
-name: Publish
+name: CD / Documentation
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
-    branches:
-      - main
   pull_request:
     branches:
-      - main
+      - "**"
+    paths:
+      - ".github/workflows/documentation-cd.yaml"
+      - "documentation/**"
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/documentation-cd.yaml"
+      - "documentation/**"
 
 env:
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 
 jobs:
   publish-docker:
-    name: Build and Push to GHCR
+    name: Build documentation image
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -23,7 +27,7 @@ jobs:
       packages: 'write'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
@@ -36,7 +40,6 @@ jobs:
             type=sha
             type=ref,event=pr
             type=ref,event=branch
-            type=semver,pattern={{version}}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -48,10 +51,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: '.'
-          file: './Dockerfile'
+          context: documentation
+          file: documentation/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
