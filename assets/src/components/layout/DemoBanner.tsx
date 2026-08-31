@@ -13,7 +13,7 @@ export default function DemoBanner() {
   return (
     <div
       css={{
-        borderBottom: theme.borders.default,
+        borderBottom: theme.borders.hairline,
         padding: theme.spacing.small,
       }}
     >

@@ -63,7 +63,9 @@ export const semanticColorsDark = {
 
   // Border
   //
-  border: grey[825],
+  // `border` = in-app components (cards, tables). `border-hairline` = app chrome / sidebars.
+  border: grey[775],
+  'border-hairline': grey[825],
   'border-fill-one': grey[800],
   'border-fill-two': grey[750],
   'border-fill-three': grey[725],

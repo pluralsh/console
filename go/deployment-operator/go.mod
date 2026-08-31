@@ -31,6 +31,7 @@ require (
 	github.com/cert-manager/cert-manager v1.19.3
 	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/evanphx/json-patch/v5 v5.9.11
+	github.com/ewhauser/gomonty v0.0.14
 	github.com/fluxcd/flagger v1.41.0
 	github.com/fluxcd/helm-controller/api v1.4.3
 	github.com/gin-gonic/gin v1.12.0
@@ -103,6 +104,8 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
+	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.10.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 )

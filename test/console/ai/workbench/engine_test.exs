@@ -29,6 +29,26 @@ defmodule Console.AI.Workbench.EngineTest do
       refute refetch(job).error
     end
 
+    test "starts MCP clients before indexing workbench tools" do
+      server = insert(:mcp_server, name: "example", url: "http://localhost:3001/mcp", protocol: :streamable_http)
+      workbench = insert(:workbench)
+      tool = insert(:workbench_tool, tool: :mcp, name: "example", mcp_server: server)
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+
+      expect(Console.AI.Workbench.MCP, :expand_tools, fn tools, found_job ->
+        found = Enum.find(tools, & &1.id == tool.id)
+        assert found
+        assert found_job.id == job.id
+        name = Console.AI.MCP.Agent.name(:client, found, found_job)
+        assert is_pid(GenServer.whereis(name))
+        []
+      end)
+
+      {:ok, engine} = Engine.new(job)
+      assert engine.job.id == job.id
+    end
+
     test "returns an error if the job is not valid" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},

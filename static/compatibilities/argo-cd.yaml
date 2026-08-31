@@ -4,8 +4,27 @@ release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 eolApiSlug: argocd
 versions:
+- version: 3.5.2
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ApplicationSet: restores `ignoreApplicationDifferences` behavior after
+        normalization, which improves diff/sync accuracy when using AppSet-generated
+        apps.', 'Repository/Helm sources: fixes handling of an untyped Helm source
+        in `UpdateRevisionForPaths`, reducing errors when path-based revision updates
+        run against Helm repos.', 'UI: applications and appset pages receive small
+        improvements (operation state visible in app list; remove kind filter on appset
+        page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug fixes
+        from Dex).']
+    breaking_changes: []
+  chart_version: 10.4.2
+  images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
+    'quay.io/argoproj/argocd:v3.5.2']
 - version: 3.5.1
-  kube: ['1.36', '1.35', '1.34']
+  kube: ['1.37', '1.36', '1.35']
   requirements: []
   incompatibilities: []
   summary:

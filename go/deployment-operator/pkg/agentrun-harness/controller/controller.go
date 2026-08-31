@@ -13,6 +13,7 @@ import (
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/environment"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/output"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
@@ -54,8 +55,12 @@ func (in *agentRunController) Start(ctx context.Context) (retErr error) {
 	}
 
 	in.ensureToolCallMessageIDs()
+	in.output = output.New(ctx, in.consoleClient)
 	in.tool.OnMessage(func(message *gqlclient.AgentMessageAttributes, callID string) {
 		in.handleAgentMessage(ctx, message, callID)
+	})
+	in.tool.OnOutput(func(callID, stdout string) {
+		in.handleToolOutput(callID, stdout)
 	})
 
 	in.tool.Run(

@@ -93,6 +93,7 @@ export function SimpleToolCall({
 }) {
   const { colors, spacing } = useTheme()
   const slimCodeCss = useSlimToolCodeCss()
+  const pythonInputCodeCss = useSlimToolCodeCss({ showLanguageIcon: true })
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
@@ -151,7 +152,7 @@ export function SimpleToolCall({
               >
                 {command}
               </Code>
-              {isPending ? (
+              {isPending && !result ? (
                 <RunningToolOutputCode />
               ) : result ? (
                 <Code
@@ -180,7 +181,7 @@ export function SimpleToolCall({
               <Code
                 language="python"
                 title="Python"
-                css={slimCodeCss}
+                css={pythonInputCodeCss}
               >
                 {python}
               </Code>

@@ -657,21 +657,33 @@ defmodule Console.Deployments.PubSub.RecurseTest do
   end
 
   describe "PolicySampled" do
-    test "persists a sampled policy evaluation" do
+    test "buffers a sampled policy evaluation" do
       policy = insert(:policy)
       input = %{"tool" => "kube_update", "namespace" => "production"}
       output = %{"deny" => [], "sample" => 0.5}
 
-      assert {:ok, evaluation} =
-               Recurse.handle_event(%PubSub.PolicySampled{
-                 ids: [policy.id],
-                 input: input,
-                 result: {:ok, output}
-               })
+      expect(Console.Buffers.PolicyEvaluation, :submit, fn attrs ->
+        assert attrs.policy_ids == [policy.id]
+        assert attrs.input == input
+        assert attrs.output == output
+        :ok
+      end)
 
-      assert evaluation.policy_ids == [policy.id]
-      assert evaluation.input == input
-      assert evaluation.output == output
+      :ok = Recurse.handle_event(%PubSub.PolicySampled{
+        ids: [policy.id],
+        input: input,
+        result: {:ok, output}
+      })
+    end
+
+    test "ignores evaluations without a successful result" do
+      reject(Console.Buffers.PolicyEvaluation, :submit, 1)
+
+      :ok = Recurse.handle_event(%PubSub.PolicySampled{
+        ids: [Ecto.UUID.generate()],
+        input: %{},
+        result: {:error, :failed}
+      })
     end
   end
 end

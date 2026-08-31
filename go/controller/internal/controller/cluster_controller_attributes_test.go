@@ -98,4 +98,38 @@ func TestClusterReconcilerAttributesMergeTags(t *testing.T) {
 			"region": "us-east",
 		}, tagMap(attrs.Tags))
 	})
+
+	t.Run("drops previously owned tags when mergeTags is true", func(t *testing.T) {
+		cluster := &v1alpha1.Cluster{
+			Spec: v1alpha1.ClusterSpec{
+				Handle:    lo.ToPtr("tracked"),
+				MergeTags: true,
+				Tags: map[string]string{
+					"team": "infra",
+				},
+			},
+			Status: v1alpha1.ClusterStatus{
+				PrevTags: map[string]string{
+					"team":   "infra",
+					"region": "us-east",
+				},
+			},
+		}
+		apiCluster := &gqlclient.ClusterFragment{
+			ID: "cluster-id",
+			Tags: []*gqlclient.ClusterTags{
+				{Name: "env", Value: "prod"},
+				{Name: "team", Value: "infra"},
+				{Name: "region", Value: "us-east"},
+			},
+		}
+
+		attrs, err := reconciler.Attributes(cluster, apiCluster)
+		require.NoError(t, err)
+		require.NotNil(t, attrs)
+		assert.Equal(t, map[string]string{
+			"env":  "prod",
+			"team": "infra",
+		}, tagMap(attrs.Tags))
+	})
 }

@@ -46,7 +46,7 @@ func GetReader(url, token string) (io.ReadCloser, http.Header, error) {
 	req.Header.Add("Authorization", "Token "+token)
 
 	var lastErr error
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		resp, header, retriable, err := doRequest(req)
 		if err != nil {
 			if !retriable {

@@ -84,10 +84,12 @@ const EXPANDABLE_PROMPT_LENGTH = 400
 export function ExpandableUserPrompt({
   prompt,
   timestamp,
+  fullWidth = false,
   ...props
 }: {
   prompt: Nullable<string>
   timestamp?: Nullable<string>
+  fullWidth?: boolean
 } & ComponentPropsWithRef<typeof PromptWrapperSC>) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -97,10 +99,14 @@ export function ExpandableUserPrompt({
   return (
     <PromptWrapperSC
       {...props}
+      $fullWidth={fullWidth}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      <PromptCardSC $isExpanded={isExpandable && isExpanded}>
+      <PromptCardSC
+        $fullWidth={fullWidth}
+        $isExpanded={isExpandable && isExpanded}
+      >
         <SimplifiedMarkdown
           text={
             !isExpandable || isExpanded
@@ -143,28 +149,30 @@ function UserPromptActions({
       onClick={(e) => e.stopPropagation()}
       $show={show}
     >
-      {timestamp && (
-        <CaptionP $color="text-long-form">
-          {formatDateTime(timestamp, 'h:mmA')}
-        </CaptionP>
-      )}
-      <IconFrame
-        clickable
-        as="div"
-        tooltip="Copy to clipboard"
-        type="tertiary"
-        onClick={(e) => {
-          e.stopPropagation()
-          handleCopy()
-        }}
-        icon={
-          copied ? (
-            <CheckIcon color="icon-success" />
-          ) : (
-            <CopyIcon color="icon-xlight" />
-          )
-        }
-      />
+      <div>
+        {timestamp && (
+          <CaptionP $color="text-long-form">
+            {formatDateTime(timestamp, 'h:mmA')}
+          </CaptionP>
+        )}
+        <IconFrame
+          clickable
+          as="div"
+          tooltip="Copy to clipboard"
+          type="tertiary"
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCopy()
+          }}
+          icon={
+            copied ? (
+              <CheckIcon color="icon-success" />
+            ) : (
+              <CopyIcon color="icon-xlight" />
+            )
+          }
+        />
+      </div>
     </PromptActionsSC>
   )
 }
@@ -572,39 +580,48 @@ const MetricsLegendSwatchSC = styled.div<{ $color: string }>(({ $color }) => ({
   background: $color,
 }))
 
-const PromptWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-end',
-  width: '100%',
-  marginTop: theme.spacing.small,
-  marginBottom: theme.spacing.small,
-}))
-
-const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: theme.spacing.xxsmall,
-  paddingTop: 6,
-  width: '100%',
-  opacity: $show ? 1 : 0,
-  transition: '0.3s opacity ease',
-  pointerEvents: 'none',
-  '& > *': { pointerEvents: $show ? 'auto' : 'none' },
-}))
-
-const PromptCardSC = styled(Card)<{ $isExpanded?: boolean }>(
-  ({ theme, $isExpanded }) => ({
-    padding: theme.spacing.medium,
-    width: 'fit-content',
-    maxWidth: '100%',
-    overflow: 'auto',
-    wordBreak: 'break-word',
-    border: $isExpanded ? 'none' : undefined,
-    [`& ${Code}`]: {
-      backgroundColor: theme.colors['fill-two'],
-      borderColor: theme.colors['border-fill-two'],
-    },
+const PromptWrapperSC = styled.div<{ $fullWidth?: boolean }>(
+  ({ theme, $fullWidth }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: $fullWidth ? 'stretch' : 'flex-end',
+    width: '100%',
+    marginTop: theme.spacing.small,
+    marginBottom: theme.spacing.small,
   })
 )
+
+const PromptActionsSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
+  display: 'grid',
+  gridTemplateRows: $show ? '1fr' : '0fr',
+  justifyItems: 'end',
+  width: '100%',
+  opacity: $show ? 1 : 0,
+  transition: 'grid-template-rows 0.25s ease, opacity 0.25s ease',
+  pointerEvents: $show ? 'auto' : 'none',
+  '> div': {
+    overflow: 'hidden',
+    minHeight: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: theme.spacing.xxsmall,
+    paddingTop: 6,
+  },
+}))
+
+const PromptCardSC = styled(Card)<{
+  $isExpanded?: boolean
+  $fullWidth?: boolean
+}>(({ theme, $isExpanded, $fullWidth }) => ({
+  padding: theme.spacing.medium,
+  width: $fullWidth ? '100%' : 'fit-content',
+  maxWidth: '100%',
+  overflow: 'auto',
+  wordBreak: 'break-word',
+  border: $isExpanded ? 'none' : undefined,
+  [`& ${Code}`]: {
+    backgroundColor: theme.colors['fill-two'],
+    borderColor: theme.colors['border-fill-two'],
+  },
+}))

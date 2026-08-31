@@ -45,7 +45,7 @@ const SimpleFlyoverSC = styled.div<{
     height: '100%',
     width: 320,
     background: theme.colors['fill-accent'],
-    outline: theme.borders.default,
+    outline: theme.borders.hairline,
     // important that these use different names than the Flyover ones to avoid conflicts
     // that's also something to consider if we add other variants of this
     '@keyframes chatSlideOpen': {

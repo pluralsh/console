@@ -94,6 +94,9 @@ query Refresh($token: String!) {
   refresh(token: $token) {
     ...User
     jwt
+    refreshToken {
+      ...RefreshToken
+    }
   }
 }
 query TemporaryToken {

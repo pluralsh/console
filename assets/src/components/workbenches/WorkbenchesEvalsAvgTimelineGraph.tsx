@@ -8,6 +8,7 @@ import {
 import { WorkbenchGraphCard } from 'components/workbenches/common/WorkbenchGraphCard'
 import { GqlError } from 'components/utils/Alert'
 import { ButtonGroup } from 'components/utils/ButtonGroup'
+import { ChartTooltip } from 'components/utils/ChartTooltip'
 import { useChartTheme } from 'components/utils/charts'
 import { TRUNCATE } from 'components/utils/truncate'
 import { InlineA } from 'components/utils/typography/Text'
@@ -44,6 +45,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
   const visibleSeries = activeSelectedIds.length
     ? selectableSeries.filter((item) => activeSelectedIds.includes(item.id))
     : selectableSeries
+  const xTickValues = uniqueSortedDates(visibleSeries)
   const hasData = visibleSeries.length > 0
 
   return (
@@ -198,7 +200,7 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
                 theme={chartTheme}
                 colors={visibleSeries.map((item) => item.color)}
                 margin={{ top: 8, right: 16, bottom: 32, left: 48 }}
-                xScale={{ type: 'point' }}
+                xScale={{ type: 'time', format: 'native', useUTC: true }}
                 yScale={{
                   type: 'linear',
                   min: 0,
@@ -210,13 +212,26 @@ export function WorkbenchesEvalsAvgTimelineGraph() {
                   tickPadding: 8,
                   tickValues: [0, 2, 4, 6, 8, 10],
                 }}
-                axisBottom={{ tickSize: 0, tickPadding: 8, tickRotation: 0 }}
+                axisBottom={{
+                  tickSize: 0,
+                  tickPadding: 8,
+                  tickRotation: 0,
+                  tickValues: xTickValues,
+                  format: (value) => compactDateLabel(value),
+                }}
                 enablePoints={false}
                 enableGridX={false}
                 enableGridY
                 gridYValues={[0, 2, 4, 6, 8, 10]}
                 useMesh
                 curve="linear"
+                tooltip={({ point }) => (
+                  <ChartTooltip
+                    color={String(point.color)}
+                    label={`${point.seriesId} · ${compactDateLabel(point.data.x)}`}
+                    value={Number(point.data.y).toFixed(1)}
+                  />
+                )}
               />
             </div>
           </>
@@ -272,8 +287,8 @@ function buildSeries(
         label: item.label,
         color: theme.colors[colorToken],
         latest: sorted.length ? (sorted[sorted.length - 1]?.y ?? 0) : 0,
-        data: sorted.map((point, pointIdx) => ({
-          x: compactDateLabel(point.timestamp) || `t${pointIdx + 1}`,
+        data: sorted.map((point) => ({
+          x: new Date(point.timestamp),
           y: point.y,
         })),
       }
@@ -281,11 +296,35 @@ function buildSeries(
     .sort((a, b) => b.latest - a.latest)
 }
 
-function compactDateLabel(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  const month = date.toLocaleString('en-US', { month: 'short' })
-  const day = date.toLocaleString('en-US', { day: '2-digit' })
+function uniqueSortedDates(
+  series: Array<{ data: Array<{ x: Date }> }>
+): Date[] {
+  const seen = new Set<number>()
+  const dates: Date[] = []
+
+  for (const item of series) {
+    for (const point of item.data) {
+      const time = point.x.getTime()
+      if (Number.isNaN(time) || seen.has(time)) continue
+      seen.add(time)
+      dates.push(point.x)
+    }
+  }
+
+  return dates.sort((a, b) => a.getTime() - b.getTime())
+}
+
+function compactDateLabel(value: string | number | Date) {
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return String(value)
+  const month = date.toLocaleString('en-US', {
+    month: 'short',
+    timeZone: 'UTC',
+  })
+  const day = date.toLocaleString('en-US', {
+    day: '2-digit',
+    timeZone: 'UTC',
+  })
   return `${month} ${day}`
 }
 

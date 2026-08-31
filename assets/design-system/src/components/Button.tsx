@@ -151,7 +151,13 @@ const Button = memo(
           <LoadingIndicatorWrapperSC>
             {loadingIndicator || (
               <Spinner
-                color={theme.colors.text}
+                color={
+                  buttonType === 'primary'
+                    ? theme.colors['text-always-white']
+                    : buttonType === 'destructive'
+                      ? theme.colors['text-danger']
+                      : theme.colors.text
+                }
                 size={
                   typeof measuredHeight === 'number'
                     ? (measuredHeight * 3) / 5

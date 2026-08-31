@@ -1,6 +1,5 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
-  import Absinthe.Resolution.Helpers, only: [batch: 3]
   alias Console.Deployments.{Policy, Clusters, Policies}
   alias Console.Schema.{BindingPolicy, StackPolicy, WorkbenchPolicy, PolicyConstraint, PolicyEvaluation, Cluster, VulnerabilityReport, ComplianceReport, ComplianceReportGenerator}
   alias Console.Schema.Policy, as: PolicySchema
@@ -49,44 +48,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     PolicyEvaluation.for_policy(policy.id)
     |> PolicyEvaluation.ordered()
     |> paginate(args)
-  end
-
-  def policy_match_count(%{id: id}, _, _) do
-    batch({__MODULE__, :policy_match_counts}, id, fn counts ->
-      {:ok, Map.get(counts, id, 0)}
-    end)
-  end
-
-  def policy_match_counts(_, ids) do
-    BindingPolicy.match_counts_for_bind_policies(ids)
-  end
-
-  def policy_evaluation_count(%{id: id}, _, _) do
-    count =
-      PolicyEvaluation.for_policy(id)
-      |> Console.Repo.aggregate(:count)
-
-    {:ok, count}
-  end
-
-  def workbench_attachment_count(%{id: id}, _, _) do
-    batch({__MODULE__, :workbench_attachment_counts}, id, fn counts ->
-      {:ok, Map.get(counts, id, 0)}
-    end)
-  end
-
-  def workbench_attachment_counts(_, ids) do
-    WorkbenchPolicy.counts_for_policies(ids)
-  end
-
-  def stack_attachment_count(%{id: id}, _, _) do
-    batch({__MODULE__, :stack_attachment_counts}, id, fn counts ->
-      {:ok, Map.get(counts, id, 0)}
-    end)
-  end
-
-  def stack_attachment_counts(_, ids) do
-    StackPolicy.counts_for_policies(ids)
   end
 
   def evaluate_policy(%{policy_id: id, input: input, policy: source}, %{context: %{current_user: user}})

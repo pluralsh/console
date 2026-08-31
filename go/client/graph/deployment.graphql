@@ -188,6 +188,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         luaScript
         luaFile
         luaFolder
+        pythonScript
+        pythonFile
+        pythonFolder
         kustomizePostrender
     }
     configuration {

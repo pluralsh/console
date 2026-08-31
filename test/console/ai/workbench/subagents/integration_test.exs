@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.IntegrationTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.AI.Workbench.{Subagents, Environment, Engine}
+  alias Console.AI.Workbench.{Subagents, Environment, Engine, MCP}
   alias Console.AI.Tools.Workbench.Http
   alias Console.AI.{Provider, Tool}
   alias Console.Schema.WorkbenchJobThought
@@ -157,6 +157,12 @@ defmodule Console.AI.Workbench.Subagents.IntegrationTest do
       activity = insert(:workbench_job_activity, workbench_job: job, type: :integration)
 
       {:ok, _engine} = Engine.new(job)
+
+      assert {:ok, _} = wait(
+        fn -> MCP.list_tools(tool, job) end,
+        &match?({:ok, [_ | _]}, &1)
+      )
+
       result = Subagents.Integration.run(activity, job, Environment.new(job, [tool], []))
 
       assert result[:status] == :successful

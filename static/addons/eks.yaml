@@ -1616,6 +1616,14 @@
   publisher: AppViewX
 - name: aws-ebs-csi-driver
   versions:
+  - version: v1.65.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.64.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4380,6 +4388,13 @@
   publisher: Catalogic Software
 - name: cert-manager
   versions:
+  - version: v1.21.1-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.21.1-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4471,6 +4486,15 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.19.6-eksbuild.5
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.19.6-eksbuild.4
     compatibilities:
     - '1.36'
@@ -4782,6 +4806,14 @@
   publisher: eks
 - name: chainguard_aws-ebs-csi-driver-fips
   versions:
+  - version: v2.64.10000020260826-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.64.10000020260820-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4890,6 +4922,14 @@
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
   - version: v4.4.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.4.10002020260827-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5110,6 +5150,15 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.0.10000020260827-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.0.10000020260823-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5166,6 +5215,11 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.0.10000020260827-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.0.10000020260823-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5205,6 +5259,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.20009020260425-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10009020260826-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -9566,6 +9625,15 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.19.1-eksbuild.6
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.19.1-eksbuild.5
     compatibilities:
     - '1.36'
@@ -9995,6 +10063,11 @@
   publisher: leaksignal
 - name: metrics-server
   versions:
+  - version: v0.9.0-eksbuild.7
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
   - version: v0.9.0-eksbuild.6
     compatibilities:
     - '1.36'
@@ -10020,6 +10093,14 @@
     - '1.36'
     - '1.35'
     - '1.34'
+  - version: v0.8.1-eksbuild.16
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v0.8.1-eksbuild.15
     compatibilities:
     - '1.36'

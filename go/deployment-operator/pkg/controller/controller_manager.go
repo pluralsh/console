@@ -49,6 +49,10 @@ type Manager struct {
 	// started is true if the Manager has been Started
 	started bool
 
+	// waitCh is closed after all supervised controllers have stopped.
+	waitCh   chan struct{}
+	waitOnce sync.Once
+
 	client client.Client
 }
 
@@ -56,6 +60,7 @@ func NewControllerManager(options ...ControllerManagerOption) (*Manager, error) 
 	ctrl := &Manager{
 		Controllers: make([]*Controller, 0),
 		started:     false,
+		waitCh:      make(chan struct{}),
 	}
 
 	for _, option := range options {
@@ -126,6 +131,18 @@ func (cm *Manager) Start(ctx context.Context) error {
 	return nil
 }
 
+// Wait blocks until all controllers supervised by the manager have stopped or
+// ctx is canceled. Call Wait after Start returns successfully and the
+// manager's context has been canceled.
+func (cm *Manager) Wait(ctx context.Context) error {
+	select {
+	case <-cm.waitCh:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 func (cm *Manager) startSupervised(ctx context.Context) {
 	wg := &sync.WaitGroup{}
 	wg.Add(len(cm.Controllers))
@@ -141,6 +158,9 @@ func (cm *Manager) startSupervised(ctx context.Context) {
 	klog.InfoS("Shutdown signal received, waiting for all controllers to finish", "name", "console-manager")
 	wg.Wait()
 	klog.InfoS("All controllers finished", "name", "console-manager")
+	cm.waitOnce.Do(func() {
+		close(cm.waitCh)
+	})
 }
 
 func (cm *Manager) startControllerSupervised(ctx context.Context, ctrl *Controller) {

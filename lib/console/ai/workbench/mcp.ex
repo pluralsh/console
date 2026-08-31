@@ -35,10 +35,14 @@ defmodule Console.AI.Workbench.MCP do
   end
 
   def list_tools(%WorkbenchTool{} = t, %WorkbenchJob{} = j) do
+    name = Agent.name(:client, t, j)
+
     Console.Retrier.retry(fn ->
-      Agent.name(:client, t, j)
-      |> Anubis.Client.list_tools()
-    end)
+      case GenServer.whereis(name) do
+        nil -> {:error, :not_started}
+        _pid -> Anubis.Client.list_tools(name)
+      end
+    end, max: 8, pause: 150)
     |> case do
       {:ok, %Anubis.MCP.Response{result: %{"tools" => found}}} when is_list(found) ->
         {:ok, Enum.flat_map(found, fn

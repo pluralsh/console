@@ -64,8 +64,9 @@ export const semanticColorsLight = {
 
   // Border
   //
-  // Soft hairlines — readable on white / soft grey without hard chrome
+  // `border` = in-app components (cards, tables). `border-hairline` = app chrome / sidebars.
   border: grey[75],
+  'border-hairline': grey[50],
   'border-fill-one': grey[75],
   'border-fill-two': grey[100],
   'border-fill-three': grey[125],

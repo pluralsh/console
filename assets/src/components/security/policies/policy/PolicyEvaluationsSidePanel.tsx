@@ -128,7 +128,7 @@ export function PolicyEvaluationsSidePanel({
       overflow="hidden"
       height="100%"
       css={{
-        borderRight: theme.borders.default,
+        borderRight: theme.borders.hairline,
         minWidth: 350,
         maxWidth: 350,
       }}
@@ -138,7 +138,7 @@ export function PolicyEvaluationsSidePanel({
         gap="xsmall"
         padding="medium"
         wrap="wrap"
-        css={{ borderBottom: theme.borders.default }}
+        css={{ borderBottom: theme.borders.hairline }}
       >
         {filterOptions.map(({ key, count, severity }) => (
           <EvalFilterChip

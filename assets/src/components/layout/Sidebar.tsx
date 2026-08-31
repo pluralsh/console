@@ -392,5 +392,5 @@ const SidebarSC = styled.div<{
   minWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
   maxWidth: $isExpanded ? SIDEBAR_EXPANDED_WIDTH : SIDEBAR_WIDTH,
   backgroundColor: theme.colors['fill-accent'],
-  borderRight: theme.borders.default,
+  borderRight: theme.borders.hairline,
 }))

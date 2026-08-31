@@ -2,6 +2,7 @@ package template
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	iofs "io/fs"
 	"log"
@@ -13,15 +14,14 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pluralsh/console/go/polly/luautils"
 	lua "github.com/yuin/gopher-lua"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/polly/luautils"
 
 	"github.com/pkg/errors"
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/polly/algorithms"
-	"github.com/pluralsh/console/go/polly/fs"
 	"github.com/samber/lo"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
@@ -34,12 +34,14 @@ import (
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/util/homedir"
-	"k8s.io/klog/v2"
 	"sigs.k8s.io/yaml"
 
+	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/cmd/agent/args"
 	discoverycache "github.com/pluralsh/console/go/deployment-operator/pkg/cache/discovery"
 	loglevel "github.com/pluralsh/console/go/deployment-operator/pkg/log"
+	pythonruntime "github.com/pluralsh/console/go/deployment-operator/pkg/python"
+	"github.com/pluralsh/console/go/polly/algorithms"
 )
 
 var repoFileMutex sync.Mutex
@@ -69,7 +71,7 @@ func newEnvSettings() (*cli.EnvSettings, error) {
 	return settings, nil
 }
 
-func debug(format string, v ...interface{}) {
+func debug(format string, v ...any) {
 	format = fmt.Sprintf("INFO: %s\n", format)
 	err := log.Output(2, fmt.Sprintf(format, v...))
 	if err != nil {
@@ -78,24 +80,15 @@ func debug(format string, v ...interface{}) {
 }
 
 type helm struct {
-	dir string
+	dir        string
+	pythonPool *pythonruntime.Pool
 }
 
 func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMapper) ([]unstructured.Unstructured, error) {
-	luaValues, luaValuesFiles, err := h.luaValues(svc)
-	if err != nil {
-		var apiErr *lua.ApiError
-		if errors.As(err, &apiErr) {
-			return nil, fmt.Errorf("lua script error: %s", apiErr.Object.String())
-		}
-		return nil, err
-	}
-
-	values, err := h.values(svc, lo.ToSlicePtr(luaValuesFiles))
+	values, err := h.templateValues(svc)
 	if err != nil {
 		return nil, err
 	}
-	values = algorithms.Merge(values, luaValues)
 
 	settings, err := newEnvSettings()
 	if err != nil {
@@ -162,6 +155,33 @@ func (h *helm) Render(svc *console.ServiceDeploymentForAgent, mapper meta.RESTMa
 	return manifests, nil
 }
 
+func (h *helm) templateValues(svc *console.ServiceDeploymentForAgent) (map[string]any, error) {
+	luaValues, luaValuesFiles, err := h.luaValues(svc)
+	if err != nil {
+		var apiErr *lua.ApiError
+		if errors.As(err, &apiErr) {
+			return nil, fmt.Errorf("lua script error: %s", apiErr.Object.String())
+		}
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), pythonruntime.ExecutionTimeout)
+	defer cancel()
+	pythonValues, pythonValuesFiles, err := h.pythonValues(ctx, svc)
+	if err != nil {
+		return nil, fmt.Errorf("python templating error: %w", err)
+	}
+
+	valuesFiles := slices.Concat(luaValuesFiles, pythonValuesFiles)
+	values, err := h.values(svc, lo.ToSlicePtr(valuesFiles))
+	if err != nil {
+		return nil, err
+	}
+	values = algorithms.Merge(values, luaValues)
+	values = algorithms.Merge(values, pythonValues)
+	return values, nil
+}
+
 func (h *helm) stitchManifests(manifests []unstructured.Unstructured, rel *release.Release) {
 	for _, manifest := range manifests {
 		// Set recommended Helm labels. See: https://helm.sh/docs/chart_best_practices/labels/.
@@ -192,9 +212,9 @@ func (h *helm) stitchManifests(manifests []unstructured.Unstructured, rel *relea
 	}
 }
 
-func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]interface{}, []string, error) {
+func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]any, []string, error) {
 	// Initialize empty results
-	newValues := make(map[string]interface{})
+	newValues := make(map[string]any)
 	var valuesFiles []string
 
 	if svc == nil {
@@ -257,7 +277,7 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]int
 		return nil, valuesFiles, err
 	}
 
-	finalValues := make(map[string]interface{}, len(newValues))
+	finalValues := make(map[string]any, len(newValues))
 	for k, v := range newValues {
 		finalValues[k] = luautils.SanitizeValue(v)
 	}
@@ -265,7 +285,110 @@ func (h *helm) luaValues(svc *console.ServiceDeploymentForAgent) (map[string]int
 	return finalValues, valuesFiles, nil
 }
 
-func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues []*string) (map[string]interface{}, error) {
+func (h *helm) pythonValues(ctx context.Context, svc *console.ServiceDeploymentForAgent) (map[string]any, []string, error) {
+	newValues := make(map[string]any)
+	var valuesFiles []string
+
+	if svc == nil {
+		return nil, valuesFiles, fmt.Errorf("no service found")
+	}
+	if svc.Helm == nil || (svc.Helm.PythonScript == nil && svc.Helm.PythonFile == nil && svc.Helm.PythonFolder == nil) {
+		return newValues, valuesFiles, nil
+	}
+
+	pool := h.pythonPool
+	if pool == nil {
+		pool = pythonruntime.DefaultPool()
+	}
+	if pool == nil {
+		return nil, valuesFiles, fmt.Errorf("python runtime is not initialized")
+	}
+
+	var pythonString string
+	switch {
+	case svc.Helm.PythonScript != nil && len(*svc.Helm.PythonScript) > 0:
+		pythonString = *svc.Helm.PythonScript
+	case svc.Helm.PythonFile != nil:
+		pythonRoot, err := os.OpenRoot(h.dir)
+		if err != nil {
+			return nil, valuesFiles, fmt.Errorf("failed to open Python root: %w", err)
+		}
+		defer pythonRoot.Close()
+
+		pythonContents, err := pythonRoot.ReadFile(*svc.Helm.PythonFile)
+		if err != nil {
+			return nil, valuesFiles, fmt.Errorf("failed to read Python file %s: %w", *svc.Helm.PythonFile, err)
+		}
+		pythonString = string(pythonContents)
+	}
+
+	if svc.Helm.PythonFolder != nil && len(*svc.Helm.PythonFolder) > 0 {
+		pythonFolder, err := h.pythonFolder(*svc.Helm.PythonFolder)
+		if err != nil {
+			return nil, valuesFiles, err
+		}
+		if pythonString == "" {
+			pythonString = pythonFolder
+		} else if pythonFolder != "" {
+			pythonString = pythonFolder + "\n\n" + pythonString
+		}
+	}
+
+	if pythonString == "" {
+		return nil, valuesFiles, fmt.Errorf("no Python script, file, or folder provided")
+	}
+
+	result, err := pool.Run(ctx, pythonString, bindings(svc))
+	if err != nil {
+		return nil, valuesFiles, err
+	}
+
+	return result.Values, result.ValuesFiles, nil
+}
+
+func (h *helm) pythonFolder(folder string) (string, error) {
+	pythonRoot, err := os.OpenRoot(h.dir)
+	if err != nil {
+		return "", fmt.Errorf("failed to open Python root: %w", err)
+	}
+	defer pythonRoot.Close()
+
+	pythonFolder, err := pythonRoot.OpenRoot(folder)
+	if err != nil {
+		return "", fmt.Errorf("failed to open Python folder %s: %w", folder, err)
+	}
+	defer pythonFolder.Close()
+
+	pythonFiles := make([]string, 0)
+	if err := iofs.WalkDir(pythonFolder.FS(), ".", func(path string, info iofs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if strings.HasSuffix(info.Name(), ".py") {
+			pythonFiles = append(pythonFiles, path)
+		}
+		return nil
+	}); err != nil {
+		return "", fmt.Errorf("failed to walk Python folder %s: %w", folder, err)
+	}
+
+	sort.Strings(pythonFiles)
+	pythonFileContents := make([]string, 0, len(pythonFiles))
+	for _, file := range pythonFiles {
+		pythonContents, err := pythonFolder.ReadFile(file)
+		if err != nil {
+			return "", fmt.Errorf("failed to read Python file %s: %w", file, err)
+		}
+		pythonFileContents = append(pythonFileContents, string(pythonContents))
+	}
+
+	return strings.Join(pythonFileContents, "\n\n"), nil
+}
+
+func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues []*string) (map[string]any, error) {
 	currentMap, err := h.valuesFile(svc, "values.yaml.liquid")
 	if err != nil {
 		return currentMap, err
@@ -281,7 +404,7 @@ func (h *helm) values(svc *console.ServiceDeploymentForAgent, additionalValues [
 		}
 
 		if svc.Helm.Values != nil {
-			valuesMap := map[string]interface{}{}
+			valuesMap := map[string]any{}
 			if err := yaml.Unmarshal([]byte(*svc.Helm.Values), &valuesMap); err != nil {
 				return nil, err
 			}
@@ -320,9 +443,7 @@ func (h *helm) luaFolder(svc *console.ServiceDeploymentForAgent, folder string) 
 		return "", fmt.Errorf("failed to walk lua folder %s: %w", *svc.Helm.LuaFolder, err)
 	}
 
-	sort.Slice(luaFiles, func(i, j int) bool {
-		return luaFiles[i] < luaFiles[j]
-	})
+	slices.Sort(luaFiles)
 
 	luaFileContents := make([]string, 0)
 	for _, file := range luaFiles {
@@ -336,32 +457,36 @@ func (h *helm) luaFolder(svc *console.ServiceDeploymentForAgent, folder string) 
 	return strings.Join(luaFileContents, "\n\n"), nil
 }
 
-func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]interface{}, error) {
+func (h *helm) valuesFile(svc *console.ServiceDeploymentForAgent, filename string) (map[string]any, error) {
+	currentMap := map[string]any{}
+	if !filepath.IsLocal(filename) {
+		return nil, fmt.Errorf("helm values file path %q is outside the manifest directory", filename)
+	}
 	filename = filepath.Join(h.dir, filename)
-	currentMap := map[string]interface{}{}
-	if fs.Exists(filename) {
-		data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(filename)
+	if os.IsNotExist(err) {
+		return currentMap, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to read Helm values file %s: %w", filename, err)
+	}
+
+	if strings.HasSuffix(filename, ".liquid") {
+		data, err = renderLiquid(data, svc)
 		if err != nil {
 			return nil, err
 		}
+	}
 
-		if strings.HasSuffix(filename, ".liquid") {
-			data, err = renderLiquid(data, svc)
-			if err != nil {
-				return nil, err
-			}
+	if strings.HasSuffix(filename, ".tpl") {
+		data, err = renderTpl(data, svc)
+		if err != nil {
+			return nil, err
 		}
+	}
 
-		if strings.HasSuffix(filename, ".tpl") {
-			data, err = renderTpl(data, svc)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if err := yaml.Unmarshal(data, &currentMap); err != nil {
-			return nil, errors.Wrapf(err, "failed to parse %s", filename)
-		}
+	if err := yaml.Unmarshal(data, &currentMap); err != nil {
+		return nil, errors.Wrapf(err, "failed to parse %s", filename)
 	}
 
 	return currentMap, nil
@@ -428,7 +553,7 @@ func GetActionConfig(namespace string, settings *cli.EnvSettings) (*action.Confi
 }
 
 func NewHelm(dir string) Template {
-	return &helm{dir}
+	return &helm{dir: dir}
 }
 
 func kubeVersion(conf *action.Configuration) (*chartutil.KubeVersion, error) {

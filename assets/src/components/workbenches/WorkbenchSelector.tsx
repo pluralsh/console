@@ -23,8 +23,9 @@ export function WorkbenchSelector({
   setWorkbenchId,
   workbenches,
   loading,
-  width = WORKBENCH_SELECTOR_WIDTH,
+  width,
   maxHeight,
+  placement,
   placeholder = 'Select workbench',
   showSelectedInTrigger = true,
   triggerButton,
@@ -35,6 +36,7 @@ export function WorkbenchSelector({
   loading: boolean
   width?: string | number
   maxHeight?: string | number
+  placement?: 'left' | 'right'
   placeholder?: ReactNode
   showSelectedInTrigger?: boolean
   triggerButton?: ReactElement
@@ -51,6 +53,7 @@ export function WorkbenchSelector({
       onOpenChange={setIsOpen}
       width={width}
       maxHeight={maxHeight}
+      placement={placement}
       label="Select workbench"
       isDisabled={!loading && !workbenches.length}
       selectedKey={workbenchId ?? ''}
