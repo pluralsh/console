@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -23,6 +24,7 @@ type Server struct {
 	server   *grpc.Server
 	services []service.Service
 	stopped  chan struct{} // Channel to signal when server is stopped
+	stopOnce sync.Once
 }
 
 // Start initializes and starts the gRPC server
@@ -49,21 +51,32 @@ func (in *Server) Start(ctx context.Context) error {
 
 // Stop gracefully shuts down the server
 func (in *Server) Stop() {
-	klog.Info("stopping gRPC server")
-	go func() {
-		in.server.GracefulStop()
-		close(in.stopped)
-	}()
+	in.stopOnce.Do(func() {
+		klog.Info("stopping gRPC server")
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
-	// Wait for a graceful stop with a timeout
-	timeout := time.After(10 * time.Second)
-	select {
-	case <-in.stopped:
-		klog.Info("gRPC server stopped gracefully")
-	case <-timeout:
-		klog.Info("timeout waiting for server to stop, forcing shutdown")
-		in.server.Stop()
-	}
+		go func() {
+			in.server.GracefulStop()
+			close(in.stopped)
+		}()
+
+		select {
+		case <-in.stopped:
+			klog.Info("gRPC server stopped gracefully")
+		case <-ctx.Done():
+			klog.Info("timeout waiting for server to stop, forcing shutdown")
+			in.server.Stop()
+		}
+
+		for _, registered := range in.services {
+			if closer, ok := registered.(service.Closer); ok {
+				if err := closer.Close(ctx); err != nil {
+					klog.ErrorS(err, "failed to close service")
+				}
+			}
+		}
+	})
 }
 
 func (in *Server) register() {
