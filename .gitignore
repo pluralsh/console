@@ -6,6 +6,13 @@
 # System
 .DS_Store
 
+# JavaScript workspace
+/node_modules
+/.yarn/*
+!/.yarn/releases/
+!/.yarn/releases/**
+.pnp.*
+
 # Binaries for programs and plugins
 *.exe
 *.exe~

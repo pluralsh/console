@@ -1,0 +1,21 @@
+{
+  "name": "console-workspace",
+  "private": true,
+  "workspaces": [
+    "assets",
+    "assets/design-system",
+    "documentation"
+  ],
+  "packageManager": "yarn@4.17.1",
+  "resolutions": {
+    "@types/react": "19.2.17",
+    "brace-expansion@npm:^2.0.1": "2.1.2",
+    "brace-expansion@npm:^2.0.2": "2.1.2",
+    "dompurify": "3.4.12",
+    "elkjs": "0.12.0",
+    "fast-uri": "3.1.4",
+    "js-yaml": "4.3.1",
+    "postcss": "8.5.19",
+    "shell-quote": "1.10.0"
+  }
+}

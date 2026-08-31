@@ -2,9 +2,6 @@
   "name": "console",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "design-system"
-  ],
   "type": "module",
   "scripts": {
     "start": "vite",
@@ -32,8 +29,7 @@
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
     "openapi:codegen": "openapi-ts -i ./schema/swagger.json -o ./src/generated/kubernetes -p @tanstack/react-query -p @hey-api/client-axios",
-    "analyze": "vite-bundle-visualizer -o stats.html",
-    "postinstall": "cd .. && husky install assets/.husky"
+    "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
     "node": ">=24.11.1"
@@ -159,7 +155,6 @@
     "babel-plugin-styled-components": "2.3.0",
     "eslint": "9.39.5",
     "graphql-tag": "2.12.7",
-    "husky": "8.0.3",
     "jsdom": "29.1.1",
     "jwt-decode": "4.0.0",
     "lint-staged": "16.4.0",
@@ -176,15 +171,5 @@
   "lint-staged": {
     "./src/**/*.{js,jsx,ts,tsx,graphql,md}": "prettier --write",
     "./design-system/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
-  },
-  "resolutions": {
-    "dompurify": "3.4.12",
-    "elkjs": "0.12.0",
-    "brace-expansion@npm:^2.0.1": "2.1.2",
-    "brace-expansion@npm:^2.0.2": "2.1.2",
-    "js-yaml": "4.3.1",
-    "postcss": "8.5.19",
-    "shell-quote": "1.10.0",
-    "fast-uri": "3.1.4"
   }
 }
