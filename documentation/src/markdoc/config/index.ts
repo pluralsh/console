@@ -1,7 +1,8 @@
 /* Config must be exported from this file to work with markdoc/nextjs plugin */
-import { variables as defaultVariables } from '@pluralsh/design-system/dist/markdoc/config'
+import { markdocConfig } from '@pluralsh/design-system'
+
 import merge from 'lodash/merge'
 
-export const variables = merge(defaultVariables, {
+export const variables = merge(markdocConfig.variables, {
   docsGlobalTestVar: 'Docs global test content',
 })

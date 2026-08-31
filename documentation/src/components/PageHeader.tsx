@@ -5,7 +5,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
 import { useKey } from 'rooks'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 import { DISCORD_LINK } from '@src/consts'
 
@@ -19,7 +19,6 @@ const Filler = styled.div((_) => ({
 }))
 
 function PageHeaderUnstyled({ ...props }) {
-  const theme = useTheme()
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const { pathname } = useRouter()
   const prevPathname = usePrevious(pathname)
@@ -77,7 +76,6 @@ function PageHeaderUnstyled({ ...props }) {
             as="a"
             href="https://www.plural.sh/contact-sales"
             primary
-            fontFamily={theme.fontFamilies.sans}
           >
             Get started
           </Button>
@@ -85,7 +83,6 @@ function PageHeaderUnstyled({ ...props }) {
             as="a"
             href="https://app.plural.sh/login"
             secondary
-            fontFamily={theme.fontFamilies.sans}
           >
             Sign in
           </Button>

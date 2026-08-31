@@ -1,8 +1,9 @@
-import { getRuntimeSchema } from '@pluralsh/design-system/dist/markdoc'
+import { getRuntimeSchema } from '@pluralsh/design-system'
+
 import merge from 'lodash/merge'
 
 import * as config from './config'
-import * as functions from './functions'
+import { functions } from './functions'
 import { nodes } from './nodes'
 import { tags } from './tags'
 

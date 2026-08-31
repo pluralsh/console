@@ -24,10 +24,11 @@ import {
   ReloadIcon,
 } from '@pluralsh/design-system'
 
-import { type Nullable } from '@pluralsh/design-system/dist/types'
 import styled, { useTheme } from 'styled-components'
 
 import { useCopyText } from '@src/hooks/useCopyText'
+
+type Nullable<T> = T | null | undefined
 
 // helps prevent flickering (and potentially expensive recalculations) in virutalized lists
 // need to do this outside of React lifecycle memoization (useMemo etc) so it can persist across component mounts/unmounts

@@ -10,17 +10,17 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
     "noImplicitAny": false,
     "incremental": true,
-    "baseUrl": ".",
     "paths": {
-      "@src/*": ["src/*"],
-      "@pages/*": ["pages/*"]
+      "@pluralsh/design-system": ["../assets/design-system/src/index.ts"],
+      "@src/*": ["./src/*"],
+      "@pages/*": ["./pages/*"]
     },
     "plugins": [
       {
@@ -33,6 +33,7 @@
     "pages/**/*",
     "src/**/*",
     "scripts/**/*",
+    "../assets/design-system/src/types/**/*.d.ts",
     "pages-archive/applications",
     ".next/types/**/*.ts"
   ],

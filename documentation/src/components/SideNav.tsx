@@ -23,8 +23,8 @@ import {
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
+import { animated, useSpring } from '@react-spring/web'
 import classNames from 'classnames'
-import { animated, useSpring } from 'react-spring'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 
@@ -219,7 +219,7 @@ function NavLinkUnstyled({
   childIsSelected: boolean
   icon?: ReactElement
   desktop: boolean
-  toMenu: MenuId
+  toMenu?: MenuId
   onToggleOpen?: () => void
 } & Partial<ComponentProps<typeof StyledLink>>) {
   const href = useMemo(() => removeTrailingSlashes(props.href), [props.href])
@@ -252,7 +252,7 @@ function NavLinkUnstyled({
     }
   }, [isSelected, wasSelected, scrollRef, liRef, theme.spacing.xlarge])
 
-  const toMenuOnClick = () => setMenuId(toMenu)
+  const toMenuOnClick = () => toMenu && setMenuId(toMenu)
 
   return (
     <li

@@ -1,4 +1,6 @@
 // allows us to read the redirects object from the ts file
+const path = require('path')
+
 require('ts-node').register({
   compilerOptions: {
     module: 'commonjs',
@@ -24,6 +26,11 @@ const nextConfig = {
   },
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   webpack: (config) => {
+    config.resolve.alias['@pluralsh/design-system'] = path.resolve(
+      __dirname,
+      '../assets/design-system/src/index.ts'
+    )
+
     config.module.rules.push({
       test: /\.md$/,
       use: 'raw-loader',

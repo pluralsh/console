@@ -1,6 +1,8 @@
 import { type ComponentProps } from 'react'
 
-import { Link as DSLink } from '@pluralsh/design-system/dist/markdoc/components'
+import { markdocComponents } from '@pluralsh/design-system'
+
+const { Link: DSLink } = markdocComponents
 
 /**
  * @deprecated don't use in new docs, prefer regular markdown links to routes directly

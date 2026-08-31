@@ -1,4 +1,4 @@
-import * as designSystemTags from '@pluralsh/design-system/dist/markdoc/tags'
+import { markdocTags as designSystemTags } from '@pluralsh/design-system'
 
 import { doclink } from './doclink'
 import { htmlTag } from './htmlTag.markdoc'

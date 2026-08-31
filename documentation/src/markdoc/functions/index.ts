@@ -1,2 +1,6 @@
 /* Markdoc functions must be exported from this file to work with markdoc/nextjs plugin */
-export * from '@pluralsh/design-system/dist/markdoc/functions'
+import { markdocFunctions } from '@pluralsh/design-system'
+
+export const functions = {
+  ...markdocFunctions,
+}

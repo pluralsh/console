@@ -10,7 +10,7 @@ import {
 
 import {
   FillLevelProvider,
-  type NavigationContextLinkProps,
+  MarkdocContextProvider,
   NavigationContextProvider,
   type NavigationContextValue,
   GlobalStyle as PluralGlobalStyle,
@@ -23,7 +23,6 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 
 import { until } from '@open-draft/until'
-import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc'
 import { SSRProvider } from '@react-aria/ssr'
 import '@src/highlight'
 import '@src/styles/globals.css'
@@ -105,8 +104,8 @@ const usePathname = () => {
   return router.basePath + (router.asPath.split(/[?#]/)[0] || router.pathname)
 }
 
-const Link = forwardRef(
-  ({ href, ...props }: NavigationContextLinkProps, ref) => (
+const Link = forwardRef<HTMLAnchorElement, ComponentProps<'a'>>(
+  ({ href, ...props }, ref) => (
     <NextLink
       ref={ref}
       href={href ?? ''}

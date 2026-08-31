@@ -20,7 +20,8 @@ function getTextContent(node: React.ReactNode): string {
   if (typeof node === 'string') return node
   if (typeof node === 'number') return String(node)
   if (Array.isArray(node)) return node.map(getTextContent).join('\n')
-  if (isValidElement(node)) return getTextContent(node.props.children)
+  if (isValidElement<{ children?: React.ReactNode }>(node))
+    return getTextContent(node.props.children)
 
   return ''
 }

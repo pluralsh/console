@@ -14,13 +14,15 @@ import {
   MagicWandIcon,
   ProtectedClusterIcon,
   ShieldLockIcon,
+  markdocComponents,
 } from '@pluralsh/design-system'
 import Link, { type LinkProps } from 'next/link'
 
-import { Heading as MarkdocHeading } from '@pluralsh/design-system/dist/markdoc/components'
 import styled, { useTheme } from 'styled-components'
 
 import { mqs } from '@src/components/Breakpoints'
+
+const { Heading: MarkdocHeading } = markdocComponents
 
 const Hero = styled.div(({ theme }) => ({
   background: 'url(/images/landing/hero-bg-sm.png)',
@@ -80,7 +82,7 @@ function CardLinkUnstyled({
 }: PropsWithChildren<
   LinkProps &
     Omit<ComponentProps<'a'>, 'ref'> & {
-      icon: ReactElement
+      icon: ReactElement<{ color?: string }>
       heading: ReactNode
     }
 >) {
@@ -190,7 +192,10 @@ function Index() {
       </Hero>
       <Section>
         <SectionHeading>
-          <Heading id={tableOfContents[1].id}>
+          <Heading
+            id={tableOfContents[1].id}
+            level={2}
+          >
             {tableOfContents[1].title}
           </Heading>
           <Body2>Find what's most relevant to you</Body2>
