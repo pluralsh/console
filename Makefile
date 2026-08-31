@@ -113,13 +113,22 @@ migration:
 	MIX_ENV=test mix ecto.gen.migration $(name)
 
 web: ## starts a local webserver
-	cd assets && yarn start
+	yarn workspace console start
+
+documentation: ## starts the documentation site locally
+	yarn workspace @pluralsh/documentation dev
+
+documentation-routes: ## regenerates the documentation route index
+	yarn workspace @pluralsh/documentation generate:route-index
+
+documentation-sync: ## syncs generated documentation from in-repo sources
+	$(MAKE) --directory=documentation sync
 
 gql-codegen: ## generates introspection information for our graph
-	cd assets && yarn run graphql-codegen
+	yarn workspace console graphql:codegen
 
 yarn-add: ## adds a yarn dep
-	cd assets && yarn add $(dep)
+	yarn workspace console add $(dep)
 
 release-vsn: # tags and pushes a new release
 	@read -p "Version: " tag; \

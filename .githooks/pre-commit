@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ROOT_DIR=${SCRIPT_DIR%/*}
 CONTROLLER_DIR=go/controller
@@ -67,3 +69,6 @@ function ensure::client {
 
 echo Executing pre-commit hook
 check "$(get::commit)"
+
+yarn workspace console lint-staged
+yarn workspace @pluralsh/documentation lint-staged

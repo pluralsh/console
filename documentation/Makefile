@@ -4,13 +4,13 @@ help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 yarn-install: .PHONY
-	yarn --immutable
+	cd .. && yarn install --immutable
 
 web: ## runs the docs site locally
-	yarn dev
+	cd .. && yarn workspace @pluralsh/documentation dev
 
 routes:
-	yarn generate:route-index
+	cd .. && yarn workspace @pluralsh/documentation generate:route-index
 
 sync:
 	cp ../go/controller/docs/api.md pages/api-reference/kubernetes/management-api-reference.md
