@@ -3,6 +3,22 @@ git_url: https://github.com/vectordotdev/vector/
 release_url: https://github.com/vectordotdev/vector/releases/tag/v{vsn}
 helm_repository_url: https://helm.vector.dev/
 versions:
+- version: 0.58.0
+  kube: ['1.37', '1.36', '1.35']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Vector 0.58.0 is a new upstream release (published 2026-08-26) following
+        0.57.0 (published 2026-07-14)., No concrete feature details are present in
+        the provided notes beyond links to full release notes.]
+    breaking_changes: ['0.57.0 is described as a security-focused release that includes
+        breaking changes, with options to restore previous behavior (details not included
+        in the excerpt).', No breaking-change details for 0.58.0 are included in the
+        provided excerpt; verify via the linked 0.58.0 release notes before upgrading.]
+  chart_version: 0.58.0
+  images: ['docker.io/timberio/vector:0.58.0-distroless-libc']
 - version: 0.57.0
   kube: ['1.36', '1.35', '1.34']
   requirements: []

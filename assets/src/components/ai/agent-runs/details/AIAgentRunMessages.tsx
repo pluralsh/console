@@ -13,6 +13,7 @@ import {
   AiRole,
   ChatFragment,
   ChatType,
+  useAgentMessageOutputDeltaSubscription,
   useAgentRunChatSubscription,
 } from 'generated/graphql'
 import { produce } from 'immer'
@@ -22,12 +23,18 @@ import styled, { useTheme } from 'styled-components'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { duration } from 'utils/datetime'
 
+const MAX_STREAMED_OUTPUT_LENGTH = 1 << 20
+
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
-  const { spacing, colors } = useTheme()
+  const { spacing, colors, mode, borders, boxShadows } = useTheme()
 
   const [subscribedMessages, setSubscribedMessages] = useState<
     AgentMessageFragment[]
   >([])
+  const [stdoutByMessageId, setStdoutByMessageId] = useState<
+    Record<string, string>
+  >({})
+
   const isRunning =
     run?.status === AgentRunStatus.Running ||
     run?.status === AgentRunStatus.Pending
@@ -39,6 +46,19 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
       const payload = data?.agentMessageDelta?.payload
       if (!payload) return
 
+      const state = payload.metadata?.tool?.state
+      if (
+        state === AgentMessageToolState.Completed ||
+        state === AgentMessageToolState.Error
+      ) {
+        setStdoutByMessageId((prev) => {
+          if (!(payload.id in prev)) return prev
+          const next = { ...prev }
+          delete next[payload.id]
+          return next
+        })
+      }
+
       setSubscribedMessages(
         produce((messages) => {
           const idx = messages.findIndex((m) => m.id === payload.id)
@@ -46,6 +66,22 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
           else messages.push(payload)
         })
       )
+    },
+  })
+
+  useAgentMessageOutputDeltaSubscription({
+    skip: !isRunning,
+    variables: { runId: run.id },
+    onData: ({ data: { data } }) => {
+      const payload = data?.agentMessageOutputDelta?.payload
+      if (!payload?.messageId || !payload.stdout) return
+      setStdoutByMessageId((prev) => {
+        const stdout = (prev[payload.messageId] ?? '') + payload.stdout
+        return {
+          ...prev,
+          [payload.messageId]: stdout.slice(-MAX_STREAMED_OUTPUT_LENGTH),
+        }
+      })
     },
   })
 
@@ -59,8 +95,11 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   }, [subscribedMessages, run.messages])
 
   const messages: ChatFragment[] = useMemo(
-    () => agentMessages.map(agentMsgToChatMsg),
-    [agentMessages]
+    () =>
+      agentMessages.map((msg) =>
+        agentMsgToChatMsg(msg, stdoutByMessageId[msg.id])
+      ),
+    [agentMessages, stdoutByMessageId]
   )
 
   const displayItems: ChatDisplayItem[] = useMemo(
@@ -134,8 +173,15 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
               {...chatMessagePropsShared}
               {...getToolMessageProps(rowData.id)}
               userMsgWrapperStyle={{
-                background: colors['fill-one'],
-                borderColor: colors['border-fill-one'],
+                backgroundColor:
+                  mode === 'light' ? colors['fill-two'] : colors['fill-one'],
+                ...(mode === 'light'
+                  ? {
+                      border: borders.input,
+                      borderColor: colors['border-input'],
+                      boxShadow: boxShadows.slight,
+                    }
+                  : { borderColor: colors['border-fill-one'] }),
                 '& *': { color: colors.text },
               }}
             />
@@ -161,7 +207,7 @@ const MessagesStreamWrapperSC = styled.div(({ theme }) => ({
 const chatMessagePropsShared = {
   disableActions: 'no-spacing' as const,
   toolDisplayType: 'simple' as const,
-  style: { padding: 0 },
+  style: { padding: 0, overflow: 'visible' },
 }
 
 const isHiddenAgentMessage = (msg: AgentMessageFragment) =>
@@ -169,13 +215,28 @@ const isHiddenAgentMessage = (msg: AgentMessageFragment) =>
   !msg.metadata?.tool &&
   !msg.metadata?.file
 
-const agentMsgToChatMsg = (msg: AgentMessageFragment): ChatFragment => ({
+const overlayToolOutput = (
+  msg: AgentMessageFragment,
+  streamedStdout?: string
+) => {
+  const state = msg.metadata?.tool?.state
+  const pending =
+    state === AgentMessageToolState.Running ||
+    state === AgentMessageToolState.Pending
+  if (pending) return streamedStdout
+  return msg.metadata?.tool?.output
+}
+
+const agentMsgToChatMsg = (
+  msg: AgentMessageFragment,
+  streamedStdout?: string
+): ChatFragment => ({
   id: msg.id,
   seq: msg.seq,
   role: msg.role,
   insertedAt: msg.insertedAt,
   content: msg.metadata?.tool
-    ? msg.metadata.tool.output
+    ? overlayToolOutput(msg, streamedStdout)
     : msg.metadata?.file
       ? msg.metadata.file.text
       : msg.message,

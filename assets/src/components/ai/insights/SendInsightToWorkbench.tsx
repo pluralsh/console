@@ -1,49 +1,29 @@
 import {
-  autoUpdate,
-  flip,
-  FloatingPortal,
-  offset,
-  shift,
-  useFloating,
-} from '@floating-ui/react'
-import {
   Button,
   ButtonProps,
   Card,
-  CloseIcon,
   Flex,
   FormField,
   IconFrame,
   InfoOutlineIcon,
-  ListBoxItem,
-  Popover,
-  PopoverWrapper,
-  Select,
-  SelectButton,
+  Modal,
   WorkbenchIcon,
 } from '@pluralsh/design-system'
-import { EditableSkillChipTooltip } from 'components/ai/chatbot/input/autocomplete/EditableSkillChipTooltip'
-import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
-import { GqlError } from 'components/utils/Alert'
-import { EditableDiv } from 'components/utils/EditableDiv'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body1P } from 'components/utils/typography/Text'
-import { WorkbenchStartedJobPanel } from 'components/workbenches/common/WorkbenchStartedJobPanel'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { WorkbenchSelector } from 'components/workbenches/WorkbenchSelector'
 import { useWorkbenchOptions } from 'components/workbenches/useWorkbenchOptions'
-import {
-  AgentRuntimeType,
-  AiInsightFragment,
-  useCreateWorkbenchJobMutation,
-  WorkbenchJobFragment,
-  WorkbenchTinyFragment,
-} from 'generated/graphql'
+import { WorkbenchStoredPromptMarkdown } from 'components/workbenches/workbench/WorkbenchStoredPromptMarkdown'
+import { WorkbenchPromptRichInput } from 'components/workbenches/workbench/WorkbenchPromptRichInput'
+import { AiInsightFragment } from 'generated/graphql'
 import { useEffect, useRef, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  getWorkbenchLaunchAbsPath,
+  WorkbenchLaunchRouteState,
+} from 'routes/workbenchesRoutesConsts'
+import styled from 'styled-components'
 import { buildInsightWorkbenchPrompt } from './insightWorkbenchPrompt'
-
-const POPOVER_WIDTH = 568
 
 export function SendInsightToWorkbenchButton({
   insight,
@@ -59,6 +39,7 @@ export function SendInsightToWorkbenchButton({
     <SendToWorkbenchButton
       initialPrompt={buildInsightWorkbenchPrompt(insight)}
       popoverTitle="Send insights to workbench"
+      backLabel="Insights"
       flowId={flowId}
       {...props}
     />
@@ -69,137 +50,64 @@ export function SendToWorkbenchButton({
   flowId,
   initialPrompt,
   popoverTitle = 'Send to workbench',
+  backLabel,
+  submitLabel = 'Send to workbench',
+  editable = false,
+  selectText,
   ...props
 }: {
   flowId?: Nullable<string>
   initialPrompt: string
   popoverTitle?: string
+  backLabel?: string
+  submitLabel?: string
+  editable?: boolean
+  selectText?: string
 } & ButtonProps) {
   const { hasWorkbenches, loading: workbenchesLoading } =
     useWorkbenchOptions(flowId)
-  const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const [promptKey, setPromptKey] = useState(0)
-  const [prompt, setPrompt] = useState('')
-  const [workbenchJob, setWorkbenchJob] = useState<WorkbenchJobFragment | null>(
-    null
-  )
-
-  const {
-    refs: { setReference, setFloating },
-    placement,
-    strategy,
-    x,
-    y,
-  } = useFloating({
-    placement: 'bottom-end',
-    strategy: 'fixed',
-    middleware: [
-      offset(theme.spacing.small),
-      flip({ padding: theme.spacing.small }),
-      shift({ padding: theme.spacing.small }),
-    ],
-    whileElementsMounted: autoUpdate,
-  })
-
-  const close = () => {
-    setOpen(false)
-    setWorkbenchJob(null)
-  }
-
-  const popoverMaxHeight =
-    y == null
-      ? `calc(100vh - ${theme.spacing.medium * 2}px)`
-      : `calc(100vh - ${Math.max(y, 0) + theme.spacing.small}px)`
-
-  const openPopover = () => {
-    setOpen((value) => {
-      if (!value) {
-        setPrompt(initialPrompt)
-        setPromptKey((key) => key + 1)
-        setWorkbenchJob(null)
-      }
-      return !value
-    })
-  }
 
   if (workbenchesLoading || !hasWorkbenches) return null
 
   return (
     <>
       <Button
-        ref={setReference}
         aria-haspopup="dialog"
         aria-expanded={open}
         startIcon={<WorkbenchIcon />}
         {...props}
         floating={!hasWorkbenches}
-        onClick={openPopover}
+        onClick={() => setOpen((value) => !value)}
       >
-        Send to workbench
+        {submitLabel}
       </Button>
-      {open && (
-        <FloatingPortal id={theme.portals.default.id}>
-          <PopoverWrapper
-            $isOpen={open}
-            $placement={placement}
-            ref={setFloating}
-            style={{
-              position: strategy,
-              left: x ?? 0,
-              top: y ?? 0,
-              width: POPOVER_WIDTH,
-              height: 'auto',
-              maxHeight: popoverMaxHeight,
-              zIndex: theme.zIndexes.modal,
-            }}
+      <ModalMountTransition open={open}>
+        <Modal
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          size="auto"
+          css={{ maxWidth: 1024, minWidth: 608 }}
+          open={open}
+          onClose={() => setOpen(false)}
+          header={popoverTitle}
+        >
+          <Flex
+            direction="column"
+            gap="large"
+            overflow="hidden"
+            maxHeight={560}
           >
-            <Popover
-              isOpen={open}
-              onClose={close}
-            >
-              <PopoverSC style={{ maxHeight: popoverMaxHeight }}>
-                <StretchedFlex>
-                  <Flex
-                    align="center"
-                    gap="xsmall"
-                  >
-                    <IconFrame
-                      size="small"
-                      type="tertiary"
-                      icon={<WorkbenchIcon />}
-                    />
-                    <Body1P $color="text-light">{popoverTitle}</Body1P>
-                  </Flex>
-                  <IconFrame
-                    clickable
-                    size="small"
-                    type="tertiary"
-                    tooltip="Close"
-                    icon={<CloseIcon color={theme.colors['icon-light']} />}
-                    onClick={close}
-                  />
-                </StretchedFlex>
-                {workbenchJob ? (
-                  <WorkbenchStartedJobPanel
-                    initialJob={workbenchJob}
-                    jobId={workbenchJob.id}
-                    workbenchId={workbenchJob.workbench?.id ?? ''}
-                  />
-                ) : (
-                  <SendToWorkbenchForm
-                    flowId={flowId}
-                    prompt={prompt}
-                    promptKey={promptKey}
-                    setPrompt={setPrompt}
-                    setWorkbenchJob={setWorkbenchJob}
-                  />
-                )}
-              </PopoverSC>
-            </Popover>
-          </PopoverWrapper>
-        </FloatingPortal>
-      )}
+            <SendToWorkbenchForm
+              flowId={flowId}
+              prompt={initialPrompt}
+              backLabel={backLabel}
+              submitLabel={submitLabel}
+              editable={editable}
+              selectText={selectText}
+            />
+          </Flex>
+        </Modal>
+      </ModalMountTransition>
     </>
   )
 }
@@ -207,43 +115,53 @@ export function SendToWorkbenchButton({
 export function SendToWorkbenchForm({
   flowId,
   prompt,
-  promptKey,
-  setPrompt,
-  setWorkbenchJob,
+  backLabel,
+  submitLabel = 'Send to workbench',
+  editable = false,
+  selectText,
 }: {
   flowId?: Nullable<string>
   prompt: string
-  promptKey: number
-  setPrompt: (prompt: string) => void
-  setWorkbenchJob: (job: WorkbenchJobFragment) => void
+  backLabel?: string
+  submitLabel?: string
+  editable?: boolean
+  selectText?: string
 }) {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [workbenchId, setWorkbenchId] = useState<Nullable<string>>(null)
+  const [sourcePrompt, setSourcePrompt] = useState(prompt)
+  const [draft, setDraft] = useState(prompt)
+  const editorRef = useRef<HTMLDivElement>(null)
   const { workbenches, loading } = useWorkbenchOptions(flowId)
-  const promptInputRef = useRef<HTMLDivElement>(null)
+  const selectedWorkbenchId =
+    (workbenchId &&
+    workbenches.some((workbench) => workbench.id === workbenchId)
+      ? workbenchId
+      : workbenches[0]?.id) ?? null
+
+  if (prompt !== sourcePrompt) {
+    setSourcePrompt(prompt)
+    setDraft(prompt)
+  }
+
+  const effectivePrompt = editable ? draft : prompt
 
   useEffect(() => {
-    setWorkbenchId((current) => {
-      if (!workbenches.length) return null
-      if (workbenches.some((workbench) => workbench.id === current))
-        return current
-      return workbenches[0]?.id ?? null
-    })
-  }, [workbenches])
+    if (!editable || !selectText) return
 
-  const [createWorkbenchJob, { loading: mutationLoading, error }] =
-    useCreateWorkbenchJobMutation({
-      onCompleted: ({ createWorkbenchJob }) =>
-        createWorkbenchJob && setWorkbenchJob(createWorkbenchJob),
-      refetchQueries: ['WorkbenchJobs', 'RecentWorkbenchJobs'],
-      awaitRefetchQueries: true,
+    const id = window.requestAnimationFrame(() => {
+      const root = editorRef.current?.querySelector('[contenteditable="true"]')
+      if (root instanceof HTMLElement) selectPlainText(root, selectText)
     })
+    return () => window.cancelAnimationFrame(id)
+  }, [editable, prompt, selectText])
 
   const canSubmit =
-    !!workbenchId && !!prompt.trim() && !mutationLoading && !loading
+    !!selectedWorkbenchId && !!effectivePrompt.trim() && !loading
 
   return (
     <>
-      {error && <GqlError error={error} />}
       <FormField
         label={
           <Flex
@@ -254,7 +172,7 @@ export function SendToWorkbenchForm({
             <IconFrame
               size="small"
               type="tertiary"
-              tooltip="Choose which workbench should investigate this insight with full context."
+              tooltip="Choose which workbench should investigate this with full context."
               icon={<InfoOutlineIcon size={12} />}
             />
           </Flex>
@@ -262,145 +180,96 @@ export function SendToWorkbenchForm({
       >
         <FillLevelDiv fillLevel={2}>
           <WorkbenchSelector
-            workbenchId={workbenchId}
+            workbenchId={selectedWorkbenchId}
             setWorkbenchId={setWorkbenchId}
             workbenches={workbenches}
             loading={loading}
+            placement="left"
           />
         </FillLevelDiv>
       </FormField>
-      <PromptInputBoxSC>
-        <EditableDiv
-          key={promptKey}
-          ref={promptInputRef}
-          initialValue={prompt}
-          setValue={setPrompt}
-          deserializePlrlInitialValue
-          placeholder="Enter a prompt for the workbench"
-          disabled={mutationLoading}
-          css={{ minHeight: 200 }}
-        />
-        <EditableSkillChipTooltip containerRef={promptInputRef} />
-      </PromptInputBoxSC>
+      {editable ? (
+        <FormField
+          label="Prompt"
+          hint={
+            selectText
+              ? 'Replace the placeholder with the change you want applied.'
+              : undefined
+          }
+        >
+          <div ref={editorRef}>
+            <WorkbenchPromptRichInput
+              syncKey={prompt}
+              workbenchId={selectedWorkbenchId}
+              prompt={prompt}
+              onPromptChange={setDraft}
+              deserializePlrlInitialValue={false}
+              wrapperStyles={{
+                minHeight: 132,
+                maxHeight: 241,
+                overflow: 'auto',
+              }}
+            />
+          </div>
+        </FormField>
+      ) : (
+        <PromptPreviewBoxSC>
+          <WorkbenchStoredPromptMarkdown
+            text={prompt}
+            promptColor="text-light"
+          />
+        </PromptPreviewBoxSC>
+      )}
       <Button
         disabled={!canSubmit}
-        loading={mutationLoading}
         alignSelf="end"
-        onClick={() =>
-          workbenchId &&
-          createWorkbenchJob({
-            variables: {
-              workbenchId,
-              attributes: {
-                prompt,
-                ...(flowId ? { flowId } : {}),
-              },
-            },
-          })
-        }
+        onClick={() => {
+          if (!selectedWorkbenchId) return
+          navigate(
+            getWorkbenchLaunchAbsPath({
+              workbenchId: selectedWorkbenchId,
+              backTo: `${location.pathname}${location.search}`,
+              backLabel,
+            }),
+            {
+              state: {
+                prompt: effectivePrompt,
+              } satisfies WorkbenchLaunchRouteState,
+            }
+          )
+        }}
       >
-        Send to workbench
+        {submitLabel}
       </Button>
     </>
   )
 }
 
-function WorkbenchSelector({
-  workbenchId,
-  setWorkbenchId,
-  workbenches,
-  loading,
-}: {
-  workbenchId: Nullable<string>
-  setWorkbenchId: (id: Nullable<string>) => void
-  workbenches: WorkbenchTinyFragment[]
-  loading: boolean
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-  const selectedWorkbench = workbenches.find(
-    (workbench) => workbench.id === workbenchId
-  )
-  const SelectedIcon = selectedWorkbench
-    ? runtimeToIcon[
-        selectedWorkbench.agentRuntime?.type ?? AgentRuntimeType.Custom
-      ]
-    : null
-
-  return (
-    <Select
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-      width={POPOVER_WIDTH - 32}
-      label="Select workbench"
-      isDisabled={!loading && !workbenches.length}
-      selectedKey={workbenchId ?? ''}
-      onSelectionChange={(key) => setWorkbenchId(key ? `${key}` : null)}
-      triggerButton={
-        <SelectButton
-          css={{ width: '100%' }}
-          leftContent={
-            SelectedIcon ? (
-              <SelectedIcon
-                fullColor
-                size={16}
-              />
-            ) : undefined
-          }
-        >
-          {loading ? (
-            <RectangleSkeleton
-              $bright
-              $width={120}
-            />
-          ) : (
-            (selectedWorkbench?.name ?? 'Select workbench')
-          )}
-        </SelectButton>
-      }
-    >
-      {workbenches.map((workbench) => {
-        const ProviderIcon =
-          runtimeToIcon[workbench.agentRuntime?.type ?? AgentRuntimeType.Custom]
-
-        return (
-          <ListBoxItem
-            key={workbench.id}
-            label={workbench.name}
-            leftContent={
-              <ProviderIcon
-                fullColor
-                size={16}
-              />
-            }
-          />
-        )
-      })}
-    </Select>
-  )
-}
-
-const PopoverSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.large,
-  width: '100%',
-  minHeight: 0,
-  overflow: 'hidden',
-  padding: theme.spacing.medium,
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.default,
-  backgroundColor: theme.colors['fill-one'],
-  boxShadow: theme.boxShadows.moderate,
-}))
-
-const PromptInputBoxSC = styled(Card)(({ theme }) => ({
+const PromptPreviewBoxSC = styled(Card)(({ theme }) => ({
   flex: '1 1 auto',
-  minHeight: 0,
+  minHeight: 132,
+  maxHeight: 241,
   overflowY: 'auto',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   backgroundColor: theme.colors['fill-two'],
   border: theme.borders.input,
-  '&:focus-within': {
-    border: theme.borders['outline-focused'],
-  },
+  color: theme.colors['text-light'],
 }))
+
+function selectPlainText(root: HTMLElement, text: string) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let node: Node | null
+  while ((node = walker.nextNode())) {
+    const value = node.textContent ?? ''
+    const index = value.indexOf(text)
+    if (index === -1) continue
+
+    const range = document.createRange()
+    range.setStart(node, index)
+    range.setEnd(node, index + text.length)
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+    return
+  }
+}

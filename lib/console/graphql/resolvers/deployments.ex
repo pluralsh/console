@@ -118,6 +118,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     WorkbenchJobResult,
     WorkbenchTool,
     WorkbenchPolicy,
+    StackPolicy,
     WorkbenchCron,
     WorkbenchPrompt,
     WorkbenchSkill,
@@ -231,6 +232,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ClusterUpgradeStep, _), do: ClusterUpgradeStep
   def query(Workbench, _), do: Workbench
   def query(WorkbenchPolicy, _), do: WorkbenchPolicy
+  def query(StackPolicy, _), do: StackPolicy
   def query(WorkbenchJob, _), do: WorkbenchJob
   def query(WorkbenchJobActivity, _), do: WorkbenchJobActivity.ordered()
   def query(WorkbenchJobThought, _), do: WorkbenchJobThought.ordered()

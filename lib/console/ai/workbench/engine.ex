@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, log_error: 2, skill_knowledge_tools: 2]
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
   import Console.Schema.WorkbenchJobActivity, only: [is_action: 1]
@@ -25,15 +25,16 @@ defmodule Console.AI.Workbench.Engine do
     Supervisor,
     Heartbeat,
     Canvas,
-    Activity
+    Activity,
+    Tools
   }
   alias Console.AI.Tools.Workbench.{
     Codemode,
     Complete,
     Subagents,
     Subagent,
-    Skills,
-    Skill,
+    KnowledgeUpsert,
+    KnowledgeDelete,
     Notes,
     FetchNotes,
     SkillBackfill,
@@ -60,10 +61,13 @@ defmodule Console.AI.Workbench.Engine do
     %{user: user, workbench: workbench} = job = preload_job(job)
 
     user = Console.Services.Rbac.preload(user)
+    tools = backfill_chat(workbench.tools, job)
+
+    # MCP clients must be up before Environment.new/3 indexes tools via tools/list.
     with {:ok, _} <- Heartbeat.start_link(job),
-         {:ok, skills} <- SkillsUtil.skills(workbench),
-         env = Environment.new(job, backfill_chat(workbench.tools, job), skills),
-         {:ok, _} <- Supervisor.start_link(env) do
+         {:ok, _} <- Supervisor.start_link(tools, job),
+         {:ok, skills} <- SkillsUtil.skills(workbench) do
+      env = Environment.new(job, tools, skills)
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
     else
@@ -327,9 +331,9 @@ defmodule Console.AI.Workbench.Engine do
     categories = Environment.categories(job)
     skills = Environment.with_builtins(skills) |> Environment.subagent_skills(:orchestrator)
 
-    [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    skill_knowledge_tools(job, skills) ++ [
+      %KnowledgeUpsert{job: job},
+      %KnowledgeDelete{job: job},
       %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
@@ -349,7 +353,7 @@ defmodule Console.AI.Workbench.Engine do
   defp type_tools(_), do: [CanvasTool]
 
   defp function_tools(%Environment{job: job, functions: [_ | _] = funcs}),
-    do: Enum.map(funcs, & %FunctionCall{tool: &1, job: job})
+    do: Tools.function_tools(funcs, job)
   defp function_tools(_), do: []
 
   defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do

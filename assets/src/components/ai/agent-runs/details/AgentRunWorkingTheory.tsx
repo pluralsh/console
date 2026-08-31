@@ -63,7 +63,7 @@ export function AgentRunWorkingTheory({
       />
       {todos.length > 0 && (
         <AgentTodosTimeline
-          title="Agent todos"
+          title="Implementation Plan"
           todos={todos}
         />
       )}

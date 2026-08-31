@@ -130,6 +130,9 @@ const ChartCellSC = styled.div<{ $side?: 'left' | 'right' }>(
         : `0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px 0`,
     padding: theme.spacing.medium,
     height: '100%',
+    ...(theme.mode === 'light' && {
+      backgroundColor: theme.colors['fill-zero'],
+    }),
     ...($side === 'right' && { borderLeft: 'none' }),
   })
 )

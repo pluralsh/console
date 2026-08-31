@@ -10,7 +10,7 @@ import { StackType } from 'generated/graphql'
 export function StackTypeIcon({
   stackType,
   size = 16,
-  fullColor = false,
+  fullColor = true,
   color,
 }: {
   stackType: Nullable<StackType>

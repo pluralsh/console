@@ -368,12 +368,50 @@ defmodule Console.GraphQl.UserQueriesTest do
           refresh(token: $token) {
             id
             jwt
+            refreshToken { token }
           }
         }
       """, %{"token" => token.token}, %{current_user: user})
 
       assert found["id"] == user.id
       assert found["jwt"]
+      assert found["refreshToken"]["token"]
+      refute found["refreshToken"]["token"] == token.token
+      refute Console.Services.Users.get_refresh_token(token.token)
+      assert Console.Services.Users.get_refresh_token(found["refreshToken"]["token"])
+    end
+
+    test "it cannot reuse a rotated refresh token" do
+      user = insert(:user)
+      token = insert(:refresh_token, user: user)
+
+      {:ok, %{data: %{"refresh" => found}}} = run_query("""
+        query Refresh($token: String!) {
+          refresh(token: $token) {
+            jwt
+            refreshToken { token }
+          }
+        }
+      """, %{"token" => token.token}, %{current_user: user})
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Refresh($token: String!) {
+          refresh(token: $token) { jwt }
+        }
+      """, %{"token" => token.token}, %{current_user: user})
+
+      {:ok, %{data: %{"refresh" => again}}} = run_query("""
+        query Refresh($token: String!) {
+          refresh(token: $token) {
+            jwt
+            refreshToken { token }
+          }
+        }
+      """, %{"token" => found["refreshToken"]["token"]}, %{current_user: user})
+
+      assert again["jwt"]
+      assert again["refreshToken"]["token"]
+      refute again["refreshToken"]["token"] == found["refreshToken"]["token"]
     end
   end
 

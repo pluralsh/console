@@ -226,3 +226,235 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		})
 	})
 })
+
+func tagMap(tags []*gqlclient.TagAttributes) map[string]string {
+	result := map[string]string{}
+	for _, tag := range tags {
+		if tag == nil {
+			continue
+		}
+		result[tag.Name] = tag.Value
+	}
+	return result
+}
+
+var _ = Describe("Cluster Controller mergeTags", Ordered, func() {
+	Context("when reconciling a tracked cluster", func() {
+		const (
+			mergeTagsClusterName         = "merge-tags-cluster"
+			mergeTagsClusterConsoleID    = "merge-tags-cluster-console-id"
+			replaceTagsClusterName       = "replace-tags-cluster"
+			replaceTagsClusterConsoleID  = "replace-tags-cluster-console-id"
+			preserveTagsClusterName      = "preserve-tags-cluster"
+			preserveTagsClusterConsoleID = "preserve-tags-cluster-console-id"
+		)
+
+		ctx := context.Background()
+		mergeTagsNamespacedName := types.NamespacedName{Name: mergeTagsClusterName, Namespace: namespace}
+		replaceTagsNamespacedName := types.NamespacedName{Name: replaceTagsClusterName, Namespace: namespace}
+		preserveTagsNamespacedName := types.NamespacedName{Name: preserveTagsClusterName, Namespace: namespace}
+
+		existingAPITags := []*gqlclient.ClusterTags{
+			{Name: "env", Value: "prod"},
+			{Name: "team", Value: "platform"},
+		}
+
+		BeforeAll(func() {
+			By("Creating cluster that merges tags with the tracked Console cluster")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      mergeTagsClusterName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ClusterSpec{
+					Handle:    lo.ToPtr(mergeTagsClusterName),
+					Cloud:     "byok",
+					MergeTags: true,
+					Tags: map[string]string{
+						"team":   "infra",
+						"region": "us-east",
+					},
+				},
+			}, nil)).To(Succeed())
+
+			By("Creating cluster that replaces tags on the tracked Console cluster")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      replaceTagsClusterName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ClusterSpec{
+					Handle: lo.ToPtr(replaceTagsClusterName),
+					Cloud:  "byok",
+					Tags: map[string]string{
+						"region": "us-east",
+					},
+				},
+			}, nil)).To(Succeed())
+
+			By("Creating cluster that preserves existing Console tags when the CR specifies none")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      preserveTagsClusterName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ClusterSpec{
+					Handle:    lo.ToPtr(preserveTagsClusterName),
+					Cloud:     "byok",
+					MergeTags: true,
+				},
+			}, nil)).To(Succeed())
+		})
+
+		AfterAll(func() {
+			By("Cleanup merge and replace tag clusters")
+			for _, name := range []types.NamespacedName{mergeTagsNamespacedName, replaceTagsNamespacedName, preserveTagsNamespacedName} {
+				cluster := &v1alpha1.Cluster{}
+				Expect(k8sClient.Get(ctx, name, cluster)).NotTo(HaveOccurred())
+				Expect(k8sClient.Delete(ctx, cluster)).To(Succeed())
+			}
+		})
+
+		It("should merge existing Console tags with CR tags when mergeTags is true", func() {
+			var captured gqlclient.ClusterUpdateAttributes
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             mergeTagsClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+				Tags:           existingAPITags,
+			}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = args.Get(1).(gqlclient.ClusterUpdateAttributes)
+			}).Return(nil, nil)
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: mergeTagsNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(tagMap(captured.Tags)).To(Equal(map[string]string{
+				"env":    "prod",
+				"team":   "infra",
+				"region": "us-east",
+			}))
+
+			cluster := &v1alpha1.Cluster{}
+			Expect(k8sClient.Get(ctx, mergeTagsNamespacedName, cluster)).NotTo(HaveOccurred())
+			Expect(cluster.Status.ID).To(Equal(lo.ToPtr(mergeTagsClusterConsoleID)))
+			Expect(cluster.Status.ReadOnly).To(BeTrue())
+			Expect(cluster.Status.PrevTags).To(Equal(map[string]string{
+				"team":   "infra",
+				"region": "us-east",
+			}))
+			fakeConsoleClient.AssertCalled(GinkgoT(), "UpdateCluster", mergeTagsClusterConsoleID, mock.Anything)
+		})
+
+		It("should drop tags removed from the CR while preserving external Console tags", func() {
+			cluster := &v1alpha1.Cluster{}
+			Expect(k8sClient.Get(ctx, mergeTagsNamespacedName, cluster)).NotTo(HaveOccurred())
+			cluster.Spec.Tags = map[string]string{"team": "infra"}
+			Expect(k8sClient.Update(ctx, cluster)).To(Succeed())
+
+			var captured gqlclient.ClusterUpdateAttributes
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             mergeTagsClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+				Tags: []*gqlclient.ClusterTags{
+					{Name: "env", Value: "prod"},
+					{Name: "team", Value: "infra"},
+					{Name: "region", Value: "us-east"},
+				},
+			}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = args.Get(1).(gqlclient.ClusterUpdateAttributes)
+			}).Return(nil, nil)
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: mergeTagsNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(tagMap(captured.Tags)).To(Equal(map[string]string{
+				"env":  "prod",
+				"team": "infra",
+			}))
+
+			Expect(k8sClient.Get(ctx, mergeTagsNamespacedName, cluster)).NotTo(HaveOccurred())
+			Expect(cluster.Status.PrevTags).To(Equal(map[string]string{
+				"team": "infra",
+			}))
+		})
+
+		It("should replace tags when mergeTags is false", func() {
+			var captured gqlclient.ClusterUpdateAttributes
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             replaceTagsClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+				Tags:           existingAPITags,
+			}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = args.Get(1).(gqlclient.ClusterUpdateAttributes)
+			}).Return(nil, nil)
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: replaceTagsNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(tagMap(captured.Tags)).To(Equal(map[string]string{
+				"region": "us-east",
+			}))
+
+			cluster := &v1alpha1.Cluster{}
+			Expect(k8sClient.Get(ctx, replaceTagsNamespacedName, cluster)).NotTo(HaveOccurred())
+			Expect(cluster.Status.ID).To(Equal(lo.ToPtr(replaceTagsClusterConsoleID)))
+			Expect(cluster.Status.ReadOnly).To(BeTrue())
+			fakeConsoleClient.AssertCalled(GinkgoT(), "UpdateCluster", replaceTagsClusterConsoleID, mock.Anything)
+		})
+
+		It("should preserve existing Console tags when mergeTags is true and the CR has no tags", func() {
+			var captured gqlclient.ClusterUpdateAttributes
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             preserveTagsClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+				Tags:           existingAPITags,
+			}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = args.Get(1).(gqlclient.ClusterUpdateAttributes)
+			}).Return(nil, nil)
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: preserveTagsNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(tagMap(captured.Tags)).To(Equal(map[string]string{
+				"env":  "prod",
+				"team": "platform",
+			}))
+		})
+	})
+})

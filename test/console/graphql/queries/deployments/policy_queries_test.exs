@@ -450,6 +450,130 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert [%{"message" => "blocked"}] = result["deny"]
     end
 
+    test "evaluates unsaved policy source when provided" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy,
+        project: project,
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "saved"}] if {
+          true
+        }
+        """
+      )
+
+      {:ok, %{data: %{"evaluatePolicy" => result}}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "buffer"}] if {
+          true
+        }
+        """
+      }, %{current_user: user})
+
+      assert [%{"message" => "buffer"}] = result["deny"]
+    end
+
+    test "rejects invalid unsaved policy source" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => "package test\n\nallow {"
+      }, %{current_user: user})
+
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects an empty unsaved policy buffer instead of evaluating the stored policy" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy,
+        project: project,
+        policy: """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "saved"}] if {
+          true
+        }
+        """
+      )
+
+      {:ok, result} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => ""
+      }, %{current_user: user})
+
+      refute get_in(result, [:data, "evaluatePolicy"])
+      assert [%{message: message} | _] = result[:errors]
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects unsaved policy source over 1MB" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+
+      {:ok, %{errors: [%{message: message} | _]}} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => String.duplicate("a", 1_000_001)
+      }, %{current_user: user})
+
+      assert message =~ "should be at most"
+    end
+
+    test "does not evaluate unsaved source for a policy in another project" do
+      user = insert(:user)
+      insert(:project, read_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, type: :binding, policy: "package plrl.binding\nbind := true")
+
+      {:ok, result} = run_query("""
+        query EvaluatePolicy($policyId: ID!, $input: Json!, $policy: String) {
+          evaluatePolicy(policyId: $policyId, input: $input, policy: $policy)
+        }
+      """, %{
+        "policyId" => policy.id,
+        "input" => Jason.encode!(%{}),
+        "policy" => "package plrl.binding\nbind := true"
+      }, %{current_user: user})
+
+      refute get_in(result, [:data, "evaluatePolicy"])
+      assert [%{message: message} | _] = result[:errors]
+      assert message =~ "forbidden"
+    end
+
     test "evaluates binding policies with the binding base" do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
@@ -535,6 +659,99 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
   end
 
   describe "bindingPolicies" do
+    test "returns matchCount for bind policies" do
+      bind_policy = insert(:policy, type: :binding)
+      attached = insert(:policy)
+      rule = insert(:binding_policy, policy: attached, bind_policy: bind_policy, type: :workbench)
+      insert_list(2, :workbench_policy, policy: attached, binding_policy: rule)
+      insert(:workbench_policy, policy: attached)
+      insert(:workbench_policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id matchCount }
+        }
+      """, %{"id" => bind_policy.id}, %{current_user: admin_user()})
+
+      assert found["matchCount"] == 2
+    end
+
+    test "does not attribute another bind policy's attachments to matchCount" do
+      bind_a = insert(:policy, type: :binding)
+      bind_b = insert(:policy, type: :binding)
+      attached = insert(:policy)
+      rule_a = insert(:binding_policy, policy: attached, bind_policy: bind_a, type: :workbench)
+      rule_b = insert(:binding_policy, policy: attached, bind_policy: bind_b, type: :workbench)
+      insert_list(2, :workbench_policy, policy: attached, binding_policy: rule_a)
+      insert(:workbench_policy, policy: attached, binding_policy: rule_b)
+
+      {:ok, %{data: %{"policies" => found}}} = run_query("""
+        query {
+          policies(first: 10) {
+            edges { node { id matchCount } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      counts = from_connection(found) |> Map.new(& {&1["id"], &1["matchCount"]})
+
+      assert counts[bind_a.id] == 2
+      assert counts[bind_b.id] == 1
+    end
+
+    test "returns evaluationCount for a policy" do
+      policy = insert(:policy)
+      insert_list(3, :policy_evaluation, policy_ids: [policy.id])
+      insert(:policy_evaluation)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id evaluationCount }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert found["evaluationCount"] == 3
+    end
+
+    test "returns workbench and stack attachment counts" do
+      policy = insert(:policy)
+      insert_list(2, :workbench_policy, policy: policy)
+      insert(:stack_policy, policy: policy)
+      insert(:workbench_policy)
+
+      {:ok, %{data: %{"policy" => found}}} = run_query("""
+        query Policy($id: ID!) {
+          policy(id: $id) { id workbenchAttachmentCount stackAttachmentCount }
+        }
+      """, %{"id" => policy.id}, %{current_user: admin_user()})
+
+      assert found["workbenchAttachmentCount"] == 2
+      assert found["stackAttachmentCount"] == 1
+    end
+
+    test "batches workbench and stack attachment counts across policies" do
+      workbench_policy = insert(:policy)
+      stack_policy = insert(:policy)
+      insert_list(2, :workbench_policy, policy: workbench_policy)
+      insert(:stack_policy, policy: stack_policy)
+      insert(:workbench_policy)
+
+      {:ok, %{data: %{"policies" => found}}} = run_query("""
+        query {
+          policies(first: 10) {
+            edges { node { id workbenchAttachmentCount stackAttachmentCount } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      counts =
+        from_connection(found)
+        |> Map.new(& {&1["id"], {&1["workbenchAttachmentCount"], &1["stackAttachmentCount"]}})
+
+      assert counts[workbench_policy.id] == {2, 0}
+      assert counts[stack_policy.id] == {0, 1}
+    end
+
     test "lists stack and workbench policy associations" do
       policy = insert(:policy)
       stack_policies = insert_list(2, :stack_policy, policy: policy)

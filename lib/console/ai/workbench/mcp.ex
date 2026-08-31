@@ -25,20 +25,30 @@ defmodule Console.AI.Workbench.MCP do
     |> Enum.flat_map(fn tool ->
       case list_tools(tool, j) do
         {:ok, mcp_tools} ->
-          Enum.map(mcp_tools, & %MCPTool{tool: tool, mcp_tool: &1, job: j})
+          Enum.flat_map(mcp_tools, fn
+            %Tool{} = mcp_tool -> [%MCPTool{tool: tool, mcp_tool: mcp_tool, job: j}]
+            _ -> []
+          end)
         _ -> []
       end
     end)
   end
 
   def list_tools(%WorkbenchTool{} = t, %WorkbenchJob{} = j) do
+    name = Agent.name(:client, t, j)
+
     Console.Retrier.retry(fn ->
-      Agent.name(:client, t, j)
-      |> Anubis.Client.list_tools()
-    end)
+      case GenServer.whereis(name) do
+        nil -> {:error, :not_started}
+        _pid -> Anubis.Client.list_tools(name)
+      end
+    end, max: 8, pause: 150)
     |> case do
-      {:ok, %Anubis.MCP.Response{result: %{"tools" => found}}} ->
-        {:ok, Enum.map(found, &Tool.new/1)}
+      {:ok, %Anubis.MCP.Response{result: %{"tools" => found}}} when is_list(found) ->
+        {:ok, Enum.flat_map(found, fn
+          tool when is_map(tool) -> List.wrap(Tool.new(tool))
+          _ -> []
+        end)}
       err -> {:error, "failed to list tools: #{inspect(err)}"}
     end
   end

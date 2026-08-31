@@ -67,8 +67,11 @@ const CardSC = styled.button<{ $selected: boolean }>(
     gap: theme.spacing.xxsmall,
     padding: theme.spacing.xsmall,
     borderRadius: theme.borderRadiuses.large,
-    border: theme.borders['fill-two'],
-    background: 'transparent',
+    border: theme.borders.input,
+    // Light panel on the chart surface — no elevation shadow
+    background:
+      theme.mode === 'light' ? theme.colors['fill-zero'] : 'transparent',
+    boxShadow: 'none',
     flex: 1,
     ...($selected && {
       background: theme.colors['fill-zero-selected'],

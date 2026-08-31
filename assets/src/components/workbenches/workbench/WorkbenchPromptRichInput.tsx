@@ -17,6 +17,7 @@ export function WorkbenchPromptRichInput({
   loading,
   syncKey,
   wrapperStyles,
+  deserializePlrlInitialValue = true,
 }: {
   workbenchId: Nullable<string>
   workbenchRepositorySource?: Nullable<WorkbenchRepositorySource>
@@ -27,6 +28,7 @@ export function WorkbenchPromptRichInput({
   loading?: boolean
   syncKey?: string
   wrapperStyles?: ComponentProps<typeof ChatInputSimple>['wrapperStyles']
+  deserializePlrlInitialValue?: boolean
 }) {
   return (
     <ChatInputSimple
@@ -34,7 +36,7 @@ export function WorkbenchPromptRichInput({
       enableAutoComplete
       workbenchId={workbenchId}
       workbenchRepositorySource={workbenchRepositorySource}
-      deserializePlrlInitialValue
+      deserializePlrlInitialValue={deserializePlrlInitialValue}
       placeholder={placeholder}
       disabled={disabled}
       loading={loading}

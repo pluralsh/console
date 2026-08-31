@@ -93,6 +93,7 @@ export function SimpleToolCall({
 }) {
   const { colors, spacing } = useTheme()
   const slimCodeCss = useSlimToolCodeCss()
+  const pythonInputCodeCss = useSlimToolCodeCss({ showLanguageIcon: true })
   const [isOpen, setIsOpen] = useState(false)
   const [finishedAnimating, setFinishedAnimating] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
@@ -151,7 +152,7 @@ export function SimpleToolCall({
               >
                 {command}
               </Code>
-              {isPending ? (
+              {isPending && !result ? (
                 <RunningToolOutputCode />
               ) : result ? (
                 <Code
@@ -180,7 +181,7 @@ export function SimpleToolCall({
               <Code
                 language="python"
                 title="Python"
-                css={slimCodeCss}
+                css={pythonInputCodeCss}
               >
                 {python}
               </Code>
@@ -460,6 +461,7 @@ export function SimpleAccordion({
       css={{
         background: 'none',
         border: 'none',
+        boxShadow: 'none',
         width: '100%',
         ...accordionStyles,
       }}
@@ -583,7 +585,10 @@ const ThSC = styled.th(({ theme }) => ({
 }))
 
 const TdSC = styled.td(({ theme }) => ({
-  backgroundColor: theme.colors['fill-zero-selected'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-one']
+      : theme.colors['fill-zero-selected'],
   padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   color: theme.colors['text-light'],
   height: 40,

@@ -189,6 +189,30 @@ defmodule Console.GraphQl.Deployments.Policy do
       resolve &Deployments.list_policy_workbench_policies/3
     end
 
+    @desc "how many workbenches and stacks currently match this bind policy"
+    field :match_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :match, id)
+    end
+
+    @desc "how many sampled evaluations include this policy"
+    field :evaluation_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :evaluation, id)
+    end
+
+    @desc "how many workbenches are currently attached to this policy"
+    field :workbench_attachment_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :workbench_attachment, id)
+    end
+
+    @desc "how many stacks are currently attached to this policy"
+    field :stack_attachment_count, :integer, resolve: fn
+      %{id: id}, _, %{context: %{loader: loader}} ->
+        manual_dataloader(loader, Console.GraphQl.Resolvers.PolicyCountLoader, :stack_attachment, id)
+    end
+
     timestamps()
   end
 
@@ -465,6 +489,7 @@ defmodule Console.GraphQl.Deployments.Policy do
         action: :read
       arg :policy_id, non_null(:id), description: "policy to evaluate"
       arg :input, non_null(:json), description: "JSON-encoded tool input to evaluate"
+      arg :policy, :string, description: "optional unsaved policy source to evaluate instead of the stored policy"
 
       resolve &Deployments.evaluate_policy/2
     end

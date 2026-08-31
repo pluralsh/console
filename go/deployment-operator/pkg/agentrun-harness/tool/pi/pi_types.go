@@ -46,6 +46,7 @@ type StreamEvent struct {
 	ToolName              string          `json:"toolName,omitempty"`
 	Args                  json.RawMessage `json:"args,omitempty"`
 	Result                json.RawMessage `json:"result,omitempty"`
+	PartialResult         json.RawMessage `json:"partialResult,omitempty"`
 	IsError               bool            `json:"isError,omitempty"`
 	Error                 *StreamError    `json:"error,omitempty"`
 }

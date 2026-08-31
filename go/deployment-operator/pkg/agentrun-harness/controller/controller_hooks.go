@@ -50,6 +50,10 @@ func (in *agentRunController) preStart(ctx context.Context) error {
 
 // postStart function is executed after all agent run steps
 func (in *agentRunController) postStart(err error) {
+	if in.output != nil {
+		in.output.CloseAll()
+	}
+
 	var status gqlclient.AgentRunStatus
 
 	switch {

@@ -13,6 +13,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
@@ -59,7 +60,7 @@ func (in *Claude) BabysitRun(ctx context.Context, bCtx *v1.BabysitContext) bool 
 
 	// promptFile is the absolute path to the rendered system prompt file.
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
-	agent := babysitAgent
+	agent := in.agentJSON(babysitAgent)
 
 	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, bCtx.Prompt, in.sessionID)
 
@@ -118,9 +119,9 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 	)
 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
-	agent := analysisAgent
+	agent := in.agentJSON(analysisAgent)
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		agent = autonomousAgent
+		agent = in.agentJSON(autonomousAgent)
 	}
 	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, followUpPrompt, in.sessionID)
 
@@ -168,9 +169,9 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 
 func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
-	agent := analysisAgent
+	agent := in.agentJSON(analysisAgent)
 	if in.Config.Run.Mode == console.AgentRunModeWrite {
-		agent = autonomousAgent
+		agent = in.agentJSON(autonomousAgent)
 	}
 	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, in.Config.Run.Prompt, "")
 
@@ -236,6 +237,10 @@ func (in *Claude) ConfigureBabysitRun() error {
 	}
 
 	settings := NewSettingsBuilder(in.model)
+	external, err := mcp.Load()
+	if err != nil {
+		return err
+	}
 	settings.AllowTools(
 		"Read",
 		"Write",
@@ -245,7 +250,7 @@ func (in *Claude) ConfigureBabysitRun() error {
 		"WebFetch",
 		PluralMCPToolsWildcard,
 		CodebaseMemoryMCPToolsWildcard,
-	)
+	).AllowTools(externalMCPAllowTools(external)...)
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())
 	maxTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashMaxTimeout.Milliseconds())
 	settings.WithEnv("BASH_DEFAULT_TIMEOUT_MS", defaultTimeout)
@@ -263,15 +268,27 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 		return err
 	}
 
-	mcp := NewMCPConfigBuilder()
-	mcp.
+	mcpCfg := NewMCPConfigBuilder()
+	mcpCfg.
 		AddURLServer("plural", common.AgentMCPServerURL).
 		Done().
 		AddServer(common.CodebaseMemoryMCPServerName, common.CodebaseMemoryMCPCommand).
 		Env(common.CodebaseMemoryCacheEnv, common.CodebaseMemoryCacheDir).
 		Done()
 
-	if err := mcp.WriteToFile(filepath.Join(in.Config.WorkDir, ".mcp.json")); err != nil {
+	external, err := mcp.Load()
+	if err != nil {
+		return err
+	}
+	for _, server := range external {
+		builder := mcpCfg.AddURLServer(server.Name, server.URL)
+		for name, value := range server.Headers {
+			builder.Header(name, value)
+		}
+		builder.Done()
+	}
+
+	if err := mcpCfg.WriteToFile(filepath.Join(in.Config.WorkDir, ".mcp.json")); err != nil {
 		return err
 	}
 
@@ -300,7 +317,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"WebFetch",
 			PluralMCPToolsWildcard,
 			CodebaseMemoryMCPToolsWildcard,
-		).DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
+		).AllowTools(externalMCPAllowTools(external)...).DenyTools("Edit", "Write", "Bash(rm:*)", "Bash(sudo:*)")
 	} else {
 		settings.AllowTools(
 			"Read",
@@ -311,7 +328,7 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"WebFetch",
 			PluralMCPToolsWildcard,
 			CodebaseMemoryMCPToolsWildcard,
-		)
+		).AllowTools(externalMCPAllowTools(external)...)
 	}
 
 	defaultTimeout := fmt.Sprintf("%d", in.Config.Run.Runtime.Config.Claude.BashTimeout.Milliseconds())
@@ -321,6 +338,15 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	klog.V(log.LogLevelInfo).InfoS("claude timeouts configured", "default_timeout", defaultTimeout, "max_timeout", maxTimeout)
 
 	return settings.WriteToFile(filepath.Join(in.configPath(), "settings.local.json"))
+}
+
+func (in *Claude) agentJSON(agent string) string {
+	servers, err := mcp.Load()
+	if err != nil {
+		klog.ErrorS(err, "failed to load external mcp servers for claude agents")
+		return agent
+	}
+	return agentWithMCPTools(agent, externalMCPAllowTools(servers))
 }
 
 func (in *Claude) configPath() string {

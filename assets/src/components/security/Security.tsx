@@ -1,10 +1,13 @@
-import { SubTab, TabList } from '@pluralsh/design-system'
+import { Tab, TabList } from '@pluralsh/design-system'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { ReactNode, useMemo, useRef, useState } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
   COMPLIANCE_REPORTS_REL_PATH,
+  GATEKEEPER_REL_PATH,
   POLICIES_REL_PATH,
   SECURITY_ABS_PATH,
   SECURITY_OVERVIEW_REL_PATH,
@@ -15,6 +18,7 @@ import styled from 'styled-components'
 const directory = [
   { path: SECURITY_OVERVIEW_REL_PATH, label: 'Security overview' },
   { path: POLICIES_REL_PATH, label: 'Policies' },
+  { path: GATEKEEPER_REL_PATH, label: 'Gatekeeper' },
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerability reports' },
   { path: COMPLIANCE_REPORTS_REL_PATH, label: 'Compliance reports' },
 ]
@@ -27,55 +31,39 @@ export function Security() {
 
   return (
     <PageHeaderContext value={ctx}>
-      <WrapperSC>
-        <HeaderWrapperSC>
+      <ResponsiveLayoutPage>
+        <ResponsiveLayoutSidenavContainer>
           <TabList
-            scrollable
             stateRef={tabStateRef}
-            stateProps={{ orientation: 'horizontal', selectedKey: tab }}
+            stateProps={{ orientation: 'vertical', selectedKey: tab }}
+            width="100%"
           >
             {directory.map(({ path, label }) => (
               <LinkTabWrap
-                subTab
                 key={path}
                 textValue={label}
                 to={path}
               >
-                <SubTab
-                  key={path}
-                  textValue={label}
-                >
-                  {label}
-                </SubTab>
+                <Tab>{label}</Tab>
               </LinkTabWrap>
             ))}
           </TabList>
+        </ResponsiveLayoutSidenavContainer>
+        <ContentSC>
           {headerContent}
-        </HeaderWrapperSC>
-        <Outlet />
-      </WrapperSC>
+          <Outlet />
+        </ContentSC>
+      </ResponsiveLayoutPage>
     </PageHeaderContext>
   )
 }
 
-const HeaderWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  minHeight: 'fit-content',
-  flexShrink: 0,
-  alignItems: 'center',
-  gap: theme.spacing.medium,
-  overflow: 'hidden',
-}))
-
-const WrapperSC = styled.div(({ theme }) => ({
-  height: '100%',
-  width: '100%',
-  overflow: 'auto',
+const ContentSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  margin: 'auto',
-  maxWidth: 1280,
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+  overflow: 'auto',
   gap: theme.spacing.large,
-  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px ${theme.spacing.medium}px`,
 }))

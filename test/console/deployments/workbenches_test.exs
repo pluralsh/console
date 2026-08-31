@@ -2743,6 +2743,147 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert refetch(knowledge)
     end
+
+    test "deletes knowledge by id scoped to a workbench without a user" do
+      workbench = insert(:workbench)
+      knowledge = insert(:workbench_knowledge, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_knowledge(knowledge.id, workbench.id)
+
+      assert deleted.id == knowledge.id
+      refute refetch(knowledge)
+    end
+
+    test "does not delete knowledge that belongs to another workbench" do
+      workbench = insert(:workbench)
+      knowledge = insert(:workbench_knowledge)
+
+      {:error, "knowledge not found"} = Workbenches.delete_workbench_knowledge(knowledge.id, workbench.id)
+
+      assert refetch(knowledge)
+    end
+  end
+
+  describe "list_workbench_knowledge/1" do
+    test "lists knowledge for a workbench including usage data" do
+      workbench = insert(:workbench)
+      k1 = insert(:workbench_knowledge, workbench: workbench, name: "alpha", usages: 2)
+      k2 = insert(:workbench_knowledge, workbench: workbench, name: "beta", usages: 0)
+      insert(:workbench_knowledge)
+
+      listed = Workbenches.list_workbench_knowledge(workbench.id)
+
+      assert ids_equal(listed, [k1, k2])
+      assert Enum.find(listed, & &1.id == k1.id).usages == 2
+      assert Enum.find(listed, & &1.id == k2.id).usages == 0
+    end
+  end
+
+  describe "knowledge_used/1" do
+    test "increments usages and last_used_at by knowledge id" do
+      knowledge = insert(:workbench_knowledge, usages: 2)
+
+      {:ok, used} = Workbenches.knowledge_used(knowledge.id)
+
+      assert used.id == knowledge.id
+      assert used.usages == 3
+      assert used.last_used_at
+    end
+
+    test "increments usages by knowledge struct" do
+      knowledge = insert(:workbench_knowledge, usages: 0)
+
+      {:ok, used} = Workbenches.knowledge_used(knowledge)
+
+      assert used.usages == 1
+      assert used.last_used_at
+    end
+
+    test "returns an error when the knowledge id does not exist" do
+      {:error, "knowledge not found"} = Workbenches.knowledge_used(Ecto.UUID.generate())
+    end
+  end
+
+  describe "knowledge_used/2" do
+    test "increments usages and last_used_at by workbench id and name" do
+      workbench = insert(:workbench)
+      knowledge = insert(:workbench_knowledge, workbench: workbench, name: "runbook", usages: 4)
+
+      {:ok, used} = Workbenches.knowledge_used(workbench.id, "runbook")
+
+      assert used.id == knowledge.id
+      assert used.usages == 5
+      assert used.last_used_at
+    end
+
+    test "returns an error when the name is missing on the workbench" do
+      workbench = insert(:workbench)
+      insert(:workbench_knowledge, workbench: workbench, name: "other")
+
+      {:error, "knowledge not found"} = Workbenches.knowledge_used(workbench.id, "missing")
+    end
+  end
+
+  describe "upsert_workbench_knowledge/2" do
+    test "creates knowledge when the name is new" do
+      workbench = insert(:workbench)
+
+      {:ok, knowledge} = Workbenches.upsert_workbench_knowledge(%{
+        name: "runbook",
+        description: "ops notes",
+        knowledge: "restart the pod",
+        labels: ["ops"]
+      }, workbench.id)
+
+      assert knowledge.workbench_id == workbench.id
+      assert knowledge.name == "runbook"
+      assert knowledge.description == "ops notes"
+      assert knowledge.knowledge == "restart the pod"
+      assert knowledge.labels == ["ops"]
+    end
+
+    test "updates knowledge when the name already exists" do
+      workbench = insert(:workbench)
+      existing = insert(:workbench_knowledge, workbench: workbench, name: "runbook", knowledge: "old")
+
+      {:ok, updated} = Workbenches.upsert_workbench_knowledge(%{
+        name: "runbook",
+        description: "new desc",
+        knowledge: "new body",
+        labels: ["updated"]
+      }, workbench.id)
+
+      assert updated.id == existing.id
+      assert updated.knowledge == "new body"
+      assert updated.description == "new desc"
+      assert updated.labels == ["updated"]
+    end
+
+    test "fails to create when the workbench already has 10 knowledge entries" do
+      workbench = insert(:workbench)
+      for i <- 1..10, do: insert(:workbench_knowledge, workbench: workbench, name: "k-#{i}")
+
+      {:error, error} = Workbenches.upsert_workbench_knowledge(%{
+        name: "overflow",
+        knowledge: "too many"
+      }, workbench.id)
+
+      assert error =~ "10 knowledge entries"
+    end
+
+    test "still updates an existing entry when the workbench is at the 10 entry cap" do
+      workbench = insert(:workbench)
+      existing = insert(:workbench_knowledge, workbench: workbench, name: "k-1", knowledge: "old")
+      for i <- 2..10, do: insert(:workbench_knowledge, workbench: workbench, name: "k-#{i}")
+
+      {:ok, updated} = Workbenches.upsert_workbench_knowledge(%{
+        name: "k-1",
+        knowledge: "still allowed"
+      }, workbench.id)
+
+      assert updated.id == existing.id
+      assert updated.knowledge == "still allowed"
+    end
   end
 
   describe "create_workbench_eval/3" do

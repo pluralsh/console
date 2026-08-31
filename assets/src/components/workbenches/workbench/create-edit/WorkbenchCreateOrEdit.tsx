@@ -16,10 +16,13 @@ import { getWorkbenchesBreadcrumbs } from 'components/workbenches/Workbenches'
 import {
   PolicyBindingFragment,
   useCreateWorkbenchMutation,
+  useDeleteWorkbenchKnowledgeMutation,
+  useUpdateWorkbenchKnowledgeMutation,
   useUpdateWorkbenchMutation,
   useWorkbenchQuery,
   WorkbenchAttributes,
   WorkbenchFragment,
+  WorkbenchKnowledgeAttributes,
   WorkbenchSkillAttributes,
   WorkbenchSkillSubagent,
 } from 'generated/graphql'
@@ -81,6 +84,16 @@ export function useWorkbenchFormCardRightContent() {
 
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
 // use FormBinding[] so BindingInput can show chips (user email / group name).
+export type WorkbenchFormKnowledge = {
+  id: string
+  name: string
+  description?: string | null
+  knowledge: string
+  labels: string[]
+  usages?: number | null
+  lastUsedAt?: string | null
+}
+
 export type WorkbenchFormState = Omit<
   Required<WorkbenchAttributes>,
   'readBindings' | 'writeBindings' | 'projectId' | 'systemPrompt'
@@ -88,6 +101,7 @@ export type WorkbenchFormState = Omit<
   readBindings: PolicyBindingFragment[]
   writeBindings: PolicyBindingFragment[]
   workbenchSkills: WorkbenchSkillAttributes[]
+  workbenchKnowledge: WorkbenchFormKnowledge[]
 }
 
 export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
@@ -225,13 +239,61 @@ function WorkbenchForm({
       refetchQueries: ['Workbenches'],
       awaitRefetchQueries: true,
     })
-  const mutationLoading = createLoading || updateLoading
-  const mutationError = createError || updateError
+  const [updateKnowledge, { loading: updateKnowledgeLoading }] =
+    useUpdateWorkbenchKnowledgeMutation()
+  const [deleteKnowledge, { loading: deleteKnowledgeLoading }] =
+    useDeleteWorkbenchKnowledgeMutation()
+  const [knowledgeError, setKnowledgeError] = useState<Error | null>(null)
+  const mutationLoading =
+    createLoading ||
+    updateLoading ||
+    updateKnowledgeLoading ||
+    deleteKnowledgeLoading
+  const mutationError = createError || updateError || knowledgeError
 
-  const onSave = () => {
+  const persistKnowledgeChanges = async () => {
+    const initialById = new Map(
+      initialFormState.workbenchKnowledge.map((entry) => [entry.id, entry])
+    )
+    const currentIds = new Set(
+      formState.workbenchKnowledge.map((entry) => entry.id)
+    )
+    const deletions = [...initialById.keys()].filter(
+      (id) => !currentIds.has(id)
+    )
+    const updates = formState.workbenchKnowledge.filter((entry) => {
+      const initial = initialById.get(entry.id)
+      return (
+        !!initial && knowledgeSignature(entry) !== knowledgeSignature(initial)
+      )
+    })
+
+    await Promise.all([
+      ...deletions.map((id) => deleteKnowledge({ variables: { id } })),
+      ...updates.map((entry) =>
+        updateKnowledge({
+          variables: {
+            id: entry.id,
+            attributes: knowledgeToAttributes(entry),
+          },
+        })
+      ),
+    ])
+  }
+
+  const onSave = async () => {
     const attributes = formStateToAttributes(formState)
     if (isCreateMode) {
       createWorkbench({ variables: { attributes } })
+      return
+    }
+    try {
+      setKnowledgeError(null)
+      await persistKnowledgeChanges()
+    } catch (error) {
+      setKnowledgeError(
+        error instanceof Error ? error : new Error(String(error))
+      )
       return
     }
     updateWorkbench({
@@ -444,9 +506,31 @@ const validateForm = (formState: WorkbenchFormState) =>
     validateStep(label as WorkbenchStepLabel, formState)
   )
 
+function knowledgeToAttributes(
+  entry: WorkbenchFormKnowledge
+): WorkbenchKnowledgeAttributes {
+  return {
+    name: entry.name,
+    description: entry.description ?? null,
+    knowledge: entry.knowledge,
+    labels: entry.labels,
+  }
+}
+
+function knowledgeSignature(entry: WorkbenchFormKnowledge) {
+  return JSON.stringify(knowledgeToAttributes(entry))
+}
+
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
-  const { name, readBindings, writeBindings, modes, workbenchSkills, ...rest } =
-    state
+  const {
+    name,
+    readBindings,
+    writeBindings,
+    modes,
+    workbenchSkills,
+    workbenchKnowledge: _workbenchKnowledge,
+    ...rest
+  } = state
 
   return {
     ...deepOmitFalsy(rest),
@@ -498,6 +582,7 @@ function sanitizeInitialForm({
   modes,
   budget,
   workbenchSkills,
+  workbenchKnowledge,
   tools,
   readBindings,
   writeBindings,
@@ -520,6 +605,19 @@ function sanitizeInitialForm({
       subagents:
         (skill.subagents?.filter(isNonNullable) as WorkbenchSkillSubagent[]) ??
         [],
+    }))
+
+  const resolvedWorkbenchKnowledge = (workbenchKnowledge?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter(isNonNullable)
+    .map((entry) => ({
+      id: entry.id,
+      name: entry.name ?? '',
+      description: entry.description ?? null,
+      knowledge: entry.knowledge ?? '',
+      labels: (entry.labels ?? []).filter(isNonNullable),
+      usages: entry.usages ?? 0,
+      lastUsedAt: entry.lastUsedAt ?? null,
     }))
 
   return {
@@ -561,5 +659,6 @@ function sanitizeInitialForm({
         },
       ]) ?? [],
     workbenchSkills: resolvedWorkbenchSkills,
+    workbenchKnowledge: resolvedWorkbenchKnowledge,
   }
 }

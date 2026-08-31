@@ -61,6 +61,10 @@ fragment AgentRuntime on AgentRuntime {
   name
   type
   aiProxy
+  model {
+    model
+    provider
+  }
   cluster {
     ...ClusterTiny
   }
@@ -306,6 +310,18 @@ subscription AgentRunChat($runId: ID!) {
     delta
     payload {
       ...AgentMessage
+    }
+  }
+}
+
+subscription AgentMessageOutputDelta($runId: ID!) {
+  agentMessageOutputDelta(runId: $runId) {
+    delta
+    payload {
+      messageId
+      agentRunId
+      stdout
+      stderr
     }
   }
 }

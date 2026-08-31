@@ -50,6 +50,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> paginate(args)
   end
 
+  def evaluate_policy(%{policy_id: id, input: input, policy: source}, %{context: %{current_user: user}})
+      when is_binary(source) do
+    Policy.get_policy(id)
+    |> allow(user, :read)
+    |> when_ok(fn %{type: type} -> Policy.evaluate_custom_policy(type, source, input) end)
+  end
   def evaluate_policy(%{policy_id: id, input: input}, %{context: %{current_user: user}}),
     do: Policy.evaluate_policy(id, input, user)
 

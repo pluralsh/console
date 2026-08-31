@@ -16,7 +16,8 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
   '&&': {
     display: 'flex',
     alignItems: 'center',
-    overflow: 'hidden',
+    // Soft shadows must paint outside the card; keep text truncate on .content
+    overflow: theme.mode === 'light' ? 'visible' : 'hidden',
     padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
     gap: theme.spacing.xsmall,
     textDecoration: 'none',
@@ -33,6 +34,7 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
     flexShrink: 1,
     flexGrow: 1,
     overflow: 'hidden',
+    minWidth: 0,
     '.name': {
       ...theme.partials.text.body2Bold,
       maxWidth: '100%',

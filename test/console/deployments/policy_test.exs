@@ -51,6 +51,41 @@ defmodule Console.Deployments.PolicyTest do
       assert {:error, _} = Policy.update_policy(%{description: "Updated policy"}, policy.id, user)
       assert refetch(policy).description != "Updated policy"
     end
+
+    test "cannot transfer a policy to an inaccessible destination project" do
+      user = insert(:user)
+      source = insert(:project, write_bindings: [%{user_id: user.id}])
+      destination = insert(:project)
+      policy = insert(:policy, project: source)
+
+      assert {:error, _} = Policy.update_policy(%{project_id: destination.id}, policy.id, user)
+      assert refetch(policy).project_id == source.id
+    end
+
+    test "project writers can transfer a policy to another writable project" do
+      user = insert(:user)
+      source = insert(:project, write_bindings: [%{user_id: user.id}])
+      destination = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: source)
+
+      {:ok, updated} = Policy.update_policy(%{project_id: destination.id}, policy.id, user)
+
+      assert updated.project_id == destination.id
+    end
+
+    test "rejects type changes when attachments exist" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      policy = insert(:policy, project: project)
+      insert(:workbench_policy, policy: policy)
+
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.update_policy(%{type: :stack}, policy.id, user)
+
+      assert errors_on(changeset).type ==
+               ["cannot change type while attachments or binding rules exist"]
+      assert refetch(policy).type == :workbench
+    end
   end
 
   describe "delete_policy/2" do
@@ -204,7 +239,8 @@ defmodule Console.Deployments.PolicyTest do
       :ok = Policy.reconcile(binding)
       :ok = Policy.reconcile(binding)
 
-      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
+      [association] = Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
 
       insert(:workbench_policy, policy: policy, workbench: retained)
 
@@ -243,12 +279,32 @@ defmodule Console.Deployments.PolicyTest do
       binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy, type: :stack)
 
       :ok = Policy.reconcile(binding)
-      assert 1 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+      [association] = Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.all()
+      assert association.binding_policy_id == binding.id
 
       {:ok, bind_policy} = Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
       :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
 
       assert 0 == Console.Schema.StackPolicy.for_stack(stack.id) |> Repo.aggregate(:count)
+    end
+
+    test "does not detach manual attachments when the bind policy stops matching" do
+      insert(:user, bot_name: "console")
+      project = insert(:project)
+      workbench = insert(:workbench, project: project, name: "bound-workbench")
+      policy = insert(:policy, project: project)
+      bind_policy = insert(:policy, project: project, type: :binding, policy: "package plrl.binding\nbind := true if input.workbench.name == \"bound-workbench\"")
+      binding = insert(:binding_policy, policy: policy, bind_policy: bind_policy)
+      insert(:workbench_policy, policy: policy, workbench: workbench)
+
+      :ok = Policy.reconcile(binding)
+
+      {:ok, bind_policy} =
+        Policy.update_policy(%{policy: "package plrl.binding\nbind := false"}, bind_policy.id, admin_user())
+
+      :ok = Policy.reconcile(%{binding | bind_policy: bind_policy})
+
+      assert 1 == Console.Schema.WorkbenchPolicy.for_workbench(workbench.id) |> Repo.aggregate(:count)
     end
   end
 
@@ -298,6 +354,45 @@ defmodule Console.Deployments.PolicyTest do
       refute result["defer"]
       assert result["approve"] == []
       assert result["sample"] == 0
+    end
+  end
+
+  describe "evaluate_custom_policy/3" do
+    test "evaluates unsaved source without a stored policy" do
+      {:ok, result} = Policy.evaluate_custom_policy(:workbench, """
+        package plrl.wb.admission
+
+        sample := 0
+
+        deny[{"message": "buffer"}] if {
+          true
+        }
+      """, %{})
+
+      assert [%{"message" => "buffer"}] = result["deny"]
+    end
+
+    test "rejects invalid rego" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, "package test\n\nallow {", %{})
+
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects an empty buffer" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, "", %{})
+
+      assert [message] = errors_on(changeset).policy
+      assert message =~ "invalid rego policy"
+    end
+
+    test "rejects source over 1MB" do
+      {:error, %Ecto.Changeset{} = changeset} =
+        Policy.evaluate_custom_policy(:workbench, String.duplicate("a", 1_000_001), %{})
+
+      assert errors_on(changeset).policy == ["should be at most 1000000 character(s)"]
     end
   end
 

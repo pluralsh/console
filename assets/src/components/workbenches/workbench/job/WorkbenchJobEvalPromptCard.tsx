@@ -122,11 +122,10 @@ export function WorkbenchJobEvalPromptCard({
 
 const PromptCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
-  width: 'fit-content',
+  width: '100%',
   maxWidth: '100%',
   overflow: 'auto',
   wordBreak: 'break-word',
-  marginLeft: 'auto',
   marginTop: theme.spacing.small,
   marginBottom: theme.spacing.small,
   display: 'flex',

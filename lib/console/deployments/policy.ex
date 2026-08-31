@@ -53,6 +53,7 @@ defmodule Console.Deployments.Policy do
     get_policy!(id)
     |> allow(user, :write)
     |> when_ok(&Console.Schema.Policy.changeset(&1, attrs))
+    |> when_ok(&authorize_project_change(&1, user))
     |> when_ok(:update)
     |> notify(:update)
   end
@@ -193,6 +194,14 @@ defmodule Console.Deployments.Policy do
     |> when_ok(&evaluate_policy(&1, input))
   end
 
+  @doc "Compiles unsaved policy source and evaluates it. Does not authorize against a stored policy."
+  def evaluate_custom_policy(type, source, input) when is_binary(source) do
+    with {:ok, _} <- Console.Schema.Policy.source_changeset(source) |> Ecto.Changeset.apply_action(:validate),
+         {:ok, engine, path} <- compile_policies(type, [%{name: "custom", policy: source}]) do
+      eval_policy(engine, input, [], path)
+    end
+  end
+
   @workbench_rego Path.expand("../../../priv/policy/wb.rego", __DIR__)
   @binding_rego Path.expand("../../../priv/policy/binding.rego", __DIR__)
   @stack_rego Path.expand("../../../priv/policy/stack.rego", __DIR__)
@@ -287,24 +296,30 @@ defmodule Console.Deployments.Policy do
   end
 
   defp attach_binding(%BindingPolicy{} = binding, target, user) do
-    case fetch(binding, target) do
+    case fetch_attachment(binding, target) do
       %{} -> :ok
       _ -> reconcile_target(:attach, binding, target, user)
     end
   end
 
-  defp detach_binding(%BindingPolicy{} = binding, target, user) do
-    case fetch(binding, target) do
-      %{} -> reconcile_target(:detach, binding, target, user)
+  defp detach_binding(%BindingPolicy{id: id} = binding, target, user) do
+    case fetch_attachment(binding, target) do
+      %{binding_policy_id: ^id} -> reconcile_target(:detach, binding, target, user)
       _ -> :ok
     end
   end
 
-  defp fetch(%BindingPolicy{policy_id: id}, %Workbench{id: wid}), do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
-  defp fetch(%BindingPolicy{policy_id: id}, %Stack{id: sid}), do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid)
+  defp fetch_attachment(%BindingPolicy{policy_id: id}, %Workbench{id: wid}),
+    do: Repo.get_by(WorkbenchPolicy, policy_id: id, workbench_id: wid)
+  defp fetch_attachment(%BindingPolicy{policy_id: id}, %Stack{id: sid}),
+    do: Repo.get_by(StackPolicy, policy_id: id, stack_id: sid)
 
-  defp reconcile_target(:attach, %BindingPolicy{policy_id: id} = binding, %Workbench{} = wb, user),
-    do: Workbenches.create_workbench_policy(%{policy_id: id, matches: BindingPolicy.workbench_matches(binding)}, wb.id, user)
+  defp reconcile_target(:attach, %BindingPolicy{id: binding_id, policy_id: id} = binding, %Workbench{} = wb, user),
+    do: Workbenches.create_workbench_policy(%{
+      policy_id: id,
+      binding_policy_id: binding_id,
+      matches: BindingPolicy.workbench_matches(binding)
+    }, wb.id, user)
   defp reconcile_target(:attach, %BindingPolicy{} = binding, %Stack{} = stack, user),
     do: Stacks.create_stack_policy(stack_policy_attrs(binding), stack.id, user)
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Workbench{} = wb, user),
@@ -312,11 +327,22 @@ defmodule Console.Deployments.Policy do
   defp reconcile_target(:detach, %BindingPolicy{policy_id: id}, %Stack{} = stack, user),
     do: Stacks.delete_stack_policy(id, stack.id, user)
 
+  defp authorize_project_change(%Ecto.Changeset{} = cs, user),
+    do: authorize_project_change(Ecto.Changeset.get_change(cs, :project_id), cs, user)
+
+  defp authorize_project_change(nil, cs, _), do: {:ok, cs}
+  defp authorize_project_change(project_id, cs, user) do
+    Repo.get(Project, project_id)
+    |> allow(user, :write)
+    |> when_ok(fn _ -> cs end)
+  end
+
   defp bot(), do: Users.admin_bot()
 
-  defp stack_policy_attrs(%BindingPolicy{policy_id: id, matches: %{stack: %{type: t}}})
-    when not is_nil(t), do: %{policy_id: id, type: t}
-  defp stack_policy_attrs(%BindingPolicy{policy_id: id}), do: %{policy_id: id, type: :approval}
+  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id, matches: %{stack: %{type: t}}})
+    when not is_nil(t), do: %{policy_id: id, binding_policy_id: binding_id, type: t}
+  defp stack_policy_attrs(%BindingPolicy{id: binding_id, policy_id: id}),
+    do: %{policy_id: id, binding_policy_id: binding_id, type: :approval}
 
   defp maybe_sample({:ok, %{"sample" => s}} = res, input, ids) when is_list(ids) do
     if :rand.uniform() <= Console.clamp(s, 0, 0.5) && !Enum.empty?(ids) do

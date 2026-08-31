@@ -1,0 +1,120 @@
+import {
+  Chip,
+  EmptyState,
+  ErrorIcon,
+  Sidecar,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { Body1P, Title2H1 } from 'components/utils/typography/Text'
+
+import { Link, useOutletContext } from 'react-router-dom'
+import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
+import { formatDateTime } from 'utils/datetime'
+
+import { useTheme } from 'styled-components'
+
+import { useMemo } from 'react'
+import {
+  GATEKEEPER_ABS_PATH,
+  GATEKEEPER_DETAILS_PATH,
+  GATEKEEPER_REL_PATH,
+  SECURITY_ABS_PATH,
+  SECURITY_REL_PATH,
+} from 'routes/securityRoutesConsts'
+import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
+import { ConstraintContextType } from '../Constraint'
+
+function ConstraintDetails() {
+  const theme = useTheme()
+
+  const { policy } = useOutletContext<ConstraintContextType>()
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        { label: `${SECURITY_REL_PATH}`, url: `${SECURITY_ABS_PATH}}` },
+        { label: GATEKEEPER_REL_PATH, url: `${GATEKEEPER_ABS_PATH}` },
+        { label: policy?.name || '' },
+        { label: GATEKEEPER_DETAILS_PATH },
+      ],
+      [policy?.name]
+    )
+  )
+
+  if (!policy) {
+    return <EmptyState message="Policy details not found" />
+  }
+  const { name, cluster, violationCount, insertedAt, updatedAt, object } =
+    policy
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexGrow: 1,
+        alignItems: 'flex-start',
+        gap: theme.spacing.xlarge,
+        height: '100%',
+      }}
+    >
+      <div css={{ flexGrow: 1, height: '100%' }}>
+        <ScrollablePage
+          heading={name}
+          scrollable
+          fullWidth
+        >
+          <Title2H1 css={{ marginBottom: '0.67em' }}>Description</Title2H1>
+          <Body1P css={{ color: theme.colors['text-long-form'] }}>
+            {policy.description ||
+              'No description found for this policy, this must be set in an annotation'}
+          </Body1P>
+          <Title2H1 css={{ margin: '0.67em 0' }}>Recommended action</Title2H1>
+          <Body1P css={{ color: theme.colors['text-long-form'] }}>
+            {policy.recommendation ||
+              'No recommendation found for this policy, this must be set in an annotation'}
+          </Body1P>
+        </ScrollablePage>
+      </div>
+      <Sidecar
+        width={200}
+        minWidth={200}
+        marginTop={57}
+      >
+        <SidecarItem heading="Policy name"> {name}</SidecarItem>
+        <SidecarItem heading="Last Updated">
+          {formatDateTime(updatedAt || insertedAt, 'M/D/YYYY')}
+        </SidecarItem>
+        <SidecarItem heading="Violations">
+          <Chip
+            icon={violationCount ? <ErrorIcon /> : undefined}
+            severity={violationCount ? 'danger' : 'success'}
+            width={violationCount ? 'auto' : 'fit-content'}
+          >
+            {violationCount}
+          </Chip>
+        </SidecarItem>
+        {object?.metadata?.namespace && (
+          <SidecarItem heading="Namespace">
+            {object.metadata.namespace}
+          </SidecarItem>
+        )}
+        {object?.kind && (
+          <SidecarItem heading="Kind">{object.kind}</SidecarItem>
+        )}
+        {cluster && (
+          <SidecarItem heading="Cluster name">
+            <Link
+              css={theme.partials.text.inlineLink}
+              to={getClusterDetailsPath({ clusterId: cluster.id })}
+            >
+              {cluster.name}
+            </Link>
+          </SidecarItem>
+        )}
+      </Sidecar>
+    </div>
+  )
+}
+
+export default ConstraintDetails

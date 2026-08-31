@@ -10,7 +10,7 @@ defmodule Console.AI.Graph.Indexer.SourceTest do
         {:ok, %Cloudquery.ExtractOutput{type: "table", result: "{\"key\":\"value\"}", id: "id", links: ["link"]}},
         {:ok, %Cloudquery.ExtractOutput{type: "table", result: "{\"key\":\"value\"}", id: "id", links: ["link"]}},
       ]
-      expect(GRPC.Stub, :connect, fn _ -> {:ok, :channel} end)
+      expect(CloudQuery.Client, :connect, fn -> {:ok, :channel} end)
       expect(Cloudquery.CloudQuery.Stub, :extract, fn :channel, _ -> {:ok, result} end)
       expect(Console.AI.Graph.Indexer.Sink, :ingest, 1, fn _ -> :ok end)
 

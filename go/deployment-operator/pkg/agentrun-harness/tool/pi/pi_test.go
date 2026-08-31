@@ -6,8 +6,30 @@ import (
 	"testing"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
+
+func TestAddExternalMCPServers(t *testing.T) {
+	t.Setenv(mcp.EnvServers, `[{"name":"linear","url":"https://mcp.linear.app/mcp","allowedTools":["list_issues"],"headers":{"Authorization":"Bearer secret"}}]`)
+
+	servers := map[string]any{}
+	if err := addExternalMCPServers(servers); err != nil {
+		t.Fatalf("addExternalMCPServers() error = %v", err)
+	}
+	linear := servers["linear"].(map[string]any)
+	if linear["url"] != "https://mcp.linear.app/mcp" {
+		t.Fatalf("url = %v", linear["url"])
+	}
+	headers := linear["headers"].(map[string]string)
+	if headers["Authorization"] != "Bearer secret" {
+		t.Fatalf("headers = %#v", headers)
+	}
+	directTools := linear["directTools"].([]string)
+	if len(directTools) != 1 || directTools[0] != "list_issues" {
+		t.Fatalf("directTools = %#v", directTools)
+	}
+}
 
 func TestArgsIncludesJSONModeSessionAndMCPConfig(t *testing.T) {
 	tool := &Pi{
@@ -79,6 +101,41 @@ func TestMapStreamEventMapsToolLifecycle(t *testing.T) {
 	}
 	if end.Metadata == nil || end.Metadata.Tool == nil || *end.Metadata.Tool.State != console.AgentMessageToolStateCompleted {
 		t.Fatalf("expected completed tool message, got %#v", end)
+	}
+	if end.Metadata.Tool.Output == nil || *end.Metadata.Tool.Output != "ok" {
+		t.Fatalf("expected extracted tool output, got %#v", end.Metadata.Tool.Output)
+	}
+}
+
+func TestHandleStreamLineEmitsToolOutput(t *testing.T) {
+	var callID, stdout string
+	tool := &Pi{}
+	tool.OnOutput(func(id, out string) {
+		callID = id
+		stdout = out
+	})
+	tool.handleStreamLine([]byte(`{"type":"tool_execution_update","toolCallId":"call-1","toolName":"bash","partialResult":{"content":[{"type":"text","text":"hello\nworld"}]}}`))
+	if callID != "call-1" {
+		t.Fatalf("call id = %q", callID)
+	}
+	if stdout != "hello\nworld" {
+		t.Fatalf("stdout = %q", stdout)
+	}
+}
+
+func TestToolResultTextEmptyContent(t *testing.T) {
+	if got := toolResultText(json.RawMessage(`{"content":[]}`)); got != "" {
+		t.Fatalf("empty content = %q, want empty", got)
+	}
+}
+
+func TestHandleStreamLineIgnoresEmptyPartialContent(t *testing.T) {
+	emitted := 0
+	tool := &Pi{}
+	tool.OnOutput(func(string, string) { emitted++ })
+	tool.handleStreamLine([]byte(`{"type":"tool_execution_update","toolCallId":"call-1","toolName":"bash","partialResult":{"content":[]}}`))
+	if emitted != 0 {
+		t.Fatalf("emitted = %d, want 0", emitted)
 	}
 }
 

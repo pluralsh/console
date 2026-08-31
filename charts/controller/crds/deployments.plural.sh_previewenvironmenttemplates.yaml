@@ -110,6 +110,11 @@ spec:
                   Name specifies the name for this preview environment template.
                   If not provided, the name from the resource metadata will be used.
                 type: string
+              previewTtl:
+                description: |-
+                  PreviewTTL specifies how long preview environments created from this template should live,
+                  as a Kubernetes duration (e.g. 1d, 12h, 30m). If omitted, the Console default is used.
+                type: string
               reconciliation:
                 description: |-
                   Reconciliation settings for this resource.

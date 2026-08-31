@@ -12,6 +12,7 @@ import {
 import { CSSProperties, styled, useTheme } from 'styled-components'
 import type { RelativeRoutingType } from 'react-router-dom'
 import { resolveSpacersAndSanitizeCss, SpacerProps } from '../theme/spacing'
+import { lightElevatedSurface } from '../theme/lightElevatedSurface'
 import { applyNodeToRefs } from '../utils/applyNodeToRefs'
 import Flex, { FlexProps } from './Flex'
 import { Spinner } from './Spinner'
@@ -150,7 +151,13 @@ const Button = memo(
           <LoadingIndicatorWrapperSC>
             {loadingIndicator || (
               <Spinner
-                color={theme.colors.text}
+                color={
+                  buttonType === 'primary'
+                    ? theme.colors['text-always-white']
+                    : buttonType === 'destructive'
+                      ? theme.colors['text-danger']
+                      : theme.colors.text
+                }
                 size={
                   typeof measuredHeight === 'number'
                     ? (measuredHeight * 3) / 5
@@ -188,7 +195,8 @@ export const ButtonBaseSC = styled.button<{
   $noPadding: boolean
 }>(
   ({
-    theme: { colors, spacing, partials, borderRadiuses, boxShadows },
+    theme,
+    theme: { colors, spacing, partials, borderRadiuses, boxShadows, mode },
     $size,
     $type,
     $noPadding,
@@ -229,22 +237,34 @@ export const ButtonBaseSC = styled.button<{
     // secondary styles
     ...($type === 'secondary' && {
       color: colors['text-light'],
-      background: 'transparent',
+      background: mode === 'light' ? colors['fill-zero'] : 'transparent',
       borderColor: colors['border-input'],
+      ...lightElevatedSurface(theme),
       '&:hover': {
         color: colors['text'],
-        background: colors['action-input-hover'],
+        background:
+          mode === 'light'
+            ? colors['fill-zero-hover']
+            : colors['action-input-hover'],
         borderColor: colors['border-input'],
       },
-      '&:active': { color: colors['text'], background: 'transparent' },
+      '&:active': {
+        color: colors['text'],
+        background: mode === 'light' ? colors['fill-zero'] : 'transparent',
+      },
       '&:focus-visible': {
         color: colors['text'],
-        background: colors['action-input-hover'],
+        background:
+          mode === 'light'
+            ? colors['fill-zero-hover']
+            : colors['action-input-hover'],
+        boxShadow: 'none',
       },
       '&:disabled': {
         cursor: 'not-allowed',
         color: colors['text-disabled'],
-        background: 'transparent',
+        background: mode === 'light' ? colors['fill-zero'] : 'transparent',
+        boxShadow: 'none',
       },
     }),
     // tertiary styles
@@ -295,32 +315,42 @@ export const ButtonBaseSC = styled.button<{
     // floating styles
     ...($type === 'floating' && {
       color: colors['text-light'],
-      background: colors['fill-two'],
+      background: mode === 'light' ? colors['fill-zero'] : colors['fill-two'],
       borderColor: colors['border-input'],
-      boxShadow: boxShadows.slight,
+      ...lightElevatedSurface(theme),
+      ...(mode !== 'light' ? { boxShadow: boxShadows.slight } : {}),
       '&:hover': {
         color: colors['text'],
-        background: colors['fill-two'],
+        background: mode === 'light' ? colors['fill-zero'] : colors['fill-two'],
         borderColor: colors['border-input'],
         boxShadow: boxShadows.moderate,
       },
       '&:active': {
         color: colors['text'],
-        background: colors['fill-two-hover'],
+        background:
+          mode === 'light'
+            ? colors['fill-zero-hover']
+            : colors['fill-two-hover'],
         borderColor: colors['border-input'],
       },
       '&:focus-visible': {
         color: colors['text'],
-        background: colors['fill-two-selected'],
+        background:
+          mode === 'light'
+            ? colors['fill-zero-selected']
+            : colors['fill-two-selected'],
+        boxShadow: 'none',
       },
       '&:disabled': {
         cursor: 'not-allowed',
         color: colors['text-disabled'],
-        borderColor: colors['border-input'],
-        background: 'transparent',
+        borderColor: mode === 'light' ? 'transparent' : colors['border-input'],
+        background: mode === 'light' ? colors['fill-zero'] : 'transparent',
+        boxShadow: 'none',
         '&:hover': {
-          borderColor: colors['border-input'],
-          background: 'transparent',
+          borderColor:
+            mode === 'light' ? 'transparent' : colors['border-input'],
+          background: mode === 'light' ? colors['fill-zero'] : 'transparent',
         },
       },
     }),

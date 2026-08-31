@@ -51,6 +51,42 @@ defmodule Console.AI.Workbench.HeartbeatTest do
       assert usage.total_cost == 6.75
     end
 
+    test "backfills agent-run usage using the agent runtime model price sheet" do
+      deployment_settings(ai: %{
+        enabled: true,
+        provider: :openai,
+        openai: %{tool_model: "default-tool-model"},
+        price_sheets: [
+          %{provider: :openai, model: "default-tool-model", input_price: 1.0, output_price: 2.0},
+          %{provider: :anthropic, model: "claude-sonnet-4-5", input_price: 3.0, output_price: 15.0}
+        ]
+      })
+
+      runtime = insert(:agent_runtime, model: %{provider: :anthropic, model: "claude-sonnet-4-5"})
+      workbench = insert(:workbench, agent_runtime: runtime)
+      job = insert(:workbench_job, status: :running, workbench: workbench)
+            |> Repo.preload(workbench: :agent_runtime)
+      run = insert(:agent_run, runtime: runtime) |> Repo.preload(:runtime)
+
+      {:ok, pid} = Heartbeat.start_link(job)
+      Process.unlink(pid)
+
+      on_exit(fn ->
+        if Process.alive?(pid), do: GenServer.stop(pid, :normal)
+      end)
+
+      Console.AI.Workbench.Environment.runtime_usage_callback(job, run, %{
+        input_tokens: 1_000_000,
+        output_tokens: 250_000
+      })
+
+      %{usage: usage} = :sys.get_state(pid)
+
+      assert usage.input_cost == 3.0
+      assert usage.output_cost == 3.75
+      assert usage.total_cost == 6.75
+    end
+
     test "backfills missing costs using the job model override price sheet" do
       settings = deployment_settings(ai: %{
         enabled: true,

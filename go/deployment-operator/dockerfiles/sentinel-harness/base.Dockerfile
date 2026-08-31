@@ -1,7 +1,7 @@
-FROM golang:1.26.5-alpine AS builder
+FROM golang:1.26.6-alpine AS builder
 
 ARG TARGETARCH
-ARG TARGETOS  
+ARG TARGETOS
 ARG VERSION
 
 WORKDIR /workspace
@@ -26,12 +26,13 @@ RUN CGO_ENABLED=0 \
     GOOS=${TARGETOS} \
     GOARCH=${TARGETARCH} \
     go build \
+    -tags musl \
     -trimpath \
     -ldflags="-s -w -X github.com/pluralsh/deployment-operator/pkg/sentinel-harness/environment.Version=${VERSION}" \
     -o /sentinel-harness \
     cmd/sentinel-harness/main.go
 
-FROM golang:1.26.5-alpine AS final
+FROM golang:1.26.6-alpine AS final
 
 ARG TARGETARCH
 ARG TARGETOS

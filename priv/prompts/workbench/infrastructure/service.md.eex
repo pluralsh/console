@@ -17,9 +17,9 @@ Here are the details for the Plural service **<%= @service.name %>** (namespace:
 
 ```json
 <%= Jason.encode!(%{
-  id: @service.cluster.id,
-  handle: @service.cluster.handle,
-  name: @service.cluster.name
+  id: @service.cluster && @service.cluster.id,
+  handle: @service.cluster && @service.cluster.handle,
+  name: @service.cluster && @service.cluster.name
 }, pretty: true) %>
 ```
 
@@ -30,7 +30,7 @@ This service is created as a ServiceDeployment resource in a parent service with
 <%= Jason.encode!(%{
   id: @service.parent.id,
   name: @service.parent.name,
-  cluster: @service.parent.cluster.handle
+  cluster: @service.parent.cluster && @service.parent.cluster.handle
 }, pretty: true) %>
 ```
 <% end %>
@@ -85,11 +85,11 @@ This service is owned by a GlobalService resource, which itself has this basic s
 
 ```json
 <%= Jason.encode!(%{
-  parent_service: @service.owner.parent && %{id: @service.owner.parent.id, name: @service.owner.parent.name, cluster: @service.owner.parent.cluster.handle},
+  parent_service: @service.owner.parent && %{id: @service.owner.parent.id, name: @service.owner.parent.name, cluster: @service.owner.parent.cluster && @service.owner.parent.cluster.handle},
   name: @service.owner.name,
   distro: @service.owner.distro,
   mgmt: @service.owner.mgmt,
-  tags: Enum.map(@service.owner.tags, & %{name: &1.name, value: &1.value})
+  tags: Enum.map(@service.owner.tags || [], & %{name: &1.name, value: &1.value})
 }, pretty: true) %>
 ```
 

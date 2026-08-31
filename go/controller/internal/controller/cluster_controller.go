@@ -132,7 +132,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
-	attrs, err := r.Attributes(cluster)
+	attrs, err := r.Attributes(cluster, apiCluster)
 	if err != nil {
 		return common.HandleRequeue(nil, err, cluster.SetCondition)
 	}
@@ -153,6 +153,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	cluster.Status.KasURL = apiCluster.KasURL
 	cluster.Status.CurrentVersion = apiCluster.CurrentVersion
 	cluster.Status.PingedAt = apiCluster.PingedAt
+	cluster.SyncPrevTags()
 
 	if apiCluster.Status != nil {
 		for _, condition := range apiCluster.Status.Conditions {
@@ -166,8 +167,12 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	return cluster.Spec.Reconciliation.Requeue(), nil
 }
 
-func (r *ClusterReconciler) Attributes(cluster *v1alpha1.Cluster) (*console.ClusterUpdateAttributes, error) {
-	tagAttributes := cluster.TagUpdateAttributes()
+func (r *ClusterReconciler) Attributes(cluster *v1alpha1.Cluster, apiCluster *console.ClusterFragment) (*console.ClusterUpdateAttributes, error) {
+	var existingTags []*console.ClusterTags
+	if apiCluster != nil {
+		existingTags = apiCluster.Tags
+	}
+	tagAttributes := cluster.TagUpdateAttributes(existingTags)
 
 	var readBindings, writeBindings []*console.PolicyBindingAttributes
 	var err error

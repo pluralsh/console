@@ -29,15 +29,11 @@ export function useSlicePolling<
   queryResult: QueryResult<QData, QVariables>,
   {
     interval = POLL_INTERVAL,
+    skip = false,
     ...fetchSliceOpts
-  }: { interval?: number } & FetchSliceOptions
+  }: { interval?: number; skip?: boolean } & FetchSliceOptions
 ) {
-  const { data, loading, refetch: originalRefetch } = queryResult
-  const edges = useMemo(() => {
-    const queryKey = fetchSliceOpts.keyPath[fetchSliceOpts.keyPath.length - 1]
-
-    return data?.[queryKey]?.edges
-  }, [data, fetchSliceOpts.keyPath])
+  const { loading, refetch: originalRefetch } = queryResult
 
   const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
   const refetch = !fetchSliceOpts?.virtualSlice?.start?.index
@@ -49,17 +45,12 @@ export function useSlicePolling<
   })
 
   useEffect(() => {
-    if (!edges) return
+    if (interval === 0 || skip || loading) return
 
-    // if interval is 0, prevent polling
-    if (interval === 0) return
-
-    let intervalId
-
-    if (!loading) intervalId = setInterval(() => poll(), interval)
+    const intervalId = setInterval(() => poll(), interval)
 
     return () => clearInterval(intervalId)
-  }, [edges, interval, loading])
+  }, [interval, loading, skip])
 
   return useMemo(() => ({ refetch }), [refetch])
 }

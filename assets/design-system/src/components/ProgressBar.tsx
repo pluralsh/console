@@ -1,6 +1,7 @@
 import { Div } from 'honorable'
 
 import { keyframes } from '@emotion/react'
+import { useTheme } from 'styled-components'
 
 export type Props = {
   mode?: 'indeterminate' | 'determinate'
@@ -104,6 +105,14 @@ export default function ProgressBar({
   completeColor = 'border-success',
   ...props
 }: Props) {
+  const theme = useTheme()
+  // fill-three matches light elevated card fills; use a darker hairline grey
+  // so the unfilled track reads on white and on fill-zero-selected.
+  const trackColor =
+    theme.mode === 'light'
+      ? theme.colors['border-fill-two']
+      : theme.colors['fill-three']
+  const pct = Math.min(Math.max(progress ?? 0, 0), 1)
   let fill
 
   if (mode !== 'determinate') {
@@ -120,10 +129,8 @@ export default function ProgressBar({
         left={0}
         top={0}
         bottom={0}
-        backgroundColor={
-          (progress ?? 0) >= 1 || complete ? completeColor : progressColor
-        }
-        right={`${(1 - (progress ?? 0)) * 100}%`}
+        backgroundColor={pct >= 1 || complete ? completeColor : progressColor}
+        width={pct > 0 ? `max(${height}px, ${pct * 100}%)` : 0}
       />
     )
   }
@@ -134,7 +141,7 @@ export default function ProgressBar({
       width="100%"
       height={height}
       borderRadius={height / 2}
-      backgroundColor="fill-three"
+      backgroundColor={trackColor}
       overflow="hidden"
       {...props}
     >

@@ -76,6 +76,53 @@ func (_c *ClientMock_AddStackRunLogs_Call) RunAndReturn(run func(string, string)
 	return _c
 }
 
+// AgentMessageOutput provides a mock function with given fields: ctx, attrs
+func (_m *ClientMock) AgentMessageOutput(ctx context.Context, attrs goclient.AgentMessageOutputAttributes) error {
+	ret := _m.Called(ctx, attrs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AgentMessageOutput")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, goclient.AgentMessageOutputAttributes) error); ok {
+		r0 = rf(ctx, attrs)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ClientMock_AgentMessageOutput_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AgentMessageOutput'
+type ClientMock_AgentMessageOutput_Call struct {
+	*mock.Call
+}
+
+// AgentMessageOutput is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attrs goclient.AgentMessageOutputAttributes
+func (_e *ClientMock_Expecter) AgentMessageOutput(ctx interface{}, attrs interface{}) *ClientMock_AgentMessageOutput_Call {
+	return &ClientMock_AgentMessageOutput_Call{Call: _e.mock.On("AgentMessageOutput", ctx, attrs)}
+}
+
+func (_c *ClientMock_AgentMessageOutput_Call) Run(run func(ctx context.Context, attrs goclient.AgentMessageOutputAttributes)) *ClientMock_AgentMessageOutput_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(goclient.AgentMessageOutputAttributes))
+	})
+	return _c
+}
+
+func (_c *ClientMock_AgentMessageOutput_Call) Return(_a0 error) *ClientMock_AgentMessageOutput_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ClientMock_AgentMessageOutput_Call) RunAndReturn(run func(context.Context, goclient.AgentMessageOutputAttributes) error) *ClientMock_AgentMessageOutput_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CancelAgentRun provides a mock function with given fields: ctx, id
 func (_m *ClientMock) CancelAgentRun(ctx context.Context, id string) error {
 	ret := _m.Called(ctx, id)

@@ -107,7 +107,7 @@ const ModalWrapperSC = styled(ModalWrapper)<{
 
 const FlyoverWrapperSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
-  borderLeft: theme.borders.default,
+  borderLeft: theme.borders.hairline,
   boxShadow: theme.boxShadows.modal,
   height: '100%',
   display: 'flex',

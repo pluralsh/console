@@ -89,10 +89,9 @@ defmodule Console.Deployments.Sentinels do
     do: run_sentinel(overrides, get_sentinel!(id), user)
 
   def run_sentinel(overrides, %Sentinel{} = sentinel, %User{} = user) do
-    start_transaction()
-    |> add_operation(:fetch, fn _ -> allow(sentinel, user, :write) end)
-    |> add_operation(:run, fn %{fetch: sentinel} -> run_sentinel(overrides, sentinel) end)
-    |> execute(extract: :run)
+    with {:ok, sentinel} <- allow(sentinel, user, :write) do
+      run_sentinel(overrides, sentinel)
+    end
   end
 
   @doc """

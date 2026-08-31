@@ -1,5 +1,12 @@
 defmodule Console.AI.ModelSelection do
-  alias Console.Schema.{AIUsage, DeploymentSettings, WorkbenchJob}
+  alias Console.Schema.{
+    AIUsage,
+    AgentRun,
+    AgentRuntime,
+    DeploymentSettings,
+    Workbench,
+    WorkbenchJob
+  }
 
   @tokens_per_million 1_000_000
 
@@ -9,10 +16,12 @@ defmodule Console.AI.ModelSelection do
   A workbench job's model override takes precedence over the configured tool model.
   """
   @spec tool_model(WorkbenchJob.t(), DeploymentSettings.t() | nil) :: %{provider: atom, model: binary} | nil
-  def tool_model(%WorkbenchJob{modes: %{model: %{provider: provider, model: model}}}, _settings)
-      when is_atom(provider) and is_binary(model),
-      do: %{provider: provider, model: model}
-  def tool_model(%WorkbenchJob{}, %DeploymentSettings{ai: %{provider: provider} = ai}) do
+  def tool_model(%WorkbenchJob{modes: %{model: model}} = job, settings) do
+    model_info(model) || settings_tool_model(job, settings)
+  end
+  def tool_model(%WorkbenchJob{} = job, settings), do: settings_tool_model(job, settings)
+
+  defp settings_tool_model(%WorkbenchJob{}, %DeploymentSettings{ai: %{provider: provider} = ai}) do
     provider = ai.tool_provider || provider
 
     with config when is_map(config) <- Map.get(ai, provider),
@@ -22,7 +31,25 @@ defmodule Console.AI.ModelSelection do
       _ -> nil
     end
   end
-  def tool_model(%WorkbenchJob{}, _), do: nil
+  defp settings_tool_model(_, _), do: nil
+
+  @doc """
+  Resolves the provider and model used by an agent runtime.
+
+  Coding-agent runs report token counts but often omit cost. This is the model those
+  tokens should be attributed against when a price sheet is configured.
+  """
+  @spec runtime_model(term) :: %{provider: atom, model: binary} | nil
+  def runtime_model(%AgentRun{runtime: runtime}), do: runtime_model(runtime)
+  def runtime_model(%WorkbenchJob{workbench: workbench}), do: runtime_model(workbench)
+  def runtime_model(%Workbench{agent_runtime: runtime}), do: runtime_model(runtime)
+  def runtime_model(%AgentRuntime{model: model}), do: model_info(model)
+  def runtime_model(_), do: nil
+
+  defp model_info(%{provider: provider, model: model})
+       when is_atom(provider) and is_binary(model),
+       do: %{provider: provider, model: model}
+  defp model_info(_), do: nil
 
   @doc """
   Finds the configured price sheet for a provider and model.

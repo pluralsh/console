@@ -137,7 +137,7 @@ function PopoverListBox({
               headerFixed={dropdownHeaderFixed}
               footerFixed={dropdownFooterFixed}
               extendStyle={{
-                boxShadow: theme.boxShadows.moderate,
+                boxShadow: theme.boxShadows.slight,
               }}
               listBoxRef={listBoxRef}
               {...listBoxProps}

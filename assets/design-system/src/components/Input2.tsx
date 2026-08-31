@@ -22,6 +22,7 @@ import { parentFillLevelToBackground, TitleContent } from './Select'
 import Tooltip from './Tooltip'
 
 import { useFormField } from './FormField'
+import { lightElevatedSurface } from '../theme/lightElevatedSurface'
 
 export type InputProps = {
   suffix?: ReactNode
@@ -126,7 +127,7 @@ const InputRootSC = styled.div<{
     ? theme.partials.text.caption
     : theme.partials.text.body2),
   display: 'flex',
-  overflow: 'hidden',
+  overflow: theme.mode === 'light' ? 'visible' : 'hidden',
   justifyContent: 'space-between',
   alignItems: 'center',
   height: 'auto',
@@ -142,11 +143,14 @@ const InputRootSC = styled.div<{
     ? theme.colors['border-danger']
     : theme.colors['border-input'],
   borderRadius: theme.borderRadiuses.medium,
+  ...lightElevatedSurface(theme, { error: $error }),
   '&:focus-within': {
     borderColor: theme.colors['border-outline-focused'],
+    boxShadow: 'none',
   },
   '&[aria-disabled=true]': {
     borderColor: theme.colors['border-disabled'],
+    boxShadow: 'none',
   },
   '&[aria-disabled=true], &[aria-disabled=true] *': {
     color: theme.colors['text-input-disabled'],

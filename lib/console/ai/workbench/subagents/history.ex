@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.History do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
-  alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Search, Scratchpad}
+  alias Console.AI.Tools.Workbench.{Result, Search, Scratchpad}
   alias Console.AI.Workbench.{Environment}
   import Console.AI.Workbench.Environment, only: [engine_opts: 1]
 
@@ -13,7 +13,7 @@ defmodule Console.AI.Workbench.Subagents.History do
       engine_opts(environment) ++ [
         system_prompt: &String.trim(system_prompt(prompt: WorkbenchJob.objective(job), engine: &1)),
         acc: %{},
-        callback: &callback(activity, &1),
+        callback: &callback(activity, environment, &1),
         continue_msg: cont_msg()
       ]
     )
@@ -37,9 +37,7 @@ defmodule Console.AI.Workbench.Subagents.History do
   defp tools(%Environment{skills: skills}, job) do
     job = Repo.preload(job, [referenced_job: [activities: :thoughts]])
     skills = Environment.subagent_skills(skills, :memory)
-    [
-      %Skills{skills: skills},
-      %Skill{skills: skills},
+    skill_knowledge_tools(job, skills) ++ [
       Scratchpad,
       %Search{activities: job.referenced_job.activities},
       Result

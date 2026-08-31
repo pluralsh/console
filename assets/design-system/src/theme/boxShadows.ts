@@ -29,22 +29,22 @@ export const getBoxShadows = ({ mode }: { mode: ColorMode }) =>
         }
       : {
           slight: [
-            `0px 2px 10px 0px ${shadowL.alpha(0.04)}`,
+            `0px 1px 2px 0px ${shadowL.alpha(0.03)}`,
             `0px 1px 3px 0px ${shadowL.alpha(0.04)}`,
           ].join(','),
           moderate: [
-            `0px 2px 10px 0px ${shadowL.alpha(0.08)}`,
-            `0px 2px 7px 1px ${shadowL.alpha(0.1)}`,
+            `0px 4px 12px 0px ${shadowL.alpha(0.06)}`,
+            `0px 1px 3px 0px ${shadowL.alpha(0.04)}`,
           ].join(','),
-          modal: `0px 10px 40px 0px ${shadowL.alpha(0.25)}`,
+          modal: `0px 8px 28px 0px ${shadowL.alpha(0.12)}`,
           slightPurple: [
-            `0px 2px 10px 0px ${shadowLPurple.alpha(0.04)}`,
+            `0px 1px 2px 0px ${shadowLPurple.alpha(0.03)}`,
             `0px 1px 3px 0px ${shadowLPurple.alpha(0.04)}`,
           ].join(','),
           moderatePurple: [
-            `0px 2px 10px 0px ${shadowLPurple.alpha(0.08)}`,
-            `0px 2px 7px 1px ${shadowLPurple.alpha(0.1)}`,
+            `0px 4px 12px 0px ${shadowLPurple.alpha(0.06)}`,
+            `0px 1px 3px 0px ${shadowLPurple.alpha(0.04)}`,
           ].join(','),
-          modalPurple: `0px 10px 40px 0px ${shadowLPurple.alpha(0.25)}`,
+          modalPurple: `0px 8px 28px 0px ${shadowLPurple.alpha(0.12)}`,
         }),
   }) as const satisfies Record<string, CSSProperties['boxShadow']>

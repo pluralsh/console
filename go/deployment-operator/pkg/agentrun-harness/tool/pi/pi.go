@@ -10,6 +10,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/mcp"
 	proxymodel "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/model"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
@@ -244,12 +245,38 @@ func (in *Pi) writeConfig() error {
 			},
 		},
 	}
+	if err := addExternalMCPServers(mcp["mcpServers"].(map[string]any)); err != nil {
+		return err
+	}
 	mcpData, err := json.Marshal(mcp)
 	if err != nil {
 		return fmt.Errorf("marshal pi mcp config: %w", err)
 	}
 	if err := helpers.File().Create(in.mcpConfigPath(), string(mcpData), 0644); err != nil {
 		return fmt.Errorf("write pi mcp config: %w", err)
+	}
+	return nil
+}
+
+func addExternalMCPServers(servers map[string]any) error {
+	external, err := mcp.Load()
+	if err != nil {
+		return fmt.Errorf("load external mcp servers: %w", err)
+	}
+	for _, server := range external {
+		entry := map[string]any{
+			"url": server.URL,
+		}
+		if len(server.Headers) > 0 {
+			entry["headers"] = server.Headers
+		}
+		if server.HasAllowedTools() {
+			entry["directTools"] = server.AllowedTools
+			entry["includeTools"] = server.AllowedTools
+		} else {
+			entry["directTools"] = true
+		}
+		servers[server.Name] = entry
 	}
 	return nil
 }
@@ -271,6 +298,10 @@ func (in *Pi) handleStreamLine(line []byte) {
 	if event.Type == "session" && event.ID != "" {
 		in.sessionID = event.ID
 	}
+	if event.Type == "tool_execution_update" {
+		in.EmitOutput(event.ToolCallID, toolResultText(event.PartialResult))
+		return
+	}
 	message, callID := in.mapStreamEvent(&event)
 	if message != nil && in.onMessage != nil {
 		in.onMessage(message, callID)
@@ -286,7 +317,7 @@ func (in *Pi) mapStreamEvent(event *StreamEvent) (*console.AgentMessageAttribute
 		if event.IsError {
 			state = console.AgentMessageToolStateError
 		}
-		return toolMessage(event.ToolName, state, rawString(event.Args), rawString(event.Result)), event.ToolCallID
+		return toolMessage(event.ToolName, state, rawString(event.Args), toolResultText(event.Result)), event.ToolCallID
 	case "message_end":
 		return in.messageEnd(event.Message), ""
 	case "error":
@@ -338,16 +369,7 @@ func (in *Pi) messageEnd(message *AgentMessage) *console.AgentMessageAttributes 
 }
 
 func assistantText(content json.RawMessage) string {
-	var blocks []contentBlock
-	if json.Unmarshal(content, &blocks) != nil {
-		return ""
-	}
-	text := ""
-	for _, block := range blocks {
-		if block.Type == "text" {
-			text += block.Text
-		}
-	}
+	text, _ := contentBlocksText(content)
 	return text
 }
 
@@ -356,4 +378,42 @@ func rawString(value json.RawMessage) string {
 		return ""
 	}
 	return string(value)
+}
+
+func toolResultText(value json.RawMessage) string {
+	if len(value) == 0 || string(value) == "null" {
+		return ""
+	}
+	if text, ok := contentBlocksText(value); ok {
+		return text
+	}
+	var wrapped struct {
+		Content json.RawMessage `json:"content"`
+	}
+	if json.Unmarshal(value, &wrapped) == nil && len(wrapped.Content) > 0 {
+		if text, ok := contentBlocksText(wrapped.Content); ok {
+			// Empty content arrays are partial results with no stdout yet.
+			// Returning the wrapper JSON would poison later delta slicing.
+			return text
+		}
+	}
+	var s string
+	if json.Unmarshal(value, &s) == nil {
+		return s
+	}
+	return string(value)
+}
+
+func contentBlocksText(value json.RawMessage) (string, bool) {
+	var blocks []contentBlock
+	if json.Unmarshal(value, &blocks) != nil {
+		return "", false
+	}
+	text := ""
+	for _, block := range blocks {
+		if block.Type == "text" {
+			text += block.Text
+		}
+	}
+	return text, true
 }

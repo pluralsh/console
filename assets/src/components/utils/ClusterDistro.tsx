@@ -21,7 +21,7 @@ export const ClusterProviderIcons = {
   },
   [ClusterDistro.Eks]: {
     dark: `${DISTRO_ICON_PATH}/eks-dark.svg`,
-    light: `${DISTRO_ICON_PATH}/eks-light.svg`,
+    light: `${DISTRO_ICON_PATH}/eks-dark.svg`,
   },
   [ClusterDistro.Gke]: {
     dark: `${DISTRO_ICON_PATH}/gke-dark.svg`,
@@ -37,7 +37,7 @@ export const ClusterProviderIcons = {
   },
   [ClusterDistro.Openshift]: {
     dark: `${DISTRO_ICON_PATH}/openshift-dark.svg`,
-    light: `${DISTRO_ICON_PATH}/openshift-light.svg`,
+    light: `${DISTRO_ICON_PATH}/openshift-dark.svg`,
   },
   [ClusterDistro.Generic]: {
     dark: `${DISTRO_ICON_PATH}/k8s.svg`,

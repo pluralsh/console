@@ -60,7 +60,7 @@ defmodule Console.Schema.WorkbenchJob do
       |> cast_embed(:kubernetes, with: &kubernetes_changeset/2)
     end
 
-    defp model_changeset(model, attrs) do
+    def model_changeset(model, attrs) do
       model
       |> cast(attrs, [:provider, :model])
       |> validate_required([:provider, :model])
