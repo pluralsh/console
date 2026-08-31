@@ -6,13 +6,21 @@ on:
       - "**"
     paths:
       - ".github/workflows/documentation-cd.yaml"
+      - ".yarnrc.yml"
+      - "assets/design-system/**"
       - "documentation/**"
+      - "package.json"
+      - "yarn.lock"
   push:
     branches:
       - "master"
     paths:
       - ".github/workflows/documentation-cd.yaml"
+      - ".yarnrc.yml"
+      - "assets/design-system/**"
       - "documentation/**"
+      - "package.json"
+      - "yarn.lock"
     tags:
       - "documentation/v*.*.*"
 
@@ -56,7 +64,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: documentation
+          context: .
           file: documentation/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}

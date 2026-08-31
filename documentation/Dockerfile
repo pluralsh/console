@@ -1,15 +1,18 @@
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 WORKDIR /app
 
 RUN apk add --no-cache git
 
-COPY package.json yarn.lock ./
-COPY .yarnrc.docker.yml ./.yarnrc.yml
+COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/ ./.yarn/
+COPY assets/package.json ./assets/package.json
+COPY assets/design-system/package.json ./assets/design-system/package.json
+COPY documentation/package.json ./documentation/package.json
 RUN yarn install --immutable
 
-COPY . .
+COPY assets/design-system/ ./assets/design-system/
+COPY documentation/ ./documentation/
 
 ARG NEXT_PUBLIC_ROOT_URL
 ARG NEXT_PUBLIC_GA_ID
@@ -17,18 +20,15 @@ ARG NEXT_PUBLIC_GA_ID
 ENV NEXT_PUBLIC_ROOT_URL=$NEXT_PUBLIC_ROOT_URL
 ENV NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID
 
-RUN yarn build
+RUN yarn workspace @pluralsh/documentation build:next
 
-FROM node:22-alpine AS production
+FROM node:24-alpine AS production
 WORKDIR /app
 
-COPY --from=base /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
 COPY --from=base /app/node_modules/ ./node_modules/
-COPY --from=base /app/.yarn/ ./.yarn/
-COPY --from=base /app/.next/ ./.next/
-COPY --from=base /app/public/ ./public/
-COPY --from=base /app/pages/ ./pages/
+COPY --from=base /app/documentation/ ./documentation/
 
 EXPOSE 3000
 
-CMD ["yarn", "start"]
+WORKDIR /app/documentation
+CMD ["node", "/app/node_modules/next/dist/bin/next", "start", "-p", "3000"]

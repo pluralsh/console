@@ -1,8 +1,8 @@
 services:
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: assets/Dockerfile
     working_dir: /app/assets
     ports:
       - "3000:3000"

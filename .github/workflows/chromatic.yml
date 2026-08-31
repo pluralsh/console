@@ -5,14 +5,20 @@ on:
     branches:
       - master
     paths:
+      - ".yarnrc.yml"
       - "assets/design-system/**"
       - ".github/workflows/chromatic.yml"
+      - "package.json"
+      - "yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
+      - ".yarnrc.yml"
       - "assets/design-system/**"
       - ".github/workflows/chromatic.yml"
+      - "package.json"
+      - "yarn.lock"
 
 jobs:
   chromatic:
@@ -34,7 +40,7 @@ jobs:
         with:
           node-version: 24.11.1
           cache: yarn
-          cache-dependency-path: assets/yarn.lock
+          cache-dependency-path: yarn.lock
       - run: yarn --immutable
       - run: yarn workspace @pluralsh/design-system build:storybook
       - uses: chromaui/action@534eebfc19023579541d106f7b61d5ad70ed65c7 # v18.5.0

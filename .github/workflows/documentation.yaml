@@ -6,19 +6,27 @@ on:
       - "master"
     paths:
       - ".github/workflows/documentation.yaml"
+      - ".yarnrc.yml"
+      - "assets/design-system/**"
       - "documentation/**"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
+      - "package.json"
+      - "yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/documentation.yaml"
+      - ".yarnrc.yml"
+      - "assets/design-system/**"
       - "documentation/**"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
+      - "package.json"
+      - "yarn.lock"
 jobs:
   lint:
     name: Lint

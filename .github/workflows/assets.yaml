@@ -6,13 +6,19 @@ on:
       - "master"
     paths:
       - ".github/workflows/assets.yaml"
+      - ".yarnrc.yml"
       - "assets/**"
+      - "package.json"
+      - "yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/assets.yaml"
+      - ".yarnrc.yml"
       - "assets/**"
+      - "package.json"
+      - "yarn.lock"
 jobs:
   test:
     name: Unit test
