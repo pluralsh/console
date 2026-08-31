@@ -6,6 +6,7 @@ import (
 	"time"
 
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/output"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	console "github.com/pluralsh/console/go/deployment-operator/pkg/client"
@@ -84,9 +85,15 @@ type agentRunController struct {
 	// babysit. This catches delayed SCM API visibility even when created_at is old.
 	seenPRCommentBodies map[string]string
 
+	// toolCallMu guards toolCallMessageIDs.
+	toolCallMu sync.RWMutex
+
 	// toolCallMessageIDs maps provider tool call IDs to Console agent message IDs
 	// so long-running tools can be created on start and updated on completion.
 	toolCallMessageIDs map[string]string
+
+	// output streams buffered tool stdout to Console.
+	output *output.Streamer
 }
 
 type Option func(*agentRunController)

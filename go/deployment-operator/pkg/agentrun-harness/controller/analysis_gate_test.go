@@ -119,6 +119,8 @@ func (t *recordingTool) Configure(_, _ string) error { return nil }
 
 func (t *recordingTool) OnMessage(toolv1.MessageCallback) {}
 
+func (t *recordingTool) OnOutput(toolv1.OutputCallback) {}
+
 func (t *recordingTool) FollowUpRun(context.Context, string) error {
 	t.analysisFollowUps++
 	return t.followErr

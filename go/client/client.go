@@ -29,6 +29,7 @@ type ConsoleClient interface {
 	CreateAgentPullRequest(ctx context.Context, runID string, attributes AgentPullRequestAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentPullRequest, error)
 	CreateAgentMessage(ctx context.Context, runID string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessage, error)
 	UpdateAgentMessage(ctx context.Context, id string, attributes AgentMessageAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateAgentMessage, error)
+	CreateAgentMessageOutput(ctx context.Context, attributes AgentMessageOutputAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessageOutput, error)
 	CreateAgentRunUpload(ctx context.Context, runID string, session *graphql.Upload, screenRecording *graphql.Upload, patch *graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*CreateAgentRunUpload, error)
 	AddClusterAuditLog(ctx context.Context, audit *ClusterAuditAttributes, audits []*ClusterAuditAttributes, interceptors ...clientv2.RequestInterceptor) (*AddClusterAuditLog, error)
 	ListScmWebhooks(ctx context.Context, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListScmWebhooks, error)
@@ -17507,6 +17508,38 @@ func (t *UpdateAgentMessage_UpdateAgentMessage) GetMessage() string {
 		t = &UpdateAgentMessage_UpdateAgentMessage{}
 	}
 	return t.Message
+}
+
+type CreateAgentMessageOutput_AgentMessageOutput struct {
+	AgentRunID string  "json:\"agentRunId\" graphql:\"agentRunId\""
+	MessageID  string  "json:\"messageId\" graphql:\"messageId\""
+	Stderr     *string "json:\"stderr,omitempty\" graphql:\"stderr\""
+	Stdout     *string "json:\"stdout,omitempty\" graphql:\"stdout\""
+}
+
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetAgentRunID() string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.AgentRunID
+}
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetMessageID() string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.MessageID
+}
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetStderr() *string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.Stderr
+}
+func (t *CreateAgentMessageOutput_AgentMessageOutput) GetStdout() *string {
+	if t == nil {
+		t = &CreateAgentMessageOutput_AgentMessageOutput{}
+	}
+	return t.Stdout
 }
 
 type ListScmWebhooks_ScmWebhooks_Edges struct {
@@ -44266,6 +44299,17 @@ func (t *UpdateAgentMessage) GetUpdateAgentMessage() *UpdateAgentMessage_UpdateA
 	return t.UpdateAgentMessage
 }
 
+type CreateAgentMessageOutput struct {
+	AgentMessageOutput *CreateAgentMessageOutput_AgentMessageOutput "json:\"agentMessageOutput,omitempty\" graphql:\"agentMessageOutput\""
+}
+
+func (t *CreateAgentMessageOutput) GetAgentMessageOutput() *CreateAgentMessageOutput_AgentMessageOutput {
+	if t == nil {
+		t = &CreateAgentMessageOutput{}
+	}
+	return t.AgentMessageOutput
+}
+
 type CreateAgentRunUpload struct {
 	CreateAgentRunUpload *AgentRunUploadFragment "json:\"createAgentRunUpload,omitempty\" graphql:\"createAgentRunUpload\""
 }
@@ -49317,6 +49361,33 @@ func (c *Client) UpdateAgentMessage(ctx context.Context, id string, attributes A
 
 	var res UpdateAgentMessage
 	if err := c.Client.Post(ctx, "UpdateAgentMessage", UpdateAgentMessageDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateAgentMessageOutputDocument = `mutation CreateAgentMessageOutput ($attributes: AgentMessageOutputAttributes!) {
+	agentMessageOutput(attributes: $attributes) {
+		messageId
+		agentRunId
+		stdout
+		stderr
+	}
+}
+`
+
+func (c *Client) CreateAgentMessageOutput(ctx context.Context, attributes AgentMessageOutputAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateAgentMessageOutput, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateAgentMessageOutput
+	if err := c.Client.Post(ctx, "CreateAgentMessageOutput", CreateAgentMessageOutputDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -73506,6 +73577,7 @@ var DocumentOperationNames = map[string]string{
 	CreateAgentPullRequestDocument:                    "CreateAgentPullRequest",
 	CreateAgentMessageDocument:                        "CreateAgentMessage",
 	UpdateAgentMessageDocument:                        "UpdateAgentMessage",
+	CreateAgentMessageOutputDocument:                  "CreateAgentMessageOutput",
 	CreateAgentRunUploadDocument:                      "CreateAgentRunUpload",
 	AddClusterAuditLogDocument:                        "AddClusterAuditLog",
 	ListScmWebhooksDocument:                           "ListScmWebhooks",

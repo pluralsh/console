@@ -314,6 +314,18 @@ subscription AgentRunChat($runId: ID!) {
   }
 }
 
+subscription AgentMessageOutputDelta($runId: ID!) {
+  agentMessageOutputDelta(runId: $runId) {
+    delta
+    payload {
+      messageId
+      agentRunId
+      stdout
+      stderr
+    }
+  }
+}
+
 subscription AgentRunDelta($runId: ID!) {
   agentRunDelta(id: $runId) {
     delta

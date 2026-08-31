@@ -146,6 +146,15 @@ mutation UpdateAgentMessage($id: ID!, $attributes: AgentMessageAttributes!) {
   }
 }
 
+mutation CreateAgentMessageOutput($attributes: AgentMessageOutputAttributes!) {
+  agentMessageOutput(attributes: $attributes) {
+    messageId
+    agentRunId
+    stdout
+    stderr
+  }
+}
+
 mutation CreateAgentRunUpload($runId: ID!, $session: Upload, $screenRecording: Upload, $patch: Upload) {
   createAgentRunUpload(runId: $runId, attributes: {session: $session, screenRecording: $screenRecording, patch: $patch}) {
     ...AgentRunUploadFragment

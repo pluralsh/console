@@ -18474,6 +18474,13 @@ export type AgentRunChatSubscriptionVariables = Exact<{
 
 export type AgentRunChatSubscription = { __typename?: 'RootSubscriptionType', agentMessageDelta?: { __typename?: 'AgentMessageDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, insertedAt?: string | null, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', startedAt?: string | null, completedAt?: string | null, reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null } | null };
 
+export type AgentMessageOutputDeltaSubscriptionVariables = Exact<{
+  runId: Scalars['ID']['input'];
+}>;
+
+
+export type AgentMessageOutputDeltaSubscription = { __typename?: 'RootSubscriptionType', agentMessageOutputDelta?: { __typename?: 'AgentMessageOutputDelta', delta?: Delta | null, payload?: { __typename?: 'AgentMessageOutput', messageId: string, agentRunId: string, stdout?: string | null, stderr?: string | null } | null } | null };
+
 export type AgentRunDeltaSubscriptionVariables = Exact<{
   runId: Scalars['ID']['input'];
 }>;
@@ -29570,6 +29577,42 @@ export function useAgentRunChatSubscription(baseOptions: Apollo.SubscriptionHook
       }
 export type AgentRunChatSubscriptionHookResult = ReturnType<typeof useAgentRunChatSubscription>;
 export type AgentRunChatSubscriptionResult = Apollo.SubscriptionResult<AgentRunChatSubscription>;
+export const AgentMessageOutputDeltaDocument = gql`
+    subscription AgentMessageOutputDelta($runId: ID!) {
+  agentMessageOutputDelta(runId: $runId) {
+    delta
+    payload {
+      messageId
+      agentRunId
+      stdout
+      stderr
+    }
+  }
+}
+    `;
+
+/**
+ * __useAgentMessageOutputDeltaSubscription__
+ *
+ * To run a query within a React component, call `useAgentMessageOutputDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useAgentMessageOutputDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentMessageOutputDeltaSubscription({
+ *   variables: {
+ *      runId: // value for 'runId'
+ *   },
+ * });
+ */
+export function useAgentMessageOutputDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<AgentMessageOutputDeltaSubscription, AgentMessageOutputDeltaSubscriptionVariables> & ({ variables: AgentMessageOutputDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<AgentMessageOutputDeltaSubscription, AgentMessageOutputDeltaSubscriptionVariables>(AgentMessageOutputDeltaDocument, options);
+      }
+export type AgentMessageOutputDeltaSubscriptionHookResult = ReturnType<typeof useAgentMessageOutputDeltaSubscription>;
+export type AgentMessageOutputDeltaSubscriptionResult = Apollo.SubscriptionResult<AgentMessageOutputDeltaSubscription>;
 export const AgentRunDeltaDocument = gql`
     subscription AgentRunDelta($runId: ID!) {
   agentRunDelta(id: $runId) {
@@ -49845,6 +49888,7 @@ export const namedOperations = {
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
+    AgentMessageOutputDelta: 'AgentMessageOutputDelta',
     AgentRunDelta: 'AgentRunDelta',
     AIChatStream: 'AIChatStream',
     LogsDelta: 'LogsDelta',

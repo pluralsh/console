@@ -25,6 +25,10 @@ const (
 // Empty callID means the controller should always create a new message.
 type MessageCallback func(message *console.AgentMessageAttributes, callID string)
 
+// OutputCallback streams incremental tool stdout for a provider tool call ID.
+// stdout is the accumulated output so far; the controller converts it to deltas.
+type OutputCallback func(callID, stdout string)
+
 // EnrichedPR pairs the Console PR fragment with its live SCM state.
 type EnrichedPR struct {
 	URL         string
@@ -72,6 +76,10 @@ type Tool interface {
 	// Empty callID means the controller should always create a new message.
 	OnMessage(MessageCallback)
 
+	// OnOutput registers a callback for incremental tool stdout. Providers that
+	// do not stream tool output may leave this unimplemented via DefaultTool.
+	OnOutput(OutputCallback)
+
 	// FollowUpRun re-invokes the provider CLI with a user prompt after the
 	// initial run, resuming the provider session when a session ID was captured
 	// during streaming. It must not write to ErrorChan; failures are returned
@@ -89,6 +97,22 @@ type Tool interface {
 // It contains the common configuration logic.
 type DefaultTool struct {
 	Config Config
+
+	onOutput OutputCallback
+}
+
+// OnOutput stores the stdout streaming callback used by providers that emit
+// incremental tool output.
+func (in *DefaultTool) OnOutput(f OutputCallback) {
+	in.onOutput = f
+}
+
+// EmitOutput forwards accumulated tool stdout to the registered OutputCallback.
+func (in *DefaultTool) EmitOutput(callID, stdout string) {
+	if in.onOutput == nil || callID == "" || stdout == "" {
+		return
+	}
+	in.onOutput(callID, stdout)
 }
 
 type Config struct {
