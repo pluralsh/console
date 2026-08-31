@@ -1,0 +1,17 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": ["source.formatDocument", "source.fixAll.eslint"],
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "eslint.nodePath": ".yarn/sdks",
+  "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "dotenv.enableAutocloaking": false,
+  "prettier.documentSelectors": ["*.{js,jsx,ts,tsx,graphql,md,mdpart}"],
+  "files.associations": {
+    "*.md": "markdown",
+    "*.mdpart": "markdoc"
+  }
+}

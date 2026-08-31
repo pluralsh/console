@@ -1,0 +1,45 @@
+name: Confirm Route Changes
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  validate-routes:
+    name: Validate Generated Routes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Need full history for git log in index-routes.ts
+      - name: Read Node.js version from package.json
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
+        id: engines
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
+      - name: Install dependencies
+        run: yarn --immutable
+      - name: Backup current routes.json
+        run: cp -f generated/routes.json generated/routes.json.original
+      - name: Regenerate routes.json
+        run: yarn generate:route-index
+      - name: Create comparison files with just routes and filepaths
+        run: |
+          jq 'map_values({relPath})' generated/routes.json > routes.paths.json
+          jq 'map_values({relPath})' generated/routes.json.original > routes.original.paths.json
+      - name: Compare route paths
+        run: |
+          if ! diff -q routes.paths.json routes.original.paths.json > /dev/null; then
+            echo "Error: The routes.json file is out of sync with the docs structure."
+            echo "Please run 'yarn generate:route-index' and commit the updated file."
+            diff -u routes.original.paths.json routes.paths.json || true
+            exit 1
+          fi
+          echo "Routes validation passed: routes.json is up to date."

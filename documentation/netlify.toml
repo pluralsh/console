@@ -1,0 +1,3 @@
+# Include all files from '/pages' and '/src' so they can be read on the server
+[functions]
+included_files = ["pages/**", "src/**"]

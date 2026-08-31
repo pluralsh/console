@@ -1,0 +1,8 @@
+// needed for ts-node to work on the scripts
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "node16",
+    "moduleResolution": "node16"
+  }
+}

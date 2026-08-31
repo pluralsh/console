@@ -1,0 +1,730 @@
+{
+  "/overview": {
+    "relPath": "/overview/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/overview/introduction": {
+    "relPath": "/overview/introduction.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/overview/architecture": {
+    "relPath": "/overview/architecture.md",
+    "lastmod": "2026-03-13T12:49:45.000Z"
+  },
+  "/getting-started": {
+    "relPath": "/getting-started/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/first-steps": {
+    "relPath": "/getting-started/first-steps/index.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/first-steps/cli-quickstart": {
+    "relPath": "/getting-started/first-steps/cli-quickstart.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/first-steps/existing-cluster": {
+    "relPath": "/getting-started/first-steps/existing-cluster.md",
+    "lastmod": "2025-03-27T19:09:28.000Z"
+  },
+  "/getting-started/first-steps/plural-cloud": {
+    "relPath": "/getting-started/first-steps/plural-cloud.md",
+    "lastmod": "2025-07-14T15:36:50.000Z"
+  },
+  "/getting-started/first-steps/add-a-cluster": {
+    "relPath": "/getting-started/first-steps/add-a-cluster.md",
+    "lastmod": "2025-11-21T23:34:41.000Z"
+  },
+  "/getting-started/how-to-use": {
+    "relPath": "/getting-started/how-to-use/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/how-to-use/mgmt-cluster": {
+    "relPath": "/getting-started/how-to-use/mgmt-cluster.md",
+    "lastmod": "2025-12-03T21:39:43.000Z"
+  },
+  "/getting-started/how-to-use/rbac": {
+    "relPath": "/getting-started/how-to-use/rbac.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/how-to-use/scm-connection": {
+    "relPath": "/getting-started/how-to-use/scm-connection.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/how-to-use/workload-cluster": {
+    "relPath": "/getting-started/how-to-use/workload-cluster.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/how-to-use/controllers": {
+    "relPath": "/getting-started/how-to-use/controllers.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/how-to-use/observability": {
+    "relPath": "/getting-started/how-to-use/observability.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/how-to-use/microservice": {
+    "relPath": "/getting-started/how-to-use/microservice.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/how-to-use/pr-automation": {
+    "relPath": "/getting-started/how-to-use/pr-automation.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/how-to-use/pipelines": {
+    "relPath": "/getting-started/how-to-use/pipelines.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/how-to-use/cleaning-up": {
+    "relPath": "/getting-started/how-to-use/cleaning-up.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/getting-started/advanced-config": {
+    "relPath": "/getting-started/advanced-config/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/advanced-config/sandboxing": {
+    "relPath": "/getting-started/advanced-config/sandboxing.md",
+    "lastmod": "2026-08-06T14:42:58.000Z"
+  },
+  "/getting-started/advanced-config/edge-configuration": {
+    "relPath": "/getting-started/advanced-config/edge-configuration.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/getting-started/advanced-config/network-configuration": {
+    "relPath": "/getting-started/advanced-config/network-configuration.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/advanced-config/private-ca": {
+    "relPath": "/getting-started/advanced-config/private-ca.md",
+    "lastmod": "2026-06-02T22:54:32.000Z"
+  },
+  "/api-reference": {
+    "relPath": "/api-reference/index.md",
+    "lastmod": "2026-02-03T22:03:47.000Z"
+  },
+  "/api-reference/kubernetes": {
+    "relPath": "/api-reference/kubernetes/index.md",
+    "lastmod": "2026-02-03T22:03:47.000Z"
+  },
+  "/api-reference/kubernetes/management-api-reference": {
+    "relPath": "/api-reference/kubernetes/management-api-reference.md",
+    "lastmod": "2026-08-29T16:32:07.000Z"
+  },
+  "/api-reference/kubernetes/agent-api-reference": {
+    "relPath": "/api-reference/kubernetes/agent-api-reference.md",
+    "lastmod": "2026-08-29T16:32:07.000Z"
+  },
+  "/api-reference/graphql": {
+    "relPath": "/api-reference/graphql.md",
+    "lastmod": "2026-02-03T22:03:47.000Z"
+  },
+  "/api-reference/rest": {
+    "relPath": null,
+    "lastmod": null
+  },
+  "/api-reference/terraform": {
+    "relPath": "/api-reference/terraform/index.md",
+    "lastmod": "2026-08-04T15:01:58.000Z"
+  },
+  "/api-reference/terraform/pulumi": {
+    "relPath": "/api-reference/terraform/pulumi.md",
+    "lastmod": "2026-08-04T15:01:58.000Z"
+  },
+  "/plural-features": {
+    "relPath": "/plural-features/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/continuous-deployment": {
+    "relPath": "/plural-features/continuous-deployment/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/continuous-deployment/management-controller": {
+    "relPath": "/plural-features/continuous-deployment/management-controller/index.md",
+    "lastmod": "2026-08-06T14:42:58.000Z"
+  },
+  "/plural-features/continuous-deployment/management-controller/deployment-settings": {
+    "relPath": "/plural-features/continuous-deployment/management-controller/deployment-settings.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/continuous-deployment/deployment-operator": {
+    "relPath": "/plural-features/continuous-deployment/deployment-operator/index.md",
+    "lastmod": "2026-08-06T14:42:58.000Z"
+  },
+  "/plural-features/continuous-deployment/deployment-operator/agent-configuration": {
+    "relPath": "/plural-features/continuous-deployment/deployment-operator/agent-configuration.md",
+    "lastmod": "2026-08-06T14:42:58.000Z"
+  },
+  "/plural-features/continuous-deployment/deployment-operator/custom-health": {
+    "relPath": "/plural-features/continuous-deployment/deployment-operator/custom-health.md",
+    "lastmod": "2026-08-13T15:30:45.000Z"
+  },
+  "/plural-features/continuous-deployment/git-service": {
+    "relPath": "/plural-features/continuous-deployment/git-service.md",
+    "lastmod": "2025-12-30T16:00:47.000Z"
+  },
+  "/plural-features/continuous-deployment/helm-service": {
+    "relPath": "/plural-features/continuous-deployment/helm-service.md",
+    "lastmod": "2026-05-25T02:47:02.000Z"
+  },
+  "/plural-features/continuous-deployment/multi-source-services": {
+    "relPath": "/plural-features/continuous-deployment/multi-source-services.md",
+    "lastmod": "2026-05-25T02:47:02.000Z"
+  },
+  "/plural-features/continuous-deployment/resource-application-logic": {
+    "relPath": "/plural-features/continuous-deployment/resource-application-logic.md",
+    "lastmod": "2026-03-31T16:44:35.000Z"
+  },
+  "/plural-features/continuous-deployment/service-templating": {
+    "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
+    "lastmod": "2026-08-29T22:15:22.702Z"
+  },
+  "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
+    "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
+    "lastmod": "2026-08-29T22:15:22.724Z"
+  },
+  "/plural-features/continuous-deployment/lua": {
+    "relPath": "/plural-features/continuous-deployment/lua.md",
+    "lastmod": "2025-07-15T12:44:58.000Z"
+  },
+  "/plural-features/continuous-deployment/global-service": {
+    "relPath": "/plural-features/continuous-deployment/global-service.md",
+    "lastmod": "2025-12-30T16:00:47.000Z"
+  },
+  "/plural-features/continuous-deployment/observer": {
+    "relPath": "/plural-features/continuous-deployment/observer.md",
+    "lastmod": "2025-12-15T20:59:31.000Z"
+  },
+  "/plural-features/continuous-deployment/pipelines": {
+    "relPath": "/plural-features/continuous-deployment/pipelines.md",
+    "lastmod": "2026-03-13T12:49:45.000Z"
+  },
+  "/plural-features/continuous-deployment/github-actions-ci": {
+    "relPath": "/plural-features/continuous-deployment/github-actions-ci.md",
+    "lastmod": "2026-01-21T22:44:46.000Z"
+  },
+  "/plural-features/continuous-deployment/management-controllers-reconciliation-logic": {
+    "relPath": "/plural-features/continuous-deployment/management-controllers-reconciliation-logic.md",
+    "lastmod": "2026-01-16T15:49:48.000Z"
+  },
+  "/plural-features/k8s-upgrade-assistant": {
+    "relPath": "/plural-features/k8s-upgrade-assistant/index.md",
+    "lastmod": "2025-05-11T23:04:59.000Z"
+  },
+  "/plural-features/k8s-upgrade-assistant/upgrade-insights": {
+    "relPath": "/plural-features/k8s-upgrade-assistant/upgrade-insights.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/k8s-upgrade-assistant/addon-compatibilities": {
+    "relPath": "/plural-features/k8s-upgrade-assistant/addon-compatibilities.md",
+    "lastmod": "2025-08-15T02:54:41.000Z"
+  },
+  "/plural-features/k8s-upgrade-assistant/cluster-drain": {
+    "relPath": "/plural-features/k8s-upgrade-assistant/cluster-drain.md",
+    "lastmod": "2025-05-13T01:49:39.000Z"
+  },
+  "/plural-features/stacks-iac-management": {
+    "relPath": "/plural-features/stacks-iac-management/index.md",
+    "lastmod": "2026-08-04T15:01:58.000Z"
+  },
+  "/plural-features/stacks-iac-management/customize-runners": {
+    "relPath": "/plural-features/stacks-iac-management/customize-runners.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/pulumi": {
+    "relPath": "/plural-features/stacks-iac-management/pulumi.md",
+    "lastmod": "2026-08-04T15:01:58.000Z"
+  },
+  "/plural-features/stacks-iac-management/pr-workflow": {
+    "relPath": "/plural-features/stacks-iac-management/pr-workflow.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/manual-runs": {
+    "relPath": "/plural-features/stacks-iac-management/manual-runs.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/sharing-outputs": {
+    "relPath": "/plural-features/stacks-iac-management/sharing-outputs.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/custom-stacks": {
+    "relPath": "/plural-features/stacks-iac-management/custom-stacks.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/auto-cancellation": {
+    "relPath": "/plural-features/stacks-iac-management/auto-cancellation.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/local-execution": {
+    "relPath": "/plural-features/stacks-iac-management/local-execution.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/stacks-iac-management/service-contexts": {
+    "relPath": "/plural-features/stacks-iac-management/service-contexts.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/service-catalog": {
+    "relPath": "/plural-features/service-catalog/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/service-catalog/creation": {
+    "relPath": "/plural-features/service-catalog/creation.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/service-catalog/contribution-program": {
+    "relPath": "/plural-features/service-catalog/contribution-program.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/workbenches": {
+    "relPath": "/plural-features/workbenches/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/workbenches/configuration": {
+    "relPath": "/plural-features/workbenches/configuration.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/workbenches/coding-agent": {
+    "relPath": "/plural-features/workbenches/coding-agent.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/workbenches/tools": {
+    "relPath": "/plural-features/workbenches/tools.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/workbenches/tools/datadog": {
+    "relPath": "/plural-features/workbenches/tools/datadog.md",
+    "lastmod": "2026-08-06T15:20:26.000Z"
+  },
+  "/plural-features/workbenches/running-jobs": {
+    "relPath": "/plural-features/workbenches/running-jobs.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/workbenches/automation": {
+    "relPath": "/plural-features/workbenches/automation.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/workbenches/follow-up-automation": {
+    "relPath": "/plural-features/workbenches/follow-up-automation.md",
+    "lastmod": "2026-08-06T15:20:26.000Z"
+  },
+  "/plural-features/workbenches/use-cases": {
+    "relPath": "/plural-features/workbenches/use-cases.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/policy-management": {
+    "relPath": "/plural-features/policy-management/index.md",
+    "lastmod": "2026-08-29T16:31:45.000Z"
+  },
+  "/plural-features/policy-management/stack-policies": {
+    "relPath": "/plural-features/policy-management/stack-policies.md",
+    "lastmod": "2026-08-29T16:31:45.000Z"
+  },
+  "/plural-features/policy-management/workbench-policies": {
+    "relPath": "/plural-features/policy-management/workbench-policies.md",
+    "lastmod": "2026-08-29T16:31:45.000Z"
+  },
+  "/plural-features/policy-management/simulating-policies": {
+    "relPath": "/plural-features/policy-management/simulating-policies.md",
+    "lastmod": "2026-08-29T16:31:45.000Z"
+  },
+  "/plural-features/policy-management/common-use-cases": {
+    "relPath": "/plural-features/policy-management/common-use-cases.md",
+    "lastmod": "2026-08-29T16:31:45.000Z"
+  },
+  "/plural-features/kubernetes-dashboard": {
+    "relPath": "/plural-features/kubernetes-dashboard/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/plural-ai": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/plural-ai/ai-agent": {
+    "relPath": "/plural-features/plural-ai/ai-agent/index.md",
+    "lastmod": "2026-03-04T02:33:39.000Z"
+  },
+  "/plural-features/plural-ai/ai-agent/configure-agent": {
+    "relPath": "/plural-features/plural-ai/ai-agent/configure-agent.md",
+    "lastmod": "2026-08-29T16:31:45.000Z"
+  },
+  "/plural-features/plural-ai/ai-agent/remote-browser": {
+    "relPath": "/plural-features/plural-ai/ai-agent/remote-browser.md",
+    "lastmod": "2026-03-04T02:33:39.000Z"
+  },
+  "/plural-features/plural-ai/sentinels": {
+    "relPath": "/plural-features/plural-ai/sentinels.md",
+    "lastmod": "2025-11-08T16:45:39.000Z"
+  },
+  "/plural-features/plural-ai/multi-model-configuration": {
+    "relPath": "/plural-features/plural-ai/multi-model-configuration.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/flows": {
+    "relPath": "/plural-features/flows/index.md",
+    "lastmod": "2025-12-30T16:00:47.000Z"
+  },
+  "/plural-features/flows/create-a-flow": {
+    "relPath": "/plural-features/flows/create-a-flow.md",
+    "lastmod": "2025-04-18T18:30:29.000Z"
+  },
+  "/plural-features/flows/flow-ai": {
+    "relPath": "/plural-features/flows/flow-ai.md",
+    "lastmod": "2025-04-18T18:30:29.000Z"
+  },
+  "/plural-features/flows/preview-environments": {
+    "relPath": "/plural-features/flows/preview-environments.md",
+    "lastmod": "2026-02-23T00:07:19.000Z"
+  },
+  "/plural-features/flows/mcp": {
+    "relPath": "/plural-features/flows/mcp.md",
+    "lastmod": "2025-04-18T18:30:29.000Z"
+  },
+  "/plural-features/flows/mcp-auth": {
+    "relPath": "/plural-features/flows/mcp-auth.md",
+    "lastmod": "2025-12-30T16:00:47.000Z"
+  },
+  "/plural-features/flows/scm-webhooks-and-pr-linking": {
+    "relPath": "/plural-features/flows/scm-webhooks-and-pr-linking.md",
+    "lastmod": "2025-05-27T02:01:02.000Z"
+  },
+  "/plural-features/observability": {
+    "relPath": "/plural-features/observability/index.md",
+    "lastmod": "2025-05-10T04:27:39.000Z"
+  },
+  "/plural-features/observability/prometheus": {
+    "relPath": "/plural-features/observability/prometheus.md",
+    "lastmod": "2025-03-25T13:31:40.000Z"
+  },
+  "/plural-features/observability/logging": {
+    "relPath": "/plural-features/observability/logging.md",
+    "lastmod": "2026-05-11T20:29:08.000Z"
+  },
+  "/plural-features/observability/cost": {
+    "relPath": "/plural-features/observability/cost.md",
+    "lastmod": "2025-03-25T13:31:40.000Z"
+  },
+  "/plural-features/observability/observability-webhooks": {
+    "relPath": null,
+    "lastmod": null
+  },
+  "/plural-features/observability/observability-webhooks/datadog": {
+    "relPath": "/plural-features/observability/observability-webhooks/datadog.md",
+    "lastmod": "2025-05-10T04:27:39.000Z"
+  },
+  "/plural-features/observability/observability-webhooks/grafana": {
+    "relPath": "/plural-features/observability/observability-webhooks/grafana.md",
+    "lastmod": "2025-05-10T04:27:39.000Z"
+  },
+  "/plural-features/pr-automation": {
+    "relPath": "/plural-features/pr-automation/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/pr-automation/crds": {
+    "relPath": "/plural-features/pr-automation/crds.md",
+    "lastmod": "2025-06-05T13:01:10.000Z"
+  },
+  "/plural-features/pr-automation/governance": {
+    "relPath": "/plural-features/pr-automation/governance/index.md",
+    "lastmod": "2026-02-23T00:07:19.000Z"
+  },
+  "/plural-features/pr-automation/governance/servicenow": {
+    "relPath": "/plural-features/pr-automation/governance/servicenow.md",
+    "lastmod": "2026-02-26T22:47:50.000Z"
+  },
+  "/plural-features/pr-automation/governance/webhook": {
+    "relPath": "/plural-features/pr-automation/governance/webhook.md",
+    "lastmod": "2026-02-26T22:47:50.000Z"
+  },
+  "/plural-features/pr-automation/ai-based-pr-automations": {
+    "relPath": "/plural-features/pr-automation/ai-based-pr-automations.md",
+    "lastmod": "2026-03-13T12:49:45.000Z"
+  },
+  "/plural-features/pr-automation/description-patterns": {
+    "relPath": "/plural-features/pr-automation/description-patterns.md",
+    "lastmod": "2026-02-23T00:07:19.000Z"
+  },
+  "/plural-features/pr-automation/testing": {
+    "relPath": "/plural-features/pr-automation/testing.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/pr-automation/lua": {
+    "relPath": "/plural-features/pr-automation/lua.md",
+    "lastmod": "2025-12-15T20:59:31.000Z"
+  },
+  "/plural-features/pr-automation/pipelines": {
+    "relPath": "/plural-features/pr-automation/pipelines.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/plural-features/pr-automation/filters": {
+    "relPath": "/plural-features/pr-automation/filters.md",
+    "lastmod": "2025-05-19T07:10:18.000Z"
+  },
+  "/plural-features/projects-and-multi-tenancy": {
+    "relPath": "/plural-features/projects-and-multi-tenancy/index.md",
+    "lastmod": "2025-05-15T21:02:36.000Z"
+  },
+  "/plural-features/notifications": {
+    "relPath": "/plural-features/notifications/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/resources": {
+    "relPath": "/resources/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/resources/release-notes": {
+    "relPath": "/resources/release-notes.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/resources/product-updates": {
+    "relPath": "/resources/product-updates.md",
+    "lastmod": "2025-05-01T19:37:01.000Z"
+  },
+  "/resources/security": {
+    "relPath": null,
+    "lastmod": null
+  },
+  "/resources/architecture": {
+    "relPath": "/resources/architecture.md",
+    "lastmod": "2025-08-11T16:38:17.000Z"
+  },
+  "/resources/architecture/gitops-architecture": {
+    "relPath": "/resources/architecture/gitops-architecture.md",
+    "lastmod": "2025-08-11T16:38:17.000Z"
+  },
+  "/getting-started/agent-api-reference": {
+    "relPath": null,
+    "lastmod": null
+  },
+  "/getting-started/readme": {
+    "relPath": "/getting-started/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/getting-started/quickstart": {
+    "relPath": "/getting-started/first-steps/index.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/deployments/architecture": {
+    "relPath": "/overview/architecture.md",
+    "lastmod": "2026-03-13T12:49:45.000Z"
+  },
+  "/reference/architecture": {
+    "relPath": null,
+    "lastmod": null
+  },
+  "/deployments/operator/api": {
+    "relPath": null,
+    "lastmod": null
+  },
+  "/deployments/cli-quickstart": {
+    "relPath": "/getting-started/first-steps/cli-quickstart.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/deployments/existing-cluster": {
+    "relPath": "/getting-started/first-steps/existing-cluster.md",
+    "lastmod": "2025-03-27T19:09:28.000Z"
+  },
+  "/getting-started/deployments": {
+    "relPath": "/getting-started/first-steps/index.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/how-to/set-up/mgmt-cluster": {
+    "relPath": "/getting-started/how-to-use/mgmt-cluster.md",
+    "lastmod": "2025-12-03T21:39:43.000Z"
+  },
+  "/how-to/set-up/rbac": {
+    "relPath": "/getting-started/how-to-use/rbac.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/how-to/set-up/scm-connection": {
+    "relPath": "/getting-started/how-to-use/scm-connection.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/how-to/set-up/workload-cluster": {
+    "relPath": "/getting-started/how-to-use/workload-cluster.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/how-to/set-up/controllers": {
+    "relPath": "/getting-started/how-to-use/controllers.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/how-to/deploy/pr-automation": {
+    "relPath": "/getting-started/how-to-use/pr-automation.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/how-to/deploy/microservice": {
+    "relPath": "/getting-started/how-to-use/microservice.md",
+    "lastmod": "2025-07-14T14:40:01.000Z"
+  },
+  "/how-to/deploy/pipelines": {
+    "relPath": "/getting-started/how-to-use/pipelines.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/how-to/index": {
+    "relPath": "/getting-started/how-to-use/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/sandboxing": {
+    "relPath": "/getting-started/advanced-config/sandboxing.md",
+    "lastmod": "2026-08-06T14:42:58.000Z"
+  },
+  "/deployments/network-configuration": {
+    "relPath": "/getting-started/advanced-config/network-configuration.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/private-ca": {
+    "relPath": "/getting-started/advanced-config/private-ca.md",
+    "lastmod": "2026-06-02T22:54:32.000Z"
+  },
+  "/deployments/operator/architecture": {
+    "relPath": "/plural-features/continuous-deployment/deployment-operator/index.md",
+    "lastmod": "2026-08-06T14:42:58.000Z"
+  },
+  "/plural-features/continuous-deployment/deployment-operator/deployment-settings": {
+    "relPath": "/plural-features/continuous-deployment/management-controller/deployment-settings.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/deployments/operator/git-service": {
+    "relPath": "/plural-features/continuous-deployment/git-service.md",
+    "lastmod": "2025-12-30T16:00:47.000Z"
+  },
+  "/deployments/operator/helm-service": {
+    "relPath": "/plural-features/continuous-deployment/helm-service.md",
+    "lastmod": "2026-05-25T02:47:02.000Z"
+  },
+  "/deployments/operator/global-service": {
+    "relPath": "/plural-features/continuous-deployment/global-service.md",
+    "lastmod": "2025-12-30T16:00:47.000Z"
+  },
+  "/deployments/using-operator": {
+    "relPath": "/plural-features/continuous-deployment/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/deprecations": {
+    "relPath": "/plural-features/k8s-upgrade-assistant/index.md",
+    "lastmod": "2025-05-11T23:04:59.000Z"
+  },
+  "/stacks/customize-runners": {
+    "relPath": "/plural-features/stacks-iac-management/customize-runners.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/stacks/pr-workflow": {
+    "relPath": "/plural-features/stacks-iac-management/pr-workflow.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/stacks/manual-runs": {
+    "relPath": "/plural-features/stacks-iac-management/manual-runs.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/stacks/local-execution": {
+    "relPath": "/plural-features/stacks-iac-management/local-execution.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/stacks/custom-stacks": {
+    "relPath": "/plural-features/stacks-iac-management/custom-stacks.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/stacks/auto-cancellation": {
+    "relPath": "/plural-features/stacks-iac-management/auto-cancellation.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/terraform-interop": {
+    "relPath": "/plural-features/stacks-iac-management/service-contexts.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/stacks": {
+    "relPath": "/plural-features/stacks-iac-management/index.md",
+    "lastmod": "2026-08-04T15:01:58.000Z"
+  },
+  "/service-catalog/creation": {
+    "relPath": "/plural-features/service-catalog/creation.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/service-catalog/contributing": {
+    "relPath": "/plural-features/service-catalog/contribution-program.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/service-catalog/overview": {
+    "relPath": "/plural-features/service-catalog/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/dashboard": {
+    "relPath": "/plural-features/kubernetes-dashboard/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/ai/setup": {
+    "relPath": "/plural-features/plural-ai/multi-model-configuration.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/plural-ai/setup": {
+    "relPath": "/plural-features/plural-ai/multi-model-configuration.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/ai/architecture": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/ai/cost": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/plural-ai/architecture": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/plural-ai/arch-diagram": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/plural-features/plural-ai/cost": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/ai/overview": {
+    "relPath": "/plural-features/plural-ai/index.md",
+    "lastmod": "2026-08-29T22:15:14.000Z"
+  },
+  "/deployments/pr/crds": {
+    "relPath": "/plural-features/pr-automation/crds.md",
+    "lastmod": "2025-06-05T13:01:10.000Z"
+  },
+  "/deployments/pr/testing": {
+    "relPath": "/plural-features/pr-automation/testing.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/pr/pipelines": {
+    "relPath": "/plural-features/pr-automation/pipelines.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/pr-automation": {
+    "relPath": "/plural-features/pr-automation/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/deployments/templating": {
+    "relPath": "/plural-features/service-templating/index.md",
+    "lastmod": "2026-03-13T12:49:45.000Z"
+  },
+  "/deployments/multi-tenancy": {
+    "relPath": "/plural-features/projects-and-multi-tenancy/index.md",
+    "lastmod": "2025-05-15T21:02:36.000Z"
+  },
+  "/deployments/notifications": {
+    "relPath": "/plural-features/notifications/index.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/faq/plural-paid-tiers": {
+    "relPath": "/faq/paid-tiers.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/reference/release-notes": {
+    "relPath": "/resources/release-notes.md",
+    "lastmod": "2025-03-12T14:59:41.000Z"
+  },
+  "/management-api-reference": {
+    "relPath": "/api-reference/kubernetes/management-api-reference.md",
+    "lastmod": "2026-08-29T16:32:07.000Z"
+  },
+  "/agent-api-reference": {
+    "relPath": "/api-reference/kubernetes/agent-api-reference.md",
+    "lastmod": "2026-08-29T16:32:07.000Z"
+  }
+}
