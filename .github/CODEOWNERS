@@ -1,4 +1,2 @@
-js/console/* @pluralsh/frontend
-js/design-system/* @pluralsh/frontend
-js/documentation/* @pluralsh/frontend
+js/* @pluralsh/frontend
 go/* @pluralsh/server
