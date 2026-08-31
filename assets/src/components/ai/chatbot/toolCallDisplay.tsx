@@ -39,7 +39,6 @@ const TITLE_OVERRIDES: Record<string, string> = {
   python_sandbox: 'Python sandbox',
   workbench_lua: 'Lua',
   workbench_notes: 'Notes',
-  workbench_plan: 'Plan',
   current_time: 'Time',
   agent_scratchpad: 'Scratchpad',
   saved_prompt: 'Prompt',

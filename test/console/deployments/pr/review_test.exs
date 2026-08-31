@@ -33,10 +33,18 @@ defmodule Console.Deployments.Pr.ReviewTest do
     assert summary =~ "## Plural Summary"
     assert summary =~ "### Grade: B"
     assert summary =~ "<details>"
-    assert summary =~ "<summary>Files changed (2)</summary>"
-    assert summary =~ "| Filename | Summary |"
-    assert summary =~ "| `lib/review.ex` | Defines the provider-neutral schema. |"
-    assert summary =~ "| `lib/a\\|b.ex` | Handles rows \\| columns<br>without breaking tables. |"
+    assert summary =~ "<summary><strong>Files changed (2)</strong></summary>"
+
+    expected_table =
+      """
+      | Filename | Summary |
+      | --- | --- |
+      | `lib/review.ex` | Defines the provider-neutral schema. |
+      | `lib/a\\|b.ex` | Handles rows \\| columns<br>without breaking tables. |
+      """
+      |> String.trim()
+
+    assert summary =~ expected_table
     assert summary =~ "</details>"
 
     assert Review.inline_body(comment) ==

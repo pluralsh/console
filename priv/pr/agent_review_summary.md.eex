@@ -8,12 +8,11 @@
 <%= if Enum.any?(@review.files) do %>
 
 <details>
-<summary>Files changed (<%= length(@review.files) %>)</summary>
+<summary><strong>Files changed (<%= length(@review.files) %>)</strong></summary>
 
 | Filename | Summary |
 | --- | --- |
-<%= for file <- @review.files do %>
-| `<%= Console.Deployments.Pr.Review.table_cell(file.filename) %>` | <%= Console.Deployments.Pr.Review.table_cell(file.summary) %> |
+<%= for file <- @review.files do %>| `<%= Console.Deployments.Pr.Review.table_cell(file.filename) %>` | <%= Console.Deployments.Pr.Review.table_cell(file.summary) %> |
 <% end %>
 </details>
 <% end %>
