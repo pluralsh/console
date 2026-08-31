@@ -1,4 +1,4 @@
-name: Docs
+name: Utility / Documentation
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -30,6 +30,9 @@ jobs:
       - name: Regenerate deployment operator docs
         working-directory: go/deployment-operator
         run: make crd-docs
+      - name: Sync documentation pages
+        working-directory: documentation
+        run: make sync
       - name: Save date
         id: date
         run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
