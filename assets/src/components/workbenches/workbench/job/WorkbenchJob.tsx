@@ -99,103 +99,108 @@ export function WorkbenchJob() {
     <StretchedFlex
       gap="small"
       height="100%"
+      align="stretch"
     >
-      <WrapperSC>
-        {job?.error && (
-          <GqlError
-            header="Workbench job reported an error"
-            error={job?.error}
-            css={{ marginBottom: theme.spacing.small }}
-          />
-        )}
+      <MainColumnSC>
+        <WrapperSC>
+          {job?.error && (
+            <GqlError
+              header="Workbench job reported an error"
+              error={job?.error}
+              css={{ marginBottom: theme.spacing.small }}
+            />
+          )}
 
-        <StretchedFlex
-          gap="xlarge"
-          css={{
-            borderBottom: theme.borders.default,
-            paddingBottom: theme.spacing.large,
-          }}
-        >
-          <StackedText
-            truncate
-            loading={isLoading}
-            gap="xxsmall"
-            first={job?.workbench?.name}
-            firstColor="text"
-            firstPartialType="subtitle2"
-            second={
-              job && (
-                <Flex
-                  gap="medium"
-                  css={{
-                    ...theme.partials.text.caption,
-                    color: theme.colors['text-xlight'],
-                  }}
-                >
-                  {job.user?.name?.trim() && (
-                    <span>{job.user.name.trim()}</span>
-                  )}
-                  {job.insertedAt && (
-                    <span>
-                      {formatDateTime(
-                        job.insertedAt,
-                        'YYYY-MM-DD ',
-                        false,
-                        true
-                      )}
-                      <span css={{ color: theme.colors['code-block-purple'] }}>
+          <StretchedFlex
+            gap="xlarge"
+            css={{
+              borderBottom: theme.borders.default,
+              paddingBottom: theme.spacing.large,
+            }}
+          >
+            <StackedText
+              truncate
+              loading={isLoading}
+              gap="xxsmall"
+              first={job?.workbench?.name}
+              firstColor="text"
+              firstPartialType="subtitle2"
+              second={
+                job && (
+                  <Flex
+                    gap="medium"
+                    css={{
+                      ...theme.partials.text.body2,
+                      color: theme.colors['text-xlight'],
+                    }}
+                  >
+                    {job.user?.name?.trim() && (
+                      <span>{job.user.name.trim()}</span>
+                    )}
+                    {job.insertedAt && (
+                      <span>
                         {formatDateTime(
                           job.insertedAt,
-                          'HH:mm:ss',
+                          'YYYY-MM-DD ',
                           false,
                           true
                         )}
+                        <span
+                          css={{ color: theme.colors['code-block-purple'] }}
+                        >
+                          {formatDateTime(
+                            job.insertedAt,
+                            'HH:mm:ss',
+                            false,
+                            true
+                          )}
+                        </span>
+                        {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
                       </span>
-                      {formatDateTime(job.insertedAt, ' [UTC]', false, true)}
-                    </span>
-                  )}
-                  {!isEmpty(jobTools) && (
-                    <MetadataIcons
-                      maxVisibleItems={3}
-                      items={jobTools.map((tool) => ({
-                        id: tool.id,
-                        label: tool.name,
-                        icon: (
-                          <WorkbenchToolIcon
-                            type={tool.tool}
-                            provider={tool.cloudConnection?.provider}
-                            size={12}
-                          />
-                        ),
-                      }))}
-                    />
-                  )}
-                </Flex>
-              )
-            }
-            secondColor="text-xlight"
-            secondPartialType="body2"
+                    )}
+                    {!isEmpty(jobTools) && (
+                      <MetadataIcons
+                        maxVisibleItems={3}
+                        items={jobTools.map((tool) => ({
+                          id: tool.id,
+                          label: tool.name,
+                          icon: (
+                            <WorkbenchToolIcon
+                              type={tool.tool}
+                              provider={tool.cloudConnection?.provider}
+                              size={12}
+                            />
+                          ),
+                        }))}
+                      />
+                    )}
+                  </Flex>
+                )
+              }
+              secondColor="text-xlight"
+              secondPartialType="body2"
+            />
+            <Flex
+              align="center"
+              gap="small"
+            >
+              <RunStatusIcon
+                fullColor
+                status={job?.status}
+              />
+              <SaveWorkbenchPromptButton
+                workbenchId={workbenchId}
+                prompt={trimmedPrompt}
+              />
+            </Flex>
+          </StretchedFlex>
+          <WorkbenchJobActivities
+            jobId={jobId}
+            workbenchId={workbenchId}
+            workbenchName={workbenchName}
           />
-          <Flex
-            align="center"
-            gap="small"
-          >
-            <RunStatusIcon
-              fullColor
-              status={job?.status}
-            />
-            <SaveWorkbenchPromptButton
-              workbenchId={workbenchId}
-              prompt={trimmedPrompt}
-            />
-          </Flex>
-        </StretchedFlex>
-        <WorkbenchJobActivities
-          jobId={jobId}
-          workbenchId={workbenchId}
-          workbenchName={workbenchName}
-        />
-      </WrapperSC>
+        </WrapperSC>
+      </MainColumnSC>
       {!!job?.id && hasPanelContent && !isOpen && (
         <PanelOpenBtnSC
           tertiary
@@ -211,7 +216,14 @@ export function WorkbenchJob() {
 const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
   height: '100%',
   borderLeft: theme.borders.default,
+  flexShrink: 0,
 }))
+
+const MainColumnSC = styled.div({
+  flex: 1,
+  minWidth: 0,
+  height: '100%',
+})
 
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',

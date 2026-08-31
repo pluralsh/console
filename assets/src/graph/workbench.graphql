@@ -332,6 +332,9 @@ fragment WorkbenchJobThought on WorkbenchJobThought {
   content
   toolName
   toolArgs
+  tool {
+    ...WorkbenchToolTiny
+  }
   activity {
     id
   }

@@ -10,6 +10,7 @@ import {
   Flex,
   KubernetesIcon,
   ListIcon,
+  PrOpenIcon,
   Switch,
   TrashCanIcon,
   UpdatesIcon,
@@ -344,6 +345,12 @@ export function WorkbenchPromptOptionPills({
           icon={<DiscoverIcon size={12} />}
           optionIcons={
             <>
+              {value?.coding?.review && (
+                <PrOpenIcon
+                  size={12}
+                  color="icon-light"
+                />
+              )}
               {value?.coding?.approval && (
                 <WarningShieldIcon
                   size={12}
@@ -688,7 +695,11 @@ function SelectedOptionPill({
   return (
     <ChatOptionPill
       showArrow={false}
-      css={{ height: 32 }}
+      css={{
+        height: 32,
+        flexShrink: 0,
+        gap: 8,
+      }}
     >
       {icon}
       <span>{label}</span>

@@ -14,7 +14,7 @@ import {
   useCopyText,
 } from '@pluralsh/design-system'
 
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunTinyFragment,
   AgentSessionFragment,
@@ -179,9 +179,9 @@ export function ChatMessageActions({
       {...props}
     >
       {timestamp && side === 'right' && (
-        <CaptionP $color="text-light">
+        <Body2P $color="text-light">
           {formatDateTime(timestamp, 'h:mma')}
-        </CaptionP>
+        </Body2P>
       )}
       <Flex gap="xxsmall">
         <IconFrame
@@ -223,9 +223,9 @@ export function ChatMessageActions({
         />
       </Flex>
       {timestamp && side === 'left' && (
-        <CaptionP $color="text-light">
+        <Body2P $color="text-light">
           {formatDateTime(timestamp, 'h:mma')}
-        </CaptionP>
+        </Body2P>
       )}
     </ActionsWrapperSC>
   )
@@ -242,7 +242,7 @@ function PrChatMesssage({ url, title }: { url: string; title: string }) {
       direction="column"
       gap="xsmall"
     >
-      <CaptionP $color="text-light">PR generated from chat context</CaptionP>
+      <Body2P $color="text-light">PR generated from chat context</Body2P>
       <PrLinkoutCard
         url={url}
         title={title}
@@ -309,10 +309,11 @@ const ChatMessageSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   display: 'flex',
   overflow: 'hidden',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.small,
   position: 'relative',
   padding: theme.spacing.small,
   paddingBottom: $role === AiRole.Assistant ? theme.spacing.small : 0,
   width: '100%',
+  maxWidth: '100%',
   alignItems: $role === AiRole.User ? 'flex-end' : 'flex-start',
 }))

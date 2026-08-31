@@ -1,11 +1,11 @@
 import {
   AccordionItem,
   Card,
+  DiffMethod,
+  DiffViewer,
   FailedFilledIcon,
   Flex,
   IconFrame,
-  Markdown,
-  Modal,
   TimeSeriesIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
@@ -14,20 +14,31 @@ import {
   AgentRunInfoCard,
   AgentRunInfoSimple,
 } from 'components/ai/agent-runs/AgentRunInfoDisplays'
+import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
+import { stripEmoji } from 'components/ai/stripEmoji'
 import {
-  ClickableLabelSC,
   SimpleAccordion,
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
+import {
+  getSearchQuery,
+  humanizeToolName,
+  toolCallGroupHeader,
+} from 'components/ai/chatbot/toolCallDisplay'
+import { PreviewablePanel } from 'components/ai/chatbot/ToolCallContent'
+import {
+  getWorkbenchToolLabel,
+  WorkbenchToolIcon,
+} from 'components/workbenches/tools/workbenchToolsUtils'
 import pluralize from 'pluralize'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
 import { GqlError } from 'components/utils/Alert'
+import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, CaptionP, SpanSC } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -37,14 +48,16 @@ import {
   WorkbenchJobProgressFragment,
   WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
+  WorkbenchToolTinyFragment,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { isEmpty, startCase } from 'lodash'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { getOldContentFromTextDiff } from 'utils/textDiff'
 import {
   ActivityModalIcon,
   hasWorkbenchMetricsToolQuery,
@@ -87,7 +100,11 @@ export function WorkbenchJobActivity({
 
   if (type === WorkbenchJobActivityType.Conclusion)
     return (
-      <div css={{ padding: `${spacing.small}px ${spacing.large}px 0 0` }}>
+      <div
+        css={{
+          padding: `${spacing.small}px ${spacing.medium}px 0 0`,
+        }}
+      >
         <WorkbenchJobActivityResult
           activity={activity}
           jobId={jobId}
@@ -104,6 +121,101 @@ export function WorkbenchJobActivity({
       />
     )
 
+  const titleColor = 'text-xlight'
+  const typeLabel = workbenchActivityTitle(type)
+  const taskSummary = workbenchActivityTaskSummary({
+    prompt,
+    output: result?.output,
+    textStream,
+  })
+  const titleNode = (
+    <ActivityTitleSC>
+      <Body2P
+        as="span"
+        className="type"
+        $color={titleColor}
+        $shimmer={isRunning}
+      >
+        {typeLabel}
+      </Body2P>
+      {taskSummary && (
+        <Body2P
+          as="span"
+          className="task"
+          $color="text-disabled"
+          $shimmer={isRunning}
+        >
+          {taskSummary}
+        </Body2P>
+      )}
+    </ActivityTitleSC>
+  )
+  const trailingIcons = (
+    <>
+      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
+      {!isEmpty(result?.logs) && (
+        <ActivityModalIcon
+          icon={VisualInspectionIcon}
+          tooltip="View logs"
+          modalHeader="Logs"
+          modalContent={
+            <JobActivityLogs
+              cardWrapper
+              logs={result?.logs?.filter(isNonNullable) ?? []}
+            />
+          }
+        />
+      )}
+      {hasWorkbenchMetricsToolQuery(result?.metricsQuery) && (
+        <ActivityModalIcon
+          icon={TimeSeriesIcon}
+          tooltip="View metrics"
+          modalHeader="Metrics"
+          modalContent={
+            <JobActivityMetrics
+              jobId={jobId}
+              metricsQuery={result?.metricsQuery}
+              skeletonHeight={320}
+            />
+          }
+        />
+      )}
+      {agentRun && (
+        <IconFrame
+          clickable
+          as={Link}
+          size="small"
+          to={getAgentRunAbsPath({
+            agentRunId: agentRun.id,
+            ...(workbenchId
+              ? {
+                  backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+                  backLabel: workbenchName,
+                }
+              : {}),
+          })}
+          target="_blank"
+          rel="noopener noreferrer"
+          icon={
+            <AgentRunIcon
+              runtime={agentRun.runtime}
+              size={14}
+              fullColor={false}
+              color="icon-light"
+            />
+          }
+          tooltip="Go to agent run details"
+        />
+      )}
+      {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
+        <FailedFilledIcon
+          size={12}
+          color="icon-danger"
+        />
+      )}
+    </>
+  )
+
   return (
     <AccordionItem
       key={id}
@@ -113,90 +225,26 @@ export function WorkbenchJobActivity({
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
         gap: 10,
-        padding: `${spacing.xsmall}px 0`,
-        '.icon': { width: 10 },
+        padding: `${spacing.xxsmall}px 0`,
+        width: 'fit-content',
+        maxWidth: '100%',
       }}
       trigger={
         <Flex
           gap="xsmall"
           alignItems="center"
+          minWidth={0}
+          css={{ maxWidth: '100%' }}
         >
-          <Body2P
-            $color="text-long-form"
-            $shimmer={isRunning}
-            css={{ textTransform: 'capitalize' }}
-          >
-            {type?.toLowerCase() ?? 'activity'}
-          </Body2P>
-          {result?.jobUpdate && (
-            <MemoActivityIcon jobUpdate={result.jobUpdate} />
-          )}
-          {!isEmpty(result?.logs) && (
-            <ActivityModalIcon
-              icon={VisualInspectionIcon}
-              tooltip="View logs"
-              modalHeader="Logs"
-              modalContent={
-                <JobActivityLogs
-                  cardWrapper
-                  logs={result?.logs?.filter(isNonNullable) ?? []}
-                />
-              }
-            />
-          )}
-          {hasWorkbenchMetricsToolQuery(result?.metricsQuery) && (
-            <ActivityModalIcon
-              icon={TimeSeriesIcon}
-              tooltip="View metrics"
-              modalHeader="Metrics"
-              modalContent={
-                <JobActivityMetrics
-                  jobId={jobId}
-                  metricsQuery={result?.metricsQuery}
-                  skeletonHeight={320}
-                />
-              }
-            />
-          )}
-          {agentRun && (
-            <IconFrame
-              clickable
-              as={Link}
-              size="small"
-              to={getAgentRunAbsPath({
-                agentRunId: agentRun.id,
-                ...(workbenchId
-                  ? {
-                      backTo: getWorkbenchJobAbsPath({ workbenchId, jobId }),
-                      backLabel: workbenchName,
-                    }
-                  : {}),
-              })}
-              target="_blank"
-              rel="noopener noreferrer"
-              icon={
-                <AgentRunIcon
-                  runtime={agentRun.runtime}
-                  size={14}
-                />
-              }
-              tooltip="Go to agent run details"
-            />
-          )}
-          {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
-            <FailedFilledIcon
-              size={12}
-              color="icon-danger"
-            />
-          )}
+          {titleNode}
+          {trailingIcons}
         </Flex>
       }
     >
       <Flex
         direction="column"
-        gap="xsmall"
+        gap="small"
         overflow="auto"
-        css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
         {prompt && <JobActivityPrompt prompt={prompt} />}
         <WorkbenchJobActivityThoughts
@@ -209,7 +257,10 @@ export function WorkbenchJobActivity({
             maxHeight={120}
             overflow="auto"
           >
-            <SimplifiedMarkdown text={textStream} />
+            <SimplifiedMarkdown
+              text={textStream}
+              tone="thought"
+            />
           </Flex>
         )}
         <WorkbenchJobActivityResult
@@ -217,12 +268,7 @@ export function WorkbenchJobActivity({
           jobId={jobId}
           metricsFetchEnabled={isOpen}
         />
-        {isRunning && (
-          <AILoadingText
-            activityId={id}
-            size="small"
-          />
-        )}
+        {isRunning && <AILoadingText activityId={id} />}
       </Flex>
     </AccordionItem>
   )
@@ -264,12 +310,7 @@ export function WorkbenchJobMemoGroup({
         label={`${activities.length} memos`}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          gap: spacing.xsmall,
-          '.icon': { width: 10 },
-        }}
+        hoverCaret
       >
         <Flex
           direction="column"
@@ -304,12 +345,12 @@ function WorkbenchJobMemo({
   activity: WorkbenchJobActivityFragment
   textStream: string
 }) {
-  const { prompt, result, status } = activity
-  const [isOpen, setIsOpen] = useState(false)
-  const [finishedAnimating, setFinishedAnimating] = useState(false)
-  const isRunning = isJobRunning(status)
-  const isFailed = status === WorkbenchJobActivityStatus.Failed
-  const isRejected = status === WorkbenchJobActivityStatus.Rejected
+  const { spacing } = useTheme()
+  const [isExpanded, setIsExpanded] = useState(false)
+  const isRunning = isJobRunning(activity.status)
+  const isFailed = activity.status === WorkbenchJobActivityStatus.Failed
+  const isRejected = activity.status === WorkbenchJobActivityStatus.Rejected
+  const { prompt, result } = activity
   const summary = textStream || result?.output || prompt || ''
   const workingTheory =
     result?.jobUpdate?.workingTheory?.trim() ||
@@ -324,49 +365,67 @@ function WorkbenchJobMemo({
     (isRejected ? 'Rejected workbench notes update' : null) ||
     (isFailed ? 'Failed to update workbench notes' : 'Updated workbench notes')
 
+  const jobUpdate = result?.jobUpdate
+  const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''
+  const oldValue = useMemo(
+    () => getOldContentFromTextDiff(newValue, jobUpdate?.diff),
+    [newValue, jobUpdate?.diff]
+  )
+  const hasDiff = !!jobUpdate?.diff
+
   return (
-    <MemoRowSC>
-      <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <MemoLabelSC $shimmer={isRunning}>{label}</MemoLabelSC>
-      </ClickableLabelSC>
-      {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
-      {(isFailed || isRejected) && (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )}
-      <Modal
-        open={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-          setFinishedAnimating(false)
-        }}
-        onAnimationEnd={() => setFinishedAnimating(true)}
-        header={workingTheory ? 'Working theory' : 'Memo'}
-        size="large"
+    <SimpleAccordion
+      hoverCaret
+      isOpen={isExpanded}
+      setIsOpen={setIsExpanded}
+      triggerWrapperStyles={{
+        justifyContent: 'flex-start',
+        width: 'fit-content',
+        maxWidth: '100%',
+      }}
+      label={
+        <Flex
+          alignItems="center"
+          gap="xsmall"
+          minWidth={0}
+        >
+          <MemoLabelSC $shimmer={isRunning}>{label}</MemoLabelSC>
+          {(isFailed || isRejected) && (
+            <FailedFilledIcon
+              size={12}
+              color="icon-danger"
+            />
+          )}
+        </Flex>
+      }
+    >
+      <Flex
+        direction="column"
+        gap="small"
+        marginTop={spacing.xsmall}
+        minWidth={0}
       >
-        {finishedAnimating ? (
-          <Flex
-            direction="column"
-            gap="small"
-          >
-            {result?.error && (
-              <GqlError
-                error={result.error}
-                css={{ wordBreak: 'break-word' }}
-              />
-            )}
-            {fullText && <SimplifiedMarkdown text={fullText} />}
-          </Flex>
-        ) : (
-          <RectangleSkeleton
-            $height={160}
-            $width="100%"
+        {result?.error && (
+          <GqlError
+            error={result.error}
+            css={{ wordBreak: 'break-word' }}
           />
         )}
-      </Modal>
-    </MemoRowSC>
+        {fullText && (
+          <SimplifiedMarkdown
+            text={fullText}
+            tone="thought"
+          />
+        )}
+        {hasDiff && (
+          <DiffViewer
+            compareMethod={DiffMethod.WORDS}
+            oldValue={oldValue}
+            newValue={newValue}
+          />
+        )}
+      </Flex>
+    </SimpleAccordion>
   )
 }
 
@@ -392,7 +451,7 @@ function WorkbenchJobActivityResult({
   return (
     <Flex
       direction="column"
-      gap="medium"
+      gap="small"
     >
       {result?.error && (
         <GqlError
@@ -403,9 +462,12 @@ function WorkbenchJobActivityResult({
       {!hasCanvasBlocks && (
         <div>
           {markdownType === 'simplified' ? (
-            <SimplifiedMarkdown text={result?.output ?? ''} />
+            <SimplifiedMarkdown
+              text={result?.output ?? ''}
+              tone="major"
+            />
           ) : (
-            <Markdown text={result?.output ?? ''} />
+            <ChatMarkdown text={result?.output ?? ''} />
           )}
         </div>
       )}
@@ -452,24 +514,11 @@ const MemoGroupSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
 }))
 
-const MemoRowSC = styled.div(() => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-  minWidth: 0,
-  width: '100%',
-  '& > button': {
-    flex: 1,
-    minWidth: 0,
-    overflow: 'hidden',
-  },
-}))
-
-const MemoLabelSC = styled(CaptionP)(({ theme }) => ({
+const MemoLabelSC = styled(Body2P)(({ theme }) => ({
   color: theme.colors['text-xlight'],
   display: 'block',
   minWidth: 0,
-  width: '100%',
+  maxWidth: '100%',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -497,15 +546,53 @@ function WorkbenchJobActivityThoughts({
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
     let [numWithLogs, numWithMetrics] = [0, 0]
-    thoughts.forEach(({ attributes }) => {
-      numWithLogs += isEmpty(attributes?.logs) ? 0 : 1
-      numWithMetrics += isEmpty(attributes?.metrics) ? 0 : 1
+    const configuredToolCounts = new Map<
+      string,
+      { count: number; tool: WorkbenchToolTinyFragment }
+    >()
+    const otherThoughts: Array<{
+      name?: string | null
+      arguments?: WorkbenchJobThoughtFragment['toolArgs']
+    }> = []
+    thoughts.forEach((thought) => {
+      if (thought.tool) {
+        const toolKey = `${thought.tool.tool}:${thought.tool.cloudConnection?.provider ?? ''}`
+        const current = configuredToolCounts.get(toolKey)
+        configuredToolCounts.set(toolKey, {
+          count: (current?.count ?? 0) + 1,
+          tool: thought.tool,
+        })
+      } else if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
+      else if (!isEmpty(thought.attributes?.metrics)) numWithMetrics += 1
+      else {
+        otherThoughts.push({
+          name: thought.toolName,
+          arguments: thought.toolArgs,
+        })
+      }
     })
-    const numOtherToolCalls = thoughts.length - numWithLogs - numWithMetrics
-    let header = `${numOtherToolCalls} tool ${pluralize('call', numOtherToolCalls)}`
-    if (numWithLogs > 0) header += `, ${numWithLogs} fetched logs`
-    if (numWithMetrics > 0) header += `, ${numWithMetrics} fetched metrics`
-    return { thoughts, lastThought: thoughts.at(-1), header }
+    const textParts = [
+      toolCallGroupHeader(otherThoughts),
+      numWithLogs > 0 &&
+        `${numWithLogs} fetched ${pluralize('log', numWithLogs)}`,
+      numWithMetrics > 0 &&
+        `${numWithMetrics} fetched ${pluralize('metric', numWithMetrics)}`,
+    ].filter((part): part is string => !!part)
+    const toolCounts = [...configuredToolCounts.values()]
+    return {
+      thoughts,
+      lastThought: thoughts.at(-1),
+      header:
+        toolCounts.length > 0 ? (
+          <WorkbenchToolCallSummary
+            toolCounts={toolCounts}
+            textParts={textParts}
+          />
+        ) : (
+          textParts.join(', ') ||
+          `${thoughts.length} tool ${pluralize('call', thoughts.length)}`
+        ),
+    }
   }, [activity?.thoughts])
 
   if (isEmpty(thoughts) && !isLoading) return null
@@ -526,11 +613,7 @@ function WorkbenchJobActivityThoughts({
         loading={isLoading}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          '.icon': { width: 10 },
-        }}
+        hoverCaret
       >
         <Flex
           direction="column"
@@ -559,18 +642,32 @@ function WorkbenchJobActivityThought({
 }: {
   thought: WorkbenchJobThoughtFragment
 }) {
-  const { content, toolName, toolArgs, attributes } = thought
+  const { id, content, toolName, toolArgs, attributes, tool } = thought
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
+  const query = getSearchQuery(toolArgs)
+  const toolIcon = tool ? (
+    <WorkbenchToolIcon
+      type={tool.tool}
+      provider={tool.cloudConnection?.provider}
+      size={12}
+    />
+  ) : undefined
   return (
     <SimpleToolCall
       content={content}
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
+      customTitle={
+        tool ? compactWorkbenchToolCallTitle(toolName, tool) : undefined
+      }
+      leadingIcon={toolIcon}
       {...(!isEmpty(metrics) && {
         customLabel: (
-          <CaptionP $color="text">
-            Fetched metrics <SpanSC $color="text-xlight">{toolName}</SpanSC>
-          </CaptionP>
+          <WorkbenchObservabilityToolLabel
+            icon={toolIcon}
+            title="Fetched metrics"
+            query={query}
+          />
         ),
         customResultBody: (
           <Card>
@@ -585,19 +682,163 @@ function WorkbenchJobActivityThought({
       })}
       {...(!isEmpty(logs) && {
         customLabel: (
-          <CaptionP $color="text">
-            Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
-          </CaptionP>
+          <WorkbenchObservabilityToolLabel
+            icon={toolIcon}
+            title="Fetched logs"
+            query={query}
+          />
         ),
         customResultBody: (
-          <JobActivityLogs
-            cardWrapper
-            logs={logs}
-          />
+          <PreviewablePanel contentKey={`logs:${id}:${logs.length}`}>
+            <JobActivityLogs logs={logs} />
+          </PreviewablePanel>
         ),
       })}
     />
   )
+}
+
+function WorkbenchObservabilityToolLabel({
+  icon,
+  title,
+  query,
+}: {
+  icon?: ReactNode
+  title: string
+  query: string
+}) {
+  return (
+    <Flex
+      align="center"
+      gap="xsmall"
+      minWidth={0}
+      css={{ maxWidth: '100%', overflow: 'hidden' }}
+    >
+      {icon}
+      <Body2P
+        as="span"
+        $color="text-xlight"
+        css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+      >
+        {title}
+      </Body2P>
+      {query && (
+        <Body2P
+          as="span"
+          $color="text-disabled"
+          css={{
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {query}
+        </Body2P>
+      )}
+    </Flex>
+  )
+}
+
+function WorkbenchToolCallSummary({
+  toolCounts,
+  textParts,
+}: {
+  toolCounts: Array<{ count: number; tool: WorkbenchToolTinyFragment }>
+  textParts: string[]
+}) {
+  const { spacing } = useTheme()
+
+  return (
+    <span
+      css={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
+      {textParts.map((part, index) => (
+        <Body2P
+          key={part}
+          as="span"
+          $color="text-xlight"
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            ...(index > 0 && {
+              '&::before': {
+                content: "','",
+                marginRight: spacing.xsmall,
+              },
+            }),
+          }}
+        >
+          {part}
+        </Body2P>
+      ))}
+      {toolCounts.map(({ count, tool }, index) => (
+        <span
+          key={tool.id}
+          title={`${count} ${getWorkbenchToolLabel(
+            tool.tool,
+            tool.cloudConnection?.provider
+          )} tool ${pluralize('call', count)}`}
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            ...((textParts.length > 0 || index > 0) && {
+              '&::before': {
+                content: "','",
+                marginRight: spacing.xsmall,
+              },
+            }),
+          }}
+        >
+          <Body2P
+            as="span"
+            $color="text-xlight"
+            css={{ marginRight: spacing.xxsmall }}
+          >
+            {count}
+          </Body2P>
+          <Body2P
+            as="span"
+            $color="text-xlight"
+          >
+            {getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)}
+          </Body2P>
+          <WorkbenchToolIcon
+            type={tool.tool}
+            provider={tool.cloudConnection?.provider}
+            size={12}
+            css={{ marginLeft: spacing.xxsmall }}
+          />
+        </span>
+      ))}
+    </span>
+  )
+}
+
+function compactWorkbenchToolCallTitle(
+  toolName: Nullable<string>,
+  tool: WorkbenchToolTinyFragment
+): string {
+  const title = humanizeToolName(toolName ?? '')
+  const toolLabel = getWorkbenchToolLabel(
+    tool.tool,
+    tool.cloudConnection?.provider
+  )
+  const hiddenWords = new Set(
+    [toolLabel, startCase(tool.tool.replace(/_/g, ' ')), tool.name, 'gh']
+      .flatMap((value) => value.toLowerCase().split(/\s+/))
+      .filter(Boolean)
+  )
+  const withoutToolLabel = title
+    .split(/\s+/)
+    .filter((word) => !hiddenWords.has(word.toLowerCase()))
+    .join(' ')
+
+  return withoutToolLabel || 'Tool call'
 }
 
 /** Cycles 1 → 2 → 3 dots every second for the job-level thinking label. */
@@ -635,7 +876,7 @@ export function WorkbenchJobJobLevelThinking({
       <SimpleAccordion
         label={
           <>
-            thinking
+            Thinking
             <span
               style={{
                 display: 'inline-block',
@@ -650,11 +891,7 @@ export function WorkbenchJobJobLevelThinking({
         loading={false}
         isOpen={isExpanded}
         setIsOpen={setIsExpanded}
-        caret="right-quarter-mirror"
-        triggerWrapperStyles={{
-          justifyContent: 'flex-start',
-          '.icon': { width: 10 },
-        }}
+        hoverCaret
       >
         <Flex
           direction="column"
@@ -700,3 +937,75 @@ export const isJobRunning = (
     WorkbenchJobActivityStatus | WorkbenchJobStatus | AgentRunStatus
   >
 ) => status === 'PENDING' || status === 'RUNNING'
+
+function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
+  switch (type) {
+    case WorkbenchJobActivityType.User:
+      return 'You'
+    case WorkbenchJobActivityType.Memo:
+      return 'Notes'
+    case WorkbenchJobActivityType.Conclusion:
+      return 'Conclusion'
+    case WorkbenchJobActivityType.Function:
+      return 'Function'
+    case WorkbenchJobActivityType.Kubernetes:
+      return 'Kubernetes'
+    case WorkbenchJobActivityType.Exec:
+      return 'Command'
+    default:
+      return startCase((type ?? 'activity').toLowerCase())
+  }
+}
+
+/** Prefer completed output, then stream, then prompt — first clean line. */
+function workbenchActivityTaskSummary({
+  prompt,
+  output,
+  textStream,
+}: {
+  prompt?: Nullable<string>
+  output?: Nullable<string>
+  textStream?: Nullable<string>
+}): string {
+  const raw = [output, textStream, prompt]
+    .map((value) => value?.trim())
+    .find(Boolean)
+  if (!raw) return ''
+
+  const text = stripEmoji(prettifyPrompt(raw))
+
+  const line =
+    text
+      .split('\n')
+      .map((part) =>
+        part
+          .replace(/^#{1,6}\s+/, '')
+          .replace(/^[-*+]\s+/, '')
+          .replace(/^\d+\.\s+/, '')
+          .replace(/^>\s+/, '')
+          .trim()
+      )
+      .find(Boolean) ?? ''
+
+  return line.replace(/\s+/g, ' ').trim()
+}
+
+const ActivityTitleSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  '.type': {
+    flexShrink: 0,
+  },
+  '.task': {
+    minWidth: 0,
+    // Cap so the caret stays after the label; long tasks ellipsize.
+    maxWidth: '52ch',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+}))
