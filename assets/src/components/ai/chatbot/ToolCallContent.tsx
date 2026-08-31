@@ -13,8 +13,8 @@ import styled, { useTheme } from 'styled-components'
 import { prettifyToolJson } from './toolCallDisplay'
 
 enum ToolCallTab {
-  Arguments = 'arguments',
-  Response = 'response',
+  Input = 'input',
+  Output = 'output',
 }
 
 export function useSlimToolCodeCss({
@@ -74,57 +74,29 @@ export function ToolCallContent({
   attributes,
   customResultBody,
   hideArguments = false,
+  flushTop = false,
   isPending,
-  /** When true (e.g. inside a modal), skip clamp / Show more — full content scrolls in place. */
-  unclamped = false,
 }: {
   content: string
   attributes: Nullable<ChatTypeAttributes>
   customResultBody?: ReactNode
   hideArguments?: boolean
+  flushTop?: boolean
   isPending?: boolean
-  unclamped?: boolean
 }) {
   const { spacing } = useTheme()
   const slimCodeCss = useSlimToolCodeCss()
 
-  const showArguments = !hideArguments && !!attributes?.tool?.arguments
+  const showInput = !hideArguments
   const hasResponse = !!(isPending || customResultBody || content)
-  const showTabs = showArguments && hasResponse
+  const showTabs = showInput
 
   const [tab, setTab] = useState<ToolCallTab>(() =>
-    hasResponse ? ToolCallTab.Response : ToolCallTab.Arguments
+    hasResponse ? ToolCallTab.Output : ToolCallTab.Input
   )
-  const prevHasResponseRef = useRef(hasResponse)
-
-  useEffect(() => {
-    const responseJustArrived = hasResponse && !prevHasResponseRef.current
-    prevHasResponseRef.current = hasResponse
-
-    if (!showTabs) return
-    if (!hasResponse && tab === ToolCallTab.Response) {
-      setTab(ToolCallTab.Arguments)
-      return
-    }
-    if (!showArguments && tab === ToolCallTab.Arguments) {
-      setTab(ToolCallTab.Response)
-      return
-    }
-    // Polled/live completion: surface Response when output first arrives.
-    if (responseJustArrived && tab === ToolCallTab.Arguments) {
-      setTab(ToolCallTab.Response)
-    }
-  }, [hasResponse, showArguments, showTabs, tab])
-
-  const showingArguments =
-    showArguments && (!showTabs || tab === ToolCallTab.Arguments)
-  const showingResponse =
-    hasResponse && (!showTabs || tab === ToolCallTab.Response)
-
-  const codeCss = {
-    ...slimCodeCss,
-    ...(unclamped && { maxHeight: '70vh', overflow: 'auto' as const }),
-  }
+  const activeTab = showInput ? tab : ToolCallTab.Output
+  const showingInput = showInput && activeTab === ToolCallTab.Input
+  const showingOutput = activeTab === ToolCallTab.Output
 
   const plainResponse = (
     <Markdown
@@ -139,30 +111,30 @@ export function ToolCallContent({
       gap="xsmall"
       width="100%"
       minHeight={0}
-      marginTop={spacing.xsmall}
+      marginTop={flushTop ? 0 : spacing.xsmall}
     >
       {showTabs && (
         <SegmentedControlCardSC>
           <SegmentedControlBtn
-            active={tab === ToolCallTab.Arguments}
-            onClick={() => setTab(ToolCallTab.Arguments)}
+            active={activeTab === ToolCallTab.Input}
+            onClick={() => setTab(ToolCallTab.Input)}
           >
-            Arguments
+            Input
           </SegmentedControlBtn>
           <SegmentedControlBtn
-            active={tab === ToolCallTab.Response}
-            onClick={() => setTab(ToolCallTab.Response)}
+            active={activeTab === ToolCallTab.Output}
+            onClick={() => setTab(ToolCallTab.Output)}
           >
-            Response
+            Output
           </SegmentedControlBtn>
         </SegmentedControlCardSC>
       )}
 
-      {showingArguments && (
+      {showingInput && (
         <Code
           language="json"
           showHeader={false}
-          css={codeCss}
+          css={slimCodeCss}
         >
           {prettifyToolJson(
             JSON.stringify(attributes?.tool?.arguments ?? null)
@@ -170,7 +142,7 @@ export function ToolCallContent({
         </Code>
       )}
 
-      {showingResponse && (
+      {showingOutput && (
         <Flex
           direction="column"
           minWidth={0}
@@ -187,15 +159,17 @@ export function ToolCallContent({
             <Code
               language="json"
               showHeader={false}
-              css={codeCss}
+              css={slimCodeCss}
             >
               {prettifyToolJson(content)}
             </Code>
-          ) : unclamped ? (
-            <ModalPlainBodySC>{plainResponse}</ModalPlainBodySC>
-          ) : (
+          ) : content ? (
             <PreviewablePanel contentKey={`resp:${content.length}:plain`}>
               {plainResponse}
+            </PreviewablePanel>
+          ) : (
+            <PreviewablePanel contentKey="resp:empty">
+              <EmptyOutputSC>No output yet</EmptyOutputSC>
             </PreviewablePanel>
           )}
         </Flex>
@@ -209,19 +183,21 @@ export function PreviewablePanel({
   children,
   contentKey,
   header,
+  subtle = false,
 }: {
   children: ReactNode
   contentKey: string
   /** Optional in-frame header (e.g. "Prompt"), matching Cursor-style tool boxes. */
   header?: ReactNode
+  /** Use a quieter surface for nested content such as activity prompts. */
+  subtle?: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const [expandedContentKey, setExpandedContentKey] = useState<string | null>(
+    null
+  )
   const [canExpand, setCanExpand] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setExpanded(false)
-  }, [contentKey])
+  const expanded = expandedContentKey === contentKey
 
   useLayoutEffect(() => {
     const element = contentRef.current
@@ -245,7 +221,7 @@ export function PreviewablePanel({
   }, [contentKey, expanded])
 
   return (
-    <PreviewBoxSC>
+    <PreviewBoxSC $subtle={subtle}>
       {header != null && <PreviewHeaderSC>{header}</PreviewHeaderSC>}
       <PreviewContentSC
         ref={contentRef}
@@ -259,7 +235,11 @@ export function PreviewablePanel({
         <ShowMoreSC
           type="button"
           aria-expanded={expanded}
-          onClick={() => setExpanded((value) => !value)}
+          onClick={() =>
+            setExpandedContentKey((key) =>
+              key === contentKey ? null : contentKey
+            )
+          }
         >
           {expanded ? 'Show less' : 'Show more'}
         </ShowMoreSC>
@@ -293,28 +273,20 @@ function SegmentedControlBtn({
   )
 }
 
-const PreviewBoxSC = styled.div(({ theme }) => ({
+const PreviewBoxSC = styled.div<{ $subtle: boolean }>(({ theme, $subtle }) => ({
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
   minHeight: 0,
   overflow: 'hidden',
-  border: theme.borders['fill-two'],
+  border: $subtle ? theme.borders['fill-one'] : theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.medium,
-  backgroundColor: theme.colors['fill-two'],
+  backgroundColor: theme.colors[$subtle ? 'fill-one' : 'fill-two'],
 }))
 
-/** Full plain-text body inside a tool modal (no clamp / Show more). */
-const ModalPlainBodySC = styled.div(({ theme }) => ({
-  maxHeight: '70vh',
-  overflow: 'auto',
-  padding: theme.spacing.small,
-  border: theme.borders['fill-two'],
-  borderRadius: theme.borderRadiuses.medium,
-  backgroundColor: theme.colors['fill-two'],
-  color: theme.colors['text-long-form'],
-  fontSize: theme.partials.text.body2.fontSize,
-  lineHeight: 1.45,
+const EmptyOutputSC = styled.div(({ theme }) => ({
+  color: theme.colors['text-disabled'],
+  fontStyle: 'italic',
 }))
 
 const PreviewHeaderSC = styled.div(({ theme }) => ({

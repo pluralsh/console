@@ -5,7 +5,6 @@ import {
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
   toolCallGroupHeader,
-  toolCallOpensInModal,
 } from './toolCallDisplay'
 
 describe('resolveToolCallKind', () => {
@@ -23,6 +22,11 @@ describe('resolveToolCallKind', () => {
       'enable_tools'
     )
   })
+
+  it('does not classify integration tools containing read as file reads', () => {
+    expect(resolveToolCallKind('Read', { path: 'README.md' })).toBe('read')
+    expect(resolveToolCallKind('github_pull_request_read')).toBe('generic')
+  })
 })
 
 describe('toolCallDisplayTitle', () => {
@@ -32,7 +36,7 @@ describe('toolCallDisplayTitle', () => {
     )
     expect(toolCallDisplayTitle('read', 'Read')).toBe('Read')
     expect(toolCallDisplayTitle('python_sandbox', 'python_sandbox')).toBe(
-      'Python'
+      'Python sandbox'
     )
   })
 
@@ -91,40 +95,14 @@ describe('toolCallGroupHeader', () => {
       ])
     ).toBe('1 tool call, 2 subagents')
   })
-})
 
-describe('toolCallOpensInModal', () => {
-  it('opens MCP / enable / subagent_result in a modal', () => {
-    expect(toolCallOpensInModal('mcp_tool_call')).toBe(true)
-    expect(toolCallOpensInModal('enable_tools')).toBe(true)
-    expect(toolCallOpensInModal('subagent_result')).toBe(true)
-  })
-
-  it('keeps transcript tools inline', () => {
-    expect(toolCallOpensInModal('bash')).toBe(false)
-    expect(toolCallOpensInModal('command_execution')).toBe(false)
-    expect(toolCallOpensInModal('read')).toBe(false)
-    expect(toolCallOpensInModal('edit')).toBe(false)
-  })
-
-  it('opens generic JSON payloads in a modal, not plain transcripts', () => {
-    expect(toolCallOpensInModal('generic', '{}')).toBe(true)
-    expect(toolCallOpensInModal('generic', '{"ok":true}')).toBe(true)
-    expect(toolCallOpensInModal('generic', '')).toBe(true)
+  it('labels Python sandbox calls consistently', () => {
     expect(
-      toolCallOpensInModal('generic', 'error: connection refused\nretrying...')
-    ).toBe(false)
-  })
-
-  it('opens read/grep JSON API results in a modal', () => {
-    expect(toolCallOpensInModal('read', '{"number":4066}')).toBe(true)
-    expect(toolCallOpensInModal('read', 'export function foo() {}')).toBe(false)
-    expect(toolCallOpensInModal('grep', 'match at line 12')).toBe(false)
-  })
-
-  it('detects fenced JSON payloads', () => {
-    expect(toolCallOpensInModal('read', '```json\n{"ok":true}\n```')).toBe(true)
-    expect(toolCallOpensInModal('bash', '{"status":"ok"}')).toBe(true)
-    expect(toolCallOpensInModal('bash', 'done\n{"status":"ok"}')).toBe(false)
+      toolCallGroupHeader([
+        { name: 'python_sandbox' },
+        { name: 'python_sandbox' },
+        { name: 'python_sandbox' },
+      ])
+    ).toBe('3 python sandboxes')
   })
 })

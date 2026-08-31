@@ -36,7 +36,7 @@ const TITLE_OVERRIDES: Record<string, string> = {
   workbench_subagents: 'Subagents',
   subagent_result: 'Result',
   enable_tools: 'Enable tools',
-  python_sandbox: 'Python',
+  python_sandbox: 'Python sandbox',
   workbench_lua: 'Lua',
   workbench_notes: 'Notes',
   workbench_plan: 'Plan',
@@ -97,7 +97,7 @@ export function resolveToolCallKind(
   }
   if (name.includes('bash')) return 'bash'
   if (name === 'edit' || name.includes('edit')) return 'edit'
-  if (name.includes('read')) return 'read'
+  if (name === 'read') return 'read'
   if (name.includes('grep')) return 'grep'
 
   return 'generic'
@@ -133,7 +133,7 @@ const BATCH_LABELS: Record<string, string> = {
   grep: 'grep',
   edit: 'edit',
   command: 'command',
-  python: 'python',
+  python: 'python sandbox',
   mcp: 'mcp',
   files: 'file change',
   search: 'search',
@@ -164,6 +164,7 @@ export function toolCallBatchLabel(kind: ToolCallKind, count: number): string {
 export function toolCallBatchLabelFromKey(key: string, count: number): string {
   const noun = BATCH_LABELS[key] ?? BATCH_LABELS.generic
   if (key === 'enable') return `${count} ${noun}`
+  if (key === 'python') return `${count} ${pluralize(noun, count)}`
   return `${count} ${noun}${count === 1 ? '' : 's'}`
 }
 
@@ -198,7 +199,7 @@ export function toolCallDisplayTitle(
     case 'bash':
       return isShellCommand(getCommand(toolName, args)) ? 'Bash' : 'Command'
     case 'python_sandbox':
-      return 'Python'
+      return 'Python sandbox'
     case 'file_change':
     case 'edit':
       return 'Edit'
@@ -394,44 +395,6 @@ function isMcpToolName(toolName: string): boolean {
     !CODEX_TOOL_NAMES.has(toolName.toLowerCase()) &&
     !CLAUDE_BATCH_TOOLS.has(toolName.toLowerCase())
   )
-}
-
-export function toolCallModalHeader(
-  kind: ToolCallKind,
-  toolName: string,
-  args?: ToolArguments
-): string {
-  const title = toolCallDisplayTitle(kind, toolName, args)
-  const subtitle = toolCallDisplaySubtitle(kind, toolName, args)
-  return subtitle ? `${title}: ${subtitle}` : `${title}: ${toolName}`
-}
-
-/**
- * Cursor-style: structured / inspectable payloads open in a modal.
- * Transcript-native tools (bash, edits, search, long plain text) stay inline.
- */
-export function toolCallOpensInModal(
-  kind: ToolCallKind,
-  content?: string | null
-): boolean {
-  switch (kind) {
-    case 'mcp_tool_call':
-    case 'enable_tools':
-    case 'subagent_result':
-      return true
-    case 'read':
-    case 'grep':
-    case 'generic': {
-      const trimmed = content?.trim() ?? ''
-      // Args-only generic → modal. JSON blobs (e.g. API read results) → modal.
-      // Plain text transcripts stay inline under the accordion.
-      if (kind === 'generic' && !trimmed) return true
-      return extractJsonPayload(trimmed) != null
-    }
-    default:
-      // Any tool whose result is a JSON blob should open in a modal.
-      return extractJsonPayload(content) != null
-  }
 }
 
 /** Pull a parseable JSON object/array out of tool output (raw or fenced). */

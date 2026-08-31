@@ -732,6 +732,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :attributes, :workbench_job_thought_attributes, description: "metrics and logs for the thought"
 
     field :activity, :workbench_job_activity, resolve: dataloader(Deployments), description: "the activity this thought belongs to"
+    field :tool,     :workbench_tool, resolve: dataloader(Deployments), description: "the configured workbench tool that emitted this thought"
 
     timestamps()
   end

@@ -219,13 +219,10 @@ const PanelOpenBtnSC = styled(Button)(({ theme }) => ({
   flexShrink: 0,
 }))
 
-/** Centers the capped job column in the main area. */
 const MainColumnSC = styled.div({
   flex: 1,
   minWidth: 0,
   height: '100%',
-  display: 'flex',
-  justifyContent: 'center',
 })
 
 const WrapperSC = styled.div(({ theme }) => ({
@@ -234,6 +231,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
   minWidth: 0,
-  maxWidth: '56rem',
   padding: theme.spacing.large,
 }))

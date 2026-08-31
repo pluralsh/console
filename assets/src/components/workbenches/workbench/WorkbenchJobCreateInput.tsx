@@ -222,8 +222,10 @@ export function WorkbenchJobCreateInput({
           flowId={flowId}
           options={
             <Flex
+              align="center"
               gap="xsmall"
-              height={32}
+              wrap="wrap"
+              css={{ minHeight: 32, minWidth: 0 }}
             >
               <WorkbenchPromptOptionsSelector
                 workbenchId={workbenchId}
@@ -307,7 +309,7 @@ function WorkbenchPillSelector({
       triggerButton={
         <ChatOptionPill
           isOpen={isOpen}
-          css={{ height: '100%' }}
+          css={{ height: 32 }}
         >
           <WorkbenchIcon size={12} />
           {!loaded && loading ? (
@@ -396,7 +398,7 @@ function WorkbenchSavedPrompts({
           aria-label="Saved prompts"
           css={{
             width: 32,
-            height: '100%',
+            height: 32,
             justifyContent: 'center',
             padding: 0,
             borderRadius: '50%',

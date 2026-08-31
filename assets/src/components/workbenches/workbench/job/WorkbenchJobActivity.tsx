@@ -21,7 +21,16 @@ import {
   SimpleToolCall,
   SimplifiedMarkdown,
 } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { toolCallGroupHeader } from 'components/ai/chatbot/toolCallDisplay'
+import {
+  getSearchQuery,
+  humanizeToolName,
+  toolCallGroupHeader,
+} from 'components/ai/chatbot/toolCallDisplay'
+import { PreviewablePanel } from 'components/ai/chatbot/ToolCallContent'
+import {
+  getWorkbenchToolLabel,
+  WorkbenchToolIcon,
+} from 'components/workbenches/tools/workbenchToolsUtils'
 import pluralize from 'pluralize'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { AILoadingText } from 'components/utils/AILoadingText'
@@ -29,7 +38,7 @@ import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import { Body2P, SpanSC } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -39,9 +48,10 @@ import {
   WorkbenchJobProgressFragment,
   WorkbenchJobStatus,
   WorkbenchJobThoughtFragment,
+  WorkbenchToolTinyFragment,
 } from 'generated/graphql'
 import { isEmpty, startCase } from 'lodash'
-import { useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -536,32 +546,52 @@ function WorkbenchJobActivityThoughts({
   const { thoughts, lastThought, header } = useMemo(() => {
     const thoughts = activity?.thoughts?.filter(isNonNullable) ?? []
     let [numWithLogs, numWithMetrics] = [0, 0]
+    const configuredToolCounts = new Map<
+      string,
+      { count: number; tool: WorkbenchToolTinyFragment }
+    >()
     const otherThoughts: Array<{
       name?: string | null
       arguments?: WorkbenchJobThoughtFragment['toolArgs']
     }> = []
     thoughts.forEach((thought) => {
-      if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
+      if (thought.tool) {
+        const toolKey = `${thought.tool.tool}:${thought.tool.cloudConnection?.provider ?? ''}`
+        const current = configuredToolCounts.get(toolKey)
+        configuredToolCounts.set(toolKey, {
+          count: (current?.count ?? 0) + 1,
+          tool: thought.tool,
+        })
+      } else if (!isEmpty(thought.attributes?.logs)) numWithLogs += 1
       else if (!isEmpty(thought.attributes?.metrics)) numWithMetrics += 1
-      else
+      else {
         otherThoughts.push({
           name: thought.toolName,
           arguments: thought.toolArgs,
         })
+      }
     })
-    const parts = [
+    const textParts = [
       toolCallGroupHeader(otherThoughts),
       numWithLogs > 0 &&
         `${numWithLogs} fetched ${pluralize('log', numWithLogs)}`,
       numWithMetrics > 0 &&
         `${numWithMetrics} fetched ${pluralize('metric', numWithMetrics)}`,
-    ].filter(Boolean)
+    ].filter((part): part is string => !!part)
+    const toolCounts = [...configuredToolCounts.values()]
     return {
       thoughts,
       lastThought: thoughts.at(-1),
       header:
-        parts.join(', ') ||
-        `${thoughts.length} tool ${pluralize('call', thoughts.length)}`,
+        toolCounts.length > 0 ? (
+          <WorkbenchToolCallSummary
+            toolCounts={toolCounts}
+            textParts={textParts}
+          />
+        ) : (
+          textParts.join(', ') ||
+          `${thoughts.length} tool ${pluralize('call', thoughts.length)}`
+        ),
     }
   }, [activity?.thoughts])
 
@@ -612,18 +642,32 @@ function WorkbenchJobActivityThought({
 }: {
   thought: WorkbenchJobThoughtFragment
 }) {
-  const { content, toolName, toolArgs, attributes } = thought
+  const { id, content, toolName, toolArgs, attributes, tool } = thought
   const metrics = attributes?.metrics?.filter(isNonNullable) ?? []
   const logs = attributes?.logs?.filter(isNonNullable) ?? []
+  const query = getSearchQuery(toolArgs)
+  const toolIcon = tool ? (
+    <WorkbenchToolIcon
+      type={tool.tool}
+      provider={tool.cloudConnection?.provider}
+      size={12}
+    />
+  ) : undefined
   return (
     <SimpleToolCall
       content={content}
       attributes={{ tool: { name: toolName, arguments: toolArgs } }}
+      customTitle={
+        tool ? compactWorkbenchToolCallTitle(toolName, tool) : undefined
+      }
+      leadingIcon={toolIcon}
       {...(!isEmpty(metrics) && {
         customLabel: (
-          <Body2P $color="text-xlight">
-            Fetched metrics <SpanSC $color="text-xlight">{toolName}</SpanSC>
-          </Body2P>
+          <WorkbenchObservabilityToolLabel
+            icon={toolIcon}
+            title="Fetched metrics"
+            query={query}
+          />
         ),
         customResultBody: (
           <Card>
@@ -638,19 +682,163 @@ function WorkbenchJobActivityThought({
       })}
       {...(!isEmpty(logs) && {
         customLabel: (
-          <Body2P $color="text-xlight">
-            Fetched logs <SpanSC $color="text-xlight">{toolName}</SpanSC>
-          </Body2P>
+          <WorkbenchObservabilityToolLabel
+            icon={toolIcon}
+            title="Fetched logs"
+            query={query}
+          />
         ),
         customResultBody: (
-          <JobActivityLogs
-            cardWrapper
-            logs={logs}
-          />
+          <PreviewablePanel contentKey={`logs:${id}:${logs.length}`}>
+            <JobActivityLogs logs={logs} />
+          </PreviewablePanel>
         ),
       })}
     />
   )
+}
+
+function WorkbenchObservabilityToolLabel({
+  icon,
+  title,
+  query,
+}: {
+  icon?: ReactNode
+  title: string
+  query: string
+}) {
+  return (
+    <Flex
+      align="center"
+      gap="xsmall"
+      minWidth={0}
+      css={{ maxWidth: '100%', overflow: 'hidden' }}
+    >
+      {icon}
+      <Body2P
+        as="span"
+        $color="text-xlight"
+        css={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+      >
+        {title}
+      </Body2P>
+      {query && (
+        <Body2P
+          as="span"
+          $color="text-disabled"
+          css={{
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {query}
+        </Body2P>
+      )}
+    </Flex>
+  )
+}
+
+function WorkbenchToolCallSummary({
+  toolCounts,
+  textParts,
+}: {
+  toolCounts: Array<{ count: number; tool: WorkbenchToolTinyFragment }>
+  textParts: string[]
+}) {
+  const { spacing } = useTheme()
+
+  return (
+    <span
+      css={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
+      {textParts.map((part, index) => (
+        <Body2P
+          key={part}
+          as="span"
+          $color="text-xlight"
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            ...(index > 0 && {
+              '&::before': {
+                content: "','",
+                marginRight: spacing.xsmall,
+              },
+            }),
+          }}
+        >
+          {part}
+        </Body2P>
+      ))}
+      {toolCounts.map(({ count, tool }, index) => (
+        <span
+          key={tool.id}
+          title={`${count} ${getWorkbenchToolLabel(
+            tool.tool,
+            tool.cloudConnection?.provider
+          )} tool ${pluralize('call', count)}`}
+          css={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            ...((textParts.length > 0 || index > 0) && {
+              '&::before': {
+                content: "','",
+                marginRight: spacing.xsmall,
+              },
+            }),
+          }}
+        >
+          <Body2P
+            as="span"
+            $color="text-xlight"
+            css={{ marginRight: spacing.xxsmall }}
+          >
+            {count}
+          </Body2P>
+          <Body2P
+            as="span"
+            $color="text-xlight"
+          >
+            {getWorkbenchToolLabel(tool.tool, tool.cloudConnection?.provider)}
+          </Body2P>
+          <WorkbenchToolIcon
+            type={tool.tool}
+            provider={tool.cloudConnection?.provider}
+            size={12}
+            css={{ marginLeft: spacing.xxsmall }}
+          />
+        </span>
+      ))}
+    </span>
+  )
+}
+
+function compactWorkbenchToolCallTitle(
+  toolName: Nullable<string>,
+  tool: WorkbenchToolTinyFragment
+): string {
+  const title = humanizeToolName(toolName ?? '')
+  const toolLabel = getWorkbenchToolLabel(
+    tool.tool,
+    tool.cloudConnection?.provider
+  )
+  const hiddenWords = new Set(
+    [toolLabel, startCase(tool.tool.replace(/_/g, ' ')), tool.name, 'gh']
+      .flatMap((value) => value.toLowerCase().split(/\s+/))
+      .filter(Boolean)
+  )
+  const withoutToolLabel = title
+    .split(/\s+/)
+    .filter((word) => !hiddenWords.has(word.toLowerCase()))
+    .join(' ')
+
+  return withoutToolLabel || 'Tool call'
 }
 
 /** Cycles 1 → 2 → 3 dots every second for the job-level thinking label. */

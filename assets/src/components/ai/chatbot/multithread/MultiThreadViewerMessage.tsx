@@ -17,25 +17,13 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
+import { ToolCallContent } from '../ToolCallContent'
 import {
-  PreviewablePanel,
-  ToolCallContent,
-  useSlimToolCodeCss,
-} from '../ToolCallContent'
-import {
-  formatFileChangeSummary,
   getCommand,
-  getPath,
   getPython,
-  getSearchQuery,
-  getSubagentPrompt,
-  extractJsonPayload,
-  prettifyToolJson,
   resolveToolCallKind,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
-  toolCallModalHeader,
-  toolCallOpensInModal,
 } from '../toolCallDisplay'
 
 import {
@@ -88,6 +76,8 @@ export function SimpleToolCall({
   toolRuntime,
   customResultBody,
   customLabel,
+  customTitle,
+  leadingIcon,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
@@ -95,12 +85,14 @@ export function SimpleToolCall({
   toolRuntime?: string
   customResultBody?: ReactNode
   customLabel?: ReactNode
+  customTitle?: string
+  leadingIcon?: ReactNode
 }) {
   const { spacing } = useTheme()
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
-  const title = toolCallDisplayTitle(kind, toolName, args)
+  const title = customTitle ?? toolCallDisplayTitle(kind, toolName, args)
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
   const label = customLabel ?? (
     <ToolCallLineLabel
@@ -108,6 +100,7 @@ export function SimpleToolCall({
       subtitle={subtitle}
       runtime={toolRuntime}
       isPending={isPending}
+      leadingIcon={leadingIcon}
     />
   )
   const accordionProps = {
@@ -115,42 +108,33 @@ export function SimpleToolCall({
     hoverCaret: true,
   }
 
-  // Structured payloads → modal; transcript tools → inline accordion.
-  if (toolCallOpensInModal(kind, content)) {
-    return (
-      <ToolCallModalRow
-        label={label}
-        header={toolCallModalHeader(kind, toolName, args)}
-        content={content ?? ''}
-        attributes={attributes}
-        customResultBody={customResultBody}
-        isPending={isPending}
-      />
-    )
-  }
-
   switch (kind) {
     case 'bash':
     case 'command_execution': {
       const command = getCommand(toolName, args)
-      const result = content || undefined
       return (
         <SimpleAccordion {...accordionProps}>
           <Flex
             direction="column"
-            gap="xsmall"
+            gap="none"
             minWidth={0}
             width="100%"
             marginTop={spacing.xsmall}
           >
-            <PreviewablePanel
-              contentKey={`cmd:${command}:${result ?? ''}:${isPending}`}
+            <Code
+              language="bash"
+              showHeader={false}
             >
-              <ToolPreviewPreSC>
-                {`$ ${command}`}
-                {isPending ? '\nrunning...' : result ? `\n${result}` : ''}
-              </ToolPreviewPreSC>
-            </PreviewablePanel>
+              {`$ ${command}`}
+            </Code>
+            <ToolCallContent
+              content={content ?? ''}
+              attributes={attributes}
+              customResultBody={customResultBody}
+              hideArguments
+              flushTop
+              isPending={isPending}
+            />
           </Flex>
         </SimpleAccordion>
       )
@@ -161,112 +145,25 @@ export function SimpleToolCall({
         <SimpleAccordion {...accordionProps}>
           <Flex
             direction="column"
-            gap="xsmall"
+            gap="none"
             minWidth={0}
             width="100%"
             marginTop={spacing.xsmall}
           >
-            <PreviewablePanel contentKey={`py:${python}`}>
-              <ToolPreviewPreSC>{python}</ToolPreviewPreSC>
-            </PreviewablePanel>
+            <Code
+              language="python"
+              showHeader={false}
+            >
+              {python}
+            </Code>
             <ToolCallContent
               content={content ?? ''}
               attributes={attributes}
               customResultBody={customResultBody}
               hideArguments
+              flushTop
               isPending={isPending}
             />
-          </Flex>
-        </SimpleAccordion>
-      )
-    }
-    case 'web_search': {
-      const query = getSearchQuery(args)
-      return (
-        <SimpleAccordion {...accordionProps}>
-          <Flex
-            direction="column"
-            gap="xsmall"
-            minWidth={0}
-            width="100%"
-            marginTop={spacing.xsmall}
-          >
-            <PreviewablePanel contentKey={`search:${query}:${content ?? ''}`}>
-              <ToolPreviewPreSC>
-                {query}
-                {content ? `\n${content}` : ''}
-              </ToolPreviewPreSC>
-            </PreviewablePanel>
-          </Flex>
-        </SimpleAccordion>
-      )
-    }
-    case 'read':
-    case 'grep': {
-      const path = getPath(args)
-      const body = content?.trim() || path || subtitle
-      return (
-        <SimpleAccordion {...accordionProps}>
-          <Flex
-            direction="column"
-            gap="xsmall"
-            minWidth={0}
-            width="100%"
-            marginTop={spacing.xsmall}
-          >
-            <PreviewablePanel contentKey={`file:${kind}:${body.length}`}>
-              <ToolPreviewPreSC>{body}</ToolPreviewPreSC>
-            </PreviewablePanel>
-          </Flex>
-        </SimpleAccordion>
-      )
-    }
-    case 'subagent': {
-      const prompt = getSubagentPrompt(args)
-      return (
-        <SimpleAccordion {...accordionProps}>
-          <Flex
-            direction="column"
-            gap="small"
-            minWidth={0}
-            width="100%"
-            marginTop={spacing.xsmall}
-          >
-            {prompt && (
-              <SimplifiedMarkdown
-                text={prompt}
-                tone="thought"
-              />
-            )}
-            {(content || isPending || customResultBody) && (
-              <ToolCallContent
-                content={content ?? ''}
-                attributes={attributes}
-                customResultBody={customResultBody}
-                hideArguments
-                isPending={isPending}
-              />
-            )}
-          </Flex>
-        </SimpleAccordion>
-      )
-    }
-    case 'file_change':
-    case 'edit': {
-      const summary = formatFileChangeSummary(args, content)
-      const body = Array.isArray(args) ? JSON.stringify(args, null, 2) : summary
-      return (
-        <SimpleAccordion {...accordionProps}>
-          <Flex
-            direction="column"
-            gap="xsmall"
-            minWidth={0}
-            width="100%"
-            marginTop={spacing.xsmall}
-          >
-            <PreviewablePanel contentKey={`edit:${body.length}`}>
-              <ToolPreviewPreSC>{body}</ToolPreviewPreSC>
-            </PreviewablePanel>
           </Flex>
         </SimpleAccordion>
       )
@@ -283,68 +180,6 @@ export function SimpleToolCall({
         </SimpleAccordion>
       )
   }
-}
-
-/** Structured tool payloads (MCP, JSON API results, …) open in a modal. */
-function ToolCallModalRow({
-  label,
-  header,
-  content,
-  attributes,
-  customResultBody,
-  isPending,
-}: {
-  label: ReactNode
-  header: string
-  content: string
-  attributes: ChatFragment['attributes']
-  customResultBody?: ReactNode
-  isPending?: boolean
-}) {
-  const [isOpen, setIsOpen] = useState(false)
-  const slimCodeCss = useSlimToolCodeCss()
-  const jsonPayload = extractJsonPayload(content)
-
-  return (
-    <>
-      <ClickableLabelSC
-        type="button"
-        onClick={() => setIsOpen(true)}
-        css={{ width: '100%' }}
-      >
-        {label}
-      </ClickableLabelSC>
-      <Modal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        header={header}
-        size="large"
-      >
-        {jsonPayload && !customResultBody && !isPending ? (
-          <Code
-            language="json"
-            showHeader={false}
-            css={{
-              ...slimCodeCss,
-              maxHeight: '70vh',
-              overflow: 'auto',
-            }}
-          >
-            {prettifyToolJson(jsonPayload)}
-          </Code>
-        ) : (
-          <ToolCallContent
-            content={content}
-            attributes={attributes}
-            customResultBody={customResultBody}
-            isPending={isPending}
-            hideArguments={!!jsonPayload}
-            unclamped
-          />
-        )}
-      </Modal>
-    </>
-  )
 }
 
 function CodeBlockLabel({
@@ -488,14 +323,17 @@ function ToolCallLineLabel({
   subtitle,
   runtime,
   isPending,
+  leadingIcon,
 }: {
   title: string
   subtitle?: string
   runtime?: string
   isPending?: boolean
+  leadingIcon?: ReactNode
 }) {
   return (
     <ToolCallLineSC>
+      {leadingIcon}
       <Body2P
         as="span"
         className="title"
@@ -653,17 +491,6 @@ const ToolCallLineSC = styled.span(({ theme }) => ({
   '.runtime': {
     flexShrink: 0,
   },
-}))
-
-const ToolPreviewPreSC = styled.pre(({ theme }) => ({
-  margin: 0,
-  padding: 0,
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word',
-  fontFamily: theme.fontFamilies.mono,
-  fontSize: theme.partials.text.body2.fontSize,
-  lineHeight: 1.45,
-  color: theme.colors['text-light'],
 }))
 
 export const ClickableLabelSC = styled.button(() => ({
