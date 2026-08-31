@@ -122,6 +122,36 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Error("ANALYZE mode coreTools should not include WriteFileTool or EditTool")
 		}
 	})
+
+	t.Run("includeDirectories contains extra prebake dirs", func(t *testing.T) {
+		input := *baseInput
+		input.AgentRunMode = console.AgentRunModeWrite
+		input.ExtraDirectories = []string{"/plural/shared/repos"}
+
+		_, content, err := settings(&input)
+		if err != nil {
+			t.Fatalf("settings() failed: %v", err)
+		}
+
+		var out map[string]any
+		if err := json.Unmarshal([]byte(content), &out); err != nil {
+			t.Fatalf("generated content is not valid JSON: %v", err)
+		}
+		dirs, ok := out["includeDirectories"].([]any)
+		if !ok {
+			t.Fatal("includeDirectories missing or not an array")
+		}
+		found := false
+		for _, d := range dirs {
+			if s, ok := d.(string); ok && s == "/plural/shared/repos" {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("expected includeDirectories to contain /plural/shared/repos, got %#v", dirs)
+		}
+	})
 }
 
 func TestSettingsTemplate_ExternalMCPServer(t *testing.T) {

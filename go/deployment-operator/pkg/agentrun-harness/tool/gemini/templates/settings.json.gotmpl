@@ -37,7 +37,8 @@
   ],
   "includeDirectories": [
     "/plural/contexts",
-    "{{ .RepositoryDir }}"
+    "{{ .RepositoryDir }}"{{ range .ExtraDirectories }},
+    "{{ . }}"{{ end }}
   ],
   "model": {
     "name": "{{ .Model }}"

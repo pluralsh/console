@@ -86,6 +86,21 @@ func TestLookupMissingManifest(t *testing.T) {
 	}
 }
 
+func TestExtraReadDirs(t *testing.T) {
+	missing := filepath.Join(t.TempDir(), "does-not-exist")
+	t.Setenv(EnvDir, missing)
+	if got := ExtraReadDirs(); got != nil {
+		t.Fatalf("ExtraReadDirs() = %v, want nil for missing dir", got)
+	}
+
+	root := t.TempDir()
+	t.Setenv(EnvDir, root)
+	got := ExtraReadDirs()
+	if len(got) != 1 || got[0] != root {
+		t.Fatalf("ExtraReadDirs() = %v, want [%q]", got, root)
+	}
+}
+
 func TestResolvePathRejectsEscape(t *testing.T) {
 	root := t.TempDir()
 	if _, err := ResolvePath(root, "../escape"); err == nil {

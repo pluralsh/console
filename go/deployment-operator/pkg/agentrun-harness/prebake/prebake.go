@@ -47,6 +47,17 @@ func Dir() string {
 	return common.AgentRunRepositoryPrebakeDir
 }
 
+// ExtraReadDirs returns the prebake directory when it exists on disk so
+// provider CLIs can be granted read access without changing the project cwd.
+func ExtraReadDirs() []string {
+	dir := Dir()
+	info, err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		return nil
+	}
+	return []string{dir}
+}
+
 // ManifestPath is the absolute path to manifest.json in the prebake directory.
 func ManifestPath() string {
 	return filepath.Join(Dir(), ManifestFileName)

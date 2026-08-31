@@ -13,6 +13,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini/events"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -242,6 +243,7 @@ func (in *Gemini) Configure(_, _ string) error {
 
 	input := &ConfigTemplateInput{
 		RepositoryDir:     in.Config.RepositoryDir,
+		ExtraDirectories:  prebake.ExtraReadDirs(),
 		AgentRunID:        in.Config.Run.ID,
 		AgentRunMode:      in.Config.Run.Mode,
 		InactivityTimeout: int64(in.Config.Run.Runtime.Config.Gemini.InactivityTimeout.Seconds()),
