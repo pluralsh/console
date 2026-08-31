@@ -1,9 +1,9 @@
 import { ComponentPropsWithRef, ReactNode, useRef, useState } from 'react'
 import styled from 'styled-components'
 
-import { SemanticColorKey } from 'src/theme/colors'
 import useResizeObserver from '../hooks/useResizeObserver'
 import { ArrowLeftIcon, ArrowRightIcon } from '../icons'
+import { SemanticColorKey } from '../theme/colors'
 
 function ArrowScroll({
   children,

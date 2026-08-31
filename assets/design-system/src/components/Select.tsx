@@ -264,6 +264,17 @@ const SelectInner = styled.div((_) => ({
   position: 'relative',
 }))
 
+const HiddenSelectWrapper = styled.div`
+  /* CAN BREAK TABLE VIRTUALIZATION WITHOUT THIS
+   * React Aria changed this to fixed in https://github.com/adobe/react-spectrum/commit/a98c2a5ef8e0ad971cc98025faf30b81bd5fd42f.
+   * Tables calculate the range of all children for row height, so fixed positioning
+   * can make every measurement start from the top of the page.
+   */
+  & [data-testid='hidden-select-container'] {
+    position: absolute !important;
+  }
+`
+
 export type SelectPropsSingle = Omit<
   SelectProps,
   'selectionMode' | 'selectedKeys' | 'onSelectionChange'
@@ -385,25 +396,14 @@ function Select({
         e.stopPropagation()
       }}
     >
-      <div
-        aria-hidden="true"
-        css={{
-          // CAN BREAK TABLE VIRTUALIZATION WITHOUT THIS
-          // react aria changed this to 'fixed' here https://github.com/adobe/react-spectrum/commit/a98c2a5ef8e0ad971cc98025faf30b81bd5fd42f
-          // but since our tables calculate the range of all children for row height, that change made every measurement start from the top of the page in some cases
-          // @ts-expect-error we have to use !important here because it's the only way to override HiddenSelect's inline style
-          '& [data-testid="hidden-select-container"]': {
-            position: 'absolute !important',
-          },
-        }}
-      >
+      <HiddenSelectWrapper aria-hidden="true">
         <HiddenSelect
           state={state}
           triggerRef={ref}
           label={label}
           name={name}
         />
-      </div>
+      </HiddenSelectWrapper>
       <Trigger
         buttonRef={triggerRef as unknown as RefObject<HTMLElement | null>}
         buttonElt={triggerButton}

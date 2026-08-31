@@ -1,8 +1,8 @@
 import styled from 'styled-components'
 
+import { SemanticColorKey } from '../../theme/colors'
 import { tableCellColor, tableCellHoverColor } from './colors'
 import { type TableFillLevel } from './tableUtils'
-import { SemanticColorKey } from 'src/theme/colors'
 
 export const Tr = styled.tr<{
   $fillLevel: TableFillLevel

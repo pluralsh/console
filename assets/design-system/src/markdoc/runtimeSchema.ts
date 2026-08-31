@@ -43,7 +43,18 @@ function transformRecord(config?: Record<string, any>) {
   return { output, components }
 }
 
-export const getSchema = function getSchema(schema: Config) {
+type RuntimeSchema = {
+  tags?: object
+  nodes?: object
+}
+
+type RuntimeConfig = Config & {
+  components: Record<string, any>
+}
+
+export const getSchema = function getSchema<Schema extends RuntimeSchema>(
+  schema: Schema
+): RuntimeConfig {
   const { output: tags, components: tagComponents } = transformRecord(
     schema.tags
   )
@@ -60,7 +71,7 @@ export const getSchema = function getSchema(schema: Config) {
       ...tagComponents,
       ...nodeComponents,
     },
-  }
+  } as RuntimeConfig
 }
 
 export const defaultObject = function defaultObject(o: Record<string, any>) {

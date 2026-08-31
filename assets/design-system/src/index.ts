@@ -215,6 +215,7 @@ export {
   useMarkdocContext,
 } from './markdoc/MarkdocContext'
 export type { MarkdocContextValue } from './markdoc/MarkdocContext'
+export { getSchema as getRuntimeSchema } from './markdoc/runtimeSchema'
 export * as markdocNodes from './markdoc/nodes'
 export * as markdocTags from './markdoc/tags'
 export {

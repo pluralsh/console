@@ -123,7 +123,7 @@ export function ClusterUpgradePlan() {
   const clusterBasic = basicData?.cluster
   const kubeVersion = getClusterKubeVersion(clusterBasic) ?? ''
   const parsedKubeVersion =
-    semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
+    semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')!
   const nextKubeVersion = `${parsedKubeVersion.major}.${parsedKubeVersion.minor + 1}`
 
   const { data, loading, error } = useClusterOverviewDetailsQuery({

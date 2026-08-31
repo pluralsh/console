@@ -1,6 +1,7 @@
 import { type ComponentPropsWithRef } from 'react'
-import { SemanticColorKey } from 'src/theme/colors'
 import styled, { keyframes, useTheme } from 'styled-components'
+
+import { SemanticColorKey } from '../theme/colors'
 
 const rotateAnim = keyframes`
   from {

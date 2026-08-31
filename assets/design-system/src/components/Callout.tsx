@@ -185,7 +185,7 @@ function Callout({
         $borderColorKey={borderColorKey}
         $fillLevel={fillLevel}
         $size={size}
-        $expanded={expanded}
+        $expanded={!!expanded}
         ref={ref}
         {...(expandable && !expanded ? triggerProps : {})}
       >
