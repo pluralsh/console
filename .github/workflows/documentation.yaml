@@ -27,6 +27,10 @@ on:
       - "go/polly/docs/**"
       - "js/package.json"
       - "js/yarn.lock"
+
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint
@@ -34,18 +38,15 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: js/documentation
+        working-directory: js
     steps:
       - uses: actions/checkout@v6
-      - name: Read Node.js version from package.json
-        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
-        id: engines
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ steps.engines.outputs.nodeVersion }}
+          node-version: 24.11.1
       - run: corepack enable
       - run: yarn --immutable
-      - run: yarn lint
+      - run: yarn workspace @pluralsh/documentation lint
 
   sync-docs:
     name: Check docs sync
@@ -76,14 +77,13 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Read Node.js version from package.json
-        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
-        id: engines
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ steps.engines.outputs.nodeVersion }}
+          node-version: 24.11.1
       - run: corepack enable
+        working-directory: js
       - run: yarn --immutable
+        working-directory: js
       - name: Backup current routes.json
         run: cp -f generated/routes.json generated/routes.json.original
       - name: Regenerate routes.json

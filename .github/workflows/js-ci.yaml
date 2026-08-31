@@ -1,11 +1,11 @@
-name: CI / Console UI
+name: CI / JavaScript
 
 on:
   push:
     branches:
       - "master"
     paths:
-      - ".github/workflows/assets.yaml"
+      - ".github/workflows/js.yaml"
       - "js/.yarnrc.yml"
       - "js/assets/**"
       - "js/design-system/**"
@@ -15,20 +15,40 @@ on:
     branches:
       - "**"
     paths:
-      - ".github/workflows/assets.yaml"
+      - ".github/workflows/js.yaml"
       - "js/.yarnrc.yml"
       - "js/assets/**"
       - "js/design-system/**"
       - "js/package.json"
       - "js/yarn.lock"
+
+permissions:
+  contents: read
+
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+      - run: corepack enable
+      - run: yarn --immutable
+      - run: yarn workspace console lint
+
   test:
     name: Unit test
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-        working-directory: js/assets
+        working-directory: js
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -37,18 +57,3 @@ jobs:
       - run: corepack enable
       - run: yarn --immutable
       - run: yarn test
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: js/assets
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24.11.1
-      - run: corepack enable
-      - run: yarn --immutable
-      - run: yarn lint

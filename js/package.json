@@ -6,6 +6,14 @@
     "design-system",
     "documentation"
   ],
+  "scripts": {
+    "lint": "yarn workspace console lint && yarn workspace @pluralsh/documentation lint",
+    "test": "yarn workspace console test && yarn workspace @pluralsh/design-system test",
+    "lint-staged": "yarn workspace console lint-staged && yarn workspace @pluralsh/documentation lint-staged"
+  },
+  "engines": {
+    "node": "24.11.1"
+  },
   "packageManager": "yarn@4.17.1",
   "resolutions": {
     "@types/react": "19.2.17",

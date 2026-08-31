@@ -113,6 +113,12 @@ test-full: ## run test suite in docker (TEST_CMD=...)
 migration:
 	MIX_ENV=test mix ecto.gen.migration $(name)
 
+js-lint: ## lints all JavaScript workspaces
+	$(YARN) lint
+
+js-test: ## runs JavaScript unit tests
+	$(YARN) test
+
 web: ## starts a local webserver
 	$(YARN) workspace console start
 

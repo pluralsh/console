@@ -59,6 +59,8 @@ yarn workspace console start:cd # or any other yarn target, we often test on dif
 
 Run `make documentation` to start the documentation site.
 
+From `js/`, `yarn lint` and `yarn test` cover every JavaScript workspace. `make js-lint` and `make js-test` do the same from the repository root.
+
 ### Developing Server
 To make changes to the server codebase, you'll want to install elixir and rust (for nif compilation) on your machine.  For Mac desktops, we do this via mise, which can be done simply at the root of the repo like so:
 

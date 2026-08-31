@@ -5,18 +5,18 @@ on:
     branches:
       - master
     paths:
+      - ".github/workflows/chromatic.yml"
       - "js/.yarnrc.yml"
       - "js/design-system/**"
-      - ".github/workflows/chromatic.yml"
       - "js/package.json"
       - "js/yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
+      - ".github/workflows/chromatic.yml"
       - "js/.yarnrc.yml"
       - "js/design-system/**"
-      - ".github/workflows/chromatic.yml"
       - "js/package.json"
       - "js/yarn.lock"
 
