@@ -162,7 +162,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
     Input: {
       Root: [
         {
-          body2: true,
+          caption: true,
           display: 'flex',
           overflow: 'hidden',
           justifyContent: 'space-between',
@@ -180,6 +180,11 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             borderColor: 'border-outline-focused',
           },
         },
+        // multi-line inputs hold prose, so they keep the larger body type
+        ({ multiline }: any) =>
+          multiline && {
+            body2: true,
+          },
         ({ valid }: any) =>
           valid && {
             borderColor: 'border-outline',
@@ -203,8 +208,8 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         {
           width: '100%',
           flex: '1 1',
-          height: '38px',
-          lineHeight: '38px',
+          height: '30px',
+          lineHeight: '30px',
           color: 'text',
           _placeholder: {
             color: 'text-xlight',
@@ -234,8 +239,8 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           paddingLeft: 'medium',
           paddingRight: 'medium',
           lineHeight: 'inherit',
-          paddingTop: 9,
-          paddingBottom: 9,
+          paddingTop: 7,
+          paddingBottom: 7,
         },
         ({ small }: any) =>
           small && {

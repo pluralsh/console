@@ -234,6 +234,7 @@ function Input2({
   titleContent,
   size,
   small,
+  medium,
   large,
   raised = false,
   onEnter,
@@ -288,7 +289,7 @@ function Input2({
 
   const parentFillLevel = useFillLevel()
 
-  size = size || (large ? 'large' : small ? 'small' : 'medium')
+  size = size || (large ? 'large' : medium && !small ? 'medium' : 'small')
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
 
