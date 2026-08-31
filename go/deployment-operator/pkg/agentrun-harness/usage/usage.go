@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/samber/lo"
 )
 
 // Usage is the central run-level token and cost accumulator for agent harnesses.
@@ -19,6 +18,7 @@ type Usage struct {
 	inputCost       float64
 	outputCost      float64
 	totalCost       float64
+	cumulativeCosts map[string]float64
 }
 
 // Record contains a single provider usage event, normalized to the Console schema.
@@ -86,6 +86,38 @@ func (u *Usage) RecordUsage(record Record) {
 	u.mu.Unlock()
 }
 
+// RecordCumulativeCost records the positive change from the previous cost
+// snapshot for scope and returns that change. The first snapshot for a scope
+// is measured from zero. A lower snapshot resets the scope baseline without
+// recording a cost.
+func (u *Usage) RecordCumulativeCost(scope string, cumulative float64) float64 {
+	if u == nil {
+		return 0
+	}
+
+	if cumulative < 0 {
+		cumulative = 0
+	}
+
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	if u.cumulativeCosts == nil {
+		u.cumulativeCosts = make(map[string]float64)
+	}
+	previous, exists := u.cumulativeCosts[scope]
+	u.cumulativeCosts[scope] = cumulative
+	if exists && cumulative < previous {
+		return 0
+	}
+
+	delta := cumulative - previous
+	if delta > 0 {
+		u.totalCost += delta
+		return delta
+	}
+	return 0
+}
+
 func (u *Usage) Attributes() *console.AiUsageAttributes {
 	if u == nil {
 		return nil
@@ -102,14 +134,14 @@ func (u *Usage) attributesLocked() *console.AiUsageAttributes {
 	}
 
 	return &console.AiUsageAttributes{
-		InputTokens:     lo.ToPtr(u.inputTokens),
-		OutputTokens:    lo.ToPtr(u.outputTokens),
-		TotalTokens:     lo.ToPtr(u.totalTokens),
-		CachedTokens:    lo.ToPtr(u.cachedTokens),
-		ReasoningTokens: lo.ToPtr(u.reasoningTokens),
-		InputCost:       lo.ToPtr(u.inputCost),
-		OutputCost:      lo.ToPtr(u.outputCost),
-		TotalCost:       lo.ToPtr(u.totalCost),
+		InputTokens:     new(u.inputTokens),
+		OutputTokens:    new(u.outputTokens),
+		TotalTokens:     new(u.totalTokens),
+		CachedTokens:    new(u.cachedTokens),
+		ReasoningTokens: new(u.reasoningTokens),
+		InputCost:       new(u.inputCost),
+		OutputCost:      new(u.outputCost),
+		TotalCost:       new(u.totalCost),
 	}
 }
 

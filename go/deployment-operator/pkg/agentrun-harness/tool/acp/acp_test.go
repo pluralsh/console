@@ -300,33 +300,253 @@ func TestRunUsesLifecycleOptionsOnlyForInitialPrompt(t *testing.T) {
 	}
 }
 
-func TestToolOutputThresholdAndTerminalFlush(t *testing.T) {
+func TestToolOutputEmitsAccumulatedStdout(t *testing.T) {
 	state := &scriptedState{}
 	tool := testTool(t, state)
-	tool.flushBytes = 3
 	var outputs []string
-	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
-		if callID != "call-1" || message.Metadata == nil || message.Metadata.Tool == nil || message.Metadata.Tool.Output == nil {
-			return
+	tool.OnOutput(func(callID, stdout string) {
+		if callID == "call-1" {
+			outputs = append(outputs, stdout)
 		}
-		outputs = append(outputs, *message.Metadata.Tool.Output)
 	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall(
+		"call-1",
+		"shell",
+		acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress),
+		acpsdk.WithStartContent([]acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("first"))}),
+	)
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
+		t.Fatal(err)
+	}
+	updates := []acpsdk.SessionNotification{
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateContent([]acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("first\nsecond"))}))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusCompleted), acpsdk.WithUpdateContent([]acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("first\nsecond\nfinal"))}))},
+	}
+	for _, update := range updates {
+		if err := turn.handle(update); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	want := []string{"first", "first\nsecond", "first\nsecond\nfinal"}
+	if len(outputs) != len(want) {
+		t.Fatalf("output callbacks = %v, want %v", outputs, want)
+	}
+	for i := range want {
+		if outputs[i] != want[i] {
+			t.Fatalf("output callback %d = %q, want %q", i, outputs[i], want[i])
+		}
+	}
+}
+
+func TestToolNonterminalMessagesTrackMeaningfulMetadataChanges(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var messages []*console.AgentMessageAttributes
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		if callID == "call-1" {
+			messages = append(messages, message)
+		}
+	})
+
 	turn := newTurn(tool, "session-1")
 	start := acpsdk.StartToolCall("call-1", "shell", acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress))
 	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
 		t.Fatal(err)
 	}
-	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawOutput("abc"))}); err != nil {
+	updates := []acpsdk.SessionNotification{
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawOutput("output-only"))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateTitle("renamed"))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateTitle("renamed"))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawInput(map[string]string{"command": "ls"}))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawInput(map[string]string{"command": "ls"}))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusPending))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusPending))},
+	}
+	for _, update := range updates {
+		if err := turn.handle(update); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if len(messages) != 4 {
+		t.Fatalf("nonterminal messages = %d, want start plus three metadata changes", len(messages))
+	}
+	if got := *messages[1].Metadata.Tool.Name; got != "renamed" {
+		t.Fatalf("title update = %q, want renamed", got)
+	}
+	if got := *messages[2].Metadata.Tool.Input; got != "{\"command\":\"ls\"}" {
+		t.Fatalf("input update = %q, want command input", got)
+	}
+	if got := *messages[3].Metadata.Tool.State; got != console.AgentMessageToolStatePending {
+		t.Fatalf("status update = %q, want pending", got)
+	}
+}
+
+func TestToolOutputOnlyUpdatesDoNotRewriteMessage(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var messages []*console.AgentMessageAttributes
+	var outputs []string
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		if callID == "call-1" {
+			messages = append(messages, message)
+		}
+	})
+	tool.OnOutput(func(callID, stdout string) {
+		if callID == "call-1" {
+			outputs = append(outputs, stdout)
+		}
+	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall("call-1", "shell", acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress))
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
 		t.Fatal(err)
 	}
-	if len(outputs) != 2 || outputs[1] != "abc" {
-		t.Fatalf("threshold outputs = %v, want initial and abc", outputs)
+	for _, output := range []string{"first", "first\nsecond"} {
+		update := acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawOutput(output))
+		if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: update}); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusCompleted), acpsdk.WithUpdateRawOutput("done"))}); err != nil {
+
+	if len(messages) != 1 {
+		t.Fatalf("output-only messages = %d, want start message only", len(messages))
+	}
+	if len(outputs) != 2 || outputs[0] != "first" || outputs[1] != "first\nsecond" {
+		t.Fatalf("output snapshots = %v, want [first first\\nsecond]", outputs)
+	}
+}
+
+func TestToolStartFallsBackToRawOutput(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var messageOutput string
+	var streamedOutput string
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		if callID == "call-1" && message.Metadata != nil && message.Metadata.Tool != nil && message.Metadata.Tool.Output != nil {
+			messageOutput = *message.Metadata.Tool.Output
+		}
+	})
+	tool.OnOutput(func(callID, stdout string) {
+		if callID == "call-1" {
+			streamedOutput = stdout
+		}
+	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall(
+		"call-1",
+		"shell",
+		acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress),
+		acpsdk.WithStartRawOutput(map[string]string{"result": "structured output"}),
+	)
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
 		t.Fatal(err)
 	}
-	if len(outputs) != 3 || outputs[2] != "done" {
-		t.Fatalf("terminal outputs = %v, want final done snapshot", outputs)
+
+	want := "{\"result\":\"structured output\"}"
+	if messageOutput != want {
+		t.Fatalf("start message output = %q, want %q", messageOutput, want)
+	}
+	if streamedOutput != want {
+		t.Fatalf("start streamed output = %q, want %q", streamedOutput, want)
+	}
+}
+
+func TestToolOutputCallbackOrdering(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var events []string
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		state := "message"
+		if message.Metadata != nil && message.Metadata.Tool != nil && message.Metadata.Tool.State != nil {
+			state = string(*message.Metadata.Tool.State)
+		}
+		events = append(events, state+":"+callID)
+	})
+	tool.OnOutput(func(callID, stdout string) {
+		events = append(events, "output:"+callID+":"+stdout)
+	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall(
+		"call-1",
+		"shell",
+		acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress),
+		acpsdk.WithStartContent([]acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("start"))}),
+	)
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
+		t.Fatal(err)
+	}
+	terminal := acpsdk.UpdateToolCall(
+		"call-1",
+		acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusCompleted),
+		acpsdk.WithUpdateContent([]acpsdk.ToolCallContent{acpsdk.ToolContent(acpsdk.TextBlock("start\nterminal"))}),
+	)
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: terminal}); err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{
+		"RUNNING:call-1",
+		"output:call-1:start",
+		"output:call-1:start\nterminal",
+		"COMPLETED:call-1",
+	}
+	if len(events) != len(want) {
+		t.Fatalf("callback events = %v, want %v", events, want)
+	}
+	for i := range want {
+		if events[i] != want[i] {
+			t.Fatalf("callback event %d = %q, want %q", i, events[i], want[i])
+		}
+	}
+}
+
+func TestToolOutputSkipsNonMonotonicSnapshots(t *testing.T) {
+	state := &scriptedState{}
+	tool := testTool(t, state)
+	var outputs []string
+	var terminalOutput string
+	tool.OnOutput(func(callID, stdout string) {
+		if callID == "call-1" {
+			outputs = append(outputs, stdout)
+		}
+	})
+	tool.OnMessage(func(message *console.AgentMessageAttributes, callID string) {
+		if callID != "call-1" || message.Metadata == nil || message.Metadata.Tool == nil || message.Metadata.Tool.State == nil || *message.Metadata.Tool.State != console.AgentMessageToolStateCompleted {
+			return
+		}
+		if message.Metadata.Tool.Output != nil {
+			terminalOutput = *message.Metadata.Tool.Output
+		}
+	})
+
+	turn := newTurn(tool, "session-1")
+	start := acpsdk.StartToolCall("call-1", "shell", acpsdk.WithStartStatus(acpsdk.ToolCallStatusInProgress))
+	if err := turn.handle(acpsdk.SessionNotification{SessionId: "session-1", Update: start}); err != nil {
+		t.Fatal(err)
+	}
+	updates := []acpsdk.SessionNotification{
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawOutput("abc"))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateRawOutput("done"))},
+		{SessionId: "session-1", Update: acpsdk.UpdateToolCall("call-1", acpsdk.WithUpdateStatus(acpsdk.ToolCallStatusCompleted), acpsdk.WithUpdateRawOutput("ab"))},
+	}
+	for _, update := range updates {
+		if err := turn.handle(update); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if len(outputs) != 1 || outputs[0] != "abc" {
+		t.Fatalf("output callbacks = %v, want [abc]", outputs)
+	}
+	if terminalOutput != "ab" {
+		t.Fatalf("terminal metadata output = %q, want ab", terminalOutput)
 	}
 }
 
@@ -399,22 +619,34 @@ func TestPromptStopReasonIsFailure(t *testing.T) {
 	}
 }
 
-func TestRecordCostHandlesCumulativeUpdatesAndReset(t *testing.T) {
-	tool := &Tool{}
-	for _, test := range []struct {
-		name   string
-		amount float64
-		want   float64
-	}{
-		{name: "initial", amount: 4, want: 4},
-		{name: "increase", amount: 7, want: 3},
-		{name: "provider reset", amount: 2, want: 0},
-		{name: "after reset", amount: 3, want: 1},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			if got := tool.recordCost(test.amount); got != test.want {
-				t.Fatalf("recordCost(%v) = %v, want %v", test.amount, got, test.want)
-			}
-		})
+func TestNewInitializesUsageForCumulativeCostUpdates(t *testing.T) {
+	tool := New(toolv1.Config{})
+	if tool.Config.Usage == nil {
+		t.Fatal("ACP tool did not initialize usage")
+	}
+
+	var message *console.AgentMessageAttributes
+	tool.OnMessage(func(got *console.AgentMessageAttributes, _ string) {
+		message = got
+	})
+	turn := newTurn(tool, "session-1")
+	turn.usageUpdate(&acpsdk.SessionUsageUpdate{Cost: &acpsdk.Cost{Amount: 4}})
+	turn.emitAssistant(nil)
+
+	attrs := tool.Config.Usage.Attributes()
+	if attrs == nil || attrs.TotalCost == nil || *attrs.TotalCost != 4 {
+		t.Fatalf("recorded total cost = %v, want 4", attrs)
+	}
+	if message == nil || message.Cost == nil || message.Cost.Total != 4 {
+		t.Fatalf("assistant cost = %v, want 4", message)
+	}
+}
+
+func TestNewPreservesProvidedUsage(t *testing.T) {
+	provided := usage.New(nil)
+	tool := New(toolv1.Config{Usage: provided})
+
+	if tool.Config.Usage != provided {
+		t.Fatal("ACP tool replaced the provided usage recorder")
 	}
 }

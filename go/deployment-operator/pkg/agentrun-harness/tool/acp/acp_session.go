@@ -45,7 +45,6 @@ func (tool *Tool) runAttempt(ctx context.Context, prompt string, options []exec.
 		return err
 	}
 	defer attempt.close()
-	defer attempt.turn.stopFlusher()
 	return attempt.run(cwd, prompt)
 }
 
@@ -103,7 +102,6 @@ func newSessionAttempt(tool *Tool, ctx context.Context, process *exec.StdioProce
 	}
 	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	attempt.drainStderr()
-	attempt.turn.startFlusher(ctx)
 	return attempt
 }
 
@@ -241,8 +239,6 @@ func (attempt *sessionAttempt) prompt(prompt, sessionID string) (acpsdk.PromptRe
 }
 
 func (attempt *sessionAttempt) finishTurn(usage *acpsdk.Usage) {
-	attempt.turn.stopFlusher()
-	attempt.turn.flushTools(true)
 	attempt.turn.emitAssistant(usage)
 }
 

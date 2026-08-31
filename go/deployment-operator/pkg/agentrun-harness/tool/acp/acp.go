@@ -18,14 +18,13 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/usage"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
 const (
-	defaultFlushInterval = 5 * time.Second
-	defaultFlushBytes    = 64 * 1024
-	defaultStopTimeout   = 2 * time.Second
+	defaultStopTimeout = 2 * time.Second
 )
 
 // LaunchFunc starts one ACP agent process. A new process is started for every
@@ -82,41 +81,12 @@ func WithModel(model string) Option {
 	return func(tool *Tool) { tool.model = model }
 }
 
-// WithToolOutputFlushInterval changes the interval at which dirty tool output
-// is emitted. It is primarily useful for deterministic tests.
-func WithToolOutputFlushInterval(interval time.Duration) Option {
-	return func(tool *Tool) {
-		if interval > 0 {
-			tool.flushInterval = interval
-		}
-	}
-}
-
-// WithToolOutputFlushBytes changes the amount of newly received UTF-8 bytes
-// that triggers an immediate tool output flush.
-func WithToolOutputFlushBytes(size int) Option {
-	return func(tool *Tool) {
-		if size > 0 {
-			tool.flushBytes = size
-		}
-	}
-}
-
 // WithStopTimeout sets the bounded wait after session/cancel before the agent
 // process is killed.
 func WithStopTimeout(timeout time.Duration) Option {
 	return func(tool *Tool) {
 		if timeout > 0 {
 			tool.stopTimeout = timeout
-		}
-	}
-}
-
-// WithNow injects the clock used for progressive tool output flushing.
-func WithNow(now func() time.Time) Option {
-	return func(tool *Tool) {
-		if now != nil {
-			tool.now = now
 		}
 	}
 }
@@ -132,28 +102,24 @@ type Tool struct {
 	providerName     string
 	mode             string
 
-	flushInterval time.Duration
-	flushBytes    int
-	stopTimeout   time.Duration
-	now           func() time.Time
-	model         string
+	stopTimeout time.Duration
+	model       string
 
 	mu        sync.RWMutex
 	onMessage toolv1.MessageCallback
 	sessionID string
-	costBase  *float64
 }
 
 // New creates a provider-neutral ACP tool. Provider adapters normally pass
 // WithLauncher, WithConfigure, WithBabysitConfigure, and WithExporter.
 func New(config toolv1.Config, options ...Option) *Tool {
+	if config.Usage == nil {
+		config.Usage = usage.New(nil)
+	}
 	tool := &Tool{
-		DefaultTool:   toolv1.DefaultTool{Config: config},
-		providerName:  "acp",
-		flushInterval: defaultFlushInterval,
-		flushBytes:    defaultFlushBytes,
-		stopTimeout:   defaultStopTimeout,
-		now:           time.Now,
+		DefaultTool:  toolv1.DefaultTool{Config: config},
+		providerName: "acp",
+		stopTimeout:  defaultStopTimeout,
 	}
 	for _, option := range options {
 		option(tool)
@@ -286,28 +252,6 @@ func (tool *Tool) setSessionID(sessionID string) {
 	tool.mu.Lock()
 	tool.sessionID = sessionID
 	tool.mu.Unlock()
-}
-
-func (tool *Tool) recordCost(amount float64) float64 {
-	if amount < 0 {
-		amount = 0
-	}
-	tool.mu.Lock()
-	defer tool.mu.Unlock()
-	if tool.costBase == nil {
-		tool.costBase = &amount
-		return amount
-	}
-	if amount < *tool.costBase {
-		*tool.costBase = amount
-		return 0
-	}
-	delta := amount - *tool.costBase
-	*tool.costBase = amount
-	if delta < 0 {
-		return 0
-	}
-	return delta
 }
 
 var _ toolv1.Tool = (*Tool)(nil)

@@ -1,12 +1,10 @@
 package acp
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"strings"
 	"sync"
-	"time"
 
 	acpsdk "github.com/coder/acp-go-sdk"
 	"k8s.io/klog/v2"
@@ -25,19 +23,14 @@ type turnState struct {
 	reasoning      strings.Builder
 	tools          map[string]*toolCall
 	cost           float64
-	stopFlush      chan struct{}
-	flushDone      chan struct{}
 }
 
 type toolCall struct {
-	id           string
-	name         string
-	input        string
-	output       string
-	state        console.AgentMessageToolState
-	dirty        bool
-	pendingBytes int
-	lastFlush    time.Time
+	id     string
+	name   string
+	input  string
+	output string
+	state  console.AgentMessageToolState
 }
 
 func newTurn(tool *Tool, sessionID string) *turnState {
@@ -45,36 +38,7 @@ func newTurn(tool *Tool, sessionID string) *turnState {
 		tool:           tool,
 		sessionIDValue: sessionID,
 		tools:          make(map[string]*toolCall),
-		stopFlush:      make(chan struct{}),
-		flushDone:      make(chan struct{}),
 	}
-}
-
-func (turn *turnState) startFlusher(ctx context.Context) {
-	go func() {
-		defer close(turn.flushDone)
-		ticker := time.NewTicker(turn.tool.flushInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ticker.C:
-				turn.flushTools(false)
-			case <-turn.stopFlush:
-				return
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-}
-
-func (turn *turnState) stopFlusher() {
-	select {
-	case <-turn.stopFlush:
-	default:
-		close(turn.stopFlush)
-	}
-	<-turn.flushDone
 }
 
 func (turn *turnState) sessionID() string {
@@ -167,19 +131,21 @@ func (turn *turnState) startTool(update *acpsdk.SessionUpdateToolCall) error {
 		return turn.fail(err.Error())
 	}
 	call := &toolCall{
-		id:        id,
-		name:      toolName(update.Title, update.Kind),
-		input:     formatValue(update.RawInput),
-		state:     state,
-		lastFlush: turn.tool.now(),
+		id:    id,
+		name:  toolName(update.Title, update.Kind),
+		input: formatValue(update.RawInput),
+		state: state,
 	}
 	call.output = contentOutput(update.Content)
-	call.dirty = true
+	if call.output == "" && update.RawOutput != nil {
+		call.output = formatValue(update.RawOutput)
+	}
 	turn.tools[id] = call
 	message := call.message()
-	call.dirty = false
+	output := call.output
 	turn.mu.Unlock()
 	turn.tool.emit(message, id)
+	turn.tool.EmitOutput(id, output)
 	return nil
 }
 
@@ -191,12 +157,21 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 		turn.mu.Unlock()
 		return turn.fail(fmt.Sprintf("ACP tool call update %q arrived before tool_call", id))
 	}
+	metadataChanged := false
 	if update.Title != nil {
-		call.name = *update.Title
+		if call.name != *update.Title {
+			metadataChanged = true
+			call.name = *update.Title
+		}
 	}
 	if update.RawInput != nil {
-		call.input = formatValue(update.RawInput)
+		input := formatValue(update.RawInput)
+		if call.input != input {
+			metadataChanged = true
+			call.input = input
+		}
 	}
+	previousOutput := call.output
 	output := contentOutput(update.Content)
 	if output == "" && update.RawOutput != nil {
 		output = formatValue(update.RawOutput)
@@ -204,6 +179,8 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 	if output != "" {
 		call.addOutput(output)
 	}
+	accumulatedOutput := call.output
+	streamOutput := accumulatedOutput != previousOutput && (previousOutput == "" || strings.HasPrefix(accumulatedOutput, previousOutput))
 	terminal := false
 	if update.Status != nil {
 		state, err := toolState(*update.Status)
@@ -211,52 +188,30 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 			turn.mu.Unlock()
 			return turn.fail(err.Error())
 		}
-		call.state = state
+		if call.state != state {
+			metadataChanged = true
+			call.state = state
+		}
 		terminal = state == console.AgentMessageToolStateCompleted || state == console.AgentMessageToolStateError
 	}
 	message := (*console.AgentMessageAttributes)(nil)
 	if terminal {
 		message = call.message()
 		delete(turn.tools, id)
-		call.dirty = false
-	} else if call.dirty && call.pendingBytes >= turn.tool.flushBytes {
+	} else if metadataChanged {
 		message = call.message()
-		call.dirty = false
-		call.pendingBytes = 0
-		call.lastFlush = turn.tool.now()
 	}
 	turn.mu.Unlock()
+	if terminal && streamOutput {
+		turn.tool.EmitOutput(id, accumulatedOutput)
+	}
 	if message != nil {
 		turn.tool.emit(message, id)
 	}
+	if !terminal && streamOutput {
+		turn.tool.EmitOutput(id, accumulatedOutput)
+	}
 	return nil
-}
-
-func (turn *turnState) flushTools(force bool) {
-	turn.mu.Lock()
-	type pendingMessage struct {
-		id      string
-		message *console.AgentMessageAttributes
-	}
-	messages := make([]pendingMessage, 0)
-	now := turn.tool.now()
-	for id, call := range turn.tools {
-		if !call.dirty {
-			continue
-		}
-		if !force && now.Sub(call.lastFlush) < turn.tool.flushInterval {
-			continue
-		}
-		messages = append(messages, pendingMessage{id: id, message: call.message()})
-		call.dirty = false
-		call.pendingBytes = 0
-		call.lastFlush = now
-		_ = id
-	}
-	turn.mu.Unlock()
-	for _, pending := range messages {
-		turn.tool.emit(pending.message, pending.id)
-	}
 }
 
 func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {
@@ -309,15 +264,13 @@ func (turn *turnState) usageUpdate(update *acpsdk.SessionUsageUpdate) {
 		klog.V(log.LogLevelDebug).InfoS("ACP usage update omitted optional cost")
 		return
 	}
-	delta := turn.tool.recordCost(update.Cost.Amount)
-	if delta > 0 {
-		turn.mu.Lock()
-		turn.cost += delta
-		turn.mu.Unlock()
-		if turn.tool.Config.Usage != nil {
-			turn.tool.Config.Usage.RecordUsage(usage.Record{TotalCost: delta})
-		}
+	delta := turn.tool.Config.Usage.RecordCumulativeCost(turn.sessionID(), update.Cost.Amount)
+	if delta <= 0 {
+		return
 	}
+	turn.mu.Lock()
+	turn.cost += delta
+	turn.mu.Unlock()
 }
 
 func (turn *turnState) fail(message string) error {
@@ -330,12 +283,5 @@ func (call *toolCall) addOutput(output string) {
 	if output == "" || output == call.output {
 		return
 	}
-	previous := call.output
 	call.output = output
-	if strings.HasPrefix(output, previous) {
-		call.pendingBytes += len(output) - len(previous)
-	} else {
-		call.pendingBytes += len(output)
-	}
-	call.dirty = true
 }

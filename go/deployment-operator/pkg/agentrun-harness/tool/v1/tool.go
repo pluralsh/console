@@ -32,7 +32,7 @@ const (
 
 // ConfigureSystemPrompt prepares system prompt/context files for the provider and puts them in the required directory
 // for the agent CLI to read during the run.
-func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) error {
+func (in *DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) error {
 	providerDir := ""
 	switch runtime {
 	case console.AgentRuntimeTypeClaude:
@@ -70,7 +70,7 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 	return nil
 }
 
-func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRuntimeType) error {
+func (in *DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRuntimeType) error {
 	providerDir := ""
 	switch runtime {
 	case console.AgentRuntimeTypeClaude:
@@ -100,7 +100,7 @@ func (in DefaultTool) ConfigureSystemPromptForBabysitRun(runtime console.AgentRu
 	return nil
 }
 
-func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
+func (in *DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	branch := ""
 	if in.Config.Run.Branch != nil {
 		branch = *in.Config.Run.Branch
@@ -119,7 +119,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 	}
 }
 
-func (in DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
+func (in *DefaultTool) BuildUploadArtifacts(ctx context.Context, opts artifacts.BuildArtifactsOptions) (*artifacts.UploadArtifacts, error) {
 	return artifacts.NewUploadArtifactBuilder(artifacts.Config{
 		WorkDir:       in.Config.WorkDir,
 		RepositoryDir: in.Config.RepositoryDir,
