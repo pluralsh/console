@@ -20,23 +20,6 @@ on:
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
 jobs:
-  sync-docs:
-    name: Check docs sync
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: documentation
-    steps:
-      - uses: actions/checkout@v6
-      - name: Sync docs
-        run: make sync
-      - name: Verify changed files
-        run: |
-          git diff --exit-code -- pages || {
-            echo "::error Documentation pages are out of sync. Please run 'make sync' from documentation/ and commit the changes."
-            exit 1
-          }
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -54,3 +37,57 @@ jobs:
           node-version: ${{ steps.engines.outputs.nodeVersion }}
       - run: yarn --immutable
       - run: yarn lint
+
+  sync-docs:
+    name: Check docs sync
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: documentation
+    steps:
+      - uses: actions/checkout@v6
+      - name: Sync docs
+        run: make sync
+      - name: Verify changed files
+        run: |
+          git diff --exit-code -- pages || {
+            echo "::error Documentation pages are out of sync. Please run 'make sync' from documentation/ and commit the changes."
+            exit 1
+          }
+
+  validate-routes:
+    name: Validate generated routes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: documentation
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Read Node.js version from package.json
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
+        id: engines
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
+      - run: yarn --immutable
+      - name: Backup current routes.json
+        run: cp -f generated/routes.json generated/routes.json.original
+      - name: Regenerate routes.json
+        run: make routes
+      - name: Create comparison files with just routes and filepaths
+        run: |
+          jq 'map_values({relPath})' generated/routes.json > routes.paths.json
+          jq 'map_values({relPath})' generated/routes.json.original > routes.original.paths.json
+      - name: Compare route paths
+        run: |
+          if ! diff -q routes.paths.json routes.original.paths.json > /dev/null; then
+            echo "::error The routes.json file is out of sync with the docs structure."
+            echo "Please run 'make routes' from documentation/ and commit the updated file."
+            diff -u routes.original.paths.json routes.paths.json || true
+            exit 1
+          fi
+          echo "Routes validation passed: routes.json is up to date."
