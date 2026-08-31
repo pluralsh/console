@@ -1,0 +1,56 @@
+name: CI / Documentation
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/documentation.yaml"
+      - "documentation/**"
+      - "go/controller/docs/**"
+      - "go/deployment-operator/docs/**"
+      - "go/polly/docs/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/documentation.yaml"
+      - "documentation/**"
+      - "go/controller/docs/**"
+      - "go/deployment-operator/docs/**"
+      - "go/polly/docs/**"
+jobs:
+  sync-docs:
+    name: Check docs sync
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: documentation
+    steps:
+      - uses: actions/checkout@v6
+      - name: Sync docs
+        run: make sync-docs
+      - name: Verify changed files
+        run: |
+          git diff --exit-code -- pages || {
+            echo "::error Documentation pages are out of sync. Please run 'make sync-docs' from documentation/ and commit the changes."
+            exit 1
+          }
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: documentation
+    steps:
+      - uses: actions/checkout@v6
+      - name: Read Node.js version from package.json
+        run: echo "nodeVersion=$(node -p "require('./package.json').engines.node")" >> $GITHUB_OUTPUT
+        id: engines
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ steps.engines.outputs.nodeVersion }}
+      - run: yarn --immutable
+      - run: yarn lint
