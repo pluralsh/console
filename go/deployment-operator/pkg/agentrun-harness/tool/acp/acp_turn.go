@@ -14,6 +14,28 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
+type toolCall struct {
+	id     string
+	name   string
+	input  string
+	output string
+	state  console.AgentMessageToolState
+}
+
+func (call *toolCall) addOutput(output string) {
+	if output == "" || output == call.output {
+		return
+	}
+	call.output = output
+}
+
+type toolUpdateEvents struct {
+	message      *console.AgentMessageAttributes
+	output       string
+	streamOutput bool
+	terminal     bool
+}
+
 type turnState struct {
 	tool           *Tool
 	mu             sync.Mutex
@@ -25,20 +47,55 @@ type turnState struct {
 	cost           float64
 }
 
-type toolCall struct {
-	id     string
-	name   string
-	input  string
-	output string
-	state  console.AgentMessageToolState
+func (turn *turnState) contentText(content acpsdk.ContentBlock) (string, error) {
+	if content.Text != nil {
+		return content.Text.Text, nil
+	}
+	return "", errors.New("expected text content")
 }
 
-func newTurn(tool *Tool, sessionID string) *turnState {
-	return &turnState{
-		tool:           tool,
-		sessionIDValue: sessionID,
-		tools:          make(map[string]*toolCall),
+func (turn *turnState) contentOutput(content []acpsdk.ToolCallContent) string {
+	var builder strings.Builder
+	for _, item := range content {
+		switch {
+		case item.Content != nil:
+			if item.Content.Content.Text != nil {
+				builder.WriteString(item.Content.Content.Text.Text)
+			}
+		case item.Diff != nil:
+			builder.WriteString(item.Diff.NewText)
+		case item.Terminal != nil:
+			builder.WriteString(item.Terminal.TerminalId)
+		}
 	}
+	return builder.String()
+}
+
+func (turn *turnState) toolOutput(content []acpsdk.ToolCallContent, rawOutput any) string {
+	output := turn.contentOutput(content)
+	if output == "" && rawOutput != nil {
+		return formatValue(rawOutput)
+	}
+	return output
+}
+
+func (turn *turnState) normalizeUsage(providerUsage *acpsdk.Usage) (input, output, total, cached, thought int64) {
+	input = int64(max(providerUsage.InputTokens, 0))
+	output = int64(max(providerUsage.OutputTokens, 0))
+	total = max(int64(max(providerUsage.TotalTokens, 0)), input+output)
+	if providerUsage.CachedReadTokens != nil {
+		cached += int64(max(*providerUsage.CachedReadTokens, 0))
+	}
+	if providerUsage.CachedWriteTokens != nil {
+		cached += int64(max(*providerUsage.CachedWriteTokens, 0))
+	}
+	if providerUsage.ThoughtTokens != nil {
+		thought = int64(max(*providerUsage.ThoughtTokens, 0))
+		if total < input+output+thought {
+			total = input + output + thought
+		}
+	}
+	return
 }
 
 func (turn *turnState) sessionID() string {
@@ -71,31 +128,15 @@ func (turn *turnState) setErr(err error) {
 }
 
 func (turn *turnState) handle(notification acpsdk.SessionNotification) error {
-	if notification.SessionId != acpsdk.SessionId(turn.sessionID()) {
-		err := fmt.Errorf("ACP session update belongs to session %q, expected %q", notification.SessionId, turn.sessionID())
-		turn.setErr(err)
+	if err := turn.bindNotification(notification.SessionId); err != nil {
 		return err
 	}
 	update := notification.Update
 	switch {
 	case update.AgentMessageChunk != nil:
-		text, err := contentText(update.AgentMessageChunk.Content)
-		if err != nil {
-			turn.setErr(fmt.Errorf("ACP agent message content: %w", err))
-			return err
-		}
-		turn.mu.Lock()
-		turn.assistant.WriteString(text)
-		turn.mu.Unlock()
+		return turn.appendTextChunk(update.AgentMessageChunk.Content, &turn.assistant, "agent message")
 	case update.AgentThoughtChunk != nil:
-		text, err := contentText(update.AgentThoughtChunk.Content)
-		if err != nil {
-			turn.setErr(fmt.Errorf("ACP agent thought content: %w", err))
-			return err
-		}
-		turn.mu.Lock()
-		turn.reasoning.WriteString(text)
-		turn.mu.Unlock()
+		return turn.appendTextChunk(update.AgentThoughtChunk.Content, &turn.reasoning, "agent thought")
 	case update.ToolCall != nil:
 		return turn.startTool(update.ToolCall)
 	case update.ToolCallUpdate != nil:
@@ -103,8 +144,8 @@ func (turn *turnState) handle(notification acpsdk.SessionNotification) error {
 	case update.UsageUpdate != nil:
 		turn.usageUpdate(update.UsageUpdate)
 	case update.UserMessageChunk != nil:
-		if _, err := contentText(update.UserMessageChunk.Content); err != nil {
-			turn.setErr(fmt.Errorf("ACP user message content: %w", err))
+		if _, err := turn.contentText(update.UserMessageChunk.Content); err != nil {
+			turn.setErr(fmt.Errorf("acp user message content: %w", err))
 			return err
 		}
 	default:
@@ -115,31 +156,66 @@ func (turn *turnState) handle(notification acpsdk.SessionNotification) error {
 	return nil
 }
 
+func (turn *turnState) bindNotification(sessionID acpsdk.SessionId) error {
+	if sessionID == "" {
+		return turn.fail("acp session update has an empty session id")
+	}
+
+	// A trusted ACP child can send updates before NewSession returns. Bind the
+	// first non-empty notification provisionally and reconcile it in createSession;
+	// buffering those callbacks would add latency and state without protecting
+	// this trusted process from a protocol race.
+	turn.mu.Lock()
+	expected := turn.sessionIDValue
+	if expected == "" {
+		expected = string(sessionID)
+		turn.sessionIDValue = expected
+	}
+	turn.mu.Unlock()
+	if sessionID == acpsdk.SessionId(expected) {
+		return nil
+	}
+	return turn.sessionUpdateMismatch(sessionID, expected)
+}
+
+func (turn *turnState) appendTextChunk(content acpsdk.ContentBlock, target *strings.Builder, kind string) error {
+	text, err := turn.contentText(content)
+	if err != nil {
+		turn.setErr(fmt.Errorf("acp %s content: %w", kind, err))
+		return err
+	}
+	turn.mu.Lock()
+	target.WriteString(text)
+	turn.mu.Unlock()
+	return nil
+}
+
+func (turn *turnState) sessionUpdateMismatch(actual acpsdk.SessionId, expected string) error {
+	err := fmt.Errorf("acp session update belongs to session %q, expected %q", actual, expected)
+	turn.setErr(err)
+	return err
+}
+
 func (turn *turnState) startTool(update *acpsdk.SessionUpdateToolCall) error {
 	if update.ToolCallId == "" {
-		return turn.fail("ACP tool call has an empty id")
+		return turn.fail("acp tool call has an empty id")
 	}
 	id := string(update.ToolCallId)
 	turn.mu.Lock()
 	if _, exists := turn.tools[id]; exists {
 		turn.mu.Unlock()
-		return turn.fail(fmt.Sprintf("ACP tool call %q was started twice", id))
-	}
-	state, err := toolState(update.Status)
-	if err != nil {
-		turn.mu.Unlock()
-		return turn.fail(err.Error())
+		return turn.fail(fmt.Sprintf("acp tool call %q was started twice", id))
 	}
 	call := &toolCall{
 		id:    id,
-		name:  toolName(update.Title, update.Kind),
 		input: formatValue(update.RawInput),
-		state: state,
 	}
-	call.output = contentOutput(update.Content)
-	if call.output == "" && update.RawOutput != nil {
-		call.output = formatValue(update.RawOutput)
+	call.setName(update.Title, update.Kind)
+	if _, _, err := call.updateStatus(&update.Status); err != nil {
+		turn.mu.Unlock()
+		return turn.fail(err.Error())
 	}
+	call.output = turn.toolOutput(update.Content, update.RawOutput)
 	turn.tools[id] = call
 	message := call.message()
 	output := call.output
@@ -150,50 +226,34 @@ func (turn *turnState) startTool(update *acpsdk.SessionUpdateToolCall) error {
 }
 
 func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
-	id := string(update.ToolCallId)
 	turn.mu.Lock()
+	events, err := turn.applyToolUpdate(update)
+	turn.mu.Unlock()
+	if err != nil {
+		turn.setErr(err)
+		return err
+	}
+	turn.emitToolUpdate(update.ToolCallId, events)
+	return nil
+}
+
+func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate) (toolUpdateEvents, error) {
+	id := string(update.ToolCallId)
 	call, exists := turn.tools[id]
 	if !exists {
-		turn.mu.Unlock()
-		return turn.fail(fmt.Sprintf("ACP tool call update %q arrived before tool_call", id))
+		return toolUpdateEvents{}, fmt.Errorf("acp tool call update %q arrived before tool_call", id)
 	}
-	metadataChanged := false
-	if update.Title != nil {
-		if call.name != *update.Title {
-			metadataChanged = true
-			call.name = *update.Title
-		}
-	}
-	if update.RawInput != nil {
-		input := formatValue(update.RawInput)
-		if call.input != input {
-			metadataChanged = true
-			call.input = input
-		}
-	}
+	metadataChanged := call.updateMetadata(update)
 	previousOutput := call.output
-	output := contentOutput(update.Content)
-	if output == "" && update.RawOutput != nil {
-		output = formatValue(update.RawOutput)
-	}
-	if output != "" {
+	if output := turn.toolOutput(update.Content, update.RawOutput); output != "" {
 		call.addOutput(output)
 	}
-	accumulatedOutput := call.output
-	streamOutput := accumulatedOutput != previousOutput && (previousOutput == "" || strings.HasPrefix(accumulatedOutput, previousOutput))
-	terminal := false
-	if update.Status != nil {
-		state, err := toolState(*update.Status)
-		if err != nil {
-			turn.mu.Unlock()
-			return turn.fail(err.Error())
-		}
-		if call.state != state {
-			metadataChanged = true
-			call.state = state
-		}
-		terminal = state == console.AgentMessageToolStateCompleted || state == console.AgentMessageToolStateError
+	streamOutput := call.output != previousOutput && (previousOutput == "" || strings.HasPrefix(call.output, previousOutput))
+	terminal, statusChanged, err := call.updateStatus(update.Status)
+	if err != nil {
+		return toolUpdateEvents{}, err
 	}
+	metadataChanged = metadataChanged || statusChanged
 	message := (*console.AgentMessageAttributes)(nil)
 	if terminal {
 		message = call.message()
@@ -201,17 +261,24 @@ func (turn *turnState) updateTool(update *acpsdk.SessionToolCallUpdate) error {
 	} else if metadataChanged {
 		message = call.message()
 	}
-	turn.mu.Unlock()
-	if terminal && streamOutput {
-		turn.tool.EmitOutput(id, accumulatedOutput)
+	return toolUpdateEvents{
+		message:      message,
+		output:       call.output,
+		streamOutput: streamOutput,
+		terminal:     terminal,
+	}, nil
+}
+
+func (turn *turnState) emitToolUpdate(id acpsdk.ToolCallId, events toolUpdateEvents) {
+	if events.terminal && events.streamOutput {
+		turn.tool.EmitOutput(string(id), events.output)
 	}
-	if message != nil {
-		turn.tool.emit(message, id)
+	if events.message != nil {
+		turn.tool.emit(events.message, string(id))
 	}
-	if !terminal && streamOutput {
-		turn.tool.EmitOutput(id, accumulatedOutput)
+	if !events.terminal && events.streamOutput {
+		turn.tool.EmitOutput(string(id), events.output)
 	}
-	return nil
 }
 
 func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {
@@ -228,7 +295,7 @@ func (turn *turnState) emitAssistant(responseUsage *acpsdk.Usage) {
 		}
 	}
 	if responseUsage != nil {
-		input, output, total, cached, thought := normalizeUsage(responseUsage)
+		input, output, total, cached, thought := turn.normalizeUsage(responseUsage)
 		if turn.tool.Config.Usage != nil {
 			turn.tool.Config.Usage.RecordUsage(usage.Record{
 				InputTokens: input, OutputTokens: output, TotalTokens: total,
@@ -279,9 +346,10 @@ func (turn *turnState) fail(message string) error {
 	return err
 }
 
-func (call *toolCall) addOutput(output string) {
-	if output == "" || output == call.output {
-		return
+func newTurn(tool *Tool, sessionID string) *turnState {
+	return &turnState{
+		tool:           tool,
+		sessionIDValue: sessionID,
+		tools:          make(map[string]*toolCall),
 	}
-	call.output = output
 }

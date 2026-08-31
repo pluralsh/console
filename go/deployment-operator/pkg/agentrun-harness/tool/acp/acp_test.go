@@ -21,15 +21,16 @@ import (
 type scriptedState struct {
 	mu sync.Mutex
 
-	initializations []acpsdk.InitializeRequest
-	newSessions     []acpsdk.NewSessionRequest
-	resumedSessions []acpsdk.ResumeSessionRequest
-	configOptions   []acpsdk.SessionConfigOption
-	setConfig       []acpsdk.SetSessionConfigOptionRequest
-	modes           *acpsdk.SessionModeState
-	setModes        []acpsdk.SetSessionModeRequest
-	prompts         []string
-	stopReason      acpsdk.StopReason
+	initializations   []acpsdk.InitializeRequest
+	newSessions       []acpsdk.NewSessionRequest
+	newSessionUpdates []acpsdk.SessionNotification
+	resumedSessions   []acpsdk.ResumeSessionRequest
+	configOptions     []acpsdk.SessionConfigOption
+	setConfig         []acpsdk.SetSessionConfigOptionRequest
+	modes             *acpsdk.SessionModeState
+	setModes          []acpsdk.SetSessionModeRequest
+	prompts           []string
+	stopReason        acpsdk.StopReason
 }
 
 type scriptedAgent struct {
@@ -64,15 +65,80 @@ func (agent *scriptedAgent) ListSessions(context.Context, acpsdk.ListSessionsReq
 	return acpsdk.ListSessionsResponse{}, nil
 }
 
-func (agent *scriptedAgent) NewSession(_ context.Context, request acpsdk.NewSessionRequest) (acpsdk.NewSessionResponse, error) {
+func (agent *scriptedAgent) NewSession(ctx context.Context, request acpsdk.NewSessionRequest) (acpsdk.NewSessionResponse, error) {
 	agent.state.mu.Lock()
 	agent.state.newSessions = append(agent.state.newSessions, request)
+	updates := append([]acpsdk.SessionNotification(nil), agent.state.newSessionUpdates...)
 	agent.state.mu.Unlock()
+	for _, update := range updates {
+		if err := agent.conn.SessionUpdate(ctx, update); err != nil {
+			return acpsdk.NewSessionResponse{}, err
+		}
+	}
 	agent.state.mu.Lock()
 	configOptions := agent.state.configOptions
 	modes := agent.state.modes
 	agent.state.mu.Unlock()
 	return acpsdk.NewSessionResponse{SessionId: "session-1", ConfigOptions: configOptions, Modes: modes}, nil
+}
+
+func TestRunPromptHandlesUpdatesSentBeforeNewSessionResponse(t *testing.T) {
+	state := &scriptedState{
+		newSessionUpdates: []acpsdk.SessionNotification{
+			{SessionId: "session-1", Update: acpsdk.UpdateAgentMessageText("early ")},
+			{SessionId: "session-1", Update: acpsdk.UpdateAgentMessageText("update ")},
+		},
+	}
+	tool := testTool(t, state)
+	var messages []string
+	tool.OnMessage(func(message *console.AgentMessageAttributes, _ string) {
+		if message.Role == console.AiRoleAssistant {
+			messages = append(messages, message.Message)
+		}
+	})
+
+	if err := tool.FollowUpRun(context.Background(), "prompt"); err != nil {
+		t.Fatalf("prompt: %v", err)
+	}
+
+	if len(messages) != 1 || messages[0] != "early update response: prompt" {
+		t.Fatalf("assistant messages = %v, want [early update response: prompt]", messages)
+	}
+}
+
+func TestRunPromptRejectsMismatchedInitialSessionUpdate(t *testing.T) {
+	state := &scriptedState{
+		newSessionUpdates: []acpsdk.SessionNotification{
+			{SessionId: "session-other", Update: acpsdk.UpdateAgentMessageText("wrong session")},
+		},
+	}
+	tool := testTool(t, state)
+
+	err := tool.FollowUpRun(context.Background(), "prompt")
+	if err == nil {
+		t.Fatal("prompt with mismatched initial session update unexpectedly succeeded")
+	}
+	if !strings.Contains(err.Error(), `belongs to session "session-other", expected "session-1"`) {
+		t.Fatalf("mismatched initial update error = %v", err)
+	}
+	if got := tool.sessionIDValue(); got != "" {
+		t.Fatalf("tool session id = %q, want empty after rejected session", got)
+	}
+}
+
+func TestSessionUpdateRejectsEmptySessionIDBeforeBinding(t *testing.T) {
+	turn := newTurn(&Tool{}, "")
+
+	err := turn.handle(acpsdk.SessionNotification{Update: acpsdk.UpdateAgentMessageText("ignored")})
+	if err == nil {
+		t.Fatal("empty session update unexpectedly succeeded")
+	}
+	if got := err.Error(); got != "acp session update has an empty session id" {
+		t.Fatalf("empty session update error = %q", got)
+	}
+	if got := turn.sessionID(); got != "" {
+		t.Fatalf("provisional session id = %q, want empty", got)
+	}
 }
 
 func (agent *scriptedAgent) Prompt(ctx context.Context, request acpsdk.PromptRequest) (acpsdk.PromptResponse, error) {

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	acpsdk "github.com/coder/acp-go-sdk"
 	"k8s.io/klog/v2"
 
 	console "github.com/pluralsh/console/go/client"
@@ -91,6 +92,8 @@ func WithStopTimeout(timeout time.Duration) Option {
 	}
 }
 
+var _ toolv1.Tool = (*Tool)(nil)
+
 // Tool implements v1.Tool for an ACP-speaking provider.
 type Tool struct {
 	toolv1.DefaultTool
@@ -161,7 +164,7 @@ func (tool *Tool) BabysitRun(ctx context.Context, babysit *toolv1.BabysitContext
 // Configure configures the provider adapter.
 func (tool *Tool) Configure(consoleURL, consoleToken string) error {
 	if tool.configure == nil {
-		return errors.New("ACP configure function is not set")
+		return errors.New("acp configure function is not set")
 	}
 	return tool.configure(consoleURL, consoleToken)
 }
@@ -192,19 +195,19 @@ func (tool *Tool) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifac
 	// Kept in a small adapter method so provider-specific export remains outside
 	// the protocol implementation.
 	if tool.export == nil {
-		return nil, errors.New("ACP session exporter is not set")
+		return nil, errors.New("acp session exporter is not set")
 	}
 	tool.mu.RLock()
 	sessionID := tool.sessionID
 	providerName := tool.providerName
 	tool.mu.RUnlock()
 	if sessionID == "" {
-		return nil, errors.New("ACP session id is not set")
+		return nil, errors.New("acp session id is not set")
 	}
 
 	sourcePath, err := os.MkdirTemp(tool.Config.WorkDir, "acp-session-export-*")
 	if err != nil {
-		return nil, fmt.Errorf("create ACP session export dir: %w", err)
+		return nil, fmt.Errorf("create acp session export dir: %w", err)
 	}
 	defer os.RemoveAll(sourcePath)
 
@@ -220,6 +223,29 @@ func (tool *Tool) UploadArtifacts(ctx context.Context) (*artifacts.UploadArtifac
 		},
 		SessionID: sessionID,
 	})
+}
+
+func (tool *Tool) startAttempt(ctx context.Context, options []exec.Option) (*sessionAttempt, error) {
+	tool.mu.RLock()
+	launch := tool.launch
+	priorSessionID := tool.sessionID
+	tool.mu.RUnlock()
+	if launch == nil {
+		return nil, errors.New("acp launcher is not set")
+	}
+
+	process, err := launch(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	if process == nil || process.Stdin == nil || process.Stdout == nil {
+		if process != nil {
+			_ = process.Stop()
+			_ = process.Wait()
+		}
+		return nil, errors.New("acp launcher returned an incomplete stdio process")
+	}
+	return newSessionAttempt(tool, ctx, process, priorSessionID), nil
 }
 
 func (tool *Tool) reportError(err error) {
@@ -242,7 +268,7 @@ func (tool *Tool) emit(message *console.AgentMessageAttributes, callID string) {
 	}
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			klog.ErrorS(fmt.Errorf("panic in ACP message callback: %v", recovered), "ACP message callback panicked")
+			klog.ErrorS(fmt.Errorf("panic in acp message callback: %v", recovered), "ACP message callback panicked")
 		}
 	}()
 	callback(message, callID)
@@ -254,4 +280,130 @@ func (tool *Tool) setSessionID(sessionID string) {
 	tool.mu.Unlock()
 }
 
-var _ toolv1.Tool = (*Tool)(nil)
+func (tool *Tool) sessionIDValue() string {
+	tool.mu.RLock()
+	defer tool.mu.RUnlock()
+	return tool.sessionID
+}
+
+func (tool *Tool) setSessionConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, modes *acpsdk.SessionModeState, options []acpsdk.SessionConfigOption) error {
+	tool.mu.RLock()
+	mode := tool.mode
+	model := tool.model
+	tool.mu.RUnlock()
+
+	if err := tool.setModelConfig(ctx, connection, sessionID, options, model); err != nil {
+		return err
+	}
+	return tool.setModeConfig(ctx, connection, sessionID, modes, options, mode)
+}
+
+func (tool *Tool) setModelConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, model string) error {
+	if model == "" {
+		return nil
+	}
+	found, err := tool.setConfigOption(ctx, connection, sessionID, options, "model", model)
+	if err != nil {
+		return err
+	}
+	if !found {
+		klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a model config option")
+	}
+	return nil
+}
+
+func (tool *Tool) setModeConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, modes *acpsdk.SessionModeState, options []acpsdk.SessionConfigOption, mode string) error {
+	if mode == "" {
+		return nil
+	}
+	if tool.modeAvailable(modes, mode) {
+		if _, err := connection.SetSessionMode(ctx, acpsdk.SetSessionModeRequest{
+			SessionId: acpsdk.SessionId(sessionID),
+			ModeId:    acpsdk.SessionModeId(mode),
+		}); err != nil {
+			return fmt.Errorf("acp session/set_mode: %w", err)
+		}
+		return nil
+	}
+	if found, err := tool.setConfigOption(ctx, connection, sessionID, options, "mode", mode); err != nil {
+		return err
+	} else if found {
+		return nil
+	}
+	klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a mode config option", "mode", mode)
+	return nil
+}
+
+func (tool *Tool) modeAvailable(modes *acpsdk.SessionModeState, mode string) bool {
+	if modes == nil {
+		return false
+	}
+	for _, available := range modes.AvailableModes {
+		if string(available.Id) == mode {
+			return true
+		}
+	}
+	return false
+}
+
+func (tool *Tool) setConfigOption(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, configID, value string) (bool, error) {
+	for _, option := range options {
+		if option.Select == nil || string(option.Select.Id) != configID {
+			continue
+		}
+		wanted := acpsdk.SessionConfigValueId(value)
+		if option.Select.CurrentValue == wanted {
+			return true, nil
+		}
+		if !tool.configOptionContains(option.Select.Options, wanted) {
+			return true, fmt.Errorf("acp %s %q is not advertised", configID, value)
+		}
+		if _, err := connection.SetSessionConfigOption(ctx, acpsdk.SetSessionConfigOptionRequest{
+			ValueId: &acpsdk.SetSessionConfigOptionValueId{
+				ConfigId:  option.Select.Id,
+				SessionId: acpsdk.SessionId(sessionID),
+				Value:     wanted,
+			},
+		}); err != nil {
+			return true, fmt.Errorf("acp session/set_config_option %s: %w", configID, err)
+		}
+		return true, nil
+	}
+	return false, nil
+}
+
+func (tool *Tool) configOptionContains(options acpsdk.SessionConfigSelectOptions, wanted acpsdk.SessionConfigValueId) bool {
+	if options.Ungrouped != nil {
+		for _, option := range *options.Ungrouped {
+			if option.Value == wanted {
+				return true
+			}
+		}
+	}
+	if options.Grouped != nil {
+		for _, group := range *options.Grouped {
+			for _, option := range group.Options {
+				if option.Value == wanted {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func (tool *Tool) validate() error {
+	if tool.Config.Run == nil {
+		return errors.New("agent run is not set")
+	}
+	if tool.Config.RepositoryDir == "" {
+		return errors.New("repository directory is not set")
+	}
+	if tool.Config.WorkDir == "" {
+		return errors.New("work directory is not set")
+	}
+	if tool.Config.ErrorChan == nil {
+		return errors.New("error channel is not set")
+	}
+	return nil
+}

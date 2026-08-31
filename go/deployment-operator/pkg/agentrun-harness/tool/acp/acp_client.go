@@ -15,6 +15,8 @@ import (
 
 const maxTextFileBytes = 16 << 20
 
+var _ acpsdk.Client = (*client)(nil)
+
 type client struct {
 	turn *turnState
 }
@@ -26,59 +28,90 @@ func (client *client) ReadTextFile(ctx context.Context, request acpsdk.ReadTextF
 	if err := ctx.Err(); err != nil {
 		return acpsdk.ReadTextFileResponse{}, err
 	}
-	if !filepath.IsAbs(request.Path) {
-		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem path must be absolute: %q", request.Path)
-	}
-	file, err := os.Open(request.Path)
+	file, err := client.openTextFile(request.Path)
 	if err != nil {
-		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("read %s: %w", request.Path, err)
+		return acpsdk.ReadTextFileResponse{}, err
 	}
 	defer file.Close()
-	info, err := file.Stat()
-	if err != nil {
-		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("stat %s: %w", request.Path, err)
-	}
-	if !info.Mode().IsRegular() {
-		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem path is not a regular file: %q", request.Path)
-	}
-	if info.Size() > maxTextFileBytes {
-		return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem file exceeds %d-byte read limit: %q", maxTextFileBytes, request.Path)
-	}
 
 	reader := bufio.NewReader(io.LimitReader(&contextReader{ctx: ctx, reader: file}, maxTextFileBytes+1))
-	if request.Line != nil {
-		for line := 1; line < max(*request.Line, 1); line++ {
-			if _, readErr := reader.ReadString('\n'); readErr != nil {
-				if errors.Is(readErr, io.EOF) {
-					return acpsdk.ReadTextFileResponse{}, nil
-				}
-				return acpsdk.ReadTextFileResponse{}, fmt.Errorf("read %s: %w", request.Path, readErr)
+	exhausted, err := client.skipTextFileLines(reader, request.Line, request.Path)
+	if err != nil {
+		return acpsdk.ReadTextFileResponse{}, err
+	}
+	if exhausted {
+		return acpsdk.ReadTextFileResponse{}, nil
+	}
+	content, err := client.readTextFileContent(reader, request.Path, request.Limit)
+	if err != nil {
+		return acpsdk.ReadTextFileResponse{}, err
+	}
+	return acpsdk.ReadTextFileResponse{Content: content}, nil
+}
+
+func (client *client) openTextFile(path string) (*os.File, error) {
+	if !filepath.IsAbs(path) {
+		return nil, fmt.Errorf("acp filesystem path must be absolute: %q", path)
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %w", path, err)
+	}
+	info, err := file.Stat()
+	if err != nil {
+		_ = file.Close()
+		return nil, fmt.Errorf("stat %s: %w", path, err)
+	}
+	if !info.Mode().IsRegular() {
+		_ = file.Close()
+		return nil, fmt.Errorf("acp filesystem path is not a regular file: %q", path)
+	}
+	if info.Size() > maxTextFileBytes {
+		_ = file.Close()
+		return nil, fmt.Errorf("acp filesystem file exceeds %d-byte read limit: %q", maxTextFileBytes, path)
+	}
+	return file, nil
+}
+
+func (client *client) skipTextFileLines(reader *bufio.Reader, line *int, path string) (bool, error) {
+	if line == nil {
+		return false, nil
+	}
+	for current := 1; current < max(*line, 1); current++ {
+		if _, err := reader.ReadString('\n'); err != nil {
+			if errors.Is(err, io.EOF) {
+				return true, nil
 			}
+			return false, fmt.Errorf("read %s: %w", path, err)
 		}
 	}
-	if request.Limit == nil || *request.Limit <= 0 {
-		content, readErr := io.ReadAll(reader)
-		if readErr != nil {
-			return acpsdk.ReadTextFileResponse{}, fmt.Errorf("read %s: %w", request.Path, readErr)
+	return false, nil
+}
+
+func (client *client) readTextFileContent(reader *bufio.Reader, path string, limit *int) (string, error) {
+	if limit == nil || *limit <= 0 {
+		content, err := io.ReadAll(reader)
+		if err != nil {
+			return "", fmt.Errorf("read %s: %w", path, err)
 		}
 		if len(content) > maxTextFileBytes {
-			return acpsdk.ReadTextFileResponse{}, fmt.Errorf("ACP filesystem file exceeds %d-byte read limit: %q", maxTextFileBytes, request.Path)
+			return "", fmt.Errorf("acp filesystem file exceeds %d-byte read limit: %q", maxTextFileBytes, path)
 		}
-		return acpsdk.ReadTextFileResponse{Content: string(content)}, nil
+		return string(content), nil
 	}
 
-	lines := make([]string, 0, min(*request.Limit, 1024))
-	for len(lines) < *request.Limit {
-		line, readErr := reader.ReadString('\n')
+	lines := make([]string, 0, min(*limit, 1024))
+	for len(lines) < *limit {
+		line, err := reader.ReadString('\n')
 		lines = append(lines, strings.TrimSuffix(line, "\n"))
-		if readErr != nil {
-			if errors.Is(readErr, io.EOF) {
+		if err != nil {
+			if errors.Is(err, io.EOF) {
 				break
 			}
-			return acpsdk.ReadTextFileResponse{}, fmt.Errorf("read %s: %w", request.Path, readErr)
+			return "", fmt.Errorf("read %s: %w", path, err)
 		}
 	}
-	return acpsdk.ReadTextFileResponse{Content: strings.Join(lines, "\n")}, nil
+	return strings.Join(lines, "\n"), nil
 }
 
 type contextReader struct {
@@ -98,7 +131,7 @@ func (client *client) WriteTextFile(_ context.Context, request acpsdk.WriteTextF
 		return acpsdk.WriteTextFileResponse{}, err
 	}
 	if !filepath.IsAbs(request.Path) {
-		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("ACP filesystem path must be absolute: %q", request.Path)
+		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("acp filesystem path must be absolute: %q", request.Path)
 	}
 	if err := os.MkdirAll(filepath.Dir(request.Path), 0o755); err != nil {
 		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("mkdir %s: %w", filepath.Dir(request.Path), err)
@@ -110,7 +143,7 @@ func (client *client) WriteTextFile(_ context.Context, request acpsdk.WriteTextF
 }
 
 func (client *client) RequestPermission(context.Context, acpsdk.RequestPermissionRequest) (acpsdk.RequestPermissionResponse, error) {
-	return acpsdk.RequestPermissionResponse{}, errors.New("ACP permission requests are unavailable in unattended runs")
+	return acpsdk.RequestPermissionResponse{}, errors.New("acp permission requests are unavailable in unattended runs")
 }
 
 func (*client) CreateTerminal(context.Context, acpsdk.CreateTerminalRequest) (acpsdk.CreateTerminalResponse, error) {
@@ -138,18 +171,16 @@ func (client *client) SessionUpdate(_ context.Context, notification acpsdk.Sessi
 }
 
 func (client *client) UnstableCreateElicitation(context.Context, acpsdk.UnstableCreateElicitationRequest) (acpsdk.UnstableCreateElicitationResponse, error) {
-	return acpsdk.UnstableCreateElicitationResponse{}, errors.New("ACP elicitation requests are unavailable in unattended runs")
+	return acpsdk.UnstableCreateElicitationResponse{}, errors.New("acp elicitation requests are unavailable in unattended runs")
 }
 
 func (client *client) validateSession(sessionID acpsdk.SessionId) error {
 	if client.turn == nil {
-		return errors.New("ACP client is not attached to a turn")
+		return errors.New("acp client is not attached to a turn")
 	}
 	expected := client.turn.sessionID()
 	if sessionID != acpsdk.SessionId(expected) {
-		return fmt.Errorf("ACP request belongs to session %q, expected %q", sessionID, expected)
+		return fmt.Errorf("acp request belongs to session %q, expected %q", sessionID, expected)
 	}
 	return nil
 }
-
-var _ acpsdk.Client = (*client)(nil)
