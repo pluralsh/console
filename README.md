@@ -1,6 +1,6 @@
 # Plural Console
 
-![Console](assets/public/PluralConsole-background.png)
+![Console](js/assets/public/PluralConsole-background.png)
 
 The Plural Console is the core control plane of the Plural fleet-management platform.  It has a number of key features:
 
@@ -42,14 +42,17 @@ To claim the reward, you should get in touch with us on our discord at https://d
 There are three core components in this repo:
 
 * server core - written in elixir, mainly exposing a graphql api
-* react frontend - lives under `/assets` and is bundled in the elixir server docker image to make self-hosting simple
-* documentation site - lives under `/documentation` and shares the frontend Yarn workspace and design system
+* JavaScript workspace - lives under `/js` and contains the Console frontend, design system, and documentation site
+* react frontend - lives under `/js/assets` and is bundled in the elixir server docker image to make self-hosting simple
+* documentation site - lives under `/js/documentation` and shares the frontend Yarn workspace and design system
 * `go/*` - a number of golang projects, the main one being `go/controller`, which manages the operator for defining all kubernetes CRDs that control the GitOps experience of using Plural.
 
 ### Developing Web
 To begin developing the web app, install npm & yarn, then run:
 
 ```sh
+cd js
+corepack enable
 yarn install --immutable
 yarn workspace console start:cd # or any other yarn target, we often test on different Console instances
 ```

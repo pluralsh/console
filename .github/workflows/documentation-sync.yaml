@@ -31,7 +31,7 @@ jobs:
         working-directory: go/deployment-operator
         run: make crd-docs
       - name: Sync documentation pages
-        working-directory: documentation
+        working-directory: js/documentation
         run: make sync
       - name: Save date
         id: date

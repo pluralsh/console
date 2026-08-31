@@ -9,16 +9,17 @@ FROM node:24.11.1-alpine as node
 
 WORKDIR /app
 
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn/ ./.yarn/
-COPY assets/package.json ./assets/package.json
-COPY design-system/package.json ./design-system/package.json
-COPY documentation/package.json ./documentation/package.json
+COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
+COPY js/.yarn/ ./.yarn/
+COPY js/assets/package.json ./assets/package.json
+COPY js/design-system/package.json ./design-system/package.json
+COPY js/documentation/package.json ./documentation/package.json
 
-RUN yarn install --immutable
+RUN corepack enable \
+  && yarn install --immutable
 
-COPY assets/ ./assets/
-COPY design-system/ ./design-system/
+COPY js/assets/ ./assets/
+COPY js/design-system/ ./design-system/
 
 ARG VITE_PROD_SECRET_KEY
 ARG VITE_SENTRY_DSN

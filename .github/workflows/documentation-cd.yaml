@@ -6,21 +6,21 @@ on:
       - "**"
     paths:
       - ".github/workflows/documentation-cd.yaml"
-      - ".yarnrc.yml"
-      - "design-system/**"
-      - "documentation/**"
-      - "package.json"
-      - "yarn.lock"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/documentation/**"
+      - "js/package.json"
+      - "js/yarn.lock"
   push:
     branches:
       - "master"
     paths:
       - ".github/workflows/documentation-cd.yaml"
-      - ".yarnrc.yml"
-      - "design-system/**"
-      - "documentation/**"
-      - "package.json"
-      - "yarn.lock"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/documentation/**"
+      - "js/package.json"
+      - "js/yarn.lock"
     tags:
       - "documentation/v*.*.*"
 
@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: documentation/Dockerfile
+          file: js/documentation/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

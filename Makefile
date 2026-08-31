@@ -13,6 +13,7 @@ ERLANG_VERSION ?= `grep erlang .tool-versions | cut -d' ' -f2`
 REPO_ROOT ?= `pwd`
 GIT_HOOKS_PATH = .githooks
 TEST_CMD ?= mix deps.get && mix compile && mix test
+YARN = node js/.yarn/releases/yarn-4.17.1.cjs --cwd js
 
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -113,22 +114,22 @@ migration:
 	MIX_ENV=test mix ecto.gen.migration $(name)
 
 web: ## starts a local webserver
-	yarn workspace console start
+	$(YARN) workspace console start
 
 documentation: ## starts the documentation site locally
-	yarn workspace @pluralsh/documentation dev
+	$(YARN) workspace @pluralsh/documentation dev
 
 documentation-routes: ## regenerates the documentation route index
-	yarn workspace @pluralsh/documentation generate:route-index
+	$(YARN) workspace @pluralsh/documentation generate:route-index
 
 documentation-sync: ## syncs generated documentation from in-repo sources
-	$(MAKE) --directory=documentation sync
+	$(MAKE) --directory=js/documentation sync
 
 gql-codegen: ## generates introspection information for our graph
-	yarn workspace console graphql:codegen
+	$(YARN) workspace console graphql:codegen
 
 yarn-add: ## adds a yarn dep
-	yarn workspace console add $(dep)
+	$(YARN) workspace console add $(dep)
 
 release-vsn: # tags and pushes a new release
 	@read -p "Version: " tag; \
@@ -157,8 +158,8 @@ openapi-schema:
 
 update-schema: openapi-schema
 	MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
-	cd assets && yarn graphql:codegen
-	cd assets && yarn fix
+	$(YARN) workspace console graphql:codegen
+	$(YARN) workspace console fix
 	@$(MAKE) --directory go/client --no-print-directory generate
 
 k3s:  ## starts a k3d cluster for testing

@@ -5,20 +5,20 @@ on:
     branches:
       - master
     paths:
-      - ".yarnrc.yml"
-      - "design-system/**"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
       - ".github/workflows/chromatic.yml"
-      - "package.json"
-      - "yarn.lock"
+      - "js/package.json"
+      - "js/yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
-      - ".yarnrc.yml"
-      - "design-system/**"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
       - ".github/workflows/chromatic.yml"
-      - "package.json"
-      - "yarn.lock"
+      - "js/package.json"
+      - "js/yarn.lock"
 
 jobs:
   chromatic:
@@ -31,6 +31,7 @@ jobs:
     defaults:
       run:
         shell: bash
+        working-directory: js
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -39,14 +40,15 @@ jobs:
         with:
           node-version: 24.11.1
           cache: yarn
-          cache-dependency-path: yarn.lock
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
       - run: yarn --immutable
       - run: yarn workspace @pluralsh/design-system build:storybook
       - uses: chromaui/action@534eebfc19023579541d106f7b61d5ad70ed65c7 # v18.5.0
         id: chromatic
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          workingDir: design-system
+          workingDir: js/design-system
           storybookBuildDir: storybook-static
           exitOnceUploaded: true
       - if: ${{ github.event_name == 'pull_request' && steps.chromatic.outcome == 'success' }}

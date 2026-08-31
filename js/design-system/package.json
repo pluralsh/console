@@ -82,6 +82,7 @@
   },
   "devDependencies": {
     "@apollo/client": "3.14.1",
+    "@pluralsh/eslint-config-pluralsh": "1.4.48",
     "@react-stately/form": "3.3.1",
     "@react-types/listbox": "3.8.0",
     "@react-types/select": "3.13.0",
@@ -103,6 +104,7 @@
     "http-server": "14.1.1",
     "monaco-editor": "0.55.1",
     "npm-run-all": "4.1.5",
+    "prettier": "3.9.5",
     "react-transition-group": "4.4.5",
     "rimraf": "5.0.10",
     "storybook": "9.1.20",

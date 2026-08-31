@@ -8,9 +8,10 @@
 
 # JavaScript workspace
 /node_modules
-/.yarn/*
-!/.yarn/releases/
-!/.yarn/releases/**
+/js/node_modules
+/js/.yarn/*
+!/js/.yarn/releases/
+!/js/.yarn/releases/**
 .pnp.*
 
 # Binaries for programs and plugins

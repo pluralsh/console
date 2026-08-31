@@ -6,27 +6,27 @@ on:
       - "master"
     paths:
       - ".github/workflows/documentation.yaml"
-      - ".yarnrc.yml"
-      - "design-system/**"
-      - "documentation/**"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/documentation/**"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
-      - "package.json"
-      - "yarn.lock"
+      - "js/package.json"
+      - "js/yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/documentation.yaml"
-      - ".yarnrc.yml"
-      - "design-system/**"
-      - "documentation/**"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/documentation/**"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
       - "go/polly/docs/**"
-      - "package.json"
-      - "yarn.lock"
+      - "js/package.json"
+      - "js/yarn.lock"
 jobs:
   lint:
     name: Lint
@@ -34,7 +34,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: documentation
+        working-directory: js/documentation
     steps:
       - uses: actions/checkout@v6
       - name: Read Node.js version from package.json
@@ -43,6 +43,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ steps.engines.outputs.nodeVersion }}
+      - run: corepack enable
       - run: yarn --immutable
       - run: yarn lint
 
@@ -52,7 +53,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: documentation
+        working-directory: js/documentation
     steps:
       - uses: actions/checkout@v6
       - name: Sync docs
@@ -60,7 +61,7 @@ jobs:
       - name: Verify changed files
         run: |
           git diff --exit-code -- pages || {
-            echo "::error Documentation pages are out of sync. Please run 'make sync' from documentation/ and commit the changes."
+            echo "::error Documentation pages are out of sync. Please run 'make sync' from js/documentation/ and commit the changes."
             exit 1
           }
 
@@ -70,7 +71,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: documentation
+        working-directory: js/documentation
     steps:
       - uses: actions/checkout@v6
         with:
@@ -81,6 +82,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ steps.engines.outputs.nodeVersion }}
+      - run: corepack enable
       - run: yarn --immutable
       - name: Backup current routes.json
         run: cp -f generated/routes.json generated/routes.json.original
@@ -94,7 +96,7 @@ jobs:
         run: |
           if ! diff -q routes.paths.json routes.original.paths.json > /dev/null; then
             echo "::error The routes.json file is out of sync with the docs structure."
-            echo "Please run 'make routes' from documentation/ and commit the updated file."
+            echo "Please run 'make routes' from js/documentation/ and commit the updated file."
             diff -u routes.original.paths.json routes.paths.json || true
             exit 1
           fi

@@ -1,8 +1,8 @@
 services:
   frontend-test:
     build:
-      context: ..
-      dockerfile: assets/Dockerfile
+      context: ../..
+      dockerfile: js/assets/Dockerfile
     working_dir: /app/assets
     environment:
       CI: "true"

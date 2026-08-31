@@ -1,7 +1,7 @@
 overwrite: true
 generates:
   src/generated/graphql.ts:
-    schema: '../schema/schema.graphql'
+    schema: '../../schema/schema.graphql'
     documents: './src/graph/**/*.graphql'
     plugins:
       - 'typescript'
@@ -13,7 +13,7 @@ generates:
             - '/* eslint-disable */'
             - '/* prettier-ignore */'
   src/generated/persisted-queries/client.json:
-    schema: '../schema/schema.graphql'
+    schema: '../../schema/schema.graphql'
     documents:
       - './src/graph/**/*.graphql'
     plugins:
@@ -22,7 +22,7 @@ generates:
       output: server
       includeAlgorithmPrefix: true
   src/generated/fragments.json:
-    schema: '../schema/schema.graphql'
+    schema: '../../schema/schema.graphql'
     plugins:
       - 'fragment-matcher'
     config:

@@ -94,7 +94,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   return <SidebarContext value={ctx}>{children}</SidebarContext>
 }
 
-// Keep hotkeys in sync with assets/src/components/commandpalette/commands.ts.
+// Keep hotkeys in sync with js/assets/src/components/commandpalette/commands.ts.
 function getMenuItems({
   isCDEnabled,
   featureFlags,

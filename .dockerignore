@@ -18,13 +18,13 @@ Makefile
 README*
 **/node_modules/
 .pnp.*
-.yarn/*
-!.yarn/releases/
-!.yarn/releases/**
-/assets/build/
-/design-system/dist/
-/design-system/storybook-static/
-/documentation/.next/
+/js/.yarn/*
+!/js/.yarn/releases/
+!/js/.yarn/releases/**
+/js/assets/build/
+/js/design-system/dist/
+/js/design-system/storybook-static/
+/js/documentation/.next/
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json

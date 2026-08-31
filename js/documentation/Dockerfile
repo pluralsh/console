@@ -4,15 +4,16 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn/ ./.yarn/
-COPY assets/package.json ./assets/package.json
-COPY design-system/package.json ./design-system/package.json
-COPY documentation/package.json ./documentation/package.json
-RUN yarn install --immutable
+COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
+COPY js/.yarn/ ./.yarn/
+COPY js/assets/package.json ./assets/package.json
+COPY js/design-system/package.json ./design-system/package.json
+COPY js/documentation/package.json ./documentation/package.json
+RUN corepack enable \
+  && yarn install --immutable
 
-COPY design-system/ ./design-system/
-COPY documentation/ ./documentation/
+COPY js/design-system/ ./design-system/
+COPY js/documentation/ ./documentation/
 
 ARG NEXT_PUBLIC_ROOT_URL
 ARG NEXT_PUBLIC_GA_ID

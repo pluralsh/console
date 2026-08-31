@@ -6,21 +6,21 @@ on:
       - "master"
     paths:
       - ".github/workflows/assets.yaml"
-      - ".yarnrc.yml"
-      - "assets/**"
-      - "design-system/**"
-      - "package.json"
-      - "yarn.lock"
+      - "js/.yarnrc.yml"
+      - "js/assets/**"
+      - "js/design-system/**"
+      - "js/package.json"
+      - "js/yarn.lock"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/assets.yaml"
-      - ".yarnrc.yml"
-      - "assets/**"
-      - "design-system/**"
-      - "package.json"
-      - "yarn.lock"
+      - "js/.yarnrc.yml"
+      - "js/assets/**"
+      - "js/design-system/**"
+      - "js/package.json"
+      - "js/yarn.lock"
 jobs:
   test:
     name: Unit test
@@ -28,12 +28,13 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: assets
+        working-directory: js/assets
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24.11.1
+      - run: corepack enable
       - run: yarn --immutable
       - run: yarn test
   lint:
@@ -42,11 +43,12 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: assets
+        working-directory: js/assets
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24.11.1
+      - run: corepack enable
       - run: yarn --immutable
       - run: yarn lint
