@@ -369,16 +369,7 @@ func (in *Pi) messageEnd(message *AgentMessage) *console.AgentMessageAttributes 
 }
 
 func assistantText(content json.RawMessage) string {
-	var blocks []contentBlock
-	if json.Unmarshal(content, &blocks) != nil {
-		return ""
-	}
-	text := ""
-	for _, block := range blocks {
-		if block.Type == "text" {
-			text += block.Text
-		}
-	}
+	text, _ := contentBlocksText(content)
 	return text
 }
 
@@ -393,14 +384,16 @@ func toolResultText(value json.RawMessage) string {
 	if len(value) == 0 || string(value) == "null" {
 		return ""
 	}
-	if text := assistantText(value); text != "" {
+	if text, ok := contentBlocksText(value); ok {
 		return text
 	}
 	var wrapped struct {
 		Content json.RawMessage `json:"content"`
 	}
 	if json.Unmarshal(value, &wrapped) == nil && len(wrapped.Content) > 0 {
-		if text := assistantText(wrapped.Content); text != "" {
+		if text, ok := contentBlocksText(wrapped.Content); ok {
+			// Empty content arrays are partial results with no stdout yet.
+			// Returning the wrapper JSON would poison later delta slicing.
 			return text
 		}
 	}
@@ -409,4 +402,18 @@ func toolResultText(value json.RawMessage) string {
 		return s
 	}
 	return string(value)
+}
+
+func contentBlocksText(value json.RawMessage) (string, bool) {
+	var blocks []contentBlock
+	if json.Unmarshal(value, &blocks) != nil {
+		return "", false
+	}
+	text := ""
+	for _, block := range blocks {
+		if block.Type == "text" {
+			text += block.Text
+		}
+	}
+	return text, true
 }

@@ -123,6 +123,22 @@ func TestHandleStreamLineEmitsToolOutput(t *testing.T) {
 	}
 }
 
+func TestToolResultTextEmptyContent(t *testing.T) {
+	if got := toolResultText(json.RawMessage(`{"content":[]}`)); got != "" {
+		t.Fatalf("empty content = %q, want empty", got)
+	}
+}
+
+func TestHandleStreamLineIgnoresEmptyPartialContent(t *testing.T) {
+	emitted := 0
+	tool := &Pi{}
+	tool.OnOutput(func(string, string) { emitted++ })
+	tool.handleStreamLine([]byte(`{"type":"tool_execution_update","toolCallId":"call-1","toolName":"bash","partialResult":{"content":[]}}`))
+	if emitted != 0 {
+		t.Fatalf("emitted = %d, want 0", emitted)
+	}
+}
+
 func TestMessageEndExtractsAssistantText(t *testing.T) {
 	tool := &Pi{}
 	message := tool.messageEnd(&AgentMessage{
