@@ -7,7 +7,7 @@ on:
     paths:
       - ".github/workflows/documentation-cd.yaml"
       - ".yarnrc.yml"
-      - "assets/design-system/**"
+      - "design-system/**"
       - "documentation/**"
       - "package.json"
       - "yarn.lock"
@@ -17,7 +17,7 @@ on:
     paths:
       - ".github/workflows/documentation-cd.yaml"
       - ".yarnrc.yml"
-      - "assets/design-system/**"
+      - "design-system/**"
       - "documentation/**"
       - "package.json"
       - "yarn.lock"

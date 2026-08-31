@@ -8,6 +8,7 @@ import {
   DockerLogoIcon,
   DynatraceLogoIcon,
   ElasticsearchLogoIcon,
+  ExaLogoIcon,
   GitHubLogoIcon,
   GitLabLogoIcon,
   GoogleCloudLogoIcon,
@@ -29,7 +30,6 @@ import {
   ToolsIcon,
   VSphereLogoIcon,
 } from '@pluralsh/design-system'
-import ExaLogoIcon from '../../../../design-system/src/components/icons/ExaLogoIcon'
 import {
   Provider,
   ScmType,

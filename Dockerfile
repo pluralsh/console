@@ -12,12 +12,13 @@ WORKDIR /app
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/ ./.yarn/
 COPY assets/package.json ./assets/package.json
-COPY assets/design-system/package.json ./assets/design-system/package.json
+COPY design-system/package.json ./design-system/package.json
 COPY documentation/package.json ./documentation/package.json
 
 RUN yarn install --immutable
 
 COPY assets/ ./assets/
+COPY design-system/ ./design-system/
 
 ARG VITE_PROD_SECRET_KEY
 ARG VITE_SENTRY_DSN

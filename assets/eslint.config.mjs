@@ -4,7 +4,7 @@ export default plural({
   ignores: [
     'src/archive/*',
     'src/generated/**/*',
-    'design-system/**',
+    '../design-system/**',
   ],
   tsconfigRootDir: import.meta.dirname,
 })

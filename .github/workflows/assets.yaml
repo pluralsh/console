@@ -8,6 +8,7 @@ on:
       - ".github/workflows/assets.yaml"
       - ".yarnrc.yml"
       - "assets/**"
+      - "design-system/**"
       - "package.json"
       - "yarn.lock"
   pull_request:
@@ -17,6 +18,7 @@ on:
       - ".github/workflows/assets.yaml"
       - ".yarnrc.yml"
       - "assets/**"
+      - "design-system/**"
       - "package.json"
       - "yarn.lock"
 jobs:

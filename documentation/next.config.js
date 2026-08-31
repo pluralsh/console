@@ -28,7 +28,7 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias['@pluralsh/design-system'] = path.resolve(
       __dirname,
-      '../assets/design-system/src/index.ts'
+      '../design-system/src/index.ts'
     )
 
     config.module.rules.push({

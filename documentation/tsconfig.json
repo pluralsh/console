@@ -18,7 +18,7 @@
     "noImplicitAny": false,
     "incremental": true,
     "paths": {
-      "@pluralsh/design-system": ["../assets/design-system/src/index.ts"],
+      "@pluralsh/design-system": ["../design-system/src/index.ts"],
       "@src/*": ["./src/*"],
       "@pages/*": ["./pages/*"]
     },
@@ -33,7 +33,7 @@
     "pages/**/*",
     "src/**/*",
     "scripts/**/*",
-    "../assets/design-system/src/types/**/*.d.ts",
+    "../design-system/src/types/**/*.d.ts",
     "pages-archive/applications",
     ".next/types/**/*.ts"
   ],

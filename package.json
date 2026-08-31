@@ -3,7 +3,7 @@
   "private": true,
   "workspaces": [
     "assets",
-    "assets/design-system",
+    "design-system",
     "documentation"
   ],
   "packageManager": "yarn@4.17.1",

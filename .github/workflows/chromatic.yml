@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - ".yarnrc.yml"
-      - "assets/design-system/**"
+      - "design-system/**"
       - ".github/workflows/chromatic.yml"
       - "package.json"
       - "yarn.lock"
@@ -15,7 +15,7 @@ on:
       - "**"
     paths:
       - ".yarnrc.yml"
-      - "assets/design-system/**"
+      - "design-system/**"
       - ".github/workflows/chromatic.yml"
       - "package.json"
       - "yarn.lock"
@@ -31,7 +31,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: assets
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
@@ -47,7 +46,7 @@ jobs:
         id: chromatic
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          workingDir: assets/design-system
+          workingDir: design-system
           storybookBuildDir: storybook-static
           exitOnceUploaded: true
       - if: ${{ github.event_name == 'pull_request' && steps.chromatic.outcome == 'success' }}

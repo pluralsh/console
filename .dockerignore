@@ -22,8 +22,8 @@ README*
 !.yarn/releases/
 !.yarn/releases/**
 /assets/build/
-/assets/design-system/dist/
-/assets/design-system/storybook-static/
+/design-system/dist/
+/design-system/storybook-static/
 /documentation/.next/
 
 # Ignore generated credentials from google-github-actions/auth

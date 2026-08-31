@@ -7,7 +7,7 @@ on:
     paths:
       - ".github/workflows/documentation.yaml"
       - ".yarnrc.yml"
-      - "assets/design-system/**"
+      - "design-system/**"
       - "documentation/**"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"
@@ -20,7 +20,7 @@ on:
     paths:
       - ".github/workflows/documentation.yaml"
       - ".yarnrc.yml"
-      - "assets/design-system/**"
+      - "design-system/**"
       - "documentation/**"
       - "go/controller/docs/**"
       - "go/deployment-operator/docs/**"

@@ -1,4 +1,10 @@
-import { Chip, Flex, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  Chip,
+  Flex,
+  IconFrame,
+  type Severity,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
@@ -9,7 +15,6 @@ import { InfoSection, PaddedCard, PropWideBold } from './common'
 import { JobStatus, useDeleteJobMutation } from '../../../generated/graphql.ts'
 import { ComponentDetailsContext } from '../ComponentDetails.tsx'
 import { ConditionsTable } from './Conditions.tsx'
-import { Severity } from '../../../../design-system/dist/types'
 
 const JOB_COMPLETE = 'complete'
 const JOB_FAILED = 'failed'

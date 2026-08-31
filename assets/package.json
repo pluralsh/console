@@ -169,6 +169,6 @@
   },
   "lint-staged": {
     "./src/**/*.{js,jsx,ts,tsx,graphql,md}": "prettier --write",
-    "./design-system/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
+    "../design-system/src/**/*.{js,jsx,ts,tsx,md,mdx}": "prettier --write"
   }
 }

@@ -7,11 +7,11 @@ RUN apk add --no-cache git
 COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn/ ./.yarn/
 COPY assets/package.json ./assets/package.json
-COPY assets/design-system/package.json ./assets/design-system/package.json
+COPY design-system/package.json ./design-system/package.json
 COPY documentation/package.json ./documentation/package.json
 RUN yarn install --immutable
 
-COPY assets/design-system/ ./assets/design-system/
+COPY design-system/ ./design-system/
 COPY documentation/ ./documentation/
 
 ARG NEXT_PUBLIC_ROOT_URL

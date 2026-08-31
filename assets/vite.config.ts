@@ -163,7 +163,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@pluralsh/design-system': resolve(__dirname, './design-system/src'),
+      '@pluralsh/design-system': resolve(__dirname, '../design-system/src'),
     },
   },
 })
