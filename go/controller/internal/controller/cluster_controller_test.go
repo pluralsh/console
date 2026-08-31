@@ -347,7 +347,53 @@ var _ = Describe("Cluster Controller mergeTags", Ordered, func() {
 			Expect(k8sClient.Get(ctx, mergeTagsNamespacedName, cluster)).NotTo(HaveOccurred())
 			Expect(cluster.Status.ID).To(Equal(lo.ToPtr(mergeTagsClusterConsoleID)))
 			Expect(cluster.Status.ReadOnly).To(BeTrue())
+			Expect(cluster.Status.PrevTags).To(Equal(map[string]string{
+				"team":   "infra",
+				"region": "us-east",
+			}))
 			fakeConsoleClient.AssertCalled(GinkgoT(), "UpdateCluster", mergeTagsClusterConsoleID, mock.Anything)
+		})
+
+		It("should drop tags removed from the CR while preserving external Console tags", func() {
+			cluster := &v1alpha1.Cluster{}
+			Expect(k8sClient.Get(ctx, mergeTagsNamespacedName, cluster)).NotTo(HaveOccurred())
+			cluster.Spec.Tags = map[string]string{"team": "infra"}
+			Expect(k8sClient.Update(ctx, cluster)).To(Succeed())
+
+			var captured gqlclient.ClusterUpdateAttributes
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
+				ID:             mergeTagsClusterConsoleID,
+				CurrentVersion: lo.ToPtr("1.24.11"),
+				Tags: []*gqlclient.ClusterTags{
+					{Name: "env", Value: "prod"},
+					{Name: "team", Value: "infra"},
+					{Name: "region", Value: "us-east"},
+				},
+			}, nil)
+			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				captured = args.Get(1).(gqlclient.ClusterUpdateAttributes)
+			}).Return(nil, nil)
+
+			controllerReconciler := &controller.ClusterReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: mergeTagsNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(tagMap(captured.Tags)).To(Equal(map[string]string{
+				"env":  "prod",
+				"team": "infra",
+			}))
+
+			Expect(k8sClient.Get(ctx, mergeTagsNamespacedName, cluster)).NotTo(HaveOccurred())
+			Expect(cluster.Status.PrevTags).To(Equal(map[string]string{
+				"team": "infra",
+			}))
 		})
 
 		It("should replace tags when mergeTags is false", func() {

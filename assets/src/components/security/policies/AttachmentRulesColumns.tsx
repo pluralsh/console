@@ -70,26 +70,11 @@ export const ColTarget = columnHelper.accessor(({ node }) => node?.type, {
   header: 'Target',
   meta: { gridTemplate: 'auto' },
   cell: function Cell({ getValue }) {
-    const theme = useTheme()
     const type = getValue()
 
     if (!type) return null
 
-    return (
-      <Chip
-        size="small"
-        fillLevel={1}
-        css={{
-          borderRadius: 20,
-          minWidth: 80,
-          justifyContent: 'center',
-        }}
-      >
-        <span css={{ color: theme.colors['text-xlight'] }}>
-          {startCase(type.toLowerCase())}
-        </span>
-      </Chip>
-    )
+    return <Chip>{startCase(type.toLowerCase())}</Chip>
   },
 })
 

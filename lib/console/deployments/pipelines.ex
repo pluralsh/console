@@ -651,15 +651,10 @@ defmodule Console.Deployments.Pipelines do
   @spec run_sentinel(PipelineGate.t) :: gate_resp
   def run_sentinel(%PipelineGate{sentinel_id: id, context_id: cid, last_context_id: lid} = gate)
     when is_binary(id) and is_binary(cid) and cid != lid do
-    start_transaction()
-    |> add_operation(:run, fn _ ->
-      Sentinels.run_sentinel(%{}, Sentinels.get_sentinel!(id), Users.admin_bot())
-    end)
-    |> add_operation(:update, fn %{run: run} ->
+    with {:ok, run} <- Sentinels.run_sentinel(%{}, Sentinels.get_sentinel!(id), Users.admin_bot()) do
       PipelineGate.changeset(gate, %{sentinel_run_id: run.id, last_context_id: cid})
       |> Repo.update()
-    end)
-    |> execute(extract: :update)
+    end
   end
 
   def run_sentinel(%PipelineGate{sentinel_id: id}) when is_binary(id),

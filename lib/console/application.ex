@@ -2,6 +2,8 @@ defmodule Console.Application do
   use Application
   alias Console.Services.OAuth
 
+  @env Mix.env()
+
   def start(_type, _args) do
     :logger.add_handler(:sentry_logger, Sentry.LoggerHandler, %{
       config: %{metadata: [:file, :line]}
@@ -41,6 +43,7 @@ defmodule Console.Application do
       Console.Deployments.Pipelines.Supervisor,
       Console.Deployments.Helm.Supervisor,
       Console.Deployments.Local.Server,
+    ] ++ cloud_query_client(@env) ++ [
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,
@@ -50,6 +53,7 @@ defmodule Console.Application do
       Console.Features,
       Console.Cron.Scheduler,
       Console.Buffers.ClusterAudit,
+      Console.Buffers.PolicyEvaluation,
       Console.Prom.Meter,
       Console.AI.Agents.Supervisor,
       Console.AI.MCP.Supervisor,
@@ -65,7 +69,6 @@ defmodule Console.Application do
       Console.AI.GothManager,
       Console.PromEx,
       Console.Chat.Supervisor,
-      {GRPC.Client.Supervisor, []}
     ] ++ consumers()
       ++ oidc_providers()
       ++ [Piazza.GracefulShutdown]
@@ -77,6 +80,18 @@ defmodule Console.Application do
   def config_change(changed, _new, removed) do
     ConsoleWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp cloud_query_client(:test), do: []
+
+  defp cloud_query_client(_) do
+    [
+      {GRPC.Client.Connection,
+        name: CloudQuery.Client,
+        target: Console.conf(:cloudquery_host),
+        adapter: GRPC.Client.Adapters.Mint
+      }
+    ]
   end
 
   defp consumers(), do: Console.conf(:consumers) || []

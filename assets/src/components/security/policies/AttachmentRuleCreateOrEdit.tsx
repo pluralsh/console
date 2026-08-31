@@ -549,23 +549,7 @@ function MatchesChip({ count }: { count: number }) {
 }
 
 function TypeChip({ type }: { type: PolicyType }) {
-  const theme = useTheme()
-
-  return (
-    <Chip
-      size="small"
-      fillLevel={1}
-      css={{
-        borderRadius: 20,
-        minWidth: 80,
-        justifyContent: 'center',
-      }}
-    >
-      <span css={{ color: theme.colors['text-xlight'] }}>
-        {startCase(type.toLowerCase())}
-      </span>
-    </Chip>
-  )
+  return <Chip>{startCase(type.toLowerCase())}</Chip>
 }
 
 function sanitizeForm(

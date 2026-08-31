@@ -83,3 +83,21 @@ defmodule Console.GraphQl.Resolvers.ClusterLoader do
     |> Map.new(& {&1.id, &1})
   end
 end
+
+defmodule Console.GraphQl.Resolvers.PolicyCountLoader do
+  alias Console.Schema.{BindingPolicy, StackPolicy, WorkbenchPolicy, PolicyEvaluation}
+
+  def data(_) do
+    Dataloader.KV.new(&query/2, max_concurrency: 1)
+  end
+
+  def query(:match, ids), do: counts(&BindingPolicy.match_counts_for_bind_policies/1, ids)
+  def query(:evaluation, ids), do: counts(&PolicyEvaluation.counts_for_policies/1, ids)
+  def query(:workbench_attachment, ids), do: counts(&WorkbenchPolicy.counts_for_policies/1, ids)
+  def query(:stack_attachment, ids), do: counts(&StackPolicy.counts_for_policies/1, ids)
+
+  defp counts(fun, ids) do
+    counts = fun.(MapSet.to_list(ids))
+    Map.new(ids, & {&1, Map.get(counts, &1, 0)})
+  end
+end

@@ -13,6 +13,22 @@ defmodule Console.Schema.PolicyEvaluation do
     from(p in query, where: fragment("? @> ARRAY[?]::uuid[]", p.policy_ids, type(^policy_id, :binary_id)))
   end
 
+  def counts_for_policies([]), do: %{}
+  def counts_for_policies(policy_ids) do
+    requested = MapSet.new(policy_ids)
+
+    from(p in __MODULE__,
+      where: fragment("? && ?::uuid[]", p.policy_ids, type(^policy_ids, {:array, :binary_id})),
+      select: p.policy_ids
+    )
+    |> Console.Repo.all()
+    |> Enum.reduce(%{}, fn ids, acc ->
+      Enum.reduce(ids, acc, fn id, acc ->
+        if MapSet.member?(requested, id), do: Map.update(acc, id, 1, &(&1 + 1)), else: acc
+      end)
+    end)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(p in query, order_by: ^order)
   end

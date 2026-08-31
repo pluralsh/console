@@ -113,7 +113,11 @@ function IntegrationTestExpander({
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useSentinelRunJobsQuery, keyPath: ['sentinelRun', 'jobs'] },
+      {
+        queryHook: useSentinelRunJobsQuery,
+        keyPath: ['sentinelRun', 'jobs'],
+        pollInterval: isNullish(result?.jobCount) ? 2_000 : undefined,
+      },
       {
         id: runId,
         check: checkName,

@@ -18,7 +18,7 @@ RUN go mod download
 COPY deployment-operator/ ./
 
 # Build the MCP server binary
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o terraform-mcpserver cmd/mcpserver/terraform-server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -tags musl -a -installsuffix cgo -o terraform-mcpserver cmd/mcpserver/terraform-server/main.go
 
 # Use a minimal base image
 FROM alpine:3.22.1
