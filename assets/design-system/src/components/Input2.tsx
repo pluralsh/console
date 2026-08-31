@@ -289,8 +289,7 @@ function Input2({
 
   const parentFillLevel = useFillLevel()
 
-  // `small` is the default, but stays destructured so it never reaches the DOM
-  size = size || (large ? 'large' : medium ? 'medium' : 'small')
+  size = size || (large ? 'large' : medium && !small ? 'medium' : 'small')
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
 

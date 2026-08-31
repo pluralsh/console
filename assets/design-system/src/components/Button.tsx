@@ -99,8 +99,7 @@ const Button = memo(
       'auto'
     )
 
-    // `small` is the default, but stays destructured so it never reaches the DOM
-    const buttonSize = large ? 'large' : medium ? 'medium' : 'small'
+    const buttonSize = large ? 'large' : medium && !small ? 'medium' : 'small'
     const buttonType = secondary
       ? 'secondary'
       : tertiary
