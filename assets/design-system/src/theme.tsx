@@ -162,7 +162,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
     Input: {
       Root: [
         {
-          caption: true,
+          body2: true,
           display: 'flex',
           overflow: 'hidden',
           justifyContent: 'space-between',
@@ -180,11 +180,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             borderColor: 'border-outline-focused',
           },
         },
-        // multi-line inputs hold prose, so they keep the larger body type
-        ({ multiline }: any) =>
-          multiline && {
-            body2: true,
-          },
         ({ valid }: any) =>
           valid && {
             borderColor: 'border-outline',
@@ -210,6 +205,10 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           flex: '1 1',
           height: '30px',
           lineHeight: '30px',
+          // caption type, written out because the `caption` alias resolves from
+          // props and would drag its own 16px line height along with it
+          fontSize: 12,
+          letterSpacing: '0.5px',
           color: 'text',
           _placeholder: {
             color: 'text-xlight',
@@ -224,6 +223,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           large && {
             height: '46px',
             lineHeight: '46px',
+            fontSize: 14,
           },
         ({ disabled }: any) =>
           disabled && {
