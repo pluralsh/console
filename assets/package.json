@@ -34,7 +34,6 @@
   "engines": {
     "node": ">=24.11.1"
   },
-  "packageManager": "yarn@4.17.1",
   "dependencies": {
     "@algolia/client-search": "5.56.0",
     "@apollo/client": "3.14.1",
