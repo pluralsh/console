@@ -1,4 +1,4 @@
-js/assets/* @pluralsh/frontend
+js/console/* @pluralsh/frontend
 js/design-system/* @pluralsh/frontend
 js/documentation/* @pluralsh/frontend
 go/* @pluralsh/server

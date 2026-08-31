@@ -1,4 +1,4 @@
-# console/assets
+# js/console
 
 ## Available Scripts
 

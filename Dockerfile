@@ -11,14 +11,14 @@ WORKDIR /app
 
 COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
 COPY js/.yarn/ ./.yarn/
-COPY js/assets/package.json ./assets/package.json
+COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
 COPY js/documentation/package.json ./documentation/package.json
 
 RUN corepack enable \
   && yarn install --immutable
 
-COPY js/assets/ ./assets/
+COPY js/console/ ./console/
 COPY js/design-system/ ./design-system/
 
 ARG VITE_PROD_SECRET_KEY
@@ -79,7 +79,7 @@ RUN git config --global --add safe.directory '/opt/app'
 RUN mix do deps.get, compile
 RUN ls -al
 
-COPY --from=node /app/assets/build ./priv/static
+COPY --from=node /app/console/build ./priv/static
 
 RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 

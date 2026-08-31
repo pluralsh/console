@@ -1,6 +1,6 @@
 # Plural Console
 
-![Console](js/assets/public/PluralConsole-background.png)
+![Console](js/console/public/PluralConsole-background.png)
 
 The Plural Console is the core control plane of the Plural fleet-management platform.  It has a number of key features:
 
@@ -43,7 +43,7 @@ There are three core components in this repo:
 
 * server core - written in elixir, mainly exposing a graphql api
 * JavaScript workspace - lives under `/js` and contains the Console frontend, design system, and documentation site
-* react frontend - lives under `/js/assets` and is bundled in the elixir server docker image to make self-hosting simple
+* react frontend - lives under `/js/console` and is bundled in the elixir server docker image to make self-hosting simple
 * documentation site - lives under `/js/documentation` and shares the frontend Yarn workspace and design system
 * `go/*` - a number of golang projects, the main one being `go/controller`, which manages the operator for defining all kubernetes CRDs that control the GitOps experience of using Plural.
 

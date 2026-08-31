@@ -21,7 +21,7 @@ README*
 /js/.yarn/*
 !/js/.yarn/releases/
 !/js/.yarn/releases/**
-/js/assets/build/
+/js/console/build/
 /js/design-system/dist/
 /js/design-system/storybook-static/
 /js/documentation/.next/

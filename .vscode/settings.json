@@ -1,6 +1,6 @@
 {
   "eslint.workingDirectories": [
-    { "directory": "./js/assets", "changeProcessCWD": true },
+    { "directory": "./js/console", "changeProcessCWD": true },
     { "directory": "./js/design-system", "changeProcessCWD": true },
     { "directory": "./js/documentation", "changeProcessCWD": true }
   ],

@@ -1,5 +1,5 @@
 {
-  "extends": "../assets/tsconfig.app.json",
+  "extends": "../console/tsconfig.app.json",
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",

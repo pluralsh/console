@@ -39,7 +39,7 @@ DOCS_PATHS = [
 NOISY_PATTERNS = re.compile(
     r"(^package-lock\.json|^js/yarn\.lock|^pnpm-lock\.yaml|^mix\.lock"
     r"|^go\.sum|\.gen\.|/generated/|/__generated__/|\.snap$"
-    r"|^js/assets/src/generated/)",
+    r"|^js/console/src/generated/)",
     re.MULTILINE,
 )
 

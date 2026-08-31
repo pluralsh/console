@@ -11787,9 +11787,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"console@workspace:assets":
+"console@workspace:console":
   version: 0.0.0-use.local
-  resolution: "console@workspace:assets"
+  resolution: "console@workspace:console"
   dependencies:
     "@algolia/client-search": "npm:5.56.0"
     "@apollo/client": "npm:3.14.1"

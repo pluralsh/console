@@ -5,9 +5,9 @@ on:
     branches:
       - "master"
     paths:
-      - ".github/workflows/js.yaml"
+      - ".github/workflows/js-ci.yaml"
       - "js/.yarnrc.yml"
-      - "js/assets/**"
+      - "js/console/**"
       - "js/design-system/**"
       - "js/package.json"
       - "js/yarn.lock"
@@ -15,9 +15,9 @@ on:
     branches:
       - "**"
     paths:
-      - ".github/workflows/js.yaml"
+      - ".github/workflows/js-ci.yaml"
       - "js/.yarnrc.yml"
-      - "js/assets/**"
+      - "js/console/**"
       - "js/design-system/**"
       - "js/package.json"
       - "js/yarn.lock"

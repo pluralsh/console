@@ -2,7 +2,7 @@
   "name": "console-workspace",
   "private": true,
   "workspaces": [
-    "assets",
+    "console",
     "design-system",
     "documentation"
   ],
