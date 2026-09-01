@@ -306,15 +306,31 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.SentinelRunJobUpdated do
   def process(%@for{item: job}), do: Job.publish(job)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunCreated do
+  alias Console.Deployments.Agents
+
+  def process(%@for{item: run}), do: Agents.agent_review_check(run)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
   alias Console.AI.Workbench.Activity
   alias Console.Deployments.Agents
   alias Console.Schema.AgentRun
+  import Console.Schema.AgentRun, only: [is_terminal: 1]
 
   def process(%@for{item: %AgentRun{} = run}) do
     Activity.publish(run)
-    Agents.record_repository(run)
+
+    case {maybe_review_check(run), Agents.record_repository(run)} do
+      {{:error, _} = error, _} -> error
+      {_, res} -> res
+    end
   end
+
+  defp maybe_review_check(%AgentRun{mode: :review, status: status} = run)
+       when is_terminal(status),
+       do: Agents.agent_review_check(run)
+  defp maybe_review_check(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do

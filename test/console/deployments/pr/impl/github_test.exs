@@ -6,15 +6,71 @@ defmodule Console.Deployments.Pr.Impl.GithubTest do
   alias Console.Deployments.Pr.Review
   alias Console.Schema.{PullRequest, ScmConnection}
 
-  test "fetches pull request title and body" do
+  test "fetches pull request title, body, and head commit" do
     connection = %ScmConnection{type: :github, token: "token"}
 
     expect(Tentacat.Pulls, :find, fn _, "pluralsh", "console", "42" ->
-      {200, %{"title" => "Agent review support", "body" => "Adds normalized reviews."}, nil}
+      {200,
+       %{
+         "title" => "Agent review support",
+         "body" => "Adds normalized reviews.",
+         "head" => %{"sha" => "head-sha"}
+       }, nil}
     end)
 
-    assert {:ok, %{title: "Agent review support", body: "Adds normalized reviews."}} =
+    assert {:ok,
+            %{
+              title: "Agent review support",
+              body: "Adds normalized reviews.",
+              commit_sha: "head-sha"
+            }} =
              Github.pr_details(connection, "https://github.com/pluralsh/console/pull/42")
+  end
+
+  test "starts a check run with a link to the agent run" do
+    connection = %ScmConnection{type: :github, token: "token"}
+    pr = %PullRequest{url: "https://github.com/pluralsh/console/pull/42"}
+
+    expect(Tentacat, :post, fn "repos/pluralsh/console/check-runs", _, body ->
+      assert body.status == :in_progress
+      assert body.head_sha == "head-sha"
+      assert body.details_url == "https://console.example.com/ai/agent-runs/run-id"
+      assert body.output.summary == "[View agent run](https://console.example.com/ai/agent-runs/run-id)"
+      {201, %{"id" => 123}, nil}
+    end)
+
+    assert {:ok, "123"} =
+             Github.commit_status(connection, pr, nil, :running, %{
+               sha: "head-sha",
+               url: "https://console.example.com/ai/agent-runs/run-id",
+               name: "Plural: Agent review",
+               description: "Plural agent review",
+               summary: "[View agent run](https://console.example.com/ai/agent-runs/run-id)"
+             })
+  end
+
+  for {status, conclusion} <- [successful: :success, failed: :failure, cancelled: :cancelled] do
+    test "completes a check run as #{status}" do
+      status = unquote(status)
+      conclusion = unquote(conclusion)
+      connection = %ScmConnection{type: :github, token: "token"}
+      pr = %PullRequest{url: "https://github.com/pluralsh/console/pull/42"}
+
+      expect(Tentacat, :patch, fn "repos/pluralsh/console/check-runs/123", _, body ->
+        assert body.status == :completed
+        assert body.conclusion == conclusion
+        assert body.completed_at
+        {200, %{"id" => 123}, nil}
+      end)
+
+      assert {:ok, "123"} =
+               Github.commit_status(connection, pr, "123", status, %{
+                 sha: "head-sha",
+                 url: "https://console.example.com/ai/agent-runs/run-id",
+                 name: "Plural: Agent review",
+                 description: "Plural agent review"
+               })
+    end
   end
 
   test "creates a summary issue comment and inline review comments" do
@@ -47,7 +103,7 @@ defmodule Console.Deployments.Pr.Impl.GithubTest do
 
     expect(Tentacat, :post, fn "repos/pluralsh/console/issues/42/comments", _, body ->
       assert body.body =~ "### Plural Summary"
-      assert body.body =~ "### Grade: B"
+      assert body.body =~ "### Mergeability Grade: B"
       {201, %{"id" => 10}, nil}
     end)
 

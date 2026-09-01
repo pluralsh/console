@@ -165,7 +165,29 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
     end
   end
 
-  def commit_status(_, _, _, _, _), do: :ok
+  def commit_status(scm_conn, %PullRequest{url: url}, id, status, attrs) do
+    with {:ok, project, slug, _} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn) do
+      key = id || "plural-agent-review"
+
+      post(conn, "/projects/#{project}/repos/#{slug}/commits/#{attrs.sha}/builds", %{
+        key: key,
+        state: commit_status_state(status),
+        url: attrs.url,
+        name: attrs.name,
+        description: attrs.description
+      })
+      |> case do
+        {:ok, _} -> {:ok, key}
+        error -> error
+      end
+    end
+  end
+
+  defp commit_status_state(:successful), do: "SUCCESSFUL"
+  defp commit_status_state(:failed), do: "FAILED"
+  defp commit_status_state(:cancelled), do: "CANCELLED"
+  defp commit_status_state(_), do: "INPROGRESS"
 
   def merge(conn, %PullRequest{url: url}) do
     with {:ok, project, slug, number} <- get_pull_id(url),
@@ -189,7 +211,12 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
          {:ok, conn} <- connection(scm_conn),
          {:ok, %{"title" => title} = pr} <-
            get(conn, "/projects/#{project}/repos/#{repo}/pull-requests/#{number}") do
-      {:ok, %{title: title, body: pr["description"] || ""}}
+      {:ok,
+       %{
+         title: title,
+         body: pr["description"] || "",
+         commit_sha: get_in(pr, ["fromRef", "latestCommit"])
+       }}
     end
   end
 
@@ -211,6 +238,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
     |> handle_response()
   end
 
+  defp handle_response({:ok, %Req.Response{status: code, body: body}})
+    when code >= 200 and code < 300 and body in ["", nil], do: {:ok, %{}}
   defp handle_response({:ok, %Req.Response{status: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
   defp handle_response({:ok, %Req.Response{body: body}}), do: {:error, "bitbucket request failed: #{body}"}

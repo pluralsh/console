@@ -28,6 +28,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
     |> cast(attrs, @valid)
     |> validate_required(@valid -- [:base_branch, :head_branch, :babysit, :approval, :followup, :pr_url])
     |> fix_mode(bench, job)
+    |> AgentRun.validate_followup_mode()
     |> fix_babysit(bench, job)
     |> fix_approval(bench, job)
     |> validate_repository(bench)

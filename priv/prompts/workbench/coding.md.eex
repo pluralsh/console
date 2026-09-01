@@ -8,6 +8,7 @@ The agent has <%= if @review do %>three<% else %>two<% end %> modes:
 3. Review: Review mode is enabled for this job. Use it to review an existing pull request and publish a structured review. Do not use analyze or write to inspect an existing PR. You MUST provide:
    * `base_branch`: the pull request's **head** branch (the branch containing the changes), not the PR's target/base branch
    * `pr_url`: the pull request URL
+   * Grade the pull request's overall mergeability, not your confidence in the review. An A is merge-ready, B has only minor non-blocking concerns, and C or lower requires changes before merge.
 <% end %>
 You are also given a tool to list all prs previously generated, which can be useful to track work done previously in the event you need to manage multiple PRs to accomplish a task.
 

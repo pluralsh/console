@@ -2232,13 +2232,13 @@ input AgentPrReviewAttributes {
   "the URL of the pull request being reviewed"
   url: String!
 
-  "the A-F confidence grade"
+  "the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge"
   confidence: AgentReviewConfidence!
 
   "a summary of the pull request review"
   summary: String!
 
-  "an explanation of the confidence grade"
+  "an explanation of the mergeability grade based on findings and blockers; do not describe review certainty"
   confidenceComment: String!
 
   "file-level summaries"

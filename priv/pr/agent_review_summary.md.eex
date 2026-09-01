@@ -2,7 +2,7 @@
 
 <%= @review.summary %>
 
-### Grade: <%= @review.confidence |> to_string() |> String.upcase() %>
+### Mergeability Grade: <%= @review.confidence |> to_string() |> String.upcase() %>
 
 <%= @review.confidence_comment %>
 <%= if Enum.any?(@review.files) do %>

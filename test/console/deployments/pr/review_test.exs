@@ -30,8 +30,8 @@ defmodule Console.Deployments.Pr.ReviewTest do
     assert [%Review.Comment{line: 10, priority: :p2} = comment] = review.comments
 
     summary = Review.summary(review)
-    assert summary =~ "## Plural Summary"
-    assert summary =~ "### Grade: B"
+    assert summary =~ "### Plural Summary"
+    assert summary =~ "### Mergeability Grade: B"
     assert summary =~ "<details>"
     assert summary =~ "<summary><strong>Files changed (2)</strong></summary>"
 

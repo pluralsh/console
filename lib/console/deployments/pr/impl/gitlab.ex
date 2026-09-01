@@ -138,7 +138,25 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def commit_status(_, _, _, _, _), do: :ok
+  def commit_status(conn, %PullRequest{url: url}, _, status, attrs) do
+    with {:ok, project, _} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, _} <-
+           post(conn, "/api/v4/projects/#{uri_encode(project)}/statuses/#{attrs.sha}", %{
+             state: commit_status_state(status),
+             target_url: attrs.url,
+             name: attrs.name,
+             description: attrs.description
+           }) do
+      {:ok, attrs.name}
+    end
+  end
+
+  defp commit_status_state(:successful), do: "success"
+  defp commit_status_state(:failed), do: "failed"
+  defp commit_status_state(:cancelled), do: "canceled"
+  defp commit_status_state(:queued), do: "pending"
+  defp commit_status_state(_), do: "running"
 
   def pr_info(url) do
     with {:ok, project, number} <- get_pull_id(url) do
@@ -157,7 +175,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
          {:ok, conn} <- connection(conn),
          {:ok, %{"title" => title} = pr} <-
            get(conn, "/api/v4/projects/#{uri_encode(project)}/merge_requests/#{number}") do
-      {:ok, %{title: title, body: pr["description"] || ""}}
+      {:ok, %{title: title, body: pr["description"] || "", commit_sha: pr["sha"]}}
     end
   end
 

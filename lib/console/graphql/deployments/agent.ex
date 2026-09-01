@@ -99,9 +99,11 @@ defmodule Console.GraphQl.Deployments.Agent do
 
   input_object :agent_pr_review_attributes do
     field :url,                non_null(:string), description: "the URL of the pull request being reviewed"
-    field :confidence,         non_null(:agent_review_confidence), description: "the A-F confidence grade"
+    field :confidence,         non_null(:agent_review_confidence),
+      description: "the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge"
     field :summary,            non_null(:string), description: "a summary of the pull request review"
-    field :confidence_comment, non_null(:string), description: "an explanation of the confidence grade"
+    field :confidence_comment, non_null(:string),
+      description: "an explanation of the mergeability grade based on findings and blockers; do not describe review certainty"
     field :files,              list_of(:agent_pr_review_file_attributes), description: "file-level summaries"
     field :comments,           list_of(:agent_pr_review_comment_attributes), description: "up to three inline review findings"
   end

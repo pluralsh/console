@@ -68,6 +68,29 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
       assert pr_url == "https://github.com/pluralsh/console/pull/1"
     end
 
+    test "review mode rejects followup runs" do
+      job = %WorkbenchJob{
+        modes: %WorkbenchJob.Modes{
+          coding: %WorkbenchJob.Modes.Coding{review: true}
+        }
+      }
+
+      {:error, changeset} =
+        %CodingAgent{workbench: %Workbench{}, job: job}
+        |> CodingAgent.changeset(%{
+          "mode" => "review",
+          "repository" => "https://github.com/pluralsh/console.git",
+          "prompt" => "review the pull request",
+          "followup" => true,
+          "base_branch" => "agent/review",
+          "head_branch" => "agent/follow-up",
+          "pr_url" => "https://github.com/pluralsh/console/pull/1"
+        })
+        |> Ecto.Changeset.apply_action(:update)
+
+      assert "cannot be enabled in review mode" in errors_on(changeset).followup
+    end
+
     test "job babysit mode forces babysitting on" do
       job = %WorkbenchJob{
         modes: %WorkbenchJob.Modes{

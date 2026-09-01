@@ -21,6 +21,7 @@ defmodule Console.Schema.AgentRun do
   defenum Language, javascript: 0, python: 1, java: 2, cpp: 3, csharp: 4, go: 5, ruby: 6, php: 7, terraform: 8
   defenum ReviewDepth, low: 0, medium: 1, high: 2
 
+  defguard is_terminal(status) when status in ~w(successful failed cancelled)a
 
   schema "agent_runs" do
     field :status,           Status
@@ -38,6 +39,7 @@ defmodule Console.Schema.AgentRun do
     field :error,            :binary
     field :followup,         :boolean, default: false
     field :followup_pr_url,  :string
+    field :check_id,         :string
     field :consumed,         :binary_id
     field :approval,         :boolean, default: false
     field :approved_at,      :utc_datetime_usec
@@ -108,7 +110,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup followup_pr_url review_depth)a
+  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup followup_pr_url review_depth check_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -119,6 +121,7 @@ defmodule Console.Schema.AgentRun do
     |> foreign_key_constraint(:flow_id)
     |> validate_repository()
     |> validate_branch()
+    |> validate_followup_mode()
     |> cast_embed(:pod_reference)
     |> cast_embed(:usage)
     |> cast_embed(:todos, with: &todo_changeset/2)
@@ -153,6 +156,13 @@ defmodule Console.Schema.AgentRun do
       ^field, "https://" <> _ -> []
       ^field, _ -> [{field, "must be a valid https or ssh git clone URL (e.g. https://github.com/pluralsh/plural.git or git@github.com:pluralsh/plural.git)"}]
     end)
+  end
+
+  def validate_followup_mode(cs) do
+    case {get_field(cs, :mode), get_field(cs, :followup)} do
+      {:review, true} -> add_error(cs, :followup, "cannot be enabled in review mode")
+      _ -> cs
+    end
   end
 
   @branch_blacklist ~w(main master develop)
