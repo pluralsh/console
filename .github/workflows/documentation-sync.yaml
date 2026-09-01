@@ -45,7 +45,7 @@ jobs:
           commit-message: Update docs for Console controller
           branch: docs-${{steps.date.outputs.date}}
           labels: documentation
-          base: main
+          base: master
 #      - name: Auto-approve
 #        if: steps.cpr.outputs.pull-request-operation == 'created'
 #        run: gh pr review --approve "${{ steps.cpr.outputs.pull-request-number }}"

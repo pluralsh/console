@@ -44,6 +44,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
       - run: corepack enable
       - run: yarn --immutable
       - run: yarn workspace @pluralsh/documentation lint
@@ -80,6 +82,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
       - run: corepack enable
         working-directory: js
       - run: yarn --immutable
