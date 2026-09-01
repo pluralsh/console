@@ -1,7 +1,6 @@
 import { type ReactNode, useMemo } from 'react'
 
-import { DocumentIcon } from '@pluralsh/design-system'
-import { Button } from 'honorable'
+import { Button, DocumentIcon } from '@pluralsh/design-system'
 import { useRouter } from 'next/router'
 
 import styled from 'styled-components'
@@ -37,7 +36,6 @@ export const ArticleList = styled.ul(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
   gap: theme.spacing.small,
-  ...theme.partials.marketingText.label,
   marginBottom: theme.spacing.medium,
 }))
 
@@ -83,7 +81,6 @@ function ArticlesInSection({
             <li key={article.href}>
               <Button
                 floating
-                textTransform="none"
                 startIcon={article.icon || <DocumentIcon />}
                 as="a"
                 href={article.href}

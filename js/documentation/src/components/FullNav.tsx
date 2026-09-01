@@ -11,9 +11,9 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   Button,
+  type ButtonProps,
   usePrevious,
 } from '@pluralsh/design-system'
-import type { ButtonProps } from 'honorable'
 import { useRouter } from 'next/router'
 
 import styled from 'styled-components'

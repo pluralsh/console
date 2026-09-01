@@ -76,6 +76,7 @@ const Button = memo(
     children,
     small,
     large,
+    primary: _primary,
     secondary,
     tertiary,
     destructive,
