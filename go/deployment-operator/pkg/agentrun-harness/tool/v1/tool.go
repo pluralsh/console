@@ -29,6 +29,7 @@ const (
 	// markdown template located in the system directory.
 	systemPromptWriteTemplateFile = "write.md.tmpl"
 
+	systemPromptReviewTemplateFile  = "review.md.tmpl"
 	systemPromptBabysitTemplateFile = "babysit.md.tmpl"
 )
 
@@ -57,6 +58,8 @@ func (in DefaultTool) ConfigureSystemPrompt(runtime console.AgentRuntimeType) er
 		templateFile = path.Join(templateFile, systemPromptAnalyzeTemplateFile)
 	case console.AgentRunModeWrite:
 		templateFile = path.Join(templateFile, systemPromptWriteTemplateFile)
+	case console.AgentRunModeReview:
+		templateFile = path.Join(templateFile, systemPromptReviewTemplateFile)
 	}
 
 	content, err := systemPromptTemplate(templateFile, in.systemPromptInput())
@@ -110,6 +113,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 
 	return &SystemPromptTemplateInput{
 		Mode:                 in.Config.Run.Mode,
+		ReviewDepth:          in.Config.Run.ReviewDepth,
 		BrowserEnabled:       in.Config.Run.BrowserEnabled,
 		DindEnabled:          in.Config.Run.DindEnabled,
 		MemoryEnabled:        in.Config.Run.MemoryEnabled,
@@ -117,6 +121,7 @@ func (in DefaultTool) systemPromptInput() *SystemPromptTemplateInput {
 		RepositoryDir:        in.Config.RepositoryDir,
 		Prompt:               in.Config.Run.Prompt,
 		Branch:               branch,
+		PRURL:                in.Config.Run.PRURL,
 		Followup:             in.Config.Run.Followup,
 		PrebakedRepositories: prebakedRepositories(in.Config.Run.Repository),
 	}

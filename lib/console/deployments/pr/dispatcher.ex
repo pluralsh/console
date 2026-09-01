@@ -2,7 +2,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   import Console.Deployments.Pr.Git
   import Console.Deployments.Pr.Utils
   alias Console.Repo
-  alias Console.Deployments.{Pr.Config, Pr.File, Git.Discovery, Tar, Settings}
+  alias Console.Deployments.{Pr.Config, Pr.File, Pr.Review, Git.Discovery, Tar, Settings}
   alias Console.Commands.{Plural}
   alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket, BitBucketDatacenter, Azure}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository, DeploymentSettings}
@@ -33,6 +33,12 @@ defmodule Console.Deployments.Pr.Dispatcher do
   """
   @callback review(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
+  @doc """
+  Creates or updates an agent review and adds its inline comments.
+  """
+  @callback agent_review(conn :: ScmConnection.t, pr :: PullRequest.t, review :: Review.t()) ::
+              {:ok, binary} | Console.error
+
   @callback approve(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
   @callback files(conn :: ScmConnection.t, url :: binary) :: {:ok, [File.t]} | Console.error
@@ -42,6 +48,9 @@ defmodule Console.Deployments.Pr.Dispatcher do
   @callback merge(conn :: ScmConnection.t, pr :: PullRequest.t) :: :ok | Console.error
 
   @callback pr_info(url :: binary) :: {:ok, %{atom => binary}} | Console.error
+
+  @callback pr_details(conn :: ScmConnection.t, url :: binary) ::
+              {:ok, %{title: binary, body: binary}} | Console.error
 
   @callback slug(url :: binary) :: {:ok, binary} | Console.error
 
@@ -105,6 +114,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl.review(conn, pr, body)
   end
 
+  def agent_review(%ScmConnection{} = conn, %PullRequest{} = pr, %Review{} = review) do
+    impl = dispatcher(conn)
+    impl.agent_review(conn, pr, review)
+  end
+
   def approve(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
     impl = dispatcher(conn)
     impl.approve(conn, pr, body)
@@ -128,6 +142,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def pr_info(%ScmConnection{} = conn, url) do
     impl = dispatcher(conn)
     impl.pr_info(url)
+  end
+
+  def pr_details(%ScmConnection{} = conn, url) do
+    impl = dispatcher(conn)
+    impl.pr_details(conn, url)
   end
 
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, git: %{ref: _, folder: _} = ref1, creates: %{git: %{ref: _, folder: _} = ref2}}),

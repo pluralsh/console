@@ -47,6 +47,22 @@ func TestBuildCodexConfig_ProxyProvider(t *testing.T) {
 	}
 }
 
+func TestProfileForMode(t *testing.T) {
+	for _, tc := range []struct {
+		mode    console.AgentRunMode
+		profile string
+	}{
+		{console.AgentRunModeAnalyze, "analysis"},
+		{console.AgentRunModeWrite, autonomousProfile},
+		{console.AgentRunModeReview, reviewProfile},
+	} {
+		profile, ok := profileForMode(tc.mode)
+		if !ok || profile != tc.profile {
+			t.Fatalf("profileForMode(%s) = %q, %v; want %q, true", tc.mode, profile, ok, tc.profile)
+		}
+	}
+}
+
 func TestBuildCodexConfig_CodebaseMemoryMCPServer(t *testing.T) {
 	cfg, err := BuildCodexConfig("/repo", []AgentInput{{
 		Name:        autonomousProfile,

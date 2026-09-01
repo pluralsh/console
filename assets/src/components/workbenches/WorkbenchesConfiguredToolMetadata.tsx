@@ -358,19 +358,18 @@ function hasDisplayValue(value?: string | null): value is string {
 }
 
 const ToolMetaSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxxsmall,
+  display: 'grid',
+  gridTemplateColumns: 'max-content minmax(0, 1fr)',
+  alignItems: 'center',
+  columnGap: theme.spacing.xsmall,
+  rowGap: theme.spacing.xxxsmall,
   marginLeft: 'auto',
   width: '100%',
 }))
 
-const ToolMetaRowSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'auto 1fr',
-  columnGap: theme.spacing.xsmall,
-  alignItems: 'center',
-}))
+const ToolMetaRowSC = styled.div({
+  display: 'contents',
+})
 
 const ToolMetaLabelSC = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,

@@ -133,7 +133,8 @@
             "description": "Mode of the agent run (analyze for read-only analysis, write for code modifications)",
             "enum": [
               "analyze",
-              "write"
+              "write",
+              "review"
             ],
             "type": "string"
           },
@@ -197,7 +198,8 @@
             "description": "Mode of the agent run (analyze for read-only, write for modifications)",
             "enum": [
               "analyze",
-              "write"
+              "write",
+              "review"
             ],
             "type": "string"
           },

@@ -422,6 +422,27 @@ func TestBuildAgentRunPod_IncludesMCPServerSidecar(t *testing.T) {
 	}
 }
 
+func TestGetMCPServerEnvVars_ModeToolExclusions(t *testing.T) {
+	runtime := &v1alpha1.AgentRuntime{}
+
+	for _, tc := range []struct {
+		mode     console.AgentRunMode
+		excluded string
+	}{
+		{console.AgentRunModeAnalyze, analyzeModeExcludedTools},
+		{console.AgentRunModeWrite, writeModeExcludedTools},
+		{console.AgentRunModeReview, reviewModeExcludedTools},
+	} {
+		t.Run(string(tc.mode), func(t *testing.T) {
+			env := getMCPServerEnvVars(&v1alpha1.AgentRun{
+				Spec: v1alpha1.AgentRunSpec{Mode: tc.mode},
+			}, runtime)
+
+			assert.Contains(t, env, corev1.EnvVar{Name: EnvMcpExcludeTools, Value: tc.excluded})
+		})
+	}
+}
+
 func TestBuildAgentRunPod_PreservesCustomAgentBootstrapSecurityContext(t *testing.T) {
 	customSC := &corev1.SecurityContext{
 		ReadOnlyRootFilesystem: lo.ToPtr(false),

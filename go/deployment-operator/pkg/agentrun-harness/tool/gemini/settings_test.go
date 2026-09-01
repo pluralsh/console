@@ -89,16 +89,27 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 			t.Fatalf("settings() ANALYZE failed: %v", err)
 		}
 
-		var writeOut, analyzeOut map[string]any
+		reviewInput := *baseInput
+		reviewInput.AgentRunMode = console.AgentRunModeReview
+		_, reviewContent, err := settings(&reviewInput)
+		if err != nil {
+			t.Fatalf("settings() REVIEW failed: %v", err)
+		}
+
+		var writeOut, analyzeOut, reviewOut map[string]any
 		if err := json.Unmarshal([]byte(writeContent), &writeOut); err != nil {
 			t.Fatalf("WRITE content not valid JSON: %v", err)
 		}
 		if err := json.Unmarshal([]byte(analyzeContent), &analyzeOut); err != nil {
 			t.Fatalf("ANALYZE content not valid JSON: %v", err)
 		}
+		if err := json.Unmarshal([]byte(reviewContent), &reviewOut); err != nil {
+			t.Fatalf("REVIEW content not valid JSON: %v", err)
+		}
 
 		writeCoreTools, _ := writeOut["coreTools"].([]any)
 		analyzeCoreTools, _ := analyzeOut["coreTools"].([]any)
+		reviewCoreTools, _ := reviewOut["coreTools"].([]any)
 
 		hasWriteFile := false
 		for _, t := range writeCoreTools {
@@ -120,6 +131,11 @@ func TestSettingsTemplate_GenerateAndVerifyContents(t *testing.T) {
 		}
 		if hasWriteInAnalyze {
 			t.Error("ANALYZE mode coreTools should not include WriteFileTool or EditTool")
+		}
+		for _, tool := range reviewCoreTools {
+			if tool == "WriteFileTool" || tool == "EditTool" {
+				t.Error("REVIEW mode coreTools should not include WriteFileTool or EditTool")
+			}
 		}
 	})
 

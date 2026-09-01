@@ -17,14 +17,17 @@ defmodule Console.Schema.AgentRun do
   @expiry 14
 
   defenum Status,   pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4, babysitting: 5, pending_approval: 6
-  defenum Mode,     analyze: 0, write: 1
+  defenum Mode,     analyze: 0, write: 1, review: 2
   defenum Language, javascript: 0, python: 1, java: 2, cpp: 3, csharp: 4, go: 5, ruby: 6, php: 7, terraform: 8
+  defenum ReviewDepth, low: 0, medium: 1, high: 2
+
 
   schema "agent_runs" do
     field :status,           Status
     field :language,         Language
     field :language_version, :string
     field :mode,             Mode, default: :write
+    field :review_depth,     ReviewDepth, default: :medium
     field :shared,           :boolean, default: false
     field :babysit,          :boolean, default: false
     field :babysit_interval, :integer
@@ -105,7 +108,7 @@ defmodule Console.Schema.AgentRun do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup followup_pr_url)a
+  @valid ~w(status language consumed approval approved_at language_version shared babysit babysit_interval prompt repository runtime_id user_id flow_id session_id mode branch head_branch error followup followup_pr_url review_depth)a
 
   def changeset(model, attrs \\ %{}) do
     model

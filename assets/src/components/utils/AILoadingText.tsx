@@ -1,5 +1,5 @@
 import { Flex, FlexProps, LoaderIcon } from '@pluralsh/design-system'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobActivityWhimseyTextQuery,
   useWorkbenchJobWhimseyTextQuery,
@@ -11,13 +11,11 @@ const WHIMSEY_POLL_INTERVAL = 12_000
 export function AILoadingText({
   jobId,
   activityId,
-  size = 'medium',
   defaultText = 'Planning next moves',
   ...props
 }: {
   jobId?: string
   activityId?: string
-  size?: 'small' | 'medium'
   defaultText?: string
 } & FlexProps) {
   const { data: jobData } = useWorkbenchJobWhimseyTextQuery({
@@ -46,7 +44,7 @@ export function AILoadingText({
     >
       <LoaderIcon
         color="icon-xlight"
-        size={size === 'small' ? 12 : 16}
+        size={16}
         css={{
           animation: 'workbench-loader-pulse 1.2s ease-in-out infinite',
           '@keyframes workbench-loader-pulse': {
@@ -57,11 +55,12 @@ export function AILoadingText({
         }}
       />
       <EaseIn currentKey={whimseyText}>
-        {size === 'small' ? (
-          <CaptionP $shimmer>{whimseyText}</CaptionP>
-        ) : (
-          <Body2P $shimmer>{whimseyText}</Body2P>
-        )}
+        <Body2P
+          $color="text-xlight"
+          $shimmer
+        >
+          {whimseyText}
+        </Body2P>
       </EaseIn>
     </Flex>
   )

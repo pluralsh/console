@@ -3,7 +3,7 @@ dir: "pkg/test/mocks"
 mockname: "{{.InterfaceName}}Mock"
 outpkg: "mocks"
 packages:
-  github.com/pluralsh/deployment-operator/pkg/client:
+  github.com/pluralsh/console/go/deployment-operator/pkg/client:
     interfaces:
       Client:
   k8s.io/client-go/discovery:

@@ -163,6 +163,7 @@ func TestAnalysisGateEnabled(t *testing.T) {
 	t.Parallel()
 	require.True(t, analysisGateEnabled(gqlclient.AgentRunModeAnalyze))
 	require.True(t, analysisGateEnabled(gqlclient.AgentRunModeWrite))
+	require.True(t, analysisGateEnabled(gqlclient.AgentRunModeReview))
 }
 
 func TestEnsureAnalysisPersistedAfterInitialRun_runsInWriteMode(t *testing.T) {

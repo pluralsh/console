@@ -121,8 +121,11 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := in.agentJSON(analysisAgent)
-	if in.Config.Run.Mode == console.AgentRunModeWrite {
+	switch in.Config.Run.Mode {
+	case console.AgentRunModeWrite:
 		agent = in.agentJSON(autonomousAgent)
+	case console.AgentRunModeReview:
+		agent = in.agentJSON(reviewAgent)
 	}
 	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, followUpPrompt, in.sessionID, prebake.ExtraReadDirs()...)
 
@@ -171,8 +174,11 @@ func (in *Claude) FollowUpRun(ctx context.Context, followUpPrompt string) error 
 func (in *Claude) start(ctx context.Context, options ...exec.Option) {
 	promptFile := path.Join(in.Config.WorkDir, ".claude", "prompts", v1.SystemPromptFile)
 	agent := in.agentJSON(analysisAgent)
-	if in.Config.Run.Mode == console.AgentRunModeWrite {
+	switch in.Config.Run.Mode {
+	case console.AgentRunModeWrite:
 		agent = in.agentJSON(autonomousAgent)
+	case console.AgentRunModeReview:
+		agent = in.agentJSON(reviewAgent)
 	}
 	args := claudeRunArgs(in.Config.RepositoryDir, promptFile, agent, in.model, in.Config.Run.Prompt, "", prebake.ExtraReadDirs()...)
 
@@ -299,7 +305,8 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 	}
 
 	settings := NewSettingsBuilder(in.model)
-	if in.Config.Run.Mode == console.AgentRunModeAnalyze {
+	if in.Config.Run.Mode == console.AgentRunModeAnalyze ||
+		in.Config.Run.Mode == console.AgentRunModeReview {
 		settings.AllowTools(
 			"Read",
 			"Grep",
@@ -309,6 +316,11 @@ func (in *Claude) Configure(consoleURL, consoleToken string) error {
 			"Bash(pwd)",
 			"Bash(git status)",
 			"Bash(git diff:*)",
+			"Bash(git branch:*)",
+			"Bash(git log:*)",
+			"Bash(git show:*)",
+			"Bash(git merge-base:*)",
+			"Bash(git rev-parse:*)",
 			"Bash(head:*)",
 			"Bash(tail:*)",
 			"Bash(cat:*)",

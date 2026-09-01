@@ -21,7 +21,7 @@ export const WRITE_MODE_HINT =
 export const CODING_AGENT_LABEL = 'Coding agent'
 export const KUBERNETES_ACTIONS_LABEL = 'Enable Kubernetes actions'
 export const KUBERNETES_ACTIONS_HINT =
-  'Reads are always permitted. Every mutation you enable below still requires your approval before it runs.'
+  'Reads are always permitted. Every mutation you enable below still requires your approval before it runs. Kubernetes RBAC is enforced end to end for every action.'
 
 export function attributesForPromptMode(
   mode: WorkbenchPromptMode,
@@ -91,6 +91,7 @@ export function modesFormValue(
       ? {
           approval: modes.coding.approval,
           babysit: modes.coding.babysit,
+          review: modes.coding.review,
         }
       : undefined,
     budget: modes.budget

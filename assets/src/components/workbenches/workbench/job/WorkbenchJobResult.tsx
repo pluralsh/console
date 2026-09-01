@@ -5,13 +5,13 @@ import {
   Code,
   Flex,
   IconFrame,
-  Markdown,
   Modal,
   prettifyRepoUrl,
   PrIcon,
   PrOpenIcon,
   WarningOutlineIcon,
 } from '@pluralsh/design-system'
+import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
 import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -86,7 +86,7 @@ export function WorkbenchJobResult({
           direction="column"
           overflow="auto"
         >
-          <Markdown text={resultText} />
+          <ChatMarkdown text={resultText} />
         </Flex>
       )}
       {!isEmpty(getWorkbenchJobTodos(job?.result)) && !hasConclusion && (
@@ -404,7 +404,7 @@ function EvalSection({
       >
         {title}
       </Subtitle2H1>
-      <Markdown text={children} />
+      <ChatMarkdown text={children} />
     </Flex>
   )
 }

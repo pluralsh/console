@@ -1,11 +1,4 @@
-import {
-  fetchRefreshToken,
-  fetchToken,
-  setRefreshToken,
-  setToken,
-  wipeRefreshToken,
-  wipeToken,
-} from 'helpers/auth'
+import { fetchToken, setToken, wipeRefreshToken, wipeToken } from 'helpers/auth'
 import {
   clearServiceAccountImpersonation,
   isImpersonatingServiceAccount,
@@ -18,6 +11,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
 } from 'react'
 
 import {
@@ -25,8 +19,8 @@ import {
   PersonaConfigurationFragment,
   PersonaRole,
   useLogoutMutation,
-  useRefreshLazyQuery,
 } from '../generated/graphql'
+import { getRefreshedToken } from '../helpers/refreshToken'
 
 import { reducePersonaConfigs } from './login/reducePersonaConfigs'
 
@@ -94,39 +88,39 @@ export function LoginContextProvider({
     onCompleted: completeLogout,
     onError: completeLogout,
   })
-  const [refreshQuery, { loading: refreshLoading }] = useRefreshLazyQuery({
-    onCompleted: (res) => {
-      setToken(res.refresh?.jwt)
-      if (res.refresh?.refreshToken?.token) {
-        setRefreshToken(res.refresh.refreshToken.token)
-      }
-      if (!res.refresh?.jwt) {
-        logout()
-      }
-    },
-    onError: () => {
-      logout()
-    },
-    fetchPolicy: 'network-only',
-  })
+  const refreshLoading = useRef(false)
   const jwt = fetchToken()
   const impersonating = isImpersonatingServiceAccount()
 
-  const refresh = useCallback(() => {
-    refreshQuery({ variables: { token: fetchRefreshToken() || '' } })
-  }, [refreshQuery])
+  const refresh = useCallback(async () => {
+    refreshLoading.current = true
+
+    try {
+      const jwt = await getRefreshedToken()
+
+      if (jwt) {
+        setToken(jwt)
+      } else {
+        logout()
+      }
+    } catch {
+      logout()
+    } finally {
+      refreshLoading.current = false
+    }
+  }, [logout])
 
   useEffect(() => {
     if (impersonating) return
 
     if (
-      !refreshLoading &&
+      !refreshLoading.current &&
       (!jwt ||
         (getJwtExpiry(jwt) ?? 0) * 1000 < Date.now() + JWT_REFRESH_THRESHOLD)
     ) {
       refresh()
     }
-  }, [impersonating, jwt, refresh, refreshLoading, refreshQuery])
+  }, [impersonating, jwt, refresh])
 
   const value = useMemo(
     () =>

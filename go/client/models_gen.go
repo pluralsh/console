@@ -352,6 +352,43 @@ type AgentPodReference struct {
 	Namespace string `json:"namespace"`
 }
 
+type AgentPrReviewAttributes struct {
+	// the URL of the pull request being reviewed
+	URL string `json:"url"`
+	// the A-F confidence grade
+	Confidence AgentReviewConfidence `json:"confidence"`
+	// a summary of the pull request review
+	Summary string `json:"summary"`
+	// an explanation of the confidence grade
+	ConfidenceComment string `json:"confidenceComment"`
+	// file-level summaries
+	Files []*AgentPrReviewFileAttributes `json:"files,omitempty"`
+	// up to three inline review findings
+	Comments []*AgentPrReviewCommentAttributes `json:"comments,omitempty"`
+}
+
+type AgentPrReviewCommentAttributes struct {
+	// the repository-relative filename
+	Filename string `json:"filename"`
+	// the new-file line where the finding begins
+	Line int64 `json:"line"`
+	// the optional new-file line where the finding ends
+	EndLine *int64 `json:"endLine,omitempty"`
+	// the concise title of the inline finding
+	Title string `json:"title"`
+	// the detailed inline review comment
+	Body string `json:"body"`
+	// the P0-P3 finding priority
+	Priority AgentReviewPriority `json:"priority"`
+}
+
+type AgentPrReviewFileAttributes struct {
+	// the repository-relative filename
+	Filename string `json:"filename"`
+	// a summary of the changes to this file
+	Summary string `json:"summary"`
+}
+
 type AgentPrompt struct {
 	ID string `json:"id"`
 	// the prompt to give this agent run
@@ -400,6 +437,8 @@ type AgentRun struct {
 	Status AgentRunStatus `json:"status"`
 	// the mode of the agent run
 	Mode AgentRunMode `json:"mode"`
+	// how deeply a review run should explore adjacent code
+	ReviewDepth *AgentReviewDepth `json:"reviewDepth,omitempty"`
 	// the kubernetes pod this agent is running on
 	PodReference *AgentPodReference `json:"podReference,omitempty"`
 	// the error reason of the agent run
@@ -465,6 +504,8 @@ type AgentRunAttributes struct {
 	Branch *string `json:"branch,omitempty"`
 	// the mode of the agent run
 	Mode AgentRunMode `json:"mode"`
+	// how deeply a review run should explore adjacent code
+	ReviewDepth *AgentReviewDepth `json:"reviewDepth,omitempty"`
 	// the programming language used in the agent run
 	Language *AgentRunLanguage `json:"language,omitempty"`
 	// the version of the language to use, if you wish to specify
@@ -10863,6 +10904,8 @@ type WorkbenchJobCodingModes struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// whether coding agent runs require approval before continuing
 	Approval *bool `json:"approval,omitempty"`
+	// whether pull request review mode is enabled for coding agent runs
+	Review *bool `json:"review,omitempty"`
 }
 
 type WorkbenchJobCodingModesAttributes struct {
@@ -10870,6 +10913,8 @@ type WorkbenchJobCodingModesAttributes struct {
 	Babysit *bool `json:"babysit,omitempty"`
 	// whether coding agent runs require approval before continuing
 	Approval *bool `json:"approval,omitempty"`
+	// whether pull request review mode is enabled for coding agent runs
+	Review *bool `json:"review,omitempty"`
 }
 
 type WorkbenchJobConnection struct {
@@ -12170,6 +12215,185 @@ func (e AgentMessageToolState) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type AgentReviewConfidence string
+
+const (
+	AgentReviewConfidenceA AgentReviewConfidence = "A"
+	AgentReviewConfidenceB AgentReviewConfidence = "B"
+	AgentReviewConfidenceC AgentReviewConfidence = "C"
+	AgentReviewConfidenceD AgentReviewConfidence = "D"
+	AgentReviewConfidenceE AgentReviewConfidence = "E"
+	AgentReviewConfidenceF AgentReviewConfidence = "F"
+)
+
+var AllAgentReviewConfidence = []AgentReviewConfidence{
+	AgentReviewConfidenceA,
+	AgentReviewConfidenceB,
+	AgentReviewConfidenceC,
+	AgentReviewConfidenceD,
+	AgentReviewConfidenceE,
+	AgentReviewConfidenceF,
+}
+
+func (e AgentReviewConfidence) IsValid() bool {
+	switch e {
+	case AgentReviewConfidenceA, AgentReviewConfidenceB, AgentReviewConfidenceC, AgentReviewConfidenceD, AgentReviewConfidenceE, AgentReviewConfidenceF:
+		return true
+	}
+	return false
+}
+
+func (e AgentReviewConfidence) String() string {
+	return string(e)
+}
+
+func (e *AgentReviewConfidence) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentReviewConfidence(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentReviewConfidence", str)
+	}
+	return nil
+}
+
+func (e AgentReviewConfidence) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AgentReviewConfidence) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AgentReviewConfidence) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type AgentReviewDepth string
+
+const (
+	AgentReviewDepthLow    AgentReviewDepth = "LOW"
+	AgentReviewDepthMedium AgentReviewDepth = "MEDIUM"
+	AgentReviewDepthHigh   AgentReviewDepth = "HIGH"
+)
+
+var AllAgentReviewDepth = []AgentReviewDepth{
+	AgentReviewDepthLow,
+	AgentReviewDepthMedium,
+	AgentReviewDepthHigh,
+}
+
+func (e AgentReviewDepth) IsValid() bool {
+	switch e {
+	case AgentReviewDepthLow, AgentReviewDepthMedium, AgentReviewDepthHigh:
+		return true
+	}
+	return false
+}
+
+func (e AgentReviewDepth) String() string {
+	return string(e)
+}
+
+func (e *AgentReviewDepth) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentReviewDepth(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentReviewDepth", str)
+	}
+	return nil
+}
+
+func (e AgentReviewDepth) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AgentReviewDepth) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AgentReviewDepth) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type AgentReviewPriority string
+
+const (
+	AgentReviewPriorityP0 AgentReviewPriority = "P0"
+	AgentReviewPriorityP1 AgentReviewPriority = "P1"
+	AgentReviewPriorityP2 AgentReviewPriority = "P2"
+	AgentReviewPriorityP3 AgentReviewPriority = "P3"
+)
+
+var AllAgentReviewPriority = []AgentReviewPriority{
+	AgentReviewPriorityP0,
+	AgentReviewPriorityP1,
+	AgentReviewPriorityP2,
+	AgentReviewPriorityP3,
+}
+
+func (e AgentReviewPriority) IsValid() bool {
+	switch e {
+	case AgentReviewPriorityP0, AgentReviewPriorityP1, AgentReviewPriorityP2, AgentReviewPriorityP3:
+		return true
+	}
+	return false
+}
+
+func (e AgentReviewPriority) String() string {
+	return string(e)
+}
+
+func (e *AgentReviewPriority) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AgentReviewPriority(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AgentReviewPriority", str)
+	}
+	return nil
+}
+
+func (e AgentReviewPriority) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *AgentReviewPriority) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e AgentReviewPriority) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type AgentRunLanguage string
 
 const (
@@ -12244,16 +12468,18 @@ type AgentRunMode string
 const (
 	AgentRunModeAnalyze AgentRunMode = "ANALYZE"
 	AgentRunModeWrite   AgentRunMode = "WRITE"
+	AgentRunModeReview  AgentRunMode = "REVIEW"
 )
 
 var AllAgentRunMode = []AgentRunMode{
 	AgentRunModeAnalyze,
 	AgentRunModeWrite,
+	AgentRunModeReview,
 }
 
 func (e AgentRunMode) IsValid() bool {
 	switch e {
-	case AgentRunModeAnalyze, AgentRunModeWrite:
+	case AgentRunModeAnalyze, AgentRunModeWrite, AgentRunModeReview:
 		return true
 	}
 	return false

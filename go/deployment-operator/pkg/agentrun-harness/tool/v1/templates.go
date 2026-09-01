@@ -10,6 +10,7 @@ import (
 
 type SystemPromptTemplateInput struct {
 	Mode                 console.AgentRunMode
+	ReviewDepth          console.AgentReviewDepth
 	BrowserEnabled       bool
 	DindEnabled          bool
 	MemoryEnabled        bool
@@ -17,6 +18,7 @@ type SystemPromptTemplateInput struct {
 	RepositoryDir        string
 	Prompt               string
 	Branch               string
+	PRURL                string
 	Followup             bool
 	PrebakedRepositories []PrebakedRepository
 }

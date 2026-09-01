@@ -36,6 +36,7 @@ defmodule Console.Schema.PullRequest do
     field :commit_sha,         :string
     field :approver,           :string
     field :preview,            :string
+    field :review_comment_id,  :string
     field :attributes,         :map
     field :patch,              :binary
     field :agent_id,           :string
@@ -66,6 +67,7 @@ defmodule Console.Schema.PullRequest do
     belongs_to :agent_run,      AgentRun
     belongs_to :author,         User
     belongs_to :workbench_job,  WorkbenchJob
+    belongs_to :workbench,      Workbench
     belongs_to :stack_run,      StackRun
 
     has_many :notifications_bindings, PolicyBinding,
@@ -249,6 +251,7 @@ defmodule Console.Schema.PullRequest do
     creator
     labels
     preview
+    review_comment_id
     patch
     agent_id
     governance_id
@@ -260,6 +263,7 @@ defmodule Console.Schema.PullRequest do
     merge_cron
     merge_attempt_at
     workbench_job_id
+    workbench_id
     stack_run_id
   )a
 
