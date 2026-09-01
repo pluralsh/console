@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Azure do
   import Console.Deployments.Pr.Utils
+  alias Console.Deployments.Pr.Review
   alias Console.Schema.{
     ScmConnection,
     PrAutomation,
@@ -82,6 +83,16 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     end
   end
 
+  def agent_review(conn, %PullRequest{url: url} = pr, %Review{} = review) do
+    with {:ok, id} <- review(conn, pr, Review.summary(review)),
+         {:ok, name, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, repo_id} <- get_repo_id(conn, name),
+         :ok <- add_inline_comments(conn, repo_id, number, review.comments) do
+      {:ok, id}
+    end
+  end
+
   def approve(conn, %PullRequest{url: url}, _) do
     with {:ok, name, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn),
@@ -122,6 +133,16 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   def pr_info(url) do
     with {:ok, repo_id, number} <- get_pull_id(url) do
       {:ok, %{repoId: repo_id, number: number}}
+    end
+  end
+
+  def pr_details(scm_conn, url) do
+    with {:ok, name, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn),
+         {:ok, repo_id} <- get_repo_id(conn, name),
+         {:ok, %{"title" => title} = pr} <-
+           get(conn, "/git/repositories/#{repo_id}/pullrequests/#{number}") do
+      {:ok, %{title: title, body: pr["description"] || ""}}
     end
   end
 
@@ -166,11 +187,13 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   defp web_url(_), do: :ignore
 
   defp url(conn, url) do
+    separator = if String.contains?(url, "?"), do: "&", else: "?"
+
     Path.join([
       conn.host,
       "/#{conn.organization}/#{conn.project}/_apis",
-      "#{url}?api-version=7.2-preview.2"
-    ])
+      url
+    ]) <> "#{separator}api-version=7.2-preview.2"
   end
 
   defp state(%{"status" => "completed"}), do: :merged
@@ -198,9 +221,19 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   defp get_pull_id(url) do
     url = String.downcase(url)
     with %URI{path: "/" <> path} <- URI.parse(url),
-         [_, repo_part] <- String.split(path, "/git/repositories/"),
-         [repo_id, number] <- String.split(repo_part, "/pullrequests/") do
-      {:ok, repo_id, number}
+         parts <- String.split(path, "/", trim: true) do
+      case parts do
+        [_, _, "_git", repo, "pullrequest", number] ->
+          {:ok, repo, number}
+
+        api_parts ->
+          with [_, repo_part] <- String.split(Enum.join(api_parts, "/"), "/git/repositories/"),
+               [repo, number] <- String.split(repo_part, "/pullrequests/") do
+            {:ok, repo, number}
+          else
+            _ -> {:error, "could not parse azure devops url"}
+          end
+      end
     else
       _ -> {:error, "could not parse azure devops url"}
     end
@@ -239,4 +272,76 @@ defmodule Console.Deployments.Pr.Impl.Azure do
   defp connection(%ScmConnection{token: token, azure: %ScmConnection.Azure{} = azure}),
     do: Connection.new(token, azure)
   defp connection(_), do: {:error, "no azure devops connection configured"}
+
+  defp add_inline_comments(_, _, _, []), do: :ok
+
+  defp add_inline_comments(conn, repo_id, number, comments) do
+    path = Path.join(["/git/repositories", repo_id, "pullRequests", number, "threads"])
+
+    with {:ok, context} <- review_context(conn, repo_id, number) do
+      Enum.reduce_while(comments, :ok, fn %Review.Comment{} = comment, :ok ->
+        case inline_body(comment, context) do
+          {:ok, body} ->
+            case post(conn, path, body) do
+              {:ok, %{"id" => _}} -> {:cont, :ok}
+              {:error, _} = error -> {:halt, error}
+            end
+
+          {:error, _} = error ->
+            {:halt, error}
+        end
+      end)
+    end
+  end
+
+  defp review_context(conn, repo_id, number) do
+    root = "/git/repositories/#{repo_id}/pullRequests/#{number}/iterations"
+
+    with {:ok, %{"value" => [_ | _] = iterations}} <- get(conn, root),
+         %{"id" => iteration} <- Enum.max_by(iterations, & &1["id"]),
+         {:ok, %{"changeEntries" => changes}} <-
+           get(conn, "#{root}/#{iteration}/changes?$top=2000") do
+      {:ok, %{
+        iteration: iteration,
+        changes:
+          Map.new(changes, fn change ->
+            {get_in(change, ["item", "path"]), change["changeTrackingId"]}
+          end)
+      }}
+    else
+      {:ok, %{"value" => []}} -> {:error, "pull request has no iterations"}
+      error -> error
+    end
+  end
+
+  defp inline_body(%Review.Comment{} = comment, context) do
+    file_path = "/" <> String.trim_leading(comment.filename, "/")
+
+    case Map.get(context.changes, file_path) do
+      change_tracking_id when is_integer(change_tracking_id) ->
+        {:ok, %{
+          comments: [%{
+            content: Review.inline_body(comment),
+            commentType: 1,
+            parentCommentId: 0
+          }],
+          status: 1,
+          threadContext: %{
+            filePath: file_path,
+            rightFileStart: %{line: comment.line, offset: 1},
+            rightFileEnd: %{line: comment.end_line || comment.line, offset: 1}
+          },
+          pullRequestThreadContext: %{
+            changeTrackingId: change_tracking_id,
+            iterationContext: %{
+              firstComparingIteration: 1,
+              secondComparingIteration: context.iteration
+            }
+          }
+        }}
+
+      _ ->
+        {:error, "could not find pull request change for #{comment.filename}"}
+    end
+  end
 end

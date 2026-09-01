@@ -102,7 +102,7 @@ func injectExternalMCPServers(content string) (string, error) {
 		}
 		mcpSection[server.Name] = entry
 
-		for _, agentName := range []string{"analysis", "autonomous"} {
+		for _, agentName := range []string{"analysis", "review", "autonomous"} {
 			agent, _ := agentSection[agentName].(map[string]any)
 			if agent == nil {
 				continue

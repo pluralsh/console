@@ -16,6 +16,7 @@ import (
 
 const (
 	DefaultAnalysisAgent = "analysis"
+	DefaultReviewAgent   = "review"
 	DefaultWriteAgent    = "autonomous"
 )
 

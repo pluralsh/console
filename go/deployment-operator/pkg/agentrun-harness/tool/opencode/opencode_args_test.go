@@ -51,6 +51,25 @@ func TestOpencodeArgsResume(t *testing.T) {
 	assertArgsEqual(t, want, args)
 }
 
+func TestOpencodeArgsReview(t *testing.T) {
+	oc := &Opencode{
+		DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{
+			Run: &agentrunv1.AgentRun{Mode: console.AgentRunModeReview, Prompt: "review"},
+		}},
+		provider: "anthropic",
+		model:    "claude-sonnet-4-6",
+	}
+
+	args := oc.args("review changes", false)
+	assertArgsEqual(t, []string{
+		"run",
+		"--format", "json",
+		"--agent", defaultReviewAgent,
+		"--model", "anthropic/claude-sonnet-4-6",
+		"review changes",
+	}, args)
+}
+
 func assertArgsEqual(t *testing.T, want, got []string) {
 	t.Helper()
 	if len(got) != len(want) {

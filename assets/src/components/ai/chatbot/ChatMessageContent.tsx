@@ -10,14 +10,13 @@ import {
   Flex,
   FillLevelProvider,
   IconFrame,
-  Markdown,
   PrQueueIcon,
 } from '@pluralsh/design-system'
 import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrModal'
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { CaptionP } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunTinyFragment,
   AgentSessionFragment,
@@ -37,6 +36,7 @@ import { StackedText } from 'components/utils/table/StackedText.tsx'
 import styled, { DefaultTheme, StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
 import { AgentRunInfoCard } from '../agent-runs/AgentRunInfoDisplays.tsx'
+import { ChatMarkdown } from './ChatMarkdown'
 import { ChatMessageActions } from './ChatMessage'
 import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
 import { ToolCallContent } from './ToolCallContent'
@@ -150,13 +150,13 @@ export function ChatMessageContent({
         >
           {role === AiRole.User ? (
             <FillLevelProvider value={1}>
-              <Markdown
+              <ChatMarkdown
                 text={content ?? ''}
                 isStreaming={isStreaming}
               />
             </FillLevelProvider>
           ) : (
-            <Markdown
+            <ChatMarkdown
               text={content ?? ''}
               isStreaming={isStreaming}
             />
@@ -196,7 +196,7 @@ function FileMessageContent({
               size={12}
               color="icon-light"
             />
-            <CaptionP $color="text-light">{fileName || 'File'}</CaptionP>
+            <Body2P $color="text-light">{fileName || 'File'}</Body2P>
             <ChatMessageActions
               id={id ?? ''}
               seq={seq}
@@ -370,11 +370,11 @@ function ToolMessageContent({
       align="flex-end"
       width="100%"
     >
-      <CaptionP $color="text-xlight">
+      <Body2P $color="text-xlight">
         {pendingConfirmation
           ? 'Pending confirmation'
           : 'Auto-generated toolcall'}
-      </CaptionP>
+      </Body2P>
       <ToolMessageWrapperSC>
         {(confirmError || deleteError) && (
           <GqlError error={confirmError || deleteError} />
@@ -395,13 +395,13 @@ function ToolMessageContent({
                 align="center"
                 width="100%"
               >
-                <CaptionP
+                <Body2P
                   $shimmer={isPending}
                   $color="text-light"
                   css={{ wordBreak: 'break-word' }}
                 >
                   {`${isPending ? 'Calling' : 'Called'} ${serverName ? `MCP tool for ${serverName}.` : 'tool '}${attributes?.tool?.name}`}
-                </CaptionP>
+                </Body2P>
 
                 {serverName && <Chip size="small">{serverName}</Chip>}
               </Flex>
@@ -539,7 +539,7 @@ function ToolCallLabel({
       align="center"
       wrap="wrap"
     >
-      <CaptionP
+      <Body2P
         $shimmer={isPending}
         $color="text-xlight"
       >
@@ -550,7 +550,7 @@ function ToolCallLabel({
             : 'Called'}{' '}
         {serverName ? `MCP tool for ${serverName}` : 'tool'}{' '}
         <span css={{ color: colors['text-light'] }}>{toolName}</span>
-      </CaptionP>
+      </Body2P>
       {serverName && <Chip size="small">{serverName}</Chip>}
     </Flex>
   )

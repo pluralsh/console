@@ -20,7 +20,7 @@ func TestResolveBabysitPRURLsPrefersCreatedPR(t *testing.T) {
 	created := "https://github.com/pluralsh/console/pull/2"
 	followup := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{
-		agentRun: &agentrunv1.AgentRun{FollowupPrURL: followup},
+		agentRun: &agentrunv1.AgentRun{PRURL: followup},
 	}
 
 	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunFragment{
@@ -36,7 +36,7 @@ func TestResolveBabysitPRURLsUsesFollowupWhenNoCreatedPR(t *testing.T) {
 
 	followup := "https://github.com/pluralsh/console/pull/1"
 	in := &agentRunController{
-		agentRun: &agentrunv1.AgentRun{FollowupPrURL: followup},
+		agentRun: &agentrunv1.AgentRun{PRURL: followup},
 	}
 
 	urls := in.resolveBabysitPRURLs(&gqlclient.AgentRunFragment{})
@@ -65,7 +65,7 @@ func TestRunBabysitPRStopsWhenFollowupPRMerged(t *testing.T) {
 	in := &agentRunController{
 		agentRunID:    "r1",
 		consoleClient: m,
-		agentRun:      &agentrunv1.AgentRun{FollowupPrURL: prURL},
+		agentRun:      &agentrunv1.AgentRun{PRURL: prURL},
 		newBabysitClient: func() (scm.GRPCClient, error) {
 			return &fakeBabysitGRPCClient{
 				details: map[string]*scm.PRDetails{
@@ -94,7 +94,7 @@ func TestRunBabysitPRContinuesWhenFollowupPROpen(t *testing.T) {
 	in := &agentRunController{
 		agentRunID:    "r1",
 		consoleClient: m,
-		agentRun:      &agentrunv1.AgentRun{FollowupPrURL: prURL},
+		agentRun:      &agentrunv1.AgentRun{PRURL: prURL},
 		dir:           t.TempDir(),
 		newBabysitClient: func() (scm.GRPCClient, error) {
 			return &fakeBabysitGRPCClient{
@@ -131,7 +131,7 @@ func TestRunBabysitPRUsesCreatedPRURL(t *testing.T) {
 	in := &agentRunController{
 		agentRunID:    "r1",
 		consoleClient: m,
-		agentRun:      &agentrunv1.AgentRun{FollowupPrURL: followup},
+		agentRun:      &agentrunv1.AgentRun{PRURL: followup},
 		newBabysitClient: func() (scm.GRPCClient, error) {
 			return &recordingBabysitClient{
 				fakeBabysitGRPCClient: fakeBabysitGRPCClient{

@@ -1,6 +1,7 @@
 defmodule Console.Deployments.AgentsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Agents
+  alias Console.Deployments.Pr.Review
   alias Console.PubSub
   alias Console.Schema.{AgentMessage, AgentPrompt, AgentPromptHistory, WorkbenchJobActivity, WorkbenchJobActivityAgentRun}
   use Mimic
@@ -555,6 +556,124 @@ defmodule Console.Deployments.AgentsTest do
       }, run.id, user)
 
       assert pr.agent_run_id == run.id
+    end
+  end
+
+  describe "agent_pr_review/3" do
+    test "publishes a typed review and saves its summary comment id" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, cluster: insert(:cluster))
+      run = insert(:agent_run, runtime: runtime, user: user, mode: :review)
+      pr = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/123")
+      connection = insert(:scm_connection, default: true)
+
+      review =
+        Review.new(%{
+          url: pr.url,
+          confidence: :b,
+          summary: "Safe refactor",
+          confidence_comment: "The behavior is covered by tests.",
+          files: [%{filename: "lib/example.ex", summary: "Extracts a helper."}],
+          comments: [
+            %{
+              filename: "lib/example.ex",
+              line: 12,
+              title: "Unhandled error",
+              body: "Handle this error.",
+              priority: :p1
+            }
+          ]
+        })
+
+      expect(Console.Deployments.Pr.Dispatcher, :agent_review, fn conn, found, ^review ->
+        assert conn.id == connection.id
+        assert found.id == pr.id
+        assert is_nil(found.comment_id)
+        {:ok, "review-1"}
+      end)
+
+      assert {:ok, updated} = Agents.agent_pr_review(review, run.id, user)
+      assert updated.review_comment_id == "review-1"
+      assert refetch(pr).review_comment_id == "review-1"
+    end
+
+    test "uses the saved comment id when updating a review summary" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, mode: :review)
+      pr =
+        insert(:pull_request,
+          url: "https://github.com/pluralsh/console/pull/124",
+          review_comment_id: "review-1"
+        )
+
+      insert(:scm_connection, default: true)
+
+      review =
+        Review.new(%{
+          url: pr.url,
+          confidence: :a,
+          summary: "Ready to merge",
+          confidence_comment: "No issues found."
+        })
+
+      expect(Console.Deployments.Pr.Dispatcher, :agent_review, fn _, found, ^review ->
+        assert found.comment_id == "review-1"
+        {:ok, "review-1"}
+      end)
+
+      assert {:ok, updated} = Agents.agent_pr_review(review, run.id, user)
+      assert updated.review_comment_id == "review-1"
+    end
+
+    test "fetches and persists pull requests that are not yet recorded" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, mode: :review)
+      connection = insert(:scm_connection, default: true)
+      url = "https://github.com/pluralsh/console/pull/126"
+
+      review =
+        Review.new(%{
+          url: url,
+          confidence: :a,
+          summary: "Ready to merge",
+          confidence_comment: "No issues found."
+        })
+
+      expect(Console.Deployments.Pr.Dispatcher, :pr_details, fn conn, ^url ->
+        assert conn.id == connection.id
+        {:ok, %{title: "Agent review support", body: "Adds normalized reviews."}}
+      end)
+
+      expect(Console.Deployments.Pr.Dispatcher, :agent_review, fn _, found, ^review ->
+        assert is_nil(found.id)
+        assert found.url == url
+        assert found.title == "Agent review support"
+        assert found.body == "Adds normalized reviews."
+        {:ok, "review-126"}
+      end)
+
+      assert {:ok, persisted} = Agents.agent_pr_review(review, run.id, user)
+      assert persisted.id
+      assert persisted.url == url
+      assert persisted.title == "Agent review support"
+      assert persisted.body == "Adds normalized reviews."
+      assert persisted.review_comment_id == "review-126"
+    end
+
+    test "rejects non-review agent runs" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, mode: :write)
+
+      review =
+        Review.new(%{
+          url: "https://github.com/pluralsh/console/pull/125",
+          confidence: :a,
+          summary: "Ready",
+          confidence_comment: "No issues found."
+        })
+
+      assert {:error, "agent run must be in review mode"} =
+               Agents.agent_pr_review(review, run.id, user)
     end
   end
 

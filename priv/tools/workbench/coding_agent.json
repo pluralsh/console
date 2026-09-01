@@ -4,7 +4,7 @@
         "mode": {
             "type": "string",
             "enum": ["analyze", "write"],
-            "description": "The mode of the coding agent (analyze or write).  If you just want to gather information about a repository, use analyze. If you want to generate a pr, use write."
+            "description": "The mode of the coding agent. Use analyze to gather information, write to generate a PR, or review to evaluate and publish a review for an existing PR when review mode is enabled for this job."
         },
         "repository": {
             "type": "string",
@@ -12,15 +12,15 @@
         },
         "base_branch": {
             "type": "string",
-            "description": "**OPTIONAL** branch to clone for a normal run and use as its pull request base. Leave it blank unless explicitly prompted to set it. Do not use this for follow-up runs."
+            "description": "Required for review mode; otherwise optional. The branch to clone for a normal run and use as its pull request base. Leave it blank unless explicitly prompted to set it. Do not use this for follow-up runs."
         },
         "head_branch": {
             "type": "string",
             "description": "Required when `followup` is true. The existing pull request's head branch. The harness checks out this branch before starting the agent so it can commit and push its additional work there."
         },
-        "followup_pr_url": {
+        "pr_url": {
             "type": "string",
-            "description": "Required when `followup` is true. The URL of the existing pull request this run is continuing. Always provide this whenever `followup` is true."
+            "description": "Required for review mode and whenever `followup` is true. The URL of the existing pull request to review or continue. For review runs, this URL is provided directly to the review agent as pull request context."
         },
         "prompt": {
             "type": "string", 
@@ -32,7 +32,7 @@
         },
         "followup": {
             "type": "boolean",
-            "description": "When true, this run performs additional work on an existing pull request. You MUST always provide `followup_pr_url` (the existing PR URL) and `head_branch` (that PR's head branch). The agent commits and pushes to the current branch; it does not create a branch or a new pull request."
+            "description": "When true, this run performs additional work on an existing pull request. You MUST always provide `pr_url` (the existing PR URL) and `head_branch` (that PR's head branch). The agent commits and pushes to the current branch; it does not create a branch or a new pull request."
         }
     },
     "required": ["mode", "repository", "prompt"]

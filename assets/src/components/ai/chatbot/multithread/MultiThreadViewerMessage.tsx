@@ -8,7 +8,7 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { CaptionP, InlineA } from 'components/utils/typography/Text'
+import { Body2P, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { ComponentProps, ReactElement, ReactNode, useState } from 'react'
@@ -17,21 +17,13 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import styled, { CSSProperties, useTheme } from 'styled-components'
+import { ToolCallContent } from '../ToolCallContent'
 import {
-  RunningToolOutputCode,
-  ToolCallContent,
-  useSlimToolCodeCss,
-} from '../ToolCallContent'
-import {
-  formatFileChangeSummary,
   getCommand,
   getPython,
-  getSearchQuery,
-  isStyledToolCall,
   resolveToolCallKind,
   toolCallDisplaySubtitle,
   toolCallDisplayTitle,
-  toolCallModalHeader,
 } from '../toolCallDisplay'
 
 import {
@@ -39,6 +31,7 @@ import {
   PLRL_CHIP_TAG_NAMES,
 } from '../input/autocomplete/mentionTypes'
 import { plrlChipComponents } from '../input/autocomplete/PlrlChipMdRenderers'
+import { stripEmoji } from '../../stripEmoji'
 
 const chipSanitizeSchema = {
   ...markdownSanitizeSchema,
@@ -83,6 +76,8 @@ export function SimpleToolCall({
   toolRuntime,
   customResultBody,
   customLabel,
+  customTitle,
+  leadingIcon,
 }: {
   content?: ChatFragment['content']
   attributes: ChatFragment['attributes']
@@ -90,223 +85,101 @@ export function SimpleToolCall({
   toolRuntime?: string
   customResultBody?: ReactNode
   customLabel?: ReactNode
+  customTitle?: string
+  leadingIcon?: ReactNode
 }) {
-  const { colors, spacing } = useTheme()
-  const slimCodeCss = useSlimToolCodeCss()
-  const pythonInputCodeCss = useSlimToolCodeCss({ showLanguageIcon: true })
-  const [isOpen, setIsOpen] = useState(false)
-  const [finishedAnimating, setFinishedAnimating] = useState(false)
+  const { spacing } = useTheme()
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
-
-  if (!customLabel && isStyledToolCall(toolName, attributes)) {
-    const title = toolCallDisplayTitle(kind, toolName, args)
-    const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
-
-    const label = (
-      <CaptionP
-        as="span"
-        $color="text"
-        $shimmer={isPending}
-      >
-        {title}{' '}
-        {subtitle && (
-          <CaptionP
-            as="span"
-            $color="text-xlight"
-          >
-            {subtitle}
-          </CaptionP>
-        )}
-        {toolRuntime && (
-          <CaptionP
-            as="span"
-            $color="text-xlight"
-          >
-            {' '}
-            · {toolRuntime}
-          </CaptionP>
-        )}
-      </CaptionP>
-    )
-
-    switch (kind) {
-      case 'bash':
-      case 'command_execution': {
-        const command = getCommand(toolName, args)
-        const result = content || undefined
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="small"
-              minWidth={0}
-              width="100%"
-              marginTop={spacing.xsmall}
-            >
-              <Code
-                language="bash"
-                title="Command"
-                css={slimCodeCss}
-              >
-                {command}
-              </Code>
-              {isPending && !result ? (
-                <RunningToolOutputCode />
-              ) : result ? (
-                <Code
-                  title="Response"
-                  showHeader
-                  css={slimCodeCss}
-                >
-                  {result}
-                </Code>
-              ) : null}
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'python_sandbox': {
-        const python = getPython(args)
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="small"
-              minWidth={0}
-              width="100%"
-              marginTop={spacing.xsmall}
-            >
-              <Code
-                language="python"
-                title="Python"
-                css={pythonInputCodeCss}
-              >
-                {python}
-              </Code>
-              <ToolCallContent
-                content={content ?? ''}
-                attributes={attributes}
-                customResultBody={customResultBody}
-                hideArguments
-                isPending={isPending}
-              />
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'web_search': {
-        const query = getSearchQuery(args)
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="xsmall"
-              minWidth={0}
-              width="100%"
-            >
-              <Code showHeader={false}>{query}</Code>
-              {content ? <Code showHeader={false}>{content}</Code> : null}
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'mcp_tool_call':
-        return (
-          <SimpleAccordion label={label}>
-            <ToolCallContent
-              content={content ?? ''}
-              attributes={attributes}
-              customResultBody={customResultBody}
-              isPending={isPending}
-            />
-          </SimpleAccordion>
-        )
-      case 'file_change':
-      case 'edit': {
-        const summary = formatFileChangeSummary(args, content)
-        return (
-          <SimpleAccordion label={label}>
-            <Flex
-              direction="column"
-              gap="xsmall"
-              minWidth={0}
-              width="100%"
-            >
-              {Array.isArray(args) ? (
-                <Code
-                  language="json"
-                  showHeader={false}
-                >
-                  {JSON.stringify(args, null, 2)}
-                </Code>
-              ) : (
-                <Code showHeader={false}>{summary}</Code>
-              )}
-            </Flex>
-          </SimpleAccordion>
-        )
-      }
-      case 'read':
-      case 'grep':
-      case 'generic':
-      default:
-        return (
-          <SimpleAccordion label={label}>
-            <ToolCallContent
-              content={content ?? ''}
-              attributes={attributes}
-              customResultBody={customResultBody}
-              isPending={isPending}
-            />
-          </SimpleAccordion>
-        )
-    }
+  const title = customTitle ?? toolCallDisplayTitle(kind, toolName, args)
+  const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
+  const label = customLabel ?? (
+    <ToolCallLineLabel
+      title={title}
+      subtitle={subtitle}
+      runtime={toolRuntime}
+      isPending={isPending}
+      leadingIcon={leadingIcon}
+    />
+  )
+  const accordionProps = {
+    label,
+    hoverCaret: true,
   }
 
-  return (
-    <>
-      <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        {customLabel || (
-          <CaptionP
-            $shimmer={isPending}
-            $color="text-xlight"
+  switch (kind) {
+    case 'bash':
+    case 'command_execution': {
+      const command = getCommand(toolName, args)
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="none"
+            minWidth={0}
+            width="100%"
+            marginTop={spacing.xsmall}
           >
-            {isPending ? 'Calling' : 'Called'} tool{' '}
-            <span css={{ color: colors['text-light'] }}>{toolName}</span>
-            {toolRuntime ? ` · ${toolRuntime}` : ''}
-          </CaptionP>
-        )}
-      </ClickableLabelSC>
-      <Modal
-        open={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-          setFinishedAnimating(false)
-        }}
-        onAnimationEnd={() => setFinishedAnimating(true)}
-        header={toolCallModalHeader(kind, toolName, args)}
-        size="large"
-      >
-        <ToolCallContent
-          content={content ?? ''}
-          attributes={attributes}
-          isPending={isPending}
-          customResultBody={
-            finishedAnimating ? (
-              customResultBody
-            ) : (
-              <RectangleSkeleton
-                $height={160}
-                $width="100%"
-              />
-            )
-          }
-        />
-      </Modal>
-    </>
-  )
+            <Code
+              language="bash"
+              showHeader={false}
+            >
+              {`$ ${command}`}
+            </Code>
+            <ToolCallContent
+              content={content ?? ''}
+              attributes={attributes}
+              customResultBody={customResultBody}
+              hideArguments
+              flushTop
+              isPending={isPending}
+            />
+          </Flex>
+        </SimpleAccordion>
+      )
+    }
+    case 'python_sandbox': {
+      const python = getPython(args)
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <Flex
+            direction="column"
+            gap="none"
+            minWidth={0}
+            width="100%"
+            marginTop={spacing.xsmall}
+          >
+            <Code
+              language="python"
+              showHeader={false}
+            >
+              {python}
+            </Code>
+            <ToolCallContent
+              content={content ?? ''}
+              attributes={attributes}
+              customResultBody={customResultBody}
+              hideArguments
+              flushTop
+              isPending={isPending}
+            />
+          </Flex>
+        </SimpleAccordion>
+      )
+    }
+    default:
+      return (
+        <SimpleAccordion {...accordionProps}>
+          <ToolCallContent
+            content={content ?? ''}
+            attributes={attributes}
+            customResultBody={customResultBody}
+            isPending={isPending}
+          />
+        </SimpleAccordion>
+      )
+  }
 }
 
 function CodeBlockLabel({
@@ -318,53 +191,65 @@ function CodeBlockLabel({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const isMermaid = language === 'mermaid'
-  const label = isMermaid
-    ? 'DRAFTED MERMAID DIAGRAM'
-    : language
-      ? `${language.toUpperCase()} BLOCK`
-      : 'CODE BLOCK'
 
-  if (language === 'bash' || language === 'sh')
+  // Mermaid stays click-to-modal; other fences render once with no language chrome
+  // (Code's language header duplicates a "PYTHON BLOCK"-style label).
+  if (isMermaid) {
     return (
-      <SimpleAccordion label={label}>
-        <Code
-          showHeader={false}
-          language={language}
+      <>
+        <ClickableLabelSC onClick={() => setIsOpen(true)}>
+          <Body2P $color="text-xlight">DRAFTED MERMAID DIAGRAM</Body2P>
+        </ClickableLabelSC>
+        <Modal
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          header="Mermaid Diagram"
+          size="large"
         >
-          {content}
-        </Code>
-      </SimpleAccordion>
+          <Code language={language}>{content}</Code>
+        </Modal>
+      </>
     )
+  }
 
   return (
-    <>
-      <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <CaptionP $color="text-xlight">{label}</CaptionP>
-      </ClickableLabelSC>
-      <Modal
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        header={isMermaid ? 'Mermaid Diagram' : language || 'Code'}
-        size="large"
-      >
-        <Code language={language}>{content}</Code>
-      </Modal>
-    </>
+    <Code
+      language={language}
+      showHeader={false}
+    >
+      {content}
+    </Code>
   )
 }
 
 export function SimplifiedMarkdown({
   text,
   rootLayout = 'flex',
+  size = 'body2',
+  tone,
 }: {
   text: string
   /** `block` keeps chip/custom nodes inline inside `<p>`; `flex` stacks each mdast block (can split chips to their own row). */
   rootLayout?: 'flex' | 'block'
+  /** Stream UI stays body2; hierarchy is via `tone` color. */
+  size?: 'body1' | 'body2'
+  /**
+   * Emphasis via DS text fills (same size):
+   * - major — findings / conclusions (`text`)
+   * - thought — reasoning / prompts (`text-long-form`)
+   * - meta — tools / status (`text-xlight`)
+   */
+  tone?: 'major' | 'thought' | 'meta'
 }) {
   const Root = rootLayout === 'block' ? SimpleMarkdownBlockSC : SimpleMarkdownSC
+  const displayText = stripEmoji(text)
+  const resolvedTone = tone ?? 'thought'
 
   return (
-    <Root>
+    <Root
+      $size={size}
+      $tone={resolvedTone}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={REHYPE_PLUGINS}
@@ -377,7 +262,7 @@ export function SimplifiedMarkdown({
           h4: ({ children }) => <strong>{children}</strong>,
           h5: ({ children }) => <strong>{children}</strong>,
           h6: ({ children }) => <strong>{children}</strong>,
-          // Code blocks - clickable labels that open modal with code
+          // Fenced code — inline, no language chrome (header was redundant).
           pre: ({ children }) => {
             // Extract language from the code element inside pre
             const codeChild = children as ReactElement<{
@@ -427,9 +312,57 @@ export function SimplifiedMarkdown({
           td: ({ children }) => <TdSC>{children}</TdSC>,
         }}
       >
-        {text}
+        {displayText}
       </ReactMarkdown>
     </Root>
+  )
+}
+
+function ToolCallLineLabel({
+  title,
+  subtitle,
+  runtime,
+  isPending,
+  leadingIcon,
+}: {
+  title: string
+  subtitle?: string
+  runtime?: string
+  isPending?: boolean
+  leadingIcon?: ReactNode
+}) {
+  return (
+    <ToolCallLineSC>
+      {leadingIcon}
+      <Body2P
+        as="span"
+        className="title"
+        $color="text-xlight"
+        $shimmer={isPending}
+      >
+        {title}
+      </Body2P>
+      {subtitle && (
+        <Body2P
+          as="span"
+          className="subtitle"
+          $color="text-disabled"
+          $shimmer={isPending}
+        >
+          {subtitle}
+        </Body2P>
+      )}
+      {runtime && (
+        <Body2P
+          as="span"
+          className="runtime"
+          $color="text-disabled"
+          $shimmer={isPending}
+        >
+          · {runtime}
+        </Body2P>
+      )}
+    </ToolCallLineSC>
   )
 }
 
@@ -442,6 +375,9 @@ export function SimpleAccordion({
   loading = false,
   children,
   accordionStyles,
+  hoverCaret = false,
+  caret,
+  triggerWrapperStyles,
   ...props
 }: {
   label?: ReactNode
@@ -450,9 +386,13 @@ export function SimpleAccordion({
   setIsOpen?: (isOpen: boolean) => void
   loading?: boolean
   accordionStyles?: CSSProperties
+  /** Hide caret until hover; keep it visible (pointing down) while open. */
+  hoverCaret?: boolean
   children: ReactNode
 } & Partial<ComponentProps<typeof AccordionItem>>) {
-  return (
+  const resolvedCaret = caret ?? (hoverCaret ? 'right-quarter-mirror' : 'none')
+
+  const accordion = (
     <Accordion
       type="single"
       defaultValue={defaultOpen ? ARBITRARY_VALUE_NAME : undefined}
@@ -472,60 +412,142 @@ export function SimpleAccordion({
           loading ? (
             <RectangleSkeleton />
           ) : typeof label === 'string' ? (
-            <CaptionP $color="text-xlight">{label}</CaptionP>
+            <Body2P $color="text-xlight">{label}</Body2P>
           ) : (
             <AccordionLabelSC>{label}</AccordionLabelSC>
           )
         }
         padding="none"
-        caret="none"
+        caret={resolvedCaret}
+        triggerWrapperStyles={{
+          ...(hoverCaret ? hoverCaretTriggerStyles : undefined),
+          ...triggerWrapperStyles,
+        }}
         {...props}
       >
         {children}
       </AccordionItem>
     </Accordion>
   )
+
+  if (!hoverCaret) return accordion
+
+  return <HoverCaretAccordionSC>{accordion}</HoverCaretAccordionSC>
 }
 
-/** Keeps styled tool labels on one line inside the accordion flex trigger. */
+/** Shared hover-caret rules — only the accordion's own caret (direct child `.icon`). */
+export const hoverCaretAccordionCss = {
+  // !important beats Accordion TriggerSC icon rules from the design system.
+  // Use `>` so nested IconFrame / status icons stay visible.
+  '& button > .icon': {
+    width: 10,
+    opacity: '0 !important',
+    transition: 'opacity 0.15s ease, rotate 0.3s ease, scale 0.3s ease',
+  },
+  '& button:hover > .icon, & button[data-state="open"] > .icon': {
+    opacity: '1 !important',
+  },
+} as const
+
+/** Ensures tool-row carets are hover-only (visible while open). */
+const HoverCaretAccordionSC = styled.div({
+  width: '100%',
+  ...hoverCaretAccordionCss,
+})
+
+export const hoverCaretTriggerStyles = {
+  justifyContent: 'flex-start',
+  width: 'fit-content',
+  maxWidth: '100%',
+  gap: 6,
+} as const
+
+/** Keeps styled tool labels on one line; size to content so caret sits after the text. */
 const AccordionLabelSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
-  flex: 1,
+  ...theme.partials.text.body2,
+  flex: '0 1 auto',
   minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
   textAlign: 'left',
 }))
 
-export const ClickableLabelSC = styled.button(({ theme }) => ({
+const ToolCallLineSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'baseline',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  '.title': {
+    flexShrink: 0,
+  },
+  '.subtitle': {
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  },
+  '.runtime': {
+    flexShrink: 0,
+  },
+}))
+
+export const ClickableLabelSC = styled.button(() => ({
   background: 'none',
   border: 'none',
   padding: 0,
   cursor: 'pointer',
   textAlign: 'left',
-  '&:hover': {
-    textDecoration: 'underline',
-    textDecorationColor: theme.colors['text-xlight'],
-  },
 }))
 
-const SimpleMarkdownSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
-  color: theme.colors['text-light'],
+const SimpleMarkdownSC = styled.div<{
+  $size?: 'body1' | 'body2'
+  $tone?: 'major' | 'thought' | 'meta'
+}>(({ theme, $size = 'body2', $tone }) => ({
+  ...($size === 'body1'
+    ? theme.partials.text.body1
+    : $tone === 'major'
+      ? theme.partials.text.body2LooseLineHeight
+      : theme.partials.text.body2),
+  color:
+    theme.colors[
+      $tone === 'major'
+        ? 'text'
+        : $tone === 'meta'
+          ? 'text-xlight'
+          : $tone === 'thought'
+            ? 'text-long-form'
+            : 'text-light'
+    ],
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
+  gap: theme.spacing.xsmall,
 }))
 
-/** Normal block flow so inline chips stay in the same `<p>`; typography comes from the parent (e.g. caption clamp). */
-const SimpleMarkdownBlockSC = styled.div(({ theme }) => ({
-  color: 'inherit',
+/** Normal block flow so inline chips stay in the same `<p>`; typography comes from size/tone props. */
+const SimpleMarkdownBlockSC = styled.div<{
+  $size?: 'body1' | 'body2'
+  $tone?: 'major' | 'thought' | 'meta'
+}>(({ theme, $size = 'body2', $tone }) => ({
+  ...($size === 'body1'
+    ? theme.partials.text.body1
+    : $tone === 'major'
+      ? theme.partials.text.body2LooseLineHeight
+      : theme.partials.text.body2),
+  color:
+    theme.colors[
+      $tone === 'major'
+        ? 'text'
+        : $tone === 'meta'
+          ? 'text-xlight'
+          : $tone === 'thought'
+            ? 'text-long-form'
+            : 'text-light'
+    ],
   display: 'block',
-  fontFamily: 'inherit',
-  fontSize: 'inherit',
-  fontWeight: 'inherit',
-  letterSpacing: 'inherit',
-  lineHeight: 'inherit',
   '& > *:not(:last-child)': {
-    marginBottom: theme.spacing.small,
+    marginBottom: theme.spacing.xsmall,
   },
 }))
 
@@ -556,32 +578,40 @@ const HrSC = styled.hr(({ theme }) => ({
 }))
 
 const TableWrapperSC = styled.div(({ theme }) => ({
-  paddingTop: theme.spacing.medium,
-  overflowX: 'auto',
+  paddingTop: theme.spacing.xsmall,
   maxWidth: '100%',
-  minHeight: 'fit-content',
+  width: '100%',
+  minWidth: 0,
 }))
 
 const TableSC = styled.table(() => ({
   borderCollapse: 'separate',
   borderSpacing: 0,
-  minWidth: '100%',
-  width: 'max-content',
+  width: '100%',
+  maxWidth: '100%',
+  tableLayout: 'fixed',
 }))
 
 const ThSC = styled.th(({ theme }) => ({
   padding: theme.spacing.small,
-  height: 40,
   textAlign: 'left',
+  verticalAlign: 'top',
   backgroundColor: theme.colors['fill-one'],
   border: theme.borders['fill-two'],
   borderBottom: theme.borders.default,
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
+  wordBreak: 'break-word',
   'tr:first-child &': {
     '&:first-child': { borderTopLeftRadius: theme.borderRadiuses.large },
     '&:last-child': { borderTopRightRadius: theme.borderRadiuses.large },
   },
   '&:not(:last-child)': { borderRight: 'none' },
   '&:not(:first-child)': { borderLeft: 'none' },
+  '& code': {
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+  },
 }))
 
 const TdSC = styled.td(({ theme }) => ({
@@ -591,11 +621,14 @@ const TdSC = styled.td(({ theme }) => ({
       : theme.colors['fill-zero-selected'],
   padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   color: theme.colors['text-light'],
-  height: 40,
+  textAlign: 'left',
+  verticalAlign: 'top',
   border: theme.borders['fill-two'],
   borderBottom: theme.borders.default,
   borderTop: 'none',
-  textAlign: 'left',
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
+  wordBreak: 'break-word',
   'tr:last-child &': {
     borderBottom: theme.borders['fill-two'],
     '&:first-child': { borderBottomLeftRadius: theme.borderRadiuses.large },
@@ -603,4 +636,8 @@ const TdSC = styled.td(({ theme }) => ({
   },
   '&:not(:last-child)': { borderRight: 'none' },
   '&:not(:first-child)': { borderLeft: 'none' },
+  '& code': {
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+  },
 }))

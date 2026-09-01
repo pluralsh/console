@@ -42,7 +42,21 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.PodLogs do
       |> Map.to_list()
       |> then(&CoreV1.read_namespaced_pod_log!(ns, n, &1))
       |> Kazan.run(server: Clusters.control_plane(cluster, user))
-      |> when_ok(&Output.truncate(&1, "tweak limit_bytes or since_seconds to retrieve the remaining logs"))
+      |> when_ok(fn output ->
+        content =
+          Output.truncate(
+            output,
+            "tweak limit_bytes or since_seconds to retrieve the remaining logs"
+          )
+
+        %{
+          content: content,
+          logs:
+            content
+            |> String.split("\n", trim: true)
+            |> Enum.map(&%{message: &1})
+        }
+      end)
     else
       {:cluster, _} -> {:error, "no cluster found matching handle=#{handle}"}
       err -> {:error, "error fetching pod logs: #{inspect(err)}"}

@@ -26,9 +26,13 @@ type AgentRunSpec struct {
 	// +kubebuilder:validation:Optional
 	Branch *string `json:"branch,omitempty"`
 
-	// Mode defines how the agent should run (ANALYZE, WRITE)
+	// Mode defines how the agent should run (ANALYZE, WRITE, REVIEW)
 	// +kubebuilder:validation:Required
 	Mode console.AgentRunMode `json:"mode"`
+
+	// ReviewDepth controls how far a review run explores code adjacent to the pull request changes.
+	// +kubebuilder:validation:Optional
+	ReviewDepth *console.AgentReviewDepth `json:"reviewDepth,omitempty"`
 
 	// FlowID is the flow this agent run is associated with (optional)
 	// +kubebuilder:validation:Optional
@@ -144,11 +148,12 @@ func (in *AgentRun) IsCancelled() bool {
 // Attributes converts the AgentRun CRD to console API format for creating runs
 func (in *AgentRun) Attributes() console.AgentRunAttributes {
 	return console.AgentRunAttributes{
-		Prompt:     in.Spec.Prompt,
-		Repository: in.Spec.Repository,
-		Branch:     in.Spec.Branch,
-		Mode:       in.Spec.Mode,
-		FlowID:     in.Spec.FlowID,
+		Prompt:      in.Spec.Prompt,
+		Repository:  in.Spec.Repository,
+		Branch:      in.Spec.Branch,
+		Mode:        in.Spec.Mode,
+		ReviewDepth: in.Spec.ReviewDepth,
+		FlowID:      in.Spec.FlowID,
 	}
 }
 

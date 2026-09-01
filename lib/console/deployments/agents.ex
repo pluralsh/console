@@ -4,6 +4,7 @@ defmodule Console.Deployments.Agents do
   require Logger
   import Console.Deployments.Policies
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
+  alias Console.Deployments.Pr.Review
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches}
   alias Console.AI.Tool
@@ -399,7 +400,7 @@ defmodule Console.Deployments.Agents do
   @spec agent_pull_request(map, binary, User.t) :: Git.pr_resp
   def agent_pull_request(%{title: t, body: b, base: ba, head: he} = attrs, run_id, %User{} = user) do
     run = get_agent_run!(run_id)
-          |> Repo.preload([runtime: :connection, workbench_job_activity_agent_run: :workbench_job_activity])
+          |> Repo.preload([runtime: :connection, workbench_job_activity_agent_run: [workbench_job_activity: :workbench_job]])
     shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
     with {:ok, run} <- allow(run, user, :pr),
          %ScmConnection{} = conn <- scm_connection(run),
@@ -412,7 +413,7 @@ defmodule Console.Deployments.Agents do
       |> PullRequest.changeset(
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
-        |> Map.put(:workbench_job_id, workbench_job_id_for_agent_pr(run))
+        |> Map.merge(workbench_pr_attrs(run))
         |> Map.put(:difficulty, attrs[:difficulty])
       )
       |> Repo.insert()
@@ -420,6 +421,47 @@ defmodule Console.Deployments.Agents do
     else
       nil -> {:error, "no scm connection found"}
       err -> err
+    end
+  end
+
+  @doc """
+  Publishes a normalized agent review to the pull request's SCM provider.
+
+  The summary comment is updated on subsequent calls while inline comments are
+  always created as new comments.
+  """
+  @spec agent_pr_review(Review.t(), binary, User.t()) :: {:ok, PullRequest.t()} | Console.error
+  def agent_pr_review(%Review{url: url} = review, run_id, %User{} = user) do
+    run =
+      get_agent_run!(run_id)
+      |> Repo.preload([runtime: :connection])
+
+    with {:ok, %AgentRun{mode: :review} = run} <- allow(run, user, :update),
+         %ScmConnection{} = conn <- scm_connection(run),
+         {:ok, conn} <- backfill_token(conn),
+         {:ok, %PullRequest{} = pr} <- find_pull_request(conn, url),
+         {:ok, comment_id} <-
+           Dispatcher.agent_review(conn, %{pr | comment_id: pr.review_comment_id}, review) do
+      pr
+      |> PullRequest.changeset(%{review_comment_id: comment_id})
+      |> Repo.insert_or_update()
+    else
+      {:ok, %AgentRun{}} -> {:error, "agent run must be in review mode"}
+      nil -> {:error, "no scm connection found"}
+      err -> err
+    end
+  end
+
+  defp find_pull_request(conn, url) do
+    case Repo.get_by(PullRequest, url: url) do
+      %PullRequest{} = pr -> {:ok, pr}
+      nil -> external_pr(conn, url)
+    end
+  end
+
+  defp external_pr(conn, url) do
+    with {:ok, %{title: title, body: body}} <- Dispatcher.pr_details(conn, url) do
+      {:ok, %PullRequest{url: url, title: title, body: body}}
     end
   end
 
@@ -588,12 +630,12 @@ defmodule Console.Deployments.Agents do
     end
   end
 
-  defp workbench_job_id_for_agent_pr(%AgentRun{
+  defp workbench_pr_attrs(%AgentRun{
     workbench_job_activity_agent_run: %{
-      workbench_job_activity: %{workbench_job_id: id}
+      workbench_job_activity: %{workbench_job_id: job_id, workbench_job: %{workbench_id: workbench_id}}
     }
-  }), do: id
-  defp workbench_job_id_for_agent_pr(%AgentRun{}), do: nil
+  }), do: %{workbench_job_id: job_id, workbench_id: workbench_id}
+  defp workbench_pr_attrs(_), do: %{}
 
   EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
 
