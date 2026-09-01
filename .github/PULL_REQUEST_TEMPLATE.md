@@ -23,5 +23,6 @@ Test environment: https://console.your-env.onplural.sh/
 
 Plural Flow: console
 
+<!-- To enable a documentation preview, uncomment the next two lines. -->
 <!-- Plural Flow: docs -->
 <!-- Plural Preview: docs -->
