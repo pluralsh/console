@@ -45,10 +45,7 @@ export const FooterLink = styled.a(({ theme }) => ({
 
 export const EditOnGitHubLink = styled(
   ({ ...props }: ComponentPropsWithoutRef<'a'>) => (
-    <a
-      href=""
-      {...props}
-    >
+    <a {...props}>
       <GitHubLogoIcon size={20} />
       Edit on Github
     </a>

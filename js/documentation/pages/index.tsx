@@ -186,6 +186,7 @@ function Index() {
           <img
             className="bgImgLg"
             aria-hidden="true"
+            alt=""
             src="/images/landing/docs-hero.png"
           />
         </picture>

@@ -90,7 +90,7 @@ export function RestApiReference({
 
   const currentLabel = isAuthPage
     ? 'Authentication'
-    : detail?.operationName ?? selectedId
+    : (detail?.operationName ?? selectedId)
 
   const breadcrumbs = useMemo(
     () => [

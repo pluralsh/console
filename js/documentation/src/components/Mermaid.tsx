@@ -93,7 +93,7 @@ export function Mermaid({
         })
 
         try {
-          await mermaid.registerLayoutLoaders(elkLayouts)
+          mermaid.registerLayoutLoaders(elkLayouts)
         } catch (err) {
           console.error('Failed to register ELK layout with mermaid:', err)
         }
