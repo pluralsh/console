@@ -4,3 +4,7 @@ semi: false
 singleQuote: true
 singleAttributePerLine: true
 bracketSpacing: true
+overrides:
+  - files: "*.mdpart"
+    options:
+      parser: "markdown"
