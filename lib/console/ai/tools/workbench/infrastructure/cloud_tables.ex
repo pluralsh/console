@@ -29,7 +29,7 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.CloudTables do
     with %{} = pb <- to_pb(connection) || {:error, "cloud connection is missing provider credentials"},
          {:ok, client} <- Client.connect(),
          input = %TablesInput{connection: pb, table: table},
-         {:ok, output} <- Stub.tables(client, input) do
+         {:ok, output} <- Stub.tables(client, input, Client.cloud_query_rpc_opts()) do
       Protobuf.JSON.encode(output)
     end
   end

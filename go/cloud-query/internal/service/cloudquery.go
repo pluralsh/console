@@ -34,16 +34,9 @@ func (in *CloudQueryService) Install(server *grpc.Server) {
 }
 
 func (in *CloudQueryService) createProviderConnection(conn *cloudquery.Connection) (connection.Connection, config.Provider, error) {
-	provider, err := in.toProvider(conn)
+	provider, configuration, err := in.providerConfiguration(conn)
 	if err != nil {
-		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
-		return nil, config.ProviderUnknown, status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
-	}
-
-	configuration, err := in.toConnectionConfiguration(provider, conn)
-	if err != nil {
-		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to create connection configuration")
-		return nil, config.ProviderUnknown, status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
+		return nil, config.ProviderUnknown, err
 	}
 
 	c, err := in.pool.Connect(configuration)
@@ -53,6 +46,59 @@ func (in *CloudQueryService) createProviderConnection(conn *cloudquery.Connectio
 	}
 
 	return c, provider, nil
+}
+
+func (in *CloudQueryService) providerConfiguration(conn *cloudquery.Connection) (config.Provider, config.Configuration, error) {
+	provider, err := in.toProvider(conn)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to determine provider from input")
+		return config.ProviderUnknown, config.Configuration{}, status.Errorf(codes.InvalidArgument, "failed to determine provider from input: %v", err)
+	}
+
+	configuration, err := in.toConnectionConfiguration(provider, conn)
+	if err != nil {
+		klog.V(log.LogLevelVerbose).ErrorS(err, "failed to create connection configuration")
+		return config.ProviderUnknown, config.Configuration{}, status.Errorf(codes.InvalidArgument, "failed to create connection configuration: %v", err)
+	}
+
+	return provider, configuration, nil
+}
+
+func (in *CloudQueryService) withProviderConnection(conn *cloudquery.Connection, fn func(connection.Connection) error) error {
+	provider, configuration, err := in.providerConfiguration(conn)
+	if err != nil {
+		return err
+	}
+
+	run := func() error {
+		c, err := in.pool.Connect(configuration)
+		if err != nil {
+			klog.V(log.LogLevelVerbose).ErrorS(err, "failed to connect to provider", "provider", provider)
+			return status.Errorf(codes.Internal, "failed to connect to provider '%s': %v", provider, err)
+		}
+		return fn(c)
+	}
+
+	err = run()
+	if err == nil || !pool.IsStaleConnection(err) {
+		return err
+	}
+
+	klog.ErrorS(err, "stale postgres session for cloud query, recreating", "provider", provider)
+	if evictErr := in.pool.Evict(configuration); evictErr != nil {
+		klog.ErrorS(evictErr, "failed to evict stale cloud query connection", "provider", provider)
+	}
+	return run()
+}
+
+func wrapInternal(err error, format string, args ...any) error {
+	if err == nil {
+		return nil
+	}
+	if _, ok := status.FromError(err); ok {
+		return err
+	}
+	return status.Errorf(codes.Internal, format, args...)
 }
 
 func (in *CloudQueryService) toProvider(conn *cloudquery.Connection) (config.Provider, error) {
