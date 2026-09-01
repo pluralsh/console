@@ -97,11 +97,13 @@
     "@types/d3": "7.4.3",
     "@types/lodash-es": "4.17.12",
     "@types/react-transition-group": "4.4.12",
+    "@vitest/ui": "3.2.7",
     "chromatic": "18.5.0",
     "eslint": "9.39.5",
     "eslint-plugin-storybook": "9.1.20",
     "fuse.js": "6.6.2",
     "http-server": "14.1.1",
+    "jsdom": "29.1.1",
     "monaco-editor": "0.55.1",
     "npm-run-all": "4.1.5",
     "prettier": "3.9.5",
@@ -112,7 +114,8 @@
     "typescript": "5.8.2",
     "vite": "7.3.6",
     "vite-bundle-visualizer": "1.2.1",
-    "vite-plugin-dts": "5.0.3"
+    "vite-plugin-dts": "5.0.3",
+    "vitest": "3.2.7"
   },
   "peerDependencies": {
     "@apollo/client": ">=3.14.1",
