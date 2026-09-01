@@ -6,10 +6,13 @@
 <!-- your work with our users. -->
 
 ## Test Plan
+
 <!--- Please describe the tests you have added and your testing environment (if applicable). -->
+
 Test environment: https://console.your-env.onplural.sh/
 
 ## Checklist
+
 <!--- Go over all the following points to make sure you've checked all that apply before merging. -->
 <!--- If you're unsure about any of these, don't hesitate to ask in our Discord. -->
 
@@ -19,3 +22,6 @@ Test environment: https://console.your-env.onplural.sh/
 - [ ] I have deployed the agent to a test environment and verified that it works as expected (required only when changing agent code).
 
 Plural Flow: console
+
+<!-- Plural Flow: docs -->
+<!-- Plural Preview: docs -->

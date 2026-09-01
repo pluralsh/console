@@ -2,8 +2,6 @@ FROM node:24.11.1
 
 WORKDIR /app
 
-ENV HUSKY=0
-
 COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
 COPY js/.yarn/ ./.yarn/
 COPY js/console/package.json ./console/package.json
