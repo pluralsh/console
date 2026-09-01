@@ -35,6 +35,7 @@ export type ButtonProps = {
   innerFlexProps?: FlexProps
   // flags- keeping this pattern instead of using "size" and "type" for backwards compatibility
   small?: boolean
+  medium?: boolean
   large?: boolean
   primary?: boolean
   secondary?: boolean
@@ -75,6 +76,7 @@ const Button = memo(
     disabled,
     children,
     small,
+    medium,
     large,
     secondary,
     tertiary,
@@ -97,7 +99,7 @@ const Button = memo(
       'auto'
     )
 
-    const buttonSize = large ? 'large' : small ? 'small' : 'medium'
+    const buttonSize = large ? 'large' : medium && !small ? 'medium' : 'small'
     const buttonType = secondary
       ? 'secondary'
       : tertiary

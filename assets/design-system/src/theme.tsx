@@ -203,8 +203,12 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         {
           width: '100%',
           flex: '1 1',
-          height: '38px',
-          lineHeight: '38px',
+          height: '30px',
+          lineHeight: '30px',
+          // caption type, written out because the `caption` alias resolves from
+          // props and would drag its own 16px line height along with it
+          fontSize: 12,
+          letterSpacing: '0.5px',
           color: 'text',
           _placeholder: {
             color: 'text-xlight',
@@ -219,6 +223,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           large && {
             height: '46px',
             lineHeight: '46px',
+            fontSize: 14,
           },
         ({ disabled }: any) =>
           disabled && {
@@ -234,8 +239,8 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           paddingLeft: 'medium',
           paddingRight: 'medium',
           lineHeight: 'inherit',
-          paddingTop: 9,
-          paddingBottom: 9,
+          paddingTop: 7,
+          paddingBottom: 7,
         },
         ({ small }: any) =>
           small && {

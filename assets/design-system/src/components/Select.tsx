@@ -168,7 +168,7 @@ const SelectButtonInner = styled.div<{
       display: 'flex',
       flexDirection: 'row',
       flexShrink: 1,
-      padding: `${size === 'medium' ? 9 : 5}px ${theme.spacing.medium}px`,
+      padding: `${size === 'large' ? 13 : size === 'medium' ? 9 : 5}px ${theme.spacing.medium}px`,
       width: '100%',
       '.children': {
         flexGrow: 1,
@@ -221,7 +221,7 @@ function SelectButton({
   children,
   showArrow = true,
   isOpen,
-  size = 'medium',
+  size = 'small',
   transparent = false,
   isDisabled,
   ...props
@@ -299,7 +299,7 @@ function Select({
   name,
   triggerButton,
   placement,
-  size = 'medium',
+  size = 'small',
   width,
   maxHeight,
   transparent = false,
