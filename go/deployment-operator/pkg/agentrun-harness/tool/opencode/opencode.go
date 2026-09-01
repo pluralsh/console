@@ -249,7 +249,7 @@ func (in *Opencode) agent() string {
 	case console.AgentRunModeAnalyze:
 		return DefaultAnalysisAgent
 	case console.AgentRunModeReview:
-		return defaultReviewAgent
+		return DefaultReviewAgent
 	}
 
 	return DefaultWriteAgent
