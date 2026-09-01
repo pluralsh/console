@@ -82,7 +82,7 @@
   },
   "devDependencies": {
     "@apollo/client": "3.14.1",
-    "@pluralsh/eslint-config-pluralsh": "1.4.48",
+    "@pluralsh/eslint-config-pluralsh": "workspace:*",
     "@react-stately/form": "3.3.1",
     "@react-types/listbox": "3.8.0",
     "@react-types/select": "3.13.0",

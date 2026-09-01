@@ -132,7 +132,7 @@
     "@graphql-codegen/typescript-operations": "5.1.0",
     "@graphql-codegen/typescript-react-apollo": "4.4.2",
     "@hey-api/openapi-ts": "0.99.0",
-    "@pluralsh/eslint-config-pluralsh": "1.4.48",
+    "@pluralsh/eslint-config-pluralsh": "workspace:*",
     "@pluralsh/stylelint-config": "2.0.10",
     "@react-types/shared": "3.36.0",
     "@replit/graphql-codegen-persisted-queries": "0.1.2",

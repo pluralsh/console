@@ -1,5 +1,7 @@
 {
-  "branches": ["main"],
+  "branches": ["master"],
+  "extends": ["semantic-release-monorepo"],
+  "tagFormat": "eslint-config-v${version}",
   "plugins": [
     [
       "@semantic-release/commit-analyzer",

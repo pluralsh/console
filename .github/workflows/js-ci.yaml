@@ -9,6 +9,7 @@ on:
       - "js/.yarnrc.yml"
       - "js/console/**"
       - "js/design-system/**"
+      - "js/eslint-config/**"
       - "js/package.json"
       - "js/yarn.lock"
   pull_request:
@@ -19,6 +20,7 @@ on:
       - "js/.yarnrc.yml"
       - "js/console/**"
       - "js/design-system/**"
+      - "js/eslint-config/**"
       - "js/package.json"
       - "js/yarn.lock"
 
@@ -42,6 +44,7 @@ jobs:
           cache-dependency-path: js/yarn.lock
       - run: corepack enable
       - run: yarn --immutable
+      - run: yarn workspace @pluralsh/eslint-config-pluralsh lint
       - run: yarn workspace console lint
 
   test:

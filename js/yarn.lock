@@ -1954,6 +1954,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@conventional-changelog/template@npm:^1.2.1":
+  version: 1.4.0
+  resolution: "@conventional-changelog/template@npm:1.4.0"
+  checksum: 10/dac527b0eb01ff4b2457b560f3fb61e24c8797cd5e7cafe4d4561454352714d8aec4d39092a15da068fc082878b1713a589cfd8471267f340f9a78c28057d74b
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -6048,7 +6055,7 @@ __metadata:
     "@markdoc/markdoc": "npm:0.4.0"
     "@mermaid-js/layout-elk": "npm:0.2.2"
     "@monaco-editor/react": "npm:4.7.0"
-    "@pluralsh/eslint-config-pluralsh": "npm:1.4.48"
+    "@pluralsh/eslint-config-pluralsh": "workspace:*"
     "@radix-ui/react-accordion": "npm:1.2.16"
     "@radix-ui/react-dialog": "npm:1.1.19"
     "@radix-ui/react-focus-scope": "npm:1.1.12"
@@ -6224,24 +6231,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/eslint-config-pluralsh@npm:1.4.48":
-  version: 1.4.48
-  resolution: "@pluralsh/eslint-config-pluralsh@npm:1.4.48"
+"@pluralsh/eslint-config-pluralsh@workspace:*, @pluralsh/eslint-config-pluralsh@workspace:eslint-config":
+  version: 0.0.0-use.local
+  resolution: "@pluralsh/eslint-config-pluralsh@workspace:eslint-config"
   dependencies:
+    conventional-changelog-conventionalcommits: "npm:10.2.1"
+    eslint: "npm:9.39.5"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
     eslint-plugin-prettier: "npm:5.5.6"
     eslint-plugin-react: "npm:7.37.5"
     eslint-plugin-react-hooks: "npm:7.1.1"
     globals: "npm:17.7.0"
+    prettier: "npm:3.9.5"
+    typescript: "npm:6.0.3"
     typescript-eslint: "npm:8.64.0"
   peerDependencies:
     eslint: ">=9.17.0 <10.0.0"
     prettier: ">=3.0.0 <4.0.0"
     typescript: ">=5.6.0 <6.1.0"
-  checksum: 10/43d32ddfc960df11f751b78fa15fc4cdb28988094daea898adfca9842d285c6ac1d5fdad6904c88d2b2b4bbaedc0d292e7bf6128c1c0cf024ea9ca484f9c0274
-  languageName: node
-  linkType: hard
+  languageName: unknown
+  linkType: soft
 
 "@pluralsh/eslint-config-typescript@npm:2.5.183":
   version: 2.5.183
@@ -11721,7 +11731,7 @@ __metadata:
     "@nivo/tooltip": "npm:0.99.0"
     "@nivo/treemap": "npm:0.99.0"
     "@pluralsh/design-system": "workspace:*"
-    "@pluralsh/eslint-config-pluralsh": "npm:1.4.48"
+    "@pluralsh/eslint-config-pluralsh": "workspace:*"
     "@pluralsh/stylelint-config": "npm:2.0.10"
     "@react-hooks-library/core": "npm:0.6.2"
     "@react-spring/web": "npm:10.1.2"
@@ -11830,6 +11840,15 @@ __metadata:
     tslib: "npm:^2.0.3"
     upper-case: "npm:^2.0.2"
   checksum: 10/6c3346d51afc28d9fae922e966c68eb77a19d94858dba230dd92d7b918b37d36db50f0311e9ecf6847e43e934b1c01406a0936973376ab17ec2c471fbcfb2cf3
+  languageName: node
+  linkType: hard
+
+"conventional-changelog-conventionalcommits@npm:10.2.1":
+  version: 10.2.1
+  resolution: "conventional-changelog-conventionalcommits@npm:10.2.1"
+  dependencies:
+    "@conventional-changelog/template": "npm:^1.2.1"
+  checksum: 10/670efe9ba741a1b8daae4cb456961e00e1325b54c5d1af7bed7b2b7f0ab2c034668a0f18b5c8a309773f062795d813d14d64b91fa025790557c9b27d8531e5a0
   languageName: node
   linkType: hard
 
@@ -22998,6 +23017,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:6.0.3":
+  version: 6.0.3
+  resolution: "typescript@npm:6.0.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/0ef2357a4cffd916b52b683a021cdab0f81eea4e9aa35f2d254581c9a5106da02224e3392e1b0ed42b7a48f80c966e5f52b8e1a27941fa0523c1705a9c2e0330
+  languageName: node
+  linkType: hard
+
 "typescript@patch:typescript@npm%3A4.9.5#optional!builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#optional!builtin<compat/typescript>::version=4.9.5&hash=289587"
@@ -23025,6 +23054,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/97920a082ffc57583b1cb6bc4faa502acc156358e03f54c7fc7fdf0b61c439a717f4c9070c449ee9ee683d4cfc3bb203127c2b9794b2950f66d9d307a4ff262c
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>":
+  version: 6.0.3
+  resolution: "typescript@patch:typescript@npm%3A6.0.3#optional!builtin<compat/typescript>::version=6.0.3&hash=5786d5"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 10/22b67a18dafedf9b1468b64ca20d9aa02ea61d449b65413d8aa6552aeb63f52ef369e86beb25b6b4c91a803d9726ee5c196f391a9b64201263263410a4223ee6
   languageName: node
   linkType: hard
 
