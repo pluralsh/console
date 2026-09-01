@@ -8,9 +8,25 @@ defmodule Console.GraphQl.Deployments.Agent do
   ecto_enum :agent_runtime_type, AgentRuntime.Type
   ecto_enum :agent_run_status, AgentRun.Status
   ecto_enum :agent_run_mode, AgentRun.Mode
+  ecto_enum :agent_review_depth, AgentRun.ReviewDepth
   ecto_enum :agent_message_tool_state, Console.Schema.AgentMessage.ToolState
   ecto_enum :agent_run_language, AgentRun.Language
 
+  enum :agent_review_confidence do
+    value :a
+    value :b
+    value :c
+    value :d
+    value :e
+    value :f
+  end
+
+  enum :agent_review_priority do
+    value :p0
+    value :p1
+    value :p2
+    value :p3
+  end
 
   input_object :agent_runtime_attributes do
     field :name,                 non_null(:string), description: "the name of this runtime"
@@ -36,6 +52,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :repository,       non_null(:string), description: "the repository the agent will be working in"
     field :branch,           :string, description: "the branch this agent run should operate on (if not set, the repository default branch is used)"
     field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
+    field :review_depth,     :agent_review_depth, description: "how deeply a review run should explore adjacent code"
     field :language,         :agent_run_language, description: "the programming language used in the agent run"
     field :language_version, :string, description: "the version of the language to use, if you wish to specify"
     field :flow_id,          :id, description: "the flow this agent run is associated with"
@@ -78,6 +95,29 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :head,        non_null(:string), description: "the head branch of the pull request"
     field :commit_shas, list_of(:commit_sha_attributes), description: "the commit shas of the pull request"
     field :difficulty,  :pull_request_difficulty_attributes, description: "the classified type and changed line count of the pull request"
+  end
+
+  input_object :agent_pr_review_attributes do
+    field :url,                non_null(:string), description: "the URL of the pull request being reviewed"
+    field :confidence,         non_null(:agent_review_confidence), description: "the A-F confidence grade"
+    field :summary,            non_null(:string), description: "a summary of the pull request review"
+    field :confidence_comment, non_null(:string), description: "an explanation of the confidence grade"
+    field :files,              list_of(:agent_pr_review_file_attributes), description: "file-level summaries"
+    field :comments,           list_of(:agent_pr_review_comment_attributes), description: "up to three inline review findings"
+  end
+
+  input_object :agent_pr_review_file_attributes do
+    field :filename, non_null(:string), description: "the repository-relative filename"
+    field :summary,  non_null(:string), description: "a summary of the changes to this file"
+  end
+
+  input_object :agent_pr_review_comment_attributes do
+    field :filename, non_null(:string), description: "the repository-relative filename"
+    field :line,     non_null(:integer), description: "the new-file line where the finding begins"
+    field :end_line, :integer, description: "the optional new-file line where the finding ends"
+    field :title,    non_null(:string), description: "the concise title of the inline finding"
+    field :body,     non_null(:string), description: "the detailed inline review comment"
+    field :priority, non_null(:agent_review_priority), description: "the P0-P3 finding priority"
   end
 
   input_object :commit_sha_attributes do
@@ -192,6 +232,7 @@ defmodule Console.GraphQl.Deployments.Agent do
     field :head_branch,      :string, description: "the head branch this agent run has created for its pull request"
     field :status,           non_null(:agent_run_status), description: "the status of this agent run"
     field :mode,             non_null(:agent_run_mode), description: "the mode of the agent run"
+    field :review_depth,     :agent_review_depth, description: "how deeply a review run should explore adjacent code"
     field :pod_reference,    :agent_pod_reference, description: "the kubernetes pod this agent is running on"
     field :error,            :string, description: "the error reason of the agent run"
     field :shared,           :boolean, description: "whether this agent run is shared"
@@ -581,6 +622,14 @@ defmodule Console.GraphQl.Deployments.Agent do
       arg :attributes, non_null(:agent_pull_request_attributes)
 
       resolve &Deployments.agent_pull_request/2
+    end
+
+    field :agent_pr_review, :pull_request do
+      middleware Authenticated
+      arg :run_id, non_null(:id)
+      arg :attributes, non_null(:agent_pr_review_attributes)
+
+      resolve &Deployments.agent_pr_review/2
     end
   end
 

@@ -39,3 +39,29 @@ func TestAgentWithMCPTools(t *testing.T) {
 		t.Fatalf("analysis tools = %#v", payload["analysis"].Tools)
 	}
 }
+
+func TestReviewAgentTools(t *testing.T) {
+	payload := map[string]agentDef{}
+	if err := json.Unmarshal([]byte(reviewAgent), &payload); err != nil {
+		t.Fatal(err)
+	}
+
+	tools := payload["review"].Tools
+	for _, expected := range []string{mcpGetPRState, mcpUpdateAnalysis, mcpAgentPrReview} {
+		found := false
+		for _, tool := range tools {
+			if tool == expected {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("review tools missing %q: %#v", expected, tools)
+		}
+	}
+	for _, tool := range tools {
+		if tool == mcpAgentPullRequest || tool == mcpCreateBranch || tool == mcpCreateCommit {
+			t.Fatalf("review tools unexpectedly include write tool %q", tool)
+		}
+	}
+}

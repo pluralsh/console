@@ -292,6 +292,11 @@ func (in *AgentRunSpec) DeepCopyInto(out *AgentRunSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ReviewDepth != nil {
+		in, out := &in.ReviewDepth, &out.ReviewDepth
+		*out = new(client.AgentReviewDepth)
+		**out = **in
+	}
 	if in.FlowID != nil {
 		in, out := &in.FlowID, &out.FlowID
 		*out = new(string)

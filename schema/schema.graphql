@@ -1570,6 +1570,8 @@ type RootMutationType {
 
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
 
+  agentPrReview(runId: ID!, attributes: AgentPrReviewAttributes!): PullRequest
+
   upsertAgentRuntime(attributes: AgentRuntimeAttributes!): AgentRuntime
 
   deleteAgentRuntime(id: ID!): AgentRuntime
@@ -2020,6 +2022,13 @@ enum AgentRunStatus {
 enum AgentRunMode {
   ANALYZE
   WRITE
+  REVIEW
+}
+
+enum AgentReviewDepth {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 enum AgentMessageToolState {
@@ -2039,6 +2048,22 @@ enum AgentRunLanguage {
   RUBY
   PHP
   TERRAFORM
+}
+
+enum AgentReviewConfidence {
+  A
+  B
+  C
+  D
+  E
+  F
+}
+
+enum AgentReviewPriority {
+  P0
+  P1
+  P2
+  P3
 }
 
 input AgentRuntimeAttributes {
@@ -2093,6 +2118,9 @@ input AgentRunAttributes {
 
   "the mode of the agent run"
   mode: AgentRunMode!
+
+  "how deeply a review run should explore adjacent code"
+  reviewDepth: AgentReviewDepth
 
   "the programming language used in the agent run"
   language: AgentRunLanguage
@@ -2198,6 +2226,54 @@ input AgentPullRequestAttributes {
 
   "the classified type and changed line count of the pull request"
   difficulty: PullRequestDifficultyAttributes
+}
+
+input AgentPrReviewAttributes {
+  "the URL of the pull request being reviewed"
+  url: String!
+
+  "the A-F confidence grade"
+  confidence: AgentReviewConfidence!
+
+  "a summary of the pull request review"
+  summary: String!
+
+  "an explanation of the confidence grade"
+  confidenceComment: String!
+
+  "file-level summaries"
+  files: [AgentPrReviewFileAttributes]
+
+  "up to three inline review findings"
+  comments: [AgentPrReviewCommentAttributes]
+}
+
+input AgentPrReviewFileAttributes {
+  "the repository-relative filename"
+  filename: String!
+
+  "a summary of the changes to this file"
+  summary: String!
+}
+
+input AgentPrReviewCommentAttributes {
+  "the repository-relative filename"
+  filename: String!
+
+  "the new-file line where the finding begins"
+  line: Int!
+
+  "the optional new-file line where the finding ends"
+  endLine: Int
+
+  "the concise title of the inline finding"
+  title: String!
+
+  "the detailed inline review comment"
+  body: String!
+
+  "the P0-P3 finding priority"
+  priority: AgentReviewPriority!
 }
 
 input CommitShaAttributes {
@@ -2407,6 +2483,9 @@ type AgentRun {
 
   "the mode of the agent run"
   mode: AgentRunMode!
+
+  "how deeply a review run should explore adjacent code"
+  reviewDepth: AgentReviewDepth
 
   "the kubernetes pod this agent is running on"
   podReference: AgentPodReference
@@ -2954,6 +3033,9 @@ input WorkbenchJobCodingModesAttributes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+
+  "whether pull request review mode is enabled for coding agent runs"
+  review: Boolean
 }
 
 input WorkbenchJobBudgetAttributes {
@@ -4042,6 +4124,9 @@ type WorkbenchJobCodingModes {
 
   "whether coding agent runs require approval before continuing"
   approval: Boolean
+
+  "whether pull request review mode is enabled for coding agent runs"
+  review: Boolean
 }
 
 type WorkbenchJobBudget {
@@ -4152,6 +4237,9 @@ type WorkbenchJobThought {
 
   "the activity this thought belongs to"
   activity: WorkbenchJobActivity
+
+  "the configured workbench tool that emitted this thought"
+  tool: WorkbenchTool
 
   insertedAt: DateTime
 

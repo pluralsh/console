@@ -140,7 +140,7 @@ export function WorkbenchJobPromptInput({
           options={
             <Flex
               align="center"
-              gap="xsmall"
+              gap="small"
               wrap="wrap"
               css={{ minHeight: 32, minWidth: 0 }}
             >

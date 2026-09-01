@@ -58,7 +58,9 @@ func (in *agentRunController) requeuePendingInitialRunError() bool {
 }
 
 func analysisGateEnabled(mode gqlclient.AgentRunMode) bool {
-	return mode == gqlclient.AgentRunModeAnalyze || mode == gqlclient.AgentRunModeWrite
+	return mode == gqlclient.AgentRunModeAnalyze ||
+		mode == gqlclient.AgentRunModeWrite ||
+		mode == gqlclient.AgentRunModeReview
 }
 
 func (in *agentRunController) ensureAnalysisPersistedAfterInitialRun(ctx context.Context) {

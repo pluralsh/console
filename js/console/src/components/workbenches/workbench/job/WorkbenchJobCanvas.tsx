@@ -1,5 +1,5 @@
 import { useApolloClient } from '@apollo/client'
-import { Markdown } from '@pluralsh/design-system'
+import { ChatMarkdown } from 'components/ai/chatbot/ChatMarkdown'
 import { PieChart } from 'components/utils/PieChart'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
@@ -167,7 +167,7 @@ function CanvasBlockRenderer({
 function MarkdownBlock({ text }: { text: string }) {
   return (
     <MarkdownBlockSC>
-      <Markdown text={text || '_No content._'} />
+      <ChatMarkdown text={text || '_No content._'} />
     </MarkdownBlockSC>
   )
 }
@@ -359,7 +359,7 @@ const BarRowSC = styled.div(({ theme }) => ({
 }))
 
 const BarLabelSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
+  ...theme.partials.text.body2,
   color: theme.colors['text-light'],
   overflow: 'hidden',
   whiteSpace: 'nowrap',
@@ -384,6 +384,6 @@ const BarFillSC = styled.div<{ $pct: number; $color: string }>(
 )
 
 const BarValueSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.caption,
+  ...theme.partials.text.body2,
   color: theme.colors['text'],
 }))

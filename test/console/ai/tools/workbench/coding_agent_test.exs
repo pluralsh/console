@@ -6,6 +6,60 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
   alias Console.Schema.{AgentRun, Workbench, WorkbenchJob}
 
   describe "changeset/2" do
+    test "only exposes review mode when enabled for the job" do
+      disabled = %CodingAgent{job: %WorkbenchJob{}}
+      assert get_in(CodingAgent.json_schema(disabled), ["properties", "mode", "enum"]) == ~w(analyze write)
+
+      enabled = %CodingAgent{
+        job: %WorkbenchJob{
+          modes: %WorkbenchJob.Modes{
+            coding: %WorkbenchJob.Modes.Coding{review: true}
+          }
+        }
+      }
+      assert get_in(CodingAgent.json_schema(enabled), ["properties", "mode", "enum"]) == ~w(analyze write review)
+    end
+
+    test "review mode must be enabled and requires a branch" do
+      attrs = %{
+        "mode" => "review",
+        "repository" => "https://github.com/pluralsh/console.git",
+        "prompt" => "review https://github.com/pluralsh/console/pull/1"
+      }
+
+      {:error, disabled} =
+        %CodingAgent{workbench: %Workbench{}, job: %WorkbenchJob{}}
+        |> CodingAgent.changeset(attrs)
+        |> Ecto.Changeset.apply_action(:update)
+
+      assert "review mode is not enabled for this workbench job" in errors_on(disabled).mode
+
+      job = %WorkbenchJob{
+        modes: %WorkbenchJob.Modes{
+          coding: %WorkbenchJob.Modes.Coding{review: true}
+        }
+      }
+
+      {:error, missing_branch} =
+        %CodingAgent{workbench: %Workbench{}, job: job}
+        |> CodingAgent.changeset(attrs)
+        |> Ecto.Changeset.apply_action(:update)
+
+      assert "can't be blank" in errors_on(missing_branch).base_branch
+      assert "can't be blank" in errors_on(missing_branch).pr_url
+
+      assert {:ok, %CodingAgent{mode: :review, base_branch: "agent/review", pr_url: pr_url}} =
+               %CodingAgent{workbench: %Workbench{}, job: job}
+               |> CodingAgent.changeset(
+                 attrs
+                 |> Map.put("base_branch", "agent/review")
+                 |> Map.put("pr_url", "https://github.com/pluralsh/console/pull/1")
+               )
+               |> Ecto.Changeset.apply_action(:update)
+
+      assert pr_url == "https://github.com/pluralsh/console/pull/1"
+    end
+
     test "job babysit mode forces babysitting on" do
       job = %WorkbenchJob{
         modes: %WorkbenchJob.Modes{
@@ -54,9 +108,9 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
         |> Ecto.Changeset.apply_action(:update)
 
       assert "can't be blank" in errors_on(changeset).head_branch
-      assert "can't be blank" in errors_on(changeset).followup_pr_url
+      assert "can't be blank" in errors_on(changeset).pr_url
 
-      assert {:ok, %CodingAgent{followup: true, head_branch: "agent/follow-up", followup_pr_url: url}} =
+      assert {:ok, %CodingAgent{followup: true, head_branch: "agent/follow-up", pr_url: url}} =
                %CodingAgent{workbench: %Workbench{}, job: %WorkbenchJob{}}
                |> CodingAgent.changeset(%{
                  "mode" => "write",
@@ -64,7 +118,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
                  "prompt" => "update the readme",
                  "followup" => true,
                  "head_branch" => "agent/follow-up",
-                 "followup_pr_url" => "https://github.com/pluralsh/console/pull/1"
+                 "pr_url" => "https://github.com/pluralsh/console/pull/1"
                })
                |> Ecto.Changeset.apply_action(:update)
 
@@ -97,6 +151,25 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
   end
 
   describe "implement/1" do
+    test "creates a review run on the requested branch" do
+      user = insert(:user)
+      runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
+      Tool.context(user: user, runtime: runtime)
+
+      assert {:ok, %AgentRun{id: run_id, mode: :review, branch: "agent/review", followup_pr_url: pr_url}} =
+               CodingAgent.implement(%CodingAgent{
+                 mode: :review,
+                 repository: "https://github.com/pluralsh/console.git",
+                 prompt: "review https://github.com/pluralsh/console/pull/1",
+                 base_branch: "agent/review",
+                 pr_url: "https://github.com/pluralsh/console/pull/1",
+                 approval: false
+               })
+
+      assert pr_url == "https://github.com/pluralsh/console/pull/1"
+      assert %AgentRun{mode: :review, branch: "agent/review", followup_pr_url: ^pr_url} = Repo.get!(AgentRun, run_id)
+    end
+
     test "passes approval, followup, head branch, and pr url through to the agent run" do
       user = insert(:user)
       runtime = insert(:agent_runtime, create_bindings: [%{user_id: user.id}])
@@ -110,7 +183,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgentTest do
                  approval: true,
                  followup: true,
                  head_branch: "agent/follow-up",
-                 followup_pr_url: "https://github.com/pluralsh/console/pull/1"
+                 pr_url: "https://github.com/pluralsh/console/pull/1"
                })
 
       run = Repo.get!(AgentRun, run_id)

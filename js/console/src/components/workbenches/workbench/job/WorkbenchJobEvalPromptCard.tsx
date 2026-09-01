@@ -7,12 +7,11 @@ import {
 } from '@pluralsh/design-system'
 import { RunStatusIcon } from 'components/ai/agent-runs/AgentRunInfoDisplays'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
-import { BasicTextButton } from 'components/utils/typography/BasicTextButton'
+import { ShowMoreSC } from 'components/ai/chatbot/ToolCallContent'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { truncateKeepingChips } from 'components/utils/contentEditableChips'
 import { WorkbenchEvalGradeBadge } from 'components/workbenches/common/WorkbenchEvalGradeBadge'
 import { WorkbenchJobActivitiesQuery } from 'generated/graphql'
-import { ComponentPropsWithRef, useState } from 'react'
+import { ComponentPropsWithRef, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -20,8 +19,6 @@ import styled, { useTheme } from 'styled-components'
 type ReferencedJob = NonNullable<
   NonNullable<WorkbenchJobActivitiesQuery['workbenchJob']>['referencedJob']
 >
-
-const EXPANDABLE_PROMPT_LENGTH = 400
 
 export function WorkbenchJobEvalPromptCard({
   prompt,
@@ -33,7 +30,29 @@ export function WorkbenchJobEvalPromptCard({
 } & ComponentPropsWithRef<typeof PromptCardSC>) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
-  const isExpandable = prompt.length > EXPANDABLE_PROMPT_LENGTH
+  const [canExpand, setCanExpand] = useState(false)
+  const bodyRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const element = bodyRef.current
+    if (!element) return
+
+    const updateCanExpand = () => {
+      const nextCanExpand = element.scrollHeight > element.clientHeight + 1
+      setCanExpand((prev) => {
+        const next = isExpanded ? prev || nextCanExpand : nextCanExpand
+        return prev === next ? prev : next
+      })
+    }
+
+    updateCanExpand()
+    const resizeObserver = new ResizeObserver(updateCanExpand)
+    resizeObserver.observe(element)
+    return () => resizeObserver.disconnect()
+  }, [prompt, isExpanded])
+
+  const isExpandable = canExpand || isExpanded
+  const showFade = !isExpanded && canExpand
 
   const refWorkbenchId = referencedJob.workbench?.id
   const grade = referencedJob.evalResult?.grade ?? null
@@ -91,7 +110,10 @@ export function WorkbenchJobEvalPromptCard({
         <SectionSC>
           <CaptionP $color="text-xlight">Original job prompt</CaptionP>
           <OriginalPromptSC>
-            <SimplifiedMarkdown text={referencedJob.prompt} />
+            <SimplifiedMarkdown
+              text={referencedJob.prompt}
+              tone="thought"
+            />
           </OriginalPromptSC>
         </SectionSC>
       )}
@@ -99,21 +121,25 @@ export function WorkbenchJobEvalPromptCard({
       {/* Skills update prompt — full, expandable */}
       <SectionSC>
         <CaptionP $color="text-xlight">Skills update</CaptionP>
-        <SimplifiedMarkdown
-          text={
-            !isExpandable || isExpanded
-              ? prompt
-              : truncateKeepingChips(prompt, EXPANDABLE_PROMPT_LENGTH)
-          }
-        />
+        <PromptBodySC
+          ref={bodyRef}
+          $expanded={isExpanded}
+          $fade={showFade}
+        >
+          <SimplifiedMarkdown
+            text={prompt}
+            tone="thought"
+          />
+        </PromptBodySC>
         {isExpandable && (
-          <BasicTextButton
+          <ShowMoreSC
             type="button"
+            aria-expanded={isExpanded}
             onClick={() => setIsExpanded((v) => !v)}
-            css={{ width: '100%', textAlign: 'right' }}
+            css={{ paddingLeft: 0, paddingRight: 0, paddingBottom: 0 }}
           >
-            {isExpanded ? 'view less' : 'view more'}
-          </BasicTextButton>
+            {isExpanded ? 'Show less' : 'Show more'}
+          </ShowMoreSC>
         )}
       </SectionSC>
     </PromptCardSC>
@@ -151,3 +177,18 @@ const OriginalPromptSC = styled.div({
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
 })
+
+const PromptBodySC = styled.div<{
+  $expanded: boolean
+  $fade?: boolean
+}>(({ $expanded, $fade }) => ({
+  minWidth: 0,
+  minHeight: 0,
+  maxHeight: $expanded ? 'none' : '4lh',
+  overflow: $expanded ? 'visible' : 'hidden',
+  lineHeight: 1.45,
+  ...($fade && {
+    maskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+    WebkitMaskImage: 'linear-gradient(to bottom, #000 55%, transparent 100%)',
+  }),
+}))

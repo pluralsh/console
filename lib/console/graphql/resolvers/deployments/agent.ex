@@ -2,6 +2,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   use Console.GraphQl.Resolvers.Deployments.Base
   import Console.Deployments.Policies, only: [allow: 3]
   alias Console.Deployments.Agents
+  alias Console.Deployments.Pr.Review
   alias Console.Schema.{AgentRuntime, AgentRun, Cluster, AgentRunRepository}
 
   def agent_runtimes(args, %{context: %{current_user: user}}) do
@@ -102,6 +103,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
 
   def agent_pull_request(%{run_id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.agent_pull_request(attrs, id, user)
+
+  def agent_pr_review(%{run_id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Agents.agent_pr_review(Review.new(attrs), id, user)
 
   def update_agent_run_analysis(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Agents.update_analysis(attrs, id, user)

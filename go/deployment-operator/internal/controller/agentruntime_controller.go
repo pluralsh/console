@@ -318,6 +318,7 @@ func (r *AgentRuntimeReconciler) createAgentRun(ctx context.Context, agentRuntim
 			Prompt:          run.Prompt,
 			Repository:      run.Repository,
 			Mode:            run.Mode,
+			ReviewDepth:     run.ReviewDepth,
 			Language:        run.Language,
 			LanguageVersion: run.LanguageVersion,
 		},
