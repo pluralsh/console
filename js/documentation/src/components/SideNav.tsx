@@ -331,7 +331,7 @@ const TopSection = styled(({ title, children, ...props }) => (
   margin: 0,
   padding: 0,
   listStyle: 'none',
-  ':not(:first-child)': {
+  '&:not(:first-child)': {
     marginTop: theme.spacing.large,
   },
 }))

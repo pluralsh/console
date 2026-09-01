@@ -75,7 +75,7 @@ const SectionGroup = styled.div(({ theme }) => ({
   display: 'block',
   margin: 0,
   padding: 0,
-  ':not(:first-child)': {
+  '&:not(:first-child)': {
     marginTop: theme.spacing.large,
   },
 }))
