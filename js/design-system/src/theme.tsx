@@ -360,39 +360,45 @@ export const styledThemeLight = {
 export const styledTheme = styledThemeDark
 export default honorableThemeDark
 
+const getDocumentElement = () =>
+  typeof document === 'undefined' ? undefined : document.documentElement
+
 export const setThemeColorMode = (
   mode: ColorMode,
   {
     dataAttrName = COLOR_THEME_KEY,
-    element = document?.documentElement,
+    element,
   }: {
     dataAttrName?: string
     element?: HTMLElement
   } = {}
 ) => {
-  if (!element) {
+  const target = element ?? getDocumentElement()
+
+  if (!target) {
     return
   }
   localStorage.setItem(dataAttrName, mode)
-  element.setAttribute(`data-${dataAttrName}`, mode)
+  target.setAttribute(`data-${dataAttrName}`, mode)
 }
 
 export const useThemeColorMode = ({
   dataAttrName = COLOR_THEME_KEY,
   defaultMode = 'dark',
-  element = document?.documentElement,
+  element,
 }: {
   dataAttrName?: string
   defaultMode?: ColorMode
   element?: HTMLElement
 } = {}) => {
+  const resolvedElement = element ?? getDocumentElement()
   const attrName = `data-${dataAttrName}`
   const [thisTheme, setThisTheme] = useState(
-    element?.getAttribute(attrName) || defaultMode
+    resolvedElement?.getAttribute(attrName) || defaultMode
   )
 
   useMutationObserver(
-    element,
+    resolvedElement,
     (mutations) => {
       mutations.forEach((mutation) => {
         if (

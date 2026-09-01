@@ -10,14 +10,13 @@ import {
 
 import {
   FillLevelProvider,
+  HonorableThemeProvider,
   MarkdocContextProvider,
   NavigationContextProvider,
   type NavigationContextValue,
   GlobalStyle as PluralGlobalStyle,
-  theme as honorableTheme,
   styledTheme,
 } from '@pluralsh/design-system'
-import { CssBaseline, ThemeProvider } from 'honorable'
 import type { AppProps } from 'next/app'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
@@ -151,7 +150,6 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
 
   const app = (
     <>
-      <CssBaseline />
       <PluralGlobalStyle />
       <GlobalStyles />
       <PagePropsContext.Provider value={pageProps}>
@@ -214,11 +212,11 @@ function App({ Component, pageProps = {}, swrConfig }: MyAppProps) {
           <SWRConfig value={swrConfig}>
             <NavDataProvider value={navData}>
               <BreakpointProvider>
-                <ThemeProvider theme={honorableTheme}>
-                  <StyledThemeProvider theme={docsStyledTheme}>
+                <StyledThemeProvider theme={docsStyledTheme}>
+                  <HonorableThemeProvider>
                     <FillLevelProvider value={0}>{app}</FillLevelProvider>
-                  </StyledThemeProvider>
-                </ThemeProvider>
+                  </HonorableThemeProvider>
+                </StyledThemeProvider>
               </BreakpointProvider>
             </NavDataProvider>
           </SWRConfig>

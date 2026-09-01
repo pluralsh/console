@@ -40,14 +40,14 @@ module.exports = {
             position: 'after',
           },
           {
-            pattern: '{next,next/*,@pluralsh/design-system,honorable}',
+            pattern: '{next,next/*,@pluralsh/design-system}',
             group: 'external',
             position: 'before',
           },
         ],
         pathGroupsExcludedImportTypes: [
           'react',
-          '{next/*,next,@pluralsh/design-system,honorable}',
+          '{next/*,next,@pluralsh/design-system}',
         ],
         groups: [
           'builtin',
