@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apk add --no-cache git
 
-COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
+COPY js/package.json js/yarn.lock js/.yarnrc.yml js/.prettierrc.yaml ./
 COPY js/.yarn/ ./.yarn/
 COPY js/console/package.json ./console/package.json
 COPY js/design-system/package.json ./design-system/package.json
