@@ -64,7 +64,7 @@ func TestOpencodeArgsReview(t *testing.T) {
 	assertArgsEqual(t, []string{
 		"run",
 		"--format", "json",
-		"--agent", defaultReviewAgent,
+		"--agent", DefaultReviewAgent,
 		"--model", "anthropic/claude-sonnet-4-6",
 		"review changes",
 	}, args)
