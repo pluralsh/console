@@ -36,7 +36,8 @@ jobs:
       - name: Bootstrap migrated release history
         run: |
           if [[ -z "$(git tag --list 'eslint-config-v*')" ]]; then
-            git tag eslint-config-v1.4.48 14f784408592001aa12be43505498d72d8bb055c
+            git tag eslint-config-v1.4.48 HEAD
+            git push origin eslint-config-v1.4.48
           fi
       - name: Semantic release
         uses: cycjimmy/semantic-release-action@v6
@@ -48,3 +49,4 @@ jobs:
             semantic-release-monorepo@8.0.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          NPM_CONFIG_PROVENANCE: true

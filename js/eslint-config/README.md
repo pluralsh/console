@@ -28,6 +28,18 @@ export default plural({
 By default, application-specific rules target `src/**/*.{js,jsx,ts,tsx}`. Use the
 `files` option to change that glob.
 
+## Development
+
+This package lives in the Console JavaScript workspace. Install dependencies and
+run its linter from the repository root:
+
+```sh
+corepack yarn --cwd js install
+corepack yarn --cwd js workspace @pluralsh/eslint-config-pluralsh lint
+```
+
+Other packages in this repository should depend on it using `workspace:*`.
+
 ## License
 
 MIT
