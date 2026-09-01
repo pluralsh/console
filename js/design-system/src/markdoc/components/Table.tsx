@@ -2,7 +2,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { Fragment } from 'react'
 
-import { Table as PluralTable } from '../../index'
+import PluralTable from '../../components/table/Table'
 
 type TableProps = {
   thead: any[]

@@ -2,7 +2,7 @@ import { type ComponentProps } from 'react'
 
 import { useTheme } from 'styled-components'
 
-import { Tab as TabBase } from '../../index'
+import TabBase from '../../components/Tab'
 
 function Tab({ ...props }: ComponentProps<typeof TabBase>) {
   const theme = useTheme()

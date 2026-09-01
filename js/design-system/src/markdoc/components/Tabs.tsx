@@ -10,8 +10,8 @@ import styled from 'styled-components'
 
 import { type Key } from '@react-types/shared'
 
-import { TabList, TabPanel } from '../../index'
-import type { TabListStateProps } from '../../index'
+import { TabList, type TabListStateProps } from '../../components/TabList'
+import TabPanel from '../../components/TabPanel'
 
 import TabComponent from './Tab'
 

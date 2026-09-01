@@ -1,7 +1,7 @@
 import { Flex, type FlexProps } from 'honorable'
 import styled from 'styled-components'
 
-import { Divider } from '../index'
+import Divider from './Divider'
 
 const PropWideSC = styled.div(({ theme }) => ({
   alignItems: 'center',

@@ -1,4 +1,4 @@
-import { useNavigationContext } from '../../index'
+import { useNavigationContext } from '../../components/contexts/NavigationContext'
 
 import { isRelativeUrl, removeTrailingSlashes, stripMdExtension } from './text'
 

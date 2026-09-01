@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import styled from 'styled-components'
 
 import { isExternalUrl } from '../utils/text'
-import { useNavigationContext } from '../../index'
+import { useNavigationContext } from '../../components/contexts/NavigationContext'
 import { useNormalizeHref } from '../utils/useNormalizeHref'
 
 function Link({

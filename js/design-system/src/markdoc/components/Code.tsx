@@ -1,4 +1,4 @@
-import { InlineCode } from '../../index'
+import InlineCode from '../../components/InlineCode'
 
 function Code({ ...props }) {
   return <InlineCode {...props} />

@@ -2,8 +2,7 @@ import { useMemo } from 'react'
 import styled from 'styled-components'
 import { type RenderableTreeNode } from '@markdoc/markdoc'
 
-import { Code as CodeBase } from '../../index'
-import { type CodeProps } from '../../components/Code'
+import CodeBase, { type CodeProps } from '../../components/Code'
 
 export function toCodeString({
   process,

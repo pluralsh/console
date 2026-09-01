@@ -9,20 +9,20 @@ import {
   useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
-import {
-  CheckIcon,
-  CloseIcon,
-  CopyIcon,
-  DownloadIcon,
-  ExpandIcon,
-  IconFrame,
-  ReloadIcon,
-  styledTheme,
-} from '..'
+
+import { styledTheme } from '../theme'
 import { grey } from '../theme/colors-base'
 import { semanticColorsDark } from '../theme/colors-semantic-dark'
+
 import { useCopyText } from './Code'
 import Highlight from './Highlight'
+import IconFrame from './IconFrame'
+import CheckIcon from './icons/CheckIcon'
+import CloseIcon from './icons/CloseIcon'
+import CopyIcon from './icons/CopyIcon'
+import DownloadIcon from './icons/DownloadIcon'
+import ExpandIcon from './icons/ExpandIcon'
+import ReloadIcon from './icons/ReloadIcon'
 import { ModalWrapper } from './ModalWrapper'
 import { PanZoomWrapper } from './PanZoomWrapper'
 import WrapWithIf from './WrapWithIf'

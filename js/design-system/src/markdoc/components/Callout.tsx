@@ -4,7 +4,8 @@ import { type MouseEvent } from 'react'
 
 import { useNormalizeHref } from '../utils/useNormalizeHref'
 import { isExternalUrl } from '../utils/text'
-import { Callout, type CalloutProps, useNavigationContext } from '../../index'
+import Callout, { type CalloutProps } from '../../components/Callout'
+import { useNavigationContext } from '../../components/contexts/NavigationContext'
 
 import { ListItem } from './List'
 import Paragraph from './Paragraph'

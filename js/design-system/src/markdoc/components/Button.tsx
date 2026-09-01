@@ -5,9 +5,9 @@ import styled from 'styled-components'
 import { isExternalUrl } from '../utils/text'
 import { useNormalizeHref } from '../utils/useNormalizeHref'
 
+import PluralButton from '../../components/Button'
+import { useNavigationContext } from '../../components/contexts/NavigationContext'
 import * as icons from '../../icons'
-
-import { Button as PluralButton, useNavigationContext } from '../../index'
 
 function Button({
   href,

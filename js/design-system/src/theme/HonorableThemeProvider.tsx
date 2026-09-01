@@ -1,7 +1,11 @@
 import { FC, ReactNode } from 'react'
 
 import { CssBaseline, ThemeProvider, ThemeProviderProps } from 'honorable'
-import { honorableThemeDark, honorableThemeLight, useThemeColorMode } from '..'
+import {
+  honorableThemeDark,
+  honorableThemeLight,
+  useThemeColorMode,
+} from '../theme'
 
 // workarounds for broken type from honorable
 const TypedHonorableThemeProvider = ThemeProvider as FC<ThemeProviderProps>

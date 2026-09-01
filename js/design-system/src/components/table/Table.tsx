@@ -19,9 +19,11 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import { InfoOutlineIcon, Tooltip, WrapWithIf } from '../../index'
 import EmptyState from '../EmptyState'
+import InfoOutlineIcon from '../icons/InfoOutlineIcon'
 import { Spinner } from '../Spinner'
+import Tooltip from '../Tooltip'
+import WrapWithIf from '../WrapWithIf'
 
 import {
   tableFillLevelToBg,

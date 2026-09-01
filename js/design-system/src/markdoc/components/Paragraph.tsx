@@ -1,6 +1,6 @@
 import styled, { DefaultTheme } from 'styled-components'
 
-import { useFillLevel } from '../../index'
+import { useFillLevel } from '../../components/contexts/FillLevelContext'
 import { type MarkdocContextValue, useMarkdocContext } from '../MarkdocContext'
 
 export function bodyText({

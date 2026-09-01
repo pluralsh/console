@@ -1,6 +1,6 @@
 import styled, { type PolymorphicComponentProps } from 'styled-components'
 
-import { useFillLevel } from '../../index'
+import { useFillLevel } from '../../components/contexts/FillLevelContext'
 import { useMarkdocContext } from '../MarkdocContext'
 
 import { bodyText } from './Paragraph'

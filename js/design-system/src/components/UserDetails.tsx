@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-import { AppIcon } from '../index'
+import AppIcon from './AppIcon'
 
 const UserDetailsSC = styled.div(({ theme }) => ({
   alignItems: 'center',

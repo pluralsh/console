@@ -1,17 +1,14 @@
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import {
-  Chip,
-  ChipList,
-  ComboBox,
-  Flex,
-  ListBoxItem,
-  Select,
-  SelectButton,
-  type SelectPropsSingle,
-} from '..'
 import { isNonNullable } from '../utils/isNonNullable'
+
+import Chip from './Chip'
+import ChipList from './ChipList'
+import { ComboBox } from './ComboBox'
+import Flex from './Flex'
+import { ListBoxItem } from './ListBoxItem'
+import { Select, SelectButton, type SelectPropsSingle } from './Select'
 
 const matchOptions = [
   { label: 'All', value: 'AND' },
