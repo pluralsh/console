@@ -1166,6 +1166,15 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.1.0-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.1.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4239,6 +4248,15 @@
   publisher: aws-privateca
 - name: aws-secrets-store-csi-driver-provider
   versions:
+  - version: v3.1.3-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v3.1.2-eksbuild.1
     compatibilities:
     - '1.36'
@@ -4816,6 +4834,14 @@
   publisher: eks
 - name: chainguard_aws-ebs-csi-driver-fips
   versions:
+  - version: v2.65.10000020260831-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.64.10000020260826-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4932,6 +4958,14 @@
 - name: chainguard_aws-efs-csi-driver-fips
   versions:
   - version: v4.4.100000020260723-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+  - version: v4.4.10002020260831-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -5070,6 +5104,15 @@
   publisher: Chainguard
 - name: chainguard_aws-vpc-cni-fips
   versions:
+  - version: v1.22.10004020260830-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.21.100000020260722-eksbuild.1
     compatibilities:
     - '1.35'
