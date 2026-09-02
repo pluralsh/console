@@ -16220,6 +16220,7 @@ export type WorkbenchIssuesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -22360,6 +22361,7 @@ export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIs
 
 export type WorkbenchIssuesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  q?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
@@ -46502,10 +46504,10 @@ export type WorkbenchesIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenc
 export type WorkbenchesIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesIssuesSuspenseQuery>;
 export type WorkbenchesIssuesQueryResult = Apollo.QueryResult<WorkbenchesIssuesQuery, WorkbenchesIssuesQueryVariables>;
 export const WorkbenchIssuesDocument = gql`
-    query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+    query WorkbenchIssues($id: ID!, $q: String, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
-    issues(first: $first, after: $after) {
+    issues(q: $q, first: $first, after: $after) {
       pageInfo {
         ...PageInfo
       }
@@ -46533,6 +46535,7 @@ ${WorkbenchIssueFragmentDoc}`;
  * const { data, loading, error } = useWorkbenchIssuesQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      q: // value for 'q'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *   },

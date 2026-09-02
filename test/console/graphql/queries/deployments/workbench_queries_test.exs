@@ -589,6 +589,36 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal(issues)
     end
 
+    test "it can search workbench issues by title or external id" do
+      workbench = insert(:workbench)
+      by_title  = insert(:issue, workbench: workbench, title: "flaky deploy job")
+      by_ext_id = insert(:issue, workbench: workbench, external_id: "PROD-5172", title: "unrelated")
+      insert(:issue, workbench: workbench, title: "something else", external_id: "OPS-1")
+
+      query = """
+        query Workbench($id: ID!, $q: String) {
+          workbench(id: $id) {
+            id
+            issues(first: 5, q: $q) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "q" => "flaky"}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> ids_equal([by_title])
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "q" => "prod-51"}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> ids_equal([by_ext_id])
+    end
+
     test "users field returns users from user and group policy bindings on the workbench" do
       user_direct = insert(:user)
       group = insert(:group)

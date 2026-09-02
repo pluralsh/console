@@ -51,6 +51,10 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.status == ^status)
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(i in query, where: ilike(i.title, ^"%#{q}%") or ilike(i.external_id, ^"%#{q}%"))
+  end
+
   @valid ~w(provider status external_id url title body payload workbench_id workbench_webhook_id flow_id webhook)a
 
   def changeset(model, attrs \\ %{}) do

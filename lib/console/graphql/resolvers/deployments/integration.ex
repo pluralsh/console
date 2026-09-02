@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Integration do
 
   def list_issues(%Workbench{id: id}, args, _) do
     Issue.for_workbench(id)
+    |> maybe_search(Issue, args)
     |> Issue.ordered()
     |> paginate(args)
   end
