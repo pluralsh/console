@@ -148,11 +148,19 @@ export function ToolCallContent({
           minWidth={0}
           width="100%"
         >
-          {isPending ? (
+          {isPending && !content ? (
             <RunningToolOutputCode
               showHeader={false}
               fillLevel={2}
             />
+          ) : isPending ? (
+            <Code
+              fillLevel={2}
+              showHeader={false}
+              css={slimCodeCss}
+            >
+              {content}
+            </Code>
           ) : customResultBody ? (
             customResultBody
           ) : isJson(content) ? (
