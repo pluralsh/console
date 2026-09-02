@@ -9,15 +9,18 @@ FROM node:24.11.1-alpine as node
 
 WORKDIR /app
 
-COPY assets/package.json ./package.json
-COPY assets/yarn.lock ./yarn.lock
-COPY assets/.yarn ./.yarn
-COPY assets/.yarnrc.yml ./.yarnrc.yml
-COPY assets/design-system/package.json ./design-system/package.json
+COPY js/package.json js/yarn.lock js/.yarnrc.yml ./
+COPY js/.yarn/ ./.yarn/
+COPY js/console/package.json ./console/package.json
+COPY js/design-system/package.json ./design-system/package.json
+COPY js/documentation/package.json ./documentation/package.json
+COPY js/eslint-config/package.json ./eslint-config/package.json
 
-RUN yarn install
+RUN corepack enable \
+  && yarn install --immutable
 
-COPY assets/ ./
+COPY js/console/ ./console/
+COPY js/design-system/ ./design-system/
 
 ARG VITE_PROD_SECRET_KEY
 ARG VITE_SENTRY_DSN
@@ -29,7 +32,7 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY} \
     VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
     SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 
-RUN yarn run build
+RUN yarn workspace console build
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION} AS builder
 
@@ -77,7 +80,7 @@ RUN git config --global --add safe.directory '/opt/app'
 RUN mix do deps.get, compile
 RUN ls -al
 
-COPY --from=node /app/build ./priv/static
+COPY --from=node /app/console/build ./priv/static
 
 RUN mix do db.certs, agent.chart, sentry.package_source_code, release
 

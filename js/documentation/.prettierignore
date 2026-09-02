@@ -1,0 +1,4 @@
+/src/generated/
+*.md
+/src/routes/docs.generated.ts
+/src/routing/navigation.ts

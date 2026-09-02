@@ -1,0 +1,537 @@
+import {
+  AtlassianLogoIcon,
+  AwsLogoIcon,
+  AzureLogoIcon,
+  BitBucketIcon,
+  CloudWatchIcon,
+  DatadogLogoIcon,
+  DockerLogoIcon,
+  DynatraceLogoIcon,
+  ElasticsearchLogoIcon,
+  ExaLogoIcon,
+  GitHubLogoIcon,
+  GitLabLogoIcon,
+  GoogleCloudLogoIcon,
+  GoogleCloudRunIcon,
+  IconFrame,
+  IconProps,
+  LambdaIcon,
+  LinearLogoIcon,
+  LokiLogoIcon,
+  McpLogoIcon,
+  MicrosoftActionsIcon,
+  MsTeamsLogoIcon,
+  OpenSearchLogoIcon,
+  PrometheusLogoIcon,
+  SentryLogoIcon,
+  PagerdutyLogoIcon,
+  SlackLogoIcon,
+  SplunkLogoIcon,
+  TempoLogoIcon,
+  ToolsIcon,
+  VSphereLogoIcon,
+} from '@pluralsh/design-system'
+import {
+  Provider,
+  ScmType,
+  WorkbenchToolCategory,
+  WorkbenchToolConfigurationAttributes,
+  WorkbenchToolType,
+} from 'generated/graphql'
+import { ComponentType, type CSSProperties } from 'react'
+import styled from 'styled-components'
+
+/** Tool types that have a configuration branch in WorkbenchToolConfigurationAttributes and editable forms. */
+const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
+  WorkbenchToolType.Datadog,
+  WorkbenchToolType.Elastic,
+  WorkbenchToolType.Opensearch,
+  WorkbenchToolType.Http,
+  WorkbenchToolType.Loki,
+  WorkbenchToolType.Prometheus,
+  WorkbenchToolType.Tempo,
+  WorkbenchToolType.Jaeger,
+  WorkbenchToolType.Atlassian,
+  WorkbenchToolType.Linear,
+  WorkbenchToolType.Slack,
+  WorkbenchToolType.Pagerduty,
+  WorkbenchToolType.Teams,
+  WorkbenchToolType.Exa,
+  WorkbenchToolType.Github,
+  WorkbenchToolType.Gitlab,
+  WorkbenchToolType.Bitbucket,
+  WorkbenchToolType.BitbucketDatacenter,
+  WorkbenchToolType.AzureDevops,
+  WorkbenchToolType.Splunk,
+  WorkbenchToolType.Dynatrace,
+  WorkbenchToolType.Cloudwatch,
+  WorkbenchToolType.Azure,
+  WorkbenchToolType.Sentry,
+  WorkbenchToolType.Docker,
+  WorkbenchToolType.Lambda,
+  WorkbenchToolType.CloudRun,
+  WorkbenchToolType.AzureFunction,
+] as const
+
+const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
+  CONFIGURABLE_WORKBENCH_TOOL_TYPES
+)
+export type ConfigurableWorkbenchToolType =
+  (typeof CONFIGURABLE_WORKBENCH_TOOL_TYPES)[number]
+
+/** map configurable tool type -> config key in WorkbenchToolConfigurationAttributes. */
+export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
+  [WorkbenchToolType.Http]: 'http',
+  [WorkbenchToolType.Elastic]: 'elastic',
+  [WorkbenchToolType.Opensearch]: 'opensearch',
+  [WorkbenchToolType.Prometheus]: 'prometheus',
+  [WorkbenchToolType.Loki]: 'loki',
+  [WorkbenchToolType.Tempo]: 'tempo',
+  [WorkbenchToolType.Jaeger]: 'jaeger',
+  [WorkbenchToolType.Datadog]: 'datadog',
+  [WorkbenchToolType.Linear]: 'linear',
+  [WorkbenchToolType.Slack]: 'slack',
+  [WorkbenchToolType.Pagerduty]: 'pagerduty',
+  [WorkbenchToolType.Teams]: 'teams',
+  [WorkbenchToolType.Atlassian]: 'atlassian',
+  [WorkbenchToolType.Exa]: 'exa',
+  [WorkbenchToolType.Github]: 'github',
+  [WorkbenchToolType.Gitlab]: 'gitlab',
+  [WorkbenchToolType.Bitbucket]: 'bitbucket',
+  [WorkbenchToolType.BitbucketDatacenter]: 'bitbucketDatacenter',
+  [WorkbenchToolType.AzureDevops]: 'azureDevops',
+  [WorkbenchToolType.Splunk]: 'splunk',
+  [WorkbenchToolType.Dynatrace]: 'dynatrace',
+  [WorkbenchToolType.Cloudwatch]: 'cloudwatch',
+  [WorkbenchToolType.Azure]: 'azure',
+  [WorkbenchToolType.Sentry]: 'sentry',
+  [WorkbenchToolType.Docker]: 'docker',
+  [WorkbenchToolType.Lambda]: 'lambda',
+  [WorkbenchToolType.CloudRun]: 'cloudRun',
+  [WorkbenchToolType.AzureFunction]: 'azureFunction',
+} as const satisfies Record<
+  ConfigurableWorkbenchToolType,
+  keyof WorkbenchToolConfigurationAttributes
+>
+
+/** The non-nullable inner config type for a given configurable tool type. */
+export type ConfigForToolType<T extends ConfigurableWorkbenchToolType> =
+  NonNullable<
+    WorkbenchToolConfigurationAttributes[(typeof CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY)[T]]
+  >
+
+export const isConfigurableWorkbenchToolType = (
+  type: Nullable<string>
+): type is ConfigurableWorkbenchToolType =>
+  !!type && CONFIGURABLE_SET.has(type as WorkbenchToolType)
+
+/** Workbench tool kinds that map to a registered {@link ScmType} connection. */
+export const WORKBENCH_TOOL_TO_SCM_TYPE: Partial<
+  Record<WorkbenchToolType, ScmType>
+> = {
+  [WorkbenchToolType.Github]: ScmType.Github,
+  [WorkbenchToolType.Gitlab]: ScmType.Gitlab,
+  [WorkbenchToolType.Bitbucket]: ScmType.Bitbucket,
+  [WorkbenchToolType.BitbucketDatacenter]: ScmType.BitbucketDatacenter,
+  [WorkbenchToolType.AzureDevops]: ScmType.AzureDevops,
+}
+
+export function scmTypeForWorkbenchTool(
+  type: WorkbenchToolType
+): ScmType | undefined {
+  return WORKBENCH_TOOL_TO_SCM_TYPE[type]
+}
+
+const CLOUD_FUNCTION_TOOL_TO_PROVIDER: Partial<
+  Record<WorkbenchToolType, Provider>
+> = {
+  [WorkbenchToolType.Lambda]: Provider.Aws,
+  [WorkbenchToolType.CloudRun]: Provider.Gcp,
+  [WorkbenchToolType.AzureFunction]: Provider.Azure,
+}
+
+export const cloudFunctionProviderForWorkbenchTool = (
+  type: WorkbenchToolType
+): Provider | undefined => CLOUD_FUNCTION_TOOL_TO_PROVIDER[type]
+
+export const workbenchToolSupportsApproval = (
+  type: WorkbenchToolType
+): boolean => !!cloudFunctionProviderForWorkbenchTool(type)
+
+const WORKBENCH_TOOL_LABELS: Record<
+  WorkbenchToolType | `${WorkbenchToolType.Cloud}:${Provider}`,
+  string
+> = {
+  [WorkbenchToolType.Http]: 'Custom',
+  [WorkbenchToolType.Elastic]: 'Elasticsearch',
+  [WorkbenchToolType.Opensearch]: 'OpenSearch',
+  [WorkbenchToolType.Prometheus]: 'Prometheus',
+  [WorkbenchToolType.Loki]: 'Loki',
+  [WorkbenchToolType.Tempo]: 'Tempo',
+  [WorkbenchToolType.Datadog]: 'Datadog',
+  [WorkbenchToolType.Atlassian]: 'Atlassian',
+  [WorkbenchToolType.Linear]: 'Linear',
+  [WorkbenchToolType.Slack]: 'Slack',
+  [WorkbenchToolType.Pagerduty]: 'PagerDuty',
+  [WorkbenchToolType.Teams]: 'Microsoft Teams',
+  [WorkbenchToolType.Mcp]: 'MCP',
+  [WorkbenchToolType.Sentry]: 'Sentry',
+  [WorkbenchToolType.Splunk]: 'Splunk',
+  [WorkbenchToolType.Dynatrace]: 'Dynatrace',
+  [WorkbenchToolType.Cloudwatch]: 'Cloudwatch',
+  [WorkbenchToolType.Azure]: 'Azure Monitor',
+  [WorkbenchToolType.Jaeger]: 'Jaeger',
+  [WorkbenchToolType.Exa]: 'Exa',
+  [WorkbenchToolType.Github]: 'GitHub',
+  [WorkbenchToolType.Gitlab]: 'GitLab',
+  [WorkbenchToolType.Bitbucket]: 'Bitbucket Cloud',
+  [WorkbenchToolType.BitbucketDatacenter]: 'Bitbucket Data Center',
+  [WorkbenchToolType.AzureDevops]: 'Azure DevOps',
+  [WorkbenchToolType.Cloud]: 'Cloud',
+  [WorkbenchToolType.Lambda]: 'AWS Lambda',
+  [WorkbenchToolType.CloudRun]: 'GCP Cloud Run',
+  [WorkbenchToolType.AzureFunction]: 'Azure Cloud Function',
+  [WorkbenchToolType.Docker]: 'Docker / OCI registry',
+  [`${WorkbenchToolType.Cloud}:${Provider.Aws}`]: 'AWS',
+  [`${WorkbenchToolType.Cloud}:${Provider.Gcp}`]: 'GCP',
+  [`${WorkbenchToolType.Cloud}:${Provider.Azure}`]: 'Azure',
+  [`${WorkbenchToolType.Cloud}:${Provider.Vsphere}`]: 'vSphere',
+}
+
+export const getWorkbenchToolLabel = (
+  type: WorkbenchToolType,
+  provider?: Nullable<Provider>
+) =>
+  type === WorkbenchToolType.Cloud && provider
+    ? WORKBENCH_TOOL_LABELS[`${type}:${provider}`]
+    : WORKBENCH_TOOL_LABELS[type]
+
+/** Description from Lambda / Cloud Run / Azure Function tool configuration. */
+export function getWorkbenchToolDescription(
+  tool:
+    | {
+        configuration?: Nullable<{
+          lambda?: Nullable<{ description?: Nullable<string> }>
+          cloudRun?: Nullable<{ description?: Nullable<string> }>
+          azureFunction?: Nullable<{ description?: Nullable<string> }>
+        }>
+      }
+    | null
+    | undefined
+): string | undefined {
+  const description =
+    tool?.configuration?.lambda?.description?.trim() ||
+    tool?.configuration?.cloudRun?.description?.trim() ||
+    tool?.configuration?.azureFunction?.description?.trim()
+  return description || undefined
+}
+
+export const TOOL_TYPE_TO_CATEGORIES: Record<
+  WorkbenchToolType,
+  WorkbenchToolCategory[]
+> = {
+  [WorkbenchToolType.Datadog]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+    WorkbenchToolCategory.Traces,
+  ],
+  [WorkbenchToolType.Elastic]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Opensearch]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Prometheus]: [WorkbenchToolCategory.Metrics],
+  [WorkbenchToolType.Loki]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
+  [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Slack]: [WorkbenchToolCategory.Chat],
+  [WorkbenchToolType.Pagerduty]: [WorkbenchToolCategory.Integration],
+  [WorkbenchToolType.Teams]: [WorkbenchToolCategory.Chat],
+  [WorkbenchToolType.Exa]: [WorkbenchToolCategory.Search],
+  [WorkbenchToolType.Github]: [WorkbenchToolCategory.Scm],
+  [WorkbenchToolType.Gitlab]: [WorkbenchToolCategory.Scm],
+  [WorkbenchToolType.Bitbucket]: [WorkbenchToolCategory.Scm],
+  [WorkbenchToolType.BitbucketDatacenter]: [WorkbenchToolCategory.Scm],
+  [WorkbenchToolType.AzureDevops]: [WorkbenchToolCategory.Scm],
+  [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
+  [WorkbenchToolType.Mcp]: [
+    WorkbenchToolCategory.Integration,
+    WorkbenchToolCategory.Observability,
+    WorkbenchToolCategory.Infrastructure,
+    WorkbenchToolCategory.Coding,
+    WorkbenchToolCategory.Verification,
+  ],
+  [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
+  [WorkbenchToolType.Splunk]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Dynatrace]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+    WorkbenchToolCategory.Traces,
+  ],
+  [WorkbenchToolType.Cloudwatch]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+  ],
+  [WorkbenchToolType.Azure]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+  ],
+  [WorkbenchToolType.Lambda]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.CloudRun]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.AzureFunction]: [WorkbenchToolCategory.Function],
+  [WorkbenchToolType.Jaeger]: [WorkbenchToolCategory.Traces],
+  [WorkbenchToolType.Cloud]: [WorkbenchToolCategory.Infrastructure],
+  [WorkbenchToolType.Docker]: [WorkbenchToolCategory.Integration],
+}
+
+/** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
+const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
+  ConfigurableWorkbenchToolType,
+  string
+> = {
+  [WorkbenchToolType.Datadog]: 'Connect to Datadog for metrics, logs, and APM.',
+  [WorkbenchToolType.Elastic]: 'Query logs and search data in Elasticsearch.',
+  [WorkbenchToolType.Opensearch]:
+    'Query logs and search data in AWS OpenSearch using SigV4 auth.',
+  [WorkbenchToolType.Prometheus]:
+    'Query metrics from Prometheus or Prometheus-compatible stores.',
+  [WorkbenchToolType.Loki]: 'Query log data from Grafana Loki.',
+  [WorkbenchToolType.Tempo]:
+    'Query trace data from Grafana Tempo for distributed tracing.',
+  [WorkbenchToolType.Atlassian]:
+    'Connect to Jira, Confluence, and other Atlassian products.',
+  [WorkbenchToolType.Linear]:
+    'Connect to Linear for issue tracking and project management.',
+  [WorkbenchToolType.Slack]:
+    'Connect to Slack to search channels, read threads, and post messages.',
+  [WorkbenchToolType.Pagerduty]:
+    'Connect to PagerDuty to fetch incident details, notes, and log entries missing from webhooks.',
+  [WorkbenchToolType.Teams]:
+    'Connect to Microsoft Teams via Graph to list teams and channels, search users, and post messages.',
+  [WorkbenchToolType.Exa]:
+    'Search the web with Exa to fetch high-signal context for tasks.',
+  [WorkbenchToolType.Github]:
+    'Use the GitHub REST API for repository, issue, pull request, and security workflows.',
+  [WorkbenchToolType.Gitlab]:
+    'Connect to GitLab for repository and merge request workflows via the GitLab API.',
+  [WorkbenchToolType.Bitbucket]:
+    'Connect to Bitbucket Cloud for repository and pull request workflows.',
+  [WorkbenchToolType.BitbucketDatacenter]:
+    'Connect to Bitbucket Data Center for on-prem repository and pull request workflows.',
+  [WorkbenchToolType.AzureDevops]:
+    'Connect to Azure DevOps for repositories, pull requests, and boards via the REST API.',
+  [WorkbenchToolType.Http]:
+    'Call arbitrary HTTP endpoints- useful for custom integrations.',
+  [WorkbenchToolType.Splunk]: 'Query logs and search data in Splunk.',
+  [WorkbenchToolType.Dynatrace]:
+    'Query metrics, logs, and traces from Dynatrace.',
+  [WorkbenchToolType.Cloudwatch]: 'Query metrics and logs from CloudWatch.',
+  [WorkbenchToolType.Azure]:
+    'Query Azure Monitor metrics and logs for Azure resources.',
+  [WorkbenchToolType.Jaeger]:
+    'Query distributed traces from Jaeger with structured filters.',
+  [WorkbenchToolType.Sentry]:
+    'Connect to Sentry to list issues, inspect error details, and read stack traces.',
+  [WorkbenchToolType.Docker]:
+    'Inspect Docker and OCI registries by listing tags and fetching manifests.',
+  [WorkbenchToolType.Lambda]:
+    'Run custom code with AWS Lambda without provisioning or managing servers.',
+  [WorkbenchToolType.CloudRun]:
+    'Run custom containerized applications on GCP Cloud Run.',
+  [WorkbenchToolType.AzureFunction]:
+    'Run custom code with Azure Functions without managing infrastructure.',
+}
+
+export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
+  [WorkbenchToolCategory.Metrics]: 'Metrics',
+  [WorkbenchToolCategory.Logs]: 'Logs',
+  [WorkbenchToolCategory.Traces]: 'Traces',
+  [WorkbenchToolCategory.Ticketing]: 'Ticketing',
+  [WorkbenchToolCategory.Search]: 'Web Search',
+  [WorkbenchToolCategory.Integration]: 'Integration',
+  [WorkbenchToolCategory.Scm]: 'Source control',
+  [WorkbenchToolCategory.Chat]: 'Chat',
+  [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
+  [WorkbenchToolCategory.Infrastructure]: 'Infrastructure',
+  [WorkbenchToolCategory.Function]: 'Cloud Function',
+  [WorkbenchToolCategory.Coding]: 'Coding',
+  [WorkbenchToolCategory.Verification]: 'Verification',
+  [WorkbenchToolCategory.Observability]: 'Observability',
+}
+
+export type WorkbenchToolCard = {
+  type: WorkbenchToolType
+  provider?: Provider
+  label: string
+  description: string
+  categoryLabels: string[]
+}
+
+export const WORKBENCH_TOOL_CARDS: WorkbenchToolCard[] = [
+  {
+    type: WorkbenchToolType.Mcp,
+    label: 'MCP',
+    description:
+      'Connect to a generic MCP server not covered by another integration.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Integration]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Aws,
+    label: 'AWS',
+    description:
+      'Query AWS infrastructure (EC2, S3, RDS, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Gcp,
+    label: 'GCP',
+    description:
+      'Query Google Cloud infrastructure (Compute, Storage, BigQuery, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Azure,
+    label: 'Azure',
+    description:
+      'Query Azure infrastructure (VMs, storage accounts, resource groups, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  {
+    type: WorkbenchToolType.Cloud,
+    provider: Provider.Vsphere,
+    label: 'vSphere',
+    description:
+      'Query vSphere infrastructure (datacenters, clusters, hosts, VMs, and more) via CloudQuery.',
+    categoryLabels: [categoryToLabel[WorkbenchToolCategory.Infrastructure]],
+  },
+  ...CONFIGURABLE_WORKBENCH_TOOL_TYPES.map((type) => ({
+    type,
+    description: CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS[type],
+    label: getWorkbenchToolLabel(type),
+    categoryLabels: TOOL_TYPE_TO_CATEGORIES[type].map(
+      (category) => categoryToLabel[category]
+    ),
+  })),
+]
+
+export const PROVIDER_TO_ICON: Record<Provider, ComponentType<IconProps>> = {
+  [Provider.Aws]: AwsLogoIcon,
+  [Provider.Gcp]: GoogleCloudLogoIcon,
+  [Provider.Azure]: AzureLogoIcon,
+  [Provider.Vsphere]: VSphereLogoIcon,
+}
+
+export const isProvider = (value: Nullable<string>): value is Provider =>
+  !!value && (Object.values(Provider) as string[]).includes(value)
+
+export function WorkbenchToolIcon({
+  type,
+  provider,
+  fullColor = true,
+  ...props
+}: {
+  type: Nullable<string>
+  provider?: Nullable<Provider>
+} & IconProps) {
+  const Icon =
+    type === WorkbenchToolType.Cloud && provider
+      ? PROVIDER_TO_ICON[provider]
+      : type === WorkbenchToolType.Mcp
+        ? McpLogoIcon
+        : isConfigurableWorkbenchToolType(type)
+          ? toolToIcon[type]
+          : ToolsIcon
+
+  return (
+    <Icon
+      fullColor={fullColor}
+      {...props}
+    />
+  )
+}
+
+const WORKBENCH_TOOL_CARD_ICON_SIZE = 20
+
+export function WorkbenchToolCardIcon({
+  type,
+  provider,
+}: {
+  type: Nullable<string>
+  provider?: Nullable<Provider>
+}) {
+  return (
+    <IconFrame
+      type="secondary"
+      css={{
+        flexShrink: 0,
+        '& svg': {
+          width: WORKBENCH_TOOL_CARD_ICON_SIZE,
+          height: WORKBENCH_TOOL_CARD_ICON_SIZE,
+        },
+      }}
+      icon={
+        <WorkbenchToolIcon
+          type={type}
+          provider={provider}
+          fullColor
+        />
+      }
+    />
+  )
+}
+
+export const WorkbenchToolCardBody = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  boxSizing: 'border-box',
+  width: '100%',
+  minWidth: 0,
+  minHeight: 0,
+  flex: 1,
+  padding: theme.spacing.medium,
+}))
+
+export function workbenchToolCardGridStyles(
+  minColumnWidthPx: number
+): CSSProperties {
+  return {
+    gridTemplateColumns: `repeat(auto-fill, minmax(${minColumnWidthPx}px, 1fr))`,
+    gridAutoRows: 'minmax(min-content, auto)',
+  }
+}
+
+const toolToIcon: Record<
+  ConfigurableWorkbenchToolType,
+  ComponentType<IconProps>
+> = {
+  [WorkbenchToolType.Datadog]: DatadogLogoIcon,
+  [WorkbenchToolType.Elastic]: ElasticsearchLogoIcon,
+  [WorkbenchToolType.Opensearch]: OpenSearchLogoIcon,
+  [WorkbenchToolType.Loki]: LokiLogoIcon,
+  [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
+  [WorkbenchToolType.Tempo]: TempoLogoIcon,
+  [WorkbenchToolType.Http]: ToolsIcon,
+  [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
+  [WorkbenchToolType.Linear]: LinearLogoIcon,
+  [WorkbenchToolType.Slack]: SlackLogoIcon,
+  [WorkbenchToolType.Pagerduty]: PagerdutyLogoIcon,
+  [WorkbenchToolType.Teams]: MsTeamsLogoIcon,
+  [WorkbenchToolType.Exa]: ExaLogoIcon,
+  [WorkbenchToolType.Github]: GitHubLogoIcon,
+  [WorkbenchToolType.Gitlab]: GitLabLogoIcon,
+  [WorkbenchToolType.Bitbucket]: BitBucketIcon,
+  [WorkbenchToolType.BitbucketDatacenter]: BitBucketIcon,
+  [WorkbenchToolType.AzureDevops]: AzureLogoIcon,
+  [WorkbenchToolType.Splunk]: SplunkLogoIcon,
+  [WorkbenchToolType.Dynatrace]: DynatraceLogoIcon,
+  [WorkbenchToolType.Cloudwatch]: CloudWatchIcon,
+  [WorkbenchToolType.Azure]: AzureLogoIcon,
+  [WorkbenchToolType.Jaeger]: ToolsIcon,
+  [WorkbenchToolType.Sentry]: SentryLogoIcon,
+  [WorkbenchToolType.Docker]: DockerLogoIcon,
+  [WorkbenchToolType.Lambda]: LambdaIcon,
+  [WorkbenchToolType.CloudRun]: GoogleCloudRunIcon,
+  [WorkbenchToolType.AzureFunction]: MicrosoftActionsIcon,
+}

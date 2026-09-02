@@ -1,11 +1,13 @@
 {
   "eslint.workingDirectories": [
-    { "directory": "./assets", "changeProcessCWD": true },
-    { "directory": "./assets/design-system", "changeProcessCWD": true }
+    { "directory": "./js/console", "changeProcessCWD": true },
+    { "directory": "./js/design-system", "changeProcessCWD": true },
+    { "directory": "./js/documentation", "changeProcessCWD": true }
   ],
   "files.associations": {
     "**/src/archive/**/*": "plaintext",
-    "*.ejs": "handlebars"
+    "*.ejs": "handlebars",
+    "*.mdpart": "markdoc"
   },
   "[html]": {
     "editor.defaultFormatter": "vscode.html-language-features"
@@ -15,5 +17,6 @@
     "editor.formatOnPaste": false
   },
   "editor.formatOnSave": true,
+  "dotenv.enableAutocloaking": false,
   "git.ignoreLimitWarning": true
 }

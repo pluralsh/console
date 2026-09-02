@@ -1,0 +1,31 @@
+fragment Recipe on Recipe {
+  name
+  description
+  provider
+  private
+  repository {
+    description
+  }
+  recipeSections {
+    repository {
+      name
+    }
+    configuration {
+      name
+      type
+      optional
+      documentation
+      longform
+    }
+  }
+}
+
+query Recipes($repoName: String!) {
+  recipes(repositoryName: $repoName, first: 500) {
+    edges {
+      node {
+        ...Recipe
+      }
+    }
+  }
+}
