@@ -29,6 +29,13 @@ export const ISSUE_STATUS_OPTIONS = [
   IssueStatus.Cancelled,
 ] as const
 
+export const ISSUE_STATUS_LABELS: Record<IssueStatus, string> = {
+  [IssueStatus.Open]: 'Open',
+  [IssueStatus.InProgress]: 'In progress',
+  [IssueStatus.Completed]: 'Completed',
+  [IssueStatus.Cancelled]: 'Cancelled',
+}
+
 export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
   view: 'list',
   providers: ALL_ISSUE_PROVIDERS,

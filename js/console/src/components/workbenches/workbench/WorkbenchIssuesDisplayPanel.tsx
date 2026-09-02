@@ -2,14 +2,14 @@ import {
   Card,
   Checkbox,
   Chip,
+  DiffColumnIcon,
+  DiffUnifiedIcon,
   Flex,
   IconFrame,
-  ListIcon,
   Radio,
   RadioGroup,
   SortAscIcon,
   SortDescIcon,
-  TableIcon,
 } from '@pluralsh/design-system'
 import {
   IssueSort,
@@ -21,6 +21,7 @@ import { startCase } from 'lodash'
 import { ReactElement } from 'react'
 import styled from 'styled-components'
 import {
+  ISSUE_STATUS_LABELS,
   ISSUE_STATUS_OPTIONS,
   toggleListValue,
   visibleIssueProviders,
@@ -45,14 +46,14 @@ export function WorkbenchIssuesDisplayPanel({
       <ViewToggleSC>
         <ViewChip
           selected={state.view === 'list'}
-          icon={<ListIcon />}
+          icon={<DiffUnifiedIcon />}
           onClick={() => onChange({ ...state, view: 'list' })}
         >
           List
         </ViewChip>
         <ViewChip
           selected={state.view === 'board'}
-          icon={<TableIcon />}
+          icon={<DiffColumnIcon />}
           onClick={() => onChange({ ...state, view: 'board' })}
         >
           Board
@@ -80,7 +81,7 @@ export function WorkbenchIssuesDisplayPanel({
         {ISSUE_STATUS_OPTIONS.map((status) => (
           <FilterRow
             key={status}
-            label={startCase(status.toLowerCase())}
+            label={ISSUE_STATUS_LABELS[status]}
             count={statusCounts[status] ?? 0}
             checked={state.statuses.includes(status)}
             onChange={() =>
@@ -159,11 +160,12 @@ function ViewChip({
     <Chip
       clickable
       icon={icon}
-      inactive={!selected}
+      fillLevel={selected ? 3 : 1}
       onClick={onClick}
       css={{
         width: '100%',
         justifyContent: 'center',
+        '&&': { borderRadius: 100 },
       }}
     >
       {children}
@@ -208,7 +210,7 @@ const PanelSC = styled(Card)(({ theme }) => ({
 const ViewToggleSC = styled.div(({ theme }) => ({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.xxsmall,
   paddingTop: theme.spacing.medium,
 }))
 

@@ -6,9 +6,9 @@ import {
   Flex,
 } from '@pluralsh/design-system'
 import { IssueStatus } from 'generated/graphql'
-import { startCase } from 'lodash'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
+import { ISSUE_STATUS_LABELS } from 'components/workbenches/workbench/workbenchIssuesDisplay'
 
 const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
   [IssueStatus.InProgress]: (
@@ -57,7 +57,7 @@ export function IssueStatusChip({
               : {}),
           }}
         >
-          {startCase(status.toLowerCase())}
+          {ISSUE_STATUS_LABELS[status]}
         </span>
       </Flex>
     </Chip>
