@@ -20,7 +20,7 @@ versions:
         page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug fixes
         from Dex).']
     breaking_changes: []
-  chart_version: 10.5.0
+  chart_version: 10.6.0
   images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
     'quay.io/argoproj/argocd:v3.5.2']
 - version: 3.5.1
