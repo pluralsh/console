@@ -73,14 +73,14 @@ func (ErrorInterceptor) toSanitizedError(response *clientv2.ErrorResponse) error
 	}
 }
 
-func (_ ErrorInterceptor) isKnownError(err error) bool {
+func (ErrorInterceptor) isKnownError(err error) bool {
 	message := err.Error()
 	return strings.HasPrefix(message, gqlgencTopLevelDecodePrefix) ||
 		strings.HasPrefix(message, gqlgencResponseDecodePrefix) ||
 		strings.HasPrefix(message, gqlgencMalformedGraphQLErrorsPrefix)
 }
 
-func (_ ErrorInterceptor) toOperationName(gqlInfo *clientv2.GQLRequestInfo) string {
+func (ErrorInterceptor) toOperationName(gqlInfo *clientv2.GQLRequestInfo) string {
 	if gqlInfo == nil || gqlInfo.Request == nil || gqlInfo.Request.OperationName == "" {
 		return "unknown"
 	}
