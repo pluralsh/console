@@ -40,7 +40,7 @@ func (c *client) GetCredentials() (url, token string) {
 
 func New(url, token string) Client {
 	client := &client{
-		consoleClient: console.NewClient(&http.Client{
+		consoleClient: console.NewConsoleClient(&http.Client{
 			Transport: helpers.NewAuthorizationTokenTransport(token),
 		}, url, nil, console.PersistedQueryInterceptor),
 		ctx:   context.Background(),

@@ -31,14 +31,14 @@ func New(url, token string) *Client {
 	}
 
 	return &Client{
-		Console: console.NewClient(&httpClient, url, nil),
+		Console: console.NewConsoleClient(&httpClient, url, nil),
 		ctx:     context.Background(),
 	}
 }
 
 func NewUnauthorized(url string) *Client {
 	return &Client{
-		Console: console.NewClient(http.DefaultClient, url, nil),
+		Console: console.NewConsoleClient(http.DefaultClient, url, nil),
 		ctx:     context.Background(),
 	}
 }

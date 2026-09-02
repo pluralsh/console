@@ -14,6 +14,6 @@ func (c *client) UseCredentials(namespace string, credentialsCache credentials.N
 		return nc.NamespaceCredentials, fmt.Errorf("cannot use %s namespace credentials, got error: %s", nc.NamespaceCredentials, nc.Err.Error())
 	}
 
-	c.consoleClient = console.NewClient(http.NewHttpClient(nc.Token), c.url, nil)
+	c.consoleClient = console.NewConsoleClient(http.NewHttpClient(nc.Token), c.url, nil)
 	return nc.NamespaceCredentials, nil
 }

@@ -245,7 +245,7 @@ func New(url, token string, datadogEnabled bool) ConsoleClient {
 	}
 
 	return &client{
-		consoleClient: console.NewClient(http.NewHttpClient(token), url, nil, interceptors...),
+		consoleClient: console.NewConsoleClient(http.NewHttpClient(token), url, nil, interceptors...),
 		url:           url,
 		ctx:           context.Background(),
 	}
