@@ -510,7 +510,7 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
     <PreviewablePanel
       contentKey={`prompt:${prompt.length}`}
       subtle
-      collapsedLines={3}
+      collapsedLines={2}
     >
       <SimplifiedMarkdown
         text={prompt}
