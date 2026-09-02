@@ -148,7 +148,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
        %{
          title: title,
          body: get_in(pr, ["summary", "raw"]) || pr["description"] || "",
-         commit_sha: get_in(pr, ["source", "commit", "hash"])
+         commit_sha: get_in(pr, ["source", "commit", "hash"]),
+         ref: get_in(pr, ["source", "branch", "name"])
        }}
     end
   end
@@ -162,7 +163,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def commit_status(scm_conn, %PullRequest{url: url}, id, status, attrs) do
+  def commit_status(scm_conn, %PullRequest{url: url} = pr, id, status, attrs) do
     with {:ok, workspace, repo, _} <- get_pull_id(url),
          {:ok, conn} <- connection(scm_conn) do
       key = id || "plural-agent-review"
@@ -173,7 +174,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
         state: commit_status_state(status),
         url: attrs.url,
         name: attrs.name,
-        description: attrs.description
+        description: attrs.description,
+        refname: pr.ref
       }
 
       case id do
