@@ -374,9 +374,9 @@ function Input2({
           {...inputProps}
         />
       </InputAreaSC>
-      {showClearButton && (
+      {showClearButton && !!value && (
         <ClearButton
-          disabled={!value || disabled}
+          disabled={disabled}
           onClick={() => {
             const input = inputRef?.current
 
