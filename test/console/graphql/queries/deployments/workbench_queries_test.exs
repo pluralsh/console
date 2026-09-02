@@ -619,6 +619,95 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
              |> ids_equal([by_ext_id])
     end
 
+    test "it can filter workbench issues by status and provider" do
+      workbench = insert(:workbench)
+      match = insert(:issue, workbench: workbench, status: :open, provider: :github, title: "keep")
+      insert(:issue, workbench: workbench, status: :completed, provider: :github, title: "wrong status")
+      insert(:issue, workbench: workbench, status: :open, provider: :linear, title: "wrong provider")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!, $statuses: [IssueStatus], $providers: [IssueWebhookProvider]) {
+          workbench(id: $id) {
+            issues(first: 10, statuses: $statuses, providers: $providers) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id, "statuses" => ["OPEN"], "providers" => ["GITHUB"]}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> ids_equal([match])
+    end
+
+    test "empty status or provider filters return no issues" do
+      workbench = insert(:workbench)
+      insert(:issue, workbench: workbench)
+
+      query = """
+        query Workbench($id: ID!, $statuses: [IssueStatus], $providers: [IssueWebhookProvider]) {
+          workbench(id: $id) {
+            issues(first: 10, statuses: $statuses, providers: $providers) {
+              edges { node { id } }
+            }
+          }
+        }
+      """
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "statuses" => []}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"]) == []
+
+      {:ok, %{data: %{"workbench" => found}}} =
+        run_query(query, %{"id" => workbench.id, "providers" => []}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"]) == []
+    end
+
+    test "it can sort workbench issues by title" do
+      workbench = insert(:workbench)
+      later  = insert(:issue, workbench: workbench, title: "Zulu issue")
+      earlier = insert(:issue, workbench: workbench, title: "Alpha issue")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            issues(first: 10, sort: TITLE, direction: ASC) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["issues"])
+             |> Enum.map(& &1["id"]) == [earlier.id, later.id]
+    end
+
+    test "it can fetch workbench issue counts" do
+      workbench = insert(:workbench)
+      insert(:issue, workbench: workbench, status: :open, provider: :github)
+      insert(:issue, workbench: workbench, status: :open, provider: :github)
+      insert(:issue, workbench: workbench, status: :completed, provider: :linear)
+      insert(:issue, workbench: insert(:workbench), status: :open, provider: :github)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            issueCounts {
+              providers { provider count }
+              statuses { status count }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      providers = Map.new(found["issueCounts"]["providers"], & {&1["provider"], &1["count"]})
+      statuses  = Map.new(found["issueCounts"]["statuses"], & {&1["status"], &1["count"]})
+
+      assert providers == %{"GITHUB" => 2, "LINEAR" => 1}
+      assert statuses == %{"OPEN" => 2, "COMPLETED" => 1}
+    end
+
     test "users field returns users from user and group policy bindings on the workbench" do
       user_direct = insert(:user)
       group = insert(:group)

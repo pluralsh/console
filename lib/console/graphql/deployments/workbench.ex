@@ -555,8 +555,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
     connection field :issues, node_type: :issue do
       middleware Nested, check: true, msg: "workbench issues cannot be fetched through a policy"
       arg :q, :string, description: "search issues by title or external id"
+      arg :providers, list_of(:issue_webhook_provider), description: "filter issues by provider"
+      arg :statuses, list_of(:issue_status), description: "filter issues by status"
+      arg :sort, :issue_sort, description: "field to sort issues by"
+      arg :direction, :issue_sort_direction, description: "sort direction"
 
       resolve &Deployments.list_issues/3
+    end
+
+    field :issue_counts, :workbench_issue_counts do
+      middleware Nested, check: true, msg: "workbench issue counts cannot be fetched through a policy"
+      arg :q, :string, description: "search issues by title or external id"
+
+      resolve &Deployments.issue_counts/3
     end
 
     @desc "users that have read or write access to this workbench"

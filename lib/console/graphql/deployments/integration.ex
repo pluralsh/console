@@ -7,6 +7,16 @@ defmodule Console.GraphQl.Deployments.Integration do
   ecto_enum :issue_webhook_provider, IssueWebhook.Provider
   ecto_enum :issue_status, Issue.Status
 
+  enum :issue_sort do
+    value :inserted_at
+    value :title
+  end
+
+  enum :issue_sort_direction do
+    value :asc
+    value :desc
+  end
+
   @desc "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
   input_object :chat_provider_connection_attributes do
     field :name,           non_null(:string), description: "the name of this chat connection"
@@ -118,6 +128,21 @@ defmodule Console.GraphQl.Deployments.Integration do
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the workbench job this issue is associated with"
 
     timestamps()
+  end
+
+  object :workbench_issue_counts do
+    field :providers, list_of(:issue_count_by_provider)
+    field :statuses, list_of(:issue_count_by_status)
+  end
+
+  object :issue_count_by_provider do
+    field :provider, non_null(:issue_webhook_provider)
+    field :count, non_null(:integer)
+  end
+
+  object :issue_count_by_status do
+    field :status, non_null(:issue_status)
+    field :count, non_null(:integer)
   end
 
   @desc "A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"

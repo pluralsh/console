@@ -1004,10 +1004,37 @@ query WorkbenchesIssues($first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchIssues($id: ID!, $q: String, $first: Int = 100, $after: String) {
+query WorkbenchIssues(
+  $id: ID!
+  $q: String
+  $providers: [IssueWebhookProvider]
+  $statuses: [IssueStatus]
+  $sort: IssueSort
+  $direction: IssueSortDirection
+  $first: Int = 100
+  $after: String
+) {
   workbench(id: $id) {
     id
-    issues(q: $q, first: $first, after: $after) {
+    issueCounts(q: $q) {
+      providers {
+        provider
+        count
+      }
+      statuses {
+        status
+        count
+      }
+    }
+    issues(
+      q: $q
+      providers: $providers
+      statuses: $statuses
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
       pageInfo {
         ...PageInfo
       }
