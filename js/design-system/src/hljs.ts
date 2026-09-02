@@ -244,3 +244,8 @@ hljs.registerLanguage('vim', vim)
 hljs.registerLanguage('xml', xml)
 hljs.registerLanguage('yaml', yaml)
 hljs.registerLanguage('yml', yaml)
+
+// Consumers must import this instance rather than `highlight.js/lib/core` directly.
+// A bare side-effect import gets dropped by bundlers because of `sideEffects: false`,
+// and a second core import would be a separate registry with no languages.
+export default hljs

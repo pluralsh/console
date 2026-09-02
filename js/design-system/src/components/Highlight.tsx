@@ -1,4 +1,3 @@
-import hljs from 'highlight.js/lib/core'
 import {
   type ComponentPropsWithoutRef,
   type RefObject,
@@ -6,7 +5,7 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import '../hljs'
+import hljs from '../hljs'
 import { hljsSyntaxStyles } from '../styles/hljsSyntaxStyles'
 
 import styled from 'styled-components'

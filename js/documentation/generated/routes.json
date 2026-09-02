@@ -177,11 +177,11 @@
   },
   "/plural-features/continuous-deployment/service-templating": {
     "relPath": "/plural-features/continuous-deployment/service-templating/index.md",
-    "lastmod": "2026-09-01T14:41:58.964Z"
+    "lastmod": "2026-09-02T09:18:26.135Z"
   },
   "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters": {
     "relPath": "/plural-features/continuous-deployment/service-templating/supporting-liquid-filters.md",
-    "lastmod": "2026-09-01T14:41:58.985Z"
+    "lastmod": "2026-09-02T09:18:26.157Z"
   },
   "/plural-features/continuous-deployment/lua": {
     "relPath": "/plural-features/continuous-deployment/lua.md",
