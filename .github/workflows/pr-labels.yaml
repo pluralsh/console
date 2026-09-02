@@ -7,9 +7,22 @@ jobs:
   label:
     name: Check that PR has required labels
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
+      - name: Classify documentation pull requests
+        if: startsWith(github.event.pull_request.title, 'docs:')
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['documentation'],
+            })
       - uses: mheap/github-action-required-labels@v2
         with:
           mode: exactly
           count: 1
-          labels: "bug-fix, enhancement, breaking-change, dependencies, release"
+          labels: "bug-fix, enhancement, breaking-change, dependencies, release, documentation"

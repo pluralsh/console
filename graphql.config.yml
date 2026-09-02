@@ -1,2 +1,2 @@
 schema: "schema/schema.graphql"
-documents: "assets/**/*.graphql"
+documents: "js/console/**/*.graphql"

@@ -1,0 +1,107 @@
+name: CI / Documentation
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/documentation.yaml"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/documentation/**"
+      - "go/controller/docs/**"
+      - "go/deployment-operator/docs/**"
+      - "go/polly/docs/**"
+      - "js/package.json"
+      - "js/yarn.lock"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/documentation.yaml"
+      - "js/.yarnrc.yml"
+      - "js/design-system/**"
+      - "js/documentation/**"
+      - "go/controller/docs/**"
+      - "go/deployment-operator/docs/**"
+      - "go/polly/docs/**"
+      - "js/package.json"
+      - "js/yarn.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+      - run: yarn --immutable
+      - run: yarn workspace @pluralsh/documentation lint
+
+  sync-docs:
+    name: Check docs sync
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js/documentation
+    steps:
+      - uses: actions/checkout@v6
+      - name: Sync docs
+        run: make sync
+      - name: Verify changed files
+        run: |
+          git diff --exit-code -- pages || {
+            echo "::error Documentation pages are out of sync. Please run 'make sync' from js/documentation/ and commit the changes."
+            exit 1
+          }
+
+  validate-routes:
+    name: Validate generated routes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js/documentation
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+        working-directory: js
+      - run: yarn --immutable
+        working-directory: js
+      - name: Backup current routes.json
+        run: cp -f generated/routes.json generated/routes.json.original
+      - name: Regenerate routes.json
+        run: make routes
+      - name: Create comparison files with just routes and filepaths
+        run: |
+          jq 'map_values({relPath})' generated/routes.json > routes.paths.json
+          jq 'map_values({relPath})' generated/routes.json.original > routes.original.paths.json
+      - name: Compare route paths
+        run: |
+          if ! diff -q routes.paths.json routes.original.paths.json > /dev/null; then
+            echo "::error The routes.json file is out of sync with the docs structure."
+            echo "Please run 'make routes' from js/documentation/ and commit the updated file."
+            diff -u routes.original.paths.json routes.paths.json || true
+            exit 1
+          fi
+          echo "Routes validation passed: routes.json is up to date."

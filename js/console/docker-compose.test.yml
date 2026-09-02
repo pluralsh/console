@@ -1,0 +1,9 @@
+services:
+  frontend-test:
+    build:
+      context: ../..
+      dockerfile: js/console/Dockerfile
+    working_dir: /app/console
+    environment:
+      CI: "true"
+    command: yarn test
