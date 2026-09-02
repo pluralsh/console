@@ -14,7 +14,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func TestNewConsoleClientSanitizesResponseBodies(t *testing.T) {
+func TestNewSanitizesResponseBodies(t *testing.T) {
 	tests := []struct {
 		name       string
 		statusCode int
@@ -49,7 +49,7 @@ func TestNewConsoleClientSanitizesResponseBodies(t *testing.T) {
 			server := newGraphQLTestServer(test.statusCode, test.body)
 			defer server.Close()
 
-			client := NewConsoleClient(server.Client(), server.URL, nil)
+			client := New(server.Client(), server.URL, nil)
 			_, err := client.MyCluster(context.Background())
 			if err == nil {
 				t.Fatal("MyCluster returned nil error")
@@ -63,11 +63,11 @@ func TestNewConsoleClientSanitizesResponseBodies(t *testing.T) {
 	}
 }
 
-func TestNewConsoleClientPreservesNonSuccessClassification(t *testing.T) {
+func TestNewPreservesNonSuccessClassification(t *testing.T) {
 	server := newGraphQLTestServer(http.StatusBadGateway, `{"errors":[{"message":"safe graphql error"}],"token":"status-token-secret"}`)
 	defer server.Close()
 
-	client := NewConsoleClient(server.Client(), server.URL, nil)
+	client := New(server.Client(), server.URL, nil)
 	_, err := client.MyCluster(context.Background())
 	if err == nil {
 		t.Fatal("MyCluster returned nil error")
@@ -121,11 +121,11 @@ func TestSanitizeErrorClonesNonSuccessResponse(t *testing.T) {
 	}
 }
 
-func TestNewConsoleClientPreservesGraphQLErrors(t *testing.T) {
+func TestNewPreservesGraphQLErrors(t *testing.T) {
 	server := newGraphQLTestServer(http.StatusOK, `{"errors":[{"message":"access denied"}]}`)
 	defer server.Close()
 
-	client := NewConsoleClient(server.Client(), server.URL, nil)
+	client := New(server.Client(), server.URL, nil)
 	_, err := client.MyCluster(context.Background())
 	if err == nil {
 		t.Fatal("MyCluster returned nil error")
@@ -143,7 +143,7 @@ func TestNewConsoleClientPreservesGraphQLErrors(t *testing.T) {
 	}
 }
 
-func TestNewConsoleClientSanitizesBeforeCallerInterceptors(t *testing.T) {
+func TestNewSanitizesBeforeCallerInterceptors(t *testing.T) {
 	const body = `{"data":{"myCluster":{"id":"cluster-id","name":"cluster","distro":"INVALID","token":"tracing-token-secret"}}}`
 	server := newGraphQLTestServer(http.StatusOK, body)
 	defer server.Close()
@@ -157,7 +157,7 @@ func TestNewConsoleClientSanitizesBeforeCallerInterceptors(t *testing.T) {
 		return err
 	}
 
-	client := NewConsoleClient(server.Client(), server.URL, nil, tracingInterceptor)
+	client := New(server.Client(), server.URL, nil, tracingInterceptor)
 	_, err := client.MyCluster(context.Background())
 	if err == nil {
 		t.Fatal("MyCluster returned nil error")
@@ -170,9 +170,9 @@ func TestNewConsoleClientSanitizesBeforeCallerInterceptors(t *testing.T) {
 	}
 }
 
-func TestNewConsoleClientPreservesTransportErrors(t *testing.T) {
+func TestNewPreservesTransportErrors(t *testing.T) {
 	transportErr := errors.New("dial failed")
-	client := NewConsoleClient(&failingHTTPClient{err: transportErr}, "http://console.test/graphql", nil)
+	client := New(&failingHTTPClient{err: transportErr}, "http://console.test/graphql", nil)
 
 	_, err := client.MyCluster(context.Background())
 	if err == nil {

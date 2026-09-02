@@ -17,8 +17,8 @@ const (
 	gqlgencMalformedGraphQLErrorsPrefix = "faild to parse graphql errors. Response content " // "faild" is from gqlgenc v0.33.0.
 )
 
-// NewConsoleClient creates a ConsoleClient that does not expose GraphQL response bodies in errors.
-func NewConsoleClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
+// New creates a ConsoleClient that does not expose GraphQL response bodies in errors.
+func New(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) ConsoleClient {
 	safeInterceptors := make([]clientv2.RequestInterceptor, 0, len(interceptors)+1)
 	safeInterceptors = append(safeInterceptors, interceptors...)
 	safeInterceptors = append(safeInterceptors, NewErrorInterceptor())
