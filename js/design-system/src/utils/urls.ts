@@ -3,7 +3,12 @@ export function removeTrailingSlashes(str: string | null | undefined) {
     return str
   }
 
-  return str.replace(/\/+$/, '')
+  let end = str.length
+  while (end > 0 && str.charAt(end - 1) === '/') {
+    end -= 1
+  }
+
+  return str.slice(0, end)
 }
 
 export function isRelativeUrl(str: string) {
@@ -84,10 +89,18 @@ export function extractRepoProjectPath(repoUrl: string): string | null {
     return null
   }
 
-  path = path
-    .replace(/^\/+/, '')
-    .replace(/\/-\/.*$/, '')
-    .replace(/\.git$/, '')
+  while (path.startsWith('/')) {
+    path = path.slice(1)
+  }
+
+  const gitlabMarker = path.indexOf('/-/')
+  if (gitlabMarker !== -1) {
+    path = path.slice(0, gitlabMarker)
+  }
+
+  if (path.endsWith('.git')) {
+    path = path.slice(0, -'.git'.length)
+  }
 
   const normalized = path.split('/').filter(Boolean).join('/')
   return normalized || null

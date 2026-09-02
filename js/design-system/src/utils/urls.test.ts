@@ -105,12 +105,10 @@ describe('URL utils', () => {
     expect(isSubrouteOf('/a/b/cdefg/h/ijk', '/a/b/cdefg/h/')).toBeTruthy()
     expect(isSubrouteOf('/a/b/cdefg/', '/a/b/cdefg/h/')).toBeFalsy()
     expect(isSubrouteOf('/a/b/cdefg/i/', '/a/b/cdefg/h/')).toBeFalsy()
-    expect(
-      isSubrouteOf('http://google.com/?x=something', 'http://google.com')
-    ).toBeTruthy()
+    expect(isSubrouteOf('/docs/intro?x=something', '/docs/intro')).toBeTruthy()
 
     expect(isSubrouteOf('', '/')).toBeFalsy()
-    expect(isSubrouteOf('https://google.com', 'http://google.com')).toBeFalsy()
+    expect(isSubrouteOf('/https-docs', '/http-docs')).toBeFalsy()
   })
 
   it('should create valid id attributes', () => {
