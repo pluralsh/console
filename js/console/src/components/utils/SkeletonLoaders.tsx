@@ -6,6 +6,7 @@ import {
   SidecarItem,
 } from '@pluralsh/design-system'
 import chroma from 'chroma-js'
+import { type CSSProperties as ReactCSSProperties } from 'react'
 import styled, {
   CSSObject,
   CSSProperties,
@@ -31,11 +32,13 @@ const LinearGradient = styled.linearGradient`
   }
 `
 
-function skeletonCssVars(theme: ReturnType<typeof useTheme>): CSSProperties {
+function skeletonCssVars(
+  theme: ReturnType<typeof useTheme>
+): ReactCSSProperties {
   return {
     '--skeleton-from': theme.colors['fill-two'],
     '--skeleton-to': theme.colors['fill-three'],
-  } as CSSProperties
+  }
 }
 
 // pretty much deprecated in favor of "loading" prop on tables
