@@ -177,6 +177,7 @@ const TabClone = styled(
   position: 'relative',
   '&:focus, &:focus-visible': {
     outline: 'none',
+    color: 'inherit',
     zIndex: theme.zIndexes.base + 1,
   },
   '&:focus-visible': {
@@ -219,9 +220,15 @@ function TabRenderer({ item, state, stateProps, stateRef }: TabRendererProps) {
       {
         ...{
           cursor: 'pointer',
-          _focusVisible: { ...theme.partials.focus.default },
+          _focus: { outline: 'none', color: 'inherit' },
+          _focusVisible: {
+            ...theme.partials.focus.default,
+            color: 'inherit',
+          },
           position: 'relative',
           '&:focus, &:focus-visible': {
+            outline: 'none',
+            color: 'inherit',
             zIndex: theme.zIndexes.base + 1,
           },
         },
