@@ -78,6 +78,31 @@ export function groupIssuesByStatus<
   return grouped
 }
 
+export function allIssueProvidersSelected(
+  providers: IssueWebhookProvider[]
+): boolean {
+  return (
+    providers.length === ALL_ISSUE_PROVIDERS.length &&
+    ALL_ISSUE_PROVIDERS.every((provider) => providers.includes(provider))
+  )
+}
+
+export function allIssueStatusesSelected(statuses: IssueStatus[]): boolean {
+  return (
+    statuses.length === ISSUE_STATUS_OPTIONS.length &&
+    ISSUE_STATUS_OPTIONS.every((status) => statuses.includes(status))
+  )
+}
+
+export function hasUncheckedIssueFilters({
+  providers,
+  statuses,
+}: Pick<WorkbenchIssuesDisplayState, 'providers' | 'statuses'>): boolean {
+  return (
+    !allIssueProvidersSelected(providers) || !allIssueStatusesSelected(statuses)
+  )
+}
+
 export function toIssueFilterVariables({
   providers,
   statuses,
@@ -89,18 +114,12 @@ export function toIssueFilterVariables({
   sort?: IssueSort
   direction?: IssueSortDirection
 } {
-  const allProvidersSelected =
-    providers.length === ALL_ISSUE_PROVIDERS.length &&
-    ALL_ISSUE_PROVIDERS.every((provider) => providers.includes(provider))
-  const allStatusesSelected =
-    statuses.length === ISSUE_STATUS_OPTIONS.length &&
-    ISSUE_STATUS_OPTIONS.every((status) => statuses.includes(status))
   const defaultSort =
     sort === IssueSort.InsertedAt && direction === IssueSortDirection.Desc
 
   return {
-    providers: allProvidersSelected ? undefined : providers,
-    statuses: allStatusesSelected ? undefined : statuses,
+    providers: allIssueProvidersSelected(providers) ? undefined : providers,
+    statuses: allIssueStatusesSelected(statuses) ? undefined : statuses,
     sort: defaultSort ? undefined : sort,
     direction: defaultSort ? undefined : direction,
   }

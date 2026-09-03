@@ -24,6 +24,7 @@ import { WorkbenchPageLayout } from './Workbench'
 import { WorkbenchIssuesDisplayPanel } from './WorkbenchIssuesDisplayPanel'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
+  hasUncheckedIssueFilters,
   toIssueFilterVariables,
 } from './workbenchIssuesDisplay'
 
@@ -87,7 +88,10 @@ export function WorkbenchIssues() {
               startIcon={<FiltersIcon />}
               onClick={() => setDisplayOpen(!displayOpen)}
             >
-              Display
+              <DisplayLabelSC>
+                Display
+                {hasUncheckedIssueFilters(display) && <DisplayFilterDotSC />}
+              </DisplayLabelSC>
             </Button>
           </ToolbarSC>
           <ContentSC>
@@ -137,6 +141,20 @@ const WrapperSC = styled(Flex)(({ theme }) => ({
 const ToolbarSC = styled(Flex)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing.medium,
+}))
+
+const DisplayLabelSC = styled.span(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: theme.spacing.xsmall,
+}))
+
+const DisplayFilterDotSC = styled.span(({ theme }) => ({
+  width: 8,
+  height: 8,
+  borderRadius: '50%',
+  backgroundColor: theme.colors['text-primary-accent'],
+  flexShrink: 0,
 }))
 
 const ContentSC = styled(Flex)(({ theme }) => ({
