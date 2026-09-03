@@ -262,8 +262,9 @@ defmodule Console.Deployments.IntegrationsTest do
         }
       })
 
-      {:ok, _} = Integrations.upsert_issue(payload)
+      {:ok, issue} = Integrations.upsert_issue(payload)
 
+      assert issue.id in [first.id, second.id]
       assert refetch(first).status == :completed
       assert refetch(second).status == :completed
       assert Console.Repo.aggregate(Console.Schema.Issue, :count) == 2

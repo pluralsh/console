@@ -134,7 +134,9 @@ defmodule Console.Deployments.Integrations do
 
     start_transaction()
     |> add_operation(:issue, fn _ -> persist_issue(extant, attrs) end)
-    |> add_operation(:related, fn %{issue: issue} -> sync_related_issue_statuses(issue, attrs) end)
+    |> add_operation(:related, fn %{issue: issue} ->
+      sync_related_issue_statuses(attrs, except_id(issue))
+    end)
     |> execute()
     |> notify_issue_sync(extant)
   end
@@ -146,6 +148,9 @@ defmodule Console.Deployments.Integrations do
   defp persist_issue(nil, %{workbench_id: id} = attrs) when is_binary(id), do: insert_issue(attrs)
   defp persist_issue(nil, %{flow_id: id} = attrs) when is_binary(id), do: insert_issue(attrs)
   defp persist_issue(nil, _), do: {:ok, nil}
+
+  defp except_id(%Issue{id: id}), do: id
+  defp except_id(_), do: nil
 
   defp insert_issue(%{external_id: external_id} = attrs) do
     %Issue{external_id: external_id}
@@ -194,17 +199,19 @@ defmodule Console.Deployments.Integrations do
   end
   defp inherit_issue_scope(attrs, _), do: attrs
 
-  defp sync_related_issue_statuses(issue, %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload})
-    when status in [:open, :completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
-    github_issues_for_reference(url)
-    |> Repo.all()
-    |> Enum.reject(&same_issue?(&1, issue))
-    |> Enum.reduce_while({:ok, []}, &sync_issue_status(&1, &2, status))
-  end
+  defp sync_related_issue_statuses(%{provider: :github, status: status, url: url, payload: payload}, except_id)
+    when status in [:open, :completed, :cancelled] and is_binary(url) and is_map(payload),
+    do: sync_github_pr_statuses(payload, url, status, except_id)
   defp sync_related_issue_statuses(_, _), do: {:ok, []}
 
-  defp same_issue?(%Issue{id: id}, %Issue{id: id}), do: true
-  defp same_issue?(_, _), do: false
+  defp sync_github_pr_statuses(%{"comment" => comment}, _, _, _) when is_map(comment), do: {:ok, []}
+  defp sync_github_pr_statuses(%{"pull_request" => _}, url, status, except_id) do
+    github_issues_for_reference(url)
+    |> Repo.all()
+    |> Enum.reject(& &1.id == except_id)
+    |> Enum.reduce_while({:ok, []}, &sync_issue_status(&1, &2, status))
+  end
+  defp sync_github_pr_statuses(_, _, _, _), do: {:ok, []}
 
   defp sync_issue_status(%Issue{} = issue, {:ok, synced}, status) do
     Issue.changeset(issue, %{status: status})
