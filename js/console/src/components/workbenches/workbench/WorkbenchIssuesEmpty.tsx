@@ -13,7 +13,7 @@ const EMPTY_COPY: Record<
   },
   statuses: {
     message: 'No statuses selected',
-    description: 'It looks like there are no status selected.',
+    description: 'It looks like there are no statuses selected.',
   },
 }
 
