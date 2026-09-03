@@ -3,20 +3,6 @@ import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import styled from 'styled-components'
 import { IssueFilterEmptyKind } from './workbenchIssuesDisplay'
 
-const EMPTY_COPY: Record<
-  IssueFilterEmptyKind,
-  { message: string; description: string }
-> = {
-  sources: {
-    message: 'No source selected',
-    description: 'It looks like there are no sources selected.',
-  },
-  statuses: {
-    message: 'No statuses selected',
-    description: 'It looks like there are no statuses selected.',
-  },
-}
-
 export function WorkbenchIssuesFilterEmpty({
   kind,
   onReset,
@@ -24,17 +10,15 @@ export function WorkbenchIssuesFilterEmpty({
   kind: IssueFilterEmptyKind
   onReset: () => void
 }) {
-  const { message, description } = EMPTY_COPY[kind]
-
   return (
     <WrapperSC fillLevel={1}>
       <CopySC>
-        <Body1BoldP css={{ margin: 0 }}>{message}</Body1BoldP>
+        <Body1BoldP css={{ margin: 0 }}>No {kind} selected</Body1BoldP>
         <Body2P
           $color="text-light"
           css={{ margin: 0 }}
         >
-          {description}
+          It looks like there are no {kind} selected.
         </Body2P>
       </CopySC>
       <Button
