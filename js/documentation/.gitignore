@@ -1,9 +1,5 @@
-# IDE settings.
-.idea
-#
 .next/
 .vercel
-node_modules/
 
 # dependencies
 .yarn/*

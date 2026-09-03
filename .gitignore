@@ -1,5 +1,5 @@
 # IDE
-/.idea
+.idea/
 /.vscode/**/*
 !/.vscode/settings.json
 !/.vscode/markdown.code-snippets
@@ -8,8 +8,7 @@
 .DS_Store
 
 # JavaScript workspace
-/node_modules
-/js/node_modules
+node_modules/
 /js/.yarn/*
 !/js/.yarn/releases/
 !/js/.yarn/releases/**
