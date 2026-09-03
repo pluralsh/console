@@ -18,11 +18,6 @@ export type WorkbenchIssuesDisplayState = {
 
 export const ALL_ISSUE_PROVIDERS = Object.values(IssueWebhookProvider)
 
-export const PINNED_ISSUE_PROVIDERS = [
-  IssueWebhookProvider.Github,
-  IssueWebhookProvider.Linear,
-]
-
 export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
   view: 'list',
   providers: ALL_ISSUE_PROVIDERS,
@@ -40,12 +35,7 @@ export function toggleListValue<T>(list: T[], value: T): T[] {
 export function visibleIssueProviders(
   counts: Partial<Record<IssueWebhookProvider, number>>
 ): IssueWebhookProvider[] {
-  const extras = ALL_ISSUE_PROVIDERS.filter(
-    (provider) =>
-      !PINNED_ISSUE_PROVIDERS.includes(provider) && (counts[provider] ?? 0) > 0
-  )
-
-  return [...PINNED_ISSUE_PROVIDERS, ...extras]
+  return ALL_ISSUE_PROVIDERS.filter((provider) => (counts[provider] ?? 0) > 0)
 }
 
 export function allIssueProvidersSelected(
@@ -82,7 +72,10 @@ export function getIssueFilterEmptyKind(
   }: Pick<WorkbenchIssuesDisplayState, 'providers' | 'statuses'>,
   visibleProviders: IssueWebhookProvider[]
 ): IssueFilterEmptyKind | null {
-  if (visibleProviders.every((provider) => !providers.includes(provider))) {
+  if (
+    visibleProviders.length > 0 &&
+    visibleProviders.every((provider) => !providers.includes(provider))
+  ) {
     return 'sources'
   }
   if (statuses.length === 0) return 'statuses'
