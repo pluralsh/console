@@ -9,6 +9,7 @@ import { useDebounce } from '@react-hooks-library/core'
 import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { GqlError } from 'components/utils/Alert'
+import usePersistedState from 'components/hooks/usePersistedState'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   IssueStatus,
@@ -30,15 +31,33 @@ import {
   resetIssueFilters,
   toIssueFilterVariables,
   visibleIssueProviders,
+  WorkbenchIssuesDisplayState,
+  WorkbenchIssuesView,
 } from './workbenchIssuesDisplay'
+
+const WORKBENCH_ISSUES_VIEW_STORAGE_KEY = 'workbench-issues-view'
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
+  const [persistedView, setPersistedView] = usePersistedState(
+    WORKBENCH_ISSUES_VIEW_STORAGE_KEY,
+    DEFAULT_WORKBENCH_ISSUES_DISPLAY.view,
+    0,
+    (value: unknown): WorkbenchIssuesView =>
+      value === 'board' ? 'board' : 'list'
+  )
   const [searchString, setSearchString] = useState('')
   const [displayOpen, setDisplayOpen] = useState(false)
-  const [display, setDisplay] = useState(DEFAULT_WORKBENCH_ISSUES_DISPLAY)
+  const [display, setDisplay] = useState(() => ({
+    ...DEFAULT_WORKBENCH_ISSUES_DISPLAY,
+    view: persistedView,
+  }))
   const debouncedSearchString = useDebounce(searchString.trim(), 200)
   const filterVars = useMemo(() => toIssueFilterVariables(display), [display])
+  const updateDisplay = (next: WorkbenchIssuesDisplayState) => {
+    setDisplay(next)
+    setPersistedView(next.view)
+  }
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -108,7 +127,7 @@ export function WorkbenchIssues() {
               {filterEmptyKind ? (
                 <WorkbenchIssuesFilterEmpty
                   kind={filterEmptyKind}
-                  onReset={() => setDisplay(resetIssueFilters)}
+                  onReset={() => updateDisplay(resetIssueFilters(display))}
                 />
               ) : display.view === 'board' ? (
                 <WorkbenchIssuesBoard
@@ -132,7 +151,7 @@ export function WorkbenchIssues() {
             {displayOpen && (
               <WorkbenchIssuesDisplayPanel
                 state={display}
-                onChange={setDisplay}
+                onChange={updateDisplay}
                 providerCounts={providerCounts}
                 statusCounts={statusCounts}
               />
