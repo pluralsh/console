@@ -104,11 +104,11 @@ export function WorkbenchIssuesBoard({
               ) : (
                 <EmptyColumnCard expanded={expandCards} />
               )}
-              {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
             </CardsSC>
           </ColumnSC>
         )
       )}
+      {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
     </BoardSC>
   )
 }
@@ -171,7 +171,7 @@ function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
     return () => observer.disconnect()
   }, [onVisible])
 
-  return <div ref={ref} />
+  return <LoadMoreSentinelSC ref={ref} />
 }
 
 const BoardSC = styled.div<{ $columnCount: number }>(
@@ -264,6 +264,11 @@ const EmptyCardTextSC = styled.p(({ theme }) => ({
   margin: 0,
   color: theme.colors['text-light'],
 }))
+
+const LoadMoreSentinelSC = styled.div({
+  gridColumn: '1 / -1',
+  height: 1,
+})
 
 const LoadingSC = styled(Flex)({
   flex: 1,
