@@ -112,7 +112,25 @@ defmodule Console.Deployments.Pr.Impl.Azure do
 
   def files(_, _), do: {:ok, []}
 
-  def commit_status(_, _, _, _, _), do: :ok
+  def commit_status(scm_conn, %PullRequest{url: url}, _, status, attrs) do
+    with {:ok, name, _} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn),
+         {:ok, repo_id} <- get_repo_id(conn, name),
+         {:ok, response} <-
+           post(conn, "/git/repositories/#{repo_id}/commits/#{attrs.sha}/statuses", %{
+             state: commit_status_state(status),
+             description: attrs.description,
+             targetUrl: attrs.url,
+             context: %{name: attrs.name, genre: "Plural"}
+           }) do
+      {:ok, "#{response["id"] || attrs.name}"}
+    end
+  end
+
+  defp commit_status_state(:successful), do: "succeeded"
+  defp commit_status_state(:failed), do: "failed"
+  defp commit_status_state(:cancelled), do: "notApplicable"
+  defp commit_status_state(_), do: "pending"
 
   def merge(conn, %PullRequest{url: url}) do
     body = %{
@@ -142,7 +160,14 @@ defmodule Console.Deployments.Pr.Impl.Azure do
          {:ok, repo_id} <- get_repo_id(conn, name),
          {:ok, %{"title" => title} = pr} <-
            get(conn, "/git/repositories/#{repo_id}/pullrequests/#{number}") do
-      {:ok, %{title: title, body: pr["description"] || ""}}
+      {:ok,
+       %{
+         title: title,
+         body: pr["description"] || "",
+         commit_sha:
+           get_in(pr, ["lastMergeSourceCommit", "commitId"]) ||
+             get_in(pr, ["lastMergeCommit", "commitId"])
+       }}
     end
   end
 

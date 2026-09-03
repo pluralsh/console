@@ -508,9 +508,9 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
   if (!prompt) return null
   return (
     <PreviewablePanel
-      header="Prompt"
       contentKey={`prompt:${prompt.length}`}
       subtle
+      collapsedLines={2}
     >
       <SimplifiedMarkdown
         text={prompt}

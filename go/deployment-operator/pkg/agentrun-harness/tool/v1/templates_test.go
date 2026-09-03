@@ -43,7 +43,13 @@ func TestSystemPromptTemplate_EmbedsOriginalPrompt(t *testing.T) {
 				t.Fatal("expected updateAgentRunAnalysis in analyze system prompt")
 			}
 			if tc.name == "review" {
-				for _, expected := range []string{"updateAgentRunAnalysis", "agentPrReview", "getPRState"} {
+				for _, expected := range []string{
+					"updateAgentRunAnalysis",
+					"agentPrReview",
+					"getPRState",
+					"overall mergeability, not your confidence",
+					"Any finding that should block merge requires a grade of `C` or lower",
+				} {
 					if !strings.Contains(content, expected) {
 						t.Fatalf("expected review instructions to contain %q", expected)
 					}
@@ -184,13 +190,43 @@ func TestSystemPromptTemplate_MemoryPersistenceInstructions(t *testing.T) {
 
 func TestSystemPromptTemplate_DindInstructions(t *testing.T) {
 	templateDir := filepath.Join("..", "..", "..", "..", "dockerfiles", "agent-harness", "system")
+	shared := []string{
+		"Kubernetes pod sandbox",
+		"may not include many language runtimes",
+		"preferred approach",
+		"verify compilation",
+		"run unit tests",
+	}
 
 	for _, tc := range []struct {
 		name     string
 		template string
+		extra    []string
 	}{
-		{"write", "write.md.tmpl"},
-		{"babysit", "babysit.md.tmpl"},
+		{
+			name:     "write",
+			template: "write.md.tmpl",
+			extra: []string{
+				"bump dependencies and regenerate lock files",
+				"deterministic, reviewable dependency and lock-file updates",
+			},
+		},
+		{
+			name:     "babysit",
+			template: "babysit.md.tmpl",
+			extra: []string{
+				"bump dependencies and regenerate lock files",
+				"deterministic, reviewable dependency and lock-file updates",
+			},
+		},
+		{
+			name:     "review",
+			template: "review.md.tmpl",
+			extra: []string{
+				"same way write-mode agents do for verification",
+				"keep the review read-only",
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			content, err := systemPromptTemplate(filepath.Join(templateDir, tc.template), &SystemPromptTemplateInput{
@@ -202,15 +238,7 @@ func TestSystemPromptTemplate_DindInstructions(t *testing.T) {
 			if err != nil {
 				t.Fatalf("systemPromptTemplate() failed: %v", err)
 			}
-			for _, expected := range []string{
-				"Kubernetes pod sandbox",
-				"may not include many language runtimes",
-				"preferred approach",
-				"verify compilation",
-				"run unit tests",
-				"bump dependencies and regenerate lock files",
-				"deterministic, reviewable dependency and lock-file updates",
-			} {
+			for _, expected := range append(append([]string{}, shared...), tc.extra...) {
 				if !strings.Contains(content, expected) {
 					t.Fatalf("expected DinD instructions to contain %q", expected)
 				}

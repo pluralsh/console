@@ -4,6 +4,7 @@ defmodule Console.Deployments.Agents do
   require Logger
   import Console.Deployments.Policies
   import Console.Deployments.Pr.Git, only: [backfill_token: 1, to_http: 2]
+  import Console.Schema.AgentRun, only: [is_terminal: 1]
   alias Console.Deployments.Pr.Review
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Pr.Dispatcher, Git, Workbenches}
@@ -452,6 +453,54 @@ defmodule Console.Deployments.Agents do
     end
   end
 
+  @doc """
+  Creates or updates the SCM check associated with a review-mode agent run.
+  """
+  @spec agent_review_check(AgentRun.t()) :: {:ok, AgentRun.t()} | Console.error
+  def agent_review_check(
+        %AgentRun{id: id, mode: :review, followup_pr_url: url}
+      )
+      when is_binary(url) do
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      get_agent_run!(id)
+      |> Repo.preload([runtime: :connection])
+      |> ok()
+    end)
+    |> add_operation(:check, fn %{run: run} ->
+      with {:connection, %ScmConnection{} = conn} <- {:connection, scm_connection(run)},
+           {:ok, conn} <- backfill_token(conn),
+           {:ok, %PullRequest{} = pr} <- find_check_pull_request(conn, url),
+           {:sha, sha} when is_binary(sha) <- {:sha, pr.commit_sha || pr.sha} do
+        Dispatcher.commit_status(conn, pr, run.check_id, check_status(run), %{
+          sha: sha,
+          url: Console.url("/ai/agent-runs/#{run.id}"),
+          name: "Plural: Agent review",
+          description: "Plural agent review",
+          summary: String.trim(review_check_blob(run: run))
+        })
+        |> persist_check(run)
+      else
+        {:connection, _} -> {:error, "no scm connection found"}
+        {:sha, _} -> {:error, "could not find pull request head commit"}
+        error -> error
+      end
+    end)
+    |> execute(extract: :check)
+  end
+  def agent_review_check(%AgentRun{} = run), do: {:ok, run}
+
+  defp persist_check({:ok, id}, %AgentRun{} = run) when is_binary(id) do
+    run
+    |> AgentRun.changeset(%{check_id: id})
+    |> Repo.update()
+  end
+  defp persist_check(:ok, %AgentRun{} = run), do: {:ok, run}
+  defp persist_check(error, _), do: error
+
+  defp check_status(%AgentRun{status: status}) when is_terminal(status), do: status
+  defp check_status(%AgentRun{}), do: :running
+
   defp find_pull_request(conn, url) do
     case Repo.get_by(PullRequest, url: url) do
       %PullRequest{} = pr -> {:ok, pr}
@@ -459,9 +508,20 @@ defmodule Console.Deployments.Agents do
     end
   end
 
+  defp find_check_pull_request(conn, url) do
+    with {:ok, %PullRequest{commit_sha: s1, sha: s2} = pr}
+            when not is_binary(s1) and not is_binary(s2) <- find_pull_request(conn, url),
+         {:ok, external} <- external_pr(conn, url) do
+      {:ok, %{pr | commit_sha: external.commit_sha, sha: external.sha}}
+    end
+  end
+
   defp external_pr(conn, url) do
-    with {:ok, %{title: title, body: body}} <- Dispatcher.pr_details(conn, url) do
-      {:ok, %PullRequest{url: url, title: title, body: body}}
+    with {:ok, attrs} <- Dispatcher.pr_details(conn, url) do
+      attrs
+      |> Map.take(~w(title body commit_sha sha ref base)a)
+      |> Map.put(:url, url)
+      |> then(& {:ok, struct(PullRequest, &1)})
     end
   end
 
@@ -638,6 +698,7 @@ defmodule Console.Deployments.Agents do
   defp workbench_pr_attrs(_), do: %{}
 
   EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :review_check_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review_check.md.eex"]), [:assigns])
 
   defp notify({:ok, %AgentRun{} = run}, :create),
     do: handle_notify(PubSub.AgentRunCreated, run)

@@ -16,18 +16,23 @@ import (
 
 // Query implements the cloudquery.CloudQueryServer interface
 func (in *CloudQueryService) Query(_ context.Context, input *cloudquery.QueryInput) (*cloudquery.QueryResult, error) {
-	c, _, err := in.createProviderConnection(input.GetConnection())
-	if err != nil {
-		return nil, err
-	}
-
-	return in.handleQuery(c, input.GetQuery())
+	query := input.GetQuery()
+	var out *cloudquery.QueryResult
+	err := in.withProviderConnection(input.GetConnection(), func(c connection.Connection) error {
+		result, err := in.handleQuery(c, query)
+		if err != nil {
+			return err
+		}
+		out = result
+		return nil
+	})
+	return out, wrapInternal(err, "failed to execute query '%s': %v", query, err)
 }
 
 func (in *CloudQueryService) handleQuery(c connection.Connection, query string) (*cloudquery.QueryResult, error) {
 	columns, rows, err := c.Query(query)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to execute query '%s': %v", query, err)
+		return nil, err
 	}
 	klog.V(log.LogLevelDebug).InfoS("found query results", "rows", len(rows))
 

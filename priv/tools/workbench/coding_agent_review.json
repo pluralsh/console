@@ -3,8 +3,8 @@
     "properties": {
         "mode": {
             "type": "string",
-            "enum": ["analyze", "write"],
-            "description": "The mode of the coding agent. Use analyze to gather information, or write to generate a PR."
+            "enum": ["analyze", "write", "review"],
+            "description": "The mode of the coding agent. Use analyze to gather information, write to generate a PR, or review to evaluate and publish a structured review for an existing PR. Review mode is enabled for this job; use it whenever the task is to review a pull request."
         },
         "repository": {
             "type": "string",
@@ -12,7 +12,7 @@
         },
         "base_branch": {
             "type": "string",
-            "description": "Optional. The branch to clone and use as the pull request base. Leave it blank unless explicitly prompted to set it. Do not use this for follow-up runs."
+            "description": "Required for review mode: the pull request's head branch (the branch containing the changes to review), not the PR's target/base. For analyze/write this is optional and is the branch to clone and use as the pull request base. Leave it blank unless explicitly prompted. Do not use this for follow-up runs."
         },
         "head_branch": {
             "type": "string",
@@ -20,10 +20,10 @@
         },
         "pr_url": {
             "type": "string",
-            "description": "Required whenever `followup` is true. The URL of the existing pull request to continue."
+            "description": "Required for review mode and whenever `followup` is true. The URL of the existing pull request to review or continue. For review runs, this URL is provided directly to the review agent as pull request context."
         },
         "prompt": {
-            "type": "string", 
+            "type": "string",
             "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository.  Commonmark Markdown formatting is encouraged to convey structure and semantic importance."
         },
         "babysit": {

@@ -427,9 +427,9 @@ export type AgentPodReference = {
 export type AgentPrReviewAttributes = {
   /** up to three inline review findings */
   comments?: InputMaybe<Array<InputMaybe<AgentPrReviewCommentAttributes>>>;
-  /** the A-F confidence grade */
+  /** the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge */
   confidence: AgentReviewConfidence;
-  /** an explanation of the confidence grade */
+  /** an explanation of the mergeability grade based on findings and blockers; do not describe review certainty */
   confidenceComment: Scalars['String']['input'];
   /** file-level summaries */
   files?: InputMaybe<Array<InputMaybe<AgentPrReviewFileAttributes>>>;

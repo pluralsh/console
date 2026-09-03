@@ -144,7 +144,13 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
          {:ok, conn} <- connection(scm_conn),
          {:ok, %{"title" => title} = pr} <-
            get(conn, "/repositories/#{workspace}/#{repo}/pullrequests/#{number}") do
-      {:ok, %{title: title, body: get_in(pr, ["summary", "raw"]) || pr["description"] || ""}}
+      {:ok,
+       %{
+         title: title,
+         body: get_in(pr, ["summary", "raw"]) || pr["description"] || "",
+         commit_sha: get_in(pr, ["source", "commit", "hash"]),
+         ref: get_in(pr, ["source", "branch", "name"])
+       }}
     end
   end
 
@@ -157,7 +163,36 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def commit_status(_, _, _, _, _), do: :ok
+  def commit_status(scm_conn, %PullRequest{url: url} = pr, id, status, attrs) do
+    with {:ok, workspace, repo, _} <- get_pull_id(url),
+         {:ok, conn} <- connection(scm_conn) do
+      key = id || "plural-agent-review"
+      root = "/repositories/#{workspace}/#{repo}/commit/#{attrs.sha}/statuses/build"
+
+      body = %{
+        key: key,
+        state: commit_status_state(status),
+        url: attrs.url,
+        name: attrs.name,
+        description: attrs.description,
+        refname: pr.ref
+      }
+
+      case id do
+        id when is_binary(id) -> put(conn, "#{root}/#{id}", body)
+        _ -> post(conn, root, body)
+      end
+      |> case do
+        {:ok, response} -> {:ok, "#{response["key"] || key}"}
+        error -> error
+      end
+    end
+  end
+
+  defp commit_status_state(:successful), do: "SUCCESSFUL"
+  defp commit_status_state(:failed), do: "FAILED"
+  defp commit_status_state(:cancelled), do: "STOPPED"
+  defp commit_status_state(_), do: "INPROGRESS"
 
   def merge(_, _), do: :ok
 

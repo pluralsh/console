@@ -58,6 +58,14 @@ defmodule Console.Deployments.Pr.Review do
     |> String.trim()
   end
 
+  @doc false
+  def table_cell(value) when is_binary(value) do
+    value
+    |> String.replace("|", "\\|")
+    |> String.replace(~r/\R+/, "<br>")
+  end
+  def table_cell(_), do: ""
+
   defp to_structs(nil, _), do: []
   defp to_structs(items, module), do: Enum.map(items, &to_struct(&1, module))
 

@@ -1,8 +1,6 @@
 defmodule Console.AI.Workbench.Engine do
   @moduledoc """
-  The overarching orchestrator to manage workbench execution.  The general architecture is as follows:
-
-  The engine first calls a plan subagent to compile a general plan of attack. From there it falls into an execution loop which:
+  The overarching orchestrator to manage workbench execution. It runs an execution loop which:
 
   1. Runs a small agentic process to fetch skill information or take notes, but ultimately delegates to a variety of subagents
   2. Each subagent does work independently and comes back with a result, these are marked as activities that can be presented in UI but also as
@@ -345,7 +343,7 @@ defmodule Console.AI.Workbench.Engine do
     skill_knowledge_tools(job, skills) ++ [
       %KnowledgeUpsert{job: job},
       %KnowledgeDelete{job: job},
-      %Subagents{bench: job.workbench, subagents: subagents, categories: categories},
+      %Subagents{bench: job.workbench, job: job, subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       %Codemode{tools: []},
@@ -384,7 +382,8 @@ defmodule Console.AI.Workbench.Engine do
       job: job,
       prompt: objective,
       engine: engine,
-      actions: Environment.actions(environment)
+      actions: Environment.actions(environment),
+      review: WorkbenchJob.coding_review?(job)
     ))
   end
 
