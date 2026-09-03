@@ -102,6 +102,7 @@ export function WorkbenchIssuesDisplayPanel({
           <SectionTitleSC>Sort by</SectionTitleSC>
           <IconFrame
             clickable
+            textValue={`Sort ${state.direction === IssueSortDirection.Desc ? 'descending' : 'ascending'}`}
             size="small"
             type="tertiary"
             tooltip={
