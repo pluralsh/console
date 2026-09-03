@@ -171,6 +171,7 @@ function ViewChip({
       clickable
       icon={icon}
       fillLevel={selected ? 3 : 1}
+      aria-pressed={selected}
       onClick={onClick}
       css={{
         width: '100%',
