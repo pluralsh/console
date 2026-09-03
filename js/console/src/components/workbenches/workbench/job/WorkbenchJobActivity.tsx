@@ -244,7 +244,6 @@ export function WorkbenchJobActivity({
       <Flex
         direction="column"
         gap="small"
-        overflow="auto"
       >
         {prompt && <JobActivityPrompt prompt={prompt} />}
         <WorkbenchJobActivityThoughts
