@@ -66,7 +66,6 @@ export function WorkbenchIssuesBoard({
   fetchNextPage: () => void
 }) {
   const grouped = useMemo(() => groupIssuesByStatus(issues), [issues])
-  const expandCards = statuses.length < ISSUE_STATUS_OPTIONS.length
   const fetchingRef = useRef(false)
   const loadMore = useCallback(() => {
     if (fetchingRef.current || loading || !hasNextPage) return
@@ -98,11 +97,10 @@ export function WorkbenchIssuesBoard({
                   <IssueCard
                     key={issue.id}
                     issue={issue}
-                    expanded={expandCards}
                   />
                 ))
               ) : (
-                <EmptyColumnCard expanded={expandCards} />
+                <EmptyColumnCard />
               )}
             </CardsSC>
           </ColumnSC>
@@ -113,18 +111,9 @@ export function WorkbenchIssuesBoard({
   )
 }
 
-function IssueCard({
-  issue,
-  expanded,
-}: {
-  issue: WorkbenchIssueFragment
-  expanded: boolean
-}) {
+function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
   return (
-    <CardSC
-      fillLevel={1}
-      $expanded={expanded}
-    >
+    <CardSC fillLevel={1}>
       <Flex
         justify="space-between"
         align="center"
@@ -147,9 +136,9 @@ function IssueCard({
   )
 }
 
-function EmptyColumnCard({ expanded }: { expanded: boolean }) {
+function EmptyColumnCard() {
   return (
-    <EmptyCardSC $expanded={expanded}>
+    <EmptyCardSC>
       <EmptyCardTextSC>
         No tickets available in this status yet.
       </EmptyCardTextSC>
@@ -177,7 +166,7 @@ function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
 const BoardSC = styled.div<{ $columnCount: number }>(
   ({ theme, $columnCount }) => ({
     display: 'grid',
-    gridTemplateColumns: `repeat(${Math.max($columnCount, 1)}, minmax(156px, 1fr))`,
+    gridTemplateColumns: `repeat(${Math.max($columnCount, 1)}, minmax(250px, 1fr))`,
     gap: theme.spacing.medium,
     flex: 1,
     minHeight: 0,
@@ -212,18 +201,17 @@ const CardsSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: 10,
-  alignItems: 'flex-start',
+  alignItems: 'stretch',
   paddingBottom: theme.spacing.small,
 }))
 
-const CardSC = styled(Card)<{ $expanded: boolean }>(({ theme, $expanded }) => ({
+const CardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   padding: theme.spacing.medium,
   boxSizing: 'border-box',
   width: '100%',
-  maxWidth: $expanded ? 'none' : 250,
   overflow: 'hidden',
   flexShrink: 0,
 }))
@@ -239,25 +227,22 @@ const TitleSC = styled.p(({ theme }) => ({
   WebkitLineClamp: 2,
 }))
 
-const EmptyCardSC = styled.div<{ $expanded: boolean }>(
-  ({ theme, $expanded }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    boxSizing: 'border-box',
-    gap: theme.spacing.xsmall,
-    padding: theme.spacing.medium,
-    minHeight: 130,
-    width: '100%',
-    maxWidth: $expanded ? 'none' : 250,
-    flexShrink: 0,
-    overflow: 'hidden',
-    backgroundColor: 'transparent',
-    border: `1px dashed ${theme.colors.border}`,
-    borderRadius: theme.borderRadiuses.large,
-  })
-)
+const EmptyCardSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'flex-start',
+  boxSizing: 'border-box',
+  gap: theme.spacing.xsmall,
+  padding: theme.spacing.medium,
+  minHeight: 130,
+  width: '100%',
+  flexShrink: 0,
+  overflow: 'hidden',
+  backgroundColor: 'transparent',
+  border: `1px dashed ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.large,
+}))
 
 const EmptyCardTextSC = styled.p(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
