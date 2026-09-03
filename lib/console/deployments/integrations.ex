@@ -164,7 +164,7 @@ defmodule Console.Deployments.Integrations do
   defp sync_related_issue_statuses(
     {:ok, %Issue{} = issue} = result,
     %{provider: :github, status: status, payload: %{"pull_request" => _} = payload}
-  ) when status in [:completed, :cancelled] and not is_map_key(payload, "comment") do
+  ) when status in [:open, :completed, :cancelled] and not is_map_key(payload, "comment") do
     Issue.for_reference(:github, issue.url)
     |> Repo.update_all(set: [status: status, updated_at: DateTime.utc_now()])
 
