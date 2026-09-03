@@ -565,8 +565,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     field :issue_counts, :workbench_issue_counts do
       middleware Nested, check: true, msg: "workbench issue counts cannot be fetched through a policy"
-      arg :q, :string, description: "search issues by title or external id"
-
       resolve &Deployments.issue_counts/3
     end
 

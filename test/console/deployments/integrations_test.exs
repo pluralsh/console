@@ -249,8 +249,22 @@ defmodule Console.Deployments.IntegrationsTest do
       hook = insert(:issue_webhook, provider: :github)
       insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
       url = "https://github.com/myorg/myrepo/issues/11"
-      first = insert(:issue, provider: :github, external_id: "myorg/myrepo:comment:5", url: url, status: :open)
-      second = insert(:issue, provider: :github, external_id: "myorg/myrepo:comment:6", url: url, status: :open)
+      first_workbench = insert(:workbench)
+      second_workbench = insert(:workbench)
+      first = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:5",
+        url: url,
+        status: :open,
+        workbench: first_workbench
+      )
+      second = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:6",
+        url: url,
+        status: :open,
+        workbench: second_workbench
+      )
 
       {:ok, payload} = Issues.Webhook.payload(hook, %{
         "action" => "closed",

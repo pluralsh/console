@@ -291,7 +291,7 @@ function Input2({
   size = size || (large ? 'large' : small ? 'small' : 'medium')
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
-  const effectiveValue = value ?? inputProps?.value
+  const effectiveValue = inputProps?.value ?? value
   const hasValue =
     effectiveValue !== undefined &&
     effectiveValue !== null &&

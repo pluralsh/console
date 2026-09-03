@@ -3,6 +3,7 @@ import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhoo
 import { IssueWebhookProvider } from 'generated/graphql'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
+import { ensureURLValidity } from 'utils/url'
 import { issueLinkLabel } from './issueLinkDisplay'
 
 export function IssueLink({
@@ -14,7 +15,10 @@ export function IssueLink({
 }) {
   if (!url) return null
 
-  const ticket = issueLinkLabel({ url, provider })
+  const href = ensureURLValidity(url)
+  if (!href) return null
+
+  const ticket = issueLinkLabel({ url: href, provider })
   const icon = getIssueWebhookProviderIcon(provider)
 
   return (
@@ -23,7 +27,7 @@ export function IssueLink({
       label={url}
     >
       <LinkSC
-        href={url}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         onClick={(e) => e.stopPropagation()}

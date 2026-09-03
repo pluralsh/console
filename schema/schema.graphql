@@ -3990,10 +3990,7 @@ type Workbench {
     direction: IssueSortDirection
   ): IssueConnection
 
-  issueCounts(
-    "search issues by title or external id"
-    q: String
-  ): WorkbenchIssueCounts
+  issueCounts: WorkbenchIssueCounts
 
   "users that have read or write access to this workbench"
   users: [User]

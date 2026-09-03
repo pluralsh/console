@@ -16238,11 +16238,6 @@ export type WorkbenchEvalResultsArgs = {
 };
 
 
-export type WorkbenchIssueCountsArgs = {
-  q?: InputMaybe<Scalars['String']['input']>;
-};
-
-
 export type WorkbenchIssuesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
