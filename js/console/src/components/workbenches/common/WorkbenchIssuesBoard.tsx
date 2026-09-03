@@ -66,6 +66,7 @@ export function WorkbenchIssuesBoard({
   fetchNextPage: () => void
 }) {
   const grouped = useMemo(() => groupIssuesByStatus(issues), [issues])
+  const expandCards = statuses.length < ISSUE_STATUS_OPTIONS.length
   const fetchingRef = useRef(false)
   const loadMore = useCallback(() => {
     if (fetchingRef.current || loading || !hasNextPage) return
@@ -97,10 +98,11 @@ export function WorkbenchIssuesBoard({
                   <IssueCard
                     key={issue.id}
                     issue={issue}
+                    expanded={expandCards}
                   />
                 ))
               ) : (
-                <EmptyColumnCard />
+                <EmptyColumnCard expanded={expandCards} />
               )}
               {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
             </CardsSC>
@@ -111,9 +113,18 @@ export function WorkbenchIssuesBoard({
   )
 }
 
-function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
+function IssueCard({
+  issue,
+  expanded,
+}: {
+  issue: WorkbenchIssueFragment
+  expanded: boolean
+}) {
   return (
-    <CardSC fillLevel={1}>
+    <CardSC
+      fillLevel={1}
+      $expanded={expanded}
+    >
       <Flex
         justify="space-between"
         align="center"
@@ -136,9 +147,9 @@ function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
   )
 }
 
-function EmptyColumnCard() {
+function EmptyColumnCard({ expanded }: { expanded: boolean }) {
   return (
-    <EmptyCardSC>
+    <EmptyCardSC $expanded={expanded}>
       <EmptyCardTextSC>
         No tickets available in this status yet.
       </EmptyCardTextSC>
@@ -205,14 +216,14 @@ const CardsSC = styled.div(({ theme }) => ({
   paddingBottom: theme.spacing.small,
 }))
 
-const CardSC = styled(Card)(({ theme }) => ({
+const CardSC = styled(Card)<{ $expanded: boolean }>(({ theme, $expanded }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   padding: theme.spacing.medium,
   boxSizing: 'border-box',
   width: '100%',
-  maxWidth: 250,
+  maxWidth: $expanded ? 'none' : 250,
   overflow: 'hidden',
   flexShrink: 0,
 }))
@@ -228,23 +239,25 @@ const TitleSC = styled.p(({ theme }) => ({
   WebkitLineClamp: 2,
 }))
 
-const EmptyCardSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'flex-start',
-  boxSizing: 'border-box',
-  gap: theme.spacing.xsmall,
-  padding: theme.spacing.medium,
-  minHeight: 130,
-  width: '100%',
-  maxWidth: 250,
-  flexShrink: 0,
-  overflow: 'hidden',
-  backgroundColor: 'transparent',
-  border: `1px dashed ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.large,
-}))
+const EmptyCardSC = styled.div<{ $expanded: boolean }>(
+  ({ theme, $expanded }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    boxSizing: 'border-box',
+    gap: theme.spacing.xsmall,
+    padding: theme.spacing.medium,
+    minHeight: 130,
+    width: '100%',
+    maxWidth: $expanded ? 'none' : 250,
+    flexShrink: 0,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    border: `1px dashed ${theme.colors.border}`,
+    borderRadius: theme.borderRadiuses.large,
+  })
+)
 
 const EmptyCardTextSC = styled.p(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
