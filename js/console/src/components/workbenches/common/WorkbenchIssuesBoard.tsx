@@ -14,6 +14,7 @@ import {
   WorkbenchIssueFragment,
   WorkbenchJobStatus,
 } from 'generated/graphql'
+import { includes, isEmpty, isNil } from 'lodash'
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -77,7 +78,7 @@ export function WorkbenchIssuesBoard({
     if (!loading) fetchingRef.current = false
   }, [loading])
 
-  if (loading && issues.length === 0) {
+  if (loading && isEmpty(issues)) {
     return (
       <LoadingSC>
         <Spinner />
@@ -87,12 +88,12 @@ export function WorkbenchIssuesBoard({
 
   return (
     <BoardSC $columnCount={statuses.length}>
-      {ISSUE_STATUS_OPTIONS.filter((status) => statuses.includes(status)).map(
+      {ISSUE_STATUS_OPTIONS.filter((status) => includes(statuses, status)).map(
         (status) => (
           <ColumnSC key={status}>
             <ColumnTitleSC>{ISSUE_STATUS_LABELS[status]}</ColumnTitleSC>
             <CardsSC>
-              {grouped[status].length > 0 ? (
+              {!isEmpty(grouped[status]) ? (
                 grouped[status].map((issue) => (
                   <IssueCard
                     key={issue.id}
@@ -151,7 +152,7 @@ function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
 
   useEffect(() => {
     const element = ref.current
-    if (!element) return
+    if (isNil(element)) return
 
     const observer = new IntersectionObserver(([entry]) => {
       if (entry?.isIntersecting) onVisible()

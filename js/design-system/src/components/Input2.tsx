@@ -8,6 +8,7 @@ import {
   useCallback,
   useRef,
 } from 'react'
+import { isEmpty, isNil } from 'lodash'
 import { mergeProps } from 'react-aria'
 import { mergeRefs } from 'react-merge-refs'
 import styled, { type DefaultTheme } from 'styled-components'
@@ -292,10 +293,7 @@ function Input2({
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
   const effectiveValue = inputProps?.value ?? value
-  const hasValue =
-    effectiveValue !== undefined &&
-    effectiveValue !== null &&
-    String(effectiveValue).length > 0
+  const hasValue = !isNil(effectiveValue) && !isEmpty(String(effectiveValue))
 
   const hasEndContent = !!suffix
   const hasStartContent = !!prefix || !!titleContent

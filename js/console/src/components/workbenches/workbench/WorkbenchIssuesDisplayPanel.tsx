@@ -17,7 +17,7 @@ import {
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
-import { startCase } from 'lodash'
+import { includes, startCase } from 'lodash'
 import { ReactElement } from 'react'
 import styled from 'styled-components'
 import {
@@ -69,7 +69,7 @@ export function WorkbenchIssuesDisplayPanel({
               key={provider}
               label={startCase(provider.toLowerCase())}
               count={providerCounts[provider] ?? 0}
-              checked={state.providers.includes(provider)}
+              checked={includes(state.providers, provider)}
               onChange={() =>
                 onChange({
                   ...state,
@@ -88,7 +88,7 @@ export function WorkbenchIssuesDisplayPanel({
               key={status}
               label={ISSUE_STATUS_LABELS[status]}
               count={statusCounts[status] ?? 0}
-              checked={state.statuses.includes(status)}
+              checked={includes(state.statuses, status)}
               onChange={() =>
                 onChange({
                   ...state,

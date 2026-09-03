@@ -16,6 +16,7 @@ import {
   IssueWebhookProvider,
   useWorkbenchIssuesQuery,
 } from 'generated/graphql'
+import { compact, fromPairs, isEmpty, isNil } from 'lodash'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
@@ -64,7 +65,7 @@ export function WorkbenchIssues() {
       { queryHook: useWorkbenchIssuesQuery, keyPath: ['workbench', 'issues'] },
       {
         id: workbenchId,
-        q: debouncedSearchString || undefined,
+        q: isEmpty(debouncedSearchString) ? undefined : debouncedSearchString,
         ...filterVars,
       }
     )
@@ -72,24 +73,26 @@ export function WorkbenchIssues() {
     () => mapExistingNodes(data?.workbench?.issues),
     [data]
   )
-  const providerCounts = useMemo(() => {
-    const counts: Partial<Record<IssueWebhookProvider, number>> = {}
-
-    for (const entry of data?.workbench?.issueCounts?.providers ?? []) {
-      if (entry) counts[entry.provider] = entry.count
-    }
-
-    return counts
-  }, [data])
-  const statusCounts = useMemo(() => {
-    const counts: Partial<Record<IssueStatus, number>> = {}
-
-    for (const entry of data?.workbench?.issueCounts?.statuses ?? []) {
-      if (entry) counts[entry.status] = entry.count
-    }
-
-    return counts
-  }, [data])
+  const providerCounts = useMemo(
+    () =>
+      fromPairs(
+        compact(data?.workbench?.issueCounts?.providers).map((entry) => [
+          entry.provider,
+          entry.count,
+        ])
+      ) as Partial<Record<IssueWebhookProvider, number>>,
+    [data]
+  )
+  const statusCounts = useMemo(
+    () =>
+      fromPairs(
+        compact(data?.workbench?.issueCounts?.statuses).map((entry) => [
+          entry.status,
+          entry.count,
+        ])
+      ) as Partial<Record<IssueStatus, number>>,
+    [data]
+  )
   const filterEmptyKind = useMemo(
     () =>
       getIssueFilterEmptyKind(display, visibleIssueProviders(providerCounts)),
@@ -124,7 +127,7 @@ export function WorkbenchIssues() {
           </ToolbarSC>
           <ContentSC>
             <TableContainerSC>
-              {filterEmptyKind ? (
+              {!isEmpty(filterEmptyKind) ? (
                 <WorkbenchIssuesFilterEmpty
                   kind={filterEmptyKind}
                   onReset={() => updateDisplay(resetIssueFilters(display))}
@@ -140,7 +143,7 @@ export function WorkbenchIssues() {
               ) : (
                 <WorkbenchIssuesTable
                   issues={issues}
-                  loading={!data && loading}
+                  loading={isNil(data) && loading}
                   hasNextPage={pageInfo?.hasNextPage}
                   fetchNextPage={fetchNextPage}
                   setVirtualSlice={setVirtualSlice}

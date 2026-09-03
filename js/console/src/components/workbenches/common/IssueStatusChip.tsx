@@ -6,9 +6,12 @@ import {
   Flex,
 } from '@pluralsh/design-system'
 import { IssueStatus } from 'generated/graphql'
+import { includes } from 'lodash'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 import { ISSUE_STATUS_LABELS } from './issueStatus'
+
+const COMPLETED_STATUSES = [IssueStatus.Completed, IssueStatus.Cancelled]
 
 const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
   [IssueStatus.InProgress]: (
@@ -24,11 +27,6 @@ const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
     />
   ),
 }
-
-const completedStatuses = new Set([
-  IssueStatus.Completed,
-  IssueStatus.Cancelled,
-])
 
 export function IssueStatusChip({
   status,
@@ -52,7 +50,7 @@ export function IssueStatusChip({
         <span
           css={{
             whiteSpace: 'nowrap',
-            ...(completedStatuses.has(status)
+            ...(includes(COMPLETED_STATUSES, status)
               ? { color: theme.colors['text-light'] }
               : {}),
           }}

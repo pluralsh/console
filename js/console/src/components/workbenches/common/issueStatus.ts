@@ -1,4 +1,5 @@
 import { IssueStatus } from 'generated/graphql'
+import { groupBy, isNil } from 'lodash'
 
 export const ISSUE_STATUS_OPTIONS = [
   IssueStatus.Open,
@@ -17,16 +18,15 @@ export const ISSUE_STATUS_LABELS: Record<IssueStatus, string> = {
 export function groupIssuesByStatus<
   T extends { status?: Nullable<IssueStatus> },
 >(issues: T[]): Record<IssueStatus, T[]> {
-  const grouped: Record<IssueStatus, T[]> = {
-    [IssueStatus.Open]: [],
-    [IssueStatus.InProgress]: [],
-    [IssueStatus.Completed]: [],
-    [IssueStatus.Cancelled]: [],
-  }
+  const grouped = groupBy(
+    issues.filter((issue) => !isNil(issue.status)),
+    (issue) => issue.status as IssueStatus
+  )
 
-  for (const issue of issues) {
-    if (issue.status) grouped[issue.status].push(issue)
+  return {
+    [IssueStatus.Open]: grouped[IssueStatus.Open] ?? [],
+    [IssueStatus.InProgress]: grouped[IssueStatus.InProgress] ?? [],
+    [IssueStatus.Completed]: grouped[IssueStatus.Completed] ?? [],
+    [IssueStatus.Cancelled]: grouped[IssueStatus.Cancelled] ?? [],
   }
-
-  return grouped
 }

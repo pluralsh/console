@@ -1,6 +1,7 @@
 import { Tooltip } from '@pluralsh/design-system'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { IssueWebhookProvider } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
 import { ensureURLValidity } from 'utils/url'
@@ -13,10 +14,10 @@ export function IssueLink({
   url?: Nullable<string>
   provider?: Nullable<IssueWebhookProvider>
 }) {
-  if (!url) return null
+  if (isEmpty(url)) return null
 
   const href = ensureURLValidity(url)
-  if (!href) return null
+  if (isEmpty(href)) return null
 
   const ticket = issueLinkLabel({ url: href, provider })
   const icon = getIssueWebhookProviderIcon(provider)

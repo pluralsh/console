@@ -1,4 +1,5 @@
 import { IssueWebhookProvider } from 'generated/graphql'
+import { compact, isEmpty } from 'lodash'
 
 export function issueLinkLabel({
   url,
@@ -15,7 +16,7 @@ export function issueLinkLabel({
         (part) => part === 'issues' || part === 'pull' || part === 'pulls'
       )
       const number = numericSegment(parts[kindIdx + 1])
-      if (number) {
+      if (!isEmpty(number)) {
         return `${parts[kindIdx] === 'issues' ? 'Issue' : 'PR'} ${number}`
       }
       break
@@ -23,7 +24,7 @@ export function issueLinkLabel({
     case IssueWebhookProvider.Linear: {
       const issueIdx = parts.findIndex((part) => part === 'issue')
       const id = parts[issueIdx + 1]
-      if (id) return id
+      if (!isEmpty(id)) return String(id)
       break
     }
     case IssueWebhookProvider.Gitlab: {
@@ -31,7 +32,7 @@ export function issueLinkLabel({
         (part) => part === 'issues' || part === 'merge_requests'
       )
       const number = numericSegment(parts[kindIdx + 1])
-      if (number) {
+      if (!isEmpty(number)) {
         return `${parts[kindIdx] === 'issues' ? 'Issue' : 'MR'} ${number}`
       }
       break
@@ -39,7 +40,7 @@ export function issueLinkLabel({
     case IssueWebhookProvider.Jira: {
       const browseIdx = parts.findIndex((part) => part === 'browse')
       const id = browseIdx >= 0 ? parts[browseIdx + 1] : undefined
-      if (id) return id
+      if (!isEmpty(id)) return String(id)
       break
     }
     default:
@@ -47,25 +48,26 @@ export function issueLinkLabel({
   }
 
   const last = parts.at(-1)
-  if (last && ISSUE_KEY.test(last)) return last
+  if (!isEmpty(last) && ISSUE_KEY.test(String(last))) return String(last)
   const number = numericSegment(last)
-  if (number) return `Issue ${number}`
+  if (!isEmpty(number)) return `Issue ${number}`
 
-  return last || url || 'Issue'
+  return compact([last, url])[0] ?? 'Issue'
 }
 
 function pathParts(url?: Nullable<string>): string[] {
-  if (!url) return []
+  if (isEmpty(url)) return []
+  const href = String(url)
   try {
-    return new URL(url).pathname.split('/').filter(Boolean)
+    return compact(new URL(href).pathname.split('/'))
   } catch {
-    return url.split('/').filter(Boolean)
+    return compact(href.split('/'))
   }
 }
 
 function numericSegment(segment?: string): string | undefined {
   const value = segment?.split(/[#?]/)[0]
-  return value && /^\d+$/.test(value) ? value : undefined
+  return !isEmpty(value) && /^\d+$/.test(String(value)) ? value : undefined
 }
 
 const ISSUE_KEY = /^[A-Za-z][\w]*-\d+$/

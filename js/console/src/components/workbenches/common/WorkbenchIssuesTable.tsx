@@ -13,6 +13,7 @@ import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { StackedText } from 'components/utils/table/StackedText'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { WorkbenchIssueFragment, WorkbenchJobStatus } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
@@ -108,7 +109,7 @@ function getColumns(fallbackWorkbenchId?: string) {
         const workbenchId = issue.workbench?.id ?? fallbackWorkbenchId
         const workbenchJobId = issue.workbenchJob?.id
 
-        if (!workbenchId || !workbenchJobId) return null
+        if (isEmpty(workbenchId) || isEmpty(workbenchJobId)) return null
 
         return (
           <Chip
@@ -164,7 +165,7 @@ export function WorkbenchIssuesTable({
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      loading={loading && issues.length === 0}
+      loading={loading && isEmpty(issues)}
       emptyStateProps={{ message: 'No issues found.' }}
     />
   )
