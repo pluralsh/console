@@ -129,6 +129,8 @@ defmodule Console.Deployments.Integrations do
   @spec upsert_issue(%{external_id: binary}) :: issue_resp
   def upsert_issue(%{external_id: external_id} = attrs) do
     extant = get_issue_by_ext_id(external_id)
+    related = related_issue(attrs)
+    attrs = inherit_issue_scope(attrs, extant || related)
 
     case extant do
       %Issue{} = issue -> issue
@@ -136,6 +138,37 @@ defmodule Console.Deployments.Integrations do
     end
     |> Issue.changeset(attrs)
     |> Repo.insert_or_update()
+    |> sync_related_issue_statuses(attrs)
     |> notify(if is_nil(extant), do: :create, else: :update)
   end
+
+  defp related_issue(
+    %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload}
+  ) when status in [:completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
+    Issue.for_reference(:github, url)
+    |> Repo.all()
+    |> List.first()
+  end
+  defp related_issue(_), do: nil
+
+  defp inherit_issue_scope(attrs, %Issue{} = issue) do
+    Enum.reduce(~w(workbench_id workbench_webhook_id flow_id)a, attrs, fn key, attrs ->
+      case {Map.get(attrs, key), Map.get(issue, key)} do
+        {nil, id} when is_binary(id) -> Map.put(attrs, key, id)
+        _ -> attrs
+      end
+    end)
+  end
+  defp inherit_issue_scope(attrs, _), do: attrs
+
+  defp sync_related_issue_statuses(
+    {:ok, %Issue{} = issue} = result,
+    %{provider: :github, status: status, payload: %{"pull_request" => _} = payload}
+  ) when status in [:completed, :cancelled] and not is_map_key(payload, "comment") do
+    Issue.for_reference(:github, issue.url)
+    |> Repo.update_all(set: [status: status, updated_at: DateTime.utc_now()])
+
+    result
+  end
+  defp sync_related_issue_statuses(result, _), do: result
 end

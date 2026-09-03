@@ -1339,6 +1339,83 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert issue.status == :open
     end
 
+    test "it marks all records for a merged GitHub pull request as completed", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :github)
+      workbench_webhook = insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Only match the original review comment"}
+      )
+      url = "https://github.com/myorg/myrepo/pull/202"
+      insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:99887766",
+        url: url,
+        status: :open,
+        workbench: workbench_webhook.workbench,
+        workbench_webhook: workbench_webhook
+      )
+
+      github_payload = %{
+        "action" => "closed",
+        "pull_request" => %{
+          "id" => 55667788,
+          "title" => "Refactor deployment worker",
+          "body" => "Moves side effects behind a service boundary.",
+          "html_url" => url,
+          "state" => "closed",
+          "merged" => true
+        }
+      }
+
+      payload = Jason.encode!(github_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      issues = Console.Repo.all(Console.Schema.Issue)
+      assert length(issues) == 2
+      assert Enum.all?(issues, & &1.status == :completed)
+      assert Enum.any?(issues, & &1.external_id == "myorg/myrepo:pull_request:55667788")
+    end
+
+    test "it marks a closed unmerged GitHub pull request as cancelled", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :github)
+      insert(:workbench_webhook,
+        issue_webhook: hook,
+        matches: %{substring: "Drop obsolete deployment path"}
+      )
+
+      github_payload = %{
+        "action" => "closed",
+        "pull_request" => %{
+          "id" => 66778899,
+          "title" => "Drop obsolete deployment path",
+          "body" => "Superseded by another approach.",
+          "html_url" => "https://github.com/myorg/myrepo/pull/203",
+          "state" => "closed",
+          "merged" => false
+        }
+      }
+
+      payload = Jason.encode!(github_payload)
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{signature}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.status == :cancelled
+    end
+
     test "it handles GitHub pull request review comment payloads", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :github)
       insert(:workbench_webhook,

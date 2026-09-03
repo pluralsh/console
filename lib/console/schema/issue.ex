@@ -47,6 +47,10 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.provider == ^provider)
   end
 
+  def for_reference(query \\ __MODULE__, provider, url) do
+    from(i in query, where: i.provider == ^provider and i.url == ^url)
+  end
+
   def for_status(query \\ __MODULE__, status) do
     from(i in query, where: i.status == ^status)
   end
