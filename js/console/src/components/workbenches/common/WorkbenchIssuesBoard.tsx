@@ -166,11 +166,15 @@ function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
 const BoardSC = styled.div<{ $columnCount: number }>(
   ({ theme, $columnCount }) => ({
     display: 'grid',
-    gridTemplateColumns: `repeat(${Math.max($columnCount, 1)}, minmax(250px, 1fr))`,
-    gap: theme.spacing.medium,
+    gridTemplateColumns: `repeat(${Math.max($columnCount, 1)}, minmax(0, 1fr))`,
+    columnGap: theme.spacing.medium,
+    rowGap: 0,
     flex: 1,
+    width: '100%',
+    minWidth: 0,
     minHeight: 0,
-    overflow: 'auto',
+    overflowX: 'hidden',
+    overflowY: 'auto',
   })
 )
 
@@ -247,6 +251,7 @@ const EmptyCardSC = styled.div(({ theme }) => ({
 const EmptyCardTextSC = styled.p(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
   margin: 0,
+  width: '100%',
   color: theme.colors['text-light'],
 }))
 
