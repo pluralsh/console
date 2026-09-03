@@ -54,6 +54,15 @@ defmodule Console.AI.Workbench.EnvironmentTest do
     end
   end
 
+  describe "actions/1" do
+    test "advertises kubernetes actions when node drain is enabled" do
+      job = insert(:workbench_job, modes: %{kubernetes: %{drain: true}})
+      environment = Environment.new(job, [], [])
+
+      assert Environment.actions(environment).kubernetes
+    end
+  end
+
   describe "engine_opts/1" do
     test "includes the workbench's cached compiled policies" do
       workbench = insert(:workbench)

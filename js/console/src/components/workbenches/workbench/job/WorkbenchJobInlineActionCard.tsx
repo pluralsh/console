@@ -34,6 +34,7 @@ import {
 import { getKubeActionVariant } from './workbenchJobKubeActionUtils'
 import {
   WorkbenchJobKubeActionChips,
+  WorkbenchJobKubeDrainDetails,
   WorkbenchJobKubeUpdateDiff,
 } from './WorkbenchJobKubeUpdateDiff'
 import { WorkbenchJobActionDenialResult } from './WorkbenchJobActionDenialResult'
@@ -57,7 +58,10 @@ export function WorkbenchJobInlineActionCard({
     activity.status === WorkbenchJobActivityStatus.NeedsApproval
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const isExec = activity.type === WorkbenchJobActivityType.Exec
-  const kubeVariant = getKubeActionVariant(activity.result?.kubeRequest?.method)
+  const kubeRequest = activity.result?.kubeRequest
+  const kubeDrain = activity.result?.kubeDrain
+  const kubeVariant = getKubeActionVariant(kubeRequest?.method)
+  const isKubeDrain = isKubernetes && !!kubeDrain
   const isKubeDiff =
     isKubernetes &&
     needsApproval &&
@@ -116,7 +120,8 @@ export function WorkbenchJobInlineActionCard({
           <HeaderActionsSC>
             <WorkbenchJobKubeActionChips
               type={activity.type}
-              method={activity.result?.kubeRequest?.method}
+              method={kubeRequest?.method}
+              drain={!!kubeDrain}
               statusChip={<InlineActionStatus activity={activity} />}
             />
             <ExpandButtonSC
@@ -153,7 +158,9 @@ export function WorkbenchJobInlineActionCard({
               {getActionDescription(activity)}
             </CaptionP>
           )}
-          {isKubeDiff ? (
+          {isKubeDrain ? (
+            <WorkbenchJobKubeDrainDetails node={kubeDrain?.node} />
+          ) : isKubeDiff ? (
             <WorkbenchJobKubeUpdateDiff
               activityId={activity.id}
               kubeRequest={activity.result?.kubeRequest}

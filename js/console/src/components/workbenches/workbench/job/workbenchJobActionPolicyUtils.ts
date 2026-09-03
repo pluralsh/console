@@ -8,7 +8,10 @@ export function getActionPolicyToolName(
   activity: WorkbenchJobActionFragment
 ): string | undefined {
   if (activity.type === WorkbenchJobActivityType.Kubernetes) {
-    const variant = getKubeActionVariant(activity.result?.kubeRequest?.method)
+    if (activity.result?.kubeDrain) return 'drain_k8s_node'
+
+    const request = activity.result?.kubeRequest
+    const variant = getKubeActionVariant(request?.method)
     if (variant === 'delete') return 'delete_k8s_resource'
     if (variant === 'create' || variant === 'update')
       return 'update_k8s_resource'

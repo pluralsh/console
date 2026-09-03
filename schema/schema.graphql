@@ -3081,6 +3081,9 @@ input WorkbenchJobKubernetesModesAttributes {
   "whether kubernetes exec actions are enabled"
   exec: Boolean
 
+  "whether kubernetes node drain actions are enabled"
+  drain: Boolean
+
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
 
@@ -4197,6 +4200,9 @@ type WorkbenchJobKubernetesModes {
   "whether kubernetes exec actions are enabled"
   exec: Boolean
 
+  "whether kubernetes node drain actions are enabled"
+  drain: Boolean
+
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
 
@@ -4323,6 +4329,9 @@ type WorkbenchJobActivityResult {
   "kubernetes request approval payload when present"
   kubeRequest: WorkbenchJobActivityKubeRequest
 
+  "kubernetes node drain approval payload when present"
+  kubeDrain: WorkbenchJobActivityKubeDrain
+
   "kubernetes exec payload when present"
   kubeExec: WorkbenchJobActivityKubeExec
 
@@ -4414,6 +4423,17 @@ type WorkbenchJobActivityKubeExec {
   container: String
 
   "why this command is needed and its expected effect"
+  explanation: String
+}
+
+type WorkbenchJobActivityKubeDrain {
+  "the target cluster handle"
+  handle: String
+
+  "the target node name"
+  node: String
+
+  "why this node drain is needed and its expected impact"
   explanation: String
 }
 

@@ -34,7 +34,7 @@ defmodule Console.Deployments.Workbenches do
     QueuedPrompt
   }
   alias Console.AI.{Provider, VectorStore}
-  alias Console.AI.Tools.Workbench.{FunctionCall, KubeRequest, SavedPrompt, KubeShell}
+  alias Console.AI.Tools.Workbench.{FunctionCall, KubeDrain, KubeRequest, SavedPrompt, KubeShell}
   alias Console.Services.Users
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -869,6 +869,7 @@ defmodule Console.Deployments.Workbenches do
       job_modes
       |> Map.put(:update, job_modes[:update] && wb_kubernetes[:update])
       |> Map.put(:delete, job_modes[:delete] && wb_kubernetes[:delete])
+      |> Map.put(:drain, job_modes[:drain] && wb_kubernetes[:drain])
 
     %{modes | kubernetes: kubernetes}
   end
@@ -1276,6 +1277,30 @@ defmodule Console.Deployments.Workbenches do
     end)
 
     {:ok, activity}
+  end
+
+  defp execute_approved_activity(
+    %WorkbenchJobActivity{type: :kubernetes, result: %{kube_drain: %KubeDrain{} = drain}} = activity,
+    user
+  ) do
+    case KubeDrain.invoke(drain, user) do
+      {:ok, _} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :successful,
+          result: %{output: "Node #{drain.node} drained successfully"}
+        })
+      {:error, {:http_error, _, %{"message" => msg}}} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Kubernetes node drain failed: #{msg}"}
+        })
+      {:error, err} ->
+        WorkbenchJobActivity.changeset(activity, %{
+          status: :failed,
+          result: %{error: "Kubernetes node drain failed: #{inspect(err)}"}
+        })
+    end
+    |> Repo.update()
   end
 
   defp execute_approved_activity(
