@@ -145,7 +145,7 @@ defmodule Console.Deployments.Integrations do
   defp related_issue(
     %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload}
   ) when status in [:completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
-    Issue.for_reference(:github, url)
+    github_issues_for_reference(url)
     |> Repo.all()
     |> List.first()
   end
@@ -165,10 +165,34 @@ defmodule Console.Deployments.Integrations do
     {:ok, %Issue{} = issue} = result,
     %{provider: :github, status: status, payload: %{"pull_request" => _} = payload}
   ) when status in [:open, :completed, :cancelled] and not is_map_key(payload, "comment") do
-    Issue.for_reference(:github, issue.url)
+    github_issues_for_reference(issue.url)
     |> Repo.update_all(set: [status: status, updated_at: DateTime.utc_now()])
 
     result
   end
   defp sync_related_issue_statuses(result, _), do: result
+
+  defp github_issues_for_reference(url) do
+    Issue.for_references(:github, github_reference_urls(url))
+  end
+
+  defp github_reference_urls(url) do
+    case github_reference_identity(url) do
+      {repository_url, number} ->
+        [url, "#{repository_url}/issues/#{number}", "#{repository_url}/pull/#{number}"]
+        |> Enum.uniq()
+      _ -> [url]
+    end
+  end
+
+  defp github_reference_identity(url) do
+    uri = URI.parse(url)
+
+    case Regex.run(~r{^(.+)/(?:issues|pull)/(\d+)/?$}, uri.path || "") do
+      [_, repository_path, number] ->
+        repository_url = URI.to_string(%{uri | path: repository_path, query: nil, fragment: nil})
+        {repository_url, number}
+      _ -> nil
+    end
+  end
 end

@@ -1345,11 +1345,12 @@ defmodule ConsoleWeb.WebhookControllerTest do
         issue_webhook: hook,
         matches: %{substring: "Only match the original review comment"}
       )
-      url = "https://github.com/myorg/myrepo/pull/202"
+      comment_url = "https://github.com/myorg/myrepo/issues/202"
+      pull_request_url = "https://github.com/myorg/myrepo/pull/202"
       insert(:issue,
         provider: :github,
         external_id: "myorg/myrepo:comment:99887766",
-        url: url,
+        url: comment_url,
         status: :open,
         workbench: workbench_webhook.workbench,
         workbench_webhook: workbench_webhook
@@ -1361,7 +1362,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
           "id" => 55667788,
           "title" => "Refactor deployment worker",
           "body" => "Moves side effects behind a service boundary.",
-          "html_url" => url,
+          "html_url" => pull_request_url,
           "state" => "closed",
           "merged" => true
         }
@@ -1381,6 +1382,8 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert length(issues) == 2
       assert Enum.all?(issues, & &1.status == :completed)
       assert Enum.any?(issues, & &1.external_id == "myorg/myrepo:pull_request:55667788")
+      assert Enum.any?(issues, & &1.url == comment_url)
+      assert Enum.any?(issues, & &1.url == pull_request_url)
     end
 
     test "it marks a closed unmerged GitHub pull request as cancelled", %{conn: conn} do
