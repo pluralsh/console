@@ -114,7 +114,7 @@ export function WorkbenchIssues() {
                 <WorkbenchIssuesBoard
                   issues={issues}
                   statuses={display.statuses}
-                  loading={!data && loading}
+                  loading={loading}
                   hasNextPage={!!pageInfo?.hasNextPage}
                   fetchNextPage={fetchNextPage}
                 />
