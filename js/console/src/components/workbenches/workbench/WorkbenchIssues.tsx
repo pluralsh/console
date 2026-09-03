@@ -6,6 +6,7 @@ import {
   SearchIcon,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
+import { WorkbenchIssuesBoard } from 'components/workbenches/common/WorkbenchIssuesBoard'
 import { WorkbenchIssuesTable } from 'components/workbenches/common/WorkbenchIssuesTable'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -91,14 +92,23 @@ export function WorkbenchIssues() {
           </ToolbarSC>
           <ContentSC>
             <TableContainerSC>
-              <WorkbenchIssuesTable
-                issues={issues}
-                loading={!data && loading}
-                hasNextPage={pageInfo?.hasNextPage}
-                fetchNextPage={fetchNextPage}
-                setVirtualSlice={setVirtualSlice}
-                fallbackWorkbenchId={workbenchId}
-              />
+              {display.view === 'board' ? (
+                <WorkbenchIssuesBoard
+                  issues={issues}
+                  loading={!data && loading}
+                  hasNextPage={!!pageInfo?.hasNextPage}
+                  fetchNextPage={fetchNextPage}
+                />
+              ) : (
+                <WorkbenchIssuesTable
+                  issues={issues}
+                  loading={!data && loading}
+                  hasNextPage={pageInfo?.hasNextPage}
+                  fetchNextPage={fetchNextPage}
+                  setVirtualSlice={setVirtualSlice}
+                  fallbackWorkbenchId={workbenchId}
+                />
+              )}
             </TableContainerSC>
             {displayOpen && (
               <WorkbenchIssuesDisplayPanel
@@ -136,6 +146,8 @@ const ContentSC = styled(Flex)(({ theme }) => ({
 }))
 
 const TableContainerSC = styled.div({
+  display: 'flex',
+  flexDirection: 'column',
   flex: 1,
   minHeight: 0,
   minWidth: 0,

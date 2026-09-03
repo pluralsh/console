@@ -61,6 +61,23 @@ export function visibleIssueProviders(
   return [...PINNED_ISSUE_PROVIDERS, ...extras]
 }
 
+export function groupIssuesByStatus<
+  T extends { status?: Nullable<IssueStatus> },
+>(issues: T[]): Record<IssueStatus, T[]> {
+  const grouped: Record<IssueStatus, T[]> = {
+    [IssueStatus.Open]: [],
+    [IssueStatus.InProgress]: [],
+    [IssueStatus.Completed]: [],
+    [IssueStatus.Cancelled]: [],
+  }
+
+  for (const issue of issues) {
+    if (issue.status) grouped[issue.status].push(issue)
+  }
+
+  return grouped
+}
+
 export function toIssueFilterVariables({
   providers,
   statuses,
