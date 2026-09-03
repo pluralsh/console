@@ -132,19 +132,31 @@ defmodule Console.Deployments.Integrations do
     related = related_issue(attrs)
     attrs = inherit_issue_scope(attrs, extant || related)
 
-    case extant do
-      %Issue{} = issue -> issue
-      nil -> %Issue{external_id: external_id}
+    start_transaction()
+    |> add_operation(:issue, fn _ ->
+      case extant do
+        %Issue{} = issue -> issue
+        nil -> %Issue{external_id: external_id}
+      end
+      |> Issue.changeset(attrs)
+      |> Repo.insert_or_update()
+    end)
+    |> add_operation(:related, fn %{issue: issue} -> sync_related_issue_statuses(issue, attrs) end)
+    |> execute()
+    |> case do
+      {:ok, %{issue: issue, related: related}} ->
+        Enum.each(related, &notify({:ok, &1}, :update))
+        notify({:ok, issue}, issue_delta(extant))
+      error -> error
     end
-    |> Issue.changeset(attrs)
-    |> Repo.insert_or_update()
-    |> sync_related_issue_statuses(attrs)
-    |> notify(if is_nil(extant), do: :create, else: :update)
   end
+
+  defp issue_delta(%Issue{}), do: :update
+  defp issue_delta(_), do: :create
 
   defp related_issue(
     %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload}
-  ) when status in [:completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
+  ) when status in [:open, :completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
     github_issues_for_reference(url)
     |> Repo.all()
     |> List.first()
@@ -162,15 +174,24 @@ defmodule Console.Deployments.Integrations do
   defp inherit_issue_scope(attrs, _), do: attrs
 
   defp sync_related_issue_statuses(
-    {:ok, %Issue{} = issue} = result,
+    %Issue{} = issue,
     %{provider: :github, status: status, payload: %{"pull_request" => _} = payload}
   ) when status in [:open, :completed, :cancelled] and not is_map_key(payload, "comment") do
     github_issues_for_reference(issue.url)
-    |> Repo.update_all(set: [status: status, updated_at: DateTime.utc_now()])
-
-    result
+    |> Repo.all()
+    |> Enum.reject(& &1.id == issue.id)
+    |> Enum.reduce_while({:ok, []}, &sync_issue_status(&1, &2, status))
   end
-  defp sync_related_issue_statuses(result, _), do: result
+  defp sync_related_issue_statuses(_, _), do: {:ok, []}
+
+  defp sync_issue_status(%Issue{} = issue, {:ok, synced}, status) do
+    Issue.changeset(issue, %{status: status})
+    |> Repo.update()
+    |> case do
+      {:ok, issue} -> {:cont, {:ok, [issue | synced]}}
+      {:error, error} -> {:halt, {:error, error}}
+    end
+  end
 
   defp github_issues_for_reference(url) do
     Issue.for_references(:github, github_reference_urls(url))

@@ -173,5 +173,36 @@ defmodule Console.Deployments.IntegrationsTest do
 
       assert_receive {:event, %PubSub.IssueCreated{item: ^issue}}
     end
+
+    test "it marks related issues as changed and notifies when a pull request is reopened" do
+      hook = insert(:issue_webhook, provider: :github)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
+      comment = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:1",
+        url: "https://github.com/myorg/myrepo/issues/7",
+        status: :completed,
+        workbench: wh.workbench,
+        workbench_webhook: wh
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "reopened",
+        "pull_request" => %{
+          "id" => 2,
+          "title" => "Reopened work",
+          "body" => "Back to the drawing board",
+          "html_url" => "https://github.com/myorg/myrepo/pull/7",
+          "state" => "open"
+        }
+      })
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.status == :open
+      assert refetch(comment).status == :open
+
+      comment_id = comment.id
+      assert_receive {:event, %PubSub.IssueUpdated{item: %{id: ^comment_id, status: :open, status_changed: true}}}
+    end
   end
 end
