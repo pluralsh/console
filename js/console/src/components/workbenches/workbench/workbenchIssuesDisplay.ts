@@ -4,6 +4,7 @@ import {
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
+import { intersection, isEmpty, xor } from 'lodash'
 import { ISSUE_STATUS_OPTIONS } from 'components/workbenches/common/issueStatus'
 
 export type WorkbenchIssuesView = 'list' | 'board'
@@ -27,9 +28,7 @@ export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
 }
 
 export function toggleListValue<T>(list: T[], value: T): T[] {
-  return list.includes(value)
-    ? list.filter((item) => item !== value)
-    : [...list, value]
+  return xor(list, [value])
 }
 
 export function visibleIssueProviders(
@@ -41,17 +40,11 @@ export function visibleIssueProviders(
 export function allIssueProvidersSelected(
   providers: IssueWebhookProvider[]
 ): boolean {
-  return (
-    providers.length === ALL_ISSUE_PROVIDERS.length &&
-    ALL_ISSUE_PROVIDERS.every((provider) => providers.includes(provider))
-  )
+  return isEmpty(xor(providers, ALL_ISSUE_PROVIDERS))
 }
 
 export function allIssueStatusesSelected(statuses: IssueStatus[]): boolean {
-  return (
-    statuses.length === ISSUE_STATUS_OPTIONS.length &&
-    ISSUE_STATUS_OPTIONS.every((status) => statuses.includes(status))
-  )
+  return isEmpty(xor(statuses, ISSUE_STATUS_OPTIONS))
 }
 
 export function hasUncheckedIssueFilters({
@@ -73,12 +66,12 @@ export function getIssueFilterEmptyKind(
   visibleProviders: IssueWebhookProvider[]
 ): IssueFilterEmptyKind | null {
   if (
-    visibleProviders.length > 0 &&
-    visibleProviders.every((provider) => !providers.includes(provider))
+    !isEmpty(visibleProviders) &&
+    isEmpty(intersection(visibleProviders, providers))
   ) {
     return 'sources'
   }
-  if (statuses.length === 0) return 'statuses'
+  if (isEmpty(statuses)) return 'statuses'
   return null
 }
 
