@@ -9,7 +9,11 @@ import {
 } from '@pluralsh/design-system'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
 import { CaptionP } from 'components/utils/typography/Text'
-import { WorkbenchIssueFragment, WorkbenchJobStatus } from 'generated/graphql'
+import {
+  IssueStatus,
+  WorkbenchIssueFragment,
+  WorkbenchJobStatus,
+} from 'generated/graphql'
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -50,11 +54,13 @@ function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
 
 export function WorkbenchIssuesBoard({
   issues,
+  statuses,
   loading,
   hasNextPage,
   fetchNextPage,
 }: {
   issues: WorkbenchIssueFragment[]
+  statuses: IssueStatus[]
   loading: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
@@ -80,25 +86,27 @@ export function WorkbenchIssuesBoard({
   }
 
   return (
-    <BoardSC>
-      {ISSUE_STATUS_OPTIONS.map((status) => (
-        <ColumnSC key={status}>
-          <ColumnTitleSC>{ISSUE_STATUS_LABELS[status]}</ColumnTitleSC>
-          <CardsSC>
-            {grouped[status].length > 0 ? (
-              grouped[status].map((issue) => (
-                <IssueCard
-                  key={issue.id}
-                  issue={issue}
-                />
-              ))
-            ) : (
-              <EmptyColumnCard />
-            )}
-            {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
-          </CardsSC>
-        </ColumnSC>
-      ))}
+    <BoardSC $columnCount={statuses.length}>
+      {ISSUE_STATUS_OPTIONS.filter((status) => statuses.includes(status)).map(
+        (status) => (
+          <ColumnSC key={status}>
+            <ColumnTitleSC>{ISSUE_STATUS_LABELS[status]}</ColumnTitleSC>
+            <CardsSC>
+              {grouped[status].length > 0 ? (
+                grouped[status].map((issue) => (
+                  <IssueCard
+                    key={issue.id}
+                    issue={issue}
+                  />
+                ))
+              ) : (
+                <EmptyColumnCard />
+              )}
+              {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
+            </CardsSC>
+          </ColumnSC>
+        )
+      )}
     </BoardSC>
   )
 }
@@ -155,31 +163,37 @@ function LoadMoreSentinel({ onVisible }: { onVisible: () => void }) {
   return <div ref={ref} />
 }
 
-const BoardSC = styled.div(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(4, minmax(156px, 1fr))',
-  gap: theme.spacing.medium,
-  flex: 1,
-  minHeight: 0,
-  overflowX: 'auto',
-}))
+const BoardSC = styled.div<{ $columnCount: number }>(
+  ({ theme, $columnCount }) => ({
+    display: 'grid',
+    gridTemplateColumns: `repeat(${Math.max($columnCount, 1)}, minmax(156px, 1fr))`,
+    gap: theme.spacing.medium,
+    flex: 1,
+    minHeight: 0,
+    overflow: 'auto',
+  })
+)
 
-const ColumnSC = styled.div(({ theme }) => ({
+const ColumnSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
+  gap: 0,
   minWidth: 0,
-  minHeight: 0,
-}))
+})
 
 const ColumnTitleSC = styled.h2(({ theme }) => ({
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
   fontFamily: theme.fontFamilies.mono,
   fontSize: 18,
   fontWeight: 400,
   lineHeight: '24px',
   letterSpacing: 0,
   margin: 0,
+  paddingBottom: theme.spacing.xsmall,
   color: theme.colors.text,
+  backgroundColor: theme.colors['fill-zero'],
   flexShrink: 0,
 }))
 
@@ -188,8 +202,6 @@ const CardsSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: 10,
   alignItems: 'flex-start',
-  minHeight: 0,
-  overflowY: 'auto',
   paddingBottom: theme.spacing.small,
 }))
 

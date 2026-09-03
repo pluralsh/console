@@ -113,6 +113,7 @@ export function WorkbenchIssues() {
               ) : display.view === 'board' ? (
                 <WorkbenchIssuesBoard
                   issues={issues}
+                  statuses={display.statuses}
                   loading={!data && loading}
                   hasNextPage={!!pageInfo?.hasNextPage}
                   fetchNextPage={fetchNextPage}
