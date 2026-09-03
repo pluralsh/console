@@ -1,15 +1,11 @@
 # IDE settings.
 .idea
 #
-.DS_Store
 .next/
 .vercel
-yalc.lock
-.yalc/
 node_modules/
 
 # dependencies
-.pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -26,7 +22,6 @@ yarn-error.log*
 /build
 /dist
 .env.local
-*.tsbuildinfo
 
 # OpenAPI schema (fetched at Docker build time)
 schema/
