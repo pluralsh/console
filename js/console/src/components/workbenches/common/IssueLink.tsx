@@ -3,7 +3,7 @@ import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhoo
 import { IssueWebhookProvider } from 'generated/graphql'
 import { cloneElement } from 'react'
 import styled from 'styled-components'
-import { issueLinkParts } from './issueLinkDisplay'
+import { issueLinkLabel } from './issueLinkDisplay'
 
 export function IssueLink({
   url,
@@ -14,7 +14,7 @@ export function IssueLink({
 }) {
   if (!url) return null
 
-  const { ticket } = issueLinkParts({ url, provider })
+  const ticket = issueLinkLabel({ url, provider })
   const icon = getIssueWebhookProviderIcon(provider)
 
   return (

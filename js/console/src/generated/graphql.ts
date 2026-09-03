@@ -46549,7 +46549,7 @@ export const WorkbenchIssuesDocument = gql`
     query WorkbenchIssues($id: ID!, $q: String, $providers: [IssueWebhookProvider], $statuses: [IssueStatus], $sort: IssueSort, $direction: IssueSortDirection, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
-    issueCounts(q: $q) {
+    issueCounts {
       providers {
         provider
         count

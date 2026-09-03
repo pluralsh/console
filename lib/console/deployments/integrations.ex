@@ -159,15 +159,40 @@ defmodule Console.Deployments.Integrations do
   end
 
   defp notify_issue_sync({:ok, %{issue: issue, related: related}}, extant) do
-    Enum.each(related, &notify({:ok, &1}, :update))
+    issue
+    |> issue_notifications(related, extant)
+    |> notify_synced_issues()
 
     case {issue, related} do
-      {%Issue{} = issue, _} -> notify({:ok, issue}, issue_delta(extant))
+      {%Issue{} = issue, _} -> {:ok, issue}
       {nil, [issue | _]} -> {:ok, issue}
       {nil, []} -> {:error, "issue has no workbench or flow"}
     end
   end
   defp notify_issue_sync(error, _), do: error
+
+  defp issue_notifications(%Issue{} = issue, related, extant),
+    do: [{issue, issue_delta(extant)} | Enum.map(related, & {&1, :update})]
+  defp issue_notifications(_, related, _), do: Enum.map(related, & {&1, :update})
+
+  defp notify_synced_issues(issues) do
+    Enum.reduce(issues, MapSet.new(), fn {issue, delta}, notified ->
+      {issue, notified} = dedupe_actionable_issue(issue, notified)
+      notify({:ok, issue}, delta)
+      notified
+    end)
+  end
+
+  defp dedupe_actionable_issue(
+    %Issue{workbench_id: id, status: :open, status_changed: true} = issue,
+    notified
+  ) when is_binary(id) do
+    case MapSet.member?(notified, id) do
+      true -> {%{issue | status_changed: false}, notified}
+      false -> {issue, MapSet.put(notified, id)}
+    end
+  end
+  defp dedupe_actionable_issue(issue, notified), do: {issue, notified}
 
   defp issue_delta(%Issue{}), do: :update
   defp issue_delta(_), do: :create

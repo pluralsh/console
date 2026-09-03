@@ -4,6 +4,7 @@ import {
   IssueStatus,
   IssueWebhookProvider,
 } from 'generated/graphql'
+import { ISSUE_STATUS_OPTIONS } from 'components/workbenches/common/issueStatus'
 
 export type WorkbenchIssuesView = 'list' | 'board'
 
@@ -21,20 +22,6 @@ export const PINNED_ISSUE_PROVIDERS = [
   IssueWebhookProvider.Github,
   IssueWebhookProvider.Linear,
 ]
-
-export const ISSUE_STATUS_OPTIONS = [
-  IssueStatus.Open,
-  IssueStatus.InProgress,
-  IssueStatus.Completed,
-  IssueStatus.Cancelled,
-] as const
-
-export const ISSUE_STATUS_LABELS: Record<IssueStatus, string> = {
-  [IssueStatus.Open]: 'Open',
-  [IssueStatus.InProgress]: 'In progress',
-  [IssueStatus.Completed]: 'Completed',
-  [IssueStatus.Cancelled]: 'Cancelled',
-}
 
 export const DEFAULT_WORKBENCH_ISSUES_DISPLAY: WorkbenchIssuesDisplayState = {
   view: 'list',
@@ -59,23 +46,6 @@ export function visibleIssueProviders(
   )
 
   return [...PINNED_ISSUE_PROVIDERS, ...extras]
-}
-
-export function groupIssuesByStatus<
-  T extends { status?: Nullable<IssueStatus> },
->(issues: T[]): Record<IssueStatus, T[]> {
-  const grouped: Record<IssueStatus, T[]> = {
-    [IssueStatus.Open]: [],
-    [IssueStatus.InProgress]: [],
-    [IssueStatus.Completed]: [],
-    [IssueStatus.Cancelled]: [],
-  }
-
-  for (const issue of issues) {
-    if (issue.status) grouped[issue.status].push(issue)
-  }
-
-  return grouped
 }
 
 export function allIssueProvidersSelected(

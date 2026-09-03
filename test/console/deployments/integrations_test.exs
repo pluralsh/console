@@ -174,7 +174,7 @@ defmodule Console.Deployments.IntegrationsTest do
       assert_receive {:event, %PubSub.IssueCreated{item: ^issue}}
     end
 
-    test "it marks related issues as changed and notifies when a pull request is reopened" do
+    test "it publishes one actionable notification per workbench when a pull request is reopened" do
       hook = insert(:issue_webhook, provider: :github)
       wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
       comment = insert(:issue,
@@ -201,8 +201,10 @@ defmodule Console.Deployments.IntegrationsTest do
       assert issue.status == :open
       assert refetch(comment).status == :open
 
+      issue_id = issue.id
       comment_id = comment.id
-      assert_receive {:event, %PubSub.IssueUpdated{item: %{id: ^comment_id, status: :open, status_changed: true}}}
+      assert_receive {:event, %PubSub.IssueCreated{item: %{id: ^issue_id, status: :open, status_changed: true}}}
+      assert_receive {:event, %PubSub.IssueUpdated{item: %{id: ^comment_id, status: :open, status_changed: false}}}
     end
 
     test "it syncs pull request status into every workbench that already has it" do

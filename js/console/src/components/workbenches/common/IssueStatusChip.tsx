@@ -8,7 +8,7 @@ import {
 import { IssueStatus } from 'generated/graphql'
 import { ReactNode } from 'react'
 import { useTheme } from 'styled-components'
-import { ISSUE_STATUS_LABELS } from 'components/workbenches/workbench/workbenchIssuesDisplay'
+import { ISSUE_STATUS_LABELS } from './issueStatus'
 
 const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
   [IssueStatus.InProgress]: (

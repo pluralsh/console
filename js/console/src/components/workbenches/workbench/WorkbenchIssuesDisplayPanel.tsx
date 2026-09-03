@@ -23,6 +23,8 @@ import styled from 'styled-components'
 import {
   ISSUE_STATUS_LABELS,
   ISSUE_STATUS_OPTIONS,
+} from 'components/workbenches/common/issueStatus'
+import {
   toggleListValue,
   visibleIssueProviders,
   WorkbenchIssuesDisplayState,

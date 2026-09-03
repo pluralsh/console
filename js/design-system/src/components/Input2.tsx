@@ -291,6 +291,11 @@ function Input2({
   size = size || (large ? 'large' : small ? 'small' : 'medium')
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
+  const effectiveValue = value ?? inputProps?.value
+  const hasValue =
+    effectiveValue !== undefined &&
+    effectiveValue !== null &&
+    String(effectiveValue).length > 0
 
   const hasEndContent = !!suffix
   const hasStartContent = !!prefix || !!titleContent
@@ -374,7 +379,7 @@ function Input2({
           {...inputProps}
         />
       </InputAreaSC>
-      {showClearButton && !!value && (
+      {showClearButton && hasValue && (
         <ClearButton
           disabled={disabled}
           onClick={() => {

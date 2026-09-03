@@ -1016,7 +1016,7 @@ query WorkbenchIssues(
 ) {
   workbench(id: $id) {
     id
-    issueCounts(q: $q) {
+    issueCounts {
       providers {
         provider
         count

@@ -21,7 +21,7 @@ import {
   groupIssuesByStatus,
   ISSUE_STATUS_LABELS,
   ISSUE_STATUS_OPTIONS,
-} from 'components/workbenches/workbench/workbenchIssuesDisplay'
+} from './issueStatus'
 
 function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
   switch (status) {

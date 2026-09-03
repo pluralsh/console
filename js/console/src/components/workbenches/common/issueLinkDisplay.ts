@@ -1,20 +1,12 @@
 import { IssueWebhookProvider } from 'generated/graphql'
 
-export type IssueLinkParts = {
-  ticket: string
-  slug?: string
-}
-
-export function issueLinkParts({
+export function issueLinkLabel({
   url,
   provider,
-  title,
 }: {
   url?: Nullable<string>
   provider?: Nullable<IssueWebhookProvider>
-  title?: Nullable<string>
-}): IssueLinkParts {
-  const slug = slackSlug(title)
+}): string {
   const parts = pathParts(url)
 
   switch (provider) {
@@ -24,23 +16,14 @@ export function issueLinkParts({
       )
       const number = numericSegment(parts[kindIdx + 1])
       if (number) {
-        return {
-          ticket: `${parts[kindIdx] === 'issues' ? 'Issue' : 'PR'} ${number}`,
-          slug,
-        }
+        return `${parts[kindIdx] === 'issues' ? 'Issue' : 'PR'} ${number}`
       }
       break
     }
     case IssueWebhookProvider.Linear: {
       const issueIdx = parts.findIndex((part) => part === 'issue')
       const id = parts[issueIdx + 1]
-      if (id) {
-        const urlSlug = parts[issueIdx + 2]
-        return {
-          ticket: id,
-          slug: distinctSlug(id, urlSlug) ?? slug,
-        }
-      }
+      if (id) return id
       break
     }
     case IssueWebhookProvider.Gitlab: {
@@ -49,16 +32,14 @@ export function issueLinkParts({
       )
       const number = numericSegment(parts[kindIdx + 1])
       if (number) {
-        return {
-          ticket: `${parts[kindIdx] === 'issues' ? 'Issue' : 'MR'} ${number}`,
-          slug,
-        }
+        return `${parts[kindIdx] === 'issues' ? 'Issue' : 'MR'} ${number}`
       }
       break
     }
     case IssueWebhookProvider.Jira: {
-      const id = parts[parts.findIndex((part) => part === 'browse') + 1]
-      if (id) return { ticket: id, slug }
+      const browseIdx = parts.findIndex((part) => part === 'browse')
+      const id = browseIdx >= 0 ? parts[browseIdx + 1] : undefined
+      if (id) return id
       break
     }
     default:
@@ -66,11 +47,11 @@ export function issueLinkParts({
   }
 
   const last = parts.at(-1)
-  if (last && ISSUE_KEY.test(last)) return { ticket: last, slug }
+  if (last && ISSUE_KEY.test(last)) return last
   const number = numericSegment(last)
-  if (number) return { ticket: `Issue ${number}`, slug }
+  if (number) return `Issue ${number}`
 
-  return { ticket: last || url || 'Issue', slug }
+  return last || url || 'Issue'
 }
 
 function pathParts(url?: Nullable<string>): string[] {
@@ -85,19 +66,6 @@ function pathParts(url?: Nullable<string>): string[] {
 function numericSegment(segment?: string): string | undefined {
   const value = segment?.split(/[#?]/)[0]
   return value && /^\d+$/.test(value) ? value : undefined
-}
-
-function slackSlug(title?: Nullable<string>): string | undefined {
-  const slug = title
-    ?.toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-  return slug || undefined
-}
-
-function distinctSlug(ticket: string, slug?: string): string | undefined {
-  if (!slug || slug.toLowerCase() === ticket.toLowerCase()) return undefined
-  return slug
 }
 
 const ISSUE_KEY = /^[A-Za-z][\w]*-\d+$/
