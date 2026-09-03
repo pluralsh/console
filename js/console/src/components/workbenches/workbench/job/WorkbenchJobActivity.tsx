@@ -2,7 +2,6 @@ import {
   AccordionItem,
   Card,
   CaretDownIcon,
-  CheckOutlineIcon,
   DiffMethod,
   DiffViewer,
   FailedFilledIcon,
@@ -205,45 +204,47 @@ export function WorkbenchJobActivity({
       }}
       trigger={
         <ActivityHeaderSC>
-          <ActivityTitleRowSC>
-            <ActivityStatusIcon status={status} />
-            <Flex
-              gap="xsmall"
-              alignItems="center"
-              minWidth={0}
-              css={{ maxWidth: '100%' }}
-            >
-              <Body2BoldP
-                as="span"
-                className="type"
-                $color="text-xlight"
+          <ActivityStatusIcon status={status} />
+          <ActivityTextSC>
+            <ActivityTitleRowSC>
+              <Flex
+                gap="xsmall"
+                alignItems="center"
+                minWidth={0}
+                css={{ maxWidth: '100%' }}
               >
-                {typeLabel}
-              </Body2BoldP>
+                <Body2BoldP
+                  as="span"
+                  className="type"
+                  $color="text-xlight"
+                >
+                  {typeLabel}
+                </Body2BoldP>
+                <Body2P
+                  as="span"
+                  className="kind"
+                  $color="text-disabled"
+                >
+                  subagent
+                </Body2P>
+                {trailingIcons}
+              </Flex>
+              <ActivityCaretSC
+                $isOpen={isOpen}
+                size={10}
+              />
+            </ActivityTitleRowSC>
+            {!isOpen && activitySummary && (
               <Body2P
                 as="span"
-                className="kind"
-                $color="text-disabled"
+                className="summary"
+                $color={isRunning ? 'text-xlight' : 'text-disabled'}
+                $shimmer={isRunning}
               >
-                subagent
+                {activitySummary}
               </Body2P>
-              {trailingIcons}
-            </Flex>
-            <ActivityCaretSC
-              $isOpen={isOpen}
-              size={10}
-            />
-          </ActivityTitleRowSC>
-          {!isOpen && activitySummary && (
-            <Body2P
-              as="span"
-              className="summary"
-              $color={isRunning ? 'text-xlight' : 'text-disabled'}
-              $shimmer={isRunning}
-            >
-              {activitySummary}
-            </Body2P>
-          )}
+            )}
+          </ActivityTextSC>
         </ActivityHeaderSC>
       }
     >
@@ -843,7 +844,7 @@ function compactWorkbenchToolCallTitle(
     .filter((word) => !hiddenWords.has(word.toLowerCase()))
     .join(' ')
 
-  return withoutToolLabel || 'Tool call'
+  return withoutToolLabel || 'tool call'
 }
 
 /** Cycles 1 → 2 → 3 dots every second for the job-level thinking label. */
@@ -948,26 +949,7 @@ function ActivityStatusIcon({
 }: {
   status: WorkbenchJobActivityStatus
 }) {
-  if (isJobRunning(status)) return <SpinnerAlt size={14} />
-  if (status === WorkbenchJobActivityStatus.Successful)
-    return (
-      <CheckOutlineIcon
-        size={14}
-        color="icon-success"
-      />
-    )
-  if (
-    status === WorkbenchJobActivityStatus.Failed ||
-    status === WorkbenchJobActivityStatus.Rejected
-  )
-    return (
-      <FailedFilledIcon
-        size={14}
-        color="icon-danger"
-      />
-    )
-
-  return null
+  return isJobRunning(status) ? <SpinnerAlt size={14} /> : null
 }
 
 function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
@@ -1036,11 +1018,15 @@ const ActivityCaretSC = styled(CaretDownIcon)<{ $isOpen: boolean }>(
 
 const ActivityHeaderSC = styled.span(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
+  alignItems: 'flex-start',
+  gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',
   overflow: 'hidden',
+  '> svg': {
+    flexShrink: 0,
+    marginTop: 2,
+  },
   [`&:hover ${ActivityCaretSC}`]: {
     opacity: 1,
   },
@@ -1058,6 +1044,16 @@ const ActivityHeaderSC = styled.span(({ theme }) => ({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
+}))
+
+const ActivityTextSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+  flex: '1 1 auto',
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
 }))
 
 const ActivityTitleRowSC = styled.span(({ theme }) => ({

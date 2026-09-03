@@ -32,16 +32,16 @@ const CODEX_TOOL_NAMES = new Set([
 const CLAUDE_BATCH_TOOLS = new Set(['bash', 'read', 'grep', 'edit'])
 
 const TITLE_OVERRIDES: Record<string, string> = {
-  workbench_subagent: 'Subagent',
-  workbench_subagents: 'Subagents',
-  subagent_result: 'Result',
-  enable_tools: 'Enable tools',
-  python_sandbox: 'Python sandbox',
-  workbench_lua: 'Lua',
-  workbench_notes: 'Notes',
-  current_time: 'Time',
-  agent_scratchpad: 'Scratchpad',
-  saved_prompt: 'Prompt',
+  workbench_subagent: 'subagent',
+  workbench_subagents: 'subagents',
+  subagent_result: 'result',
+  enable_tools: 'enable tools',
+  python_sandbox: 'python sandbox',
+  workbench_lua: 'lua',
+  workbench_notes: 'notes',
+  current_time: 'time',
+  agent_scratchpad: 'scratchpad',
+  saved_prompt: 'prompt',
 }
 
 const STRIP_PREFIXES = [
@@ -196,26 +196,26 @@ export function toolCallDisplayTitle(
   switch (kind) {
     case 'command_execution':
     case 'bash':
-      return isShellCommand(getCommand(toolName, args)) ? 'Bash' : 'Command'
+      return isShellCommand(getCommand(toolName, args)) ? 'bash' : 'command'
     case 'python_sandbox':
-      return 'Python sandbox'
+      return 'python sandbox'
     case 'file_change':
     case 'edit':
-      return 'Edit'
+      return 'edit'
     case 'web_search':
-      return 'Search'
+      return 'search'
     case 'mcp_tool_call':
-      return 'MCP'
+      return 'mcp'
     case 'read':
-      return 'Read'
+      return 'read'
     case 'grep':
-      return 'Grep'
+      return 'grep'
     case 'subagent':
-      return 'Subagent'
+      return 'subagent'
     case 'subagent_result':
-      return 'Result'
+      return 'result'
     case 'enable_tools':
-      return 'Enable tools'
+      return 'enable tools'
     default:
       return humanizeToolName(toolName)
   }
@@ -267,7 +267,7 @@ export function toolCallDisplaySubtitle(
 
 export function humanizeToolName(toolName: string): string {
   const lower = toolName.toLowerCase().trim()
-  if (!lower) return 'Tool'
+  if (!lower) return 'tool'
   if (TITLE_OVERRIDES[lower]) return TITLE_OVERRIDES[lower]
 
   let rest = toolName.trim()
@@ -278,8 +278,8 @@ export function humanizeToolName(toolName: string): string {
     }
   }
 
-  const humanized = startCase(rest.replace(/[_-]+/g, ' ').trim())
-  return humanized || 'Tool'
+  const humanized = startCase(rest.replace(/[_-]+/g, ' ').trim()).toLowerCase()
+  return humanized || 'tool'
 }
 
 export function getSubagentRole(args?: ToolArguments): string {

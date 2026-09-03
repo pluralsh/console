@@ -1,4 +1,4 @@
-import { Tooltip } from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Tooltip } from '@pluralsh/design-system'
 import { getIssueWebhookProviderIcon } from 'components/settings/webhooks/webhookIcons'
 import { IssueWebhookProvider } from 'generated/graphql'
 import { isEmpty } from 'lodash'
@@ -36,7 +36,11 @@ export function IssueLink({
         <IconWrapSC>
           {cloneElement(icon, { size: 12, fullColor: false })}
         </IconWrapSC>
-        {ticket}
+        <LinkLabelSC>{ticket}</LinkLabelSC>
+        <ArrowTopRightIcon
+          size={12}
+          color="icon-default"
+        />
       </LinkSC>
     </Tooltip>
   )
@@ -49,15 +53,24 @@ const LinkSC = styled.a(({ theme }) => ({
   gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',
-  color: theme.colors['text-primary-accent'],
+  color: theme.colors['text-light'],
   textDecoration: 'none',
   '&:hover': {
-    color: theme.colors['action-link-inline-hover'],
+    color: theme.colors.text,
+    textDecoration: 'underline',
   },
+  '> svg': { flexShrink: 0 },
 }))
 
 const IconWrapSC = styled.span({
   display: 'flex',
   flexShrink: 0,
   lineHeight: 0,
+})
+
+const LinkLabelSC = styled.span({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 })

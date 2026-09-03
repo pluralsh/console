@@ -1,54 +1,16 @@
-import {
-  CheckOutlineIcon,
-  Chip,
-  FailedFilledIcon,
-  Flex,
-  SpinnerAlt,
-  Table,
-  UnknownIcon,
-} from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
+import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { StackedText } from 'components/utils/table/StackedText'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
-import { WorkbenchIssueFragment, WorkbenchJobStatus } from 'generated/graphql'
+import { WorkbenchIssueFragment } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { ReactNode, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
 import { formatDateTime } from 'utils/datetime'
-import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 
 const columnHelper = createColumnHelper<WorkbenchIssueFragment>()
-
-function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
-  switch (status) {
-    case WorkbenchJobStatus.Pending:
-    case WorkbenchJobStatus.Running:
-      return <SpinnerAlt size={12} />
-    case WorkbenchJobStatus.Successful:
-      return (
-        <CheckOutlineIcon
-          size={12}
-          color="icon-success"
-        />
-      )
-    case WorkbenchJobStatus.Failed:
-      return (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )
-    default:
-      return (
-        <UnknownIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-  }
-}
 
 function getColumns(fallbackWorkbenchId?: string) {
   return [
@@ -104,7 +66,6 @@ function getColumns(fallbackWorkbenchId?: string) {
       header: '',
       meta: { gridTemplate: 'auto' },
       cell: function Cell({ getValue }) {
-        const navigate = useNavigate()
         const issue = getValue()
         const workbenchId = issue.workbench?.id ?? fallbackWorkbenchId
         const workbenchJobId = issue.workbenchJob?.id
@@ -112,22 +73,11 @@ function getColumns(fallbackWorkbenchId?: string) {
         if (!workbenchId || !workbenchJobId) return null
 
         return (
-          <Chip
-            clickable
-            onClick={() =>
-              navigate(
-                getWorkbenchJobAbsPath({ workbenchId, jobId: workbenchJobId })
-              )
-            }
-          >
-            <Flex
-              gap="xsmall"
-              align="center"
-            >
-              {jobStatusIcon(issue.workbenchJob?.status)}
-              <span>View job</span>
-            </Flex>
-          </Chip>
+          <WorkbenchViewJobChip
+            workbenchId={workbenchId}
+            jobId={workbenchJobId}
+            status={issue.workbenchJob?.status}
+          />
         )
       },
     }),
