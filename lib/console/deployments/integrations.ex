@@ -133,23 +133,36 @@ defmodule Console.Deployments.Integrations do
     attrs = inherit_issue_scope(attrs, extant || related)
 
     start_transaction()
-    |> add_operation(:issue, fn _ ->
-      case extant do
-        %Issue{} = issue -> issue
-        nil -> %Issue{external_id: external_id}
-      end
-      |> Issue.changeset(attrs)
-      |> Repo.insert_or_update()
-    end)
+    |> add_operation(:issue, fn _ -> persist_issue(extant, attrs) end)
     |> add_operation(:related, fn %{issue: issue} -> sync_related_issue_statuses(issue, attrs) end)
     |> execute()
-    |> case do
-      {:ok, %{issue: issue, related: related}} ->
-        Enum.each(related, &notify({:ok, &1}, :update))
-        notify({:ok, issue}, issue_delta(extant))
-      error -> error
+    |> notify_issue_sync(extant)
+  end
+
+  defp persist_issue(%Issue{} = issue, attrs) do
+    Issue.changeset(issue, attrs)
+    |> Repo.update()
+  end
+  defp persist_issue(nil, %{workbench_id: id} = attrs) when is_binary(id), do: insert_issue(attrs)
+  defp persist_issue(nil, %{flow_id: id} = attrs) when is_binary(id), do: insert_issue(attrs)
+  defp persist_issue(nil, _), do: {:ok, nil}
+
+  defp insert_issue(%{external_id: external_id} = attrs) do
+    %Issue{external_id: external_id}
+    |> Issue.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp notify_issue_sync({:ok, %{issue: issue, related: related}}, extant) do
+    Enum.each(related, &notify({:ok, &1}, :update))
+
+    case {issue, related} do
+      {%Issue{} = issue, _} -> notify({:ok, issue}, issue_delta(extant))
+      {nil, [issue | _]} -> {:ok, issue}
+      {nil, []} -> {:error, "issue has no workbench or flow"}
     end
   end
+  defp notify_issue_sync(error, _), do: error
 
   defp issue_delta(%Issue{}), do: :update
   defp issue_delta(_), do: :create
@@ -159,9 +172,17 @@ defmodule Console.Deployments.Integrations do
   ) when status in [:open, :completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
     github_issues_for_reference(url)
     |> Repo.all()
-    |> List.first()
+    |> sole_owner()
   end
   defp related_issue(_), do: nil
+
+  defp sole_owner(issues) do
+    Enum.uniq_by(issues, & {&1.workbench_id, &1.flow_id})
+    |> case do
+      [%Issue{} = issue] -> issue
+      _ -> nil
+    end
+  end
 
   defp inherit_issue_scope(attrs, %Issue{} = issue) do
     Enum.reduce(~w(workbench_id workbench_webhook_id flow_id)a, attrs, fn key, attrs ->
@@ -173,16 +194,17 @@ defmodule Console.Deployments.Integrations do
   end
   defp inherit_issue_scope(attrs, _), do: attrs
 
-  defp sync_related_issue_statuses(
-    %Issue{} = issue,
-    %{provider: :github, status: status, payload: %{"pull_request" => _} = payload}
-  ) when status in [:open, :completed, :cancelled] and not is_map_key(payload, "comment") do
-    github_issues_for_reference(issue.url)
+  defp sync_related_issue_statuses(issue, %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload})
+    when status in [:open, :completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
+    github_issues_for_reference(url)
     |> Repo.all()
-    |> Enum.reject(& &1.id == issue.id)
+    |> Enum.reject(&same_issue?(&1, issue))
     |> Enum.reduce_while({:ok, []}, &sync_issue_status(&1, &2, status))
   end
   defp sync_related_issue_statuses(_, _), do: {:ok, []}
+
+  defp same_issue?(%Issue{id: id}, %Issue{id: id}), do: true
+  defp same_issue?(_, _), do: false
 
   defp sync_issue_status(%Issue{} = issue, {:ok, synced}, status) do
     Issue.changeset(issue, %{status: status})
