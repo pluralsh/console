@@ -1,0 +1,43 @@
+# JavaScript
+**/node_modules/
+/js/.yarn/*
+!/js/.yarn/releases/
+!/js/.yarn/releases/**
+.pnp.*
+*.tsbuildinfo
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+
+# Frontend build output
+/js/console/build/
+/js/console/coverage/
+/js/design-system/dist/
+/js/design-system/storybook-static/
+/js/documentation/.next/
+/js/documentation/coverage/
+
+# Elixir / Mix
+/_build/
+/deps/
+/.hex/
+/cover/
+/.fetch
+erl_crash.dump
+*.ez
+
+# Go / Rust / caches
+.cache/
+/binaries/
+/target/
+
+# Local / secrets
+secrets/
+data/
+/priv/data
+.yalc/
+yalc.lock
+**/.env.local
+**/.env.*.local
+gha-creds-*.json
+.DS_Store

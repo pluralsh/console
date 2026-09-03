@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Exclude archive and component directories
+Disallow: /pages-archive/
+Disallow: /__components/
+Disallow: /test
+
+# Allow Algolia crawler
+User-agent: Algolia Crawler
+Allow: /
+Disallow: /pages-archive/
+Disallow: /__components/
+
+# Sitemap
+Sitemap: https://docs.plural.sh/sitemap.xml

@@ -1,6 +1,6 @@
 # Plural Console
 
-![Console](assets/public/PluralConsole-background.png)
+![Console](js/console/public/PluralConsole-background.png)
 
 The Plural Console is the core control plane of the Plural fleet-management platform.  It has a number of key features:
 
@@ -42,17 +42,24 @@ To claim the reward, you should get in touch with us on our discord at https://d
 There are three core components in this repo:
 
 * server core - written in elixir, mainly exposing a graphql api
-* react frontend - lives under `/assets` and is bundled in the elixir server docker image to make self-hosting simple
+* JavaScript workspace - lives under `/js` and contains the Console frontend, design system, and documentation site
+* react frontend - lives under `/js/console` and is bundled in the elixir server docker image to make self-hosting simple
+* documentation site - lives under `/js/documentation` and shares the frontend Yarn workspace and design system
 * `go/*` - a number of golang projects, the main one being `go/controller`, which manages the operator for defining all kubernetes CRDs that control the GitOps experience of using Plural.
 
 ### Developing Web
 To begin developing the web app, install npm & yarn, then run:
 
 ```sh
-cd assets
-yarn install
-yarn start:cd # or any other yarn target, we often test on different Console instances
+cd js
+corepack enable
+yarn install --immutable
+yarn workspace console start:cd # or any other yarn target, we often test on different Console instances
 ```
+
+Run `make documentation` to start the documentation site.
+
+From `js/`, `yarn lint` and `yarn test` cover every JavaScript workspace. `make js-lint` and `make js-test` do the same from the repository root.
 
 ### Developing Server
 To make changes to the server codebase, you'll want to install elixir and rust (for nif compilation) on your machine.  For Mac desktops, we do this via mise, which can be done simply at the root of the repo like so:
@@ -72,7 +79,7 @@ mix test
 ```
 
 ### Git Hooks
-Custom Git hooks are stored in `.githooks` directory. They ensure that when controller or client files are changed, automated code generation targets are executed. In order to enable git hooks for this repo run:
+Custom Git hooks are stored in `.githooks` directory. They run staged frontend formatting and ensure that controller or client code generation stays current. In order to enable git hooks for this repo run:
 
 ```sh
 make install-git-hooks

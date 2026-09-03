@@ -16,14 +16,15 @@ watchman-*.tar
 Dockerfile*
 Makefile
 README*
-assets/node_modules/
-assets/.pnp.*
-assets/.yarn/*
-!assets/.yarn/patches
-!assets/.yarn/plugins
-!assets/.yarn/releases
-!assets/.yarn/sdks
-!assets/.yarn/versions
+**/node_modules/
+.pnp.*
+/js/.yarn/*
+!/js/.yarn/releases/
+!/js/.yarn/releases/**
+/js/console/build/
+/js/design-system/dist/
+/js/design-system/storybook-static/
+/js/documentation/.next/
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
