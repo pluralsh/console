@@ -82,12 +82,16 @@ export function WorkbenchIssuesBoard({
         <ColumnSC key={status}>
           <ColumnTitleSC>{ISSUE_STATUS_LABELS[status]}</ColumnTitleSC>
           <CardsSC>
-            {grouped[status].map((issue) => (
-              <IssueCard
-                key={issue.id}
-                issue={issue}
-              />
-            ))}
+            {grouped[status].length > 0 ? (
+              grouped[status].map((issue) => (
+                <IssueCard
+                  key={issue.id}
+                  issue={issue}
+                />
+              ))
+            ) : (
+              <EmptyColumnCard />
+            )}
             {hasNextPage && <LoadMoreSentinel onVisible={loadMore} />}
           </CardsSC>
         </ColumnSC>
@@ -115,6 +119,16 @@ function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
         provider={issue.provider}
       />
     </CardSC>
+  )
+}
+
+function EmptyColumnCard() {
+  return (
+    <EmptyCardSC>
+      <EmptyCardTextSC>
+        No tickets available in this status yet.
+      </EmptyCardTextSC>
+    </EmptyCardSC>
   )
 }
 
@@ -185,6 +199,28 @@ const TitleSC = styled.p(({ theme }) => ({
   display: '-webkit-box',
   WebkitBoxOrient: 'vertical',
   WebkitLineClamp: 2,
+}))
+
+const EmptyCardSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'flex-start',
+  boxSizing: 'border-box',
+  gap: theme.spacing.xsmall,
+  padding: theme.spacing.medium,
+  minHeight: 130,
+  flexShrink: 0,
+  overflow: 'hidden',
+  backgroundColor: 'transparent',
+  border: `1px dashed ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.large,
+}))
+
+const EmptyCardTextSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2LooseLineHeight,
+  margin: 0,
+  color: theme.colors['text-light'],
 }))
 
 const LoadingSC = styled(Flex)({

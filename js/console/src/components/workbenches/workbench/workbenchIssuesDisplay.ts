@@ -103,6 +103,32 @@ export function hasUncheckedIssueFilters({
   )
 }
 
+export type IssueFilterEmptyKind = 'sources' | 'statuses'
+
+export function getIssueFilterEmptyKind(
+  {
+    providers,
+    statuses,
+  }: Pick<WorkbenchIssuesDisplayState, 'providers' | 'statuses'>,
+  visibleProviders: IssueWebhookProvider[]
+): IssueFilterEmptyKind | null {
+  if (visibleProviders.every((provider) => !providers.includes(provider))) {
+    return 'sources'
+  }
+  if (statuses.length === 0) return 'statuses'
+  return null
+}
+
+export function resetIssueFilters(
+  state: WorkbenchIssuesDisplayState
+): WorkbenchIssuesDisplayState {
+  return {
+    ...state,
+    providers: DEFAULT_WORKBENCH_ISSUES_DISPLAY.providers,
+    statuses: DEFAULT_WORKBENCH_ISSUES_DISPLAY.statuses,
+  }
+}
+
 export function toIssueFilterVariables({
   providers,
   statuses,

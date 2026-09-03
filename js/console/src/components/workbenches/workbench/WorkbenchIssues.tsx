@@ -22,10 +22,14 @@ import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchPageLayout } from './Workbench'
 import { WorkbenchIssuesDisplayPanel } from './WorkbenchIssuesDisplayPanel'
+import { WorkbenchIssuesFilterEmpty } from './WorkbenchIssuesEmpty'
 import {
   DEFAULT_WORKBENCH_ISSUES_DISPLAY,
+  getIssueFilterEmptyKind,
   hasUncheckedIssueFilters,
+  resetIssueFilters,
   toIssueFilterVariables,
+  visibleIssueProviders,
 } from './workbenchIssuesDisplay'
 
 export function WorkbenchIssues() {
@@ -67,6 +71,11 @@ export function WorkbenchIssues() {
 
     return counts
   }, [data])
+  const filterEmptyKind = useMemo(
+    () =>
+      getIssueFilterEmptyKind(display, visibleIssueProviders(providerCounts)),
+    [display, providerCounts]
+  )
 
   return (
     <WorkbenchPageLayout>
@@ -96,7 +105,12 @@ export function WorkbenchIssues() {
           </ToolbarSC>
           <ContentSC>
             <TableContainerSC>
-              {display.view === 'board' ? (
+              {filterEmptyKind ? (
+                <WorkbenchIssuesFilterEmpty
+                  kind={filterEmptyKind}
+                  onReset={() => setDisplay(resetIssueFilters)}
+                />
+              ) : display.view === 'board' ? (
                 <WorkbenchIssuesBoard
                   issues={issues}
                   loading={!data && loading}
