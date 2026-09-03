@@ -109,7 +109,7 @@ function getColumns(fallbackWorkbenchId?: string) {
         const workbenchId = issue.workbench?.id ?? fallbackWorkbenchId
         const workbenchJobId = issue.workbenchJob?.id
 
-        if (isEmpty(workbenchId) || isEmpty(workbenchJobId)) return null
+        if (!workbenchId || !workbenchJobId) return null
 
         return (
           <Chip

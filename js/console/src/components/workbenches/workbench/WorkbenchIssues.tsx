@@ -127,7 +127,7 @@ export function WorkbenchIssues() {
           </ToolbarSC>
           <ContentSC>
             <TableContainerSC>
-              {!isEmpty(filterEmptyKind) ? (
+              {filterEmptyKind ? (
                 <WorkbenchIssuesFilterEmpty
                   kind={filterEmptyKind}
                   onReset={() => updateDisplay(resetIssueFilters(display))}
