@@ -1,4 +1,4 @@
-import { Button, Flex } from '@pluralsh/design-system'
+import { Button, Card } from '@pluralsh/design-system'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import styled from 'styled-components'
 import { IssueFilterEmptyKind } from './workbenchIssuesDisplay'
@@ -27,11 +27,11 @@ export function WorkbenchIssuesFilterEmpty({
   const { message, description } = EMPTY_COPY[kind]
 
   return (
-    <WrapperSC>
+    <WrapperSC fillLevel={1}>
       <CopySC>
         <Body1BoldP css={{ margin: 0 }}>{message}</Body1BoldP>
         <Body2P
-          $color="text-xlight"
+          $color="text-light"
           css={{ margin: 0 }}
         >
           {description}
@@ -47,13 +47,18 @@ export function WorkbenchIssuesFilterEmpty({
   )
 }
 
-const WrapperSC = styled(Flex)(({ theme }) => ({
-  flex: 1,
+const WrapperSC = styled(Card)(({ theme }) => ({
+  boxSizing: 'border-box',
+  display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   gap: theme.spacing.small,
+  height: 540,
+  maxHeight: '100%',
+  width: '100%',
   minHeight: 160,
+  padding: `${theme.spacing.xlarge}px ${theme.spacing.medium}px`,
 }))
 
 const CopySC = styled.div(({ theme }) => ({

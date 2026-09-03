@@ -61,39 +61,43 @@ export function WorkbenchIssuesDisplayPanel({
       </ViewToggleSC>
       <SectionSC>
         <SectionHeaderSC>Source from</SectionHeaderSC>
-        {providers.map((provider) => (
-          <FilterRow
-            key={provider}
-            label={startCase(provider.toLowerCase())}
-            count={providerCounts[provider] ?? 0}
-            checked={state.providers.includes(provider)}
-            onChange={() =>
-              onChange({
-                ...state,
-                providers: toggleListValue(state.providers, provider),
-              })
-            }
-          />
-        ))}
+        <FilterRowsSC>
+          {providers.map((provider) => (
+            <FilterRow
+              key={provider}
+              label={startCase(provider.toLowerCase())}
+              count={providerCounts[provider] ?? 0}
+              checked={state.providers.includes(provider)}
+              onChange={() =>
+                onChange({
+                  ...state,
+                  providers: toggleListValue(state.providers, provider),
+                })
+              }
+            />
+          ))}
+        </FilterRowsSC>
       </SectionSC>
-      <SectionSC $divided>
+      <SectionSC>
         <SectionHeaderSC>Ticket status</SectionHeaderSC>
-        {ISSUE_STATUS_OPTIONS.map((status) => (
-          <FilterRow
-            key={status}
-            label={ISSUE_STATUS_LABELS[status]}
-            count={statusCounts[status] ?? 0}
-            checked={state.statuses.includes(status)}
-            onChange={() =>
-              onChange({
-                ...state,
-                statuses: toggleListValue(state.statuses, status),
-              })
-            }
-          />
-        ))}
+        <FilterRowsSC $compact>
+          {ISSUE_STATUS_OPTIONS.map((status) => (
+            <FilterRow
+              key={status}
+              label={ISSUE_STATUS_LABELS[status]}
+              count={statusCounts[status] ?? 0}
+              checked={state.statuses.includes(status)}
+              onChange={() =>
+                onChange({
+                  ...state,
+                  statuses: toggleListValue(state.statuses, status),
+                })
+              }
+            />
+          ))}
+        </FilterRowsSC>
       </SectionSC>
-      <SectionSC $divided>
+      <SectionSC>
         <SortHeaderSC>
           <SectionTitleSC>Sort by</SectionTitleSC>
           <IconFrame
@@ -121,6 +125,12 @@ export function WorkbenchIssuesDisplayPanel({
                     : IssueSortDirection.Desc,
               })
             }
+            css={{
+              width: 28,
+              height: 20,
+              borderRadius: 6,
+              '& svg': { width: 12, height: 12 },
+            }}
           />
         </SortHeaderSC>
         <RadioGroupSC
@@ -165,7 +175,12 @@ function ViewChip({
       css={{
         width: '100%',
         justifyContent: 'center',
-        '&&': { borderRadius: 100 },
+        '&&': {
+          borderRadius: 100,
+          minWidth: 80,
+          padding: '5px 12px',
+        },
+        '& .icon svg': { width: 12, height: 12 },
       }}
     >
       {children}
@@ -199,11 +214,15 @@ function FilterRow({
 }
 
 const PanelSC = styled(Card)(({ theme }) => ({
+  boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 0,
+  alignSelf: 'flex-start',
+  height: 540,
+  maxHeight: '100%',
   overflowY: 'auto',
-  padding: `0 ${theme.spacing.medium}px ${theme.spacing.medium}px`,
+  padding: `0 ${theme.spacing.medium}px`,
   width: 230,
 }))
 
@@ -211,30 +230,24 @@ const ViewToggleSC = styled.div(({ theme }) => ({
   display: 'grid',
   gridTemplateColumns: '1fr 1fr',
   gap: theme.spacing.xxsmall,
-  paddingTop: theme.spacing.medium,
+  padding: `${theme.spacing.medium}px 0`,
 }))
 
-const SectionSC = styled.div<{ $divided?: boolean }>(({ theme, $divided }) => ({
+const SectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  ...($divided
-    ? {
-        borderTop: theme.borders.default,
-        marginTop: theme.spacing.small,
-        paddingTop: theme.spacing.small,
-      }
-    : {}),
+  borderBottom: theme.borders.default,
 }))
 
 const SectionHeaderSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2Bold,
   color: theme.colors.text,
   paddingTop: theme.spacing.medium,
-  paddingBottom: theme.spacing.xsmall,
+  paddingBottom: theme.spacing.xxsmall,
 }))
 
 const SectionTitleSC = styled.span(({ theme }) => ({
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2Bold,
   color: theme.colors.text,
 }))
 
@@ -242,24 +255,35 @@ const SortHeaderSC = styled(Flex)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'space-between',
   paddingTop: theme.spacing.medium,
-  paddingBottom: theme.spacing.xsmall,
+  paddingBottom: theme.spacing.xxsmall,
 }))
+
+const FilterRowsSC = styled.div<{ $compact?: boolean }>(
+  ({ theme, $compact }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xxsmall,
+    paddingTop: theme.spacing.xxsmall,
+    paddingBottom: $compact ? theme.spacing.xxsmall : theme.spacing.medium,
+  })
+)
 
 const FilterRowSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: theme.spacing.xsmall,
+  gap: theme.spacing.xxsmall,
   minHeight: 36,
   '& label': {
     flex: 1,
     minWidth: 0,
+    padding: theme.spacing.xsmall,
   },
 }))
 
 const CountSC = styled.span(({ theme }) => ({
   ...theme.partials.text.body2,
-  color: theme.colors['text-xlight'],
+  color: theme.colors['text-input-disabled'],
   flexShrink: 0,
 }))
 
@@ -267,4 +291,9 @@ const RadioGroupSC = styled(RadioGroup)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.xxsmall,
+  paddingTop: theme.spacing.xxsmall,
+  paddingBottom: theme.spacing.medium,
+  '& label': {
+    padding: theme.spacing.xsmall,
+  },
 }))

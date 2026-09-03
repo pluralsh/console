@@ -1,14 +1,15 @@
 import {
-  CancelledFilledIcon,
   Card,
   CheckRoundedIcon,
-  CircleDashIcon,
+  FailedFilledIcon,
   Flex,
   Spinner,
+  SpinnerAlt,
+  UnknownIcon,
 } from '@pluralsh/design-system'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
 import { CaptionP } from 'components/utils/typography/Text'
-import { IssueStatus, WorkbenchIssueFragment } from 'generated/graphql'
+import { WorkbenchIssueFragment, WorkbenchJobStatus } from 'generated/graphql'
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
@@ -18,31 +19,33 @@ import {
   ISSUE_STATUS_OPTIONS,
 } from 'components/workbenches/workbench/workbenchIssuesDisplay'
 
-const statusToIcon: Record<IssueStatus, ReactNode> = {
-  [IssueStatus.Open]: (
-    <CircleDashIcon
-      size={16}
-      color="icon-xlight"
-    />
-  ),
-  [IssueStatus.InProgress]: (
-    <CircleDashIcon
-      size={16}
-      color="icon-info"
-    />
-  ),
-  [IssueStatus.Completed]: (
-    <CheckRoundedIcon
-      size={16}
-      color="icon-success"
-    />
-  ),
-  [IssueStatus.Cancelled]: (
-    <CancelledFilledIcon
-      size={16}
-      color="icon-danger"
-    />
-  ),
+function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
+  switch (status) {
+    case WorkbenchJobStatus.Pending:
+    case WorkbenchJobStatus.Running:
+      return <SpinnerAlt size={16} />
+    case WorkbenchJobStatus.Successful:
+      return (
+        <CheckRoundedIcon
+          size={16}
+          color="icon-success"
+        />
+      )
+    case WorkbenchJobStatus.Failed:
+      return (
+        <FailedFilledIcon
+          size={16}
+          color="icon-danger"
+        />
+      )
+    default:
+      return (
+        <UnknownIcon
+          size={16}
+          color="icon-xlight"
+        />
+      )
+  }
 }
 
 export function WorkbenchIssuesBoard({
@@ -108,8 +111,11 @@ function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
         align="center"
         gap="xsmall"
       >
-        {statusToIcon[issue.status]}
-        <CaptionP $color="text-xlight">
+        {jobStatusIcon(issue.workbenchJob?.status)}
+        <CaptionP
+          $color="text-xlight"
+          css={{ margin: 0 }}
+        >
           {issue.insertedAt ? fromNow(issue.insertedAt) : ''}
         </CaptionP>
       </Flex>
@@ -161,13 +167,17 @@ const BoardSC = styled.div(({ theme }) => ({
 const ColumnSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xlarge,
+  gap: theme.spacing.xsmall,
   minWidth: 0,
   minHeight: 0,
 }))
 
 const ColumnTitleSC = styled.h2(({ theme }) => ({
-  ...theme.partials.text.body1Bold,
+  fontFamily: theme.fontFamilies.mono,
+  fontSize: 18,
+  fontWeight: 400,
+  lineHeight: '24px',
+  letterSpacing: 0,
   margin: 0,
   color: theme.colors.text,
   flexShrink: 0,
@@ -176,7 +186,8 @@ const ColumnTitleSC = styled.h2(({ theme }) => ({
 const CardsSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.small,
+  gap: 10,
+  alignItems: 'flex-start',
   minHeight: 0,
   overflowY: 'auto',
   paddingBottom: theme.spacing.small,
@@ -187,6 +198,10 @@ const CardSC = styled(Card)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.xsmall,
   padding: theme.spacing.medium,
+  boxSizing: 'border-box',
+  width: '100%',
+  maxWidth: 250,
+  overflow: 'hidden',
   flexShrink: 0,
 }))
 
@@ -210,6 +225,8 @@ const EmptyCardSC = styled.div(({ theme }) => ({
   gap: theme.spacing.xsmall,
   padding: theme.spacing.medium,
   minHeight: 130,
+  width: '100%',
+  maxWidth: 250,
   flexShrink: 0,
   overflow: 'hidden',
   backgroundColor: 'transparent',
