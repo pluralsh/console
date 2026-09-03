@@ -1,11 +1,14 @@
 import {
   AccordionItem,
   Card,
+  CaretDownIcon,
+  CheckOutlineIcon,
   DiffMethod,
   DiffViewer,
   FailedFilledIcon,
   Flex,
   IconFrame,
+  SpinnerAlt,
   TimeSeriesIcon,
   VisualInspectionIcon,
 } from '@pluralsh/design-system'
@@ -38,7 +41,7 @@ import { GqlError } from 'components/utils/Alert'
 import { prettifyPrompt } from 'components/utils/contentEditableChips'
 import { StackedText } from 'components/utils/table/StackedText'
 import { EaseIn } from 'components/utils/EaseIn'
-import { Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AgentRunStatus,
   useWorkbenchJobActivityQuery,
@@ -89,7 +92,6 @@ export function WorkbenchJobActivity({
   const { spacing } = useTheme()
   const { id, status, type, prompt, agentRun, result } = activity
   const isRunning = isJobRunning(status)
-  const isRejected = status === WorkbenchJobActivityStatus.Rejected
 
   if (
     type === WorkbenchJobActivityType.Function ||
@@ -121,35 +123,13 @@ export function WorkbenchJobActivity({
       />
     )
 
-  const titleColor = 'text-xlight'
   const typeLabel = workbenchActivityTitle(type)
-  const taskSummary = workbenchActivityTaskSummary({
+  const activitySummary = workbenchActivitySummary({
+    isRunning,
     prompt,
     output: result?.output,
-    textStream,
+    error: result?.error,
   })
-  const titleNode = (
-    <ActivityTitleSC>
-      <Body2P
-        as="span"
-        className="type"
-        $color={titleColor}
-        $shimmer={isRunning}
-      >
-        {typeLabel}
-      </Body2P>
-      {taskSummary && (
-        <Body2P
-          as="span"
-          className="task"
-          $color="text-disabled"
-          $shimmer={isRunning}
-        >
-          {taskSummary}
-        </Body2P>
-      )}
-    </ActivityTitleSC>
-  )
   const trailingIcons = (
     <>
       {result?.jobUpdate && <MemoActivityIcon jobUpdate={result.jobUpdate} />}
@@ -207,12 +187,6 @@ export function WorkbenchJobActivity({
           tooltip="Go to agent run details"
         />
       )}
-      {(status === WorkbenchJobActivityStatus.Failed || isRejected) && (
-        <FailedFilledIcon
-          size={12}
-          color="icon-danger"
-        />
-      )}
     </>
   )
 
@@ -220,7 +194,7 @@ export function WorkbenchJobActivity({
     <AccordionItem
       key={id}
       value={id}
-      caret="right-quarter-mirror"
+      caret="none"
       padding="none"
       triggerWrapperStyles={{
         justifyContent: 'flex-start',
@@ -230,15 +204,47 @@ export function WorkbenchJobActivity({
         maxWidth: '100%',
       }}
       trigger={
-        <Flex
-          gap="xsmall"
-          alignItems="center"
-          minWidth={0}
-          css={{ maxWidth: '100%' }}
-        >
-          {titleNode}
-          {trailingIcons}
-        </Flex>
+        <ActivityHeaderSC>
+          <ActivityTitleRowSC>
+            <ActivityStatusIcon status={status} />
+            <Flex
+              gap="xsmall"
+              alignItems="center"
+              minWidth={0}
+              css={{ maxWidth: '100%' }}
+            >
+              <Body2BoldP
+                as="span"
+                className="type"
+                $color="text-xlight"
+              >
+                {typeLabel}
+              </Body2BoldP>
+              <Body2P
+                as="span"
+                className="kind"
+                $color="text-disabled"
+              >
+                subagent
+              </Body2P>
+              {trailingIcons}
+            </Flex>
+            <ActivityCaretSC
+              $isOpen={isOpen}
+              size={10}
+            />
+          </ActivityTitleRowSC>
+          {!isOpen && activitySummary && (
+            <Body2P
+              as="span"
+              className="summary"
+              $color={isRunning ? 'text-xlight' : 'text-disabled'}
+              $shimmer={isRunning}
+            >
+              {activitySummary}
+            </Body2P>
+          )}
+        </ActivityHeaderSC>
       }
     >
       <Flex
@@ -937,6 +943,33 @@ export const isJobRunning = (
   >
 ) => status === 'PENDING' || status === 'RUNNING'
 
+function ActivityStatusIcon({
+  status,
+}: {
+  status: WorkbenchJobActivityStatus
+}) {
+  if (isJobRunning(status)) return <SpinnerAlt size={14} />
+  if (status === WorkbenchJobActivityStatus.Successful)
+    return (
+      <CheckOutlineIcon
+        size={14}
+        color="icon-success"
+      />
+    )
+  if (
+    status === WorkbenchJobActivityStatus.Failed ||
+    status === WorkbenchJobActivityStatus.Rejected
+  )
+    return (
+      <FailedFilledIcon
+        size={14}
+        color="icon-danger"
+      />
+    )
+
+  return null
+}
+
 function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
   switch (type) {
     case WorkbenchJobActivityType.User:
@@ -956,17 +989,19 @@ function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
   }
 }
 
-/** Prefer completed output, then stream, then prompt — first clean line. */
-function workbenchActivityTaskSummary({
+/** Show the delegated prompt while running and the result once terminal. */
+function workbenchActivitySummary({
+  isRunning,
   prompt,
   output,
-  textStream,
+  error,
 }: {
+  isRunning: boolean
   prompt?: Nullable<string>
   output?: Nullable<string>
-  textStream?: Nullable<string>
+  error?: Nullable<string>
 }): string {
-  const raw = [output, textStream, prompt]
+  const raw = (isRunning ? [prompt] : [output, error, prompt])
     .map((value) => value?.trim())
     .find(Boolean)
   if (!raw) return ''
@@ -989,22 +1024,50 @@ function workbenchActivityTaskSummary({
   return line.replace(/\s+/g, ' ').trim()
 }
 
-const ActivityTitleSC = styled.span(({ theme }) => ({
+const ActivityCaretSC = styled(CaretDownIcon)<{ $isOpen: boolean }>(
+  ({ theme, $isOpen }) => ({
+    color: theme.colors['icon-xlight'],
+    flexShrink: 0,
+    opacity: $isOpen ? 1 : 0,
+    rotate: $isOpen ? '0deg' : '-90deg',
+    transition: 'opacity 0.15s ease, rotate 0.3s ease, scale 0.3s ease',
+  })
+)
+
+const ActivityHeaderSC = styled.span(({ theme }) => ({
   display: 'flex',
-  alignItems: 'baseline',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  [`&:hover ${ActivityCaretSC}`]: {
+    opacity: 1,
+  },
+  '.type': {
+    flexShrink: 0,
+  },
+  '.kind': {
+    flexShrink: 0,
+  },
+  '.summary': {
+    display: 'block',
+    minWidth: 0,
+    maxWidth: '64ch',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+}))
+
+const ActivityTitleRowSC = styled.span(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
   gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',
   overflow: 'hidden',
-  '.type': {
+  '> svg': {
     flexShrink: 0,
-  },
-  '.task': {
-    minWidth: 0,
-    // Cap so the caret stays after the label; long tasks ellipsize.
-    maxWidth: '52ch',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
   },
 }))

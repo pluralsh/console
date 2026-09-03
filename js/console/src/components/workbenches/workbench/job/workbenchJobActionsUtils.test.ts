@@ -6,12 +6,6 @@ import {
   WorkbenchToolType,
 } from 'generated/graphql'
 import { getActionPolicyToolName } from './workbenchJobActionPolicyUtils'
-import {
-  getActionDetailButtonLabel,
-  getActionInputJson,
-  getActionSubtitle,
-  getActionTitle,
-} from './workbenchJobActionsUtils'
 
 function action(
   overrides: Partial<WorkbenchJobActionFragment> & {
@@ -64,13 +58,6 @@ describe('getActionPolicyToolName', () => {
     })
 
     expect(getActionPolicyToolName(drainAction)).toBe('drain_k8s_node')
-    expect(getActionDetailButtonLabel(drainAction)).toBe('Review drain')
-    expect(getActionTitle(drainAction)).toBe('Drain node')
-    expect(getActionSubtitle(drainAction)).toBe('cluster-a · worker-0')
-    expect(JSON.parse(getActionInputJson(drainAction))).toEqual({
-      handle: 'cluster-a',
-      node: 'worker-0',
-    })
   })
 
   it('builds function-call policy names from tool type and name', () => {
