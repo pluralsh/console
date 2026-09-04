@@ -347,6 +347,26 @@ func TestEngineTurnAppliesModelAndModeConfig(t *testing.T) {
 	}
 }
 
+func TestEngineTurnAppliesModelAndReasoningEffort(t *testing.T) {
+	state := newTestState()
+	state.configOptions = []acpsdk.SessionConfigOption{
+		{Select: &acpsdk.SessionConfigOptionSelect{Id: "model", CurrentValue: "default", Options: acpsdk.SessionConfigSelectOptions{Ungrouped: &acpsdk.SessionConfigSelectOptionsUngrouped{{Value: "default"}, {Value: "openai/gpt-5.4"}}}}},
+		{Select: &acpsdk.SessionConfigOptionSelect{Id: "reasoning_effort", CurrentValue: "low", Options: acpsdk.SessionConfigSelectOptions{Ungrouped: &acpsdk.SessionConfigSelectOptionsUngrouped{{Value: "low"}, {Value: "medium"}}}}},
+	}
+	_, process, _ := newTestAgentProcess(state, true)
+	_, err := NewEngine(Config{}).Turn(context.Background(), process, Request{
+		Cwd: t.TempDir(), Prompt: "configure", Settings: SessionSettings{ModelID: "openai/gpt-5.4", Reasoning: "medium"},
+	}, &testSink{})
+	if err != nil {
+		t.Fatalf("configured turn: %v", err)
+	}
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	if len(state.setConfig) != 2 || string(state.setConfig[0].ValueId.Value) != "openai/gpt-5.4" || string(state.setConfig[1].ValueId.Value) != "medium" {
+		t.Fatalf("config values = %#v", state.setConfig)
+	}
+}
+
 func TestEngineTurnStreamsMessagesToolsUsageAndOrdering(t *testing.T) {
 	state := newTestState()
 	cached, thought := 2, 3

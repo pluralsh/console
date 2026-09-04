@@ -20,11 +20,22 @@ type toolCall struct {
 	state  console.AgentMessageToolState
 }
 
+type toolOutputValue struct {
+	text  string
+	delta bool
+}
+
 func (call *toolCall) addOutput(output string) {
 	if output == "" || output == call.output {
 		return
 	}
 	call.output = output
+}
+
+func (call *toolCall) appendOutput(output string) {
+	if output != "" {
+		call.output += output
+	}
 }
 
 func (*toolCall) formatValue(value any) string {
@@ -58,12 +69,47 @@ func (call *toolCall) contentOutput(content []acpsdk.ToolCallContent) string {
 	return builder.String()
 }
 
-func (call *toolCall) toolOutput(content []acpsdk.ToolCallContent, rawOutput any) string {
+func (call *toolCall) toolOutput(content []acpsdk.ToolCallContent, meta map[string]any, rawOutput any) toolOutputValue {
+	if output, delta, ok := terminalOutput(meta); ok {
+		return toolOutputValue{text: output, delta: delta}
+	}
 	output := call.contentOutput(content)
 	if output == "" && rawOutput != nil {
-		return call.formatValue(rawOutput)
+		if formatted, ok := formattedRawOutput(rawOutput); ok {
+			return toolOutputValue{text: formatted}
+		}
+		output = call.formatValue(rawOutput)
 	}
-	return output
+	return toolOutputValue{text: output}
+}
+
+func terminalOutput(meta map[string]any) (string, bool, bool) {
+	for _, candidate := range []struct {
+		name  string
+		delta bool
+	}{
+		{name: "terminal_output_delta", delta: true},
+		{name: "terminal_output"},
+	} {
+		envelope, ok := meta[candidate.name].(map[string]any)
+		if !ok {
+			continue
+		}
+		data, ok := envelope["data"].(string)
+		if ok {
+			return data, candidate.delta, true
+		}
+	}
+	return "", false, false
+}
+
+func formattedRawOutput(rawOutput any) (string, bool) {
+	envelope, ok := rawOutput.(map[string]any)
+	if !ok {
+		return "", false
+	}
+	formatted, ok := envelope["formatted_output"].(string)
+	return formatted, ok
 }
 
 type toolUpdateEvents struct {

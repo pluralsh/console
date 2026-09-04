@@ -75,3 +75,47 @@ func TestClientRejectsOversizedAndCanceledReads(t *testing.T) {
 		t.Fatalf("canceled read error = %v", err)
 	}
 }
+
+func TestClientRejectsCanceledWritesBeforeFilesystemSideEffects(t *testing.T) {
+	acpClient, directory := newTestClient(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	path := filepath.Join(directory, "nested", "file.txt")
+
+	_, err := acpClient.WriteTextFile(ctx, acpsdk.WriteTextFileRequest{SessionId: "session-1", Path: path, Content: "content"})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled write error = %v", err)
+	}
+	if _, err := os.Stat(filepath.Dir(path)); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("write parent directory error = %v, want not exist", err)
+	}
+}
+
+type cancelAfterFirstCheckContext struct {
+	context.Context
+	checks int
+}
+
+func (ctx *cancelAfterFirstCheckContext) Err() error {
+	ctx.checks++
+	if ctx.checks > 1 {
+		return context.Canceled
+	}
+	return nil
+}
+func TestClientRejectsCanceledWritesBetweenFilesystemSideEffects(t *testing.T) {
+	acpClient, directory := newTestClient(t)
+	path := filepath.Join(directory, "nested", "file.txt")
+
+	ctx := &cancelAfterFirstCheckContext{Context: context.Background()}
+	_, err := acpClient.WriteTextFile(ctx, acpsdk.WriteTextFileRequest{SessionId: "session-1", Path: path, Content: "content"})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("canceled write error = %v", err)
+	}
+	if _, err := os.Stat(filepath.Dir(path)); err != nil {
+		t.Fatalf("write parent directory error = %v, want directory", err)
+	}
+	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("write file error = %v, want not exist", err)
+	}
+}

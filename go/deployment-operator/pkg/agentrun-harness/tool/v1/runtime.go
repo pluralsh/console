@@ -206,9 +206,6 @@ func (runtime *Runtime) configure(ctx context.Context, request ConfigureRequest)
 }
 
 func (runtime *Runtime) turn(ctx context.Context, request TurnRequest) error {
-	if ctx == nil {
-		ctx = context.Background()
-	}
 	if request.Kind == "" {
 		return errors.New("turn kind is not set")
 	}

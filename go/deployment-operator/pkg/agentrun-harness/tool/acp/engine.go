@@ -28,15 +28,15 @@ type Engine struct {
 }
 
 func (engine *Engine) setSessionConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, modes *acpsdk.SessionModeState, options []acpsdk.SessionConfigOption, settings SessionSettings) error {
-	if err := engine.setModelConfig(ctx, connection, sessionID, options, settings.ModelID); err != nil {
+	if err := engine.setModelConfig(ctx, connection, sessionID, options, settings.ModelID, settings.Reasoning); err != nil {
 		return err
 	}
 	return engine.setModeConfig(ctx, connection, sessionID, modes, options, settings.ModeID)
 }
 
-func (engine *Engine) setModelConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, model string) error {
+func (engine *Engine) setModelConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, model, reasoning string) error {
 	if model == "" {
-		return nil
+		return engine.setReasoningConfig(ctx, connection, sessionID, options, reasoning)
 	}
 	found, err := engine.setConfigOption(ctx, connection, sessionID, options, "model", model)
 	if err != nil {
@@ -44,6 +44,20 @@ func (engine *Engine) setModelConfig(ctx context.Context, connection *acpsdk.Cli
 	}
 	if !found {
 		klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a model config option")
+	}
+	return engine.setReasoningConfig(ctx, connection, sessionID, options, reasoning)
+}
+
+func (engine *Engine) setReasoningConfig(ctx context.Context, connection *acpsdk.ClientSideConnection, sessionID string, options []acpsdk.SessionConfigOption, reasoning string) error {
+	if reasoning == "" {
+		return nil
+	}
+	found, err := engine.setConfigOption(ctx, connection, sessionID, options, "reasoning_effort", reasoning)
+	if err != nil {
+		return err
+	}
+	if !found {
+		klog.V(log.LogLevelDebug).InfoS("ACP agent did not advertise a reasoning effort config option")
 	}
 	return nil
 }

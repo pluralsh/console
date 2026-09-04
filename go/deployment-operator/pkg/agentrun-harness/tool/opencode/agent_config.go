@@ -1,17 +1,24 @@
 package opencode
 
 import (
-	"bytes"
-	"context"
 	"fmt"
-	"os"
-	stdexec "os/exec"
 	"path/filepath"
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
+
+// These paths keep OpenCode's native configuration and skills inside the
+// workspace owned by the agent run.
+const (
+	opencodeHomeDir   = ".opencode"
+	opencodeSkillsDir = "skills"
+)
+
+// ConfigFileName is the native OpenCode configuration filename.
+const ConfigFileName = "opencode.json"
 
 // configureNative writes only the provider-native OpenCode configuration. The
 // shared prompt and skill files are prepared separately by Agent.Prepare.
@@ -40,11 +47,12 @@ func (agent *Agent) configureNative(config toolv1.Config, consoleURL, consoleTok
 	if err = helpers.File().Create(configPath, content, 0644); err != nil {
 		return fmt.Errorf("failed configuring opencode config file %q: %w", ConfigFileName, err)
 	}
+
 	return nil
 }
 
-func (*Agent) providerPath(config toolv1.Config) string {
-	return filepath.Join(config.WorkDir, ".opencode")
+func (agent *Agent) providerPath(config toolv1.Config) string {
+	return filepath.Join(config.WorkDir, opencodeHomeDir)
 }
 
 func (agent *Agent) configPath(config toolv1.Config) string {
@@ -52,49 +60,32 @@ func (agent *Agent) configPath(config toolv1.Config) string {
 }
 
 func (agent *Agent) skillsPath(config toolv1.Config) string {
-	return filepath.Join(agent.providerPath(config), "skills")
+	return filepath.Join(agent.providerPath(config), opencodeSkillsDir)
 }
 
-func (*Agent) configHome(config toolv1.Config) string {
-	return filepath.Join(config.WorkDir, ".config")
+func (agent *Agent) configWithOpenCode() (*agentrunv1.OpencodeConfig, error) {
+	if agent.config.WorkDir == "" {
+		return nil, fmt.Errorf("work directory is not set")
+	}
+	if agent.config.RepositoryDir == "" {
+		return nil, fmt.Errorf("repository directory is not set")
+	}
+	return agent.runConfig(agent.config.Run)
 }
 
-func (*Agent) dataHome(config toolv1.Config) string {
-	return filepath.Join(config.WorkDir, ".local", "share")
-}
-
-func (agent *Agent) env(config toolv1.Config, configPath string) []string {
-	return []string{
-		fmt.Sprintf("OPENCODE_CONFIG=%s", configPath),
-		fmt.Sprintf("XDG_CONFIG_HOME=%s", agent.configHome(config)),
-		fmt.Sprintf("XDG_DATA_HOME=%s", agent.dataHome(config)),
+func (agent *Agent) configForFilesystem(request toolv1.FileSystemRequest) (toolv1.Config, error) {
+	if request.WorkDir == "" {
+		return toolv1.Config{}, fmt.Errorf("work directory is not set")
 	}
-}
-
-// exportSession writes an OpenCode native session export to outputPath.
-func (agent *Agent) exportSession(ctx context.Context, config toolv1.Config, sessionID, outputPath string) error {
-	if sessionID == "" {
-		return fmt.Errorf("opencode session id is not set")
+	if request.RepositoryDir == "" {
+		return toolv1.Config{}, fmt.Errorf("repository directory is not set")
 	}
-	configPath, err := filepath.Abs(agent.configPath(config))
-	if err != nil {
-		return err
+	if agent.config.Run == nil {
+		return toolv1.Config{}, fmt.Errorf("agent run is not set")
 	}
 
-	file, err := os.Create(outputPath)
-	if err != nil {
-		return fmt.Errorf("create opencode session export %q: %w", outputPath, err)
-	}
-	defer file.Close()
-
-	cmd := stdexec.CommandContext(ctx, "opencode", "export", sessionID)
-	cmd.Env = append(os.Environ(), agent.env(config, configPath)...)
-	cmd.Dir = config.RepositoryDir
-	cmd.Stdout = file
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("opencode export session %q: %w: %s", sessionID, err, stderr.String())
-	}
-	return nil
+	config := agent.config
+	config.WorkDir = request.WorkDir
+	config.RepositoryDir = request.RepositoryDir
+	return config, nil
 }

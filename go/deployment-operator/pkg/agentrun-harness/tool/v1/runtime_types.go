@@ -41,8 +41,14 @@ const (
 // turn. Provider is nil when a provider-native configuration has no exact
 // Console AI provider equivalent.
 type ModelSelection struct {
+	// Provider is the Console AI provider selected for the turn.
 	Provider *console.AiProvider
-	Name     string
+
+	// Name is the name of the model selected for the turn.
+	Name string
+
+	// Reasoning is the provider's reasoning effort, when configurable.
+	Reasoning string
 }
 
 // Settings are the provider-neutral settings resolved by an Agent.
@@ -108,7 +114,7 @@ type ExportResult struct {
 	SessionSource artifacts.SessionSource
 }
 
-// TurnSink receives provider-neutral events from a Transport. Every callback
+// TurnSink receives provider-neutral events from Transport. Every callback
 // is optional; Runtime supplies a nil-safe implementation when it starts a
 // turn.
 type TurnSink interface {
@@ -130,7 +136,7 @@ type TurnRequest struct {
 	Options []exec.Option
 }
 
-// TurnResult contains the latest session state observed by a transport. A
+// TurnResult contains the latest session state observed by transport. A
 // transport may return both a result and an error; Runtime retains a nonempty
 // result session ID before routing the error.
 type TurnResult struct {
@@ -138,7 +144,7 @@ type TurnResult struct {
 }
 
 // Agent owns provider-specific settings, configuration, and session export.
-// FileSystemConfiguration is embedded so every agent exposes the same
+// FileSystemConfiguration is embedded, so every agent exposes the same
 // preparation seam.
 type Agent interface {
 	FileSystemConfiguration

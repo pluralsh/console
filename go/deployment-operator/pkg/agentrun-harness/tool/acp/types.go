@@ -11,6 +11,8 @@ import (
 type SessionSettings struct {
 	ModeID  string
 	ModelID string
+	// Reasoning is applied through the provider's reasoning_effort option.
+	Reasoning string
 }
 
 // Request contains the provider-neutral inputs for one ACP turn.

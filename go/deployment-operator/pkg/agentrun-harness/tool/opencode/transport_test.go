@@ -2,13 +2,16 @@ package opencode
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	console "github.com/pluralsh/console/go/client"
 	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
@@ -36,7 +39,7 @@ func TestTransportLaunchPreservesLifecycleHooks(t *testing.T) {
 	}
 
 	var preStarts, postStarts atomic.Int32
-	process, err := transport.launch(context.Background(), []exec.Option{
+	process, err := transport.launch([]exec.Option{
 		exec.WithHook(stackv1.LifecyclePreStart, func() error {
 			preStarts.Add(1)
 			return nil
@@ -59,5 +62,41 @@ func TestTransportLaunchPreservesLifecycleHooks(t *testing.T) {
 	}
 	if got := postStarts.Load(); got != 1 {
 		t.Fatalf("post-start hooks = %d, want 1", got)
+	}
+}
+
+func TestTransportTurnReturnsPreCancelledContextBeforeLaunch(t *testing.T) {
+	config := toolv1.Config{
+		WorkDir:       t.TempDir(),
+		RepositoryDir: t.TempDir(),
+		Run:           &agentrunv1.AgentRun{Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{OpenCode: &agentrunv1.OpencodeConfig{Timeout: time.Minute}}}},
+	}
+	transport, err := NewTransport(NewAgent(config))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err = transport.Turn(ctx, toolv1.TurnRequest{}, nil)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Turn() error = %v, want context canceled", err)
+	}
+}
+
+func TestTransportTurnAcceptsNilContext(t *testing.T) {
+	config := toolv1.Config{
+		WorkDir:       t.TempDir(),
+		RepositoryDir: t.TempDir(),
+		Run:           &agentrunv1.AgentRun{Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{OpenCode: &agentrunv1.OpencodeConfig{Timeout: time.Minute}}}},
+	}
+	transport, err := NewTransport(NewAgent(config))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = transport.Turn(nil, toolv1.TurnRequest{Settings: toolv1.Settings{Mode: console.AgentRunMode("unsupported")}}, nil)
+	if err == nil || !strings.Contains(err.Error(), "unsupported opencode ACP mode") {
+		t.Fatalf("Turn() error = %v, want unsupported mode", err)
 	}
 }

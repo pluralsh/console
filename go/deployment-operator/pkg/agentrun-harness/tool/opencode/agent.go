@@ -4,16 +4,15 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	console "github.com/pluralsh/console/go/client"
-	agentrunv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/artifacts"
 	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
 
-// Agent owns the provider-specific settings and configuration for OpenCode.
-// Turn execution remains the responsibility of a v1.Transport.
+// Agent owns OpenCode's shared preparation and lifecycle entrypoints. Runtime
+// settings, native configuration, and ACP environment details live in their
+// responsibility-specific files.
 type Agent struct {
 	config toolv1.Config
 }
@@ -39,26 +38,6 @@ func (*Agent) Capabilities() toolv1.AgentCapabilities {
 		console.AgentRunModeWrite,
 		console.AgentRunModeReview,
 	}}
-}
-
-// ResolveSettings resolves provider/model defaults without copying credentials
-// into the provider-neutral runtime settings.
-func (agent *Agent) ResolveSettings(run *agentrunv1.AgentRun) (toolv1.Settings, error) {
-	openCode, err := agent.runConfig(run)
-	if err != nil {
-		return toolv1.Settings{}, err
-	}
-
-	resolved := agent.resolveSettings(openCode.Provider, openCode.Model, openCode.OpenAICompatible, run.IsProxyEnabled())
-	return toolv1.Settings{
-		Mode: run.Mode,
-		Model: toolv1.ModelSelection{
-			Provider: agent.aiProvider(resolved.provider),
-			Name:     resolved.model,
-		},
-		Timeout: openCode.Timeout,
-		Proxy:   run.IsProxyEnabled(),
-	}, nil
 }
 
 // Prepare writes the OpenCode system prompt and run skills for a phase.
@@ -111,12 +90,15 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 	if err != nil {
 		return err
 	}
+
 	resolved := agent.resolveSettings(openCode.Provider, openCode.Model, openCode.OpenAICompatible, agent.config.Run.IsProxyEnabled())
 	model := request.Settings.Model.Name
 	if model == "" {
 		model = resolved.model
 	}
 
+	// The provider configuration is written once during the initial phase. The
+	// runtime supplies the already resolved model for this configuration pass.
 	if err := agent.configureNative(
 		agent.config,
 		request.ConsoleURL,
@@ -137,8 +119,11 @@ func (agent *Agent) Configure(ctx context.Context, request toolv1.ConfigureReque
 // Export writes the native OpenCode session export into OutputDir and returns
 // that directory as the source for the shared artifact builder.
 func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (toolv1.ExportResult, error) {
-	if ctx != nil && ctx.Err() != nil {
-		return toolv1.ExportResult{}, ctx.Err()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return toolv1.ExportResult{}, err
 	}
 	if request.SessionID == "" {
 		return toolv1.ExportResult{}, fmt.Errorf("opencode session id is not set")
@@ -160,66 +145,4 @@ func (agent *Agent) Export(ctx context.Context, request toolv1.ExportRequest) (t
 		Path:        request.OutputDir,
 		ArchivePath: "opencode",
 	}}, nil
-}
-
-func (agent *Agent) configWithOpenCode() (*agentrunv1.OpencodeConfig, error) {
-	if agent.config.WorkDir == "" {
-		return nil, fmt.Errorf("work directory is not set")
-	}
-	if agent.config.RepositoryDir == "" {
-		return nil, fmt.Errorf("repository directory is not set")
-	}
-	return agent.runConfig(agent.config.Run)
-}
-
-func (*Agent) runConfig(run *agentrunv1.AgentRun) (*agentrunv1.OpencodeConfig, error) {
-	if run == nil {
-		return nil, fmt.Errorf("agent run is not set")
-	}
-	if run.Runtime == nil || run.Runtime.Config == nil || run.Runtime.Config.OpenCode == nil {
-		return nil, fmt.Errorf("opencode runtime configuration is not set")
-	}
-	return run.Runtime.Config.OpenCode, nil
-}
-
-func (*Agent) aiProvider(provider Provider) *console.AiProvider {
-	var mapped console.AiProvider
-	switch strings.ToLower(string(provider)) {
-	case string(ProviderPlural), string(ProviderOpenAI):
-		mapped = console.AiProviderOpenai
-	case string(ProviderAnthropic):
-		mapped = console.AiProviderAnthropic
-	case string(ProviderOllama):
-		mapped = console.AiProviderOllama
-	case string(ProviderAzure):
-		mapped = console.AiProviderAzure
-	case string(ProviderAmazonBedrock), string(ProviderBedrock):
-		mapped = console.AiProviderBedrock
-	case string(ProviderGoogleVertex), string(ProviderVertex):
-		mapped = console.AiProviderVertex
-	case string(ProviderOpenAICompatible):
-		mapped = console.AiProviderOpenaiCompatible
-	case string(ProviderXAI):
-		mapped = console.AiProviderXai
-	default:
-		return nil
-	}
-	return &mapped
-}
-
-func (agent *Agent) configForFilesystem(request toolv1.FileSystemRequest) (toolv1.Config, error) {
-	if request.WorkDir == "" {
-		return toolv1.Config{}, fmt.Errorf("work directory is not set")
-	}
-	if request.RepositoryDir == "" {
-		return toolv1.Config{}, fmt.Errorf("repository directory is not set")
-	}
-	if agent.config.Run == nil {
-		return toolv1.Config{}, fmt.Errorf("agent run is not set")
-	}
-
-	config := agent.config
-	config.WorkDir = request.WorkDir
-	config.RepositoryDir = request.RepositoryDir
-	return config, nil
 }

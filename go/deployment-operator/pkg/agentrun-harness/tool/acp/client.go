@@ -126,15 +126,24 @@ func (reader *contextReader) Read(buffer []byte) (int, error) {
 	return reader.reader.Read(buffer)
 }
 
-func (client *client) WriteTextFile(_ context.Context, request acpsdk.WriteTextFileRequest) (acpsdk.WriteTextFileResponse, error) {
+func (client *client) WriteTextFile(ctx context.Context, request acpsdk.WriteTextFileRequest) (acpsdk.WriteTextFileResponse, error) {
 	if err := client.validateSession(request.SessionId); err != nil {
 		return acpsdk.WriteTextFileResponse{}, err
 	}
 	if !filepath.IsAbs(request.Path) {
 		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("acp filesystem path must be absolute: %q", request.Path)
 	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if err := ctx.Err(); err != nil {
+		return acpsdk.WriteTextFileResponse{}, err
+	}
 	if err := os.MkdirAll(filepath.Dir(request.Path), 0o755); err != nil {
 		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("mkdir %s: %w", filepath.Dir(request.Path), err)
+	}
+	if err := ctx.Err(); err != nil {
+		return acpsdk.WriteTextFileResponse{}, err
 	}
 	if err := os.WriteFile(request.Path, []byte(request.Content), 0o644); err != nil {
 		return acpsdk.WriteTextFileResponse{}, fmt.Errorf("write %s: %w", request.Path, err)

@@ -167,7 +167,8 @@ func (turn *turnState) startTool(update *acpsdk.SessionUpdateToolCall) error {
 		turn.mu.Unlock()
 		return turn.fail(err.Error())
 	}
-	call.output = call.toolOutput(update.Content, update.RawOutput)
+	toolOutputValue := call.toolOutput(update.Content, update.Meta, update.RawOutput)
+	call.applyOutput(toolOutputValue)
 	turn.tools[id] = call
 	message := call.message()
 	output := call.output
@@ -199,8 +200,9 @@ func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate) (to
 	}
 	metadataChanged := call.updateMetadata(update)
 	previousOutput := call.output
-	if output := call.toolOutput(update.Content, update.RawOutput); output != "" {
-		call.addOutput(output)
+	output := call.toolOutput(update.Content, update.Meta, update.RawOutput)
+	if output.text != "" {
+		call.applyOutput(output)
 	}
 	streamOutput := call.output != previousOutput && (previousOutput == "" || strings.HasPrefix(call.output, previousOutput))
 	terminal, statusChanged, err := call.updateStatus(update.Status)
@@ -221,6 +223,14 @@ func (turn *turnState) applyToolUpdate(update *acpsdk.SessionToolCallUpdate) (to
 		streamOutput: streamOutput,
 		terminal:     terminal,
 	}, nil
+}
+
+func (call *toolCall) applyOutput(output toolOutputValue) {
+	if output.delta {
+		call.appendOutput(output.text)
+		return
+	}
+	call.addOutput(output.text)
 }
 
 func (turn *turnState) emitToolUpdate(id acpsdk.ToolCallId, events toolUpdateEvents) {
