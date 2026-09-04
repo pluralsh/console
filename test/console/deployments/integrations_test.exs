@@ -173,5 +173,117 @@ defmodule Console.Deployments.IntegrationsTest do
 
       assert_receive {:event, %PubSub.IssueCreated{item: ^issue}}
     end
+
+    test "it publishes one actionable notification per workbench when a pull request is reopened" do
+      hook = insert(:issue_webhook, provider: :github)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
+      comment = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:1",
+        url: "https://github.com/myorg/myrepo/issues/7",
+        status: :completed,
+        workbench: wh.workbench,
+        workbench_webhook: wh
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "reopened",
+        "pull_request" => %{
+          "id" => 2,
+          "title" => "Reopened work",
+          "body" => "Back to the drawing board",
+          "html_url" => "https://github.com/myorg/myrepo/pull/7",
+          "state" => "open"
+        }
+      })
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.status == :open
+      assert refetch(comment).status == :open
+
+      issue_id = issue.id
+      comment_id = comment.id
+      assert_receive {:event, %PubSub.IssueCreated{item: %{id: ^issue_id, status: :open, status_changed: true}}}
+      assert_receive {:event, %PubSub.IssueUpdated{item: %{id: ^comment_id, status: :open, status_changed: false}}}
+    end
+
+    test "it syncs pull request status into every workbench that already has it" do
+      hook = insert(:issue_webhook, provider: :github)
+      wh = insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "Shared pull request"})
+      same = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:2",
+        url: "https://github.com/myorg/myrepo/issues/9",
+        status: :open,
+        workbench: wh.workbench,
+        workbench_webhook: wh
+      )
+      other = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:3",
+        url: "https://github.com/myorg/myrepo/issues/9",
+        status: :open,
+        workbench: insert(:workbench)
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "closed",
+        "pull_request" => %{
+          "id" => 4,
+          "title" => "Shared pull request",
+          "body" => "Touches a repo tracked by two workbenches",
+          "html_url" => "https://github.com/myorg/myrepo/pull/9",
+          "state" => "closed",
+          "merged" => true
+        }
+      })
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.workbench_id == wh.workbench.id
+      assert issue.status == :completed
+      assert refetch(same).status == :completed
+      assert refetch(other).status == :completed
+    end
+
+    test "it will not inherit scope when the pull request matches several workbenches" do
+      hook = insert(:issue_webhook, provider: :github)
+      insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})
+      url = "https://github.com/myorg/myrepo/issues/11"
+      first_workbench = insert(:workbench)
+      second_workbench = insert(:workbench)
+      first = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:5",
+        url: url,
+        status: :open,
+        workbench: first_workbench
+      )
+      second = insert(:issue,
+        provider: :github,
+        external_id: "myorg/myrepo:comment:6",
+        url: url,
+        status: :open,
+        workbench: second_workbench
+      )
+
+      {:ok, payload} = Issues.Webhook.payload(hook, %{
+        "action" => "closed",
+        "pull_request" => %{
+          "id" => 7,
+          "title" => "Ambiguous pull request",
+          "body" => "Cannot tell which workbench owns this",
+          "html_url" => "https://github.com/myorg/myrepo/pull/11",
+          "state" => "closed",
+          "merged" => true
+        }
+      })
+
+      {:ok, issue} = Integrations.upsert_issue(payload)
+
+      assert issue.id in [first.id, second.id]
+      assert refetch(first).status == :completed
+      assert refetch(second).status == :completed
+      assert Console.Repo.aggregate(Console.Schema.Issue, :count) == 2
+    end
   end
 end

@@ -28,6 +28,7 @@ defmodule Console.Deployments.Issues.Webhook.Github do
   def url(_), do: nil
 
   def status(%{"pull_request" => %{"merged" => true}}), do: :completed
+  def status(%{"pull_request" => %{"merged" => false, "state" => "closed"}}), do: :cancelled
   def status(%{"pull_request" => %{"state" => state}}), do: map_status(state, nil)
   def status(%{"issue" => %{"state" => state, "state_reason" => reason}}), do: map_status(state, reason)
   def status(%{"issue" => %{"state" => state}}), do: map_status(state, nil)

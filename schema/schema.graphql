@@ -1829,6 +1829,16 @@ enum IssueStatus {
   COMPLETED
 }
 
+enum IssueSort {
+  INSERTED_AT
+  TITLE
+}
+
+enum IssueSortDirection {
+  ASC
+  DESC
+}
+
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
 input ChatProviderConnectionAttributes {
   "the name of this chat connection"
@@ -1987,6 +1997,21 @@ type Issue {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchIssueCounts {
+  providers: [IssueCountByProvider]
+  statuses: [IssueCountByStatus]
+}
+
+type IssueCountByProvider {
+  provider: IssueWebhookProvider!
+  count: Int!
+}
+
+type IssueCountByStatus {
+  status: IssueStatus!
+  count: Int!
 }
 
 "A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
@@ -3940,7 +3965,32 @@ type Workbench {
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
-  issues(after: String, first: Int, before: String, last: Int): IssueConnection
+  issues(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search issues by title or external id"
+    q: String
+
+    "filter issues by provider"
+    providers: [IssueWebhookProvider]
+
+    "filter issues by status"
+    statuses: [IssueStatus]
+
+    "field to sort issues by"
+    sort: IssueSort
+
+    "sort direction"
+    direction: IssueSortDirection
+  ): IssueConnection
+
+  issueCounts: WorkbenchIssueCounts
 
   "users that have read or write access to this workbench"
   users: [User]

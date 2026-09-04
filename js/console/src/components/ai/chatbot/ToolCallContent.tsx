@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
+import { isEmpty } from 'lodash'
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { prettifyToolJson } from './toolCallDisplay'
@@ -148,11 +149,19 @@ export function ToolCallContent({
           minWidth={0}
           width="100%"
         >
-          {isPending ? (
+          {isPending && isEmpty(content) ? (
             <RunningToolOutputCode
               showHeader={false}
               fillLevel={2}
             />
+          ) : isPending ? (
+            <Code
+              fillLevel={2}
+              showHeader={false}
+              css={slimCodeCss}
+            >
+              {content}
+            </Code>
           ) : customResultBody ? (
             customResultBody
           ) : isJson(content) ? (
@@ -163,7 +172,7 @@ export function ToolCallContent({
             >
               {prettifyToolJson(content)}
             </Code>
-          ) : content ? (
+          ) : !isEmpty(content) ? (
             <PreviewablePanel contentKey={`resp:${content.length}:plain`}>
               {plainResponse}
             </PreviewablePanel>

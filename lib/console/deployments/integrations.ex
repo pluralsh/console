@@ -129,13 +129,145 @@ defmodule Console.Deployments.Integrations do
   @spec upsert_issue(%{external_id: binary}) :: issue_resp
   def upsert_issue(%{external_id: external_id} = attrs) do
     extant = get_issue_by_ext_id(external_id)
+    related = related_issue(attrs)
+    attrs = inherit_issue_scope(attrs, extant || related)
 
-    case extant do
-      %Issue{} = issue -> issue
-      nil -> %Issue{external_id: external_id}
-    end
+    start_transaction()
+    |> add_operation(:issue, fn _ -> persist_issue(extant, attrs) end)
+    |> add_operation(:related, fn %{issue: issue} ->
+      sync_related_issue_statuses(attrs, except_id(issue))
+    end)
+    |> execute()
+    |> notify_issue_sync(extant)
+  end
+
+  defp persist_issue(%Issue{} = issue, attrs) do
+    Issue.changeset(issue, attrs)
+    |> Repo.update()
+  end
+  defp persist_issue(nil, %{workbench_id: id} = attrs) when is_binary(id), do: insert_issue(attrs)
+  defp persist_issue(nil, %{flow_id: id} = attrs) when is_binary(id), do: insert_issue(attrs)
+  defp persist_issue(nil, _), do: {:ok, nil}
+
+  defp except_id(%Issue{id: id}), do: id
+  defp except_id(_), do: nil
+
+  defp insert_issue(%{external_id: external_id} = attrs) do
+    %Issue{external_id: external_id}
     |> Issue.changeset(attrs)
-    |> Repo.insert_or_update()
-    |> notify(if is_nil(extant), do: :create, else: :update)
+    |> Repo.insert()
+  end
+
+  defp notify_issue_sync({:ok, %{issue: issue, related: related}}, extant) do
+    issue
+    |> issue_notifications(related, extant)
+    |> notify_synced_issues()
+
+    case {issue, related} do
+      {%Issue{} = issue, _} -> {:ok, issue}
+      {nil, [issue | _]} -> {:ok, issue}
+      {nil, []} -> {:error, "issue has no workbench or flow"}
+    end
+  end
+  defp notify_issue_sync(error, _), do: error
+
+  defp issue_notifications(%Issue{} = issue, related, extant),
+    do: [{issue, issue_delta(extant)} | Enum.map(related, & {&1, :update})]
+  defp issue_notifications(_, related, _), do: Enum.map(related, & {&1, :update})
+
+  defp notify_synced_issues(issues) do
+    Enum.reduce(issues, MapSet.new(), fn {issue, delta}, notified ->
+      {issue, notified} = dedupe_actionable_issue(issue, notified)
+      notify({:ok, issue}, delta)
+      notified
+    end)
+  end
+
+  defp dedupe_actionable_issue(
+    %Issue{workbench_id: id, status: :open, status_changed: true} = issue,
+    notified
+  ) when is_binary(id) do
+    case MapSet.member?(notified, id) do
+      true -> {%{issue | status_changed: false}, notified}
+      false -> {issue, MapSet.put(notified, id)}
+    end
+  end
+  defp dedupe_actionable_issue(issue, notified), do: {issue, notified}
+
+  defp issue_delta(%Issue{}), do: :update
+  defp issue_delta(_), do: :create
+
+  defp related_issue(
+    %{provider: :github, status: status, url: url, payload: %{"pull_request" => _} = payload}
+  ) when status in [:open, :completed, :cancelled] and is_binary(url) and not is_map_key(payload, "comment") do
+    github_issues_for_reference(url)
+    |> Repo.all()
+    |> sole_owner()
+  end
+  defp related_issue(_), do: nil
+
+  defp sole_owner(issues) do
+    Enum.uniq_by(issues, & {&1.workbench_id, &1.flow_id})
+    |> case do
+      [%Issue{} = issue] -> issue
+      _ -> nil
+    end
+  end
+
+  defp inherit_issue_scope(attrs, %Issue{} = issue) do
+    Enum.reduce(~w(workbench_id workbench_webhook_id flow_id)a, attrs, fn key, attrs ->
+      case {Map.get(attrs, key), Map.get(issue, key)} do
+        {nil, id} when is_binary(id) -> Map.put(attrs, key, id)
+        _ -> attrs
+      end
+    end)
+  end
+  defp inherit_issue_scope(attrs, _), do: attrs
+
+  defp sync_related_issue_statuses(%{provider: :github, status: status, url: url, payload: payload}, except_id)
+    when status in [:open, :completed, :cancelled] and is_binary(url) and is_map(payload),
+    do: sync_github_pr_statuses(payload, url, status, except_id)
+  defp sync_related_issue_statuses(_, _), do: {:ok, []}
+
+  defp sync_github_pr_statuses(%{"comment" => comment}, _, _, _) when is_map(comment), do: {:ok, []}
+  defp sync_github_pr_statuses(%{"pull_request" => _}, url, status, except_id) do
+    github_issues_for_reference(url)
+    |> Repo.all()
+    |> Enum.reject(& &1.id == except_id)
+    |> Enum.reduce_while({:ok, []}, &sync_issue_status(&1, &2, status))
+  end
+  defp sync_github_pr_statuses(_, _, _, _), do: {:ok, []}
+
+  defp sync_issue_status(%Issue{} = issue, {:ok, synced}, status) do
+    Issue.changeset(issue, %{status: status})
+    |> Repo.update()
+    |> case do
+      {:ok, issue} -> {:cont, {:ok, [issue | synced]}}
+      {:error, error} -> {:halt, {:error, error}}
+    end
+  end
+
+  defp github_issues_for_reference(url) do
+    Issue.for_references(:github, github_reference_urls(url))
+  end
+
+  defp github_reference_urls(url) do
+    case github_reference_identity(url) do
+      {repository_url, number} ->
+        [url, "#{repository_url}/issues/#{number}", "#{repository_url}/pull/#{number}"]
+        |> Enum.uniq()
+      _ -> [url]
+    end
+  end
+
+  defp github_reference_identity(url) do
+    uri = URI.parse(url)
+
+    case Regex.run(~r{^(.+)/(?:issues|pull)/(\d+)/?$}, uri.path || "") do
+      [_, repository_path, number] ->
+        repository_url = URI.to_string(%{uri | path: repository_path, query: nil, fragment: nil})
+        {repository_url, number}
+      _ -> nil
+    end
   end
 end

@@ -1,8 +1,2 @@
-# macOS
-.DS_Store
-
 # IDE
 .vscode
-.idea
-
-node_modules
