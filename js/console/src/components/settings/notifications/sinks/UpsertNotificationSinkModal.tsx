@@ -8,50 +8,14 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   NotificationSinkFragment,
   NotificationSinksDocument,
-  SinkType,
   useUpsertNotificationSinkMutation,
 } from 'generated/graphql'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { appendConnection, updateCache } from 'utils/graphql'
-import { isValidURL } from 'utils/url'
 
 import { sinkTypeToIcon } from './NotificationSinksColumns'
-
-const teamsWebhookHosts = [
-  'office.com',
-  'office365.com',
-  'powerautomate.com',
-  'powerplatform.com',
-  'logic.azure.com',
-]
-
-function matchesWebhookHost(url: string, hosts: string[]) {
-  if (!isValidURL(url) || !/^https:\/\//i.test(url)) {
-    return false
-  }
-
-  let parsedUrl: URL
-
-  try {
-    parsedUrl = new URL(url)
-  } catch {
-    return false
-  }
-
-  return (
-    parsedUrl.protocol === 'https:' &&
-    hosts.some(
-      (host) =>
-        parsedUrl.hostname === host || parsedUrl.hostname.endsWith(`.${host}`)
-    )
-  )
-}
-
-const hookUrlMatch = [
-  [SinkType.Slack, (url: string) => matchesWebhookHost(url, ['slack.com'])],
-  [SinkType.Teams, (url: string) => matchesWebhookHost(url, teamsWebhookHosts)],
-] as const satisfies [SinkType, (url: string) => boolean][]
+import { getSinkTypeForWebhookUrl } from './notificationSinkUrl.ts'
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
@@ -91,9 +55,7 @@ function UpsertNotificationSinkModal({
     name: string
     hookUrl: string
   }>(initialState)
-  const hookType = hookUrlMatch.find(([_, matches]) =>
-    matches(state.hookUrl)
-  )?.[0]
+  const hookType = getSinkTypeForWebhookUrl(state.hookUrl)
 
   const [mutation, { loading }] = useUpsertNotificationSinkMutation({
     onCompleted: () => onClose?.(),
