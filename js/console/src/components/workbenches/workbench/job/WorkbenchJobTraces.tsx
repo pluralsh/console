@@ -70,7 +70,7 @@ export function TraceWaterfall({
       <TraceWaterfallSC $fullscreen={fullscreen}>
         <TraceToolbarSC>
           <div>
-            <Body2BoldP>{activeTrace.spans.length} spans</Body2BoldP>
+            <Body2BoldP>{formatSpanCount(activeTrace.spans.length)}</Body2BoldP>
             <CaptionP $color="text-xlight">
               {formatDuration(bounds.end - bounds.start)} total duration
             </CaptionP>
@@ -94,7 +94,7 @@ export function TraceWaterfall({
                     key={id}
                     value={id}
                   >
-                    {shortTraceId(id)} · {spans.length} spans
+                    {shortTraceId(id)} · {formatSpanCount(spans.length)}
                   </option>
                 ))}
               </TraceSelectSC>
@@ -321,6 +321,10 @@ function formatDuration(duration: number) {
   if (duration < 1_000) return `${Math.round(duration)}ms`
   if (duration < 60_000) return `${(duration / 1_000).toFixed(2)}s`
   return `${(duration / 60_000).toFixed(1)}m`
+}
+
+export function formatSpanCount(count: number) {
+  return `${count} ${count === 1 ? 'span' : 'spans'}`
 }
 
 function formatTime(timestamp: number) {

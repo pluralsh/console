@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
-import { orderTraceSpans, traceSeverity } from './WorkbenchJobTraces'
+import {
+  formatSpanCount,
+  orderTraceSpans,
+  traceSeverity,
+} from './WorkbenchJobTraces'
 
 function trace(
   overrides: Partial<WorkbenchJobActivityTraceFragment>
@@ -61,5 +65,15 @@ describe('traceSeverity', () => {
     [undefined, 'success'],
   ])('maps %o to %s', (tags, severity) => {
     expect(traceSeverity(tags)).toBe(severity)
+  })
+})
+
+describe('formatSpanCount', () => {
+  it('uses the singular label for one span', () => {
+    expect(formatSpanCount(1)).toBe('1 span')
+  })
+
+  it('uses the plural label for multiple spans', () => {
+    expect(formatSpanCount(2)).toBe('2 spans')
   })
 })
