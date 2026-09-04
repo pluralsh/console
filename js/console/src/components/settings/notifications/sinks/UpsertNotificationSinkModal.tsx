@@ -14,13 +14,35 @@ import {
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
 import { appendConnection, updateCache } from 'utils/graphql'
+import { isValidURL } from 'utils/url'
 
 import { sinkTypeToIcon } from './NotificationSinksColumns'
 
+const teamsWebhookHosts = [
+  'office.com',
+  'office365.com',
+  'powerautomate.com',
+  'powerplatform.com',
+  'logic.azure.com',
+]
+
+function matchesWebhookHost(url: string, hosts: string[]) {
+  if (!isValidURL(url) || !/^https:\/\//i.test(url)) {
+    return false
+  }
+
+  const { hostname, protocol } = new URL(url)
+
+  return (
+    protocol === 'https:' &&
+    hosts.some((host) => hostname === host || hostname.endsWith(`.${host}`))
+  )
+}
+
 const hookUrlMatch = [
-  [SinkType.Slack, /^https:\/\/[^/]*?slack/],
-  [SinkType.Teams, /^https:\/\/[^/]*?office/],
-] as const satisfies [SinkType, RegExp][]
+  [SinkType.Slack, (url: string) => matchesWebhookHost(url, ['slack.com'])],
+  [SinkType.Teams, (url: string) => matchesWebhookHost(url, teamsWebhookHosts)],
+] as const satisfies [SinkType, (url: string) => boolean][]
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
@@ -39,6 +61,9 @@ function UpsertNotificationSinkModal({
   ...props
 }: ModalProps) {
   const sink = mode === 'edit' ? props.sink : undefined
+  const sinkName = sink?.name
+  const slackUrl = sink?.configuration.slack?.url
+  const teamsUrl = sink?.configuration.teams?.url
   const theme = useTheme()
   const initialState = useMemo(
     () => ({
@@ -46,25 +71,19 @@ function UpsertNotificationSinkModal({
       hookUrl: '',
       ...(mode === 'edit'
         ? {
-            name: sink?.name,
-            hookUrl:
-              sink?.configuration.slack?.url || sink?.configuration.teams?.url,
+            name: sinkName,
+            hookUrl: slackUrl || teamsUrl,
           }
         : {}),
     }),
-    [
-      mode,
-      sink?.configuration.slack?.url,
-      sink?.configuration.teams?.url,
-      sink?.name,
-    ]
+    [mode, slackUrl, sinkName, teamsUrl]
   )
   const { state, update, hasUpdates } = useUpdateState<{
     name: string
     hookUrl: string
   }>(initialState)
-  const hookType = hookUrlMatch.find(([_, regex]) =>
-    regex.test(state.hookUrl)
+  const hookType = hookUrlMatch.find(([_, matches]) =>
+    matches(state.hookUrl)
   )?.[0]
 
   const [mutation, { loading }] = useUpsertNotificationSinkMutation({
