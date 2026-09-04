@@ -1,7 +1,13 @@
 import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import { useKeyDown } from '@react-hooks-library/core'
-import { CloseIcon, IconFrame, LinkoutIcon } from '@pluralsh/design-system'
+import {
+  CloseIcon,
+  ErrorIcon,
+  IconFrame,
+  LinkoutIcon,
+  WarningIcon,
+} from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import FocusLock from 'react-focus-lock'
 import styled, { DefaultTheme, useTheme } from 'styled-components'
@@ -125,7 +131,8 @@ export function TraceWaterfall({
                 const service = row.span.service ?? 'unknown service'
                 const duration = row.end - row.start
                 const { left, width } = traceBarPosition(row, bounds)
-                const color = traceColor(theme, traceSeverity(row.span.tags))
+                const severity = traceSeverity(row.span.tags)
+                const color = traceColor(theme, severity)
 
                 return (
                   <TraceRowSC
@@ -152,7 +159,12 @@ export function TraceWaterfall({
                         $left={left}
                         $width={width}
                         title={`${service} · ${formatDuration(duration)}`}
-                      />
+                      >
+                        <TraceBarTextSC>
+                          {row.span.name ?? 'Unnamed span'}
+                        </TraceBarTextSC>
+                        <TraceBarStatusIcon severity={severity} />
+                      </TraceBarSC>
                     </TraceBarAreaSC>
                   </TraceRowSC>
                 )
@@ -331,7 +343,11 @@ function serviceColor(service: string) {
   return COLORS[hash % COLORS.length]
 }
 
-export function traceSeverity(tags: Nullable<Record<string, unknown>>) {
+type TraceSeverity = 'danger' | 'success' | 'warning'
+
+export function traceSeverity(
+  tags: Nullable<Record<string, unknown>>
+): TraceSeverity {
   const status = tagValue(tags, [
     'otel.status_code',
     'status.code',
@@ -381,10 +397,7 @@ function errorHttpStatus(value: unknown) {
   return Number.isFinite(status) && status >= 500
 }
 
-function traceColor(
-  theme: DefaultTheme,
-  severity: ReturnType<typeof traceSeverity>
-) {
+function traceColor(theme: DefaultTheme, severity: TraceSeverity) {
   switch (severity) {
     case 'danger':
       return { accent: theme.colors.red[400], fill: theme.colors.red[800] }
@@ -399,6 +412,13 @@ function traceColor(
         fill: theme.colors.green[800],
       }
   }
+}
+
+function TraceBarStatusIcon({ severity }: { severity: TraceSeverity }) {
+  if (severity === 'danger') return <ErrorIcon color="icon-danger" />
+  if (severity === 'warning') return <WarningIcon color="icon-warning" />
+
+  return null
 }
 
 function formatTagValue(value: unknown) {
@@ -553,7 +573,7 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     cursor: 'pointer',
     display: 'grid',
     gridTemplateColumns: 'minmax(140px, 38%) minmax(0, 1fr)',
-    minHeight: 34,
+    minHeight: 40,
     padding: `0 ${theme.spacing.small}px`,
     textAlign: 'left',
     width: '100%',
@@ -608,15 +628,33 @@ const TraceBarSC = styled.span<{
   $left: number
   $width: number
 }>(({ theme, $accent, $fill, $left, $width }) => ({
+  alignItems: 'center',
   background: $fill,
   borderLeft: `3px solid ${$accent}`,
   borderRadius: theme.borderRadiuses.medium,
-  height: 14,
+  display: 'flex',
+  gap: theme.spacing.medium,
+  height: 32,
   left: `${$left}%`,
+  overflow: 'hidden',
+  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px ${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
   position: 'absolute',
   top: '50%',
   transform: 'translateY(-50%)',
   width: `${$width}%`,
+}))
+
+const TraceBarTextSC = styled.span(({ theme }) => ({
+  color: theme.colors.green[50],
+  flex: 1,
+  fontSize: 16,
+  fontWeight: 600,
+  letterSpacing: '0.25px',
+  lineHeight: '24px',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 }))
 
 const TraceDetailSC = styled.div<{ $fullscreen: boolean }>(
