@@ -16,6 +16,21 @@ func TestClaudeRunArgs(t *testing.T) {
 	assertArgsEqual(t, want, args)
 }
 
+func TestClaudeRunArgsExtraDirs(t *testing.T) {
+	args := claudeRunArgs("/repo", "/plural/.claude/prompts/AGENTS.md", "autonomous", Sonnet46, "fix tests", "", "/plural/shared/repos", "/repo", "")
+	want := []string{
+		"--add-dir", "/repo",
+		"--add-dir", "/plural/shared/repos",
+		"--agents", "autonomous",
+		"--system-prompt-file", "/plural/.claude/prompts/AGENTS.md",
+		"--model", string(Sonnet46),
+		"-p", "fix tests",
+		"--output-format", "stream-json",
+		"--verbose",
+	}
+	assertArgsEqual(t, want, args)
+}
+
 func TestClaudeRunArgsResume(t *testing.T) {
 	sessionID := "550e8400-e29b-41d4-a716-446655440000"
 	args := claudeRunArgs("/repo", "/plural/.claude/prompts/AGENTS.md", "autonomous", Sonnet46, "add tests", sessionID)

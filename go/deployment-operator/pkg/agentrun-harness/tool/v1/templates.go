@@ -9,17 +9,23 @@ import (
 )
 
 type SystemPromptTemplateInput struct {
-	Mode           console.AgentRunMode
-	ReviewDepth    console.AgentReviewDepth
-	BrowserEnabled bool
-	DindEnabled    bool
-	MemoryEnabled  bool
-	WorkDir        string
-	RepositoryDir  string
-	Prompt         string
-	Branch         string
-	PRURL          string
-	Followup       bool
+	Mode                 console.AgentRunMode
+	ReviewDepth          console.AgentReviewDepth
+	BrowserEnabled       bool
+	DindEnabled          bool
+	MemoryEnabled        bool
+	WorkDir              string
+	RepositoryDir        string
+	Prompt               string
+	Branch               string
+	PRURL                string
+	Followup             bool
+	PrebakedRepositories []PrebakedRepository
+}
+
+type PrebakedRepository struct {
+	URL string
+	Dir string
 }
 
 func systemPromptTemplate(templateFilePath string, input *SystemPromptTemplateInput) (content string, err error) {

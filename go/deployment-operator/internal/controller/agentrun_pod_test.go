@@ -489,6 +489,74 @@ func TestBuildAgentRunPod_PreservesCustomAgentBootstrapSecurityContext(t *testin
 	}
 }
 
+func TestBuildAgentRunPod_RepositoryImage(t *testing.T) {
+	image := "ghcr.io/pluralsh/repos:latest"
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:            console.AgentRuntimeTypeClaude,
+			TargetNamespace: "default",
+			RepositoryImage: &image,
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	for _, volume := range pod.Spec.Volumes {
+		assert.Nil(t, volume.Image, "prebake must not add an image volume")
+	}
+
+	prebake := requireContainer(t, pod.Spec.InitContainers, repositoryPrebakeContainerName)
+	assert.Equal(t, image, prebake.Image)
+	assert.Equal(t, []string{"/bin/sh", "-c"}, prebake.Command)
+	assert.Contains(t, prebake.VolumeMounts, corev1.VolumeMount{
+		Name:      sharedContextVolumeName,
+		MountPath: sharedContextVolumePath,
+	})
+	if assert.GreaterOrEqual(t, len(pod.Spec.InitContainers), 2) {
+		assert.Equal(t, repositoryPrebakeContainerName, pod.Spec.InitContainers[0].Name)
+		assert.Equal(t, agentBootstrapContainerName, pod.Spec.InitContainers[1].Name)
+	}
+}
+
+func TestBuildAgentRunPod_OmitsRepositoryImageWhenUnset(t *testing.T) {
+	run := &v1alpha1.AgentRun{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-run", Namespace: "default"},
+		Spec: v1alpha1.AgentRunSpec{
+			RuntimeRef: v1alpha1.AgentRuntimeReference{Name: "test-runtime"},
+			Prompt:     "test prompt",
+			Repository: "https://github.com/test/repo",
+			Mode:       console.AgentRunModeAnalyze,
+		},
+		Status: v1alpha1.AgentRunStatus{
+			Status: v1alpha1.Status{ID: lo.ToPtr("test-run-id")},
+		},
+	}
+	runtime := &v1alpha1.AgentRuntime{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-runtime"},
+		Spec: v1alpha1.AgentRuntimeSpec{
+			Type:            console.AgentRuntimeTypeClaude,
+			TargetNamespace: "default",
+		},
+	}
+
+	pod := buildAgentRunPod(run, runtime)
+	for _, container := range pod.Spec.InitContainers {
+		assert.NotEqual(t, repositoryPrebakeContainerName, container.Name)
+	}
+}
+
 func TestGetAgentRunPodCompletion(t *testing.T) {
 	tests := []struct {
 		name       string

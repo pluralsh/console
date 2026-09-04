@@ -13,6 +13,7 @@ import (
 
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
@@ -33,6 +34,9 @@ func (in *environment) Setup() error {
 	}
 	if err := in.cloneRepository(); err != nil {
 		return fmt.Errorf("failed to clone repository: %w", err)
+	}
+	if err := ConfigurePrebakeGitSafeDirectories(); err != nil {
+		return fmt.Errorf("failed to configure prebake git safe directories: %w", err)
 	}
 
 	return nil
@@ -72,6 +76,17 @@ func (in *environment) cloneRepository() error {
 		return in.configureRepository(repoDirPath, userName, userEmail)
 	}
 
+	copied, err := in.cloneFromPrebake(repoDirPath)
+	if err != nil {
+		return err
+	}
+	if copied {
+		if err := in.checkoutRequestedBranchBestEffort(repoDirPath); err != nil {
+			return err
+		}
+		return in.configureRepository(repoDirPath, userName, userEmail)
+	}
+
 	// Set proxy for clone via environment variable so it takes effect immediately.
 	// The same proxy is later written into the repo-local git config so that
 	// subsequent push/fetch operations inside the cloned repo also use it.
@@ -96,6 +111,63 @@ func (in *environment) cloneRepository() error {
 
 	repoDirPath = path.Join(in.dir, repoDir)
 	return in.configureRepository(repoDirPath, userName, userEmail)
+}
+
+func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
+	match, err := prebake.Lookup(in.agentRun.Repository)
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest, falling back to git clone")
+		return false, nil
+	}
+	if match == nil {
+		return false, nil
+	}
+
+	klog.V(log.LogLevelInfo).InfoS("copying prebaked repository", "src", match.Dir, "dst", repoDirPath, "url", in.agentRun.Repository)
+	if err := exec.NewExecutable("cp", exec.WithArgs([]string{"-a", match.Dir, repoDirPath})).Run(context.Background()); err != nil {
+		if removeErr := os.RemoveAll(repoDirPath); removeErr != nil {
+			klog.ErrorS(removeErr, "failed to clean up incomplete prebake copy", "dir", repoDirPath)
+		}
+		klog.ErrorS(err, "prebake copy failed, falling back to git clone", "src", match.Dir)
+		return false, nil
+	}
+
+	if err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"remote", "set-url", "origin", in.agentRun.Repository}),
+		exec.WithDir(repoDirPath),
+	).Run(context.Background()); err != nil {
+		if addErr := exec.NewExecutable("git",
+			exec.WithArgs([]string{"remote", "add", "origin", in.agentRun.Repository}),
+			exec.WithDir(repoDirPath),
+		).Run(context.Background()); addErr != nil {
+			return false, fmt.Errorf("failed to set origin remote after prebake copy: %w", err)
+		}
+	}
+
+	return true, nil
+}
+
+func (in *environment) checkoutRequestedBranchBestEffort(repoDirPath string) error {
+	if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
+		klog.InfoS("prebake fetch/checkout failed, using local copy", "dir", repoDirPath, "err", err)
+	}
+	return nil
+}
+
+// ConfigurePrebakeGitSafeDirectories marks every repository in the prebake
+// manifest as a git safe.directory so the harness can inspect them.
+func ConfigurePrebakeGitSafeDirectories() error {
+	repos, err := prebake.List()
+	if err != nil {
+		klog.ErrorS(err, "failed to load repository prebake manifest")
+		return nil
+	}
+	for _, repo := range repos {
+		if err := ConfigureGitSafeDirectory(repo.Dir); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // commitIdentity resolves the author identity for commits created by this run.

@@ -2279,6 +2279,12 @@ spec:
                   Name of this AgentRuntime.
                   If not provided, the name from AgentRuntime.ObjectMeta will be used.
                 type: string
+              repositoryImage:
+                description: |-
+                  RepositoryImage is an OCI image of precloned git repositories plus manifest.json.
+                  When set, an init container copies it into /plural/shared/repos before bootstrap
+                  so a matching repo can be copied locally instead of git clone.
+                type: string
               scmConnection:
                 description: |-
                   ScmConnection is the name of an ScmConnection in Console to use for git operations on agent runs using this runtime.

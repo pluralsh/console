@@ -84,6 +84,12 @@ type AgentRuntimeSpec struct {
 	// +kubebuilder:validation:Optional
 	Memory *bool `json:"memory,omitempty"`
 
+	// RepositoryImage is an OCI image of precloned git repositories plus manifest.json.
+	// When set, an init container copies it into /plural/shared/repos before bootstrap
+	// so a matching repo can be copied locally instead of git clone.
+	// +kubebuilder:validation:Optional
+	RepositoryImage *string `json:"repositoryImage,omitempty"`
+
 	// AllowedRepositories the git repositories allowed to be used with this runtime.
 	// +kubebuilder:validation:Optional
 	AllowedRepositories []string `json:"allowedRepositories,omitempty"`
