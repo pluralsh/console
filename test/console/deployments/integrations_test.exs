@@ -245,6 +245,96 @@ defmodule Console.Deployments.IntegrationsTest do
       assert refetch(other).status == :completed
     end
 
+    test "it syncs pull request status to comments for every SCM provider" do
+      cases = [
+        {:gitlab, "https://gitlab.com/myorg/myrepo/-/merge_requests/7#note_101",
+         %{
+           "object_kind" => "merge_request",
+           "project" => %{"path_with_namespace" => "myorg/myrepo"},
+           "object_attributes" => %{
+             "iid" => 7,
+             "title" => "Merged GitLab MR",
+             "description" => "done",
+             "url" => "https://gitlab.com/myorg/myrepo/-/merge_requests/7",
+             "state" => "merged"
+           }
+         }},
+        {:bitbucket, "https://bitbucket.org/myorg/bbrepo/pull-requests/7#comment-101",
+         %{
+           "repository" => %{"full_name" => "myorg/bbrepo"},
+           "pullrequest" => %{
+             "id" => 7,
+             "title" => "Merged Bitbucket PR",
+             "description" => "done",
+             "state" => "MERGED",
+             "links" => %{
+               "html" => %{
+                 "href" => "https://bitbucket.org/myorg/bbrepo/pull-requests/7"
+               }
+             }
+           }
+         }},
+        {:bitbucket_datacenter,
+         "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/7#comment-101",
+         %{
+           "eventKey" => "pr:merged",
+           "pullRequest" => %{
+             "id" => 7,
+             "title" => "Merged Bitbucket Data Center PR",
+             "description" => "done",
+             "state" => "MERGED",
+             "toRef" => %{
+               "repository" => %{"slug" => "repo", "project" => %{"key" => "PROJ"}}
+             },
+             "links" => %{
+               "self" => [
+                 %{
+                   "href" =>
+                     "https://bbdc.example.com/projects/PROJ/repos/repo/pull-requests/7"
+                 }
+               ]
+             }
+           }
+         }},
+        {:azure_devops,
+         "https://dev.azure.com/org/project/_git/repo/pullrequest/7?discussionId=12",
+         %{
+           "eventType" => "git.pullrequest.merged",
+           "resourceContainers" => %{"project" => %{"id" => "project-id"}},
+           "resource" => %{
+             "pullRequest" => %{
+               "pullRequestId" => 7,
+               "title" => "Merged Azure DevOps PR",
+               "description" => "done",
+               "status" => "completed",
+               "url" => "https://dev.azure.com/org/project/_git/repo/pullrequest/7"
+             }
+           }
+         }}
+      ]
+
+      Enum.each(cases, fn {provider, comment_url, scm_payload} ->
+        hook = insert(:issue_webhook, provider: provider)
+        workbench = insert(:workbench)
+
+        comment =
+          insert(:issue,
+            provider: provider,
+            external_id: "#{provider}:comment:101",
+            url: comment_url,
+            status: :open,
+            workbench: workbench
+          )
+
+        {:ok, payload} = Issues.Webhook.payload(hook, scm_payload)
+        {:ok, issue} = Integrations.upsert_issue(payload)
+
+        assert issue.status == :completed
+        assert issue.workbench_id == workbench.id
+        assert refetch(comment).status == :completed
+      end)
+    end
+
     test "it will not inherit scope when the pull request matches several workbenches" do
       hook = insert(:issue_webhook, provider: :github)
       insert(:workbench_webhook, issue_webhook: hook, matches: %{substring: "no match"})

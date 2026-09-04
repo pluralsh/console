@@ -1482,7 +1482,7 @@ defmodule ConsoleWeb.WebhookControllerTest do
       |> response(403)
     end
 
-    test "it will ignore if payload is invalid (wrong object_kind)", %{conn: conn} do
+    test "it will ignore if a merge request payload is missing required fields", %{conn: conn} do
       hook = insert(:issue_webhook, provider: :gitlab)
       payload = Jason.encode!(%{"object_kind" => "merge_request", "object_attributes" => %{}})
 

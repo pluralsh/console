@@ -177,7 +177,6 @@ const ColumnTitleSC = styled.h2(({ theme }) => ({
   margin: 0,
   paddingBottom: theme.spacing.xsmall,
   color: theme.colors.text,
-  backgroundColor: theme.colors['fill-zero'],
   flexShrink: 0,
 }))
 
