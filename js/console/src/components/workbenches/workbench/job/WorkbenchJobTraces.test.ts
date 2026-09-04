@@ -2,8 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import {
   formatSpanCount,
+  httpStatusFromAttribute,
   orderTraceSpans,
   traceSeverity,
+  traceStatusMessage,
+  traceTreeMeta,
 } from './WorkbenchJobTraces'
 
 function trace(
@@ -65,6 +68,48 @@ describe('traceSeverity', () => {
     [undefined, 'success'],
   ])('maps %o to %s', (tags, severity) => {
     expect(traceSeverity(tags)).toBe(severity)
+  })
+})
+
+describe('traceTreeMeta', () => {
+  it('marks ancestor guides and children from span depth', () => {
+    const rows = orderTraceSpans([
+      trace({ name: 'root', spanId: 'root' }),
+      trace({ name: 'child', parentId: 'root', spanId: 'child' }),
+      trace({ name: 'leaf', parentId: 'child', spanId: 'leaf' }),
+      trace({
+        name: 'sibling',
+        parentId: 'root',
+        spanId: 'sibling',
+        start: '2026-09-04T10:00:02Z',
+      }),
+    ])
+
+    expect(traceTreeMeta(rows)).toEqual([
+      { ancestorContinues: [], hasChildren: true },
+      { ancestorContinues: [true], hasChildren: true },
+      { ancestorContinues: [true, false], hasChildren: false },
+      { ancestorContinues: [false], hasChildren: false },
+    ])
+  })
+})
+
+describe('traceStatusMessage', () => {
+  it('prefers the OpenTelemetry status description', () => {
+    expect(
+      traceStatusMessage({
+        'exception.message': 'boom',
+        'otel.status_description': 'connection reset',
+      })
+    ).toBe('connection reset')
+  })
+})
+
+describe('httpStatusFromAttribute', () => {
+  it('reads numeric HTTP status attributes', () => {
+    expect(httpStatusFromAttribute('http.response.status_code', 200)).toBe(200)
+    expect(httpStatusFromAttribute('status code', '503')).toBe(503)
+    expect(httpStatusFromAttribute('http.route', '/gql')).toBeUndefined()
   })
 })
 

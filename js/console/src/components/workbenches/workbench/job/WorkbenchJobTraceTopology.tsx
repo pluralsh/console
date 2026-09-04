@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
-import { COLORS } from 'utils/color'
+import { traceBarColor } from './workbenchJobTraceColors'
 import { isNonNullable } from 'utils/isNonNullable'
 import { EdgeType } from 'components/utils/reactflow/edges'
 import { ReactFlowGraph } from 'components/utils/reactflow/ReactFlowGraph'
@@ -121,19 +121,18 @@ function TraceTopologyNode({ data, id }: NodeProps<TraceGraphNode>) {
     <NodeBase
       id={id}
       css={{
+        borderLeft: `3px solid ${data.color}`,
         gap: theme.spacing.xxsmall,
         minWidth: 160,
         padding: theme.spacing.small,
         width: 220,
       }}
     >
-      <TraceNodeHeaderSC>
-        <ServiceDotSC $color={data.color} />
-        <Body2BoldP>{data.label}</Body2BoldP>
-      </TraceNodeHeaderSC>
+      <Body2BoldP>{data.label}</Body2BoldP>
       <CaptionP $color="text-xlight">
-        {data.service} · {formatDuration(data.duration)}
-        {data.count ? ` · ${data.count} spans` : ''}
+        {formatDuration(data.duration)}
+        {data.service !== data.label ? ` • ${data.service}` : ''}
+        {data.count ? ` • ${data.count} spans` : ''}
       </CaptionP>
     </NodeBase>
   )
@@ -258,11 +257,7 @@ function formatDuration(duration: number) {
 }
 
 function serviceColor(service: string) {
-  const hash = [...service].reduce(
-    (value, char) => value + char.charCodeAt(0),
-    0
-  )
-  return COLORS[hash % COLORS.length]
+  return traceBarColor(service).accent
 }
 
 const traceElkOptions: LayoutOptions = {
@@ -276,16 +271,9 @@ const traceElkOptions: LayoutOptions = {
 const TraceTopologySC = styled.div(({ theme }) => ({
   border: `1px solid ${theme.colors.border}`,
   borderRadius: theme.borderRadiuses.medium,
-  height: 360,
+  height: 480,
   overflow: 'hidden',
   width: '100%',
-}))
-
-const TraceNodeHeaderSC = styled.div(({ theme }) => ({
-  alignItems: 'center',
-  display: 'flex',
-  gap: theme.spacing.xsmall,
-  minWidth: 0,
 }))
 
 const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
