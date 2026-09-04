@@ -2,6 +2,29 @@ import Config
 import System, only: [get_env: 1, get_env: 2]
 import Console, only: [is_set: 1]
 
+case {get_env("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"), get_env("OTEL_EXPORTER_OTLP_ENDPOINT")} do
+  {endpoint, _} when is_binary(endpoint) and byte_size(endpoint) > 0 ->
+    config :opentelemetry,
+      span_processor: :batch,
+      traces_exporter: :otlp
+
+    config :opentelemetry_exporter,
+      otlp_protocol: :http_protobuf,
+      otlp_traces_endpoint: endpoint
+
+  {_, endpoint} when is_binary(endpoint) and byte_size(endpoint) > 0 ->
+    config :opentelemetry,
+      span_processor: :batch,
+      traces_exporter: :otlp
+
+    config :opentelemetry_exporter,
+      otlp_protocol: :http_protobuf,
+      otlp_endpoint: endpoint
+
+  _ ->
+    :ok
+end
+
 config :console, Console.LocalRepo,
   adapter: Ecto.Adapters.SQLite3,
   database: "/tmp/sqlite/local.db"

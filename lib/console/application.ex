@@ -9,6 +9,8 @@ defmodule Console.Application do
       config: %{metadata: [:file, :line]}
     })
 
+    Console.Otel.Tracing.setup()
+
     children = [
       %{
         id: :pg,
