@@ -1,6 +1,7 @@
 import {
   Accordion,
   AccordionItem,
+  AgentLoadingIcon,
   Code,
   Flex,
   getLastStringChild,
@@ -92,7 +93,11 @@ export function SimpleToolCall({
   const toolName = attributes?.tool?.name ?? ''
   const args = attributes?.tool?.arguments
   const kind = resolveToolCallKind(toolName, args)
-  const title = customTitle ?? toolCallDisplayTitle(kind, toolName, args)
+  const title =
+    customTitle ??
+    (isPending && kind === 'subagent'
+      ? 'Waiting for subagent'
+      : toolCallDisplayTitle(kind, toolName, args))
   const subtitle = toolCallDisplaySubtitle(kind, toolName, args, content)
   const label = customLabel ?? (
     <ToolCallLineLabel
@@ -100,7 +105,12 @@ export function SimpleToolCall({
       subtitle={subtitle}
       runtime={toolRuntime}
       isPending={isPending}
-      leadingIcon={leadingIcon}
+      leadingIcon={
+        leadingIcon ??
+        (isPending && kind === 'subagent' ? (
+          <AgentLoadingIcon size={12} />
+        ) : undefined)
+      }
     />
   )
   const accordionProps = {
@@ -474,7 +484,7 @@ const AccordionLabelSC = styled.span(({ theme }) => ({
 
 const ToolCallLineSC = styled.span(({ theme }) => ({
   display: 'flex',
-  alignItems: 'baseline',
+  alignItems: 'center',
   gap: theme.spacing.xsmall,
   minWidth: 0,
   maxWidth: '100%',

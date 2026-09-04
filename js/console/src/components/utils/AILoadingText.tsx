@@ -1,4 +1,4 @@
-import { Flex, FlexProps, LoaderIcon } from '@pluralsh/design-system'
+import { AgentLoadingIcon, Flex, FlexProps } from '@pluralsh/design-system'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobActivityWhimseyTextQuery,
@@ -42,17 +42,9 @@ export function AILoadingText({
       gap="xsmall"
       {...props}
     >
-      <LoaderIcon
+      <AgentLoadingIcon
         color="icon-xlight"
-        size={16}
-        css={{
-          animation: 'workbench-loader-pulse 1.2s ease-in-out infinite',
-          '@keyframes workbench-loader-pulse': {
-            '0%': { opacity: 1, transform: 'scale(1) rotate(0deg)' },
-            '50%': { opacity: 0.5, transform: 'scale(1.18) rotate(90deg)' },
-            '100%': { opacity: 1, transform: 'scale(1) rotate(180deg)' },
-          },
-        }}
+        size={12}
       />
       <EaseIn currentKey={whimseyText}>
         <Body2P
