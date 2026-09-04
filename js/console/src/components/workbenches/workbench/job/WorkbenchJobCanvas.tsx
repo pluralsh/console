@@ -247,7 +247,7 @@ function TracesBlock({
   const { graphSummary, hasDistinctQuerySummary } = getToolGraphSummaries(graph)
 
   return (
-    <VizBlockCardSC>
+    <TracesBlockSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
       <JobActivityTraces
         jobId={jobId}
@@ -255,7 +255,7 @@ function TracesBlock({
         withSummary={hasDistinctQuerySummary}
       />
       {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
-    </VizBlockCardSC>
+    </TracesBlockSC>
   )
 }
 
@@ -392,6 +392,15 @@ const BlockCardSC = styled.div(({ theme }) => ({
 /** Metrics / logs / charts: center the block content vertically when the canvas row is taller than this cell. */
 const VizBlockCardSC = styled(BlockCardSC)(() => ({
   justifyContent: 'center',
+}))
+
+const TracesBlockSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  width: '100%',
 }))
 
 const ChartBlockCardSC = styled(VizBlockCardSC)(({ theme }) => ({

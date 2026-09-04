@@ -55,7 +55,7 @@ export function TraceWaterfall({
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
   const [view, setView] = useState<TraceView>('timeline')
   const [fullscreen, setFullscreen] = useState(false)
-  const [detailsOpen, setDetailsOpen] = useState(true)
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const activeTrace =
     traceGroups.find(({ id }) => id === selectedTraceId) ?? traceGroups[0]
 
@@ -149,7 +149,7 @@ export function TraceWaterfall({
           </TraceToolbarActionsSC>
         </TraceHeaderSC>
         {view === 'timeline' ? (
-          <TraceTimelineContentSC $details={!!selectedRow}>
+          <TraceTimelineContentSC $sideDetails={fullscreen && !!selectedRow}>
             <TimelineSC $fullscreen={fullscreen}>
               <TimelineHeaderSC>
                 <CaptionP $color="text-xlight">SPAN</CaptionP>
@@ -252,8 +252,8 @@ export function TraceWaterfall({
                     {formatDuration(selectedRow.end - selectedRow.start)}
                   </Body1BoldP>
                   <CaptionP $color="text-light">
-                    offset +{formatDuration(selectedRow.start - bounds.start)}{' '}
-                    from root
+                    offset {formatOffset(selectedRow.start - bounds.start)} from
+                    root
                   </CaptionP>
                 </TraceDetailHeaderSC>
                 <TraceDetailSectionSC>
@@ -307,7 +307,11 @@ export function TraceWaterfall({
             spans={activeTrace.spans}
           />
         )}
-        {summary && <Body2P $color="text-light">{summary}</Body2P>}
+        {summary && (
+          <TraceCardNoteSC>
+            <Body2P $color="text-light">{summary}</Body2P>
+          </TraceCardNoteSC>
+        )}
       </TraceWaterfallSC>
     </TraceFullscreenSC>
   )
@@ -325,7 +329,7 @@ function TraceMetric({ label, value }: { label: string; value: string }) {
   return (
     <TraceMetricSC>
       <CaptionP $color="text-xlight">{label}</CaptionP>
-      <Body2P>{value}</Body2P>
+      <Body2P $color="text-light">{value}</Body2P>
     </TraceMetricSC>
   )
 }
@@ -344,6 +348,7 @@ function TraceStatusChip({ severity }: { severity: TraceSeverity }) {
     <Chip
       fillLevel={2}
       icon={<TraceStatusIcon severity={severity} />}
+      iconColor={traceStatusIconColor(severity)}
       severity={severity}
       size="small"
     >
@@ -355,11 +360,22 @@ function TraceStatusChip({ severity }: { severity: TraceSeverity }) {
 function TraceStatusIcon({ severity }: { severity: TraceSeverity }) {
   switch (severity) {
     case 'danger':
-      return <ErrorIcon />
+      return <ErrorIcon color="icon-danger" />
     case 'warning':
-      return <WarningIcon />
+      return <WarningIcon color="icon-warning" />
     default:
-      return <StatusOkIcon />
+      return <StatusOkIcon color="icon-success" />
+  }
+}
+
+function traceStatusIconColor(severity: TraceSeverity) {
+  switch (severity) {
+    case 'danger':
+      return 'icon-danger' as const
+    case 'warning':
+      return 'icon-warning' as const
+    default:
+      return 'icon-success' as const
   }
 }
 
@@ -608,10 +624,16 @@ function dateToMs(value: Nullable<string>) {
   return Number.isNaN(timestamp) ? null : timestamp
 }
 
-function formatDuration(duration: number) {
-  if (duration < 1_000) return `${Math.round(duration)}ms`
-  if (duration < 60_000) return `${(duration / 1_000).toFixed(2)}s`
-  return `${(duration / 60_000).toFixed(1)}m`
+export function formatDuration(duration: number) {
+  const ms = Math.round(Math.max(0, duration))
+
+  if (ms < 1_000) return `${ms}ms`
+  if (ms < 60_000) return `${(ms / 1_000).toFixed(2)}s`
+  return `${(ms / 60_000).toFixed(1)}m`
+}
+
+export function formatOffset(duration: number) {
+  return `+${formatDuration(duration)}`
 }
 
 function serviceName(span: TraceSpan) {
@@ -765,10 +787,14 @@ const TraceFullscreenSC = styled(FocusLock)<{ $fullscreen: boolean }>(
 )
 
 const TraceWaterfallSC = styled.div<{ $fullscreen: boolean }>(
-  ({ $fullscreen }) => ({
+  ({ theme, $fullscreen }) => ({
+    background: theme.colors['fill-zero'],
+    border: theme.borders.default,
+    borderRadius: theme.borderRadiuses.large,
     display: 'flex',
     flexDirection: 'column',
     minWidth: 0,
+    overflow: 'hidden',
     width: '100%',
     ...($fullscreen && { height: '100%' }),
   })
@@ -872,30 +898,23 @@ const TraceSelectSC = styled.select(({ theme }) => ({
   },
 }))
 
-const TraceTimelineContentSC = styled.div<{ $details: boolean }>(
-  ({ $details }) => ({
+const TraceTimelineContentSC = styled.div<{ $sideDetails: boolean }>(
+  ({ $sideDetails }) => ({
     display: 'grid',
     flex: 1,
-    gridTemplateColumns: $details ? 'minmax(0, 1fr) 250px' : 'minmax(0, 1fr)',
+    gridTemplateColumns: $sideDetails
+      ? 'minmax(0, 1fr) 250px'
+      : 'minmax(0, 1fr)',
     minHeight: 0,
-    '@media (max-width: 960px)': {
-      gridTemplateColumns: 'minmax(0, 1fr)',
-    },
   })
 )
 
-const TimelineSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    border: `1px solid ${theme.colors.border}`,
-    flex: 1,
-    maxHeight: $fullscreen ? 'calc(100vh - 136px)' : 576,
-    overflowX: 'hidden',
-    overflowY: 'auto',
-    '@media (max-width: 720px)': {
-      maxHeight: $fullscreen ? 'calc(100vh - 280px)' : 576,
-    },
-  })
-)
+const TimelineSC = styled.div<{ $fullscreen: boolean }>(({ $fullscreen }) => ({
+  flex: 1,
+  maxHeight: $fullscreen ? 'calc(100vh - 136px)' : 576,
+  overflowX: 'hidden',
+  overflowY: 'auto',
+}))
 
 const TimelineHeaderSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-zero'],
@@ -934,10 +953,12 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     background: $selected ? theme.colors['fill-three'] : 'transparent',
     border: 'none',
     borderBottom: `1px solid ${theme.colors['border-fill-two']}`,
+    boxSizing: 'border-box',
     color: 'inherit',
     cursor: 'pointer',
     display: 'grid',
     gridTemplateColumns: '256px minmax(0, 1fr)',
+    height: 64,
     minHeight: 64,
     padding: 0,
     textAlign: 'left',
@@ -1019,8 +1040,8 @@ const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
 }))
 
 const TraceNameSC = styled.span(({ theme }) => ({
+  ...theme.partials.text.body2,
   color: theme.colors['text-light'],
-  fontSize: 12,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
@@ -1035,8 +1056,12 @@ const TraceDurationSC = styled.span(({ theme }) => ({
   whiteSpace: 'nowrap',
 }))
 
-const TraceBarAreaSC = styled.div(() => ({
+const TraceBarAreaSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  boxSizing: 'border-box',
+  display: 'flex',
   minWidth: 0,
+  padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
   position: 'relative',
 }))
 
@@ -1059,15 +1084,17 @@ const TraceBarSC = styled.span<{
   background: $fill,
   borderLeft: `3px solid ${$accent}`,
   borderRadius: theme.borderRadiuses.medium,
+  boxSizing: 'border-box',
   display: 'flex',
+  flexShrink: 0,
   gap: theme.spacing.medium,
   height: 32,
-  left: `${$left}%`,
+  marginLeft: `${$left}%`,
   overflow: 'hidden',
   padding: `${theme.spacing.xxsmall}px 12px ${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
-  position: 'absolute',
-  top: 16,
+  position: 'relative',
   width: `${$width}%`,
+  zIndex: 1,
 }))
 
 const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
@@ -1099,20 +1126,21 @@ const TraceBarServiceSC = styled.span<{ $color: string }>(({ $color }) => ({
 const TraceDetailSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     background: theme.colors['fill-two'],
-    borderLeft: `1px solid ${theme.colors['border-fill-two']}`,
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing.large,
-    maxHeight: $fullscreen ? 'calc(100vh - 136px)' : undefined,
     overflowY: 'auto',
     padding: theme.spacing.medium,
-    width: 250,
-    '@media (max-width: 960px)': {
-      borderLeft: 'none',
-      borderTop: `1px solid ${theme.colors.border}`,
-      maxHeight: 'none',
-      width: 'auto',
-    },
+    ...($fullscreen
+      ? {
+          borderLeft: `1px solid ${theme.colors['border-fill-two']}`,
+          maxHeight: 'calc(100vh - 136px)',
+          width: 250,
+        }
+      : {
+          borderTop: `1px solid ${theme.colors.border}`,
+          width: 'auto',
+        }),
   })
 )
 
@@ -1167,4 +1195,9 @@ const TraceMessageSC = styled.div(({ theme }) => ({
   border: `1px solid ${theme.colors.border}`,
   borderRadius: theme.borderRadiuses.medium,
   padding: theme.spacing.xsmall,
+}))
+
+const TraceCardNoteSC = styled.div(({ theme }) => ({
+  borderTop: `1px solid ${theme.colors.border}`,
+  padding: theme.spacing.small,
 }))

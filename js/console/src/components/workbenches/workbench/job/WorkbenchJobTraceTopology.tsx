@@ -1,19 +1,21 @@
 import {
   ReactFlowProvider,
+  Handle,
+  Position,
   type Edge,
   type Node,
   type NodeProps,
 } from '@xyflow/react'
 import { LayoutOptions } from 'elkjs'
-import { useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import { type ReactNode, useMemo } from 'react'
+import styled from 'styled-components'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { ErrorIcon, WarningIcon } from '@pluralsh/design-system'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import { traceBarColor } from './workbenchJobTraceColors'
 import { isNonNullable } from 'utils/isNonNullable'
 import { EdgeType } from 'components/utils/reactflow/edges'
 import { ReactFlowGraph } from 'components/utils/reactflow/ReactFlowGraph'
-import { NodeBase } from 'components/utils/reactflow/nodes'
 
 type TraceSpan = Pick<
   WorkbenchJobActivityTraceFragment,
@@ -28,7 +30,8 @@ type TraceGraphNodeData = {
   duration: number
   label: string
   service: string
-  tags?: Nullable<Record<string, unknown>>
+  severity: 'danger' | 'success' | 'warning'
+  tool?: boolean
 }
 
 type TraceGraphNode = Node<TraceGraphNodeData, 'trace'>
@@ -52,13 +55,23 @@ export function TraceTopology({
 
   if (!nodes.length) return null
 
+  const services = getServices(spans)
+
+  if (nodes.length === 1 && !edges.length)
+    return (
+      <TraceSingleGraphSC>
+        <TraceNodeCard data={nodes[0].data} />
+        <TraceGraphLegend services={services} />
+      </TraceSingleGraphSC>
+    )
+
   return (
-    <TraceTopologySC>
+    <TraceTopologySC $count={nodes.length}>
       <ReactFlowProvider>
         <TraceTopologyGraph
           baseEdges={edges}
           baseNodes={nodes}
-          services={getServices(spans)}
+          services={services}
         />
       </ReactFlowProvider>
     </TraceTopologySC>
@@ -74,68 +87,97 @@ function TraceTopologyGraph({
   baseNodes: TraceGraphNode[]
   services: { color: string; name: string }[]
 }) {
-  const [selectedNode, setSelectedNode] = useState<TraceGraphNode>()
-
   return (
     <ReactFlowGraph
-      allowFullscreen
       baseEdges={baseEdges}
       baseNodes={baseNodes}
+      borderless
       elkOptions={traceElkOptions}
       nodeTypes={nodeTypes}
+      showActions={false}
       showLayoutingIndicator={false}
-      onNodeClick={(_, node) => setSelectedNode(node as TraceGraphNode)}
-      additionalOverlays={
-        <>
-          <TraceGraphLegendSC>
-            <CaptionP $color="text-xlight">Services</CaptionP>
-            {services.map((service) => (
-              <TraceGraphLegendItemSC key={service.name}>
-                <ServiceDotSC $color={service.color} />
-                <CaptionP>{service.name}</CaptionP>
-              </TraceGraphLegendItemSC>
-            ))}
-          </TraceGraphLegendSC>
-          {selectedNode && (
-            <TraceGraphDetailSC>
-              <Body2BoldP>{selectedNode.data.label}</Body2BoldP>
-              <CaptionP $color="text-xlight">
-                {selectedNode.data.service} ·{' '}
-                {formatDuration(selectedNode.data.duration)}
-                {selectedNode.data.count
-                  ? ` · ${selectedNode.data.count} spans`
-                  : ''}
-              </CaptionP>
-            </TraceGraphDetailSC>
-          )}
-        </>
-      }
+      additionalOverlays={<TraceGraphLegend services={services} />}
     />
   )
 }
 
-function TraceTopologyNode({ data, id }: NodeProps<TraceGraphNode>) {
-  const theme = useTheme()
-
+function TraceTopologyNode({ data }: NodeProps<TraceGraphNode>) {
   return (
-    <NodeBase
-      id={id}
-      css={{
-        borderLeft: `3px solid ${data.color}`,
-        gap: theme.spacing.xxsmall,
-        minWidth: 160,
-        padding: theme.spacing.small,
-        width: 220,
-      }}
-    >
-      <Body2BoldP>{data.label}</Body2BoldP>
-      <CaptionP $color="text-xlight">
-        {formatDuration(data.duration)}
-        {data.service !== data.label ? ` • ${data.service}` : ''}
-        {data.count ? ` • ${data.count} spans` : ''}
-      </CaptionP>
-    </NodeBase>
+    <TraceNodeCard data={data}>
+      <TraceNodeHandleSC
+        type="target"
+        position={Position.Left}
+      />
+      <TraceNodeHandleSC
+        type="source"
+        position={Position.Right}
+      />
+    </TraceNodeCard>
   )
+}
+
+function TraceNodeCard({
+  children,
+  data,
+}: {
+  children?: ReactNode
+  data: TraceGraphNodeData
+}) {
+  return (
+    <TraceNodeSC>
+      <TraceNodeAccentSC $color={data.color} />
+      <TraceNodeBodySC>
+        <TraceNodeTitleSC>
+          <Body2BoldP css={{ minWidth: 0 }}>{data.label}</Body2BoldP>
+          {data.tool && <CaptionP $color="text-xlight">tool</CaptionP>}
+          <TraceNodeStatusIcon severity={data.severity} />
+        </TraceNodeTitleSC>
+        <CaptionP $color="text-xlight">{nodeSubtitle(data)}</CaptionP>
+      </TraceNodeBodySC>
+      {children}
+    </TraceNodeSC>
+  )
+}
+
+function TraceGraphLegend({
+  services,
+}: {
+  services: { color: string; name: string }[]
+}) {
+  return (
+    <TraceGraphLegendSC>
+      <CaptionP $color="text-xlight">Services</CaptionP>
+      {services.map((service) => (
+        <TraceGraphLegendItemSC key={service.name}>
+          <ServiceDotSC $color={service.color} />
+          <CaptionP>{service.name}</CaptionP>
+        </TraceGraphLegendItemSC>
+      ))}
+    </TraceGraphLegendSC>
+  )
+}
+
+function TraceNodeStatusIcon({
+  severity,
+}: {
+  severity: TraceGraphNodeData['severity']
+}) {
+  if (severity === 'danger')
+    return (
+      <ErrorIcon
+        color="icon-danger"
+        size={16}
+      />
+    )
+  if (severity === 'warning')
+    return (
+      <WarningIcon
+        color="icon-warning"
+        size={16}
+      />
+    )
+
+  return null
 }
 
 export function getSpanNodesAndEdges(spans: TraceSpan[]) {
@@ -151,7 +193,8 @@ export function getSpanNodesAndEdges(spans: TraceSpan[]) {
         duration,
         label: span.name ?? 'Unnamed span',
         service: serviceName(span),
-        tags: span.tags,
+        severity: nodeSeverity(span.tags),
+        tool: isToolSpan(span.tags),
       },
       id,
       position: { x: 0, y: 0 },
@@ -176,13 +219,25 @@ export function getServiceNodesAndEdges(spans: TraceSpan[]) {
       .filter(({ span }) => !!span.spanId)
       .map(({ span }) => [span.spanId!, span])
   )
-  const services = new Map<string, { duration: number; spans: TraceSpan[] }>()
+  const services = new Map<
+    string,
+    {
+      duration: number
+      severity: TraceGraphNodeData['severity']
+      spans: TraceSpan[]
+    }
+  >()
 
   validSpans.forEach(({ duration, span }) => {
     const service = serviceName(span)
-    const current = services.get(service) ?? { duration: 0, spans: [] }
+    const current = services.get(service) ?? {
+      duration: 0,
+      severity: 'success' as const,
+      spans: [],
+    }
     services.set(service, {
       duration: current.duration + duration,
+      severity: worseSeverity(current.severity, nodeSeverity(span.tags)),
       spans: [...current.spans, span],
     })
   })
@@ -194,6 +249,7 @@ export function getServiceNodesAndEdges(spans: TraceSpan[]) {
       duration: value.duration,
       label: service,
       service,
+      severity: value.severity,
     },
     id: `service:${service}`,
     position: { x: 0, y: 0 },
@@ -251,9 +307,62 @@ function timestamp(value: Nullable<string>) {
 }
 
 function formatDuration(duration: number) {
-  if (duration < 1_000) return `${Math.round(duration)}ms`
-  if (duration < 60_000) return `${(duration / 1_000).toFixed(2)}s`
-  return `${(duration / 60_000).toFixed(1)}m`
+  const ms = Math.round(Math.max(0, duration))
+
+  if (ms < 1_000) return `${ms}ms`
+  if (ms < 60_000) return `${(ms / 1_000).toFixed(2)}s`
+  return `${(ms / 60_000).toFixed(1)}m`
+}
+
+function formatSpanCount(count: number) {
+  return `${count} ${count === 1 ? 'span' : 'spans'}`
+}
+
+function nodeSubtitle(data: TraceGraphNodeData) {
+  if (data.count)
+    return `${formatDuration(data.duration)} • ${formatSpanCount(data.count)}`
+  if (data.service !== data.label)
+    return `${formatDuration(data.duration)} • ${data.service}`
+
+  return formatDuration(data.duration)
+}
+
+function nodeSeverity(
+  tags: Nullable<Record<string, unknown>>
+): TraceGraphNodeData['severity'] {
+  if (!tags) return 'success'
+
+  const status = String(
+    tags['otel.status_code'] ?? tags['status.code'] ?? tags.status ?? ''
+  ).toLowerCase()
+  const httpStatus = Number(
+    tags['http.response.status_code'] ?? tags['http.status_code']
+  )
+
+  if (
+    tags.error ||
+    tags['error.type'] ||
+    status === 'error' ||
+    httpStatus >= 500
+  )
+    return 'danger'
+  if (status === 'warning' || status === 'warn') return 'warning'
+
+  return 'success'
+}
+
+function worseSeverity(
+  current: TraceGraphNodeData['severity'],
+  next: TraceGraphNodeData['severity']
+) {
+  if (current === 'danger' || next === 'danger') return 'danger'
+  if (current === 'warning' || next === 'warning') return 'warning'
+
+  return 'success'
+}
+
+function isToolSpan(tags: Nullable<Record<string, unknown>>) {
+  return !!tags && Object.keys(tags).some((key) => /tool/i.test(key))
 }
 
 function serviceColor(service: string) {
@@ -268,13 +377,63 @@ const traceElkOptions: LayoutOptions = {
   'elk.spacing.nodeNode': '32',
 }
 
-const TraceTopologySC = styled.div(({ theme }) => ({
-  border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.medium,
-  height: 480,
+const TraceTopologySC = styled.div<{ $count: number }>(({ $count }) => ({
+  height: Math.min(520, Math.max(280, 168 + $count * 88)),
   overflow: 'hidden',
+  position: 'relative',
   width: '100%',
 }))
+
+const TraceSingleGraphSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  backgroundColor:
+    theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-zero'],
+  backgroundImage: `radial-gradient(circle, ${theme.colors['border-fill-three']} 1px, transparent 1px)`,
+  backgroundSize: `${theme.spacing.large}px ${theme.spacing.large}px`,
+  display: 'flex',
+  height: 280,
+  justifyContent: 'center',
+  overflow: 'hidden',
+  position: 'relative',
+  width: '100%',
+}))
+
+const TraceNodeSC = styled.div(({ theme }) => ({
+  background: theme.colors['fill-zero'],
+  border: `1px solid ${theme.colors['border-fill-two']}`,
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  minWidth: 160,
+  overflow: 'hidden',
+  position: 'relative',
+  width: 220,
+}))
+
+const TraceNodeAccentSC = styled.span<{ $color: string }>(({ $color }) => ({
+  background: $color,
+  flexShrink: 0,
+  width: 3,
+}))
+
+const TraceNodeBodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+  minWidth: 0,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+}))
+
+const TraceNodeTitleSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+}))
+
+const TraceNodeHandleSC = styled(Handle)({
+  opacity: 0,
+})
 
 const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
   background: $color,
@@ -288,33 +447,19 @@ const TraceGraphLegendSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-zero'],
   border: `1px solid ${theme.colors.border}`,
   borderRadius: theme.borderRadiuses.medium,
-  bottom: theme.spacing.xsmall,
+  bottom: theme.spacing.small,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-  left: theme.spacing.xsmall,
+  gap: theme.spacing.xsmall,
+  left: theme.spacing.small,
   maxWidth: 180,
-  padding: theme.spacing.xsmall,
+  padding: theme.spacing.small,
   position: 'absolute',
 }))
 
 const TraceGraphLegendItemSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
-  gap: theme.spacing.xxsmall,
+  gap: theme.spacing.xsmall,
   minWidth: 0,
-}))
-
-const TraceGraphDetailSC = styled.div(({ theme }) => ({
-  background: theme.colors['fill-zero'],
-  border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.medium,
-  bottom: theme.spacing.xsmall,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-  maxWidth: 260,
-  padding: theme.spacing.xsmall,
-  position: 'absolute',
-  right: theme.spacing.xsmall,
 }))

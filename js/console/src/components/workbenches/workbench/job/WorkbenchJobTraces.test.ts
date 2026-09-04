@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import {
+  formatDuration,
+  formatOffset,
   formatSpanCount,
   httpStatusFromAttribute,
   orderTraceSpans,
@@ -120,5 +122,21 @@ describe('formatSpanCount', () => {
 
   it('uses the plural label for multiple spans', () => {
     expect(formatSpanCount(2)).toBe('2 spans')
+  })
+})
+
+describe('formatDuration', () => {
+  it('formats milliseconds without a space', () => {
+    expect(formatDuration(52.4)).toBe('52ms')
+  })
+
+  it('formats seconds with two decimal places', () => {
+    expect(formatDuration(4230)).toBe('4.23s')
+  })
+})
+
+describe('formatOffset', () => {
+  it('clamps negative offsets to the root', () => {
+    expect(formatOffset(-2)).toBe('+0ms')
   })
 })

@@ -20,6 +20,19 @@ function trace(
 }
 
 describe('trace topology', () => {
+  it('keeps a single span as an isolated node', () => {
+    const { nodes, edges } = getSpanNodesAndEdges([
+      trace({ name: 'POST /ext/gql' }),
+    ])
+
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0]?.data).toMatchObject({
+      label: 'POST /ext/gql',
+      service: 'console',
+    })
+    expect(edges).toHaveLength(0)
+  })
+
   it('connects child spans to their parent span', () => {
     const { edges } = getSpanNodesAndEdges([
       trace({ spanId: 'root' }),
