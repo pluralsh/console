@@ -8,6 +8,7 @@ import {
   useCallback,
   useRef,
 } from 'react'
+import { isEmpty, isNil } from 'lodash'
 import { mergeProps } from 'react-aria'
 import { mergeRefs } from 'react-merge-refs'
 import styled, { type DefaultTheme } from 'styled-components'
@@ -291,6 +292,8 @@ function Input2({
   size = size || (large ? 'large' : small ? 'small' : 'medium')
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
+  const effectiveValue = inputProps?.value ?? value
+  const hasValue = !isNil(effectiveValue) && !isEmpty(String(effectiveValue))
 
   const hasEndContent = !!suffix
   const hasStartContent = !!prefix || !!titleContent
@@ -374,9 +377,9 @@ function Input2({
           {...inputProps}
         />
       </InputAreaSC>
-      {showClearButton && (
+      {showClearButton && hasValue && (
         <ClearButton
-          disabled={!value || disabled}
+          disabled={disabled}
           onClick={() => {
             const input = inputRef?.current
 

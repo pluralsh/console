@@ -5594,11 +5594,33 @@ export type IssueConnection = {
   pageInfo: PageInfo;
 };
 
+export type IssueCountByProvider = {
+  __typename?: 'IssueCountByProvider';
+  count: Scalars['Int']['output'];
+  provider: IssueWebhookProvider;
+};
+
+export type IssueCountByStatus = {
+  __typename?: 'IssueCountByStatus';
+  count: Scalars['Int']['output'];
+  status: IssueStatus;
+};
+
 export type IssueEdge = {
   __typename?: 'IssueEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Issue>;
 };
+
+export enum IssueSort {
+  InsertedAt = 'INSERTED_AT',
+  Title = 'TITLE'
+}
+
+export enum IssueSortDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
 
 export enum IssueStatus {
   Cancelled = 'CANCELLED',
@@ -16152,6 +16174,7 @@ export type Workbench = {
   /** the id of the workbench */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  issueCounts?: Maybe<WorkbenchIssueCounts>;
   issues?: Maybe<IssueConnection>;
   /** default mode-specific options for jobs created by this workbench */
   modes?: Maybe<WorkbenchJobModes>;
@@ -16218,8 +16241,13 @@ export type WorkbenchEvalResultsArgs = {
 export type WorkbenchIssuesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  direction?: InputMaybe<IssueSortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  sort?: InputMaybe<IssueSort>;
+  statuses?: InputMaybe<Array<InputMaybe<IssueStatus>>>;
 };
 
 
@@ -16665,6 +16693,12 @@ export type WorkbenchInfrastructureAttributes = {
   stacks?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable vulnerabilities capability */
   vulnerabilities?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type WorkbenchIssueCounts = {
+  __typename?: 'WorkbenchIssueCounts';
+  providers?: Maybe<Array<Maybe<IssueCountByProvider>>>;
+  statuses?: Maybe<Array<Maybe<IssueCountByStatus>>>;
 };
 
 export type WorkbenchJob = {
@@ -22360,12 +22394,17 @@ export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIs
 
 export type WorkbenchIssuesQueryVariables = Exact<{
   id: Scalars['ID']['input'];
+  q?: InputMaybe<Scalars['String']['input']>;
+  providers?: InputMaybe<Array<InputMaybe<IssueWebhookProvider>> | InputMaybe<IssueWebhookProvider>>;
+  statuses?: InputMaybe<Array<InputMaybe<IssueStatus>> | InputMaybe<IssueStatus>>;
+  sort?: InputMaybe<IssueSort>;
+  direction?: InputMaybe<IssueSortDirection>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type WorkbenchIssuesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null } | null };
+export type WorkbenchIssuesQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, issueCounts?: { __typename?: 'WorkbenchIssueCounts', providers?: Array<{ __typename?: 'IssueCountByProvider', provider: IssueWebhookProvider, count: number } | null> | null, statuses?: Array<{ __typename?: 'IssueCountByStatus', status: IssueStatus, count: number } | null> | null } | null, issues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string } | null, workbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus } | null } | null } | null> | null } | null } | null };
 
 export type GetWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -46502,10 +46541,28 @@ export type WorkbenchesIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenc
 export type WorkbenchesIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesIssuesSuspenseQuery>;
 export type WorkbenchesIssuesQueryResult = Apollo.QueryResult<WorkbenchesIssuesQuery, WorkbenchesIssuesQueryVariables>;
 export const WorkbenchIssuesDocument = gql`
-    query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+    query WorkbenchIssues($id: ID!, $q: String, $providers: [IssueWebhookProvider], $statuses: [IssueStatus], $sort: IssueSort, $direction: IssueSortDirection, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
-    issues(first: $first, after: $after) {
+    issueCounts {
+      providers {
+        provider
+        count
+      }
+      statuses {
+        status
+        count
+      }
+    }
+    issues(
+      q: $q
+      providers: $providers
+      statuses: $statuses
+      sort: $sort
+      direction: $direction
+      first: $first
+      after: $after
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -46533,6 +46590,11 @@ ${WorkbenchIssueFragmentDoc}`;
  * const { data, loading, error } = useWorkbenchIssuesQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      q: // value for 'q'
+ *      providers: // value for 'providers'
+ *      statuses: // value for 'statuses'
+ *      sort: // value for 'sort'
+ *      direction: // value for 'direction'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *   },

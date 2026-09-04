@@ -116,7 +116,7 @@ export function SimpleToolCall({
         <SimpleAccordion {...accordionProps}>
           <Flex
             direction="column"
-            gap="none"
+            gap="xsmall"
             minWidth={0}
             width="100%"
             marginTop={spacing.xsmall}
@@ -145,7 +145,7 @@ export function SimpleToolCall({
         <SimpleAccordion {...accordionProps}>
           <Flex
             direction="column"
-            gap="none"
+            gap="xsmall"
             minWidth={0}
             width="100%"
             marginTop={spacing.xsmall}

@@ -47,8 +47,36 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.provider == ^provider)
   end
 
+  def for_references(query \\ __MODULE__, provider, urls) do
+    from(i in query, where: i.provider == ^provider and i.url in ^urls)
+  end
+
   def for_status(query \\ __MODULE__, status) do
     from(i in query, where: i.status == ^status)
+  end
+
+  def for_statuses(query \\ __MODULE__, statuses)
+  def for_statuses(query, []), do: from(i in query, where: false)
+  def for_statuses(query, statuses) when is_list(statuses) do
+    from(i in query, where: i.status in ^statuses)
+  end
+
+  def for_providers(query \\ __MODULE__, providers)
+  def for_providers(query, []), do: from(i in query, where: false)
+  def for_providers(query, providers) when is_list(providers) do
+    from(i in query, where: i.provider in ^providers)
+  end
+
+  def search(query \\ __MODULE__, q) do
+    from(i in query, where: ilike(i.title, ^"%#{q}%") or ilike(i.external_id, ^"%#{q}%"))
+  end
+
+  def count_by_status(query \\ __MODULE__) do
+    from(i in query, group_by: i.status, select: %{status: i.status, count: count(i.id)})
+  end
+
+  def count_by_provider(query \\ __MODULE__) do
+    from(i in query, group_by: i.provider, select: %{provider: i.provider, count: count(i.id)})
   end
 
   @valid ~w(provider status external_id url title body payload workbench_id workbench_webhook_id flow_id webhook)a

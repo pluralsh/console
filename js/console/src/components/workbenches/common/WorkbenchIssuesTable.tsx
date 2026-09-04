@@ -1,21 +1,19 @@
 import {
-  ArrowTopRightIcon,
   CheckOutlineIcon,
   Chip,
   FailedFilledIcon,
   Flex,
   SpinnerAlt,
   Table,
-  Tooltip,
   UnknownIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import { IssueLink } from 'components/workbenches/common/IssueLink'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { StackedText } from 'components/utils/table/StackedText'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
-import { InlineA } from 'components/utils/typography/Text'
 import { WorkbenchIssueFragment, WorkbenchJobStatus } from 'generated/graphql'
-import { truncate } from 'lodash'
+import { isEmpty } from 'lodash'
 import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
@@ -78,30 +76,18 @@ function getColumns(fallbackWorkbenchId?: string) {
         )
       },
     }),
-    columnHelper.accessor((issue) => issue.url, {
+    columnHelper.accessor((issue) => issue, {
       id: 'url',
       header: '',
-      meta: { gridTemplate: 'minmax(220px, 2fr)' },
+      meta: { gridTemplate: 'minmax(148px, 1.2fr)' },
       cell: function Cell({ getValue }) {
-        const url = getValue()
+        const issue = getValue()
 
         return (
-          <Tooltip
-            placement="top"
-            label={url}
-          >
-            <Flex gap="small">
-              <InlineA href={url}>
-                <Flex
-                  gap="xsmall"
-                  align="center"
-                >
-                  {truncate(url, { length: 42 })}
-                </Flex>
-              </InlineA>
-              <ArrowTopRightIcon />
-            </Flex>
-          </Tooltip>
+          <IssueLink
+            url={issue.url}
+            provider={issue.provider}
+          />
         )
       },
     }),
@@ -179,7 +165,7 @@ export function WorkbenchIssuesTable({
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      loading={loading && issues.length === 0}
+      loading={loading && isEmpty(issues)}
       emptyStateProps={{ message: 'No issues found.' }}
     />
   )

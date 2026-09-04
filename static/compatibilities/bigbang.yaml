@@ -3,27 +3,27 @@ icon: https://artifacthub.io/image/0ca7dd5c-47ec-4d6a-87b7-2f2b74a3cca5
 git_url: https://repo1.dso.mil/big-bang/bigbang
 release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
 versions:
-- version: 3.31.1
-  kube: ['1.35']
+- version: 3.32.0
+  kube: ['1.36']
   requirements:
   - name: Alloy
     version: 4.3.2-bb.0
   - name: Anchore Enterprise
-    version: 3.25.1-bb.1
+    version: 3.25.1-bb.3
   - name: Argocd
     version: 10.2.1-bb.0
   - name: Authservice
-    version: 1.1.5-bb.7
-  - name: Bbctl
-    version: 3.0.1-bb.3
+    version: 1.1.8-bb.1
+  - name: Cert Manager
+    version: v1.20.3-bb.2
   - name: Eck Operator
     version: 3.4.1-bb.1
   - name: Elasticsearch Kibana
     version: 1.41.0-bb.0
   - name: External Secrets Operator
-    version: 2.8.0-bb.0
+    version: 2.9.0-bb.0
   - name: Fluentbit
-    version: 0.57.9-bb.0
+    version: 0.57.9-bb.1
   - name: Fortify
     version: 26.2.0-bb.2
   - name: Gatekeeper
@@ -33,7 +33,7 @@ versions:
   - name: Gitlab
     version: 10.2.4-bb.0
   - name: Gitlab Runner
-    version: 0.88.3-bb.2
+    version: 0.91.2-bb.1
   - name: Grafana
     version: 10.5.15-bb.6
   - name: Harbor
@@ -51,15 +51,15 @@ versions:
   - name: Keycloak
     version: 7.3.0-bb.0
   - name: Kiali
-    version: 2.30.0-bb.0
+    version: 2.30.0-bb.1
   - name: Kyverno
-    version: 3.8.2-bb.2
+    version: 3.9.0-bb.0
   - name: Kyverno Policies
     version: 3.3.4-bb.87
   - name: Kyverno Reporter
-    version: 3.9.0-bb.1
+    version: 3.10.0-bb.0
   - name: Loki
-    version: 6.55.0-bb.2
+    version: 6.55.0-bb.5
   - name: Mattermost
     version: 11.10.0-bb.0
   - name: Mattermost Operator
@@ -73,7 +73,7 @@ versions:
   - name: Minio Operator
     version: 7.1.1-bb.9
   - name: Monitoring
-    version: 88.3.0-bb.0
+    version: 88.3.0-bb.1
   - name: Neuvector
     version: 2.11.0-bb.2
   - name: Prometheus Operator Crds
@@ -81,15 +81,15 @@ versions:
   - name: Renovate
     version: 46.251.0-bb.0
   - name: Sonarqube
-    version: 2026.4.0-bb.0
+    version: 2026.4.1-bb.0
   - name: Tempo
     version: 2.1.0-bb.2
   - name: Thanos
-    version: 17.4.0-bb.3
+    version: 17.6.0-bb.0
   - name: Twistlock
-    version: 0.28.0-bb.3
+    version: 0.30.0-bb.0
   - name: Vault
-    version: 0.34.0-bb.0
+    version: 0.34.1-bb.0
   - name: Velero
     version: 12.1.0-bb.3
   - name: Wrapper
@@ -99,15 +99,21 @@ versions:
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: ["Big Bang 3.31.0 \u2192 3.31.1 upgrades the bundled Keycloak chart\
-        \ from 7.2.2-bb.1 to 7.3.0-bb.0."]
-    features: [Keycloak bumped to 7.3.0-bb.0 (may include upstream Keycloak chart/app
-        improvements).]
-    breaking_changes: ["Potential breaking changes may exist within the Keycloak 7.2.2-bb.1\
-        \ \u2192 7.3.0-bb.0 upgrade; review the Keycloak package/changelog for this\
-        \ version jump before upgrading."]
-  chart_version: 3.31.1
-  images: []
+    chart_updates: [BigBang 3.32.0 adds Cert Manager (v1.20.3-bb.2) and removes bbctl
+        from the stack., Most other components receive patch/minor bumps; expect chart/package
+        version alignment but review per-package changelogs for values changes.]
+    features: ['Cert Manager is now included, enabling in-cluster certificate issuance/renewal
+        workflows without separate installation.', 'Various components updated for
+        bugfixes/security patches (e.g., Authservice, ESO, Keycloak, Kyverno, Thanos,
+        Twistlock).']
+    breaking_changes: [bbctl is removed; any CI/CD or operational workflows depending
+        on bbctl need migration., Introducing Cert Manager may overlap with an existing
+        cert-manager installation/CRDs; reconcile ownership to avoid CRD/namespace
+        conflicts.]
+  chart_version: 3.32.0
+  images: ['registry1.dso.mil/ironbank/gitlab/gitlab-runner/gitlab-runner:v18.11.3',
+    'registry1.dso.mil/gitlab/gitlab-org/gitlab-runner:ubi-fips-v19.2.2', 'registry1.dso.mil/ironbank/gitlab/gitlab-runner/gitlab-runner-helper:v18.11.3',
+    'registry1.dso.mil/gitlab/gitlab-org/gitlab-runner/gitlab-runner-helper:ubi-fips-x86_64-v19.2.2']
 - version: 3.31.0
   kube: ['1.35']
   requirements:
