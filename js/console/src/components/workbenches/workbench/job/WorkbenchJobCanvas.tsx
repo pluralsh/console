@@ -112,8 +112,16 @@ function CanvasGrid({
           {rowBlocks.map((block, i) => (
             <BlockCellSC
               key={block.identifier ?? `${y}-${i}`}
-              $x={block.layout?.x ?? 0}
-              $w={block.layout?.w ?? COLUMNS}
+              $x={
+                block.type === WorkbenchCanvasBlockType.Traces
+                  ? 0
+                  : (block.layout?.x ?? 0)
+              }
+              $w={
+                block.type === WorkbenchCanvasBlockType.Traces
+                  ? COLUMNS
+                  : (block.layout?.w ?? COLUMNS)
+              }
               $h={block.layout?.h ?? 4}
             >
               <CanvasBlockRenderer

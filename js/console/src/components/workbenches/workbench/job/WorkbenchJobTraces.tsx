@@ -320,6 +320,7 @@ const TraceWaterfallSC = styled.div(({ theme }) => ({
 const TraceToolbarSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
+  flexWrap: 'wrap',
   gap: theme.spacing.small,
   justifyContent: 'space-between',
 }))
@@ -330,6 +331,10 @@ const TraceToolbarActionsSC = styled.div(({ theme }) => ({
   flexWrap: 'wrap',
   gap: theme.spacing.xsmall,
   justifyContent: 'flex-end',
+  '@media (max-width: 720px)': {
+    justifyContent: 'space-between',
+    width: '100%',
+  },
 }))
 
 const TraceViewControlSC = styled.div(({ theme }) => ({
@@ -340,6 +345,9 @@ const TraceViewControlSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: 2,
   padding: 2,
+  '@media (max-width: 720px)': {
+    flex: 1,
+  },
 }))
 
 const TraceViewButtonSC = styled.button<{ $active: boolean }>(
@@ -352,6 +360,9 @@ const TraceViewButtonSC = styled.button<{ $active: boolean }>(
     cursor: $active ? 'default' : 'pointer',
     minHeight: 28,
     padding: `0 ${theme.spacing.xsmall}px`,
+    '@media (max-width: 720px)': {
+      flex: 1,
+    },
     '&:focus-visible': {
       outline: `1px solid ${theme.colors['border-outline-focused']}`,
       outlineOffset: 1,
@@ -367,12 +378,18 @@ const TraceSelectSC = styled.select(({ theme }) => ({
   fontSize: 12,
   maxWidth: 180,
   padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+  '@media (max-width: 720px)': {
+    flex: 1,
+    maxWidth: 'none',
+  },
 }))
 
 const TimelineSC = styled.div(({ theme }) => ({
   border: `1px solid ${theme.colors.border}`,
   borderRadius: theme.borderRadiuses.medium,
-  overflow: 'hidden',
+  maxHeight: 360,
+  overflowX: 'hidden',
+  overflowY: 'auto',
 }))
 
 const TimelineHeaderSC = styled.div(({ theme }) => ({
@@ -382,6 +399,9 @@ const TimelineHeaderSC = styled.div(({ theme }) => ({
   gridTemplateColumns: 'minmax(140px, 38%) minmax(0, 1fr)',
   minHeight: 28,
   padding: `0 ${theme.spacing.small}px`,
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
 }))
 
 const TraceAxisSC = styled.div(({ theme }) => ({
