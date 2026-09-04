@@ -4,7 +4,7 @@ import { useKeyDown } from '@react-hooks-library/core'
 import { CloseIcon, IconFrame, LinkoutIcon } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import FocusLock from 'react-focus-lock'
-import styled from 'styled-components'
+import styled, { DefaultTheme, useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
 import { TraceTopology } from './WorkbenchJobTraceTopology'
@@ -39,6 +39,7 @@ export function TraceWaterfall({
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
   const [view, setView] = useState<TraceView>('timeline')
   const [fullscreen, setFullscreen] = useState(false)
+  const theme = useTheme()
   const activeTrace =
     traceGroups.find(({ id }) => id === selectedTraceId) ?? traceGroups[0]
 
@@ -124,6 +125,7 @@ export function TraceWaterfall({
                 const service = row.span.service ?? 'unknown service'
                 const duration = row.end - row.start
                 const { left, width } = traceBarPosition(row, bounds)
+                const color = traceColor(theme, traceSeverity(row.span.tags))
 
                 return (
                   <TraceRowSC
@@ -145,7 +147,8 @@ export function TraceWaterfall({
                     </TraceLabelSC>
                     <TraceBarAreaSC>
                       <TraceBarSC
-                        $color={serviceColor(service)}
+                        $accent={color.accent}
+                        $fill={color.fill}
                         $left={left}
                         $width={width}
                         title={`${service} · ${formatDuration(duration)}`}
@@ -326,6 +329,76 @@ function serviceColor(service: string) {
     0
   )
   return COLORS[hash % COLORS.length]
+}
+
+export function traceSeverity(tags: Nullable<Record<string, unknown>>) {
+  const status = tagValue(tags, [
+    'otel.status_code',
+    'status.code',
+    'status_code',
+    'status',
+  ])
+
+  if (
+    truthyTag(tagValue(tags, ['error', 'error.type', 'exception.type'])) ||
+    matchesStatus(status, ['error', 'failed', 'failure']) ||
+    errorHttpStatus(
+      tagValue(tags, ['http.status_code', 'http.response.status_code'])
+    )
+  )
+    return 'danger'
+
+  if (matchesStatus(status, ['warning', 'warn'])) return 'warning'
+
+  return 'success'
+}
+
+function tagValue(tags: Nullable<Record<string, unknown>>, names: string[]) {
+  if (!tags) return undefined
+
+  const entry = Object.entries(tags).find(([name]) => names.includes(name))
+  return entry?.[1]
+}
+
+function truthyTag(value: unknown) {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value !== 0
+  if (typeof value !== 'string') return false
+
+  return !['', '0', 'false', 'none', 'null', 'undefined'].includes(
+    value.toLowerCase()
+  )
+}
+
+function matchesStatus(value: unknown, statuses: string[]) {
+  return (
+    typeof value === 'string' && statuses.includes(value.toLocaleLowerCase())
+  )
+}
+
+function errorHttpStatus(value: unknown) {
+  const status = Number(value)
+  return Number.isFinite(status) && status >= 500
+}
+
+function traceColor(
+  theme: DefaultTheme,
+  severity: ReturnType<typeof traceSeverity>
+) {
+  switch (severity) {
+    case 'danger':
+      return { accent: theme.colors.red[400], fill: theme.colors.red[800] }
+    case 'warning':
+      return {
+        accent: theme.colors.yellow[400],
+        fill: theme.colors.yellow[800],
+      }
+    default:
+      return {
+        accent: theme.colors.green[400],
+        fill: theme.colors.green[800],
+      }
+  }
 }
 
 function formatTagValue(value: unknown) {
@@ -530,15 +603,16 @@ const TraceBarAreaSC = styled.div(({ theme }) => ({
 }))
 
 const TraceBarSC = styled.span<{
-  $color: string
+  $accent: string
+  $fill: string
   $left: number
   $width: number
-}>(({ theme, $color, $left, $width }) => ({
-  background: $color,
+}>(({ theme, $accent, $fill, $left, $width }) => ({
+  background: $fill,
+  borderLeft: `3px solid ${$accent}`,
   borderRadius: theme.borderRadiuses.medium,
   height: 14,
   left: `${$left}%`,
-  opacity: 0.85,
   position: 'absolute',
   top: '50%',
   transform: 'translateY(-50%)',

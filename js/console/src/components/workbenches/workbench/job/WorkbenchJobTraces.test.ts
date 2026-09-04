@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
-import { orderTraceSpans } from './WorkbenchJobTraces'
+import { orderTraceSpans, traceSeverity } from './WorkbenchJobTraces'
 
 function trace(
   overrides: Partial<WorkbenchJobActivityTraceFragment>
@@ -48,5 +48,18 @@ describe('orderTraceSpans', () => {
     ])
 
     expect(rows.map(({ span }) => span.name)).toEqual(['valid'])
+  })
+})
+
+describe('traceSeverity', () => {
+  it.each([
+    [{ 'otel.status_code': 'ERROR' }, 'danger'],
+    [{ error: true }, 'danger'],
+    [{ 'http.response.status_code': 503 }, 'danger'],
+    [{ status: 'WARN' }, 'warning'],
+    [{ 'otel.status_code': 'OK' }, 'success'],
+    [undefined, 'success'],
+  ])('maps %o to %s', (tags, severity) => {
+    expect(traceSeverity(tags)).toBe(severity)
   })
 })
