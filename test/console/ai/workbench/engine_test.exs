@@ -6,6 +6,12 @@ defmodule Console.AI.Workbench.EngineTest do
   alias Console.Deployments.Clusters
   alias Console.PubSub.Consumers.Recurse
   import ElasticsearchUtils
+  require Record
+
+  Record.defrecord(
+    :otel_span,
+    Record.extract(:span, from_lib: "opentelemetry/include/otel_span.hrl")
+  )
 
   setup :set_mimic_global
 
@@ -111,7 +117,8 @@ defmodule Console.AI.Workbench.EngineTest do
       job = insert(:workbench_job, workbench: workbench)
 
       {:ok, engine} = Engine.new(job)
-      {:ok, result} = Engine.run(engine)
+      {{:ok, result}, spans} =
+        capture_workbench_spans(fn -> Engine.run(engine) end)
 
       result = Console.Repo.preload(result, :result)
       assert result.status == :successful
@@ -129,6 +136,41 @@ defmodule Console.AI.Workbench.EngineTest do
       infra = Enum.find(activities, & &1.type == :infrastructure)
       assert infra.prompt == "try infrastructure"
       assert infra.tool_call.name == "workbench_subagent"
+
+      run_span = Enum.find(spans, &(otel_span(&1, :name) == "workbench.run"))
+      notes_span = Enum.find(spans, &(otel_span(&1, :name) == "workbench.activity.notes"))
+
+      subagent_span =
+        Enum.find(spans, &(otel_span(&1, :name) == "workbench.activity.subagent.infrastructure"))
+
+      assert run_span
+      assert notes_span
+      assert subagent_span
+
+      job_id = job.id
+
+      assert %{
+               "workbench.job.id" => ^job_id,
+               "workbench.job.type" => "job"
+             } = run_span |> otel_span(:attributes) |> :otel_attributes.map()
+
+      assert %{
+               "workbench.job.id" => ^job_id,
+               "workbench.activity.kind" => "notes"
+             } = notes_span |> otel_span(:attributes) |> :otel_attributes.map()
+
+      assert %{
+               "workbench.job.id" => ^job_id,
+               "workbench.activity.kind" => "subagent",
+               "workbench.subagent" => "infrastructure"
+             } = subagent_span |> otel_span(:attributes) |> :otel_attributes.map()
+
+      Enum.each([notes_span, subagent_span], fn span ->
+        assert otel_span(span, :trace_id) == otel_span(run_span, :trace_id)
+        assert otel_span(span, :parent_span_id) == otel_span(run_span, :span_id)
+        assert is_integer(otel_span(span, :start_time))
+        assert is_integer(otel_span(span, :end_time))
+      end)
     end
 
     test "runs a skill job with a referenced job without crashing" do
@@ -598,6 +640,47 @@ defmodule Console.AI.Workbench.EngineTest do
       nil ->
         Process.sleep(50)
         await_job_activity(job_id, attempts - 1)
+    end
+  end
+
+  defp capture_workbench_spans(fun) do
+    {application, version, schema_url} = :opentelemetry.get_application(Engine)
+    original_tracer = :opentelemetry.get_application_tracer(Engine)
+    provider = :workbench_engine_test_tracer
+
+    {:ok, pid} =
+      :otel_tracer_provider_sup.start(
+        provider,
+        :otel_resource.create([]),
+        %{
+          id_generator: :otel_id_generator,
+          sampler: {:parent_based, %{root: :always_on}},
+          processors: [{:otel_simple_processor, %{exporter: {:otel_exporter_pid, self()}}}],
+          deny_list: []
+        }
+    )
+
+    tracer =
+      :otel_tracer_provider.get_tracer(provider, application, version, schema_url)
+    tracer_key = {:opentelemetry, :global, :tracer, {application, version, schema_url}}
+
+    # The installed OpenTelemetry API exposes only `set_tracer/2`, while
+    # application tracers are cached by name, version, and schema URL.
+    :persistent_term.put(tracer_key, tracer)
+
+    try do
+      {fun.(), receive_spans()}
+    after
+      :persistent_term.put(tracer_key, original_tracer)
+      :ok = :supervisor.terminate_child(:otel_tracer_provider_sup, pid)
+    end
+  end
+
+  defp receive_spans(spans \\ []) do
+    receive do
+      {:span, span} -> receive_spans([span | spans])
+    after
+      100 -> Enum.reverse(spans)
     end
   end
 end
