@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
+import { TraceTopology } from './WorkbenchJobTraceTopology'
 
 type TraceSpan = Pick<
   WorkbenchJobActivityTraceFragment,
@@ -33,6 +34,7 @@ export function TraceWaterfall({
 }) {
   const traceGroups = useMemo(() => groupTraces(traces), [traces])
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
+  const [view, setView] = useState<TraceView>('timeline')
   const activeTrace =
     traceGroups.find(({ id }) => id === selectedTraceId) ?? traceGroups[0]
 
@@ -56,84 +58,142 @@ export function TraceWaterfall({
             {formatDuration(bounds.end - bounds.start)} total duration
           </CaptionP>
         </div>
-        {traceGroups.length > 1 && (
-          <TraceSelectSC
-            aria-label="Trace"
-            value={activeTrace.id}
-            onChange={(event) => setSelectedTraceId(event.target.value)}
-          >
-            {traceGroups.map(({ id, spans }) => (
-              <option
-                key={id}
-                value={id}
-              >
-                {shortTraceId(id)} · {spans.length} spans
-              </option>
-            ))}
-          </TraceSelectSC>
-        )}
-      </TraceToolbarSC>
-      <TimelineSC>
-        <TimelineHeaderSC>
-          <CaptionP $color="text-xlight">Span</CaptionP>
-          <TraceAxisSC>
-            <CaptionP $color="text-xlight">{formatTime(bounds.start)}</CaptionP>
-            <CaptionP $color="text-xlight">{formatTime(bounds.end)}</CaptionP>
-          </TraceAxisSC>
-        </TimelineHeaderSC>
-        {rows.map((row) => {
-          const selected = row.span.spanId === selectedRow?.span.spanId
-          const service = row.span.service ?? 'unknown service'
-          const duration = row.end - row.start
-          const { left, width } = traceBarPosition(row, bounds)
-
-          return (
-            <TraceRowSC
-              key={row.span.spanId ?? `${row.span.name}-${row.start}`}
-              $selected={selected}
-              type="button"
-              onClick={() => setSelectedSpanId(row.span.spanId ?? undefined)}
+        <TraceToolbarActionsSC>
+          <TraceViewControl
+            value={view}
+            onChange={setView}
+          />
+          {traceGroups.length > 1 && (
+            <TraceSelectSC
+              aria-label="Trace"
+              value={activeTrace.id}
+              onChange={(event) => setSelectedTraceId(event.target.value)}
             >
-              <TraceLabelSC $depth={row.depth}>
-                <ServiceDotSC $color={serviceColor(service)} />
-                <TraceNameSC title={row.span.name ?? 'Unnamed span'}>
-                  {row.span.name ?? 'Unnamed span'}
-                </TraceNameSC>
-                <TraceDurationSC>{formatDuration(duration)}</TraceDurationSC>
-              </TraceLabelSC>
-              <TraceBarAreaSC>
-                <TraceBarSC
-                  $color={serviceColor(service)}
-                  $left={left}
-                  $width={width}
-                  title={`${service} · ${formatDuration(duration)}`}
-                />
-              </TraceBarAreaSC>
-            </TraceRowSC>
-          )
-        })}
-      </TimelineSC>
-      {selectedRow && (
-        <TraceDetailSC>
-          <div>
-            <Body2BoldP>{selectedRow.span.name ?? 'Unnamed span'}</Body2BoldP>
-            <CaptionP $color="text-xlight">
-              {selectedRow.span.service ?? 'unknown service'} ·{' '}
-              {formatDuration(selectedRow.end - selectedRow.start)}
-            </CaptionP>
-          </div>
-          <TraceTagsSC>
-            {Object.entries(selectedRow.span.tags ?? {}).map(([key, value]) => (
-              <div key={key}>
-                <CaptionP $color="text-xlight">{key}</CaptionP>
-                <CaptionP>{formatTagValue(value)}</CaptionP>
+              {traceGroups.map(({ id, spans }) => (
+                <option
+                  key={id}
+                  value={id}
+                >
+                  {shortTraceId(id)} · {spans.length} spans
+                </option>
+              ))}
+            </TraceSelectSC>
+          )}
+        </TraceToolbarActionsSC>
+      </TraceToolbarSC>
+      {view === 'timeline' ? (
+        <>
+          <TimelineSC>
+            <TimelineHeaderSC>
+              <CaptionP $color="text-xlight">Span</CaptionP>
+              <TraceAxisSC>
+                <CaptionP $color="text-xlight">
+                  {formatTime(bounds.start)}
+                </CaptionP>
+                <CaptionP $color="text-xlight">
+                  {formatTime(bounds.end)}
+                </CaptionP>
+              </TraceAxisSC>
+            </TimelineHeaderSC>
+            {rows.map((row) => {
+              const selected = row.span.spanId === selectedRow?.span.spanId
+              const service = row.span.service ?? 'unknown service'
+              const duration = row.end - row.start
+              const { left, width } = traceBarPosition(row, bounds)
+
+              return (
+                <TraceRowSC
+                  key={row.span.spanId ?? `${row.span.name}-${row.start}`}
+                  $selected={selected}
+                  type="button"
+                  onClick={() =>
+                    setSelectedSpanId(row.span.spanId ?? undefined)
+                  }
+                >
+                  <TraceLabelSC $depth={row.depth}>
+                    <ServiceDotSC $color={serviceColor(service)} />
+                    <TraceNameSC title={row.span.name ?? 'Unnamed span'}>
+                      {row.span.name ?? 'Unnamed span'}
+                    </TraceNameSC>
+                    <TraceDurationSC>
+                      {formatDuration(duration)}
+                    </TraceDurationSC>
+                  </TraceLabelSC>
+                  <TraceBarAreaSC>
+                    <TraceBarSC
+                      $color={serviceColor(service)}
+                      $left={left}
+                      $width={width}
+                      title={`${service} · ${formatDuration(duration)}`}
+                    />
+                  </TraceBarAreaSC>
+                </TraceRowSC>
+              )
+            })}
+          </TimelineSC>
+          {selectedRow && (
+            <TraceDetailSC>
+              <div>
+                <Body2BoldP>
+                  {selectedRow.span.name ?? 'Unnamed span'}
+                </Body2BoldP>
+                <CaptionP $color="text-xlight">
+                  {selectedRow.span.service ?? 'unknown service'} ·{' '}
+                  {formatDuration(selectedRow.end - selectedRow.start)}
+                </CaptionP>
               </div>
-            ))}
-          </TraceTagsSC>
-        </TraceDetailSC>
+              <TraceTagsSC>
+                {Object.entries(selectedRow.span.tags ?? {}).map(
+                  ([key, value]) => (
+                    <div key={key}>
+                      <CaptionP $color="text-xlight">{key}</CaptionP>
+                      <CaptionP>{formatTagValue(value)}</CaptionP>
+                    </div>
+                  )
+                )}
+              </TraceTagsSC>
+            </TraceDetailSC>
+          )}
+        </>
+      ) : (
+        <TraceTopology
+          mode={view}
+          spans={activeTrace.spans}
+        />
       )}
       {summary && <Body2P $color="text-light">{summary}</Body2P>}
     </TraceWaterfallSC>
+  )
+}
+
+type TraceView = 'services' | 'spans' | 'timeline'
+
+const TRACE_VIEWS: { label: string; value: TraceView }[] = [
+  { label: 'Timeline', value: 'timeline' },
+  { label: 'Spans', value: 'spans' },
+  { label: 'Services', value: 'services' },
+]
+
+function TraceViewControl({
+  value,
+  onChange,
+}: {
+  value: TraceView
+  onChange: (view: TraceView) => void
+}) {
+  return (
+    <TraceViewControlSC aria-label="Trace view">
+      {TRACE_VIEWS.map(({ label, value: option }) => (
+        <TraceViewButtonSC
+          key={option}
+          $active={option === value}
+          type="button"
+          onClick={() => onChange(option)}
+        >
+          {label}
+        </TraceViewButtonSC>
+      ))}
+    </TraceViewControlSC>
   )
 }
 
@@ -263,6 +323,41 @@ const TraceToolbarSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   justifyContent: 'space-between',
 }))
+
+const TraceToolbarActionsSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.xsmall,
+  justifyContent: 'flex-end',
+}))
+
+const TraceViewControlSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  background: theme.colors['fill-zero'],
+  border: `1px solid ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  gap: 2,
+  padding: 2,
+}))
+
+const TraceViewButtonSC = styled.button<{ $active: boolean }>(
+  ({ theme, $active }) => ({
+    ...theme.partials.reset.button,
+    ...theme.partials.text.buttonSmall,
+    background: $active ? theme.colors['fill-three'] : 'transparent',
+    borderRadius: theme.borderRadiuses.medium,
+    color: theme.colors['text-light'],
+    cursor: $active ? 'default' : 'pointer',
+    minHeight: 28,
+    padding: `0 ${theme.spacing.xsmall}px`,
+    '&:focus-visible': {
+      outline: `1px solid ${theme.colors['border-outline-focused']}`,
+      outlineOffset: 1,
+    },
+  })
+)
 
 const TraceSelectSC = styled.select(({ theme }) => ({
   background: theme.colors['fill-two'],
