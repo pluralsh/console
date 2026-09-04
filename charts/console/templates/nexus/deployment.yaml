@@ -64,16 +64,31 @@ spec:
         - name: http
           containerPort: 8080
           protocol: TCP
+        {{- $livenessProbe := deepCopy .Values.aiProxy.livenessProbe }}
+        {{- $readinessProbe := deepCopy .Values.aiProxy.readinessProbe }}
+        {{- if .Values.aiProxy.tls.enabled }}
+        {{- if hasKey $livenessProbe "httpGet" }}
+        {{- $_ := set $livenessProbe.httpGet "scheme" "HTTPS" }}
+        {{- end }}
+        {{- if hasKey $readinessProbe "httpGet" }}
+        {{- $_ := set $readinessProbe.httpGet "scheme" "HTTPS" }}
+        {{- end }}
+        {{- end }}
         livenessProbe:
-          {{- toYaml .Values.aiProxy.livenessProbe | nindent 10 }}
+          {{- toYaml $livenessProbe | nindent 10 }}
         readinessProbe:
-          {{- toYaml .Values.aiProxy.readinessProbe | nindent 10 }}
+          {{- toYaml $readinessProbe | nindent 10 }}
         resources:
           {{- toYaml .Values.aiProxy.resources | nindent 10 }}
         volumeMounts:
         - name: nexus-config
           mountPath: /home/nexus
           readOnly: true
+        {{- if .Values.aiProxy.tls.enabled }}
+        - name: nexus-tls
+          mountPath: /etc/nexus/tls
+          readOnly: true
+        {{- end }}
         {{ if .Values.global.additionalVolumeMounts }}
         {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
         {{ end }}
@@ -81,6 +96,16 @@ spec:
       - name: nexus-config
         secret:
           secretName: nexus-config
+      {{- if .Values.aiProxy.tls.enabled }}
+      - name: nexus-tls
+        secret:
+          secretName: {{ required "aiProxy.tls.existingSecret is required when Nexus TLS is enabled" .Values.aiProxy.tls.existingSecret }}
+          items:
+          - key: {{ .Values.aiProxy.tls.certificateKey }}
+            path: tls.crt
+          - key: {{ .Values.aiProxy.tls.privateKeyKey }}
+            path: tls.key
+      {{- end }}
       {{ if .Values.global.additionalVolumes }}
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
       {{ end }}

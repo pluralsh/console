@@ -70,7 +70,10 @@ func serve() error {
 		}
 	}()
 
-	logger.Info("starting HTTP server", zap.String("address", cfg.Server.Address))
+	logger.Info("starting server",
+		zap.String("address", cfg.Server.Address),
+		zap.Bool("tls", cfg.Server.CertificateFile != ""),
+	)
 	srv := server.New(&cfg.Server, consoleClient)
 	readyChan, err := srv.Start(ctx)
 	if err != nil {
@@ -80,10 +83,14 @@ func serve() error {
 	// Wait for server to be ready
 	<-readyChan
 
+	scheme := "http"
+	if cfg.Server.CertificateFile != "" {
+		scheme = "https"
+	}
 	logger.Info("Nexus server started successfully",
 		zap.String("address", srv.Addr()),
-		zap.String("health_endpoint", fmt.Sprintf("http://%s/health", srv.Addr())),
-		zap.String("ready_endpoint", fmt.Sprintf("http://%s/ready", srv.Addr())),
+		zap.String("health_endpoint", fmt.Sprintf("%s://%s/health", scheme, srv.Addr())),
+		zap.String("ready_endpoint", fmt.Sprintf("%s://%s/ready", scheme, srv.Addr())),
 	)
 
 	// Setup signal handling for graceful shutdown

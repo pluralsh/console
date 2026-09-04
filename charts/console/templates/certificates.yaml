@@ -1,0 +1,68 @@
+{{- if .Values.console.tls.certificate.enabled }}
+{{- $dnsNames := .Values.console.tls.certificate.dnsNames }}
+{{- if and (empty $dnsNames) .Values.ingress.console_dns }}
+{{- $dnsNames = list .Values.ingress.console_dns }}
+{{- end }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: console-server-tls
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- with .Values.console.tls.certificate.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ required "console.tls.existingSecret is required when certificate creation is enabled" .Values.console.tls.existingSecret }}
+  dnsNames:
+    {{- required "console.tls.certificate.dnsNames or ingress.console_dns is required when certificate creation is enabled" $dnsNames | toYaml | nindent 4 }}
+  issuerRef:
+    {{- toYaml .Values.console.tls.certificate.issuerRef | nindent 4 }}
+{{- end }}
+{{- if .Values.aiProxy.tls.certificate.enabled }}
+{{- $dnsNames := .Values.aiProxy.tls.certificate.dnsNames }}
+{{- if and (empty $dnsNames) .Values.ingress.console_dns }}
+{{- $dnsNames = list .Values.ingress.console_dns }}
+{{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nexus-server-tls
+  labels:
+{{ include "console.labels" . | indent 4 }}
+  {{- with .Values.aiProxy.tls.certificate.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ required "aiProxy.tls.existingSecret is required when certificate creation is enabled" .Values.aiProxy.tls.existingSecret }}
+  dnsNames:
+    {{- required "aiProxy.tls.certificate.dnsNames or ingress.console_dns is required when certificate creation is enabled" $dnsNames | toYaml | nindent 4 }}
+  issuerRef:
+    {{- toYaml .Values.aiProxy.tls.certificate.issuerRef | nindent 4 }}
+{{- end }}
+{{- if .Values.kas.tls.certificate.enabled }}
+{{- $dnsNames := .Values.kas.tls.certificate.dnsNames }}
+{{- if and (empty $dnsNames) .Values.kas.ingress.kas_dns }}
+{{- $dnsNames = list .Values.kas.ingress.kas_dns }}
+{{- end }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kas-server-tls
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+  {{- with .Values.kas.tls.certificate.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ required "kas.tls.existingSecret is required when certificate creation is enabled" .Values.kas.tls.existingSecret }}
+  dnsNames:
+    {{- required "kas.tls.certificate.dnsNames or kas.ingress.kas_dns is required when certificate creation is enabled" $dnsNames | toYaml | nindent 4 }}
+  issuerRef:
+    {{- toYaml .Values.kas.tls.certificate.issuerRef | nindent 4 }}
+{{- end }}

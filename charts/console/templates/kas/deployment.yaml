@@ -164,6 +164,15 @@ spec:
                 items:
                   - key: {{ .Values.kas.jwtSecret.key }}
                     path: jwt_secret
+            {{- if .Values.kas.tls.enabled }}
+            - secret:
+                name: {{ required "kas.tls.existingSecret is required when KAS TLS is enabled" .Values.kas.tls.existingSecret }}
+                items:
+                  - key: {{ .Values.kas.tls.certificateKey }}
+                    path: tls/certificate.pem
+                  - key: {{ .Values.kas.tls.privateKeyKey }}
+                    path: tls/private-key.pem
+            {{- end }}
       {{- with .Values.kas.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

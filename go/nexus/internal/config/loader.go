@@ -81,6 +81,8 @@ func loadFromEnv(cfg *Config) {
 	envBindings := map[string]*string{
 		"server.address":         &cfg.Server.Address,
 		"server.path":            &cfg.Server.Path,
+		"server.certificateFile": &cfg.Server.CertificateFile,
+		"server.keyFile":         &cfg.Server.KeyFile,
 		"console.grpcEndpoint":   &cfg.Console.GRPCEndpoint,
 		"observability.logLevel": &cfg.Observability.LogLevel,
 	}

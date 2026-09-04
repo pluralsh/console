@@ -203,48 +203,46 @@ export function WorkbenchJobActivity({
         maxWidth: '100%',
       }}
       trigger={
-        <ActivityHeaderSC>
-          <ActivityStatusIcon status={status} />
-          <ActivityTextSC>
-            <ActivityTitleRowSC>
-              <Flex
-                gap="xsmall"
-                alignItems="center"
-                minWidth={0}
-                css={{ maxWidth: '100%' }}
+        <ActivityHeaderSC $hasStatusIcon={isRunning}>
+          <ActivityTitleRowSC>
+            <ActivityStatusIcon status={status} />
+            <Flex
+              gap="xsmall"
+              alignItems="center"
+              minWidth={0}
+              css={{ flex: '1 1 auto', maxWidth: '100%' }}
+            >
+              <Body2BoldP
+                as="span"
+                className="type"
+                $color="text-xlight"
               >
-                <Body2BoldP
-                  as="span"
-                  className="type"
-                  $color="text-xlight"
-                >
-                  {typeLabel}
-                </Body2BoldP>
-                <Body2P
-                  as="span"
-                  className="kind"
-                  $color="text-disabled"
-                >
-                  subagent
-                </Body2P>
-                {trailingIcons}
-              </Flex>
-              <ActivityCaretSC
-                $isOpen={isOpen}
-                size={10}
-              />
-            </ActivityTitleRowSC>
-            {!isOpen && activitySummary && (
+                {typeLabel}
+              </Body2BoldP>
               <Body2P
                 as="span"
-                className="summary"
-                $color={isRunning ? 'text-xlight' : 'text-disabled'}
-                $shimmer={isRunning}
+                className="kind"
+                $color="text-disabled"
               >
-                {activitySummary}
+                subagent
               </Body2P>
-            )}
-          </ActivityTextSC>
+              {trailingIcons}
+            </Flex>
+            <ActivityCaretSC
+              $isOpen={isOpen}
+              size={10}
+            />
+          </ActivityTitleRowSC>
+          {!isOpen && activitySummary && (
+            <Body2P
+              as="span"
+              className="summary"
+              $color={isRunning ? 'text-xlight' : 'text-disabled'}
+              $shimmer={isRunning}
+            >
+              {activitySummary}
+            </Body2P>
+          )}
         </ActivityHeaderSC>
       }
     >
@@ -944,12 +942,20 @@ export const isJobRunning = (
   >
 ) => status === 'PENDING' || status === 'RUNNING'
 
+const ACTIVITY_STATUS_ICON_SIZE = 14
+
 function ActivityStatusIcon({
   status,
 }: {
   status: WorkbenchJobActivityStatus
 }) {
-  return isJobRunning(status) ? <SpinnerAlt size={14} /> : null
+  if (!isJobRunning(status)) return null
+
+  return (
+    <ActivityStatusIconSC>
+      <SpinnerAlt size={ACTIVITY_STATUS_ICON_SIZE} />
+    </ActivityStatusIconSC>
+  )
 }
 
 function workbenchActivityTitle(type: Nullable<WorkbenchJobActivityType>) {
@@ -1016,45 +1022,45 @@ const ActivityCaretSC = styled(CaretDownIcon)<{ $isOpen: boolean }>(
   })
 )
 
-const ActivityHeaderSC = styled.span(({ theme }) => ({
+const ActivityStatusIconSC = styled.span({
   display: 'flex',
-  alignItems: 'flex-start',
-  gap: theme.spacing.xsmall,
-  minWidth: 0,
-  maxWidth: '100%',
-  overflow: 'hidden',
-  '> svg': {
-    flexShrink: 0,
-    marginTop: 2,
-  },
-  [`&:hover ${ActivityCaretSC}`]: {
-    opacity: 1,
-  },
-  '.type': {
-    flexShrink: 0,
-  },
-  '.kind': {
-    flexShrink: 0,
-  },
-  '.summary': {
-    display: 'block',
-    minWidth: 0,
-    maxWidth: '64ch',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-}))
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: ACTIVITY_STATUS_ICON_SIZE,
+  height: ACTIVITY_STATUS_ICON_SIZE,
+})
 
-const ActivityTextSC = styled.span(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-  flex: '1 1 auto',
-  minWidth: 0,
-  maxWidth: '100%',
-  overflow: 'hidden',
-}))
+const ActivityHeaderSC = styled.span<{ $hasStatusIcon: boolean }>(
+  ({ theme, $hasStatusIcon }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xxsmall,
+    minWidth: 0,
+    maxWidth: '100%',
+    overflow: 'hidden',
+    [`&:hover ${ActivityCaretSC}`]: {
+      opacity: 1,
+    },
+    '.type': {
+      flexShrink: 0,
+    },
+    '.kind': {
+      flexShrink: 0,
+    },
+    '.summary': {
+      display: 'block',
+      minWidth: 0,
+      maxWidth: '64ch',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      ...($hasStatusIcon && {
+        paddingLeft: ACTIVITY_STATUS_ICON_SIZE + theme.spacing.xsmall,
+      }),
+    },
+  })
+)
 
 const ActivityTitleRowSC = styled.span(({ theme }) => ({
   display: 'flex',
@@ -1063,7 +1069,4 @@ const ActivityTitleRowSC = styled.span(({ theme }) => ({
   minWidth: 0,
   maxWidth: '100%',
   overflow: 'hidden',
-  '> svg': {
-    flexShrink: 0,
-  },
 }))

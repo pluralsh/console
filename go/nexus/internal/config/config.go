@@ -20,6 +20,14 @@ type ServerConfig struct {
 	// Path is the base path for the HTTP server (e.g., "/ai/proxy")
 	Path string `json:"path"`
 
+	// CertificateFile is the path to the X.509 certificate used to enable TLS.
+	// TLS is enabled when both CertificateFile and KeyFile are provided.
+	CertificateFile string `json:"certificateFile"`
+
+	// KeyFile is the path to the X.509 private key used to enable TLS.
+	// TLS is enabled when both CertificateFile and KeyFile are provided.
+	KeyFile string `json:"keyFile"`
+
 	// ReadTimeout is the maximum duration for reading the entire request
 	ReadTimeout time.Duration `json:"readTimeout"`
 

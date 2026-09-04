@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net/http"
@@ -105,9 +106,17 @@ func (s *Server) Start(ctx context.Context) (<-chan struct{}, error) {
 		WriteTimeout:      writeTimeout, // 0 = no timeout, allows infinite streaming
 		IdleTimeout:       idleTimeout,
 		MaxHeaderBytes:    1 << 20, // 1 MB
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		},
 	}
 
-	s.logger.Info("starting HTTP server",
+	protocol := "HTTP"
+	if s.config.CertificateFile != "" {
+		protocol = "HTTPS"
+	}
+	s.logger.Info("starting server",
+		zap.String("protocol", protocol),
 		zap.String("address", addr),
 	)
 
@@ -115,9 +124,14 @@ func (s *Server) Start(ctx context.Context) (<-chan struct{}, error) {
 	errChan := make(chan error, 1)
 
 	go func() {
-		err = s.httpServer.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			errChan <- fmt.Errorf("server error: %w", err)
+		var serveErr error
+		if s.config.CertificateFile != "" {
+			serveErr = s.httpServer.ListenAndServeTLS(s.config.CertificateFile, s.config.KeyFile)
+		} else {
+			serveErr = s.httpServer.ListenAndServe()
+		}
+		if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+			errChan <- fmt.Errorf("server error: %w", serveErr)
 		}
 	}()
 
