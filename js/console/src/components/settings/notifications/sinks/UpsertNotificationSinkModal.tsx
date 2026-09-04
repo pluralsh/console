@@ -8,7 +8,6 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   NotificationSinkFragment,
   NotificationSinksDocument,
-  SinkType,
   useUpsertNotificationSinkMutation,
 } from 'generated/graphql'
 import { InlineLink } from 'components/utils/typography/InlineLink'
@@ -16,11 +15,7 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 import { sinkTypeToIcon } from './NotificationSinksColumns'
-
-const hookUrlMatch = [
-  [SinkType.Slack, /^https:\/\/[^/]*?slack/],
-  [SinkType.Teams, /^https:\/\/[^/]*?office/],
-] as const satisfies [SinkType, RegExp][]
+import { getSinkTypeForWebhookUrl } from './notificationSinkUrl.ts'
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
@@ -39,6 +34,9 @@ function UpsertNotificationSinkModal({
   ...props
 }: ModalProps) {
   const sink = mode === 'edit' ? props.sink : undefined
+  const sinkName = sink?.name
+  const slackUrl = sink?.configuration.slack?.url
+  const teamsUrl = sink?.configuration.teams?.url
   const theme = useTheme()
   const initialState = useMemo(
     () => ({
@@ -46,26 +44,18 @@ function UpsertNotificationSinkModal({
       hookUrl: '',
       ...(mode === 'edit'
         ? {
-            name: sink?.name,
-            hookUrl:
-              sink?.configuration.slack?.url || sink?.configuration.teams?.url,
+            name: sinkName,
+            hookUrl: slackUrl || teamsUrl,
           }
         : {}),
     }),
-    [
-      mode,
-      sink?.configuration.slack?.url,
-      sink?.configuration.teams?.url,
-      sink?.name,
-    ]
+    [mode, slackUrl, sinkName, teamsUrl]
   )
   const { state, update, hasUpdates } = useUpdateState<{
     name: string
     hookUrl: string
   }>(initialState)
-  const hookType = hookUrlMatch.find(([_, regex]) =>
-    regex.test(state.hookUrl)
-  )?.[0]
+  const hookType = getSinkTypeForWebhookUrl(state.hookUrl)
 
   const [mutation, { loading }] = useUpsertNotificationSinkMutation({
     onCompleted: () => onClose?.(),
