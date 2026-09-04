@@ -31,11 +31,20 @@ function matchesWebhookHost(url: string, hosts: string[]) {
     return false
   }
 
-  const { hostname, protocol } = new URL(url)
+  let parsedUrl: URL
+
+  try {
+    parsedUrl = new URL(url)
+  } catch {
+    return false
+  }
 
   return (
-    protocol === 'https:' &&
-    hosts.some((host) => hostname === host || hostname.endsWith(`.${host}`))
+    parsedUrl.protocol === 'https:' &&
+    hosts.some(
+      (host) =>
+        parsedUrl.hostname === host || parsedUrl.hostname.endsWith(`.${host}`)
+    )
   )
 }
 
