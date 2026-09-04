@@ -57,6 +57,8 @@ defmodule Console.MixProject do
           runtime_config_path: "rel/runtime.exs",
           applications: [
             runtime_tools: :permanent,
+            opentelemetry_exporter: :permanent,
+            opentelemetry: :permanent,
             console: :permanent
           ]
         ]
@@ -111,6 +113,12 @@ defmodule Console.MixProject do
       {:telemetry_poller, "~> 1.1"},
       {:cowboy_telemetry, "~> 0.4"},
       {:telemetry_registry, "~> 0.3"},
+      {:opentelemetry_api, "~> 1.5"},
+      {:opentelemetry, "~> 1.7"},
+      {:opentelemetry_exporter, "~> 1.10"},
+      {:opentelemetry_bandit, "~> 0.3"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_process_propagator, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
       {:anubis_mcp, "~> 1.14"},

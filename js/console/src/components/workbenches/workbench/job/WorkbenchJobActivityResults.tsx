@@ -26,13 +26,15 @@ import { GqlError } from 'components/utils/Alert'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body1P, Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobLogsToolQuery,
   useWorkbenchJobMetricsToolQuery,
+  useWorkbenchJobTracesToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityResultFragment,
+  WorkbenchJobActivityTraceFragment,
   WorkbenchToolQueryData,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil } from 'lodash'
@@ -50,6 +52,7 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { TraceWaterfall } from './WorkbenchJobTraces'
 
 export function MemoActivityIcon({
   jobUpdate,
@@ -204,25 +207,29 @@ function UserPromptActions({
 export function JobActivityLogs({
   logs,
   cardWrapper = false,
+  variant = 'default',
 }: {
   logs: WorkbenchJobActivityLogFragment[]
   cardWrapper?: boolean
+  variant?: 'canvas' | 'default'
 }) {
   if (isEmpty(logs)) return null
+
+  const lines = logs.map((log, i) => (
+    <LogLine
+      key={i}
+      line={{ log: log.message, timestamp: log.timestamp }}
+    />
+  ))
+
+  if (variant === 'canvas') return <CanvasLogPanelSC>{lines}</CanvasLogPanelSC>
 
   return (
     <WrapWithIf
       condition={cardWrapper}
       wrapper={<Card css={{ height: '100%', overflow: 'auto' }} />}
     >
-      <Flex direction="column">
-        {logs.map((log, i) => (
-          <LogLine
-            key={i}
-            line={{ log: log.message, timestamp: log.timestamp }}
-          />
-        ))}
-      </Flex>
+      <Flex direction="column">{lines}</Flex>
     </WrapWithIf>
   )
 }
@@ -250,11 +257,13 @@ export function JobActivityLogsFromTool({
   logsQuery,
   fetchWhen = true,
   cardWrapper = false,
+  variant,
 }: {
   jobId: string
   logsQuery: Nullable<WorkbenchMetricsToolQueryInput>
   fetchWhen?: boolean
   cardWrapper?: boolean
+  variant?: 'canvas' | 'default'
 }) {
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(logsQuery)
@@ -298,6 +307,7 @@ export function JobActivityLogsFromTool({
     <JobActivityLogs
       logs={logs}
       cardWrapper={cardWrapper}
+      variant={variant}
     />
   )
 }
@@ -317,23 +327,7 @@ export function JobActivityMetricsChart({
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
-    const grouped = groupBy(
-      metrics,
-      ({ name, labels }) =>
-        `${name ?? 'metric'}{${
-          Object.entries(labels ?? {})
-            .map(([key, value]) => `${key}:${value}`)
-            .join(',') ?? ''
-        }}`
-    )
-    return Object.entries(grouped).map(([name, points]) => ({
-      id: name,
-      data: points
-        .map((p) => ({ x: toDateOrUndef(p.timestamp), y: p.value }))
-        .filter(
-          (pt): pt is { x: Date; y: number } => !isNil(pt.x) && !isNil(pt.y)
-        ),
-    }))
+    return getMetricSeries(metrics)
   }, [metrics])
 
   if (isEmpty(metrics)) return null
@@ -380,6 +374,9 @@ export function JobActivityMetrics({
   metricsQuery,
   fetchWhen = true,
   withLegend = false,
+  withSummary = true,
+  withTimeRange = false,
+  title,
   lineProps,
   skeletonHeight = 160,
   ...props
@@ -389,12 +386,16 @@ export function JobActivityMetrics({
   /** When false, skips the GraphQL request (e.g. collapsed activity accordion). */
   fetchWhen?: boolean
   withLegend?: boolean
+  withSummary?: boolean
+  withTimeRange?: boolean
+  title?: Nullable<string>
   skeletonHeight?: number
   lineProps?: Partial<
     ComponentPropsWithRef<typeof ResponsiveLine> &
       ComponentPropsWithRef<typeof ResponsiveLineCanvas>
   >
 } & ComponentPropsWithRef<typeof MetricsChartSC>) {
+  const [timeRange, setTimeRange] = useState<MetricsTimeRange>('max')
   const shouldRunQuery =
     !!jobId && fetchWhen && hasWorkbenchMetricsToolQuery(metricsQuery)
 
@@ -431,10 +432,18 @@ export function JobActivityMetrics({
       />
     )
 
-  if (isEmpty(metrics)) return null
+  const visibleMetrics = filterMetricsByRange(metrics, timeRange)
 
-  const seriesNames = Object.keys(groupBy(metrics, (m) => m.name ?? 'metric'))
-  const summaryText = metricsQuery?.summary?.trim()
+  if (isEmpty(visibleMetrics)) return null
+
+  const series = getMetricSeries(visibleMetrics)
+  const summaryText = withSummary ? metricsQuery?.summary?.trim() : undefined
+  const legend = (
+    <WorkbenchJobMetricsLegend
+      series={series}
+      paddingLeft={20}
+    />
+  )
 
   const chartBlock = (
     <Flex
@@ -442,8 +451,20 @@ export function JobActivityMetrics({
       gap="xsmall"
       width="100%"
     >
+      {(title || withTimeRange) && (
+        <MetricsChartHeaderSC>
+          {title && <Body1P>{title}</Body1P>}
+          {withTimeRange && (
+            <MetricsRangeControl
+              value={timeRange}
+              onChange={setTimeRange}
+            />
+          )}
+        </MetricsChartHeaderSC>
+      )}
+      {withLegend && legend}
       <JobActivityMetricsChart
-        metrics={metrics}
+        metrics={visibleMetrics}
         lineProps={lineProps}
         {...props}
       />
@@ -458,30 +479,145 @@ export function JobActivityMetrics({
     </Flex>
   )
 
-  if (!withLegend) return chartBlock
+  return chartBlock
+}
+
+type MetricsTimeRange = '1d' | '1m' | '1y' | 'max'
+
+const METRICS_TIME_RANGES: { label: string; value: MetricsTimeRange }[] = [
+  { label: '1D', value: '1d' },
+  { label: '1M', value: '1m' },
+  { label: '1Y', value: '1y' },
+  { label: 'Max', value: 'max' },
+]
+
+function MetricsRangeControl({
+  value,
+  onChange,
+}: {
+  value: MetricsTimeRange
+  onChange: (value: MetricsTimeRange) => void
+}) {
+  return (
+    <MetricsRangeControlSC aria-label="Metrics time range">
+      {METRICS_TIME_RANGES.map(({ label, value: range }) => (
+        <MetricsRangeButtonSC
+          key={range}
+          $active={range === value}
+          type="button"
+          onClick={() => onChange(range)}
+        >
+          {label}
+        </MetricsRangeButtonSC>
+      ))}
+    </MetricsRangeControlSC>
+  )
+}
+
+function filterMetricsByRange(
+  metrics: WorkbenchJobActivityMetricFragment[],
+  range: MetricsTimeRange
+) {
+  if (range === 'max') return metrics
+
+  const latest = Math.max(
+    ...metrics
+      .map((metric) => toDateOrUndef(metric.timestamp)?.getTime())
+      .filter(isNonNullable)
+  )
+
+  if (!Number.isFinite(latest)) return metrics
+
+  const durationByRange: Record<Exclude<MetricsTimeRange, 'max'>, number> = {
+    '1d': 24 * 60 * 60 * 1_000,
+    '1m': 30 * 24 * 60 * 60 * 1_000,
+    '1y': 365 * 24 * 60 * 60 * 1_000,
+  }
+  const from = latest - durationByRange[range]
+
+  return metrics.filter((metric) => {
+    const timestamp = toDateOrUndef(metric.timestamp)?.getTime()
+    return timestamp != null && timestamp >= from
+  })
+}
+
+/**
+ * Renders the stored trace result when available, otherwise reloads it through
+ * `tracesTool` from the query that produced the canvas or activity result.
+ */
+export function JobActivityTraces({
+  jobId,
+  traces,
+  tracesQuery,
+  fetchWhen = true,
+  withSummary = true,
+}: {
+  jobId: string
+  traces?: Nullable<Nullable<WorkbenchJobActivityTraceFragment>[]>
+  tracesQuery: Nullable<WorkbenchMetricsToolQueryInput>
+  fetchWhen?: boolean
+  withSummary?: boolean
+}) {
+  const directTraces = traces?.filter(isNonNullable) ?? []
+  const shouldRunQuery =
+    !!jobId &&
+    fetchWhen &&
+    isEmpty(directTraces) &&
+    hasWorkbenchMetricsToolQuery(tracesQuery)
+
+  const { data, loading, error } = useWorkbenchJobTracesToolQuery({
+    variables: {
+      id: jobId,
+      name: tracesQuery?.toolName?.trim(),
+      arguments: tracesQuery?.toolArgs
+        ? JSON.stringify(tracesQuery.toolArgs)
+        : undefined,
+    },
+    skip: !shouldRunQuery,
+  })
+
+  if (isEmpty(directTraces) && !hasWorkbenchMetricsToolQuery(tracesQuery))
+    return null
+
+  if (!fetchWhen) return null
+
+  if (error)
+    return (
+      <GqlError
+        error={error}
+        css={{ wordBreak: 'break-word' }}
+      />
+    )
+
+  if (isEmpty(directTraces) && (loading || !data))
+    return (
+      <RectangleSkeleton
+        $height={200}
+        $width="100%"
+      />
+    )
+
+  const fetchedTraces =
+    data?.workbenchJob?.tracesTool?.filter(isNonNullable) ?? []
+  const resolvedTraces = isEmpty(directTraces) ? fetchedTraces : directTraces
+
+  if (isEmpty(resolvedTraces)) return null
 
   return (
-    <Flex
-      direction="column"
-      gap="medium"
-      width="100%"
-    >
-      {chartBlock}
-      <WorkbenchJobMetricsLegend
-        seriesNames={seriesNames}
-        paddingLeft={20}
-      />
-    </Flex>
+    <TraceWaterfall
+      traces={resolvedTraces}
+      summary={withSummary ? tracesQuery?.summary : undefined}
+    />
   )
 }
 
 export function WorkbenchJobMetricsLegend({
-  seriesNames,
+  series,
   ...props
 }: {
-  seriesNames: string[]
+  series: MetricSeries[]
 } & FlexProps) {
-  if (isEmpty(seriesNames)) return null
+  if (isEmpty(series)) return null
 
   return (
     <Flex
@@ -490,17 +626,66 @@ export function WorkbenchJobMetricsLegend({
       align="center"
       {...props}
     >
-      {seriesNames.map((name, i) => (
+      {series.map(({ id, label }, i) => (
         <Flex
-          key={name}
+          key={id}
           align="center"
           gap="xsmall"
         >
           <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
-          <Body2P $color="text-light">{name}</Body2P>
+          <Body2P $color="text-light">{label}</Body2P>
         </Flex>
       ))}
     </Flex>
+  )
+}
+
+type MetricSeries = {
+  data: { x: Date; y: number }[]
+  id: string
+  label: string
+}
+
+export function getMetricSeries(
+  metrics: WorkbenchJobActivityMetricFragment[]
+): MetricSeries[] {
+  const grouped = groupBy(metrics, metricSeriesId)
+
+  return Object.entries(grouped).map(([id, points]) => ({
+    id,
+    label: metricSeriesLabel(points[0]),
+    data: points
+      .map((point) => ({ x: toDateOrUndef(point.timestamp), y: point.value }))
+      .filter(
+        (point): point is { x: Date; y: number } =>
+          !isNil(point.x) && !isNil(point.y)
+      ),
+  }))
+}
+
+function metricSeriesId({
+  name,
+  labels,
+}: WorkbenchJobActivityMetricFragment): string {
+  return `${name ?? 'metric'}{${metricLabelEntries(labels)
+    .map(([key, value]) => `${key}:${value}`)
+    .join(',')}}`
+}
+
+function metricSeriesLabel({
+  name,
+  labels,
+}: WorkbenchJobActivityMetricFragment): string {
+  const label = metricLabelEntries(labels)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(', ')
+
+  return label || name || 'metric'
+}
+
+function metricLabelEntries(labels: Nullable<Record<string, unknown>>) {
+  return Object.entries(labels ?? {}).sort(([left], [right]) =>
+    left.localeCompare(right)
   )
 }
 
@@ -590,6 +775,56 @@ export function ActivityModalIcon({
 
 const MetricsChartSC = styled.div(() => ({
   height: 160,
+  width: '100%',
+}))
+
+const MetricsChartHeaderSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.small,
+  justifyContent: 'space-between',
+  minWidth: 0,
+  width: '100%',
+}))
+
+const MetricsRangeControlSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  background: theme.colors['fill-zero'],
+  border: `1px solid ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  flexShrink: 0,
+  gap: 2,
+  padding: 2,
+}))
+
+const MetricsRangeButtonSC = styled.button<{ $active: boolean }>(
+  ({ theme, $active }) => ({
+    ...theme.partials.reset.button,
+    ...theme.partials.text.buttonSmall,
+    background: $active ? theme.colors['fill-three'] : 'transparent',
+    borderRadius: theme.borderRadiuses.medium,
+    color: theme.colors['text-light'],
+    cursor: $active ? 'default' : 'pointer',
+    minHeight: 32,
+    minWidth: 32,
+    padding: `0 ${theme.spacing.xsmall}px`,
+    '&:focus-visible': {
+      outline: `1px solid ${theme.colors['border-outline-focused']}`,
+      outlineOffset: 1,
+    },
+  })
+)
+
+const CanvasLogPanelSC = styled.div(({ theme }) => ({
+  background: theme.colors['fill-one'],
+  borderRadius: theme.borderRadiuses.medium,
+  display: 'flex',
+  flex: '0 1 auto',
+  flexDirection: 'column',
+  maxHeight: 300,
+  overflowY: 'auto',
+  padding: `${theme.spacing.medium}px 0`,
   width: '100%',
 }))
 

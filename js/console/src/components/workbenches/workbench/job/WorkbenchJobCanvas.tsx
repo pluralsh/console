@@ -20,6 +20,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import {
   JobActivityLogsFromTool,
   JobActivityMetrics,
+  JobActivityTraces,
 } from './WorkbenchJobActivityResults'
 
 const COLUMNS = 3
@@ -27,8 +28,6 @@ const ROW_HEIGHT_PX = 40
 const MIN_GRID_WIDTH_PX = 600
 /** Nivo `ResponsivePie` needs a sized parent; without this the chart measures 0×0 in the flex canvas layout. */
 const PIE_CHART_HEIGHT_PX = 200
-/** Cap log body height so huge streams do not stretch the whole canvas row. */
-const CANVAS_LOGS_MAX_HEIGHT_PX = 360
 
 export function WorkbenchJobCanvas({
   jobId,
@@ -113,8 +112,16 @@ function CanvasGrid({
           {rowBlocks.map((block, i) => (
             <BlockCellSC
               key={block.identifier ?? `${y}-${i}`}
-              $x={block.layout?.x ?? 0}
-              $w={block.layout?.w ?? COLUMNS}
+              $x={
+                block.type === WorkbenchCanvasBlockType.Traces
+                  ? 0
+                  : (block.layout?.x ?? 0)
+              }
+              $w={
+                block.type === WorkbenchCanvasBlockType.Traces
+                  ? COLUMNS
+                  : (block.layout?.w ?? COLUMNS)
+              }
               $h={block.layout?.h ?? 4}
             >
               <CanvasBlockRenderer
@@ -155,6 +162,13 @@ function CanvasBlockRenderer({
           graph={content?.logs}
         />
       )
+    case WorkbenchCanvasBlockType.Traces:
+      return (
+        <TracesBlock
+          jobId={jobId}
+          graph={content?.traces}
+        />
+      )
     case WorkbenchCanvasBlockType.Pie:
       return <PieBlock graph={content?.pie} />
     case WorkbenchCanvasBlockType.Bar:
@@ -179,16 +193,21 @@ function MetricsBlock({
   jobId: string
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
+  const { graphSummary, hasDistinctQuerySummary } = getToolGraphSummaries(graph)
+
   return (
-    <VizBlockCardSC>
-      {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
+    <ChartBlockCardSC>
       <JobActivityMetrics
         jobId={jobId}
         metricsQuery={graph?.query}
-        css={{ flex: '0 0 auto', minHeight: 120 }}
+        title={graph?.title ?? undefined}
+        withLegend
+        withSummary={hasDistinctQuerySummary}
+        withTimeRange
+        css={{ flex: '0 0 auto', height: 238, minHeight: 120 }}
       />
-      {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-    </VizBlockCardSC>
+      {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
+    </ChartBlockCardSC>
   )
 }
 
@@ -199,26 +218,58 @@ function LogsBlock({
   jobId: string
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
+  const { graphSummary, querySummary, hasDistinctQuerySummary } =
+    getToolGraphSummaries(graph)
+
   return (
-    <VizBlockCardSC>
+    <LogsBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
-      <div
-        css={{
-          flex: '0 0 auto',
-          minHeight: 120,
-          maxHeight: CANVAS_LOGS_MAX_HEIGHT_PX,
-          minWidth: 0,
-          overflowY: 'auto',
-        }}
-      >
-        <JobActivityLogsFromTool
-          jobId={jobId}
-          logsQuery={graph?.query}
-        />
-      </div>
-      {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-    </VizBlockCardSC>
+      <JobActivityLogsFromTool
+        jobId={jobId}
+        logsQuery={graph?.query}
+        variant="canvas"
+      />
+      {hasDistinctQuerySummary && querySummary && (
+        <Body2P $color="text-light">{querySummary}</Body2P>
+      )}
+      {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
+    </LogsBlockCardSC>
   )
+}
+
+function TracesBlock({
+  jobId,
+  graph,
+}: {
+  jobId: string
+  graph: Nullable<WorkbenchCanvasToolGraph>
+}) {
+  const { graphSummary, hasDistinctQuerySummary } = getToolGraphSummaries(graph)
+
+  return (
+    <TracesBlockSC>
+      {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
+      <JobActivityTraces
+        jobId={jobId}
+        tracesQuery={graph?.query}
+        withSummary={hasDistinctQuerySummary}
+      />
+      {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
+    </TracesBlockSC>
+  )
+}
+
+export function getToolGraphSummaries(
+  graph: Nullable<WorkbenchCanvasToolGraph>
+) {
+  const querySummary = graph?.query?.summary?.trim() || undefined
+  const graphSummary = graph?.summary?.trim() || undefined
+
+  return {
+    graphSummary,
+    querySummary,
+    hasDistinctQuerySummary: !!querySummary && querySummary !== graphSummary,
+  }
 }
 
 function PieBlock({ graph }: { graph: Nullable<WorkbenchCanvasBlockGraph> }) {
@@ -341,6 +392,25 @@ const BlockCardSC = styled.div(({ theme }) => ({
 /** Metrics / logs / charts: center the block content vertically when the canvas row is taller than this cell. */
 const VizBlockCardSC = styled(BlockCardSC)(() => ({
   justifyContent: 'center',
+}))
+
+const TracesBlockSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  width: '100%',
+}))
+
+const ChartBlockCardSC = styled(VizBlockCardSC)(({ theme }) => ({
+  gap: theme.spacing.large,
+  padding: theme.spacing.large,
+}))
+
+const LogsBlockCardSC = styled(VizBlockCardSC)(({ theme }) => ({
+  gap: theme.spacing.small,
+  padding: theme.spacing.small,
 }))
 
 const BarListSC = styled.div(({ theme }) => ({

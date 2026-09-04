@@ -65,6 +65,7 @@ import {
   JobActivityMetrics,
   JobActivityMetricsChart,
   JobActivityPrompt,
+  JobActivityTraces,
   MemoActivityIcon,
   ExpandableUserPrompt,
 } from './WorkbenchJobActivityResults'
@@ -479,6 +480,12 @@ function WorkbenchJobActivityResult({
         jobId={jobId}
         fetchWhen={metricsFetchEnabled}
         metricsQuery={result?.metricsQuery}
+      />
+      <JobActivityTraces
+        jobId={jobId}
+        fetchWhen={metricsFetchEnabled}
+        traces={result?.traces}
+        tracesQuery={result?.tracesQuery}
       />
       <JobActivityLogs logs={result?.logs?.filter(isNonNullable) ?? []} />
       {!isEmpty(otherAgentRuns) && (

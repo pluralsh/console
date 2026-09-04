@@ -45,9 +45,11 @@ defmodule Console.AI.Workbench.Engine do
   }
   alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
+  alias OpentelemetryProcessPropagator.Task, as: TracedTask
 
   require EEx
   require Logger
+  require OpenTelemetry.Tracer
 
   defstruct [:job, :user, :environment, activities: [], messages: [], iterations: 0, max: 200, verifiable: false]
 
@@ -89,11 +91,13 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   def run(%__MODULE__{job: job} = engine) do
-    Console.AI.Provider.external_errors()
+    OpenTelemetry.Tracer.with_span "workbench.run", %{attributes: run_attributes(job)} do
+      Console.AI.Provider.external_errors()
 
-    list_activities(job)
-    |> then(& verifiable(%{engine | activities: &1}))
-    |> loop()
+      list_activities(job)
+      |> then(& verifiable(%{engine | activities: &1}))
+      |> loop()
+    end
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})
@@ -146,6 +150,35 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%KubeRequest{method: m, path: p}), do: "launched kubernetes #{m} request against #{p}, waiting for the result"
   defp tool_fmt(pass), do: pass
 
+  defp run_attributes(%WorkbenchJob{id: id, type: type}) do
+    %{
+      "workbench.job.id" => id,
+      "workbench.job.type" => to_string(type)
+    }
+  end
+
+  defp activity_span_name(%Subagent{subagent: type}), do: "workbench.activity.subagent.#{type}"
+  defp activity_span_name(%SkillBackfill{}), do: "workbench.activity.skill_backfill"
+  defp activity_span_name(%CanvasTool{}), do: "workbench.activity.canvas"
+  defp activity_span_name(%Notes{}), do: "workbench.activity.notes"
+  defp activity_span_name(%FunctionCall{}), do: "workbench.activity.function_call"
+  defp activity_span_name(%KubeRequest{}), do: "workbench.activity.kubernetes_request"
+  defp activity_span_name(%KubeShell{}), do: "workbench.activity.kubernetes_exec"
+  defp activity_span_name(_), do: "workbench.activity"
+
+  defp activity_attributes(action, %__MODULE__{job: %WorkbenchJob{id: id}}) do
+    Map.merge(%{"workbench.job.id" => id}, action_attributes(action))
+  end
+
+  defp action_attributes(%Subagent{subagent: type}), do: %{"workbench.activity.kind" => "subagent", "workbench.subagent" => to_string(type)}
+  defp action_attributes(%SkillBackfill{}), do: %{"workbench.activity.kind" => "skill_backfill"}
+  defp action_attributes(%CanvasTool{}), do: %{"workbench.activity.kind" => "canvas"}
+  defp action_attributes(%Notes{}), do: %{"workbench.activity.kind" => "notes"}
+  defp action_attributes(%FunctionCall{}), do: %{"workbench.activity.kind" => "function_call"}
+  defp action_attributes(%KubeRequest{}), do: %{"workbench.activity.kind" => "kubernetes_request"}
+  defp action_attributes(%KubeShell{}), do: %{"workbench.activity.kind" => "kubernetes_exec"}
+  defp action_attributes(_), do: %{}
+
   defp reducer(messages, %Acc{messages: msgs}) do
     Enum.reduce_while(messages, {[], []}, fn
       %Complete{} = complete, _ -> {:halt, complete}
@@ -166,7 +199,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, msgs, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
+    TracedTask.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
     |> Enum.flat_map(fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
       {:ok, {:error, error}} ->
@@ -189,7 +222,13 @@ defmodule Console.AI.Workbench.Engine do
 
   @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a
 
-  defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
+  defp spawn_activity(action, %__MODULE__{} = engine) do
+    OpenTelemetry.Tracer.with_span activity_span_name(action), %{attributes: activity_attributes(action, engine)} do
+      do_spawn_activity(action, engine)
+    end
+  end
+
+  defp do_spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
     module = subagent_module(type)
     Console.AI.Provider.external_errors()
@@ -204,7 +243,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%SkillBackfill{prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities}) do
+  defp do_spawn_activity(%SkillBackfill{prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities}) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user, job: job)
     Console.AI.Provider.external_errors()
 
@@ -218,7 +257,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
+  defp do_spawn_activity(%CanvasTool{prompt: prompt} = call, %__MODULE__{job: job, activities: activities, environment: environment}) do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     Console.AI.Provider.external_errors()
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: :canvas, prompt: prompt, tool_call: tool_attrs(call)}, job) do
@@ -239,7 +278,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
+  defp do_spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
     Console.mapify(status)
     |> Map.drop([:id])
     |> then(& %{
@@ -251,7 +290,7 @@ defmodule Console.AI.Workbench.Engine do
     |> Workbenches.update_job_status(job)
   end
 
-  defp spawn_activity(%FunctionCall{} = call, %__MODULE__{user: user}) do
+  defp do_spawn_activity(%FunctionCall{} = call, %__MODULE__{user: user}) do
     case FunctionCall.invoke(call) do
       {:ok, %WorkbenchJobActivity{status: :successful} = activity} -> {:ok, activity}
       {:ok, %WorkbenchJobActivity{status: :needs_approval} = activity} -> poll_activity(activity, user)
@@ -259,7 +298,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{user: user, job: job}) do
+  defp do_spawn_activity(%KubeRequest{handle: handle, method: m, path: p} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :kubernetes,
       status: :needs_approval,
@@ -275,7 +314,7 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity, user)
   end
 
-  defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
+  defp do_spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :exec,
       status: :needs_approval,
@@ -291,7 +330,7 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity, user)
   end
 
-  defp spawn_activity(_, _), do: :ignore
+  defp do_spawn_activity(_, _), do: :ignore
 
   defp poll_activity(%WorkbenchJobActivity{} = activity, %User{} = user) do
     with {:ok, %WorkbenchJobActivity{} = activity} <- Workbenches.auto_approve_activity(activity, user),
