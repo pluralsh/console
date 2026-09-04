@@ -193,6 +193,8 @@ function MetricsBlock({
   jobId: string
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
+  const { graphSummary, hasDistinctQuerySummary } = getToolGraphSummaries(graph)
+
   return (
     <ChartBlockCardSC>
       <JobActivityMetrics
@@ -200,10 +202,11 @@ function MetricsBlock({
         metricsQuery={graph?.query}
         title={graph?.title ?? undefined}
         withLegend
+        withSummary={hasDistinctQuerySummary}
         withTimeRange
         css={{ flex: '0 0 auto', height: 238, minHeight: 120 }}
       />
-      {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
+      {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
     </ChartBlockCardSC>
   )
 }
@@ -215,6 +218,9 @@ function LogsBlock({
   jobId: string
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
+  const { graphSummary, querySummary, hasDistinctQuerySummary } =
+    getToolGraphSummaries(graph)
+
   return (
     <LogsBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
@@ -223,7 +229,10 @@ function LogsBlock({
         logsQuery={graph?.query}
         variant="canvas"
       />
-      {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
+      {hasDistinctQuerySummary && querySummary && (
+        <Body2P $color="text-light">{querySummary}</Body2P>
+      )}
+      {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
     </LogsBlockCardSC>
   )
 }
@@ -235,16 +244,32 @@ function TracesBlock({
   jobId: string
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
+  const { graphSummary, hasDistinctQuerySummary } = getToolGraphSummaries(graph)
+
   return (
     <VizBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
       <JobActivityTraces
         jobId={jobId}
         tracesQuery={graph?.query}
+        withSummary={hasDistinctQuerySummary}
       />
-      {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
+      {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
     </VizBlockCardSC>
   )
+}
+
+export function getToolGraphSummaries(
+  graph: Nullable<WorkbenchCanvasToolGraph>
+) {
+  const querySummary = graph?.query?.summary?.trim() || undefined
+  const graphSummary = graph?.summary?.trim() || undefined
+
+  return {
+    graphSummary,
+    querySummary,
+    hasDistinctQuerySummary: !!querySummary && querySummary !== graphSummary,
+  }
 }
 
 function PieBlock({ graph }: { graph: Nullable<WorkbenchCanvasBlockGraph> }) {

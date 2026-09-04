@@ -374,6 +374,7 @@ export function JobActivityMetrics({
   metricsQuery,
   fetchWhen = true,
   withLegend = false,
+  withSummary = true,
   withTimeRange = false,
   title,
   lineProps,
@@ -385,6 +386,7 @@ export function JobActivityMetrics({
   /** When false, skips the GraphQL request (e.g. collapsed activity accordion). */
   fetchWhen?: boolean
   withLegend?: boolean
+  withSummary?: boolean
   withTimeRange?: boolean
   title?: Nullable<string>
   skeletonHeight?: number
@@ -435,7 +437,7 @@ export function JobActivityMetrics({
   if (isEmpty(visibleMetrics)) return null
 
   const series = getMetricSeries(visibleMetrics)
-  const summaryText = metricsQuery?.summary?.trim()
+  const summaryText = withSummary ? metricsQuery?.summary?.trim() : undefined
   const legend = (
     <WorkbenchJobMetricsLegend
       series={series}
@@ -548,11 +550,13 @@ export function JobActivityTraces({
   traces,
   tracesQuery,
   fetchWhen = true,
+  withSummary = true,
 }: {
   jobId: string
   traces?: Nullable<Nullable<WorkbenchJobActivityTraceFragment>[]>
   tracesQuery: Nullable<WorkbenchMetricsToolQueryInput>
   fetchWhen?: boolean
+  withSummary?: boolean
 }) {
   const directTraces = traces?.filter(isNonNullable) ?? []
   const shouldRunQuery =
@@ -602,7 +606,7 @@ export function JobActivityTraces({
   return (
     <TraceWaterfall
       traces={resolvedTraces}
-      summary={tracesQuery?.summary}
+      summary={withSummary ? tracesQuery?.summary : undefined}
     />
   )
 }
