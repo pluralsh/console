@@ -327,23 +327,7 @@ export function JobActivityMetricsChart({
   const graphTheme = useGraphTheme()
 
   const graphData = useMemo(() => {
-    const grouped = groupBy(
-      metrics,
-      ({ name, labels }) =>
-        `${name ?? 'metric'}{${
-          Object.entries(labels ?? {})
-            .map(([key, value]) => `${key}:${value}`)
-            .join(',') ?? ''
-        }}`
-    )
-    return Object.entries(grouped).map(([name, points]) => ({
-      id: name,
-      data: points
-        .map((p) => ({ x: toDateOrUndef(p.timestamp), y: p.value }))
-        .filter(
-          (pt): pt is { x: Date; y: number } => !isNil(pt.x) && !isNil(pt.y)
-        ),
-    }))
+    return getMetricSeries(metrics)
   }, [metrics])
 
   if (isEmpty(metrics)) return null
@@ -450,13 +434,11 @@ export function JobActivityMetrics({
 
   if (isEmpty(visibleMetrics)) return null
 
-  const seriesNames = Object.keys(
-    groupBy(visibleMetrics, (m) => m.name ?? 'metric')
-  )
+  const series = getMetricSeries(visibleMetrics)
   const summaryText = metricsQuery?.summary?.trim()
   const legend = (
     <WorkbenchJobMetricsLegend
-      seriesNames={seriesNames}
+      series={series}
       paddingLeft={20}
     />
   )
@@ -626,12 +608,12 @@ export function JobActivityTraces({
 }
 
 export function WorkbenchJobMetricsLegend({
-  seriesNames,
+  series,
   ...props
 }: {
-  seriesNames: string[]
+  series: MetricSeries[]
 } & FlexProps) {
-  if (isEmpty(seriesNames)) return null
+  if (isEmpty(series)) return null
 
   return (
     <Flex
@@ -640,17 +622,66 @@ export function WorkbenchJobMetricsLegend({
       align="center"
       {...props}
     >
-      {seriesNames.map((name, i) => (
+      {series.map(({ id, label }, i) => (
         <Flex
-          key={name}
+          key={id}
           align="center"
           gap="xsmall"
         >
           <MetricsLegendSwatchSC $color={COLORS[i % COLORS.length]} />
-          <Body2P $color="text-light">{name}</Body2P>
+          <Body2P $color="text-light">{label}</Body2P>
         </Flex>
       ))}
     </Flex>
+  )
+}
+
+type MetricSeries = {
+  data: { x: Date; y: number }[]
+  id: string
+  label: string
+}
+
+export function getMetricSeries(
+  metrics: WorkbenchJobActivityMetricFragment[]
+): MetricSeries[] {
+  const grouped = groupBy(metrics, metricSeriesId)
+
+  return Object.entries(grouped).map(([id, points]) => ({
+    id,
+    label: metricSeriesLabel(points[0]),
+    data: points
+      .map((point) => ({ x: toDateOrUndef(point.timestamp), y: point.value }))
+      .filter(
+        (point): point is { x: Date; y: number } =>
+          !isNil(point.x) && !isNil(point.y)
+      ),
+  }))
+}
+
+function metricSeriesId({
+  name,
+  labels,
+}: WorkbenchJobActivityMetricFragment): string {
+  return `${name ?? 'metric'}{${metricLabelEntries(labels)
+    .map(([key, value]) => `${key}:${value}`)
+    .join(',')}}`
+}
+
+function metricSeriesLabel({
+  name,
+  labels,
+}: WorkbenchJobActivityMetricFragment): string {
+  const label = metricLabelEntries(labels)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(', ')
+
+  return label || name || 'metric'
+}
+
+function metricLabelEntries(labels: Nullable<Record<string, unknown>>) {
+  return Object.entries(labels ?? {}).sort(([left], [right]) =>
+    left.localeCompare(right)
   )
 }
 
