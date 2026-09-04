@@ -20,6 +20,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import {
   JobActivityLogsFromTool,
   JobActivityMetrics,
+  JobActivityTraces,
 } from './WorkbenchJobActivityResults'
 
 const COLUMNS = 3
@@ -155,6 +156,13 @@ function CanvasBlockRenderer({
           graph={content?.logs}
         />
       )
+    case WorkbenchCanvasBlockType.Traces:
+      return (
+        <TracesBlock
+          jobId={jobId}
+          graph={content?.traces}
+        />
+      )
     case WorkbenchCanvasBlockType.Pie:
       return <PieBlock graph={content?.pie} />
     case WorkbenchCanvasBlockType.Bar:
@@ -216,6 +224,25 @@ function LogsBlock({
           logsQuery={graph?.query}
         />
       </div>
+      {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
+    </VizBlockCardSC>
+  )
+}
+
+function TracesBlock({
+  jobId,
+  graph,
+}: {
+  jobId: string
+  graph: Nullable<WorkbenchCanvasToolGraph>
+}) {
+  return (
+    <VizBlockCardSC>
+      {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
+      <JobActivityTraces
+        jobId={jobId}
+        tracesQuery={graph?.query}
+      />
       {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
     </VizBlockCardSC>
   )

@@ -30,9 +30,11 @@ import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   useWorkbenchJobLogsToolQuery,
   useWorkbenchJobMetricsToolQuery,
+  useWorkbenchJobTracesToolQuery,
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
   WorkbenchJobActivityResultFragment,
+  WorkbenchJobActivityTraceFragment,
   WorkbenchToolQueryData,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil } from 'lodash'
@@ -50,6 +52,7 @@ import { COLORS } from 'utils/color'
 import { formatDateTime, toDateOrUndef } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
+import { TraceWaterfall } from './WorkbenchJobTraces'
 
 export function MemoActivityIcon({
   jobUpdate,
@@ -472,6 +475,74 @@ export function JobActivityMetrics({
         paddingLeft={20}
       />
     </Flex>
+  )
+}
+
+/**
+ * Renders the stored trace result when available, otherwise reloads it through
+ * `tracesTool` from the query that produced the canvas or activity result.
+ */
+export function JobActivityTraces({
+  jobId,
+  traces,
+  tracesQuery,
+  fetchWhen = true,
+}: {
+  jobId: string
+  traces?: Nullable<Nullable<WorkbenchJobActivityTraceFragment>[]>
+  tracesQuery: Nullable<WorkbenchMetricsToolQueryInput>
+  fetchWhen?: boolean
+}) {
+  const directTraces = traces?.filter(isNonNullable) ?? []
+  const shouldRunQuery =
+    !!jobId &&
+    fetchWhen &&
+    isEmpty(directTraces) &&
+    hasWorkbenchMetricsToolQuery(tracesQuery)
+
+  const { data, loading, error } = useWorkbenchJobTracesToolQuery({
+    variables: {
+      id: jobId,
+      name: tracesQuery?.toolName?.trim(),
+      arguments: tracesQuery?.toolArgs
+        ? JSON.stringify(tracesQuery.toolArgs)
+        : undefined,
+    },
+    skip: !shouldRunQuery,
+  })
+
+  if (isEmpty(directTraces) && !hasWorkbenchMetricsToolQuery(tracesQuery))
+    return null
+
+  if (!fetchWhen) return null
+
+  if (error)
+    return (
+      <GqlError
+        error={error}
+        css={{ wordBreak: 'break-word' }}
+      />
+    )
+
+  if (isEmpty(directTraces) && (loading || !data))
+    return (
+      <RectangleSkeleton
+        $height={200}
+        $width="100%"
+      />
+    )
+
+  const fetchedTraces =
+    data?.workbenchJob?.tracesTool?.filter(isNonNullable) ?? []
+  const resolvedTraces = isEmpty(directTraces) ? fetchedTraces : directTraces
+
+  if (isEmpty(resolvedTraces)) return null
+
+  return (
+    <TraceWaterfall
+      traces={resolvedTraces}
+      summary={tracesQuery?.summary}
+    />
   )
 }
 
