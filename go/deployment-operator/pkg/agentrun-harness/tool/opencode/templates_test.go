@@ -26,7 +26,7 @@ func baseInput(mode console.AgentRunMode) *ConfigTemplateInput {
 		ConsoleToken: testConsoleToken,
 		AgentRunID:   testAgentRunID,
 		Provider:     ProviderOpenAI,
-		Model:        string(ModelGPT52),
+		Model:        "gpt-5.2",
 		Token:        testToken,
 		Mode:         mode,
 	}
@@ -162,14 +162,14 @@ func TestConfigTemplate_AllowsSkillLoading(t *testing.T) {
 
 func TestEnvUsesHarnessHomeAndConfigHome(t *testing.T) {
 	workDir := t.TempDir()
-	tool := &Opencode{DefaultTool: toolv1.DefaultTool{Config: toolv1.Config{
+	config := toolv1.Config{
 		WorkDir: workDir,
 		Run: &agentrunv1.AgentRun{
 			Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{OpenCode: &agentrunv1.OpencodeConfig{}}},
 		},
-	}}}
+	}
 
-	env := strings.Join(tool.env("/tmp/opencode.json"), "\n")
+	env := strings.Join(NewAgent(config).env(config, "/tmp/opencode.json"), "\n")
 	for _, want := range []string{
 		"XDG_CONFIG_HOME=" + workDir + "/.config",
 		"XDG_DATA_HOME=" + workDir + "/.local/share",
@@ -328,13 +328,17 @@ func TestConfigTemplate_Provider(t *testing.T) {
 		input.OpenAICompatible = true
 		input.Endpoint = "https://litellm.example/v1"
 		input.Token = "litellm-key"
+		input.Model = "tenant/custom-model"
 
 		out := renderJSON(t, input)
+		if out["model"] != "openai-compatible/tenant/custom-model" {
+			t.Errorf("expected model=openai-compatible/tenant/custom-model, got %v", out["model"])
+		}
 
 		providers := out["provider"].(map[string]any)
 		compat := providers[string(ProviderOpenAICompatible)].(map[string]any)
-		if compat["npm"] != "@ai-sdk/openai" {
-			t.Errorf("expected npm=@ai-sdk/openai, got %v", compat["npm"])
+		if compat["npm"] != "@ai-sdk/openai-compatible" {
+			t.Errorf("expected npm=@ai-sdk/openai-compatible, got %v", compat["npm"])
 		}
 		options := compat["options"].(map[string]any)
 		if options["baseURL"] != "https://litellm.example/v1" {

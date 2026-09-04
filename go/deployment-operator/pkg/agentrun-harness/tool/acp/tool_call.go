@@ -1,19 +1,83 @@
 package acp
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 
 	acpsdk "github.com/coder/acp-go-sdk"
 
 	console "github.com/pluralsh/console/go/client"
-	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 )
+
+const runningToolOutput = "running..."
+
+type toolCall struct {
+	id     string
+	name   string
+	input  string
+	output string
+	state  console.AgentMessageToolState
+}
+
+func (call *toolCall) addOutput(output string) {
+	if output == "" || output == call.output {
+		return
+	}
+	call.output = output
+}
+
+func (*toolCall) formatValue(value any) string {
+	if value == nil {
+		return ""
+	}
+	if stringValue, ok := value.(string); ok {
+		return stringValue
+	}
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Sprintf("%v", value)
+	}
+	return string(encoded)
+}
+
+func (call *toolCall) contentOutput(content []acpsdk.ToolCallContent) string {
+	var builder strings.Builder
+	for _, item := range content {
+		switch {
+		case item.Content != nil:
+			if item.Content.Content.Text != nil {
+				builder.WriteString(item.Content.Content.Text.Text)
+			}
+		case item.Diff != nil:
+			builder.WriteString(item.Diff.NewText)
+		case item.Terminal != nil:
+			builder.WriteString(item.Terminal.TerminalId)
+		}
+	}
+	return builder.String()
+}
+
+func (call *toolCall) toolOutput(content []acpsdk.ToolCallContent, rawOutput any) string {
+	output := call.contentOutput(content)
+	if output == "" && rawOutput != nil {
+		return call.formatValue(rawOutput)
+	}
+	return output
+}
+
+type toolUpdateEvents struct {
+	message      *console.AgentMessageAttributes
+	output       string
+	streamOutput bool
+	terminal     bool
+}
 
 func (call *toolCall) message() *console.AgentMessageAttributes {
 	name := call.name
 	output := call.output
 	if output == "" && (call.state == console.AgentMessageToolStateRunning || call.state == console.AgentMessageToolStatePending) {
-		output = toolv1.RunningToolOutput
+		output = runningToolOutput
 	}
 	message := &console.AgentMessageAttributes{
 		Role:    console.AiRoleAssistant,
@@ -48,7 +112,7 @@ func (call *toolCall) updateMetadata(update *acpsdk.SessionToolCallUpdate) bool 
 		changed = true
 	}
 	if update.RawInput != nil {
-		input := formatValue(update.RawInput)
+		input := call.formatValue(update.RawInput)
 		if call.input != input {
 			call.input = input
 			changed = true

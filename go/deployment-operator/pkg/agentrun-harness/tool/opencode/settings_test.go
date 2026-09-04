@@ -1,6 +1,10 @@
 package opencode
 
-import "testing"
+import (
+	"testing"
+
+	toolv1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
+)
 
 func TestResolveOpenCodeSettings(t *testing.T) {
 	tests := []struct {
@@ -48,17 +52,47 @@ func TestResolveOpenCodeSettings(t *testing.T) {
 			wantOpenAICompat: true,
 		},
 		{
-			name:         "native provider passes through slug",
+			name:             "openaiCompatible strips only its provider prefix",
+			provider:         "litellm",
+			model:            "openai-compatible/custom/model",
+			openaiCompatible: true,
+			wantProvider:     ProviderOpenAICompatible,
+			wantModel:        "custom/model",
+			wantOpenAICompat: true,
+		},
+		{
+			name:             "openaiCompatible preserves other slash-containing model names",
+			provider:         "litellm",
+			model:            "tenant/custom/model",
+			openaiCompatible: true,
+			wantProvider:     ProviderOpenAICompatible,
+			wantModel:        "tenant/custom/model",
+			wantOpenAICompat: true,
+		},
+		{
+			name:         "empty native provider defaults to plural",
+			wantProvider: ProviderPlural,
+			wantModel:    defaultModel,
+		},
+		{
+			name:         "native provider strips its prefix",
 			provider:     "anthropic",
-			model:        "claude-sonnet-4-5",
+			model:        "anthropic/claude-sonnet-4-5",
 			wantProvider: ProviderAnthropic,
 			wantModel:    "claude-sonnet-4-5",
+		},
+		{
+			name:         "native provider strips exactly one prefix",
+			provider:     "anthropic",
+			model:        "anthropic/anthropic/claude-sonnet-4-5",
+			wantProvider: ProviderAnthropic,
+			wantModel:    "anthropic/claude-sonnet-4-5",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := resolveOpenCodeSettings(tt.provider, tt.model, tt.openaiCompatible, tt.proxyEnabled)
+			got := NewAgent(toolv1.Config{}).resolveSettings(tt.provider, tt.model, tt.openaiCompatible, tt.proxyEnabled)
 			if got.provider != tt.wantProvider {
 				t.Fatalf("provider = %q, want %q", got.provider, tt.wantProvider)
 			}

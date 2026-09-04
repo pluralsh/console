@@ -119,8 +119,10 @@
   "username": "plural",
   "provider": {
     "{{ .Provider }}": {
-      {{- if or .OpenAICompatible (eq .Provider "plural") }}
+      {{- if eq .Provider "plural" }}
       "npm": "@ai-sdk/openai",
+      {{- else if .OpenAICompatible }}
+      "npm": "@ai-sdk/openai-compatible",
       {{- end }}
       "name": "{{ .Provider }}",
       "options": {

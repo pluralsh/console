@@ -3,15 +3,16 @@ package tool
 import (
 	"fmt"
 
+	"k8s.io/klog/v2"
+
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/acp"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/claude"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/codex"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/gemini"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/opencode"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/pi"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/tool/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
-	"k8s.io/klog/v2"
 )
 
 // New creates a specific tool implementation structure based on the provided
@@ -21,7 +22,12 @@ func New(runtimeType console.AgentRuntimeType, config v1.Config) (v1.Tool, error
 
 	switch runtimeType {
 	case console.AgentRuntimeTypeOpencode:
-		return acp.NewOpenCode(config), nil
+		agent := opencode.NewAgent(config)
+		transport, err := opencode.NewTransport(agent)
+		if err != nil {
+			return nil, err
+		}
+		return v1.NewRuntime(config, agent, transport)
 	case console.AgentRuntimeTypeClaude:
 		return claude.New(config), nil
 	case console.AgentRuntimeTypeGemini:

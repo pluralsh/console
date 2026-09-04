@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"path/filepath"
 	"time"
 
 	acpsdk "github.com/coder/acp-go-sdk"
@@ -17,44 +16,16 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
-func (tool *Tool) runPrompt(ctx context.Context, prompt string) error {
-	return tool.runPromptWithOptions(ctx, prompt, nil)
-}
-
-func (tool *Tool) runPromptWithOptions(ctx context.Context, prompt string, options []exec.Option) error {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	if err := tool.validate(); err != nil {
-		return err
-	}
-
-	return tool.runAttempt(ctx, prompt, options)
-}
-
-func (tool *Tool) runAttempt(ctx context.Context, prompt string, options []exec.Option) error {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	cwd, err := filepath.Abs(tool.Config.RepositoryDir)
-	if err != nil {
-		return fmt.Errorf("resolve acp repository directory: %w", err)
-	}
-	attempt, err := tool.startAttempt(ctx, options)
-	if err != nil {
-		return err
-	}
-	defer attempt.close()
-	return attempt.run(cwd, prompt)
-}
-
 type sessionAttempt struct {
-	tool           *Tool
+	engine         *Engine
 	ctx            context.Context
 	process        *exec.StdioProcess
 	connection     *acpsdk.ClientSideConnection
 	turn           *turnState
+	settings       SessionSettings
+	cwd            string
 	priorSessionID string
+	sessionID      string
 }
 
 type sessionDetails struct {
@@ -63,24 +34,7 @@ type sessionDetails struct {
 	configOptions []acpsdk.SessionConfigOption
 }
 
-func (attempt *sessionAttempt) drainStderr() {
-	if attempt.process.Stderr == nil {
-		return
-	}
-	go func() {
-		if _, err := io.Copy(io.Discard, attempt.process.Stderr); err != nil && !errors.Is(err, io.ErrClosedPipe) {
-			klog.V(log.LogLevelDebug).InfoS("ACP stderr drain ended", "error", err)
-		}
-	}()
-}
-
-func (attempt *sessionAttempt) close() {
-	// The process is stopped explicitly during the run. This final guard
-	// handles setup failures and keeps test launchers from leaking children.
-	_ = attempt.process.Close()
-}
-
-func (attempt *sessionAttempt) run(cwd, prompt string) error {
+func (attempt *sessionAttempt) run(prompt string) error {
 	initialize, err := attempt.initialize()
 	if err != nil {
 		return attempt.fail(fmt.Errorf("acp initialize: %w", err), attempt.cancelled())
@@ -89,7 +43,7 @@ func (attempt *sessionAttempt) run(cwd, prompt string) error {
 		return attempt.fail(fmt.Errorf("acp protocol version %d is unsupported", initialize.ProtocolVersion), false)
 	}
 
-	details, err := attempt.openSession(cwd)
+	details, err := attempt.openSession(attempt.cwd)
 	if err != nil {
 		return attempt.fail(err, attempt.cancelled())
 	}
@@ -118,9 +72,9 @@ func (attempt *sessionAttempt) run(cwd, prompt string) error {
 }
 
 func (attempt *sessionAttempt) configureSession(details sessionDetails) error {
-	err := attempt.tool.setSessionConfig(attempt.ctx, attempt.connection, details.sessionID, details.modes, details.configOptions)
+	err := attempt.engine.setSessionConfig(attempt.ctx, attempt.connection, details.sessionID, details.modes, details.configOptions, attempt.settings)
 	if err != nil && attempt.priorSessionID == "" {
-		attempt.tool.setSessionID("")
+		attempt.turn.setSessionID("")
 	}
 	return err
 }
@@ -137,14 +91,13 @@ func (attempt *sessionAttempt) initialize() (acpsdk.InitializeResponse, error) {
 				ReadTextFile:  true,
 				WriteTextFile: true,
 			},
-			Terminal: false,
-			Auth:     acpsdk.AuthCapabilities{},
+			Auth: acpsdk.AuthCapabilities{},
 		},
 	})
 }
 
 func (attempt *sessionAttempt) openSession(cwd string) (sessionDetails, error) {
-	existingSession := attempt.tool.sessionIDValue()
+	existingSession := attempt.priorSessionID
 	if existingSession == "" {
 		return attempt.createSession(cwd)
 	}
@@ -166,8 +119,9 @@ func (attempt *sessionAttempt) createSession(cwd string) (sessionDetails, error)
 	if provisionalID := attempt.turn.sessionID(); provisionalID != "" && provisionalID != sessionID {
 		return sessionDetails{}, attempt.turn.sessionUpdateMismatch(acpsdk.SessionId(provisionalID), sessionID)
 	}
-	attempt.tool.setSessionID(sessionID)
 	attempt.turn.setSessionID(sessionID)
+	attempt.sessionID = sessionID
+	attempt.turn.sink.Session(sessionID)
 	return sessionDetails{
 		sessionID:     sessionID,
 		modes:         created.Modes,
@@ -185,6 +139,8 @@ func (attempt *sessionAttempt) resumeSession(cwd, sessionID string) (sessionDeta
 		return sessionDetails{}, fmt.Errorf("acp session/resume: %w", err)
 	}
 	attempt.turn.setSessionID(sessionID)
+	attempt.sessionID = sessionID
+	attempt.turn.sink.Session(sessionID)
 	return sessionDetails{
 		sessionID:     sessionID,
 		modes:         resumed.Modes,
@@ -201,6 +157,23 @@ func (attempt *sessionAttempt) prompt(prompt, sessionID string) (acpsdk.PromptRe
 
 func (attempt *sessionAttempt) finishTurn(usage *acpsdk.Usage) {
 	attempt.turn.emitAssistant(usage)
+}
+
+func (attempt *sessionAttempt) drainStderr() {
+	if attempt.process.Stderr == nil {
+		return
+	}
+	go func() {
+		if _, err := io.Copy(io.Discard, attempt.process.Stderr); err != nil && !errors.Is(err, io.ErrClosedPipe) {
+			klog.V(log.LogLevelDebug).InfoS("ACP stderr drain ended", "error", err)
+		}
+	}()
+}
+
+func (attempt *sessionAttempt) close() {
+	// The process is stopped explicitly during the run. This final guard
+	// handles setup failures and keeps test launchers from leaking children.
+	_ = attempt.process.Close()
 }
 
 func (attempt *sessionAttempt) promptFailure(err error) error {
@@ -252,7 +225,7 @@ func (attempt *sessionAttempt) cancelSession() {
 	if sessionID == "" {
 		return
 	}
-	cancelCtx, cancel := context.WithTimeout(context.Background(), attempt.tool.stopTimeout)
+	cancelCtx, cancel := context.WithTimeout(context.Background(), attempt.engine.stopTimeout)
 	err := attempt.connection.Cancel(cancelCtx, acpsdk.CancelNotification{SessionId: acpsdk.SessionId(sessionID)})
 	cancel()
 	if err != nil {
@@ -263,7 +236,7 @@ func (attempt *sessionAttempt) cancelSession() {
 func (attempt *sessionAttempt) waitForExit() error {
 	waitCh := make(chan error, 1)
 	go func() { waitCh <- attempt.process.Wait() }()
-	timer := time.NewTimer(attempt.tool.stopTimeout)
+	timer := time.NewTimer(attempt.engine.stopTimeout)
 	defer timer.Stop()
 	select {
 	case waitErr := <-waitCh:
@@ -294,15 +267,18 @@ func (attempt *sessionAttempt) promptResult(reason acpsdk.StopReason) error {
 	}
 }
 
-func newSessionAttempt(tool *Tool, ctx context.Context, process *exec.StdioProcess, priorSessionID string) *sessionAttempt {
-	turn := newTurn(tool, priorSessionID)
+func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioProcess, request Request, sink Sink) *sessionAttempt {
+	turn := newTurn(engine, sink, request.SessionID)
 	attempt := &sessionAttempt{
-		tool:           tool,
+		engine:         engine,
 		ctx:            ctx,
 		process:        process,
 		connection:     acpsdk.NewClientSideConnection(&client{turn: turn}, process.Stdin, process.Stdout),
 		turn:           turn,
-		priorSessionID: priorSessionID,
+		settings:       request.Settings,
+		cwd:            request.Cwd,
+		priorSessionID: request.SessionID,
+		sessionID:      request.SessionID,
 	}
 	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
 	attempt.drainStderr()
