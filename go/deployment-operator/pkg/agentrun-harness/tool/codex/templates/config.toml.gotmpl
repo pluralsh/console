@@ -1,0 +1,108 @@
+[features]
+skills = true
+
+[projects.{{ quote .RepositoryDir }}]
+trust_level = "trusted"
+
+{{ range .Providers }}
+[model_providers.{{ quote .Name }}]
+{{ if .Name }}
+name = {{ quote .Name }}
+{{ end }}
+{{ if .BaseURL }}
+base_url = {{ quote .BaseURL }}
+{{ end }}
+{{ if .EnvKey }}
+env_key = {{ quote .EnvKey }}
+{{ end }}
+{{ if .WireAPI }}
+wire_api = {{ quote .WireAPI }}
+{{ end }}
+{{ end }}
+
+[profiles.{{ quote .Profile.Name }}]
+model = {{ quote .Profile.Model }}
+{{ if .Profile.ModelProvider }}
+model_provider = {{ quote .Profile.ModelProvider }}
+{{ end }}
+sandbox_mode = {{ quote .Profile.SandboxMode }}
+approval_policy = {{ quote .Profile.ApprovalPolicy }}
+model_reasoning_effort = {{ quote .Profile.ModelReasoningEffort }}
+{{ if .Profile.ModelInstructionsFile }}
+model_instructions_file = {{ quote .Profile.ModelInstructionsFile }}
+{{ end }}
+
+{{ if .Profile.ShellEnvironmentPolicy }}
+[profiles.{{ quote .Profile.Name }}.shell_environment_policy]
+{{ if .Profile.ShellEnvironmentPolicy.IncludeOnly }}
+include_only = [{{ range $index, $value := .Profile.ShellEnvironmentPolicy.IncludeOnly }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+
+{{ if .Profile.ShellEnvironmentPolicy.Set }}
+[profiles.{{ quote .Profile.Name }}.shell_environment_policy.set]
+{{ range .Profile.ShellEnvironmentPolicy.Set }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+{{ end }}
+
+[profiles.{{ quote .Profile.Name }}.features]
+{{ if .Profile.EnableWebSearch }}
+web_search_request = true
+{{ end }}
+{{ if .Profile.EnableShellCache }}
+shell_snapshot = true
+{{ end }}
+
+{{ range .MCPServers }}
+[mcp_servers.{{ quote .Name }}]
+{{ if .Type }}
+type = {{ quote .Type }}
+{{ end }}
+{{ if .URL }}
+url = {{ quote .URL }}
+{{ end }}
+{{ if .Command }}
+command = {{ quote .Command }}
+{{ end }}
+{{ if .Args }}
+args = [{{ range $index, $value := .Args }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .EnabledTools }}
+enabled_tools = [{{ range $index, $value := .EnabledTools }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .DisabledTools }}
+disabled_tools = [{{ range $index, $value := .DisabledTools }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+{{ if .TrustPolicy }}
+trust_policy = {{ quote .TrustPolicy }}
+{{ end }}
+
+{{ if .Env }}
+[mcp_servers.{{ quote .Name }}.env]
+{{ range .Env }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+
+{{ if .Headers }}
+[mcp_servers.{{ quote .Name }}.headers]
+{{ range .Headers }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+
+{{ if .HTTPHeaders }}
+[mcp_servers.{{ quote .Name }}.http_headers]
+{{ range .HTTPHeaders }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+
+{{ if .EnvHTTPHeaders }}
+[mcp_servers.{{ quote .Name }}.env_http_headers]
+{{ range .EnvHTTPHeaders }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+{{ end }}

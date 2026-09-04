@@ -13,10 +13,6 @@ import (
 //go:embed templates/opencode.json.gotmpl
 var configTemplateText string
 
-const (
-	ConfigFileName = "opencode.json"
-)
-
 type ConfigTemplateInput struct {
 	ConsoleURL   string
 	ConsoleToken string

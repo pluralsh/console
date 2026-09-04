@@ -305,7 +305,11 @@ func (ar *AgentRun) fromEnv(runtime *console.AgentRuntimeFragment) *AgentRuntime
 }
 
 func (ar *AgentRun) IsProxyEnabled() bool {
-	return ar.Runtime != nil && ar.Runtime.AiProxy
+	if ar == nil || ar.Runtime == nil {
+		return false
+	}
+
+	return ar.Runtime.AiProxy
 }
 
 func (ar *AgentRun) IsStreamingProxyEnabled() bool {

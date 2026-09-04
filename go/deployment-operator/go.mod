@@ -29,6 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.24
 	github.com/aws/aws-sdk-go-v2/service/eks v1.81.2
 	github.com/cert-manager/cert-manager v1.19.3
+	github.com/coder/acp-go-sdk v0.13.5
 	github.com/cyphar/filepath-securejoin v0.6.1
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/ewhauser/gomonty v0.0.14
