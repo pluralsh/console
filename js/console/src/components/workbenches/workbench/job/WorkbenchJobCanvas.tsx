@@ -28,8 +28,6 @@ const ROW_HEIGHT_PX = 40
 const MIN_GRID_WIDTH_PX = 600
 /** Nivo `ResponsivePie` needs a sized parent; without this the chart measures 0×0 in the flex canvas layout. */
 const PIE_CHART_HEIGHT_PX = 200
-/** Cap log body height so huge streams do not stretch the whole canvas row. */
-const CANVAS_LOGS_MAX_HEIGHT_PX = 360
 
 export function WorkbenchJobCanvas({
   jobId,
@@ -188,15 +186,17 @@ function MetricsBlock({
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
   return (
-    <VizBlockCardSC>
-      {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
+    <ChartBlockCardSC>
       <JobActivityMetrics
         jobId={jobId}
         metricsQuery={graph?.query}
-        css={{ flex: '0 0 auto', minHeight: 120 }}
+        title={graph?.title ?? undefined}
+        withLegend
+        withTimeRange
+        css={{ flex: '0 0 auto', height: 238, minHeight: 120 }}
       />
       {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-    </VizBlockCardSC>
+    </ChartBlockCardSC>
   )
 }
 
@@ -208,24 +208,15 @@ function LogsBlock({
   graph: Nullable<WorkbenchCanvasToolGraph>
 }) {
   return (
-    <VizBlockCardSC>
+    <LogsBlockCardSC>
       {graph?.title && <BlockTitle>{graph.title}</BlockTitle>}
-      <div
-        css={{
-          flex: '0 0 auto',
-          minHeight: 120,
-          maxHeight: CANVAS_LOGS_MAX_HEIGHT_PX,
-          minWidth: 0,
-          overflowY: 'auto',
-        }}
-      >
-        <JobActivityLogsFromTool
-          jobId={jobId}
-          logsQuery={graph?.query}
-        />
-      </div>
+      <JobActivityLogsFromTool
+        jobId={jobId}
+        logsQuery={graph?.query}
+        variant="canvas"
+      />
       {graph?.summary && <Body2P $color="text-light">{graph.summary}</Body2P>}
-    </VizBlockCardSC>
+    </LogsBlockCardSC>
   )
 }
 
@@ -368,6 +359,16 @@ const BlockCardSC = styled.div(({ theme }) => ({
 /** Metrics / logs / charts: center the block content vertically when the canvas row is taller than this cell. */
 const VizBlockCardSC = styled(BlockCardSC)(() => ({
   justifyContent: 'center',
+}))
+
+const ChartBlockCardSC = styled(VizBlockCardSC)(({ theme }) => ({
+  gap: theme.spacing.large,
+  padding: theme.spacing.large,
+}))
+
+const LogsBlockCardSC = styled(VizBlockCardSC)(({ theme }) => ({
+  gap: theme.spacing.small,
+  padding: theme.spacing.small,
 }))
 
 const BarListSC = styled.div(({ theme }) => ({
