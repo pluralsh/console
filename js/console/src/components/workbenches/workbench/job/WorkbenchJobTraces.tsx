@@ -4,14 +4,16 @@ import { useKeyDown } from '@react-hooks-library/core'
 import {
   CloseIcon,
   ErrorIcon,
+  GraphIcon,
   IconFrame,
   LinkoutIcon,
+  TableIcon,
+  TreeViewIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import FocusLock from 'react-focus-lock'
-import styled, { DefaultTheme, useTheme } from 'styled-components'
-import { COLORS } from 'utils/color'
+import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { TraceTopology } from './WorkbenchJobTraceTopology'
 
@@ -45,7 +47,6 @@ export function TraceWaterfall({
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
   const [view, setView] = useState<TraceView>('timeline')
   const [fullscreen, setFullscreen] = useState(false)
-  const theme = useTheme()
   const activeTrace =
     traceGroups.find(({ id }) => id === selectedTraceId) ?? traceGroups[0]
 
@@ -57,6 +58,10 @@ export function TraceWaterfall({
   const selectedRow =
     rows.find(({ span }) => span.spanId === selectedSpanId) ?? rows[0]
   const bounds = useMemo(() => traceBounds(rows), [rows])
+  const ticks = useMemo(() => traceTicks(bounds), [bounds])
+  const selectedParent = rows.find(
+    ({ span }) => span.spanId === selectedRow?.span.parentId
+  )
 
   useKeyDown('Escape', () => fullscreen && setFullscreen(false))
 
@@ -68,13 +73,31 @@ export function TraceWaterfall({
       $fullscreen={fullscreen}
     >
       <TraceWaterfallSC $fullscreen={fullscreen}>
-        <TraceToolbarSC>
-          <div>
-            <Body2BoldP>{formatSpanCount(activeTrace.spans.length)}</Body2BoldP>
-            <CaptionP $color="text-xlight">
-              {formatDuration(bounds.end - bounds.start)} total duration
-            </CaptionP>
-          </div>
+        <TraceHeaderSC>
+          <TraceSummarySC>
+            <TraceIdentifierSC>
+              <CaptionP $color="text-xlight">trace_id</CaptionP>
+              <TraceIdSC>{shortTraceId(activeTrace.id)}</TraceIdSC>
+            </TraceIdentifierSC>
+            <TraceMetric
+              label="Duration"
+              value={formatDuration(bounds.end - bounds.start)}
+            />
+            <TraceMetric
+              label="Spans"
+              value={String(activeTrace.spans.length)}
+            />
+            <TraceMetric
+              label="Services"
+              value={String(new Set(activeTrace.spans.map(serviceName)).size)}
+            />
+            <TraceStatusMetricSC>
+              <CaptionP $color="text-xlight">Status</CaptionP>
+              <TraceStatusSC $severity={traceStatus(activeTrace.spans)}>
+                {traceStatusLabel(traceStatus(activeTrace.spans))}
+              </TraceStatusSC>
+            </TraceStatusMetricSC>
+          </TraceSummarySC>
           <TraceToolbarActionsSC>
             <TraceViewControl
               value={view}
@@ -111,19 +134,20 @@ export function TraceWaterfall({
               </IconFrame>
             )}
           </TraceToolbarActionsSC>
-        </TraceToolbarSC>
+        </TraceHeaderSC>
         {view === 'timeline' ? (
           <TraceTimelineContentSC $fullscreen={fullscreen}>
             <TimelineSC $fullscreen={fullscreen}>
               <TimelineHeaderSC>
                 <CaptionP $color="text-xlight">Span</CaptionP>
                 <TraceAxisSC>
-                  <CaptionP $color="text-xlight">
-                    {formatTime(bounds.start)}
-                  </CaptionP>
-                  <CaptionP $color="text-xlight">
-                    {formatTime(bounds.end)}
-                  </CaptionP>
+                  {ticks.map((tick) => (
+                    <TraceTickSC key={tick.offset}>
+                      <CaptionP $color="text-xlight">
+                        {formatDuration(tick.offset)}
+                      </CaptionP>
+                    </TraceTickSC>
+                  ))}
                 </TraceAxisSC>
               </TimelineHeaderSC>
               {rows.map((row) => {
@@ -132,7 +156,7 @@ export function TraceWaterfall({
                 const duration = row.end - row.start
                 const { left, width } = traceBarPosition(row, bounds)
                 const severity = traceSeverity(row.span.tags)
-                const color = traceColor(theme, severity)
+                const color = traceColor(service)
 
                 return (
                   <TraceRowSC
@@ -160,7 +184,7 @@ export function TraceWaterfall({
                         $width={width}
                         title={`${service} · ${formatDuration(duration)}`}
                       >
-                        <TraceBarTextSC>
+                        <TraceBarTextSC $color={color.text}>
                           {row.span.name ?? 'Unnamed span'}
                         </TraceBarTextSC>
                         <TraceBarStatusIcon severity={severity} />
@@ -172,15 +196,38 @@ export function TraceWaterfall({
             </TimelineSC>
             {selectedRow && (
               <TraceDetailSC $fullscreen={fullscreen}>
-                <div>
+                <TraceDetailHeaderSC>
                   <Body2BoldP>
                     {selectedRow.span.name ?? 'Unnamed span'}
                   </Body2BoldP>
-                  <CaptionP $color="text-xlight">
-                    {selectedRow.span.service ?? 'unknown service'} ·{' '}
+                  <Body2BoldP>
                     {formatDuration(selectedRow.end - selectedRow.start)}
+                  </Body2BoldP>
+                  <CaptionP $color="text-xlight">
+                    offset +{formatDuration(selectedRow.start - bounds.start)}
                   </CaptionP>
-                </div>
+                </TraceDetailHeaderSC>
+                <TraceDetailSectionSC>
+                  <CaptionP $color="text-xlight">Span</CaptionP>
+                  <Body2P>{selectedRow.span.name ?? 'Unnamed span'}</Body2P>
+                  <CaptionP $color="text-xlight">Service</CaptionP>
+                  <TraceServiceSC>
+                    <ServiceDotSC
+                      $color={serviceColor(
+                        selectedRow.span.service ?? 'unknown service'
+                      )}
+                    />
+                    <Body2P>
+                      {selectedRow.span.service ?? 'unknown service'}
+                    </Body2P>
+                  </TraceServiceSC>
+                  {selectedParent && (
+                    <>
+                      <CaptionP $color="text-xlight">Parent</CaptionP>
+                      <Body2P>{selectedParent.span.name}</Body2P>
+                    </>
+                  )}
+                </TraceDetailSectionSC>
                 <TraceTagsSC>
                   {Object.entries(selectedRow.span.tags ?? {}).map(
                     ([key, value]) => (
@@ -210,9 +257,18 @@ type TraceView = 'services' | 'spans' | 'timeline'
 
 const TRACE_VIEWS: { label: string; value: TraceView }[] = [
   { label: 'Timeline', value: 'timeline' },
-  { label: 'Spans', value: 'spans' },
-  { label: 'Services', value: 'services' },
+  { label: 'Span graph', value: 'spans' },
+  { label: 'Service graph', value: 'services' },
 ]
+
+function TraceMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <TraceMetricSC>
+      <CaptionP $color="text-xlight">{label}</CaptionP>
+      <Body2P>{value}</Body2P>
+    </TraceMetricSC>
+  )
+}
 
 function TraceViewControl({
   value,
@@ -228,13 +284,26 @@ function TraceViewControl({
           key={option}
           $active={option === value}
           type="button"
+          aria-label={label}
+          title={label}
           onClick={() => onChange(option)}
         >
-          {label}
+          <TraceViewIcon view={option} />
         </TraceViewButtonSC>
       ))}
     </TraceViewControlSC>
   )
+}
+
+function TraceViewIcon({ view }: { view: TraceView }) {
+  switch (view) {
+    case 'spans':
+      return <TreeViewIcon color="text-light" />
+    case 'services':
+      return <GraphIcon color="text-light" />
+    default:
+      return <TableIcon color="text-light" />
+  }
 }
 
 export function orderTraceSpans(traces: TraceSpan[]): TraceRow[] {
@@ -299,6 +368,14 @@ function traceBounds(rows: TraceRow[]) {
   }
 }
 
+function traceTicks(bounds: { end: number; start: number }) {
+  const duration = bounds.end - bounds.start
+
+  return Array.from({ length: 5 }, (_, index) => ({
+    offset: (duration * index) / 4,
+  }))
+}
+
 function traceBarPosition(
   row: TraceRow,
   bounds: { end: number; start: number }
@@ -323,16 +400,12 @@ function formatDuration(duration: number) {
   return `${(duration / 60_000).toFixed(1)}m`
 }
 
-export function formatSpanCount(count: number) {
-  return `${count} ${count === 1 ? 'span' : 'spans'}`
+function serviceName(span: TraceSpan) {
+  return span.service ?? 'unknown service'
 }
 
-function formatTime(timestamp: number) {
-  return new Date(timestamp).toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
+export function formatSpanCount(count: number) {
+  return `${count} ${count === 1 ? 'span' : 'spans'}`
 }
 
 function shortTraceId(traceId: string) {
@@ -340,11 +413,7 @@ function shortTraceId(traceId: string) {
 }
 
 function serviceColor(service: string) {
-  const hash = [...service].reduce(
-    (value, char) => value + char.charCodeAt(0),
-    0
-  )
-  return COLORS[hash % COLORS.length]
+  return traceColor(service).accent
 }
 
 type TraceSeverity = 'danger' | 'success' | 'warning'
@@ -401,20 +470,40 @@ function errorHttpStatus(value: unknown) {
   return Number.isFinite(status) && status >= 500
 }
 
-function traceColor(theme: DefaultTheme, severity: TraceSeverity) {
+const TRACE_COLORS = [
+  { accent: '#3CECAF', fill: '#0A6B4A', text: '#F1FEF9' },
+  { accent: '#F6AD55', fill: '#9C4221', text: '#FFFAF0' },
+  { accent: '#33B4FF', fill: '#004166', text: '#F0F9FF' },
+  { accent: '#E95374', fill: '#660A19', text: '#FFF0F2' },
+  { accent: '#B794F4', fill: '#553C9A', text: '#F1F1FE' },
+]
+
+function traceColor(service: string) {
+  const hash = [...service].reduce(
+    (value, char) => value + char.charCodeAt(0),
+    0
+  )
+
+  return TRACE_COLORS[hash % TRACE_COLORS.length]
+}
+
+function traceStatus(spans: TraceSpan[]): TraceSeverity {
+  if (spans.some(({ tags }) => traceSeverity(tags) === 'danger'))
+    return 'danger'
+  if (spans.some(({ tags }) => traceSeverity(tags) === 'warning'))
+    return 'warning'
+
+  return 'success'
+}
+
+function traceStatusLabel(severity: TraceSeverity) {
   switch (severity) {
     case 'danger':
-      return { accent: theme.colors.red[400], fill: theme.colors.red[800] }
+      return 'Error'
     case 'warning':
-      return {
-        accent: theme.colors.yellow[400],
-        fill: theme.colors.yellow[800],
-      }
+      return 'Warning'
     default:
-      return {
-        accent: theme.colors.green[400],
-        fill: theme.colors.green[800],
-      }
+      return 'Healthy'
   }
 }
 
@@ -446,23 +535,80 @@ const TraceFullscreenSC = styled(FocusLock)<{ $fullscreen: boolean }>(
 )
 
 const TraceWaterfallSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
+  ({ $fullscreen }) => ({
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.small,
     minWidth: 0,
     width: '100%',
     ...($fullscreen && { height: '100%' }),
   })
 )
 
-const TraceToolbarSC = styled.div(({ theme }) => ({
+const TraceHeaderSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  borderBottom: `1px solid ${theme.colors.border}`,
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.medium,
+  justifyContent: 'space-between',
+  minHeight: 72,
+  padding: `0 ${theme.spacing.small}px`,
+}))
+
+const TraceSummarySC = styled.div(({ theme }) => ({
   alignItems: 'center',
   display: 'flex',
   flexWrap: 'wrap',
-  gap: theme.spacing.small,
-  justifyContent: 'space-between',
+  gap: theme.spacing.large,
+  minWidth: 0,
 }))
+
+const TraceIdentifierSC = styled.div(({ theme }) => ({
+  alignItems: 'baseline',
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+}))
+
+const TraceIdSC = styled.span(({ theme }) => ({
+  color: theme.colors['text-light'],
+  fontFamily: theme.fontFamilies.mono,
+  fontSize: 12,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}))
+
+const TraceMetricSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+}))
+
+const TraceStatusMetricSC = styled(TraceMetricSC)({
+  alignItems: 'flex-start',
+})
+
+const TraceStatusSC = styled.span<{ $severity: TraceSeverity }>(
+  ({ theme, $severity }) => ({
+    background:
+      $severity === 'danger'
+        ? theme.colors.red[800]
+        : $severity === 'warning'
+          ? theme.colors.yellow[800]
+          : theme.colors.green[800],
+    borderRadius: theme.borderRadiuses.small,
+    color:
+      $severity === 'danger'
+        ? theme.colors.red[50]
+        : $severity === 'warning'
+          ? theme.colors.yellow[50]
+          : theme.colors.green[50],
+    fontSize: 12,
+    lineHeight: '20px',
+    padding: `0 ${theme.spacing.xsmall}px`,
+  })
+)
 
 const TraceToolbarActionsSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -492,16 +638,14 @@ const TraceViewControlSC = styled.div(({ theme }) => ({
 const TraceViewButtonSC = styled.button<{ $active: boolean }>(
   ({ theme, $active }) => ({
     ...theme.partials.reset.button,
-    ...theme.partials.text.buttonSmall,
     background: $active ? theme.colors['fill-three'] : 'transparent',
     borderRadius: theme.borderRadiuses.medium,
     color: theme.colors['text-light'],
     cursor: $active ? 'default' : 'pointer',
-    minHeight: 28,
-    padding: `0 ${theme.spacing.xsmall}px`,
-    '@media (max-width: 720px)': {
-      flex: 1,
-    },
+    display: 'grid',
+    height: 32,
+    placeItems: 'center',
+    width: 32,
     '&:focus-visible': {
       outline: `1px solid ${theme.colors['border-outline-focused']}`,
       outlineOffset: 1,
@@ -523,48 +667,50 @@ const TraceSelectSC = styled.select(({ theme }) => ({
   },
 }))
 
-const TraceTimelineContentSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    flexDirection: $fullscreen ? 'row' : 'column',
-    gap: theme.spacing.small,
-    minHeight: 0,
-    '@media (max-width: 720px)': {
-      flexDirection: 'column',
-    },
-  })
-)
+const TraceTimelineContentSC = styled.div<{ $fullscreen: boolean }>(() => ({
+  display: 'grid',
+  flex: 1,
+  gridTemplateColumns: 'minmax(0, 1fr) 236px',
+  minHeight: 0,
+  '@media (max-width: 960px)': {
+    gridTemplateColumns: 'minmax(0, 1fr)',
+  },
+}))
 
 const TimelineSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
     border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadiuses.medium,
-    flex: $fullscreen ? 1 : undefined,
-    maxHeight: $fullscreen ? 'calc(100vh - 136px)' : 360,
+    flex: 1,
+    maxHeight: $fullscreen ? 'calc(100vh - 136px)' : 576,
     overflowX: 'hidden',
     overflowY: 'auto',
     '@media (max-width: 720px)': {
-      maxHeight: $fullscreen ? 'calc(100vh - 280px)' : 360,
+      maxHeight: $fullscreen ? 'calc(100vh - 280px)' : 576,
     },
   })
 )
 
 const TimelineHeaderSC = styled.div(({ theme }) => ({
-  background: theme.colors['fill-two'],
+  background: theme.colors['fill-zero'],
   borderBottom: `1px solid ${theme.colors.border}`,
   display: 'grid',
-  gridTemplateColumns: 'minmax(140px, 38%) minmax(0, 1fr)',
-  minHeight: 28,
-  padding: `0 ${theme.spacing.small}px`,
+  gridTemplateColumns: 'minmax(200px, 256px) minmax(0, 1fr)',
+  minHeight: 48,
   position: 'sticky',
   top: 0,
   zIndex: 1,
 }))
 
-const TraceAxisSC = styled.div(({ theme }) => ({
+const TraceAxisSC = styled.div(() => ({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+}))
+
+const TraceTickSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  borderLeft: `1px solid ${theme.colors.border}`,
   display: 'flex',
-  justifyContent: 'space-between',
-  paddingLeft: theme.spacing.small,
+  padding: `0 ${theme.spacing.small}px`,
 }))
 
 const TraceRowSC = styled.button<{ $selected: boolean }>(
@@ -576,9 +722,9 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
     color: 'inherit',
     cursor: 'pointer',
     display: 'grid',
-    gridTemplateColumns: 'minmax(140px, 38%) minmax(0, 1fr)',
-    minHeight: 40,
-    padding: `0 ${theme.spacing.small}px`,
+    gridTemplateColumns: 'minmax(200px, 256px) minmax(0, 1fr)',
+    minHeight: 64,
+    padding: 0,
     textAlign: 'left',
     width: '100%',
     '&:hover': { background: theme.colors['fill-two'] },
@@ -588,10 +734,13 @@ const TraceRowSC = styled.button<{ $selected: boolean }>(
 
 const TraceLabelSC = styled.div<{ $depth: number }>(({ theme, $depth }) => ({
   alignItems: 'center',
+  borderRight: `1px solid ${theme.colors.border}`,
   display: 'flex',
   gap: theme.spacing.xsmall,
   minWidth: 0,
-  paddingLeft: $depth * theme.spacing.small,
+  padding: `0 ${theme.spacing.small}px 0 ${
+    theme.spacing.small + $depth * theme.spacing.medium
+  }px`,
 }))
 
 const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
@@ -613,15 +762,13 @@ const TraceNameSC = styled.span(({ theme }) => ({
 const TraceDurationSC = styled.span(({ theme }) => ({
   color: theme.colors['text-xlight'],
   fontFamily: theme.fontFamilies.mono,
-  fontSize: 10,
+  fontSize: 12,
   marginLeft: 'auto',
   paddingLeft: theme.spacing.xsmall,
   whiteSpace: 'nowrap',
 }))
 
-const TraceBarAreaSC = styled.div(({ theme }) => ({
-  backgroundImage: `linear-gradient(to right, ${theme.colors['border-fill-two']} 1px, transparent 1px)`,
-  backgroundSize: '25% 100%',
+const TraceBarAreaSC = styled.div(() => ({
   minWidth: 0,
   position: 'relative',
 }))
@@ -648,8 +795,8 @@ const TraceBarSC = styled.span<{
   width: `${$width}%`,
 }))
 
-const TraceBarTextSC = styled.span(({ theme }) => ({
-  color: theme.colors.green[50],
+const TraceBarTextSC = styled.span<{ $color: string }>(({ $color }) => ({
+  color: $color,
   flex: 1,
   fontSize: 16,
   fontWeight: 600,
@@ -663,22 +810,40 @@ const TraceBarTextSC = styled.span(({ theme }) => ({
 
 const TraceDetailSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
-    background: theme.colors['fill-two'],
-    border: `1px solid ${theme.colors['border-fill-two']}`,
-    borderRadius: theme.borderRadiuses.medium,
+    borderLeft: `1px solid ${theme.colors.border}`,
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing.small,
     maxHeight: $fullscreen ? 'calc(100vh - 136px)' : undefined,
-    overflowY: $fullscreen ? 'auto' : undefined,
+    overflowY: 'auto',
     padding: theme.spacing.small,
-    width: $fullscreen ? 260 : undefined,
-    '@media (max-width: 720px)': {
+    width: $fullscreen ? 260 : 236,
+    '@media (max-width: 960px)': {
+      borderLeft: 'none',
+      borderTop: `1px solid ${theme.colors.border}`,
       maxHeight: 'none',
       width: 'auto',
     },
   })
 )
+
+const TraceDetailHeaderSC = styled.div(({ theme }) => ({
+  borderBottom: `1px solid ${theme.colors.border}`,
+  display: 'grid',
+  gap: theme.spacing.xxsmall,
+  paddingBottom: theme.spacing.small,
+}))
+
+const TraceDetailSectionSC = styled.div(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing.xxsmall,
+}))
+
+const TraceServiceSC = styled.div(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+}))
 
 const TraceTagsSC = styled.div(({ theme }) => ({
   display: 'grid',
