@@ -1,6 +1,9 @@
 import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
+import { useKeyDown } from '@react-hooks-library/core'
+import { CloseIcon, IconFrame, LinkoutIcon } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
+import FocusLock from 'react-focus-lock'
 import styled from 'styled-components'
 import { COLORS } from 'utils/color'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -35,6 +38,7 @@ export function TraceWaterfall({
   const traceGroups = useMemo(() => groupTraces(traces), [traces])
   const [selectedTraceId, setSelectedTraceId] = useState<string>()
   const [view, setView] = useState<TraceView>('timeline')
+  const [fullscreen, setFullscreen] = useState(false)
   const activeTrace =
     traceGroups.find(({ id }) => id === selectedTraceId) ?? traceGroups[0]
 
@@ -47,122 +51,143 @@ export function TraceWaterfall({
     rows.find(({ span }) => span.spanId === selectedSpanId) ?? rows[0]
   const bounds = useMemo(() => traceBounds(rows), [rows])
 
+  useKeyDown('Escape', () => fullscreen && setFullscreen(false))
+
   if (!activeTrace || !rows.length || !bounds) return null
 
   return (
-    <TraceWaterfallSC>
-      <TraceToolbarSC>
-        <div>
-          <Body2BoldP>{activeTrace.spans.length} spans</Body2BoldP>
-          <CaptionP $color="text-xlight">
-            {formatDuration(bounds.end - bounds.start)} total duration
-          </CaptionP>
-        </div>
-        <TraceToolbarActionsSC>
-          <TraceViewControl
-            value={view}
-            onChange={setView}
-          />
-          {traceGroups.length > 1 && (
-            <TraceSelectSC
-              aria-label="Trace"
-              value={activeTrace.id}
-              onChange={(event) => setSelectedTraceId(event.target.value)}
-            >
-              {traceGroups.map(({ id, spans }) => (
-                <option
-                  key={id}
-                  value={id}
-                >
-                  {shortTraceId(id)} · {spans.length} spans
-                </option>
-              ))}
-            </TraceSelectSC>
-          )}
-        </TraceToolbarActionsSC>
-      </TraceToolbarSC>
-      {view === 'timeline' ? (
-        <>
-          <TimelineSC>
-            <TimelineHeaderSC>
-              <CaptionP $color="text-xlight">Span</CaptionP>
-              <TraceAxisSC>
-                <CaptionP $color="text-xlight">
-                  {formatTime(bounds.start)}
-                </CaptionP>
-                <CaptionP $color="text-xlight">
-                  {formatTime(bounds.end)}
-                </CaptionP>
-              </TraceAxisSC>
-            </TimelineHeaderSC>
-            {rows.map((row) => {
-              const selected = row.span.spanId === selectedRow?.span.spanId
-              const service = row.span.service ?? 'unknown service'
-              const duration = row.end - row.start
-              const { left, width } = traceBarPosition(row, bounds)
+    <TraceFullscreenSC
+      disabled={!fullscreen}
+      $fullscreen={fullscreen}
+    >
+      <TraceWaterfallSC $fullscreen={fullscreen}>
+        <TraceToolbarSC>
+          <div>
+            <Body2BoldP>{activeTrace.spans.length} spans</Body2BoldP>
+            <CaptionP $color="text-xlight">
+              {formatDuration(bounds.end - bounds.start)} total duration
+            </CaptionP>
+          </div>
+          <TraceToolbarActionsSC>
+            <TraceViewControl
+              value={view}
+              onChange={(nextView) => {
+                setView(nextView)
+                if (nextView !== 'timeline') setFullscreen(false)
+              }}
+            />
+            {traceGroups.length > 1 && (
+              <TraceSelectSC
+                aria-label="Trace"
+                value={activeTrace.id}
+                onChange={(event) => setSelectedTraceId(event.target.value)}
+              >
+                {traceGroups.map(({ id, spans }) => (
+                  <option
+                    key={id}
+                    value={id}
+                  >
+                    {shortTraceId(id)} · {spans.length} spans
+                  </option>
+                ))}
+              </TraceSelectSC>
+            )}
+            {view === 'timeline' && (
+              <IconFrame
+                clickable
+                type="floating"
+                icon={fullscreen ? <CloseIcon /> : <LinkoutIcon />}
+                tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                onClick={() => setFullscreen((value) => !value)}
+              >
+                {fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+              </IconFrame>
+            )}
+          </TraceToolbarActionsSC>
+        </TraceToolbarSC>
+        {view === 'timeline' ? (
+          <TraceTimelineContentSC $fullscreen={fullscreen}>
+            <TimelineSC $fullscreen={fullscreen}>
+              <TimelineHeaderSC>
+                <CaptionP $color="text-xlight">Span</CaptionP>
+                <TraceAxisSC>
+                  <CaptionP $color="text-xlight">
+                    {formatTime(bounds.start)}
+                  </CaptionP>
+                  <CaptionP $color="text-xlight">
+                    {formatTime(bounds.end)}
+                  </CaptionP>
+                </TraceAxisSC>
+              </TimelineHeaderSC>
+              {rows.map((row) => {
+                const selected = row.span.spanId === selectedRow?.span.spanId
+                const service = row.span.service ?? 'unknown service'
+                const duration = row.end - row.start
+                const { left, width } = traceBarPosition(row, bounds)
 
-              return (
-                <TraceRowSC
-                  key={row.span.spanId ?? `${row.span.name}-${row.start}`}
-                  $selected={selected}
-                  type="button"
-                  onClick={() =>
-                    setSelectedSpanId(row.span.spanId ?? undefined)
-                  }
-                >
-                  <TraceLabelSC $depth={row.depth}>
-                    <ServiceDotSC $color={serviceColor(service)} />
-                    <TraceNameSC title={row.span.name ?? 'Unnamed span'}>
-                      {row.span.name ?? 'Unnamed span'}
-                    </TraceNameSC>
-                    <TraceDurationSC>
-                      {formatDuration(duration)}
-                    </TraceDurationSC>
-                  </TraceLabelSC>
-                  <TraceBarAreaSC>
-                    <TraceBarSC
-                      $color={serviceColor(service)}
-                      $left={left}
-                      $width={width}
-                      title={`${service} · ${formatDuration(duration)}`}
-                    />
-                  </TraceBarAreaSC>
-                </TraceRowSC>
-              )
-            })}
-          </TimelineSC>
-          {selectedRow && (
-            <TraceDetailSC>
-              <div>
-                <Body2BoldP>
-                  {selectedRow.span.name ?? 'Unnamed span'}
-                </Body2BoldP>
-                <CaptionP $color="text-xlight">
-                  {selectedRow.span.service ?? 'unknown service'} ·{' '}
-                  {formatDuration(selectedRow.end - selectedRow.start)}
-                </CaptionP>
-              </div>
-              <TraceTagsSC>
-                {Object.entries(selectedRow.span.tags ?? {}).map(
-                  ([key, value]) => (
-                    <div key={key}>
-                      <CaptionP $color="text-xlight">{key}</CaptionP>
-                      <CaptionP>{formatTagValue(value)}</CaptionP>
-                    </div>
-                  )
-                )}
-              </TraceTagsSC>
-            </TraceDetailSC>
-          )}
-        </>
-      ) : (
-        <TraceTopology
-          mode={view}
-          spans={activeTrace.spans}
-        />
-      )}
-      {summary && <Body2P $color="text-light">{summary}</Body2P>}
-    </TraceWaterfallSC>
+                return (
+                  <TraceRowSC
+                    key={row.span.spanId ?? `${row.span.name}-${row.start}`}
+                    $selected={selected}
+                    type="button"
+                    onClick={() =>
+                      setSelectedSpanId(row.span.spanId ?? undefined)
+                    }
+                  >
+                    <TraceLabelSC $depth={row.depth}>
+                      <ServiceDotSC $color={serviceColor(service)} />
+                      <TraceNameSC title={row.span.name ?? 'Unnamed span'}>
+                        {row.span.name ?? 'Unnamed span'}
+                      </TraceNameSC>
+                      <TraceDurationSC>
+                        {formatDuration(duration)}
+                      </TraceDurationSC>
+                    </TraceLabelSC>
+                    <TraceBarAreaSC>
+                      <TraceBarSC
+                        $color={serviceColor(service)}
+                        $left={left}
+                        $width={width}
+                        title={`${service} · ${formatDuration(duration)}`}
+                      />
+                    </TraceBarAreaSC>
+                  </TraceRowSC>
+                )
+              })}
+            </TimelineSC>
+            {selectedRow && (
+              <TraceDetailSC $fullscreen={fullscreen}>
+                <div>
+                  <Body2BoldP>
+                    {selectedRow.span.name ?? 'Unnamed span'}
+                  </Body2BoldP>
+                  <CaptionP $color="text-xlight">
+                    {selectedRow.span.service ?? 'unknown service'} ·{' '}
+                    {formatDuration(selectedRow.end - selectedRow.start)}
+                  </CaptionP>
+                </div>
+                <TraceTagsSC>
+                  {Object.entries(selectedRow.span.tags ?? {}).map(
+                    ([key, value]) => (
+                      <div key={key}>
+                        <CaptionP $color="text-xlight">{key}</CaptionP>
+                        <CaptionP>{formatTagValue(value)}</CaptionP>
+                      </div>
+                    )
+                  )}
+                </TraceTagsSC>
+              </TraceDetailSC>
+            )}
+          </TraceTimelineContentSC>
+        ) : (
+          <TraceTopology
+            mode={view}
+            spans={activeTrace.spans}
+          />
+        )}
+        {summary && <Body2P $color="text-light">{summary}</Body2P>}
+      </TraceWaterfallSC>
+    </TraceFullscreenSC>
   )
 }
 
@@ -309,13 +334,30 @@ function formatTagValue(value: unknown) {
   return JSON.stringify(value) ?? String(value)
 }
 
-const TraceWaterfallSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  minWidth: 0,
-  width: '100%',
-}))
+const TraceFullscreenSC = styled(FocusLock)<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    ...($fullscreen
+      ? {
+          background: theme.colors['fill-zero'],
+          inset: 0,
+          padding: theme.spacing.large,
+          position: 'fixed',
+          zIndex: theme.zIndexes.modal,
+        }
+      : { display: 'contents' }),
+  })
+)
+
+const TraceWaterfallSC = styled.div<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
+    minWidth: 0,
+    width: '100%',
+    ...($fullscreen && { height: '100%' }),
+  })
+)
 
 const TraceToolbarSC = styled.div(({ theme }) => ({
   alignItems: 'center',
@@ -384,13 +426,31 @@ const TraceSelectSC = styled.select(({ theme }) => ({
   },
 }))
 
-const TimelineSC = styled.div(({ theme }) => ({
-  border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.medium,
-  maxHeight: 360,
-  overflowX: 'hidden',
-  overflowY: 'auto',
-}))
+const TraceTimelineContentSC = styled.div<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    display: 'flex',
+    flexDirection: $fullscreen ? 'row' : 'column',
+    gap: theme.spacing.small,
+    minHeight: 0,
+    '@media (max-width: 720px)': {
+      flexDirection: 'column',
+    },
+  })
+)
+
+const TimelineSC = styled.div<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.borderRadiuses.medium,
+    flex: $fullscreen ? 1 : undefined,
+    maxHeight: $fullscreen ? 'calc(100vh - 136px)' : 360,
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    '@media (max-width: 720px)': {
+      maxHeight: $fullscreen ? 'calc(100vh - 280px)' : 360,
+    },
+  })
+)
 
 const TimelineHeaderSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-two'],
@@ -485,15 +545,24 @@ const TraceBarSC = styled.span<{
   width: `${$width}%`,
 }))
 
-const TraceDetailSC = styled.div(({ theme }) => ({
-  background: theme.colors['fill-two'],
-  border: `1px solid ${theme.colors['border-fill-two']}`,
-  borderRadius: theme.borderRadiuses.medium,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: theme.spacing.small,
-}))
+const TraceDetailSC = styled.div<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    background: theme.colors['fill-two'],
+    border: `1px solid ${theme.colors['border-fill-two']}`,
+    borderRadius: theme.borderRadiuses.medium,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
+    maxHeight: $fullscreen ? 'calc(100vh - 136px)' : undefined,
+    overflowY: $fullscreen ? 'auto' : undefined,
+    padding: theme.spacing.small,
+    width: $fullscreen ? 260 : undefined,
+    '@media (max-width: 720px)': {
+      maxHeight: 'none',
+      width: 'auto',
+    },
+  })
+)
 
 const TraceTagsSC = styled.div(({ theme }) => ({
   display: 'grid',
