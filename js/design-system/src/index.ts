@@ -16,6 +16,7 @@ export {
   type AccordionProps,
   type AccordionCaret,
 } from './components/Accordion'
+export { AgentLoadingIcon } from './components/AgentLoadingIcon'
 export { AnimatedDiv } from './components/AnimatedDiv'
 export { default as AppIcon } from './components/AppIcon'
 export { default as ArrowScroll } from './components/ArrowScroll'
