@@ -614,7 +614,7 @@ func isExpectedError(err error) bool {
 	var httpErr *manis.HTTPError
 	if errors.As(err, &httpErr) {
 		switch httpErr.StatusCode {
-		case http.StatusPaymentRequired, http.StatusForbidden, http.StatusTooManyRequests:
+		case http.StatusPaymentRequired, http.StatusForbidden, http.StatusTooEarly, http.StatusTooManyRequests:
 			return true
 		}
 	}

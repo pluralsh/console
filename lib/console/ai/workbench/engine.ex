@@ -86,7 +86,7 @@ defmodule Console.AI.Workbench.Engine do
       pause: :timer.seconds(1),
       backoff: 2,
       max_pause: :timer.seconds(10),
-      retry_if: &match?({:error, :rate_limited}, &1)
+      retry_if: &match?({:error, reason} when reason in [:agent_bootstrapping, :rate_limited], &1)
     )
   end
 
