@@ -89,8 +89,7 @@ defmodule Console.Application do
       {GRPC.Client.Connection,
         name: CloudQuery.Client,
         target: Console.conf(:cloudquery_host),
-        adapter: GRPC.Client.Adapters.Mint,
-        adapter_opts: CloudQuery.Client.mint_adapter_opts(),
+        adapter: CloudQuery.Client.adapter(),
         interceptors: CloudQuery.Client.interceptors()
       }
     ]

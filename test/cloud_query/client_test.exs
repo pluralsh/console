@@ -14,8 +14,8 @@ defmodule CloudQuery.ClientTest do
     assert {:ok, ^channel} = Client.connect()
   end
 
-  test "supervises mint with reconnect and retry interceptors" do
-    assert Client.mint_adapter_opts() == [retry: 100]
+  test "uses gun with retry interceptors" do
+    assert Client.adapter() == GRPC.Client.Adapters.Gun
     assert [{Retry, opts}] = Client.interceptors()
     assert opts[:max] == 3
   end
