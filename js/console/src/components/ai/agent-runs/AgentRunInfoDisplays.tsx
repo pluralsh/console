@@ -243,57 +243,64 @@ export function AgentRunInfoSimple({
     <Flex
       alignItems="center"
       gap="xsmall"
+      width="100%"
       {...props}
     >
-      <AgentRunModeChip
-        mode={mode}
-        css={{ flexShrink: 0, minWidth: 72, justifyContent: 'center' }}
-      />
       <Body2P
         $color="text-xlight"
-        css={TRUNCATE}
+        css={{ ...TRUNCATE, flex: 1, minWidth: 0 }}
       >
         {prompt}
       </Body2P>
-      <IconFrame
-        clickable
-        as={Link}
-        to={getAgentRunAbsPath({ agentRunId: id })}
-        target="_blank"
-        rel="noopener noreferrer"
-        tooltip="View agent run details"
-        icon={
-          <ArrowTopRightIcon
-            css={{ width: 12 }}
-            color="icon-xlight"
-          />
-        }
-        size="small"
-        style={{ flexShrink: 0 }}
-      />
-      <PRsModalIcon
-        prs={pullRequests?.filter(isNonNullable) ?? []}
-        type="tertiary"
-        size="small"
-        icon={
-          <PrOpenIcon
-            css={{ width: 12 }}
-            color="icon-xlight"
-          />
-        }
-        style={{ flexShrink: 0 }}
-      />
-      <Tooltip
-        placement="top"
-        label={capitalize(status)}
+      <Flex
+        alignItems="center"
+        gap="xsmall"
+        css={{ flexShrink: 0, marginLeft: 'auto' }}
       >
-        <div>
-          <RunStatusIcon
-            size="small"
-            status={status}
-          />
-        </div>
-      </Tooltip>
+        <IconFrame
+          clickable
+          as={Link}
+          to={getAgentRunAbsPath({ agentRunId: id })}
+          target="_blank"
+          rel="noopener noreferrer"
+          tooltip="View agent run details"
+          icon={
+            <ArrowTopRightIcon
+              css={{ width: 12 }}
+              color="icon-xlight"
+            />
+          }
+          size="small"
+          style={{ flexShrink: 0 }}
+        />
+        <PRsModalIcon
+          prs={pullRequests?.filter(isNonNullable) ?? []}
+          type="tertiary"
+          size="small"
+          icon={
+            <PrOpenIcon
+              css={{ width: 12 }}
+              color="icon-xlight"
+            />
+          }
+          style={{ flexShrink: 0 }}
+        />
+        <AgentRunModeChip
+          mode={mode}
+          css={{ flexShrink: 0, minWidth: 72, justifyContent: 'center' }}
+        />
+        <Tooltip
+          placement="top"
+          label={capitalize(status)}
+        >
+          <div>
+            <RunStatusIcon
+              size="small"
+              status={status}
+            />
+          </div>
+        </Tooltip>
+      </Flex>
     </Flex>
   )
 }

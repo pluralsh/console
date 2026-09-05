@@ -33,12 +33,15 @@ defmodule ConsoleWeb.GitController do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, run} <- Stacks.authorized(run_id, cluster),
          run <- Console.Repo.preload(run, [:repository]),
-         {:ok, f} <- Stacks.tarstream(run) do
+         {{:ok, f}, _} <- {Stacks.tarstream(run), run} do
       chunk_send_tar(conn, f)
     else
+      {{:error, :agent_bootstrapping}, run} ->
+        Stacks.add_errors(run, [%{source: "git", message: "Git or Helm agent is bootstrapping"}])
+        agent_bootstrapping(conn)
       {{:error, :rate_limited}, run} ->
         Stacks.add_errors(run, [%{source: "git", message: "Rate limited"}])
-        send_resp(conn, 429, "Rate limited")
+        rate_limited(conn)
       {{:error, err}, run} ->
         Stacks.add_errors(run, [%{source: "git", message: stringify(err)}])
         send_resp(conn, 402, stringify(err))
@@ -52,6 +55,8 @@ defmodule ConsoleWeb.GitController do
          {:ok, f} <- Sentinels.tarstream(job) do
       chunk_send_tar(conn, f)
     else
+      {:error, :agent_bootstrapping} -> agent_bootstrapping(conn)
+      {:error, :rate_limited} -> rate_limited(conn)
       _ -> send_resp(conn, 403, "Forbidden")
     end
   end
@@ -63,9 +68,12 @@ defmodule ConsoleWeb.GitController do
          {{:ok, sha}, _} <- {Services.digest(svc), svc} do
       send_resp(conn, 200, sha)
     else
+      {{:error, :agent_bootstrapping}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: "Git or Helm agent is bootstrapping"}])
+        agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
-        send_resp(conn, 429, "Rate limited")
+        rate_limited(conn)
       {{:error, err}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err)}])
         send_resp(conn, 402, stringify(err))
@@ -78,14 +86,16 @@ defmodule ConsoleWeb.GitController do
          {:ok, svc} <- Services.authorized(service_id, cluster),
          svc <- Console.Repo.preload(svc, [:revision, :dependencies]),
          {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
-         {{:ok, sha}, _} <- {get_digest(params, svc), svc},
-         {{:ok, path, sha}, _} <- {FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end), svc} do
+         {{:ok, path, sha}, _} <- {fetch_tarball(params, svc), svc} do
       put_resp_header(conn, "x-plrl-digest", sha)
       |> chunk_send_tar(path)
     else
+      {{:error, :agent_bootstrapping}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: "Git or Helm agent is bootstrapping"}])
+        agent_bootstrapping(conn)
       {{:error, :rate_limited}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: "Rate limited"}])
-        send_resp(conn, 429, "Rate limited")
+        rate_limited(conn)
       {{:error, {:dependencies, err}}, svc} ->
         Services.add_errors(svc, [%{source: "git", message: stringify(err), warning: true}])
         send_resp(conn, 402, stringify(err))
@@ -107,6 +117,16 @@ defmodule ConsoleWeb.GitController do
 
   defp get_digest(%{"digest" => digest}, _), do: {:ok, digest}
   defp get_digest(_, %Service{} = svc), do: Services.digest(svc)
+
+  defp fetch_tarball(params, svc) do
+    with {:ok, sha} <- get_digest(params, svc),
+      do: FileServer.fetch_with_sha(sha, fn -> svc_tarball(svc) end)
+  end
+
+  defp agent_bootstrapping(conn),
+    do: send_resp(conn, 425, "Git or Helm agent is not ready")
+
+  defp rate_limited(conn), do: send_resp(conn, 429, "Rate limited")
 
   defp chunk_send_tar(conn, f) do
     smart = SmartFile.new(f)

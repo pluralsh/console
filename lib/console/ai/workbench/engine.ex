@@ -86,7 +86,7 @@ defmodule Console.AI.Workbench.Engine do
       pause: :timer.seconds(1),
       backoff: 2,
       max_pause: :timer.seconds(10),
-      retry_if: &match?({:error, :rate_limited}, &1)
+      retry_if: &match?({:error, reason} when reason in [:agent_bootstrapping, :rate_limited], &1)
     )
   end
 
@@ -170,7 +170,35 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, msgs, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
+    {memos, actions} = Enum.split_with(actions, &match?(%Notes{}, &1))
+    memo_activities = run_activities(memos, engine, max_concurrency: 1)
+
+    engine = case memo_activities do
+      [_ | _] = activities ->
+        %{engine | activities: activities ++ engine.activities, job: refresh_job(engine.job)}
+      [] -> engine
+    end
+
+    activities = run_activities(actions, engine)
+    new_activities = activities ++ memo_activities
+
+    %{
+      engine
+      | activities: activities ++ engine.activities,
+        messages: new_activities ++ msgs,
+        iterations: engine.iterations + 1,
+        job: refresh_job(engine.job)
+    }
+    |> verifiable()
+    |> loop()
+  end
+
+  defp run_activities(actions, engine, opts \\ []) do
+    Task.async_stream(
+      actions,
+      &spawn_activity(&1, engine),
+      Keyword.merge([max_concurrency: 10, timeout: :timer.hours(4)], opts)
+    )
     |> Enum.flat_map(fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
       {:ok, {:error, error}} ->
@@ -178,17 +206,6 @@ defmodule Console.AI.Workbench.Engine do
         []
       _ -> []
     end)
-    |> then(
-      &%{
-        engine
-        | activities: &1 ++ engine.activities,
-          messages: &1 ++ msgs,
-          iterations: engine.iterations + 1,
-          job: refresh_job(engine.job)
-      }
-    )
-    |> verifiable()
-    |> loop()
   end
 
   @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a

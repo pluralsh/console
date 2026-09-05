@@ -456,13 +456,13 @@ defmodule Console do
 
   def handle_rpc(reason) do
     if recovering_rpc?(reason),
-      do: {:error, :rate_limited},
+      do: {:error, :agent_bootstrapping},
       else: wrap_rpc(reason)
   end
 
   # Timeouts and missing processes during git/helm agent RPC are symptoms of a
-  # node or genserver recovering from restart; treat them as rate limits so
-  # callers retry instead of failing hard.
+  # node or genserver recovering from restart. Keep them distinct from actual
+  # rate limits so callers can retry them without exposing a 429 externally.
   defp recovering_rpc?(reason) when reason in ~w(timeout noproc norproc)a, do: true
   defp recovering_rpc?({:timeout, _}), do: true
   defp recovering_rpc?({:noproc, _}), do: true
