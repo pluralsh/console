@@ -1063,6 +1063,15 @@
   publisher: eks
 - name: amazon-sagemaker-hyperpod-inference
   versions:
+  - version: v1.6.0-eksbuild.1
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.5.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -1166,6 +1175,15 @@
   publisher: sagemaker
 - name: amazon-sagemaker-hyperpod-observability
   versions:
+  - version: v1.1.0-eksbuild.3
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.1.0-eksbuild.2
     compatibilities:
     - '1.36'
@@ -1558,6 +1576,12 @@
   publisher: sagemaker
 - name: amazon-sagemaker-spaces
   versions:
+  - version: v0.2.0-eksbuild.2
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v0.2.0-eksbuild.1
     compatibilities:
     - '1.36'
@@ -5171,6 +5195,15 @@
     - '1.31'
     - '1.30'
     - '1.29'
+  - version: v1.22.10000020260903-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.21.100000020260722-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5385,6 +5418,11 @@
     - '1.34'
     - '1.33'
   - version: v0.0.20009020260425-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+  - version: v0.0.10009020260903-eksbuild.1
     compatibilities:
     - '1.35'
     - '1.34'
@@ -9794,6 +9832,15 @@
   publisher: eks
 - name: kube-state-metrics
   versions:
+  - version: v2.20.0-eksbuild.4
+    compatibilities:
+    - '1.36'
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v2.19.1-eksbuild.6
     compatibilities:
     - '1.36'
