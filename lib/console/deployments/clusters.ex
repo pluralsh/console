@@ -184,9 +184,20 @@ defmodule Console.Deployments.Clusters do
 
   def control_plane(%Cluster{id: id}, %User{} = user, claims \\ %{}) do
     with {:ok, token, _} <- Console.Guardian.encode_and_sign(user, Map.merge(claims, user_claims(user))) do
+      kas_service = Console.conf(:kas_service)
+
+      {kas_url, tls?} =
+        case kas_service do
+          "http://" <> _ -> {kas_service, false}
+          "https://" <> _ -> {kas_service, true}
+          _ -> {"http://#{kas_service}", false}
+        end
+
       %Kazan.Server{
-        url: "http://#{Console.conf(:kas_service)}/k8s-proxy",
+        url: "#{kas_url}/k8s-proxy",
         auth: %Kazan.Server.TokenAuth{token: "plrl:#{id}:#{token}"},
+        insecure_skip_tls_verify:
+          if(tls? && Console.conf(:kas_insecure_skip_tls_verify), do: true),
       }
     end
   end

@@ -11,6 +11,7 @@ import {
   KubernetesIcon,
   ListIcon,
   PrOpenIcon,
+  SmallNodeIcon,
   Switch,
   TrashCanIcon,
   UpdatesIcon,
@@ -323,7 +324,8 @@ export function WorkbenchPromptOptionPills({
     !showRead &&
     (!!value?.kubernetes?.update ||
       !!value?.kubernetes?.delete ||
-      !!value?.kubernetes?.exec)
+      !!value?.kubernetes?.exec ||
+      !!value?.kubernetes?.drain)
 
   return (
     <>
@@ -382,6 +384,7 @@ export function WorkbenchPromptOptionPills({
               {value?.kubernetes?.update && <UpdatesIcon size={12} />}
               {value?.kubernetes?.delete && <TrashCanIcon size={12} />}
               {value?.kubernetes?.exec && <CommandIcon size={12} />}
+              {value?.kubernetes?.drain && <SmallNodeIcon />}
             </>
           }
           onClear={() =>
@@ -535,9 +538,11 @@ function KubernetesSidePanel({
         allowUpdates={!!value?.kubernetes?.update}
         allowDeletes={!!value?.kubernetes?.delete}
         allowExec={!!value?.kubernetes?.exec}
+        allowDrain={!!value?.kubernetes?.drain}
         updatesDisabled={!kubernetesModes?.update}
         deletesDisabled={!kubernetesModes?.delete}
         execDisabled={!kubernetesModes?.exec}
+        drainDisabled={!kubernetesModes?.drain}
         onAllowUpdatesChange={(checked) => {
           onChange({
             ...value,
@@ -550,7 +555,8 @@ function KubernetesSidePanel({
           if (
             !checked &&
             !value?.kubernetes?.delete &&
-            !value?.kubernetes?.exec
+            !value?.kubernetes?.exec &&
+            !value?.kubernetes?.drain
           )
             onEmpty()
         }}
@@ -566,7 +572,8 @@ function KubernetesSidePanel({
           if (
             !checked &&
             !value?.kubernetes?.update &&
-            !value?.kubernetes?.exec
+            !value?.kubernetes?.exec &&
+            !value?.kubernetes?.drain
           )
             onEmpty()
         }}
@@ -582,7 +589,25 @@ function KubernetesSidePanel({
           if (
             !checked &&
             !value?.kubernetes?.update &&
-            !value?.kubernetes?.delete
+            !value?.kubernetes?.delete &&
+            !value?.kubernetes?.drain
+          )
+            onEmpty()
+        }}
+        onAllowDrainChange={(checked) => {
+          onChange({
+            ...value,
+            plan: false,
+            kubernetes: {
+              ...value?.kubernetes,
+              drain: checked,
+            },
+          })
+          if (
+            !checked &&
+            !value?.kubernetes?.update &&
+            !value?.kubernetes?.delete &&
+            !value?.kubernetes?.exec
           )
             onEmpty()
         }}

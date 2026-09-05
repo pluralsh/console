@@ -2,7 +2,8 @@ import { dump, load } from 'js-yaml'
 import { startCase } from 'lodash'
 import pluralize from 'pluralize'
 
-export type KubeActionVariant = 'create' | 'update' | 'delete' | 'other'
+export type KubeActionVariant =
+  'create' | 'update' | 'delete' | 'drain' | 'other'
 
 const YAML_DUMP_OPTS = { lineWidth: -1, noRefs: true } as const
 
@@ -22,8 +23,11 @@ export type KubeRequestLike = {
 }
 
 export function getKubeActionVariant(
-  method: string | null | undefined
+  method: string | null | undefined,
+  isDrain = false
 ): KubeActionVariant {
+  if (isDrain) return 'drain'
+
   switch (method?.toLowerCase()) {
     case 'delete':
       return 'delete'

@@ -51,6 +51,26 @@ defmodule Console.Schema.Issue do
     from(i in query, where: i.provider == ^provider and i.url in ^urls)
   end
 
+  def for_related_references(query \\ __MODULE__, provider, urls)
+  def for_related_references(query, _, []), do: from(i in query, where: false)
+  def for_related_references(query, provider, urls) do
+    references =
+      Enum.reduce(urls, dynamic(false), fn url, references ->
+        fragment_reference = "#{url}#%"
+        query_reference = "#{url}?%"
+
+        dynamic(
+          [i],
+          ^references or i.url == ^url or like(i.url, ^fragment_reference) or
+            like(i.url, ^query_reference)
+        )
+      end)
+
+    query
+    |> where([i], i.provider == ^provider)
+    |> where(^references)
+  end
+
   def for_status(query \\ __MODULE__, status) do
     from(i in query, where: i.status == ^status)
   end
@@ -59,6 +79,12 @@ defmodule Console.Schema.Issue do
   def for_statuses(query, []), do: from(i in query, where: false)
   def for_statuses(query, statuses) when is_list(statuses) do
     from(i in query, where: i.status in ^statuses)
+  end
+
+  def ignore_ids(query \\ __MODULE__, ids)
+  def ignore_ids(query, []), do: query
+  def ignore_ids(query, ids) when is_list(ids) do
+    from(i in query, where: i.id not in ^ids)
   end
 
   def for_providers(query \\ __MODULE__, providers)

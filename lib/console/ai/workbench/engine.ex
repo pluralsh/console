@@ -37,12 +37,14 @@ defmodule Console.AI.Workbench.Engine do
     FetchNotes,
     SkillBackfill,
     FunctionCall,
+    KubeDrain,
     KubeRequest,
     KubeShell,
     Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
+  alias Console.AI.Tools.Workbench.Infrastructure.KubeDrain, as: KubeDrainTool
   alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
 
@@ -84,7 +86,7 @@ defmodule Console.AI.Workbench.Engine do
       pause: :timer.seconds(1),
       backoff: 2,
       max_pause: :timer.seconds(10),
-      retry_if: &match?({:error, :rate_limited}, &1)
+      retry_if: &match?({:error, reason} when reason in [:agent_bootstrapping, :rate_limited], &1)
     )
   end
 
@@ -144,6 +146,7 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(%FunctionCall{} = call), do: "launched function call #{call.tool.name}, waiting for the result"
   defp tool_fmt(%KubeRequest{method: m, path: p}), do: "launched kubernetes #{m} request against #{p}, waiting for the result"
+  defp tool_fmt(%KubeDrain{node: node}), do: "launched kubernetes node drain against #{node}, waiting for the result"
   defp tool_fmt(pass), do: pass
 
   defp reducer(messages, %Acc{messages: msgs}) do
@@ -155,6 +158,7 @@ defmodule Console.AI.Workbench.Engine do
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
       %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
+      %KubeDrain{} = kube_drain, {msgs, acts} -> {:cont, {msgs, [kube_drain | acts]}}
       %KubeShell{} = kube_shell, {msgs, acts} -> {:cont, {msgs, [kube_shell | acts]}}
       msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
@@ -275,6 +279,30 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity, user)
   end
 
+  defp spawn_activity(%KubeDrain{handle: handle, node: node} = request, %__MODULE__{
+         user: user,
+         job: job
+       }) do
+    attrs = %{
+      type: :kubernetes,
+      status: :needs_approval,
+      prompt: "draining kubernetes node #{node} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result:
+        Map.merge(
+          %{
+            output: "request pending user approval",
+            explanation: request.explanation,
+            kube_drain: Console.mapify(request)
+          },
+          Approval.attrs(request.approval)
+        )
+    }
+
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+         do: poll_activity(activity, user)
+  end
+
   defp spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :exec,
@@ -365,11 +393,14 @@ defmodule Console.AI.Workbench.Engine do
     do: Tools.function_tools(funcs, job)
   defp function_tools(_), do: []
 
-  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do
+  defp kube_tools(
+    %WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e, drain: drain}}} = job
+  ) do
     Enum.reject([
       (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
       (if d, do: %KubeDelete{job: job, user: job.user}, else: nil),
-      (if e, do: %KubeExec{job: job, user: job.user}, else: nil)
+      (if e, do: %KubeExec{job: job, user: job.user}, else: nil),
+      (if drain, do: %KubeDrainTool{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []

@@ -46,21 +46,26 @@ export function AwaitingReviewWorkbenchActivityItem({
   const tool = functionCall?.tool
   const toolType = tool?.tool
   const kubeRequest = result?.kubeRequest
+  const kubeDrain = result?.kubeDrain
   const kubeExec = result?.kubeExec
   const isKubernetes = activity.type === WorkbenchJobActivityType.Kubernetes
   const isExec = activity.type === WorkbenchJobActivityType.Exec
   const kubeVariant = isKubernetes
-    ? getKubeActionVariant(kubeRequest?.method)
+    ? getKubeActionVariant(kubeRequest?.method, !!kubeDrain)
     : null
 
   const title = isKubernetes
-    ? getKubeActionTitle(kubeRequest)
+    ? kubeDrain
+      ? 'Drain node'
+      : getKubeActionTitle(kubeRequest)
     : isExec
       ? kubeExec?.pod?.trim() || 'Pod command'
       : tool?.name?.trim() || functionCall?.name?.trim() || 'Approval required'
 
   const subtitle = isKubernetes
-    ? getKubeActionSubtitle(kubeRequest)
+    ? kubeDrain
+      ? [kubeDrain.handle, kubeDrain.node].filter(Boolean).join(' · ')
+      : getKubeActionSubtitle(kubeRequest)
     : isExec
       ? [kubeExec?.handle, kubeExec?.namespace, kubeExec?.container]
           .filter(Boolean)
@@ -71,6 +76,7 @@ export function AwaitingReviewWorkbenchActivityItem({
 
   const description =
     workbenchJob?.result?.workingTheory?.trim() ||
+    kubeDrain?.explanation?.trim() ||
     getWorkbenchToolDescription(tool) ||
     activity.prompt?.trim() ||
     null
@@ -78,7 +84,9 @@ export function AwaitingReviewWorkbenchActivityItem({
   const detailLine =
     kubeVariant === 'delete'
       ? `Deleting ${getKubeDeleteResourceLabel(kubeRequest)}`
-      : null
+      : kubeVariant === 'drain'
+        ? `Draining ${kubeDrain?.node}`
+        : null
 
   const viewPath =
     workbenchJob?.id && workbench?.id
@@ -175,6 +183,7 @@ export function AwaitingReviewWorkbenchActivityItem({
         <WorkbenchJobKubeActionChips
           type={activity.type}
           method={kubeRequest?.method}
+          drain={!!kubeDrain}
           statusChip={
             <Chip
               size="small"
@@ -213,5 +222,6 @@ function KubeActionIcon({
       />
     )
   }
+  if (variant === 'drain') return <WarningOutlineIcon size={16} />
   return <UpdatesIcon size={16} />
 }

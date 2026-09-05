@@ -1,21 +1,10 @@
-import {
-  Card,
-  CheckRoundedIcon,
-  FailedFilledIcon,
-  Flex,
-  Spinner,
-  SpinnerAlt,
-  UnknownIcon,
-} from '@pluralsh/design-system'
+import { Card, Flex, Spinner } from '@pluralsh/design-system'
 import { IssueLink } from 'components/workbenches/common/IssueLink'
+import { WorkbenchViewJobChip } from 'components/workbenches/common/WorkbenchViewJobChip'
 import { CaptionP } from 'components/utils/typography/Text'
-import {
-  IssueStatus,
-  WorkbenchIssueFragment,
-  WorkbenchJobStatus,
-} from 'generated/graphql'
+import { IssueStatus, WorkbenchIssueFragment } from 'generated/graphql'
 import { includes, isEmpty, isNil } from 'lodash'
-import { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import {
@@ -24,47 +13,20 @@ import {
   ISSUE_STATUS_OPTIONS,
 } from './issueStatus'
 
-function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
-  switch (status) {
-    case WorkbenchJobStatus.Pending:
-    case WorkbenchJobStatus.Running:
-      return <SpinnerAlt size={16} />
-    case WorkbenchJobStatus.Successful:
-      return (
-        <CheckRoundedIcon
-          size={16}
-          color="icon-success"
-        />
-      )
-    case WorkbenchJobStatus.Failed:
-      return (
-        <FailedFilledIcon
-          size={16}
-          color="icon-danger"
-        />
-      )
-    default:
-      return (
-        <UnknownIcon
-          size={16}
-          color="icon-xlight"
-        />
-      )
-  }
-}
-
 export function WorkbenchIssuesBoard({
   issues,
   statuses,
   loading,
   hasNextPage,
   fetchNextPage,
+  fallbackWorkbenchId,
 }: {
   issues: WorkbenchIssueFragment[]
   statuses: IssueStatus[]
   loading: boolean
   hasNextPage: boolean
   fetchNextPage: () => void
+  fallbackWorkbenchId?: string
 }) {
   const grouped = useMemo(() => groupIssuesByStatus(issues), [issues])
   const fetchingRef = useRef(false)
@@ -98,6 +60,7 @@ export function WorkbenchIssuesBoard({
                   <IssueCard
                     key={issue.id}
                     issue={issue}
+                    fallbackWorkbenchId={fallbackWorkbenchId}
                   />
                 ))
               ) : (
@@ -112,7 +75,16 @@ export function WorkbenchIssuesBoard({
   )
 }
 
-function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
+function IssueCard({
+  issue,
+  fallbackWorkbenchId,
+}: {
+  issue: WorkbenchIssueFragment
+  fallbackWorkbenchId?: string
+}) {
+  const workbenchId = issue.workbench?.id ?? fallbackWorkbenchId
+  const workbenchJobId = issue.workbenchJob?.id
+
   return (
     <CardSC fillLevel={1}>
       <Flex
@@ -120,19 +92,26 @@ function IssueCard({ issue }: { issue: WorkbenchIssueFragment }) {
         align="center"
         gap="xsmall"
       >
-        {jobStatusIcon(issue.workbenchJob?.status)}
+        <IssueLink
+          url={issue.url}
+          provider={issue.provider}
+        />
         <CaptionP
           $color="text-xlight"
-          css={{ margin: 0 }}
+          css={{ flexShrink: 0, margin: 0 }}
         >
           {issue.insertedAt ? fromNow(issue.insertedAt) : ''}
         </CaptionP>
       </Flex>
       <TitleSC>{issue.title}</TitleSC>
-      <IssueLink
-        url={issue.url}
-        provider={issue.provider}
-      />
+      {workbenchId && workbenchJobId && (
+        <WorkbenchViewJobChip
+          workbenchId={workbenchId}
+          jobId={workbenchJobId}
+          status={issue.workbenchJob?.status}
+          css={{ alignSelf: 'flex-end' }}
+        />
+      )}
     </CardSC>
   )
 }
@@ -198,7 +177,6 @@ const ColumnTitleSC = styled.h2(({ theme }) => ({
   margin: 0,
   paddingBottom: theme.spacing.xsmall,
   color: theme.colors.text,
-  backgroundColor: theme.colors['fill-zero'],
   flexShrink: 0,
 }))
 

@@ -91,6 +91,8 @@ defmodule Console.MixProject do
       {:postgrex, "~> 0.22"},
       {:grpc, "~> 1.0"},
       {:grpc_server, "~> 1.0"},
+      {:gun, "~> 2.4"},
+      {:recon, "~> 2.5"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_pubsub, "~> 2.0"},

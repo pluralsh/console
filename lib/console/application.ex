@@ -82,15 +82,17 @@ defmodule Console.Application do
     :ok
   end
 
-  defp cloud_query_client(:test), do: []
+  @doc false
+  def cloud_query_client(env, enabled \\ Console.conf(:cloudquery, false))
+  def cloud_query_client(:test, _), do: []
+  def cloud_query_client(_, false), do: []
 
-  defp cloud_query_client(_) do
+  def cloud_query_client(_, true) do
     [
       {GRPC.Client.Connection,
         name: CloudQuery.Client,
         target: Console.conf(:cloudquery_host),
-        adapter: GRPC.Client.Adapters.Mint,
-        adapter_opts: CloudQuery.Client.mint_adapter_opts(),
+        adapter: CloudQuery.Client.adapter(),
         interceptors: CloudQuery.Client.interceptors()
       }
     ]

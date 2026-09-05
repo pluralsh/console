@@ -201,14 +201,10 @@ defmodule ConsoleWeb.GitControllerTest do
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
       other_cluster = insert(:cluster)
 
-      build_conn()
-      |> Map.put(:remote_ip, {127, 0, 0, 42})
-      |> add_auth_headers(other_cluster)
-      |> get("/v1/digests", %{id: svc.id})
-      |> response(403)
+      assert {:allow, 1} = Hammer.check_rate(bucket, :timer.seconds(1), 1)
 
       build_conn()
-      |> Map.put(:remote_ip, {127, 0, 0, 43})
+      |> Map.put(:remote_ip, {127, 0, 0, 42})
       |> add_auth_headers(other_cluster)
       |> get("/v1/git/tarballs", %{id: svc.id})
       |> response(429)

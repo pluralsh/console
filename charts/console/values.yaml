@@ -90,6 +90,21 @@ migrator:
 
 # console is used to configure the layout of the main Console containers, hosting the core console api and webserver.
 console:
+  # tls configures the console web server to terminate TLS in the pod.
+  tls:
+    enabled: false
+    existingSecret: console-server-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+    certificate:
+      enabled: false
+      annotations: {}
+      dnsNames: []
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
+
   config:
     # homepage is used to configure the default homepage for the console.  Use ``clusters`` to show clusters, ``workbenches`` to show workbenches
     homepage: clusters
@@ -246,6 +261,20 @@ ociAuth:
 
 aiProxy:
   enabled: false
+  # tls configures Nexus to terminate TLS in the pod.
+  tls:
+    enabled: false
+    existingSecret: nexus-server-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+    certificate:
+      enabled: false
+      annotations: {}
+      dnsNames: []
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
   replicaCount: 2
   image:
     repository: nexus
@@ -762,6 +791,20 @@ dex:
       - <your-console-fqdn>
 
 kas:
+  # tls configures the public KAS listeners to terminate TLS in the pod.
+  tls:
+    enabled: false
+    existingSecret: kas-server-tls
+    certificateKey: tls.crt
+    privateKeyKey: tls.key
+    certificate:
+      enabled: false
+      annotations: {}
+      dnsNames: []
+      issuerRef:
+        name: letsencrypt-prod
+        kind: ClusterIssuer
+        group: cert-manager.io
   logging:
     level: info
   global:

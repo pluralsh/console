@@ -66,7 +66,7 @@ spec:
           service:
             name: console
             port:
-              name: http
+              name: {{ ternary "https" "http" .Values.console.tls.enabled }}
 {{- if .Values.ingress.rewrite.enabled }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -146,6 +146,6 @@ spec:
           service:
             name: console
             port:
-              name: http
+              name: {{ ternary "https" "http" .Values.console.tls.enabled }}
 {{- end }}
 {{- end }}

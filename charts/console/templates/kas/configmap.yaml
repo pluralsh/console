@@ -13,6 +13,8 @@ data:
       kubernetes_api:
         listen:
           address: ":{{ .Values.kas.service.kubernetesApiPort }}"
+          certificate_file: {{ ternary "/etc/kas/tls/certificate.pem" "" .Values.kas.tls.enabled | quote }}
+          key_file: {{ ternary "/etc/kas/tls/private-key.pem" "" .Values.kas.tls.enabled | quote }}
         url_path_prefix: "{{ .Values.kas.ingress.kubernetesApiPath }}"
         jwt_authentication_secret_file: "/etc/kas/jwt_secret"
     observability:

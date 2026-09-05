@@ -305,8 +305,11 @@ export function ChatOptionPill({
       clickable
       fillLevel={2}
       size="large"
-      css={{ borderRadius: 12 }}
       {...props}
+      css={{
+        borderRadius: 12,
+        ...(typeof props.css === 'object' && props.css ? props.css : {}),
+      }}
     >
       <Flex
         align="center"
