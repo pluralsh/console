@@ -61,7 +61,7 @@ const BannerOuter: any = styled.div<{
   $fullWidth?: boolean
 }>(({ $borderColorKey, $fullWidth, theme }) => ({
   display: 'inline-flex',
-  align: 'flex-start',
+  alignItems: 'flex-start',
   padding: theme.spacing.medium,
   backgroundColor:
     theme.mode === 'light'
@@ -103,7 +103,7 @@ const BannerAction = styled(Span)(({ theme }) => ({
 
 const Content = styled.p<{ $hasHeading: boolean }>(
   ({ $hasHeading: $heading, theme }) => ({
-    ...theme.partials.text.body2LooseLineHeight,
+    ...theme.partials.text.body2,
     marginTop: $heading ? theme.spacing.xxsmall : theme.spacing.xxxsmall,
     marginBottom: 0,
     color: theme.colors['text-light'],
@@ -141,6 +141,7 @@ function Banner({
       $borderColorKey={borderColorKey}
       $fullWidth={fullWidth}
       as={Flex}
+      align="flex-start"
       {...props}
     >
       <BannerInner>
