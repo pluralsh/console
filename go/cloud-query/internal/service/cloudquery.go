@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -97,6 +99,9 @@ func wrapInternal(err error, format string, args ...any) error {
 	}
 	if _, ok := status.FromError(err); ok {
 		return err
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return status.FromContextError(err).Err()
 	}
 	return status.Errorf(codes.Internal, format, args...)
 }

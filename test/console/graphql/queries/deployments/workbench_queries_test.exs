@@ -1252,7 +1252,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
 
       expect(Client, :connect, fn -> {:ok, :mock_conn} end)
       expect(Stub, :traces, fn :mock_conn, input, opts ->
-        assert opts[:timeout] == :timer.minutes(1)
+        assert opts[:timeout] == :timer.minutes(5)
         assert input.query == "{ service.name = \"checkout\" }"
         assert input.limit == 50
 

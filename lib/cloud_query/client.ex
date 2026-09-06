@@ -2,7 +2,7 @@ defmodule CloudQuery.Client do
   @moduledoc false
 
   @metrics_timeout :timer.seconds(30)
-  @cloud_query_timeout :timer.minutes(1)
+  @cloud_query_timeout :timer.minutes(5)
   @logs_timeout :timer.minutes(2)
   @lambda_timeout :timer.minutes(5)
 
