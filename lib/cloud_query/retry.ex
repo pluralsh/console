@@ -28,6 +28,7 @@ defmodule CloudQuery.Client.Retry do
         end
       end
     )
+    |> normalize_result()
   end
 
   def call(stream, req, next, _opts), do: next.(stream, req)
@@ -52,6 +53,16 @@ defmodule CloudQuery.Client.Retry do
       String.contains?(message, "connection reset")
   end
   defp connection_closed_message?(_), do: false
+
+  defp normalize_result(
+         {:error,
+          %Mint.HTTPError{
+            module: Mint.HTTP2,
+            reason: {:server_closed_request, :cancel}
+          }}
+       ),
+       do: {:error, "cloud query was canceled by the server before completion (HTTP/2 CANCEL)"}
+  defp normalize_result(result), do: result
 
   defp maybe_resolve(%{channel: %GRPC.Channel{} = channel}) do
     GRPC.Client.Connection.resolve_now(channel)

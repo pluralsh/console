@@ -3,7 +3,7 @@
     "properties": {
         "output": {
             "type": "string",
-            "description": "The final output of this investigation.  Should be an informative summary of the investigation in markdown.  You *must* provide this to record a result, and nothing else will be used as the final output."
+            "description": "The final output of this investigation. The first line must specifically describe the work completed or outcome reached, without a generic heading such as \"Conclusion\" or \"Result\". Follow it with an informative markdown summary of the investigation. You *must* provide this to record a result, and nothing else will be used as the final output."
         }
     },
     "required": ["output"]

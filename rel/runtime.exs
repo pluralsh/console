@@ -114,9 +114,47 @@ config :console, Console.Guardian,
 
 [_ | rest] = get_env("HOST") |> String.split(".")
 
+endpoint_tls =
+  case {get_env("CONSOLE_TLS_CERT_FILE"), get_env("CONSOLE_TLS_KEY_FILE")} do
+    {nil, nil} ->
+      []
+
+    {cert_file, key_file}
+    when is_binary(cert_file) and byte_size(cert_file) > 0 and is_binary(key_file) and
+           byte_size(key_file) > 0 ->
+      [
+        http: false,
+        https: [
+          port: 4000,
+          certfile: cert_file,
+          keyfile: key_file,
+          cipher_suite: :strong
+        ]
+      ]
+
+    _ ->
+      raise "CONSOLE_TLS_CERT_FILE and CONSOLE_TLS_KEY_FILE must both be set to enable HTTPS"
+  end
+
+endpoint_url =
+  case endpoint_tls do
+    [] -> [host: get_env("HOST"), port: 80]
+    _ -> [scheme: "https", host: get_env("HOST"), port: 443]
+  end
+
 config :console, ConsoleWeb.Endpoint,
-  url: [host: get_env("HOST"), port: 80],
-  check_origin: ["//#{get_env("HOST")}", "//#{get_env("EXT_HOST") || get_env("HOST")}", "//#{get_env("WEBHOOK_HOST") || get_env("HOST")}", "//console"]
+  Keyword.merge(
+    [
+      url: endpoint_url,
+      check_origin: [
+        "//#{get_env("HOST")}",
+        "//#{get_env("EXT_HOST") || get_env("HOST")}",
+        "//#{get_env("WEBHOOK_HOST") || get_env("HOST")}",
+        "//console"
+      ]
+    ],
+    endpoint_tls
+  )
 
 provider = case get_env("PROVIDER") do
   "google" -> :gcp
@@ -344,6 +382,10 @@ if is_set("KAS_SERVICE") do
 else
   config :console, :kas_service, "console-kas-service.#{get_env("NAMESPACE")}:8154"
 end
+
+config :console,
+  :kas_insecure_skip_tls_verify,
+  get_env("KAS_INSECURE_SKIP_TLS_VERIFY") == "true"
 
 if is_set("CONSOLE_S3_BUCKET") do
   s3_region = get_env("CONSOLE_S3_REGION") || "us-east-1"

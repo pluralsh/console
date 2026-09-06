@@ -104,7 +104,9 @@ defmodule Console.AI.Workbench.Environment do
     }
   end
 
-  defp has_k8s?(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d}}}), do: (u || d)
+  defp has_k8s?(
+    %WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e, drain: drain}}}
+  ), do: u || d || e || drain
   defp has_k8s?(_), do: false
 
   def with_builtins(skills) when is_map(skills) do

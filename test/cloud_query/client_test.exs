@@ -14,10 +14,11 @@ defmodule CloudQuery.ClientTest do
     assert {:ok, ^channel} = Client.connect()
   end
 
-  test "supervises mint with reconnect and retry interceptors" do
-    assert Client.mint_adapter_opts() == [retry: 100]
+  test "uses mint with retry interceptors" do
+    assert Client.adapter() == GRPC.Client.Adapters.Mint
     assert [{Retry, opts}] = Client.interceptors()
     assert opts[:max] == 3
+    assert Client.cloud_query_rpc_opts() == [timeout: :timer.minutes(5)]
   end
 end
 
@@ -33,6 +34,10 @@ defmodule CloudQuery.Client.RetryTest do
   }
   @unavailable %GRPC.RPCError{status: 14, message: "upstream unavailable"}
   @internal %GRPC.RPCError{status: 13, message: "pq: role \"abc\" does not exist (28000)"}
+  @server_cancelled %Mint.HTTPError{
+    module: Mint.HTTP2,
+    reason: {:server_closed_request, :cancel}
+  }
 
   test "retries unary RPCs after a closed connection" do
     channel = %GRPC.Channel{ref: :cloud_query_retry}
@@ -63,6 +68,23 @@ defmodule CloudQuery.Client.RetryTest do
 
     assert {:error, @internal} = Retry.call(stream, :req, next, opts)
     assert Agent.get(agent, & &1) == 1
+  end
+
+  test "reports HTTP/2 server cancellation without retrying" do
+    stream = %{grpc_type: :unary, channel: %GRPC.Channel{}}
+    opts = Retry.init(max: 3, pause: 1, backoff: 1)
+    {:ok, agent} = Agent.start_link(fn -> 0 end)
+
+    next = fn _stream, :req ->
+      Agent.update(agent, &(&1 + 1))
+      {:error, @server_cancelled}
+    end
+
+    assert {:error, "cloud query was canceled by the server before completion (HTTP/2 CANCEL)"} =
+             Retry.call(stream, :req, next, opts)
+
+    assert Agent.get(agent, & &1) == 1
+    refute Retry.disconnect?(@server_cancelled)
   end
 
   test "does not retry streaming RPCs" do

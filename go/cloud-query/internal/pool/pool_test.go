@@ -1,6 +1,7 @@
 package pool
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -35,6 +36,10 @@ func (c *recordingConnection) Schemas([]string) ([]cloudquery.SchemaResult, erro
 func (c *recordingConnection) Tables(string) ([]string, error) { return nil, nil }
 
 func (c *recordingConnection) Query(string, ...any) ([]string, [][]any, error) {
+	return nil, nil, nil
+}
+
+func (c *recordingConnection) QueryWithContext(context.Context, string, ...any) ([]string, [][]any, error) {
 	return nil, nil, nil
 }
 

@@ -31,21 +31,19 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.StackInspect do
   def description(_), do: "Get detailed information about an infrastructure stack by id (from plrl_stacks)."
 
   def implement(%__MODULE__{user: %User{} = user, stack_id: id} = model) do
-    Stacks.get_stack(id)
-    |> Repo.preload([:repository, :cluster, :project, parent: [:cluster]])
-    |> Policies.allow(user, :read)
-    |> case do
-      {:ok, stack} ->
-        {:ok,
-         String.trim(
-           stack_prompt(
-             stack: stack,
-             failed_run: failed_run(stack),
-             resources: sideload_resources(stack, model.resources)
-           )
-         )}
-
+    with %Stack{} = stack <- Stacks.get_stack(id) |> Repo.preload([:repository, :cluster, :project, parent: [:cluster]]),
+         {:ok, stack} <- Policies.allow(stack, user, :read) do
+      {:ok,
+       String.trim(
+         stack_prompt(
+           stack: stack,
+           failed_run: failed_run(stack),
+           resources: sideload_resources(stack, model.resources)
+         )
+       )}
+    else
       nil -> {:error, "could not find stack with id #{id}"}
+      {:error, err} -> {:error, "failed to inspect stack, reason: #{inspect(err)}"}
       error -> error
     end
   end

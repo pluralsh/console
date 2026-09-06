@@ -9,6 +9,7 @@ defmodule Console.Deployments.Pr.Utils do
   @adapter Console.conf(:cache_adapter)
 
   @ansi_code ~r/\x1b\[[0-9;]*m/
+  @html_comment ~r/<!--.*?-->/s
 
   @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/\**Plural [sS]tacks?:\**\s+([[:alnum:]_\-]+)/]
   @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/\**Plural [sS]ervices?:\**\s+([[:alnum:]_\/\-]+)/]
@@ -59,6 +60,8 @@ defmodule Console.Deployments.Pr.Utils do
   def url_and_token(_, _), do: {:error, "could not set up gitlab connection"}
 
   def pr_associations(content, scopes \\ ~w(stack cluster service flow governance)a) do
+    content = Regex.replace(@html_comment, content, "")
+
     Enum.reduce(scopes, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))
     |> Map.put(:preview, scrape(:preview, content))
     |> Map.put(:merge_cron, scrape(:merge_cron, content))
