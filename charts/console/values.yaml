@@ -620,6 +620,7 @@ gitServer:
   image:
     repository: git-server
     tag: ~
+    pullPolicy: IfNotPresent
 
   containerSecurityContext:
     runAsNonRoot: true
