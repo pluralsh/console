@@ -11,7 +11,7 @@ import {
   traceTreeMeta,
   traceTicks,
   traceBarPosition,
-} from './WorkbenchJobTraces'
+} from './workbenchJobTraceUtils'
 
 function trace(
   overrides: Partial<WorkbenchJobActivityTraceFragment>

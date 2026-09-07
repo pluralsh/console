@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkbenchJobActivityMetricFragment } from 'generated/graphql'
-import { getMetricSeries } from './WorkbenchJobActivityResults'
+import { getMetricSeries } from './workbenchJobMetrics'
 
 function metric(
   overrides: Partial<WorkbenchJobActivityMetricFragment>

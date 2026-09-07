@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { WorkbenchCanvasToolGraph } from 'generated/graphql'
-import { getToolGraphSummaries } from './WorkbenchJobCanvas'
+import { getToolGraphSummaries } from './workbenchJobCanvasSummaries'
 
 function graph(
   overrides: Partial<WorkbenchCanvasToolGraph>

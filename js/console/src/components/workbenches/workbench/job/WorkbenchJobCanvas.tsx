@@ -22,6 +22,7 @@ import {
   JobActivityMetrics,
   JobActivityTraces,
 } from './WorkbenchJobActivityResults'
+import { getToolGraphSummaries } from './workbenchJobCanvasSummaries'
 
 const COLUMNS = 3
 const ROW_HEIGHT_PX = 40
@@ -257,19 +258,6 @@ function TracesBlock({
       {graphSummary && <Body2P $color="text-light">{graphSummary}</Body2P>}
     </TracesBlockSC>
   )
-}
-
-export function getToolGraphSummaries(
-  graph: Nullable<WorkbenchCanvasToolGraph>
-) {
-  const querySummary = graph?.query?.summary?.trim() || undefined
-  const graphSummary = graph?.summary?.trim() || undefined
-
-  return {
-    graphSummary,
-    querySummary,
-    hasDistinctQuerySummary: !!querySummary && querySummary !== graphSummary,
-  }
 }
 
 function PieBlock({ graph }: { graph: Nullable<WorkbenchCanvasBlockGraph> }) {

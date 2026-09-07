@@ -3,7 +3,7 @@ import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import {
   getServiceNodesAndEdges,
   getSpanNodesAndEdges,
-} from './WorkbenchJobTraceTopology'
+} from './workbenchJobTraceGraph'
 
 function trace(
   overrides: Partial<WorkbenchJobActivityTraceFragment>
