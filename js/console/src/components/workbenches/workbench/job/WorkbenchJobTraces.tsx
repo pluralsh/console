@@ -329,7 +329,7 @@ export function TraceWaterfall({
           requestAnimationFrame(() => fullscreenTriggerRef.current?.focus())
         }}
         css={{
-          width: 'min(1306px, 100%)',
+          width: 'min(1500px, 100%)',
           maxHeight: '100%',
           overflow: 'hidden',
         }}
