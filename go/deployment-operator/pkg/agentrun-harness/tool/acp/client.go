@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	acpsdk "github.com/coder/acp-go-sdk"
 )
@@ -53,7 +54,7 @@ func (client *client) openTextFile(path string) (*os.File, error) {
 	if !filepath.IsAbs(path) {
 		return nil, fmt.Errorf("acp filesystem path must be absolute: %q", path)
 	}
-	file, err := os.Open(path)
+	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NONBLOCK, 0)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", path, err)
 	}

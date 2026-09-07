@@ -5,7 +5,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
+	"time"
 )
 
 import acpsdk "github.com/coder/acp-go-sdk"
@@ -73,6 +75,29 @@ func TestClientRejectsOversizedAndCanceledReads(t *testing.T) {
 	_, err = acpClient.ReadTextFile(ctx, acpsdk.ReadTextFileRequest{SessionId: "session-1", Path: path})
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("canceled read error = %v", err)
+	}
+}
+
+func TestClientRejectsFIFOWithoutBlocking(t *testing.T) {
+	acpClient, directory := newTestClient(t)
+	path := filepath.Join(directory, "pipe")
+	if err := syscall.Mkfifo(path, 0o600); err != nil {
+		t.Fatalf("create FIFO: %v", err)
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		_, err := acpClient.ReadTextFile(context.Background(), acpsdk.ReadTextFileRequest{SessionId: "session-1", Path: path})
+		done <- err
+	}()
+
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Fatal("FIFO read unexpectedly succeeded")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("FIFO read blocked")
 	}
 }
 
