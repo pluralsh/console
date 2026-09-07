@@ -3,7 +3,7 @@
     "properties": {
         "prompt": {
             "type": "string",
-            "description": "The prompt to provide the dashboard subagent.  This should give all necessary context for the subagent to complete the task assigned and should be in markdown format to convey semantic structure.  It is also critical to include the necessary metrics and logs queries that will be used in metrics/logs graphs, which should be in prior observability agent investigations."
+            "description": "The prompt to provide the dashboard subagent. This should give all necessary context for the subagent to complete the task assigned and should be in markdown format to convey semantic structure. Include the exact metrics, logs, and traces queries from prior observability investigations. When trace data is available, require the native traces visualization block instead of markdown or ASCII span diagrams."
         }
     },
     "required": ["prompt"]

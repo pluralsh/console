@@ -13,7 +13,15 @@ The main components are:
 * markdown blocks
 * metrics blocks
 * logs blocks
+* traces blocks, which render the native trace timeline, span graph, and service graph
 * you can also generate pie and bar charts from direct data that's been discovered.
+
+When the investigation contains trace data, always use a traces block for it. Call
+`add_traces_block` with the exact traces tool name and JSON arguments from the
+observability result, and give it a full-width layout (`x: 0`, `w: 3`). Do not
+replace the trace visualization with markdown, ASCII art, or a hand-written list
+of spans. Markdown may summarize the findings beside the native traces block,
+but it must not duplicate or substitute for it.
 
 You can also query the current state of the canvas at any time using the `show_canvas` tool.
 
@@ -34,9 +42,10 @@ Once you've completed all the work you plan to do, **always call the `subagent_r
 There is a clear heirarchy of information that is most useful for a user in the context of an investigation.  They are:
 
 1. Metrics that support an argument
-2. Pie/Bar charts that support an argument
-3. Logs that support an argument
-4. Markdown text
+2. Trace visualizations that support an argument
+3. Pie/Bar charts that support an argument
+4. Logs that support an argument
+5. Markdown text
 
 In general users will prefer the information to be as scannable and low density as possible, which is why visualizations are preferable.  Only provide markdown to support those, don't provide a markdown block that will simply be duplicative of the text that will be in the conclusion.
 
