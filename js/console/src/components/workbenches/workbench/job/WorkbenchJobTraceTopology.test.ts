@@ -51,6 +51,12 @@ describe('trace topology', () => {
       trace({ service: 'console', spanId: 'root' }),
       trace({ parentId: 'root', service: 'console', spanId: 'local' }),
       trace({ parentId: 'root', service: 'postgres', spanId: 'query' }),
+      trace({
+        parentId: 'root',
+        service: 'postgres',
+        spanId: 'query-2',
+        end: '2026-09-04T10:00:03Z',
+      }),
     ])
 
     expect(nodes).toHaveLength(2)
@@ -58,6 +64,7 @@ describe('trace topology', () => {
     expect(edges[0]).toMatchObject({
       source: 'service:console',
       target: 'service:postgres',
+      label: '2 sent • 2.00s',
     })
   })
 })

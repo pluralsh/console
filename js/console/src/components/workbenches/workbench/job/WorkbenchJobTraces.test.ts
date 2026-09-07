@@ -9,6 +9,8 @@ import {
   traceSeverity,
   traceStatusMessage,
   traceTreeMeta,
+  traceTicks,
+  traceBarPosition,
 } from './WorkbenchJobTraces'
 
 function trace(
@@ -138,5 +140,27 @@ describe('formatDuration', () => {
 describe('formatOffset', () => {
   it('clamps negative offsets to the root', () => {
     expect(formatOffset(-2)).toBe('+0ms')
+  })
+})
+
+describe('timeline scale', () => {
+  it('aligns a child starting halfway through the trace with the middle tick', () => {
+    const [row] = orderTraceSpans([
+      trace({ start: '2026-09-04T10:00:00.500Z' }),
+    ])
+    const bounds = { start: row.start - 500, end: row.end }
+    const ticks = traceTicks(bounds)
+
+    expect(ticks[2]).toEqual({ offset: 500, position: 50 })
+    expect(traceBarPosition(row, bounds)).toEqual({ left: 50, width: 50 })
+    expect(ticks.at(-1)).toEqual({ offset: 1000, position: 100 })
+  })
+
+  it('keeps a zero-duration span visible without invalid coordinates', () => {
+    const [row] = orderTraceSpans([trace({ end: '2026-09-04T10:00:00Z' })])
+    const bounds = { start: row.start, end: row.end }
+
+    expect(traceBarPosition(row, bounds)).toEqual({ left: 0, width: 0.75 })
+    expect(traceTicks(bounds).every(({ offset }) => offset === 0)).toBe(true)
   })
 })

@@ -8,8 +8,8 @@ import {
 } from '@xyflow/react'
 import { LayoutOptions } from 'elkjs'
 import { type ReactNode, useMemo } from 'react'
-import styled from 'styled-components'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import styled, { useTheme } from 'styled-components'
+import { Body1BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
 import { ErrorIcon, WarningIcon } from '@pluralsh/design-system'
 import { WorkbenchJobActivityTraceFragment } from 'generated/graphql'
 import { traceBarColor } from './workbenchJobTraceColors'
@@ -41,7 +41,9 @@ const nodeTypes = { trace: TraceTopologyNode }
 export function TraceTopology({
   mode,
   spans,
+  fullscreen = false,
 }: {
+  fullscreen?: boolean
   mode: TraceTopologyMode
   spans: TraceSpan[]
 }) {
@@ -59,14 +61,14 @@ export function TraceTopology({
 
   if (nodes.length === 1 && !edges.length)
     return (
-      <TraceSingleGraphSC>
+      <TraceSingleGraphSC $fullscreen={fullscreen}>
         <TraceNodeCard data={nodes[0].data} />
         <TraceGraphLegend services={services} />
       </TraceSingleGraphSC>
     )
 
   return (
-    <TraceTopologySC $count={nodes.length}>
+    <TraceTopologySC $fullscreen={fullscreen}>
       <ReactFlowProvider>
         <TraceTopologyGraph
           baseEdges={edges}
@@ -87,14 +89,27 @@ function TraceTopologyGraph({
   baseNodes: TraceGraphNode[]
   services: { color: string; name: string }[]
 }) {
+  const theme = useTheme()
+
   return (
     <ReactFlowGraph
+      defaultEdgeOptions={{
+        labelStyle: {
+          ...theme.partials.text.caption,
+          fill: theme.colors['text-light'],
+        },
+        labelBgStyle: { fill: theme.colors['fill-one'] },
+        labelBgPadding: [8, 4],
+        labelBgBorderRadius: 3,
+      }}
       baseEdges={baseEdges}
       baseNodes={baseNodes}
       borderless
       elkOptions={traceElkOptions}
       nodeTypes={nodeTypes}
       showActions={false}
+      fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
+      minZoom={0.1}
       showLayoutingIndicator={false}
       additionalOverlays={<TraceGraphLegend services={services} />}
     />
@@ -124,16 +139,34 @@ function TraceNodeCard({
   data: TraceGraphNodeData
 }) {
   return (
-    <TraceNodeSC>
+    <TraceNodeSC title={`${data.label} · ${nodeSubtitle(data)}`}>
       <TraceNodeAccentSC $color={data.color} />
       <TraceNodeBodySC>
         <TraceNodeTitleSC>
-          <Body2BoldP css={{ minWidth: 0 }}>{data.label}</Body2BoldP>
+          <Body1BoldP
+            css={{
+              minWidth: 0,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {data.label}
+          </Body1BoldP>
           {data.tool && <CaptionP $color="text-xlight">tool</CaptionP>}
-          <TraceNodeStatusIcon severity={data.severity} />
         </TraceNodeTitleSC>
-        <CaptionP $color="text-xlight">{nodeSubtitle(data)}</CaptionP>
+        <Body2P
+          $color="text-xlight"
+          css={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {nodeSubtitle(data)}
+        </Body2P>
       </TraceNodeBodySC>
+      <TraceNodeStatusIcon severity={data.severity} />
       {children}
     </TraceNodeSC>
   )
@@ -255,19 +288,32 @@ export function getServiceNodesAndEdges(spans: TraceSpan[]) {
     position: { x: 0, y: 0 },
     type: 'trace' as const,
   }))
-  const edgeIds = new Set<string>()
-  const edges = validSpans.flatMap(({ span }) => {
+  const connections = new Map<
+    string,
+    { source: string; target: string; count: number; duration: number }
+  >()
+  validSpans.forEach(({ span, duration }) => {
     const parent = span.parentId ? spanById.get(span.parentId) : undefined
-    if (!parent) return []
+    if (!parent) return
 
     const source = `service:${serviceName(parent)}`
     const target = `service:${serviceName(span)}`
+    if (source === target) return
     const id = `${source}->${target}`
-    if (source === target || edgeIds.has(id)) return []
-    edgeIds.add(id)
-
-    return [traceEdge(source, target)]
+    const current = connections.get(id)
+    connections.set(id, {
+      source,
+      target,
+      count: (current?.count ?? 0) + 1,
+      duration: (current?.duration ?? 0) + duration,
+    })
   })
+  const edges = [...connections.values()].map(
+    ({ source, target, count, duration }) => ({
+      ...traceEdge(source, target),
+      label: `${count} sent • ${formatDuration(duration / count)}`,
+    })
+  )
 
   return { edges, nodes }
 }
@@ -285,7 +331,7 @@ function traceEdge(source: string, target: string): Edge {
     id: `${source}->${target}`,
     source,
     target,
-    type: EdgeType.Directed,
+    type: EdgeType.Smooth,
   }
 }
 
@@ -320,7 +366,7 @@ function formatSpanCount(count: number) {
 
 function nodeSubtitle(data: TraceGraphNodeData) {
   if (data.count)
-    return `${formatDuration(data.duration)} • ${formatSpanCount(data.count)}`
+    return `${formatSpanCount(data.count)} • ${formatDuration(data.duration / data.count)} avg`
   if (data.service !== data.label)
     return `${formatDuration(data.duration)} • ${data.service}`
 
@@ -373,44 +419,49 @@ const traceElkOptions: LayoutOptions = {
   'elk.algorithm': 'layered',
   'elk.direction': 'RIGHT',
   'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
-  'elk.layered.spacing.nodeNodeBetweenLayers': '72',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '144',
   'elk.spacing.nodeNode': '32',
 }
 
-const TraceTopologySC = styled.div<{ $count: number }>(({ $count }) => ({
-  height: Math.min(520, Math.max(280, 168 + $count * 88)),
-  overflow: 'hidden',
-  position: 'relative',
-  width: '100%',
-}))
+const TraceTopologySC = styled.div<{ $fullscreen: boolean }>(
+  ({ $fullscreen }) => ({
+    height: $fullscreen ? '100%' : 480,
+    flex: $fullscreen ? 1 : undefined,
+    minHeight: 0,
+    overflow: 'hidden',
+    position: 'relative',
+    width: '100%',
+    '.react-flow': { background: 'transparent' },
+  })
+)
 
-const TraceSingleGraphSC = styled.div(({ theme }) => ({
+const TraceSingleGraphSC = styled(TraceTopologySC)(({ theme }) => ({
   alignItems: 'center',
   backgroundColor:
     theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-zero'],
   backgroundImage: `radial-gradient(circle, ${theme.colors['border-fill-three']} 1px, transparent 1px)`,
   backgroundSize: `${theme.spacing.large}px ${theme.spacing.large}px`,
   display: 'flex',
-  height: 280,
   justifyContent: 'center',
-  overflow: 'hidden',
-  position: 'relative',
-  width: '100%',
 }))
 
 const TraceNodeSC = styled.div(({ theme }) => ({
-  background: theme.colors['fill-zero'],
-  border: `1px solid ${theme.colors['border-fill-two']}`,
-  borderRadius: theme.borderRadiuses.medium,
+  background: theme.colors['fill-one'],
+  borderRadius: 3,
   display: 'flex',
-  minWidth: 160,
+  alignItems: 'center',
+  minHeight: 70,
+  minWidth: 200,
   overflow: 'hidden',
   position: 'relative',
-  width: 220,
+  width: 260,
+  paddingRight: 12,
+  gap: 16,
 }))
 
 const TraceNodeAccentSC = styled.span<{ $color: string }>(({ $color }) => ({
   background: $color,
+  alignSelf: 'stretch',
   flexShrink: 0,
   width: 3,
 }))
@@ -419,9 +470,9 @@ const TraceNodeBodySC = styled.div(({ theme }) => ({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
+  gap: theme.spacing.xxxsmall,
   minWidth: 0,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
+  padding: `${theme.spacing.small}px 0`,
 }))
 
 const TraceNodeTitleSC = styled.div(({ theme }) => ({
@@ -437,23 +488,25 @@ const TraceNodeHandleSC = styled(Handle)({
 
 const ServiceDotSC = styled.span<{ $color: string }>(({ $color }) => ({
   background: $color,
-  borderRadius: '50%',
+  borderRadius: 2,
   flexShrink: 0,
-  height: 8,
-  width: 8,
+  height: 10,
+  width: 10,
 }))
 
 const TraceGraphLegendSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-zero'],
   border: `1px solid ${theme.colors.border}`,
   borderRadius: theme.borderRadiuses.medium,
-  bottom: theme.spacing.small,
+  bottom: theme.spacing.medium,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  left: theme.spacing.small,
-  maxWidth: 180,
-  padding: theme.spacing.small,
+  gap: theme.spacing.xxsmall,
+  left: theme.spacing.medium,
+  maxWidth: 220,
+  maxHeight: '45%',
+  overflowY: 'auto',
+  padding: theme.spacing.medium,
   position: 'absolute',
 }))
 
