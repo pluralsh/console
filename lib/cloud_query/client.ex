@@ -6,7 +6,7 @@ defmodule CloudQuery.Client do
   @logs_timeout :timer.minutes(2)
   @lambda_timeout :timer.minutes(5)
 
-  def adapter, do: GRPC.Client.Adapters.Mint
+  def adapter, do: GRPC.Client.Adapters.Gun
   def interceptors, do: [{CloudQuery.Client.Retry, max: 3, pause: 400, backoff: 2}]
 
   def connect() do
