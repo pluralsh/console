@@ -17,13 +17,6 @@ const (
 	defaultReasoning = "medium"
 )
 
-// Console run modes map to these profile names in Codex's native config.
-const (
-	analysisProfile   = "analysis"
-	autonomousProfile = "autonomous"
-	reviewProfile     = "review"
-)
-
 // These provider keys, endpoint, and wire labels are serialized into Codex's
 // model provider configuration for direct, custom, and proxied requests.
 const (
@@ -31,7 +24,6 @@ const (
 	customProvider   = "custom"
 	openAIProvider   = "openai-api"
 	openAIBaseURL    = "https://api.openai.com/v1"
-	chatWireAPI      = "chat"
 	responsesWireAPI = "responses"
 )
 
@@ -133,23 +125,8 @@ func (agent *Agent) resolveProviderSettings(config toolv1.Config) (string, strin
 	return openAIProvider, openAIBaseURL, openAIAPIKeyEnv, wireAPI
 }
 
-func (*Agent) profileForMode(mode console.AgentRunMode) (string, bool) {
-	switch mode {
-	case console.AgentRunModeAnalyze:
-		return analysisProfile, true
-	case console.AgentRunModeWrite:
-		return autonomousProfile, true
-	case console.AgentRunModeReview:
-		return reviewProfile, true
-	default:
-		return "", false
-	}
-}
-
 func (*Agent) wireAPI(method string) string {
 	switch console.OpenAiMethod(method) {
-	case console.OpenAiMethodChat:
-		return chatWireAPI
 	case console.OpenAiMethodResponses:
 		return responsesWireAPI
 	default:

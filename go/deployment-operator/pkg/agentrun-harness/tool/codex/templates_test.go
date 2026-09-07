@@ -11,11 +11,10 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/common"
 )
 
-func TestConfigTemplateProxyChat(t *testing.T) {
+func TestConfigTemplateProxyResponses(t *testing.T) {
 	doc := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: "/repo",
-		Profile: configTemplateProfile{
-			Name:                 autonomousProfile,
+		Settings: configTemplateSettings{
 			Model:                "openai/gpt-5.4",
 			ModelProvider:        pluralProvider,
 			SandboxMode:          sandboxModeHarness,
@@ -28,30 +27,25 @@ func TestConfigTemplateProxyChat(t *testing.T) {
 			Name:    pluralProvider,
 			BaseURL: "https://console.plural.sh/ext/ai/v1",
 			EnvKey:  consoleTokenEnv,
-			WireAPI: chatWireAPI,
+			WireAPI: responsesWireAPI,
 		}},
 	})
 
 	features := tableValue(t, doc, "features")
-	if features["skills"] != true {
-		t.Fatalf("features = %#v, expected skills", features)
-	}
 	projects := tableValue(t, doc, "projects")
 	if tableValue(t, projects, "/repo")["trust_level"] != "trusted" {
 		t.Fatalf("projects = %#v, expected trusted repository", projects)
 	}
-	profile := tableValue(t, tableValue(t, doc, "profiles"), autonomousProfile)
-	if profile["model"] != "openai/gpt-5.4" || profile["model_provider"] != pluralProvider ||
-		profile["sandbox_mode"] != sandboxModeHarness || profile["approval_policy"] != approvalPolicyNever ||
-		profile["model_reasoning_effort"] != defaultReasoning {
-		t.Fatalf("profile = %#v", profile)
+	if doc["model"] != "openai/gpt-5.4" || doc["model_provider"] != pluralProvider ||
+		doc["sandbox_mode"] != sandboxModeHarness || doc["approval_policy"] != approvalPolicyNever ||
+		doc["model_reasoning_effort"] != defaultReasoning {
+		t.Fatalf("settings = %#v", doc)
 	}
-	profileFeatures := tableValue(t, profile, "features")
-	if profileFeatures["web_search_request"] != true || profileFeatures["shell_snapshot"] != true {
-		t.Fatalf("profile features = %#v", profileFeatures)
+	if features["web_search_request"] != true || features["shell_snapshot"] != true {
+		t.Fatalf("features = %#v", features)
 	}
 	provider := tableValue(t, tableValue(t, doc, "model_providers"), pluralProvider)
-	if provider["base_url"] != "https://console.plural.sh/ext/ai/v1" || provider["env_key"] != consoleTokenEnv || provider["wire_api"] != chatWireAPI {
+	if provider["base_url"] != "https://console.plural.sh/ext/ai/v1" || provider["env_key"] != consoleTokenEnv || provider["wire_api"] != responsesWireAPI {
 		t.Fatalf("provider = %#v", provider)
 	}
 }
@@ -59,8 +53,7 @@ func TestConfigTemplateProxyChat(t *testing.T) {
 func TestConfigTemplateCustomEndpointAndAutoOmission(t *testing.T) {
 	custom := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: "/repo",
-		Profile: configTemplateProfile{
-			Name:                 reviewProfile,
+		Settings: configTemplateSettings{
 			Model:                "gpt-5.4",
 			ModelProvider:        customProvider,
 			SandboxMode:          sandboxModeHarness,
@@ -81,23 +74,21 @@ func TestConfigTemplateCustomEndpointAndAutoOmission(t *testing.T) {
 
 	auto := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: "/repo",
-		Profile: configTemplateProfile{
-			Name:                 analysisProfile,
+		Settings: configTemplateSettings{
 			Model:                "gpt-5.4",
 			SandboxMode:          sandboxModeHarness,
 			ApprovalPolicy:       approvalPolicyNever,
 			ModelReasoningEffort: defaultReasoning,
 		},
 	})
-	profile := tableValue(t, tableValue(t, auto, "profiles"), analysisProfile)
-	if _, ok := profile["model_provider"]; ok {
-		t.Fatalf("auto profile unexpectedly selected provider: %#v", profile)
+	if _, ok := auto["model_provider"]; ok {
+		t.Fatalf("auto settings unexpectedly selected provider: %#v", auto)
 	}
 	if _, ok := auto["model_providers"]; ok {
 		t.Fatalf("auto config unexpectedly emitted providers: %#v", auto)
 	}
-	if _, ok := profile["shell_environment_policy"]; ok {
-		t.Fatalf("empty shell policy unexpectedly emitted: %#v", profile)
+	if _, ok := auto["shell_environment_policy"]; ok {
+		t.Fatalf("empty shell policy unexpectedly emitted: %#v", auto)
 	}
 }
 
@@ -107,8 +98,7 @@ func TestConfigTemplateDindShellEnvironment(t *testing.T) {
 	shell := agent.shellEnvironmentPolicy(true)
 	doc := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: "/repo",
-		Profile: configTemplateProfile{
-			Name:                   autonomousProfile,
+		Settings: configTemplateSettings{
 			Model:                  "gpt-5.4",
 			SandboxMode:            sandboxModeHarness,
 			ApprovalPolicy:         approvalPolicyNever,
@@ -116,7 +106,7 @@ func TestConfigTemplateDindShellEnvironment(t *testing.T) {
 			ShellEnvironmentPolicy: shell,
 		},
 	})
-	policy := tableValue(t, tableValue(t, tableValue(t, doc, "profiles"), autonomousProfile), "shell_environment_policy")
+	policy := tableValue(t, doc, "shell_environment_policy")
 	includeOnly, ok := policy["include_only"].([]any)
 	if !ok || len(includeOnly) == 0 {
 		t.Fatalf("shell policy include_only = %#v", policy["include_only"])
@@ -132,7 +122,6 @@ func TestConfigTemplateBuiltInAndExternalMCP(t *testing.T) {
 	servers := agent.nativeMCPServers(nil)
 	servers = append(servers, configTemplateMCP{
 		Name:        "linear",
-		Type:        "http",
 		URL:         "https://mcp.linear.app/mcp",
 		Args:        []string{"--transport", "http"},
 		Env:         []configTemplateKeyValue{{Key: "LINEAR_TEAM", Value: "console"}},
@@ -143,20 +132,19 @@ func TestConfigTemplateBuiltInAndExternalMCP(t *testing.T) {
 		}},
 		EnabledTools:  []string{"list_issues"},
 		DisabledTools: []string{"delete_issue"},
-		TrustPolicy:   trustPolicyAlways,
 	})
 	doc := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: "/repo",
-		Profile:       configTemplateProfile{Name: autonomousProfile, Model: "gpt-5.4"},
+		Settings:      configTemplateSettings{Model: "gpt-5.4"},
 		MCPServers:    servers,
 	})
 	mcps := tableValue(t, doc, "mcp_servers")
 	plural := tableValue(t, mcps, pluralProvider)
-	if plural["type"] != mcpHTTPTransport || plural["url"] != common.AgentMCPServerURL || plural["trust_policy"] != trustPolicyAlways {
+	if plural["url"] != common.AgentMCPServerURL {
 		t.Fatalf("plural MCP = %#v", plural)
 	}
 	codebase := tableValue(t, mcps, common.CodebaseMemoryMCPServerName)
-	if codebase["type"] != mcpStdioTransport || codebase["command"] != common.CodebaseMemoryMCPCommand {
+	if codebase["command"] != common.CodebaseMemoryMCPCommand {
 		t.Fatalf("codebase MCP = %#v", codebase)
 	}
 	env := tableValue(t, codebase, "env")
@@ -164,7 +152,7 @@ func TestConfigTemplateBuiltInAndExternalMCP(t *testing.T) {
 		t.Fatalf("codebase MCP env = %#v", env)
 	}
 	linear := tableValue(t, mcps, "linear")
-	if linear["url"] != "https://mcp.linear.app/mcp" || linear["trust_policy"] != trustPolicyAlways {
+	if linear["url"] != "https://mcp.linear.app/mcp" {
 		t.Fatalf("linear MCP = %#v", linear)
 	}
 	header := tableValue(t, linear, "http_headers")
@@ -188,14 +176,12 @@ func TestConfigTemplateBuiltInAndExternalMCP(t *testing.T) {
 
 func TestConfigTemplateEscapesDynamicStrings(t *testing.T) {
 	repository := "C:\\repo\\it's\nquoted"
-	profileName := "review\"profile"
 	model := "vendor\\model\n\"name\a\v"
 	key := "X-Header\\name"
 	value := "line 1\nline 2 with \"quotes\""
 	doc := renderConfigTemplate(t, ConfigTemplateInput{
 		RepositoryDir: repository,
-		Profile: configTemplateProfile{
-			Name:                 profileName,
+		Settings: configTemplateSettings{
 			Model:                model,
 			SandboxMode:          sandboxModeHarness,
 			ApprovalPolicy:       approvalPolicyNever,
@@ -203,16 +189,14 @@ func TestConfigTemplateEscapesDynamicStrings(t *testing.T) {
 		},
 		MCPServers: []configTemplateMCP{{
 			Name:        "mcp\\\"server",
-			Type:        "http",
 			HTTPHeaders: []configTemplateKeyValue{{Key: key, Value: value}},
 		}},
 	})
 	if tableValue(t, tableValue(t, doc, "projects"), repository)["trust_level"] != "trusted" {
 		t.Fatalf("escaped repository key missing: %#v", doc["projects"])
 	}
-	profile := tableValue(t, tableValue(t, doc, "profiles"), profileName)
-	if profile["model"] != model {
-		t.Fatalf("escaped model = %#v, want %q", profile["model"], model)
+	if doc["model"] != model {
+		t.Fatalf("escaped model = %#v, want %q", doc["model"], model)
 	}
 	header := tableValue(t, tableValue(t, tableValue(t, doc, "mcp_servers"), "mcp\\\"server"), "http_headers")
 	if header[key] != value {

@@ -2,11 +2,52 @@ package acp
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"os"
+	stdexec "os/exec"
 	"strings"
 	"testing"
 
 	acpsdk "github.com/coder/acp-go-sdk"
+	"github.com/pluralsh/console/go/deployment-operator/pkg/harness/exec"
 )
+
+func TestEngineTurnReportsInitializeProcessFailure(t *testing.T) {
+	process, err := exec.StartWithStdio(context.Background(), os.Args[0],
+		exec.WithArgs([]string{"-test.run=TestInitializeFailureHelperProcess", "--"}),
+		exec.WithEnv([]string{"ACP_INITIALIZE_FAILURE_HELPER=1"}),
+	)
+	if err != nil {
+		t.Fatalf("start helper: %v", err)
+	}
+
+	_, err = NewEngine(Config{}).Turn(context.Background(), process, Request{Cwd: t.TempDir(), Prompt: "prompt"}, &testSink{})
+	if err == nil {
+		t.Fatal("initialize failure succeeded")
+	}
+	var exitErr *stdexec.ExitError
+	if !errors.As(err, &exitErr) || exitErr.ExitCode() != 42 {
+		t.Fatalf("initialize failure did not preserve child exit status: %v", err)
+	}
+	message := err.Error()
+	for _, expected := range []string{"peer disconnected before response", "exit status 42", "startup failure"} {
+		if !strings.Contains(message, expected) {
+			t.Errorf("initialize failure %q does not contain %q", message, expected)
+		}
+	}
+	if strings.Contains(message, "discarded-prefix") {
+		t.Errorf("initialize failure did not bound stderr tail: %q", message)
+	}
+}
+
+func TestInitializeFailureHelperProcess(t *testing.T) {
+	if os.Getenv("ACP_INITIALIZE_FAILURE_HELPER") != "1" {
+		return
+	}
+	_, _ = fmt.Fprint(os.Stderr, "discarded-prefix"+strings.Repeat("x", 9*1024)+"\nstartup failure\n")
+	os.Exit(42)
+}
 
 func TestEngineTurnDeliversUpdatesSentBeforeSessionResponse(t *testing.T) {
 	state := newTestState()

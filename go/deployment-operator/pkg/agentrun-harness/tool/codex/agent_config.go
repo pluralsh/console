@@ -1,9 +1,7 @@
 package codex
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
 
 	"k8s.io/klog/v2"
 
@@ -33,23 +31,14 @@ const (
 	approvalPolicyNever = "never"
 )
 
-// Built-in and user-configured MCP servers use these Codex transport and trust
-// labels when native configuration is generated.
-const (
-	mcpHTTPTransport  = "http"
-	mcpStdioTransport = "stdio"
-	trustPolicyAlways = "always"
-)
-
 func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error {
 	external, err := mcpcfg.Load()
 	if err != nil {
 		return err
 	}
 
-	profile, ok := agent.profileForMode(config.Run.Mode)
-	if !ok {
-		return fmt.Errorf("unsupported agent run mode %q for codex", config.Run.Mode)
+	if _, err := agent.resolveACPMode(config.Run.Mode, ""); err != nil {
+		return err
 	}
 	modelInstructionsFile, err := agent.systemPromptPath(config)
 	if err != nil {
@@ -69,8 +58,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 
 	templateInput := &ConfigTemplateInput{
 		RepositoryDir: config.RepositoryDir,
-		Profile: configTemplateProfile{
-			Name:                   profile,
+		Settings: configTemplateSettings{
 			Model:                  model,
 			ModelProvider:          provider,
 			SandboxMode:            sandboxModeHarness,
@@ -85,7 +73,7 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 		MCPServers: agent.nativeMCPServers(external),
 	}
 
-	configPath, err := agent.writeConfig(filepath.Join(agent.codexHome(config)), templateInput)
+	configPath, err := agent.writeConfig(agent.codexHome(config), templateInput)
 	if err != nil {
 		return err
 	}
@@ -96,16 +84,12 @@ func (agent *Agent) writeNativeConfig(config toolv1.Config, model string) error 
 
 func (agent *Agent) nativeMCPServers(external []mcpcfg.Server) []configTemplateMCP {
 	result := []configTemplateMCP{{
-		Name:        pluralProvider,
-		Type:        mcpHTTPTransport,
-		URL:         common.AgentMCPServerURL,
-		TrustPolicy: trustPolicyAlways,
+		Name: pluralProvider,
+		URL:  common.AgentMCPServerURL,
 	}, {
-		Name:        common.CodebaseMemoryMCPServerName,
-		Type:        mcpStdioTransport,
-		Command:     common.CodebaseMemoryMCPCommand,
-		Env:         agent.templateKeyValues(map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir}),
-		TrustPolicy: trustPolicyAlways,
+		Name:    common.CodebaseMemoryMCPServerName,
+		Command: common.CodebaseMemoryMCPCommand,
+		Env:     agent.templateKeyValues(map[string]string{common.CodebaseMemoryCacheEnv: common.CodebaseMemoryCacheDir}),
 	}}
 	indices := map[string]int{
 		pluralProvider:                     0,
@@ -117,7 +101,6 @@ func (agent *Agent) nativeMCPServers(external []mcpcfg.Server) []configTemplateM
 			Name:        server.Name,
 			URL:         server.URL,
 			HTTPHeaders: agent.templateKeyValues(server.Headers),
-			TrustPolicy: trustPolicyAlways,
 		}
 		if server.HasAllowedTools() {
 			input.EnabledTools = server.AllowedTools

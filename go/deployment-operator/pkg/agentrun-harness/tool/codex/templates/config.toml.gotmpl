@@ -1,5 +1,35 @@
+model = {{ quote .Settings.Model }}
+{{ if .Settings.ModelProvider }}
+model_provider = {{ quote .Settings.ModelProvider }}
+{{ end }}
+sandbox_mode = {{ quote .Settings.SandboxMode }}
+approval_policy = {{ quote .Settings.ApprovalPolicy }}
+model_reasoning_effort = {{ quote .Settings.ModelReasoningEffort }}
+{{ if .Settings.ModelInstructionsFile }}
+model_instructions_file = {{ quote .Settings.ModelInstructionsFile }}
+{{ end }}
+
+{{ if .Settings.ShellEnvironmentPolicy }}
+[shell_environment_policy]
+{{ if .Settings.ShellEnvironmentPolicy.IncludeOnly }}
+include_only = [{{ range $index, $value := .Settings.ShellEnvironmentPolicy.IncludeOnly }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
+{{ end }}
+
+{{ if .Settings.ShellEnvironmentPolicy.Set }}
+[shell_environment_policy.set]
+{{ range .Settings.ShellEnvironmentPolicy.Set }}
+{{ quote .Key }} = {{ quote .Value }}
+{{ end }}
+{{ end }}
+{{ end }}
+
 [features]
-skills = true
+{{ if .Settings.EnableWebSearch }}
+web_search_request = true
+{{ end }}
+{{ if .Settings.EnableShellCache }}
+shell_snapshot = true
+{{ end }}
 
 [projects.{{ quote .RepositoryDir }}]
 trust_level = "trusted"
@@ -20,45 +50,8 @@ wire_api = {{ quote .WireAPI }}
 {{ end }}
 {{ end }}
 
-[profiles.{{ quote .Profile.Name }}]
-model = {{ quote .Profile.Model }}
-{{ if .Profile.ModelProvider }}
-model_provider = {{ quote .Profile.ModelProvider }}
-{{ end }}
-sandbox_mode = {{ quote .Profile.SandboxMode }}
-approval_policy = {{ quote .Profile.ApprovalPolicy }}
-model_reasoning_effort = {{ quote .Profile.ModelReasoningEffort }}
-{{ if .Profile.ModelInstructionsFile }}
-model_instructions_file = {{ quote .Profile.ModelInstructionsFile }}
-{{ end }}
-
-{{ if .Profile.ShellEnvironmentPolicy }}
-[profiles.{{ quote .Profile.Name }}.shell_environment_policy]
-{{ if .Profile.ShellEnvironmentPolicy.IncludeOnly }}
-include_only = [{{ range $index, $value := .Profile.ShellEnvironmentPolicy.IncludeOnly }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
-{{ end }}
-
-{{ if .Profile.ShellEnvironmentPolicy.Set }}
-[profiles.{{ quote .Profile.Name }}.shell_environment_policy.set]
-{{ range .Profile.ShellEnvironmentPolicy.Set }}
-{{ quote .Key }} = {{ quote .Value }}
-{{ end }}
-{{ end }}
-{{ end }}
-
-[profiles.{{ quote .Profile.Name }}.features]
-{{ if .Profile.EnableWebSearch }}
-web_search_request = true
-{{ end }}
-{{ if .Profile.EnableShellCache }}
-shell_snapshot = true
-{{ end }}
-
 {{ range .MCPServers }}
 [mcp_servers.{{ quote .Name }}]
-{{ if .Type }}
-type = {{ quote .Type }}
-{{ end }}
 {{ if .URL }}
 url = {{ quote .URL }}
 {{ end }}
@@ -74,10 +67,6 @@ enabled_tools = [{{ range $index, $value := .EnabledTools }}{{ if $index }}, {{ 
 {{ if .DisabledTools }}
 disabled_tools = [{{ range $index, $value := .DisabledTools }}{{ if $index }}, {{ end }}{{ quote $value }}{{ end }}]
 {{ end }}
-{{ if .TrustPolicy }}
-trust_policy = {{ quote .TrustPolicy }}
-{{ end }}
-
 {{ if .Env }}
 [mcp_servers.{{ quote .Name }}.env]
 {{ range .Env }}

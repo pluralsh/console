@@ -6,6 +6,7 @@ import (
 	"io"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	stackv1 "github.com/pluralsh/console/go/deployment-operator/pkg/harness/stackrun/v1"
 	"github.com/stretchr/testify/require"
@@ -70,4 +71,24 @@ func TestStartWithStdioPreStartFailureDoesNotStartProcess(t *testing.T) {
 	)
 	require.ErrorIs(t, err, preErr)
 	require.Nil(t, process)
+}
+
+func TestStartWithStdioWaitBoundsInheritedStderr(t *testing.T) {
+	process, err := StartWithStdio(context.Background(), "sh",
+		WithArgs([]string{"-c", "sleep 2 >&2 & printf 'startup failure\\n' >&2"}),
+	)
+	if err != nil {
+		t.Fatalf("start process: %v", err)
+	}
+
+	started := time.Now()
+	if err := process.Wait(); err == nil {
+		t.Fatal("wait succeeded with an inherited stderr descriptor")
+	}
+	if elapsed := time.Since(started); elapsed > 1500*time.Millisecond {
+		t.Fatalf("wait exceeded stderr drain bound: %v", elapsed)
+	}
+	if tail := process.StderrTail(); tail != "startup failure\n" {
+		t.Fatalf("stderr tail = %q", tail)
+	}
 }

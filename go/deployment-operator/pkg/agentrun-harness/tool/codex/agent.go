@@ -46,7 +46,7 @@ func (*Agent) Type() console.AgentRuntimeType {
 	return console.AgentRuntimeTypeCodex
 }
 
-// Capabilities advertises the modes supported by Codex profiles.
+// Capabilities advertises the modes supported by Codex.
 func (*Agent) Capabilities() toolv1.AgentCapabilities {
 	return toolv1.AgentCapabilities{Modes: []console.AgentRunMode{
 		console.AgentRunModeAnalyze,
@@ -183,6 +183,9 @@ func (*Agent) runConfig(run *agentrunv1.AgentRun) (*agentrunv1.CodexConfig, erro
 	}
 	if run.Runtime == nil || run.Runtime.Config == nil || run.Runtime.Config.Codex == nil {
 		return nil, fmt.Errorf("codex runtime configuration is not set")
+	}
+	if console.OpenAiMethod(run.Runtime.Config.Codex.Method) == console.OpenAiMethodChat {
+		return nil, fmt.Errorf("codex does not support CHAT wire API; use RESPONSES or AUTO")
 	}
 	return run.Runtime.Config.Codex, nil
 }

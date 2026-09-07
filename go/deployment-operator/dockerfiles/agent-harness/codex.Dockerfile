@@ -20,7 +20,6 @@ RUN codex-acp --version
 # Stage 2: Copy the Codex ACP adapter into agent-harness base
 FROM $AGENT_HARNESS_BASE_IMAGE AS final
 
-COPY --from=node /usr/local/bin/codex-acp /usr/local/bin/codex-acp
 COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # Copy the Node.js runtime needed by the adapter.
@@ -28,7 +27,9 @@ COPY --from=node /usr/local/bin/node /usr/local/bin/node
 
 # Ensure proper ownership for nonroot user
 USER root
-RUN chown -R 65532:65532 /usr/local/bin/codex-acp /usr/local/lib/node_modules /usr/local/bin/node
+# COPY dereferences the npm launcher symlink, so recreate it in the final image.
+RUN ln -s ../lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js /usr/local/bin/codex-acp && \
+    chown -R 65532:65532 /usr/local/bin/codex-acp /usr/local/lib/node_modules /usr/local/bin/node
 
 # Switch back to nonroot user
 USER 65532:65532

@@ -77,7 +77,7 @@ func TestAgentPrepareAndConfigurePhases(t *testing.T) {
 
 func TestResolveProviderSettingsPreservesProxyEndpointAndWirePolicy(t *testing.T) {
 	endpoint := "https://custom.example/v1"
-	method := console.OpenAiMethodChat
+	method := console.OpenAiMethodResponses
 	run := codexTestRun(console.AgentRunModeWrite, "gpt-5.4", true)
 	run.Runtime.Config.Codex.Endpoint = &endpoint
 	run.Runtime.Config.Codex.Method = string(method)
@@ -85,12 +85,12 @@ func TestResolveProviderSettingsPreservesProxyEndpointAndWirePolicy(t *testing.T
 	agent := NewAgent(config)
 	agent.consoleURL = "https://console.example"
 	provider, baseURL, _, wireAPI := agent.resolveProviderSettings(config)
-	if provider != pluralProvider || baseURL != "https://console.example/ext/ai/v1" || wireAPI != chatWireAPI {
+	if provider != pluralProvider || baseURL != "https://console.example/ext/ai/v1" || wireAPI != responsesWireAPI {
 		t.Fatalf("proxy provider settings = %q, %q, %q", provider, baseURL, wireAPI)
 	}
 	run.Runtime.AiProxy = false
 	provider, baseURL, _, wireAPI = agent.resolveProviderSettings(config)
-	if provider != customProvider || baseURL != endpoint || wireAPI != chatWireAPI {
+	if provider != customProvider || baseURL != endpoint || wireAPI != responsesWireAPI {
 		t.Fatalf("custom provider settings = %q, %q, %q", provider, baseURL, wireAPI)
 	}
 }

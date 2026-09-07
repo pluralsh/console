@@ -5,13 +5,12 @@ package codex
 // still representing Codex's map-shaped TOML sections.
 type ConfigTemplateInput struct {
 	RepositoryDir string
-	Profile       configTemplateProfile
+	Settings      configTemplateSettings
 	Providers     []configTemplateProvider
 	MCPServers    []configTemplateMCP
 }
 
-type configTemplateProfile struct {
-	Name                   string
+type configTemplateSettings struct {
 	Model                  string
 	ModelProvider          string
 	SandboxMode            string
@@ -37,7 +36,6 @@ type configTemplateProvider struct {
 
 type configTemplateMCP struct {
 	Name           string
-	Type           string
 	URL            string
 	Command        string
 	Args           []string
@@ -47,7 +45,6 @@ type configTemplateMCP struct {
 	EnvHTTPHeaders []configTemplateKeyValue
 	EnabledTools   []string
 	DisabledTools  []string
-	TrustPolicy    string
 }
 
 type configTemplateKeyValue struct {

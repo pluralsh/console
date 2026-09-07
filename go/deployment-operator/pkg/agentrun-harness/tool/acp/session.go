@@ -66,7 +66,7 @@ func (attempt *sessionAttempt) run(prompt string) error {
 		return err
 	}
 	if err := attempt.stop(false); err != nil {
-		return fmt.Errorf("stop acp process: %w", err)
+		return attempt.processFailure(fmt.Errorf("stop acp process: %w", err), nil)
 	}
 	return attempt.promptResult(response.StopReason)
 }
@@ -159,17 +159,6 @@ func (attempt *sessionAttempt) finishTurn(usage *acpsdk.Usage) {
 	attempt.turn.emitAssistant(usage)
 }
 
-func (attempt *sessionAttempt) drainStderr() {
-	if attempt.process.Stderr == nil {
-		return
-	}
-	go func() {
-		if _, err := io.Copy(io.Discard, attempt.process.Stderr); err != nil && !errors.Is(err, io.ErrClosedPipe) {
-			klog.V(log.LogLevelDebug).InfoS("ACP stderr drain ended", "error", err)
-		}
-	}()
-}
-
 func (attempt *sessionAttempt) close() {
 	// The process is stopped explicitly during the run. This final guard
 	// handles setup failures and keeps test launchers from leaking children.
@@ -178,17 +167,30 @@ func (attempt *sessionAttempt) close() {
 
 func (attempt *sessionAttempt) promptFailure(err error) error {
 	cancelled := attempt.cancelled()
-	_ = attempt.stop(cancelled)
+	stopErr := attempt.stop(cancelled)
 	if cancelled {
 		return context.Cause(attempt.ctx)
 	}
 	// Prompt has crossed the dispatch boundary. Its result is never replayed
 	// because the agent may have received it.
-	return fmt.Errorf("acp session/prompt: %w", err)
+	return attempt.processFailure(fmt.Errorf("acp session/prompt: %w", err), stopErr)
 }
 
 func (attempt *sessionAttempt) fail(err error, cancel bool) error {
-	_ = attempt.stop(cancel)
+	stopErr := attempt.stop(cancel)
+	if cancel {
+		return err
+	}
+	return attempt.processFailure(err, stopErr)
+}
+
+func (attempt *sessionAttempt) processFailure(err, stopErr error) error {
+	if stopErr != nil {
+		err = fmt.Errorf("%w: acp process exited: %w", err, stopErr)
+	}
+	if stderr := attempt.process.StderrTail(); stderr != "" {
+		return fmt.Errorf("%w: acp stderr: %s", err, stderr)
+	}
 	return err
 }
 
@@ -281,6 +283,5 @@ func newSessionAttempt(engine *Engine, ctx context.Context, process *exec.StdioP
 		sessionID:      request.SessionID,
 	}
 	attempt.connection.SetLogger(slog.New(slog.NewTextHandler(io.Discard, nil)))
-	attempt.drainStderr()
 	return attempt
 }

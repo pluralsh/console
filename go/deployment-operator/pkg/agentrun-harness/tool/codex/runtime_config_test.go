@@ -57,19 +57,12 @@ func TestResolveSettingsPreservesExplicitModel(t *testing.T) {
 	}
 }
 
-func TestCodexProfilesAndACPSettings(t *testing.T) {
+func TestCodexACPSettings(t *testing.T) {
 	agent := NewAgent(toolv1.Config{Run: codexTestRun(console.AgentRunModeWrite, "gpt-5.4", false)})
-	for _, test := range []struct {
-		mode    console.AgentRunMode
-		profile string
-	}{
-		{console.AgentRunModeAnalyze, analysisProfile},
-		{console.AgentRunModeWrite, autonomousProfile},
-		{console.AgentRunModeReview, reviewProfile},
-	} {
-		profile, ok := agent.profileForMode(test.mode)
-		if !ok || profile != test.profile {
-			t.Fatalf("profileForMode(%s) = %q, %v", test.mode, profile, ok)
+	for _, mode := range []console.AgentRunMode{console.AgentRunModeAnalyze, console.AgentRunModeWrite, console.AgentRunModeReview} {
+		modeID, err := agent.resolveACPMode(mode, "")
+		if err != nil || modeID != acpModeID {
+			t.Fatalf("resolveACPMode(%q) = %q, %v", mode, modeID, err)
 		}
 	}
 	model, reasoning, modeID, err := agent.resolveACPSettings(toolv1.Settings{Mode: console.AgentRunModeReview, Model: toolv1.ModelSelection{Name: "gpt-5.4"}})
@@ -93,7 +86,6 @@ func TestCodexWireAPI(t *testing.T) {
 		method string
 		want   string
 	}{
-		{method: string(console.OpenAiMethodChat), want: chatWireAPI},
 		{method: string(console.OpenAiMethodResponses), want: responsesWireAPI},
 		{method: string(console.OpenAiMethodAuto), want: ""},
 		{method: "", want: ""},
@@ -101,5 +93,14 @@ func TestCodexWireAPI(t *testing.T) {
 		if got := agent.wireAPI(test.method); got != test.want {
 			t.Fatalf("wireAPI(%q) = %q, want %q", test.method, got, test.want)
 		}
+	}
+}
+
+func TestRunConfigRejectsChatWireAPI(t *testing.T) {
+	run := codexTestRun(console.AgentRunModeWrite, "gpt-5.4", false)
+	run.Runtime.Config.Codex.Method = string(console.OpenAiMethodChat)
+	_, err := NewAgent(toolv1.Config{Run: run}).ResolveSettings(run)
+	if err == nil || err.Error() != "codex does not support CHAT wire API; use RESPONSES or AUTO" {
+		t.Fatalf("ResolveSettings() error = %v", err)
 	}
 }

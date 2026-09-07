@@ -6,41 +6,52 @@ import (
 )
 
 // StdioProcess is a running executable with bidirectional standard input and
-// output. The process owner must drain Stdout and Stderr before calling Wait.
-// Stop closes the input stream and terminates the process; it is safe to call
-// more than once.
+// output. The process owner must drain Stdout before calling Wait. Standard
+// error is retained as a bounded diagnostic tail. Stop closes the
+// input stream and terminates the process; it is safe to call more than once.
 type StdioProcess struct {
 	Stdin  io.WriteCloser
 	Stdout io.ReadCloser
 	Stderr io.ReadCloser
 
-	wait  func() error
-	kill  func() error
-	close func() error
-	stop  func() error
+	wait       func() error
+	kill       func() error
+	close      func() error
+	stop       func() error
+	stderrTail func() string
 }
 
 // StdioProcessHooks supplies lifecycle operations for a StdioProcess. It is
 // useful for protocol adapters and deterministic tests that provide their own
 // in-memory streams.
 type StdioProcessHooks struct {
-	Wait  func() error
-	Kill  func() error
-	Stop  func() error
-	Close func() error
+	Wait       func() error
+	Kill       func() error
+	Stop       func() error
+	Close      func() error
+	StderrTail func() string
 }
 
 // NewStdioProcess wraps bidirectional streams and their lifecycle operations.
 func NewStdioProcess(stdin io.WriteCloser, stdout, stderr io.ReadCloser, hooks StdioProcessHooks) *StdioProcess {
 	return &StdioProcess{
-		Stdin:  stdin,
-		Stdout: stdout,
-		Stderr: stderr,
-		wait:   hooks.Wait,
-		kill:   hooks.Kill,
-		stop:   hooks.Stop,
-		close:  hooks.Close,
+		Stdin:      stdin,
+		Stdout:     stdout,
+		Stderr:     stderr,
+		wait:       hooks.Wait,
+		kill:       hooks.Kill,
+		stop:       hooks.Stop,
+		close:      hooks.Close,
+		stderrTail: hooks.StderrTail,
 	}
+}
+
+// StderrTail returns a bounded tail of the child's standard error.
+func (p *StdioProcess) StderrTail() string {
+	if p == nil || p.stderrTail == nil {
+		return ""
+	}
+	return p.stderrTail()
 }
 
 // Wait waits for the process and runs its post-start lifecycle hook. It also
