@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import {
+  getKubeActionVariant,
   getKubeUpdateDiffValues,
   isServerSideApplyKubeRequest,
 } from './workbenchJobKubeActionUtils'
+
+describe('node drain requests', () => {
+  it('classifies dedicated node drain actions separately from updates', () => {
+    expect(getKubeActionVariant(undefined, true)).toBe('drain')
+  })
+})
 
 const CURRENT_CONFIG_MAP = {
   apiVersion: 'v1',

@@ -37,12 +37,14 @@ defmodule Console.AI.Workbench.Engine do
     FetchNotes,
     SkillBackfill,
     FunctionCall,
+    KubeDrain,
     KubeRequest,
     KubeShell,
     Infrastructure.KubeExec,
     Infrastructure.KubeUpdate,
     Infrastructure.KubeDelete
   }
+  alias Console.AI.Tools.Workbench.Infrastructure.KubeDrain, as: KubeDrainTool
   alias Console.AI.Tool.Approval, as: Approval
   alias Console.AI.Tools.Workbench.Canvas, as: CanvasTool
   alias OpentelemetryProcessPropagator.Task, as: TracedTask
@@ -86,7 +88,7 @@ defmodule Console.AI.Workbench.Engine do
       pause: :timer.seconds(1),
       backoff: 2,
       max_pause: :timer.seconds(10),
-      retry_if: &match?({:error, :rate_limited}, &1)
+      retry_if: &match?({:error, reason} when reason in [:agent_bootstrapping, :rate_limited], &1)
     )
   end
 
@@ -148,6 +150,7 @@ defmodule Console.AI.Workbench.Engine do
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(%FunctionCall{} = call), do: "launched function call #{call.tool.name}, waiting for the result"
   defp tool_fmt(%KubeRequest{method: m, path: p}), do: "launched kubernetes #{m} request against #{p}, waiting for the result"
+  defp tool_fmt(%KubeDrain{node: node}), do: "launched kubernetes node drain against #{node}, waiting for the result"
   defp tool_fmt(pass), do: pass
 
   defp run_attributes(%WorkbenchJob{id: id, type: type}) do
@@ -163,6 +166,7 @@ defmodule Console.AI.Workbench.Engine do
   defp activity_span_name(%Notes{}), do: "workbench.activity.notes"
   defp activity_span_name(%FunctionCall{}), do: "workbench.activity.function_call"
   defp activity_span_name(%KubeRequest{}), do: "workbench.activity.kubernetes_request"
+  defp activity_span_name(%KubeDrain{}), do: "workbench.activity.kubernetes_drain"
   defp activity_span_name(%KubeShell{}), do: "workbench.activity.kubernetes_exec"
   defp activity_span_name(_), do: "workbench.activity"
 
@@ -176,6 +180,7 @@ defmodule Console.AI.Workbench.Engine do
   defp action_attributes(%Notes{}), do: %{"workbench.activity.kind" => "notes"}
   defp action_attributes(%FunctionCall{}), do: %{"workbench.activity.kind" => "function_call"}
   defp action_attributes(%KubeRequest{}), do: %{"workbench.activity.kind" => "kubernetes_request"}
+  defp action_attributes(%KubeDrain{}), do: %{"workbench.activity.kind" => "kubernetes_drain"}
   defp action_attributes(%KubeShell{}), do: %{"workbench.activity.kind" => "kubernetes_exec"}
   defp action_attributes(_), do: %{}
 
@@ -188,6 +193,7 @@ defmodule Console.AI.Workbench.Engine do
       %Notes{} = notes, {msgs, acts} -> {:cont, {msgs, [notes | acts]}}
       %SkillBackfill{} = backfill, {msgs, acts} -> {:cont, {msgs, [backfill | acts]}}
       %KubeRequest{} = kube_request, {msgs, acts} -> {:cont, {msgs, [kube_request | acts]}}
+      %KubeDrain{} = kube_drain, {msgs, acts} -> {:cont, {msgs, [kube_drain | acts]}}
       %KubeShell{} = kube_shell, {msgs, acts} -> {:cont, {msgs, [kube_shell | acts]}}
       msg, {msgs, acts} -> {:cont, {[msg | msgs], acts}}
     end)
@@ -199,7 +205,35 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, msgs, engine) do
-    TracedTask.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.hours(4))
+    {memos, actions} = Enum.split_with(actions, &match?(%Notes{}, &1))
+    memo_activities = run_activities(memos, engine, max_concurrency: 1)
+
+    engine = case memo_activities do
+      [_ | _] = activities ->
+        %{engine | activities: activities ++ engine.activities, job: refresh_job(engine.job)}
+      [] -> engine
+    end
+
+    activities = run_activities(actions, engine)
+    new_activities = activities ++ memo_activities
+
+    %{
+      engine
+      | activities: activities ++ engine.activities,
+        messages: new_activities ++ msgs,
+        iterations: engine.iterations + 1,
+        job: refresh_job(engine.job)
+    }
+    |> verifiable()
+    |> loop()
+  end
+
+  defp run_activities(actions, engine, opts \\ []) do
+    TracedTask.async_stream(
+      actions,
+      &spawn_activity(&1, engine),
+      Keyword.merge([max_concurrency: 10, timeout: :timer.hours(4)], opts)
+    )
     |> Enum.flat_map(fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}} -> [activity]
       {:ok, {:error, error}} ->
@@ -207,17 +241,6 @@ defmodule Console.AI.Workbench.Engine do
         []
       _ -> []
     end)
-    |> then(
-      &%{
-        engine
-        | activities: &1 ++ engine.activities,
-          messages: &1 ++ msgs,
-          iterations: engine.iterations + 1,
-          job: refresh_job(engine.job)
-      }
-    )
-    |> verifiable()
-    |> loop()
   end
 
   @supported_subagents ~w(infrastructure integration coding observability memory skill history search verify)a
@@ -314,6 +337,22 @@ defmodule Console.AI.Workbench.Engine do
       do: poll_activity(activity, user)
   end
 
+  defp do_spawn_activity(%KubeDrain{handle: handle, node: node} = request, %__MODULE__{user: user, job: job}) do
+    attrs = %{
+      type: :kubernetes,
+      status: :needs_approval,
+      prompt: "draining kubernetes node #{node} on cluster #{handle}",
+      tool_call: tool_attrs(request),
+      result: Map.merge(%{
+        output: "request pending user approval",
+        explanation: request.explanation,
+        kube_drain: Console.mapify(request)
+      }, Approval.attrs(request.approval))
+    }
+    with {:ok, activity} <- Workbenches.create_job_activity(attrs, job),
+      do: poll_activity(activity, user)
+  end
+
   defp do_spawn_activity(%KubeShell{handle: handle, pod: p, container: ct, command: command} = request, %__MODULE__{user: user, job: job}) do
     attrs = %{
       type: :exec,
@@ -404,11 +443,14 @@ defmodule Console.AI.Workbench.Engine do
     do: Tools.function_tools(funcs, job)
   defp function_tools(_), do: []
 
-  defp kube_tools(%WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e}}} = job) do
+  defp kube_tools(
+    %WorkbenchJob{modes: %{kubernetes: %{update: u, delete: d, exec: e, drain: drain}}} = job
+  ) do
     Enum.reject([
       (if u, do: %KubeUpdate{job: job, user: job.user}, else: nil),
       (if d, do: %KubeDelete{job: job, user: job.user}, else: nil),
-      (if e, do: %KubeExec{job: job, user: job.user}, else: nil)
+      (if e, do: %KubeExec{job: job, user: job.user}, else: nil),
+      (if drain, do: %KubeDrainTool{job: job, user: job.user}, else: nil)
     ], &is_nil/1)
   end
   defp kube_tools(_), do: []

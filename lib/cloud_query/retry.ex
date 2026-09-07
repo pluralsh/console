@@ -5,6 +5,7 @@ defmodule CloudQuery.Client.Retry do
   require Logger
 
   @unavailable 14
+  @invoke_lambda_path "/toolquery.ToolQuery/InvokeLambda"
 
   @impl true
   def init(opts) do
@@ -12,6 +13,9 @@ defmodule CloudQuery.Client.Retry do
   end
 
   @impl true
+  def call(%{grpc_type: :unary, path: @invoke_lambda_path} = stream, req, next, _opts),
+    do: next.(stream, req)
+
   def call(%{grpc_type: :unary} = stream, req, next, opts) do
     Console.Retrier.retry(
       fn -> next.(stream, req) end,
@@ -21,7 +25,6 @@ defmodule CloudQuery.Client.Retry do
       retry_if: fn result ->
         if retryable?(result) do
           Logger.warning("cloud-query gRPC connection dropped, retrying: #{inspect(result)}")
-          maybe_resolve(stream)
           true
         else
           false
@@ -52,13 +55,4 @@ defmodule CloudQuery.Client.Retry do
       String.contains?(message, "connection reset")
   end
   defp connection_closed_message?(_), do: false
-
-  defp maybe_resolve(%{channel: %GRPC.Channel{} = channel}) do
-    GRPC.Client.Connection.resolve_now(channel)
-  catch
-    kind, reason ->
-      Logger.debug("cloud-query gRPC resolve_now failed: #{inspect({kind, reason})}")
-      :ok
-  end
-  defp maybe_resolve(_), do: :ok
 end

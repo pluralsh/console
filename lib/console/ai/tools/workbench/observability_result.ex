@@ -20,7 +20,9 @@ defmodule Console.AI.Tools.Workbench.ObservabilityResult do
 
   def name(), do: "observability_result"
   def json_schema(), do: @json_schema
-  def description(), do: "The result of the observability tool call. Output should be a thorough summary of work done in response to the original prompt, usable for any future agent to understand everything without diving into the details of this session."
+  def description() do
+    "Complete the observability subagent session. The output's first line must specifically describe the work completed or the outcome reached, without a generic heading such as \"Conclusion\" or \"Result\". The remaining output should thoroughly summarize the work done in response to the original prompt so any future agent can understand it without reviewing this session."
+  end
 
   def changeset(model, attrs) do
     model

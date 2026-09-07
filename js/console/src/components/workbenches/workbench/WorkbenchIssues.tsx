@@ -139,6 +139,7 @@ export function WorkbenchIssues() {
                   loading={loading}
                   hasNextPage={!!pageInfo?.hasNextPage}
                   fetchNextPage={fetchNextPage}
+                  fallbackWorkbenchId={workbenchId}
                 />
               ) : (
                 <WorkbenchIssuesTable

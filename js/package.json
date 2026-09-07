@@ -24,6 +24,7 @@
     "elkjs": "0.12.0",
     "fast-uri": "3.1.5",
     "js-yaml": "4.3.1",
+    "immutable@npm:~3.7.6": "3.8.3",
     "postcss": "8.5.23",
     "shell-quote": "1.10.0"
   }

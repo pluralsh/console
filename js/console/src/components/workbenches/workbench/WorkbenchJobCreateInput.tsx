@@ -36,7 +36,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   getWorkbenchJobAbsPath,
   getWorkbenchSavedPromptCreateAbsPath,
-  WorkbenchLaunchRouteState,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -44,6 +43,7 @@ import type { SavedPromptCreateRouteState } from './prompts/SavedPromptForm'
 import { displaySavedPromptTitle } from './prompts/savedPromptDisplay'
 import { WorkbenchStoredPromptMarkdown } from './WorkbenchStoredPromptMarkdown'
 import { WorkbenchModelSelector } from './WorkbenchModelSelector'
+import { useTransientWorkbenchPrompt } from './useTransientWorkbenchPrompt'
 import {
   WorkbenchPromptOptionPills,
   WorkbenchPromptOptionsSelector,
@@ -80,11 +80,8 @@ export function WorkbenchJobCreateInput({
   const navigate = useNavigate()
   const location = useLocation()
   const inputRef = useAutofocusRef<ChatInputSimpleRef>()
-  const navPrompt = (location.state as Nullable<WorkbenchLaunchRouteState>)
-    ?.prompt
-  const prevNavPromptRef = useRef(navPrompt)
-  const [prompt, setPrompt] = useState(navPrompt ?? '')
-  const [promptSyncKey, setPromptSyncKey] = useState(navPrompt ? 1 : 0)
+  const { prompt, promptSyncKey, setPrompt, setPromptSyncKey } =
+    useTransientWorkbenchPrompt()
   const [promptModes, setPromptModes] =
     useState<WorkbenchJobModesAttributes | null>(null)
   const [selectedModelState, setSelectedModelState] = useState<{
@@ -132,13 +129,6 @@ export function WorkbenchJobCreateInput({
   useEffect(() => {
     if (promptSyncKey > 0) inputRef.current?.focus()
   }, [inputRef, promptSyncKey])
-
-  useEffect(() => {
-    if (!navPrompt || navPrompt === prevNavPromptRef.current) return
-    prevNavPromptRef.current = navPrompt
-    setPrompt(navPrompt)
-    setPromptSyncKey((key) => key + 1)
-  }, [navPrompt])
 
   const [createWorkbenchJob, { loading, error }] =
     useCreateWorkbenchJobMutation({

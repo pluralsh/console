@@ -17,6 +17,8 @@ var (
 	// Server flags (override config file and env vars)
 	argServerAddress = flag.String("server-address", "", "HTTP server bind address (e.g., ':8080')")
 	argServerPath    = flag.String("server-path", "", "HTTP server base path (e.g., '/ai/proxy')")
+	argServerCert    = flag.String("server-certificate-file", "", "X.509 certificate file for HTTPS")
+	argServerKey     = flag.String("server-key-file", "", "X.509 private key file for HTTPS")
 	argReadTimeout   = flag.Duration("server-read-timeout", 0, "HTTP server read timeout duration (e.g., '15s')")
 	argIdleTimeout   = flag.Duration("server-idle-timeout", 0, "HTTP server idle timeout duration (e.g., '60s')")
 
@@ -52,6 +54,9 @@ func Init() error {
 
 	// Override with CLI flags if provided
 	applyFlagOverrides()
+	if err := config.Validate(cfg); err != nil {
+		return fmt.Errorf("failed to validate flag overrides: %w", err)
+	}
 
 	// Initialize logger with configured level
 	if err := log.Init(cfg.Observability.LogLevel); err != nil {
@@ -69,6 +74,12 @@ func applyFlagOverrides() {
 	}
 	if *argServerPath != "" {
 		cfg.Server.Path = *argServerPath
+	}
+	if *argServerCert != "" {
+		cfg.Server.CertificateFile = *argServerCert
+	}
+	if *argServerKey != "" {
+		cfg.Server.KeyFile = *argServerKey
 	}
 	if *argReadTimeout != 0 {
 		cfg.Server.ReadTimeout = *argReadTimeout

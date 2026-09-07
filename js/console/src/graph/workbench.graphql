@@ -39,6 +39,7 @@ fragment WorkbenchJobModesFields on WorkbenchJobModes {
     update
     delete
     exec
+    drain
     excludeNamespaces
     requireNamespaces
   }
@@ -477,6 +478,11 @@ fragment WorkbenchJobActivityResult on WorkbenchJobActivityResult {
     path
     queryParams
     contentType
+  }
+  kubeDrain {
+    handle
+    node
+    explanation
   }
   kubeExec {
     handle
@@ -1396,6 +1402,11 @@ fragment WorkbenchJobAction on WorkbenchJobActivity {
       path
       queryParams
       contentType
+    }
+    kubeDrain {
+      handle
+      node
+      explanation
     }
     kubeExec {
       handle

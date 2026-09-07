@@ -1,5 +1,7 @@
 defmodule Console.Deployments.Issues.Webhook.Github do
   @behaviour Console.Deployments.Issues.Provider
+  @behaviour Console.Deployments.Issues.Scm
+  alias Console.Deployments.Issues.Scm
 
   def body(%{"comment" => %{"body" => body}}) when is_binary(body), do: body
   def body(%{"pull_request" => %{"body" => body}}) when is_binary(body), do: body
@@ -33,6 +35,29 @@ defmodule Console.Deployments.Issues.Webhook.Github do
   def status(%{"issue" => %{"state" => state, "state_reason" => reason}}), do: map_status(state, reason)
   def status(%{"issue" => %{"state" => state}}), do: map_status(state, nil)
   def status(_), do: :open
+
+  def pull_request?(%{"pull_request" => _} = payload), do: not is_map_key(payload, "comment")
+  def pull_request?(_), do: false
+
+  def reference_urls(url) do
+    uri = URI.parse(url)
+
+    case Regex.run(~r{^(.+)/(?:issues|pull)/(\d+)/?$}, uri.path || "") do
+      [_, repository_path, number] ->
+        repository_url =
+          URI.to_string(%{uri | path: repository_path, query: nil, fragment: nil})
+
+        [
+          Scm.base_reference_url(url),
+          "#{repository_url}/issues/#{number}",
+          "#{repository_url}/pull/#{number}"
+        ]
+        |> Enum.uniq()
+
+      _ ->
+        [Scm.base_reference_url(url)]
+    end
+  end
 
   defp infer_repo(%{"repository" => %{"full_name" => full_name}}) when is_binary(full_name), do: full_name
   defp infer_repo(%{} = payload) do
