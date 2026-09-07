@@ -18,7 +18,7 @@ import (
 	"github.com/pluralsh/console/go/deployment-operator/pkg/log"
 )
 
-const defaultStopTimeout = 2 * time.Second
+const defaultStopTimeout = 15 * time.Second
 
 // Engine owns one provider-neutral ACP protocol implementation. It does not
 // launch processes or retain provider configuration.

@@ -188,19 +188,20 @@ func (sink *testSink) Usage(record usage.Record) {
 }
 
 type testProcess struct {
-	stdinCloseEnds bool
-	done           chan struct{}
-	finishOnce     sync.Once
-	pipeCloseOnce  sync.Once
-	stdin          *testWriter
-	clientIn       *io.PipeReader
-	clientOut      *io.PipeReader
-	agentIn        *io.PipeReader
-	agentOut       *io.PipeWriter
-	kills          int
-	killed         bool
-	stopped        bool
-	mu             sync.Mutex
+	stdinCloseEnds  bool
+	done            chan struct{}
+	finishOnce      sync.Once
+	pipeCloseOnce   sync.Once
+	stdin           *testWriter
+	clientIn        *io.PipeReader
+	clientOut       *io.PipeReader
+	agentIn         *io.PipeReader
+	agentOut        *io.PipeWriter
+	kills           int
+	killed          bool
+	stopped         bool
+	stopReportsKill bool
+	mu              sync.Mutex
 }
 
 type testWriter struct {
@@ -252,7 +253,7 @@ func (process *testProcess) kill() error {
 
 func (process *testProcess) stop() error {
 	process.mu.Lock()
-	process.stopped = true
+	process.stopped = !process.stopReportsKill
 	process.mu.Unlock()
 	return process.kill()
 }
@@ -497,7 +498,8 @@ func TestEngineTurnCancellationKillsUncooperativeProcess(t *testing.T) {
 
 func TestEngineTurnIgnoresCleanupKillAfterSuccessfulPrompt(t *testing.T) {
 	state := newTestState()
-	_, process, _ := newTestAgentProcess(state, false)
+	_, process, cleanup := newTestAgentProcess(state, false)
+	cleanup.stopReportsKill = true
 	_, err := NewEngine(Config{StopTimeout: 10 * time.Millisecond}).Turn(context.Background(), process, Request{
 		Cwd: t.TempDir(), Prompt: "complete",
 	}, &testSink{})

@@ -47,10 +47,10 @@ func (attempt *sessionAttempt) run(prompt string) error {
 	if err != nil {
 		return attempt.fail(err, attempt.cancelled())
 	}
-	if err := attempt.configureSession(details); err != nil {
+	if err = attempt.configureSession(details); err != nil {
 		return attempt.fail(err, attempt.cancelled())
 	}
-	if err := attempt.stopIfCancelled(); err != nil {
+	if err = attempt.stopIfCancelled(); err != nil {
 		return err
 	}
 
@@ -58,17 +58,25 @@ func (attempt *sessionAttempt) run(prompt string) error {
 	if err != nil {
 		return attempt.promptFailure(err)
 	}
+
 	attempt.finishTurn(response.Usage)
-	if err := attempt.turn.err(); err != nil {
+	if err = attempt.turn.err(); err != nil {
 		return attempt.fail(err, attempt.cancelled())
 	}
-	if err := attempt.stopIfCancelled(); err != nil {
+	if err = attempt.stopIfCancelled(); err != nil {
 		return err
 	}
-	if err := attempt.stop(false); err != nil {
-		return attempt.processFailure(fmt.Errorf("stop acp process: %w", err), nil)
+
+	resultErr := attempt.promptResult(response.StopReason)
+	stopErr := attempt.stop(false)
+	if resultErr != nil {
+		return attempt.processFailure(resultErr, stopErr)
 	}
-	return attempt.promptResult(response.StopReason)
+	if stopErr != nil {
+		klog.V(log.LogLevelDebug).InfoS("ACP process cleanup failed after completed prompt", "error", stopErr)
+	}
+
+	return nil
 }
 
 func (attempt *sessionAttempt) configureSession(details sessionDetails) error {
