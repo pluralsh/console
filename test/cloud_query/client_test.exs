@@ -14,8 +14,8 @@ defmodule CloudQuery.ClientTest do
     assert {:ok, ^channel} = Client.connect()
   end
 
-  test "uses mint with retry interceptors" do
-    assert Client.adapter() == GRPC.Client.Adapters.Mint
+  test "uses gun with retry interceptors" do
+    assert Client.adapter() == GRPC.Client.Adapters.Gun
     assert [{Retry, opts}] = Client.interceptors()
     assert opts[:max] == 3
     assert Client.cloud_query_rpc_opts() == [timeout: :timer.minutes(5)]
@@ -34,9 +34,9 @@ defmodule CloudQuery.Client.RetryTest do
   }
   @unavailable %GRPC.RPCError{status: 14, message: "upstream unavailable"}
   @internal %GRPC.RPCError{status: 13, message: "pq: role \"abc\" does not exist (28000)"}
-  @server_cancelled %Mint.HTTPError{
-    module: Mint.HTTP2,
-    reason: {:server_closed_request, :cancel}
+  @server_cancelled %GRPC.RPCError{
+    status: 13,
+    message: ~s(stream_error: {:stream_error, :cancel, ~c"Stream reset by server."})
   }
 
   test "retries unary RPCs after a closed connection" do
@@ -44,8 +44,6 @@ defmodule CloudQuery.Client.RetryTest do
     stream = %{grpc_type: :unary, channel: channel}
     opts = Retry.init(max: 3, pause: 1, backoff: 1)
     {:ok, agent} = Agent.start_link(fn -> 0 end)
-
-    expect(GRPC.Client.Connection, :resolve_now, fn ^channel -> :ok end)
 
     next = fn ^stream, :req ->
       count = Agent.get_and_update(agent, fn n -> {n + 1, n + 1} end)
@@ -70,7 +68,7 @@ defmodule CloudQuery.Client.RetryTest do
     assert Agent.get(agent, & &1) == 1
   end
 
-  test "reports HTTP/2 server cancellation without retrying" do
+  test "returns Gun cancellation errors without retrying" do
     stream = %{grpc_type: :unary, channel: %GRPC.Channel{}}
     opts = Retry.init(max: 3, pause: 1, backoff: 1)
     {:ok, agent} = Agent.start_link(fn -> 0 end)
@@ -80,11 +78,29 @@ defmodule CloudQuery.Client.RetryTest do
       {:error, @server_cancelled}
     end
 
-    assert {:error, "cloud query was canceled by the server before completion (HTTP/2 CANCEL)"} =
-             Retry.call(stream, :req, next, opts)
+    assert {:error, @server_cancelled} = Retry.call(stream, :req, next, opts)
 
     assert Agent.get(agent, & &1) == 1
     refute Retry.disconnect?(@server_cancelled)
+  end
+
+  test "does not retry lambda invocations" do
+    stream = %{
+      grpc_type: :unary,
+      path: "/toolquery.ToolQuery/InvokeLambda",
+      channel: %GRPC.Channel{}
+    }
+
+    opts = Retry.init(max: 3, pause: 1, backoff: 1)
+    {:ok, agent} = Agent.start_link(fn -> 0 end)
+
+    next = fn _stream, :req ->
+      Agent.update(agent, &(&1 + 1))
+      {:error, @closed}
+    end
+
+    assert {:error, @closed} = Retry.call(stream, :req, next, opts)
+    assert Agent.get(agent, & &1) == 1
   end
 
   test "does not retry streaming RPCs" do
