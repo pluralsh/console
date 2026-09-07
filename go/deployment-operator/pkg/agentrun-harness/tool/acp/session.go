@@ -244,13 +244,13 @@ func (attempt *sessionAttempt) waitForExit() error {
 	case waitErr := <-waitCh:
 		return waitErr
 	case <-timer.C:
-		return attempt.killAndWait(waitCh)
+		return attempt.stopAndWait(waitCh)
 	}
 }
 
-func (attempt *sessionAttempt) killAndWait(waitCh <-chan error) error {
-	if err := attempt.process.Kill(); err != nil && !errors.Is(err, os.ErrProcessDone) {
-		klog.V(log.LogLevelDebug).InfoS("ACP process kill failed", "error", err)
+func (attempt *sessionAttempt) stopAndWait(waitCh <-chan error) error {
+	if err := attempt.process.Stop(); err != nil && !errors.Is(err, os.ErrProcessDone) {
+		klog.V(log.LogLevelDebug).InfoS("ACP process stop failed", "error", err)
 	}
 	return <-waitCh
 }

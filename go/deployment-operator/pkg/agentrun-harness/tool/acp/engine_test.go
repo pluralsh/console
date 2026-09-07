@@ -198,6 +198,8 @@ type testProcess struct {
 	agentIn        *io.PipeReader
 	agentOut       *io.PipeWriter
 	kills          int
+	killed         bool
+	stopped        bool
 	mu             sync.Mutex
 }
 
@@ -230,16 +232,29 @@ func (process *testProcess) closePipes() {
 func (process *testProcess) wait() error {
 	<-process.done
 	process.closePipes()
+	process.mu.Lock()
+	defer process.mu.Unlock()
+	if process.killed && !process.stopped {
+		return errors.New("signal: killed")
+	}
 	return nil
 }
 
 func (process *testProcess) kill() error {
 	process.mu.Lock()
 	process.kills++
+	process.killed = true
 	process.mu.Unlock()
 	process.finish()
 	process.closePipes()
 	return nil
+}
+
+func (process *testProcess) stop() error {
+	process.mu.Lock()
+	process.stopped = true
+	process.mu.Unlock()
+	return process.kill()
 }
 
 func (process *testProcess) close() error {
@@ -265,7 +280,7 @@ func newTestProcess(agent *testAgent, stdinCloseEnds bool) (*testProcess, *exec.
 	stdio := exec.NewStdioProcess(process.stdin, agentToClientReader, io.NopCloser(strings.NewReader("")), exec.StdioProcessHooks{
 		Wait:  process.wait,
 		Kill:  process.kill,
-		Stop:  process.kill,
+		Stop:  process.stop,
 		Close: process.close,
 	})
 	return process, stdio
@@ -477,5 +492,42 @@ func TestEngineTurnCancellationKillsUncooperativeProcess(t *testing.T) {
 	_, _, _, _, _, cancelCount, _ := processState.snapshot()
 	if cancelCount == 0 {
 		t.Fatal("cancellation did not send session/cancel")
+	}
+}
+
+func TestEngineTurnIgnoresCleanupKillAfterSuccessfulPrompt(t *testing.T) {
+	state := newTestState()
+	_, process, _ := newTestAgentProcess(state, false)
+	_, err := NewEngine(Config{StopTimeout: 10 * time.Millisecond}).Turn(context.Background(), process, Request{
+		Cwd: t.TempDir(), Prompt: "complete",
+	}, &testSink{})
+	if err != nil {
+		t.Fatalf("successful prompt returned shutdown error: %v", err)
+	}
+}
+
+func TestEngineTurnPreservesPromptStopReasonAfterCleanupKill(t *testing.T) {
+	state := newTestState()
+	state.stopReason = acpsdk.StopReasonMaxTokens
+	_, process, _ := newTestAgentProcess(state, false)
+	_, err := NewEngine(Config{StopTimeout: 10 * time.Millisecond}).Turn(context.Background(), process, Request{
+		Cwd: t.TempDir(), Prompt: "complete",
+	}, &testSink{})
+	if err == nil || !strings.Contains(err.Error(), string(acpsdk.StopReasonMaxTokens)) {
+		t.Fatalf("prompt stop reason was not preserved: %v", err)
+	}
+	if strings.Contains(err.Error(), "signal: killed") {
+		t.Fatalf("cleanup kill obscured prompt stop reason: %v", err)
+	}
+}
+
+func TestSessionAttemptPreservesSpontaneousExit(t *testing.T) {
+	naturalExit := errors.New("agent exited with status 17")
+	attempt := &sessionAttempt{
+		engine:  NewEngine(Config{StopTimeout: time.Second}),
+		process: exec.NewStdioProcess(nil, nil, nil, exec.StdioProcessHooks{Wait: func() error { return naturalExit }}),
+	}
+	if err := attempt.waitForExit(); !errors.Is(err, naturalExit) {
+		t.Fatalf("spontaneous exit = %v, want %v", err, naturalExit)
 	}
 }

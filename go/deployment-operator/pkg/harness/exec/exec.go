@@ -80,6 +80,9 @@ func (in *executable) RunWithOutput(ctx context.Context) ([]byte, error) {
 }
 
 func (in *executable) Command() string {
+	if len(in.args) == 0 {
+		return in.command
+	}
 	return fmt.Sprintf("%s %s", in.command, strings.Join(in.args, " "))
 }
 
