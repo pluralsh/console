@@ -185,7 +185,7 @@ jobs:
           - name: opencode
             version: 1.18.23
           - name: codex
-            version: 1.10.0
+            version: 0.153.4
           - name: pi
             version: 0.84.1
     permissions:
