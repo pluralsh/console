@@ -1,18 +1,24 @@
 import importlib
 import os
+import sys
 import unittest
 import yaml
+
+TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
+COMPAT_DIR = os.path.abspath(os.path.join(TESTS_DIR, ".."))
+REPO_ROOT = os.path.abspath(os.path.join(TESTS_DIR, "../../.."))
+
+if COMPAT_DIR not in sys.path:
+    sys.path.insert(0, COMPAT_DIR)
 
 
 class TestArgoEventsCompatibility(unittest.TestCase):
     def setUp(self):
-        self.base_dir = os.path.dirname(__file__)
-        self.repo_root = os.path.abspath(os.path.join(self.base_dir, "../.."))
         self.yaml_path = os.path.join(
-            self.repo_root, "static", "compatibilities", "argo-events.yaml"
+            REPO_ROOT, "static", "compatibilities", "argo-events.yaml"
         )
         self.manifest_path = os.path.join(
-            self.repo_root, "static", "compatibilities", "manifest.yaml"
+            REPO_ROOT, "static", "compatibilities", "manifest.yaml"
         )
 
     def test_scraper_module_loads(self):
@@ -56,7 +62,6 @@ class TestArgoEventsCompatibility(unittest.TestCase):
             "Expected at least one version entry in argo-events.yaml",
         )
 
-        # Validate entries
         for entry in data["versions"]:
             self.assertIn("version", entry)
             self.assertIn("kube", entry)
