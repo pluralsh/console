@@ -22,8 +22,8 @@ def _find_release_table(soup: BeautifulSoup):
     for table in soup.find_all("table"):
         text = table.get_text(" ", strip=True).lower()
         if (
-            "supported release:" in text
-            and "kubernetes versions supported:" in text
+            "supported release" in text
+            and "kubernetes versions supported" in text
         ):
             return table
     return None
@@ -73,7 +73,7 @@ def _parse_release_table(table) -> list[OrderedDict[str, object]]:
     chart_version = get_chart_versions(app_name).get(kyverno_version)
     if not chart_version:
         print_error(
-            f"No Kyverno Helm chart found for application {kyverno_version}"
+            f"No Kyverno Helm chart found for version {kyverno_version}"
         )
         return []
 
