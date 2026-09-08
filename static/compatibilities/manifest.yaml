@@ -9,6 +9,7 @@ names:
 - calico
 - cert-manager
 - cilium
+- tetragon
 - chaos-mesh
 - contour
 - coredns
