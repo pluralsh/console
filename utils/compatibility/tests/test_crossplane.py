@@ -94,6 +94,22 @@ class CrossplaneScraperTests(unittest.TestCase):
         self.assertEqual(len(versions), 1)
         self.assertEqual(versions[0]["version"], "2.4.0")
 
+    def test_catalog_yaml_contains_resolved_images(self):
+        from utils import read_yaml
+        yaml_path = COMPATIBILITY.parent.parent / "static/compatibilities/crossplane.yaml"
+        data = read_yaml(str(yaml_path))
+        self.assertIsNotNone(data)
+        self.assertIn("versions", data)
+        self.assertGreater(len(data["versions"]), 0)
+        for v in data["versions"]:
+            self.assertIn("images", v, f"Version {v['version']} is missing 'images' key")
+            self.assertIsInstance(v["images"], list)
+            self.assertGreater(
+                len(v["images"]), 0, f"Version {v['version']} has empty images list"
+            )
+            for img in v["images"]:
+                self.assertIn("crossplane", img)
+
 
 if __name__ == "__main__":
     unittest.main()
