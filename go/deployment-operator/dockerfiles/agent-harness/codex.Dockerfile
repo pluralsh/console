@@ -1,7 +1,7 @@
 ARG NODE_IMAGE_TAG=24
 ARG NODE_IMAGE=node:${NODE_IMAGE_TAG}-slim
-ARG AGENT_VERSION=1.10.0
-ARG CODEX_VERSION=0.153.4
+ARG AGENT_VERSION=0.153.4
+ARG ACP_VERSION=1.10.0
 
 ARG AGENT_HARNESS_BASE_IMAGE_TAG=latest
 ARG AGENT_HARNESS_BASE_IMAGE_REPO=ghcr.io/pluralsh/agent-harness-base
@@ -12,9 +12,9 @@ FROM $NODE_IMAGE AS node
 
 USER root
 
+ARG ACP_VERSION
 ARG AGENT_VERSION
-ARG CODEX_VERSION
-RUN npm install -g "@agentclientprotocol/codex-acp@$AGENT_VERSION" "@openai/codex@$CODEX_VERSION"
+RUN npm install -g "@agentclientprotocol/codex-acp@$ACP_VERSION" "@openai/codex@$AGENT_VERSION"
 
 # Verify installation
 RUN codex-acp --version

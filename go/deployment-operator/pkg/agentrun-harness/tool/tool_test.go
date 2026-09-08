@@ -51,8 +51,31 @@ func TestNewComposesCodexRuntime(t *testing.T) {
 	}
 }
 
+func TestNewComposesClaudeRuntime(t *testing.T) {
+	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: &agentrunv1.AgentRun{
+		Mode: console.AgentRunModeWrite,
+		Runtime: &agentrunv1.AgentRuntime{Config: &agentrunv1.AgentRuntimeConfig{
+			Claude: &agentrunv1.ClaudeConfig{Model: "claude-sonnet-4-6", Timeout: time.Minute},
+		}},
+	}}
+	created, err := New(console.AgentRuntimeTypeClaude, config)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	if _, ok := created.(*toolv1.Runtime); !ok {
+		t.Fatalf("Claude factory returned %T, want *v1.Runtime", created)
+	}
+}
+
 func TestNewRejectsMissingAgentRun(t *testing.T) {
 	if _, err := New(console.AgentRuntimeTypeClaude, toolv1.Config{}); err == nil {
 		t.Fatal("New() error = nil, want missing agent run error")
+	}
+}
+
+func TestNewRejectsMissingClaudeConfiguration(t *testing.T) {
+	config := toolv1.Config{WorkDir: t.TempDir(), RepositoryDir: t.TempDir(), Run: &agentrunv1.AgentRun{}}
+	if _, err := New(console.AgentRuntimeTypeClaude, config); err == nil {
+		t.Fatal("New() error = nil, want missing Claude configuration error")
 	}
 }

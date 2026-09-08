@@ -18,12 +18,12 @@ type SettingsBuilder struct {
 }
 
 type Settings struct {
-	Model                      string                 `json:"model"`
-	Temperature                float64                `json:"temperature"`
-	EnableAllProjectMcpServers bool                   `json:"enableAllProjectMcpServers,omitempty"`
-	Permissions                Permissions            `json:"permissions"`
-	Env                        map[string]string      `json:"env,omitempty"`
-	Custom                     map[string]interface{} `json:",inline,omitempty"`
+	Model                      string            `json:"model"`
+	Temperature                float64           `json:"temperature"`
+	EnableAllProjectMcpServers bool              `json:"enableAllProjectMcpServers,omitempty"`
+	Permissions                Permissions       `json:"permissions"`
+	Env                        map[string]string `json:"env,omitempty"`
+	AvailableModels            []string          `json:"availableModels,omitempty"`
 }
 
 type Permissions struct {
@@ -31,20 +31,24 @@ type Permissions struct {
 	Deny  []string `json:"deny"`
 }
 
-func NewSettingsBuilder(model Model) *SettingsBuilder {
+func NewSettingsBuilder(model string) *SettingsBuilder {
 	return &SettingsBuilder{
 		settings: Settings{
-			Model:                      string(model),
+			Model:                      model,
 			Temperature:                0.1,
 			EnableAllProjectMcpServers: true,
 			Permissions: Permissions{
 				Allow: []string{},
 				Deny:  []string{},
 			},
-			Env:    make(map[string]string),
-			Custom: make(map[string]interface{}),
+			Env: make(map[string]string),
 		},
 	}
+}
+
+func (b *SettingsBuilder) WithAvailableModels(models ...string) *SettingsBuilder {
+	b.settings.AvailableModels = append([]string(nil), models...)
+	return b
 }
 func (b *SettingsBuilder) WithModel(model string) *SettingsBuilder {
 	b.settings.Model = model

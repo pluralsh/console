@@ -121,10 +121,10 @@ var (
 
 	// Check .github/workflows/deployment-operator-cd-agent-harness.yaml to see images being published.
 	defaultContainerVersions = map[console.AgentRuntimeType]string{
-		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.72",
+		console.AgentRuntimeTypeClaude:   "%s-claude-2.1.236",
 		console.AgentRuntimeTypeGemini:   "%s-gemini-0.44.1",
 		console.AgentRuntimeTypeOpencode: "%s-opencode-1.18.23",
-		console.AgentRuntimeTypeCodex:    "%s-codex-1.9.0",
+		console.AgentRuntimeTypeCodex:    "%s-codex-0.153.4",
 		console.AgentRuntimeTypePi:       "%s-pi-0.84.1",
 	}
 
