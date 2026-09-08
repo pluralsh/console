@@ -1,0 +1,112 @@
+icon: https://raw.githubusercontent.com/apache/yunikorn-site/master/static/img/logo/yunikorn_classic_logo.png
+git_url: https://github.com/apache/yunikorn-k8shim
+release_url: https://github.com/apache/yunikorn-release/releases/tag/v{vsn}
+helm_repository_url: https://apache.github.io/yunikorn-release
+chart_name: yunikorn
+readme_url: https://github.com/apache/yunikorn-site/blob/master/docs/get_started/version.md
+versions:
+- version: 1.9.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.9.0
+- version: 1.8.0
+  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.8.0
+- version: 1.7.0
+  kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.7.0
+- version: 1.6.3
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.6.3
+- version: 1.6.2
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.6.2
+- version: 1.6.1
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.6.1
+- version: 1.6.0
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.6.0
+- version: 1.5.2
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.5.2
+- version: 1.5.1
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.5.1
+- version: 1.5.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.5.0
+- version: 1.4.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.4.0
+- version: 1.3.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.3.0
+- version: 1.2.0
+  kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.2.0
+- version: 1.1.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.1.0
+- version: 1.0.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.0.0
+- version: 0.12.2
+  kube: ['1.23', '1.22', '1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  chart_version: 0.12.2
+- version: 0.12.1
+  kube: ['1.21', '1.20', '1.19']
+  requirements: []
+  incompatibilities: []
+  chart_version: 0.12.1
+- version: 0.11.0
+  kube: ['1.19']
+  requirements: []
+  incompatibilities: []
+  chart_version: 0.11.0
+- version: 0.10.0
+  kube: ['1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  chart_version: 0.10.0
+- version: 0.9.0
+  kube: ['1.15', '1.14', '1.13']
+  requirements: []
+  incompatibilities: []
+  chart_version: 0.9.0
+- version: 0.8.0
+  kube: ['1.15', '1.14', '1.13']
+  requirements: []
+  incompatibilities: []
+  chart_version: 0.8.0
