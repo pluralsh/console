@@ -2,13 +2,22 @@
 
 import re
 from collections import OrderedDict
+from copy import deepcopy
 
 import requests
 import yaml
 
-from utils import get_chart_versions, print_success, update_compatibility_info
+from utils import (
+    get_chart_images,
+    get_chart_versions,
+    print_success,
+    read_yaml,
+    reduce_versions,
+    update_compatibility_info,
+)
 
 app_name = "argo-rollouts"
+TARGET_FILE = f"../../static/compatibilities/{app_name}.yaml"
 github_api_tags_url = "https://api.github.com/repos/argoproj/argo-rollouts/tags"
 workflow_url = (
     "https://raw.githubusercontent.com/argoproj/argo-rollouts/"
@@ -62,6 +71,11 @@ def parse_kube_versions(content):
 
 
 def scrape():
+    existing = read_yaml(TARGET_FILE)
+    if not existing or not isinstance(existing.get("versions"), list):
+        raise ValueError("Could not read existing Argo Rollouts compatibility versions")
+    existing_versions = {row["version"]: row for row in existing["versions"]}
+
     release_tags = fetch_github_tags()
     if not release_tags:
         raise ValueError("No Argo Rollouts release tags found")
@@ -85,19 +99,38 @@ def scrape():
         response = requests.get(workflow_url.format(tag=tag), timeout=30)
         response.raise_for_status()
         kube_versions = parse_kube_versions(response.text)
-        rows.append(OrderedDict(
+        # Keep recorded metadata when a transient Helm render cannot refresh images.
+        previous = existing_versions.get(tag_version)
+        row = deepcopy(previous) or OrderedDict(
             [
                 ("version", tag_version),
-                ("kube", kube_versions),
-                ("chart_version", chart_version),
                 ("images", []),
                 ("requirements", []),
                 ("incompatibilities", []),
             ]
-        ))
+        )
+        if previous and previous.get("chart_version") != chart_version:
+            # Never save a new chart number with images from the previous chart.
+            images = get_chart_images(
+                existing["helm_repository_url"], existing.get("chart_name", app_name),
+                chart_version, existing.get("helm_values"),
+            )
+            if not images:
+                rows.append(row)
+                continue
+            row["images"] = images
+        row["kube"] = kube_versions
+        row["chart_version"] = chart_version
+        rows.append(row)
         print_success(f"Fetched compatibility info for tag: {tag}")
 
     # Fetch and validate every candidate before changing the existing table.
     if not rows:
         raise ValueError("No chart-backed Argo Rollouts compatibility rows found")
-    update_compatibility_info(f"../../static/compatibilities/{app_name}.yaml", rows)
+    merged = {**existing_versions, **{row["version"]: row for row in rows}}
+    retained = reduce_versions(list(merged.values()))
+    if retained == existing["versions"] and all(
+        row.get("images") for row in retained if row.get("chart_version")
+    ):
+        return
+    update_compatibility_info(TARGET_FILE, rows)

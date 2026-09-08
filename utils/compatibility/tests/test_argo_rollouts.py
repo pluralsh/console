@@ -1,5 +1,6 @@
 import importlib.util
 import sys
+from copy import deepcopy
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -14,7 +15,14 @@ spec = importlib.util.spec_from_file_location(
 )
 scraper = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scraper)
+import utils
+
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+@pytest.fixture(autouse=True)
+def existing_versions(monkeypatch):
+    monkeypatch.setattr(scraper, "read_yaml", lambda _: {"versions": []})
 
 
 def fixture(version):
@@ -138,3 +146,152 @@ def test_static_rows_match_release_matrices_and_real_chart_versions():
         assert versions[version]["images"] == [f"quay.io/argoproj/argo-rollouts:v{version}"]
     aggregate = yaml.safe_load((root / "static/compatibilities.yaml").read_text())
     assert next(row for row in aggregate["addons"] if row["name"] == "argo-rollouts") == {**addon, "name": "argo-rollouts"}
+
+
+@pytest.mark.parametrize("rendered_images", [
+    None,
+    ["quay.io/argoproj/argo-rollouts:v1.10.0@sha256:" + "a" * 64],
+])
+def test_refresh_preserves_metadata_and_only_replaces_images_on_success(
+    monkeypatch, tmp_path, rendered_images
+):
+    saved = {
+        "version": "1.10.0", "kube": ["1.34"], "chart_version": "2.43.0",
+        "images": ["quay.io/argoproj/argo-rollouts:v1.10.0"],
+        "requirements": [{"name": "existing requirement", "version": "1.0.0"}],
+        "incompatibilities": [{"name": "existing incompatibility", "version": "2.0.0"}],
+        "summary": {"features": ["Retained release note"]}, "eolAt": "2027-01-01",
+    }
+    path = tmp_path / "argo-rollouts.yaml"
+    path.write_text(yaml.safe_dump({
+        "helm_repository_url": "https://argoproj.github.io/argo-helm",
+        "versions": [saved],
+    }, sort_keys=False))
+    monkeypatch.setattr(scraper, "TARGET_FILE", str(path))
+    monkeypatch.setattr(scraper, "read_yaml", utils.read_yaml)
+    monkeypatch.setattr(scraper, "fetch_github_tags", lambda: ["v1.10.0"])
+    monkeypatch.setattr(scraper, "get_chart_versions", lambda _: {"1.10.0": "2.43.0"})
+    monkeypatch.setattr(scraper.requests, "get", Mock(return_value=response(text=fixture("1.10.0"))))
+    render = Mock(return_value=rendered_images)
+    monkeypatch.setattr(utils, "get_chart_images", render)
+    monkeypatch.setattr(utils, "summarization_enabled", lambda: False)
+    write = Mock(wraps=utils.write_yaml)
+    monkeypatch.setattr(utils, "write_yaml", write)
+
+    scraper.scrape()
+    expected = deepcopy(saved)
+    expected["kube"] = ["1.35", "1.34", "1.33", "1.32"]
+    if rendered_images:
+        expected["images"] = rendered_images
+    assert yaml.safe_load(path.read_text())["versions"] == [expected]
+    render.assert_called_once_with(
+        "https://argoproj.github.io/argo-helm", "argo-rollouts", "2.43.0", None
+    )
+    write.assert_called_once()
+
+    before = path.read_bytes()
+    render.reset_mock()
+    write.reset_mock()
+    scraper.scrape()
+    assert path.read_bytes() == before
+    render.assert_not_called()
+    write.assert_not_called()
+
+
+def test_reduced_intermediate_patch_does_not_prevent_unchanged_noop(monkeypatch):
+    root = COMPATIBILITY.parents[1]
+    saved = yaml.safe_load((root / "static/compatibilities/argo-rollouts.yaml").read_text())
+    original = deepcopy(saved)
+    monkeypatch.setattr(scraper, "read_yaml", lambda _: saved)
+    monkeypatch.setattr(scraper, "fetch_github_tags", lambda: ["v1.8.3"])
+    monkeypatch.setattr(scraper, "get_chart_versions", lambda _: {"1.8.3": "2.40.5"})
+    monkeypatch.setattr(scraper.requests, "get", Mock(return_value=response(text=fixture("1.8.3"))))
+    update = Mock()
+    monkeypatch.setattr(scraper, "update_compatibility_info", update)
+    scraper.scrape()
+    update.assert_not_called()
+    assert saved == original
+
+
+def test_unreadable_existing_data_never_fetches_or_writes(monkeypatch):
+    monkeypatch.setattr(scraper, "read_yaml", lambda _: None)
+    fetch = Mock()
+    update = Mock()
+    monkeypatch.setattr(scraper, "fetch_github_tags", fetch)
+    monkeypatch.setattr(scraper, "update_compatibility_info", update)
+    with pytest.raises(ValueError, match="existing Argo Rollouts"):
+        scraper.scrape()
+    fetch.assert_not_called()
+    update.assert_not_called()
+
+
+def test_changed_chart_retries_failed_render_and_saves_verified_images_then_noops(
+    monkeypatch, tmp_path
+):
+    root = COMPATIBILITY.parents[1]
+    data = yaml.safe_load((root / "static/compatibilities/argo-rollouts.yaml").read_text())
+    data["versions"] = [data["versions"][0]]
+    saved = deepcopy(data["versions"][0])
+    path = tmp_path / "argo-rollouts.yaml"
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
+    monkeypatch.setattr(scraper, "TARGET_FILE", str(path))
+    monkeypatch.setattr(scraper, "read_yaml", utils.read_yaml)
+    monkeypatch.setattr(scraper, "fetch_github_tags", lambda: ["v1.10.0"])
+    monkeypatch.setattr(scraper, "get_chart_versions", lambda _: {"1.10.0": "2.43.1"})
+    monkeypatch.setattr(scraper.requests, "get", Mock(return_value=response(text=fixture("1.10.0"))))
+    preflight = Mock(return_value=None)
+    monkeypatch.setattr(scraper, "get_chart_images", preflight)
+    render = Mock(return_value=None)
+    monkeypatch.setattr(utils, "get_chart_images", render)
+    monkeypatch.setattr(utils, "summarization_enabled", lambda: False)
+    write = Mock(wraps=utils.write_yaml)
+    monkeypatch.setattr(utils, "write_yaml", write)
+
+    before = path.read_bytes()
+    scraper.scrape()
+    assert path.read_bytes() == before
+    preflight.assert_called_once_with(data["helm_repository_url"], "argo-rollouts", "2.43.1", None)
+    render.assert_not_called()
+    write.assert_not_called()
+
+    images = ["quay.io/argoproj/argo-rollouts:v1.10.0@sha256:" + "b" * 64]
+    preflight.return_value = images
+    scraper.scrape()
+    assert preflight.call_count == 2
+    assert yaml.safe_load(path.read_text())["versions"] == [{
+        **saved, "chart_version": "2.43.1", "images": images,
+    }]
+    # A failed second render in the shared writer retains the preflight's exact-chart images.
+    render.assert_called_once()
+    write.assert_called_once()
+
+    before = path.read_bytes()
+    preflight.reset_mock()
+    render.reset_mock()
+    write.reset_mock()
+    scraper.scrape()
+    assert path.read_bytes() == before
+    preflight.assert_not_called()
+    render.assert_not_called()
+    write.assert_not_called()
+
+
+def test_empty_saved_images_are_retried_on_an_otherwise_unchanged_run(monkeypatch, tmp_path):
+    root = COMPATIBILITY.parents[1]
+    data = yaml.safe_load((root / "static/compatibilities/argo-rollouts.yaml").read_text())
+    data["versions"] = [data["versions"][0]]
+    images = data["versions"][0]["images"]
+    data["versions"][0]["images"] = []
+    path = tmp_path / "argo-rollouts.yaml"
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
+    monkeypatch.setattr(scraper, "TARGET_FILE", str(path))
+    monkeypatch.setattr(scraper, "read_yaml", utils.read_yaml)
+    monkeypatch.setattr(scraper, "fetch_github_tags", lambda: ["v1.10.0"])
+    monkeypatch.setattr(scraper, "get_chart_versions", lambda _: {"1.10.0": "2.43.0"})
+    monkeypatch.setattr(scraper.requests, "get", Mock(return_value=response(text=fixture("1.10.0"))))
+    render = Mock(return_value=images)
+    monkeypatch.setattr(utils, "get_chart_images", render)
+    monkeypatch.setattr(utils, "summarization_enabled", lambda: False)
+    scraper.scrape()
+    assert yaml.safe_load(path.read_text())["versions"][0]["images"] == images
+    render.assert_called_once()
