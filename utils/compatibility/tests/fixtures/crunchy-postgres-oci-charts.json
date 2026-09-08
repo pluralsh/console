@@ -1,0 +1,252 @@
+{
+  "source": "https://registry.developers.crunchydata.com/v2/crunchydata/pgo",
+  "description": "Official public OCI manifests and Helm configs retrieved 2026-09-08; no credentials included.",
+  "charts": {
+    "6.0.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:4a3d7818bafb703e043589d1fcfa5d4b4f10a0b2b8d27cbfbaecf2c526f82733",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:d6d11033035cd6d1df138b1f489f437d33adfc07a3baa790d4ceb6efe4bed62f",
+            "size": 311268
+          }
+        ],
+        "annotations": {
+          "org.opencontainers.image.created": "2025-12-12T11:16:42-05:00",
+          "org.opencontainers.image.description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+          "org.opencontainers.image.title": "pgo",
+          "org.opencontainers.image.version": "6.0.0"
+        }
+      },
+      "config": {
+        "name": "pgo",
+        "version": "6.0.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "6.0.0",
+        "type": "application"
+      }
+    },
+    "5.8.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:8ab5011db562e765e790e2d772501261f64a7f0e503f456241ec3b2101b0276d",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:e69c0fedfb937dca5b364d283bfbff5c90740e7b25b647e132a252fe430457e2",
+            "size": 145207
+          }
+        ],
+        "annotations": {
+          "org.opencontainers.image.created": "2025-03-26T13:32:47-04:00",
+          "org.opencontainers.image.description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+          "org.opencontainers.image.title": "pgo",
+          "org.opencontainers.image.version": "5.8.0"
+        }
+      },
+      "config": {
+        "name": "pgo",
+        "version": "5.8.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "5.8.0",
+        "type": "application"
+      }
+    },
+    "5.7.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:43c8668062bd760ab7e7ba0a12bc18fb65fe38d847885bc3afe669b547d214db",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:1ec9852c316c4a9eecd8cc6c257719f70f61cebb7ef46d316575cba6b254bdfb",
+            "size": 130240
+          }
+        ],
+        "annotations": {
+          "org.opencontainers.image.created": "2024-10-17T13:13:30Z",
+          "org.opencontainers.image.description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+          "org.opencontainers.image.title": "pgo",
+          "org.opencontainers.image.version": "5.7.0"
+        }
+      },
+      "config": {
+        "name": "pgo",
+        "version": "5.7.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "5.7.0",
+        "type": "application"
+      }
+    },
+    "5.6.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:f3f7688bdf4f8e71e8a452dbb5dfc7875395d29bd9369faa3f2779623c24b402",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:13f246f08c9832c6367af302b8d9dd022069237e1724751ecdd455f349fd5058",
+            "size": 118565
+          }
+        ],
+        "annotations": {
+          "org.opencontainers.image.created": "2024-06-10T19:51:00Z",
+          "org.opencontainers.image.description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+          "org.opencontainers.image.title": "pgo",
+          "org.opencontainers.image.version": "5.6.0"
+        }
+      },
+      "config": {
+        "name": "pgo",
+        "version": "5.6.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "5.6.0",
+        "type": "application"
+      }
+    },
+    "5.5.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:55025f25321fda629dc858db375fb624f8bde38d2e8f548df032629617afb23e",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:9a260e99a3c02522e22b0926954076700b5fe7240e8811f68c2ae24fcdd71955",
+            "size": 114802
+          }
+        ],
+        "annotations": {
+          "org.opencontainers.image.created": "2023-11-30T16:39:26Z",
+          "org.opencontainers.image.description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+          "org.opencontainers.image.title": "pgo",
+          "org.opencontainers.image.version": "5.5.0"
+        }
+      },
+      "config": {
+        "name": "pgo",
+        "version": "5.5.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "5.5.0",
+        "type": "application"
+      }
+    },
+    "5.4.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:ae2856620e62ccd921b7beb349d6b961ce042e01f1a64fa20436b0a279b3ac87",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:6d528610e093e3f8286c576ac64da6383b13f1f305c0588f2243ac70b92a8e6a",
+            "size": 104542
+          }
+        ],
+        "annotations": {
+          "org.opencontainers.image.description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+          "org.opencontainers.image.title": "pgo",
+          "org.opencontainers.image.version": "5.4.0"
+        }
+      },
+      "config": {
+        "name": "pgo",
+        "version": "5.4.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "5.4.0",
+        "type": "application"
+      }
+    },
+    "5.3.0": {
+      "manifest": {
+        "schemaVersion": 2,
+        "config": {
+          "mediaType": "application/vnd.cncf.helm.config.v1+json",
+          "digest": "sha256:5de50a665c348ed400db68e5822ceed9fd86d3b74c1f21509ea35dece68c99d9",
+          "size": 179
+        },
+        "layers": [
+          {
+            "mediaType": "application/vnd.cncf.helm.chart.content.v1.tar+gzip",
+            "digest": "sha256:18e72a3b7a84fa9f6678f6acb29983b1cf20842a31a9a1406c874fd75e097c33",
+            "size": 103094
+          }
+        ]
+      },
+      "config": {
+        "name": "pgo",
+        "version": "5.3.0",
+        "description": "Installer for PGO, the open source Postgres Operator from Crunchy Data",
+        "apiVersion": "v2",
+        "appVersion": "5.3.0",
+        "type": "application"
+      }
+    }
+  },
+  "tags": {
+    "name": "crunchydata/pgo",
+    "tags": [
+      "5.3.0",
+      "5.3.1",
+      "5.3.2",
+      "5.4.0",
+      "5.4.1",
+      "5.4.2",
+      "5.4.3",
+      "5.5.0",
+      "5.5.1",
+      "5.5.2",
+      "5.6.0",
+      "5.6.1",
+      "5.7.0",
+      "5.7.1",
+      "5.7.2",
+      "5.7.3",
+      "5.7.4",
+      "5.8.0",
+      "5.8.1",
+      "5.8.2",
+      "5.8.3",
+      "5.8.4",
+      "5.8.5",
+      "5.8.6",
+      "5.8.7",
+      "5.8.8",
+      "5.8.9",
+      "6.0.0",
+      "6.0.1",
+      "6.0.2",
+      "6.0.3"
+    ]
+  }
+}
