@@ -50,3 +50,4 @@ names:
 - wiz-admission-controller
 - wiz-network-analyzer
 - kuberay-operator
+- mongodb-kubernetes

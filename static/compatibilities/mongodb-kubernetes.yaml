@@ -1,0 +1,90 @@
+icon: https://mongodb-images-new.s3.eu-west-1.amazonaws.com/leaf-green-dark.png
+git_url: https://github.com/mongodb/mongodb-kubernetes
+release_url: https://github.com/mongodb/mongodb-kubernetes/releases/tag/{vsn}
+helm_repository_url: https://mongodb.github.io/helm-charts
+versions:
+- version: 1.11.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.11.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.11.0']
+- version: 1.10.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.10.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.10.0']
+- version: 1.9.0
+  kube: ['1.36', '1.35', '1.34']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.9.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.9.0']
+- version: 1.8.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.8.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.8.0']
+- version: 1.7.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.7.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.7.0']
+- version: 1.6.0
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.6.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.6.0']
+- version: 1.5.0
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.5.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.5.0']
+- version: 1.4.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.4.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.4.0']
+- version: 1.3.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.3.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.3.0']
+- version: 1.2.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.2.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.2.0']
+- version: 1.1.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.1.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.1.0']
+- version: 1.0.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.0
+  images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
+name: mongodb-kubernetes
