@@ -14,6 +14,7 @@ from utils import (
     read_yaml,
     reduce_versions,
     update_compatibility_info,
+    validate_semver,
 )
 
 app_name = "argo-rollouts"
@@ -101,6 +102,13 @@ def scrape():
         kube_versions = parse_kube_versions(response.text)
         # Keep recorded metadata when a transient Helm render cannot refresh images.
         previous = existing_versions.get(tag_version)
+        if previous and previous.get("chart_version"):
+            saved_chart = validate_semver(str(previous["chart_version"]))
+            if saved_chart is None:
+                raise ValueError(f"Invalid saved Helm chart version: {previous['chart_version']!r}")
+            # An incomplete index must not roll back a previously verified chart.
+            if saved_chart > validate_semver(chart_version):
+                chart_version = str(saved_chart)
         row = deepcopy(previous) or OrderedDict(
             [
                 ("version", tag_version),

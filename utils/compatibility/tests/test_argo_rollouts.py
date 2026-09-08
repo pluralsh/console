@@ -295,3 +295,42 @@ def test_empty_saved_images_are_retried_on_an_otherwise_unchanged_run(monkeypatc
     scraper.scrape()
     assert yaml.safe_load(path.read_text())["versions"][0]["images"] == images
     render.assert_called_once()
+
+
+def test_older_index_chart_preserves_saved_chart_but_still_refreshes_kubernetes(monkeypatch, tmp_path):
+    root = COMPATIBILITY.parents[1]
+    data = yaml.safe_load((root / "static/compatibilities/argo-rollouts.yaml").read_text())
+    saved = deepcopy(data["versions"][0])
+    saved.update(chart_version="2.43.1", kube=["1.34"], eolAt="2027-01-01")
+    data["versions"] = [saved]
+    path = tmp_path / "argo-rollouts.yaml"
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
+    monkeypatch.setattr(scraper, "TARGET_FILE", str(path))
+    monkeypatch.setattr(scraper, "read_yaml", utils.read_yaml)
+    monkeypatch.setattr(scraper, "fetch_github_tags", lambda: ["v1.10.0"])
+    monkeypatch.setattr(scraper, "get_chart_versions", lambda _: {"1.10.0": "2.43.0"})
+    monkeypatch.setattr(scraper.requests, "get", Mock(return_value=response(text=fixture("1.10.0"))))
+    preflight = Mock()
+    monkeypatch.setattr(scraper, "get_chart_images", preflight)
+    render = Mock(return_value=None)
+    monkeypatch.setattr(utils, "get_chart_images", render)
+    monkeypatch.setattr(utils, "summarization_enabled", lambda: False)
+    write = Mock(wraps=utils.write_yaml)
+    monkeypatch.setattr(utils, "write_yaml", write)
+
+    scraper.scrape()
+    assert yaml.safe_load(path.read_text())["versions"] == [{
+        **saved, "kube": ["1.35", "1.34", "1.33", "1.32"],
+    }]
+    preflight.assert_not_called()
+    render.assert_called_once_with(data["helm_repository_url"], "argo-rollouts", "2.43.1", None)
+    write.assert_called_once()
+
+    before = path.read_bytes()
+    render.reset_mock()
+    write.reset_mock()
+    scraper.scrape()
+    assert path.read_bytes() == before
+    preflight.assert_not_called()
+    render.assert_not_called()
+    write.assert_not_called()
