@@ -13,7 +13,7 @@ Sources include:
 - https://docs.nvidia.com/networking/display/kubernetes2470/platform-support.html
 
 The fixtures are prerequisite-table excerpts retrieved on 2026-09-08, with
-the release identity added as a minimal page wrapper. They cover two real
+the actual upstream release-heading and navigation-link markup preserved. They cover two real
 minor ranges and the older patch ceiling. Other fixtures in the test module
 are deliberately hand-written malformed/selection cases.
 
