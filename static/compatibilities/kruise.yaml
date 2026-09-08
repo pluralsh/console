@@ -1,0 +1,146 @@
+# Sources: https://openkruise.io/docs/installation and https://openkruise.github.io/charts/index.yaml
+# Conservative API-match mapping pending console#4169; +, -, ? are not classified.
+icon: https://avatars.githubusercontent.com/u/49735278?v=4
+git_url: https://github.com/openkruise/kruise
+release_url: https://github.com/openkruise/kruise/releases/tag/v{vsn}
+helm_repository_url: https://openkruise.github.io/charts
+chart_name: kruise
+versions:
+- version: 1.9.1
+  kube:
+  - '1.32'
+  chart_version: 1.9.1
+  requirements: []
+  incompatibilities: []
+- version: 1.9.0
+  kube:
+  - '1.32'
+  chart_version: 1.9.0
+  requirements: []
+  incompatibilities: []
+- version: 1.8.3
+  kube:
+  - '1.30'
+  chart_version: 1.8.3
+  requirements: []
+  incompatibilities: []
+- version: 1.8.0
+  kube:
+  - '1.30'
+  chart_version: 1.8.0
+  requirements: []
+  incompatibilities: []
+- version: 1.7.5
+  kube:
+  - '1.28'
+  chart_version: 1.7.5
+  requirements: []
+  incompatibilities: []
+- version: 1.7.3
+  kube:
+  - '1.28'
+  chart_version: 1.7.3
+  requirements: []
+  incompatibilities: []
+- version: 1.7.2
+  kube:
+  - '1.28'
+  chart_version: 1.7.2
+  requirements: []
+  incompatibilities: []
+- version: 1.7.1
+  kube:
+  - '1.28'
+  chart_version: 1.7.1
+  requirements: []
+  incompatibilities: []
+- version: 1.7.0
+  kube:
+  - '1.28'
+  chart_version: 1.7.0
+  requirements: []
+  incompatibilities: []
+- version: 1.6.4
+  kube:
+  - '1.26'
+  chart_version: 1.6.4
+  requirements: []
+  incompatibilities: []
+- version: 1.6.3
+  kube:
+  - '1.26'
+  chart_version: 1.6.3
+  requirements: []
+  incompatibilities: []
+- version: 1.6.2
+  kube:
+  - '1.26'
+  chart_version: 1.6.2
+  requirements: []
+  incompatibilities: []
+- version: 1.6.1
+  kube:
+  - '1.26'
+  chart_version: 1.6.1
+  requirements: []
+  incompatibilities: []
+- version: 1.6.0
+  kube:
+  - '1.26'
+  chart_version: 1.6.0
+  requirements: []
+  incompatibilities: []
+- version: 1.5.5
+  kube:
+  - '1.24'
+  chart_version: 1.5.5
+  requirements: []
+  incompatibilities: []
+- version: 1.5.4
+  kube:
+  - '1.24'
+  chart_version: 1.5.4
+  requirements: []
+  incompatibilities: []
+- version: 1.5.3
+  kube:
+  - '1.24'
+  chart_version: 1.5.3
+  requirements: []
+  incompatibilities: []
+- version: 1.5.2
+  kube:
+  - '1.24'
+  chart_version: 1.5.2
+  requirements: []
+  incompatibilities: []
+- version: 1.5.1
+  kube:
+  - '1.24'
+  chart_version: 1.5.1
+  requirements: []
+  incompatibilities: []
+- version: 1.5.0
+  kube:
+  - '1.24'
+  chart_version: 1.5.0
+  requirements: []
+  incompatibilities: []
+- version: 1.4.2
+  kube:
+  - '1.22'
+  chart_version: 1.4.2
+  requirements: []
+  incompatibilities: []
+- version: 1.4.1
+  kube:
+  - '1.22'
+  chart_version: 1.4.1
+  requirements: []
+  incompatibilities: []
+- version: 1.4.0
+  kube:
+  - '1.22'
+  chart_version: 1.4.0
+  requirements: []
+  incompatibilities: []
