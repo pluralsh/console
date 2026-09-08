@@ -11,6 +11,8 @@ import (
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/console/go/polly/fs"
+
 	"github.com/pluralsh/console/go/deployment-operator/internal/controller"
 	"github.com/pluralsh/console/go/deployment-operator/internal/helpers"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
@@ -81,9 +83,6 @@ func (in *environment) cloneRepository() error {
 		return err
 	}
 	if copied {
-		if err := in.checkoutRequestedBranchBestEffort(repoDirPath); err != nil {
-			return err
-		}
 		return in.configureRepository(repoDirPath, userName, userEmail)
 	}
 
@@ -124,7 +123,7 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 	}
 
 	klog.V(log.LogLevelInfo).InfoS("copying prebaked repository", "src", match.Dir, "dst", repoDirPath, "url", in.agentRun.Repository)
-	if err := exec.NewExecutable("cp", exec.WithArgs([]string{"-a", match.Dir, repoDirPath})).Run(context.Background()); err != nil {
+	if err := fs.CopyDir(match.Dir, repoDirPath); err != nil {
 		if removeErr := os.RemoveAll(repoDirPath); removeErr != nil {
 			klog.ErrorS(removeErr, "failed to clean up incomplete prebake copy", "dir", repoDirPath)
 		}
@@ -144,14 +143,49 @@ func (in *environment) cloneFromPrebake(repoDirPath string) (bool, error) {
 		}
 	}
 
+	in.updateFromOrigin(repoDirPath)
 	return true, nil
 }
 
-func (in *environment) checkoutRequestedBranchBestEffort(repoDirPath string) error {
-	if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
-		klog.InfoS("prebake fetch/checkout failed, using local copy", "dir", repoDirPath, "err", err)
+// updateFromOrigin fetches origin and fast-forwards the working copy. Prebake
+// images are often built on a cron and lag HEAD; a fetch+ff is still cheaper
+// than cloning from scratch. Failures keep the local copy.
+func (in *environment) updateFromOrigin(repoDirPath string) {
+	if out, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"fetch", "origin"}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		klog.InfoS("prebake fetch failed, using local copy", "dir", repoDirPath, "err", err, "out", string(out))
+		return
 	}
-	return nil
+
+	if err := in.checkoutRequestedBranch(repoDirPath); err != nil {
+		klog.InfoS("prebake checkout failed, using fetched copy", "dir", repoDirPath, "err", err)
+		return
+	}
+
+	branch := strings.TrimSpace(lo.FromPtr(in.agentRun.Branch))
+	if branch == "" {
+		current, err := exec.NewExecutable("git",
+			exec.WithArgs([]string{"branch", "--show-current"}),
+			exec.WithDir(repoDirPath),
+		).RunWithOutput(context.Background())
+		if err != nil {
+			klog.InfoS("prebake could not determine current branch, using fetched copy", "dir", repoDirPath, "err", err)
+			return
+		}
+		branch = strings.TrimSpace(string(current))
+	}
+	if branch == "" {
+		return
+	}
+
+	if out, err := exec.NewExecutable("git",
+		exec.WithArgs([]string{"merge", "--ff-only", "origin/" + branch}),
+		exec.WithDir(repoDirPath),
+	).RunWithOutput(context.Background()); err != nil {
+		klog.InfoS("prebake fast-forward failed, using local copy", "dir", repoDirPath, "branch", branch, "err", err, "out", string(out))
+	}
 }
 
 // ConfigurePrebakeGitSafeDirectories marks every repository in the prebake

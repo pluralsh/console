@@ -12,6 +12,7 @@ import (
 	console "github.com/pluralsh/console/go/client"
 	v1 "github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/agentrun/v1"
 	"github.com/pluralsh/console/go/deployment-operator/pkg/agentrun-harness/prebake"
+	"github.com/pluralsh/console/go/polly/fs"
 )
 
 func TestConfigureCodebaseMemoryGitExclude(t *testing.T) {
@@ -77,14 +78,16 @@ func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("GIT_TERMINAL_PROMPT", "0")
+	t.Setenv("GIT_SSH_COMMAND", "false")
 	t.Setenv("TMPDIR", t.TempDir())
 	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
 
 	src := initGitRepo(t, "prebaked")
 	prebakeDir := t.TempDir()
 	prebakedCopy := filepath.Join(prebakeDir, "console")
-	if out, err := exec.Command("cp", "-a", src, prebakedCopy).CombinedOutput(); err != nil {
-		t.Fatalf("cp prebake fixture: %v: %s", err, out)
+	if err := fs.CopyDir(src, prebakedCopy); err != nil {
+		t.Fatalf("copy prebake fixture: %v", err)
 	}
 	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
 		Version: 1,
@@ -122,6 +125,52 @@ func TestCloneRepositoryCopiesPrebakeMatch(t *testing.T) {
 	}
 	if got := strings.TrimSpace(string(origin)); got != runURL {
 		t.Fatalf("origin = %q, want agent run repository URL", got)
+	}
+}
+
+func TestCloneRepositoryPullsPrebakeFromOrigin(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("TMPDIR", t.TempDir())
+	runGit(t, home, "config", "--global", "--add", "safe.directory", "*")
+
+	origin := initGitRepo(t, "stale")
+	prebakeDir := t.TempDir()
+	prebakedCopy := filepath.Join(prebakeDir, "console")
+	if err := fs.CopyDir(origin, prebakedCopy); err != nil {
+		t.Fatalf("copy prebake fixture: %v", err)
+	}
+	writePrebakeManifest(t, prebakeDir, prebake.Manifest{
+		Version: 1,
+		Repositories: []prebake.ManifestRepo{{
+			URL:  origin,
+			Path: "console",
+		}},
+	})
+	t.Setenv(prebake.EnvDir, prebakeDir)
+
+	if err := os.WriteFile(filepath.Join(origin, "README"), []byte("fresh\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	runGit(t, origin, "add", "README")
+	runGit(t, origin, "commit", "-m", "update")
+
+	workDir := t.TempDir()
+	env := &environment{
+		agentRun: &v1.AgentRun{Repository: origin},
+		dir:      workDir,
+	}
+	if err := env.cloneRepository(); err != nil {
+		t.Fatalf("cloneRepository() failed: %v", err)
+	}
+
+	contents, err := os.ReadFile(filepath.Join(workDir, "repository", "README"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "fresh\n" {
+		t.Fatalf("copied README = %q, want fresh after origin pull", contents)
 	}
 }
 
