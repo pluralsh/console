@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.EngineTest do
   use Console.DataCase, async: false
   use Mimic
-  alias Console.AI.Workbench.{Activity, Engine, Heartbeat, Subagents}
+  alias Console.AI.Workbench.{Activity, Engine, Heartbeat, Skills, Subagents}
   alias Console.AI.{Provider, Tool}
   alias Console.Deployments.Clusters
   alias Console.PubSub.Consumers.Recurse
@@ -27,6 +27,26 @@ defmodule Console.AI.Workbench.EngineTest do
       assert Process.alive?(pid)
       refute refetch(job).status == :failed
       refute refetch(job).error
+    end
+
+    test "retries loading skills while the git agent is bootstrapping" do
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, workbench: workbench, status: :running)
+      Process.put(:skill_load_attempts, 0)
+
+      expect(Skills, :skills, 2, fn _ ->
+        attempts = Process.get(:skill_load_attempts) + 1
+        Process.put(:skill_load_attempts, attempts)
+
+        if attempts == 1,
+          do: {:error, :agent_bootstrapping},
+          else: {:ok, []}
+      end)
+
+      assert {:ok, engine} = Engine.new(job)
+      assert engine.job.id == job.id
+      assert Process.get(:skill_load_attempts) == 2
+      refute refetch(job).status == :failed
     end
 
     test "starts MCP clients before indexing workbench tools" do
@@ -63,16 +83,6 @@ defmodule Console.AI.Workbench.EngineTest do
           },
         }
       )
-
-      # expect(Provider, :completion, fn _, _ ->
-      #   {:ok, "Plan complete", [
-      #     %Tool{
-      #       id: "1",
-      #       name: "workbench_plan",
-      #       arguments: %{"todos" => [%{name: "todo 1", description: "todo 1", done: false}]}
-      #     }
-      #   ]}
-      # end)
 
       expect(Provider, :completion, fn _, _ ->
         {:ok, "make notes", [
@@ -139,6 +149,64 @@ defmodule Console.AI.Workbench.EngineTest do
       infra = Enum.find(activities, & &1.type == :infrastructure)
       assert infra.prompt == "try infrastructure"
       assert infra.tool_call.name == "workbench_subagent"
+    end
+
+    test "refreshes the job after memos before running subagents from the same response" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "update the objective and investigate", [
+          %Tool{
+            id: "memo",
+            name: "workbench_notes",
+            arguments: %{
+              "status" => %{"objective" => "refreshed objective"},
+              "summary" => "focus the investigation"
+            }
+          },
+          %Tool{
+            id: "subagent",
+            name: "workbench_subagent",
+            arguments: %{"prompt" => "investigate", "subagent" => "infrastructure"}
+          }
+        ]}
+      end)
+
+      expect(Subagents.Infrastructure, :run, fn _, job, _ ->
+        assert Console.Schema.WorkbenchJob.objective(job) == "refreshed objective"
+        %{status: :successful, result: %{output: "infrastructure result"}}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "complete", [
+          %Tool{
+            name: "workbench_complete",
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "todo 1", description: "todo 1", done: true}]
+            }
+          }
+        ]}
+      end)
+
+      workbench = insert(:workbench, configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}})
+      job = insert(:workbench_job, workbench: workbench)
+
+      {:ok, engine} = Engine.new(job)
+      assert {:ok, result} = Engine.run(engine)
+      assert result.status == :successful
     end
 
     test "runs a skill job with a referenced job without crashing" do

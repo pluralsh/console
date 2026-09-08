@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ROOT_DIR=${SCRIPT_DIR%/*}
 CONTROLLER_DIR=go/controller
@@ -67,3 +69,5 @@ function ensure::client {
 
 echo Executing pre-commit hook
 check "$(get::commit)"
+
+node "${ROOT_DIR}/js/.yarn/releases/yarn-4.17.1.cjs" --cwd "${ROOT_DIR}/js" lint-staged

@@ -1,0 +1,23 @@
+.next/
+.vercel
+
+# dependencies
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+yarn-debug.log*
+yarn-error.log*
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+.env.local
+
+# OpenAPI schema (fetched at Docker build time)
+schema/

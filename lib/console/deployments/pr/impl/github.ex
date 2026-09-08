@@ -135,7 +135,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
     with {:ok, owner, repo, number} <- get_pull_id(url),
          {:ok, client} <- client(conn),
          {_, %{"title" => title} = pr, _} <- Tentacat.Pulls.find(client, owner, repo, number) do
-      {:ok, %{title: title, body: pr["body"] || ""}}
+      {:ok, %{title: title, body: pr["body"] || "", commit_sha: get_in(pr, ["head", "sha"])}}
     else
       {_, body, _} -> {:error, "failed to fetch pull request: #{Jason.encode!(body)}"}
       err -> err
@@ -176,6 +176,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
   defp to_commit_status(:queued), do: {:pending, %{}}
   defp to_commit_status(:failed), do: {:completed, %{completed_at: Timex.now(), conclusion: :failure}}
   defp to_commit_status(:successful), do: {:completed, %{completed_at: Timex.now(), conclusion: :success}}
+  defp to_commit_status(:cancelled), do: {:completed, %{completed_at: Timex.now(), conclusion: :cancelled}}
   defp to_commit_status(:pending_approval), do: {:completed, %{completed_at: Timex.now(), conclusion: :success}}
   defp to_commit_status(_), do: {:in_progress, %{started_at: Timex.now()}}
 

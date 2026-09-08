@@ -2,9 +2,12 @@ defmodule CloudQuery.Client do
   @moduledoc false
 
   @metrics_timeout :timer.seconds(30)
-  @cloud_query_timeout :timer.minutes(1)
+  @cloud_query_timeout :timer.minutes(5)
   @logs_timeout :timer.minutes(2)
   @lambda_timeout :timer.minutes(5)
+
+  def adapter, do: GRPC.Client.Adapters.Gun
+  def interceptors, do: [{CloudQuery.Client.Retry, max: 3, pause: 400, backoff: 2}]
 
   def connect() do
     with {:ok, channel} <- GRPC.Client.Connection.get_channel(__MODULE__),

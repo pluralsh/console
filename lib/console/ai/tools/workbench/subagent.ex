@@ -16,7 +16,9 @@ defmodule Console.AI.Tools.Workbench.Subagent do
   def json_schema(%__MODULE__{subagents: subagents}) do
     put_in(@json_schema, ["properties", "subagent"], %{"type" => "string", "enum" => subagents})
   end
-  def description(%__MODULE__{}), do: "Invoke a subagent to accomplish the task."
+  def description(%__MODULE__{}) do
+    "Invoke a subagent to accomplish the task. The prompt's first line must clearly describe the specific work to be done without a generic prefix such as \"Task\" or \"Job\"."
+  end
 
   def changeset(model, attrs) do
     model

@@ -1,0 +1,39 @@
+{
+    "type": "object",
+    "properties": {
+        "mode": {
+            "type": "string",
+            "enum": ["analyze", "write", "review"],
+            "description": "The mode of the coding agent. Use analyze to gather information, write to generate a PR, or review to evaluate and publish a structured review for an existing PR. Review mode is enabled for this job; use it whenever the task is to review a pull request."
+        },
+        "repository": {
+            "type": "string",
+            "description": "The url of the repository to create a PR for"
+        },
+        "base_branch": {
+            "type": "string",
+            "description": "Required for review mode: the pull request's head branch (the branch containing the changes to review), not the PR's target/base. For analyze/write this is optional and is the branch to clone and use as the pull request base. Leave it blank unless explicitly prompted. Do not use this for follow-up runs."
+        },
+        "head_branch": {
+            "type": "string",
+            "description": "Required when `followup` is true. The existing pull request's head branch. The harness checks out this branch before starting the agent so it can commit and push its additional work there."
+        },
+        "pr_url": {
+            "type": "string",
+            "description": "Required for review mode and whenever `followup` is true. The URL of the existing pull request to review or continue. For review runs, this URL is provided directly to the review agent as pull request context."
+        },
+        "prompt": {
+            "type": "string",
+            "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository.  Commonmark Markdown formatting is encouraged to convey structure and semantic importance."
+        },
+        "babysit": {
+            "type": "boolean",
+            "description": "When true, requests babysitting behavior for this run. Enables the agent to track CI failures and user comments.  Useful for application code prs or complex changes"
+        },
+        "followup": {
+            "type": "boolean",
+            "description": "When true, this run performs additional work on an existing pull request. You MUST always provide `pr_url` (the existing PR URL) and `head_branch` (that PR's head branch). The agent commits and pushes to the current branch; it does not create a branch or a new pull request."
+        }
+    },
+    "required": ["mode", "repository", "prompt"]
+}

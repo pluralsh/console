@@ -196,10 +196,10 @@ addons:
       breaking_changes: [No breaking changes are listed in the provided v1.65.0 release
           notes snippet; you need to review the upstream CHANGELOG for any behavior/config
           changes between v1.64.0 and v1.65.0.]
-    chart_version: 2.65.0
-    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.6', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.6',
-      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.5', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.4',
-      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.6', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.65.0',
+    chart_version: 2.65.1
+    images: ['public.ecr.aws/csi-components/csi-attacher:v4.12.0-eksbuild.7', 'public.ecr.aws/csi-components/csi-node-driver-registrar:v2.17.0-eksbuild.7',
+      'public.ecr.aws/csi-components/csi-provisioner:v6.3.0-eksbuild.6', 'public.ecr.aws/csi-components/csi-resizer:v2.2.1-eksbuild.5',
+      'public.ecr.aws/csi-components/livenessprobe:v2.19.0-eksbuild.7', 'public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.65.0',
       'us-central1-docker.pkg.dev/k8s-staging-test-infra/images/kubekins-e2e:v20260817-81577dc432-master']
   - version: 1.64.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
@@ -1780,27 +1780,27 @@ addons:
   git_url: https://repo1.dso.mil/big-bang/bigbang
   release_url: https://repo1.dso.mil/big-bang/bigbang/-/releases/{vsn}
   versions:
-  - version: 3.31.1
-    kube: ['1.35']
+  - version: 3.32.0
+    kube: ['1.36']
     requirements:
     - name: Alloy
       version: 4.3.2-bb.0
     - name: Anchore Enterprise
-      version: 3.25.1-bb.1
+      version: 3.25.1-bb.3
     - name: Argocd
       version: 10.2.1-bb.0
     - name: Authservice
-      version: 1.1.5-bb.7
-    - name: Bbctl
-      version: 3.0.1-bb.3
+      version: 1.1.8-bb.1
+    - name: Cert Manager
+      version: v1.20.3-bb.2
     - name: Eck Operator
       version: 3.4.1-bb.1
     - name: Elasticsearch Kibana
       version: 1.41.0-bb.0
     - name: External Secrets Operator
-      version: 2.8.0-bb.0
+      version: 2.9.0-bb.0
     - name: Fluentbit
-      version: 0.57.9-bb.0
+      version: 0.57.9-bb.1
     - name: Fortify
       version: 26.2.0-bb.2
     - name: Gatekeeper
@@ -1810,7 +1810,7 @@ addons:
     - name: Gitlab
       version: 10.2.4-bb.0
     - name: Gitlab Runner
-      version: 0.88.3-bb.2
+      version: 0.91.2-bb.1
     - name: Grafana
       version: 10.5.15-bb.6
     - name: Harbor
@@ -1828,15 +1828,15 @@ addons:
     - name: Keycloak
       version: 7.3.0-bb.0
     - name: Kiali
-      version: 2.30.0-bb.0
+      version: 2.30.0-bb.1
     - name: Kyverno
-      version: 3.8.2-bb.2
+      version: 3.9.0-bb.0
     - name: Kyverno Policies
       version: 3.3.4-bb.87
     - name: Kyverno Reporter
-      version: 3.9.0-bb.1
+      version: 3.10.0-bb.0
     - name: Loki
-      version: 6.55.0-bb.2
+      version: 6.55.0-bb.5
     - name: Mattermost
       version: 11.10.0-bb.0
     - name: Mattermost Operator
@@ -1850,7 +1850,7 @@ addons:
     - name: Minio Operator
       version: 7.1.1-bb.9
     - name: Monitoring
-      version: 88.3.0-bb.0
+      version: 88.3.0-bb.1
     - name: Neuvector
       version: 2.11.0-bb.2
     - name: Prometheus Operator Crds
@@ -1858,15 +1858,15 @@ addons:
     - name: Renovate
       version: 46.251.0-bb.0
     - name: Sonarqube
-      version: 2026.4.0-bb.0
+      version: 2026.4.1-bb.0
     - name: Tempo
       version: 2.1.0-bb.2
     - name: Thanos
-      version: 17.4.0-bb.3
+      version: 17.6.0-bb.0
     - name: Twistlock
-      version: 0.28.0-bb.3
+      version: 0.30.0-bb.0
     - name: Vault
-      version: 0.34.0-bb.0
+      version: 0.34.1-bb.0
     - name: Velero
       version: 12.1.0-bb.3
     - name: Wrapper
@@ -1876,15 +1876,22 @@ addons:
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ["Big Bang 3.31.0 \u2192 3.31.1 upgrades the bundled Keycloak\
-          \ chart from 7.2.2-bb.1 to 7.3.0-bb.0."]
-      features: [Keycloak bumped to 7.3.0-bb.0 (may include upstream Keycloak chart/app
-          improvements).]
-      breaking_changes: ["Potential breaking changes may exist within the Keycloak\
-          \ 7.2.2-bb.1 \u2192 7.3.0-bb.0 upgrade; review the Keycloak package/changelog\
-          \ for this version jump before upgrading."]
-    chart_version: 3.31.1
-    images: []
+      chart_updates: [BigBang 3.32.0 adds Cert Manager (v1.20.3-bb.2) and removes
+          bbctl from the stack., Most other components receive patch/minor bumps;
+          expect chart/package version alignment but review per-package changelogs
+          for values changes.]
+      features: ['Cert Manager is now included, enabling in-cluster certificate issuance/renewal
+          workflows without separate installation.', 'Various components updated for
+          bugfixes/security patches (e.g., Authservice, ESO, Keycloak, Kyverno, Thanos,
+          Twistlock).']
+      breaking_changes: [bbctl is removed; any CI/CD or operational workflows depending
+          on bbctl need migration., Introducing Cert Manager may overlap with an existing
+          cert-manager installation/CRDs; reconcile ownership to avoid CRD/namespace
+          conflicts.]
+    chart_version: 3.32.0
+    images: ['registry1.dso.mil/ironbank/gitlab/gitlab-runner/gitlab-runner:v18.11.3',
+      'registry1.dso.mil/gitlab/gitlab-org/gitlab-runner:ubi-fips-v19.2.2', 'registry1.dso.mil/ironbank/gitlab/gitlab-runner/gitlab-runner-helper:v18.11.3',
+      'registry1.dso.mil/gitlab/gitlab-org/gitlab-runner/gitlab-runner-helper:ubi-fips-x86_64-v19.2.2']
   - version: 3.31.0
     kube: ['1.35']
     requirements:
@@ -19242,22 +19249,69 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
-  - version: 88.6.1
+  - version: 90.0.0
     kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
       '1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: ['kube-prometheus-stack: update chart dependencies (non-major)
-          via renovate (PR #7223).']
-      features: ['HTTPRoute timeout support was added in 88.6.0 (PR #7221).', 88.6.1
-          primarily bumps dependency versions (non-major) and does not introduce new
-          user-facing features beyond what those dependency patch/minor updates bring.]
+      chart_updates: [Adds secret-based auth support for control-plane ServiceMonitors
+          (new capability in kube-prometheus-stack templates/values)., Grafana subchart
+          was updated to v13.2.1 in 89.2.2 (already in your starting version).]
+      features: ['Secret-based authentication can now be configured for the control-plane
+          ServiceMonitors, enabling scraping secured endpoints using credentials stored
+          in Kubernetes Secrets.']
       breaking_changes: []
-    chart_version: 88.6.1
-    images: ['docker.io/grafana/grafana:13.2.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
-      'quay.io/kiwigrid/k8s-sidecar:2.10.1', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+    chart_version: 90.0.0
+    images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+  - version: 89.2.2
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Grafana dependency updated to v13.2.1 in kube-prometheus-stack
+          89.2.2., kube-prometheus-stack 89.1.0 includes non-major dependency updates
+          (unspecified components).]
+      features: [Updated bundled Grafana Helm chart/dependency to v13.2.1 (likely
+          includes bugfixes/minor improvements from Grafana chart)., Refreshed several
+          non-major dependencies in 89.1.0 (patch/minor bumps).]
+      breaking_changes: []
+    chart_version: 89.2.2
+    images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.11.2', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
+      'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
+      'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
+  - version: 89.1.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: '- No explicit Helm values changes called out in the provided
+        notes for 89.1.0.
+
+        - From 88.6.0, a new feature was added: **HTTPRoute timeout support**. If
+        you use Gateway API/HTTPRoute integration, review any new/updated values related
+        to HTTPRoute timeouts (and ensure your Gateway API CRDs/controller support
+        the timeout fields you intend to set).
+
+        '
+      chart_updates: ['89.1.0: Bumps kube-prometheus-stack chart dependencies with
+          non-major updates (Renovate). No other chart-level changes mentioned in
+          the provided notes.', '88.6.0: Adds support for configuring HTTPRoute timeouts
+          (Gateway API HTTPRoute).']
+      features: [HTTPRoute timeout support (useful if exposing components via Gateway
+          API and you need request/response timeout tuning).]
+      breaking_changes: []
+    chart_version: 89.1.0
+    images: ['docker.io/grafana/grafana:13.2.1-distroless', 'ghcr.io/jkroepke/kube-webhook-certgen:1.8.8',
+      'quay.io/kiwigrid/k8s-sidecar:2.10.3', 'quay.io/prometheus-operator/prometheus-operator:v0.93.1',
       'quay.io/prometheus/alertmanager:v0.34.0', 'quay.io/prometheus/node-exporter:v1.12.1-distroless',
       'quay.io/prometheus/prometheus:v3.14.0-distroless', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.20.0']
   - version: 88.6.0
@@ -22652,7 +22706,7 @@ addons:
   helm_repository_url: https://charts.rook.io/release
   versions:
   - version: 1.20.0
-    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
+    kube: ['1.37', '1.36', '1.35', '1.34', '1.33', '1.32', '1.31']
     requirements: []
     incompatibilities: []
     summary:
@@ -25193,7 +25247,12 @@ addons:
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [No feature details provided in the supplied notes; both releases
+          reference external GitHub release-notes files for specifics.]
+      breaking_changes: []
     chart_version: 3.32.2
     images: ['quay.io/tigera/operator:v1.42.6']
   - version: 3.32.0
@@ -25385,7 +25444,7 @@ addons:
           appset page).', 'Dependency: Dex updated to v2.45.1 (may include security/bug
           fixes from Dex).']
       breaking_changes: []
-    chart_version: 10.4.2
+    chart_version: 10.8.1
     images: ['ecr-public.aws.com/docker/library/redis:8.6.4-alpine', 'ghcr.io/dexidp/dex:v2.45.1',
       'quay.io/argoproj/argocd:v3.5.2']
   - version: 3.5.1
@@ -25963,7 +26022,7 @@ addons:
           after init-less input staging., OpenTelemetry process owner detection is
           skipped to avoid issues in some environments.]
       breaking_changes: []
-    chart_version: 2.0.3
+    chart_version: 2.0.4
     images: ['quay.io/argoproj/argo-workflows-crdinstaller:v4.1.2', 'quay.io/argoproj/argocli:v4.1.2',
       'quay.io/argoproj/workflow-controller:v4.1.2']
   - version: 4.1.0
@@ -28872,13 +28931,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 9.5.2
-    kube: ['1.36', '1.35', '1.34']
+  - version: 9.5.3
+    kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 9.5.2
-    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+    chart_version: 9.5.3
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.5.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28886,6 +28945,13 @@ addons:
     summary: null
     chart_version: 9.5.0
     images: ['docker.elastic.co/elastic-agent/elastic-agent:9.5.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 9.4.6
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 9.4.6
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.4.6', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.4.0
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -28956,6 +29022,13 @@ addons:
     summary: null
     chart_version: 9.0.0
     images: ['docker.elastic.co/elastic-agent/elastic-agent:9.0.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  - version: 8.19.21
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 8.19.21
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.19.21', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 8.19.14
     kube: ['1.36', '1.35', '1.34']
     requirements: []
@@ -29946,8 +30019,76 @@ addons:
   helm_repository_url: https://kubescape.github.io/helm-charts
   helm_values: clusterName=example,account=example
   versions:
+  - version: 1.40.4
+    kube: ['1.37', '1.36', '1.35']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: "### Helm values / configuration changes to review\n\n- **`kubescape.submit`\
+        \ removed from docs**: the README no longer references `kubescape.submit`\
+        \ (it was dead). If you still have this value in your `values.yaml`, it is\
+        \ likely ignored and can be removed.\n\n- **New: expose `defaultFrameworks`**\n\
+        \  - The chart now exposes a `defaultFrameworks` value for **kubescape-operator\
+        \ posture scans**.\n  - Operator now **honors install-time `defaultFrameworks`**\
+        \ for posture scans.\n  - Action: if you want to control which frameworks\
+        \ are scanned by default, set `defaultFrameworks` explicitly; otherwise behavior\
+        \ should remain the chart default.\n\n- **New: opt-in RBAC for runtime posture**\n\
+        \  - Chart adds **optional RBAC** to support \u201Cagent runtime posture\u201D\
+        .\n  - Action: if you enable the runtime posture feature, ensure you also\
+        \ enable/accept the new RBAC toggle(s) and verify they align with your cluster\u2019\
+        s RBAC policies.\n\n- **New: storage APIServer host networking option**\n\
+        \  - Storage can now be configured to run its APIServer **on the host network**\
+        \ (opt-in).\n  - Action: only enable if required; validate network policy/firewalling\
+        \ and port conflicts.\n\n- **New: disable exec + open tracing options**\n\
+        \  - Adds chart options to disable **exec tracing** and **open tracing**.\n\
+        \  - Action: if you have security/compliance concerns, consider disabling;\
+        \ otherwise defaults likely keep prior behavior.\n\n- **Autoupdater: pod metadata\
+        \ overrides**\n  - Autoupdater supports overriding pod metadata (labels/annotations).\n\
+        \  - Action: if you rely on standardized labels/annotations for policy/monitoring,\
+        \ consider using these overrides.\n\n- **Node-agent config refactor**\n  -\
+        \ \u201CExtra\u201D node-agent configuration moved under an `extra` section.\n\
+        \  - Action: if you currently set node-agent \u201Cextra\u201D config keys,\
+        \ confirm the new path and adjust `values.yaml` accordingly.\n\n- **RBAC tightening\
+        \ (may affect custom workflows)**\n  - **Node-agent**: dropped RBAC for `pods/delete`.\n\
+        \  - **Workload container securityContexts** now drop **all Linux capabilities**.\n\
+        \  - Action: if you had workloads/sidecars depending on additional capabilities\
+        \ or node-agent deleting pods, confirm your flows still work.\n"
+      chart_updates: ['Updated component images/versions: operator bumped to v0.2.162
+          (Bottlerocket detection support); storage image bumped to v0.0.298 (chart
+          note) and upstream storage includes additional fixes/features in this release
+          train.', 'Node-agent behavior update: auto-set `super_t` on Bottlerocket
+          node groups; Prometheus OTEL exporter enabled; malware detection changed
+          (ClamAV removed, moved to hash sensor).', 'Security hardening in templates:
+          drop all Linux capabilities in workload container securityContexts; pin
+          `runAsGroup` wherever `runAsUser` is pinned.', "Reliability/compat fixes:\
+          \ mount CA certs into sbom-scanner sidecar; mount `config.json` as a file\
+          \ (avoid masking policy dir); don\u2019t mask baked policy library when\
+          \ downloads are off.", 'CRD/template polish: omit empty annotations key
+          on seccompprofiles CRD when empty; align SecurityException vulnerability
+          schema with kubevuln types.']
+      features: [Configurable `defaultFrameworks` for operator posture scans; operator
+          honors the install-time setting for default frameworks., Opt-in RBAC support
+          for agent runtime posture (feature gated)., Storage APIServer can be run
+          on the host network (opt-in)., Autoupdater supports pod metadata overrides
+          (labels/annotations)., 'Bottlerocket node groups: node-agent can auto-detect
+          and auto-set `super_t` to work correctly on Bottlerocket.', Options added
+          to disable exec tracing and open tracing.]
+      breaking_changes: ['Node-agent malware detection change: **ClamAV removed**
+          and malware detection moved to the **hash sensor**. If you depended on ClamAV-specific
+          behavior/artifacts, validate the new detection path.', 'Node-agent RBAC
+          reduced: **pods/delete permission removed**. If you had automation relying
+          on node-agent deleting pods, it will no longer be allowed by default.',
+        "Node-agent values structure change: some \u201Cextra node-agent configuration\u201D\
+          \ moved under an `extra` section; existing `values.yaml` may need path updates.",
+        'SecurityContext hardening: workloads now **drop all Linux capabilities**
+          by default and `runAsGroup` is pinned alongside `runAsUser`; if any container
+          required extra capabilities or different group IDs, you must override explicitly.']
+    chart_version: 1.40.4
+    images: ['quay.io/kubescape/http-request:v0.2.23', 'quay.io/kubescape/kubescape:v4.0.13',
+      'quay.io/kubescape/kubevuln:v0.3.430', 'quay.io/kubescape/node-agent:v0.3.219',
+      'quay.io/kubescape/operator:v0.2.169', 'quay.io/kubescape/storage:v0.0.331']
   - version: 1.40.3
-    kube: ['1.36', '1.35', '1.34']
+    kube: ['1.37', '1.36', '1.35']
     requirements: []
     incompatibilities: []
     summary:

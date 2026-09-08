@@ -1,0 +1,66 @@
+name: CI / JavaScript
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/js-ci.yaml"
+      - "js/.yarnrc.yml"
+      - "js/console/**"
+      - "js/design-system/**"
+      - "js/eslint-config/**"
+      - "js/package.json"
+      - "js/yarn.lock"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/js-ci.yaml"
+      - "js/.yarnrc.yml"
+      - "js/console/**"
+      - "js/design-system/**"
+      - "js/eslint-config/**"
+      - "js/package.json"
+      - "js/yarn.lock"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+      - run: yarn --immutable
+      - run: yarn workspace @pluralsh/eslint-config-pluralsh lint
+      - run: yarn workspace console lint
+
+  test:
+    name: Unit test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: js
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.1
+          cache: yarn
+          cache-dependency-path: js/yarn.lock
+      - run: corepack enable
+      - run: yarn --immutable
+      - run: yarn test

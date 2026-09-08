@@ -1,10 +1,19 @@
 # IDE
-/.idea
+.idea/
 /.vscode/**/*
 !/.vscode/settings.json
+!/.vscode/markdown.code-snippets
 
 # System
 .DS_Store
+
+# JavaScript workspace
+node_modules/
+/js/.yarn/*
+!/js/.yarn/releases/
+!/js/.yarn/releases/**
+.pnp.*
+*.tsbuildinfo
 
 # Binaries for programs and plugins
 *.exe
@@ -69,7 +78,7 @@ data/
 
 # config/pubkey.pem
 
-release-notes.md
+/release-notes.md
 # Rust binary artifacts
 /target/
 

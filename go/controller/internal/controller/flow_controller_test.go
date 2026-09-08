@@ -124,7 +124,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("UpsertFlow", mock.Anything, mock.Anything).Return(test.flowFragment, nil)
 
 			nr := &controller.FlowReconciler{
@@ -146,6 +146,42 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(flw.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
+		It("should recreate the API flow when status points to a missing resource", func() {
+			const recreatedID = "456"
+			const missingID = "missing-flow"
+
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.Flow{
+				ObjectMeta: metav1.ObjectMeta{Name: flowName, Namespace: namespace},
+			}, func(p *v1alpha1.Flow) {
+				p.Status.ID = lo.ToPtr(missingID)
+				p.Status.SHA = lo.ToPtr("PWP5EBI7YMVTF7VLCCKG7K3LXEKCNK36HGVFIOJIT3MJFBSKVEOQ====")
+			})).To(Succeed())
+
+			flowFragment := &gqlclient.FlowFragment{ID: recreatedID}
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetFlow", mock.Anything, missingID).Return(nil, errors.NewNotFound(schema.GroupResource{}, missingID))
+			fakeConsoleClient.
+				On("UpsertFlow", mock.Anything, mock.MatchedBy(func(attrs gqlclient.FlowAttributes) bool {
+					return attrs.Name == flowName
+				})).
+				Return(flowFragment, nil)
+
+			reconciler := &controller.FlowReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Process(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			flow := &v1alpha1.Flow{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, flow)).To(Succeed())
+			Expect(flow.Status.GetID()).To(Equal(recreatedID))
+			Expect(flow.Status.GetSHA()).To(Equal("PWP5EBI7YMVTF7VLCCKG7K3LXEKCNK36HGVFIOJIT3MJFBSKVEOQ===="))
+		})
+
 		It("should requeue when binding is not ready", func() {
 			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.Flow{
 				ObjectMeta: metav1.ObjectMeta{Name: flowName, Namespace: namespace},
@@ -165,7 +201,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 
 			fr := &controller.FlowReconciler{
 				Client:        k8sClient,
@@ -197,7 +233,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			flowFragment := &gqlclient.FlowFragment{ID: id}
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.
 				On("UpsertFlow", mock.Anything, mock.MatchedBy(func(attrs gqlclient.FlowAttributes) bool {
 					if len(attrs.FlowWorkbenches) != 1 {
@@ -227,7 +263,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			flowFragment := &gqlclient.FlowFragment{ID: id}
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.
 				On("UpsertFlow", mock.Anything, mock.MatchedBy(func(attrs gqlclient.FlowAttributes) bool {
 					return attrs.MaxPreviews != nil && *attrs.MaxPreviews == 5
@@ -263,7 +299,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			}
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything, mock.Anything).Return(flowFragment, nil)
+			fakeConsoleClient.On("GetFlow", mock.Anything, mock.Anything).Return(flowFragment, nil)
 			fakeConsoleClient.On("DeleteFlow", mock.Anything, mock.Anything).Return(nil)
 
 			nsReconciler := &controller.FlowReconciler{

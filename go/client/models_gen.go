@@ -355,11 +355,11 @@ type AgentPodReference struct {
 type AgentPrReviewAttributes struct {
 	// the URL of the pull request being reviewed
 	URL string `json:"url"`
-	// the A-F confidence grade
+	// the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge
 	Confidence AgentReviewConfidence `json:"confidence"`
 	// a summary of the pull request review
 	Summary string `json:"summary"`
-	// an explanation of the confidence grade
+	// an explanation of the mergeability grade based on findings and blockers; do not describe review certainty
 	ConfidenceComment string `json:"confidenceComment"`
 	// file-level summaries
 	Files []*AgentPrReviewFileAttributes `json:"files,omitempty"`
@@ -11073,9 +11073,11 @@ type WorkbenchJobThought struct {
 	// metrics and logs for the thought
 	Attributes *WorkbenchJobThoughtAttributes `json:"attributes,omitempty"`
 	// the activity this thought belongs to
-	Activity   *WorkbenchJobActivity `json:"activity,omitempty"`
-	InsertedAt *string               `json:"insertedAt,omitempty"`
-	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+	Activity *WorkbenchJobActivity `json:"activity,omitempty"`
+	// the configured workbench tool that emitted this thought
+	Tool       *WorkbenchTool `json:"tool,omitempty"`
+	InsertedAt *string        `json:"insertedAt,omitempty"`
+	UpdatedAt  *string        `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobThoughtAttributes struct {

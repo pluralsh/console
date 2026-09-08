@@ -3,8 +3,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
   use Mimic
 
   alias Console.AI.Tool
-  alias Console.AI.Tools.Workbench.{KubeRequest, KubeShell}
+  alias Console.AI.Tools.Workbench.{KubeDrain, KubeRequest, KubeShell}
   alias Console.AI.Tools.Workbench.Infrastructure.{KubeDelete, KubeExec, KubeUpdate}
+  alias Console.AI.Tools.Workbench.Infrastructure.KubeDrain, as: KubeDrainTool
   alias Console.Deployments.Clusters
   alias Console.Schema.WorkbenchJob
   alias Console.Schema.WorkbenchJob.Modes
@@ -150,6 +151,30 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.KubeRequestToolsTest do
                 explanation: "Inspect the pod hostname.",
                 approval: ^approval
               }} = KubeExec.implement(exec)
+    end
+
+    test "returns a kube request for draining a node" do
+      job = job_with_kubernetes_policy([])
+      cluster = insert(:cluster, handle: "cluster-a")
+      approval = %Tool.Approval{reason: "approved by policy"}
+
+      assert {:ok, drain} =
+               Tool.validate(
+                 %KubeDrainTool{job: job, approval: approval},
+                 %{
+                   "cluster" => cluster.handle,
+                   "node" => "worker-0",
+                   "explanation" => "Drain the node before maintenance."
+                 }
+               )
+
+      assert {:ok,
+              %KubeDrain{
+                handle: "cluster-a",
+                node: "worker-0",
+                explanation: "Drain the node before maintenance.",
+                approval: ^approval
+              }} = KubeDrainTool.implement(drain)
     end
   end
 

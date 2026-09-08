@@ -1,6 +1,6 @@
 ---
 name: add-design-system-icons
-description: Adds new icon components to the Console design system and exports them from `assets/design-system/src/icons.ts`. Use when creating a new icon from a pasted SVG, converting a Figma-exported SVG into a `createIcon` component, or adding a new brand/logo icon with optional `fullColor` support.
+description: Adds new icon components to the Console design system and exports them from `js/design-system/src/icons.ts`. Use when creating a new icon from a pasted SVG, converting a Figma-exported SVG into a `createIcon` component, or adding a new brand/logo icon with optional `fullColor` support.
 ---
 
 # Add Design System Icons
@@ -8,26 +8,26 @@ description: Adds new icon components to the Console design system and exports t
 Use this skill when the user wants a new icon added to the Console design system.
 
 Target files:
-- `assets/design-system/src/components/icons/<IconName>.tsx`
-- `assets/design-system/src/icons.ts`
+- `js/design-system/src/components/icons/<IconName>.tsx`
+- `js/design-system/src/icons.ts`
 
 ## Quick Rules
 
 - `mix format` SHOULD NEVER BE RUN in this repository.
-- Follow the existing icon pattern in `assets/design-system/src/components/icons/createIcon.tsx`.
+- Follow the existing icon pattern in `js/design-system/src/components/icons/createIcon.tsx`.
 - Default to `export default createIcon(...)` because that is the established icon system pattern in this repo.
 - Keep icon components minimal: imports, blank line, `export default createIcon(...)`.
-- Add the export to `assets/design-system/src/icons.ts` in alphabetical order.
+- Add the export to `js/design-system/src/icons.ts` in alphabetical order.
 - After substantive edits, run `ReadLints` on the changed icon file and `icons.ts`.
 - Do not remove existing comments.
 
 ## First Step
 
 Before editing, inspect:
-- `assets/design-system/src/components/icons/createIcon.tsx`
+- `js/design-system/src/components/icons/createIcon.tsx`
 - One nearby standard icon for simple SVG conversion
 - One nearby logo icon if `fullColor` is likely needed
-- The relevant section of `assets/design-system/src/icons.ts`
+- The relevant section of `js/design-system/src/icons.ts`
 
 ## Workflow Choice
 
@@ -49,7 +49,7 @@ Use this for icons like `ChatOutlineIcon`.
 
 ### Convert the SVG
 
-- Create `assets/design-system/src/components/icons/<IconName>.tsx`.
+- Create `js/design-system/src/components/icons/<IconName>.tsx`.
 - Wrap the SVG with `createIcon`.
 - Replace hard-coded `width` and `height` with `width={size}` and, when appropriate, `height={size}`.
 - Keep the original `viewBox`.
@@ -102,7 +102,7 @@ Use this for icons like vendor logos.
 
 ### Convert the logo
 
-- Create `assets/design-system/src/components/icons/<BrandName>LogoIcon.tsx` unless the user requested a different name.
+- Create `js/design-system/src/components/icons/<BrandName>LogoIcon.tsx` unless the user requested a different name.
 - Use `createIcon(({ size, color, fullColor }) => ...)`.
 - Replace `width` and `height` with `size`.
 - Keep the original `viewBox`.
@@ -146,7 +146,7 @@ export default createIcon(({ size, color, fullColor }) => (
 
 After adding the component:
 
-- Add `export { default as <IconName> } from './components/icons/<IconName>'` to `assets/design-system/src/icons.ts`
+- Add `export { default as <IconName> } from './components/icons/<IconName>'` to `js/design-system/src/icons.ts`
 - Insert it in alphabetical order with the surrounding exports
 
 ## Validation Checklist
@@ -164,7 +164,7 @@ Before finishing:
 ## Example Requests
 
 **Brand logo request**
-- "Add logo icons for Elasticsearch, Loki, Prometheus, and Tempo to `assets/design-system/src/icons.ts` with full-color support."
+- "Add logo icons for Elasticsearch, Loki, Prometheus, and Tempo to `js/design-system/src/icons.ts` with full-color support."
 
 **Raw SVG request**
 - "Create `ChatOutlineIcon` from this SVG and add it to `icons.ts`."

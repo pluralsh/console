@@ -1,0 +1,16 @@
+{
+  "branches": ["master"],
+  "extends": ["semantic-release-monorepo"],
+  "tagFormat": "eslint-config-v${version}",
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "preset": "conventionalcommits"
+      }
+    ],
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/npm",
+    "@semantic-release/github"
+  ]
+}

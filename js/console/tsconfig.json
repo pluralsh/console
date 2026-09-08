@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.eslint.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "../design-system" }
+  ]
+}

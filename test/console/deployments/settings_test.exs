@@ -212,6 +212,17 @@ defmodule Console.Deployments.SettingsTest do
       [] = Console.Repo.all(Console.Schema.AgentMigration)
     end
 
+    test "only the elected node can generate agent migrations" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      settings = insert(:deployment_settings)
+      expect(Console.ClusterRing, :node, fn :agent_migrations -> :other_node end)
+
+      {:error, _} = Settings.migrate_agents()
+
+      assert refetch(settings).agent_version == settings.agent_version
+      assert Console.Repo.all(Console.Schema.AgentMigration) == []
+    end
+
     test "it will ignore if managing agents is not set" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       insert(:deployment_settings, manage_agents: false)

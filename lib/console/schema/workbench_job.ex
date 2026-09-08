@@ -35,6 +35,7 @@ defmodule Console.Schema.WorkbenchJob do
         field :update, :boolean, default: false
         field :delete, :boolean, default: false
         field :exec,   :boolean, default: false
+        field :drain,  :boolean, default: false
 
         field :exclude_namespaces, {:array, :string}
         field :require_namespaces, {:array, :string}
@@ -79,7 +80,7 @@ defmodule Console.Schema.WorkbenchJob do
 
     defp kubernetes_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(update delete exec exclude_namespaces require_namespaces)a)
+      |> cast(attrs, ~w(update delete exec drain exclude_namespaces require_namespaces)a)
     end
   end
 
@@ -278,6 +279,9 @@ defmodule Console.Schema.WorkbenchJob do
   def objective(%__MODULE__{result: %{objective: objective}}) when is_binary(objective) and byte_size(objective) > 0,
     do: objective
   def objective(%__MODULE__{prompt: prompt}), do: prompt
+
+  def coding_review?(%__MODULE__{modes: %{coding: %{review: true}}}), do: true
+  def coding_review?(_), do: false
 
   def update_changeset(model, attrs \\ %{}) do
     model

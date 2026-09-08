@@ -1,0 +1,144 @@
+fragment AwaitingReviewStack on InfrastructureStack {
+  id
+  name
+  status
+  runs(first: 50) {
+    edges {
+      node {
+        id
+        status
+        message
+        approvalResult {
+          reason
+          result
+        }
+        configuration {
+          aiApproval {
+            enabled
+          }
+        }
+        pullRequest {
+          id
+          title
+        }
+      }
+    }
+  }
+}
+
+fragment AwaitingReviewAgentRun on AgentRun {
+  id
+  status
+  approvedAt
+  prompt
+  repository
+  runtime {
+    id
+    name
+    type
+  }
+  analysis {
+    summary
+  }
+  pullRequests {
+    ...PullRequestBasic
+  }
+  workbenchJob {
+    id
+    insertedAt
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+fragment AwaitingReviewWorkbenchActivity on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  result {
+    explanation
+    functionCall {
+      name
+      input
+      toolId
+      tool {
+        id
+        name
+        tool
+        configuration {
+          lambda {
+            description
+          }
+          cloudRun {
+            description
+          }
+          azureFunction {
+            description
+          }
+        }
+      }
+    }
+    kubeRequest {
+      handle
+      method
+      path
+    }
+    kubeDrain {
+      handle
+      node
+      explanation
+    }
+    kubeExec {
+      handle
+      command
+      namespace
+      pod
+      container
+    }
+  }
+  workbenchJob {
+    id
+    prompt
+    insertedAt
+    result {
+      workingTheory
+    }
+    workbench {
+      id
+      name
+    }
+  }
+}
+
+query PendingApprovalStacks($first: Int = 50) {
+  infrastructureStacks(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewStack
+      }
+    }
+  }
+}
+
+query PendingApprovalAgentRuns($first: Int = 100) {
+  agentRuns(first: $first, status: PENDING_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewAgentRun
+      }
+    }
+  }
+}
+
+query PendingApprovalWorkbenchActivities($first: Int = 100) {
+  workbenchJobActivities(first: $first, status: NEEDS_APPROVAL) {
+    edges {
+      node {
+        ...AwaitingReviewWorkbenchActivity
+      }
+    }
+  }
+}

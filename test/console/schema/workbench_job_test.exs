@@ -20,6 +20,21 @@ defmodule Console.Schema.WorkbenchJobTest do
     end
   end
 
+  describe "coding_review?/1" do
+    test "is true only when coding review mode is enabled" do
+      assert WorkbenchJob.coding_review?(%WorkbenchJob{
+               modes: %WorkbenchJob.Modes{coding: %WorkbenchJob.Modes.Coding{review: true}}
+             })
+
+      refute WorkbenchJob.coding_review?(%WorkbenchJob{
+               modes: %WorkbenchJob.Modes{coding: %WorkbenchJob.Modes.Coding{review: false}}
+             })
+
+      refute WorkbenchJob.coding_review?(%WorkbenchJob{})
+      refute WorkbenchJob.coding_review?(nil)
+    end
+  end
+
   describe "Mini.normalize_status/1" do
     test "accepts enum atoms" do
       assert Mini.normalize_status(:successful) == :successful

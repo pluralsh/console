@@ -18,7 +18,7 @@ defmodule Console.GraphQl.PersistedQuery do
           |> Jason.decode!()
           |> Map.get("operations")
           |> Map.merge(
-            File.read!("assets/src/generated/persisted-queries/client.json")
+            File.read!("js/console/src/generated/persisted-queries/client.json")
             |> Jason.decode!()
             |> Map.get("operations")
             |> Map.new(fn {key, %{"body" => body}} -> {key, body} end)

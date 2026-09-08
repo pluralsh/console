@@ -1,0 +1,22 @@
+fragment Repo on Repository {
+  id
+  name
+  description
+  documentation
+  icon
+  darkIcon
+  private
+  tags {
+    tag
+  }
+}
+
+query Repos {
+  repositories(first: 5000) {
+    edges {
+      node {
+        ...Repo
+      }
+    }
+  }
+}

@@ -12,3 +12,12 @@ The repo has a substantial amount of go code, all in a go workspace under `go/`.
 
 * You must always format all go code, linters will validate.
 * You should prefer using code generators in the Makefiles associated with whatever module you're interacting with. Never manually edit generated files, it'll be overwritten.
+
+## Broad frontend guidance
+
+Reusable UI belongs in `js/design-system` (`@pluralsh/design-system`), not `js/console`.
+
+* Buttons, inputs, tables, chips, empty states, icons, and other product-agnostic primitives go in the design system and are exported from `@pluralsh/design-system`.
+* `js/console` composes those primitives and owns page/feature wiring, GraphQL, and routes.
+* Before adding a new component under `js/console`, search the design system and reuse or extend it.
+* Exceptions: one-off page layout, GraphQL-coupled views, and console-only feature screens.

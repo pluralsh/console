@@ -3,7 +3,7 @@
     "properties": {
         "prompt": {
             "type": "string",
-            "description": "The prompt to provide the subagent.  This should give all necessary context for the subagent to complete the task assigned and should be in markdown format to convey semantic structure."
+            "description": "The prompt to provide the subagent. The first line must clearly and concisely describe the specific work to be done, without a generic prefix such as \"Task\" or \"Job\". Follow it with all context necessary to complete the assigned work, using markdown where semantic structure helps."
         }
     },
     "required": ["prompt"]

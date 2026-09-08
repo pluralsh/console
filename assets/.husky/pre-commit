@@ -1,3 +1,0 @@
-echo Running pre-commit hook
-cd assets
-yarn lint-staged

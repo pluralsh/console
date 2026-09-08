@@ -10,7 +10,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   @type pr_attrs :: %{title: binary, body: binary, branch: binary}
   @type pr_resp :: {:ok, pr_attrs} | Console.error
   @type commit_status_attrs :: %{sha: binary, url: binary, name: binary, description: binary}
-  @type commit_status :: :queued | :pending | :running | :failed | :successful
+  @type commit_status :: :queued | :pending | :running | :failed | :successful | :cancelled
 
   @doc """
   Create a pull request for the given SCM, and return the title + url of the pr if successful

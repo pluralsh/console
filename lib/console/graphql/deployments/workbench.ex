@@ -55,6 +55,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
     field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
+    field :drain, :boolean, description: "whether kubernetes node drain actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -554,7 +555,18 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :issues, node_type: :issue do
       middleware Nested, check: true, msg: "workbench issues cannot be fetched through a policy"
+      arg :q, :string, description: "search issues by title or external id"
+      arg :providers, list_of(:issue_webhook_provider), description: "filter issues by provider"
+      arg :statuses, list_of(:issue_status), description: "filter issues by status"
+      arg :sort, :issue_sort, description: "field to sort issues by"
+      arg :direction, :issue_sort_direction, description: "sort direction"
+
       resolve &Deployments.list_issues/3
+    end
+
+    field :issue_counts, :workbench_issue_counts do
+      middleware Nested, check: true, msg: "workbench issue counts cannot be fetched through a policy"
+      resolve &Deployments.issue_counts/3
     end
 
     @desc "users that have read or write access to this workbench"
@@ -691,6 +703,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :update, :boolean, description: "whether kubernetes update actions are enabled"
     field :delete, :boolean, description: "whether kubernetes delete actions are enabled"
     field :exec, :boolean, description: "whether kubernetes exec actions are enabled"
+    field :drain, :boolean, description: "whether kubernetes node drain actions are enabled"
     field :exclude_namespaces, list_of(:string), description: "namespaces the agent can never act in"
     field :require_namespaces, list_of(:string), description: "if set, actions are only allowed in these namespaces"
   end
@@ -749,6 +762,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :explanation,     :string, description: "why this action is needed and its expected effect"
     field :function_call,   :workbench_job_activity_function_call, description: "function call approval payload when present"
     field :kube_request,    :workbench_job_activity_kube_request, description: "kubernetes request approval payload when present"
+    field :kube_drain,      :workbench_job_activity_kube_drain, description: "kubernetes node drain approval payload when present"
     field :kube_exec,       :workbench_job_activity_kube_exec, description: "kubernetes exec payload when present"
     field :job_update,      :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :canvas,          list_of(:workbench_canvas_block), description: "dashboard canvas blocks for this activity"
@@ -791,6 +805,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :pod,       :string, description: "the target pod name"
     field :container, :string, description: "the target container name"
     field :explanation, :string, description: "why this command is needed and its expected effect"
+  end
+
+  object :workbench_job_activity_kube_drain do
+    field :handle,      :string, description: "the target cluster handle"
+    field :node,        :string, description: "the target node name"
+    field :explanation, :string, description: "why this node drain is needed and its expected impact"
   end
 
   object :workbench_job_activity_job_update do

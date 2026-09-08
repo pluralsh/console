@@ -40,7 +40,7 @@ func (c *client) GetPipeline(id string) (*console.PipelineFragmentMinimal, error
 }
 
 func (c *client) ListPipelines() (*console.GetPipelines, error) {
-	return c.consoleClient.GetPipelines(c.ctx, nil, nil, nil)
+	return c.consoleClient.GetPipelines(c.ctx, nil)
 }
 
 func (c *client) DeletePipeline(id string) (*console.PipelineFragmentID, error) {

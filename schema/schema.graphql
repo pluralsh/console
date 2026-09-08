@@ -1829,6 +1829,16 @@ enum IssueStatus {
   COMPLETED
 }
 
+enum IssueSort {
+  INSERTED_AT
+  TITLE
+}
+
+enum IssueSortDirection {
+  ASC
+  DESC
+}
+
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
 input ChatProviderConnectionAttributes {
   "the name of this chat connection"
@@ -1987,6 +1997,21 @@ type Issue {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchIssueCounts {
+  providers: [IssueCountByProvider]
+  statuses: [IssueCountByStatus]
+}
+
+type IssueCountByProvider {
+  provider: IssueWebhookProvider!
+  count: Int!
+}
+
+type IssueCountByStatus {
+  status: IssueStatus!
+  count: Int!
 }
 
 "A chat conversation is a conversation in a chat platform like Slack or Microsoft Teams"
@@ -2232,13 +2257,13 @@ input AgentPrReviewAttributes {
   "the URL of the pull request being reviewed"
   url: String!
 
-  "the A-F confidence grade"
+  "the PR's A-F mergeability grade, not the reviewer's confidence: A is merge-ready, B has only minor non-blocking concerns, C or lower requires changes before merge"
   confidence: AgentReviewConfidence!
 
   "a summary of the pull request review"
   summary: String!
 
-  "an explanation of the confidence grade"
+  "an explanation of the mergeability grade based on findings and blockers; do not describe review certainty"
   confidenceComment: String!
 
   "file-level summaries"
@@ -3055,6 +3080,9 @@ input WorkbenchJobKubernetesModesAttributes {
 
   "whether kubernetes exec actions are enabled"
   exec: Boolean
+
+  "whether kubernetes node drain actions are enabled"
+  drain: Boolean
 
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
@@ -3940,7 +3968,32 @@ type Workbench {
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
-  issues(after: String, first: Int, before: String, last: Int): IssueConnection
+  issues(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search issues by title or external id"
+    q: String
+
+    "filter issues by provider"
+    providers: [IssueWebhookProvider]
+
+    "filter issues by status"
+    statuses: [IssueStatus]
+
+    "field to sort issues by"
+    sort: IssueSort
+
+    "sort direction"
+    direction: IssueSortDirection
+  ): IssueConnection
+
+  issueCounts: WorkbenchIssueCounts
 
   "users that have read or write access to this workbench"
   users: [User]
@@ -4147,6 +4200,9 @@ type WorkbenchJobKubernetesModes {
   "whether kubernetes exec actions are enabled"
   exec: Boolean
 
+  "whether kubernetes node drain actions are enabled"
+  drain: Boolean
+
   "namespaces the agent can never act in"
   excludeNamespaces: [String]
 
@@ -4273,6 +4329,9 @@ type WorkbenchJobActivityResult {
   "kubernetes request approval payload when present"
   kubeRequest: WorkbenchJobActivityKubeRequest
 
+  "kubernetes node drain approval payload when present"
+  kubeDrain: WorkbenchJobActivityKubeDrain
+
   "kubernetes exec payload when present"
   kubeExec: WorkbenchJobActivityKubeExec
 
@@ -4364,6 +4423,17 @@ type WorkbenchJobActivityKubeExec {
   container: String
 
   "why this command is needed and its expected effect"
+  explanation: String
+}
+
+type WorkbenchJobActivityKubeDrain {
+  "the target cluster handle"
+  handle: String
+
+  "the target node name"
+  node: String
+
+  "why this node drain is needed and its expected impact"
   explanation: String
 }
 
