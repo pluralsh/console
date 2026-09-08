@@ -1,5 +1,9 @@
 # Spark Operator scraper verification
 
+The `test-compatibility-scrapers` job in `compatibility-schema-validation.yaml`
+runs this suite on pull requests and master pushes touching compatibility code
+or data. Tests isolate external helpers; no network, Helm or API keys are needed.
+
 Run from the repository root:
 
 ```sh

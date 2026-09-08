@@ -1,6 +1,8 @@
 import importlib.util
 from pathlib import Path
 import unittest
+from unittest.mock import Mock, patch
+from types import ModuleType
 
 spec = importlib.util.spec_from_file_location(
     "spark_operator", Path(__file__).parents[1] / "scrapers" / "spark-operator.py"
@@ -22,6 +24,36 @@ MATRIX = """## Version Matrix
 
 
 class SparkOperatorTests(unittest.TestCase):
+    def fake_utils(self, page):
+        helpers = ModuleType("utils")
+        helpers.fetch_page = Mock(return_value=page)
+        helpers.get_chart_versions = Mock(return_value={"2.3.0": "9.1.0"})
+        helpers.current_kube_version = Mock(return_value="1.17")
+        helpers.update_compatibility_info = Mock()
+        return helpers
+
+    def test_scrape_connects_sources_to_updater(self):
+        helpers = self.fake_utils(MATRIX.encode("utf-8"))
+        with patch.dict("sys.modules", {"utils": helpers}):
+            scraper.scrape()
+        helpers.fetch_page.assert_called_once_with(scraper.README_URL)
+        helpers.get_chart_versions.assert_called_once_with("spark-operator")
+        helpers.current_kube_version.assert_called_once_with()
+        helpers.update_compatibility_info.assert_called_once_with(
+            "../../static/compatibilities/spark-operator.yaml",
+            [{"version": "2.3.0", "kube": ["1.17", "1.16"],
+              "chart_version": "9.1.0", "images": [],
+              "requirements": [], "incompatibilities": []}],
+        )
+
+    def test_scrape_does_not_update_on_unusable_source(self):
+        for page in (None, b"", b"no matrix", b"\xff"):
+            helpers = self.fake_utils(page)
+            with self.subTest(page=page), patch.dict("sys.modules", {"utils": helpers}):
+                with self.assertRaises(ValueError):
+                    scraper.scrape()
+            helpers.update_compatibility_info.assert_not_called()
+
     def test_operator_not_spark_or_chart_version(self):
         rows = scraper.build_rows(MATRIX, {"2.3.0": "9.1.0", "4.0.0": "4.0.0"}, "1.18")
         self.assertEqual(len(rows), 1)
