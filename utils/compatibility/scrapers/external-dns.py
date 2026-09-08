@@ -206,7 +206,12 @@ def scrape():
         backfills = []
         for version, original in recorded.items():
             chart = charts.get(version)
-            if not original.get("chart_version") and stable_version(chart):
+            current_chart = original.get("chart_version")
+            candidate = stable_version(chart)
+            current = stable_version(current_chart)
+            # Packaging can advance without an application release. Never roll
+            # back a recorded chart or guess how an invalid saved version sorts.
+            if candidate and (not current_chart or (current and candidate > current)):
                 backfills.append(dict(deepcopy(original), chart_version=chart))
         rows, refreshed = [], []
         for version in sorted(versions, key=stable_version, reverse=True):

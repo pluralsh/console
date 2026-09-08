@@ -13,6 +13,7 @@ from packaging.version import Version
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 scraper = importlib.import_module("scrapers.external-dns")
+import utils
 from utils import reduce_versions, update_versions_data
 MATRIX = (Path(__file__).parent / "fixtures/external-dns/matrix.md").read_bytes()
 
@@ -135,8 +136,11 @@ class ExternalDNSTests(unittest.TestCase):
         self.save(self.run_scrape()[0].call_args.args[1])
         saved = deepcopy(self.existing["versions"][0])
         self.charts["0.22.0"] = "1.22.2"
-        rows = self.run_scrape(ceiling="1.37")[0].call_args.args[1]
-        self.assertEqual(rows, [dict(saved, kube=["1.37"] + saved["kube"], chart_version="1.22.2")])
+        for old_chart in (None, "1.22.1"):
+            with self.subTest(old_chart=old_chart):
+                self.existing["versions"][0]["chart_version"] = old_chart
+                rows = self.run_scrape(ceiling="1.37")[0].call_args.args[1]
+                self.assertEqual(rows, [dict(saved, kube=["1.37"] + saved["kube"], chart_version="1.22.2")])
         self.save(rows)
         self.run_scrape(ceiling="1.37")[0].assert_not_called()
 
@@ -157,6 +161,8 @@ class ExternalDNSTests(unittest.TestCase):
         self.assertEqual(write.call_args.args[1], [dict(original, chart_version="1.22.2")])
         image.assert_not_called()
         self.save(write.call_args.args[1])
+        self.assertEqual(self.existing["versions"][0]["summary"]["helm_changes"],
+                         "Application support is verified independently of Helm chart availability.")
         self.assertEqual(len(self.existing["versions"]), len({r["version"] for r in self.existing["versions"]}))
         self.run_scrape()[0].assert_not_called()
 
@@ -173,10 +179,41 @@ class ExternalDNSTests(unittest.TestCase):
             self.assertEqual(write.call_args.args[1], [dict(legacy, chart_version="1.0.0")])
             image.assert_not_called()
 
-    def test_existing_chart_and_prerelease_mapping_are_not_used_as_backfills(self):
+    def test_newer_exact_chart_preserves_metadata_refreshes_images_then_noops(self):
         self.save(self.run_scrape()[0].call_args.args[1])
-        self.charts.update({"0.21.0": "99.0.0", "0.22.0": "1.22.0-rc1"})
+        self.existing["helm_repository_url"] = "https://charts.example.test"
+        legacy = self.existing["versions"][1]
+        legacy.update(eolAt="2027-01-01", requirements=[{"name": "keep", "version": "1.0"}],
+                      summary={"helm_changes": "Custom packaging notes", "features": ["Keep"]})
+        before = deepcopy(self.existing)
+        self.charts["0.21.0"] = "1.21.2"
+        self.sources = {scraper.releases_url: response([])}
+        write, image = self.run_scrape()
+        changed = dict(legacy, chart_version="1.21.2")
+        self.assertEqual(write.call_args.args[1], [changed])
+        self.assertEqual(self.existing, before)
+        image.assert_not_called()
+        with patch.object(utils, "read_yaml", return_value=deepcopy(self.existing)), \
+                patch.object(utils, "get_chart_images", return_value=["from-new-chart:0.21.0"]) as render, \
+                patch.object(utils, "summarization_enabled", return_value=False), \
+                patch.object(utils, "print_warning"), patch.object(utils, "print_success"), \
+                patch.object(utils, "write_yaml", return_value=True) as persist:
+            utils.update_compatibility_info(scraper.target_file, write.call_args.args[1])
+        render.assert_called_once_with("https://charts.example.test", "external-dns", "1.21.2", None)
+        self.existing = persist.call_args.args[1]
+        self.assertEqual(self.existing["versions"][1], dict(changed, images=["from-new-chart:0.21.0"]))
+        self.assertEqual(self.existing["versions"][0], before["versions"][0])
         self.run_scrape()[0].assert_not_called()
+        self.charts["0.21.0"] = "1.21.1"
+        self.run_scrape()[0].assert_not_called()
+
+    def test_equal_older_and_nonstable_charts_are_not_used_as_updates(self):
+        self.save(self.run_scrape()[0].call_args.args[1])
+        self.charts["0.22.0"] = "1.22.0-rc1"
+        for chart in ("1.21.1", "1.21.0", "1.22.0-rc1", "1.22", "invalid", None):
+            with self.subTest(chart=chart):
+                self.charts["0.21.0"] = chart
+                self.run_scrape()[0].assert_not_called()
 
     def test_charted_intermediate_patch_is_retained_before_reduction(self):
         self.sources[scraper.releases_url] = response([release(f"0.22.{i}") for i in range(3)])

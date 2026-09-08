@@ -21,6 +21,11 @@ An explicit finite range is never extended beyond its source. Only changed
 Kubernetes lists are updated; summary/images/EOL and any simultaneous exact chart
 backfill are preserved. Unchanged ceilings produce no writes. Missing exact charts
 can be filled later, even for legacy versions outside the current release list, without replacing stored compatibility.
+Strictly newer stable charts for the same recorded application also update;
+equal, older, and prerelease mappings do not. The normal writer refreshes chart
+images while preserving compatibility, custom summaries, requirements and EOL.
+Regression tests exercise chart advancement, image refresh, the subsequent no-op,
+rollback rejection, and a simultaneous support-ceiling refresh.
 
 Sources verified on 2026-09-08:
 
@@ -38,6 +43,8 @@ with an explicitly empty images list; no image is inferred from a tag string.
 The 0.22.0 generated summary records the required explicit policy, annotation
 prefix migration, removed Plural/Akamai/Transip providers, and upstream's warning
 that dry-run does not prevent changes for ns1/hetzner/alibaba providers.
+Its chart-independent support statement remains accurate after chart packaging
+arrives, so backfills need not overwrite any generated or custom summary text.
 
 Live validation read official sources and rendered all 13 retained historical
 Helm charts with isolated Helm/Docker paths and both optional paid API keys unset.
