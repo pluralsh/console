@@ -78,6 +78,9 @@ def latest_stable_release_by_minor():
             break
 
         for release in releases:
+            if release.get("draft") or release.get("prerelease"):
+                continue
+
             tag = release.get("tag_name", "").lstrip("v")
             if not re.match(r"^\d+\.\d+\.\d+$", tag):
                 continue
@@ -97,8 +100,11 @@ def parse_matrix(readme, release_versions):
         return []
 
     headers = [cell.strip() for cell in table[0].strip("|").split("|")]
-    kube_versions = [_version(header) for header in headers[1:]]
-    kube_versions = [version for version in kube_versions if version]
+    kube_columns = [
+        (index, version)
+        for index, header in enumerate(headers)
+        if index > 0 and (version := _version(header))
+    ]
     rows = []
 
     for line in table[2:]:
@@ -116,8 +122,8 @@ def parse_matrix(readme, release_versions):
 
         supported_kube_versions = [
             kube_version
-            for kube_version, value in zip(kube_versions, cells[1:])
-            if value == SUPPORTED_MARK
+            for column, kube_version in kube_columns
+            if column < len(cells) and cells[column] == SUPPORTED_MARK
         ]
         if not supported_kube_versions:
             continue
