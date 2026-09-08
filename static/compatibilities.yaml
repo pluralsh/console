@@ -31215,3 +31215,123 @@ addons:
     chart_version: 1.0.0
     images: ['quay.io/mongodb/mongodb-kubernetes:1.0.0']
   name: mongodb-kubernetes
+- icon: https://raw.githubusercontent.com/backube/volsync/main/docs/media/volsync.svg
+  git_url: https://github.com/backube/volsync
+  release_url: https://github.com/backube/volsync/releases/tag/v{vsn}
+  helm_repository_url: https://backube.github.io/helm-charts
+  readme_url: https://volsync.readthedocs.io/en/stable/installation/index.html
+  versions:
+  - version: 0.16.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.16.0
+    images: ['quay.io/backube/volsync:0.16.0']
+  - version: 0.15.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.15.0
+    images: ['quay.io/backube/volsync:0.15.0']
+  - version: 0.14.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.14.0
+    images: ['quay.io/backube/volsync:0.14.0', 'quay.io/brancz/kube-rbac-proxy:v0.19.0']
+  - version: 0.13.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.13.0
+    images: ['quay.io/backube/volsync:0.13.0', 'quay.io/brancz/kube-rbac-proxy:v0.19.0']
+  - version: 0.12.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.12.0
+    images: ['quay.io/backube/volsync:0.12.0', 'quay.io/brancz/kube-rbac-proxy:v0.18.2']
+  - version: 0.11.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.11.0
+    images: ['quay.io/backube/volsync:0.11.0', 'quay.io/brancz/kube-rbac-proxy:v0.18.0']
+  - version: 0.10.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.10.0
+    images: ['quay.io/backube/volsync:0.10.0', 'quay.io/brancz/kube-rbac-proxy:v0.17.1']
+  - version: 0.9.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.9.0
+    images: ['quay.io/backube/volsync:0.9.0', 'quay.io/brancz/kube-rbac-proxy:v0.14.0']
+  - version: 0.8.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.8.0
+    images: ['quay.io/backube/volsync:0.8.0', 'quay.io/brancz/kube-rbac-proxy:v0.14.0']
+  - version: 0.7.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.7.0
+    images: ['quay.io/backube/volsync:0.7.0', 'quay.io/brancz/kube-rbac-proxy:v0.14.0']
+  - version: 0.6.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.6.0
+    images: ['quay.io/backube/volsync:0.6.0', 'quay.io/brancz/kube-rbac-proxy:v0.13.1']
+  - version: 0.5.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.5.0
+    images: ['gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0', 'quay.io/backube/volsync:0.5.0']
+  - version: 0.4.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.4.0
+    images: ['gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0', 'quay.io/backube/volsync:0.4.0']
+  - version: 0.3.0
+    kube: ['1.36', '1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28',
+      '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18',
+      '1.17']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 0.3.0
+    images: ['gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0', 'quay.io/backube/volsync:0.3.0']
+  name: volsync

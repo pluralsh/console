@@ -1,0 +1,17 @@
+# Relevant fields copied from https://backube.github.io/helm-charts/index.yaml
+# Retrieved 2026-09-08. This is a reduced fixture, not the complete release list.
+apiVersion: v1
+entries:
+  volsync:
+    - appVersion: 0.3.0
+      version: 0.3.0
+      kubeVersion: ^1.17.0-0
+    - appVersion: 0.16.0
+      version: 0.16.0
+      kubeVersion: ^1.20.0-0
+    - appVersion: 0.15.0-rc.1
+      version: 0.15.0-rc.1
+      kubeVersion: ^1.20.0-0
+    - appVersion: 0.9.1
+      version: 0.9.1
+      kubeVersion: ^1.20.0-0
