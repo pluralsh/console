@@ -46,14 +46,26 @@ def _strip_cell(cell_html):
     return BeautifulSoup(cell_html, "html.parser").get_text(" ", strip=True)
 
 
-def _cells(row_html):
+def _row_cells(row_html):
     return [
         _strip_cell(match.group(1))
         for match in re.finditer(
-            r"<t[dh]\b[^>]*>(.*?)(?=<t[dh]\b[^>]*>|<tr|</tr|</thead|</tbody|</table)",
+            r"<t[dh]\b[^>]*>(.*?)(?=</t[dh]>|<t[dh]\b|</tr|$)",
             row_html,
             re.IGNORECASE | re.DOTALL,
         )
+    ]
+
+
+def _table_rows(table_html):
+    return [
+        cells
+        for row_html in re.findall(
+            r"<tr\b[^>]*>(.*?)(?=<tr\b|</thead|</tbody|</table)",
+            table_html,
+            re.IGNORECASE | re.DOTALL,
+        )
+        if (cells := _row_cells(row_html))
     ]
 
 
@@ -69,19 +81,23 @@ def parse_support_matrix(content):
     matrix = {}
 
     for table in _tables(content):
-        cells = _cells(table)
-        headers = [cell.lower() for cell in cells]
-        version_column = _column(headers, "version")
-        kube_column = _column(headers, "supported kubernetes versions")
-        if version_column is None or kube_column is None:
+        rows = _table_rows(table)
+        header_index = None
+        version_column = None
+        kube_column = None
+
+        for index, row in enumerate(rows):
+            headers = [cell.lower() for cell in row]
+            version_column = _column(headers, "version")
+            kube_column = _column(headers, "supported kubernetes versions")
+            if version_column is not None and kube_column is not None:
+                header_index = index
+                break
+
+        if header_index is None:
             continue
 
-        column_count = kube_column + 1
-        if column_count < 2:
-            continue
-
-        for index in range(column_count, len(cells), column_count):
-            row = cells[index:index + column_count]
+        for row in rows[header_index + 1:]:
             if len(row) <= max(version_column, kube_column):
                 continue
 

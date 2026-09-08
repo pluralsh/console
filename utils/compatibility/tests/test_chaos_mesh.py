@@ -36,6 +36,24 @@ class ChaosMeshScraperTest(unittest.TestCase):
             },
         )
 
+
+    def test_parse_support_matrix_does_not_require_kubernetes_column_to_be_last(self):
+        content = """
+<table>
+  <thead><tr>
+    <th>Version</th><th>Supported Kubernetes versions</th><th>Notes</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>2.8</td><td>1.30, 1.31, 1.32</td><td>current</td></tr>
+  </tbody>
+</table>
+"""
+
+        self.assertEqual(
+            chaos_mesh.parse_support_matrix(content),
+            {"2.8": ["1.30", "1.31", "1.32"]},
+        )
+
     def test_parse_support_matrix_ignores_the_e2e_test_table(self):
         content = """
 <table>
