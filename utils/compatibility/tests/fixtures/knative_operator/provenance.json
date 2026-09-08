@@ -1,0 +1,14 @@
+[
+  {
+    "file": "release-schedule.md",
+    "url": "https://raw.githubusercontent.com/knative/community/main/mechanics/RELEASE-SCHEDULE.md",
+    "retrieved_at": "2026-09-08T11:12:14.264553+00:00",
+    "sha256": "b0d6b6c33ea0dfee10cbbfb7658299bb9397e39b6dc6936b464f58a9f03e76e9"
+  },
+  {
+    "file": "operator-index.yaml",
+    "url": "https://knative.github.io/operator/index.yaml",
+    "retrieved_at": "2026-09-08T11:12:14.315655+00:00",
+    "sha256": "1be4fac668b144593a167a36c55c6072fa220417f3af554c1a2080119d9d87d6"
+  }
+]

@@ -1,0 +1,57 @@
+{
+  "retrieved_at": "2026-09-08T11:20:06.577404+00:00",
+  "records": [
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.25.0",
+      "sha256": "e82c6a8cdc4917f7c949dfd2f7337cabecd861bb6636dfa900f0a0a68d34f5d9"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.26.0",
+      "sha256": "e9cc783f779be36631a43ad3e2eb5a165fb830bf5e00b5ef1dfcb810fe0b58f4"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.27.0",
+      "sha256": "baaff37d8a9ac39c316c93c55447805ab1bbbe7079fa07461166d7742317e2c3"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.28.0",
+      "sha256": "0baba30c058319d4724be3ea5c61ab4165cf36659460deda6b7a3a80c49bbf94"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.29.0",
+      "sha256": "e566f9237e69481fca1595f0b0b32cf9d7887b0721f970972c2353d5cb176e8e"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.30.0",
+      "sha256": "0d93b55c12dc15705300569f9ee906baae2b4503978206a3a28e31dc03347073"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.31.0",
+      "sha256": "da9cebaa41a16835056195e4a6cf423a4acc665900bbd3b0b33562ee87111271"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.32.0",
+      "sha256": "484e5cbd70e00918ccace30cbe7443aeef913472663673ac8ac9348f223dc888"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.33.0",
+      "sha256": "5b102c0084e8910873c3b5bf1196d8ce89f593ebbd12f2ebd99c488525e536ea"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.34.0",
+      "sha256": "10e12473c736c80f3f466aeebc0ab533b879400d714740fd60c4d7449ab6e789"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.35.0",
+      "sha256": "f67a24b2489a788e3015d4f2fc250335c89a5b24b1b2628cbb4b7ab18df7fc69"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.36.0",
+      "sha256": "4c3c66d2983a36b76d02197b9f5ba89a7a3ec8d4ab238d035394e3c1f17dc179"
+    },
+    {
+      "url": "https://api.github.com/repos/kubernetes/kubernetes/releases/tags/v1.37.0",
+      "sha256": "e8ca54c9a679f76541ea92de3071d38be2f8c6699561e9efe0e5b80cf6679550"
+    }
+  ]
+}
