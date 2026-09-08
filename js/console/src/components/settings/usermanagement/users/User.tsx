@@ -1,22 +1,19 @@
-import { useCallback, useContext, useState } from 'react'
-import { LoginContext } from 'components/contexts'
 import { Chip, Switch } from '@pluralsh/design-system'
-
+import { useLogin } from 'components/contexts'
 import { Confirm } from 'components/utils/Confirm'
-
+import { UserFragment, useUpdateUserMutation } from 'generated/graphql'
+import { useCallback, useState } from 'react'
 import styled from 'styled-components'
-import {
-  UserFragment,
-  useUpdateUserMutation,
-} from '../../../../generated/graphql.ts'
 
 export function UserAdminCell({ user }: { user: UserFragment }) {
-  const { me } = useContext(LoginContext)
+  const { me } = useLogin()
+  const [confirm, setConfirm] = useState(false)
   const [mutation, { loading, error }] = useUpdateUserMutation({
     onCompleted: () => setConfirm(false),
   })
   const editable = !!me?.roles?.admin
   const isAdmin = !!user.roles?.admin
+  const isSelf = user.id === me?.id
   const setAdmin = useCallback(
     () =>
       mutation({
@@ -24,9 +21,6 @@ export function UserAdminCell({ user }: { user: UserFragment }) {
       }),
     [mutation, user.id, isAdmin]
   )
-  const [confirm, setConfirm] = useState(false)
-
-  const isSelf = user.id === me?.id
 
   return (
     <div onClick={(e) => e.stopPropagation()}>
@@ -38,9 +32,7 @@ export function UserAdminCell({ user }: { user: UserFragment }) {
             isSelf ? 'yourself' : user.name
           } as admin?${isSelf ? ' This cannot be undone.' : ''}`}
           close={() => setConfirm(false)}
-          submit={() => {
-            setAdmin()
-          }}
+          submit={setAdmin}
           loading={loading}
           destructive
           error={error}

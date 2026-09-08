@@ -1,12 +1,8 @@
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
-
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import { getUserManagementBreadcrumbs } from '../UserManagement'
-
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body1P } from 'components/utils/typography/Text'
-import styled from 'styled-components'
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 import UserInvite from './UserInvite'
 import { UsersList } from './UsersList'
 
@@ -18,7 +14,12 @@ export default function Users() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <WrapperSC>
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+      minHeight={0}
+    >
       <StretchedFlex>
         <Body1P $color="text-light">
           See users in your org. Change them to admin here.
@@ -28,14 +29,6 @@ export default function Users() {
         )}
       </StretchedFlex>
       <UsersList />
-    </WrapperSC>
+    </Flex>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  minHeight: 0,
-  height: '100%',
-}))

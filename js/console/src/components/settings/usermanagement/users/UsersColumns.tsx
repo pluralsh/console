@@ -1,6 +1,7 @@
 import { AppIcon } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
 import { UserWithGroupsFragment } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -48,9 +49,6 @@ const ColGroups = columnHelper.accessor(
     id: 'groups',
     header: 'Groups',
     meta: { gridTemplate: '80px' },
-    cell: function Cell({ getValue }) {
-      return getValue()
-    },
   }
 )
 
@@ -78,7 +76,12 @@ export function UserGroupsExpand({
     >
       {groups.map((group) => (
         <MembershipListRowSC key={group.id}>
-          <Body2P $color="text-light">{group.name}</Body2P>
+          <Body2P
+            $color="text-light"
+            css={TRUNCATE}
+          >
+            {group.name}
+          </Body2P>
         </MembershipListRowSC>
       ))}
     </MembershipExpandPanel>

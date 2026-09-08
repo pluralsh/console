@@ -6,15 +6,37 @@ import {
   IconFrame,
   Spinner,
 } from '@pluralsh/design-system'
+import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P, CaptionP } from 'components/utils/typography/Text'
-import { Children, ReactNode, useCallback, useEffect, useState } from 'react'
+import {
+  Children,
+  MouseEvent,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import styled from 'styled-components'
 
 export const MEMBERSHIP_VISIBLE_ROWS = 5
-export const MEMBERSHIP_ROW_HEIGHT = 68
 export const MEMBERSHIP_FETCH_LIMIT = 30
-export const MEMBERSHIP_LIST_MAX_HEIGHT =
+
+const MEMBERSHIP_ROW_HEIGHT = 68
+const MEMBERSHIP_LIST_MAX_HEIGHT =
   MEMBERSHIP_VISIBLE_ROWS * MEMBERSHIP_ROW_HEIGHT
+
+export const membershipExpandTableProps = {
+  loose: true,
+  expandedRowType: 'custom' as const,
+  expandedBgColor: 'fill-zero' as const,
+  getRowCanExpand: () => true,
+  onRowClick: (
+    _e: MouseEvent<HTMLTableRowElement>,
+    row: { getToggleExpandedHandler: () => () => void }
+  ) => {
+    row.getToggleExpandedHandler()()
+  },
+}
 
 export const ColMembershipExpander = {
   id: 'expander',
@@ -44,26 +66,9 @@ export const ColMembershipExpander = {
     ),
 }
 
-export function MembershipExpandPanel({
-  copyText,
-  getCopyText,
-  copyDisabled,
-  loading,
-  emptyMessage,
-  viewAll,
-  children,
-}: {
-  copyText?: string
-  getCopyText?: () => Promise<string>
-  copyDisabled?: boolean
-  loading?: boolean
-  emptyMessage?: string
-  viewAll?: { onClick: () => void }
-  children?: ReactNode
-}) {
+function useCopyList(getText: () => Promise<string>) {
   const [copied, setCopied] = useState(false)
   const [copying, setCopying] = useState(false)
-  const showEmpty = !loading && Children.count(children) === 0
 
   useEffect(() => {
     if (!copied) return
@@ -76,17 +81,47 @@ export function MembershipExpandPanel({
   const handleCopy = useCallback(async () => {
     setCopying(true)
     try {
-      const text = getCopyText ? await getCopyText() : (copyText ?? '')
-      await window.navigator.clipboard.writeText(text)
+      await window.navigator.clipboard.writeText(await getText())
       setCopied(true)
     } finally {
       setCopying(false)
     }
-  }, [copyText, getCopyText])
+  }, [getText])
+
+  return { copied, copying, handleCopy }
+}
+
+export function MembershipExpandPanel({
+  copyText,
+  getCopyText,
+  loading,
+  emptyMessage,
+  viewAll,
+  children,
+}: {
+  copyText?: string
+  getCopyText?: () => Promise<string>
+  loading?: boolean
+  emptyMessage?: string
+  viewAll?: { onClick: () => void }
+  children?: ReactNode
+}) {
+  const { copied, copying, handleCopy } = useCopyList(
+    useCallback(
+      () => (getCopyText ? getCopyText() : Promise.resolve(copyText ?? '')),
+      [copyText, getCopyText]
+    )
+  )
+  const showEmpty = !loading && Children.count(children) === 0
 
   return (
     <WrapperSC onClick={(e) => e.stopPropagation()}>
-      <BodySC>
+      <Flex
+        direction="column"
+        gap="xsmall"
+        grow={1}
+        minWidth={0}
+      >
         <ListSC>
           {loading && (
             <Flex
@@ -111,11 +146,11 @@ export function MembershipExpandPanel({
             See full list
           </SeeFullListSC>
         )}
-      </BodySC>
+      </Flex>
       <Button
         small
         secondary
-        disabled={copyDisabled || copying || (!getCopyText && !copyText)}
+        disabled={copying || (!getCopyText && !copyText)}
         onClick={handleCopy}
         width="fit-content"
       >
@@ -136,7 +171,13 @@ export function MembershipUserRow({
 }) {
   return (
     <MembershipListRowSC>
-      <IdentitySC>
+      <Flex
+        align="center"
+        gap="small"
+        grow={1}
+        minWidth={0}
+        overflow="hidden"
+      >
         <AppIcon
           url={avatar ?? undefined}
           name={name ?? undefined}
@@ -145,15 +186,11 @@ export function MembershipUserRow({
         />
         <Body2P
           $color="text-light"
-          css={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
+          css={TRUNCATE}
         >
           {name}
         </Body2P>
-      </IdentitySC>
+      </Flex>
       {email && (
         <CaptionP
           $color="text-xlight"
@@ -197,28 +234,11 @@ const WrapperSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
 }))
 
-const BodySC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-  flex: 1,
-  minWidth: 0,
-}))
-
 const ListSC = styled.div(({ theme }) => ({
   maxHeight: MEMBERSHIP_LIST_MAX_HEIGHT,
   overflow: 'auto',
   border: theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
-}))
-
-const IdentitySC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  minWidth: 0,
-  flex: 1,
-  overflow: 'hidden',
 }))
 
 const SeeFullListSC = styled.button(({ theme }) => ({

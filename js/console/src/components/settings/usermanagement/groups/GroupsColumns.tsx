@@ -1,13 +1,8 @@
-import {
-  EyeIcon,
-  IconFrame,
-  Modal,
-  PencilIcon,
-  TrashCanIcon,
-} from '@pluralsh/design-system'
+import { EyeIcon, IconFrame, Modal, PencilIcon } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
+import { DeleteIconButton } from 'components/utils/IconButtons'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import {
@@ -18,9 +13,8 @@ import {
   useGroupMembersQuery,
 } from 'generated/graphql'
 import { useState } from 'react'
-import { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable'
 import { mapExistingNodes } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 import {
   ColMembershipExpander,
   HoverActions,
@@ -40,7 +34,7 @@ const columnHelper = createColumnHelper<GroupFragment>()
 const ColGroupInfo = columnHelper.accessor((group) => group, {
   id: 'info',
   header: 'Groups',
-  meta: { gridTemplate: 'minmax(0, 1fr)', truncate: true },
+  meta: { gridTemplate: 'minmax(0, 1fr)' },
   cell: function Cell({ getValue }) {
     const group = getValue()
 
@@ -60,9 +54,6 @@ const ColMembers = columnHelper.accessor((group) => group.memberCount ?? 0, {
   id: 'members',
   header: 'Members',
   meta: { gridTemplate: '90px' },
-  cell: function Cell({ getValue }) {
-    return getValue()
-  },
 })
 
 const ColActions = columnHelper.accessor((group) => group, {
@@ -70,7 +61,6 @@ const ColActions = columnHelper.accessor((group) => group, {
   header: '',
   meta: { gridTemplate: 'fit-content(72px)' },
   cell: function Cell({ getValue, table: { options } }) {
-    const theme = useTheme()
     const group = getValue()
     const { editable, setGroupEdit } = options.meta as GroupsListMeta
     const { popToast } = useSimpleToast()
@@ -100,11 +90,9 @@ const ColActions = columnHelper.accessor((group) => group, {
                 icon={<PencilIcon />}
                 onClick={() => setGroupEdit(group)}
               />
-              <IconFrame
-                clickable
+              <DeleteIconButton
                 size="small"
                 tooltip="Delete group"
-                icon={<TrashCanIcon color={theme.colors['icon-danger']} />}
                 onClick={() => setDialogKey('confirmDelete')}
               />
             </>
@@ -118,16 +106,11 @@ const ColActions = columnHelper.accessor((group) => group, {
             />
           )}
         </HoverActions>
-        <Modal
-          header={group.name}
+        <ViewGroupMembersModal
+          group={group}
           open={dialogKey === 'viewGroup'}
           onClose={() => setDialogKey('')}
-        >
-          <GroupMembers
-            viewOnly
-            groupId={group.id}
-          />
-        </Modal>
+        />
         <Confirm
           open={dialogKey === 'confirmDelete'}
           text={
@@ -155,18 +138,14 @@ export function GroupMembersExpand({
   setGroupEdit,
 }: {
   row: Row<GroupFragment>
-  editable: boolean
-  setGroupEdit: GroupsListMeta['setGroupEdit']
-}) {
+} & GroupsListMeta) {
   const group = row.original
   const [viewOpen, setViewOpen] = useState(false)
   const [fetchMembers] = useGroupMembersLazyQuery()
   const { data, loading, error } = useGroupMembersQuery({
     variables: { id: group.id, first: MEMBERSHIP_FETCH_LIMIT },
   })
-  const users = mapExistingNodes(data?.groupMembers)
-    .map((member) => member.user)
-    .filter(isNonNullable)
+  const users = membersFromQuery(data)
 
   return (
     <>
@@ -174,7 +153,11 @@ export function GroupMembersExpand({
       <MembershipExpandPanel
         loading={!data && loading}
         emptyMessage="This group has no members."
-        getCopyText={() => getGroupMembersCopyText(fetchMembers, group)}
+        getCopyText={() =>
+          (group.memberCount ?? 0) <= users.length
+            ? Promise.resolve(formatGroupMembersCopy(group, users))
+            : getGroupMembersCopyText(fetchMembers, group)
+        }
         viewAll={
           (group.memberCount ?? 0) > MEMBERSHIP_VISIBLE_ROWS
             ? {
@@ -194,18 +177,36 @@ export function GroupMembersExpand({
         ))}
       </MembershipExpandPanel>
       {!editable && (
-        <Modal
-          header={group.name}
+        <ViewGroupMembersModal
+          group={group}
           open={viewOpen}
           onClose={() => setViewOpen(false)}
-        >
-          <GroupMembers
-            viewOnly
-            groupId={group.id}
-          />
-        </Modal>
+        />
       )}
     </>
+  )
+}
+
+function ViewGroupMembersModal({
+  group,
+  open,
+  onClose,
+}: {
+  group: GroupFragment
+  open: boolean
+  onClose: () => void
+}) {
+  return (
+    <Modal
+      header={group.name}
+      open={open}
+      onClose={onClose}
+    >
+      <GroupMembers
+        viewOnly
+        groupId={group.id}
+      />
+    </Modal>
   )
 }
 

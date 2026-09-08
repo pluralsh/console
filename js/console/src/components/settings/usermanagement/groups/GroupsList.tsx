@@ -1,15 +1,12 @@
 import { Button, Input, SearchIcon, Table } from '@pluralsh/design-system'
-import { useGroupsQuery } from 'generated/graphql'
-import { useContext, useMemo, useState } from 'react'
-
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-
-import { GqlError } from 'components/utils/Alert'
-
-import { LoginContext } from 'components/contexts'
-
+import { useLogin } from 'components/contexts'
 import { useThrottle } from 'components/hooks/useThrottle'
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { useGroupsQuery } from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
+import { membershipExpandTableProps } from '../MembershipExpandPanel'
 import { ListWrapperSC } from '../users/UsersList'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
 import { GroupMembersExpand, groupsCols } from './GroupsColumns'
@@ -24,8 +21,7 @@ export function GroupsList({
 }: {
   setGroupEdit: (group: Nullable<GroupEditT>) => void
 }) {
-  const { me } = useContext(LoginContext)
-
+  const { me } = useLogin()
   const [q, setQ] = useState('')
   const throttledQ = useThrottle(q, 300)
 
@@ -42,6 +38,7 @@ export function GroupsList({
   }
 
   if (error) return <GqlError error={error} />
+
   return (
     <ListWrapperSC>
       <Input
@@ -49,15 +46,12 @@ export function GroupsList({
         placeholder="Search groups"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        background="fill-zero"
         flexShrink={0}
       />
       <Table
         fullHeightWrap
         virtualizeRows
-        loose
-        rowBg="stripes"
-        expandedRowType="custom"
+        {...membershipExpandTableProps}
         data={groups}
         loading={!data && loading}
         columns={groupsCols}
@@ -66,16 +60,12 @@ export function GroupsList({
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        getRowCanExpand={() => true}
         renderExpanded={({ row }) => (
           <GroupMembersExpand
             row={row}
-            editable={meta.editable}
-            setGroupEdit={setGroupEdit}
+            {...meta}
           />
         )}
-        onRowClick={(_, row) => row.getToggleExpandedHandler()()}
-        expandedBgColor="fill-zero"
         emptyStateProps={{
           ...(!throttledQ
             ? {

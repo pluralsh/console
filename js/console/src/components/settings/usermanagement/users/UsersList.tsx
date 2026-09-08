@@ -1,29 +1,25 @@
 import { Input, SearchIcon, Table } from '@pluralsh/design-system'
-import { isEmpty } from 'lodash'
-import { use, useMemo, useState } from 'react'
-
-import { useUsersQuery } from 'generated/graphql'
-
-import { LoginContext } from 'components/contexts'
-
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-
+import { useLogin } from 'components/contexts'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
-
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { useUsersQuery } from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
-
 import { mapExistingNodes } from 'utils/graphql'
+import { membershipExpandTableProps } from '../MembershipExpandPanel'
 import UserInvite from './UserInvite'
 import { UserGroupsExpand, usersCols } from './UsersColumns'
 
 export function UsersList() {
-  const { configuration } = use(LoginContext)
+  const { configuration } = useLogin()
   const [q, setQ] = useState('')
+  const throttledQ = useThrottle(q, 300)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useUsersQuery, keyPath: ['users'] },
-      { q }
+      { q: throttledQ }
     )
 
   const users = useMemo(() => mapExistingNodes(data?.users), [data?.users])
@@ -37,15 +33,12 @@ export function UsersList() {
         placeholder="Search users"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        backgroundColor="fill-zero"
         flexShrink={0}
       />
       <Table
         fullHeightWrap
         virtualizeRows
-        loose
-        rowBg="stripes"
-        expandedRowType="custom"
+        {...membershipExpandTableProps}
         data={users}
         columns={usersCols}
         loading={!data && loading}
@@ -53,14 +46,11 @@ export function UsersList() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        getRowCanExpand={() => true}
         renderExpanded={UserGroupsExpand}
-        onRowClick={(_, row) => row.getToggleExpandedHandler()()}
-        expandedBgColor="fill-zero"
         emptyStateProps={{
-          message: isEmpty(q)
+          message: !throttledQ
             ? "Looks like you don't have any users yet."
-            : `No users found for ${q}`,
+            : `No users found for ${throttledQ}`,
           // invites are only available when not using login with Plural.
           children: configuration && !configuration?.pluralLogin && (
             <UserInvite />

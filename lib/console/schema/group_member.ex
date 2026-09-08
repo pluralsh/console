@@ -21,7 +21,6 @@ defmodule Console.Schema.GroupMember do
     )
   end
 
-
   def without_names(query \\ __MODULE__, names) do
     from(m in query,
       join: g in assoc(m, :group),
