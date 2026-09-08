@@ -20,10 +20,15 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - run: python -m pip install packaging==24.1
-      - run: python -m unittest discover -s utils/compatibility/tests -p test_antrea.py -v
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Run scraper tests through the repository test entry point
+        env:
+          TEST_CMD: >-
+            apk add --no-cache python3 py3-pip &&
+            python3 -m venv /tmp/antrea-tests &&
+            /tmp/antrea-tests/bin/python -m pip install packaging==24.1 &&
+            /tmp/antrea-tests/bin/python -m unittest discover -s utils/compatibility/tests -p test_antrea.py -v
+        # Compose consumes CONSOLE_CMD and needs one argument for /bin/sh -c.
+        run: CONSOLE_CMD="\"$TEST_CMD\"" make test-full TEST_CMD="$TEST_CMD"

@@ -28,12 +28,23 @@ included. The scraper does not install a cluster or change a live cluster.
 
 ## Unit tests
 
-From the repository root, with Python 3.13:
+From the repository root, with Make and Docker Compose available, use the
+repository's required test entry point. The current test image is Alpine-based;
+the command installs Python and an isolated dependency environment in that
+disposable container:
 
 ```sh
-python -m pip install packaging==24.1
-python -m unittest discover -s utils/compatibility/tests -p test_antrea.py -v
+TEST_CMD='apk add --no-cache python3 py3-pip && python3 -m venv /tmp/antrea-tests && /tmp/antrea-tests/bin/python -m pip install packaging==24.1 && /tmp/antrea-tests/bin/python -m unittest discover -s utils/compatibility/tests -p test_antrea.py -v'
+CONSOLE_CMD="\"$TEST_CMD\"" make test-full TEST_CMD="$TEST_CMD"
 ```
+
+Both variables are supplied because `docker-compose.test.yml` currently reads
+`CONSOLE_CMD`, while the Makefile documents `TEST_CMD`. The embedded quotes keep
+the command as one argument to the container's `/bin/sh -c`. The Make target retains
+its existing dependency startup, console exit-code propagation and teardown.
+The six tests were also checked directly with Python 3.13 during development;
+the Docker wrapper has not been run on the Windows development host, which has
+neither Make nor Docker. Hosted workflow execution requires maintainer approval.
 
 The tests cover per-tag source selection, appVersion versus chart version,
 patch-level prerequisite changes, prerelease/pre-Helm filtering, malformed and
