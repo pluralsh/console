@@ -38,6 +38,20 @@ class SecretsStoreCSIDriverScraperTests(unittest.TestCase):
             ["1.26", "1.27", "1.28", "1.29"],
         )
 
+    def test_strict_patch_bounds_keep_partially_compatible_minors(self):
+        self.assertEqual(
+            scraper.kube_versions_from_constraint(">1.30.0", "1.36"),
+            ["1.30", "1.31", "1.32", "1.33", "1.34", "1.35", "1.36"],
+        )
+        self.assertEqual(
+            scraper.kube_versions_from_constraint(">=1.26.0-0 <1.29.5", "1.36"),
+            ["1.26", "1.27", "1.28", "1.29"],
+        )
+        self.assertEqual(
+            scraper.kube_versions_from_constraint(">=1.26.0-0 <1.29.0", "1.36"),
+            ["1.26", "1.27", "1.28"],
+        )
+
     def test_unsupported_constraints_fail_closed(self):
         for constraint in ("", "1.30+", "<1.30.0", "not-a-version"):
             with self.subTest(constraint=constraint):

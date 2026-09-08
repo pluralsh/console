@@ -21,7 +21,8 @@ APP_NAME = "secrets-store-csi-driver"
 HELM_INDEX_URL = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts/index.yaml"
 TARGET_FILE = f"../../static/compatibilities/{APP_NAME}.yaml"
 KUBE_CONSTRAINT_RE = re.compile(
-    r"(?P<operator><=|>=|<|>)\s*v?(?P<major>\d+)\.(?P<minor>\d+)(?:\.\d+)?(?:-[0-9A-Za-z.-]+)?"
+    r"(?P<operator><=|>=|<|>)\s*v?(?P<major>\d+)\.(?P<minor>\d+)"
+    r"(?:\.(?P<patch>\d+))?(?:-[0-9A-Za-z.-]+)?"
 )
 
 
@@ -46,6 +47,10 @@ def _previous_minor(version: str) -> str:
         major -= 1
         minor = 99
     return f"{major}.{minor}"
+
+
+def _has_patch_room_below(match: re.Match) -> bool:
+    return int(match.group("patch") or 0) > 0
 
 
 def _newer_minor(left: str, right: str) -> str:
@@ -73,10 +78,10 @@ def kube_versions_from_constraint(constraint: str, latest_kube: str) -> list[str
         if operator == ">=":
             start = minor if start is None else _newer_minor(start, minor)
         elif operator == ">":
-            next_minor = f"{match.group('major')}.{int(match.group('minor')) + 1}"
-            start = next_minor if start is None else _newer_minor(start, next_minor)
+            start = minor if start is None else _newer_minor(start, minor)
         elif operator == "<":
-            end = _older_minor(end, _previous_minor(version))
+            boundary = minor if _has_patch_room_below(match) else _previous_minor(version)
+            end = _older_minor(end, boundary)
         elif operator == "<=":
             end = _older_minor(end, minor)
 
