@@ -211,7 +211,7 @@ defmodule Console.Deployments.Git.Cache do
 
   defp new_line(cache, key, repo, sha, path, filter) do
     Tracing.span("git.checkout", %{
-      "git.repository.url" => repo.url,
+      "git.repository.url" => Tracing.sanitize_url(repo.url),
       "git.sha" => sha,
       "git.folder" => path
     }, fn ->

@@ -53,7 +53,7 @@ defmodule Console.Deployments.Git.Discovery do
   @spec changes(GitRepository.t, binary, binary, binary) :: {:ok, [binary] | :pass, binary, binary | nil} | error
   def changes(%GitRepository{} = repo, sha1, sha2, folder) do
     Tracing.span("git.changes", %{
-      "git.repository.url" => repo.url,
+      "git.repository.url" => Tracing.sanitize_url(repo.url),
       "git.from" => sha1,
       "git.to" => sha2,
       "git.folder" => folder
@@ -128,7 +128,7 @@ defmodule Console.Deployments.Git.Discovery do
   defp git_attrs(repo, %Service.Git{} = ref, svc) do
     %{
       "git.repository.id" => repo && repo.id,
-      "git.repository.url" => repo && repo.url,
+      "git.repository.url" => repo && Tracing.sanitize_url(repo.url),
       "git.ref" => ref.ref,
       "git.folder" => ref.folder,
       "service.id" => svc && svc.id
@@ -137,7 +137,7 @@ defmodule Console.Deployments.Git.Discovery do
   defp git_attrs(repo, ref, _svc) do
     %{
       "git.repository.id" => repo && repo.id,
-      "git.repository.url" => repo && repo.url,
+      "git.repository.url" => repo && Tracing.sanitize_url(repo.url),
       "git.ref" => ref
     }
   end

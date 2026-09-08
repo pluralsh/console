@@ -51,7 +51,7 @@ defmodule Console.Deployments.Git.Cmd do
   defp maybe_overwrite_key(git), do: {:ok, git}
 
   def fetch(%GitRepository{} = repo) do
-    Tracing.span("git.pull", %{"git.repository.url" => repo.url}, fn ->
+    Tracing.span("git.pull", %{"git.repository.url" => Tracing.sanitize_url(repo.url)}, fn ->
       with {:ok, _} <- git(repo, "fetch", maybe_recurse_submodules(repo, ["--all", "--tags", "--force", "--prune", "--prune-tags"])),
         do: reset(repo)
     end)
@@ -140,7 +140,7 @@ defmodule Console.Deployments.Git.Cmd do
   end
 
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
-    Tracing.span("git.clone", %{"git.repository.url" => git.url}, fn ->
+    Tracing.span("git.clone", %{"git.repository.url" => Tracing.sanitize_url(git.url)}, fn ->
       with {:ok, _} = res <- git(git, "clone", maybe_recurse_submodules(git, ["--filter=blob:none", url(git), git.dir])),
            :ok <- branches(git),
            :ok <- unlock(git),

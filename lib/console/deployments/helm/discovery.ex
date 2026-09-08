@@ -51,7 +51,7 @@ defmodule Console.Deployments.Helm.Discovery do
 
   defp helm_attrs(url, chart, vsn) do
     %{
-      "helm.repository.url" => url,
+      "helm.repository.url" => Tracing.sanitize_url(url),
       "helm.chart" => chart,
       "helm.version" => vsn
     }

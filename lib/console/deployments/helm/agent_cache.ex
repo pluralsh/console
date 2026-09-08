@@ -51,7 +51,7 @@ defmodule Console.Deployments.Helm.AgentCache do
   end
 
   def refresh(%__MODULE__{client: client, repo: repo} = cache) do
-    Tracing.span("helm.index", %{"helm.repository.url" => repo.url}, fn ->
+    Tracing.span("helm.index", %{"helm.repository.url" => Tracing.sanitize_url(repo.url)}, fn ->
       case Client.index(client) do
         {:ok, idx} -> {:ok, sweep(%{cache | index: idx})}
         _ -> {:error, "could not fetch index"}
@@ -92,7 +92,7 @@ defmodule Console.Deployments.Helm.AgentCache do
 
   def write(%__MODULE__{client: client, repo: repo} = cache, chart, vsn) do
     Tracing.span("helm.chart.download", %{
-      "helm.repository.url" => repo.url,
+      "helm.repository.url" => Tracing.sanitize_url(repo.url),
       "helm.chart" => chart,
       "helm.version" => vsn
     }, fn ->
