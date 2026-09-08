@@ -1,0 +1,59 @@
+name: Regenerate ECK compatibility aggregate
+
+on:
+  push:
+    branches:
+      - feat/eck-operator-compatibility
+    paths:
+      - '.github/workflows/eck-regenerate-aggregate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: feat/eck-operator-compatibility
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install compatibility utility dependencies
+        run: python -m pip install PyYAML==6.0.2 requests==2.33.0 semantic-version==2.10.0 colorama==0.4.6 packaging==24.1
+
+      - name: Regenerate aggregate with repository formatter
+        working-directory: utils/compatibility
+        run: |
+          python - <<'PY'
+          import utils
+
+          manifest = utils.read_yaml('../../static/compatibilities/manifest.yaml')
+          if not manifest or not manifest.get('names'):
+              raise SystemExit('compatibility manifest is empty')
+
+          addons = []
+          for name in manifest['names']:
+              addon = utils.read_yaml(f'../../static/compatibilities/{name}.yaml')
+              if not addon:
+                  raise SystemExit(f'missing compatibility data for {name}')
+              addons.append(addon)
+
+          if not utils.write_yaml('../../static/compatibilities.yaml', {'addons': addons}):
+              raise SystemExit('failed to write aggregate compatibility matrix')
+          PY
+
+      - name: Commit aggregate
+        run: |
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add static/compatibilities.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m 'chore: regenerate compatibility aggregate for ECK'
+          git push origin HEAD:feat/eck-operator-compatibility
