@@ -37,6 +37,7 @@ names:
 - tigera-operator
 - argo-cd
 - argo-workflows
+- argo-events
 - vector
 - victoria-metrics-operator
 - gpu-operator

@@ -4,6 +4,14 @@ import requests
 import semantic_version
 import subprocess
 import traceback
+import shutil
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 
 from functools import lru_cache
@@ -176,6 +184,9 @@ def get_chart_images(url, chart, version, values=None):
     Returns the Helm chart YAML or None if not found.
     This assumes the chart is available via a Helm repository.
     """
+    if not shutil.which("helm"):
+        return None
+
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
@@ -293,8 +304,7 @@ def get_github_releases_timestamps(repo_owner, repo_name):
                 created_at = release.get("created_at")
                 if not created_at:
                     continue
-                print(created_at)
-                # created_at = created_at.replace("Z", "+00:00")
+                created_at = created_at.replace("Z", "+00:00")
                 yield (release["tag_name"], datetime.fromisoformat(created_at))
         else:
             return
