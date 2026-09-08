@@ -1,0 +1,35 @@
+icon: https://raw.githubusercontent.com/hashicorp/consul-k8s/main/assets/icon.png
+git_url: https://github.com/hashicorp/consul
+release_url: https://github.com/hashicorp/consul/releases/tag/v{vsn}
+readme_url: https://developer.hashicorp.com/consul/docs/upgrade/k8s/compatibility
+helm_repository_url: https://helm.releases.hashicorp.com
+chart_name: consul
+versions:
+- version: 2.0.3
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.0.3
+  images: []
+- version: 1.22.7
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.9.11
+  images: []
+- version: 1.21.5
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.8.16
+  images: []
+- version: 1.17.3
+  kube: ['1.28', '1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.3.9
+  images: []

@@ -13,6 +13,7 @@ names:
 - coredns
 - cloudnative-pg
 - cluster-autoscaler
+- consul
 - descheduler
 - external-dns
 - external-secrets
