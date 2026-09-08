@@ -39,6 +39,7 @@ names:
 - tigera-operator
 - argo-cd
 - argo-workflows
+- volcano
 - vector
 - victoria-metrics-operator
 - gpu-operator
@@ -52,4 +53,4 @@ names:
 - wiz-admission-controller
 - wiz-network-analyzer
 - kuberay-operator
-- volcano
+- mongodb-kubernetes
