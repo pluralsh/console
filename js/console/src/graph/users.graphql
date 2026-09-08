@@ -73,6 +73,11 @@ query Users($q: String, $after: String) {
     edges {
       node {
         ...User
+        groups {
+          id
+          name
+          description
+        }
       }
     }
   }
