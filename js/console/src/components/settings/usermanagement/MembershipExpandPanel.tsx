@@ -18,12 +18,9 @@ import {
 } from 'react'
 import styled from 'styled-components'
 
-export const MEMBERSHIP_FETCH_LIMIT = 30
+export const MEMBERSHIP_VISIBLE_ROWS = 5
 
-const MEMBERSHIP_VISIBLE_ROWS = 5
 const MEMBERSHIP_ROW_HEIGHT = 68
-const MEMBERSHIP_LIST_MAX_HEIGHT =
-  MEMBERSHIP_VISIBLE_ROWS * MEMBERSHIP_ROW_HEIGHT
 
 export const membershipExpandTableProps = {
   loose: true,
@@ -96,12 +93,14 @@ export function MembershipExpandPanel({
   getCopyText,
   loading,
   emptyMessage,
+  viewAll,
   children,
 }: {
   copyText?: string
   getCopyText?: () => Promise<string>
   loading?: boolean
   emptyMessage?: string
+  viewAll?: { onClick: () => void }
   children?: ReactNode
 }) {
   const { copied, copying, handleCopy } = useCopyList(
@@ -110,23 +109,13 @@ export function MembershipExpandPanel({
       [copyText, getCopyText]
     )
   )
-  const showEmpty = !loading && Children.count(children) === 0
+  const items = Children.toArray(children).slice(0, MEMBERSHIP_VISIBLE_ROWS)
+  const showEmpty = !loading && items.length === 0
 
   return (
     <WrapperSC onClick={(e) => e.stopPropagation()}>
-      <Flex
-        direction="column"
-        grow={1}
-        minWidth={0}
-        minHeight={0}
-      >
-        <ListSC
-          onWheel={(e) => {
-            if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight) {
-              e.stopPropagation()
-            }
-          }}
-        >
+      <BodySC>
+        <ListSC>
           {loading && (
             <Flex
               justify="center"
@@ -140,9 +129,17 @@ export function MembershipExpandPanel({
               <CaptionP $color="text-xlight">{emptyMessage}</CaptionP>
             </MembershipListRowSC>
           )}
-          {children}
+          {items}
         </ListSC>
-      </Flex>
+        {viewAll && (
+          <SeeFullListSC
+            type="button"
+            onClick={viewAll.onClick}
+          >
+            See full list
+          </SeeFullListSC>
+        )}
+      </BodySC>
       <Button
         small
         secondary
@@ -233,15 +230,29 @@ const WrapperSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
 }))
 
+const BodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  flex: 1,
+  minWidth: 0,
+}))
+
 const ListSC = styled.div(({ theme }) => ({
-  boxSizing: 'content-box',
-  maxHeight: MEMBERSHIP_LIST_MAX_HEIGHT,
-  minHeight: 0,
-  overflowX: 'hidden',
-  overflowY: 'auto',
-  overscrollBehavior: 'contain',
+  overflow: 'hidden',
   border: theme.borders['fill-two'],
   borderRadius: theme.borderRadiuses.large,
+}))
+
+const SeeFullListSC = styled.button(({ theme }) => ({
+  ...theme.partials.text.caption,
+  color: theme.colors['text-xlight'],
+  background: 'none',
+  border: 'none',
+  padding: 0,
+  cursor: 'pointer',
+  width: 'fit-content',
+  '&:hover': { color: theme.colors['text-light'] },
 }))
 
 const HoverActionsSC = styled.div(({ theme }) => ({

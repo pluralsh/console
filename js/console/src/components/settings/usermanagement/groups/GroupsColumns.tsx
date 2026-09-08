@@ -20,7 +20,7 @@ import {
   HoverActions,
   MembershipExpandPanel,
   MembershipUserRow,
-  MEMBERSHIP_FETCH_LIMIT,
+  MEMBERSHIP_VISIBLE_ROWS,
 } from '../MembershipExpandPanel'
 import { formatGroupMembersCopy } from '../membershipCopy'
 import { GroupMembers } from './GroupMembers'
@@ -133,11 +133,13 @@ const ColActions = columnHelper.accessor((group) => group, {
 
 export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
   const group = row.original
+  const [viewOpen, setViewOpen] = useState(false)
   const [fetchMembers] = useGroupMembersLazyQuery()
   const { data, loading, error } = useGroupMembersQuery({
-    variables: { id: group.id, first: MEMBERSHIP_FETCH_LIMIT },
+    variables: { id: group.id, first: MEMBERSHIP_VISIBLE_ROWS },
   })
   const users = membersFromQuery(data)
+  const hasMore = (group.memberCount ?? users.length) > MEMBERSHIP_VISIBLE_ROWS
 
   return (
     <>
@@ -145,11 +147,8 @@ export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
       <MembershipExpandPanel
         loading={!data && loading}
         emptyMessage="This group has no members."
-        getCopyText={() =>
-          (group.memberCount ?? 0) <= users.length
-            ? Promise.resolve(formatGroupMembersCopy(group, users))
-            : getGroupMembersCopyText(fetchMembers, group)
-        }
+        getCopyText={() => getGroupMembersCopyText(fetchMembers, group)}
+        viewAll={hasMore ? { onClick: () => setViewOpen(true) } : undefined}
       >
         {users.map((user) => (
           <MembershipUserRow
@@ -160,6 +159,11 @@ export function GroupMembersExpand({ row }: { row: Row<GroupFragment> }) {
           />
         ))}
       </MembershipExpandPanel>
+      <ViewGroupMembersModal
+        group={group}
+        open={viewOpen}
+        onClose={() => setViewOpen(false)}
+      />
     </>
   )
 }
@@ -178,11 +182,14 @@ function ViewGroupMembersModal({
       header={group.name}
       open={open}
       onClose={onClose}
+      size="large"
     >
-      <GroupMembers
-        viewOnly
-        groupId={group.id}
-      />
+      <div css={{ height: 480, minHeight: 0 }}>
+        <GroupMembers
+          viewOnly
+          groupId={group.id}
+        />
+      </div>
     </Modal>
   )
 }
