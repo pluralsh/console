@@ -1,0 +1,35 @@
+name: Test MetalLB compatibility scraper
+on:
+  pull_request:
+    paths:
+      - 'utils/compatibility/scrapers/metallb.py'
+      - 'utils/compatibility/tests/test_metallb.py'
+      - 'utils/compatibility/utils.py'
+      - 'static/compatibilities/metallb.yaml'
+      - '.github/workflows/test-metallb-compatibility.yaml'
+  push:
+    branches: [master]
+    paths:
+      - 'utils/compatibility/scrapers/metallb.py'
+      - 'utils/compatibility/tests/test_metallb.py'
+      - 'utils/compatibility/utils.py'
+      - 'static/compatibilities/metallb.yaml'
+      - '.github/workflows/test-metallb-compatibility.yaml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Run scraper tests through the repository test entry point
+        env:
+          TEST_CMD: >-
+            apk add --no-cache python3 py3-pip &&
+            python3 -m venv /tmp/metallb-tests &&
+            /tmp/metallb-tests/bin/python -m pip install packaging==24.1 PyYAML==6.0.2 &&
+            /tmp/metallb-tests/bin/python -m unittest discover -s utils/compatibility/tests -p test_metallb.py -v
+        # Compose consumes CONSOLE_CMD and needs one argument for /bin/sh -c.
+        run: CONSOLE_CMD="\"$TEST_CMD\"" make test-full TEST_CMD="$TEST_CMD"
+
