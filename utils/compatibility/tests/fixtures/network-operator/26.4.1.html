@@ -1,0 +1,16 @@
+<!-- Extracted from https://docs.nvidia.com/networking/display/kubernetes2641/platform-support.html on 2026-09-08 -->
+<p>NVIDIA Network Operator v26.4.1</p>
+<table><style>td:nth-child(1) {width: 33%;}td:nth-child(2) {width: 33%;}td:nth-child(3) {width: 33%;}; width: fit-content;</style><tbody><tr><th class="head"><p>Component</p></th><th class="head"><p>Version</p></th><th class="head"><p>Notes</p></th></tr>
+<tr class="row-even"><td>Kubernetes</td>
+<td>&gt;=1.31 and &lt;=1.36</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td>Helm</td>
+<td>v3.5+</td>
+<td>For installation methods, refer to the official <a class="external" href="https://helm.sh/">Helm website</a>.</td>
+</tr>
+<tr class="row-even"><td>Node Feature Discovery</td>
+<td>&gt;=0.15.6 and &lt;=0.17.0</td>
+<td>When deploying the Network Operator and GPU Operator on the same cluster, ensure only one instance of Node Feature Discovery (NFD) is installed. We recommend using the version included with the GPU Operator.</td>
+</tr>
+</tbody></table>
