@@ -44,23 +44,14 @@ defmodule Console.Otel.Tracing do
   Drops credentials, signed query parameters, and fragments from a repository URL.
 
   Returns host/path (with scheme when it is a real URL). SCP-style Git remotes
-  become `host/path`. Unparseable values that still look secret are dropped.
+  become `host/path`. Unsupported schemes and values that still contain
+  userinfo after fallback are dropped.
   """
   @spec sanitize_url(term) :: String.t() | nil
   def sanitize_url(url) when is_binary(url) and byte_size(url) > 0 do
-    case URI.parse(url) do
-      %URI{scheme: scheme, host: host} = uri
-           when scheme in @network_schemes and is_binary(host) and byte_size(host) > 0 ->
-        redact_uri(uri)
-
-      %URI{scheme: "file"} = uri ->
-        redact_uri(uri)
-
-      _ ->
-        url
-        |> strip_query_fragment()
-        |> sanitize_scp()
-    end
+    url
+    |> URI.parse()
+    |> sanitize_parsed(url)
   end
   def sanitize_url(_), do: nil
 
@@ -152,6 +143,21 @@ defmodule Console.Otel.Tracing do
   defp url_attr?(key) when is_binary(key), do: String.ends_with?(key, ".url")
   defp url_attr?(_), do: false
 
+  defp sanitize_parsed(%URI{scheme: scheme, host: host} = uri, _original)
+       when scheme in @network_schemes and is_binary(host) and byte_size(host) > 0 do
+    redact_uri(uri)
+  end
+  defp sanitize_parsed(%URI{scheme: "file"} = uri, _original), do: redact_uri(uri)
+  defp sanitize_parsed(%URI{scheme: scheme, host: host}, _original)
+       when is_binary(scheme) and is_binary(host) and byte_size(host) > 0 do
+    nil
+  end
+  defp sanitize_parsed(_uri, original) do
+    original
+    |> strip_query_fragment()
+    |> sanitize_scp()
+  end
+
   defp redact_uri(%URI{} = uri) do
     %{uri | userinfo: nil, query: nil, fragment: nil}
     |> URI.to_string()
@@ -167,15 +173,18 @@ defmodule Console.Otel.Tracing do
 
   defp sanitize_scp(url) do
     case Regex.run(~r/^(?:[^@]+@)?([^:]+):(.+)$/, url) do
-      [_, host, path] -> "#{host}/#{String.trim_leading(path, "/")}"
-      _ -> scp_fallback(url)
+      [_, host, path] ->
+        drop_if_userinfo("#{host}/#{String.trim_leading(path, "/")}")
+      _ ->
+        drop_if_userinfo(url)
     end
   end
 
-  defp scp_fallback(url) do
-    case String.contains?(url, "@") do
+  defp drop_if_userinfo(value) when is_binary(value) do
+    case String.contains?(value, "@") do
       true -> nil
-      false -> url
+      false -> value
     end
   end
+  defp drop_if_userinfo(_), do: nil
 end
