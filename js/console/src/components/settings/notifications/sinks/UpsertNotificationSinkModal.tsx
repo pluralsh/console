@@ -8,6 +8,7 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   NotificationSinkFragment,
   NotificationSinksDocument,
+  SinkType,
   useUpsertNotificationSinkMutation,
 } from 'generated/graphql'
 import { InlineLink } from 'components/utils/typography/InlineLink'
@@ -15,7 +16,8 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 import { sinkTypeToIcon } from './NotificationSinksColumns'
-import { getSinkTypeForWebhookUrl } from './notificationSinkUrl.ts'
+
+const slackHookUrlRegex = /^https:\/\/[^/]*?slack/
 
 type ModalBaseProps = {
   mode: 'edit' | 'create'
@@ -35,6 +37,7 @@ function UpsertNotificationSinkModal({
 }: ModalProps) {
   const sink = mode === 'edit' ? props.sink : undefined
   const sinkName = sink?.name
+  const sinkType = sink?.type
   const slackUrl = sink?.configuration.slack?.url
   const teamsUrl = sink?.configuration.teams?.url
   const theme = useTheme()
@@ -49,13 +52,18 @@ function UpsertNotificationSinkModal({
           }
         : {}),
     }),
-    [mode, slackUrl, sinkName, teamsUrl]
+    [mode, sinkName, slackUrl, teamsUrl]
   )
   const { state, update, hasUpdates } = useUpdateState<{
     name: string
     hookUrl: string
   }>(initialState)
-  const hookType = getSinkTypeForWebhookUrl(state.hookUrl)
+  const hookType =
+    mode === 'edit' && sinkType
+      ? sinkType
+      : slackHookUrlRegex.test(state.hookUrl)
+        ? SinkType.Slack
+        : SinkType.Teams
 
   const [mutation, { loading }] = useUpsertNotificationSinkMutation({
     onCompleted: () => onClose?.(),
@@ -71,7 +79,7 @@ function UpsertNotificationSinkModal({
       }),
   })
 
-  const allowSubmit = hookType && state.name && state.hookUrl && hasUpdates
+  const allowSubmit = state.name && state.hookUrl && hasUpdates
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
@@ -168,7 +176,7 @@ function UpsertNotificationSinkModal({
             )}
             <Input2
               value={state.hookUrl}
-              endIcon={sinkTypeToIcon[hookType || '']}
+              endIcon={state.hookUrl ? sinkTypeToIcon[hookType] : undefined}
               onChange={(e) => update({ hookUrl: e.target.value })}
               placeholder="https://hooks.provider.com/..."
               css={{ flex: '1 1 100%' }}
