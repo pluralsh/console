@@ -167,6 +167,48 @@ injector:
     def test_extract_default_images_fails_closed_on_bad_archive(self):
         self.assertEqual(openbao.extract_default_images(b"not a chart", "2.6.2"), [])
 
+    def test_extract_default_images_ignores_unexpected_values_yaml(self):
+        for values in ("", "- just\n- a\n- list\n", "server:\n"):
+            with self.subTest(values=values):
+                chart = self._chart_with_values(values)
+
+                self.assertEqual(openbao.extract_default_images(chart, "2.6.2"), [])
+
+    def test_extract_default_images_ignores_null_image_sections(self):
+        chart = self._chart_with_values(
+            """
+server: null
+injector:
+  image: null
+"""
+        )
+
+        self.assertEqual(openbao.extract_default_images(chart, "2.6.2"), [])
+
+    def test_extract_rows_keeps_row_when_chart_download_fails(self):
+        index_yaml = {
+            "entries": {
+                "openbao": [
+                    {
+                        "version": "0.29.4",
+                        "appVersion": "v2.6.2",
+                        "kubeVersion": ">= 1.30.0-0",
+                        "urls": ["openbao-0.29.4.tgz"],
+                    }
+                ],
+            }
+        }
+
+        with (
+            patch.object(openbao, "fetch_page", side_effect=RuntimeError("timeout")),
+            patch.object(openbao, "print_error") as print_error,
+        ):
+            rows = openbao.extract_rows(index_yaml, "1.36")
+
+        self.assertEqual([row["version"] for row in rows], ["2.6.2"])
+        self.assertEqual(rows[0]["images"], [])
+        print_error.assert_called_once()
+
     def _chart_with_values(self, values):
         output = BytesIO()
         with tarfile.open(fileobj=output, mode="w:gz") as archive:

@@ -137,7 +137,12 @@ def _chart_url(entry):
     return urljoin("https://openbao.github.io/openbao-helm/", url)
 
 
+def _mapping(value):
+    return value if isinstance(value, dict) else {}
+
+
 def _format_image(image_config, app_version):
+    image_config = _mapping(image_config)
     registry = image_config.get("registry") or "docker.io"
     repository = image_config.get("repository")
     if not repository:
@@ -157,9 +162,12 @@ def extract_default_images(chart_content, app_version):
     except (tarfile.TarError, yaml.YAMLError, OSError):
         return []
 
+    values = _mapping(values)
+    server = _mapping(values.get("server"))
+    injector = _mapping(values.get("injector"))
     images = {
-        _format_image(values.get("server", {}).get("image", {}), app_version),
-        _format_image(values.get("injector", {}).get("image", {}), app_version),
+        _format_image(server.get("image"), app_version),
+        _format_image(injector.get("image"), app_version),
     }
     return sorted(image for image in images if image)
 
@@ -183,7 +191,12 @@ def extract_rows(index_yaml, latest_kube):
             continue
 
         chart_url = _chart_url(entry)
-        chart_content = fetch_page(chart_url) if chart_url else None
+        chart_content = None
+        if chart_url:
+            try:
+                chart_content = fetch_page(chart_url)
+            except Exception as exc:
+                print_error(f"Failed to fetch OpenBao chart {chart_version}: {exc}")
         images = extract_default_images(chart_content, app_version) if chart_content else []
 
         rows_by_version[app_version] = OrderedDict(
