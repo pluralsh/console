@@ -76,6 +76,11 @@ class StackGresTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Conflicting"):
             self.rows()
 
+    def test_missing_modern_release_bounds_does_not_silently_keep_stale_data(self):
+        del self.index["entries"][scraper.CHART_NAME][0]["kubeVersion"]
+        with self.assertRaisesRegex(ValueError, "Missing Kubernetes bounds"):
+            self.rows()
+
     def test_malformed_or_empty_indices_do_not_generate_rows(self):
         for index in [None, [], {}, {"entries": []}, {"entries": {scraper.CHART_NAME: []}}, {"entries": {scraper.CHART_NAME: [None]}}]:
             with self.subTest(index=index), self.assertRaises(ValueError):

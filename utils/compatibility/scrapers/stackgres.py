@@ -57,7 +57,9 @@ def build_rows(index_payload):
         if constraint is None:
             # The official pre-1.5 charts omit this field. Missing metadata does
             # not prove that a historical release supports current Kubernetes.
-            continue
+            if app_version < (1, 5, 0):
+                continue
+            raise ValueError(f"Missing Kubernetes bounds for StackGres {chart['appVersion']}")
         kube = parse_kube_range(constraint)
         previous = releases.get(app_version)
         if previous is not None:
