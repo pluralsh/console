@@ -20538,6 +20538,8 @@ export type FlowBasicFragment = { __typename?: 'Flow', id: string, name: string,
 
 export type FlowBasicWithBindingsFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
 
+export type FlowCardFragment = { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, services?: { __typename?: 'ServiceDeploymentConnection', edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, status: ServiceDeploymentStatus } | null } | null> | null } | null, pipelines?: { __typename?: 'PipelineConnection', edges?: Array<{ __typename?: 'PipelineEdge', node?: { __typename?: 'Pipeline', id: string, status?: { __typename?: 'PipelineStatus', closed?: number | null } | null } | null } | null> | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null };
+
 export type PreviewEnvironmentTemplateFragment = { __typename?: 'PreviewEnvironmentTemplate', id: string, name: string, commentTemplate?: string | null, referenceService?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null, recurseSubmodules?: boolean | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
 
 export type PreviewEnvironmentInstanceFragment = { __typename?: 'PreviewEnvironmentInstance', id: string, updatedAt?: string | null, insertedAt?: string | null, pullRequest?: { __typename?: 'PullRequest', url: string } | null, service?: { __typename?: 'ServiceDeployment', protect?: boolean | null, deletedAt?: string | null, id: string, name: string, componentStatus?: string | null, status: ServiceDeploymentStatus, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null, template?: { __typename?: 'PreviewEnvironmentTemplate', id: string, name: string } | null };
@@ -20553,7 +20555,7 @@ export type FlowsQueryVariables = Exact<{
 }>;
 
 
-export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, metadata?: Record<string, unknown> | null, repositories?: Array<string | null> | null, services?: { __typename?: 'ServiceDeploymentConnection', edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, status: ServiceDeploymentStatus } | null } | null> | null } | null, pipelines?: { __typename?: 'PipelineConnection', edges?: Array<{ __typename?: 'PipelineEdge', node?: { __typename?: 'Pipeline', id: string, status?: { __typename?: 'PipelineStatus', closed?: number | null } | null } | null } | null> | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, project?: { __typename?: 'Project', id: string, name: string } | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type FlowQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -26141,6 +26143,29 @@ export const FlowBasicWithBindingsFragmentDoc = gql`
 }
     ${FlowBasicFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const FlowCardFragmentDoc = gql`
+    fragment FlowCard on Flow {
+  ...FlowBasicWithBindings
+  services(first: 500) {
+    edges {
+      node {
+        id
+        status
+      }
+    }
+  }
+  pipelines(first: 500) {
+    edges {
+      node {
+        id
+        status {
+          closed
+        }
+      }
+    }
+  }
+}
+    ${FlowBasicWithBindingsFragmentDoc}`;
 export const PreviewEnvironmentInstanceFragmentDoc = gql`
     fragment PreviewEnvironmentInstance on PreviewEnvironmentInstance {
   id
@@ -38455,7 +38480,7 @@ export const FlowsDocument = gql`
   flows(first: $first, after: $after, q: $q) {
     edges {
       node {
-        ...FlowBasicWithBindings
+        ...FlowCard
       }
     }
     pageInfo {
@@ -38463,7 +38488,7 @@ export const FlowsDocument = gql`
     }
   }
 }
-    ${FlowBasicWithBindingsFragmentDoc}
+    ${FlowCardFragmentDoc}
 ${PageInfoFragmentDoc}`;
 
 /**
@@ -50151,6 +50176,7 @@ export const namedOperations = {
     IsoImage: 'IsoImage',
     FlowBasic: 'FlowBasic',
     FlowBasicWithBindings: 'FlowBasicWithBindings',
+    FlowCard: 'FlowCard',
     PreviewEnvironmentTemplate: 'PreviewEnvironmentTemplate',
     PreviewEnvironmentInstance: 'PreviewEnvironmentInstance',
     PreviewEnvironmentInstanceConnection: 'PreviewEnvironmentInstanceConnection',

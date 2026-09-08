@@ -291,6 +291,7 @@ export { default as StackRunCanceledIcon } from './components/icons/StackRunCanc
 export { default as StackRunIcon } from './components/icons/StackRunIcon'
 export { default as StackRunPausedIcon } from './components/icons/StackRunPausedIcon'
 export { default as StackRunPendingIcon } from './components/icons/StackRunPendingIcon'
+export { default as StarFilledIcon } from './components/icons/StarFilledIcon'
 export { default as StarIcon } from './components/icons/StarIcon'
 export { default as StatusIpIcon } from './components/icons/StatusIpIcon'
 export { default as StatusOkIcon } from './components/icons/StatusOkIcon'
