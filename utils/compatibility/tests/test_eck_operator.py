@@ -9,12 +9,22 @@ helpers = ModuleType("utils")
 helpers.fetch_page = Mock()
 helpers.get_chart_versions = Mock()
 helpers.update_compatibility_info = Mock()
-sys.modules["utils"] = helpers
 
-SCRAPER_PATH = Path(__file__).parents[1] / "scrapers" / "eck-operator.py"
-spec = importlib.util.spec_from_file_location("eck_operator", SCRAPER_PATH)
-scraper = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(scraper)
+# The scraper imports its helpers from a top-level `utils` module. Keep that
+# temporary stub strictly scoped to module loading so this test cannot affect
+# compatibility tests imported later in the same unittest discovery process.
+_original_utils = sys.modules.get("utils")
+sys.modules["utils"] = helpers
+try:
+    SCRAPER_PATH = Path(__file__).parents[1] / "scrapers" / "eck-operator.py"
+    spec = importlib.util.spec_from_file_location("eck_operator", SCRAPER_PATH)
+    scraper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(scraper)
+finally:
+    if _original_utils is None:
+        sys.modules.pop("utils", None)
+    else:
+        sys.modules["utils"] = _original_utils
 
 
 def readme(kube_range: str) -> bytes:
